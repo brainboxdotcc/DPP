@@ -14,6 +14,8 @@ class WSClient : public SSLClient
 	std::string key;
 	WSState state;
 	std::map<std::string, std::string> HTTPHeaders;
+	bool parseheader(std::string &buffer);
+	bool unpack(std::string &buffer);
 public:
         WSClient(const std::string &hostname, const std::string &port = "443");
         virtual ~WSClient();

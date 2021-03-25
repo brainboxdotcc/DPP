@@ -2,6 +2,24 @@
 #include <iostream>
 #include "wsclient.h"
 
+const unsigned char WS_MASKBIT = (1 << 7);
+const unsigned char WS_FINBIT = (1 << 7);
+const unsigned char WS_PAYLOAD_LENGTH_MAGIC_LARGE = 126;
+const unsigned char WS_PAYLOAD_LENGTH_MAGIC_HUGE = 127;
+const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
+const size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
+const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
+
+enum OpCode
+{
+	OP_CONTINUATION = 0x00,
+	OP_TEXT = 0x01,
+	OP_BINARY = 0x02,
+	OP_CLOSE = 0x08,
+	OP_PING = 0x09,
+	OP_PONG = 0x0a
+};
+
 WSClient::WSClient(const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest")
 {
 	this->write("GET /?v=6&encoding=etf HTTP/1.1\r\nHost: "+hostname+"\r\n" +
@@ -79,8 +97,108 @@ bool WSClient::HandleBuffer(std::string &buffer)
 			}
 		break;
 		case CONNECTED:
-			std::cout << "Received in connected state: " << buffer << std::endl;
+			return this->parseheader(buffer);
 		break;
+	}
+	return true;
+}
+
+bool WSClient::unpack(std::string &buffer)
+{
+	uint8_t x = buffer[0];
+	uint32_t y = x;
+	std::cout << "ver " << y << "\n";
+	x = buffer[1];
+	y = x;
+	std::cout << "type " << y << "\n";
+	return true;
+}
+
+bool WSClient::parseheader(std::string &buffer)
+{
+	if (buffer.size() < 6) {
+		/* Not enough data to form a frame yet */
+		return true;
+	} else {
+		unsigned char opcode = buffer[0];
+		switch (opcode & ~WS_FINBIT)
+		{
+			case OP_CONTINUATION:
+			case OP_TEXT:
+			case OP_BINARY:
+			{
+				std::string erl;
+
+				unsigned char len1 = buffer[1];
+				unsigned int payloadstartoffset = 2;
+
+				if (len1 & WS_MASKBIT) {
+					len1 &= ~WS_MASKBIT;
+					payloadstartoffset += 2;
+				}
+
+				unsigned int len = len1;
+
+				if (len1 == WS_PAYLOAD_LENGTH_MAGIC_LARGE) {
+					if (buffer.length() < 8) {
+						return true;
+					}
+
+					unsigned char len2 = (unsigned char)buffer[2];
+					unsigned char len3 = (unsigned char)buffer[3];
+					len = (len2 << 8) | len3;
+
+					payloadstartoffset += 2;
+				} else if (len1 == WS_PAYLOAD_LENGTH_MAGIC_HUGE) {
+					/* MISSING!!! */
+				}
+
+				if (buffer.length() < payloadstartoffset + len) {
+					return true;
+				}
+
+				const std::string::iterator endit = buffer.begin() + payloadstartoffset + len;
+				for (std::string::const_iterator i = buffer.begin() + payloadstartoffset; i != endit; ++i) {
+					const unsigned char c = (unsigned char)*i;
+					erl.push_back(c);
+				}
+		
+				buffer.erase(buffer.begin(), endit);
+
+				return this->unpack(erl);
+			}
+			break;
+
+			case OP_PING:
+			{
+			//	return HandlePingPongFrame(sock, true);
+			}
+			break;
+
+			case OP_PONG:
+			{
+				// A pong frame may be sent unsolicited, so we have to handle it.
+				// It may carry application data which we need to remove from the recvq as well.
+			//	return HandlePingPongFrame(sock, false);
+			}
+			break;
+
+			case OP_CLOSE:
+			{
+			//	sock->SetError("Connection closed");
+				std::cout << "Connection close" << std::endl;
+				return -1;
+			}
+			break;
+
+			default:
+			{
+			//	sock->SetError("WebSocket: Invalid opcode");
+				std::cout << "Invalid opcode" << std::endl;
+				return -1;
+			}
+			break;
+		}
 	}
 	return true;
 }
@@ -92,7 +210,6 @@ void WSClient::close()
 
 int main(int argc, char const *argv[])
 {
-	//Host is hardcoded to localhost for testing purposes
 	WSClient client("gateway.discord.gg");
 	client.ReadLoop();
 	client.close();

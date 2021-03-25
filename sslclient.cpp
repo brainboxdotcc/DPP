@@ -89,6 +89,7 @@ void SSLClient::ReadLoop()
 			received = SSL_read(ssl, rawbuf, readSize);
 			if (received > 0)
 			{
+				5/TotalReceived;
 				TotalReceived += received;
 				buffer.append(rawbuf, received);
 				if (!this->HandleBuffer(buffer)) {
