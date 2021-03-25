@@ -1,6 +1,9 @@
 #include <string>
 #include <iostream>
 #include "wsclient.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 const unsigned char WS_MASKBIT = (1 << 7);
 const unsigned char WS_FINBIT = (1 << 7);
@@ -20,9 +23,10 @@ enum OpCode
 	OP_PONG = 0x0a
 };
 
-WSClient::WSClient(const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest")
+WSClient::WSClient(uint32_t _shard_id, const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest"), shard_id(_shard_id)
 {
-	this->write("GET /?v=6&encoding=etf HTTP/1.1\r\nHost: "+hostname+"\r\n" +
+	// etf
+	this->write("GET /?v=6&encoding=json HTTP/1.1\r\nHost: "+hostname+"\r\n" +
 			"pragma: no-cache\r\n" +
 			"Upgrade: WebSocket\r\n"
 			"Connection: Upgrade\r\n"
@@ -36,6 +40,7 @@ WSClient::~WSClient()
 
 void WSClient::write(const std::string &data)
 {
+	std::cout << "W: " << data << "\n";
 	SSLClient::write(data);
 }
 
@@ -103,14 +108,34 @@ bool WSClient::HandleBuffer(std::string &buffer)
 	return true;
 }
 
-bool WSClient::unpack(std::string &buffer)
+bool WSClient::unpack(std::string &buffer, uint32_t offset, bool first)
 {
-	uint8_t x = buffer[0];
-	uint32_t y = x;
-	std::cout << "ver " << y << "\n";
-	x = buffer[1];
-	y = x;
-	std::cout << "type " << y << "\n";
+	std::cout << "R: " << buffer << "\n";
+	json j = json::parse(buffer);
+	if (j.find("op") != j.end()) {
+		uint32_t op = j["op"];
+
+		switch (op) {
+			case 10:
+				this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
+				this->write(
+					json({
+						{"op", 2},
+						{"d", {
+								{"token", "my_token"},
+								{"intents", 513},
+								{"properties", {
+									{"$os", "linux"},
+									{"$browser", "D++"},
+									{"$device", "D++"}
+								}
+							}
+						}
+					}
+				}).dump());
+			break;
+		}
+	}
 	return true;
 }
 
@@ -165,7 +190,7 @@ bool WSClient::parseheader(std::string &buffer)
 		
 				buffer.erase(buffer.begin(), endit);
 
-				return this->unpack(erl);
+				return this->unpack(erl, 0);
 			}
 			break;
 
@@ -210,7 +235,7 @@ void WSClient::close()
 
 int main(int argc, char const *argv[])
 {
-	WSClient client("gateway.discord.gg");
+	WSClient client(0, "gateway.discord.gg");
 	client.ReadLoop();
 	client.close();
 	return 0;

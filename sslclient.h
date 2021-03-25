@@ -6,6 +6,8 @@
 class SSLClient
 {
 	std::string buffer;
+	std::string obuffer;
+	bool nonblocking;
 	int sfd;
 	SSL* ssl;
 	SSL_CTX* ctx;
