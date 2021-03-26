@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
 	json configdocument;
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
-	WSClient client(0, 1, configdocument["token"], "gateway.discord.gg");
+	DiscordClient client(0, 1, configdocument["token"]);
 	client.ReadLoop();
 	client.close();
 	return 0;

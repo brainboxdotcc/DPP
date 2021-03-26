@@ -34,8 +34,8 @@ include_directories( "include" )
 
 target_link_libraries(test)
 
-set (modules_dir "src/lib")
-file(GLOB subdirlist ${modules_dir}/*)
+set (modules_dir "src")
+file(GLOB subdirlist ${modules_dir}/dpp)
 foreach (fullmodname ${subdirlist})
         get_filename_component(modname ${fullmodname} NAME)
         set (modsrc "")
@@ -46,5 +46,4 @@ endforeach(fullmodname)
 target_link_libraries(test dl ssl crypto z dpp ${ZLIB_LIBRARIES})
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread -g -O2 -fPIC -rdynamic")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
-
 

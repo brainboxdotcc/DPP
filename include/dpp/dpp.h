@@ -2,5 +2,5 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <dpp/wsclient.h>
+#include <dpp/discordclient.h>
 

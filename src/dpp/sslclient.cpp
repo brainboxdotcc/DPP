@@ -25,18 +25,24 @@
 #define BUFSIZZ 10240
 const int ERROR_STATUS = -1;
 
+/* SSL Client constructor throws std::runtime_error if it can't connect to the host */
 SSLClient::SSLClient(const std::string &hostname, const std::string &port)
 {
+	/* Initial connection is done in blocking mode. There is a timeout on it. */
 	nonblocking = false;
 	const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
+
+	/* Create SSL context */
 	ctx = SSL_CTX_new(method);
 	if (ctx == nullptr)
 		throw std::runtime_error("Failed to create SSL client context!");
 
+	/* Create SSL session */
 	ssl = SSL_new(ctx);
 	if (ssl == nullptr)
 		throw std::runtime_error("SSL_new failed!");
 
+	/* Resolve hostname to IP */
 	struct hostent *host;
 	if ((host = gethostbyname(hostname.c_str())) == nullptr)
 		throw std::runtime_error("Couldn't resolve hostname");
@@ -50,6 +56,7 @@ SSLClient::SSLClient(const std::string &hostname, const std::string &port)
 	if (status != 0)
 		throw std::runtime_error(gai_strerror(status));
 
+	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 	int err;
 	for (struct addrinfo *addr = addrs; addr != nullptr; addr = addr->ai_next) {
 		sfd = socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
@@ -65,23 +72,29 @@ SSLClient::SSLClient(const std::string &hostname, const std::string &port)
 	}
 	freeaddrinfo(addrs);
 
+	/* Check if none of the IPs yielded a valid connection */
 	if (sfd == ERROR_STATUS)
 		throw std::runtime_error(strerror(err));
 
+	/* We're good to go - hand the fd over to openssl */
 	SSL_set_fd(ssl, sfd);
 
 	status = SSL_connect(ssl);
 	if (status != 1) {
 		throw std::runtime_error("SSL_connect error");
-				//fprintf(stderr, "SSL_connect failed with SSL_get_error code %d\n", status);
 	}
 
-		printf("Connected with %s encryption\n", SSL_get_cipher(ssl));
-
+	this->cipher = SSL_get_cipher(ssl);
 }
 
 void SSLClient::write(const std::string &data)
 {
+	/* If we are in nonblocking mode, append to the buffer,
+	 * otherwise just use SSL_write directly. The only time we
+	 * use SSL_write directly is during connection before the
+	 * ReadLoop is called, which allows for guaranteed simple
+	 * lock-step delivery e.g. for HTTP header negotiation
+	 */
 	if (nonblocking) {
 		obuffer += data;
 	} else {
@@ -91,26 +104,33 @@ void SSLClient::write(const std::string &data)
 
 void SSLClient::ReadLoop()
 {
+	/* The read loop is non-blocking using select(). This method
+	 * cannot read while it is waiting for write, or write while it is
+	 * waiting for read. This is a limitation of the openssl libraries,
+	 * as SSL is sent and received in low level ~16k frames which must
+	 * be synchronised and ordered correctly. Attempting to send while
+	 * we need another frame or receive while we are due to send a frame
+	 * would cause the protocol to break.
+	 */
 	int width;
-	int r,c2sl=0,c2s_offset=0;
-	int read_blocked_on_write=0,write_blocked_on_read=0,read_blocked=0;
-	fd_set readfds,writefds;
-	int shutdown_wait=0;
-	char c2s[BUFSIZZ],s2c[BUFSIZZ];
+	int r = 0, ClientToServerLength = 0, ClientToServerOffset = 0;
+	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
+	fd_set readfds, writefds;
+	char ClientToServerBuffer[BUFSIZZ],ServerToClientBuffer[BUFSIZZ];
 	int ofcmode;
 		
-	/*First we make the socket nonblocking*/
-	ofcmode = fcntl(sfd,F_GETFL,0);
+	/* Make the socket nonblocking */
+	ofcmode = fcntl(sfd, F_GETFL, 0);
 	ofcmode |= O_NDELAY;
 	if (fcntl(sfd, F_SETFL, ofcmode)) {
-		std::cout <<"Couldn't make socket nonblocking\n";
-		return;
+		throw std::runtime_error("Can't switch socket to non-blocking mode!");
 	}
 
 	nonblocking = true;
 	width=sfd+1;
-		
-	while(1) {
+	
+	/* Loop until there is a socket error */
+	while(true) {
 		FD_ZERO(&readfds);
 		FD_ZERO(&writefds);
 
@@ -118,7 +138,7 @@ void SSLClient::ReadLoop()
 
 		/* If we're waiting for a read on the socket don't try to write to the server */
 		if (!write_blocked_on_read) {
-			if (c2sl || read_blocked_on_write) {
+			if (ClientToServerLength || read_blocked_on_write) {
 				FD_SET(sfd,&writefds);
 			}
 		}
@@ -133,37 +153,35 @@ void SSLClient::ReadLoop()
 		/* Now check if there's data to read */
 		if((FD_ISSET(sfd,&readfds) && !write_blocked_on_read) || (read_blocked_on_write && FD_ISSET(sfd,&writefds))) {
 			do {
-				read_blocked_on_write=0;
-				read_blocked=0;
+				read_blocked_on_write = false;
+				read_blocked = false;
 					
-				r = SSL_read(ssl,s2c,BUFSIZZ);
+				r = SSL_read(ssl,ServerToClientBuffer,BUFSIZZ);
 				
 				int e = SSL_get_error(ssl,r);
 
 				switch(e){
 					case SSL_ERROR_NONE:
-						std::cout << "buffer append\n";
-						buffer.append(s2c, r);
+						/* Data received, add it to the buffer */
+						buffer.append(ServerToClientBuffer, r);
 						this->HandleBuffer(buffer);
 					break;
 					case SSL_ERROR_ZERO_RETURN:
 						/* End of data */
-						if(!shutdown_wait)
-							SSL_shutdown(ssl);
+						SSL_shutdown(ssl);
 						return;
 					break;
 					case SSL_ERROR_WANT_READ:
-						read_blocked=1;
+						read_blocked = true;
 					break;
 							
 					/* We get a WANT_WRITE if we're trying to rehandshake and we block on a write during that rehandshake.
 					 * We need to wait on the socket to be writeable but reinitiate the read when it is
 					 */
 					case SSL_ERROR_WANT_WRITE:
-						read_blocked_on_write=1;
+						read_blocked_on_write = true;
 					break;
 					default:
-						std::cout << "SSL read problem " << e << "\n";
 						return;
 					break;
 				}
@@ -175,30 +193,24 @@ void SSLClient::ReadLoop()
 		}
 			
 		/* Check for input on the sendq */
-		if (obuffer.length() && c2sl == 0) {
-			memcpy(&c2s, obuffer.data(), obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length());
-			c2sl = obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length();
-			obuffer = obuffer.substr(c2sl, obuffer.length());
-			std::cout << "New obuffer '" << obuffer << "' len " << obuffer.length() << "\n";
-			c2s_offset = 0;
+		if (obuffer.length() && ClientToServerLength == 0) {
+			memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length());
+			ClientToServerLength = obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length();
+			obuffer = obuffer.substr(ClientToServerLength, obuffer.length());
+			ClientToServerOffset = 0;
 		}
 
 		/* If the socket is writeable... */
-		if ((FD_ISSET(sfd,&writefds) && c2sl) || (write_blocked_on_read && FD_ISSET(sfd,&readfds))) {
-			write_blocked_on_read=0;
+		if ((FD_ISSET(sfd,&writefds) && ClientToServerLength) || (write_blocked_on_read && FD_ISSET(sfd,&readfds))) {
+			write_blocked_on_read = false;
 			/* Try to write */
-			r = SSL_write(ssl, c2s + c2s_offset, c2sl);
-			for (int v = c2s_offset; v < c2s_offset + c2sl; ++v) {
-				std::cout << std::hex << ((uint16_t)c2s[v] & 0xff) << std::dec << " ";
-			}
-			std::cout << " -- written\n";
+			r = SSL_write(ssl, ClientToServerBuffer + ClientToServerOffset, ClientToServerLength);
 			
 			switch(SSL_get_error(ssl,r)){
-				/* We wrote something*/
+				/* We wrote something */
 				case SSL_ERROR_NONE:
-					c2sl -= r;
-					c2s_offset += r;
-					std::cout << "wrote " << r << " offset now " << c2s_offset << " len now " << c2sl << "\n";
+					ClientToServerLength -= r;
+					ClientToServerOffset += r;
 				break;
 					
 				/* We would have blocked */
@@ -209,12 +221,12 @@ void SSLClient::ReadLoop()
 				 * We need to wait on the socket to be readable but reinitiate our write when it is
 				*/
 				case SSL_ERROR_WANT_READ:
-					write_blocked_on_read=1;
+					write_blocked_on_read = true;
 				break;
 						
 				/* Some other error */
-				default:				
-					std::cout << "SSL write problem";
+				default:
+					return;
 				return;
 			}
 		}

@@ -2,9 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include <dpp/wsclient.h>
-#include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
 
 const unsigned char WS_MASKBIT = (1 << 7);
 const unsigned char WS_FINBIT = (1 << 7);
@@ -14,18 +11,26 @@ const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 const size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-WSClient::WSClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest"), shard_id(_shard_id), max_shards(_max_shards), token(_token)
+WSClient::WSClient(const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest")
 {
-	this->write("GET /?v=6&encoding=json HTTP/1.1\r\nHost: "+hostname+"\r\n" +
-			"pragma: no-cache\r\n" +
+	/* Send headers synchronously */
+	this->write("GET /?v=6&encoding=json HTTP/1.1\r\n" 
+			"Host: " + hostname + "\r\n"
+			"pragma: no-cache\r\n"
 			"Upgrade: WebSocket\r\n"
 			"Connection: Upgrade\r\n"
-			"Sec-WebSocket-Key: "+key+"\r\n"
+			"Sec-WebSocket-Key: " + key + "\r\n"
 			"Sec-WebSocket-Version: 13\r\n\r\n");
 }
 
 WSClient::~WSClient()
 {
+}
+
+bool WSClient::HandleFrame(const std::string &buffer)
+{
+	/* This is a stub for classes that derive the websocket client */
+	return true;
 }
 
 size_t WSClient::FillHeader(unsigned char* outbuf, size_t sendlength, OpCode opcode)
@@ -73,7 +78,6 @@ void WSClient::write(const std::string &data)
 		unsigned char out[MAXHEADERSIZE];
 		size_t s = this->FillHeader(out, data.length(), OP_TEXT);
 		std::string header((const char*)out, s);
-		std::cout << "W: " << data << std::endl;
 		SSLClient::write(header);
 		SSLClient::write(data);
 	}
@@ -122,9 +126,9 @@ bool WSClient::HandleBuffer(std::string &buffer)
 						}
 		
 						state = CONNECTED;
-						std::cout << "Websocket connected\n";
+						//std::cout << "Websocket connected\n";
 					} else {
-						std::cout << "Unexpected status: " << status_line << std::endl;
+						//std::cout << "Unexpected status: " << status_line << std::endl;
 						return false;
 					}
 				}
@@ -137,48 +141,10 @@ bool WSClient::HandleBuffer(std::string &buffer)
 	return true;
 }
 
-bool WSClient::unpack(std::string &buffer, uint32_t offset, bool first)
-{
-	std::cout << "R: " << buffer << "\n";
-	json j = json::parse(buffer);
-	if (j.find("op") != j.end()) {
-		uint32_t op = j["op"];
-
-		switch (op) {
-			case 10:
-			    	json obj = {
-				    { "op", 2 },
-				    {
-					"d",
-					{
-					    { "token", this->token },
-					    { "intents", 513 },
-					    { "properties",
-						{
-						    { "$os", "Linux" },
-						    { "$browser", "D++" },
-						    { "$device", "D++" }
-						}
-					    },
-					    { "shard", json::array({ shard_id, max_shards }) },
-					    { "compress", false },
-					    { "large_threshold", 250 }
-					}
-				    }
-				};
-				this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
-				this->write(obj.dump());
-			break;
-		}
-	}
-	return true;
-}
-
 bool WSClient::parseheader(std::string &buffer)
 {
 	if (buffer.size() < 4) {
 		/* Not enough data to form a frame yet */
-		std::cout << buffer.size() << "<4 Can't parse yet\n";
 		return true;
 	} else {
 		unsigned char opcode = buffer[0];
@@ -196,14 +162,15 @@ bool WSClient::parseheader(std::string &buffer)
 				if (len1 & WS_MASKBIT) {
 					len1 &= ~WS_MASKBIT;
 					payloadstartoffset += 2;
-					std::cout << "Masked!!!\n";
+					/* We don't handle masked data, because discord doesnt send it */
+					return false;
 				}
 
 				uint64_t len = len1;
 
 				if (len1 == WS_PAYLOAD_LENGTH_MAGIC_LARGE) {
 					if (buffer.length() < 8) {
-						std::cout << "<8 cant parse yet\n";
+						/* We don't have a complete header yet */
 						return true;
 					}
 
@@ -213,9 +180,8 @@ bool WSClient::parseheader(std::string &buffer)
 
 					payloadstartoffset += 2;
 				} else if (len1 == WS_PAYLOAD_LENGTH_MAGIC_HUGE) {
-					/* MISSING!!! */
 					if (buffer.length() < 10) {
-						std::cout << "<10 cant parse yet\n";
+						/* We don't have a complete header yet */
 						return true;
 					}
 
@@ -239,63 +205,61 @@ bool WSClient::parseheader(std::string &buffer)
 					len |= (uint64_t)(len8 & 0xff) << 8;
 					len |= (uint64_t)(len9 & 0xff) << 0;
 
-					std::cout << "Huge packet, length: " << len << "\n";
-
 				}
 
 				if (buffer.length() < payloadstartoffset + len) {
-					std::cout << "Payload too small to parse " << buffer.length() << " " << payloadstartoffset + len << "\n";
+					/* We don't have a complete frame yet */
 					return true;
 				}
 
+				/* Copy from buffer into string */
 				const std::string::iterator endit = buffer.begin() + payloadstartoffset + len;
 				for (std::string::const_iterator i = buffer.begin() + payloadstartoffset; i != endit; ++i) {
 					const unsigned char c = (unsigned char)*i;
 					erl.push_back(c);
 				}
 		
+				/* Remove this frame from the input buffer */
 				buffer.erase(buffer.begin(), endit);
 
-				return this->unpack(erl, 0);
+				/* Pass this frame to the deriving class */
+				return this->HandleFrame(erl);
 			}
 			break;
 
 			case OP_PING:
 			{
-				std::cout << "Ping\n";
-			//	return HandlePingPongFrame(sock, true);
 			}
 			break;
 
 			case OP_PONG:
 			{
-				std::cout << "Pong\n";
-				// A pong frame may be sent unsolicited, so we have to handle it.
-				// It may carry application data which we need to remove from the recvq as well.
-			//	return HandlePingPongFrame(sock, false);
 			}
 			break;
 
 			case OP_CLOSE:
 			{
-				std::cout << "Connection close" << std::endl;
 				uint16_t error = buffer[2] & 0xff;
 			       	error <<= 8;
 				error |= (buffer[3] & 0xff);
-				std::cout << "Error: " << error << "\n";
+				this->Error(error);
 				return false;
 			}
 			break;
 
 			default:
 			{
-				std::cout << "Invalid opcode" << std::endl;
+				this->Error(0);
 				return false;
 			}
 			break;
 		}
 	}
 	return true;
+}
+
+void WSClient::Error(uint32_t errorcode)
+{
 }
 
 void WSClient::close()
