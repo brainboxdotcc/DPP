@@ -20,7 +20,7 @@
 #include <exception>
 #include <string>
 #include <iostream>
-#include <sslclient.h>
+#include <dpp/sslclient.h>
 
 #define BUFSIZZ 10240
 const int ERROR_STATUS = -1;

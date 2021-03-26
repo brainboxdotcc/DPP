@@ -32,9 +32,19 @@ endif( ZLIB_FOUND )
 
 include_directories( "include" )
 
-target_link_libraries(test dl ssl crypto z ${ZLIB_LIBRARIES})
+target_link_libraries(test)
+
+set (modules_dir "src/lib")
+file(GLOB subdirlist ${modules_dir}/*)
+foreach (fullmodname ${subdirlist})
+        get_filename_component(modname ${fullmodname} NAME)
+        set (modsrc "")
+        aux_source_directory(${modules_dir}/${modname} modsrc)
+        add_library(${modname} SHARED ${modsrc})
+endforeach(fullmodname)
+
+target_link_libraries(test dl ssl crypto z dpp ${ZLIB_LIBRARIES})
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread -g -O2 -fPIC -rdynamic")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
 
-target_link_libraries(test)
 

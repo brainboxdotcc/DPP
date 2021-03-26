@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <wsclient.h>
+#include <dpp/wsclient.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;

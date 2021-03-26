@@ -2,5 +2,5 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <wsclient.h>
+#include <dpp/wsclient.h>
 
