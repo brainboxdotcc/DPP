@@ -38,7 +38,7 @@ At present, **Linux** only. This may change.
 * [cmake](https://cmake.org/) (version 3.13+)
 * [g++](https://gcc.gnu.org) (version 8+)
 * gdb for debugging on development servers (any recent version)
-* [nlohmann::json](https://github.com/nlohmann/json) (included with aegis.cpp)
+* [nlohmann::json](https://github.com/nlohmann/json)
 * [OpenSSL](https://openssl.org/) (whichever -dev package comes with your OS)
 
 # Setup
