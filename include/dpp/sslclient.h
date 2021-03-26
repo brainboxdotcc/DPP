@@ -33,10 +33,16 @@ protected:
 	/* For timers */
 	time_t last_tick;
 
+	std::string hostname;
+
+	std::string port;
+
 	virtual void OneSecondTimer();
+
+	virtual void Connect();
 public:
 	/* Connect to a specified host and port */
-	SSLClient(const std::string &hostname, const std::string &port = "443");
+	SSLClient(const std::string &_hostname, const std::string &_port = "443");
 
 	/* Nonblocking I/O loop */
 	void ReadLoop();

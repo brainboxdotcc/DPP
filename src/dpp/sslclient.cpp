@@ -10,7 +10,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
-#include <netdb.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
@@ -25,8 +24,13 @@
 #define BUFSIZZ 10240
 const int ERROR_STATUS = -1;
 
+SSLClient::SSLClient(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port)
+{
+	Connect();
+}
+
 /* SSL Client constructor throws std::runtime_error if it can't connect to the host */
-SSLClient::SSLClient(const std::string &hostname, const std::string &port) : last_tick(time(NULL))
+void SSLClient::Connect()
 {
 	/* Initial connection is done in blocking mode. There is a timeout on it. */
 	nonblocking = false;

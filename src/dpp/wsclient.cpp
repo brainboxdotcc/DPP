@@ -13,6 +13,11 @@ const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
 WSClient::WSClient(const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest")
 {
+	Connect();
+}
+
+void WSClient::Connect()
+{
 	/* Send headers synchronously */
 	this->write("GET /?v=6&encoding=json HTTP/1.1\r\n" 
 			"Host: " + hostname + "\r\n"

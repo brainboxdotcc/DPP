@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
 	DiscordClient client(0, 1, configdocument["token"]);
-	client.ReadLoop();
+	client.Run();
 	client.close();
 	return 0;
 }

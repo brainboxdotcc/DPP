@@ -25,7 +25,12 @@ class DiscordClient : public WSClient
 
 	/* Discord bot token */
 	std::string token;
+
+	/* Discord session id */
+	std::string sessionid;
+
 protected:
+
 	virtual void OneSecondTimer();
 public:
 	/* Constructor takes shard id, max shards and token */
@@ -39,5 +44,8 @@ public:
 
 	/* Handle a websocket error */
 	virtual void Error(uint32_t errorcode);
+
+	/* Start and monitor I/O loop */
+	void Run();
 };
 

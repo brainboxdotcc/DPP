@@ -45,6 +45,11 @@ class WSClient : public SSLClient
 
 	/* Handle ping and pong requests */
 	void HandlePingPong(bool ping, const std::string &payload);
+
+protected:
+
+	/* Reconnect */
+	virtual void Connect();
 public:
 
 	/* Connect to a specific websocket server */
