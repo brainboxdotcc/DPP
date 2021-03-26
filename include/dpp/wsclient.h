@@ -42,6 +42,9 @@ class WSClient : public SSLClient
 
 	/* Fill a header for outbound messages */
 	size_t FillHeader(unsigned char* outbuf, size_t sendlength, OpCode opcode);
+
+	/* Handle ping and pong requests */
+	void HandlePingPong(bool ping, const std::string &payload);
 public:
 
 	/* Connect to a specific websocket server */

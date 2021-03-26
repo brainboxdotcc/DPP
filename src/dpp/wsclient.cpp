@@ -153,8 +153,10 @@ bool WSClient::parseheader(std::string &buffer)
 			case OP_CONTINUATION:
 			case OP_TEXT:
 			case OP_BINARY:
+			case OP_PING:
+			case OP_PONG:
 			{
-				std::string erl;
+				std::string payload;
 
 				unsigned char len1 = buffer[1];
 				unsigned int payloadstartoffset = 2;
@@ -166,9 +168,11 @@ bool WSClient::parseheader(std::string &buffer)
 					return false;
 				}
 
+				/* 6 bit ("small") length frame */
 				uint64_t len = len1;
 
 				if (len1 == WS_PAYLOAD_LENGTH_MAGIC_LARGE) {
+					/* 24 bit ("large") length frame */
 					if (buffer.length() < 8) {
 						/* We don't have a complete header yet */
 						return true;
@@ -180,31 +184,17 @@ bool WSClient::parseheader(std::string &buffer)
 
 					payloadstartoffset += 2;
 				} else if (len1 == WS_PAYLOAD_LENGTH_MAGIC_HUGE) {
+					/* 64 bit ("huge") length frame */
 					if (buffer.length() < 10) {
 						/* We don't have a complete header yet */
 						return true;
 					}
-
-					unsigned char len2 = (unsigned char)buffer[2];
-					unsigned char len3 = (unsigned char)buffer[3];
-					unsigned char len4 = (unsigned char)buffer[4];
-					unsigned char len5 = (unsigned char)buffer[5];
-					unsigned char len6 = (unsigned char)buffer[6];
-					unsigned char len7 = (unsigned char)buffer[7];
-					unsigned char len8 = (unsigned char)buffer[8];
-					unsigned char len9 = (unsigned char)buffer[9];
-
-					payloadstartoffset += 8;
 					len = 0;
-					len |= (uint64_t)(len2 & 0xff) << 52;
-					len |= (uint64_t)(len3 & 0xff) << 48;
-					len |= (uint64_t)(len4 & 0xff) << 40;
-					len |= (uint64_t)(len5 & 0xff) << 32;
-					len |= (uint64_t)(len6 & 0xff) << 24;
-					len |= (uint64_t)(len7 & 0xff) << 16;
-					len |= (uint64_t)(len8 & 0xff) << 8;
-					len |= (uint64_t)(len9 & 0xff) << 0;
-
+					for (int v = 2, shift = 56; v < 10; ++v, shift -= 8) {
+						unsigned char l = (unsigned char)buffer[v];
+						len |= (uint64_t)(l & 0xff) << shift;
+					}
+					payloadstartoffset += 8;
 				}
 
 				if (buffer.length() < payloadstartoffset + len) {
@@ -216,24 +206,18 @@ bool WSClient::parseheader(std::string &buffer)
 				const std::string::iterator endit = buffer.begin() + payloadstartoffset + len;
 				for (std::string::const_iterator i = buffer.begin() + payloadstartoffset; i != endit; ++i) {
 					const unsigned char c = (unsigned char)*i;
-					erl.push_back(c);
+					payload.push_back(c);
 				}
 		
 				/* Remove this frame from the input buffer */
 				buffer.erase(buffer.begin(), endit);
 
-				/* Pass this frame to the deriving class */
-				return this->HandleFrame(erl);
-			}
-			break;
-
-			case OP_PING:
-			{
-			}
-			break;
-
-			case OP_PONG:
-			{
+				if ((opcode & ~WS_FINBIT) == OP_PING || (opcode & ~WS_FINBIT) == OP_PONG) {
+					HandlePingPong((opcode & ~WS_FINBIT) == OP_PING, payload);
+				} else {
+					/* Pass this frame to the deriving class */
+					return this->HandleFrame(payload);
+				}
 			}
 			break;
 
@@ -256,6 +240,18 @@ bool WSClient::parseheader(std::string &buffer)
 		}
 	}
 	return true;
+}
+
+void WSClient::HandlePingPong(bool ping, const std::string &payload)
+{
+	if (ping) {
+		/* For pings we echo back their payload with the type OP_PONG */
+		unsigned char out[MAXHEADERSIZE];
+		size_t s = this->FillHeader(out, payload.length(), OP_PONG);
+		std::string header((const char*)out, s);
+		SSLClient::write(header);
+		SSLClient::write(payload);
+	}
 }
 
 void WSClient::Error(uint32_t errorcode)
