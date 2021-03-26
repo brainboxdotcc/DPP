@@ -154,8 +154,8 @@ void SSLClient::ReadLoop()
 		}
 			
 		timeval ts;
-		ts.tv_sec = 0;
-		ts.tv_usec = 1000;
+		ts.tv_sec = 1;
+		ts.tv_usec = 0;
 		r = select(width,&readfds,&writefds,0,&ts);
 		if (r == 0)
 			continue;
