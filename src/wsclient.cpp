@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
-#include "wsclient.h"
+#include <fstream>
+#include <wsclient.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -13,9 +14,8 @@ const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 const size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-WSClient::WSClient(uint32_t _shard_id, const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest"), shard_id(_shard_id)
+WSClient::WSClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest"), shard_id(_shard_id), max_shards(_max_shards), token(_token)
 {
-	// etf
 	this->write("GET /?v=6&encoding=json HTTP/1.1\r\nHost: "+hostname+"\r\n" +
 			"pragma: no-cache\r\n" +
 			"Upgrade: WebSocket\r\n"
@@ -35,12 +35,10 @@ size_t WSClient::FillHeader(unsigned char* outbuf, size_t sendlength, OpCode opc
 
 	if (sendlength <= WS_MAX_PAYLOAD_LENGTH_SMALL)
 	{
-		std::cout << "Fill hdr payload small\n";
 		outbuf[pos++] = sendlength;
 	}
 	else if (sendlength <= WS_MAX_PAYLOAD_LENGTH_LARGE)
 	{
-		std::cout << "Fill hdr payload large\n";
 		outbuf[pos++] = WS_PAYLOAD_LENGTH_MAGIC_LARGE;
 		outbuf[pos++] = (sendlength >> 8) & 0xff;
 		outbuf[pos++] = sendlength & 0xff;
@@ -53,7 +51,14 @@ size_t WSClient::FillHeader(unsigned char* outbuf, size_t sendlength, OpCode opc
 			outbuf[pos++] = ((len >> i*8) & 0xff);
 	}
 
-	std::cout << "header len " << pos << "\n";
+	/* Masking - We don't care about masking, but discord insists on it. We send a mask of 0x00000000 because
+	 * any value XOR 0 is itself, meaning we dont have to waste time and effort on this crap.
+	 */
+	outbuf[1] |= WS_MASKBIT;
+	outbuf[pos++] = 0;
+	outbuf[pos++] = 0;
+	outbuf[pos++] = 0;
+	outbuf[pos++] = 0;
 
 	return pos;
 }
@@ -146,15 +151,16 @@ bool WSClient::unpack(std::string &buffer, uint32_t offset, bool first)
 				    {
 					"d",
 					{
-					    { "token", "AAAAAAAA" },
+					    { "token", this->token },
+					    { "intents", 513 },
 					    { "properties",
 						{
 						    { "$os", "Linux" },
-						    { "$browser", "DPP" },
-						    { "$device", "DPP" }
+						    { "$browser", "D++" },
+						    { "$device", "D++" }
 						}
 					    },
-					    { "shard", json::array({ 0, 2 }) },
+					    { "shard", json::array({ shard_id, max_shards }) },
 					    { "compress", false },
 					    { "large_threshold", 250 }
 					}
@@ -193,7 +199,7 @@ bool WSClient::parseheader(std::string &buffer)
 					std::cout << "Masked!!!\n";
 				}
 
-				unsigned int len = len1;
+				uint64_t len = len1;
 
 				if (len1 == WS_PAYLOAD_LENGTH_MAGIC_LARGE) {
 					if (buffer.length() < 8) {
@@ -208,7 +214,33 @@ bool WSClient::parseheader(std::string &buffer)
 					payloadstartoffset += 2;
 				} else if (len1 == WS_PAYLOAD_LENGTH_MAGIC_HUGE) {
 					/* MISSING!!! */
-					std::cout << "HUUUUGE!\n";
+					if (buffer.length() < 10) {
+						std::cout << "<10 cant parse yet\n";
+						return true;
+					}
+
+					unsigned char len2 = (unsigned char)buffer[2];
+					unsigned char len3 = (unsigned char)buffer[3];
+					unsigned char len4 = (unsigned char)buffer[4];
+					unsigned char len5 = (unsigned char)buffer[5];
+					unsigned char len6 = (unsigned char)buffer[6];
+					unsigned char len7 = (unsigned char)buffer[7];
+					unsigned char len8 = (unsigned char)buffer[8];
+					unsigned char len9 = (unsigned char)buffer[9];
+
+					payloadstartoffset += 8;
+					len = 0;
+					len |= (uint64_t)(len2 & 0xff) << 52;
+					len |= (uint64_t)(len3 & 0xff) << 48;
+					len |= (uint64_t)(len4 & 0xff) << 40;
+					len |= (uint64_t)(len5 & 0xff) << 32;
+					len |= (uint64_t)(len6 & 0xff) << 24;
+					len |= (uint64_t)(len7 & 0xff) << 16;
+					len |= (uint64_t)(len8 & 0xff) << 8;
+					len |= (uint64_t)(len9 & 0xff) << 0;
+
+					std::cout << "Huge packet, length: " << len << "\n";
+
 				}
 
 				if (buffer.length() < payloadstartoffset + len) {
@@ -269,14 +301,5 @@ bool WSClient::parseheader(std::string &buffer)
 void WSClient::close()
 {
 	SSLClient::close();
-}
-
-int main(int argc, char const *argv[])
-{
-	// gateway.discord.gg
-	WSClient client(0, "gateway.discord.gg");
-	client.ReadLoop();
-	client.close();
-	return 0;
 }
 

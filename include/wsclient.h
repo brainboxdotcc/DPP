@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 #include <variant>
-#include "sslclient.h"
+#include <sslclient.h>
 
 enum WSState {
 	HTTP_HEADERS,
@@ -28,12 +28,14 @@ class WSClient : public SSLClient
 	WSState state;
 	uint32_t heartbeat_interval;
 	uint32_t shard_id;
+	uint32_t max_shards;
+	std::string token;
 	std::map<std::string, std::string> HTTPHeaders;
 	bool parseheader(std::string &buffer);
 	bool unpack(std::string &buffer, uint32_t offset, bool first = true);
 	size_t FillHeader(unsigned char* outbuf, size_t sendlength, OpCode opcode);
 public:
-        WSClient(uint32_t _shard_id, const std::string &hostname, const std::string &port = "443");
+        WSClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, const std::string &hostname, const std::string &port = "443");
         virtual ~WSClient();
         virtual void write(const std::string &data);
         virtual bool HandleBuffer(std::string &buffer);
