@@ -18,6 +18,7 @@ WSClient::WSClient(const std::string &hostname, const std::string &port) : SSLCl
 
 void WSClient::Connect()
 {
+	state = HTTP_HEADERS;
 	/* Send headers synchronously */
 	this->write("GET /?v=6&encoding=json HTTP/1.1\r\n" 
 			"Host: " + hostname + "\r\n"

@@ -31,6 +31,7 @@ void DiscordClient::Run()
 	do {
 		SSLClient::ReadLoop();
 		SSLClient::close();
+		SSLClient::Connect();
 		WSClient::Connect();
 	} while(true);
 }
