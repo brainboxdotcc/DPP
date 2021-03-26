@@ -11,14 +11,22 @@ class DiscordClient : public WSClient
 	/* Heartbeat interval for sending heartbeat keepalive */
 	uint32_t heartbeat_interval;
 
+	/* Last heartbeat */
+	time_t last_heartbeat;
+
 	/* Shard ID of this client */
 	uint32_t shard_id;
 
 	/* Total number of shards */
 	uint32_t max_shards;
 
+	/* Last sequence number received, for resumes and pings */
+	uint64_t last_seq;
+
 	/* Discord bot token */
 	std::string token;
+protected:
+	virtual void OneSecondTimer();
 public:
 	/* Constructor takes shard id, max shards and token */
         DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token);

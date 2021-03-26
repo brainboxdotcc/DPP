@@ -29,6 +29,11 @@ protected:
 
 	/* SSL cipher in use */
 	std::string cipher;
+
+	/* For timers */
+	time_t last_tick;
+
+	virtual void OneSecondTimer();
 public:
 	/* Connect to a specified host and port */
 	SSLClient(const std::string &hostname, const std::string &port = "443");

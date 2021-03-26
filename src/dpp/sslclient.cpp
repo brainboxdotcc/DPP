@@ -26,7 +26,7 @@
 const int ERROR_STATUS = -1;
 
 /* SSL Client constructor throws std::runtime_error if it can't connect to the host */
-SSLClient::SSLClient(const std::string &hostname, const std::string &port)
+SSLClient::SSLClient(const std::string &hostname, const std::string &port) : last_tick(time(NULL))
 {
 	/* Initial connection is done in blocking mode. There is a timeout on it. */
 	nonblocking = false;
@@ -102,6 +102,10 @@ void SSLClient::write(const std::string &data)
 	}
 }
 
+void SSLClient::OneSecondTimer()
+{
+}
+
 void SSLClient::ReadLoop()
 {
 	/* The read loop is non-blocking using select(). This method
@@ -131,6 +135,12 @@ void SSLClient::ReadLoop()
 	
 	/* Loop until there is a socket error */
 	while(true) {
+
+		if (last_tick != time(NULL)) {
+			this->OneSecondTimer();
+			last_tick = time(NULL);
+		}
+
 		FD_ZERO(&readfds);
 		FD_ZERO(&writefds);
 
