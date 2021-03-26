@@ -27,7 +27,7 @@ It is my intention to get this stable enough to use on my production bot, [Trivi
 
 ## Documentation
 
-Documentation will be here in the project wiki when the project is more complete.ots for Discord](https://botsfordiscord.com/api/bot/715906723982082139/widget)](https://botsfordiscord.com/bots/715906723982082139)
+Documentation will be here in the project wiki when the project is more complete.
 
 ## Supported OSes
 
