@@ -5,6 +5,7 @@
 
 class SSLClient
 {
+protected:
 	std::string buffer;
 	std::string obuffer;
 	bool nonblocking;

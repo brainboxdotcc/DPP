@@ -13,16 +13,6 @@ const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 const size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-enum OpCode
-{
-	OP_CONTINUATION = 0x00,
-	OP_TEXT = 0x01,
-	OP_BINARY = 0x02,
-	OP_CLOSE = 0x08,
-	OP_PING = 0x09,
-	OP_PONG = 0x0a
-};
-
 WSClient::WSClient(uint32_t _shard_id, const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest"), shard_id(_shard_id)
 {
 	// etf
@@ -38,10 +28,50 @@ WSClient::~WSClient()
 {
 }
 
+size_t WSClient::FillHeader(unsigned char* outbuf, size_t sendlength, OpCode opcode)
+{
+	size_t pos = 0;
+	outbuf[pos++] = WS_FINBIT | opcode;
+
+	if (sendlength <= WS_MAX_PAYLOAD_LENGTH_SMALL)
+	{
+		std::cout << "Fill hdr payload small\n";
+		outbuf[pos++] = sendlength;
+	}
+	else if (sendlength <= WS_MAX_PAYLOAD_LENGTH_LARGE)
+	{
+		std::cout << "Fill hdr payload large\n";
+		outbuf[pos++] = WS_PAYLOAD_LENGTH_MAGIC_LARGE;
+		outbuf[pos++] = (sendlength >> 8) & 0xff;
+		outbuf[pos++] = sendlength & 0xff;
+	}
+	else
+	{
+		outbuf[pos++] = WS_PAYLOAD_LENGTH_MAGIC_HUGE;
+		const uint64_t len = sendlength;
+		for (int i = sizeof(uint64_t)-1; i >= 0; i--)
+			outbuf[pos++] = ((len >> i*8) & 0xff);
+	}
+
+	std::cout << "header len " << pos << "\n";
+
+	return pos;
+}
+
+
 void WSClient::write(const std::string &data)
 {
-	std::cout << "W: " << data << "\n";
-	SSLClient::write(data);
+	if (state == HTTP_HEADERS) {
+		/* Simple write */
+		SSLClient::write(data);
+	} else {
+		unsigned char out[MAXHEADERSIZE];
+		size_t s = this->FillHeader(out, data.length(), OP_TEXT);
+		std::string header((const char*)out, s);
+		std::cout << "W: " << data << std::endl;
+		SSLClient::write(header);
+		SSLClient::write(data);
+	}
 }
 
 std::vector<std::string> tokenize(std::string const &in, const char* sep = "\r\n") {
@@ -86,14 +116,8 @@ bool WSClient::HandleBuffer(std::string &buffer)
 							}
 						}
 		
-						/* Check for valid websocket upgrade header */
-						if (HTTPHeaders.find("upgrade") != HTTPHeaders.end() && HTTPHeaders["upgrade"] == "websocket") {
-							state = CONNECTED;
-							std::cout << "Websocket connected\n";
-						} else {
-							std::cout << "No upgrade header found" << std::endl;
-							return false;
-						}
+						state = CONNECTED;
+						std::cout << "Websocket connected\n";
 					} else {
 						std::cout << "Unexpected status: " << status_line << std::endl;
 						return false;
@@ -117,22 +141,27 @@ bool WSClient::unpack(std::string &buffer, uint32_t offset, bool first)
 
 		switch (op) {
 			case 10:
-				this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
-				this->write(
-					json({
-						{"op", 2},
-						{"d", {
-								{"token", "my_token"},
-								{"intents", 513},
-								{"properties", {
-									{"$os", "linux"},
-									{"$browser", "D++"},
-									{"$device", "D++"}
-								}
-							}
+			    	json obj = {
+				    { "op", 2 },
+				    {
+					"d",
+					{
+					    { "token", "AAAAAAAA" },
+					    { "properties",
+						{
+						    { "$os", "Linux" },
+						    { "$browser", "DPP" },
+						    { "$device", "DPP" }
 						}
+					    },
+					    { "shard", json::array({ 0, 2 }) },
+					    { "compress", false },
+					    { "large_threshold", 250 }
 					}
-				}).dump());
+				    }
+				};
+				this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
+				this->write(obj.dump());
 			break;
 		}
 	}
@@ -141,8 +170,9 @@ bool WSClient::unpack(std::string &buffer, uint32_t offset, bool first)
 
 bool WSClient::parseheader(std::string &buffer)
 {
-	if (buffer.size() < 6) {
+	if (buffer.size() < 4) {
 		/* Not enough data to form a frame yet */
+		std::cout << buffer.size() << "<4 Can't parse yet\n";
 		return true;
 	} else {
 		unsigned char opcode = buffer[0];
@@ -160,12 +190,14 @@ bool WSClient::parseheader(std::string &buffer)
 				if (len1 & WS_MASKBIT) {
 					len1 &= ~WS_MASKBIT;
 					payloadstartoffset += 2;
+					std::cout << "Masked!!!\n";
 				}
 
 				unsigned int len = len1;
 
 				if (len1 == WS_PAYLOAD_LENGTH_MAGIC_LARGE) {
 					if (buffer.length() < 8) {
+						std::cout << "<8 cant parse yet\n";
 						return true;
 					}
 
@@ -176,9 +208,11 @@ bool WSClient::parseheader(std::string &buffer)
 					payloadstartoffset += 2;
 				} else if (len1 == WS_PAYLOAD_LENGTH_MAGIC_HUGE) {
 					/* MISSING!!! */
+					std::cout << "HUUUUGE!\n";
 				}
 
 				if (buffer.length() < payloadstartoffset + len) {
+					std::cout << "Payload too small to parse " << buffer.length() << " " << payloadstartoffset + len << "\n";
 					return true;
 				}
 
@@ -196,12 +230,14 @@ bool WSClient::parseheader(std::string &buffer)
 
 			case OP_PING:
 			{
+				std::cout << "Ping\n";
 			//	return HandlePingPongFrame(sock, true);
 			}
 			break;
 
 			case OP_PONG:
 			{
+				std::cout << "Pong\n";
 				// A pong frame may be sent unsolicited, so we have to handle it.
 				// It may carry application data which we need to remove from the recvq as well.
 			//	return HandlePingPongFrame(sock, false);
@@ -210,17 +246,19 @@ bool WSClient::parseheader(std::string &buffer)
 
 			case OP_CLOSE:
 			{
-			//	sock->SetError("Connection closed");
 				std::cout << "Connection close" << std::endl;
-				return -1;
+				uint16_t error = buffer[2] & 0xff;
+			       	error <<= 8;
+				error |= (buffer[3] & 0xff);
+				std::cout << "Error: " << error << "\n";
+				return false;
 			}
 			break;
 
 			default:
 			{
-			//	sock->SetError("WebSocket: Invalid opcode");
 				std::cout << "Invalid opcode" << std::endl;
-				return -1;
+				return false;
 			}
 			break;
 		}
@@ -235,6 +273,7 @@ void WSClient::close()
 
 int main(int argc, char const *argv[])
 {
+	// gateway.discord.gg
 	WSClient client(0, "gateway.discord.gg");
 	client.ReadLoop();
 	client.close();
