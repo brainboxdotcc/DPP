@@ -1,23 +1,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <errno.h>
-#include <unistd.h>
-#include <string.h>
-#include <resolv.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <dpp/discordclient.h>
-#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-
-using json = nlohmann::json;
 
 DiscordClient::DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, spdlog::logger* _logger) : WSClient("gateway.discord.gg", "443"), shard_id(_shard_id), max_shards(_max_shards), token(_token), last_heartbeat(time(NULL)), heartbeat_interval(0), last_seq(0), sessionid(""), logger(_logger)
 {
@@ -114,12 +99,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 			case 0: {
 				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
 
-				if (event == "READY") {
-					this->sessionid = j["d"]["session_id"];
-					logger->debug("Received READY, session: {}", sessionid);
-				} else if (event == "RESUMED") {
-					logger->debug("Successfully resumed session id {}", sessionid);
-				}
+				HandleEvent(event, j);
 			}
 			break;
 			case 7:
@@ -140,7 +120,7 @@ void DiscordClient::OneSecondTimer()
 {
 	if (this->heartbeat_interval) {
 		/* Check if we're due to emit a heartbeat */
-		if (time(NULL) > last_heartbeat + (heartbeat_interval / 1000.0) - 2) {
+		if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 			logger->debug("Emit heartbeat, seq={}", last_seq);
 			this->write(json({{"op", 1}, {"d", last_seq}}).dump());
 			last_heartbeat = time(NULL);

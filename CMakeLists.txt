@@ -54,6 +54,8 @@ add_subdirectory(deps/json)
 include_directories("deps/spdlog/include")
 include_directories("deps/json/single_include")
 
+execute_process(COMMAND "g++ -c deps/json/single_include/nlohmann/json.hpp -o deps/json/single_include/nlohmann/json.hpp.gch")
+
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread -g -O2 -fPIC -rdynamic")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
 
@@ -64,7 +66,7 @@ foreach (fullmodname ${subdirlist})
         set (modsrc "")
         aux_source_directory(${modules_dir}/${modname} modsrc)
         add_library(${modname} SHARED ${modsrc})
-	target_link_libraries(${modname} ssl crypto)
+	target_link_libraries(${modname} PRIVATE ssl crypto nlohmann_json::nlohmann_json)
 endforeach(fullmodname)
 
 target_link_libraries(test dpp spdlog)
