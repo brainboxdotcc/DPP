@@ -111,7 +111,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 					this->write(obj.dump());
 				}
 			break;
-			case 0:
+			case 0: {
 				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
 
 				if (event == "READY") {
@@ -119,10 +119,12 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 					logger->debug("Received READY, session: {}", sessionid);
 				} else if (event == "RESUMED") {
 					logger->debug("Successfully resumed session id {}", sessionid);
-				} else if (event == "RECONNECT") {
-					logger->debug("Reconnection requested, closing socket {}", sessionid);
-					::close(sfd);
 				}
+			}
+			break;
+			case 7:
+				logger->debug("Reconnection requested, closing socket {}", sessionid);
+				::close(sfd);
 			break;
 		}
 	}
