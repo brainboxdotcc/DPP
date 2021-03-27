@@ -31,7 +31,7 @@ int main(int argc, char const *argv[])
 	log->set_level(spdlog::level::level_enum::debug);
 
 	log->info("Starting test bot");
-	DiscordClient client(0, 48, configdocument["token"], log.get());
+	DiscordClient client(0, 1, configdocument["token"], log.get());
 	client.Run();
 	client.close();
 	return 0;
