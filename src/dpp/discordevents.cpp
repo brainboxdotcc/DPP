@@ -37,6 +37,12 @@ std::map<std::string, std::function<void(DiscordClient* client, json &j)>> event
 		}
 	},
 	{
+		"MESSAGE_CREATE",
+		[](DiscordClient* client, json &j) {
+			 client->logger->debug("MESSAGE_CREATE");
+		}
+	},
+	{
 		"CHANNEL_UPDATE",
 		[](DiscordClient* client, json &j) {
 			 client->logger->debug("CHANNEL_UPDATE");
