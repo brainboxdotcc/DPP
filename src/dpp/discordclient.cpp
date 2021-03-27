@@ -15,11 +15,24 @@
 #include <netinet/tcp.h>
 #include <dpp/discordclient.h>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 
 using json = nlohmann::json;
 
-DiscordClient::DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token) : WSClient("gateway.discord.gg", "443"), shard_id(_shard_id), max_shards(_max_shards), token(_token), last_heartbeat(time(NULL)), heartbeat_interval(0), last_seq(0), sessionid("")
+DiscordClient::DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, spdlog::logger* _logger) : WSClient("gateway.discord.gg", "443"), shard_id(_shard_id), max_shards(_max_shards), token(_token), last_heartbeat(time(NULL)), heartbeat_interval(0), last_seq(0), sessionid(""), logger(_logger)
 {
+	if (logger == nullptr) {
+		try {
+			std::shared_ptr<spdlog::logger> log;
+			std::vector<spdlog::sink_ptr> sinks;
+			log = std::make_shared<spdlog::logger>("nullsink", begin(sinks), end(sinks));
+			spdlog::register_logger(log);
+			logger = log.get();
+		}
+		catch (const spdlog::spdlog_ex& ex) {
+			std::cout << "Log initialization failed: " << ex.what() << std::endl;
+		}
+	}
 }
 
 DiscordClient::~DiscordClient()
@@ -38,7 +51,7 @@ void DiscordClient::Run()
 
 bool DiscordClient::HandleFrame(const std::string &buffer)
 {
-	//std::cout << "R: " << buffer << "\n";
+	logger->trace("R: {}", buffer);
 	json j = json::parse(buffer);
 
 	if (j.find("s") != j.end() && !j["s"].is_null()) {
@@ -52,7 +65,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 			case 9:
 				/* Reset session state and fall through to 9 */
 				op = 10;
-				std::cout << "Failed to resume session " << sessionid << ", will reidentify\n";
+				logger->debug("Failed to resume session {}, will reidentify", sessionid);
 				this->sessionid = "";
 				this->last_seq = 0;
 				/* No break here, falls through to state 10 to cause a reidentify */
@@ -61,39 +74,39 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 
 				if (last_seq && !sessionid.empty()) {
 					/* Resume */
-					std::cout << "Resuming session " << sessionid << " with seq=" << last_seq << "...\n";
+					logger->debug("Resuming session {} with seq={}", sessionid, last_seq);
 					json obj = {
 						{ "op", 6 },
 						{ "d", {
-							       {"token", this->token },
-							       {"session_id", this->sessionid },
-							       {"seq", this->last_seq }
-						       }
+								{"token", this->token },
+								{"session_id", this->sessionid },
+								{"seq", this->last_seq }
+							}
 						}
 					};
 					this->write(obj.dump());
 				} else {
 					/* Full connect */
-					std::cout << "Connecting new session...\n";
-				    	json obj = {
-					    { "op", 2 },
-					    {
-						"d",
+					logger->debug("Connecting new session...");
+						json obj = {
+						{ "op", 2 },
 						{
-						    { "token", this->token },
-						    { "intents", 513 },
-						    { "properties",
+							"d",
 							{
-							    { "$os", "Linux" },
-								    { "$browser", "D++" },
-						    { "$device", "D++" }
+								{ "token", this->token },
+								{ "intents", 513 },
+								{ "properties",
+									{
+										{ "$os", "Linux" },
+										{ "$browser", "D++" },
+										{ "$device", "D++" }
+									}
+								},
+								{ "shard", json::array({ shard_id, max_shards }) },
+								{ "compress", false },
+								{ "large_threshold", 250 }
 							}
-						    },
-						    { "shard", json::array({ shard_id, max_shards }) },
-						    { "compress", false },
-						    { "large_threshold", 250 }
 						}
-					    }
 					};
 					this->write(obj.dump());
 				}
@@ -103,11 +116,11 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 
 				if (event == "READY") {
 					this->sessionid = j["d"]["session_id"];
-					std::cout << "Received READY, session: " << sessionid << "\n";
+					logger->debug("Received READY, session: {}", sessionid);
 				} else if (event == "RESUMED") {
-					std::cout << "Successfully resumed session id " << sessionid << "\n";
+					logger->debug("Successfully resumed session id {}", sessionid);
 				} else if (event == "RECONNECT") {
-					std::cout << "Reconnection requested, closing socket\n" << sessionid << "\n";
+					logger->debug("Reconnection requested, closing socket {}", sessionid);
 					::close(sfd);
 				}
 			break;
@@ -118,7 +131,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 
 void DiscordClient::Error(uint32_t errorcode)
 {
-	std::cout << "OOF! Error from underlying websocket: " << errorcode << "\n";
+	logger->debug("OOF! Error from underlying websocket: {}", errorcode);
 }
 
 void DiscordClient::OneSecondTimer()
@@ -126,7 +139,7 @@ void DiscordClient::OneSecondTimer()
 	if (this->heartbeat_interval) {
 		/* Check if we're due to emit a heartbeat */
 		if (time(NULL) > last_heartbeat + (heartbeat_interval / 1000.0) - 2) {
-			std::cout << "Emit heartbeat, seq=" << last_seq << "\n";
+			logger->debug("Emit heartbeat, seq={}", last_seq);
 			this->write(json({{"op", 1}, {"d", last_seq}}).dump());
 			last_heartbeat = time(NULL);
 		}

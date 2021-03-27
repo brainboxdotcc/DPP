@@ -54,6 +54,9 @@ add_subdirectory(deps/json)
 include_directories("deps/spdlog/include")
 include_directories("deps/json/single_include")
 
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread -g -O2 -fPIC -rdynamic")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
+
 set (modules_dir "src")
 file(GLOB subdirlist ${modules_dir}/dpp)
 foreach (fullmodname ${subdirlist})
@@ -61,10 +64,8 @@ foreach (fullmodname ${subdirlist})
         set (modsrc "")
         aux_source_directory(${modules_dir}/${modname} modsrc)
         add_library(${modname} SHARED ${modsrc})
-	target_link_libraries(${modname} ssl crypto spdlog)
+	target_link_libraries(${modname} ssl crypto)
 endforeach(fullmodname)
 
 target_link_libraries(test dpp spdlog)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread -g -O2 -fPIC -rdynamic")
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
 

@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <variant>
+#include <spdlog/spdlog.h>
 #include <dpp/wsclient.h>
 
 /* Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
@@ -29,12 +30,15 @@ class DiscordClient : public WSClient
 	/* Discord session id */
 	std::string sessionid;
 
+	/* Opaque logger */
+	class spdlog::logger* logger;
+
 protected:
 
 	virtual void OneSecondTimer();
 public:
 	/* Constructor takes shard id, max shards and token */
-        DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token);
+        DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, class spdlog::logger* _logger = nullptr);
 
 	/* Destructor */
         virtual ~DiscordClient();
