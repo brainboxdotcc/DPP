@@ -24,15 +24,35 @@ add_executable(test ${coresrc})
 
 string(ASCII 27 Esc)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
-find_package(ZLIB REQUIRED)
-if ( ZLIB_FOUND )
-	include_directories( ${ZLIB_INCLUDE_DIRS} )
-endif( ZLIB_FOUND )
 
 include_directories( "include" )
 
 target_link_libraries(test)
+
+find_package(Git QUIET)
+if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+# Update submodules as needed
+        message(STATUS "Submodule update")
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+        endif()
+endif()
+
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/spdlog/CMakeLists.txt" OR NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/json/CMakeLists.txt")
+    message(FATAL_ERROR "The submodules were not downloaded! Please update submodules and try again.")
+endif()
+
+add_subdirectory(deps/spdlog)
+add_subdirectory(deps/json)
+
+include_directories("deps/spdlog/include")
+include_directories("deps/json/single_include")
 
 set (modules_dir "src")
 file(GLOB subdirlist ${modules_dir}/dpp)
@@ -41,9 +61,10 @@ foreach (fullmodname ${subdirlist})
         set (modsrc "")
         aux_source_directory(${modules_dir}/${modname} modsrc)
         add_library(${modname} SHARED ${modsrc})
+	target_link_libraries(${modname} ssl crypto spdlog)
 endforeach(fullmodname)
 
-target_link_libraries(test dl ssl crypto z dpp ${ZLIB_LIBRARIES})
+target_link_libraries(test dpp spdlog)
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread -g -O2 -fPIC -rdynamic")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
 
