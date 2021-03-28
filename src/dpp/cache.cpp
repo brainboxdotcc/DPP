@@ -1,5 +1,6 @@
 #include <dpp/discord.h>
 #include <mutex>
+#include <iostream>
 
 namespace dpp {
 
@@ -12,7 +13,7 @@ std::mutex guild_mutex;
 
 void store_guild(guild* g) {
 	std::lock_guard<std::mutex> lock(guild_mutex);
-	if (guilds.find(g->id) != guilds.end()) {
+	if (guilds.find(g->id) == guilds.end()) {
 		guilds[g->id] = g;
 	}
 }
@@ -28,7 +29,7 @@ guild* find_guild(snowflake id) {
 
 void store_user(user * u) {
 	std::lock_guard<std::mutex> lock(user_mutex);
-	if (users.find(u->id) != users.end()) {
+	if (users.find(u->id) == users.end()) {
 		users[u->id] = u;
 	}
 }
@@ -44,9 +45,11 @@ user* find_user(snowflake id) {
 
 void store_channel(channel* c) {
 	std::lock_guard<std::mutex> lock(channel_mutex);
-	if (channels.find(c->id) != channels.end()) {
+	if (channels.find(c->id) == channels.end()) {
 		channels[c->id] = c;
 	}
+
+	std::cout << "Guilds: " << guilds.size() << " Channels: " << channels.size() << "\n";
 }
 
 channel* find_channel(snowflake id) {

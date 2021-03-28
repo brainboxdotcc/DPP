@@ -72,6 +72,10 @@ public:
 	snowflake public_updates_channel_id;
 	uint32_t max_video_channel_users;
 
+	std::vector<snowflake> roles;
+	std::vector<snowflake> channels;
+	std::map<snowflake, class guild_member*> members;
+
 	guild();
 	~guild();
 

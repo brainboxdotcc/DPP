@@ -43,6 +43,36 @@ std::map<std::string, dpp::region> regionmap = {
         { "western-europe", dpp::r_western_europe }
 };
 
+uint64_t SnowflakeNotNull(json& j, const char *keyname)
+{
+	return j.find(keyname) != j.end() && !j[keyname].is_null() ? from_string<uint64_t>(j[keyname].get<std::string>(), std::dec) : 0;
+}
+
+std::string StringNotNull(json& j, const char *keyname)
+{
+	return j.find(keyname) != j.end() && !j[keyname].is_null() ? j[keyname].get<std::string>() : "";
+}
+
+uint32_t Int32NotNull(json& j, const char *keyname)
+{
+	return j.find(keyname) != j.end() && !j[keyname].is_null() ? j[keyname].get<uint32_t>() : 0;
+}
+
+uint16_t Int16NotNull(json& j, const char *keyname)
+{
+	return j.find(keyname) != j.end() && !j[keyname].is_null() ? j[keyname].get<uint16_t>() : 0;
+}
+
+uint8_t Int8NotNull(json& j, const char *keyname)
+{
+	return j.find(keyname) != j.end() && !j[keyname].is_null() ? j[keyname].get<uint8_t>() : 0;
+}
+
+bool BoolNotNull(json &j, const char *keyname)
+{
+	return (j.find(keyname) != j.end() && j[keyname].get<bool>() == true);
+}
+
 std::map<std::string, std::function<void(DiscordClient* client, json &j)>> events = {
 	{
 		"READY",
@@ -63,13 +93,12 @@ std::map<std::string, std::function<void(DiscordClient* client, json &j)>> event
 			dpp::guild* g = new dpp::guild();
 			json& d = j["d"];
 
-			g->id = from_string<uint64_t>(d["id"].get<std::string>(), std::dec);
+			g->id = SnowflakeNotNull(d, "id");
 			if (d.find("unavailable") == d.end() || d["unavailable"].get<bool>() == false) {
-				g->name = d["name"].get<std::string>();
-				g->icon = !d["icon"].is_null() ? d["icon"].get<std::string>() : "";
-				g->splash = !d["splash"].is_null() ? d["splash"].get<std::string>() : "";
-				g->discovery_splash = !d["discovery_splash"].is_null() ? d["discovery_splash"].get<std::string>() : "";
-				g->owner_id = from_string<uint64_t>(d["owner_id"].get<std::string>(), std::dec);
+				g->name = StringNotNull(d, "name");
+				g->icon = StringNotNull(d, "icon");
+				g->discovery_splash = StringNotNull(d, "discovery_splash");
+				g->owner_id = SnowflakeNotNull(d, "owner_id");
 				if (!d["region"].is_null()) {
 					auto r = regionmap.find(d["region"].get<std::string>());
 					if (r != regionmap.end()) {
@@ -77,8 +106,8 @@ std::map<std::string, std::function<void(DiscordClient* client, json &j)>> event
 					}
 				}
 
-				g->flags |= (d.find("large") != d.end() && d["large"].get<bool>() == true) ? dpp::g_large : 0;
-				g->flags |= (d.find("widget_enabled") != d.end() && d["widget_enabled"].get<bool>() == true) ? dpp::g_widget_enabled : 0;
+				g->flags |= BoolNotNull(d, "large") ? dpp::g_large : 0;
+				g->flags |= BoolNotNull(d, "widget_enabled") ? dpp::g_widget_enabled : 0;
 
 				for (auto & feature : d["features"]) {
 					auto f = featuremap.find(feature.get<std::string>());
@@ -86,7 +115,7 @@ std::map<std::string, std::function<void(DiscordClient* client, json &j)>> event
 						g->flags |= f->second;
 					}
 				}
-				uint8_t scf = d["system_channel_flags"].get<uint8_t>();
+				uint8_t scf = Int8NotNull(d, "system_channel_flags");
 				if (scf & 1) {
 					g->flags |= dpp::g_no_join_notifications;
 				}
@@ -94,29 +123,63 @@ std::map<std::string, std::function<void(DiscordClient* client, json &j)>> event
 					g->flags |= dpp::g_no_boost_notifications;
 				}
 
-				g->afk_channel_id = !d["afk_channel_id"].is_null() ? from_string<uint64_t>(d["afk_channel_id"].get<std::string>(), std::dec) : 0;
-				g->afk_timeout = !d["afk_timeout"].is_null() ? d["afk_timeout"].get<uint32_t>() : 0;
-				g->widget_channel_id = !d["widget_channel_id"].is_null() ? from_string<uint64_t>(d["widget_channel_id"].get<std::string>(), std::dec) : 0;
-				g->verification_level = !d["verification_level"].is_null() ? d["verification_level"].get<uint8_t>() : 0;
-				g->default_message_notifications = !d["default_message_notifications"].is_null() ? d["default_message_notifications"].get<uint8_t>() : 0;
-				g->explicit_content_filter = !d["explicit_content_filter"].is_null() ? d["explicit_content_filter"].get<uint8_t>() : 0;
-				g->mfa_level = !d["mfa_level"].is_null() ? d["mfa_level"].get<uint8_t>() : 0;
-				g->application_id = !d["application_id"].is_null() ? from_string<uint64_t>(d["application_id"].get<std::string>(), std::dec) : 0;
-				g->system_channel_id = !d["system_channel_id"].is_null() ? from_string<uint64_t>(d["system_channel_id"].get<std::string>(), std::dec) : 0;
-				g->rules_channel_id = !d["rules_channel_id"].is_null() ? from_string<uint64_t>(d["rules_channel_id"].get<std::string>(), std::dec) : 0;
+				g->afk_channel_id = SnowflakeNotNull(d, "afk_channel_id");
+				g->afk_timeout = Int16NotNull(d, "afk_timeout");
+				g->widget_channel_id = SnowflakeNotNull(d, "widget_channel_id");
+				g->verification_level = Int8NotNull(d, "verification_level");
+				g->default_message_notifications = Int8NotNull(d, "default_message_notifications");
+				g->explicit_content_filter = Int8NotNull(d, "explicit_content_filter");
+				g->mfa_level = Int8NotNull(d, "mfa_level");
+				g->application_id = SnowflakeNotNull(d, "application_id");
+				g->system_channel_id = SnowflakeNotNull(d, "system_channel_id");
+				g->rules_channel_id = SnowflakeNotNull(d, "rules_channel_id");
 				//g->joined_at = 
-				g->member_count = !d["member_count"].is_null() ? d["member_count"].get<uint32_t>() : 0;
-				g->vanity_url_code = !d["vanity_url_code"].is_null() ? d["vanity_url_code"].get<std::string>() : "";
-				g->description = !d["description"].is_null() ? d["description"].get<std::string>() : "";
-				g->banner = !d["banner"].is_null() ? d["banner"].get<std::string>() : "";
-				g->premium_tier = !d["premium_tier"].is_null() ? d["premium_tier"].get<uint8_t>() : 0;
-				g->premium_subscription_count = !d["premium_subscription_count"].is_null() ? d["premium_subscription_count"].get<uint16_t>() : 0;
-				g->public_updates_channel_id = !d["public_updates_channel_id"].is_null() ? from_string<int64_t>(d["public_updates_channel_id"].get<std::string>(), std::dec) : 0;
-				g->max_video_channel_users = !d["max_video_channel_users"].is_null() ? d["max_video_channel_users"].get<uint32_t>() : 0;
+				g->member_count = Int32NotNull(d, "member_count");
+				g->vanity_url_code = StringNotNull(d, "vanity_url_code");
+				g->description = StringNotNull(d, "description");
+				g->banner = StringNotNull(d, "banner");
+				g->premium_tier = Int8NotNull(d, "premium_tier");
+				g->premium_subscription_count = Int16NotNull(d, "premium_subscription_count");
+				g->public_updates_channel_id = SnowflakeNotNull(d, "public_updates_channel_id");
+				g->max_video_channel_users = Int32NotNull(d, "max_video_channel_users");
+
+				/* Store guild roles */
+				//std::vector<snowflake> roles;
+
+				// Store guild channels
+				for (auto & channel : d["channels"]) {
+					dpp::channel *c = new dpp::channel();
+
+					c->id = SnowflakeNotNull(channel, "id");
+					c->guild_id = SnowflakeNotNull(channel, "guild_id");
+					c->position = Int16NotNull(channel, "position");
+					c->name = StringNotNull(channel, "name");
+					c->topic = StringNotNull(channel, "topic");
+					c->last_message_id = SnowflakeNotNull(channel, "last_message_id");
+					c->user_limit = Int32NotNull(channel, "user_limit");
+					c->rate_limit_per_user = Int16NotNull(channel, "rate_limit_per_user");
+					c->owner_id = SnowflakeNotNull(channel, "owner_id");
+					c->parent_id = SnowflakeNotNull(channel, "parent_id");
+					//c->last_pin_timestamp
+					uint8_t type = Int8NotNull(channel, "type");
+					c->flags |= BoolNotNull(channel, "nsfw") ? dpp::c_nsfw : 0;
+					c->flags |= (type == GUILD_TEXT) ? dpp::c_text : 0;
+					c->flags |= (type == GUILD_VOICE) ? dpp::c_voice : 0;
+					c->flags |= (type == DM) ? dpp::c_dm : 0;
+					c->flags |= (type == GROUP_DM) ? (dpp::c_group | dpp::c_dm) : 0;
+					c->flags |= (type == GUILD_CATEGORY) ? dpp::c_category : 0;
+					c->flags |= (type == GUILD_NEWS) ? dpp::c_news : 0;
+					c->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
+
+					dpp::store_channel(c);
+					g->channels.push_back(c->id);
+				}
+
+				//std::map<snowflake, class guild_member*> members;
+
 			} else {
 				g->flags |= dpp::g_unavailable;
 			}
-			
 			dpp::store_guild(g);
 		}
 	},

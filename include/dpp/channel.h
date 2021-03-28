@@ -2,6 +2,16 @@
 
 namespace dpp {
 
+/* Flag integers as received from and sent to discord */
+#define GUILD_TEXT	0	// a text channel within a server
+#define DM		1	// a direct message between users
+#define GUILD_VOICE	2	// a voice channel within a server
+#define GROUP_DM	3	// a direct message between multiple users
+#define GUILD_CATEGORY	4	// an organizational category that contains up to 50 channels
+#define GUILD_NEWS	5	// a channel that users can follow and crosspost into their own server
+#define GUILD_STORE	6	// a channel in which game developers can sell their game on Discord
+
+/* Our flags as stored in the object */
 enum channel_flags {
 	c_nsfw =		0b00000001,
 	c_text =		0b00000010,
@@ -13,6 +23,7 @@ enum channel_flags {
 	c_store =		0b10000000
 };
 
+/* A definition of a discord channel */
 class channel {
 public:
 	snowflake id;
@@ -30,6 +41,13 @@ public:
 
 	channel();
 	~channel();
+	bool is_text_channel();
+	bool is_dm();
+	bool is_voice_channel();
+	bool is_group_dm();
+	bool is_category();
+	bool is_news_channel();
+	bool is_store_channel();
 };
 
 typedef std::unordered_map<snowflake, channel*> channel_map;
