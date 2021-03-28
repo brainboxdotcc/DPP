@@ -37,7 +37,9 @@ enum guild_flags {
 	g_banner =				0b00000100000000000000,
 	g_welcome_screen_enabled =		0b00001000000000000000,
 	g_member_verification_gate =		0b00010000000000000000,
-	g_preview_enabled =			0b00100000000000000000
+	g_preview_enabled =			0b00100000000000000000,
+	g_no_join_notifications =		0b01000000000000000000,
+	g_no_boost_notifications =		0b10000000000000000000
 };
 
 class guild {
@@ -53,13 +55,12 @@ public:
 	snowflake afk_channel_id;
 	uint32_t afk_timeout;
 	snowflake widget_channel_id;
-	uint8_t verificaion_level;
+	uint8_t verification_level;
 	uint8_t default_message_notifications;
 	uint8_t explicit_content_filter;
 	uint8_t mfa_level;
 	snowflake application_id;
 	snowflake system_channel_id;
-	uint32_t system_channel_flags;
 	snowflake rules_channel_id;
 	time_t joined_at;
 	uint32_t member_count;
