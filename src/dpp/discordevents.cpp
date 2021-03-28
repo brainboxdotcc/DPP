@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <dpp/discordclient.h>
+#include <dpp/discord.h>
+#include <dpp/cache.h>
 #include <spdlog/spdlog.h>
 
 std::map<std::string, std::function<void(DiscordClient* client, json &j)>> events = {
@@ -21,7 +23,8 @@ std::map<std::string, std::function<void(DiscordClient* client, json &j)>> event
 	{
 		"GUILD_CREATE",
 		[](DiscordClient* client, json &j) {
-			client->logger->debug("GUILD_CREATE");
+			dpp::guild* g = new dpp::guild();
+			dpp::store_guild(g);
 		}
 	},
 	{
