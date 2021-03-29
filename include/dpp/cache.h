@@ -4,6 +4,7 @@
 
 namespace dpp {
 
+	void garbage_collection();
 	void store_guild(guild* g);
 	guild* find_guild(snowflake id);
 	void store_user(user * u);

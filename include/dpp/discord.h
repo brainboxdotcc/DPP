@@ -9,6 +9,11 @@ namespace dpp {
 	typedef int64_t snowflake;
 };
 
+class managed {
+public:
+	~managed() = default;
+};
+
 #include <dpp/role.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>

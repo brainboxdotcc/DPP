@@ -25,7 +25,7 @@ enum user_flags {
 	u_verified_bot_dev =	0b00000100000000000000000,
 };
 
-class user {
+class user : public managed {
 public:
 	snowflake id;
 	std::string username;

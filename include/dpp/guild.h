@@ -42,7 +42,7 @@ enum guild_flags {
 	g_no_boost_notifications =		0b10000000000000000000
 };
 
-class guild {
+class guild : public managed {
 public:
 	snowflake id;
 	uint32_t flags;

@@ -11,7 +11,7 @@ enum role_flags {
 	r_premium_subscriber =	0b00001000,
 };
 
-class role {
+class role : public managed {
 public:
 	snowflake id;
 	std::string name;
