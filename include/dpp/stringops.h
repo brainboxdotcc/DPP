@@ -27,6 +27,8 @@
 #include <iomanip>
 #include <locale>
 #include <algorithm>
+#include <sstream>
+#include <iostream>
 
 /**
  * Convert a string to lowercase using tolower()
