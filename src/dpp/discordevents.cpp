@@ -213,9 +213,7 @@ std::map<std::string, std::function<void(DiscordClient* client, json &j)>> event
 				for (auto & user : d["members"]) {
 					dpp::user *u = new dpp::user();
 
-					std::cout << "user: " << user["user"].dump() << "\n";
 					u->id = SnowflakeNotNull(user["user"], "id");
-					std::cout << "user id: " << u->id << "\n";
 					u->username = StringNotNull(user["user"], "username");
 					u->avatar = StringNotNull(user["user"], "avatar");
 					u->discriminator = SnowflakeNotNull(user["user"], "discriminator");
