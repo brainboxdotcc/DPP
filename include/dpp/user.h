@@ -1,5 +1,7 @@
 #pragma once
 
+#include <dpp/json_fwd.hpp>
+
 namespace dpp {
 
 enum user_flags {
@@ -33,6 +35,7 @@ public:
 
 	user();
 	~user();
+	void fill_from_json(nlohmann::json* j);
 
 	bool is_bot();
 	bool is_system();

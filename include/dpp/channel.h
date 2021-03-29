@@ -1,5 +1,7 @@
 #pragma once
 
+#include <dpp/json_fwd.hpp>
+
 namespace dpp {
 
 /* Flag integers as received from and sent to discord */
@@ -41,6 +43,8 @@ public:
 
 	channel();
 	~channel();
+	void fill_from_json(nlohmann::json* j);
+
 	bool is_text_channel();
 	bool is_dm();
 	bool is_voice_channel();

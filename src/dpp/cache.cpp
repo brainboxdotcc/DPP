@@ -19,7 +19,6 @@ void store_guild(guild* g) {
 	if (guilds.find(g->id) == guilds.end()) {
 		guilds[g->id] = g;
 	}
-	std::cout << "Users: " << users.size() << " Channels: " << channels.size() << " Roles: " << roles.size() << " Guilds: " << guilds.size() << "\n";
 }
 
 guild* find_guild(snowflake id) {
