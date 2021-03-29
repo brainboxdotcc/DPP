@@ -1,5 +1,7 @@
 #pragma once
 
+#include <dpp/json_fwd.hpp>
+
 namespace dpp {
 
 enum role_flags {
@@ -22,6 +24,7 @@ public:
 
 	role();
 	~role();
+	void fill_from_json(nlohmann::json* j);
 };
 
 typedef std::unordered_map<snowflake, role*> role_map;

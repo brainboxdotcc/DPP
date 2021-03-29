@@ -78,6 +78,7 @@ public:
 
 	guild();
 	~guild();
+	void fill_from_json(nlohmann::json* j);
 
 	bool is_large();
 	bool is_unavailable();
@@ -120,6 +121,7 @@ public:
 
 	guild_member();
 	~guild_member();
+	void fill_from_json(nlohmann::json* j, const class guild* g, const class user* u);
 };
 
 };
