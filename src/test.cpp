@@ -30,8 +30,17 @@ int main(int argc, char const *argv[])
 	log->set_pattern("%^%Y-%m-%d %H:%M:%S.%e [%L] [th#%t]%$ : %v");
 	log->set_level(spdlog::level::level_enum::debug);
 
+
+
 	log->info("Starting test bot");
-	DiscordClient client(0, configdocument["shards"].get<uint32_t>(), configdocument["token"].get<std::string>(), log.get());
+	DiscordClient client(
+		0,
+		configdocument["shards"].get<uint32_t>(),
+		configdocument["token"].get<std::string>(),
+		dpp::GUILDS | dpp::GUILD_MEMBERS | dpp::GUILD_BANS | dpp::GUILD_EMOJIS | dpp::GUILD_INTEGRATIONS | dpp::GUILD_WEBHOOKS | dpp::GUILD_INVITES | dpp::GUILD_MESSAGES | dpp::GUILD_MESSAGE_REACTIONS,
+		log.get()
+	);
+
 	client.Run();
 	client.close();
 	return 0;

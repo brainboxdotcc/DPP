@@ -31,6 +31,9 @@ public:
 	/* Discord bot token */
 	std::string token;
 
+	/* Privileged gateway intents */
+	uint32_t intents;
+
 	/* Discord session id */
 	std::string sessionid;
 
@@ -45,7 +48,7 @@ public:
 
 
 	/* Constructor takes shard id, max shards and token */
-        DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, class spdlog::logger* _logger = nullptr);
+        DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, class spdlog::logger* _logger = nullptr);
 
 	/* Destructor */
         virtual ~DiscordClient();

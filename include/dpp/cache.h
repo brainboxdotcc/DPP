@@ -10,6 +10,7 @@ namespace dpp {
 	user* find_user(snowflake id);
 	void store_channel(channel* c);
 	channel* find_channel(snowflake id);
-
+	void store_role(role* r);
+	role* find_role(snowflake id);
 };
 

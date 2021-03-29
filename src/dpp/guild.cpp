@@ -31,6 +31,14 @@ guild::~guild()
 {
 }
 
+guild_member::guild_member()
+{
+}
+
+guild_member::~guild_member()
+{
+}
+
 bool guild::is_large() {
 	return this->flags & g_large;
 }

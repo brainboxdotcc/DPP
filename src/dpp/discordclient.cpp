@@ -4,7 +4,7 @@
 #include <dpp/discordclient.h>
 #include <spdlog/spdlog.h>
 
-DiscordClient::DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, spdlog::logger* _logger) : WSClient("gateway.discord.gg", "443"), shard_id(_shard_id), max_shards(_max_shards), token(_token), last_heartbeat(time(NULL)), heartbeat_interval(0), last_seq(0), sessionid(""), logger(_logger)
+DiscordClient::DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, spdlog::logger* _logger) : WSClient("gateway.discord.gg", "443"), shard_id(_shard_id), max_shards(_max_shards), token(_token), last_heartbeat(time(NULL)), heartbeat_interval(0), last_seq(0), sessionid(""), logger(_logger), intents(_intents)
 {
 	if (logger == nullptr) {
 		try {
@@ -79,7 +79,6 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 							"d",
 							{
 								{ "token", this->token },
-								{ "intents", 513 },
 								{ "properties",
 									{
 										{ "$os", "Linux" },
@@ -93,6 +92,9 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 							}
 						}
 					};
+					if (this->intents) {
+						obj["d"]["intents"] = this->intents;
+					}
 					this->write(obj.dump());
 				}
 			break;

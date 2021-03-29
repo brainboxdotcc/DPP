@@ -9,6 +9,8 @@ namespace dpp {
 	typedef int64_t snowflake;
 };
 
+#include <dpp/role.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>
 #include <dpp/guild.h>
+#include <dpp/intents.h>
