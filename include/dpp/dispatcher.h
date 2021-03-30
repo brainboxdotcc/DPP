@@ -137,6 +137,7 @@ struct user_update_t {
 };
 
 struct message_create_t {
+	message* msg;
 };
 
 struct guild_ban_add_t {
