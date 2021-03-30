@@ -6,13 +6,20 @@
 #include <spdlog/fwd.h>
 #include <nlohmann/json.hpp>
 #include <dpp/wsclient.h>
+#include <dpp/dispatcher.h>
+#include <dpp/cluster.h>
 
 using json = nlohmann::json;
+
+namespace dpp {
+	class cluster;
+};
 
 /* Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
 class DiscordClient : public WSClient
 {
 public:
+	class dpp::cluster* creator;
 	/* Heartbeat interval for sending heartbeat keepalive */
 	uint32_t heartbeat_interval;
 
@@ -46,9 +53,8 @@ public:
 	/* Opaque logger */
 	class spdlog::logger* logger;
 
-
 	/* Constructor takes shard id, max shards and token */
-        DiscordClient(uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, class spdlog::logger* _logger = nullptr);
+        DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, class spdlog::logger* _logger = nullptr);
 
 	/* Destructor */
         virtual ~DiscordClient();

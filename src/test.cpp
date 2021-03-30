@@ -33,16 +33,14 @@ int main(int argc, char const *argv[])
 
 
 	log->info("Starting test bot");
-	DiscordClient client(
-		0,
-		configdocument["shards"].get<uint32_t>(),
-		configdocument["token"].get<std::string>(),
-		dpp::GUILDS | dpp::GUILD_MEMBERS | dpp::GUILD_BANS | dpp::GUILD_EMOJIS | dpp::GUILD_INTEGRATIONS | dpp::GUILD_WEBHOOKS | dpp::GUILD_INVITES | dpp::GUILD_MESSAGES | dpp::GUILD_MESSAGE_REACTIONS,
+	dpp::cluster bot;
+	bot.start(configdocument["token"].get<std::string>(),
+		dpp::GUILDS | dpp::GUILD_MEMBERS | dpp::GUILD_BANS | dpp::GUILD_EMOJIS | dpp::GUILD_INTEGRATIONS |
+		dpp::GUILD_WEBHOOKS | dpp::GUILD_INVITES | dpp::GUILD_MESSAGES | dpp::GUILD_MESSAGE_REACTIONS,
+		configdocument["shards"].get<uint32_t>(), 0, 1,
 		log.get()
 	);
-
-	client.Run();
-	client.close();
+	
 	return 0;
 }
 
