@@ -18,7 +18,11 @@
 #include <iostream>
 #include <dpp/sslclient.h>
 
-#define BUFSIZZ 1024 * 1024 * 8
+/* You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
+ * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
+ * it'd go unused.
+ */
+#define BUFSIZZ 1024 * 16
 const int ERROR_STATUS = -1;
 
 SSLClient::SSLClient(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port)
