@@ -44,6 +44,9 @@ void garbage_collection() {
 }
 
 void cache::store(managed* object) {
+	if (!object) {
+		return;
+	}
 	std::lock_guard<std::mutex> lock(this->cache_mutex);
 	auto existing = cache_map.find(object->id);
 	if (existing == cache_map.end()) {
@@ -57,6 +60,9 @@ void cache::store(managed* object) {
 }
 
 void cache::remove(managed* object) {
+	if (!object) {
+		return;
+	}
 	std::lock_guard<std::mutex> lock(cache_mutex);
 	std::lock_guard<std::mutex> delete_lock(deletion_mutex);
 	auto existing = cache_map.find(object->id);
