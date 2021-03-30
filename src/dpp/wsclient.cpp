@@ -141,7 +141,8 @@ bool WSClient::HandleBuffer(std::string &buffer)
 			}
 		break;
 		case CONNECTED:
-			return this->parseheader(buffer);
+			/* Process packets until we can't */
+			while (this->parseheader(buffer));
 		break;
 	}
 	return true;
@@ -151,7 +152,7 @@ bool WSClient::parseheader(std::string &buffer)
 {
 	if (buffer.size() < 4) {
 		/* Not enough data to form a frame yet */
-		return true;
+		return false;
 	} else {
 		unsigned char opcode = buffer[0];
 		switch (opcode & ~WS_FINBIT)
@@ -171,7 +172,7 @@ bool WSClient::parseheader(std::string &buffer)
 					len1 &= ~WS_MASKBIT;
 					payloadstartoffset += 2;
 					/* We don't handle masked data, because discord doesnt send it */
-					return false;
+					return true;
 				}
 
 				/* 6 bit ("small") length frame */
@@ -181,7 +182,7 @@ bool WSClient::parseheader(std::string &buffer)
 					/* 24 bit ("large") length frame */
 					if (buffer.length() < 8) {
 						/* We don't have a complete header yet */
-						return true;
+						return false;
 					}
 
 					unsigned char len2 = (unsigned char)buffer[2];
@@ -193,7 +194,7 @@ bool WSClient::parseheader(std::string &buffer)
 					/* 64 bit ("huge") length frame */
 					if (buffer.length() < 10) {
 						/* We don't have a complete header yet */
-						return true;
+						return false;
 					}
 					len = 0;
 					for (int v = 2, shift = 56; v < 10; ++v, shift -= 8) {
@@ -205,7 +206,7 @@ bool WSClient::parseheader(std::string &buffer)
 
 				if (buffer.length() < payloadstartoffset + len) {
 					/* We don't have a complete frame yet */
-					return true;
+					return false;
 				}
 
 				/* Copy from buffer into string */
@@ -222,8 +223,9 @@ bool WSClient::parseheader(std::string &buffer)
 					HandlePingPong((opcode & ~WS_FINBIT) == OP_PING, payload);
 				} else {
 					/* Pass this frame to the deriving class */
-					return this->HandleFrame(payload);
+					this->HandleFrame(payload);
 				}
+				return true;
 			}
 			break;
 
@@ -245,7 +247,7 @@ bool WSClient::parseheader(std::string &buffer)
 			break;
 		}
 	}
-	return true;
+	return false;
 }
 
 void WSClient::HandlePingPong(bool ping, const std::string &payload)
