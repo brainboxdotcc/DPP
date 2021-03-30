@@ -20,6 +20,7 @@ cmake_minimum_required (VERSION 3.6)
 project(test)
 
 aux_source_directory("src" coresrc)
+
 add_executable(test ${coresrc})
 
 string(ASCII 27 Esc)
@@ -64,7 +65,7 @@ file(GLOB subdirlist ${modules_dir}/dpp)
 foreach (fullmodname ${subdirlist})
         get_filename_component(modname ${fullmodname} NAME)
         set (modsrc "")
-        aux_source_directory(${modules_dir}/${modname} modsrc)
+	file(GLOB modsrc ${modules_dir}/dpp/*.cpp ${modules_dir}/dpp/events/*.cpp)
         add_library(${modname} SHARED ${modsrc})
 	target_link_libraries(${modname} PRIVATE ssl crypto nlohmann_json::nlohmann_json)
 endforeach(fullmodname)

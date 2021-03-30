@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 #include <variant>
-#include <spdlog/spdlog.h>
+#include <spdlog/fwd.h>
 #include <nlohmann/json.hpp>
 #include <dpp/wsclient.h>
 
