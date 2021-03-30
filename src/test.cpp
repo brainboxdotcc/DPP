@@ -34,6 +34,9 @@ int main(int argc, char const *argv[])
 
 	log->info("Starting test bot");
 	dpp::cluster bot;
+	bot.on_message_create([log](const dpp::message_create_t & event) {
+			log->info("Message received: {} -> {}", event.msg->id, event.msg->content);
+	});
 	bot.start(configdocument["token"].get<std::string>(),
 		dpp::GUILDS | dpp::GUILD_MEMBERS | dpp::GUILD_BANS | dpp::GUILD_EMOJIS | dpp::GUILD_INTEGRATIONS |
 		dpp::GUILD_WEBHOOKS | dpp::GUILD_INVITES | dpp::GUILD_MESSAGES | dpp::GUILD_MESSAGE_REACTIONS,
