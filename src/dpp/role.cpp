@@ -8,7 +8,7 @@ using json = nlohmann::json;
 namespace dpp {
 
 role::role() :
-	id(0),
+	managed(),
 	colour(0),
 	position(0),
 	permissions(0),

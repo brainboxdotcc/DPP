@@ -2,22 +2,27 @@
 #include <mutex>
 #include <iostream>
 #include <variant>
+#include <dpp/cache.h>
 
 namespace dpp {
 
-user_map users;
-channel_map channels;
-guild_map guilds;
-role_map roles;
 std::unordered_map<managed*, time_t> deletion_queue;
-
-std::mutex user_mutex;
-std::mutex channel_mutex;
-std::mutex guild_mutex;
-std::mutex role_mutex;
 std::mutex deletion_mutex;
 
-/* Because other threads and systems may run for a short while after an event is received, we don't immediately
+#define cache_helper(type, cache_name, setter, getter) \
+cache* cache_name = nullptr; \
+type * setter (snowflake id) { \
+		return cache_name ? ( type * ) cache_name ->find(id) : nullptr; \
+} \
+cache* getter () { \
+	if (! cache_name ) { \
+		cache_name = new cache(); \
+	} \
+	return cache_name ; \
+}
+
+
+/* Because othe( threads and sBecauseystems may run for a short while after an event is received, we don't immediately
  * delete pointers when objects are replaced. We put them into a queue, and periodically delete pointers in the
  * queue.
  */
@@ -38,135 +43,41 @@ void garbage_collection() {
 	} while (repeat);
 }
 
-void store_guild(guild* g) {
-	std::lock_guard<std::mutex> lock(guild_mutex);
-	auto existing = guilds.find(g->id);
-	if (existing == guilds.end()) {
-		guilds[g->id] = g;
-	} else if (g != existing->second) {
+void cache::store(managed* object) {
+	std::lock_guard<std::mutex> lock(this->cache_mutex);
+	auto existing = cache_map.find(object->id);
+	if (existing == cache_map.end()) {
+		cache_map[object->id] = object;
+	} else if (object != existing->second) {
 		/* Flag old pointer for deletion and replace */
 		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
 		deletion_queue[existing->second] = time(NULL);
-		guilds[g->id] = g;
+		cache_map[object->id] = object;
 	}
 }
 
-void delete_guild(guild* g) {
-	std::lock_guard<std::mutex> lock(guild_mutex);
+void cache::remove(managed* object) {
+	std::lock_guard<std::mutex> lock(cache_mutex);
 	std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-	auto existing = guilds.find(g->id);
-	if (existing != guilds.end()) {
-		guilds.erase(existing);
-		deletion_queue[g] = time(NULL);
+	auto existing = cache_map.find(object->id);
+	if (existing != cache_map.end()) {
+		cache_map.erase(existing);
+		deletion_queue[object] = time(NULL);
 	}
 }
 
-guild* find_guild(snowflake id) {
-	std::lock_guard<std::mutex> lock(guild_mutex);
-	auto r = guilds.find(id);
-	if (r != guilds.end()) {
+managed* cache::find(snowflake id) {
+	std::lock_guard<std::mutex> lock(cache_mutex);
+	auto r = cache_map.find(id);
+	if (r != cache_map.end()) {
 		return r->second;
 	}
 	return nullptr;
 }
 
-void store_user(user * u) {
-	std::lock_guard<std::mutex> lock(user_mutex);
-	auto existing = users.find(u->id);
-	if (existing == users.end()) {
-		users[u->id] = u;
-	} else if (u != existing->second) {
-		/* Flag old pointer for deletion and replace */
-		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-		deletion_queue[existing->second] = time(NULL);
-		users[u->id] = u;
-	}
-
-}
-
-void delete_user(user* u) {
-	std::lock_guard<std::mutex> lock(user_mutex);
-	std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-	auto existing = users.find(u->id);
-	if (existing != users.end()) {
-		users.erase(existing);
-		deletion_queue[u] = time(NULL);
-	}
-}
-
-user* find_user(snowflake id) {
-	std::lock_guard<std::mutex> lock(user_mutex);
-	auto r = users.find(id);
-	if (r != users.end()) {
-		return r->second;
-	}
-	return nullptr;
-}
-
-void store_channel(channel* c) {
-	std::lock_guard<std::mutex> lock(channel_mutex);
-	auto existing = channels.find(c->id);
-	if (existing == channels.end()) {
-		channels[c->id] = c;
-	} else if (c != existing->second) {
-		/* Flag old pointer for deletion and replace */
-		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-		deletion_queue[existing->second] = time(NULL);
-		channels[c->id] = c;
-	}
-}
-
-void delete_channel(channel* c) {
-	std::lock_guard<std::mutex> lock(channel_mutex);
-	std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-	auto existing = channels.find(c->id);
-	if (existing != channels.end()) {
-		channels.erase(existing);
-		deletion_queue[c] = time(NULL);
-	}
-}
-
-channel* find_channel(snowflake id) {
-	std::lock_guard<std::mutex> lock(channel_mutex);
-	auto r = channels.find(id);
-	if (r != channels.end()) {
-		return r->second;
-	}
-	return nullptr;
-}
-
-void store_role(role* r) {
-	std::lock_guard<std::mutex> lock(role_mutex);
-	auto existing = roles.find(r->id);
-	if (existing == roles.end()) {
-		roles[r->id] = r;
-	} else if (r != existing->second) {
-		/* Flag old pointer for deletion and replace */
-		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-		deletion_queue[existing->second] = time(NULL);
-		roles[r->id] = r;
-	}
-
-}
-
-void delete_role(role* r) {
-	std::lock_guard<std::mutex> lock(role_mutex);
-	std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-	auto existing = roles.find(r->id);
-	if (existing != roles.end()) {
-		roles.erase(existing);
-		deletion_queue[r] = time(NULL);
-	}
-}
-
-role* find_role(snowflake id) {
-	std::lock_guard<std::mutex> lock(role_mutex);
-	auto r = roles.find(id);
-	if (r != roles.end()) {
-		return r->second;
-	}
-	return nullptr;
-}
-
+cache_helper(user, user_cache, find_user, get_user_cache);
+cache_helper(channel, channel_cache, find_channel, get_channel_cache);
+cache_helper(role, role_cache, find_role, get_role_cache);
+cache_helper(guild, guild_cache, find_guild, get_guild_cache);
 
 };

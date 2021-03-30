@@ -28,7 +28,6 @@ enum channel_flags {
 /* A definition of a discord channel */
 class channel : public managed {
 public:
-	snowflake id;
 	uint8_t flags;
 	snowflake guild_id;
 	uint16_t position;

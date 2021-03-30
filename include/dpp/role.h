@@ -13,7 +13,6 @@ enum role_flags {
 
 class role : public managed {
 public:
-	snowflake id;
 	std::string name;
 	uint32_t colour;
 	uint8_t position;

@@ -44,7 +44,6 @@ enum guild_flags {
 
 class guild : public managed {
 public:
-	snowflake id;
 	uint32_t flags;
 	std::string name;
 	std::string icon;

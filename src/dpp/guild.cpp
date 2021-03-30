@@ -44,7 +44,7 @@ std::map<std::string, dpp::region> regionmap = {
 namespace dpp {
 
 guild::guild() :
-	id(0),
+	managed(),
 	flags(0),
 	owner_id(0),
 	voice_region(r_us_central),

@@ -7,11 +7,14 @@
 
 namespace dpp {
 	typedef int64_t snowflake;
-};
 
-class managed {
-public:
-	~managed() = default;
+	class managed {
+	public:
+		snowflake id;
+		managed();
+		~managed() = default;
+	};
+
 };
 
 #include <dpp/role.h>

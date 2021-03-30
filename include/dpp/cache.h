@@ -1,25 +1,27 @@
 #pragma once
 
 #include <dpp/discord.h>
+#include <map>
+#include <mutex>
 
 namespace dpp {
 
+	class cache {
+	private:
+		std::mutex cache_mutex;
+		std::unordered_map<uint64_t, managed*> cache_map;
+	public:
+		void store(managed* object);
+		void remove(managed* object);
+		managed* find(snowflake id);
+	};
+
 	void garbage_collection();
 
-	void store_guild(guild* g);
-	void delete_guild(guild* g);
-	guild* find_guild(snowflake id);
-
-	void store_user(user * u);
-	void delete_user(user* u);
-	user* find_user(snowflake id);
-
-	void store_channel(channel* c);
-	void delete_channel(channel* c);
-	channel* find_channel(snowflake id);
-
-	void store_role(role* r);
-	void delete_role(role* r);
-	role* find_role(snowflake id);
+	#define cache_decl(type, setter, getter) type * setter (snowflake id); cache * getter ();
+	cache_decl(user, find_user, get_user_cache);
+	cache_decl(guild, find_guild, get_guild_cache);
+	cache_decl(role, find_role, get_role_cache);
+	cache_decl(channel, find_channel, get_channel_cache);
 };
 

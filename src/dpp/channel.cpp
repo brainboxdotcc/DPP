@@ -7,7 +7,7 @@ using json = nlohmann::json;
 namespace dpp {
 
 channel::channel() :
-	id(0),
+	managed(),
 	flags(0),
 	guild_id(0),
 	position(0),

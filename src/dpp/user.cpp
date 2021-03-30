@@ -22,7 +22,7 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 namespace dpp {
 
 user::user() :
-	id(0),
+	managed(),
 	discriminator(0),
 	flags(0)
 {

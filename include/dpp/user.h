@@ -27,7 +27,6 @@ enum user_flags {
 
 class user : public managed {
 public:
-	snowflake id;
 	std::string username;
 	uint16_t discriminator;
 	std::string avatar;
