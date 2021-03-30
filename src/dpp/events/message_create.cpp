@@ -12,5 +12,7 @@
 using json = nlohmann::json;
 
 void message_create::handle(class DiscordClient* client, json &j) {
+	dpp::message m;
+	client->creator->dispatcher.message_create(&m);
 }
 
