@@ -24,19 +24,35 @@ void message_create::handle(class DiscordClient* client, json &j) {
 	m.id = SnowflakeNotNull(&d, "id");			
 	m.channel_id = SnowflakeNotNull(&d, "channel_id");
 	m.guild_id = SnowflakeNotNull(&d, "guild_id");
+	m.author = nullptr;
+	dpp::user* authoruser = nullptr;
 	/* May be null, if its null cache it from the partial */
 	if (d.find("author") != d.end()) {
 		json &author = d["author"];
-		m.author = dpp::find_user(SnowflakeNotNull(&author, "id"));
+		authoruser = dpp::find_user(SnowflakeNotNull(&author, "id"));
+		if (!authoruser) {
+			/* User does not exist yet, cache the partial as a user record */
+			authoruser = new dpp::user();
+			authoruser->fill_from_json(&author);
+			dpp::get_user_cache()->store(authoruser);
+		}
+		m.author = authoruser;
 	}
-	/* TODO: Fill this in */
+	/* Fill in member record, cache uncached ones */
 	dpp::guild* g = dpp::find_guild(m.guild_id);
 	m.member = nullptr;
 	if (g && d.find("member") != d.end()) {
 		json& mi = d["member"];
 		dpp::snowflake uid = SnowflakeNotNull(&mi, "id");
 		auto thismember = g->members.find(uid);
-		if (thismember != g->members.end()) {
+		if (thismember == g->members.end()) {
+			if (authoruser) {
+				dpp::guild_member* gm = new dpp::guild_member();
+				gm->fill_from_json(&mi, g, authoruser);
+				g->members[authoruser->id] = gm;
+				m.member = gm;
+			}
+		} else {
 			m.member = thismember->second;
 		}
 	}
