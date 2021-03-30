@@ -18,7 +18,7 @@
 #include <iostream>
 #include <dpp/sslclient.h>
 
-#define BUFSIZZ 10240
+#define BUFSIZZ 1024 * 1024 * 8
 const int ERROR_STATUS = -1;
 
 SSLClient::SSLClient(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port)
@@ -121,7 +121,7 @@ void SSLClient::ReadLoop()
 	int r = 0, ClientToServerLength = 0, ClientToServerOffset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
 	fd_set readfds, writefds;
-	char ClientToServerBuffer[BUFSIZZ],ServerToClientBuffer[BUFSIZZ];
+	static char ClientToServerBuffer[BUFSIZZ],ServerToClientBuffer[BUFSIZZ];
 	int ofcmode;
 		
 	/* Make the socket nonblocking */
@@ -156,7 +156,7 @@ void SSLClient::ReadLoop()
 			
 		timeval ts;
 		ts.tv_sec = 0;
-		ts.tv_usec = 250000;
+		ts.tv_usec = 50000;
 		r = select(width,&readfds,&writefds,0,&ts);
 		if (r == 0)
 			continue;
@@ -166,7 +166,7 @@ void SSLClient::ReadLoop()
 			do {
 				read_blocked_on_write = false;
 				read_blocked = false;
-					
+				
 				r = SSL_read(ssl,ServerToClientBuffer,BUFSIZZ);
 				
 				int e = SSL_get_error(ssl,r);
