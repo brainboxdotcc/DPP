@@ -2,8 +2,8 @@
 
 #include <string>
 #include <map>
-#include <dpp/dispatcher.h>
 #include <dpp/discord.h>
+#include <dpp/dispatcher.h>
 #include <spdlog/fwd.h>
 #include <dpp/discordclient.h>
 

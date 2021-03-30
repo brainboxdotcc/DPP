@@ -1,5 +1,7 @@
 #pragma once
 
+#include <dpp/discord.h>
+#include <dpp/message.h>
 #include <functional>
 
 namespace dpp {
@@ -11,15 +13,19 @@ struct interaction_create_t {
 };
 
 struct guild_delete_t {
+	guild* deleted;
 };
 
 struct channel_delete_t {
+	channel* deleted;
 };
 
 struct channel_update_t {
+	channel* updated;
 };
 
 struct ready_t {
+	std::string session_id;
 };
 
 struct message_delete_t {
@@ -29,15 +35,19 @@ struct application_command_delete_t {
 };
 
 struct guild_member_remove_t {
+	guild* removing_guild;
+	guild_member* removed;
 };
 
 struct application_command_create_t {
 };
 
 struct resumed_t {
+	std::string session_id;
 };
 
 struct guild_role_create_t {
+	role* created;
 };
 
 struct typing_start_t {
@@ -53,9 +63,11 @@ struct message_reaction_remove_t {
 };
 
 struct guild_create_t {
+	guild* created;
 };
 
 struct channel_create_t {
+	channel* created;
 };
 
 struct message_reaction_remove_emoji_t {
@@ -65,9 +77,13 @@ struct message_delete_bulk_t {
 };
 
 struct guild_role_update_t {
+	guild* updating_guild;
+	role* updated;
 };
 
 struct guild_role_delete_t {
+	guild* deleting_guild;
+	role* deleted;
 };
 
 struct channel_pins_update_t {
@@ -89,6 +105,8 @@ struct webhooks_update_t {
 };
 
 struct guild_member_add_t {
+	guild* adding_guild;
+	guild_member* added;
 };
 
 struct invite_delete_t {
@@ -101,6 +119,8 @@ struct guild_integrations_update_t {
 };
 
 struct guild_member_update_t {
+	guild* updating_guild;
+	guild_member* updated;
 };
 
 struct application_command_update_t {
@@ -113,12 +133,14 @@ struct message_update_t {
 };
 
 struct user_update_t {
+	user* updated;
 };
 
 struct message_create_t {
 };
 
 struct guild_ban_add_t {
+	guild* banning_guild;
 };
 
 class dispatcher {
