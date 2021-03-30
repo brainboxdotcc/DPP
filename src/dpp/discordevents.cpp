@@ -47,7 +47,28 @@ std::map<std::string, event*> events = {
 	{ "READY", new ready() },
 	{ "CHANNEL_CREATE", new channel_create() },
 	{ "CHANNEL_UPDATE", new channel_update() },
-	{ "CHANNEL_DELETE", new channel_delete() }
+	{ "CHANNEL_DELETE", new channel_delete() },
+	{ "PRESENCE_UPDATE", new presence_update() },
+	{ "TYPING_START", new typing_start() },
+	{ "MESSAGE_CREATE", new message_create() },
+	{ "MESSAGE_UPDATE", new message_update() },
+	{ "MESSAGE_DELETE", new message_delete() },
+	{ "MESSAGE_REACTION_ADD", new message_reaction_add() },
+	{ "MESSAGE_REACTION_REMOVE", new message_reaction_remove() },
+	{ "MESSAGE_REACTION_REMOVE_ALL", new message_reaction_remove_all() },
+	{ "CHANNEL_PINS_UPDATE", new channel_pins_update() },
+	{ "GUILD_BAN_ADD", new guild_ban_add() },
+	{ "GUILD_EMOJIS_UPDATE", new guild_emojis_update() },
+	{ "GUILD_INTEGRATIONS_UPDATE", new guild_integrations_update() },
+	{ "GUILD_MEMBER_ADD", new guild_member_add() },
+	{ "GUILD_MEMBER_REMOVE", new guild_member_remove() },
+	{ "GUILD_MEMBERS_CHUNK", new guild_members_chunk() },
+	{ "GUILD_ROLE_CREATE", new guild_role_create() },
+	{ "GUILD_ROLE_UPDATE", new guild_role_update() },
+	{ "GUILD_ROLE_DELETE", new guild_role_delete() },
+	{ "VOICE_STATE_UPDATE", new voice_state_update() },
+	{ "VOICE_SERVER_UPDATE", new voice_server_update() },
+	{ "WEBHOOKS_UPDATE", new webhooks_update() }
 };
 
 void DiscordClient::HandleEvent(const std::string &event, json &j)
