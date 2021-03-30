@@ -56,6 +56,7 @@ std::map<std::string, event*> events = {
 	{ "MESSAGE_REACTION_ADD", new message_reaction_add() },
 	{ "MESSAGE_REACTION_REMOVE", new message_reaction_remove() },
 	{ "MESSAGE_REACTION_REMOVE_ALL", new message_reaction_remove_all() },
+	{ "MESSAGE_REACTION_REMOVE_EMOJI", new message_reaction_remove_emoji() },
 	{ "CHANNEL_PINS_UPDATE", new channel_pins_update() },
 	{ "GUILD_BAN_ADD", new guild_ban_add() },
 	{ "GUILD_EMOJIS_UPDATE", new guild_emojis_update() },
@@ -68,7 +69,13 @@ std::map<std::string, event*> events = {
 	{ "GUILD_ROLE_DELETE", new guild_role_delete() },
 	{ "VOICE_STATE_UPDATE", new voice_state_update() },
 	{ "VOICE_SERVER_UPDATE", new voice_server_update() },
-	{ "WEBHOOKS_UPDATE", new webhooks_update() }
+	{ "WEBHOOKS_UPDATE", new webhooks_update() },
+	{ "INVITE_CREATE", new invite_create() },
+	{ "INVITE_DELETE", new invite_delete() },
+	{ "APPLICATION_COMMAND_CREATE", new application_command_create() },
+	{ "APPLICATION_COMMAND_UPDATE", new application_command_update() },
+	{ "APPLICATION_COMMAND_DELETE", new application_command_delete() },
+	{ "INTERACTION_CREATE", new interaction_create() }
 };
 
 void DiscordClient::HandleEvent(const std::string &event, json &j)
