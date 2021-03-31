@@ -48,7 +48,9 @@ void guild_create::handle(class DiscordClient* client, json &j) {
 		}
 	}
 	dpp::get_guild_cache()->store(g);
-	client->add_chunk_queue(g->id);
+	if (client->intents & dpp::GUILD_MEMBERS) {
+		client->add_chunk_queue(g->id);
+	}
 
 	dpp::guild_create_t gc;
 	gc.created = g;
