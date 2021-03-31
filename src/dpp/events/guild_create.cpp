@@ -19,7 +19,10 @@ void guild_create::handle(class DiscordClient* client, json &j) {
 	if (!g->is_unavailable()) {
 		/* Store guild roles */
 		for (auto & role : d["roles"]) {
-			dpp::role *r = new dpp::role();
+			dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
+			if (!r) {
+				r = new dpp::role();
+			}
 			r->fill_from_json(&role);
 			dpp::get_role_cache()->store(r);
 			g->roles.push_back(r->id);

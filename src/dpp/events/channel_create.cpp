@@ -13,7 +13,10 @@ using json = nlohmann::json;
 
 void channel_create::handle(class DiscordClient* client, json &j) {
 	json& d = j["d"];
-	dpp::channel* c = new dpp::channel();
+	dpp::channel* c = dpp::find_channel(SnowflakeNotNull(&d, "id"));
+	if (!c) {
+		c = new dpp::channel();
+	}
 	c->fill_from_json(&d);
 	dpp::get_channel_cache()->store(c);
 	dpp::guild* g = dpp::find_guild(c->guild_id);
