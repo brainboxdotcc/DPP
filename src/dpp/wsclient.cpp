@@ -148,6 +148,11 @@ bool WSClient::HandleBuffer(std::string &buffer)
 	return true;
 }
 
+WSState WSClient::GetState()
+{
+	return this->state;
+}
+
 bool WSClient::parseheader(std::string &buffer)
 {
 	if (buffer.size() < 4) {

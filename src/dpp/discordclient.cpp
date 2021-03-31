@@ -125,16 +125,17 @@ void DiscordClient::Error(uint32_t errorcode)
 
 void DiscordClient::OneSecondTimer()
 {
-	if (this->heartbeat_interval) {
-		/* Check if we're due to emit a heartbeat */
-		if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-			logger->debug("Emit heartbeat, seq={}", last_seq);
-			this->write(json({{"op", 1}, {"d", last_seq}}).dump());
-			last_heartbeat = time(NULL);
-			dpp::garbage_collection();
+	if (this->GetState() == CONNECTED) {
+		if (this->heartbeat_interval) {
+			/* Check if we're due to emit a heartbeat */
+			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
+				logger->debug("Emit heartbeat, seq={}", last_seq);
+				this->write(json({{"op", 1}, {"d", last_seq}}).dump());
+				last_heartbeat = time(NULL);
+				dpp::garbage_collection();
+			}
 		}
-	}
-	if ((time(NULL) % 2) == 0) {
+		/* Rate limited chunk requests, 1 per 2 seconds */
 		if (chunk_queue.size()) {
 			uint64_t next_guild_chunk = chunk_queue.front();
 			chunk_queue.pop();

@@ -50,6 +50,8 @@ protected:
 
 	/* Reconnect */
 	virtual void Connect();
+
+	WSState GetState();
 public:
 
 	/* Connect to a specific websocket server */
