@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <dpp/discordclient.h>
+#include <dpp/discordevents.h>
 #include <dpp/discord.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
