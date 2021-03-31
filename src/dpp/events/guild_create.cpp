@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <dpp/discordclient.h>
+#include <dpp/discordevents.h>
 #include <dpp/discord.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
@@ -34,15 +35,24 @@ void guild_create::handle(class DiscordClient* client, json &j) {
 
 		/* Store guild members */
 		for (auto & user : d["members"]) {
-			dpp::user *u = new dpp::user();
-			u->fill_from_json(&(user["user"]));
+			dpp::user* u = dpp::find_user(SnowflakeNotNull(&(user["user"]), "id"));
+			if (!u) {
+				u = new dpp::user();
+				u->fill_from_json(&(user["user"]));
+				dpp::get_user_cache()->store(u);
+			}
 			dpp::guild_member* gm = new dpp::guild_member();
-			gm->fill_from_json(&user, g, u);
+			gm->fill_from_json(&(user["user"]), g, u);
 
 			g->members[u->id] = gm;
-			dpp::get_user_cache()->store(u);
 		}
 	}
 	dpp::get_guild_cache()->store(g);
+	client->add_chunk_queue(g->id);
+
+	dpp::guild_create_t gc;
+	gc.created = g;
+	if (client->creator->dispatch.guild_create)
+		client->creator->dispatch.guild_create(gc);
 }
 

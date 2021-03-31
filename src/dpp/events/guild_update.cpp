@@ -29,6 +29,11 @@ void guild_update::handle(class DiscordClient* client, json &j) {
 				g->roles.push_back(r->id);
 			}
 		}
+
+		dpp::guild_update_t gu;
+		gu.updated = g;
+		if (client->creator->dispatch.guild_update)
+			client->creator->dispatch.guild_update(gu);
 	}
 }
 

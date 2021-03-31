@@ -134,4 +134,15 @@ void DiscordClient::OneSecondTimer()
 			dpp::garbage_collection();
 		}
 	}
+	if ((time(NULL) % 2) == 0) {
+		if (chunk_queue.size()) {
+			uint64_t next_guild_chunk = chunk_queue.front();
+			chunk_queue.pop();
+			json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(next_guild_chunk)},{"query",""},{"limit",0}}}});
+			if (this->intents & dpp::GUILD_PRESENCES) {
+				chunk_req["d"]["presences"] = true;
+			}
+			this->write(chunk_req.dump());
+		}
+	}
 }

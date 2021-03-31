@@ -8,6 +8,7 @@
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
+#include <queue>
 
 using json = nlohmann::json;
 
@@ -18,6 +19,7 @@ namespace dpp {
 /* Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
 class DiscordClient : public WSClient
 {
+	std::queue<uint64_t> chunk_queue;
 public:
 	class dpp::cluster* creator;
 	/* Heartbeat interval for sending heartbeat keepalive */
@@ -67,5 +69,11 @@ public:
 
 	/* Start and monitor I/O loop */
 	void Run();
+
+	/* Add a guild to the chunk queue, to request its guild member chunks on a timer
+	 * (must be on a timer because the guild member chunk requests are rate limited)
+	 */
+	void add_chunk_queue(uint64_t id);
+
 };
 

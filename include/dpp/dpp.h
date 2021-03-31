@@ -6,3 +6,4 @@
 #include <dpp/discordclient.h>
 #include <dpp/discord.h>
 #include <dpp/cluster.h>
+#include <dpp/cache.h>

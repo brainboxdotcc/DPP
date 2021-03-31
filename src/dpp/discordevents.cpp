@@ -105,6 +105,12 @@ void DiscordClient::HandleEvent(const std::string &event, json &j)
 	if (ev_iter != events.end()) {
 		ev_iter->second->handle(this, j);
 	} else {
-		logger->debug("Unhandled event: {}", event);
+		logger->debug("Unhandled event: {}, {}", event, j.dump());
 	}
 }
+
+void DiscordClient::add_chunk_queue(uint64_t id)
+{
+	chunk_queue.push(id);
+}
+

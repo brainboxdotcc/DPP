@@ -9,7 +9,7 @@ namespace dpp {
 std::unordered_map<managed*, time_t> deletion_queue;
 std::mutex deletion_mutex;
 
-#define cache_helper(type, cache_name, setter, getter) \
+#define cache_helper(type, cache_name, setter, getter, counter) \
 cache* cache_name = nullptr; \
 type * setter (snowflake id) { \
 		return cache_name ? ( type * ) cache_name ->find(id) : nullptr; \
@@ -19,6 +19,9 @@ cache* getter () { \
 		cache_name = new cache(); \
 	} \
 	return cache_name ; \
+} \
+uint64_t counter () { \
+	return ( cache_name ? cache_name ->count() : 0 ); \
 }
 
 
@@ -41,6 +44,11 @@ void garbage_collection() {
 			}
 		}
 	} while (repeat);
+}
+
+uint64_t cache::count() {
+	std::lock_guard<std::mutex> lock(this->cache_mutex);
+	return cache_map.size();
 }
 
 void cache::store(managed* object) {
@@ -81,9 +89,9 @@ managed* cache::find(snowflake id) {
 	return nullptr;
 }
 
-cache_helper(user, user_cache, find_user, get_user_cache);
-cache_helper(channel, channel_cache, find_channel, get_channel_cache);
-cache_helper(role, role_cache, find_role, get_role_cache);
-cache_helper(guild, guild_cache, find_guild, get_guild_cache);
+cache_helper(user, user_cache, find_user, get_user_cache, get_user_count);
+cache_helper(channel, channel_cache, find_channel, get_channel_cache, get_channel_count);
+cache_helper(role, role_cache, find_role, get_role_cache, get_role_count);
+cache_helper(guild, guild_cache, find_guild, get_guild_cache, get_guild_count);
 
 };

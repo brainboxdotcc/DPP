@@ -12,20 +12,27 @@ struct voice_state_update_t {
 struct interaction_create_t {
 };
 
+/* Delete guild */
 struct guild_delete_t {
 	guild* deleted;
 };
 
+/* Delete channel */
 struct channel_delete_t {
+	guild* deleting_guild;
 	channel* deleted;
 };
 
+/* Update channel */
 struct channel_update_t {
+	guild* updating_guild;
 	channel* updated;
 };
 
+/* Session ready */
 struct ready_t {
 	std::string session_id;
+	uint32_t shard_id;
 };
 
 struct message_delete_t {
@@ -42,8 +49,10 @@ struct guild_member_remove_t {
 struct application_command_create_t {
 };
 
+/* Session resumed */
 struct resumed_t {
 	std::string session_id;
+	uint32_t shard_id;
 };
 
 struct guild_role_create_t {
@@ -62,11 +71,14 @@ struct guild_members_chunk_t {
 struct message_reaction_remove_t {
 };
 
+/* Create guild */
 struct guild_create_t {
 	guild* created;
 };
 
+/* Create channel */
 struct channel_create_t {
+	guild* creating_guild;
 	channel* created;
 };
 
@@ -113,6 +125,7 @@ struct invite_delete_t {
 };
 
 struct guild_update_t {
+	guild* updated;
 };
 
 struct guild_integrations_update_t {
@@ -136,6 +149,7 @@ struct user_update_t {
 	user* updated;
 };
 
+/* Create message */
 struct message_create_t {
 	message* msg;
 };

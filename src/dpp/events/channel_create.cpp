@@ -19,6 +19,13 @@ void channel_create::handle(class DiscordClient* client, json &j) {
 	dpp::guild* g = dpp::find_guild(c->guild_id);
 	if (g) {
 		g->channels.push_back(c->id);
+
+		dpp::channel_create_t cc;
+		cc.created = c;
+		cc.creating_guild = g;
+		if (client->creator->dispatch.channel_create)
+			client->creator->dispatch.channel_create(cc);
+
 	}
 }
 

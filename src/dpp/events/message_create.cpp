@@ -73,7 +73,7 @@ void message_create::handle(class DiscordClient* client, json &j) {
 	}
 	m.pinned = BoolNotNull(&d, "pinned");
 	m.webhook_id = SnowflakeNotNull(&d, "webhook_id");
-
-	client->creator->dispatch.message_create(msg);
+	if (client->creator->dispatch.message_create)
+		client->creator->dispatch.message_create(msg);
 }
 

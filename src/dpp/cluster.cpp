@@ -176,5 +176,4 @@ void cluster::on_guild_ban_add (std::function<void(const guild_ban_add_t& _event
 }
 
 
-
 };

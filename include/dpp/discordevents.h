@@ -10,3 +10,4 @@ uint8_t Int8NotNull(nlohmann::json* j, const char *keyname);
 bool BoolNotNull(nlohmann::json* j, const char *keyname);
 time_t TimestampNotNull(nlohmann::json* j, const char *keyname);
 
+
