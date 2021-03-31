@@ -6,11 +6,13 @@ This project is in alpha stages of development.
 Completed so far:
 
 * Websocket connection with heartbeat keepalive and connection resuming
+* Event dispatcher - currently only dispatches `on_message_create`
+* Ability to attach handlers to events
 
 To do:
 
 * Add the rest of the discord events
-* Ability to attach to events, and either receive parsed objects or raw json strings
+* Ability to receive raw json strings to event handlers
 * REST HTTPS call system using cpp-httplib
 * Message send/edit/delete
 * Embeds
@@ -31,15 +33,19 @@ Documentation will be here in the project wiki when the project is more complete
 
 ## Supported OSes
 
-At present, **Linux** only. This may change.
+At present, **Linux** only. This may change. The Library may build and work on other platforms.
 
 ## Dependencies
 
+### External Dependencies (You must install these)
 * [cmake](https://cmake.org/) (version 3.13+)
 * [g++](https://gcc.gnu.org) (version 8+)
 * gdb for debugging on development servers (any recent version)
+* [OpenSSL](https://openssl.org/) (whichever -dev package comes with your OS
+
+### Included Dependencies (Packaged with the library)
 * [nlohmann::json](https://github.com/nlohmann/json)
-* [OpenSSL](https://openssl.org/) (whichever -dev package comes with your OS)
+* [spdlog](https://github.com/gabime/spdlog)
 
 # Setup
 
@@ -50,7 +56,7 @@ At present, **Linux** only. This may change.
     cmake ..
     make -j8
     
-Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine.
+Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
 ## 2. Run test cases
 
