@@ -6,6 +6,7 @@ This project is in alpha stages of development.
 Completed so far:
 
 * Websocket connection with heartbeat keepalive and connection resuming
+* Caching system for guilds, channels, guild members, roles, users
 * Event dispatcher - currently only dispatches `on_message_create`
 * Ability to attach handlers to events
 
