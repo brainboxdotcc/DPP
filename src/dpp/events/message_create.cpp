@@ -57,8 +57,8 @@ void message_create::handle(class DiscordClient* client, json &j) {
 		}
 	}
 	m.content = StringNotNull(&d, "content");
-	/* TODO: Waiting on TimestampNotNull */
-	/*m.sent, m.edited */
+	m.sent = TimestampNotNull(&d, "timestamp");
+	m.edited = TimestampNotNull(&d, "edited_timestamp");
 	m.tts = BoolNotNull(&d, "tts");
 	m. mention_everyone = BoolNotNull(&d, "mention_everyone");
 	/* TODO: Fix these */
@@ -66,7 +66,11 @@ void message_create::handle(class DiscordClient* client, json &j) {
 	m.mention_roles = nullptr;
 	/* TODO: Populate these */
 	/* m.mention_channels, m.attachments, m.embeds, m.reactions */
-	m.nonce = StringNotNull(&d, "nonce");
+	if (d["nonce"].is_string()) {
+		m.nonce = StringNotNull(&d, "nonce");
+	} else {
+		m.nonce = std::to_string(SnowflakeNotNull(&d, "nonce"));
+	}
 	m.pinned = BoolNotNull(&d, "pinned");
 	m.webhook_id = SnowflakeNotNull(&d, "webhook_id");
 

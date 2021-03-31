@@ -58,7 +58,6 @@ guild::guild() :
 	application_id(0),
 	system_channel_id(0),
 	rules_channel_id(0),
-	joined_at(0),
 	member_count(0),
 	premium_tier(0),
 	premium_subscription_count(0),
@@ -72,7 +71,11 @@ guild::~guild()
 {
 }
 
-guild_member::guild_member()
+guild_member::guild_member() :
+	joined_at(0),
+	premium_since(0),
+	flags(0)
+
 {
 }
 
@@ -84,6 +87,8 @@ void guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user*
 	this->guild_id = g->id;
 	this->user_id = u->id;
 	this->nickname = StringNotNull(j, "nickname");
+	this->joined_at = TimestampNotNull(j, "joined_at");
+	this->premium_since = TimestampNotNull(j, "premium_since");
 	for (auto & role : (*j)["roles"]) {
 		this->roles.push_back(from_string<uint64_t>(role.get<std::string>(), std::dec));
 	}
@@ -204,7 +209,6 @@ void guild::fill_from_json(nlohmann::json* d) {
 		this->application_id = SnowflakeNotNull(d, "application_id");
 		this->system_channel_id = SnowflakeNotNull(d, "system_channel_id");
 		this->rules_channel_id = SnowflakeNotNull(d, "rules_channel_id");
-		//this->joined_at =
 		this->member_count = Int32NotNull(d, "member_count");
 		this->vanity_url_code = StringNotNull(d, "vanity_url_code");
 		this->description = StringNotNull(d, "description");

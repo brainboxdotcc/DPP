@@ -39,4 +39,128 @@ void role::fill_from_json(nlohmann::json* j)
 	}
 }
 
+bool role::has_create_instant_invite() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_create_instant_invite));
+}
+
+bool role::has_kick_members() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_kick_members));
+}
+
+bool role::has_ban_members() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_ban_members));
+}
+
+bool role::has_administrator() {
+	return (this->permissions & p_administrator);
+}
+
+bool role::has_manage_channels() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_channels));
+}
+
+bool role::has_manage_guild() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_guild));
+}
+
+bool role::has_add_reactions() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_add_reactions));
+}
+
+bool role::has_view_audit_log() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_view_audit_log));
+}
+
+bool role::has_priority_speaker() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_priority_speaker));
+}
+
+bool role::has_stream() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_stream));
+}
+
+bool role::has_view_channel() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_view_channel));
+}
+
+bool role::has_send_messages() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_send_messages));
+}
+
+bool role::has_send_tts_messages() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_send_tts_messages));
+}
+
+bool role::has_manage_messages() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_messages));
+}
+
+bool role::has_embed_links() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_embed_links));
+}
+
+bool role::has_attach_files() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_attach_files));
+}
+
+bool role::has_read_message_history() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_read_message_history));
+}
+
+bool role::has_mention_everyone() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_mention_everyone));
+}
+
+bool role::has_use_external_emojis() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_use_external_emojis));
+}
+
+bool role::has_view_guild_insights() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_view_guild_insights));
+}
+
+bool role::has_connect() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_connect));
+}
+
+bool role::has_speak() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_speak));
+}
+
+bool role::has_mute_members() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_mute_members));
+}
+
+bool role::has_deafen_members() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_deafen_members));
+}
+
+bool role::has_move_members() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_move_members));
+}
+
+bool role::has_use_vad() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_use_vad));
+}
+
+bool role::has_change_nickname() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_change_nickname));
+}
+
+bool role::has_manage_nicknames() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_nicknames));
+}
+
+bool role::has_manage_roles() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_roles));
+}
+
+bool role::has_manage_webhooks() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_webhooks));
+}
+
+bool role::has_manage_emojis() {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_emojis));
+}
+
 };

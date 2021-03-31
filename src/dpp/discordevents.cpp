@@ -1,6 +1,8 @@
+#define _XOPEN_SOURCE
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <time.h>
 #include <dpp/discordclient.h>
 #include <dpp/discord.h>
 #include <dpp/event.h>
@@ -10,32 +12,51 @@
 
 uint64_t SnowflakeNotNull(json* j, const char *keyname)
 {
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() ? from_string<uint64_t>((*j)[keyname].get<std::string>(), std::dec) : 0;
+	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? from_string<uint64_t>((*j)[keyname].get<std::string>(), std::dec) : 0;
 }
 
 std::string StringNotNull(json* j, const char *keyname)
 {
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() ? (*j)[keyname].get<std::string>() : "";
+	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? (*j)[keyname].get<std::string>() : "";
 }
 
 uint32_t Int32NotNull(json* j, const char *keyname)
 {
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() ? (*j)[keyname].get<uint32_t>() : 0;
+	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && !(*j)[keyname].is_string() ? (*j)[keyname].get<uint32_t>() : 0;
 }
 
 uint16_t Int16NotNull(json* j, const char *keyname)
 {
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() ? (*j)[keyname].get<uint16_t>() : 0;
+	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && !(*j)[keyname].is_string() ? (*j)[keyname].get<uint16_t>() : 0;
 }
 
 uint8_t Int8NotNull(json* j, const char *keyname)
 {
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() ? (*j)[keyname].get<uint8_t>() : 0;
+	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && !(*j)[keyname].is_string() ? (*j)[keyname].get<uint8_t>() : 0;
 }
 
 bool BoolNotNull(json* j, const char *keyname)
 {
 	return (j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].get<bool>() == true);
+}
+
+time_t TimestampNotNull(json* j, const char* keyname)
+{
+	/* Parses discord ISO 8061 timestamps to time_t, accounting for local time adjustment.
+	 * Note that discord timestamps contain a decimal seconds part, which time_t and struct tm
+	 * can't handle. We strip these out.
+	 */
+	time_t retval = 0;
+	if (j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string()) {
+		tm timestamp;
+		std::string timedate = (*j)[keyname].get<std::string>();
+		std::string tzpart = timedate.substr(timedate.find('+'), timedate.length());
+		timedate = timedate.substr(0, timedate.find('.')) + tzpart ;
+		strptime(timedate.substr(0, 19).c_str(), "%FT%TZ%z", &timestamp);
+		timestamp.tm_isdst = 0;
+		retval = mktime(&timestamp);
+	}
+	return retval;
 }
 
 std::map<std::string, event*> events = {

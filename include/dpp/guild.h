@@ -61,7 +61,6 @@ public:
 	snowflake application_id;
 	snowflake system_channel_id;
 	snowflake rules_channel_id;
-	time_t joined_at;
 	uint32_t member_count;
 	std::string vanity_url_code;
 	std::string description;
