@@ -13,8 +13,11 @@
 using json = nlohmann::json;
 
 void guild_create::handle(class DiscordClient* client, json &j) {
-	dpp::guild* g = new dpp::guild();
 	json& d = j["d"];
+	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "id"));
+	if (!g) {
+		g = new dpp::guild();
+	}
 	g->fill_from_json(&d);
 	if (!g->is_unavailable()) {
 		/* Store guild roles */

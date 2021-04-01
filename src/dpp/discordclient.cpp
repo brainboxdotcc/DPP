@@ -135,15 +135,17 @@ void DiscordClient::OneSecondTimer()
 				dpp::garbage_collection();
 			}
 		}
-		/* Rate limited chunk requests, 1 per 2 seconds */
-		if (chunk_queue.size()) {
-			uint64_t next_guild_chunk = chunk_queue.front();
-			chunk_queue.pop();
-			json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(next_guild_chunk)},{"query",""},{"limit",0}}}});
-			if (this->intents & dpp::GUILD_PRESENCES) {
-				chunk_req["d"]["presences"] = true;
+		/* Rate limited chunk requests, 1 every odd second, 2 every even second */
+		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
+			if (chunk_queue.size()) {
+				uint64_t next_guild_chunk = chunk_queue.front();
+				chunk_queue.pop();
+				json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(next_guild_chunk)},{"query",""},{"limit",0}}}});
+				if (this->intents & dpp::GUILD_PRESENCES) {
+					chunk_req["d"]["presences"] = true;
+				}
+				this->write(chunk_req.dump());
 			}
-			this->write(chunk_req.dump());
 		}
 	}
 }
