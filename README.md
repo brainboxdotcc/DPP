@@ -1,26 +1,26 @@
 # D++
-## An incredibly lightweight C++ discord library
+## An incredibly lightweight C++ Discord library
 
 This project is in alpha stages of development.
 
-Completed so far:
+### Completed so far:
 
-* Websocket connection with heartbeat keepalive and connection resuming
-* Caching system for guilds, channels, guild members, roles, users
-* Event dispatcher - currently only dispatches `on_message_create`
-* Ability to attach handlers to events
+* [x] Websocket connection with heartbeat keepalive and connection resuming
+* [x] Caching system for guilds, channels, guild members, roles, users
+* [x] Event dispatcher - currently only dispatches `on_message_create`
+* [x] Ability to attach handlers to events
 
-To do:
+### To do:
 
-* Add the rest of the discord events
-* Ability to receive raw json strings to event handlers
-* REST HTTPS call system using cpp-httplib
-* Message send/edit/delete
-* Embeds
-* Ratelimit system
-* Shard manager
-* Cluster management
-* File uploading
+* [ ] Add the rest of the discord events
+* [ ] Ability to receive raw json strings to event handlers
+* [ ] REST HTTPS call system using cpp-httplib
+* [ ] Message send/edit/delete
+* [ ] Embeds
+* [ ] Ratelimit system
+* [ ] Shard manager
+* [ ] Cluster management
+* [ ] File uploading
 
 (Basically everything!)
 
