@@ -19,7 +19,7 @@ void guild_update::handle(class DiscordClient* client, json &j) {
 		if (!g->is_unavailable()) {
 			for (int rc = 0; rc < g->roles.size(); ++rc) {
 				dpp::role* oldrole = dpp::find_role(g->roles[rc]);
-				dpp::get_guild_cache()->remove(oldrole);
+				dpp::get_role_cache()->remove(oldrole);
 			}
 			g->roles.clear();
 			for (auto & role : d["roles"]) {
