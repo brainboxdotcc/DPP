@@ -11,6 +11,7 @@ namespace dpp {
 
 class cluster {
 public:
+	std::string token;
 	dpp::dispatcher dispatch;
 	std::map<uint32_t, class DiscordClient*> shards;
 

@@ -7,6 +7,7 @@
 #include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
+#include <dpp/queues.h>
 
 using json = nlohmann::json;
 
@@ -34,18 +35,16 @@ int main(int argc, char const *argv[])
 
 	log->info("Starting test bot");
 	dpp::cluster bot;
-	bot.on_message_create([log, bot](const dpp::message_create_t & event) {
+	bot.on_message_create([log, &bot](const dpp::message_create_t & event) {
 		std::string content = event.msg->content;
-		if (event.msg->embeds.size()) {
-			content.append(fmt::format(" [Embed: '{}']", event.msg->embeds[0].title));
-		}
 		log->info("[G:{} U:{} R:{} C:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), event.msg->author->username, event.msg->author->discriminator, content);
-	});
-	bot.on_guild_update([log, bot](const dpp::guild_update_t & event) {
-		log->info("[G:{} U:{} R:{} C:{}] Guild updated", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count());
-	});
-	bot.on_guild_delete([log, bot](const dpp::guild_delete_t & event) {
-		log->info("[G:{} U:{} R:{} C:{}] Guild deleted", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count());
+		if (content == ".dotest" && event.msg->guild_id == 825407338755653642) {
+			dpp::http_request r(&bot, "/api/users/@me", [log](const dpp::http_request_completion_t &c) {
+				log->debug("Got reply, status={} body={}", c.status, c.body);
+			});
+			dpp::http_request_completion_t c = r.Run();
+			r.complete(c);
+		}
 	});
 	bot.start(configdocument["token"].get<std::string>(),
 		dpp::GUILDS | dpp::GUILD_MEMBERS | dpp::GUILD_BANS | dpp::GUILD_EMOJIS | dpp::GUILD_INTEGRATIONS |
