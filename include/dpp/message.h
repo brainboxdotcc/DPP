@@ -1,6 +1,8 @@
 #pragma once
 
 #include <dpp/discord.h>
+#include <optional>
+#include <dpp/json_fwd.hpp>
 
 namespace dpp {
 
@@ -48,13 +50,24 @@ struct embed {
 	std::string			url;			/* Optional: url of embed */
 	time_t				timestamp;		/* Optional: timestamp of embed content */
 	uint32_t			color;			/* Optional: color code of the embed */
-	embed_footer*			footer = nullptr;	/* Optional: footer information */
-	embed_image*			image = nullptr;	/* Optional: image information */
-	embed_thumbnail*		thumbnail = nullptr;	/* Optional: thumbnail information */
-	embed_video*			video = nullptr;	/* Optional: video information */
-	embed_provider*			provider = nullptr;	/* Optional: provider information */
-	embed_author*			author = nullptr;	/* Optional: author information */
+	std::optional<embed_footer>	footer;			/* Optional: footer information */
+	std::optional<embed_image>	image;			/* Optional: image information */
+	std::optional<embed_image>	thumbnail;		/* Optional: thumbnail information */
+	std::optional<embed_image>	video;			/* Optional: video information */
+	std::optional<embed_provider>	provider;		/* Optional: provider information */
+	std::optional<embed_author>	author;			/* Optional: author information */
 	std::vector<embed_field>	fields;			/* Optional: fields information */
+
+	embed();
+	embed(nlohmann::json* j);
+	~embed();
+
+	embed& add_field(const std::string& name, const std::string &value, bool is_inline);
+	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
+	embed& set_provider(const std::string& name, const std::string& url);
+	embed& set_image(const std::string& url);
+	embed& set_video(const std::string& url);
+	embed& set_thumbnail(const std::string& url);
 };
 
 struct reaction {

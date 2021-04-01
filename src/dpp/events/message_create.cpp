@@ -56,6 +56,12 @@ void message_create::handle(class DiscordClient* client, json &j) {
 			m.member = thismember->second;
 		}
 	}
+	if (d.find("embeds") != d.end()) {
+		json & el = d["embeds"];
+		for (auto& e : el) {
+			m.embeds.push_back(dpp::embed(&e));
+		}
+	}
 	m.content = StringNotNull(&d, "content");
 	m.sent = TimestampNotNull(&d, "timestamp");
 	m.edited = TimestampNotNull(&d, "edited_timestamp");
