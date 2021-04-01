@@ -175,5 +175,17 @@ void cluster::on_guild_ban_add (std::function<void(const guild_ban_add_t& _event
 	this->dispatch.guild_ban_add = _guild_ban_add; 
 }
 
+void cluster::on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create) {
+	this->dispatch.integration_create = _integration_create;
+}
+
+void cluster::on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update) {
+	this->dispatch.integration_update = _integration_update;
+}
+
+void cluster::on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete) {
+	this->dispatch.integration_delete = _integration_delete;
+}
+
 
 };

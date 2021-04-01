@@ -76,3 +76,7 @@ event_decl(application_command_update);
 event_decl(application_command_delete);
 event_decl(interaction_create);
 
+event_decl(integration_create);
+event_decl(integration_update);
+event_decl(integration_delete);
+

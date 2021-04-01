@@ -158,6 +158,15 @@ struct guild_ban_add_t {
 	guild* banning_guild;
 };
 
+struct integration_create_t {
+};
+
+struct integration_update_t {
+};
+
+struct integration_delete_t {
+};
+
 class dispatcher {
 public:
 	std::function<void(const voice_state_update_t& event)> voice_state_update;
@@ -199,6 +208,10 @@ public:
 	std::function<void(const user_update_t& event)> user_update;
 	std::function<void(const message_create_t& event)> message_create;
 	std::function<void(const guild_ban_add_t& event)> guild_ban_add;
+	std::function<void(const integration_create_t& event)> integration_create;
+	std::function<void(const integration_update_t& event)> integration_update;
+	std::function<void(const integration_delete_t& event)> integration_delete;
 };
 
 };
+
