@@ -216,7 +216,10 @@ void request_queue::in_loop()
 									/* Time has passed, we can process this bucket again. send its request. */
 									rv = req->Run(creator);
 								} else {
+									/* Time not up yet, emit signal and wait */
+									std::this_thread::sleep_for(std::chrono::milliseconds(50));
 									emit_in_queue_signal();
+									break;
 								}
 							} else {
 								/* There's limit remaining, we can just run the request */
