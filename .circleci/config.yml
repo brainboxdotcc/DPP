@@ -1,0 +1,26 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: "debian:buster"
+    steps:
+      - checkout
+      - run:
+          name: Installing SUDO
+          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
+      - run:
+          name: Installing GCC
+          command: 'apt-get update && apt-get install -y gcc g++ build-essential git'
+      - run:
+          name: Install CMAKE
+          command: 'apt-get update && apt-get install -y cmake'
+      - run:
+          name: Installing other dependencies
+          command: 'apt-get update && apt-get install -y libssl-dev zlib1g-dev curl wget'
+      - run:
+          name: Creating Build Files
+          command: 'cmake -H. -Bbuild'
+      - run:
+          name: Creating Binary Files
+          command: 'cmake --build build'
