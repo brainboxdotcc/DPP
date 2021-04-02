@@ -39,11 +39,6 @@ int main(int argc, char const *argv[])
 		std::string content = event.msg->content;
 		log->info("[G:{} U:{} R:{} C:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), event.msg->author->username, event.msg->author->discriminator, content);
 		if (content == ".dotest" && event.msg->guild_id == 825407338755653642) {
-			dpp::http_request r(&bot, "/api/users/@me", [log](const dpp::http_request_completion_t &c) {
-				log->debug("Got reply, status={} body={}", c.status, c.body);
-			});
-			dpp::http_request_completion_t c = r.Run();
-			r.complete(c);
 		}
 	});
 	bot.start(configdocument["token"].get<std::string>(),
