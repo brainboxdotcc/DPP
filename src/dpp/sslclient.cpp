@@ -6,14 +6,14 @@
 #include <resolv.h>
 #include <netdb.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #define _close close
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <unistd.h>
