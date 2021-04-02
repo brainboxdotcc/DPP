@@ -26,6 +26,7 @@ public:
 	~cluster();
 	void start();
 
+	/* Functions for attaching to event handlers */
 	void on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
 	void on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);
 	void on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete);
@@ -69,7 +70,10 @@ public:
 	void on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update);
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
 
+	/* Post a REST request. Where possible use a helper method instead like message_create */
 	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, http_completion_event callback);
+
+	/* Send a message to a channel. The callback function is called when the message has been sent */
 	void message_create(const class message &m, http_completion_event callback);
 };
 

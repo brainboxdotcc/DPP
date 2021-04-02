@@ -16,7 +16,6 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <dpp/httplib.h>
 #include <dpp/stringops.h>
-#include <spdlog/spdlog.h>
 
 namespace dpp {
 
@@ -28,10 +27,12 @@ http_request::~http_request() {
 }
 
 void http_request::complete(const http_request_completion_t &c) {
+	/* Call completion handler only if the request has been completed */
 	if (is_completed() && complete_handler)
 		complete_handler(c);
 }
 
+/* Fill a http_request_completion_t from a HTTP result */
 void populate_result(http_request_completion_t& rv, const httplib::Result &res) {
 	rv.status = res->status;
 	rv.body = (res->status < 400) ? res->body : "";
@@ -48,18 +49,22 @@ void populate_result(http_request_completion_t& rv, const httplib::Result &res) 
 	}
 }
 
+/* Returns true if the request has been made */
 bool http_request::is_completed()
 {
 	return completed;
 }
 
+/* Execute a HTTP request */
 http_request_completion_t http_request::Run(const cluster* owner) {
 
 	http_request_completion_t rv;
 
 	httplib::Client cli("https://discord.com");
+	/* This is for a reason :( - Some systems have really out of date cert stores */
 	cli.enable_server_certificate_verification(false);
 	cli.set_follow_location(true);
+	/* TODO: Once we have a version number header, use it here */
 	httplib::Headers headers = {
 		{"Authorization", std::string("Bot ") + owner->token},
 		{"User-Agent", "DiscordBot (https://github.com/brainboxdotcc/DPP, 0.0.1)"}
@@ -75,6 +80,10 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		_url = endpoint + "/" +parameters;
 	}
 
+	/* Because of the design of cpp-httplib we can't create a httplib::Result once and make this code
+	 * shorter. We have to use "auto res = ...". This is because httplib::Result has no default constructor
+	 * and needs to be passed a result and some other blackboxed rammel.
+	 */
 	switch (method) {
 		case m_get: {
 			if (auto res = cli.Get(_url.c_str())) {
@@ -85,7 +94,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		}
 		break;
 		case m_post: {
-			std::cout << "POST " << _url << ", " << postdata << "\n";
+			/* POST supports post data body */
 			if (auto res = cli.Post(_url.c_str(), postdata.c_str(), "application/json")) {
 				populate_result(rv, res);
 			} else {
@@ -102,6 +111,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		}
 		break;
 		case m_put: {
+			/* PUT supports post data body */
 			if (auto res = cli.Put(_url.c_str(), postdata.c_str(), "application/json")) {
 				populate_result(rv, res);
 			} else {
@@ -120,6 +130,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		}
 		break;
 	}
+	/* Set completion flag */
 	completed = true;
 	return rv;
 }
@@ -132,6 +143,7 @@ request_queue::request_queue(const class cluster* owner) : creator(owner), termi
 		throw std::runtime_error("Can't initialise request queue sockets");
 	}
 
+	/* TODO: Randomize these! */
 	in_queue_port = 16820;
 	out_queue_port = 16821;
 
@@ -168,13 +180,10 @@ request_queue::request_queue(const class cluster* owner) : creator(owner), termi
 	if ((connect(in_queue_connect_sock, (struct sockaddr *)&in_client, sizeof(in_client)) < 0) || (connect(out_queue_connect_sock, (struct sockaddr *)&out_client, sizeof(out_client)) < 0)) {
 		throw std::runtime_error("Can't connect notifiers");
 	}
-
-	creator->log->debug("request queue started. Handles: {},{},{},{}", in_queue_listen_sock, out_queue_listen_sock, in_queue_connect_sock, out_queue_connect_sock);
 }
 
 request_queue::~request_queue()
 {
-	creator->log->debug("Request queue terminating");
 	terminating = true;
 	in_thread->join();
 	out_thread->join();
@@ -185,9 +194,7 @@ void request_queue::in_loop()
 	int c = sizeof(struct sockaddr_in);
 	char n;
 	struct sockaddr_in client;
-	creator->log->debug("in_loop() waiting on accept");
 	int notifier = accept(in_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
-	creator->log->debug("in_loop accept() = {}", notifier);
 	while (!terminating) {
 		while (recv(notifier, &n, 1, 0) > 0) {
 			/* New request to be sent! */
@@ -283,7 +290,6 @@ void request_queue::in_loop()
 		}
 	}
 	::close(notifier);
-	creator->log->debug("Exiting in_loop() thread, terminating={}", terminating);
 }
 
 void request_queue::out_loop()
@@ -291,9 +297,7 @@ void request_queue::out_loop()
 	int c = sizeof(struct sockaddr_in);
 	char n;
 	struct sockaddr_in client;
-	creator->log->debug("out_loop() waiting on accept");
 	int notifier = accept(out_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
-	creator->log->debug("out_loop accept() = {}", notifier);
 	while (!terminating) {
 		while (recv(notifier, &n, 1, 0) > 0) {
 			/* New request to be sent! */
@@ -314,10 +318,12 @@ void request_queue::out_loop()
 			delete queue_head.second;
 		}
 	}
-	creator->log->debug("Exiting oug_loop() thread, terminating={}", terminating);
 	::close(notifier);
 }
 
+
+/* These only need to send a byte to notify the other end of something to do. any byte will do.
+ */
 void request_queue::emit_in_queue_signal()
 {
 	send(in_queue_connect_sock, "X", 1, 0);
@@ -328,6 +334,7 @@ void request_queue::emit_out_queue_signal()
 	send(out_queue_connect_sock, "X", 1, 0);
 }
 
+/* Post a http_request into the queue */
 void request_queue::post_request(http_request* req)
 {
 	std::lock_guard<std::mutex> lock(in_mutex);
@@ -336,4 +343,4 @@ void request_queue::post_request(http_request* req)
 }
 
 };
-	
+
