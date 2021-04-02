@@ -2,7 +2,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <variant>
 #include <spdlog/fwd.h>
 #include <nlohmann/json.hpp>
 #include <dpp/wsclient.h>
