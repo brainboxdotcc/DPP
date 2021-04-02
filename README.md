@@ -7,22 +7,21 @@ This project is in alpha stages of development.
 
 * [x] Websocket connection with heartbeat keepalive and connection resuming
 * [x] Caching system for guilds, channels, guild members, roles, users
-* [x] Event dispatcher - currently only dispatches `on_message_create`
+* [x] Event dispatcher - currently only dispatches a subset of messages including e.g. `on_message_create` and `on_guild_create`
 * [x] Ability to attach handlers to events
+* [x] REST HTTPS call system using cpp-httplib
+* [x] Message send (`dpp::cluster::message_create()`)
+* [x] Embeds
+* [x] Ratelimit system
 
 ### To do:
 
 * [ ] Add the rest of the discord events
+* [ ] Add the REST of the HTTP calls (pun intended)
 * [ ] Ability to receive raw json strings to event handlers
-* [ ] REST HTTPS call system using cpp-httplib
-* [ ] Message send/edit/delete
-* [ ] Embeds
-* [ ] Ratelimit system
 * [ ] Shard manager
 * [ ] Cluster management
 * [ ] File uploading
-
-(Basically everything!)
 
 Want to help? Drop me a line or send me a PR. I'll be choosy about what PRs i accept whilst the library is in such a heavy state of development.
 
@@ -41,11 +40,11 @@ At present, **Linux** only. This may change. The Library may build and work on o
 ### External Dependencies (You must install these)
 * [cmake](https://cmake.org/) (version 3.13+)
 * [g++](https://gcc.gnu.org) (version 8+)
-* gdb for debugging on development servers (any recent version)
-* [OpenSSL](https://openssl.org/) (whichever -dev package comes with your OS
+* [OpenSSL](https://openssl.org/) (whichever `-dev` package comes with your OS)
 
 ### Included Dependencies (Packaged with the library)
 * [nlohmann::json](https://github.com/nlohmann/json)
+* [cpp-httplib](https://github.com/yhirose/cpp-httplib)
 * [spdlog](https://github.com/gabime/spdlog)
 
 # Setup
@@ -57,11 +56,11 @@ At present, **Linux** only. This may change. The Library may build and work on o
     cmake ..
     make -j8
     
-Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
+Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
 ## 2. Run test cases
 
-run `./test` for unit test cases
+run `./test` for unit test cases.
 
 ## 3. Install to /usr/local/include and /usr/local/lib
 
