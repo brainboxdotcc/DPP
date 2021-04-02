@@ -29,6 +29,8 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 
+target_compile_features(test PRIVATE cxx_std_17)
+
 include_directories( "include" )
 
 target_link_libraries(test)
@@ -70,5 +72,6 @@ foreach (fullmodname ${subdirlist})
 	target_link_libraries(${modname} PRIVATE ssl crypto nlohmann_json::nlohmann_json)
 endforeach(fullmodname)
 
+target_compile_features(dpp PRIVATE cxx_std_17)
 target_link_libraries(test dpp spdlog)
 
