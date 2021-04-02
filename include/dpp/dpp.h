@@ -7,3 +7,4 @@
 #include <dpp/discord.h>
 #include <dpp/cluster.h>
 #include <dpp/cache.h>
+#include <dpp/queues.h>

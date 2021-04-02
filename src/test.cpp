@@ -7,13 +7,12 @@
 #include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
-#include <dpp/queues.h>
 
 using json = nlohmann::json;
 
-
 int main(int argc, char const *argv[])
 {
+	/* Read config file */
 	json configdocument;
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
@@ -31,10 +30,10 @@ int main(int argc, char const *argv[])
 	log->set_pattern("%^%Y-%m-%d %H:%M:%S.%e [%L] [th#%t]%$ : %v");
 	log->set_level(spdlog::level::level_enum::debug);
 
-
-
+	/* Lets just output some log */
 	log->info("Starting test bot");
 
+	/* Create a D++ cluster. The intents, shard counts, cluster counts and logger are all optional. */
 	dpp::cluster bot(configdocument["token"].get<std::string>(),
                 dpp::GUILDS | dpp::GUILD_MEMBERS | dpp::GUILD_BANS | dpp::GUILD_EMOJIS | dpp::GUILD_INTEGRATIONS |
                 dpp::GUILD_WEBHOOKS | dpp::GUILD_INVITES | dpp::GUILD_MESSAGES | dpp::GUILD_MESSAGE_REACTIONS,
@@ -42,21 +41,36 @@ int main(int argc, char const *argv[])
                 log.get()
         );
 
+	/* Attach to the message_create event to get notified of new messages */
 	bot.on_message_create([log, &bot](const dpp::message_create_t & event) {
+
 		std::string content = event.msg->content;
+
+		/* Log some stats of the guild, user, role and channel counts, and the message content */
 		log->info("[G:{} U:{} R:{} C:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), event.msg->author->username, event.msg->author->discriminator, content);
+
+		/* Crappy command handler example */
 		if (content == ".dotest" && event.msg->guild_id == 825407338755653642) {
+
+			/* Fill a message object for a reply */
 			dpp::message reply;
 			reply.channel_id = event.msg->channel_id;
 			reply.content = "Do your own test lazybones";
+
+			/* Send message! */
 			bot.message_create(reply,[log, &bot](const dpp::http_request_completion_t& http) {
+
+				/* This is called when the request is completed */
 				log->debug("message reply status={} content={}", http.status, http.body);
+
 			});
 		}
 	});
 
+	/* This method call actually starts the bot by connecting all shards in the cluster */
 	bot.start();
 	
+	/* Never reached */
 	return 0;
 }
 
