@@ -74,7 +74,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 	if (!empty(parameters)) {
 		_url = endpoint + "/" +parameters;
 	}
-	
+
 	switch (method) {
 		case m_get: {
 			if (auto res = cli.Get(_url.c_str())) {
@@ -218,6 +218,9 @@ void request_queue::in_loop()
 								} else {
 									emit_in_queue_signal();
 								}
+							} else {
+								/* There's limit remaining, we can just run the request */
+								rv = req->Run(creator);
 							}
 						} else {
 							/* No bucket for this endpoint yet. Just send it, and make one from its reply */
