@@ -56,6 +56,13 @@ int main(int argc, char const *argv[])
 			dpp::message reply;
 			reply.channel_id = event.msg->channel_id;
 			reply.content = "Do your own test lazybones";
+			/* Make a nice pretty embed */
+			reply.embeds.push_back(dpp::embed().
+					set_title("This is a test").
+					set_color(0xff00ff).
+					set_description("It is not a drill. THIS is a drill.").
+					set_image("https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/2020-03-10-use-a-drill-final-clean-00-01-57-10-still053-1584632505.jpg")
+			);
 
 			/* Send message! */
 			bot.message_create(reply,[log, &bot](const dpp::http_request_completion_t& http) {

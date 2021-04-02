@@ -122,6 +122,26 @@ embed& embed::set_thumbnail(const std::string& url) {
 	return *this;
 }
 
+embed& embed::set_title(const std::string &text) {
+	title = text;
+	return *this;
+}
+
+embed& embed::set_description(const std::string &text) {
+	description = text;
+	return *this;
+}
+
+embed& embed::set_color(uint32_t col) {
+	color = col;
+	return *this;
+}
+
+embed& embed::set_url(const std::string &u) {
+	url = u;
+	return *this;
+}
+
 std::string message::build_json(bool with_id) const {
 	/* This is the basics. once it works, expand on it. */
 	json j({
@@ -130,7 +150,61 @@ std::string message::build_json(bool with_id) const {
 		{"tts", tts},
 		{"nonce", nonce}
 	});
+	if (embeds.size()) {
+		for (auto& embed : embeds) {
+			json e;
+			if (!embed.description.empty())
+				e["description"] = embed.description;
+			if (!embed.title.empty())
+				e["title"] = embed.title;
+			if (!embed.url.empty())
+				e["url"] = embed.url;
+			e["color"] = embed.color;
+			if (embed.footer.has_value()) {
+				e["footer"]["text"] = embed.footer->text;
+				e["footer"]["icon_url"] = embed.footer->icon_url;
+			}
+			if (embed.image.has_value()) {
+				e["image"]["url"] = embed.image->url;
+			}
+			if (embed.thumbnail.has_value()) {
+				e["thumbnail"]["url"] = embed.thumbnail->url;
+			}
+			if (embed.author.has_value()) {
+				e["author"]["name"] = embed.author->name;
+				e["author"]["url"] = embed.author->url;
+				e["author"]["icon_url"] = embed.author->icon_url;
+			}
+			if (embed.fields.size()) {
+				e["fields"] = json();
+				for (auto& field : embed.fields) {
+					json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
+					e["fields"].push_back(f);
+				}
+			}
+
+			/* Sending embeds only accepts the first entry */
+			j["embed"] = e;
+			break;
+		}
+	}
 	return j.dump();
 }
+
+/*
+struct embed_image {
+        std::string url;
+        std::string proxy_url;
+        std::string height;
+        std::string width;
+};
+
+struct embed_field {
+        std::string name;
+        std::string value;
+        std::string is_inline;
+};
+
+*/
 
 };

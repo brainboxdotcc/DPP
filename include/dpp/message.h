@@ -62,6 +62,10 @@ struct embed {
 	embed(nlohmann::json* j);
 	~embed();
 
+	embed& set_title(const std::string &text);
+	embed& set_description(const std::string &text);
+	embed& set_color(uint32_t col);
+	embed& set_url(const std::string &url);
 	embed& add_field(const std::string& name, const std::string &value, bool is_inline);
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 	embed& set_provider(const std::string& name, const std::string& url);
