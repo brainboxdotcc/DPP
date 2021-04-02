@@ -46,8 +46,11 @@ int main(int argc, char const *argv[])
 		std::string content = event.msg->content;
 		log->info("[G:{} U:{} R:{} C:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), event.msg->author->username, event.msg->author->discriminator, content);
 		if (content == ".dotest" && event.msg->guild_id == 825407338755653642) {
-			bot.post_rest("/api/users", "189759562910400512", dpp::m_get, "", [log, &bot](const dpp::http_request_completion_t& http) {
-				log->debug("Yay http! status={} content={}", http.status, http.body);
+			dpp::message reply;
+			reply.channel_id = event.msg->channel_id;
+			reply.content = "Do your own test lazybones";
+			bot.message_create(reply,[log, &bot](const dpp::http_request_completion_t& http) {
+				log->debug("message reply status={} content={}", http.status, http.body);
 			});
 		}
 	});

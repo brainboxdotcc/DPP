@@ -122,4 +122,15 @@ embed& embed::set_thumbnail(const std::string& url) {
 	return *this;
 }
 
+std::string message::build_json(bool with_id) const {
+	/* This is the basics. once it works, expand on it. */
+	json j({
+		{"content", content},
+		{"channel_id", channel_id},
+		{"tts", tts},
+		{"nonce", nonce}
+	});
+	return j.dump();
+}
+
 };

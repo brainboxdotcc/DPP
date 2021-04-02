@@ -75,4 +75,8 @@ void channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
 }
 
+std::string channel::build_json(bool with_id) {
+	return "";
+}
+
 };

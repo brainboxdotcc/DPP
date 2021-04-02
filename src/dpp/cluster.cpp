@@ -2,6 +2,7 @@
 #include <dpp/discord.h>
 #include <dpp/cluster.h>
 #include <dpp/discordclient.h>
+#include <dpp/message.h>
 #include <spdlog/spdlog.h>
 
 namespace dpp {
@@ -33,6 +34,10 @@ void cluster::start() {
 void cluster::post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, http_completion_event callback) {
 	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
 	rest->post_request(new http_request(endpoint, parameters, callback, postdata, method));
+}
+
+void cluster::message_create(const message &m, http_completion_event callback) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages", m_post, m.build_json(), callback);
 }
 
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {

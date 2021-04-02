@@ -43,6 +43,7 @@ public:
 	channel();
 	~channel();
 	void fill_from_json(nlohmann::json* j);
+	std::string build_json(bool with_id = false);
 
 	bool is_text_channel();
 	bool is_dm();

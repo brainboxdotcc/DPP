@@ -85,6 +85,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		}
 		break;
 		case m_post: {
+			std::cout << "POST " << _url << ", " << postdata << "\n";
 			if (auto res = cli.Post(_url.c_str(), postdata.c_str(), "application/json")) {
 				populate_result(rv, res);
 			} else {
