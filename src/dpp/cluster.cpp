@@ -4,6 +4,7 @@
 #include <dpp/discordclient.h>
 #include <dpp/message.h>
 #include <spdlog/spdlog.h>
+#include <chrono>
 
 namespace dpp {
 
@@ -26,7 +27,7 @@ void cluster::start() {
 			/* TODO: DiscordClient should spawn a thread in its Run() */
 			this->shards[s] = new DiscordClient(this, s, numshards, token, intents, log);
 			this->shards[s]->Run();
-			::sleep(5);
+			std::this_thread::sleep_for(std::chrono::seconds(5));
 		}
 	}
 }
