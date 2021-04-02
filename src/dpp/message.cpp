@@ -150,6 +150,9 @@ std::string message::build_json(bool with_id) const {
 		{"tts", tts},
 		{"nonce", nonce}
 	});
+	if (with_id) {
+		j["id"] = std::to_string(id);
+	}
 	if (embeds.size()) {
 		for (auto& embed : embeds) {
 			json e;

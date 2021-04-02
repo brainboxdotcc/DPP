@@ -75,6 +75,12 @@ public:
 
 	/* Send a message to a channel. The callback function is called when the message has been sent */
 	void message_create(const class message &m, http_completion_event callback);
+
+	/* Edit a message on a channel. The callback function is called when the message has been edited */
+	void message_edit(const class message &m, http_completion_event callback);
+
+	/* Delete a message from a channel. The callback function is called when the message has been edited */
+	void message_delete(snowflake message_id, snowflake channel_id, http_completion_event callback);
 };
 
 };
