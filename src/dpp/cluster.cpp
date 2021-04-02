@@ -6,14 +6,24 @@
 
 namespace dpp {
 
-void cluster::start(const std::string &_token, uint32_t intents, uint32_t shards, uint32_t cluster_id, uint32_t maxclusters, spdlog::logger* log) {
+cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, spdlog::logger* _log)
+	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), log(_log)
+{
+	rest = new request_queue(this);
+}
+
+cluster::~cluster()
+{
+	delete rest;
+}
+
+void cluster::start() {
 	/* Start up all shards */
-	token = _token;
-	for (uint32_t s = 0; s < shards; ++s) {
+	for (uint32_t s = 0; s < numshards; ++s) {
 		/* Filter out shards that arent part of the current cluster, if the bot is clustered */
 		if (s % maxclusters == cluster_id) {
 			/* TODO: DiscordClient should spawn a thread in its Run() */
-			this->shards[s] = new DiscordClient(this, s, shards, token, intents, log);
+			this->shards[s] = new DiscordClient(this, s, numshards, token, intents, log);
 			this->shards[s]->Run();
 			::sleep(5);
 		}

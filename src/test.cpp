@@ -34,19 +34,22 @@ int main(int argc, char const *argv[])
 
 
 	log->info("Starting test bot");
-	dpp::cluster bot;
+
+	dpp::cluster bot(configdocument["token"].get<std::string>(),
+                dpp::GUILDS | dpp::GUILD_MEMBERS | dpp::GUILD_BANS | dpp::GUILD_EMOJIS | dpp::GUILD_INTEGRATIONS |
+                dpp::GUILD_WEBHOOKS | dpp::GUILD_INVITES | dpp::GUILD_MESSAGES | dpp::GUILD_MESSAGE_REACTIONS,
+                configdocument["shards"].get<uint32_t>(), 0, 1,
+                log.get()
+        );
+
 	bot.on_message_create([log, &bot](const dpp::message_create_t & event) {
 		std::string content = event.msg->content;
 		log->info("[G:{} U:{} R:{} C:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), event.msg->author->username, event.msg->author->discriminator, content);
 		if (content == ".dotest" && event.msg->guild_id == 825407338755653642) {
 		}
 	});
-	bot.start(configdocument["token"].get<std::string>(),
-		dpp::GUILDS | dpp::GUILD_MEMBERS | dpp::GUILD_BANS | dpp::GUILD_EMOJIS | dpp::GUILD_INTEGRATIONS |
-		dpp::GUILD_WEBHOOKS | dpp::GUILD_INVITES | dpp::GUILD_MESSAGES | dpp::GUILD_MESSAGE_REACTIONS,
-		configdocument["shards"].get<uint32_t>(), 0, 1,
-		log.get()
-	);
+
+	bot.start();
 	
 	return 0;
 }

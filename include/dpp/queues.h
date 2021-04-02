@@ -6,8 +6,7 @@
 #include <thread>
 #include <mutex>
 #include <vector>
-#include <condition_variable>
-#include <dpp/cluster.h>
+#include <functional>
 
 /* Queue of web requests, managed with rate limits */
 

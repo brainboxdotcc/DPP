@@ -6,16 +6,25 @@
 #include <dpp/dispatcher.h>
 #include <spdlog/fwd.h>
 #include <dpp/discordclient.h>
+#include <dpp/queues.h>
 
 namespace dpp {
 
 class cluster {
+	request_queue* rest;
 public:
 	std::string token;
+	uint32_t intents;
+	uint32_t numshards;
+	uint32_t cluster_id;
+	uint32_t maxclusters;
+	spdlog::logger* log;
 	dpp::dispatcher dispatch;
 	std::map<uint32_t, class DiscordClient*> shards;
 
-	void start(const std::string &token, uint32_t intents = 0, uint32_t shards = 1, uint32_t cluster_id = 0, uint32_t maxclusters = 1, spdlog::logger* log = nullptr);
+	cluster(const std::string &token, uint32_t intents = 0, uint32_t shards = 1, uint32_t cluster_id = 0, uint32_t maxclusters = 1, spdlog::logger* log = nullptr);
+	~cluster();
+	void start();
 
 	void on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
 	void on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);

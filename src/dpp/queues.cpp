@@ -12,9 +12,11 @@
 #include <unistd.h>
 #include <string.h>
 #include <dpp/queues.h>
+#include <dpp/cluster.h>
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <dpp/httplib.h>
 #include <dpp/stringops.h>
+#include <spdlog/spdlog.h>
 
 namespace dpp {
 
@@ -145,8 +147,8 @@ request_queue::request_queue(const class cluster* owner) : creator(owner), termi
 	listen(in_queue_listen_sock, 1);
 	listen(out_queue_listen_sock, 1);
 
-	in_thread = new std::thread(&request_queue::in_thread, this);
-	out_thread = new std::thread(&request_queue::out_thread, this);
+	in_thread = new std::thread(&request_queue::in_loop, this);
+	out_thread = new std::thread(&request_queue::out_loop, this);
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(250));	
 
@@ -165,10 +167,13 @@ request_queue::request_queue(const class cluster* owner) : creator(owner), termi
 	if ((connect(in_queue_connect_sock, (struct sockaddr *)&in_client, sizeof(in_client)) < 0) || (connect(out_queue_connect_sock, (struct sockaddr *)&out_client, sizeof(out_client)) < 0)) {
 		throw std::runtime_error("Can't connect notifiers");
 	}
+
+	creator->log->debug("request queue started. Handles: {},{},{},{}", in_queue_listen_sock, out_queue_listen_sock, in_queue_connect_sock, out_queue_connect_sock);
 }
 
 request_queue::~request_queue()
 {
+	creator->log->debug("Request queue terminating");
 	terminating = true;
 	in_thread->join();
 	out_thread->join();
@@ -179,8 +184,9 @@ void request_queue::in_loop()
 	int c = sizeof(struct sockaddr_in);
 	char n;
 	struct sockaddr_in client;
+	creator->log->debug("in_loop() waiting on accept");
 	int notifier = accept(in_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
-	::close(in_queue_listen_sock);
+	creator->log->debug("in_loop accept() = {}", notifier);
 	while (!terminating) {
 		while (recv(notifier, &n, 1, 0) > 0) {
 			/* New request to be sent! */
@@ -270,6 +276,7 @@ void request_queue::in_loop()
 		}
 	}
 	::close(notifier);
+	creator->log->debug("Exiting in_loop() thread, terminating={}", terminating);
 }
 
 void request_queue::out_loop()
@@ -277,8 +284,9 @@ void request_queue::out_loop()
 	int c = sizeof(struct sockaddr_in);
 	char n;
 	struct sockaddr_in client;
+	creator->log->debug("out_loop() waiting on accept");
 	int notifier = accept(out_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
-	::close(out_queue_listen_sock);
+	creator->log->debug("out_loop accept() = {}", notifier);
 	while (!terminating) {
 		while (recv(notifier, &n, 1, 0) > 0) {
 			/* New request to be sent! */
@@ -299,6 +307,7 @@ void request_queue::out_loop()
 			delete queue_head.second;
 		}
 	}
+	creator->log->debug("Exiting oug_loop() thread, terminating={}", terminating);
 	::close(notifier);
 }
 
