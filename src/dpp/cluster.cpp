@@ -30,6 +30,11 @@ void cluster::start() {
 	}
 }
 
+void cluster::post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, http_completion_event callback) {
+	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
+	rest->post_request(new http_request(endpoint, parameters, callback, postdata, method));
+}
+
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {
 	this->dispatch.voice_state_update = _voice_state_update; 
 }

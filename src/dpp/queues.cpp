@@ -20,7 +20,7 @@
 
 namespace dpp {
 
-http_request::http_request(const std::string &_endpoint, std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method) : endpoint(_endpoint), parameters(_parameters), complete_handler(completion), postdata(_postdata), method(_method), completed(false)
+http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method) : endpoint(_endpoint), parameters(_parameters), complete_handler(completion), postdata(_postdata), method(_method), completed(false)
 {
 }
 
@@ -72,7 +72,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 
 	std::string _url = endpoint;
 	if (!empty(parameters)) {
-		endpoint.append("/").append(parameters);
+		_url = endpoint + "/" +parameters;
 	}
 	
 	switch (method) {

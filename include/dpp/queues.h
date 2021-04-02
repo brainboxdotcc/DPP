@@ -57,7 +57,7 @@ public:
 	std::string postdata;
 	http_method method;
 
-	http_request(const std::string &_endpoint, std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get);
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get);
 	~http_request();
 	void complete(const http_request_completion_t &c);
 	http_request_completion_t Run(const class cluster* owner);

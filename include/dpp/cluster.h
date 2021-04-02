@@ -68,6 +68,8 @@ public:
 	void on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create);
 	void on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update);
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
+
+	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, http_completion_event callback);
 };
 
 };
