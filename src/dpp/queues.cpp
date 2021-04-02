@@ -2,7 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+
+#ifdef _WIN32
+#include <winsock.h>
+#else
 #include <sys/socket.h>
+#define _close close
+#endif
+
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <fcntl.h>

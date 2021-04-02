@@ -10,6 +10,22 @@
 #include <dpp/stringops.h>
 #include <spdlog/spdlog.h>
 
+#ifdef _WIN32
+#include <time.h>
+#include <iomanip>
+#include <sstream>
+
+char* strptime(const char* s, const char* f, struct tm* tm) {
+	std::istringstream input(s);
+	input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
+	input >> std::get_time(tm, f);
+	if (input.fail()) {
+		return nullptr;
+	}
+	return (char*)(s + input.tellg());
+}
+#endif
+
 uint64_t SnowflakeNotNull(json* j, const char *keyname)
 {
 	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? from_string<uint64_t>((*j)[keyname].get<std::string>(), std::dec) : 0;
