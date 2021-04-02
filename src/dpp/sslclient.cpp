@@ -73,7 +73,7 @@ void SSLClient::Connect()
 		}
 		err = errno;
 		sfd = ERROR_STATUS;
-		::close(sfd);
+		::_close(sfd);
 	}
 	freeaddrinfo(addrs);
 
@@ -257,7 +257,7 @@ void SSLClient::close()
 {
 	if (ctx && ssl && sfd) {
 		SSL_free(ssl);
-		::close(sfd);
+		::_close(sfd);
 		SSL_CTX_free(ctx);
 		ctx = nullptr;
 		ssl = nullptr;

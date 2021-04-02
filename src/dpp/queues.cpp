@@ -1,6 +1,4 @@
 #include <errno.h>
-#include <resolv.h>
-#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -289,7 +287,7 @@ void request_queue::in_loop()
 			}
 		}
 	}
-	::close(notifier);
+	::_close(notifier);
 }
 
 void request_queue::out_loop()
@@ -318,7 +316,7 @@ void request_queue::out_loop()
 			delete queue_head.second;
 		}
 	}
-	::close(notifier);
+	::_close(notifier);
 }
 
 
