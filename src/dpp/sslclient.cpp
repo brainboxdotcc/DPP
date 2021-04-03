@@ -140,7 +140,7 @@ void SSLClient::ReadLoop()
 	/* Make the socket nonblocking */
 #ifdef _WIN32
 	u_long mode = 1;
-	int result = ioctlsocket(sfd, FIONBIO, &iMode);
+	int result = ioctlsocket(sfd, FIONBIO, &mode);
 	if (result != NO_ERROR)
 		throw std::runtime_error("Can't switch socket to non-blocking mode!");
 #else
