@@ -1,7 +1,9 @@
 #include <errno.h>
 
 #ifdef _WIN32
-#include <winsock.h>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#pragma  comment(lib,"ws2_32_lib")
 #else
 #include <resolv.h>
 #include <netdb.h>
