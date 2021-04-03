@@ -12,7 +12,6 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
-#define _close close
 #endif
 
 #include <fcntl.h>
@@ -296,7 +295,7 @@ void request_queue::in_loop()
 			}
 		}
 	}
-	::_close(notifier);
+	::close(notifier);
 }
 
 void request_queue::out_loop()
@@ -325,7 +324,7 @@ void request_queue::out_loop()
 			delete queue_head.second;
 		}
 	}
-	::_close(notifier);
+	::close(notifier);
 }
 
 

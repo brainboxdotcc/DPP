@@ -11,7 +11,6 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
-#define _close close
 #endif
 
 #include <stdio.h>
@@ -82,7 +81,7 @@ void SSLClient::Connect()
 		}
 		err = errno;
 		sfd = ERROR_STATUS;
-		::_close(sfd);
+		::close(sfd);
 	}
 	freeaddrinfo(addrs);
 
@@ -266,7 +265,7 @@ void SSLClient::close()
 {
 	if (ctx && ssl && sfd) {
 		SSL_free(ssl);
-		::_close(sfd);
+		::close(sfd);
 		SSL_CTX_free(ctx);
 		ctx = nullptr;
 		ssl = nullptr;
