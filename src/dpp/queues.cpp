@@ -7,7 +7,7 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
-#pragma  comment(lib,"ws2_32_lib")
+#pragma  comment(lib,"ws2_32")
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
