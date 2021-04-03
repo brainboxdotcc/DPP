@@ -169,6 +169,42 @@ bool guild::is_preview_enabled() {
 	return this->flags & g_preview_enabled;
 }
 
+std::string guild::build_json(bool with_id) {
+	json j;
+	if (with_id) {
+		j["id"] = std::to_string(id);
+	}
+	if (!name.empty()) {
+		j["name"] = name;
+	}
+	j["widget_enabled"] = widget_enabled();
+	if (afk_channel_id) {
+		j["afk_channel_id"] = afk_channel_id;
+	}
+	if (afk_channel_id) {
+		j["afk_timeout"] = afk_timeout;
+	}
+	if (widget_enabled()) {
+		j["widget_channel_id"] = widget_channel_id;
+	}
+	j["default_message_notifications"] = default_message_notifications;
+	j["explicit_content_filter"] = explicit_content_filter;
+	j["mfa_level"] = mfa_level;
+	if (system_channel_id) {
+		j["system_channel_id"] = system_channel_id;
+	}
+	if (rules_channel_id) {
+		j["rules_channel_id"] = rules_channel_id;
+	}
+	if (!vanity_url_code.empty()) {
+		j["vanity_url_code"] = vanity_url_code;
+	}
+	if (!description.empty()) {
+		j["description"] = description;
+	}
+	return j.dump();
+}
+
 void guild::fill_from_json(nlohmann::json* d) {
 	this->id = SnowflakeNotNull(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {

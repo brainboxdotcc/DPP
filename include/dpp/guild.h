@@ -77,6 +77,7 @@ public:
 	guild();
 	~guild();
 	void fill_from_json(nlohmann::json* j);
+	std::string build_json(bool with_id = false);
 
 	bool is_large();
 	bool is_unavailable();
