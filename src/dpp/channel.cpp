@@ -24,6 +24,10 @@ channel::~channel()
 {
 }
 
+bool channel::is_nsfw() {
+	return flags & dpp::c_nsfw;
+}
+
 bool channel::is_text_channel() {
 	return flags & dpp::c_text;
 }
@@ -76,7 +80,41 @@ void channel::fill_from_json(json* j) {
 }
 
 std::string channel::build_json(bool with_id) {
-	return "";
+	json j;
+	if (with_id) {
+		j["id"] = std::to_string(id);
+	}
+	j["guild_id"] = std::to_string(guild_id);
+	j["position"] = position;
+	j["name"] = name;
+	j["topic"] = topic;
+	if (is_voice_channel()) {
+		j["user_limit"] = user_limit; 
+		j["rate_limit_per_user"] = rate_limit_per_user;
+	}
+	if (!is_dm()) {
+		j["parent_id"] = parent_id;
+		if (is_text_channel()) {
+			j["type"] = GUILD_TEXT;
+		} else if (is_voice_channel()) {
+			j["type"] = GUILD_VOICE;
+		} else if (is_category()) {
+			j["type"] = GUILD_CATEGORY;
+		} else if (is_news_channel()) {
+			j["type"] = GUILD_NEWS;
+		} else if (is_store_channel()) {
+			j["type"] = GUILD_STORE;
+		}
+		j["nsfw"] = is_nsfw();
+	} else {
+		if (is_group_dm()) {
+			j["type"] = GROUP_DM;
+		} else  {
+			j["type"] = DM;
+		}
+	}
+
+	return j.dump();
 }
 
 };
