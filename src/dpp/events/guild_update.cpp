@@ -24,7 +24,7 @@ void guild_update::handle(class DiscordClient* client, json &j) {
 			g->roles.clear();
 			for (auto & role : d["roles"]) {
 				dpp::role *r = new dpp::role();
-				r->fill_from_json(&role);
+				r->fill_from_json(g->id, &role);
 				dpp::get_role_cache()->store(r);
 				g->roles.push_back(r->id);
 			}

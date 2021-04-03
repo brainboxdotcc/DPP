@@ -82,17 +82,35 @@ public:
 	/* Delete a message from a channel. The callback function is called when the message has been edited */
 	void message_delete(snowflake message_id, snowflake channel_id, http_completion_event callback);
 
+	/* Create a channel */
+	void channel_create(const class channel &c, http_completion_event callback);
+
 	/* Edit a channel. */
 	void channel_edit(const class channel &c, http_completion_event callback);
 
 	/* Delete a channel */
 	void channel_delete(snowflake channel_id, http_completion_event callback);
 
+	/* Create a guild */
+	void guild_create(const class guild &g, http_completion_event callback);
+
 	/* Edit a guild */
 	void guild_edit(const class guild &g, http_completion_event callback);
 
 	/* Delete a guild */
 	void guild_delete(snowflake guild_id, http_completion_event callback);
+
+	/* Create a role */
+	void role_create(const class role &r, http_completion_event callback);
+
+        /* Edit a role */
+	void role_edit(const class role &r, http_completion_event callback);
+	void role_edit_position(const class role &r, http_completion_event callback);
+
+	/* Delete a role */
+	void role_delete(snowflake guild_id, snowflake role_id, http_completion_event callback);
+
+
 };
 
 };

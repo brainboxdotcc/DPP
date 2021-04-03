@@ -26,7 +26,7 @@ void guild_create::handle(class DiscordClient* client, json &j) {
 			if (!r) {
 				r = new dpp::role();
 			}
-			r->fill_from_json(&role);
+			r->fill_from_json(g->id, &role);
 			dpp::get_role_cache()->store(r);
 			g->roles.push_back(r->id);
 		}

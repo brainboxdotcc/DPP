@@ -42,27 +42,59 @@ void cluster::message_create(const message &m, http_completion_event callback) {
 }
 
 void cluster::message_edit(const message &m, http_completion_event callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(), callback);
+	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(true), callback);
 }
 
 void cluster::message_delete(snowflake message_id, snowflake channel_id, http_completion_event callback) {
 	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/" + std::to_string(message_id), m_delete, "", callback);
 }
 
+void cluster::channel_create(const class channel &c, http_completion_event callback) {
+	this->post_rest("/api/channels", "", m_post, c.build_json(), callback);
+}
+
 void cluster::channel_edit(const class channel &c, http_completion_event callback) {
-	this->post_rest("/api/channels", std::to_string(c.id), m_patch, c.build_json(), callback);
+	this->post_rest("/api/channels", std::to_string(c.id), m_patch, c.build_json(true), callback);
 }
 
 void cluster::channel_delete(snowflake channel_id, http_completion_event callback) {
 	this->post_rest("/api/channels", std::to_string(channel_id), m_delete, "", callback);
 }
 
+void cluster::guild_create(const class guild &g, http_completion_event callback) {
+	this->post_rest("/api/guilds", "", m_post, g.build_json(), callback);
+}
+
 void cluster::guild_edit(const class guild &g, http_completion_event callback) {
-	this->post_rest("/api/guilds", std::to_string(g.id), m_patch, g.build_json(), callback);
+	this->post_rest("/api/guilds", std::to_string(g.id), m_patch, g.build_json(true), callback);
 }
 
 void cluster::guild_delete(snowflake guild_id, http_completion_event callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id), m_delete, "", callback);
+}
+
+void cluster::role_create(const class role &r, http_completion_event callback) {
+	this->post_rest("/api/channels", std::to_string(r.guild_id) + "/roles", m_post, r.build_json(), callback);
+}
+
+void cluster::role_edit(const class role &r, http_completion_event callback) {
+	json j = r.build_json(true);
+	auto p = j.find("position");
+	if (p != j.end()) {
+		j.erase(p);
+	}
+	this->post_rest("/api/guilds", std::to_string(r.guild_id) + "/roles/" + std::to_string(r.id) , m_patch, j, callback);
+}
+
+void cluster::role_edit_position(const class role &r, http_completion_event callback) {
+	json j({ {"id", r.id}, {"position", r.position}  });
+	this->post_rest("/api/guilds", std::to_string(r.guild_id) + "/roles/" + std::to_string(r.id), m_patch, j, callback);
+}
+
+
+
+void cluster::role_delete(snowflake guild_id, snowflake role_id, http_completion_event callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles/" + std::to_string(role_id), m_delete, "", callback);
 }
 
 

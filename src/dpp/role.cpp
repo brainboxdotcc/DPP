@@ -9,6 +9,7 @@ namespace dpp {
 
 role::role() :
 	managed(),
+	guild_id(0),
 	colour(0),
 	position(0),
 	permissions(0),
@@ -22,8 +23,9 @@ role::~role()
 {
 }
 
-void role::fill_from_json(nlohmann::json* j)
+void role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 {
+	this->guild_id = _guild_id;
 	this->id = SnowflakeNotNull(j, "id");
 	this->colour = Int32NotNull(j, "color");
 	this->position = Int8NotNull(j, "position");

@@ -48,6 +48,7 @@ enum role_permissions {
 class role : public managed {
 public:
 	std::string name;
+	snowflake guild_id;
 	uint32_t colour;
 	uint8_t position;
 	uint32_t permissions;
@@ -57,7 +58,7 @@ public:
 
 	role();
 	~role();
-	void fill_from_json(nlohmann::json* j);
+	void fill_from_json(snowflake guild_id, nlohmann::json* j);
 	std::string build_json(bool with_id = false) const;
 
 	bool is_hoisted() const;
