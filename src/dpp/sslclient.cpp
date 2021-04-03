@@ -3,6 +3,7 @@
 #ifdef _WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
+#include <io.h>
 #pragma  comment(lib,"ws2_32_lib")
 #else
 #include <resolv.h>
@@ -137,12 +138,18 @@ void SSLClient::ReadLoop()
 	int ofcmode;
 		
 	/* Make the socket nonblocking */
+#ifdef _WIN32
+	u_long mode = 1;
+	int result = ioctlsocket(sfd, FIONBIO, &iMode);
+	if (result != NO_ERROR)
+		throw std::runtime_error("Can't switch socket to non-blocking mode!");
+#else
 	ofcmode = fcntl(sfd, F_GETFL, 0);
 	ofcmode |= O_NDELAY;
 	if (fcntl(sfd, F_SETFL, ofcmode)) {
 		throw std::runtime_error("Can't switch socket to non-blocking mode!");
 	}
-
+#endif
 	nonblocking = true;
 	width=sfd+1;
 	
