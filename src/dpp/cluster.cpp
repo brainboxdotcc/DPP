@@ -50,11 +50,21 @@ void cluster::message_delete(snowflake message_id, snowflake channel_id, http_co
 }
 
 void cluster::channel_create(const class channel &c, http_completion_event callback) {
-	this->post_rest("/api/channels", "", m_post, c.build_json(), callback);
+	this->post_rest("/api/guilds", std::to_string(c.guild_id) + "/channels", m_post, c.build_json(), callback);
 }
 
 void cluster::channel_edit(const class channel &c, http_completion_event callback) {
-	this->post_rest("/api/channels", std::to_string(c.id), m_patch, c.build_json(true), callback);
+	json j = c.build_json(true);
+	auto p = j.find("position");
+	if (p != j.end()) {
+		j.erase(p);
+	}
+	this->post_rest("/api/channels", std::to_string(c.id), m_patch, j, callback);
+}
+
+void cluster::channel_edit_position(const class channel &c, http_completion_event callback) {
+	json j({ {"id", c.id}, {"position", c.position}  });
+	this->post_rest("/api/guilds", std::to_string(c.guild_id) + "/channels/" + std::to_string(c.id), m_patch, j, callback);
 }
 
 void cluster::channel_delete(snowflake channel_id, http_completion_event callback) {

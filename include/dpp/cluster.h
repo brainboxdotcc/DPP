@@ -87,6 +87,7 @@ public:
 
 	/* Edit a channel. */
 	void channel_edit(const class channel &c, http_completion_event callback);
+	void channel_edit_position(const class channel &c, http_completion_event callback);
 
 	/* Delete a channel */
 	void channel_delete(snowflake channel_id, http_completion_event callback);
