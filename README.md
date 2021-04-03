@@ -13,6 +13,7 @@ This project is in alpha stages of development.
 * [x] Message send (`dpp::cluster::message_create()`)
 * [x] Embeds
 * [x] Ratelimit system
+* [x] [Windows support](https://github.com/brainboxdotcc/DPP/wiki/Building-on-Windows)
 
 ### To do:
 
@@ -33,7 +34,8 @@ Documentation will be here in the project wiki when the project is more complete
 
 ## Supported OSes
 
-At present, **Linux** only. This may change. The Library may build and work on other platforms.
+The library runs best on **Linux**. Windows is supported via cmake and Visual Studio 2019 but not encouraged for production use.
+The library may work fine in other operating systems too, but with no access to these we cannot support them.
 
 ## Dependencies
 
@@ -47,7 +49,7 @@ At present, **Linux** only. This may change. The Library may build and work on o
 * [cpp-httplib](https://github.com/yhirose/cpp-httplib)
 * [spdlog](https://github.com/gabime/spdlog)
 
-# Setup
+# Linux Setup
 
 ## 1. Build Source Code
 
