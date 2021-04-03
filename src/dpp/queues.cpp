@@ -9,12 +9,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <unistd.h>
 #define _close close
 #endif
 
 #include <fcntl.h>
 #include <signal.h>
-#include <unistd.h>
 #include <string.h>
 #include <dpp/queues.h>
 #include <dpp/cluster.h>

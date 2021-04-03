@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <unistd.h>
 #define _close close
 #endif
 
@@ -16,7 +17,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <signal.h>
-#include <unistd.h>
 #include <string.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
