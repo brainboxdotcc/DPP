@@ -58,6 +58,9 @@ add_subdirectory(deps/json)
 
 include_directories("deps/spdlog/include")
 include_directories("deps/json/single_include")
+if (WIN32)
+	include_directories("C:\Program Files\OpenSSL-Win64\include")
+endif (WIN32)
 
 execute_process(COMMAND "g++ -c deps/json/single_include/nlohmann/json.hpp -o deps/json/single_include/nlohmann/json.hpp.gch")
 
