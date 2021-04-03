@@ -97,79 +97,79 @@ void guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user*
 	this->flags |= BoolNotNull(j, "pending") ? dpp::gm_pending : 0;
 }
 
-bool guild::is_large() {
+bool guild::is_large() const {
 	return this->flags & g_large;
 }
 
-bool guild::is_unavailable() {
+bool guild::is_unavailable() const {
 	return this->flags & g_unavailable;
 }
 
-bool guild::widget_enabled() {
+bool guild::widget_enabled() const {
 	return this->flags & g_widget_enabled;
 }
 
-bool guild::has_invite_splash() {
+bool guild::has_invite_splash() const {
 	return this->flags & g_invite_splash;
 }
 
-bool guild::has_vip_regions() {
+bool guild::has_vip_regions() const {
 	return this->flags & g_vip_regions;
 }
 
-bool guild::has_vanity_url() {
+bool guild::has_vanity_url() const {
 	return this->flags & g_vanity_url;
 }
 
-bool guild::is_verified() {
+bool guild::is_verified() const {
 	return this->flags & g_verified;
 }
 
-bool guild::is_partnered() {
+bool guild::is_partnered() const {
 	return this->flags & g_partnered;
 }
 
-bool guild::is_community() {
+bool guild::is_community() const {
 	return this->flags & g_community;
 }
 
-bool guild::has_commerce() {
+bool guild::has_commerce() const {
 	return this->flags & g_commerce;
 }
 
-bool guild::has_news() {
+bool guild::has_news() const {
 	return this->flags & g_news;
 }
 
-bool guild::is_discoverable() {
+bool guild::is_discoverable() const {
 	return this->flags & g_discoverable;
 }
 
-bool guild::is_featureable() {
+bool guild::is_featureable() const {
 	return this->flags & g_featureable;
 }
 
-bool guild::has_animated_icon() {
+bool guild::has_animated_icon() const {
 	return this->flags & g_animated_icon;
 }
 
-bool guild::has_banner() {
+bool guild::has_banner() const {
 	return this->flags & g_banner;
 }
 
-bool guild::is_welcome_screen_enabled() {
+bool guild::is_welcome_screen_enabled() const {
 	return this->flags & g_welcome_screen_enabled;
 }
 
-bool guild::has_member_verification_gate() {
+bool guild::has_member_verification_gate() const {
 	return this->flags & g_member_verification_gate;
 }
 
-bool guild::is_preview_enabled() {
+bool guild::is_preview_enabled() const {
 	return this->flags & g_preview_enabled;
 }
 
-std::string guild::build_json(bool with_id) {
+std::string guild::build_json(bool with_id) const {
 	json j;
 	if (with_id) {
 		j["id"] = std::to_string(id);

@@ -81,6 +81,12 @@ public:
 
 	/* Delete a message from a channel. The callback function is called when the message has been edited */
 	void message_delete(snowflake message_id, snowflake channel_id, http_completion_event callback);
+
+	/* Edit a channel. */
+	void channel_edit(const class channel &c, http_completion_event callback);
+
+	/* Delete a channel */
+	void channel_delete(snowflake channel_id, http_completion_event callback);
 };
 
 };

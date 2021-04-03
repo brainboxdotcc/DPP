@@ -24,35 +24,35 @@ channel::~channel()
 {
 }
 
-bool channel::is_nsfw() {
+bool channel::is_nsfw() const {
 	return flags & dpp::c_nsfw;
 }
 
-bool channel::is_text_channel() {
+bool channel::is_text_channel() const {
 	return flags & dpp::c_text;
 }
 
-bool channel::is_dm() {
+bool channel::is_dm() const {
 	return flags & dpp::c_dm;
 }
 
-bool channel::is_voice_channel() {
+bool channel::is_voice_channel() const {
 	return flags & dpp::c_voice;
 }
 
-bool channel::is_group_dm() {
+bool channel::is_group_dm() const {
 	return (flags & (dpp::c_dm | dpp::c_group)) == (dpp::c_dm | dpp::c_group);
 }
 
-bool channel::is_category() {
+bool channel::is_category() const {
 	return flags & dpp::c_category;
 }
 
-bool channel::is_news_channel() {
+bool channel::is_news_channel() const {
 	return flags & dpp::c_news;
 }
 
-bool channel::is_store_channel() {
+bool channel::is_store_channel() const {
 	return flags & dpp::c_store;
 }
 
@@ -79,7 +79,7 @@ void channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
 }
 
-std::string channel::build_json(bool with_id) {
+std::string channel::build_json(bool with_id) const {
 	json j;
 	if (with_id) {
 		j["id"] = std::to_string(id);

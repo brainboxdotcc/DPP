@@ -43,16 +43,16 @@ public:
 	channel();
 	~channel();
 	void fill_from_json(nlohmann::json* j);
-	std::string build_json(bool with_id = false);
+	std::string build_json(bool with_id = false) const;
 
-	bool is_nsfw();
-	bool is_text_channel();
-	bool is_dm();
-	bool is_voice_channel();
-	bool is_group_dm();
-	bool is_category();
-	bool is_news_channel();
-	bool is_store_channel();
+	bool is_nsfw() const;
+	bool is_text_channel() const;
+	bool is_dm() const;
+	bool is_voice_channel() const;
+	bool is_group_dm() const;
+	bool is_category() const;
+	bool is_news_channel() const;
+	bool is_store_channel() const;
 };
 
 typedef std::unordered_map<snowflake, channel*> channel_map;

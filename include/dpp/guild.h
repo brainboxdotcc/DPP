@@ -77,26 +77,26 @@ public:
 	guild();
 	~guild();
 	void fill_from_json(nlohmann::json* j);
-	std::string build_json(bool with_id = false);
+	std::string build_json(bool with_id = false) const;
 
-	bool is_large();
-	bool is_unavailable();
-	bool widget_enabled();
-	bool has_invite_splash();
-	bool has_vip_regions();
-	bool has_vanity_url();
-	bool is_verified();
-	bool is_partnered();
-	bool is_community();
-	bool has_commerce();
-	bool has_news();
-	bool is_discoverable();
-	bool is_featureable();
-	bool has_animated_icon();
-	bool has_banner();
-	bool is_welcome_screen_enabled();
-	bool has_member_verification_gate();
-	bool is_preview_enabled();
+	bool is_large() const;
+	bool is_unavailable() const;
+	bool widget_enabled() const;
+	bool has_invite_splash() const;
+	bool has_vip_regions() const;
+	bool has_vanity_url() const;
+	bool is_verified() const;
+	bool is_partnered() const;
+	bool is_community() const;
+	bool has_commerce() const;
+	bool has_news() const;
+	bool is_discoverable() const;
+	bool is_featureable() const;
+	bool has_animated_icon() const;
+	bool has_banner() const;
+	bool is_welcome_screen_enabled() const;
+	bool has_member_verification_gate() const;
+	bool is_preview_enabled() const;
 
 };
 

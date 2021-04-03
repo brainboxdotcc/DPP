@@ -49,6 +49,14 @@ void cluster::message_delete(snowflake message_id, snowflake channel_id, http_co
 	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/" + std::to_string(message_id), m_delete, "", callback);
 }
 
+void cluster::channel_edit(const class channel &c, http_completion_event callback) {
+	this->post_rest("/api/channels", std::to_string(c.id), m_patch, c.build_json(), callback);
+}
+
+void cluster::channel_delete(snowflake channel_id, http_completion_event callback) {
+	this->post_rest("/api/channels", std::to_string(channel_id), m_delete, "", callback);
+}
+
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {
 	this->dispatch.voice_state_update = _voice_state_update; 
 }
