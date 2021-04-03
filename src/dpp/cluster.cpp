@@ -57,6 +57,16 @@ void cluster::channel_delete(snowflake channel_id, http_completion_event callbac
 	this->post_rest("/api/channels", std::to_string(channel_id), m_delete, "", callback);
 }
 
+void cluster::guild_edit(const class guild &g, http_completion_event callback) {
+	this->post_rest("/api/guilds", std::to_string(g.id), m_patch, g.build_json(), callback);
+}
+
+void cluster::guild_delete(snowflake guild_id, http_completion_event callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), m_delete, "", callback);
+}
+
+
+
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {
 	this->dispatch.voice_state_update = _voice_state_update; 
 }

@@ -87,6 +87,12 @@ public:
 
 	/* Delete a channel */
 	void channel_delete(snowflake channel_id, http_completion_event callback);
+
+	/* Edit a guild */
+	void guild_edit(const class guild &g, http_completion_event callback);
+
+	/* Delete a guild */
+	void guild_delete(snowflake guild_id, http_completion_event callback);
 };
 
 };
