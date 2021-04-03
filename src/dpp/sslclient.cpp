@@ -4,6 +4,7 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #pragma  comment(lib,"ws2_32")
 #else
 #include <resolv.h>
@@ -131,12 +132,12 @@ void SSLClient::ReadLoop()
 	 * would cause the protocol to break.
 	 */
 	int width;
-	int r = 0, ClientToServerLength = 0, ClientToServerOffset = 0;
+	int r = 0;
+	size_t ClientToServerLength = 0, ClientToServerOffset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
 	fd_set readfds, writefds;
-	static char ClientToServerBuffer[BUFSIZZ],ServerToClientBuffer[BUFSIZZ];
-	int ofcmode;
-		
+	char ClientToServerBuffer[BUFSIZZ],ServerToClientBuffer[BUFSIZZ];
+	
 	/* Make the socket nonblocking */
 #ifdef _WIN32
 	u_long mode = 1;
@@ -144,6 +145,7 @@ void SSLClient::ReadLoop()
 	if (result != NO_ERROR)
 		throw std::runtime_error("Can't switch socket to non-blocking mode!");
 #else
+	int ofcmode;
 	ofcmode = fcntl(sfd, F_GETFL, 0);
 	ofcmode |= O_NDELAY;
 	if (fcntl(sfd, F_SETFL, ofcmode)) {

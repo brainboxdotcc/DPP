@@ -17,6 +17,8 @@
 #
 
 cmake_minimum_required (VERSION 3.6)
+
+
 project(test)
 
 aux_source_directory("src" coresrc)
@@ -69,7 +71,11 @@ foreach (fullmodname ${subdirlist})
         set (modsrc "")
 	file(GLOB modsrc ${modules_dir}/dpp/*.cpp ${modules_dir}/dpp/events/*.cpp)
         add_library(${modname} SHARED ${modsrc})
+if (WIN32)
+	target_link_libraries(${modname} PRIVATE libssl64MTd crypto64MTd nlohmann_json::nlohmann_json)
+else (WIN32)
 	target_link_libraries(${modname} PRIVATE ssl crypto nlohmann_json::nlohmann_json)
+endif (WIN32)
 endforeach(fullmodname)
 
 target_compile_features(dpp PRIVATE cxx_std_17)
