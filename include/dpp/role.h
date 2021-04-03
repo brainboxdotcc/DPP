@@ -58,7 +58,11 @@ public:
 	role();
 	~role();
 	void fill_from_json(nlohmann::json* j);
+	std::string build_json(bool with_id = false);
 
+	bool is_hoisted();
+	bool is_mentionable();
+	bool is_managed();
 	bool has_create_instant_invite();
 	bool has_kick_members();
 	bool has_ban_members();

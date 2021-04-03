@@ -39,6 +39,35 @@ void role::fill_from_json(nlohmann::json* j)
 	}
 }
 
+std::string role::build_json(bool with_id) {
+	json j;
+
+	if (with_id) {
+		j["id"] = std::to_string(id);
+	}
+	if (colour) {
+		j["color"] = colour;
+	}
+	j["position"] = position;
+	j["permissions"] = permissions;
+	j["hoist"] = is_hoisted();
+	j["mentionable"] = is_mentionable();
+
+	return j.dump();
+}
+
+bool role::is_hoisted() {
+	return this->flags & dpp::r_hoist;
+}
+
+bool role::is_mentionable() {
+	return this->flags & dpp::r_mentionable;
+}
+
+bool role::is_managed() {
+	return this->flags & dpp::r_managed;
+}
+
 bool role::has_create_instant_invite() {
 	return ((this->permissions & p_administrator) | (this->permissions & p_create_instant_invite));
 }
