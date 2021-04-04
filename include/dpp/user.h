@@ -4,6 +4,7 @@
 
 namespace dpp {
 
+/** Various bitmask flags used to represent information about a dpp::user */
 enum user_flags {
 	u_bot =			0b00000000000000000000001,
 	u_system =		0b00000000000000000000010,
@@ -25,15 +26,28 @@ enum user_flags {
 	u_verified_bot_dev =	0b00000100000000000000000,
 };
 
+/** Represents a user on discord. May or may not be a member of a dpp::guild.
+ */
 class user : public managed {
 public:
+	/** Username */
 	std::string username;
+	/** Discriminator (aka tag) */
 	uint16_t discriminator;
+	/** Avatar hash */
 	std::string avatar;
+	/** Flags built from a bitmask of values in dpp::user_flags */
 	uint32_t flags;
 
+	/** Constructor */
 	user();
+
+	/** Destructor */
 	~user();
+
+	/** Fill this record from json.
+	 * @param j The json to fill this record from
+	 */
 	user& fill_from_json(nlohmann::json* j);
 
 	bool is_bot();
@@ -56,6 +70,8 @@ public:
 	bool is_verified_bot_dev();
 };
 
+/** A group of users */
 typedef std::unordered_map<snowflake, user*> user_map;
 
 };
+

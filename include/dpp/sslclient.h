@@ -3,60 +3,71 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-/* Implements a simple SSL stream client */
+/** Implements a simple non-blocking SSL stream client */
 class SSLClient
 {
 protected:
-	/* Input buffer received from openssl */
+	/** Input buffer received from openssl */
 	std::string buffer;
 
-	/* Output buffer for sending to openssl */
+	/** Output buffer for sending to openssl */
 	std::string obuffer;
 
-	/* True if in nonblocking mode. The socket switches to nonblocking mode
+	/** True if in nonblocking mode. The socket switches to nonblocking mode
 	 * once ReadLoop is called.
 	 */
 	bool nonblocking;
 
-	/* Raw file descriptor */
+	/** Raw file descriptor of connection */
 	int sfd;
 
-	/* SSL session */
+	/** OpenSSL session */
 	SSL* ssl;
 
-	/* SSL context */
+	/** OpenSSL context */
 	SSL_CTX* ctx;
 
-	/* SSL cipher in use */
+	/** SSL cipher in use */
 	std::string cipher;
 
-	/* For timers */
+	/** For timers */
 	time_t last_tick;
 
+	/** Hostname connected to */
 	std::string hostname;
 
+	/** Port connected to */
 	std::string port;
 
+	/** Called every second */
 	virtual void OneSecondTimer();
 
+	/** Start connection */
 	virtual void Connect();
 public:
-	/* Connect to a specified host and port */
+	/** Connect to a specified host and port. Throws std::runtime_error on fatal error.
+	 * @param _hostname The hostname to connect to
+	 * @param _post the Port number to connect to
+	 */
 	SSLClient(const std::string &_hostname, const std::string &_port = "443");
 
-	/* Nonblocking I/O loop */
+	/** Nonblocking I/O loop */
 	void ReadLoop();
 
-	/* Destructor */
+	/** Destructor */
 	virtual ~SSLClient();
 
-	/* Handle input from the input buffer */
+	/** Handle input from the input buffer.
+	 * @param buffer the buffer content. Will be modified removing any processed front elements
+	 */
 	virtual bool HandleBuffer(std::string &buffer);
 
-	/* Write to the output buffer */
+	/** Write to the output buffer.
+	 * @param data Data to be written to the buffer
+	 */
 	virtual void write(const std::string &data);
 
-	/* Close SSL connection */
+	/** Close SSL connection */
 	virtual void close();
 };
 
