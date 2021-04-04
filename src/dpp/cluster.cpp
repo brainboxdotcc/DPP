@@ -22,6 +22,11 @@ cluster::~cluster()
 
 confirmation_callback_t::confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http) : type(_type), value(_value), http_info(_http)
 {
+	if (type == "confirmation") {
+		confirmation newvalue = std::get<confirmation>(_value);
+		newvalue.success = (http_info.status == 204);
+		value = newvalue;
+	}
 }
 
 void cluster::start() {
@@ -200,6 +205,15 @@ void cluster::channel_get(snowflake c, command_completion_event_t callback) {
 void cluster::channel_edit_position(const class channel &c, command_completion_event_t callback) {
 	json j({ {"id", c.id}, {"position", c.position}  });
 	this->post_rest("/api/guilds", std::to_string(c.guild_id) + "/channels/" + std::to_string(c.id), m_patch, j, [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback) {
+	json j({ {"allow", std::to_string(allow)}, {"deny", std::to_string(deny)}, {"type", member ? 1 : 0}  });
+	this->post_rest("/api/channel", std::to_string(c.id) + "/permissions/" + std::to_string(overwrite_id), m_put, j, [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}

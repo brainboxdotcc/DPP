@@ -15,6 +15,7 @@ using  json = nlohmann::json;
 namespace dpp {
 
 struct confirmation {
+	bool success;
 };
 
 typedef std::variant<
@@ -198,6 +199,9 @@ public:
 	/** Edit a channel. */
 	void channel_edit(const class channel &c, command_completion_event_t callback);
 	void channel_edit_position(const class channel &c, command_completion_event_t callback);
+
+	/** Edit a channel permission */
+	void channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback);
 
 	/** Delete a channel */
 	void channel_delete(snowflake channel_id, command_completion_event_t callback);
