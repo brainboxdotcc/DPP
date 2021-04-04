@@ -183,6 +183,9 @@ public:
 	/** Delete a message from a channel. The callback function is called when the message has been edited */
 	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
 
+	/** Bulk delete messages from a channel. The callback function is called when the message has been edited */
+	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback);
+
 	/** Get a channel */
 	void channel_get(snowflake c, command_completion_event_t callback);
 
