@@ -168,6 +168,12 @@ public:
 	/** Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character. */
 	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback);
 
+	/** Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character */
+	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback);
+
+	/** Get reactions on a message for a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character */
+	void message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
+
 	/** Delete a message from a channel. The callback function is called when the message has been edited */
 	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
 

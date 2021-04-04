@@ -10,6 +10,9 @@
 
 namespace dpp {
 
+/** Encodes a url parameter similar to php urlencode() */
+std::string url_encode(const std::string &value);
+
 /** Error values. Don't change the order or add extra values here,
  * as they map onto the error values of cpp-httplib
  */

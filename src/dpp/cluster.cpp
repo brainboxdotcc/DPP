@@ -67,11 +67,11 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 }
 
 void cluster::message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
-        this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/" + std::to_string(message_id) + "/crosspost", m_post, "", [callback](json &j, const http_request_completion_t& http) {
-                if (callback) {
-                        callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
-                }
-        });
+	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/" + std::to_string(message_id) + "/crosspost", m_post, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
+		}
+	});
 }
 
 void cluster::message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
@@ -83,9 +83,42 @@ void cluster::message_add_reaction(const struct message &m, const std::string &r
 }
 
 void cluster::message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + reaction + "/@me", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/@me", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
+        std::string parameters;
+        if (before) {
+                parameters.append("&before=" + std::to_string(before));
+        }
+        if (after) {
+                parameters.append("&after=" + std::to_string(after));
+        }
+        if (limit) {
+                parameters.append("&limit=" + std::to_string(limit));
+        }
+        if (!parameters.empty()) {
+                parameters[0] = '?';
+        }
+	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			user_map users;
+			for (auto & curr_user : j) {
+				users[SnowflakeNotNull(&curr_user, "id")] = user().fill_from_json(&curr_user);
+			}
+			callback(confirmation_callback_t("user_map", users, http));
 		}
 	});
 }
