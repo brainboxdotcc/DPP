@@ -1,7 +1,7 @@
 #
-# Sporks, the learning, scriptable Discord bot!
+# D++ (DPP), The Lightweight C++ Discord Library
 #
-# Copyright 2019 Craig Edwards <support@sporks.gg>
+# Copyright 2021 Craig Edwards <support@brainbox.cc>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ foreach (fullmodname ${subdirlist})
 	file(GLOB modsrc ${modules_dir}/dpp/*.cpp ${modules_dir}/dpp/events/*.cpp)
         add_library(${modname} SHARED ${modsrc})
 if (WIN32)
-	target_link_libraries(${modname} PRIVATE libssl64MTd libcrypto64MTd nlohmann_json::nlohmann_json)
+	target_link_libraries(${modname} PRIVATE "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\libssl64MTd.lib" "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\libcrypto64MTd.lib" nlohmann_json::nlohmann_json)
 else (WIN32)
 	target_link_libraries(${modname} PRIVATE ssl crypto nlohmann_json::nlohmann_json)
 endif (WIN32)
