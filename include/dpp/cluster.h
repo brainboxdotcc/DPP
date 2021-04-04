@@ -139,45 +139,57 @@ public:
 	void on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update);
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
 
-	/* Post a REST request. Where possible use a helper method instead like message_create */
+	/** Post a REST request. Where possible use a helper method instead like message_create */
 	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback);
 
-	/* Send a message to a channel. The callback function is called when the message has been sent */
+	/** Get a message */
+	void message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
+
+	/** Send a message to a channel. The callback function is called when the message has been sent */
 	void message_create(const struct message &m, command_completion_event_t callback);
 
-	/* Edit a message on a channel. The callback function is called when the message has been edited */
+	/** Edit a message on a channel. The callback function is called when the message has been edited */
 	void message_edit(const struct message &m, command_completion_event_t callback);
 
-	/* Delete a message from a channel. The callback function is called when the message has been edited */
+	/** Delete a message from a channel. The callback function is called when the message has been edited */
 	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
 
-	/* Create a channel */
+	/** Get a channel */
+	void channel_get(snowflake c, command_completion_event_t callback);
+
+	/** Create a channel */
 	void channel_create(const class channel &c, command_completion_event_t callback);
 
-	/* Edit a channel. */
+	/** Edit a channel. */
 	void channel_edit(const class channel &c, command_completion_event_t callback);
 	void channel_edit_position(const class channel &c, command_completion_event_t callback);
 
-	/* Delete a channel */
+	/** Delete a channel */
 	void channel_delete(snowflake channel_id, command_completion_event_t callback);
 
-	/* Create a guild */
+	/** Get a guild */
+	void guild_get(snowflake g, command_completion_event_t callback);
+
+	/** Create a guild */
 	void guild_create(const class guild &g, command_completion_event_t callback);
 
-	/* Edit a guild */
+	/** Edit a guild */
 	void guild_edit(const class guild &g, command_completion_event_t callback);
 
-	/* Delete a guild */
+	/** Delete a guild */
 	void guild_delete(snowflake guild_id, command_completion_event_t callback);
 
-	/* Create a role */
+	/** Get a role */
+	void role_get(snowflake role_id, snowflake guild_id, command_completion_event_t callback);
+
+	/** Create a role */
 	void role_create(const class role &r, command_completion_event_t callback);
 
-        /* Edit a role */
+        /** Edit a role */
 	void role_edit(const class role &r, command_completion_event_t callback);
 	void role_edit_position(const class role &r, command_completion_event_t callback);
 
-	/* Delete a role */
+	/** Delete a role */
 	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback);
 
 
