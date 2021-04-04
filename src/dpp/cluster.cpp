@@ -153,19 +153,19 @@ void cluster::guild_get(snowflake guild_id, command_completion_event_t callback)
 }
 
 void cluster::user_get(snowflake user_id, command_completion_event_t callback) {
-        this->post_rest("/api/users", std::to_string(user_id), m_get, json(), [callback](json &j, const http_request_completion_t& http) {
-                if (callback) {
-                        callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
-                }
-        });
+	this->post_rest("/api/users", std::to_string(user_id), m_get, json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
+		}
+	});
 }
 
 void cluster::current_user_get(command_completion_event_t callback) {
-        this->post_rest("/api/users", "@me", m_get, json(), [callback](json &j, const http_request_completion_t& http) {
-                if (callback) {
-                        callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
-                }
-        });
+	this->post_rest("/api/users", "@me", m_get, json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
+		}
+	});
 }
 
 
@@ -206,6 +206,34 @@ void cluster::roles_get(snowflake guild_id, command_completion_event_t callback)
 				roles[SnowflakeNotNull(&curr_role, "id")] = role().fill_from_json(guild_id, &curr_role);
 			}
 			callback(confirmation_callback_t("role_map", roles, http));
+		}
+	});
+}
+
+void cluster::messagess_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
+	std::string parameters;
+	if (around) {
+		parameters.append("&around=" + std::to_string(around));
+	}
+	if (before) {
+		parameters.append("&before=" + std::to_string(before));
+	}
+	if (after) {
+		parameters.append("&after=" + std::to_string(after));
+	}
+	if (limit) {
+		parameters.append("&limit=" + std::to_string(limit));
+	}
+	if (!parameters.empty()) {
+		parameters[0] = '?';
+	}
+	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages" + parameters, m_get, json(), [channel_id, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			message_map messages;
+			for (auto & curr_message : j) {
+				messages[SnowflakeNotNull(&curr_message, "id")] = message().fill_from_json(&curr_message);
+			}
+			callback(confirmation_callback_t("message_map", messages, http));
 		}
 	});
 }

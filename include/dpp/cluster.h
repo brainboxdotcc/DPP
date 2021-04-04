@@ -149,6 +149,9 @@ public:
 	/** Get a message */
 	void message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
 
+	/** Get multiple messages */
+	void messagess_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
+
 	/** Send a message to a channel. The callback function is called when the message has been sent */
 	void message_create(const struct message &m, command_completion_event_t callback);
 
