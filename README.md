@@ -14,15 +14,16 @@ This project is in alpha stages of development.
 * [x] Embeds
 * [x] Ratelimit system
 * [x] [Windows support](https://github.com/brainboxdotcc/DPP/wiki/Building-on-Windows)
+* [x] Manual Sharding (user specifies number of shards)
 
 ### To do:
 
 * [ ] Add the rest of the discord events
 * [ ] Add the REST of the HTTP calls (pun intended)
 * [ ] Ability to receive raw json strings to event handlers
-* [ ] Shard manager
 * [ ] Cluster management
 * [ ] File uploading
+* [ ] Automatic sharding (library determines correct number of shards)
 
 Want to help? Drop me a line or send me a PR. I'll be choosy about what PRs i accept whilst the library is in such a heavy state of development.
 
@@ -34,7 +35,7 @@ Documentation will be here in the project wiki when the project is more complete
 
 ## Supported OSes
 
-The library runs best on **Linux**. Windows is supported via cmake and Visual Studio 2019 but not encouraged for production use.
+The library runs best on **Linux**. **Windows** is supported via cmake and Visual Studio 2019 but not encouraged for production use.
 The library may work fine in other operating systems too, but with no access to these we cannot support them.
 
 ## Dependencies
