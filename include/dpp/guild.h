@@ -76,7 +76,7 @@ public:
 
 	guild();
 	~guild();
-	void fill_from_json(nlohmann::json* j);
+	guild& fill_from_json(nlohmann::json* j);
 	std::string build_json(bool with_id = false) const;
 
 	bool is_large() const;
@@ -120,7 +120,7 @@ public:
 
 	guild_member();
 	~guild_member();
-	void fill_from_json(nlohmann::json* j, const class guild* g, const class user* u);
+	guild_member& fill_from_json(nlohmann::json* j, const class guild* g, const class user* u);
 };
 
 };

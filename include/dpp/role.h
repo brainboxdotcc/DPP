@@ -58,7 +58,7 @@ public:
 
 	role();
 	~role();
-	void fill_from_json(snowflake guild_id, nlohmann::json* j);
+	role& fill_from_json(snowflake guild_id, nlohmann::json* j);
 	std::string build_json(bool with_id = false) const;
 
 	bool is_hoisted() const;

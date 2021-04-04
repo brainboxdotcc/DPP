@@ -17,41 +17,85 @@ namespace dpp {
 struct confirmation {
 };
 
+typedef std::variant<
+                confirmation,
+                message,
+                user,
+                guild_member,
+                channel,
+                guild,
+                role
+        > confirmable_t;
+
 struct confirmation_callback_t {
 	std::string type;
 	http_request_completion_t http_info;
-	std::variant<
-		confirmation,
-		message,
-		user,
-		guild_member, 
-		channel, 
-		guild, 
-		role
-	> value;
+	confirmable_t value;
+
+	confirmation_callback_t() = default;
+	confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http);
 };
 
 typedef std::function<void(const confirmation_callback_t&)> command_completion_event_t;
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
+/** The cluster class represents a group of shards and a command queue for sending and 
+ * receiving commands from discord via HTTP. You should usually instantiate a cluster object
+ * at the very least to make use of the library.
+ */
 class cluster {
+	/** queue system for commands sent to Discord, and any replies */
 	request_queue* rest;
 public:
+	/** Current bot token for all shards on this cluster and all commands sent via HTTP */
 	std::string token;
+
+	/** Current bitmask of gateway intents */
 	uint32_t intents;
+
+	/** Total number of shards across all clusters */
 	uint32_t numshards;
+
+	/** ID of this cluster, between 0 and MAXCLUSTERS-1 inclusive */
 	uint32_t cluster_id;
+
+	/** Total number of clusters that are active */
 	uint32_t maxclusters;
+
+	/** Optional spdlog::logger log object */
 	spdlog::logger* log;
+
+	/** Routes events from Discord back to user program code via std::functions */
 	dpp::dispatcher dispatch;
+
+	/** Active shards on this cluster. Shard IDs may have gaps between if there 
+	 * are multiple clusters.
+	 */
 	std::map<uint32_t, class DiscordClient*> shards;
 
+	/** Constructor for creating a cluster. All but the token are optional.
+	 * @param token The bot token to use for all HTTP commands and websocket connections
+	 * @param intents A bitmask of dpd::intents values for all shards on this cluster. This is required to be sent for all bots with over 100 servers.
+	 * @param shards The total number of shards on this bot. If there are multiple clusters, then (shards / clusters) actual shards will run on this cluster.
+	 * @param cluster_id The ID of this cluster, should be between 0 and MAXCLUSTERS-1
+	 * @param maxclusters The total number of clusters that are active, which may be on seperate processes or even separate machines.
+	 * @param log An optional spdlog::logger object for logging details about the cluster
+	 */
 	cluster(const std::string &token, uint32_t intents = 0, uint32_t shards = 1, uint32_t cluster_id = 0, uint32_t maxclusters = 1, spdlog::logger* log = nullptr);
+
+	/** Destructor */
 	~cluster();
+
+	/** Start the cluster, connecting all its shards.
+	 */
 	void start();
 
 	/* Functions for attaching to event handlers */
+
+	/** Called for VOICE_STATE_UPDATE */
 	void on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
+
+	/** Called for ON_INTERACTION_CREATE */
 	void on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);
 	void on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete);
 	void on_channel_delete (std::function<void(const channel_delete_t& _event)> _channel_delete);

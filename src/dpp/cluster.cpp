@@ -19,6 +19,10 @@ cluster::~cluster()
 	delete rest;
 }
 
+confirmation_callback_t::confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http) : type(_type), value(_value), http_info(_http)
+{
+}
+
 void cluster::start() {
 	/* Start up all shards */
 	for (uint32_t s = 0; s < numshards; ++s) {
@@ -47,55 +51,32 @@ void cluster::post_rest(const std::string &endpoint, const std::string &paramete
 
 void cluster::message_create(const message &m, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages", m_post, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		message m;
-		m.fill_from_json(&j);
-		rv.type = "message";
-		rv.value = m;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
 	});
 }
 
 void cluster::message_edit(const message &m, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(true), [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		message m;
-		m.fill_from_json(&j);
-		rv.type = "message";
-		rv.value = m;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
 	});
 }
 
 void cluster::message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		confirmation c;
-		rv.type = "confirmation";
-		rv.value = c;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
 }
 
 void cluster::channel_create(const class channel &c, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(c.guild_id) + "/channels", m_post, c.build_json(), [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		channel c;
-		c.fill_from_json(&j);
-		rv.type = "channel";
-		rv.value = c;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
 	});
 }
@@ -107,14 +88,8 @@ void cluster::channel_edit(const class channel &c, command_completion_event_t ca
 		j.erase(p);
 	}
 	this->post_rest("/api/channels", std::to_string(c.id), m_patch, j, [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		channel c;
-		c.fill_from_json(&j);
-		rv.type = "message";
-		rv.value = c;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
 	});
 }
@@ -122,82 +97,48 @@ void cluster::channel_edit(const class channel &c, command_completion_event_t ca
 void cluster::channel_edit_position(const class channel &c, command_completion_event_t callback) {
 	json j({ {"id", c.id}, {"position", c.position}  });
 	this->post_rest("/api/guilds", std::to_string(c.guild_id) + "/channels/" + std::to_string(c.id), m_patch, j, [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		channel c;
-		c.fill_from_json(&j);
-		rv.type = "channel";
-		rv.value = c;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
 	});
 }
 
 void cluster::channel_delete(snowflake channel_id, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(channel_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		confirmation c;
-		rv.type = "confirmation";
-		rv.value = c;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
 }
 
 void cluster::guild_create(const class guild &g, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", "", m_post, g.build_json(), [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		guild g;
-		g.fill_from_json(&j);
-		rv.type = "guild";
-		rv.value = g;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("guild", guild().fill_from_json(&j), http));
 		}
 	});
 }
 
 void cluster::guild_edit(const class guild &g, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(g.id), m_patch, g.build_json(true), [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		guild g;
-		g.fill_from_json(&j);
-		rv.type = "message";
-		rv.value = g;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("guild", guild().fill_from_json(&j), http));
 		}
 	});
 }
 
 void cluster::guild_delete(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		confirmation c;
-		rv.type = "confirmation";
-		rv.value = c;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
 }
 
 void cluster::role_create(const class role &r, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(r.guild_id) + "/roles", m_post, r.build_json(), [r, callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		role rl;
-		rl.fill_from_json(r.guild_id, &j);
-		rv.type = "role";
-		rv.value = rl;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}
 	});
 }
@@ -209,14 +150,8 @@ void cluster::role_edit(const class role &r, command_completion_event_t callback
 		j.erase(p);
 	}
 	this->post_rest("/api/guilds", std::to_string(r.guild_id) + "/roles/" + std::to_string(r.id) , m_patch, j, [r, callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		role rl;
-		rl.fill_from_json(r.guild_id, &j);
-		rv.type = "role";
-		rv.value = rl;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}
 	});
 }
@@ -224,14 +159,8 @@ void cluster::role_edit(const class role &r, command_completion_event_t callback
 void cluster::role_edit_position(const class role &r, command_completion_event_t callback) {
 	json j({ {"id", r.id}, {"position", r.position}  });
 	this->post_rest("/api/guilds", std::to_string(r.guild_id) + "/roles/" + std::to_string(r.id), m_patch, j, [r, callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		role rl;
-		rl.fill_from_json(r.guild_id, &j);
-		rv.type = "role";
-		rv.value = rl;
-		rv.http_info = http;
 		if (callback) {
-			callback(rv);
+			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}
 	});
 }
@@ -240,13 +169,8 @@ void cluster::role_edit_position(const class role &r, command_completion_event_t
 
 void cluster::role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		confirmation_callback_t rv;
-		confirmation c;
-		rv.type = "confirmation";
-		rv.value = c;
-		rv.http_info = http;
-		if (callback) {
-			callback(rv);
+		if (callback) 
+			callback(confirmation_callback_t("confirmation", confirmation(), http));{
 		}
 	});
 }

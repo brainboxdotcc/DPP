@@ -42,7 +42,7 @@ public:
 
 	channel();
 	~channel();
-	void fill_from_json(nlohmann::json* j);
+	channel& fill_from_json(nlohmann::json* j);
 	std::string build_json(bool with_id = false) const;
 
 	bool is_nsfw() const;

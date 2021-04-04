@@ -104,7 +104,7 @@ bool user::is_verified_bot_dev() {
 	 return this->flags & u_verified_bot_dev; 
 }
 
-void user::fill_from_json(json* j) {
+user& user::fill_from_json(json* j) {
 	this->id = SnowflakeNotNull(j, "id");
 	this->username = StringNotNull(j, "username");
 	this->avatar = StringNotNull(j, "avatar");
@@ -121,6 +121,7 @@ void user::fill_from_json(json* j) {
 			this->flags |= flag.second;
 		}
 	}
+	return *this;
 }
 
 };

@@ -23,7 +23,7 @@ role::~role()
 {
 }
 
-void role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
+role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 {
 	this->guild_id = _guild_id;
 	this->id = SnowflakeNotNull(j, "id");
@@ -39,6 +39,7 @@ void role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 		this->bot_id = SnowflakeNotNull(&t, "bot_id");
 		this->integration_id = SnowflakeNotNull(&t, "integration_id");
 	}
+	return *this;
 }
 
 std::string role::build_json(bool with_id) const {

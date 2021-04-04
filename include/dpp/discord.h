@@ -6,7 +6,7 @@
 #include <map>
 
 namespace dpp {
-	typedef int64_t snowflake;
+	typedef uint64_t snowflake;
 
 	class managed {
 	public:

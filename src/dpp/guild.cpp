@@ -83,7 +83,7 @@ guild_member::~guild_member()
 {
 }
 
-void guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user* u) {
+guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user* u) {
 	this->guild_id = g->id;
 	this->user_id = u->id;
 	this->nickname = StringNotNull(j, "nickname");
@@ -95,6 +95,7 @@ void guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user*
 	this->flags |= BoolNotNull(j, "deaf") ? dpp::gm_deaf : 0;
 	this->flags |= BoolNotNull(j, "mute") ? dpp::gm_mute : 0;
 	this->flags |= BoolNotNull(j, "pending") ? dpp::gm_pending : 0;
+	return *this;
 }
 
 bool guild::is_large() const {
@@ -205,7 +206,7 @@ std::string guild::build_json(bool with_id) const {
 	return j.dump();
 }
 
-void guild::fill_from_json(nlohmann::json* d) {
+guild& guild::fill_from_json(nlohmann::json* d) {
 	this->id = SnowflakeNotNull(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
 		this->name = StringNotNull(d, "name");
@@ -256,6 +257,7 @@ void guild::fill_from_json(nlohmann::json* d) {
 	} else {
 		this->flags |= dpp::g_unavailable;
 	}
+	return *this;
 }
 
 };

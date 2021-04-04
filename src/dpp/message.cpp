@@ -198,7 +198,7 @@ std::string message::build_json(bool with_id) const {
 	return j.dump();
 }
 
-void message::fill_from_json(json* d) {
+message& message::fill_from_json(json* d) {
 	this->id = SnowflakeNotNull(d, "id");
 	this->channel_id = SnowflakeNotNull(d, "channel_id");
 	this->guild_id = SnowflakeNotNull(d, "guild_id");
@@ -257,6 +257,7 @@ void message::fill_from_json(json* d) {
 	}
 	this->pinned = BoolNotNull(d, "pinned");
 	this->webhook_id = SnowflakeNotNull(d, "webhook_id");
+	return *this;
 }
 
 };

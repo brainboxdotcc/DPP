@@ -56,7 +56,7 @@ bool channel::is_store_channel() const {
 	return flags & dpp::c_store;
 }
 
-void channel::fill_from_json(json* j) {
+channel& channel::fill_from_json(json* j) {
 	this->id = SnowflakeNotNull(j, "id");
 	this->guild_id = SnowflakeNotNull(j, "guild_id");
 	this->position = Int16NotNull(j, "position");
@@ -77,6 +77,7 @@ void channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_CATEGORY) ? dpp::c_category : 0;
 	this->flags |= (type == GUILD_NEWS) ? dpp::c_news : 0;
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
+	return *this;
 }
 
 std::string channel::build_json(bool with_id) const {

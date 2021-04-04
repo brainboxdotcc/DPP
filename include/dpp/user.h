@@ -34,7 +34,7 @@ public:
 
 	user();
 	~user();
-	void fill_from_json(nlohmann::json* j);
+	user& fill_from_json(nlohmann::json* j);
 
 	bool is_bot();
 	bool is_system();
