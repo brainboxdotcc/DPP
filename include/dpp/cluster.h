@@ -196,6 +196,12 @@ public:
 	/** Delete a role */
 	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback);
 
+	/** Get a user by id */
+	void user_get(snowflake user_id, command_completion_event_t callback);
+
+	/** Get current user */
+	void current_user_get(command_completion_event_t callback);
+
 
 };
 

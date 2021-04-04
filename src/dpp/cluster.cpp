@@ -152,6 +152,23 @@ void cluster::guild_get(snowflake guild_id, command_completion_event_t callback)
 	});
 }
 
+void cluster::user_get(snowflake user_id, command_completion_event_t callback) {
+        this->post_rest("/api/users", std::to_string(user_id), m_get, json(), [callback](json &j, const http_request_completion_t& http) {
+                if (callback) {
+                        callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
+                }
+        });
+}
+
+void cluster::current_user_get(command_completion_event_t callback) {
+        this->post_rest("/api/users", "@me", m_get, json(), [callback](json &j, const http_request_completion_t& http) {
+                if (callback) {
+                        callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
+                }
+        });
+}
+
+
 void cluster::guild_delete(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
