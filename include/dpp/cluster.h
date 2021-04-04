@@ -27,6 +27,7 @@ typedef std::variant<
 		channel,
 		channel_map,
 		guild,
+		guild_map,
 		role,
 		role_map
 	> confirmable_t;
@@ -207,6 +208,9 @@ public:
 
 	/** Get current user */
 	void current_user_get(command_completion_event_t callback);
+
+	/** Get current user guilds */
+	void current_user_get_guilds(command_completion_event_t callback);
 
 
 };

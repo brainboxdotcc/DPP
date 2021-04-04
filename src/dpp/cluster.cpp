@@ -168,6 +168,17 @@ void cluster::current_user_get(command_completion_event_t callback) {
 	});
 }
 
+void cluster::current_user_get_guilds(command_completion_event_t callback) {
+	this->post_rest("/api/users", "@me/guilds", m_get, json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			guild_map guilds;
+			for (auto & curr_guild : j) {
+				guilds[SnowflakeNotNull(&curr_guild, "id")] = guild().fill_from_json(&curr_guild);
+			}
+			callback(confirmation_callback_t("guild_map", guilds, http));
+		}
+	});
+}
 
 void cluster::guild_delete(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
