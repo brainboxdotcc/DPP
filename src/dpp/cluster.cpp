@@ -210,6 +210,19 @@ void cluster::roles_get(snowflake guild_id, command_completion_event_t callback)
 	});
 }
 
+void cluster::channels_get(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/channels", m_get, json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			channel_map channels;
+			for (auto & curr_channel: j) {
+				channels[SnowflakeNotNull(&curr_channel, "id")] = channel().fill_from_json(&curr_channel);
+			}
+			callback(confirmation_callback_t("channel_map", channels, http));
+		}
+	});
+}
+
+
 void cluster::messagess_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
 	std::string parameters;
 	if (around) {

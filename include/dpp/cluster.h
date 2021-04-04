@@ -164,6 +164,9 @@ public:
 	/** Get a channel */
 	void channel_get(snowflake c, command_completion_event_t callback);
 
+	/** Get all channels for a guild */
+	void channels_get(snowflake guild_id, command_completion_event_t callback);
+
 	/** Create a channel */
 	void channel_create(const class channel &c, command_completion_event_t callback);
 
