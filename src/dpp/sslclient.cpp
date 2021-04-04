@@ -259,7 +259,7 @@ void SSLClient::ReadLoop()
 				/* Some other error */
 				default:
 					return;
-				return;
+				break;
 			}
 		}
 	}
