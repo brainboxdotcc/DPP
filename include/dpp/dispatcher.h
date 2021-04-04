@@ -12,24 +12,24 @@ struct voice_state_update_t {
 struct interaction_create_t {
 };
 
-/* Delete guild */
+/** Delete guild */
 struct guild_delete_t {
 	guild* deleted;
 };
 
-/* Delete channel */
+/** Delete channel */
 struct channel_delete_t {
 	guild* deleting_guild;
 	channel* deleted;
 };
 
-/* Update channel */
+/** Update channel */
 struct channel_update_t {
 	guild* updating_guild;
 	channel* updated;
 };
 
-/* Session ready */
+/** Session ready */
 struct ready_t {
 	std::string session_id;
 	uint32_t shard_id;
@@ -49,7 +49,7 @@ struct guild_member_remove_t {
 struct application_command_create_t {
 };
 
-/* Session resumed */
+/** Session resumed */
 struct resumed_t {
 	std::string session_id;
 	uint32_t shard_id;
@@ -71,12 +71,12 @@ struct guild_members_chunk_t {
 struct message_reaction_remove_t {
 };
 
-/* Create guild */
+/** Create guild */
 struct guild_create_t {
 	guild* created;
 };
 
-/* Create channel */
+/** Create channel */
 struct channel_create_t {
 	guild* creating_guild;
 	channel* created;
@@ -149,7 +149,7 @@ struct user_update_t {
 	user* updated;
 };
 
-/* Create message */
+/** Create message */
 struct message_create_t {
 	message* msg;
 };
@@ -167,6 +167,9 @@ struct integration_update_t {
 struct integration_delete_t {
 };
 
+/** The dispatcher class contains a set of std::functions representing hooked events
+ * that the user code is interested in.
+ */
 class dispatcher {
 public:
 	std::function<void(const voice_state_update_t& event)> voice_state_update;

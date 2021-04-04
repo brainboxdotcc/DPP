@@ -6,12 +6,21 @@
 #include <map>
 
 namespace dpp {
+	/** A 64 bit unsigned value representing many things on discord.
+	 * Discord calls the value a 'snowflake' value.
+	 */
 	typedef uint64_t snowflake;
 
+	/** The managed class is the base class for various types that can
+	 * be stored in a cache that are identified by a dpp::snowflake id
+	 */
 	class managed {
 	public:
+		/** Unique ID of object */
 		snowflake id;
+		/** Constructor, initialises id to 0 */
 		managed();
+		/** Default destructor */
 		~managed() = default;
 	};
 

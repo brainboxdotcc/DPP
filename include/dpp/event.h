@@ -5,8 +5,14 @@
 
 #define event_decl(x) class x : public event { public: virtual void handle(class DiscordClient* client, nlohmann::json &j); };
 
+/** An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
+ */
 class event {
 public:
+	/** Pure virtual method for event handler code
+	 * @param client The creating shard
+	 * @param j The json data of the event
+	 */
 	virtual void handle(class DiscordClient* client, nlohmann::json &j) = 0;
 };
 
