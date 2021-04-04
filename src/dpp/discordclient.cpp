@@ -5,8 +5,9 @@
 #include <dpp/cache.h>
 #include <spdlog/spdlog.h>
 #include <dpp/cluster.h>
+#include <thread>
 
-DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, spdlog::logger* _logger) : WSClient("gateway.discord.gg", "443"), creator(_cluster), shard_id(_shard_id), max_shards(_max_shards), token(_token), last_heartbeat(time(NULL)), heartbeat_interval(0), last_seq(0), sessionid(""), logger(_logger), intents(_intents)
+DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, spdlog::logger* _logger) : WSClient("gateway.discord.gg", "443"), creator(_cluster), shard_id(_shard_id), max_shards(_max_shards), token(_token), last_heartbeat(time(NULL)), heartbeat_interval(0), last_seq(0), sessionid(""), logger(_logger), intents(_intents), runner(nullptr)
 {
 	if (logger == nullptr) {
 		try {
@@ -24,9 +25,13 @@ DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_
 
 DiscordClient::~DiscordClient()
 {
+	if (runner) {
+		runner->join();
+		delete runner;
+	}
 }
 
-void DiscordClient::Run()
+void DiscordClient::ThreadRun()
 {
 	do {
 		SSLClient::ReadLoop();
@@ -34,6 +39,11 @@ void DiscordClient::Run()
 		SSLClient::Connect();
 		WSClient::Connect();
 	} while(true);
+}
+
+void DiscordClient::Run()
+{
+	runner = new std::thread(&DiscordClient::ThreadRun, this);
 }
 
 bool DiscordClient::HandleFrame(const std::string &buffer)

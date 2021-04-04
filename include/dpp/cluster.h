@@ -87,6 +87,7 @@ public:
 	~cluster();
 
 	/** Start the cluster, connecting all its shards.
+	 * Returns once all shards are connected.
 	 */
 	void start();
 
