@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <string.h>
+#include <random>
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
 #define CPPHTTPLIB_OPENSSL_SUPPORT
@@ -151,9 +152,11 @@ request_queue::request_queue(const class cluster* owner) : creator(owner), termi
 		throw std::runtime_error("Can't initialise request queue sockets");
 	}
 
-	/* TODO: Randomize these! */
-	in_queue_port = 16820;
-	out_queue_port = 16821;
+	std::mt19937 generator(time(NULL));
+	std::uniform_real_distribution<double> distribution(8192, 32760);
+
+	in_queue_port = distribution(generator);
+	out_queue_port = distribution(generator);
 
 	struct sockaddr_in in_server, out_server;
 	in_server.sin_family = out_server.sin_family = AF_INET;
@@ -203,6 +206,7 @@ void request_queue::in_loop()
 	char n;
 	struct sockaddr_in client;
 	int notifier = accept(in_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
+	::close(in_queue_listen_sock);
 	while (!terminating) {
 		while (recv(notifier, &n, 1, 0) > 0) {
 			/* New request to be sent! */
@@ -306,6 +310,7 @@ void request_queue::out_loop()
 	char n;
 	struct sockaddr_in client;
 	int notifier = accept(out_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
+	::close(out_queue_listen_sock);
 	while (!terminating) {
 		while (recv(notifier, &n, 1, 0) > 0) {
 			/* New request to be sent! */

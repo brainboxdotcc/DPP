@@ -1,4 +1,8 @@
 #include <dpp/message.h>
+#include <dpp/user.h>
+#include <dpp/channel.h>
+#include <dpp/guild.h>
+#include <dpp/cache.h>
 #include <nlohmann/json.hpp>
 #include <dpp/discordevents.h>
 
@@ -194,20 +198,66 @@ std::string message::build_json(bool with_id) const {
 	return j.dump();
 }
 
-/*
-struct embed_image {
-        std::string url;
-        std::string proxy_url;
-        std::string height;
-        std::string width;
+void message::fill_from_json(json* d) {
+	this->id = SnowflakeNotNull(d, "id");
+	this->channel_id = SnowflakeNotNull(d, "channel_id");
+	this->guild_id = SnowflakeNotNull(d, "guild_id");
+	this->author = nullptr;
+	user* authoruser = nullptr;
+	/* May be null, if its null cache it from the partial */
+	if (d->find("author") != d->end()) {
+		json &author = (*d)["author"];
+		authoruser = find_user(SnowflakeNotNull(&author, "id"));
+		if (!authoruser) {
+			/* User does not exist yet, cache the partial as a user record */
+			authoruser = new user();
+			authoruser->fill_from_json(&author);
+			get_user_cache()->store(authoruser);
+		}
+		this->author = authoruser;
+	}
+	/* Fill in member record, cache uncached ones */
+	guild* g = find_guild(this->guild_id);
+	this->member = nullptr;
+	if (g && d->find("member") != d->end()) {
+		json& mi = (*d)["member"];
+		snowflake uid = SnowflakeNotNull(&mi, "id");
+		auto thismember = g->members.find(uid);
+		if (thismember == g->members.end()) {
+			if (authoruser) {
+				guild_member* gm = new guild_member();
+				gm->fill_from_json(&mi, g, authoruser);
+				g->members[authoruser->id] = gm;
+				this->member = gm;
+			}
+		} else {
+			this->member = thismember->second;
+		}
+	}
+	if (d->find("embeds") != d->end()) {
+		json & el = (*d)["embeds"];
+		for (auto& e : el) {
+			this->embeds.push_back(embed(&e));
+		}
+	}
+	this->content = StringNotNull(d, "content");
+	this->sent = TimestampNotNull(d, "timestamp");
+	this->edited = TimestampNotNull(d, "edited_timestamp");
+	this->tts = BoolNotNull(d, "tts");
+	this->mention_everyone = BoolNotNull(d, "mention_everyone");
+	/* TODO: Fix these */
+	this->mentions = nullptr;
+	this->mention_roles = nullptr;
+	/* TODO: Populate these */
+	/* this->mention_channels, this->attachments, this->reactions */
+	if (((*d)["nonce"]).is_string()) {
+		this->nonce = StringNotNull(d, "nonce");
+	} else {
+		this->nonce = std::to_string(SnowflakeNotNull(d, "nonce"));
+	}
+	this->pinned = BoolNotNull(d, "pinned");
+	this->webhook_id = SnowflakeNotNull(d, "webhook_id");
+}
+
 };
 
-struct embed_field {
-        std::string name;
-        std::string value;
-        std::string is_inline;
-};
-
-*/
-
-};

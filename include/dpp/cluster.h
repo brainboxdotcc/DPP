@@ -2,13 +2,37 @@
 
 #include <string>
 #include <map>
+#include <variant>
 #include <dpp/discord.h>
 #include <dpp/dispatcher.h>
+#include <dpp/json_fwd.hpp>
 #include <spdlog/fwd.h>
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
 
+using  json = nlohmann::json;
+
 namespace dpp {
+
+struct confirmation {
+};
+
+struct confirmation_callback_t {
+	std::string type;
+	http_request_completion_t http_info;
+	std::variant<
+		confirmation,
+		message,
+		user,
+		guild_member, 
+		channel, 
+		guild, 
+		role
+	> value;
+};
+
+typedef std::function<void(const confirmation_callback_t&)> command_completion_event_t;
+typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
 class cluster {
 	request_queue* rest;
@@ -71,45 +95,45 @@ public:
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
 
 	/* Post a REST request. Where possible use a helper method instead like message_create */
-	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, http_completion_event callback);
+	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback);
 
 	/* Send a message to a channel. The callback function is called when the message has been sent */
-	void message_create(const struct message &m, http_completion_event callback);
+	void message_create(const struct message &m, command_completion_event_t callback);
 
 	/* Edit a message on a channel. The callback function is called when the message has been edited */
-	void message_edit(const struct message &m, http_completion_event callback);
+	void message_edit(const struct message &m, command_completion_event_t callback);
 
 	/* Delete a message from a channel. The callback function is called when the message has been edited */
-	void message_delete(snowflake message_id, snowflake channel_id, http_completion_event callback);
+	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
 
 	/* Create a channel */
-	void channel_create(const class channel &c, http_completion_event callback);
+	void channel_create(const class channel &c, command_completion_event_t callback);
 
 	/* Edit a channel. */
-	void channel_edit(const class channel &c, http_completion_event callback);
-	void channel_edit_position(const class channel &c, http_completion_event callback);
+	void channel_edit(const class channel &c, command_completion_event_t callback);
+	void channel_edit_position(const class channel &c, command_completion_event_t callback);
 
 	/* Delete a channel */
-	void channel_delete(snowflake channel_id, http_completion_event callback);
+	void channel_delete(snowflake channel_id, command_completion_event_t callback);
 
 	/* Create a guild */
-	void guild_create(const class guild &g, http_completion_event callback);
+	void guild_create(const class guild &g, command_completion_event_t callback);
 
 	/* Edit a guild */
-	void guild_edit(const class guild &g, http_completion_event callback);
+	void guild_edit(const class guild &g, command_completion_event_t callback);
 
 	/* Delete a guild */
-	void guild_delete(snowflake guild_id, http_completion_event callback);
+	void guild_delete(snowflake guild_id, command_completion_event_t callback);
 
 	/* Create a role */
-	void role_create(const class role &r, http_completion_event callback);
+	void role_create(const class role &r, command_completion_event_t callback);
 
         /* Edit a role */
-	void role_edit(const class role &r, http_completion_event callback);
-	void role_edit_position(const class role &r, http_completion_event callback);
+	void role_edit(const class role &r, command_completion_event_t callback);
+	void role_edit_position(const class role &r, command_completion_event_t callback);
 
 	/* Delete a role */
-	void role_delete(snowflake guild_id, snowflake role_id, http_completion_event callback);
+	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback);
 
 
 };
