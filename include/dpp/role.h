@@ -121,7 +121,7 @@ public:
 };
 
 /** A group of roles */
-typedef std::unordered_map<snowflake, role*> role_map;
+typedef std::unordered_map<snowflake, role> role_map;
 
 };
 

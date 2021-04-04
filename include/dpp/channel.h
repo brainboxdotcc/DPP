@@ -55,7 +55,7 @@ public:
 	bool is_store_channel() const;
 };
 
-typedef std::unordered_map<snowflake, channel*> channel_map;
+typedef std::unordered_map<snowflake, channel> channel_map;
 
 };
 

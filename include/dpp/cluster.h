@@ -18,14 +18,18 @@ struct confirmation {
 };
 
 typedef std::variant<
-                confirmation,
-                message,
-                user,
-                guild_member,
-                channel,
-                guild,
-                role
-        > confirmable_t;
+		confirmation,
+		message,
+		message_map,
+		user,
+		user_map,
+		guild_member,
+		channel,
+		channel_map,
+		guild,
+		role,
+		role_map
+	> confirmable_t;
 
 struct confirmation_callback_t {
 	std::string type;
@@ -180,12 +184,12 @@ public:
 	void guild_delete(snowflake guild_id, command_completion_event_t callback);
 
 	/** Get a role */
-	void role_get(snowflake role_id, snowflake guild_id, command_completion_event_t callback);
+	void roles_get(snowflake guild_id, command_completion_event_t callback);
 
 	/** Create a role */
 	void role_create(const class role &r, command_completion_event_t callback);
 
-        /** Edit a role */
+	/** Edit a role */
 	void role_edit(const class role &r, command_completion_event_t callback);
 	void role_edit_position(const class role &r, command_completion_event_t callback);
 

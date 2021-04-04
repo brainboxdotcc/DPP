@@ -71,7 +71,7 @@ public:
 };
 
 /** A group of users */
-typedef std::unordered_map<snowflake, user*> user_map;
+typedef std::unordered_map<snowflake, user> user_map;
 
 };
 

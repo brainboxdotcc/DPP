@@ -2,6 +2,7 @@
 #include <dpp/discord.h>
 #include <dpp/cluster.h>
 #include <dpp/discordclient.h>
+#include <dpp/discordevents.h>
 #include <dpp/message.h>
 #include <spdlog/spdlog.h>
 #include <chrono>
@@ -180,10 +181,14 @@ void cluster::role_edit(const class role &r, command_completion_event_t callback
 	});
 }
 
-void cluster::role_get(snowflake role_id, snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles/" + std::to_string(role_id) , m_get, json(), [guild_id, callback](json &j, const http_request_completion_t& http) {
+void cluster::roles_get(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles", m_get, json(), [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("role", role().fill_from_json(guild_id, &j), http));
+			role_map roles;
+			for (auto & curr_role : j) {
+				roles[SnowflakeNotNull(&curr_role, "id")] = role().fill_from_json(guild_id, &curr_role);
+			}
+			callback(confirmation_callback_t("role_map", roles, http));
 		}
 	});
 }

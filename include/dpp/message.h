@@ -190,4 +190,7 @@ struct message {
 
 };
 
+/** A group of messages */
+typedef std::unordered_map<snowflake, message> message_map;
+
 };

@@ -184,7 +184,7 @@ public:
 };
 
 /** A container of guilds */
-typedef std::unordered_map<snowflake, guild*> guild_map;
+typedef std::unordered_map<snowflake, guild> guild_map;
 
 /** Various flags that can be used to indicate the status of a guild member */
 enum guild_member_flags {
