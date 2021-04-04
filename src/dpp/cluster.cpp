@@ -95,7 +95,7 @@ void cluster::message_delete_all_reactions(const struct message &m, command_comp
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
-	));
+	});
 }
 
 void cluster::message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
