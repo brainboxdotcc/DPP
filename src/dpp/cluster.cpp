@@ -74,6 +74,21 @@ void cluster::message_crosspost(snowflake message_id, snowflake channel_id, comm
         });
 }
 
+void cluster::message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + reaction + "/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + reaction + "/@me", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
 
 void cluster::message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/" + std::to_string(message_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {

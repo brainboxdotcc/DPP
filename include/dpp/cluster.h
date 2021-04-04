@@ -162,6 +162,12 @@ public:
 	/** Edit a message on a channel. The callback function is called when the message has been edited */
 	void message_edit(const struct message &m, command_completion_event_t callback);
 
+	/** Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character. */
+	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback);
+
+	/** Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character. */
+	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback);
+
 	/** Delete a message from a channel. The callback function is called when the message has been edited */
 	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
 
