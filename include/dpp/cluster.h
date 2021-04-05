@@ -236,7 +236,14 @@ public:
 	/** Follow a news channel */
 	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback);
 
+	/** Trigger channel typing indicator */
 	void channel_typing(const class channel &c, command_completion_event_t callback);
+
+	/** Pin a message */
+	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback);
+
+	/** Unpin a message */
+	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback);
 
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);
