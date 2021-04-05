@@ -218,6 +218,9 @@ public:
 
 	void channel_invites_get(const class channel &c, command_completion_event_t callback);
 
+	/** Get a channel's pins */
+	void pins_get(snowflake channel_id, command_completion_event_t callback);
+
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);
 
