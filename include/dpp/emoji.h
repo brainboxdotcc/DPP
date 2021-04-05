@@ -21,8 +21,13 @@ public:
 	~emoji();
 	emoji& fill_from_json(nlohmann::json* j);
 	std::string build_json(bool with_id = false) const;
+
+	bool requires_colons() const;
+	bool is_managed() const;
+	bool is_animated() const;
+	bool is_available() const;
 };
 
-typedef std::map<uint64_t, emoji> emoji_map;
+typedef std::unordered_map<snowflake, emoji> emoji_map;
 
 };

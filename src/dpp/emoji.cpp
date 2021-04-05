@@ -52,4 +52,22 @@ std::string emoji::build_json(bool with_id) const {
 	return j.dump();
 }
 
+bool emoji::requires_colons() const {
+	return flags & e_require_colons;
+}
+
+bool emoji::is_managed() const {
+	return flags & e_managed;
+}
+
+bool emoji::is_animated() const {
+	return flags & e_animated;
+}
+
+bool emoji::is_available() const {
+	return flags & e_available;
+}
+
+
 };
+
