@@ -35,7 +35,9 @@ typedef std::variant<
 		invite,
 		invite_map,
 		dtemplate,
-		dtemplate_map
+		dtemplate_map,
+		emoji,
+		emoji_map
 	> confirmable_t;
 
 struct confirmation_callback_t {
