@@ -218,6 +218,9 @@ public:
 
 	void channel_invites_get(const class channel &c, command_completion_event_t callback);
 
+	/** Create invite for a channel */
+	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback);
+
 	/** Get a channel's pins */
 	void pins_get(snowflake channel_id, command_completion_event_t callback);
 

@@ -240,6 +240,14 @@ void cluster::channel_invites_get(const class channel &c, command_completion_eve
 	});
 }
 
+void cluster::channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback) {
+	this->post_rest("/api/channels", std::to_string(c.id) + "/invites", m_post, i.build_json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("invite", invite().fill_from_json(&j), http));
+		}
+	});
+}
+
 void cluster::pins_get(snowflake channel_id, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(channel_id) + "/pins", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		message_map pins_messages;

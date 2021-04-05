@@ -23,20 +23,27 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 	target_user_type = Int8NotNull(j, "target_user_type");
 	approximate_presence_count = Int32NotNull(j, "approximate_presence_count");
 	approximate_member_count = Int32NotNull(j, "approximate_member_count");
+	max_age = Int32NotNull(j, "max_age");
+	max_uses = Int32NotNull(j, "max_uses");
+	temporary = BoolNotNull(j, "temporary");
+	unique = BoolNotNull(j, "unique");
 	return *this;
 }
 
 std::string invite::build_json() const {
-	json j({
-		{"code", code},
-		{"guild_id", guild_id},
-		{"channel_id", channel_id},
-		{"inviter_id", inviter_id},
-		{"target_user_id", target_user_id},
-		{"target_user_type", target_user_type},
-		{"approximate_presence_count", approximate_presence_count},
-		{"approximate_member_count", approximate_member_count}
-	});
+	json j;
+	if (max_age > 0)
+		j["max_age"] = max_age;
+	if (max_uses > 0)
+		j["max_uses"] = max_uses;
+	if (target_user_id > 0)
+		j["target_user"] = target_user_id;
+	if (target_user_type > 0)
+		j["target_user_type"] = target_user_type;
+	if (temporary)
+		j["temporary"] = temporary;
+	if (unique)
+		j["unique"] = unique;
 	return j.dump();
 }
 
