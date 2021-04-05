@@ -9,8 +9,6 @@
 #include <spdlog/fwd.h>
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
-#include <dpp/invite.h>
-#include <dpp/dtemplate.h>
 
 using  json = nlohmann::json;
 

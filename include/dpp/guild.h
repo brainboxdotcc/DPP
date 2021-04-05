@@ -111,6 +111,10 @@ public:
 	 */
 	std::map<snowflake, class guild_member*> members;
 
+	/** List of emojis
+	 */
+	std::map<snowflake, class emoji*> emojis;
+
 	/** Default constructor, zeroes all values */
 	guild();
 

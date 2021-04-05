@@ -30,4 +30,6 @@ namespace dpp {
 #include <dpp/user.h>
 #include <dpp/channel.h>
 #include <dpp/guild.h>
+#include <dpp/invite.h>
+#include <dpp/emoji.h>
 #include <dpp/intents.h>

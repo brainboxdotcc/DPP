@@ -52,5 +52,6 @@ namespace dpp {
 	cache_decl(guild, find_guild, get_guild_cache, get_guild_count);
 	cache_decl(role, find_role, get_role_cache, get_role_count);
 	cache_decl(channel, find_channel, get_channel_cache, get_channel_count);
+	cache_decl(emoji, find_emoji, get_emoji_cache, get_emoji_count);
 };
 
