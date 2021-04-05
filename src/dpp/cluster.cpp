@@ -246,7 +246,9 @@ void cluster::pins_get(snowflake channel_id, command_completion_event_t callback
 		for (auto & curr_message : j) {
 			pins_messages[SnowflakeNotNull(&curr_message, "id")] = message().fill_from_json(&curr_message);
 		}
-		callback(confirmation_callback_t("message_map", pins_messages, http));
+                if (callback) {
+		        callback(confirmation_callback_t("message_map", pins_messages, http));
+                }
 	});
 }
 
@@ -372,7 +374,7 @@ void cluster::channels_get(snowflake guild_id, command_completion_event_t callba
 }
 
 
-void cluster::messagess_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
+void cluster::messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
 	std::string parameters;
 	if (around) {
 		parameters.append("&around=" + std::to_string(around));
