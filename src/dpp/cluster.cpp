@@ -213,7 +213,7 @@ void cluster::channel_edit_position(const class channel &c, command_completion_e
 
 void cluster::channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback) {
 	json j({ {"allow", std::to_string(allow)}, {"deny", std::to_string(deny)}, {"type", member ? 1 : 0}  });
-	this->post_rest("/api/channel", std::to_string(c.id) + "/permissions/" + std::to_string(overwrite_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c.id) + "/permissions/" + std::to_string(overwrite_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
@@ -229,7 +229,7 @@ void cluster::invite_get(const std::string &invitecode, command_completion_event
 }
 
 void cluster::channel_invites_get(const class channel &c, command_completion_event_t callback) {
-	this->post_rest("/api/channel", std::to_string(c.id) + "/invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c.id) + "/invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		invite_map invites;
 		for (auto & curr_invite : j) {
 			invites[SnowflakeNotNull(&curr_invite, "id")] = invite().fill_from_json(&curr_invite);
