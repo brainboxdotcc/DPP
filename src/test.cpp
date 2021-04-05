@@ -50,7 +50,7 @@ int main(int argc, char const *argv[])
 		log->info("[G:{} U:{} R:{} C:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), event.msg->author->username, event.msg->author->discriminator, content);
 
 		/* Crappy command handler example */
-		if (content == ".dotest" && event.msg->guild_id == 825407338755653642) {
+		if (content == ".dotest" && (event.msg->guild_id == 825407338755653642 || event.msg->guild_id == 828433613343162459)) {
 
 			/* Fill a message object for a reply */
 			dpp::message reply;
