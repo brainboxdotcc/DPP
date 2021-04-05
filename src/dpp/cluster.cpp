@@ -246,9 +246,28 @@ void cluster::pins_get(snowflake channel_id, command_completion_event_t callback
 		for (auto & curr_message : j) {
 			pins_messages[SnowflakeNotNull(&curr_message, "id")] = message().fill_from_json(&curr_message);
 		}
-                if (callback) {
-		        callback(confirmation_callback_t("message_map", pins_messages, http));
-                }
+		if (callback) {
+		callback(confirmation_callback_t("message_map", pins_messages, http));
+		}
+	});
+}
+
+void cluster::gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback) {
+	json j;
+	j["access_token"] = access_token;
+	j["nick"] = nick;
+	this->post_rest("/api/channels", std::to_string(channel_id) + "/recipients/" + std::to_string(user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+        if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback) {
+	this->post_rest("/api/channels", std::to_string(channel_id) + "/recipients/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+        if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
 	});
 }
 
