@@ -228,6 +228,18 @@ void cluster::invite_get(const std::string &invitecode, command_completion_event
 	});
 }
 
+void cluster::channel_invites_get(const class channel &c, command_completion_event_t callback) {
+	this->post_rest("/api/channel", std::to_string(c.id) + "/invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		invite_map invites;
+		for (auto & curr_invite : j) {
+			invites[SnowflakeNotNull(&curr_invite, "id")] = invite().fill_from_json(&curr_invite);
+		}
+		if (callback) {
+			callback(confirmation_callback_t("invite_map", invites, http));
+		}
+	});
+}
+
 void cluster::invite_delete(const std::string &invitecode, command_completion_event_t callback) {
 	this->post_rest("/api/invites", dpp::url_encode(invitecode), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

@@ -216,6 +216,8 @@ public:
 	/** Delete an invite */
 	void invite_delete(const std::string &invite, command_completion_event_t callback);
 
+	void channel_invites_get(const class channel &c, command_completion_event_t callback);
+
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);
 
