@@ -221,6 +221,12 @@ public:
 	/** Get a channel's pins */
 	void pins_get(snowflake channel_id, command_completion_event_t callback);
 
+	/** Adds a recipient to a Group DM using their access token */
+	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback);
+
+	/** Removes a recipient from a Group DM */
+	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback);
+
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);
 
