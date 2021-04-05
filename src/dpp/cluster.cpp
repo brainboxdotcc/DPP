@@ -360,6 +360,15 @@ void cluster::guild_get(snowflake guild_id, command_completion_event_t callback)
 	});
 }
 
+void cluster::guild_get_preview(snowflake guild_id, command_completion_event_t callback) {
+        this->post_rest("/api/guilds", std::to_string(guild_id) + "/preview", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+                if (callback) {
+                        callback(confirmation_callback_t("guild", guild().fill_from_json(&j), http));
+                }
+        });
+}
+
+
 void cluster::template_get(const std::string &code, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", "templates/" + code, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

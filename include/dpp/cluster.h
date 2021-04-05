@@ -251,6 +251,9 @@ public:
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);
 
+	/** Get a guild preview. Returns a guild object but only a subset of the fields will be populated. */
+	void guild_get_preview(snowflake g, command_completion_event_t callback);
+
 	/** Get a template */
 	void template_get(const std::string &code, command_completion_event_t callback);
 
