@@ -409,7 +409,7 @@ void cluster::guild_template_sync(snowflake guild_id, const std::string &code, c
 	});
 }
 
-void cluster::guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, std::string description, command_completion_event_t callback) {
+void cluster::guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback) {
 	json params;
 	params["name"] = name;
 	params["description"] = description;
