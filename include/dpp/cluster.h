@@ -221,6 +221,9 @@ public:
 
 	void channel_invites_get(const class channel &c, command_completion_event_t callback);
 
+	/** Create invite for a channel */
+	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback);
+
 	/** Get a channel's pins */
 	void pins_get(snowflake channel_id, command_completion_event_t callback);
 
@@ -229,6 +232,21 @@ public:
 
 	/** Removes a recipient from a Group DM */
 	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback);
+
+	/** Remove a permission from a channel */
+	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback);
+
+	/** Follow a news channel */
+	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback);
+
+	/** Trigger channel typing indicator */
+	void channel_typing(const class channel &c, command_completion_event_t callback);
+
+	/** Pin a message */
+	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback);
+
+	/** Unpin a message */
+	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback);
 
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);

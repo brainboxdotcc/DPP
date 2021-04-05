@@ -15,6 +15,10 @@ public:
 	uint8_t target_user_type;
 	uint32_t approximate_presence_count;
 	uint32_t approximate_member_count;
+	uint32_t max_age;
+	uint32_t max_uses;
+	bool temporary;
+	bool unique;
 
 	invite();
 	~invite();
