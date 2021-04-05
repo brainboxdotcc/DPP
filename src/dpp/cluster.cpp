@@ -215,7 +215,15 @@ void cluster::channel_edit_permissions(const class channel &c, snowflake overwri
 	json j({ {"allow", std::to_string(allow)}, {"deny", std::to_string(deny)}, {"type", member ? 1 : 0}  });
 	this->post_rest("/api/channels", std::to_string(c.id) + "/permissions/" + std::to_string(overwrite_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback) {
+	this->post_rest("/api/channels", std::to_string(c.id) + "/permissions/" + std::to_string(overwrite_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
 }
@@ -265,7 +273,7 @@ void cluster::gdm_add(snowflake channel_id, snowflake user_id, const std::string
 	j["access_token"] = access_token;
 	j["nick"] = nick;
 	this->post_rest("/api/channels", std::to_string(channel_id) + "/recipients/" + std::to_string(user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
-        if (callback) {
+		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
@@ -273,7 +281,7 @@ void cluster::gdm_add(snowflake channel_id, snowflake user_id, const std::string
 
 void cluster::gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(channel_id) + "/recipients/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-        if (callback) {
+		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});

@@ -230,6 +230,9 @@ public:
 	/** Removes a recipient from a Group DM */
 	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback);
 
+	/** Remove a permission from a channel */
+	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback);
+
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);
 
