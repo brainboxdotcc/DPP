@@ -93,5 +93,6 @@ cache_helper(user, user_cache, find_user, get_user_cache, get_user_count);
 cache_helper(channel, channel_cache, find_channel, get_channel_cache, get_channel_count);
 cache_helper(role, role_cache, find_role, get_role_cache, get_role_count);
 cache_helper(guild, guild_cache, find_guild, get_guild_cache, get_guild_count);
+cache_helper(emoji, emoji_cache, find_emoji, get_emoji_cache, get_emoji_count);
 
 };
