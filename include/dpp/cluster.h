@@ -281,6 +281,12 @@ public:
 	/** Delete a guild */
 	void guild_delete(snowflake guild_id, command_completion_event_t callback);
 
+	/** Get all emojis for a guild */
+	void guild_emojis_get(snowflake guild_id, command_completion_event_t callback);
+
+	/** Get single guild emoji */
+	void guild_emoji_get(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback);
+
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 
