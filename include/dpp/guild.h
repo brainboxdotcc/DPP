@@ -228,5 +228,9 @@ public:
 	guild_member& fill_from_json(nlohmann::json* j, const class guild* g, const class user* u);
 };
 
+/** A container of guild members */
+typedef std::unordered_map<snowflake, guild_member> guild_member_map;
+
+
 };
 

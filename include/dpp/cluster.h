@@ -9,6 +9,7 @@
 #include <spdlog/fwd.h>
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
+#include <dpp/invite.h>
 
 using  json = nlohmann::json;
 
@@ -25,12 +26,15 @@ typedef std::variant<
 		user,
 		user_map,
 		guild_member,
+		guild_member_map,
 		channel,
 		channel_map,
 		guild,
 		guild_map,
 		role,
-		role_map
+		role_map,
+		invite,
+		invite_map
 	> confirmable_t;
 
 struct confirmation_callback_t {
@@ -205,6 +209,12 @@ public:
 
 	/** Delete a channel */
 	void channel_delete(snowflake channel_id, command_completion_event_t callback);
+
+	/** Get details about an invite */
+	void invite_get(const std::string &invite, command_completion_event_t callback);
+
+	/** Delete an invite */
+	void invite_delete(const std::string &invite, command_completion_event_t callback);
 
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);
