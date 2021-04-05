@@ -58,7 +58,7 @@ void guild_create::handle(class DiscordClient* client, json &j) {
 			dpp::emoji* e = dpp::find_emoji(SnowflakeNotNull(&emoji, "id"));
 			if (!e) {
 				e = new dpp::emoji();
-				u->fill_from_json(&emoji);
+				e->fill_from_json(&emoji);
 				dpp::get_emoji_cache()->store(e);
 			}
 			g->emojis[e->id] = e;
