@@ -15,7 +15,6 @@ public:
 	time_t created_at;
 	time_t updated_at;
 	snowflake source_guild_id;
-	guild serialized_source_guild;
 	bool is_dirty;
 
 	dtemplate();
