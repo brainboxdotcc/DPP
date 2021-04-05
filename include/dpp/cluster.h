@@ -10,6 +10,7 @@
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
 #include <dpp/invite.h>
+#include <dpp/dtemplate.h>
 
 using  json = nlohmann::json;
 
@@ -34,7 +35,9 @@ typedef std::variant<
 		role,
 		role_map,
 		invite,
-		invite_map
+		invite_map,
+		dtemplate,
+		dtemplate_map
 	> confirmable_t;
 
 struct confirmation_callback_t {
@@ -229,6 +232,27 @@ public:
 
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);
+
+	/** Get a template */
+	void template_get(std::string code, command_completion_event_t callback);
+
+	/** Create a new guild based on a template. */
+	void guild_create_from_template(std::string code, std::string name, command_completion_event_t callback);
+
+	/** Get guild templates */
+	void guild_templates_get(snowflake guild_id, command_completion_event_t callback);
+
+	/** Creates a template for the guild */
+	void guild_template_create(snowflake guild_id, std::string name, std::string description, command_completion_event_t callback);
+
+	/** Syncs the template to the guild's current state. */
+	void guild_template_sync(snowflake guild_id, std::string code, command_completion_event_t callback);
+
+	/** Modifies the template's metadata. */
+	void guild_template_modify(snowflake guild_id, std::string code, std::string name, std::string description, command_completion_event_t callback);
+
+	/** Deletes the template */
+	void guild_template_delete(snowflake guild_id, std:: string code, command_completion_event_t callback);
 
 	/** Create a guild */
 	void guild_create(const class guild &g, command_completion_event_t callback);

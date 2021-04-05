@@ -1,3 +1,5 @@
+#pragma once
+
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
