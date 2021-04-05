@@ -24,7 +24,7 @@ confirmation_callback_t::confirmation_callback_t(const std::string &_type, const
 {
 	if (type == "confirmation") {
 		confirmation newvalue = std::get<confirmation>(_value);
-		newvalue.success = (http_info.status == 204);
+		newvalue.success = (http_info.status < 400);
 		value = newvalue;
 	}
 }
@@ -214,6 +214,15 @@ void cluster::channel_edit_position(const class channel &c, command_completion_e
 void cluster::channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback) {
 	json j({ {"allow", std::to_string(allow)}, {"deny", std::to_string(deny)}, {"type", member ? 1 : 0}  });
 	this->post_rest("/api/channels", std::to_string(c.id) + "/permissions/" + std::to_string(overwrite_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback) {
+	json j({ {"webhook_channel_id", target_channel_id} });
+	this->post_rest("/api/channels", std::to_string(c.id) + "/followers", m_post, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
