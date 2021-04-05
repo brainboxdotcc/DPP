@@ -302,11 +302,11 @@ void cluster::pins_get(snowflake channel_id, command_completion_event_t callback
 }
 
 void cluster::gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback) {
-	json j;
-	j["access_token"] = access_token;
-	j["nick"] = nick;
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/recipients/" + std::to_string(user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
+	json params;
+	params["access_token"] = access_token;
+	params["nick"] = nick;
+	this->post_rest("/api/channels", std::to_string(channel_id) + "/recipients/" + std::to_string(user_id), m_put, params.dump(), [callback](json &j, const http_request_completion_t& http) {
+        if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
@@ -356,6 +356,74 @@ void cluster::guild_get(snowflake guild_id, command_completion_event_t callback)
 	this->post_rest("/api/guilds", std::to_string(guild_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild", guild().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::template_get(const std::string &code, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", "templates/" + code, m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback) {
+	json params;
+	params["name"] = name;
+	this->post_rest("/api/guilds", "templates/" + code, m_post, params.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("guild", guild().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_templates_get(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	dtemplate_map dtemplates;
+		for (auto & curr_dtemplate : j) {
+			dtemplates[SnowflakeNotNull(&curr_dtemplate, "id")] = dtemplate().fill_from_json(&curr_dtemplate);
+		}
+		if (callback) {
+				callback(confirmation_callback_t("dtemplate_map", dtemplates, http));
+		}
+	});
+}
+
+void cluster::guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback) {
+	json params;
+	params["name"] = name;
+	params["description"] = description;
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates", m_post, params.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates/" + code, m_put, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, std::string description, command_completion_event_t callback) {
+	json params;
+	params["name"] = name;
+	params["description"] = description;
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates/" + code, m_patch, params.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates/" + code, m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
 		}
 	});
 }
@@ -478,8 +546,6 @@ void cluster::role_edit_position(const class role &r, command_completion_event_t
 		}
 	});
 }
-
-
 
 void cluster::role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
