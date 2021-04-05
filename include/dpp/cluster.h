@@ -287,6 +287,15 @@ public:
 	/** Get single guild emoji */
 	void guild_emoji_get(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback);
 
+	/** Create single emoji. You must ensure that the emoji passed contained image data using the emoji::load_image() method. */
+	void guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback);
+
+	/** Edit a single emoji. You must ensure that the emoji passed contained image data using the emoji::load_image() method. */
+	void guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback);
+
+	/** Delete a guild emoji */
+	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback);
+
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 
