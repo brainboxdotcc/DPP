@@ -387,6 +387,16 @@ void cluster::guild_add_member(const guild_member& gm, const std::string &access
 	});
 }
 
+void cluster::guild_edit_member(const guild_member& gm, command_completion_event_t callback) {
+        this->post_rest("/api/guilds", std::to_string(gm.guild_id) + "/members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [&gm, callback](json &j, const http_request_completion_t& http) {
+                if (callback) {
+                        callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(gm.guild_id), dpp::find_user(gm.user_id)), http));
+                }
+        });
+}
+
+
+
 void cluster::guild_get_members(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members", m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
 		guild_member_map guild_members;

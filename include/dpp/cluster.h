@@ -263,6 +263,9 @@ public:
 	/** Add guild member. Needs a specific oauth2 scope, from which you get the access_token. */
 	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback);
 
+	/** Edit the properties of an existing guild member. */
+	void guild_edit_member(const guild_member& gm, command_completion_event_t callback);
+
 	/** Get a template */
 	void template_get(const std::string &code, command_completion_event_t callback);
 
