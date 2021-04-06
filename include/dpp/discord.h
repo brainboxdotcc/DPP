@@ -34,4 +34,5 @@ namespace dpp {
 #include <dpp/dtemplate.h>
 #include <dpp/emoji.h>
 #include <dpp/ban.h>
+#include <dpp/prune.h>
 #include <dpp/intents.h>

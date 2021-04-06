@@ -39,7 +39,8 @@ typedef std::variant<
 		emoji,
 		emoji_map,
 		ban,
-		ban_map
+		ban_map,
+		prune
 	> confirmable_t;
 
 struct confirmation_callback_t {
@@ -336,6 +337,12 @@ public:
 
 	/** Delete a guild emoji */
 	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback);
+
+	/** Get prune counts */
+	void guild_get_prune_counts(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback);
+
+	/** Begin guild prune */
+	void guild_begin_prune(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback);
 
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);

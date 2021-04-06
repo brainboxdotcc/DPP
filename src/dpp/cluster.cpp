@@ -665,6 +665,23 @@ void cluster::guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command
 	});
 }
 
+void cluster::guild_get_prune_counts(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/prune", m_get, pruneinfo.build_json(false), [guild_id, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("prune", prune().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_begin_prune(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/prune", m_get, pruneinfo.build_json(true), [guild_id, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("prune", prune().fill_from_json(&j), http));
+		}
+	});
+}
+
+
 void cluster::roles_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
