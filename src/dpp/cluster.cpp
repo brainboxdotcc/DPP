@@ -306,6 +306,30 @@ void cluster::guild_get_integrations(snowflake guild_id, command_completion_even
 	});
 }
 
+void cluster::guild_get_widget(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/widget", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("guild_widget", guild_widget().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_get_vanity(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/vanity-url", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("invite", invite().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/widget", m_patch, gw.build_json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("guild_widget", guild_widget().fill_from_json(&j), http));
+		}
+	});
+}
+
 void cluster::guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id) + "/integrations/" + std::to_string(i.id), m_patch, i.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

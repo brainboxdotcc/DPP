@@ -190,6 +190,16 @@ public:
 /** A container of guilds */
 typedef std::unordered_map<snowflake, guild> guild_map;
 
+class guild_widget {
+public:
+	bool enabled;
+	snowflake channel_id;
+
+	guild_widget();
+	guild_widget& fill_from_json(nlohmann::json* j);
+	std::string build_json() const;
+};
+
 /** Various flags that can be used to indicate the status of a guild member */
 enum guild_member_flags {
 	/** Member deafened */
