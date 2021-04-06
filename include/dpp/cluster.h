@@ -42,6 +42,8 @@ typedef std::variant<
 		ban_map,
 		voiceregion,
 		voiceregion_map,
+		integration,
+		integration_map,
 		prune
 	> confirmable_t;
 

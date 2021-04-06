@@ -36,4 +36,5 @@ namespace dpp {
 #include <dpp/ban.h>
 #include <dpp/prune.h>
 #include <dpp/voiceregion.h>
+#include <dpp/integration.h>
 #include <dpp/intents.h>
