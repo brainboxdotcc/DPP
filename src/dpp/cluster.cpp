@@ -978,6 +978,29 @@ void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string 
 	});
 }
 
+void cluster::execute_webhook(const class webhook &wh, const class message& m, command_completion_event_t callback) {
+	this->post_rest("/api/webhooks", std::to_string(wh.id) + "/" + dpp::url_encode(token), m_post, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::edit_webhook_message(const class webhook &wh, const class message& m, command_completion_event_t callback) {
+	this->post_rest("/api/webhooks", std::to_string(wh.id) + "/" + dpp::url_encode(token) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback) {
+	this->post_rest("/api/webhooks", std::to_string(wh.id) + "/" + dpp::url_encode(token) + "/messages/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
 
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {
 	this->dispatch.voice_state_update = _voice_state_update; 

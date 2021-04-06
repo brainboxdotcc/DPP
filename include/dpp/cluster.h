@@ -405,6 +405,15 @@ public:
 	/** Delete webhook with token */
 	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback);
 
+	/** Execute webhook */
+	void execute_webhook(const class webhook &wh, const class message &m, command_completion_event_t callback);
+
+	/** Edit webhook message */
+	void edit_webhook_message(const class webhook &wh, const class message &m, command_completion_event_t callback);
+
+	/** Delete webhook message */
+	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback);
+
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 
