@@ -286,6 +286,11 @@ public:
 	/** Delete guild ban */
 	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
 
+	/** Get guild ban list */
+	void guild_get_bans(snowflake guild_id, command_completion_event_t callback);
+
+	/** Get single guild ban */
+	void guild_get_ban(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
 
 	/** Get a template */
 	void template_get(const std::string &code, command_completion_event_t callback);

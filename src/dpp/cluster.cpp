@@ -601,6 +601,26 @@ void cluster::role_edit(const class role &r, command_completion_event_t callback
 	});
 }
 
+void cluster::guild_get_bans(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/bans", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		ban_map bans;
+		for (auto & curr_ban : j) {
+			bans[SnowflakeNotNull(&curr_ban, "user_id")] = ban().fill_from_json(&curr_ban);
+		}
+		if (callback) {
+			callback(confirmation_callback_t("ban_map", bans, http));
+		}
+	});
+}
+
+void cluster::guild_get_ban(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/bans/" + std::to_string(user_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("ban", ban().fill_from_json(&j), http));
+		}
+	});
+}
+
 void cluster::guild_emojis_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
