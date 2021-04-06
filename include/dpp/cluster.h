@@ -378,6 +378,15 @@ public:
         /** Get guild vanity url, if enabled */
         void guild_get_vanity(snowflake guild_id, command_completion_event_t callback);
 
+	/** Create webhook */
+	void create_webhook(const class webhook &w, command_completion_event_t callback);
+
+	/** Get guild webhooks */
+	void get_guild_webhooks(snowflake guild_id, command_completion_event_t callback);
+
+	/** Get channel webhooks */
+	void get_channel_webhooks(snowflake channel_id, command_completion_event_t callback);
+
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 

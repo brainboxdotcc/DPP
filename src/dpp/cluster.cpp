@@ -894,6 +894,39 @@ void cluster::create_dm_channel(snowflake user_id, command_completion_event_t ca
 	});
 }
 
+void cluster::create_webhook(const class webhook &w, command_completion_event_t callback) {
+	this->post_rest("/api/channnels", std::to_string(w.channel_id) + "/webhooks", m_post, w.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::get_guild_webhooks(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			webhook_map webhooks;
+			for (auto & curr_webhook: j) {
+				webhooks[SnowflakeNotNull(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
+			}
+			callback(confirmation_callback_t("webhook_map", webhooks, http));
+		}
+	});
+}
+
+void cluster::get_channel_webhooks(snowflake channel_id, command_completion_event_t callback) {
+	this->post_rest("/api/channels", std::to_string(channel_id) + "/webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			webhook_map webhooks;
+			for (auto & curr_webhook: j) {
+				webhooks[SnowflakeNotNull(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
+			}
+			callback(confirmation_callback_t("webhook_map", webhooks, http));
+		}
+	});
+}
+
+
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {
 	this->dispatch.voice_state_update = _voice_state_update; 
 }
