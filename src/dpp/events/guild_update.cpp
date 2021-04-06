@@ -30,10 +30,11 @@ void guild_update::handle(class DiscordClient* client, json &j) {
 			}
 		}
 
-		dpp::guild_update_t gu;
-		gu.updated = g;
-		if (client->creator->dispatch.guild_update)
+		if (client->creator->dispatch.guild_update) {
+			dpp::guild_update_t gu;
+			gu.updated = g;
 			client->creator->dispatch.guild_update(gu);
+		}
 	}
 }
 

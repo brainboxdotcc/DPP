@@ -70,9 +70,10 @@ void guild_create::handle(class DiscordClient* client, json &j) {
 		client->add_chunk_queue(g->id);
 	}
 
-	dpp::guild_create_t gc;
-	gc.created = g;
-	if (client->creator->dispatch.guild_create)
+	if (client->creator->dispatch.guild_create) {
+		dpp::guild_create_t gc;
+		gc.created = g;
 		client->creator->dispatch.guild_create(gc);
+	}
 }
 

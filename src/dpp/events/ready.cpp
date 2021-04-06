@@ -15,11 +15,12 @@ using json = nlohmann::json;
 void ready::handle(class DiscordClient* client, json &j) {
 	client->logger->info("Shard {}/{} ready!", client->shard_id, client->max_shards);
 	client->sessionid = j["d"]["session_id"];
-	dpp::ready_t r;
-	r.session_id = client->sessionid;
-	r.shard_id = client->shard_id;
-	if (client->creator->dispatch.ready)
-		client->creator->dispatch.ready(r);
 
+	if (client->creator->dispatch.ready) {
+		dpp::ready_t r;
+		r.session_id = client->sessionid;
+		r.shard_id = client->shard_id;
+		client->creator->dispatch.ready(r);
+	}
 }
 
