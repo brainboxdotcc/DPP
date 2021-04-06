@@ -425,6 +425,14 @@ void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, sn
 	});
 }
 
+void cluster::guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
 
 
 void cluster::guild_get_members(snowflake guild_id, command_completion_event_t callback) {

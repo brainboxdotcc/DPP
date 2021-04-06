@@ -275,6 +275,9 @@ public:
 	/** Remove role from guild member */
 	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback);
 
+	/** Remove (kick) a guild member */
+	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
+
 	/** Get a template */
 	void template_get(const std::string &code, command_completion_event_t callback);
 
