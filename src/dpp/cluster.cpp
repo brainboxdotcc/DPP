@@ -388,11 +388,41 @@ void cluster::guild_add_member(const guild_member& gm, const std::string &access
 }
 
 void cluster::guild_edit_member(const guild_member& gm, command_completion_event_t callback) {
-        this->post_rest("/api/guilds", std::to_string(gm.guild_id) + "/members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [&gm, callback](json &j, const http_request_completion_t& http) {
-                if (callback) {
-                        callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(gm.guild_id), dpp::find_user(gm.user_id)), http));
-                }
-        });
+	this->post_rest("/api/guilds", std::to_string(gm.guild_id) + "/members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [&gm, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(gm.guild_id), dpp::find_user(gm.user_id)), http));
+		}
+	});
+}
+
+void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
+	std::string o;
+	if (nickname.empty()) {
+		o = "{\"nickname\": null}";
+	} else {
+		o = json({{"nickname", nickname}}).dump();
+	}
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members/@me/nick", m_patch, o, [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
 }
 
 

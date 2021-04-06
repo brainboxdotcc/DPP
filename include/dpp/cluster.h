@@ -266,6 +266,15 @@ public:
 	/** Edit the properties of an existing guild member. */
 	void guild_edit_member(const guild_member& gm, command_completion_event_t callback);
 
+	/** Change current user nickname */
+	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback);
+
+	/** Add role to guild member */
+	void guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback);
+
+	/** Remove role from guild member */
+	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback);
+
 	/** Get a template */
 	void template_get(const std::string &code, command_completion_event_t callback);
 
