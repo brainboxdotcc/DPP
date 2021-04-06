@@ -297,6 +297,7 @@ guild_widget::guild_widget() : enabled(false), channel_id(0)
 guild_widget& guild_widget::fill_from_json(nlohmann::json* j) {
 	enabled = BoolNotNull(j, "enabled");
 	channel_id = SnowflakeNotNull(j, "channel_id");
+	return *this;
 }
 
 std::string guild_widget::build_json() const {
