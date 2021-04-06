@@ -27,7 +27,7 @@ integration::~integration()
 {
 }
 
-integration& integration::fill_from_json(snowflake _guild_id, nlohmann::json* j)
+integration& integration::fill_from_json(nlohmann::json* j)
 {
 	std::map<std::string, integration_type> type_map = {
 		{ "", i_discord },

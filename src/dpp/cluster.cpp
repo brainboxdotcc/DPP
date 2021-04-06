@@ -294,6 +294,43 @@ void cluster::get_guild_invites(snowflake guild_id, command_completion_event_t c
 	});
 }
 
+void cluster::guild_get_integrations(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/integrations", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		integration_map integrations;
+		for (auto & curr_integration : j) {
+			integrations[SnowflakeNotNull(&curr_integration, "id")] = integration().fill_from_json(&curr_integration);
+		}
+		if (callback) {
+			callback(confirmation_callback_t("integration_map", integrations, http));
+		}
+	});
+}
+
+void cluster::guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/integrations/" + std::to_string(i.id), m_patch, i.build_json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/integrations/" + std::to_string(integration_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/integrations/" + std::to_string(integration_id), m_post, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+
 
 void cluster::channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(c.id) + "/invites", m_post, i.build_json(), [callback](json &j, const http_request_completion_t& http) {

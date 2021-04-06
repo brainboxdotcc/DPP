@@ -354,6 +354,18 @@ public:
 	/** Get guild invites */
 	void get_guild_invites(snowflake guild_id, command_completion_event_t callback);
 
+	/** Get guild itegrations */
+	void guild_get_integrations(snowflake guild_id, command_completion_event_t callback);
+
+	/** Modify guild integration */
+	void guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback); 
+
+	/** Delete guild integration */
+	void guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback);
+
+	/** Sync guild integration */
+	void guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback);
+
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 

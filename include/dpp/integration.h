@@ -60,13 +60,11 @@ public:
 	~integration();
 
 	/** Fill this integration from json.
-	 * @param guild_id the guild id to place in the json
 	 * @param j The json data
 	 */
-	integration& fill_from_json(snowflake guild_id, nlohmann::json* j);
+	integration& fill_from_json(nlohmann::json* j);
 
 	/** Build a json string from this object.
-	 * @param with_id true if the ID is to be included in the json text
 	 */
 	std::string build_json() const;
 
