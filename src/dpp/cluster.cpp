@@ -274,13 +274,26 @@ void cluster::channel_invites_get(const class channel &c, command_completion_eve
 	this->post_rest("/api/channels", std::to_string(c.id) + "/invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		invite_map invites;
 		for (auto & curr_invite : j) {
-			invites[SnowflakeNotNull(&curr_invite, "id")] = invite().fill_from_json(&curr_invite);
+			invites[StringNotNull(&curr_invite, "code")] = invite().fill_from_json(&curr_invite);
 		}
 		if (callback) {
 			callback(confirmation_callback_t("invite_map", invites, http));
 		}
 	});
 }
+
+void cluster::get_guild_invites(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		invite_map invites;
+		for (auto & curr_invite : j) {
+			invites[StringNotNull(&curr_invite, "code")] = invite().fill_from_json(&curr_invite);
+		}
+		if (callback) {
+			callback(confirmation_callback_t("invite_map", invites, http));
+		}
+	});
+}
+
 
 void cluster::channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(c.id) + "/invites", m_post, i.build_json(), [callback](json &j, const http_request_completion_t& http) {

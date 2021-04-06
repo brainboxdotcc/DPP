@@ -349,6 +349,9 @@ public:
 	/** Get guild voice regions */
 	void guild_get_voice_regions(snowflake guild_id, command_completion_event_t callback);
 
+	/** Get guild invites */
+	void get_guild_invites(snowflake guild_id, command_completion_event_t callback);
+
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 
@@ -361,6 +364,7 @@ public:
 
 	/** Delete a role */
 	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback);
+
 
 	/** Get a user by id */
 	void user_get(snowflake user_id, command_completion_event_t callback);
