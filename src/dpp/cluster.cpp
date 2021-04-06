@@ -800,7 +800,6 @@ void cluster::channels_get(snowflake guild_id, command_completion_event_t callba
 	});
 }
 
-
 void cluster::messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
 	std::string parameters;
 	if (around) {
@@ -840,10 +839,39 @@ void cluster::role_edit_position(const class role &r, command_completion_event_t
 
 void cluster::role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) 
-			callback(confirmation_callback_t("confirmation", confirmation(), http));{
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
+}
+
+void cluster::current_user_edit(const std::string &nickname, const std::string& image_blob, image_type type, command_completion_event_t callback) {
+	json j = json::parse("{\"nickname\": null}");
+	if (!nickname.empty()) {
+		j["nickname"] = nickname;
+	}
+	if (!image_blob.empty()) {
+		static std::map<image_type, std::string> mimetypes = {
+			{ i_gif, "image/gif" },
+			{ i_jpg, "image/jpeg" },
+			{ i_png, "image/png" }
+		};
+		if (image_blob.size() > MAX_EMOJI_SIZE) {
+			throw std::runtime_error("User icon file exceeds discord limit of 256 kilobytes");
+		}
+		j["avatar"] = "data:" + mimetypes[type] + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length());
+	}
+	this->post_rest("/api/users", "@me", m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::current_user_leave_guild(snowflake guild_id, command_completion_event_t callback) {
+	 this->post_rest("/api/users", "@me/guilds/" + std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		callback(confirmation_callback_t("confirmation", confirmation(), http));
+	 });
 }
 
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {

@@ -399,6 +399,12 @@ public:
 	/** Get current user guilds */
 	void current_user_get_guilds(command_completion_event_t callback);
 
+	/** Edit current user */
+	void current_user_edit(const std::string &nickname, const std::string& image_blob, image_type type, command_completion_event_t callback);
+
+	/** Leave a guild */
+	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback);
+
 	/** Get voice regions */
 	void get_voice_regions(command_completion_event_t callback);
 

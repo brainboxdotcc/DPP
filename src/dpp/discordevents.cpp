@@ -56,6 +56,34 @@ bool BoolNotNull(json* j, const char *keyname)
 	return (j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].get<bool>() == true);
 }
 
+std::string base64_encode(unsigned char const* buf, unsigned int buffer_length)
+{
+
+	static const char to_base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	size_t ret_size = buffer_length + 2;
+
+	ret_size = 4 * ret_size / 3;
+
+	std::string ret;
+	ret.reserve(ret_size);
+
+	for (unsigned int i=0; i<ret_size/4; ++i)
+	{
+		size_t index = i*3;
+		unsigned char b3[3];
+		b3[0] = buf[index+0];
+		b3[1] = buf[index+1];
+		b3[2] = buf[index+2];
+
+		ret.push_back(to_base64[ ((b3[0] & 0xfc) >> 2) ]);
+		ret.push_back(to_base64[ ((b3[0] & 0x03) << 4) + ((b3[1] & 0xf0) >> 4) ]);
+		ret.push_back(to_base64[ ((b3[1] & 0x0f) << 2) + ((b3[2] & 0xc0) >> 6) ]);
+		ret.push_back(to_base64[ ((b3[2] & 0x3f)) ]);
+	}
+
+	return ret;
+}
+
 time_t TimestampNotNull(json* j, const char* keyname)
 {
 	/* Parses discord ISO 8061 timestamps to time_t, accounting for local time adjustment.

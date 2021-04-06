@@ -45,4 +45,8 @@ bool BoolNotNull(nlohmann::json* j, const char *keyname);
  */
 time_t TimestampNotNull(nlohmann::json* j, const char *keyname);
 
-
+/** Base64 encode data.
+ * @param buf Raw buffer
+ * @param buffer_length Buffer length to encode
+ */
+std::string base64_encode(unsigned char const* buf, unsigned int buffer_length);
