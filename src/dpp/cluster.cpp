@@ -433,6 +433,29 @@ void cluster::guild_member_delete(snowflake guild_id, snowflake user_id, command
 	});
 }
 
+void cluster::guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback) {
+	json j;
+	if (delete_message_days > 7)
+		delete_message_days = 7;
+	if (!reason.empty())
+		j["reason"] = reason;
+	if (delete_message_days)
+		j["delete_message_days"] = delete_message_days;
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/bans/" + std::to_string(user_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/bans/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
 
 
 void cluster::guild_get_members(snowflake guild_id, command_completion_event_t callback) {

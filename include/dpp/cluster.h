@@ -37,7 +37,9 @@ typedef std::variant<
 		dtemplate,
 		dtemplate_map,
 		emoji,
-		emoji_map
+		emoji_map,
+		ban,
+		ban_map
 	> confirmable_t;
 
 struct confirmation_callback_t {
@@ -277,6 +279,13 @@ public:
 
 	/** Remove (kick) a guild member */
 	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
+
+	/** Add guild ban */
+	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback);
+
+	/** Delete guild ban */
+	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
+
 
 	/** Get a template */
 	void template_get(const std::string &code, command_completion_event_t callback);

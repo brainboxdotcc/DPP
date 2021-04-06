@@ -33,4 +33,5 @@ namespace dpp {
 #include <dpp/invite.h>
 #include <dpp/dtemplate.h>
 #include <dpp/emoji.h>
+#include <dpp/ban.h>
 #include <dpp/intents.h>
