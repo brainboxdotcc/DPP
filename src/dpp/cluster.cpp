@@ -874,6 +874,26 @@ void cluster::current_user_leave_guild(snowflake guild_id, command_completion_ev
 	 });
 }
 
+void cluster::current_user_get_dms(command_completion_event_t callback) {
+	this->post_rest("/api/users", "@me/channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			channel_map channels;
+			for (auto & curr_channel: j) {
+				channels[SnowflakeNotNull(&curr_channel, "id")] = channel().fill_from_json(&curr_channel);
+			}
+			callback(confirmation_callback_t("channel_map", channels, http));
+		}
+	});
+}
+
+void cluster::create_dm_channel(snowflake user_id, command_completion_event_t callback) {
+	this->post_rest("/api/users", "@me/channels", m_post, json({{"recipient_id", std::to_string(user_id)}}).dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
+		}
+	});
+}
+
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {
 	this->dispatch.voice_state_update = _voice_state_update; 
 }

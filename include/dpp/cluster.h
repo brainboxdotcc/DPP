@@ -402,6 +402,12 @@ public:
 	/** Edit current user */
 	void current_user_edit(const std::string &nickname, const std::string& image_blob, image_type type, command_completion_event_t callback);
 
+	/** Get current user DM channels */
+	void current_user_get_dms(command_completion_event_t callback);
+
+	/** Create DM channel */
+	void create_dm_channel(snowflake user_id, command_completion_event_t callback);
+
 	/** Leave a guild */
 	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback);
 
