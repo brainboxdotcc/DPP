@@ -387,6 +387,24 @@ public:
 	/** Get channel webhooks */
 	void get_channel_webhooks(snowflake channel_id, command_completion_event_t callback);
 
+	/** Get webhook */
+	void get_webhook(snowflake webhook_id, command_completion_event_t callback);
+
+	/** Get webhook using token */
+	void get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback);
+
+	/** Edit webhook */
+	void edit_webhook(const class webhook& wh, command_completion_event_t callback);
+
+	/** Edit webhook with token (token is encapsulated in the webhook object) */
+	void edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback);
+
+	/** Delete webhook */
+	void delete_webhook(snowflake webhook_id, command_completion_event_t callback);
+
+	/** Delete webhook with token */
+	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback);
+
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 

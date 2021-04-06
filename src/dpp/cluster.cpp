@@ -926,6 +926,58 @@ void cluster::get_channel_webhooks(snowflake channel_id, command_completion_even
 	});
 }
 
+void cluster::get_webhook(snowflake webhook_id, command_completion_event_t callback) {
+	this->post_rest("/api/webhooks", std::to_string(webhook_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
+	this->post_rest("/api/webhooks", std::to_string(webhook_id) + "/" + dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::edit_webhook(const class webhook& wh, command_completion_event_t callback) {
+	this->post_rest("/api/webhooks", std::to_string(wh.id), m_patch, wh.build_json(true), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback) {
+	json jwh = json::parse(wh.build_json(true));
+	if (jwh.find("channel_id") != jwh.end()) {
+		jwh.erase(jwh.find("channel_id"));
+	}
+	this->post_rest("/api/webhooks", std::to_string(wh.id)+ "/" + dpp::url_encode(wh.token), m_patch, jwh.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::delete_webhook(snowflake webhook_id, command_completion_event_t callback) {
+	this->post_rest("/api/webhooks", std::to_string(webhook_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
+	this->post_rest("/api/webhooks", std::to_string(webhook_id) + "/" + dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
 
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {
 	this->dispatch.voice_state_update = _voice_state_update; 
