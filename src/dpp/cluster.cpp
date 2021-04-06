@@ -681,6 +681,26 @@ void cluster::guild_begin_prune(snowflake guild_id, const class prune& pruneinfo
 	});
 }
 
+void cluster::guild_get_voice_regions(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/regions", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
+		voiceregion_map voiceregions;
+		for (auto & curr_region : j) {
+			voiceregions[StringNotNull(&curr_region, "id")] = voiceregion().fill_from_json(&j);
+		}
+		callback(confirmation_callback_t("voiceregion_map", voiceregions, http));
+	});
+}
+
+void cluster::get_voice_regions(command_completion_event_t callback) {
+	this->post_rest("/voice/regions", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		voiceregion_map voiceregions;
+		for (auto & curr_region : j) {
+			voiceregions[StringNotNull(&curr_region, "id")] = voiceregion().fill_from_json(&j);
+		}
+		callback(confirmation_callback_t("voiceregion_map", voiceregions, http));
+	});
+}
+
 
 void cluster::roles_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {

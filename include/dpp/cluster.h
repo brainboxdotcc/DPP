@@ -40,6 +40,8 @@ typedef std::variant<
 		emoji_map,
 		ban,
 		ban_map,
+		voiceregion,
+		voiceregion_map,
 		prune
 	> confirmable_t;
 
@@ -344,6 +346,9 @@ public:
 	/** Begin guild prune */
 	void guild_begin_prune(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback);
 
+	/** Get guild voice regions */
+	void guild_get_voice_regions(snowflake guild_id, command_completion_event_t callback);
+
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 
@@ -365,6 +370,9 @@ public:
 
 	/** Get current user guilds */
 	void current_user_get_guilds(command_completion_event_t callback);
+
+	/** Get voice regions */
+	void get_voice_regions(command_completion_event_t callback);
 
 
 };
