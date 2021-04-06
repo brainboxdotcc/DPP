@@ -24,6 +24,13 @@ namespace dpp {
 		~managed() = default;
 	};
 
+	enum image_type {
+		i_png,
+		i_jpg,
+		i_gif
+	};
+
+
 };
 
 #include <dpp/role.h>
@@ -37,4 +44,5 @@ namespace dpp {
 #include <dpp/prune.h>
 #include <dpp/voiceregion.h>
 #include <dpp/integration.h>
+#include <dpp/webhook.h>
 #include <dpp/intents.h>

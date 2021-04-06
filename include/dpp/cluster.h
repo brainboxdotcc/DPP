@@ -44,6 +44,8 @@ typedef std::variant<
 		voiceregion_map,
 		integration,
 		integration_map,
+		webhook,
+		webhook_map,
 		prune,
 		guild_widget
 	> confirmable_t;

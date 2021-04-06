@@ -13,12 +13,6 @@ enum emoji_flags {
 	e_available =      0b00001000,
 };
 
-enum image_type {
-	i_png,
-	i_jpg,
-	i_gif
-};
-
 class emoji : public managed {
 public:
 	std::string name;
