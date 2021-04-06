@@ -230,6 +230,16 @@ public:
 	 * @param u The user to associate the member with
 	 */
 	guild_member& fill_from_json(nlohmann::json* j, const class guild* g, const class user* u);
+
+	/** Build json string for the member object */
+	std::string build_json() const;
+
+	/** Returns true if the user is deafened */
+	bool is_deaf() const;
+
+	/** Returns true if the user is muted */
+	bool is_muted() const;
+
 };
 
 /** A container of guild members */

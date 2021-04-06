@@ -254,6 +254,15 @@ public:
 	/** Get a guild preview. Returns a guild object but only a subset of the fields will be populated. */
 	void guild_get_preview(snowflake g, command_completion_event_t callback);
 
+	/** Get a guild member */
+	void guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
+
+	/** Get all guild members */
+	void guild_get_members(snowflake guild_id, command_completion_event_t callback);
+
+	/** Add guild member. Needs a specific oauth2 scope, from which you get the access_token. */
+	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback);
+
 	/** Get a template */
 	void template_get(const std::string &code, command_completion_event_t callback);
 

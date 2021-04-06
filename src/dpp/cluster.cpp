@@ -5,6 +5,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/message.h>
 #include <spdlog/spdlog.h>
+#include <dpp/cache.h>
 #include <chrono>
 
 namespace dpp {
@@ -361,11 +362,46 @@ void cluster::guild_get(snowflake guild_id, command_completion_event_t callback)
 }
 
 void cluster::guild_get_preview(snowflake guild_id, command_completion_event_t callback) {
-        this->post_rest("/api/guilds", std::to_string(guild_id) + "/preview", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-                if (callback) {
-                        callback(confirmation_callback_t("guild", guild().fill_from_json(&j), http));
-                }
-        });
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/preview", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("guild", guild().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/member/" + std::to_string(user_id), m_get, "", [callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(guild_id), dpp::find_user(user_id)), http));
+		}
+	});
+}
+
+void cluster::guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback) {
+	json j = json::parse(gm.build_json());
+	j["access_token"] = access_token;
+	this->post_rest("/api/guilds", std::to_string(gm.guild_id) + "/members/" + std::to_string(gm.user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::guild_get_members(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members", m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
+		guild_member_map guild_members;
+		for (auto & curr_member : j) {
+			guild_member gm;
+			snowflake user_id = 0;
+			if (curr_member.find("user") != curr_member.end()) {
+				user_id = SnowflakeNotNull(&(curr_member["user"]), "id");
+			}
+			guild_members[SnowflakeNotNull(&curr_member, "id")] = guild_member().fill_from_json(&curr_member, dpp::find_guild(guild_id), dpp::find_user(user_id));
+		}
+		if (callback) {
+				callback(confirmation_callback_t("guild_member_map", guild_members, http));
+		}
+	});
 }
 
 
@@ -389,7 +425,7 @@ void cluster::guild_create_from_template(const std::string &code, const std::str
 
 void cluster::guild_templates_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-	dtemplate_map dtemplates;
+		dtemplate_map dtemplates;
 		for (auto & curr_dtemplate : j) {
 			dtemplates[SnowflakeNotNull(&curr_dtemplate, "id")] = dtemplate().fill_from_json(&curr_dtemplate);
 		}
@@ -523,19 +559,19 @@ void cluster::guild_emoji_create(snowflake guild_id, const class emoji& newemoji
 }
 
 void cluster::guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback) {
-        this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis/" + std::to_string(newemoji.id), m_patch, newemoji.build_json(), [guild_id, callback](json &j, const http_request_completion_t& http) {
-                if (callback) {
-                        callback(confirmation_callback_t("emoji", emoji().fill_from_json(&j), http));
-                }
-        });
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis/" + std::to_string(newemoji.id), m_patch, newemoji.build_json(), [guild_id, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("emoji", emoji().fill_from_json(&j), http));
+		}
+	});
 }
 
 void cluster::guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback) {
-        this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis/" + std::to_string(emoji_id), m_delete, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
-                if (callback) {
-                        callback(confirmation_callback_t("confirmation", confirmation(), http));
-                }
-        });
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis/" + std::to_string(emoji_id), m_delete, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
 }
 
 void cluster::roles_get(snowflake guild_id, command_completion_event_t callback) {

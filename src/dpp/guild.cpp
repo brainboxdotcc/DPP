@@ -98,6 +98,33 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, co
 	return *this;
 }
 
+std::string guild_member::build_json() const {
+	json j;
+	if (!this->nickname.empty())
+		j["nick"] = this->nickname;
+	if (this->roles.size()) {
+		j["roles"] = {};
+		for (auto & role : roles) {
+			j["roles"].push_back(std::to_string(role));
+		}
+	}
+	if (is_muted()) {
+		j["muted"] = true;
+	}
+	if (is_deaf()) {
+		j["deaf"] = true;
+	}
+	return j.dump();
+}
+
+bool guild_member::is_deaf() const {
+	return flags & dpp::gm_deaf;
+}
+
+bool guild_member::is_muted() const {
+	return flags & dpp::gm_mute;
+}
+
 bool guild::is_large() const {
 	return this->flags & g_large;
 }
