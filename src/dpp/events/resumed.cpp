@@ -14,7 +14,8 @@ using json = nlohmann::json;
 
 void resumed::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	client->logger->debug("Successfully resumed session id {}", client->sessionid);
-	if (client->creator->dispatch.resumed) {
+
+  if (client->creator->dispatch.resumed) {
 		dpp::resumed_t r(raw);
 		r.session_id = client->sessionid;
 		r.shard_id = client->shard_id;
