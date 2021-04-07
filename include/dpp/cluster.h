@@ -173,37 +173,37 @@ public:
 	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
 
 	/** Send a message to a channel. The callback function is called when the message has been sent */
-	void message_create(const struct message &m, command_completion_event_t callback);
+	void message_create(const struct message &m, command_completion_event_t callback = {});
 
 	/** Crosspost a message. The callback function is called when the message has been sent */
-	void message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
+	void message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
 
 	/** Edit a message on a channel. The callback function is called when the message has been edited */
-	void message_edit(const struct message &m, command_completion_event_t callback);
+	void message_edit(const struct message &m, command_completion_event_t callback = {});
 
 	/** Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character. */
-	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback);
+	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
 
 	/** Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character. */
-	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback);
+	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
 
 	/** Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character */
-	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback);
+	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback = {});
 
 	/** Get reactions on a message for a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character */
 	void message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
 
 	/** Delete all reactions on a message */
-	void message_delete_all_reactions(const struct message &m, command_completion_event_t callback);
+	void message_delete_all_reactions(const struct message &m, command_completion_event_t callback = {});
 
 	/** Delete all reactions on a message using a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character */
-	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback);
+	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
 
 	/** Delete a message from a channel. The callback function is called when the message has been edited */
-	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
+	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
 
 	/** Bulk delete messages from a channel. The callback function is called when the message has been edited */
-	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback);
+	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = {});
 
 	/** Get a channel */
 	void channel_get(snowflake c, command_completion_event_t callback);
@@ -212,52 +212,52 @@ public:
 	void channels_get(snowflake guild_id, command_completion_event_t callback);
 
 	/** Create a channel */
-	void channel_create(const class channel &c, command_completion_event_t callback);
+	void channel_create(const class channel &c, command_completion_event_t callback = {});
 
 	/** Edit a channel. */
-	void channel_edit(const class channel &c, command_completion_event_t callback);
-	void channel_edit_position(const class channel &c, command_completion_event_t callback);
+	void channel_edit(const class channel &c, command_completion_event_t callback = {});
+	void channel_edit_position(const class channel &c, command_completion_event_t callback = {});
 
 	/** Edit a channel permission */
-	void channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback);
+	void channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback = {});
 
 	/** Delete a channel */
-	void channel_delete(snowflake channel_id, command_completion_event_t callback);
+	void channel_delete(snowflake channel_id, command_completion_event_t callback = {});
 
 	/** Get details about an invite */
 	void invite_get(const std::string &invite, command_completion_event_t callback);
 
 	/** Delete an invite */
-	void invite_delete(const std::string &invite, command_completion_event_t callback);
+	void invite_delete(const std::string &invite, command_completion_event_t callback = {});
 
 	void channel_invites_get(const class channel &c, command_completion_event_t callback);
 
 	/** Create invite for a channel */
-	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback);
+	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback = {});
 
 	/** Get a channel's pins */
 	void pins_get(snowflake channel_id, command_completion_event_t callback);
 
 	/** Adds a recipient to a Group DM using their access token */
-	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback);
+	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback = {});
 
 	/** Removes a recipient from a Group DM */
-	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback);
+	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback = {});
 
 	/** Remove a permission from a channel */
-	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback);
+	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback = {});
 
 	/** Follow a news channel */
-	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback);
+	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback = {});
 
 	/** Trigger channel typing indicator */
-	void channel_typing(const class channel &c, command_completion_event_t callback);
+	void channel_typing(const class channel &c, command_completion_event_t callback = {});
 
 	/** Pin a message */
-	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback);
+	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
 
 	/** Unpin a message */
-	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback);
+	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
 
 	/** Get a guild */
 	void guild_get(snowflake g, command_completion_event_t callback);
@@ -272,28 +272,28 @@ public:
 	void guild_get_members(snowflake guild_id, command_completion_event_t callback);
 
 	/** Add guild member. Needs a specific oauth2 scope, from which you get the access_token. */
-	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback);
+	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback = {});
 
 	/** Edit the properties of an existing guild member. */
-	void guild_edit_member(const guild_member& gm, command_completion_event_t callback);
+	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = {});
 
 	/** Change current user nickname */
-	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback);
+	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
 
 	/** Add role to guild member */
-	void guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback);
+	void guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
 
 	/** Remove role from guild member */
-	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback);
+	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
 
 	/** Remove (kick) a guild member */
-	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
+	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
 
 	/** Add guild ban */
-	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback);
+	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback = {});
 
 	/** Delete guild ban */
-	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
+	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
 
 	/** Get guild ban list */
 	void guild_get_bans(snowflake guild_id, command_completion_event_t callback);
@@ -305,7 +305,7 @@ public:
 	void template_get(const std::string &code, command_completion_event_t callback);
 
 	/** Create a new guild based on a template. */
-	void guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback);
+	void guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback = {});
 
 	/** Get guild templates */
 	void guild_templates_get(snowflake guild_id, command_completion_event_t callback);
@@ -314,22 +314,22 @@ public:
 	void guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback);
 
 	/** Syncs the template to the guild's current state. */
-	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback);
+	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
 
 	/** Modifies the template's metadata. */
-	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback);
+	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback = {});
 
 	/** Deletes the template */
-	void guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback);
+	void guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
 
 	/** Create a guild */
-	void guild_create(const class guild &g, command_completion_event_t callback);
+	void guild_create(const class guild &g, command_completion_event_t callback = {});
 
 	/** Edit a guild */
-	void guild_edit(const class guild &g, command_completion_event_t callback);
+	void guild_edit(const class guild &g, command_completion_event_t callback = {});
 
 	/** Delete a guild */
-	void guild_delete(snowflake guild_id, command_completion_event_t callback);
+	void guild_delete(snowflake guild_id, command_completion_event_t callback = {});
 
 	/** Get all emojis for a guild */
 	void guild_emojis_get(snowflake guild_id, command_completion_event_t callback);
@@ -338,19 +338,19 @@ public:
 	void guild_emoji_get(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback);
 
 	/** Create single emoji. You must ensure that the emoji passed contained image data using the emoji::load_image() method. */
-	void guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback);
+	void guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
 
 	/** Edit a single emoji. You must ensure that the emoji passed contained image data using the emoji::load_image() method. */
-	void guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback);
+	void guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
 
 	/** Delete a guild emoji */
-	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback);
+	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = {});
 
 	/** Get prune counts */
 	void guild_get_prune_counts(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback);
 
 	/** Begin guild prune */
-	void guild_begin_prune(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback);
+	void guild_begin_prune(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback = {});
 
 	/** Get guild voice regions */
 	void guild_get_voice_regions(snowflake guild_id, command_completion_event_t callback);
@@ -362,25 +362,25 @@ public:
 	void guild_get_integrations(snowflake guild_id, command_completion_event_t callback);
 
 	/** Modify guild integration */
-	void guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback); 
+	void guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback = {}); 
 
 	/** Delete guild integration */
-	void guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback);
+	void guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
 
 	/** Sync guild integration */
-	void guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback);
+	void guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
 
 	/** Get guild widget */
 	void guild_get_widget(snowflake guild_id, command_completion_event_t callback);
 
 	/** Edit guild widget */
-	void guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback);
+	void guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback = {});
 
         /** Get guild vanity url, if enabled */
         void guild_get_vanity(snowflake guild_id, command_completion_event_t callback);
 
 	/** Create webhook */
-	void create_webhook(const class webhook &w, command_completion_event_t callback);
+	void create_webhook(const class webhook &w, command_completion_event_t callback = {});
 
 	/** Get guild webhooks */
 	void get_guild_webhooks(snowflake guild_id, command_completion_event_t callback);
@@ -395,38 +395,38 @@ public:
 	void get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback);
 
 	/** Edit webhook */
-	void edit_webhook(const class webhook& wh, command_completion_event_t callback);
+	void edit_webhook(const class webhook& wh, command_completion_event_t callback = {});
 
 	/** Edit webhook with token (token is encapsulated in the webhook object) */
-	void edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback);
+	void edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback = {});
 
 	/** Delete webhook */
-	void delete_webhook(snowflake webhook_id, command_completion_event_t callback);
+	void delete_webhook(snowflake webhook_id, command_completion_event_t callback = {});
 
 	/** Delete webhook with token */
-	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback);
+	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback = {});
 
 	/** Execute webhook */
-	void execute_webhook(const class webhook &wh, const class message &m, command_completion_event_t callback);
+	void execute_webhook(const class webhook &wh, const class message &m, command_completion_event_t callback = {});
 
 	/** Edit webhook message */
-	void edit_webhook_message(const class webhook &wh, const class message &m, command_completion_event_t callback);
+	void edit_webhook_message(const class webhook &wh, const class message &m, command_completion_event_t callback = {});
 
 	/** Delete webhook message */
-	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback);
+	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = {});
 
 	/** Get a role */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 
 	/** Create a role */
-	void role_create(const class role &r, command_completion_event_t callback);
+	void role_create(const class role &r, command_completion_event_t callback = {});
 
 	/** Edit a role */
-	void role_edit(const class role &r, command_completion_event_t callback);
-	void role_edit_position(const class role &r, command_completion_event_t callback);
+	void role_edit(const class role &r, command_completion_event_t callback = {});
+	void role_edit_position(const class role &r, command_completion_event_t callback = {});
 
 	/** Delete a role */
-	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback);
+	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback = {});
 
 
 	/** Get a user by id */
@@ -439,16 +439,16 @@ public:
 	void current_user_get_guilds(command_completion_event_t callback);
 
 	/** Edit current user */
-	void current_user_edit(const std::string &nickname, const std::string& image_blob, image_type type, command_completion_event_t callback);
+	void current_user_edit(const std::string &nickname, const std::string& image_blob, image_type type, command_completion_event_t callback = {});
 
 	/** Get current user DM channels */
 	void current_user_get_dms(command_completion_event_t callback);
 
 	/** Create DM channel */
-	void create_dm_channel(snowflake user_id, command_completion_event_t callback);
+	void create_dm_channel(snowflake user_id, command_completion_event_t callback = {});
 
 	/** Leave a guild */
-	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback);
+	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = {});
 
 	/** Get voice regions */
 	void get_voice_regions(command_completion_event_t callback);
