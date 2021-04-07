@@ -87,3 +87,21 @@ endforeach(fullmodname)
 target_compile_features(dpp PRIVATE cxx_std_17)
 target_link_libraries(test dpp fmt spdlog)
 
+# Installation
+
+include(GNUInstallDirs)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libdpp.so DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(TARGETS fmt
+ ARCHIVE DESTINATION lib
+ LIBRARY DESTINATION lib
+ RUNTIME DESTINATION bin
+ COMPONENT fmt
+)
+install(TARGETS spdlog
+ ARCHIVE DESTINATION lib
+ LIBRARY DESTINATION lib
+ RUNTIME DESTINATION bin
+ COMPONENT spdlog
+)
+
