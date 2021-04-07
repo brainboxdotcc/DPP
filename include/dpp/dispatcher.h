@@ -149,6 +149,7 @@ struct invite_create_t {
 struct message_update_t {
 };
 
+/* User update */
 struct user_update_t {
 	user* updated;
 };
