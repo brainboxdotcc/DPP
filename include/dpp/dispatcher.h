@@ -35,15 +35,18 @@ struct ready_t {
 	uint32_t shard_id;
 };
 
+/* Message Deleted */
 struct message_delete_t {
+	message* deleted;
 };
 
 struct application_command_delete_t {
 };
 
+/* Guild member remove */
 struct guild_member_remove_t {
 	guild* removing_guild;
-	guild_member* removed;
+	user* removed;
 };
 
 struct application_command_create_t {
@@ -116,6 +119,7 @@ struct presence_update_t {
 struct webhooks_update_t {
 };
 
+/* Guild member add */
 struct guild_member_add_t {
 	guild* adding_guild;
 	guild_member* added;
