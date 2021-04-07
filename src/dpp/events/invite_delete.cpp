@@ -11,6 +11,6 @@
 
 using json = nlohmann::json;
 
-void invite_delete::handle(class DiscordClient* client, json &j) {
+void invite_delete::handle(class DiscordClient* client, json &j, const std::string &raw) {
 }
 

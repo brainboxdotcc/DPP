@@ -11,6 +11,15 @@
 
 using json = nlohmann::json;
 
-void message_update::handle(class DiscordClient* client, json &j) {
+void message_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
+	if (client->creator->dispatch.message_update) {
+		json d = j["d"];
+		dpp::message_update_t msg(raw);
+		dpp::message m;
+		m.fill_from_json(&d);
+	      	msg.updated = &m;
+		client->creator->dispatch.message_update(msg);
+	}
+
 }
 

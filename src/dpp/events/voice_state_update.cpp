@@ -11,6 +11,6 @@
 
 using json = nlohmann::json;
 
-void voice_state_update::handle(class DiscordClient* client, json &j) {
+void voice_state_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
 }
 

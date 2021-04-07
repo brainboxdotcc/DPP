@@ -12,7 +12,7 @@
 
 using json = nlohmann::json;
 
-void guild_delete::handle(class DiscordClient* client, json &j) {
+void guild_delete::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "id"));
 	if (g) {
@@ -23,7 +23,7 @@ void guild_delete::handle(class DiscordClient* client, json &j) {
 		}
 
 		if (client->creator->dispatch.guild_delete) {
-			dpp::guild_delete_t gd;
+			dpp::guild_delete_t gd(raw);
 			gd.deleted = g;
 			client->creator->dispatch.guild_delete(gd);
 		}

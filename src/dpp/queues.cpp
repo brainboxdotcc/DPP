@@ -28,7 +28,7 @@
 
 namespace dpp {
 
-http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method) : endpoint(_endpoint), parameters(_parameters), complete_handler(completion), postdata(_postdata), method(_method), completed(false)
+http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &filename, const std::string &filecontent) : endpoint(_endpoint), parameters(_parameters), complete_handler(completion), postdata(_postdata), method(_method), completed(false), file_name(filename), file_content(filecontent)
 {
 }
 
@@ -104,10 +104,22 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		break;
 		case m_post: {
 			/* POST supports post data body */
-			if (auto res = cli.Post(_url.c_str(), postdata.c_str(), "application/json")) {
-				populate_result(rv, res);
+			if (!file_name.empty() && !file_content.empty()) {
+				httplib::MultipartFormDataItems items = {
+					{ "payload_json", postdata, "", "application/json" },
+					{ "file", file_content, file_name, "application/octet-stream" }
+				};
+				if (auto res = cli.Post(_url.c_str(), items)) {
+					populate_result(rv, res);
+				} else {
+					rv.error = (http_error)res.error();
+				}
 			} else {
-				rv.error = (http_error)res.error();
+				if (auto res = cli.Post(_url.c_str(), postdata.c_str(), "application/json")) {
+					populate_result(rv, res);
+				} else {
+					rv.error = (http_error)res.error();
+				}
 			}
 		}
 		break;

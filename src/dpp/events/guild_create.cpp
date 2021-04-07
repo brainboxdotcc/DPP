@@ -12,7 +12,7 @@
 
 using json = nlohmann::json;
 
-void guild_create::handle(class DiscordClient* client, json &j) {
+void guild_create::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "id"));
 	if (!g) {
@@ -71,7 +71,7 @@ void guild_create::handle(class DiscordClient* client, json &j) {
 	}
 
 	if (client->creator->dispatch.guild_create) {
-		dpp::guild_create_t gc;
+		dpp::guild_create_t gc(raw);
 		gc.created = g;
 		client->creator->dispatch.guild_create(gc);
 	}

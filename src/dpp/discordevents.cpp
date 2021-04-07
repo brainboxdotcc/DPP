@@ -125,6 +125,7 @@ std::map<std::string, event*> events = {
 	{ "MESSAGE_REACTION_REMOVE_EMOJI", new message_reaction_remove_emoji() },
 	{ "CHANNEL_PINS_UPDATE", new channel_pins_update() },
 	{ "GUILD_BAN_ADD", new guild_ban_add() },
+	{ "GUILD_BAN_REMOVE", new guild_ban_remove() },
 	{ "GUILD_EMOJIS_UPDATE", new guild_emojis_update() },
 	{ "GUILD_INTEGRATIONS_UPDATE", new guild_integrations_update() },
 	{ "INTEGRATION_CREATE", new integration_create() },
@@ -147,11 +148,11 @@ std::map<std::string, event*> events = {
 	{ "INTERACTION_CREATE", new interaction_create() }
 };
 
-void DiscordClient::HandleEvent(const std::string &event, json &j)
+void DiscordClient::HandleEvent(const std::string &event, json &j, const std::string &raw)
 {
 	auto ev_iter = events.find(event);
 	if (ev_iter != events.end()) {
-		ev_iter->second->handle(this, j);
+		ev_iter->second->handle(this, j, raw);
 	} else {
 		logger->debug("Unhandled event: {}, {}", event, j.dump());
 	}

@@ -12,8 +12,9 @@
 
 using json = nlohmann::json;
 
-void guild_members_chunk::handle(class DiscordClient* client, json &j) {
+void guild_members_chunk::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json &d = j["d"];
+	dpp::guild_member_map um;
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 	if (g) {
 		/* Store guild members */
@@ -28,6 +29,13 @@ void guild_members_chunk::handle(class DiscordClient* client, json &j) {
 			dpp::guild_member* gm = new dpp::guild_member();
 			gm->fill_from_json(&userrec, g, u);
 			g->members[u->id] = gm;
+			um[u->id] = *gm;
+		}
+		if (client->creator->dispatch.guild_members_chunk) {
+			dpp::guild_members_chunk_t gmc(raw);
+			gmc.adding = g;
+			gmc.members = &um;
+			client->creator->dispatch.guild_members_chunk(gmc);
 		}
 	}
 }

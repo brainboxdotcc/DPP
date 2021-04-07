@@ -12,7 +12,7 @@
 
 using json = nlohmann::json;
 
-void channel_delete::handle(class DiscordClient* client, json &j) {
+void channel_delete::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	dpp::channel* c = dpp::find_channel(SnowflakeNotNull(&d, "id"));
 	if (c) {
@@ -24,10 +24,11 @@ void channel_delete::handle(class DiscordClient* client, json &j) {
 			}
 
 			if (client->creator->dispatch.channel_delete) {
-				dpp::channel_delete_t cd;
-				cd.deleted = c;
-				cd.deleting_guild = g;
+			  dpp::channel_delete_t cd(raw);
+			  cd.deleted = c;
+			  cd.deleting_guild = g;
 				client->creator->dispatch.channel_delete(cd);
+      }
 			}
 		}
 		dpp::get_channel_cache()->remove(c);
