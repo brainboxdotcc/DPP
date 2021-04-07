@@ -20,13 +20,13 @@ This project is in alpha stages of development.
 * [x] Manual Sharding (user specifies number of shards)
 * [x] Ability to receive raw json strings to event handlers
 * [x] File uploading
+* [x] Automatic sharding (library determines correct number of shards)
 
 ### To do:
 
 * [ ] Add the rest of the discord events
 * [ ] Add the REST of the HTTP calls (pun intended)
 * [ ] Cluster management
-* [ ] Automatic sharding (library determines correct number of shards)
 
 Want to help? Drop me a line or send me a PR. I'll be choosy about what PRs i accept whilst the library is in such a heavy state of development.
 
@@ -70,4 +70,12 @@ run `./test` for unit test cases.
 
 ## 3. Install to /usr/local/include and /usr/local/lib
 
-`make install` coming soon!
+`make install`
+
+## 4. Installation to a different directory
+
+If you want to install the library, its dependendancies and header files to a different directory, specify this directory when running `cmake`:
+
+`cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install`
+
+Then once the build is complete, run `make install` to install to the location you specified.
