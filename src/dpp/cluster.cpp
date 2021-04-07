@@ -43,7 +43,7 @@ void cluster::start() {
 	}
 }
 
-void cluster::post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback) {
+void cluster::post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent) {
 	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
 	rest->post_request(new http_request(endpoint, parameters, [callback](const http_request_completion_t& rv) {
 		json j;
@@ -53,7 +53,7 @@ void cluster::post_rest(const std::string &endpoint, const std::string &paramete
 		if (callback) {
 			callback(j, rv);
 		}
-	}, postdata, method));
+	}, postdata, method, filename, filecontent));
 }
 
 void cluster::message_create(const message &m, command_completion_event_t callback) {
@@ -61,7 +61,7 @@ void cluster::message_create(const message &m, command_completion_event_t callba
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
-	});
+	}, m.filename, m.filecontent);
 }
 
 void cluster::message_edit(const message &m, command_completion_event_t callback) {

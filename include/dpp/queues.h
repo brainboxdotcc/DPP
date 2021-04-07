@@ -92,6 +92,10 @@ public:
 	std::string postdata;
 	/** HTTP method for request */
 	http_method method;
+	/** Upload file name (server side) */
+	std::string file_name;
+	/** Upload file contents (binary) */
+	std::string file_content;
 
 	/** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _endpoint The API endpoint, e.g. /api/guilds
@@ -100,7 +104,7 @@ public:
 	 * @param _postdata Data to send in POST and PUT requests
 	 * @param method The HTTP method to use from dpp::http_method
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get);
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &filename = "", const std::string &filecontent = "");
 
 	/** Destructor */
 	~http_request();

@@ -164,7 +164,7 @@ public:
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
 
 	/** Post a REST request. Where possible use a helper method instead like message_create */
-	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback);
+	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
 
 	/** Get a message */
 	void message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback);

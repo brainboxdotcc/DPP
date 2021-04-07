@@ -56,6 +56,11 @@ int main(int argc, char const *argv[])
 			dpp::message reply;
 			reply.channel_id = event.msg->channel_id;
 			reply.content = "Do your own test lazybones";
+
+			/* Upload a test file along with the message */
+			reply.filename = "test.txt";
+			reply.filecontent = "Nothing to see here, move along.";
+
 			/* Make a nice pretty embed */
 			reply.embeds.push_back(dpp::embed().
 					set_title("This is a test").
