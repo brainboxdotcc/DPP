@@ -158,6 +158,7 @@ public:
 	void on_user_update (std::function<void(const user_update_t& _event)> _user_update);
 	void on_message_create (std::function<void(const message_create_t& _event)> _message_create);
 	void on_guild_ban_add (std::function<void(const guild_ban_add_t& _event)> _guild_ban_add);
+	void on_guild_ban_remove (std::function<void(const guild_ban_remove_t& _event)> _guild_ban_remove);
 	void on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create);
 	void on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update);
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);

@@ -69,6 +69,8 @@ struct message_reaction_add_t {
 };
 
 struct guild_members_chunk_t {
+	guild* adding;
+	guild_member_map* members;
 };
 
 struct message_reaction_remove_t {
@@ -101,7 +103,11 @@ struct guild_role_delete_t {
 	role* deleted;
 };
 
+/* Channel pins update */
 struct channel_pins_update_t {
+	guild* pin_guild;
+	channel* pin_channel;
+	time_t timestamp;
 };
 
 struct message_reaction_remove_all_t {
@@ -128,6 +134,7 @@ struct guild_member_add_t {
 struct invite_delete_t {
 };
 
+/* Guild update */
 struct guild_update_t {
 	guild* updated;
 };
@@ -135,6 +142,7 @@ struct guild_update_t {
 struct guild_integrations_update_t {
 };
 
+/* Guild member update */
 struct guild_member_update_t {
 	guild* updating_guild;
 	guild_member* updated;
@@ -163,6 +171,12 @@ struct message_create_t {
 
 struct guild_ban_add_t {
 	guild* banning_guild;
+	snowflake user_id;
+};
+
+struct guild_ban_remove_t {
+	guild* unbanning_guild;
+	snowflake user_id;
 };
 
 struct integration_create_t {
@@ -218,6 +232,7 @@ public:
 	std::function<void(const user_update_t& event)> user_update;
 	std::function<void(const message_create_t& event)> message_create;
 	std::function<void(const guild_ban_add_t& event)> guild_ban_add;
+	std::function<void(const guild_ban_remove_t& event)> guild_ban_remove;
 	std::function<void(const integration_create_t& event)> integration_create;
 	std::function<void(const integration_update_t& event)> integration_update;
 	std::function<void(const integration_delete_t& event)> integration_delete;

@@ -125,6 +125,7 @@ std::map<std::string, event*> events = {
 	{ "MESSAGE_REACTION_REMOVE_EMOJI", new message_reaction_remove_emoji() },
 	{ "CHANNEL_PINS_UPDATE", new channel_pins_update() },
 	{ "GUILD_BAN_ADD", new guild_ban_add() },
+	{ "GUILD_BAN_REMOVE", new guild_ban_remove() },
 	{ "GUILD_EMOJIS_UPDATE", new guild_emojis_update() },
 	{ "GUILD_INTEGRATIONS_UPDATE", new guild_integrations_update() },
 	{ "INTEGRATION_CREATE", new integration_create() },
