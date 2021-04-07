@@ -55,27 +55,4 @@ The library may work fine in other operating systems too, but with no access to 
 
 # Linux Setup
 
-## 1. Build Source Code
-
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
-    
-Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
-
-## 2. Run test cases
-
-run `./test` for unit test cases.
-
-## 3. Install to /usr/local/include and /usr/local/lib
-
-`make install`
-
-## 4. Installation to a different directory
-
-If you want to install the library, its dependendancies and header files to a different directory, specify this directory when running `cmake`:
-
-`cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install`
-
-Then once the build is complete, run `make install` to install to the location you specified.
+Please [view the wiki article on setting up the library](https://github.com/brainboxdotcc/DPP/wiki/Building-on-Linux)
