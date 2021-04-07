@@ -146,7 +146,9 @@ struct application_command_update_t {
 struct invite_create_t {
 };
 
+/* Message update */
 struct message_update_t {
+	message* updated;
 };
 
 /* User update */
