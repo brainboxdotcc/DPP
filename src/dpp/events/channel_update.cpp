@@ -16,7 +16,7 @@ void channel_update::handle(class DiscordClient* client, json &j) {
 	dpp::channel* c = dpp::find_channel(from_string<uint64_t>(d["id"].get<std::string>(), std::dec));
 	if (c) {
 		c->fill_from_json(&d);
-		dpp::channel_update_t cu;
+		dpp::channel_update_t cu(d.dump());
 		cu.updated = c;
 		cu.updating_guild = dpp::find_guild(c->guild_id);
 		if (client->creator->dispatch.channel_update)

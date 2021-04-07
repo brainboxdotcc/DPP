@@ -15,7 +15,7 @@ using json = nlohmann::json;
 void guild_member_remove::handle(class DiscordClient* client, json &j) {
 	json d = j["d"];
 
-	dpp::guild_member_remove_t gmr;
+	dpp::guild_member_remove_t gmr(d.dump());
 
 	gmr.removing_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 	gmr.removed = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));

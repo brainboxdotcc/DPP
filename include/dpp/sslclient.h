@@ -39,12 +39,21 @@ protected:
 	/** Port connected to */
 	std::string port;
 
+	/** Bytes out */
+	uint64_t bytes_out;
+
+	/** Bytes in */
+	uint64_t bytes_in;
+
 	/** Called every second */
 	virtual void OneSecondTimer();
 
 	/** Start connection */
 	virtual void Connect();
 public:
+	uint64_t GetBytesOut();
+	uint64_t GetBytesIn();
+
 	/** Connect to a specified host and port. Throws std::runtime_error on fatal error.
 	 * @param _hostname The hostname to connect to
 	 * @param _post the Port number to connect to

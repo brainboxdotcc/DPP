@@ -189,14 +189,15 @@ void SSLClient::ReadLoop()
 				read_blocked = false;
 				
 				r = SSL_read(ssl,ServerToClientBuffer,BUFSIZZ);
-				
+
 				int e = SSL_get_error(ssl,r);
 
-				switch(e){
+				switch (e) {
 					case SSL_ERROR_NONE:
 						/* Data received, add it to the buffer */
 						buffer.append(ServerToClientBuffer, r);
 						this->HandleBuffer(buffer);
+						bytes_in += r;
 					break;
 					case SSL_ERROR_ZERO_RETURN:
 						/* End of data */
@@ -243,6 +244,7 @@ void SSLClient::ReadLoop()
 				case SSL_ERROR_NONE:
 					ClientToServerLength -= r;
 					ClientToServerOffset += r;
+					bytes_out += r;
 				break;
 					
 				/* We would have blocked */
@@ -263,6 +265,16 @@ void SSLClient::ReadLoop()
 			}
 		}
 	}
+}
+
+uint64_t SSLClient::GetBytesOut()
+{
+	return bytes_out;
+}
+
+uint64_t SSLClient::GetBytesIn()
+{
+	return bytes_in;
 }
 
 bool SSLClient::HandleBuffer(std::string &buffer)

@@ -23,7 +23,7 @@ void channel_delete::handle(class DiscordClient* client, json &j) {
 				g->channels.erase(gc);
 			}
 
-			dpp::channel_delete_t cd;
+			dpp::channel_delete_t cd(d.dump());
 			cd.deleted = c;
 			cd.deleting_guild = g;
 			if (client->creator->dispatch.channel_delete)

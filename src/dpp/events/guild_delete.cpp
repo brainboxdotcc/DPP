@@ -22,10 +22,11 @@ void guild_delete::handle(class DiscordClient* client, json &j) {
 			g->flags |= dpp::g_unavailable;
 		}
 
-		dpp::guild_delete_t gd;
-		gd.deleted = g;
-		if (client->creator->dispatch.guild_delete)
+		if (client->creator->dispatch.guild_delete) {
+			dpp::guild_delete_t gd(d.dump());
+			gd.deleted = g;
 			client->creator->dispatch.guild_delete(gd);
+		}
 	}
 }
 

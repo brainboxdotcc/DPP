@@ -15,13 +15,13 @@ using json = nlohmann::json;
 
 void message_create::handle(class DiscordClient* client, json &j) {
 
-	json d = j["d"];
-	dpp::message_create_t msg;
-	dpp::message m;
-	m.fill_from_json(&d);	
-	msg.msg = &m;
-
-	if (client->creator->dispatch.message_create)
+	if (client->creator->dispatch.message_create) {
+		json d = j["d"];
+		dpp::message_create_t msg(d.dump());
+		dpp::message m;
+		m.fill_from_json(&d);	
+		msg.msg = &m;
 		client->creator->dispatch.message_create(msg);
+	}
 }
 

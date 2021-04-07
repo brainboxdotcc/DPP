@@ -27,12 +27,12 @@ void guild_member_add::handle(class DiscordClient* client, json &j) {
 		gm->fill_from_json(&d, g, u);
 		g->members[u->id] = gm;
 
-		dpp::guild_member_add_t gmr;
-		gmr.adding_guild = g;
-		gmr.added = gm;
-
-		if (client->creator->dispatch.guild_member_add)
+		if (client->creator->dispatch.guild_member_add) {
+			dpp::guild_member_add_t gmr(d.dump());
+			gmr.adding_guild = g;
+			gmr.added = gm;
 			client->creator->dispatch.guild_member_add(gmr);
+		}
 	}
 }
 

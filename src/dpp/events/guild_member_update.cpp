@@ -20,6 +20,13 @@ void guild_member_update::handle(class DiscordClient* client, json &j) {
 		auto gmi = g->members.find(u->id);
 		if (gmi != g->members.end()) {
 			gmi->second->fill_from_json(&user, g, u);
+
+			if (client->creator->dispatch.guild_member_update) {
+				dpp::guild_member_update_t gmu(d.dump());
+				gmu.updating_guild = g;
+				gmu.updated = gmi->second;
+				client->creator->dispatch.guild_member_update(gmu);
+			}
 		}
 	}
 }

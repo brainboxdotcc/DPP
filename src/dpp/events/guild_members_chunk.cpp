@@ -31,11 +31,12 @@ void guild_members_chunk::handle(class DiscordClient* client, json &j) {
 			g->members[u->id] = gm;
 			um[u->id] = *gm;
 		}
-		dpp::guild_members_chunk_t gmc;
-		gmc.adding = g;
-		gmc.members = &um;
-		if (client->creator->dispatch.guild_members_chunk)
+		if (client->creator->dispatch.guild_members_chunk) {
+			dpp::guild_members_chunk_t gmc(d.dump());
+			gmc.adding = g;
+			gmc.members = &um;
 			client->creator->dispatch.guild_members_chunk(gmc);
+		}
 	}
 }
 

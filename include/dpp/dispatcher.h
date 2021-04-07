@@ -6,186 +6,239 @@
 
 namespace dpp {
 
-struct voice_state_update_t {
+struct event_dispatch_t {
+	std::string raw_event;
+	event_dispatch_t(const std::string& raw);
 };
 
-struct interaction_create_t {
+struct voice_state_update_t : public event_dispatch_t {
+	voice_state_update_t(const std::string& raw);
+};
+
+struct interaction_create_t : public event_dispatch_t {
+	interaction_create_t(const std::string& raw);
 };
 
 /** Delete guild */
-struct guild_delete_t {
+struct guild_delete_t : public event_dispatch_t {
+	guild_delete_t(const std::string& raw);
 	guild* deleted;
 };
 
 /** Delete channel */
-struct channel_delete_t {
+struct channel_delete_t : public event_dispatch_t {
+	channel_delete_t(const std::string& raw);
 	guild* deleting_guild;
 	channel* deleted;
 };
 
 /** Update channel */
-struct channel_update_t {
+struct channel_update_t : public event_dispatch_t {
+	channel_update_t(const std::string& raw);
 	guild* updating_guild;
 	channel* updated;
 };
 
 /** Session ready */
-struct ready_t {
+struct ready_t : public event_dispatch_t {
+	ready_t(const std::string& raw);
 	std::string session_id;
 	uint32_t shard_id;
 };
 
 /* Message Deleted */
-struct message_delete_t {
+struct message_delete_t : public event_dispatch_t {
+	message_delete_t(const std::string& raw);
 	message* deleted;
 };
 
-struct application_command_delete_t {
+struct application_command_delete_t : public event_dispatch_t {
+	application_command_delete_t(const std::string& raw);
 };
 
 /* Guild member remove */
-struct guild_member_remove_t {
+struct guild_member_remove_t : public event_dispatch_t {
+	guild_member_remove_t(const std::string& raw);
 	guild* removing_guild;
 	user* removed;
 };
 
-struct application_command_create_t {
+struct application_command_create_t : public event_dispatch_t {
+	application_command_create_t(const std::string& raw);
 };
 
 /** Session resumed */
-struct resumed_t {
+struct resumed_t : public event_dispatch_t {
+	resumed_t(const std::string& raw);
 	std::string session_id;
 	uint32_t shard_id;
 };
 
-struct guild_role_create_t {
+struct guild_role_create_t : public event_dispatch_t {
+	guild_role_create_t(const std::string& raw);
 	role* created;
 };
 
-struct typing_start_t {
+/** Typing start */
+struct typing_start_t : public event_dispatch_t {
+	typing_start_t(const std::string& raw);
+	guild* typing_guild;
+	channel* typing_channel;
+	user* typing_user;
+	time_t timestamp;
 };
 
-struct message_reaction_add_t {
+struct message_reaction_add_t : public event_dispatch_t {
+	message_reaction_add_t(const std::string& raw);
 };
 
-struct guild_members_chunk_t {
+struct guild_members_chunk_t : public event_dispatch_t {
+	guild_members_chunk_t(const std::string& raw);
 	guild* adding;
 	guild_member_map* members;
 };
 
-struct message_reaction_remove_t {
+struct message_reaction_remove_t : public event_dispatch_t {
+	message_reaction_remove_t(const std::string& raw);
 };
 
 /** Create guild */
-struct guild_create_t {
+struct guild_create_t : public event_dispatch_t {
+	guild_create_t(const std::string& raw);
 	guild* created;
 };
 
 /** Create channel */
-struct channel_create_t {
+struct channel_create_t : public event_dispatch_t {
+	channel_create_t(const std::string& raw);
 	guild* creating_guild;
 	channel* created;
 };
 
-struct message_reaction_remove_emoji_t {
+struct message_reaction_remove_emoji_t : public event_dispatch_t {
+	message_reaction_remove_emoji_t(const std::string& raw);
 };
 
-struct message_delete_bulk_t {
+struct message_delete_bulk_t : public event_dispatch_t {
+	message_delete_bulk_t(const std::string& raw);
 };
 
-struct guild_role_update_t {
+struct guild_role_update_t : public event_dispatch_t {
+	guild_role_update_t(const std::string& raw);
 	guild* updating_guild;
 	role* updated;
 };
 
-struct guild_role_delete_t {
+struct guild_role_delete_t : public event_dispatch_t {
+	guild_role_delete_t(const std::string& raw);
 	guild* deleting_guild;
 	role* deleted;
 };
 
 /* Channel pins update */
-struct channel_pins_update_t {
+struct channel_pins_update_t : public event_dispatch_t {
+	channel_pins_update_t(const std::string& raw);
 	guild* pin_guild;
 	channel* pin_channel;
 	time_t timestamp;
 };
 
-struct message_reaction_remove_all_t {
+struct message_reaction_remove_all_t : public event_dispatch_t {
+	message_reaction_remove_all_t(const std::string& raw);
 };
 
-struct voice_server_update_t {
+struct voice_server_update_t : public event_dispatch_t {
+	voice_server_update_t(const std::string& raw);
 };
 
-struct guild_emojis_update_t {
+struct guild_emojis_update_t : public event_dispatch_t {
+	guild_emojis_update_t(const std::string& raw);
 };
 
-struct presence_update_t {
+struct presence_update_t : public event_dispatch_t {
+	presence_update_t(const std::string& raw);
 };
 
-struct webhooks_update_t {
+struct webhooks_update_t : public event_dispatch_t {
+	webhooks_update_t(const std::string& raw);
 };
 
 /* Guild member add */
-struct guild_member_add_t {
+struct guild_member_add_t : public event_dispatch_t {
+	guild_member_add_t(const std::string& raw);
 	guild* adding_guild;
 	guild_member* added;
 };
 
-struct invite_delete_t {
+struct invite_delete_t : public event_dispatch_t {
+	invite_delete_t(const std::string& raw);
 };
 
 /* Guild update */
-struct guild_update_t {
+struct guild_update_t : public event_dispatch_t {
+	guild_update_t(const std::string& raw);
 	guild* updated;
 };
 
-struct guild_integrations_update_t {
+struct guild_integrations_update_t : public event_dispatch_t {
+	guild_integrations_update_t(const std::string& raw);
 };
 
 /* Guild member update */
-struct guild_member_update_t {
+struct guild_member_update_t : public event_dispatch_t {
+	guild_member_update_t(const std::string& raw);
 	guild* updating_guild;
 	guild_member* updated;
 };
 
-struct application_command_update_t {
+struct application_command_update_t : public event_dispatch_t {
+	application_command_update_t(const std::string& raw);
 };
 
-struct invite_create_t {
+struct invite_create_t : public event_dispatch_t {
+	invite_create_t(const std::string& raw);
 };
 
 /* Message update */
-struct message_update_t {
+struct message_update_t : public event_dispatch_t {
+	message_update_t(const std::string& raw);
 	message* updated;
 };
 
 /* User update */
-struct user_update_t {
+struct user_update_t : public event_dispatch_t {
+	user_update_t(const std::string& raw);
 	user* updated;
 };
 
 /** Create message */
-struct message_create_t {
+struct message_create_t : public event_dispatch_t {
+	message_create_t(const std::string& raw);
 	message* msg;
 };
 
-struct guild_ban_add_t {
+struct guild_ban_add_t : public event_dispatch_t {
+	guild_ban_add_t(const std::string& raw);
 	guild* banning_guild;
 	snowflake user_id;
 };
 
-struct guild_ban_remove_t {
+struct guild_ban_remove_t : public event_dispatch_t {
+	guild_ban_remove_t(const std::string& raw);
 	guild* unbanning_guild;
 	snowflake user_id;
 };
 
-struct integration_create_t {
+struct integration_create_t : public event_dispatch_t {
+	integration_create_t(const std::string& raw);
 };
 
-struct integration_update_t {
+struct integration_update_t : public event_dispatch_t {
+	integration_update_t(const std::string& raw);
 };
 
-struct integration_delete_t {
+struct integration_delete_t : public event_dispatch_t {
+	integration_delete_t(const std::string& raw);
 };
 
 /** The dispatcher class contains a set of std::functions representing hooked events

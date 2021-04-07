@@ -12,14 +12,14 @@
 using json = nlohmann::json;
 
 void message_delete::handle(class DiscordClient* client, json &j) {
-	json d = j["d"];
-	dpp::message_delete_t msg;
-	dpp::message m;
-	m.fill_from_json(&d);
-	msg.deleted = &m;
-
-	if (client->creator->dispatch.message_delete)
+	if (client->creator->dispatch.message_delete) {
+		json d = j["d"];
+		dpp::message_delete_t msg(d.dump());
+		dpp::message m;
+		m.fill_from_json(&d);
+		msg.deleted = &m;
 		client->creator->dispatch.message_delete(msg);
+	}
 
 }
 
