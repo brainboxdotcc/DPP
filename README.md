@@ -18,12 +18,12 @@ This project is in alpha stages of development.
 * [x] Ratelimit system
 * [x] [Windows support](https://github.com/brainboxdotcc/DPP/wiki/Building-on-Windows)
 * [x] Manual Sharding (user specifies number of shards)
+* [x] Ability to receive raw json strings to event handlers
 
 ### To do:
 
 * [ ] Add the rest of the discord events
 * [ ] Add the REST of the HTTP calls (pun intended)
-* [ ] Ability to receive raw json strings to event handlers
 * [ ] Cluster management
 * [ ] File uploading
 * [ ] Automatic sharding (library determines correct number of shards)
