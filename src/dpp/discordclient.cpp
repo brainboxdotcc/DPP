@@ -130,7 +130,45 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 
 void DiscordClient::Error(uint32_t errorcode)
 {
-	logger->debug("OOF! Error from underlying websocket: {}", errorcode);
+	std::map<uint32_t, std::string> errortext = {
+		{ 1000, "Socket shutdown" },
+		{ 1001, "Client is leaving" },
+		{ 1002, "Endpoint received a malformed frame" },
+		{ 1003, "Endpoint received an unsupported frame" },
+		{ 1004, "Reserved code" },
+		{ 1005, "Expected close status, received none" },
+		{ 1006, "No close code frame has been receieved" },
+		{ 1007, "Endpoint received inconsistent message (e.g. malformed UTF-8)" },
+		{ 1008, "Generic error" },
+		{ 1009, "Endpoint won't process large frame" },
+		{ 1010, "Client wanted an extension which server did not negotiate" },
+		{ 1011, "Internal server error while operating" },
+		{ 1012, "Server/service is restarting" },
+		{ 1013, "Temporary server condition forced blocking client's request" },
+		{ 1014, "Server acting as gateway received an invalid response" },
+		{ 1015, "Transport Layer Security handshake failure" },
+		{ 4000,	"Unknown error" },
+		{ 4001,	"Unknown opcode" },
+		{ 4002,	"Decode error" },
+		{ 4003,	"Not authenticated" },
+		{ 4004,	"Authentication failed" },
+		{ 4005,	"Already authenticated" },
+		{ 4007,	"Invalid seq" },
+		{ 4008,	"Rate limited" },
+		{ 4009,	"Session timed out" },
+		{ 4010,	"Invalid shard" },
+		{ 4011,	"Sharding required" },
+		{ 4012,	"Invalid API version" },
+		{ 4013,	"Invalid intent(s)" },
+		{ 4014,	"Disallowed intent(s)" },
+		{ 6666, "Hell freezing over" }
+	};
+	std::string error = "Unknown error";
+	auto i = errortext.find(errorcode);
+	if (i != errortext.end()) {
+		error = i->second;
+	}
+	logger->debug("OOF! Error from underlying websocket: {}: {}", errorcode, error);
 }
 
 void DiscordClient::OneSecondTimer()
