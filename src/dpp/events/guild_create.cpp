@@ -66,7 +66,7 @@ void guild_create::handle(class DiscordClient* client, json &j, const std::strin
 
 	}
 	dpp::get_guild_cache()->store(g);
-	if (client->intents & dpp::GUILD_MEMBERS) {
+	if ((client->intents & dpp::GUILD_MEMBERS) | client->intents == 0) {
 		client->add_chunk_queue(g->id);
 	}
 

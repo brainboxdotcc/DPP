@@ -34,12 +34,9 @@ int main(int argc, char const *argv[])
 	log->info("Starting test bot");
 
 	/* Create a D++ cluster. The intents, shard counts, cluster counts and logger are all optional. */
-	dpp::cluster bot(configdocument["token"].get<std::string>(),
-                dpp::GUILDS | dpp::GUILD_MEMBERS | dpp::GUILD_BANS | dpp::GUILD_EMOJIS | dpp::GUILD_INTEGRATIONS |
-                dpp::GUILD_WEBHOOKS | dpp::GUILD_INVITES | dpp::GUILD_MESSAGES | dpp::GUILD_MESSAGE_REACTIONS,
-                configdocument["shards"].get<uint32_t>(), 0, 1,
-                log.get()
-        );
+	dpp::cluster bot(configdocument["token"]);
+
+	bot.set_logger(log.get());
 
 	/* Attach to the message_create event to get notified of new messages */
 	bot.on_message_create([log, &bot](const dpp::message_create_t & event) {

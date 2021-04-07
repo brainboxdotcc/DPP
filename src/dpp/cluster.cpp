@@ -7,6 +7,7 @@
 #include <spdlog/spdlog.h>
 #include <dpp/cache.h>
 #include <chrono>
+#include <iostream>
 
 namespace dpp {
 
@@ -30,8 +31,33 @@ confirmation_callback_t::confirmation_callback_t(const std::string &_type, const
 	}
 }
 
+void cluster::set_logger(spdlog::logger* _log)
+{
+	log = _log;
+}
+
+void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
+	gateway g = std::get<gateway>(shardinfo.value);
+	numshards = g.shards;
+	this->log->info("Bot requires {} shard(s)", g.shards);
+	if (g.shards) {
+		if (g.session_start_remaining == 0) {
+			this->log->critical("Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later.");
+		} else {
+			this->log->debug("{} of {} session starts remaining", g.session_start_remaining, g.session_start_total);
+			cluster::start();
+		}
+	} else {
+		this->log->critical("Could not auto detect shard count! Cluster startup aborted.");
+	}
+}
+
 void cluster::start() {
 	/* Start up all shards */
+	if (numshards == 0) {
+		get_gateway_bot(std::bind(&cluster::auto_shard, this, std::placeholders::_1));
+	}
+
 	for (uint32_t s = 0; s < numshards; ++s) {
 		/* Filter out shards that arent part of the current cluster, if the bot is clustered */
 		if (s % maxclusters == cluster_id) {
@@ -54,6 +80,24 @@ void cluster::post_rest(const std::string &endpoint, const std::string &paramete
 			callback(j, rv);
 		}
 	}, postdata, method, filename, filecontent));
+}
+
+gateway::gateway(nlohmann::json* j) {
+	url = StringNotNull(j, "url");
+	shards = Int32NotNull(j, "shards");
+	session_start_total = Int32NotNull(&((*j)["session_start_limit"]), "total");
+	session_start_remaining  = Int32NotNull(&((*j)["session_start_limit"]), "remaining");
+	session_start_reset_after = Int32NotNull(&((*j)["session_start_limit"]), "reset_after");
+	session_start_max_concurrency = Int32NotNull(&((*j)["session_start_limit"]), "max_concurrency");
+}
+
+
+void cluster::get_gateway_bot(command_completion_event_t callback) {
+	this->post_rest("/api/gateway", "bot", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("gateway", gateway(&j), http));
+		}
+	});
 }
 
 void cluster::message_create(const message &m, command_completion_event_t callback) {

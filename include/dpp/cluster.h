@@ -14,6 +14,16 @@ using  json = nlohmann::json;
 
 namespace dpp {
 
+struct gateway {
+	std::string url;
+	uint32_t shards;
+	uint32_t session_start_total;
+	uint32_t session_start_remaining;
+	uint32_t session_start_reset_after;
+	uint32_t session_start_max_concurrency;
+	gateway(nlohmann::json* j);
+};
+
 struct confirmation {
 	bool success;
 };
@@ -47,7 +57,8 @@ typedef std::variant<
 		webhook,
 		webhook_map,
 		prune,
-		guild_widget
+		guild_widget,
+		gateway
 	> confirmable_t;
 
 struct confirmation_callback_t {
@@ -69,6 +80,9 @@ typedef std::function<void(json&, const http_request_completion_t&)> json_encode
 class cluster {
 	/** queue system for commands sent to Discord, and any replies */
 	request_queue* rest;
+
+	/** Accepts result from /gateway/bot REST API call and populates numshards with it */
+	void auto_shard(const confirmation_callback_t &shardinfo);
 public:
 	/** Current bot token for all shards on this cluster and all commands sent via HTTP */
 	std::string token;
@@ -100,14 +114,18 @@ public:
 	 * @param token The bot token to use for all HTTP commands and websocket connections
 	 * @param intents A bitmask of dpd::intents values for all shards on this cluster. This is required to be sent for all bots with over 100 servers.
 	 * @param shards The total number of shards on this bot. If there are multiple clusters, then (shards / clusters) actual shards will run on this cluster.
+	 * If you omit this value, the library will attempt to query the Discord API for the correct number of shards to start.
 	 * @param cluster_id The ID of this cluster, should be between 0 and MAXCLUSTERS-1
 	 * @param maxclusters The total number of clusters that are active, which may be on seperate processes or even separate machines.
 	 * @param log An optional spdlog::logger object for logging details about the cluster
 	 */
-	cluster(const std::string &token, uint32_t intents = 0, uint32_t shards = 1, uint32_t cluster_id = 0, uint32_t maxclusters = 1, spdlog::logger* log = nullptr);
+	cluster(const std::string &token, uint32_t intents = 0, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, spdlog::logger* log = nullptr);
 
 	/** Destructor */
 	~cluster();
+
+	/** Set or change current logger */
+	void set_logger(spdlog::logger* log);
 
 	/** Start the cluster, connecting all its shards.
 	 * Returns once all shards are connected.
@@ -376,8 +394,8 @@ public:
 	/** Edit guild widget */
 	void guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback = {});
 
-        /** Get guild vanity url, if enabled */
-        void guild_get_vanity(snowflake guild_id, command_completion_event_t callback);
+	/** Get guild vanity url, if enabled */
+	void guild_get_vanity(snowflake guild_id, command_completion_event_t callback);
 
 	/** Create webhook */
 	void create_webhook(const class webhook &w, command_completion_event_t callback = {});
@@ -428,7 +446,6 @@ public:
 	/** Delete a role */
 	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback = {});
 
-
 	/** Get a user by id */
 	void user_get(snowflake user_id, command_completion_event_t callback);
 
@@ -452,6 +469,9 @@ public:
 
 	/** Get voice regions */
 	void get_voice_regions(command_completion_event_t callback);
+
+	/** Get gateway bot */
+	void get_gateway_bot(command_completion_event_t callback);
 
 
 };
