@@ -78,18 +78,21 @@ foreach (fullmodname ${subdirlist})
 	file(GLOB modsrc ${modules_dir}/dpp/*.cpp ${modules_dir}/dpp/events/*.cpp)
         add_library(${modname} SHARED ${modsrc})
 if (WIN32)
-	target_link_libraries(${modname} PRIVATE "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\libssl64MTd.lib" "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\libcrypto64MTd.lib" nlohmann_json::nlohmann_json fmt)
+	target_link_libraries(${modname} PUBLIC "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\libssl64MTd.lib" "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\libcrypto64MTd.lib" nlohmann_json::nlohmann_json fmt)
 else (WIN32)
-	target_link_libraries(${modname} PRIVATE ssl crypto nlohmann_json::nlohmann_json fmt)
+	target_link_libraries(${modname} PUBLIC ssl crypto nlohmann_json::nlohmann_json fmt)
 endif (WIN32)
 endforeach(fullmodname)
 
 target_compile_features(dpp PRIVATE cxx_std_17)
-target_link_libraries(test dpp fmt spdlog)
+target_link_libraries(test PUBLIC dpp fmt spdlog)
 
 # Installation
 
 include(GNUInstallDirs)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/fmt/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/json/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/spdlog/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libdpp.so DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(TARGETS fmt
