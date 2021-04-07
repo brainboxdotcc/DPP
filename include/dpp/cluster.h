@@ -132,6 +132,9 @@ public:
 	 */
 	void start();
 
+        /* Standard logger with rotating logfiles and console */
+	std::shared_ptr<spdlog::logger> default_logger(const std::string &name);
+
 	/* Functions for attaching to event handlers */
 
 	/** Called for VOICE_STATE_UPDATE */
