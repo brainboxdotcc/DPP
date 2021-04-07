@@ -12,10 +12,10 @@
 
 using json = nlohmann::json;
 
-void guild_member_remove::handle(class DiscordClient* client, json &j) {
+void guild_member_remove::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json d = j["d"];
 
-	dpp::guild_member_remove_t gmr(d.dump());
+	dpp::guild_member_remove_t gmr(raw);
 
 	gmr.removing_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 	gmr.removed = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));

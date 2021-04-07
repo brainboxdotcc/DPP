@@ -11,6 +11,6 @@
 
 using json = nlohmann::json;
 
-void guild_integrations_update::handle(class DiscordClient* client, json &j) {
+void guild_integrations_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
 }
 

@@ -148,11 +148,11 @@ std::map<std::string, event*> events = {
 	{ "INTERACTION_CREATE", new interaction_create() }
 };
 
-void DiscordClient::HandleEvent(const std::string &event, json &j)
+void DiscordClient::HandleEvent(const std::string &event, json &j, const std::string &raw)
 {
 	auto ev_iter = events.find(event);
 	if (ev_iter != events.end()) {
-		ev_iter->second->handle(this, j);
+		ev_iter->second->handle(this, j, raw);
 	} else {
 		logger->debug("Unhandled event: {}, {}", event, j.dump());
 	}

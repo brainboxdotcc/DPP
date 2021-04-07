@@ -11,6 +11,6 @@
 
 using json = nlohmann::json;
 
-void webhooks_update::handle(class DiscordClient* client, json &j) {
+void webhooks_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
 }
 

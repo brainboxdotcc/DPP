@@ -116,7 +116,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 			case 0: {
 				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
 
-				HandleEvent(event, j);
+				HandleEvent(event, j, buffer);
 			}
 			break;
 			case 7:

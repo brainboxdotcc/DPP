@@ -58,9 +58,10 @@ public:
 
 	/** Handle an event (opcode 0)
 	 * @param event Event name, e.g. MESSAGE_CREATE
-	 * @pram j JSON object for the event content
+	 * @param j JSON object for the event content
+	 * @param raw Raw JSON event string
 	 */
-	virtual void HandleEvent(const std::string &event, json &j);
+	virtual void HandleEvent(const std::string &event, json &j, const std::string &raw);
 
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
 	virtual void OneSecondTimer();

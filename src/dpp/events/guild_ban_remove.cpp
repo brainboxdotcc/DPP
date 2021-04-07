@@ -11,6 +11,6 @@
 
 using json = nlohmann::json;
 
-void guild_ban_remove::handle(class DiscordClient* client, json &j) {
+void guild_ban_remove::handle(class DiscordClient* client, json &j, const std::string &raw) {
 }
 

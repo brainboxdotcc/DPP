@@ -11,7 +11,7 @@
 
 using json = nlohmann::json;
 
-void guild_update::handle(class DiscordClient* client, json &j) {
+void guild_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
        json& d = j["d"];
 	dpp::guild* g = dpp::find_guild(from_string<uint64_t>(d["id"].get<std::string>(), std::dec));
 	if (g) {
@@ -31,7 +31,7 @@ void guild_update::handle(class DiscordClient* client, json &j) {
 		}
 
 		if (client->creator->dispatch.guild_update) {
-			dpp::guild_update_t gu(d.dump());
+			dpp::guild_update_t gu(raw);
 			gu.updated = g;
 			client->creator->dispatch.guild_update(gu);
 		}

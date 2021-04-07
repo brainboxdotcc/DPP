@@ -11,6 +11,6 @@
 
 using json = nlohmann::json;
 
-void message_reaction_remove_emoji::handle(class DiscordClient* client, json &j) {
+void message_reaction_remove_emoji::handle(class DiscordClient* client, json &j, const std::string &raw) {
 }
 

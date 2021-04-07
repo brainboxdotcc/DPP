@@ -12,7 +12,7 @@
 
 using json = nlohmann::json;
 
-void guild_member_add::handle(class DiscordClient* client, json &j) {
+void guild_member_add::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json d = j["d"];
 
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
@@ -28,7 +28,7 @@ void guild_member_add::handle(class DiscordClient* client, json &j) {
 		g->members[u->id] = gm;
 
 		if (client->creator->dispatch.guild_member_add) {
-			dpp::guild_member_add_t gmr(d.dump());
+			dpp::guild_member_add_t gmr(raw);
 			gmr.adding_guild = g;
 			gmr.added = gm;
 			client->creator->dispatch.guild_member_add(gmr);

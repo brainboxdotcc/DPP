@@ -3,7 +3,7 @@
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
-#define event_decl(x) class x : public event { public: virtual void handle(class DiscordClient* client, nlohmann::json &j); };
+#define event_decl(x) class x : public event { public: virtual void handle(class DiscordClient* client, nlohmann::json &j, const std::string &raw); };
 
 /** An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
  */
@@ -12,8 +12,9 @@ public:
 	/** Pure virtual method for event handler code
 	 * @param client The creating shard
 	 * @param j The json data of the event
+	 * @param raw The raw event json
 	 */
-	virtual void handle(class DiscordClient* client, nlohmann::json &j) = 0;
+	virtual void handle(class DiscordClient* client, nlohmann::json &j, const std::string &raw) = 0;
 };
 
 /* Guilds */

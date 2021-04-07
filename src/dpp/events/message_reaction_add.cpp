@@ -11,6 +11,6 @@
 
 using json = nlohmann::json;
 
-void message_reaction_add::handle(class DiscordClient* client, json &j) {
+void message_reaction_add::handle(class DiscordClient* client, json &j, const std::string &raw) {
 }
 

@@ -12,7 +12,7 @@
 
 using json = nlohmann::json;
 
-void user_update::handle(class DiscordClient* client, json &j) {
+void user_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 
 	dpp::snowflake user_id = SnowflakeNotNull(&d, "id");
@@ -21,7 +21,7 @@ void user_update::handle(class DiscordClient* client, json &j) {
 		u->fill_from_json(&d);
 
 		if (client->creator->dispatch.user_update) {
-			dpp::user_update_t uu(d.dump());
+			dpp::user_update_t uu(raw);
 			uu.updated = u;
 			client->creator->dispatch.user_update(uu);
 		}
