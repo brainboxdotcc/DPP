@@ -1,4 +1,8 @@
 #pragma once
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <map>
 
 namespace dpp {
 
@@ -109,11 +113,12 @@ public:
 	 * This depends upon your dpp::intents and the size of your bot.
 	 * It will be filled by guild member chunk requests.
 	 */
-	std::map<snowflake, class guild_member*> members;
+	std::unordered_map<snowflake, class guild_member*> members;
 
-	/** List of emojis
+
+        /** List of emojis
 	 */
-	std::map<snowflake, class emoji*> emojis;
+	std::vector<snowflake> emojis;
 
 	/** Default constructor, zeroes all values */
 	guild();

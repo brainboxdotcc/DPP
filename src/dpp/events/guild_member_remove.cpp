@@ -23,7 +23,7 @@ void guild_member_remove::handle(class DiscordClient* client, json &j, const std
 	if (client->creator->dispatch.guild_member_remove)
 		client->creator->dispatch.guild_member_remove(gmr);
 
-	if (gmr.removing_guild) {
+	if (gmr.removing_guild && gmr.removed) {
 		auto i = gmr.removing_guild->members.find(gmr.removed->id);
 		if (i != gmr.removing_guild->members.end()) {
 			delete i->second;

@@ -169,7 +169,7 @@ void DiscordClient::Error(uint32_t errorcode)
 	if (i != errortext.end()) {
 		error = i->second;
 	}
-	logger->debug("OOF! Error from underlying websocket: {}: {}", errorcode, error);
+	logger->warn("OOF! Error from underlying websocket: {}: {}", errorcode, error);
 }
 
 void DiscordClient::OneSecondTimer()

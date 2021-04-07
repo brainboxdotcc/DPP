@@ -16,7 +16,7 @@ void guild_member_update::handle(class DiscordClient* client, json &j, const std
 	dpp::guild* g = dpp::find_guild(from_string<uint64_t>(d["guild_id"].get<std::string>(), std::dec));
 	dpp::user* u = dpp::find_user(from_string<uint64_t>(d["user"]["id"].get<std::string>(), std::dec));
 	if (g && u) {
-		auto user = d["user"];
+		auto& user = d["user"];
 		auto gmi = g->members.find(u->id);
 		if (gmi != g->members.end()) {
 			gmi->second->fill_from_json(&user, g, u);

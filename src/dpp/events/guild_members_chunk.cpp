@@ -29,7 +29,8 @@ void guild_members_chunk::handle(class DiscordClient* client, json &j, const std
 			dpp::guild_member* gm = new dpp::guild_member();
 			gm->fill_from_json(&userrec, g, u);
 			g->members[u->id] = gm;
-			um[u->id] = *gm;
+			if (client->creator->dispatch.guild_members_chunk)
+				um[u->id] = *gm;
 		}
 		if (client->creator->dispatch.guild_members_chunk) {
 			dpp::guild_members_chunk_t gmc(raw);
