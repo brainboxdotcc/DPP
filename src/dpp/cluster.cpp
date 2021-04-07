@@ -4,6 +4,7 @@
 #include <dpp/discordclient.h>
 #include <dpp/discordevents.h>
 #include <dpp/message.h>
+#define SPDLOG_FMT_EXTERNAL
 #include <spdlog/spdlog.h>
 #include <dpp/cache.h>
 #include <chrono>

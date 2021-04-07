@@ -1,3 +1,4 @@
+#define SPDLOG_FMT_EXTERNAL
 #include <dpp/dpp.h>
 #include <fstream>
 #include <iostream>

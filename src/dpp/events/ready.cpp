@@ -7,6 +7,7 @@
 #include <dpp/discord.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
+#define SPDLOG_FMT_EXTERNAL
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 

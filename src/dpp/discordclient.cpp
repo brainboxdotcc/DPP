@@ -3,6 +3,7 @@
 #include <fstream>
 #include <dpp/discordclient.h>
 #include <dpp/cache.h>
+#define SPDLOG_FMT_EXTERNAL
 #include <spdlog/spdlog.h>
 #include <dpp/cluster.h>
 #include <thread>
