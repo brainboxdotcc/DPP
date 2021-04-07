@@ -19,13 +19,13 @@ This project is in alpha stages of development.
 * [x] [Windows support](https://github.com/brainboxdotcc/DPP/wiki/Building-on-Windows)
 * [x] Manual Sharding (user specifies number of shards)
 * [x] Ability to receive raw json strings to event handlers
+* [x] File uploading
 
 ### To do:
 
 * [ ] Add the rest of the discord events
 * [ ] Add the REST of the HTTP calls (pun intended)
 * [ ] Cluster management
-* [ ] File uploading
 * [ ] Automatic sharding (library determines correct number of shards)
 
 Want to help? Drop me a line or send me a PR. I'll be choosy about what PRs i accept whilst the library is in such a heavy state of development.
