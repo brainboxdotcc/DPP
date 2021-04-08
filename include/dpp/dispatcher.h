@@ -198,6 +198,7 @@ struct guild_emojis_update_t : public event_dispatch_t {
 
 struct presence_update_t : public event_dispatch_t {
 	presence_update_t(const std::string& raw);
+	presence rich_presence;
 };
 
 /** Webhooks update */

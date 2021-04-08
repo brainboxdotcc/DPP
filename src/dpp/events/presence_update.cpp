@@ -8,9 +8,16 @@
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
 #include <nlohmann/json.hpp>
+#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
 void presence_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
+	if (client->creator->dispatch.presence_update) {
+		json& d = j["d"];
+		dpp::presence_update_t pu(raw);
+		pu.rich_presence = dpp::presence().fill_from_json(&d);
+		client->creator->dispatch.presence_update(pu);
+	}
 }
 

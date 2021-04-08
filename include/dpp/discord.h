@@ -46,4 +46,5 @@ namespace dpp {
 #include <dpp/integration.h>
 #include <dpp/webhook.h>
 #include <dpp/voicestate.h>
+#include <dpp/presence.h>
 #include <dpp/intents.h>

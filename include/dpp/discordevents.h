@@ -14,6 +14,13 @@ uint64_t SnowflakeNotNull(nlohmann::json* j, const char *keyname);
  */
 std::string StringNotNull(nlohmann::json* j, const char *keyname);
 
+/** Returns a 64 bit unsigned integer from a json field value, if defined, else returns 0.
+ * DO NOT use this for snowflakes, as usually snowflakes are wrapped in a string!
+ * @param j nlohmann::json instance to retrieve value from
+ * @param keyname key name to check for a value
+ */
+uint64_t Int64NotNull(nlohmann::json* j, const char *keyname);
+
 /** Returns a 32 bit unsigned integer from a json field value, if defined, else returns 0
  * @param j nlohmann::json instance to retrieve value from
  * @param keyname key name to check for a value

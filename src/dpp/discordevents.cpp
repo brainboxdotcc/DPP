@@ -36,6 +36,11 @@ std::string StringNotNull(json* j, const char *keyname)
 	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? (*j)[keyname].get<std::string>() : "";
 }
 
+uint64_t Int64NotNull(json* j, const char *keyname)
+{
+	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && !(*j)[keyname].is_string() ? (*j)[keyname].get<uint64_t>() : 0;
+}
+
 uint32_t Int32NotNull(json* j, const char *keyname)
 {
 	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && !(*j)[keyname].is_string() ? (*j)[keyname].get<uint32_t>() : 0;
