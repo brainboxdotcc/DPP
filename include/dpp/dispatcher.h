@@ -6,13 +6,16 @@
 
 namespace dpp {
 
+/** Base event parameter struct */
 struct event_dispatch_t {
 	std::string raw_event;
 	event_dispatch_t(const std::string& raw);
 };
 
+/** Voice state update */
 struct voice_state_update_t : public event_dispatch_t {
 	voice_state_update_t(const std::string& raw);
+	voicestate state;
 };
 
 struct interaction_create_t : public event_dispatch_t {
@@ -46,7 +49,7 @@ struct ready_t : public event_dispatch_t {
 	uint32_t shard_id;
 };
 
-/* Message Deleted */
+/** Message Deleted */
 struct message_delete_t : public event_dispatch_t {
 	message_delete_t(const std::string& raw);
 	message* deleted;
@@ -56,7 +59,7 @@ struct application_command_delete_t : public event_dispatch_t {
 	application_command_delete_t(const std::string& raw);
 };
 
-/* Guild member remove */
+/** Guild member remove */
 struct guild_member_remove_t : public event_dispatch_t {
 	guild_member_remove_t(const std::string& raw);
 	guild* removing_guild;
@@ -74,7 +77,7 @@ struct resumed_t : public event_dispatch_t {
 	uint32_t shard_id;
 };
 
-/* Guild role create */
+/** Guild role create */
 struct guild_role_create_t : public event_dispatch_t {
 	guild_role_create_t(const std::string& raw);
 	guild* creating_guild;
@@ -90,7 +93,7 @@ struct typing_start_t : public event_dispatch_t {
 	time_t timestamp;
 };
 
-/* Message reaction add */
+/** Message reaction add */
 struct message_reaction_add_t : public event_dispatch_t {
 	message_reaction_add_t(const std::string& raw);
 	guild* reacting_guild;
@@ -100,13 +103,14 @@ struct message_reaction_add_t : public event_dispatch_t {
 	snowflake message_id;
 };
 
+/** Guild members chunk */
 struct guild_members_chunk_t : public event_dispatch_t {
 	guild_members_chunk_t(const std::string& raw);
 	guild* adding;
 	guild_member_map* members;
 };
 
-/* Message reaction remove */
+/** Message reaction remove */
 struct message_reaction_remove_t : public event_dispatch_t {
 	message_reaction_remove_t(const std::string& raw);
         guild* reacting_guild;
@@ -129,7 +133,7 @@ struct channel_create_t : public event_dispatch_t {
 	channel* created;
 };
 
-/* Message remove emoji */
+/** Message remove emoji */
 struct message_reaction_remove_emoji_t : public event_dispatch_t {
 	message_reaction_remove_emoji_t(const std::string& raw);
         guild* reacting_guild;
@@ -138,6 +142,7 @@ struct message_reaction_remove_emoji_t : public event_dispatch_t {
         snowflake message_id;
 };
 
+/** Message delete bulk */
 struct message_delete_bulk_t : public event_dispatch_t {
 	message_delete_bulk_t(const std::string& raw);
 	guild* deleting_guild;
@@ -146,21 +151,21 @@ struct message_delete_bulk_t : public event_dispatch_t {
 	std::vector<snowflake> deleted;
 };
 
-/* Guild role update */
+/** Guild role update */
 struct guild_role_update_t : public event_dispatch_t {
 	guild_role_update_t(const std::string& raw);
 	guild* updating_guild;
 	role* updated;
 };
 
-/* Guild role delete */
+/** Guild role delete */
 struct guild_role_delete_t : public event_dispatch_t {
 	guild_role_delete_t(const std::string& raw);
 	guild* deleting_guild;
 	role* deleted;
 };
 
-/* Channel pins update */
+/** Channel pins update */
 struct channel_pins_update_t : public event_dispatch_t {
 	channel_pins_update_t(const std::string& raw);
 	guild* pin_guild;
@@ -168,7 +173,7 @@ struct channel_pins_update_t : public event_dispatch_t {
 	time_t timestamp;
 };
 
-/* Message remove all reactions */
+/** Message remove all reactions */
 struct message_reaction_remove_all_t : public event_dispatch_t {
 	message_reaction_remove_all_t(const std::string& raw);
         guild* reacting_guild;
@@ -176,11 +181,15 @@ struct message_reaction_remove_all_t : public event_dispatch_t {
         snowflake message_id;
 };
 
+/** Voice server update */
 struct voice_server_update_t : public event_dispatch_t {
 	voice_server_update_t(const std::string& raw);
+	snowflake guild_id;
+	std::string token;
+	std::string endpoint;
 };
 
-/* Guild emojis update */
+/** Guild emojis update */
 struct guild_emojis_update_t : public event_dispatch_t {
 	guild_emojis_update_t(const std::string& raw);
 	std::vector<snowflake> emojis;
@@ -191,36 +200,39 @@ struct presence_update_t : public event_dispatch_t {
 	presence_update_t(const std::string& raw);
 };
 
+/** Webhooks update */
 struct webhooks_update_t : public event_dispatch_t {
 	webhooks_update_t(const std::string& raw);
 	guild* webhook_guild;
 	channel* webhook_channel;
 };
 
-/* Guild member add */
+/** Guild member add */
 struct guild_member_add_t : public event_dispatch_t {
 	guild_member_add_t(const std::string& raw);
 	guild* adding_guild;
 	guild_member* added;
 };
 
+/** Invite delete */
 struct invite_delete_t : public event_dispatch_t {
 	invite_delete_t(const std::string& raw);
 	invite deleted_invite;
 };
 
-/* Guild update */
+/** Guild update */
 struct guild_update_t : public event_dispatch_t {
 	guild_update_t(const std::string& raw);
 	guild* updated;
 };
 
+/** Guild integrations update */
 struct guild_integrations_update_t : public event_dispatch_t {
 	guild_integrations_update_t(const std::string& raw);
 	guild* updating_guild;
 };
 
-/* Guild member update */
+/** Guild member update */
 struct guild_member_update_t : public event_dispatch_t {
 	guild_member_update_t(const std::string& raw);
 	guild* updating_guild;
@@ -231,12 +243,13 @@ struct application_command_update_t : public event_dispatch_t {
 	application_command_update_t(const std::string& raw);
 };
 
+/** Invite create */
 struct invite_create_t : public event_dispatch_t {
 	invite_create_t(const std::string& raw);
 	invite created_invite;
 };
 
-/* Message update */
+/** Message update */
 struct message_update_t : public event_dispatch_t {
 	message_update_t(const std::string& raw);
 	message* updated;
@@ -254,37 +267,41 @@ struct message_create_t : public event_dispatch_t {
 	message* msg;
 };
 
-/* Guild ban add */
+/** Guild ban add */
 struct guild_ban_add_t : public event_dispatch_t {
 	guild_ban_add_t(const std::string& raw);
 	guild* banning_guild;
 	user banned;
 };
 
-/* Guild ban remove */
+/** Guild ban remove */
 struct guild_ban_remove_t : public event_dispatch_t {
 	guild_ban_remove_t(const std::string& raw);
 	guild* unbanning_guild;
 	user unbanned;
 };
 
+/** Integration create */
 struct integration_create_t : public event_dispatch_t {
 	integration_create_t(const std::string& raw);
 	integration created_integration;
 };
 
+/** Integration update */
 struct integration_update_t : public event_dispatch_t {
 	integration_update_t(const std::string& raw);
 	integration updated_integration;
 };
 
+/** Integration delete */
 struct integration_delete_t : public event_dispatch_t {
 	integration_delete_t(const std::string& raw);
 	integration deleted_integration;
 };
 
 /** The dispatcher class contains a set of std::functions representing hooked events
- * that the user code is interested in.
+ * that the user code is interested in. These are modified via the on_eventname style
+ * methods in the cluster class.
  */
 class dispatcher {
 public:
