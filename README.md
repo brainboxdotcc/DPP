@@ -6,27 +6,13 @@
 
 This project is in alpha stages of development.
 
-### Completed so far:
+### Library features:
 
-* [x] Websocket connection with heartbeat keepalive and connection resuming
-* [x] Caching system for guilds, channels, guild members, roles, users
-* [x] Event dispatcher - currently only dispatches a subset of messages including e.g. `on_message_create` and `on_guild_create`
-* [x] Ability to attach handlers to events
-* [x] REST HTTPS call system using cpp-httplib
-* [x] Message send (`dpp::cluster::message_create()`)
-* [x] Embeds
-* [x] Ratelimit system
-* [x] [Windows support](https://github.com/brainboxdotcc/DPP/wiki/Building-on-Windows)
-* [x] Manual Sharding (user specifies number of shards)
-* [x] Ability to receive raw json strings to event handlers
-* [x] File uploading
-* [x] Automatic sharding (library determines correct number of shards)
-
-### To do:
-
-* [ ] Add the rest of the discord events
-* [ ] Add the REST of the HTTP calls (pun intended)
-* [ ] Cluster management
+* Really small memory footprint
+* Efficient caching system for guilds, channels, guild members, roles, users
+* Sharding (Many shards, one process: specify the number of shards, or let the library decide)
+* Pretty much the entire API is supported except for voice and slash commands
+* [Windows support](https://github.com/brainboxdotcc/DPP/wiki/Building-on-Windows)
 
 Want to help? Drop me a line or send me a PR. I'll be choosy about what PRs i accept whilst the library is in such a heavy state of development.
 
@@ -34,7 +20,7 @@ It is my intention to get this stable enough to use on my production bot, [Trivi
 
 ## Documentation
 
-Documentation will be here in the project wiki when the project is more complete.
+Documentation is a work in progress. Want to contribute? Fork the wiki and submit a PR!
 
 ## Supported OSes
 
@@ -50,9 +36,6 @@ The library may work fine in other operating systems too, but with no access to 
 
 ### Included Dependencies (Packaged with the library)
 * [nlohmann::json](https://github.com/nlohmann/json)
+* [fmt::format](https://github.com/fmt/format)
 * [cpp-httplib](https://github.com/yhirose/cpp-httplib)
-* [spdlog](https://github.com/gabime/spdlog)
 
-# Linux Setup
-
-Please [view the wiki article on setting up the library](https://github.com/brainboxdotcc/DPP/wiki/Building-on-Linux)
