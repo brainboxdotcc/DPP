@@ -8,21 +8,21 @@ namespace dpp {
  * your real life ID.
  */
 enum intents {
-	GUILDS = (1 << 0),
-	GUILD_MEMBERS = (1 << 1),
-	GUILD_BANS = (1 << 2),
-	GUILD_EMOJIS = (1 << 3),
-	GUILD_INTEGRATIONS = (1 << 4),
-	GUILD_WEBHOOKS = (1 << 5),
-	GUILD_INVITES = (1 << 6),
-	GUILD_VOICE_STATES = (1 << 7),
-	GUILD_PRESENCES = (1 << 8),
-	GUILD_MESSAGES = (1 << 9),
-	GUILD_MESSAGE_REACTIONS = (1 << 10),
-	GUILD_MESSAGE_TYPING = (1 << 11),
-	DIRECT_MESSAGES = (1 << 12),
-	DIRECT_MESSAGE_REACTIONS = (1 << 13),
-	DIRECT_MESSAGE_TYPING = (1 << 14)
+	i_guilds			= (1 << 0),
+	i_guild_members			= (1 << 1),
+	i_guild_bans			= (1 << 2),
+	i_guild_emojis			= (1 << 3),
+	i_guild_integrations		= (1 << 4),
+	i_guild_webhooks		= (1 << 5),
+	i_guild_invites			= (1 << 6),
+	i_guild_voice_states		= (1 << 7),
+	i_guild_presences		= (1 << 8),
+	i_guild_messages		= (1 << 9),
+	i_guild_message_reactions	= (1 << 10),
+	i_guild_message_typing		= (1 << 11),
+	i_direct_messages		= (1 << 12),
+	i_direct_message_reactions	= (1 << 13),
+	i_direct_message_typing		= (1 << 14)
 };
 
 };

@@ -19,6 +19,11 @@ public:
 
 	dtemplate();
 	~dtemplate();
+	
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
 	dtemplate& fill_from_json(nlohmann::json* j);
 	std::string build_json() const;
 

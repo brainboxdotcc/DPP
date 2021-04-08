@@ -4,7 +4,7 @@
 
 namespace dpp {
 
-/* Flag integers as received from and sent to discord */
+/** Flag integers as received from and sent to discord */
 #define GUILD_TEXT	0	// a text channel within a server
 #define DM		1	// a direct message between users
 #define GUILD_VOICE	2	// a voice channel within a server
@@ -13,7 +13,7 @@ namespace dpp {
 #define GUILD_NEWS	5	// a channel that users can follow and crosspost into their own server
 #define GUILD_STORE	6	// a channel in which game developers can sell their game on Discord
 
-/* Our flags as stored in the object */
+/** Our flags as stored in the object */
 enum channel_flags {
 	c_nsfw =		0b00000001,
 	c_text =		0b00000010,
@@ -25,23 +25,52 @@ enum channel_flags {
 	c_store =		0b10000000
 };
 
-/* A definition of a discord channel */
+/** A definition of a discord channel */
 class channel : public managed {
 public:
+	/** Flags bitmap */
 	uint8_t flags;
+	
+	/** Guild id of the guild that owns the channel */
 	snowflake guild_id;
+
+	/** Sorting position, lower number means higher up the list */
 	uint16_t position;
+
+	/** Channel name */
 	std::string name;
+
+	/** Channel topic */
 	std::string topic;
+
+	/** ID of last message to be sent to the channel */
 	snowflake last_message_id;
+
+	/** Maximum user limit for voice channels */
 	uint32_t user_limit;
+
+	/** Rate limit in kilobits per second for voice channels */
 	uint16_t rate_limit_per_user;
+
+	/** User ID of owner for group DMs */
 	snowflake owner_id;
+
+	/** Parent ID (category) */
 	snowflake parent_id;
+
+	/** Timestamp of last pinned message */
 	time_t last_pin_timestamp;
 
+	/** Constructor */
 	channel();
+
+	/** Destructor */
 	~channel();
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
 	channel& fill_from_json(nlohmann::json* j);
 	std::string build_json(bool with_id = false) const;
 

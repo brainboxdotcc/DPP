@@ -4,12 +4,14 @@
 
 namespace dpp {
 
+/** Integration types */
 enum integration_type {
 	i_twitch,
 	i_youtube,
 	i_discord
 };
 
+/** Integration flags */
 enum integration_flags {
 	if_enabled =     0b00000001,
 	if_syncing =     0b00000010,
@@ -18,6 +20,7 @@ enum integration_flags {
 	if_expire_kick = 0b00010000,
 };
 
+/** An application that has been integrated */
 struct integration_app {
 	snowflake id;
 	std::string name;
@@ -59,19 +62,26 @@ public:
 	/** Default destructor */
 	~integration();
 
-	/** Fill this integration from json.
-	 * @param j The json data
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
 	 */
 	integration& fill_from_json(nlohmann::json* j);
 
 	/** Build a json string from this object.
+	 * @return JSON string of the object
 	 */
 	std::string build_json() const;
 
+	/** True if emoticons are enabled */
 	bool emoticons_enabled() const;
+	/** True if integration is enabled */
 	bool is_enabled() const;
+	/** True if is syncing */
 	bool is_syncing() const;
+	/** True if has been revoked */
 	bool is_revoked() const;
+	/** True if expiring kicks the user */
 	bool expiry_kicks_user() const;
 };
 

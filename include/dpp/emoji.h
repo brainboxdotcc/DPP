@@ -22,6 +22,11 @@ public:
 	
 	emoji();
 	~emoji();
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
 	emoji& fill_from_json(nlohmann::json* j);
 	std::string build_json(bool with_id = false) const;
 

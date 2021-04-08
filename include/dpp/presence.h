@@ -5,6 +5,7 @@
 
 namespace dpp {
 
+/** Presence flags bitmask */
 enum presence_flags {
 	p_desktop_online	=	0b00000001,
 	p_desktop_dnd		=	0b00000010,
@@ -20,6 +21,7 @@ enum presence_flags {
 	p_status_idle		=	0b11000000
 };
 
+/** Online presence status values */
 enum presence_status : uint8_t {
 	ps_offline	=	0,
 	ps_online	=	1,
@@ -27,26 +29,35 @@ enum presence_status : uint8_t {
 	ps_idle		=	3
 };
 
+/** Bit shift for desktop status */
 #define PF_SHIFT_DESKTOP	0
+/** Bit shift for web status */
 #define PF_SHIFT_WEB		2
+/** Bit shift for mobile status */
 #define PF_SHIFT_MOBILE		4
+/** Bit shift for main status */
 #define PF_SHIFT_MAIN		6
-
+/** Bit mask for status */
 #define PF_STATUS_MASK		0b00000011
-
+/** Bit mask for clearing desktop status */
 #define PF_CLEAR_DESKTOP	0b11111100
+/** Bit mask for clearing web status */
 #define PF_CLEAR_WEB		0b11110011
+/** Bit mask for clearing mobile status */
 #define PF_CLEAR_MOBILE		0b11001111
+/** Bit mask for clearing main status */
 #define PF_CLEAR_STATUS		0b00111111
 
-enum activity_type {
-	at_game		=	0,
-	at_listening	=	1,
-	at_streaming	=	2,
-	at_custom	=	3,
-	at_competing	=	4
+/** Game types */
+enum activity_type : uint8_t {
+	at_game		=	0, //< "Playing ..."
+	at_listening	=	1, //< "Listening ..."
+	at_streaming	=	2, //< "Streaming..."
+	at_custom	=	3, //< Custom with emoji
+	at_competing	=	4  //< "Competing in..."
 };
 
+/** Activity types for rich presence */
 enum activity_flags {
 	af_instance	= 0b00000001,
 	af_join		= 0b00000010,
@@ -56,34 +67,94 @@ enum activity_flags {
 	af_play		= 0b00100000
 };
 
+/** An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
+ */
 class activity {
 public:
+	/** Name of ativity
+	 * e.g. "Fortnite"
+	 */
 	std::string name;
+	/** State of activity.
+	 * e.g. "Waiting in lobby"
+	 */
 	std::string state;
+	/** URL.
+	 * Only applicable for certain sites such a YouTube
+	 */
 	std::string url;
-	uint8_t type;
+	/** Activity type
+	 */
+	activity_type type;
+	/** Time activity was created
+	 */
 	time_t created_at;
+	/** Start time. e.g. when game was started
+	 */
 	time_t start;
+	/** End time, e.g. for songs on spotify
+	 */
 	time_t end;
+	/** Creating application (e.g. a linked account on the user's client)
+	 */
 	snowflake application_id;
+	/** Flags bitmask from activity_flags
+	 */
 	uint8_t flags;
 };
 
+/** Represents user presence, e.g. what game they are playing and if they are online
+ */
 class presence {
 public:
+	/** The user the presence applies to */
 	snowflake	user_id;
+
+	/** Guild ID. Apparently, Discord supports this internally but the client doesnt... */
 	snowflake       guild_id;
+
+	/** Flags bitmask containing presence_flags */
 	uint8_t		flags;
+
+	/** List of activities */
 	std::vector<activity> activities;
 
+	/** Constructor */
 	presence();
+
+	/** Destructor */
 	~presence();
+
+	/** Fill this object from json.
+	 * @param j JSON object to fill from
+	 * @return A reference to self
+	 */
 	presence& fill_from_json(nlohmann::json* j);
+
+	/** Build JSON from this object.
+	 * @param with_id True if the ID is to be included in the built JSON
+	 * @return The JSON text of the presence
+	 */
 	std::string build_json() const;
 
+	/** The users status on desktop
+	 * @return The user's status on desktop
+	 */
 	presence_status desktop_status() const;
+
+	/** The user's status on web
+	 * @return The user's status on web
+	 */
 	presence_status web_status() const;
+
+	/** The user's status on mobile
+	 * @return The user's status on mobile
+	 */
 	presence_status mobile_status() const;
+
+	/** The user's status as shown to other users
+	 * @return The user's status as shown to other users
+	 */
 	presence_status status() const;
 };
 

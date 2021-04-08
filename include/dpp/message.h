@@ -91,40 +91,73 @@ struct embed {
 	/** Constructor */
 	embed();
 
-	/** Constructor to build embed from json object */
+	/** Constructor to build embed from json object 
+	 * @param j JSON to read content from
+	 */
 	embed(nlohmann::json* j);
 
 	/** Destructor */
 	~embed();
 
-	/** Set embed title. Returns the embed itself so these method calls may be "chained" */
+	/** Set embed title. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
 	embed& set_title(const std::string &text);
 
-	/** Set embed description. Returns the embed itself so these method calls may be "chained" */
+	/** Set embed description. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
 	embed& set_description(const std::string &text);
 
-	/** Set embed colour. Returns the embed itself so these method calls may be "chained" */
+	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
 	embed& set_color(uint32_t col);
 
-	/** Set embed url. Returns the embed itself so these method calls may be "chained" */
+	/** Set embed url. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
 	embed& set_url(const std::string &url);
 
-	/** Add an embed field. Returns the embed itself so these method calls may be "chained" */
+	/** Add an embed field. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
 	embed& add_field(const std::string& name, const std::string &value, bool is_inline);
 
-	/** Set embed author. Returns the embed itself so these method calls may be "chained" */
+	/** Set embed author. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
+
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 
-	/** Set embed provider. Returns the embed itself so these method calls may be "chained" */
+	/** Set embed provider. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
 	embed& set_provider(const std::string& name, const std::string& url);
 
-	/** Set embed image. Returns the embed itself so these method calls may be "chained" */
+	/** Set embed image. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
 	embed& set_image(const std::string& url);
 
-	/** Set embed video. Returns the embed itself so these method calls may be "chained" */
+	/** Set embed video. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
 	embed& set_video(const std::string& url);
 
-	/** Set embed thumbnail. Returns the embed itself so these method calls may be "chained" */
+	/** Set embed thumbnail. Returns the embed itself so these method calls may be "chained"
+	 * @param text The text of the title
+	 * @return A reference to self
+	 */
 	embed& set_thumbnail(const std::string& url);
 };
 
@@ -186,12 +219,15 @@ struct message {
 
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
+	 * @return A reference to self
 	 */
-	message&	fill_from_json(nlohmann::json* j);
+	message& fill_from_json(nlohmann::json* j);
+
 	/** Build JSON from this object.
 	 * @param with_id True if the ID is to be included in the built JSON
+	 * @return The JSON text of the message
 	 */
-	std::string	build_json(bool with_id = false) const;
+	std::string build_json(bool with_id = false) const;
 };
 
 /** A group of messages */
