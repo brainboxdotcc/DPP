@@ -2,8 +2,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <spdlog/fwd.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json_fwd.hpp>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
@@ -56,6 +55,14 @@ public:
 	/** Discord session id */
 	std::string sessionid;
 
+	/** Log a message to whatever log the user is using.
+	 * The logged message is passed up the chain to the on_log event in user code which can then do whatever
+	 * it wants to do with it.
+	 * @param severity The log level from dpp::loglevel
+	 * @param msg The log message to output
+	 */
+	void log(dpp::loglevel severity, const std::string &msg);
+
 	/** Handle an event (opcode 0)
 	 * @param event Event name, e.g. MESSAGE_CREATE
 	 * @param j JSON object for the event content
@@ -66,21 +73,17 @@ public:
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
 	virtual void OneSecondTimer();
 
-	/** Optional spdlog::logger */
-	class spdlog::logger* logger;
-
 	/** Constructor takes shard id, max shards and token.
 	 * @param _cluster The owning cluster for this shard
 	 * @param _shard_id The ID of the shard to start
 	 * @param _max_shards The total number of shards across all clusters
 	 * @param _token The bot token to use for identifying to the websocket
 	 * @param intents Privileged intents to use, a bitmask of values from dpp::intents
-	 * @param _logger An optional spdlog::logger instance
 	 */
-        DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, class spdlog::logger* _logger = nullptr);
+	DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0);
 
 	/** Destructor */
-        virtual ~DiscordClient();
+	virtual ~DiscordClient();
 
 	/** Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client

@@ -1,19 +1,19 @@
-#define SPDLOG_FMT_EXTERNAL
 #include <map>
 #include <dpp/discord.h>
 #include <dpp/cluster.h>
 #include <dpp/discordclient.h>
 #include <dpp/discordevents.h>
 #include <dpp/message.h>
-#include <spdlog/spdlog.h>
 #include <dpp/cache.h>
 #include <chrono>
 #include <iostream>
+#include <nlohmann/json.hpp>
+#include <fmt/format.h>
 
 namespace dpp {
 
-cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, spdlog::logger* _log)
-	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), log(_log), last_identify(time(NULL) - 5)
+cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters)
+	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), last_identify(time(NULL) - 5)
 {
 	rest = new request_queue(this);
 }
@@ -32,24 +32,28 @@ confirmation_callback_t::confirmation_callback_t(const std::string &_type, const
 	}
 }
 
-void cluster::set_logger(spdlog::logger* _log)
-{
-	log = _log;
-}
-
 void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 	gateway g = std::get<gateway>(shardinfo.value);
 	numshards = g.shards;
-	this->log->info("Bot requires {} shard(s)", g.shards);
+	log(ll_info, fmt::format("Bot requires {} shard(s)", g.shards));
 	if (g.shards) {
 		if (g.session_start_remaining == 0) {
-			this->log->critical("Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later.");
+			log(ll_critical, fmt::format("Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later."));
 		} else {
-			this->log->debug("{} of {} session starts remaining", g.session_start_remaining, g.session_start_total);
+			log(ll_debug, fmt::format("{} of {} session starts remaining", g.session_start_remaining, g.session_start_total));
 			cluster::start();
 		}
 	} else {
-		this->log->critical("Could not auto detect shard count! Cluster startup aborted.");
+		log(ll_critical, "Could not auto detect shard count! Cluster startup aborted.");
+	}
+}
+
+void cluster::log(dpp::loglevel severity, const std::string &msg) {
+	if (dispatch.log) {
+		dpp::log_t logmsg(msg);
+		logmsg.severity = severity;
+		logmsg.message = msg;
+		dispatch.log(logmsg);
 	}
 }
 
@@ -63,7 +67,7 @@ void cluster::start() {
 		/* Filter out shards that arent part of the current cluster, if the bot is clustered */
 		if (s % maxclusters == cluster_id) {
 			/* TODO: DiscordClient should spawn a thread in its Run() */
-			this->shards[s] = new DiscordClient(this, s, numshards, token, intents, log);
+			this->shards[s] = new DiscordClient(this, s, numshards, token, intents);
 			this->shards[s]->Run();
 			std::this_thread::sleep_for(std::chrono::seconds(5));
 		}
@@ -1045,6 +1049,10 @@ void cluster::delete_webhook_message(const class webhook &wh, snowflake message_
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
+}
+
+void cluster::on_log (std::function<void(const log_t& _event)> _log) {
+	this->dispatch.log = _log;
 }
 
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {

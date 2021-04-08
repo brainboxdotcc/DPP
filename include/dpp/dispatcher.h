@@ -12,6 +12,13 @@ struct event_dispatch_t {
 	event_dispatch_t(const std::string& raw);
 };
 
+/* Log messages */
+struct log_t : public event_dispatch_t {
+	log_t(const std::string& raw);
+	loglevel severity;
+	std::string message;
+};
+
 /** Voice state update */
 struct voice_state_update_t : public event_dispatch_t {
 	voice_state_update_t(const std::string& raw);
@@ -306,6 +313,7 @@ struct integration_delete_t : public event_dispatch_t {
  */
 class dispatcher {
 public:
+	std::function<void(const log_t& event)> log;
 	std::function<void(const voice_state_update_t& event)> voice_state_update;
 	std::function<void(const interaction_create_t& event)> interaction_create;
 	std::function<void(const guild_delete_t& event)> guild_delete;

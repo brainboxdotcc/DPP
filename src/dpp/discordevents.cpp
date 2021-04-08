@@ -8,7 +8,8 @@
 #include <dpp/event.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
-#include <spdlog/spdlog.h>
+#include <nlohmann/json.hpp>
+#include <fmt/format.h>
 
 #ifdef _WIN32
 #include <time.h>
@@ -109,6 +110,7 @@ time_t TimestampNotNull(json* j, const char* keyname)
 }
 
 std::map<std::string, event*> events = {
+	{ "__LOG__", new logger() },
 	{ "GUILD_CREATE", new guild_create() },
 	{ "GUILD_UPDATE", new guild_update() },
 	{ "GUILD_DELETE", new guild_delete() },
@@ -159,7 +161,7 @@ void DiscordClient::HandleEvent(const std::string &event, json &j, const std::st
 	if (ev_iter != events.end()) {
 		ev_iter->second->handle(this, j, raw);
 	} else {
-		logger->debug("Unhandled event: {}, {}", event, j.dump());
+		log(dpp::ll_debug, fmt::format("Unhandled event: {}, {}", event, j.dump()));
 	}
 }
 

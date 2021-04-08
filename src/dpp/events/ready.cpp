@@ -7,21 +7,34 @@
 #include <dpp/discord.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
-#define SPDLOG_FMT_EXTERNAL
-#include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
+#include <fmt/format.h>
 
 using json = nlohmann::json;
 
+std::mutex protect_the_loot;
+
 void ready::handle(class DiscordClient* client, json &j, const std::string &raw) {
-	client->logger->info("Shard {}/{} ready!", client->shard_id, client->max_shards);
+	client->log(dpp::ll_info, fmt::format("Shard {}/{} ready!", client->shard_id, client->max_shards));
 	client->sessionid = j["d"]["session_id"];
+
+	/* Mutex this to make sure multiple threads don't change it at the same time */
+	{
+		std::lock_guard<std::mutex> lockit(protect_the_loot);
+		client->creator->me.fill_from_json(&(j["d"]["user"]));
+	}
 
 	if (client->creator->dispatch.ready) {
 		dpp::ready_t r(raw);
 		r.session_id = client->sessionid;
 		r.shard_id = client->shard_id;
 		client->creator->dispatch.ready(r);
+	}
+
+	/* Simulate GUILD_CREATE for each guild in the list.
+	 * These generally arrive as unavailable and are filled by separate GUILD_CREATEs */
+	for (auto & g : j["d"]["guilds"]) {
+		client->HandleEvent("GUILD_CREATE", g, "");
 	}
 }
 

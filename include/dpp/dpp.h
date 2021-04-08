@@ -2,6 +2,9 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <fstream>
+#include <iostream>
+#include <ctime>
 #include <dpp/dispatcher.h>
 #include <dpp/discordclient.h>
 #include <dpp/discord.h>

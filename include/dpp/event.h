@@ -17,6 +17,9 @@ public:
 	virtual void handle(class DiscordClient* client, nlohmann::json &j, const std::string &raw) = 0;
 };
 
+/* Internal logger */
+event_decl(logger);
+
 /* Guilds */
 event_decl(guild_create);
 event_decl(guild_update);

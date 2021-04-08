@@ -1,27 +1,29 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 #include <dpp/discordclient.h>
 #include <dpp/cache.h>
-#define SPDLOG_FMT_EXTERNAL
-#include <spdlog/spdlog.h>
 #include <dpp/cluster.h>
 #include <thread>
+#include <nlohmann/json.hpp>
+#include <fmt/format.h>
 
-DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, spdlog::logger* _logger) : WSClient("gateway.discord.gg", "443"), creator(_cluster), shard_id(_shard_id), max_shards(_max_shards), token(_token), last_heartbeat(time(NULL)), heartbeat_interval(0), last_seq(0), sessionid(""), logger(_logger), intents(_intents), runner(nullptr)
+DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents)
+       : WSClient("gateway.discord.gg", "443"),
+	creator(_cluster),
+	shard_id(_shard_id),
+	max_shards(_max_shards),
+	token(_token),
+	last_heartbeat(time(NULL)),
+	heartbeat_interval(0),
+	last_seq(0),
+	sessionid(""),
+	intents(_intents),
+	runner(nullptr)
 {
-	if (logger == nullptr) {
-		try {
-			std::shared_ptr<spdlog::logger> log;
-			std::vector<spdlog::sink_ptr> sinks;
-			log = std::make_shared<spdlog::logger>("nullsink", begin(sinks), end(sinks));
-			spdlog::register_logger(log);
-			logger = log.get();
-		}
-		catch (const spdlog::spdlog_ex& ex) {
-			std::cout << "Log initialization failed: " << ex.what() << std::endl;
-		}
-	}
 }
 
 DiscordClient::~DiscordClient()
@@ -49,7 +51,7 @@ void DiscordClient::Run()
 
 bool DiscordClient::HandleFrame(const std::string &buffer)
 {
-	logger->trace("R: {}", buffer);
+	log(dpp::ll_trace, fmt::format("R: {}", buffer));
 	json j = json::parse(buffer);
 
 	if (j.find("s") != j.end() && !j["s"].is_null()) {
@@ -63,7 +65,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 			case 9:
 				/* Reset session state and fall through to 9 */
 				op = 10;
-				logger->debug("Failed to resume session {}, will reidentify", sessionid);
+				log(dpp::ll_debug, fmt::format("Failed to resume session {}, will reidentify", sessionid));
 				this->sessionid = "";
 				this->last_seq = 0;
 				/* No break here, falls through to state 10 to cause a reidentify */
@@ -75,7 +77,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 
 				if (last_seq && !sessionid.empty()) {
 					/* Resume */
-					logger->debug("Resuming session {} with seq={}", sessionid, last_seq);
+					log(dpp::ll_debug, fmt::format("Resuming session {} with seq={}", sessionid, last_seq));
 					json obj = {
 						{ "op", 6 },
 						{ "d", {
@@ -90,10 +92,10 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 					/* Full connect */
 					while (time(NULL) < creator->last_identify + 5) {
 						uint32_t wait = (creator->last_identify + 5) - time(NULL);
-						logger->debug("Waiting {} seconds before identifying for session...", wait);
+						log(dpp::ll_debug, fmt::format("Waiting {} seconds before identifying for session...", wait));
 						std::this_thread::sleep_for(std::chrono::seconds(wait));
 					}
-					logger->debug("Connecting new session...");
+					log(dpp::ll_debug, "Connecting new session...");
 						json obj = {
 						{ "op", 2 },
 						{
@@ -127,7 +129,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 			}
 			break;
 			case 7:
-				logger->debug("Reconnection requested, closing socket {}", sessionid);
+				log(dpp::ll_debug, fmt::format("Reconnection requested, closing socket {}", sessionid));
 				::close(sfd);
 			break;
 		}
@@ -175,7 +177,12 @@ void DiscordClient::Error(uint32_t errorcode)
 	if (i != errortext.end()) {
 		error = i->second;
 	}
-	logger->warn("OOF! Error from underlying websocket: {}: {}", errorcode, error);
+	log(dpp::ll_warning, fmt::format("OOF! Error from underlying websocket: {}: {}", errorcode, error));
+}
+
+void DiscordClient::log(dpp::loglevel severity, const std::string &msg)
+{
+	creator->log(severity, msg);
 }
 
 void DiscordClient::OneSecondTimer()
@@ -184,7 +191,7 @@ void DiscordClient::OneSecondTimer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				logger->debug("Emit heartbeat, seq={}", last_seq);
+				log(dpp::ll_debug, fmt::format("Emit heartbeat, seq={}", last_seq));
 				this->write(json({{"op", 1}, {"d", last_seq}}).dump());
 				last_heartbeat = time(NULL);
 				dpp::garbage_collection();

@@ -6,7 +6,6 @@
 #include <dpp/discord.h>
 #include <dpp/dispatcher.h>
 #include <dpp/json_fwd.hpp>
-#include <spdlog/fwd.h>
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
 
@@ -102,9 +101,6 @@ public:
 	/** Total number of clusters that are active */
 	uint32_t maxclusters;
 
-	/** Optional spdlog::logger log object */
-	spdlog::logger* log;
-
 	/** Routes events from Discord back to user program code via std::functions */
 	dpp::dispatcher dispatch;
 
@@ -113,6 +109,11 @@ public:
 	 */
 	std::map<uint32_t, class DiscordClient*> shards;
 
+	/** The details of the bot user. This is assumed to be identical across all shards
+	 * in the cluster. Each connecting shard updates this information.
+	 */
+	dpp::user me;
+
 	/** Constructor for creating a cluster. All but the token are optional.
 	 * @param token The bot token to use for all HTTP commands and websocket connections
 	 * @param intents A bitmask of dpd::intents values for all shards on this cluster. This is required to be sent for all bots with over 100 servers.
@@ -120,23 +121,24 @@ public:
 	 * If you omit this value, the library will attempt to query the Discord API for the correct number of shards to start.
 	 * @param cluster_id The ID of this cluster, should be between 0 and MAXCLUSTERS-1
 	 * @param maxclusters The total number of clusters that are active, which may be on seperate processes or even separate machines.
-	 * @param log An optional spdlog::logger object for logging details about the cluster
 	 */
-	cluster(const std::string &token, uint32_t intents = 0, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, spdlog::logger* log = nullptr);
+	cluster(const std::string &token, uint32_t intents = 0, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1);
 
 	/** Destructor */
 	~cluster();
 
-	/** Set or change current logger */
-	void set_logger(spdlog::logger* log);
+	/** Log a message to whatever log the user is using.
+	 * The logged message is passed up the chain to the on_log event in user code which can then do whatever
+	 * it wants to do with it.
+	 * @param severity The log level from dpp::loglevel
+	 * @param msg The log message to output
+	 */
+	void log(dpp::loglevel severity, const std::string &msg);
 
 	/** Start the cluster, connecting all its shards.
 	 * Returns once all shards are connected.
 	 */
 	void start();
-
-        /* Standard logger with rotating logfiles and console */
-	std::shared_ptr<spdlog::logger> default_logger(const std::string &name);
 
 	/* Functions for attaching to event handlers */
 
@@ -144,6 +146,7 @@ public:
 	void on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
 
 	/** Called for ON_INTERACTION_CREATE */
+	void on_log (std::function<void(const log_t& _event)> _log);
 	void on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);
 	void on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete);
 	void on_channel_delete (std::function<void(const channel_delete_t& _event)> _channel_delete);

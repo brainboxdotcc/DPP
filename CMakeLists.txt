@@ -49,17 +49,15 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
         endif()
 endif()
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/spdlog/CMakeLists.txt" OR NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/json/CMakeLists.txt" OR NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/fmt/CMakeLists.txt")
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/json/CMakeLists.txt" OR NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/fmt/CMakeLists.txt")
     message(FATAL_ERROR "The submodules were not downloaded! Please update submodules and try again.")
 endif()
 
 set(BUILD_SHARED_LIBS 1 CACHE BOOL "Build fmt::format as a shared library")
 add_subdirectory(deps/fmt)
-add_subdirectory(deps/spdlog)
 add_subdirectory(deps/json)
 
 include_directories("deps/fmt/include")
-include_directories("deps/spdlog/include")
 include_directories("deps/json/single_include")
 if (WIN32)
 	include_directories("C:/Program Files/OpenSSL-Win64/include")
@@ -85,14 +83,13 @@ endif (WIN32)
 endforeach(fullmodname)
 
 target_compile_features(dpp PRIVATE cxx_std_17)
-target_link_libraries(test PUBLIC dpp fmt spdlog)
+target_link_libraries(test PUBLIC dpp fmt)
 
 # Installation
 
 include(GNUInstallDirs)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/fmt/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/json/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/spdlog/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libdpp.so DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(TARGETS fmt
@@ -100,11 +97,5 @@ install(TARGETS fmt
  LIBRARY DESTINATION lib
  RUNTIME DESTINATION bin
  COMPONENT fmt
-)
-install(TARGETS spdlog
- ARCHIVE DESTINATION lib
- LIBRARY DESTINATION lib
- RUNTIME DESTINATION bin
- COMPONENT spdlog
 )
 

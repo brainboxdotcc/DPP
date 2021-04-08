@@ -21,6 +21,7 @@ void guild_create::handle(class DiscordClient* client, json &j, const std::strin
 	g->fill_from_json(&d);
 	if (!g->is_unavailable()) {
 		/* Store guild roles */
+		g->roles.clear();
 		for (auto & role : d["roles"]) {
 			dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
 			if (!r) {
@@ -32,6 +33,7 @@ void guild_create::handle(class DiscordClient* client, json &j, const std::strin
 		}
 
 		/* Store guild channels */
+		g->channels.clear();
 		for (auto & channel : d["channels"]) {
 			dpp::channel *c = new dpp::channel();
 			c->fill_from_json(&channel);
@@ -40,6 +42,7 @@ void guild_create::handle(class DiscordClient* client, json &j, const std::strin
 		}
 
 		/* Store guild members */
+		g->members.clear();
 		for (auto & user : d["members"]) {
 			dpp::user* u = dpp::find_user(SnowflakeNotNull(&(user["user"]), "id"));
 			if (!u) {
@@ -53,6 +56,7 @@ void guild_create::handle(class DiscordClient* client, json &j, const std::strin
 			g->members[u->id] = gm;
 		}
 		/* Store emojis */
+		g->emojis.clear();
 		for (auto & emoji : d["emojis"]) {
 			dpp::emoji* e = dpp::find_emoji(SnowflakeNotNull(&emoji, "id"));
 			if (!e) {
@@ -65,7 +69,9 @@ void guild_create::handle(class DiscordClient* client, json &j, const std::strin
 	}
 	dpp::get_guild_cache()->store(g);
 	if ((client->intents & dpp::GUILD_MEMBERS) | client->intents == 0) {
-		client->add_chunk_queue(g->id);
+		if (!g->is_unavailable()) {
+			client->add_chunk_queue(g->id);
+		}
 	}
 
 	if (client->creator->dispatch.guild_create) {

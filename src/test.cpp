@@ -1,10 +1,7 @@
-#define SPDLOG_FMT_EXTERNAL
-#include <spdlog/spdlog.h>
 #include <dpp/dpp.h>
-#include <fstream>
-#include <iostream>
-#include <string>
 #include <nlohmann/json.hpp>
+#include <fmt/format.h>
+#include <iomanip>
 
 using json = nlohmann::json;
 
@@ -15,19 +12,28 @@ int main(int argc, char const *argv[])
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
 
-	/* Create a D++ cluster. The intents, shard counts, cluster counts and logger are all optional. */
+	/* Create a D++ cluster. There are many more optional parameters but as this is a demo lets keep it simple. */
 	dpp::cluster bot(configdocument["token"]);
 
-	std::shared_ptr<spdlog::logger> log = bot.default_logger("test.log");
-	bot.set_logger(log.get());
+	/* Attach to the log event to log messages from the library.
+	 * You can attach much fancier loggers to this such as spdlog,
+	 * but that's up to you what you use.
+	 */
+	bot.on_log([&bot](const dpp::log_t & event) {
+		/* Print all messages of level 'debug' or higher */
+		if (event.severity >= dpp::ll_debug) {
+			std::cout << dpp::utility::current_date_time() << " [" << dpp::utility::loglevel(event.severity) << "] " << event.message << "\n";
+		}
+	});
 
 	/* Attach to the message_create event to get notified of new messages */
-	bot.on_message_create([log, &bot](const dpp::message_create_t & event) {
+	bot.on_message_create([&bot](const dpp::message_create_t & event) {
 
+		/* event.msg->content contains the message text */
 		std::string content = event.msg->content;
 
 		/* Log some stats of the guild, user, role and channel counts, and the message content */
-		log->info("[G:{} U:{} R:{} C:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), event.msg->author->username, event.msg->author->discriminator, content);
+		bot.log(dpp::ll_info, fmt::format("[G:{} U:{} R:{} C:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), event.msg->author->username, event.msg->author->discriminator, content));
 
 		/* Crappy command handler example */
 		if (content == ".dotest" && (event.msg->guild_id == 825407338755653642 || event.msg->guild_id == 828433613343162459)) {
@@ -50,7 +56,7 @@ int main(int argc, char const *argv[])
 			);
 
 			/* Send message! */
-			bot.message_create(reply,[log, &bot](const dpp::confirmation_callback_t& completion) {
+			bot.message_create(reply,[&bot](const dpp::confirmation_callback_t& completion) {
 				/* This is called when the request is completed. 
 				 * completion.value contains the message object of the created message.
 				 * completion.type contains the string "message"
@@ -58,8 +64,7 @@ int main(int argc, char const *argv[])
 				 * was sent when issuing the command.
 				 */
 				dpp::message newmessage = std::get<dpp::message>(completion.value);
-				log->debug("message created! id={} http status={}", newmessage.id, completion.http_info.status);
-
+				bot.log(dpp::ll_debug, fmt::format("message created! id={} http status={}", newmessage.id, completion.http_info.status));
 			});
 		}
 	});

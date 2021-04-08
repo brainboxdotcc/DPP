@@ -7,14 +7,13 @@
 #include <dpp/discord.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
-#define SPDLOG_FMT_EXTERNAL
-#include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
+#include <fmt/format.h>
 
 using json = nlohmann::json;
 
 void resumed::handle(class DiscordClient* client, json &j, const std::string &raw) {
-	client->logger->debug("Successfully resumed session id {}", client->sessionid);
+	client->log(dpp::ll_debug, fmt::format("Successfully resumed session id {}", client->sessionid));
 
 	if (client->creator->dispatch.resumed) {
 		dpp::resumed_t r(raw);

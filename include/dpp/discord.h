@@ -30,6 +30,19 @@ namespace dpp {
 		i_gif
 	};
 
+	enum loglevel {
+		ll_trace = 0,
+		ll_debug,
+		ll_info,
+		ll_warning,
+		ll_error,
+		ll_critical
+	};
+
+	namespace utility {
+		std::string current_date_time();
+		std::string loglevel(dpp::loglevel in);
+	};
 
 };
 

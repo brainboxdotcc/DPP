@@ -7,6 +7,10 @@ event_dispatch_t::event_dispatch_t(const std::string &raw) : raw_event(raw)
 {
 }
 
+log_t::log_t(const std::string &raw) : event_dispatch_t(raw)
+{
+}
+
 voice_state_update_t::voice_state_update_t(const std::string &raw) : event_dispatch_t(raw)
 {
 }
