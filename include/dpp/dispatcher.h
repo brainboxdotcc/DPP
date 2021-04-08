@@ -74,8 +74,10 @@ struct resumed_t : public event_dispatch_t {
 	uint32_t shard_id;
 };
 
+/* Guild role create */
 struct guild_role_create_t : public event_dispatch_t {
 	guild_role_create_t(const std::string& raw);
+	guild* creating_guild;
 	role* created;
 };
 
@@ -123,12 +125,14 @@ struct message_delete_bulk_t : public event_dispatch_t {
 	message_delete_bulk_t(const std::string& raw);
 };
 
+/* Guild role update */
 struct guild_role_update_t : public event_dispatch_t {
 	guild_role_update_t(const std::string& raw);
 	guild* updating_guild;
 	role* updated;
 };
 
+/* Guild role delete */
 struct guild_role_delete_t : public event_dispatch_t {
 	guild_role_delete_t(const std::string& raw);
 	guild* deleting_guild;
@@ -217,16 +221,18 @@ struct message_create_t : public event_dispatch_t {
 	message* msg;
 };
 
+/* Guild ban add */
 struct guild_ban_add_t : public event_dispatch_t {
 	guild_ban_add_t(const std::string& raw);
 	guild* banning_guild;
-	snowflake user_id;
+	user banned;
 };
 
+/* Guild ban remove */
 struct guild_ban_remove_t : public event_dispatch_t {
 	guild_ban_remove_t(const std::string& raw);
 	guild* unbanning_guild;
-	snowflake user_id;
+	user unbanned;
 };
 
 struct integration_create_t : public event_dispatch_t {

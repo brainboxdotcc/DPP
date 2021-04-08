@@ -8,9 +8,29 @@
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
 #include <nlohmann/json.hpp>
+#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
 void guild_role_delete::handle(class DiscordClient* client, json &j, const std::string &raw) {
+	json &d = j["d"];
+	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	if (g) {
+		json& role = d["role"];
+		dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
+		if (r) {
+			if (client->creator->dispatch.guild_role_delete) {
+				dpp::guild_role_delete_t grd(raw);
+				grd.deleting_guild = g;
+				grd.deleted = r;
+				client->creator->dispatch.guild_role_delete(grd);
+			}
+			auto i = std::find(g->roles.begin(), g->roles.end(), r->id);
+			if (i != g->roles.end()) {
+				g->roles.erase(i);
+			}
+			dpp::get_role_cache()->remove(r);
+		}
+	}
 }
 
