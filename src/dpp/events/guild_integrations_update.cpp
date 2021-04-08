@@ -8,6 +8,7 @@
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
 #include <nlohmann/json.hpp>
+#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 

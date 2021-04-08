@@ -270,14 +270,17 @@ struct guild_ban_remove_t : public event_dispatch_t {
 
 struct integration_create_t : public event_dispatch_t {
 	integration_create_t(const std::string& raw);
+	integration created_integration;
 };
 
 struct integration_update_t : public event_dispatch_t {
 	integration_update_t(const std::string& raw);
+	integration updated_integration;
 };
 
 struct integration_delete_t : public event_dispatch_t {
 	integration_delete_t(const std::string& raw);
+	integration deleted_integration;
 };
 
 /** The dispatcher class contains a set of std::functions representing hooked events
