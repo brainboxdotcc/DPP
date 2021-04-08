@@ -87,6 +87,9 @@ public:
 	/** Current bot token for all shards on this cluster and all commands sent via HTTP */
 	std::string token;
 
+	/* Last time the bot sent an IDENTIFY */
+	time_t last_identify;
+
 	/** Current bitmask of gateway intents */
 	uint32_t intents;
 

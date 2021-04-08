@@ -88,6 +88,11 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 					this->write(obj.dump());
 				} else {
 					/* Full connect */
+					while (time(NULL) < creator->last_identify + 5) {
+						uint32_t wait = (creator->last_identify + 5) - time(NULL);
+						logger->debug("Waiting {} seconds before identifying for session...", wait);
+						std::this_thread::sleep_for(std::chrono::seconds(wait));
+					}
 					logger->debug("Connecting new session...");
 						json obj = {
 						{ "op", 2 },
@@ -112,6 +117,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 						obj["d"]["intents"] = this->intents;
 					}
 					this->write(obj.dump());
+					creator->last_identify = time(NULL);
 				}
 			break;
 			case 0: {
@@ -175,7 +181,7 @@ void DiscordClient::Error(uint32_t errorcode)
 void DiscordClient::OneSecondTimer()
 {
 	if (this->GetState() == CONNECTED) {
-		if (this->heartbeat_interval) {
+		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 				logger->debug("Emit heartbeat, seq={}", last_seq);

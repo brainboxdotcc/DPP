@@ -1,10 +1,10 @@
+#define SPDLOG_FMT_EXTERNAL
 #include <map>
 #include <dpp/discord.h>
 #include <dpp/cluster.h>
 #include <dpp/discordclient.h>
 #include <dpp/discordevents.h>
 #include <dpp/message.h>
-#define SPDLOG_FMT_EXTERNAL
 #include <spdlog/spdlog.h>
 #include <dpp/cache.h>
 #include <chrono>
@@ -13,7 +13,7 @@
 namespace dpp {
 
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, spdlog::logger* _log)
-	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), log(_log)
+	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), log(_log), last_identify(time(NULL) - 5)
 {
 	rest = new request_queue(this);
 }
