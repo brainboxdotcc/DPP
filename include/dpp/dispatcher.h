@@ -90,8 +90,14 @@ struct typing_start_t : public event_dispatch_t {
 	time_t timestamp;
 };
 
+/* Message reaction add */
 struct message_reaction_add_t : public event_dispatch_t {
 	message_reaction_add_t(const std::string& raw);
+	guild* reacting_guild;
+	user* reacting_user;
+	channel* reacting_channel;
+	emoji* reacting_emoji;
+	snowflake message_id;
 };
 
 struct guild_members_chunk_t : public event_dispatch_t {
@@ -100,8 +106,14 @@ struct guild_members_chunk_t : public event_dispatch_t {
 	guild_member_map* members;
 };
 
+/* Message reaction remove */
 struct message_reaction_remove_t : public event_dispatch_t {
 	message_reaction_remove_t(const std::string& raw);
+        guild* reacting_guild;
+        user* reacting_user;
+        channel* reacting_channel;
+        emoji* reacting_emoji;
+        snowflake message_id;
 };
 
 /** Create guild */
@@ -117,8 +129,13 @@ struct channel_create_t : public event_dispatch_t {
 	channel* created;
 };
 
+/* Message remove emoji */
 struct message_reaction_remove_emoji_t : public event_dispatch_t {
 	message_reaction_remove_emoji_t(const std::string& raw);
+        guild* reacting_guild;
+        channel* reacting_channel;
+        emoji* reacting_emoji;
+        snowflake message_id;
 };
 
 struct message_delete_bulk_t : public event_dispatch_t {
@@ -147,14 +164,19 @@ struct channel_pins_update_t : public event_dispatch_t {
 	time_t timestamp;
 };
 
+/* Message remove all reactions */
 struct message_reaction_remove_all_t : public event_dispatch_t {
 	message_reaction_remove_all_t(const std::string& raw);
+        guild* reacting_guild;
+        channel* reacting_channel;
+        snowflake message_id;
 };
 
 struct voice_server_update_t : public event_dispatch_t {
 	voice_server_update_t(const std::string& raw);
 };
 
+/* Guild emojis update */
 struct guild_emojis_update_t : public event_dispatch_t {
 	guild_emojis_update_t(const std::string& raw);
 	std::vector<snowflake> emojis;
