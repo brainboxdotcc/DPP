@@ -157,6 +157,8 @@ struct voice_server_update_t : public event_dispatch_t {
 
 struct guild_emojis_update_t : public event_dispatch_t {
 	guild_emojis_update_t(const std::string& raw);
+	std::vector<snowflake> emojis;
+	guild* updating_guild;
 };
 
 struct presence_update_t : public event_dispatch_t {
