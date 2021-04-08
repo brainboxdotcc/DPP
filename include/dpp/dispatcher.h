@@ -217,6 +217,7 @@ struct guild_update_t : public event_dispatch_t {
 
 struct guild_integrations_update_t : public event_dispatch_t {
 	guild_integrations_update_t(const std::string& raw);
+	guild* updating_guild;
 };
 
 /* Guild member update */
