@@ -45,4 +45,5 @@ namespace dpp {
 #include <dpp/voiceregion.h>
 #include <dpp/integration.h>
 #include <dpp/webhook.h>
+#include <dpp/voicestate.h>
 #include <dpp/intents.h>
