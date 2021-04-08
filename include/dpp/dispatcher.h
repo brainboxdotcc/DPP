@@ -140,6 +140,10 @@ struct message_reaction_remove_emoji_t : public event_dispatch_t {
 
 struct message_delete_bulk_t : public event_dispatch_t {
 	message_delete_bulk_t(const std::string& raw);
+	guild* deleting_guild;
+	user* deleting_user;
+	channel* deleting_channel;
+	std::vector<snowflake> deleted;
 };
 
 /* Guild role update */
