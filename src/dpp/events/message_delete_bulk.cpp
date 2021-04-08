@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 void message_delete_bulk::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.message_delete_bulk) {
-		json d = j["d"];
+		json& d = j["d"];
 		dpp::message_delete_bulk_t msg(raw);
 		msg.deleting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		msg.deleting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));

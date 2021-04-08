@@ -204,6 +204,7 @@ struct guild_member_add_t : public event_dispatch_t {
 
 struct invite_delete_t : public event_dispatch_t {
 	invite_delete_t(const std::string& raw);
+	invite deleted_invite;
 };
 
 /* Guild update */
@@ -229,6 +230,7 @@ struct application_command_update_t : public event_dispatch_t {
 
 struct invite_create_t : public event_dispatch_t {
 	invite_create_t(const std::string& raw);
+	invite created_invite;
 };
 
 /* Message update */
