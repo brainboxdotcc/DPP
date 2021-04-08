@@ -193,6 +193,8 @@ struct presence_update_t : public event_dispatch_t {
 
 struct webhooks_update_t : public event_dispatch_t {
 	webhooks_update_t(const std::string& raw);
+	guild* webhook_guild;
+	channel* webhook_channel;
 };
 
 /* Guild member add */
