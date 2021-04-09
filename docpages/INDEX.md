@@ -12,5 +12,5 @@
 * Event Handlers
 
 ## Architecture
-* [Clusters, Shards and Guilds])(docpages/Z_05_CLUSTERS.md)
+* [Clusters, Shards and Guilds](docpages/Z_05_CLUSTERS.md)
 * [Thread model](docpages/Z_06_THREADMODEL.md)
