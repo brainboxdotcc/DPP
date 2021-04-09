@@ -44,6 +44,9 @@ class DiscordClient : public WSClient
 	/** Total decompressed received bytes */
 	uint64_t decompressed_total;
 
+	void SetupZLib();
+	void EndZLib();
+
 public:
 	/** Owning cluster */
 	class dpp::cluster* creator;

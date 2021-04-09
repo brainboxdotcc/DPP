@@ -53,10 +53,6 @@ DiscordClient::~DiscordClient()
 		runner->join();
 		delete runner;
 	}
-	if (compressed) {
-		inflateEnd(&d_stream);
-	}
-	delete[] this->decomp_buffer;
 }
 
 uint64_t DiscordClient::GetDeompressedBytesIn()
@@ -64,11 +60,40 @@ uint64_t DiscordClient::GetDeompressedBytesIn()
 	return 0;
 }
 
+void DiscordClient::SetupZLib()
+{
+	if (compressed) {
+		d_stream.zalloc = (alloc_func)0;
+		d_stream.zfree = (free_func)0;
+		d_stream.opaque = (voidpf)0;
+		if (inflateInit(&d_stream) != Z_OK) {
+			throw std::runtime_error("Can't initialise stream compression!");
+		}
+		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
+		log(dpp::ll_debug, fmt::format("Starting compression of shard {}", shard_id));
+	}
+
+}
+
+void DiscordClient::EndZLib()
+{
+	if (compressed) {
+		inflateEnd(&d_stream);
+		if (this->decomp_buffer) {
+			delete[] this->decomp_buffer;
+			this->decomp_buffer = nullptr;
+		}
+	}
+}
+
 void DiscordClient::ThreadRun()
 {
+	SetupZLib();
 	do {
 		SSLClient::ReadLoop();
 		SSLClient::close();
+		EndZLib();
+		SetupZLib();
 		SSLClient::Connect();
 		WSClient::Connect();
 	} while(true);
