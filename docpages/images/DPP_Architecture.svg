@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="83cm" height="47cm" viewBox="-160 -379 1656 938" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="507.333" y="15" width="239" height="145"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="507.333" y="15" width="239" height="145"/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="626.833" y="87.5">
+    <tspan x="626.833" y="87.5"></tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="577" y="149">
+    <tspan x="577" y="149"></tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="626.833" y="87.5">
+    <tspan x="626.833" y="87.5"></tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="602.167" y="100.833">
+    <tspan x="602.167" y="100.833">Cluster</tspan>
+  </text>
+  <g>
+    <rect style="fill: #add8e6" x="-131.1" y="350" width="239" height="145"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-131.1" y="350" width="239" height="145"/>
+  </g>
+  <g>
+    <rect style="fill: #add8e6" x="170.8" y="347" width="239" height="145"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="170.8" y="347" width="239" height="145"/>
+  </g>
+  <g>
+    <rect style="fill: #add8e6" x="430.7" y="349" width="239" height="145"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="430.7" y="349" width="239" height="145"/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="-11.6" y="422.5">
+    <tspan x="-11.6" y="422.5"></tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="-36.6" y="424.5">
+    <tspan x="-36.6" y="424.5">Shard</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="267.3" y="419.5">
+    <tspan x="267.3" y="419.5">Shard</tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="530.2" y="421.5">
+    <tspan x="530.2" y="421.5">Shard</tspan>
+  </text>
+  <g>
+    <rect style="fill: #add8e6" x="836.9" y="355" width="239" height="145"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="836.9" y="355" width="239" height="145"/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="903.4" y="435.5">
+    <tspan x="903.4" y="435.5">REST Request Queue</tspan>
+  </text>
+  <g>
+    <rect style="fill: #add8e6" x="1194.8" y="357" width="239" height="145"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1194.8" y="357" width="239" height="145"/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1267.3" y="431.5">
+    <tspan x="1267.3" y="431.5">REST Reply Queue</tspan>
+  </text>
+  <g>
+    <rect style="fill: #add8e6" x="1193.8" y="79.0002" width="239" height="145"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="1193.8" y="79.0002" width="239" height="145"/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1259.3" y="152.5">
+    <tspan x="1259.3" y="152.5">User Callback Functions</tspan>
+  </text>
+  <g>
+    <rect style="fill: #add8e6" x="30.8" y="79.0002" width="239" height="145"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="30.8" y="79.0002" width="239" height="145"/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="150.3" y="151.5">
+    <tspan x="150.3" y="151.5"></tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="127.8" y="145">
+    <tspan x="127.8" y="145"></tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="150.3" y="151.5">
+    <tspan x="150.3" y="151.5"></tspan>
+  </text>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="102.3" y="158.5">
+    <tspan x="102.3" y="158.5">Discord Events</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="837.8" y="136" width="239" height="145"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="837.8" y="136" width="239" height="145"/>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="896.3" y="213.167">
+    <tspan x="896.3" y="213.167">Discord REST Requests</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="609.972" y1="160.991" x2="569.239" y2="338.52"/>
+    <polygon style="fill: #000000" points="567.562,345.83 564.925,334.965 569.239,338.52 574.671,337.201 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="567.562,345.83 564.925,334.965 569.239,338.52 574.671,337.201 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="552.354" y1="160.976" x2="371.71" y2="339.186"/>
+    <polygon style="fill: #000000" points="366.371,344.454 369.979,333.871 371.71,339.186 377.002,340.99 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="366.371,344.454 369.979,333.871 371.71,339.186 377.002,340.99 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="506.338" y1="150.727" x2="117.517" y2="354.75"/>
+    <polygon style="fill: #000000" points="110.875,358.234 117.407,349.161 117.517,354.75 122.054,358.016 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="110.875,358.234 117.407,349.161 117.517,354.75 122.054,358.016 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="441.328" y1="347.993" x2="267.241" y2="230.455"/>
+    <polygon style="fill: #000000" points="261.025,226.258 272.111,227.71 267.241,230.455 266.515,235.998 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="261.025,226.258 272.111,227.71 267.241,230.455 266.515,235.998 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="251.908" y1="346.006" x2="193.2" y2="233.624"/>
+    <polygon style="fill: #000000" points="189.728,226.976 198.79,233.524 193.2,233.624 189.926,238.155 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="189.728,226.976 198.79,233.524 193.2,233.624 189.926,238.155 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="32.294" y1="349.027" x2="101.413" y2="233.331"/>
+    <polygon style="fill: #000000" points="105.259,226.893 104.423,238.042 101.413,233.331 95.8382,232.913 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="105.259,226.893 104.423,238.042 101.413,233.331 95.8382,232.913 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="956.998" y1="281.99" x2="956.742" y2="344.274"/>
+    <polygon style="fill: #000000" points="956.711,351.774 951.752,341.753 956.742,344.274 961.752,341.795 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="956.711,351.774 951.752,341.753 956.742,344.274 961.752,341.795 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1076.91" y1="428.173" x2="1184.06" y2="428.772"/>
+    <polygon style="fill: #000000" points="1191.56,428.814 1181.53,433.758 1184.06,428.772 1181.59,423.758 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1191.56,428.814 1181.53,433.758 1184.06,428.772 1181.59,423.758 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1314.04" y1="356.03" x2="1313.6" y2="234.707"/>
+    <polygon style="fill: #000000" points="1313.57,227.207 1318.61,237.189 1313.6,234.707 1308.61,237.225 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="1313.57,227.207 1318.61,237.189 1313.6,234.707 1308.61,237.225 "/>
+  </g>
+  <g>
+    <path style="fill: #ffffff" d="M 628.088 -377.056 L 914.516,-377.056 L 971.802,-239.556 L 914.516,-102.056 L 628.088,-102.056 L 570.802,-239.556 L 628.088,-377.056z"/>
+    <path style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" d="M 628.088 -377.056 L 914.516,-377.056 L 971.802,-239.556 L 914.516,-102.056 L 628.088,-102.056 L 570.802,-239.556 L 628.088,-377.056"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="771.302" y="-234.556">
+      <tspan x="771.302" y="-234.556">Your Program</tspan>
+    </text>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="743.146" y1="-101.05" x2="677.292" y2="5.70395"/>
+    <polygon style="fill: #000000" points="673.354,12.0871 674.349,0.951127 677.292,5.70395 682.86,6.20133 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="673.354,12.0871 674.349,0.951127 677.292,5.70395 682.86,6.20133 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="270.793" y1="82.0318" x2="611.459" y2="-114.374"/>
+    <polygon style="fill: #000000" points="617.956,-118.12 611.79,-108.793 611.459,-114.374 606.796,-117.457 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="617.956,-118.12 611.79,-108.793 611.459,-114.374 606.796,-117.457 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="747.34" y1="131.623" x2="827.651" y2="161.029"/>
+    <polygon style="fill: #000000" points="834.694,163.608 823.585,164.865 827.651,161.029 827.023,155.475 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="834.694,163.608 823.585,164.865 827.651,161.029 827.023,155.475 "/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="1222.3" y1="78.0817" x2="944.164" y2="-146.312"/>
+    <polygon style="fill: #000000" points="938.327,-151.021 949.249,-148.634 944.164,-146.312 942.97,-140.851 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="938.327,-151.021 949.249,-148.634 944.164,-146.312 942.97,-140.851 "/>
+  </g>
+  <g>
+    <rect style="fill: #add8e6" x="-159.031" y="517.977" width="283.3" height="24.5"/>
+    <text font-size="20.3197" style="fill: #7f7f7f;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="-159.031" y="538.277">
+      <tspan x="-159.031" y="538.277">Each shard is a separate thread</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #add8e6" x="809.533" y="510.844" width="324.8" height="24.5"/>
+    <text font-size="20.3197" style="fill: #7f7f7f;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="809.533" y="531.144">
+      <tspan x="809.533" y="531.144">Request queue is a separate thread.</tspan>
+    </text>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1235.8" y="511.144">
+    <tspan x="1235.8" y="511.144"></tspan>
+  </text>
+  <g>
+    <rect style="fill: #add8e6" x="1141.14" y="509.177" width="355.55" height="49.9"/>
+    <text font-size="20.3197" style="fill: #7f7f7f;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="1141.14" y="529.477">
+      <tspan x="1141.14" y="529.477">Reply queue is a separate thread, order</tspan>
+      <tspan x="1141.14" y="554.877">of replies is guaranteed.</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #add8e6" x="184.9" y="517.444" width="502.5" height="24.5"/>
+    <text font-size="20.3197" style="fill: #7f7f7f;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="184.9" y="537.744">
+      <tspan x="184.9" y="537.744">You may create as many shards per cluster as you need</tspan>
+    </text>
+  </g>
+</svg>

@@ -27,3 +27,5 @@ Eventually it is our intent to support voice using `libopus`. This will follow o
 ## Does this library support sharding?
 Yes! D++ supports sharding and also clustering (grouping of shards into one process) to ensure it is scalable for small and large bots alike.
 
+## How do I contribute to the documentation and website?
+The documentation and website are built using Doxygen. To contribute to site pages, submit a Pull Request to the main repository. The site pages can be found within the `docpages` directory. Details of classes, variables, namespaces etc are auto generated from Doxygen comments within the library source code in the `include` and `src` folders.
