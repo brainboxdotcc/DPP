@@ -7,7 +7,7 @@ We will be changing over our production bots [TriviaBot](https://triviabot.co.uk
 During testing this library takes approximately 32 megabytes of ram to cache 250,000 users and 2200 guilds, with their respective roles and emojis. We will update these figures as we continue to test.
 
 ## How much of the library is completed?
-Enough of the library is completed to produce a simple bot that responds to text commands on channel with messages, embeds and even uploaded files in the responses. All REST calls (outbound commands) are completed with the exception of *slash commands* and *audit log*. We will update this as we progress.
+All REST calls (outbound commands) are completed with the exception of *slash commands* and *audit log*, and all Discord events are available. We still need to add voice support, and we will update this as we progress.
 
 ## How do I chat with the developers or get help?
 The best place to do this is on the [discord server](https://discord.gg/RnG32Ctyq7). You most likely won't get an answer immediately (we have lives, and need to sleep sometimes), so feel free to lurk and join the community!
