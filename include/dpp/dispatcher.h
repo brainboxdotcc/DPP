@@ -6,7 +6,7 @@
 
 namespace dpp {
 
-/** Base event parameter struct */
+/** @brief Base event parameter struct */
 struct event_dispatch_t {
 	/** Raw event text */
 	std::string raw_event;
@@ -16,7 +16,7 @@ struct event_dispatch_t {
 	event_dispatch_t(const std::string& raw);
 };
 
-/* Log messages */
+/** @brief Log messages */
 struct log_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -28,7 +28,7 @@ struct log_t : public event_dispatch_t {
 	std::string message;
 };
 
-/** Voice state update */
+/** @brief Voice state update */
 struct voice_state_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -48,7 +48,7 @@ struct interaction_create_t : public event_dispatch_t {
 	interaction_create_t(const std::string& raw);
 };
 
-/** Delete guild */
+/** @brief Delete guild */
 struct guild_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -58,7 +58,7 @@ struct guild_delete_t : public event_dispatch_t {
 	guild* deleted;
 };
 
-/** Delete channel */
+/** @brief Delete channel */
 struct channel_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -68,7 +68,7 @@ struct channel_delete_t : public event_dispatch_t {
 	channel* deleted;
 };
 
-/** Update channel */
+/** @brief Update channel */
 struct channel_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -78,7 +78,7 @@ struct channel_update_t : public event_dispatch_t {
 	channel* updated;
 };
 
-/** Session ready */
+/** @brief Session ready */
 struct ready_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -88,7 +88,7 @@ struct ready_t : public event_dispatch_t {
 	uint32_t shard_id;
 };
 
-/** Message Deleted */
+/** @brief Message Deleted */
 struct message_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -104,7 +104,7 @@ struct application_command_delete_t : public event_dispatch_t {
 	application_command_delete_t(const std::string& raw);
 };
 
-/** Guild member remove */
+/** @brief Guild member remove */
 struct guild_member_remove_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -114,6 +114,10 @@ struct guild_member_remove_t : public event_dispatch_t {
 	user* removed;
 };
 
+/**
+ * @brief Create application slash command
+ * 
+ */
 struct application_command_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -121,7 +125,7 @@ struct application_command_create_t : public event_dispatch_t {
 	application_command_create_t(const std::string& raw);
 };
 
-/** Session resumed */
+/** @brief Session resumed */
 struct resumed_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -131,7 +135,7 @@ struct resumed_t : public event_dispatch_t {
 	uint32_t shard_id;
 };
 
-/** Guild role create */
+/** @brief Guild role create */
 struct guild_role_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -141,7 +145,7 @@ struct guild_role_create_t : public event_dispatch_t {
 	role* created;
 };
 
-/** Typing start */
+/** @brief Typing start */
 struct typing_start_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -153,7 +157,7 @@ struct typing_start_t : public event_dispatch_t {
 	time_t timestamp;
 };
 
-/** Message reaction add */
+/** @brief Message reaction add */
 struct message_reaction_add_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -166,7 +170,7 @@ struct message_reaction_add_t : public event_dispatch_t {
 	snowflake message_id;
 };
 
-/** Guild members chunk */
+/** @brief Guild members chunk */
 struct guild_members_chunk_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -176,7 +180,7 @@ struct guild_members_chunk_t : public event_dispatch_t {
 	guild_member_map* members;
 };
 
-/** Message reaction remove */
+/** @brief Message reaction remove */
 struct message_reaction_remove_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -189,7 +193,7 @@ struct message_reaction_remove_t : public event_dispatch_t {
         snowflake message_id;
 };
 
-/** Create guild */
+/** @brief Create guild */
 struct guild_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -198,7 +202,7 @@ struct guild_create_t : public event_dispatch_t {
 	guild* created;
 };
 
-/** Create channel */
+/** @brief Create channel */
 struct channel_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -208,7 +212,7 @@ struct channel_create_t : public event_dispatch_t {
 	channel* created;
 };
 
-/** Message remove emoji */
+/** @brief Message remove emoji */
 struct message_reaction_remove_emoji_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -220,7 +224,7 @@ struct message_reaction_remove_emoji_t : public event_dispatch_t {
         snowflake message_id;
 };
 
-/** Message delete bulk */
+/** @brief Message delete bulk */
 struct message_delete_bulk_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -232,7 +236,7 @@ struct message_delete_bulk_t : public event_dispatch_t {
 	std::vector<snowflake> deleted;
 };
 
-/** Guild role update */
+/** @brief Guild role update */
 struct guild_role_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -242,7 +246,7 @@ struct guild_role_update_t : public event_dispatch_t {
 	role* updated;
 };
 
-/** Guild role delete */
+/** @brief Guild role delete */
 struct guild_role_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -252,7 +256,7 @@ struct guild_role_delete_t : public event_dispatch_t {
 	role* deleted;
 };
 
-/** Channel pins update */
+/** @brief Channel pins update */
 struct channel_pins_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -263,7 +267,7 @@ struct channel_pins_update_t : public event_dispatch_t {
 	time_t timestamp;
 };
 
-/** Message remove all reactions */
+/** @brief Message remove all reactions */
 struct message_reaction_remove_all_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -274,7 +278,7 @@ struct message_reaction_remove_all_t : public event_dispatch_t {
         snowflake message_id;
 };
 
-/** Voice server update */
+/** @brief Voice server update */
 struct voice_server_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -285,7 +289,7 @@ struct voice_server_update_t : public event_dispatch_t {
 	std::string endpoint;
 };
 
-/** Guild emojis update */
+/** @brief Guild emojis update */
 struct guild_emojis_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -295,6 +299,10 @@ struct guild_emojis_update_t : public event_dispatch_t {
 	guild* updating_guild;
 };
 
+/**
+ * @brief Presence update
+ * 
+ */
 struct presence_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -303,7 +311,7 @@ struct presence_update_t : public event_dispatch_t {
 	presence rich_presence;
 };
 
-/** Webhooks update */
+/** @brief Webhooks update */
 struct webhooks_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -313,7 +321,7 @@ struct webhooks_update_t : public event_dispatch_t {
 	channel* webhook_channel;
 };
 
-/** Guild member add */
+/** @brief Guild member add */
 struct guild_member_add_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -323,7 +331,7 @@ struct guild_member_add_t : public event_dispatch_t {
 	guild_member* added;
 };
 
-/** Invite delete */
+/** @brief Invite delete */
 struct invite_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -332,7 +340,7 @@ struct invite_delete_t : public event_dispatch_t {
 	invite deleted_invite;
 };
 
-/** Guild update */
+/** @brief Guild update */
 struct guild_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -341,7 +349,7 @@ struct guild_update_t : public event_dispatch_t {
 	guild* updated;
 };
 
-/** Guild integrations update */
+/** @brief Guild integrations update */
 struct guild_integrations_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -350,7 +358,7 @@ struct guild_integrations_update_t : public event_dispatch_t {
 	guild* updating_guild;
 };
 
-/** Guild member update */
+/** @brief Guild member update */
 struct guild_member_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -360,6 +368,10 @@ struct guild_member_update_t : public event_dispatch_t {
 	guild_member* updated;
 };
 
+/**
+ * @brief Update application slash command
+ * 
+ */
 struct application_command_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -367,7 +379,7 @@ struct application_command_update_t : public event_dispatch_t {
 	application_command_update_t(const std::string& raw);
 };
 
-/** Invite create */
+/** @brief Invite create */
 struct invite_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -376,7 +388,7 @@ struct invite_create_t : public event_dispatch_t {
 	invite created_invite;
 };
 
-/** Message update */
+/** @brief Message update */
 struct message_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -385,7 +397,7 @@ struct message_update_t : public event_dispatch_t {
 	message* updated;
 };
 
-/* User update */
+/* @brief User update */
 struct user_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -394,7 +406,7 @@ struct user_update_t : public event_dispatch_t {
 	user* updated;
 };
 
-/** Create message */
+/** @brief Create message */
 struct message_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -403,7 +415,7 @@ struct message_create_t : public event_dispatch_t {
 	message* msg;
 };
 
-/** Guild ban add */
+/** @brief Guild ban add */
 struct guild_ban_add_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -413,7 +425,7 @@ struct guild_ban_add_t : public event_dispatch_t {
 	user banned;
 };
 
-/** Guild ban remove */
+/** @brief Guild ban remove */
 struct guild_ban_remove_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -423,7 +435,7 @@ struct guild_ban_remove_t : public event_dispatch_t {
 	user unbanned;
 };
 
-/** Integration create */
+/** @brief Integration create */
 struct integration_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON
@@ -432,203 +444,205 @@ struct integration_create_t : public event_dispatch_t {
 	integration created_integration;
 };
 
-/** Integration update */
+/** @brief Integration update */
 struct integration_update_t : public event_dispatch_t {
-	/** Constructor
+	/** 
+	 * @brief Constructor
 	 * @param raw Raw event text as JSON
 	 */
 	integration_update_t(const std::string& raw);
 	integration updated_integration;
 };
 
-/** Integration delete */
+/** @brief Integration delete */
 struct integration_delete_t : public event_dispatch_t {
-	/** Constructor
+	/** 
+	 * @brief Constructor
 	 * @param raw Raw event text as JSON
 	 */
 	integration_delete_t(const std::string& raw);
 	integration deleted_integration;
 };
 
-/** The dispatcher class contains a set of std::functions representing hooked events
+/** @brief The dispatcher class contains a set of std::functions representing hooked events
  * that the user code is interested in. These are modified via the on_eventname style
  * methods in the cluster class.
  */
 class dispatcher {
 public:
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for log event
 	 * @param event Event parameters
 	 */
 	std::function<void(const log_t& event)> log;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for voice state update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const voice_state_update_t& event)> voice_state_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for interaction create event
 	 * @param event Event parameters
 	 */
 	std::function<void(const interaction_create_t& event)> interaction_create;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild delete event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_delete_t& event)> guild_delete;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for channel delete event
 	 * @param event Event parameters
 	 */
 	std::function<void(const channel_delete_t& event)> channel_delete;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for channel update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const channel_update_t& event)> channel_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for ready event
 	 * @param event Event parameters
 	 */
 	std::function<void(const ready_t& event)> ready;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for message delete event
 	 * @param event Event parameters
 	 */
 	std::function<void(const message_delete_t& event)> message_delete;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for application command delete event
 	 * @param event Event parameters
 	 */
 	std::function<void(const application_command_delete_t& event)> application_command_delete;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild member remove event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_member_remove_t& event)> guild_member_remove;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild member remove event
 	 * @param event Event parameters
 	 */
 	std::function<void(const application_command_create_t& event)> application_command_create;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for resumed event
 	 * @param event Event parameters
 	 */
 	std::function<void(const resumed_t& event)> resumed;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild role create event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_role_create_t& event)> guild_role_create;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for typing start event
 	 * @param event Event parameters
 	 */
 	std::function<void(const typing_start_t& event)> typing_start;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for message reaction add event
 	 * @param event Event parameters
 	 */
 	std::function<void(const message_reaction_add_t& event)> message_reaction_add;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild members chunk event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_members_chunk_t& event)> guild_members_chunk;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for message reaction remove event
 	 * @param event Event parameters
 	 */
 	std::function<void(const message_reaction_remove_t& event)> message_reaction_remove;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild create event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_create_t& event)> guild_create;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild channel create event
 	 * @param event Event parameters
 	 */
 	std::function<void(const channel_create_t& event)> channel_create;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for message reaction remove emoji event
 	 * @param event Event parameters
 	 */
 	std::function<void(const message_reaction_remove_emoji_t& event)> message_reaction_remove_emoji;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for message delete bulk event
 	 * @param event Event parameters
 	 */
 	std::function<void(const message_delete_bulk_t& event)> message_delete_bulk;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild role update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_role_update_t& event)> guild_role_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild role delete event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_role_delete_t& event)> guild_role_delete;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for channel pins update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const channel_pins_update_t& event)> channel_pins_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for message reaction remove all event
 	 * @param event Event parameters
 	 */
 	std::function<void(const message_reaction_remove_all_t& event)> message_reaction_remove_all;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for voice server update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const voice_server_update_t& event)> voice_server_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild emojis update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_emojis_update_t& event)> guild_emojis_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for presence update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const presence_update_t& event)> presence_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for webhooks update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const webhooks_update_t& event)> webhooks_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild member add event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_member_add_t& event)> guild_member_add;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for invite delete event
 	 * @param event Event parameters
 	 */
 	std::function<void(const invite_delete_t& event)> invite_delete;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_update_t& event)> guild_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild integrations update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_integrations_update_t& event)> guild_integrations_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild member update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_member_update_t& event)> guild_member_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for application command update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const application_command_update_t& event)> application_command_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for invite create event
 	 * @param event Event parameters
 	 */
 	std::function<void(const invite_create_t& event)> invite_create;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for message update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const message_update_t& event)> message_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for user update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const user_update_t& event)> user_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for message create event
 	 * @param event Event parameters
 	 */
 	std::function<void(const message_create_t& event)> message_create;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild ban add event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_ban_add_t& event)> guild_ban_add;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for guild ban remove event
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_ban_remove_t& event)> guild_ban_remove;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for integration create event
 	 * @param event Event parameters
 	 */
 	std::function<void(const integration_create_t& event)> integration_create;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for integration update event
 	 * @param event Event parameters
 	 */
 	std::function<void(const integration_update_t& event)> integration_update;
-	/** Event handler function pointer
+	/** @brief Event handler function pointer for integration delete event
 	 * @param event Event parameters
 	 */
 	std::function<void(const integration_delete_t& event)> integration_delete;

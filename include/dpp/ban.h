@@ -4,7 +4,9 @@
 
 namespace dpp {
 
-/** The ban class represents a ban on a guild.
+/**
+ * @brief The ban class represents a ban on a guild.
+ * 
  */
 class ban {
 public:

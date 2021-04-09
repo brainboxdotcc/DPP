@@ -9,12 +9,12 @@
  * @brief The main namespace for D++ functions. classes and types
  */
 namespace dpp {
-	/** A 64 bit unsigned value representing many things on discord.
+	/** @brief A 64 bit unsigned value representing many things on discord.
 	 * Discord calls the value a 'snowflake' value.
 	 */
 	typedef uint64_t snowflake;
 
-	/** The managed class is the base class for various types that can
+	/** @brief The managed class is the base class for various types that can
 	 * be stored in a cache that are identified by a dpp::snowflake id
 	 */
 	class managed {
@@ -27,14 +27,14 @@ namespace dpp {
 		~managed() = default;
 	};
 
-	/** Supported image types for profile pictures */
+	/** @brief Supported image types for profile pictures */
 	enum image_type {
 		i_png,
 		i_jpg,
 		i_gif
 	};
 
-	/** Log levels */
+	/** @brief Log levels */
 	enum loglevel {
 		ll_trace = 0,
 		ll_debug,
@@ -44,7 +44,7 @@ namespace dpp {
 		ll_critical
 	};
 
-	/** Utility helper functions, generally for logging */
+	/** @brief Utility helper functions, generally for logging */
 	namespace utility {
 		/**
 		 * @brief Returns urrent date and time

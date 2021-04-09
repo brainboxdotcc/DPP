@@ -6,7 +6,8 @@
 
 namespace dpp {
 
-	/** A cache object maintains a cache of dpp::managed objects.
+	/**
+	 * @brief A cache object maintains a cache of dpp::managed objects.
 	 * This is for example users, channels or guilds.
 	 */
 	class cache {

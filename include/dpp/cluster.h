@@ -37,13 +37,17 @@ struct gateway {
 	gateway(nlohmann::json* j);
 };
 
-/** Confirmation object represents any true or false simple REST request
+/**
+ * @brief Confirmation object represents any true or false simple REST request
+ * 
  */
 struct confirmation {
 	bool success;
 };
 
-/** A container for types that can be returned for a REST API call
+/**
+ * @brief A container for types that can be returned for a REST API call
+ * 
  */
 typedef std::variant<
 		confirmation,
@@ -114,7 +118,7 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
-/** The cluster class represents a group of shards and a command queue for sending and 
+/** @brief The cluster class represents a group of shards and a command queue for sending and 
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
  */

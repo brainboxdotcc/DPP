@@ -17,7 +17,7 @@ namespace dpp {
 	class cluster;
 };
 
-/** Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
+/** @brief Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
 class DiscordClient : public WSClient
 {
 	/** Queue of guild ids we are requesting member chunks for */
