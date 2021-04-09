@@ -33,17 +33,6 @@ DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_
 	decompressed_total(0),
 	decomp_buffer(nullptr)
 {
-	if (compressed) {
-		d_stream.zalloc = (alloc_func)0;
-		d_stream.zfree = (free_func)0;
-		d_stream.opaque = (voidpf)0;
-		if (inflateInit(&d_stream) != Z_OK) {
-			throw std::runtime_error("Can't initialise stream compression!");
-		}
-		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
-		log(dpp::ll_debug, fmt::format("Starting compression of shard {}", shard_id));
-	}
-
 	Connect();
 }
 
