@@ -66,7 +66,9 @@ protected:
 	/** (Re)connect */
 	virtual void Connect();
 
-	/** Get websocket state */
+	/** Get websocket state
+	 * @return websocket state
+	 */
 	WSState GetState();
 public:
 
@@ -94,6 +96,7 @@ public:
 
 	/** Receives raw frame content only without headers
 	 * @param buffer The buffer contents
+	 * @return True if the frame was successfully handled. False if no valid frame is in the buffer.
 	 */
 	virtual bool HandleFrame(const std::string &buffer);
 

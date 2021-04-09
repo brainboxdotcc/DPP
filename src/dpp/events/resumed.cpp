@@ -12,6 +12,13 @@
 
 using json = nlohmann::json;
 
+/**
+ * @brief Handle event
+ * 
+ * @param client Websocket client (current shard)
+ * @param j JSON data for the event
+ * @param raw Raw JSON string
+ */
 void resumed::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	client->log(dpp::ll_debug, fmt::format("Successfully resumed session id {}", client->sessionid));
 

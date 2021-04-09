@@ -39,14 +39,19 @@ public:
 	/** Flags built from a bitmask of values in dpp::user_flags */
 	uint32_t flags;
 
-	/** Constructor */
+	/**
+	 * @brief Construct a new user object
+	 */
 	user();
 
-	/** Destructor */
+	/**
+	 * @brief Destroy the user object
+	 */
 	~user();
 
 	/** Fill this record from json.
 	 * @param j The json to fill this record from
+	 * @return Reference to self
 	 */
 	user& fill_from_json(nlohmann::json* j);
 

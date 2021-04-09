@@ -28,16 +28,60 @@ public:
 	 * @return A reference to self
 	 */
 	emoji& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 * 
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
 	std::string build_json(bool with_id = false) const;
 
+	/**
+	 * @brief Emoji requires colons
+	 * 
+	 * @return true Requires colons
+	 * @return false Does not require colons
+	 */
 	bool requires_colons() const;
+
+	/**
+	 * @brief Emoji is managed
+	 * 
+	 * @return true Is managed
+	 * @return false Is not managed
+	 */
 	bool is_managed() const;
+
+	/**
+	 * @brief Emoji is animated
+	 * 
+	 * @return true Is animated
+	 * @return false Is noy animated
+	 */
 	bool is_animated() const;
+
+	/**
+	 * @brief Is available
+	 * 
+	 * @return true Is available
+	 * @return false Is unavailable
+	 */
 	bool is_available() const;
 
+	/**
+	 * @brief Load an image into the object as base64
+	 * 
+	 * @param image_blob Image binary data
+	 * @param type Type of image
+	 * @return emoji& Reference to self
+	 */
 	emoji& load_image(const std::string &image_blob, image_type type);
 };
 
+/**
+ * @brief Group of emojis
+ */
 typedef std::unordered_map<snowflake, emoji> emoji_map;
 
 };

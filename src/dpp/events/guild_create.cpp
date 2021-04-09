@@ -12,6 +12,13 @@
 
 using json = nlohmann::json;
 
+/**
+ * @brief Handle event
+ * 
+ * @param client Websocket client (current shard)
+ * @param j JSON data for the event
+ * @param raw Raw JSON string
+ */
 void guild_create::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "id"));
@@ -68,7 +75,7 @@ void guild_create::handle(class DiscordClient* client, json &j, const std::strin
 		}
 	}
 	dpp::get_guild_cache()->store(g);
-	if ((client->intents & dpp::GUILD_MEMBERS) | client->intents == 0) {
+	if ((client->intents & dpp::i_guild_members) || client->intents == 0) {
 		if (!g->is_unavailable()) {
 			client->add_chunk_queue(g->id);
 		}

@@ -38,6 +38,9 @@ struct voice_state_update_t : public event_dispatch_t {
 	voicestate state;
 };
 
+/**
+ * @brief Create interaction
+ */
 struct interaction_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param raw Raw event text as JSON

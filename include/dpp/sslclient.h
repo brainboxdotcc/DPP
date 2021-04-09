@@ -51,7 +51,9 @@ protected:
 	/** Start connection */
 	virtual void Connect();
 public:
+	/** Get total bytes sent */
 	uint64_t GetBytesOut();
+	/** Get total bytes received */
 	uint64_t GetBytesIn();
 
 	/** Connect to a specified host and port. Throws std::runtime_error on fatal error.

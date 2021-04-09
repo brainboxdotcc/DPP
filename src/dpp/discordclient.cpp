@@ -203,7 +203,7 @@ void DiscordClient::OneSecondTimer()
 				uint64_t next_guild_chunk = chunk_queue.front();
 				chunk_queue.pop();
 				json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(next_guild_chunk)},{"query",""},{"limit",0}}}});
-				if (this->intents & dpp::GUILD_PRESENCES) {
+				if (this->intents & dpp::i_guild_presences) {
 					chunk_req["d"]["presences"] = true;
 				}
 				this->write(chunk_req.dump());

@@ -5,6 +5,9 @@
 #include <unordered_map>
 #include <map>
 
+/**
+ * @brief The main namespace for D++ functions. classes and types
+ */
 namespace dpp {
 	/** A 64 bit unsigned value representing many things on discord.
 	 * Discord calls the value a 'snowflake' value.
@@ -24,12 +27,14 @@ namespace dpp {
 		~managed() = default;
 	};
 
+	/** Supported image types for profile pictures */
 	enum image_type {
 		i_png,
 		i_jpg,
 		i_gif
 	};
 
+	/** Log levels */
 	enum loglevel {
 		ll_trace = 0,
 		ll_debug,
@@ -39,8 +44,20 @@ namespace dpp {
 		ll_critical
 	};
 
+	/** Utility helper functions, generally for logging */
 	namespace utility {
+		/**
+		 * @brief Returns urrent date and time
+		 * 
+		 * @return std::string Current date and time
+		 */
 		std::string current_date_time();
+		/**
+		 * @brief Convert a dpp::loglevel enum value to a string
+		 * 
+		 * @param in log level to convert
+		 * @return std::string string form of log level
+		 */
 		std::string loglevel(dpp::loglevel in);
 	};
 

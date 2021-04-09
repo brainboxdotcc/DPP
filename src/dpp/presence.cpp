@@ -85,7 +85,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			activity a;
 			a.name = StringNotNull(&act, "name");
 			a.state = StringNotNull(&act, "state");
-			a.type = Int8NotNull(&act, "type");
+			a.type = (activity_type)Int8NotNull(&act, "type");
 			a.url = StringNotNull(&act, "url");
 			a.created_at = Int64NotNull(&act, "created_at");
 			if (act.find("timestamps") != act.end()) {

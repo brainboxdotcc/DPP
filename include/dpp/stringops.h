@@ -31,7 +31,11 @@
 #include <iostream>
 
 /**
- * Convert a string to lowercase using tolower()
+ * @brief Convert a string to lowercase using tolower()
+ * 
+ * @tparam T type of string
+ * @param s String to lowercase
+ * @return std::basic_string<T> lowercased string
  */
 template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>& s)
 {
@@ -41,7 +45,11 @@ template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>&
 }
 
 /**
- * Convert a string to uppercase using toupper()
+ * @brief Convert a string to uppercase using toupper()
+ * 
+ * @tparam T type of string
+ * @param s String to uppercase
+ * @return std::basic_string<T> uppercased string 
  */
 template <typename T> std::basic_string<T> uppercase(const std::basic_string<T>& s)
 {
@@ -51,7 +59,10 @@ template <typename T> std::basic_string<T> uppercase(const std::basic_string<T>&
 }
 
 /**
- *  trim from end of string (right)
+ * @brief trim from end of string (right)
+ * 
+ * @param s String to trim
+ * @return std::string trimmed string
  */
 inline std::string rtrim(std::string s)
 {
@@ -60,7 +71,10 @@ inline std::string rtrim(std::string s)
 }
 
 /**
- * trim from beginning of string (left)
+ * @brief trim from beginning of string (left)
+ * 
+ * @param s string to trim
+ * @return std::string trimmed string
  */
 inline std::string ltrim(std::string s)
 {
@@ -69,7 +83,10 @@ inline std::string ltrim(std::string s)
 }
 
 /**
- * trim from both ends of string (right then left)
+ * @brief Trim from both ends of string (right then left)
+ * 
+ * @param s string to trim 
+ * @return std::string trimmed string
  */
 inline std::string trim(std::string s)
 {
@@ -77,7 +94,11 @@ inline std::string trim(std::string s)
 }
 
 /**
- * Add commas to a string (or dots) based on current locale server-side
+ * @brief Add commas to a string (or dots) based on current locale server-side
+ * 
+ * @tparam T type of numeric value
+ * @param value Value
+ * @return std::string number with commas added 
  */
 template<class T> std::string Comma(T value)
 {
@@ -88,9 +109,14 @@ template<class T> std::string Comma(T value)
 }
 
 /**
- * Convert any value from a string to another type using stringstream.
+ * @brief  Convert any value from a string to another type using stringstream.
  * The optional second parameter indicates the format of the input string,
  * e.g. std::dec for decimal, std::hex for hex, std::oct for octal.
+ * 
+ * @tparam T Type to convert to 
+ * @param s String to convert from
+ * @param f Numeric base, e.g. `std::dec` or `std::hex`
+ * @return T Returned numeric value
  */
 template <typename T> T from_string(const std::string &s, std::ios_base & (*f)(std::ios_base&))
 {

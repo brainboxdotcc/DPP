@@ -11,6 +11,13 @@
 
 using json = nlohmann::json;
 
+/**
+ * @brief Handle event
+ * 
+ * @param client Websocket client (current shard)
+ * @param j JSON data for the event
+ * @param raw Raw JSON string
+ */
 void voice_state_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.voice_state_update) {
 		json& d = j["d"];

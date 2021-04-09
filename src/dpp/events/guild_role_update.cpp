@@ -12,6 +12,13 @@
 
 using json = nlohmann::json;
 
+/**
+ * @brief Handle event
+ * 
+ * @param client Websocket client (current shard)
+ * @param j JSON data for the event
+ * @param raw Raw JSON string
+ */
 void guild_role_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json &d = j["d"];
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
