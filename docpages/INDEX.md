@@ -8,9 +8,13 @@
 
 ## Reference
 * Library Types, Classes and Structs
-* REST Call Coverage
-* Event Handlers
+* [REST Calls](docpages/Z_07_REST.md)
+* [Event Handlers](docpages/Z_06_EVENT.md)
 
 ## Architecture
 * [Clusters, Shards and Guilds](docpages/Z_05_CLUSTERS.md)
 * [Thread model](docpages/Z_06_THREADMODEL.md)
+
+## Additional Resources
+* [GitHub Repository](https://github.com/brainboxdotcc/DPP)
+* [Discord Server](https://discord.gg/RnG32Ctyq7)
