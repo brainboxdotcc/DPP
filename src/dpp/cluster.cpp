@@ -12,8 +12,9 @@
 
 namespace dpp {
 
-cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters)
-	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), last_identify(time(NULL) - 5)
+cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp)
+	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id),
+	maxclusters(_maxclusters), last_identify(time(NULL) - 5), compressed(comp)
 {
 	rest = new request_queue(this);
 }
@@ -35,9 +36,9 @@ confirmation_callback_t::confirmation_callback_t(const std::string &_type, const
 void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 	gateway g = std::get<gateway>(shardinfo.value);
 	numshards = g.shards;
-	log(ll_info, fmt::format("Bot requires {} shard(s)", g.shards));
+	log(ll_info, fmt::format("Bot requires {} shard{}", g.shards, g.shards > 1 ? "s" : ""));
 	if (g.shards) {
-		if (g.session_start_remaining == 0) {
+		if (g.session_start_remaining < g.shards) {
 			log(ll_critical, fmt::format("Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later."));
 		} else {
 			log(ll_debug, fmt::format("{} of {} session starts remaining", g.session_start_remaining, g.session_start_total));
@@ -50,6 +51,7 @@ void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 
 void cluster::log(dpp::loglevel severity, const std::string &msg) {
 	if (dispatch.log) {
+		/* Pass to user if theyve hooked the event */
 		dpp::log_t logmsg(msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
@@ -61,25 +63,33 @@ void cluster::start() {
 	/* Start up all shards */
 	if (numshards == 0) {
 		get_gateway_bot(std::bind(&cluster::auto_shard, this, std::placeholders::_1));
-	}
-
-	for (uint32_t s = 0; s < numshards; ++s) {
-		/* Filter out shards that arent part of the current cluster, if the bot is clustered */
-		if (s % maxclusters == cluster_id) {
-			/* TODO: DiscordClient should spawn a thread in its Run() */
-			this->shards[s] = new DiscordClient(this, s, numshards, token, intents);
-			this->shards[s]->Run();
-			std::this_thread::sleep_for(std::chrono::seconds(5));
+	} else {
+		for (uint32_t s = 0; s < numshards; ++s) {
+			/* Filter out shards that arent part of the current cluster, if the bot is clustered */
+			if (s % maxclusters == cluster_id) {
+				/* TODO: DiscordClient should spawn a thread in its Run() */
+				this->shards[s] = new DiscordClient(this, s, numshards, token, intents, compressed);
+				this->shards[s]->Run();
+				/* Stagger the shard startups */
+				std::this_thread::sleep_for(std::chrono::seconds(5));
+			}
 		}
 	}
 }
 
 void cluster::post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent) {
 	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	rest->post_request(new http_request(endpoint, parameters, [callback](const http_request_completion_t& rv) {
+	rest->post_request(new http_request(endpoint, parameters, [endpoint, callback, this](const http_request_completion_t& rv) {
 		json j;
 		if (rv.error == h_success && !rv.body.empty()) {
-			j = json::parse(rv.body);
+			try {
+				j = json::parse(rv.body);
+			}
+			catch (const std::exception &e) {
+				/* TODO: Do something clever to handle malformed JSON */
+				log(ll_error, fmt::format("post_rest() to {}: {}", endpoint, e.what()));
+				return;
+			}
 		}
 		if (callback) {
 			callback(j, rv);
@@ -501,7 +511,14 @@ void cluster::guild_get_member(snowflake guild_id, snowflake user_id, command_co
 }
 
 void cluster::guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback) {
-	json j = json::parse(gm.build_json());
+	json j;
+	try {
+		j = json::parse(gm.build_json());
+	}
+	catch (const std::exception &e) {
+		log(ll_error, fmt::format("guild_add_member(): {}", e.what()));
+		return;
+	}
 	j["access_token"] = access_token;
 	this->post_rest("/api/guilds", std::to_string(gm.guild_id) + "/members/" + std::to_string(gm.user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
@@ -1000,7 +1017,14 @@ void cluster::edit_webhook(const class webhook& wh, command_completion_event_t c
 }
 
 void cluster::edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback) {
-	json jwh = json::parse(wh.build_json(true));
+	json jwh;
+	try {
+		jwh = json::parse(wh.build_json(true));
+	}
+	catch (const std::exception &e) {
+		log(ll_error, fmt::format("edit_webhook_with_token(): {}", e.what()));
+		return;
+	}
 	if (jwh.find("channel_id") != jwh.end()) {
 		jwh.erase(jwh.find("channel_id"));
 	}

@@ -10,9 +10,15 @@
 #include <thread>
 #include <nlohmann/json.hpp>
 #include <fmt/format.h>
+#include <zlib.h>
 
-DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents)
-       : WSClient("gateway.discord.gg", "443"),
+#define DEFAULT_GATEWAY		"gateway.discord.gg"
+#define PATH_UNCOMPRESSED	"/?v=6&encoding=json"
+#define PATH_COMPRESSED		"/?v=6&encoding=json&compress=zlib-stream"
+#define DECOMP_BUFFER_SIZE	512 * 1024
+
+DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
+       : WSClient(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
 	creator(_cluster),
 	shard_id(_shard_id),
 	max_shards(_max_shards),
@@ -22,8 +28,23 @@ DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_
 	last_seq(0),
 	sessionid(""),
 	intents(_intents),
-	runner(nullptr)
+	runner(nullptr),
+	compressed(comp),
+	decompressed_total(0),
+	decomp_buffer(nullptr)
 {
+	if (compressed) {
+		d_stream.zalloc = (alloc_func)0;
+		d_stream.zfree = (free_func)0;
+		d_stream.opaque = (voidpf)0;
+		if (inflateInit(&d_stream) != Z_OK) {
+			throw std::runtime_error("Can't initialise stream compression!");
+		}
+		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
+		log(dpp::ll_debug, fmt::format("Starting compression of shard {}", shard_id));
+	}
+
+	Connect();
 }
 
 DiscordClient::~DiscordClient()
@@ -32,6 +53,15 @@ DiscordClient::~DiscordClient()
 		runner->join();
 		delete runner;
 	}
+	if (compressed) {
+		inflateEnd(&d_stream);
+	}
+	delete[] this->decomp_buffer;
+}
+
+uint64_t DiscordClient::GetDeompressedBytesIn()
+{
+	return 0;
 }
 
 void DiscordClient::ThreadRun()
@@ -46,13 +76,74 @@ void DiscordClient::ThreadRun()
 
 void DiscordClient::Run()
 {
-	runner = new std::thread(&DiscordClient::ThreadRun, this);
+	this->runner = new std::thread(&DiscordClient::ThreadRun, this);
+	this->thread_id = runner->native_handle();
 }
 
 bool DiscordClient::HandleFrame(const std::string &buffer)
 {
-	log(dpp::ll_trace, fmt::format("R: {}", buffer));
-	json j = json::parse(buffer);
+	std::string& data = (std::string&)buffer;
+
+	/* gzip compression is a special case */
+	if (compressed) {
+		/* Check that we have a complete compressed frame */
+		if ((uint8_t)buffer[buffer.size() - 4] == 0x00 && (uint8_t)buffer[buffer.size() - 3] == 0x00 && (uint8_t)buffer[buffer.size() - 2] == 0xFF
+		&& (uint8_t)buffer[buffer.size() - 1] == 0xFF) {
+			/* Decompress buffer */
+			decompressed.clear();
+			d_stream.next_in = (Bytef *)buffer.c_str();
+			d_stream.avail_in = buffer.size();
+			do {
+				int have = 0;
+				d_stream.next_out = (Bytef*)decomp_buffer;
+				d_stream.avail_out = DECOMP_BUFFER_SIZE;
+				int ret = inflate(&d_stream, Z_NO_FLUSH);
+				have = DECOMP_BUFFER_SIZE - d_stream.avail_out;
+				switch (ret)
+				{
+					case Z_NEED_DICT:
+					case Z_STREAM_ERROR:
+						this->Error(6000);
+						this->close();
+						return true;
+					break;
+					case Z_DATA_ERROR:
+						this->Error(6001);
+						this->close();
+						return true;
+					break;
+					case Z_MEM_ERROR:
+						this->Error(6002);
+						this->close();
+						return true;
+					break;
+					case Z_OK:
+						this->decompressed.append((const char*)decomp_buffer, have);
+						this->decompressed_total += have;
+					break;
+					default:
+						/* Stub */
+					break;
+				}
+			} while (d_stream.avail_out == 0);
+			data = decompressed;
+		} else {
+			/* No complete compressed frame yet */
+			return false;
+		}
+	}
+
+
+	log(dpp::ll_trace, fmt::format("R: {}", data));
+	json j;
+	
+	try {
+		j = json::parse(data);
+	}
+	catch (const std::exception &e) {
+		log(dpp::ll_error, fmt::format("DiscordClient::HandleFrame {} [{}]", e.what(), data));
+		return true;
+	}
 
 	if (j.find("s") != j.end() && !j["s"].is_null()) {
 		last_seq = j["s"].get<uint64_t>();
@@ -63,7 +154,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 
 		switch (op) {
 			case 9:
-				/* Reset session state and fall through to 9 */
+				/* Reset session state and fall through to 10 */
 				op = 10;
 				log(dpp::ll_debug, fmt::format("Failed to resume session {}, will reidentify", sessionid));
 				this->sessionid = "";
@@ -125,7 +216,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 			case 0: {
 				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
 
-				HandleEvent(event, j, buffer);
+				HandleEvent(event, j, data);
 			}
 			break;
 			case 7:
@@ -170,6 +261,9 @@ void DiscordClient::Error(uint32_t errorcode)
 		{ 4012, "Invalid API version" },
 		{ 4013, "Invalid intent(s)" },
 		{ 4014, "Disallowed intent(s)" },
+		{ 6000, "ZLib Stream Error" },
+		{ 6001, "ZLib Data Error" },
+		{ 6002, "ZLib Memory Error" },
 		{ 6666, "Hell freezing over" }
 	};
 	std::string error = "Unknown error";

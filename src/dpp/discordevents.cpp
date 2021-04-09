@@ -21,7 +21,7 @@ char* strptime(const char* s, const char* f, struct tm* tm) {
 	input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
 	input >> std::get_time(tm, f);
 	if (input.fail()) {
-		return nullptr;
+		return "";
 	}
 	return (char*)(s + input.tellg());
 }
@@ -29,11 +29,18 @@ char* strptime(const char* s, const char* f, struct tm* tm) {
 
 uint64_t SnowflakeNotNull(json* j, const char *keyname)
 {
+	/* Snowflakes are a special case. Pun intended.
+	 * Because discord drinks the javascript kool-aid, they have to send 64 bit integers as strings as js can't deal with them
+	 * even though we can. So, all snowflakes are sent and received wrapped as string values and must be read by nlohmann::json
+	 * as string types, then converted from string to uint64_t. Checks for existence of the value, and that it is a string containing
+	 * a number. If not, then this function returns 0.
+	 */
 	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? from_string<uint64_t>((*j)[keyname].get<std::string>(), std::dec) : 0;
 }
 
 std::string StringNotNull(json* j, const char *keyname)
 {
+	/* Returns empty string if the value is not a string, or is null or not defined */
 	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? (*j)[keyname].get<std::string>() : "";
 }
 
@@ -64,7 +71,7 @@ bool BoolNotNull(json* j, const char *keyname)
 
 std::string base64_encode(unsigned char const* buf, unsigned int buffer_length)
 {
-
+	/* Quick and dirty base64 encode */
 	static const char to_base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	size_t ret_size = buffer_length + 2;
 

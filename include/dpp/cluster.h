@@ -119,8 +119,12 @@ typedef std::function<void(json&, const http_request_completion_t&)> json_encode
  * at the very least to make use of the library.
  */
 class cluster {
+
 	/** queue system for commands sent to Discord, and any replies */
 	request_queue* rest;
+
+	/** True if to use compression on shards */
+	bool compressed;
 
 	/**
 	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
@@ -168,8 +172,9 @@ public:
 	 * If you omit this value, the library will attempt to query the Discord API for the correct number of shards to start.
 	 * @param cluster_id The ID of this cluster, should be between 0 and MAXCLUSTERS-1
 	 * @param maxclusters The total number of clusters that are active, which may be on seperate processes or even separate machines.
+	 * @param compressed Wether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
 	 */
-	cluster(const std::string &token, uint32_t intents = 0, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1);
+	cluster(const std::string &token, uint32_t intents = 0, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true);
 
 	/** Destructor */
 	~cluster();

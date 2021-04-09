@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <dpp/wsclient.h>
+#include <fmt/format.h>
 
 const unsigned char WS_MASKBIT = (1 << 7);
 const unsigned char WS_FINBIT = (1 << 7);
@@ -11,22 +12,32 @@ const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 const size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-WSClient::WSClient(const std::string &hostname, const std::string &port) : SSLClient(hostname, port), state(HTTP_HEADERS), key("DASFcazvbgest")
+WSClient::WSClient(const std::string &hostname, const std::string &port, const std::string &urlpath)
+	: SSLClient(hostname, port),
+	state(HTTP_HEADERS),
+	key("DASFcazvbgest"),
+	path(urlpath)
 {
-	Connect();
 }
 
 void WSClient::Connect()
 {
 	state = HTTP_HEADERS;
 	/* Send headers synchronously */
-	this->write("GET /?v=6&encoding=json HTTP/1.1\r\n" 
-			"Host: " + hostname + "\r\n"
+	this->write(
+		fmt::format(
+
+			"GET {} HTTP/1.1\r\n"
+			"Host: {}\r\n"
 			"pragma: no-cache\r\n"
 			"Upgrade: WebSocket\r\n"
 			"Connection: Upgrade\r\n"
-			"Sec-WebSocket-Key: " + key + "\r\n"
-			"Sec-WebSocket-Version: 13\r\n\r\n");
+			"Sec-WebSocket-Key: {}\r\n"
+			"Sec-WebSocket-Version: 13\r\n\r\n",
+
+			this->path, this->hostname, this->key
+		)
+	);
 }
 
 WSClient::~WSClient()
@@ -132,9 +143,7 @@ bool WSClient::HandleBuffer(std::string &buffer)
 						}
 		
 						state = CONNECTED;
-						//std::cout << "Websocket connected\n";
 					} else {
-						//std::cout << "Unexpected status: " << status_line << std::endl;
 						return false;
 					}
 				}
@@ -153,13 +162,13 @@ WSState WSClient::GetState()
 	return this->state;
 }
 
-bool WSClient::parseheader(std::string &buffer)
+bool WSClient::parseheader(std::string &data)
 {
-	if (buffer.size() < 4) {
+	if (data.size() < 4) {
 		/* Not enough data to form a frame yet */
 		return false;
 	} else {
-		unsigned char opcode = buffer[0];
+		unsigned char opcode = data[0];
 		switch (opcode & ~WS_FINBIT)
 		{
 			case OP_CONTINUATION:
@@ -170,7 +179,7 @@ bool WSClient::parseheader(std::string &buffer)
 			{
 				std::string payload;
 
-				unsigned char len1 = buffer[1];
+				unsigned char len1 = data[1];
 				unsigned int payloadstartoffset = 2;
 
 				if (len1 & WS_MASKBIT) {
@@ -185,44 +194,44 @@ bool WSClient::parseheader(std::string &buffer)
 
 				if (len1 == WS_PAYLOAD_LENGTH_MAGIC_LARGE) {
 					/* 24 bit ("large") length frame */
-					if (buffer.length() < 8) {
+					if (data.length() < 8) {
 						/* We don't have a complete header yet */
 						return false;
 					}
 
-					unsigned char len2 = (unsigned char)buffer[2];
-					unsigned char len3 = (unsigned char)buffer[3];
+					unsigned char len2 = (unsigned char)data[2];
+					unsigned char len3 = (unsigned char)data[3];
 					len = (len2 << 8) | len3;
 
 					payloadstartoffset += 2;
 				} else if (len1 == WS_PAYLOAD_LENGTH_MAGIC_HUGE) {
 					/* 64 bit ("huge") length frame */
-					if (buffer.length() < 10) {
+					if (data.length() < 10) {
 						/* We don't have a complete header yet */
 						return false;
 					}
 					len = 0;
 					for (int v = 2, shift = 56; v < 10; ++v, shift -= 8) {
-						unsigned char l = (unsigned char)buffer[v];
+						unsigned char l = (unsigned char)data[v];
 						len |= (uint64_t)(l & 0xff) << shift;
 					}
 					payloadstartoffset += 8;
 				}
 
-				if (buffer.length() < payloadstartoffset + len) {
+				if (data.length() < payloadstartoffset + len) {
 					/* We don't have a complete frame yet */
 					return false;
 				}
 
 				/* Copy from buffer into string */
-				const std::string::iterator endit = buffer.begin() + payloadstartoffset + len;
-				for (std::string::const_iterator i = buffer.begin() + payloadstartoffset; i != endit; ++i) {
+				const std::string::iterator endit = data.begin() + payloadstartoffset + len;
+				for (std::string::const_iterator i = data.begin() + payloadstartoffset; i != endit; ++i) {
 					const unsigned char c = (unsigned char)*i;
 					payload.push_back(c);
 				}
 		
 				/* Remove this frame from the input buffer */
-				buffer.erase(buffer.begin(), endit);
+				data.erase(data.begin(), endit);
 
 				if ((opcode & ~WS_FINBIT) == OP_PING || (opcode & ~WS_FINBIT) == OP_PONG) {
 					HandlePingPong((opcode & ~WS_FINBIT) == OP_PING, payload);
@@ -236,9 +245,9 @@ bool WSClient::parseheader(std::string &buffer)
 
 			case OP_CLOSE:
 			{
-				uint16_t error = buffer[2] & 0xff;
+				uint16_t error = data[2] & 0xff;
 			       	error <<= 8;
-				error |= (buffer[3] & 0xff);
+				error |= (data[3] & 0xff);
 				this->Error(error);
 				return false;
 			}

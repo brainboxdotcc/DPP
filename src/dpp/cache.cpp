@@ -25,7 +25,7 @@ uint64_t counter () { \
 }
 
 
-/* Because othe( threads and sBecauseystems may run for a short while after an event is received, we don't immediately
+/* Because other threads and sBecauseystems may run for a short while after an event is received, we don't immediately
  * delete pointers when objects are replaced. We put them into a queue, and periodically delete pointers in the
  * queue.
  */

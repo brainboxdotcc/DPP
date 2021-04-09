@@ -33,6 +33,9 @@ class WSClient : public SSLClient
 	/** Current websocket state */
 	WSState state;
 
+	/** Path part of URL for websocket */
+	std::string path;
+
 	/** HTTP headers received on connecting/upgrading */
 	std::map<std::string, std::string> HTTPHeaders;
 
@@ -70,13 +73,14 @@ protected:
 	 * @return websocket state
 	 */
 	WSState GetState();
+
 public:
 
 	/** Connect to a specific websocket server.
 	 * @param hostname Hostname to connect to
 	 * @param port Port to connect to
 	 */
-        WSClient(const std::string &hostname, const std::string &port = "443");
+        WSClient(const std::string &hostname, const std::string &port = "443", const std::string &urlpath = "");
 
 	/** Destructor */
         virtual ~WSClient();

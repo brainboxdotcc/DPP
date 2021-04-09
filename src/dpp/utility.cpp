@@ -22,6 +22,7 @@ namespace dpp {
 				case dpp::ll_debug: return "DEBUG";
 				case dpp::ll_info: return "INFO";
 				case dpp::ll_warning: return "WARN";
+				case dpp::ll_error: return "ERROR";
 				case dpp::ll_critical: return "CRIT";
 				default: return "???";
 			}

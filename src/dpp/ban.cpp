@@ -24,6 +24,7 @@ ban& ban::fill_from_json(nlohmann::json* j) {
 }
 
 std::string ban::build_json() const {
+	/* This is an unused stub, because sending a ban is simple as a user id and a reason */
 	return "{}";
 }
 

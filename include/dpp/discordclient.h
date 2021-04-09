@@ -8,6 +8,7 @@
 #include <dpp/cluster.h>
 #include <queue>
 #include <thread>
+#include <zlib.h>
 
 using json = nlohmann::json;
 
@@ -27,6 +28,22 @@ class DiscordClient : public WSClient
 
 	/** Run shard loop under a thread */
 	void ThreadRun();
+
+	/** If true, stream compression is enabled */
+	bool compressed;
+
+	/** ZLib decompression buffer */
+	unsigned char* decomp_buffer;
+
+	/** Decompressed string */
+	std::string decompressed;
+
+	/** Frame decompression stream */
+	z_stream d_stream;
+
+	/** Total decompressed received bytes */
+	uint64_t decompressed_total;
+
 public:
 	/** Owning cluster */
 	class dpp::cluster* creator;
@@ -42,6 +59,9 @@ public:
 
 	/** Total number of shards */
 	uint32_t max_shards;
+
+	/** Thread ID */
+	std::thread::native_handle_type thread_id;
 
 	/** Last sequence number received, for resumes and pings */
 	uint64_t last_seq;
@@ -79,11 +99,15 @@ public:
 	 * @param _max_shards The total number of shards across all clusters
 	 * @param _token The bot token to use for identifying to the websocket
 	 * @param intents Privileged intents to use, a bitmask of values from dpp::intents
+	 * @param compressed True if the received data will be gzip compressed
 	 */
-	DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0);
+	DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true);
 
 	/** Destructor */
 	virtual ~DiscordClient();
+
+	/** Get decompressed total bytes received */
+	uint64_t GetDeompressedBytesIn();
 
 	/** Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client

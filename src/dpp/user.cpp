@@ -1,9 +1,11 @@
 #include <dpp/discord.h>
 #include <dpp/discordevents.h>
 #include <nlohmann/json.hpp>
+#include <fmt/format.h>
 
 using json = nlohmann::json;
 
+/* A mapping of discord's flag values to our bitmap (theyre different bit positions to fit other stuff in) */
 std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 0,       dpp::u_discord_employee },
 	{ 1 << 1,       dpp::u_partnered_owner },
@@ -30,6 +32,15 @@ user::user() :
 
 user::~user()
 {
+}
+
+std::string user::get_avatar_url() {
+	/* Animated profile pictures hashes start with a_ */
+	std::string suffix = avatar.substr(0, 2) == "a_" ? ".gif" : ".png";
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they havent.
+	 * At some point in the future this URL *will* change!
+	 */
+	return fmt::format("https://cdn.discordapp.com/avatars/{}/{}.{}", this->id, this->avatar, suffix); 
 }
 
 bool user::is_bot() {
