@@ -2,3 +2,7 @@ img {
 	max-width: 100% !important;
 	max-height: auto;
 }
+
+#projectname {
+	font-size: 160% !important;
+}
