@@ -12,6 +12,12 @@
                 "kind": "build",
                 "isDefault": true
             }
-        }
-    ]
+        },
+        {
+		"label": "doxygen",
+		"type": "shell",
+		"command": "doxygen",
+		"problemMatcher": []
+	}
+	]
 }

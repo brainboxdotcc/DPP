@@ -18,3 +18,7 @@
 ## Additional Resources
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)
 * [Discord Server](https://discord.gg/RnG32Ctyq7)
+
+## Learning Resources
+* [C++ for JavaScript Developers](https://pawelgrzybek.com/cpp-for-javascript-developers/)
+* [C++ In Four Hours](https://www.youtube.com/watch?v=vLnPwxZdW4Y&vl=en)
