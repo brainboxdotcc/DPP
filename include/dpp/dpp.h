@@ -1,4 +1,5 @@
 #pragma once
+#include <dpp/version.h>
 #include <string>
 #include <map>
 #include <vector>
