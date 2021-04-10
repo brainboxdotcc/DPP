@@ -13,8 +13,8 @@
 #include <zlib.h>
 
 #define DEFAULT_GATEWAY		"gateway.discord.gg"
-#define PATH_UNCOMPRESSED	"/?v=6&encoding=json"
-#define PATH_COMPRESSED		"/?v=6&encoding=json&compress=zlib-stream"
+#define PATH_UNCOMPRESSED	"/?v=8&encoding=json"
+#define PATH_COMPRESSED		"/?v=8&encoding=json&compress=zlib-stream"
 #define DECOMP_BUFFER_SIZE	512 * 1024
 
 DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
@@ -320,8 +320,8 @@ void DiscordClient::OneSecondTimer()
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 	if (this->GetState() == CONNECTED) {
 		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
+			std::lock_guard<std::mutex> locker(queue_mutex);
 			if (message_queue.size()) {
-				std::lock_guard<std::mutex> locker(queue_mutex);
 				std::string message = message_queue.front();
 				message_queue.pop_front();
 				this->write(message);

@@ -24,7 +24,8 @@ cluster::~cluster()
 	delete rest;
 }
 
-confirmation_callback_t::confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http) : type(_type), value(_value), http_info(_http)
+confirmation_callback_t::confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http)
+	: type(_type), value(_value), http_info(_http)
 {
 	if (type == "confirmation") {
 		confirmation newvalue = std::get<confirmation>(_value);

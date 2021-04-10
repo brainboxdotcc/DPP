@@ -25,4 +25,8 @@ enum intents {
 	i_direct_message_typing		= (1 << 14)
 };
 
+#define i_default_intents	dpp::i_guilds | dpp::i_guild_bans | dpp::i_guild_emojis | dpp::i_guild_integrations | dpp::i_guild_webhooks | dpp::i_guild_invites | dpp::i_guild_voice_states | dpp::i_guild_messages | dpp::i_guild_message_reactions | dpp::i_guild_message_typing | dpp::i_direct_messages | dpp::i_direct_message_typing | dpp::i_direct_message_reactions
+#define i_privileged intents	dpp::i_guild_members | dpp::i_guild_presences
+#define i_all_intents		i_default_intents | i_privileged_intents
+
 };
