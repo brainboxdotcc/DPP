@@ -339,8 +339,17 @@ void request_queue::out_loop()
 			if (queue_head.first && queue_head.second) {
 				queue_head.second->complete(*queue_head.first);
 			}
-			delete queue_head.first;
-			delete queue_head.second;
+
+			/* Queue deletions for 60 seconds from now */
+			time_t now = time(nullptr);
+			responses_to_delete[now + 60] = queue_head;
+
+			/* Check for deletable items */
+			while (responses_to_delete.size() && now >= responses_to_delete.begin()->first) {
+				delete responses_to_delete.begin()->second.first;
+				delete responses_to_delete.begin()->second.second;
+				responses_to_delete.erase(responses_to_delete.begin());
+			}
 		}
 	}
 	::close(notifier);

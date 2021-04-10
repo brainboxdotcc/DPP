@@ -168,6 +168,9 @@ private:
 	std::map<std::string, std::vector<http_request*>> requests_in;
 	/** Completed requests queue */
 	std::queue<std::pair<http_request_completion_t*, http_request*>> responses_out;
+	/** Completed requests to delete */
+	std::map<time_t, std::pair<http_request_completion_t*, http_request*>> responses_to_delete;
+
 	/** Set to true if the threads should terminate */
 	bool terminating;
 	/** True if globally rate limited - makes the entire request thread wait */

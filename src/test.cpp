@@ -58,11 +58,11 @@ int main(int argc, char const *argv[])
 			/* Send message! */
 			bot.message_create(reply,[&bot](const dpp::confirmation_callback_t& completion) {
 				/* This is called when the request is completed. 
-				 * completion.value contains the message object of the created message.
-				 * completion.type contains the string "message"
-				 * completion.http_info contains various information about the HTTP request which
-				 * was sent when issuing the command.
-				 */
+				* completion.value contains the message object of the created message.
+				* completion.type contains the string "message"
+				* completion.http_info contains various information about the HTTP request which
+				* was sent when issuing the command.
+				*/
 				dpp::message newmessage = std::get<dpp::message>(completion.value);
 				bot.log(dpp::ll_debug, fmt::format("message created! id={} http status={}", newmessage.id, completion.http_info.status));
 			});
