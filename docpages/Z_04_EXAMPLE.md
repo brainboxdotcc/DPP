@@ -18,7 +18,7 @@ Let's break this program down step by step:
 
 Make sure to include the header file for the D++ library with the instruction `#include <dpp/dpp.h>`!
 
-~~~~~~~~~~~~~~(.cpp)
+~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <iostream>
 
@@ -34,7 +34,7 @@ To make use of the library you must create a dpp::cluster object. This object is
 
 You can instantiate this class as shown below. Remember to put your bot token in the code where it says `"token"`!
 
-~~~~~~~~~~~~~~~(.cpp)
+~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <iostream>
 
@@ -50,7 +50,7 @@ int main()
 
 To have a bot that does something, you should attach to some events. Let's start by attaching to the `on_ready` event (dpp::cluster::on_ready) which will notify your program when the bot is connected:
 
-~~~~~~~~~~~~~~~~(.cpp)
+~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <iostream>
 
@@ -69,7 +69,7 @@ int main()
 
 If you want to receive messages, you should also attach your program to the `on_message_crete` event (dpp::custer::on_message_create) which is the same as the Discord.js `message` event. You add this to your program after the `on_ready` event:
 
-~~~~~~~~~~~~~~(.cpp)
+~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <iostream>
 
@@ -94,7 +94,7 @@ Attaching to an event is a good start, but to make a bot you should actually put
 #include <dpp/dpp.h>
 #include <iostream>
 
-~~~~~~~~~~~~~~~~~~~~~~~(.cpp)
+~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 int main()
 {
     dpp::cluster bot("token");
@@ -116,7 +116,7 @@ int main()
 
 Let's break down the code in the `on_message_create` event so that we can discuss what it is doing:
 
-~~~~~~~~~~~~~~~~~~~~~~~(.cpp)
+~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 if (event.msg->content == "!ping") {
 	bot.message_create(dpp::message(event.msg->channel_id, "Pong!"));
 }
@@ -135,7 +135,7 @@ To make the bot start, we must call the cluster::start method, e.g. in our progr
 
 The parameter which we set to false indicates if the function should return once all shards are created. Passing `false` here tells the program you do not need to do anything once `bot.start` is called, so the `return` statement directly afterwards is never reached:
 
-~~~~~~~~~~~~~~(.cpp)
+~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <iostream>
 
