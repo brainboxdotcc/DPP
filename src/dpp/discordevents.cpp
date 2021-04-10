@@ -159,7 +159,8 @@ std::map<std::string, event*> events = {
 	{ "APPLICATION_COMMAND_CREATE", new application_command_create() },
 	{ "APPLICATION_COMMAND_UPDATE", new application_command_update() },
 	{ "APPLICATION_COMMAND_DELETE", new application_command_delete() },
-	{ "INTERACTION_CREATE", new interaction_create() }
+	{ "INTERACTION_CREATE", new interaction_create() },
+	{ "USER_UPDATE", new user_update() }
 };
 
 void DiscordClient::HandleEvent(const std::string &event, json &j, const std::string &raw)

@@ -59,7 +59,6 @@ void DiscordClient::SetupZLib()
 			throw std::runtime_error("Can't initialise stream compression!");
 		}
 		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
-		log(dpp::ll_debug, fmt::format("Starting compression of shard {}", shard_id));
 	}
 
 }

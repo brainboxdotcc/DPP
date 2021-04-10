@@ -21,6 +21,8 @@ using json = nlohmann::json;
  */
 void guild_create::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json& d = j["d"];
+	if (SnowflakeNotNull(&d, "id") == 0)
+		return;
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "id"));
 	if (!g) {
 		g = new dpp::guild();
@@ -75,14 +77,12 @@ void guild_create::handle(class DiscordClient* client, json &j, const std::strin
 		}
 	}
 	dpp::get_guild_cache()->store(g);
-	if ((client->intents & dpp::i_guild_members) || client->intents == 0) {
-		if (!g->is_unavailable()) {
-			json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(g->id)},{"query",""},{"limit",0}}}});
-			if (client->intents & dpp::i_guild_presences) {
-				chunk_req["d"]["presences"] = true;
-			}
-			client->QueueMessage(chunk_req.dump());
+	if (g->id && (client->intents & dpp::i_guild_members)) {
+		json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(g->id)},{"query",""},{"limit",0}}}});
+		if (client->intents & dpp::i_guild_presences) {
+			chunk_req["d"]["presences"] = true;
 		}
+		client->QueueMessage(chunk_req.dump());
 	}
 
 	if (client->creator->dispatch.guild_create) {

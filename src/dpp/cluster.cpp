@@ -68,9 +68,14 @@ void cluster::start(bool return_after) {
 		for (uint32_t s = 0; s < numshards; ++s) {
 			/* Filter out shards that arent part of the current cluster, if the bot is clustered */
 			if (s % maxclusters == cluster_id) {
-				/* TODO: DiscordClient should spawn a thread in its Run() */
-				this->shards[s] = new DiscordClient(this, s, numshards, token, intents, compressed);
-				this->shards[s]->Run();
+				/* Each DiscordClient spawns its own thread in its Run() */
+				try {
+					this->shards[s] = new DiscordClient(this, s, numshards, token, intents, compressed);
+					this->shards[s]->Run();
+				}
+				catch (const std::exception &e) {
+					log(dpp::ll_critical, fmt::format("Could not start shard {}: {}", s, e.what()));
+				}
 				/* Stagger the shard startups */
 				std::this_thread::sleep_for(std::chrono::seconds(5));
 			}
