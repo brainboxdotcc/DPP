@@ -16,6 +16,17 @@ embed::~embed() {
 embed::embed() {
 }
 
+message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), member(nullptr), sent(0), edited(0),
+	tts(false), mention_everyone(false), mentions(nullptr), mention_roles(nullptr), pinned(false), webhook_id(0)
+{
+
+}
+
+message::message(snowflake _channel_id, const std::string &_content) : message(), channel_id(_channel_id), content(_content) {
+
+}
+
+
 embed::embed(json* j) : embed() {
 	title = StringNotNull(j, "title");
 	type = StringNotNull(j, "type");

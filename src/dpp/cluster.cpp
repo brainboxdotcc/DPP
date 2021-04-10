@@ -59,7 +59,7 @@ void cluster::log(dpp::loglevel severity, const std::string &msg) {
 	}
 }
 
-void cluster::start() {
+void cluster::start(bool return_after) {
 	/* Start up all shards */
 	if (numshards == 0) {
 		get_gateway_bot(std::bind(&cluster::auto_shard, this, std::placeholders::_1));
@@ -73,6 +73,12 @@ void cluster::start() {
 				/* Stagger the shard startups */
 				std::this_thread::sleep_for(std::chrono::seconds(5));
 			}
+		}
+	}
+
+	if (!return_after) {
+		while (true) {
+			std::this_thread::sleep_for(std::chrono::seconds(86400));
 		}
 	}
 }

@@ -217,6 +217,19 @@ struct message {
 	/** File content to upload (raw binary) */
 	std::string	filecontent;
 
+	/**
+	 * @brief Construct a new message object
+	 */
+	message();
+
+	/**
+	 * @brief Construct a new message object with a channel and content
+	 * 
+	 * @param channel_id The channel to send the message to
+	 * @param content The content of the message
+	 */
+	message(snowflake channel_id, const std::string &content);
+
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
 	 * @return A reference to self

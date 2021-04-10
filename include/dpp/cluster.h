@@ -164,12 +164,14 @@ public:
 	 */
 	std::map<uint32_t, class DiscordClient*> shards;
 
-	/** The details of the bot user. This is assumed to be identical across all shards
+	/** 
+	 * @brief The details of the bot user. This is assumed to be identical across all shards
 	 * in the cluster. Each connecting shard updates this information.
 	 */
 	dpp::user me;
 
-	/** Constructor for creating a cluster. All but the token are optional.
+	/** 
+	 * @brief Constructor for creating a cluster. All but the token are optional.
 	 * @param token The bot token to use for all HTTP commands and websocket connections
 	 * @param intents A bitmask of dpd::intents values for all shards on this cluster. This is required to be sent for all bots with over 100 servers.
 	 * @param shards The total number of shards on this bot. If there are multiple clusters, then (shards / clusters) actual shards will run on this cluster.
@@ -183,7 +185,8 @@ public:
 	/** Destructor */
 	~cluster();
 
-	/** Log a message to whatever log the user is using.
+	/** 
+	 * @brief Log a message to whatever log the user is using.
 	 * The logged message is passed up the chain to the on_log event in user code which can then do whatever
 	 * it wants to do with it.
 	 * @param severity The log level from dpp::loglevel
@@ -191,10 +194,13 @@ public:
 	 */
 	void log(dpp::loglevel severity, const std::string &msg);
 
-	/** Start the cluster, connecting all its shards.
+	/** 
+	 * @brief Start the cluster, connecting all its shards.
 	 * Returns once all shards are connected.
+	 * 
+	 * @param return_after If true the bot will return to your program after starting shards, if false this function will never return.
 	 */
-	void start();
+	void start(bool return_after = true);
 
 	/**
 	 * @brief Set the presence for all shards on the cluster
