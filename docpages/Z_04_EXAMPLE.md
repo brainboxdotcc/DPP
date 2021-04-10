@@ -67,7 +67,7 @@ int main()
 
 ### 4. Attach to another event to reveice messages
 
-If you want to receive messages, you should also attach your program to the `on_message_crete` event (dpp::custer::on_message_create) which is the same as the Discord.js `message` event. You add this to your program after the `on_ready` event:
+If you want to receive messages, you should also attach your program to the `on_message_create` event (dpp::cluster::on_message_create) which is the same as the Discord.js `message` event. You add this to your program after the `on_ready` event:
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -91,10 +91,10 @@ int main()
 
 Attaching to an event is a good start, but to make a bot you should actually put some program code into the events. Lets add some simple things into the events. We will add some code to the `on_ready` event to output the bot's nickname (dpp::cluster::me) and some code into the `on_message_create` to look for messages that are the text `!ping` and reply with `!pong`:
 
+~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <iostream>
 
-~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 int main()
 {
     dpp::cluster bot("token");
