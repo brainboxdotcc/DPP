@@ -22,8 +22,9 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), member(
 
 }
 
-message::message(snowflake _channel_id, const std::string &_content) : message(), channel_id(_channel_id), content(_content) {
-
+message::message(snowflake _channel_id, const std::string &_content) : message() {
+	channel_id = _channel_id;
+	content = _content;
 }
 
 
