@@ -10,6 +10,21 @@ presence::presence() : guild_id(0), user_id(0), flags(0)
 {
 }
 
+presence::presence(presence_status status, activity_type type, const std::string activity_description) {
+	dpp::activity a;
+	a.name = activity_description;
+	a.type = type;
+	activities.clear();
+	activities.push_back(a);
+	flags &= PF_CLEAR_STATUS;
+	if (status == ps_online)
+		flags |= p_status_online;
+	else if (status == ps_idle)
+		flags |= p_status_idle;
+	else if (status == ps_dnd)
+		flags |= p_status_dnd;
+}
+
 presence::~presence() {
 }
 
@@ -110,12 +125,18 @@ std::string presence::build_json() const {
 		{ps_dnd, "dnd"}
 	};
 	json j({
-		{ "status", status_name_mapping[status()] },
-		{ "since", 1 },
-		{ "afk", false }
+
+		{"op", 3},
+		{"d",	
+			{
+				{ "status", status_name_mapping[status()] },
+				{ "since", json::value_t::null },
+				{ "afk", false }
+			}
+		}
 	});
 	if (activities.size()) {
-		j["game"] = json({
+		j["d"]["game"] = json({
 			{ "name", activities[0].name },
 			{ "type", activities[0].type }
 		});

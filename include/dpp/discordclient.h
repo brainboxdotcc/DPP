@@ -8,6 +8,8 @@
 #include <dpp/cluster.h>
 #include <queue>
 #include <thread>
+#include <deque>
+#include <mutex>
 #include <zlib.h>
 
 using json = nlohmann::json;
@@ -20,8 +22,11 @@ namespace dpp {
 /** @brief Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
 class DiscordClient : public WSClient
 {
-	/** Queue of guild ids we are requesting member chunks for */
-	std::queue<uint64_t> chunk_queue;
+	/** Mutex for message queue */
+	std::mutex queue_mutex;
+
+	/** Queue of outbound messages */
+	std::deque<std::string> message_queue;
 
 	/** Thread this shard is executing on */
 	std::thread* runner;
@@ -96,6 +101,29 @@ public:
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
 	virtual void OneSecondTimer();
 
+	/**
+	 * @brief Queue a message to be sent via the websocket
+	 * 
+	 * @param j The JSON data of the message to be sent
+	 * @param to_front If set to true, will place the message at the front of the queue not the back
+	 * (this is for urgent messages such as heartbeat, presence, so they can take precedence over
+	 * chunk requests etc)
+	 */
+	void QueueMessage(const std::string &j, bool to_front = false);
+
+	/**
+	 * @brief Clear the outbound message queue
+	 * 
+	 */
+	void ClearQueue();
+
+	/**
+	 * @brief Get the size of the outbound message queue
+	 * 
+	 * @return The size of the queue
+	 */
+	size_t GetQueueSize();
+
 	/** Constructor takes shard id, max shards and token.
 	 * @param _cluster The owning cluster for this shard
 	 * @param _shard_id The ID of the shard to start
@@ -125,12 +153,5 @@ public:
 
 	/** Start and monitor I/O loop */
 	void Run();
-
-	/** Add a guild to the chunk queue, to request its guild member chunks on a timer
-	 * (must be on a timer because the guild member chunk requests are rate limited).
-	 * @param id Guild to add to the chunk queue
-	 */
-	void add_chunk_queue(uint64_t id);
-
 };
 

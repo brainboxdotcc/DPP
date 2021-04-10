@@ -51,8 +51,8 @@ enum presence_status : uint8_t {
 /** Game types */
 enum activity_type : uint8_t {
 	at_game		=	0, //< "Playing ..."
-	at_listening	=	1, //< "Listening ..."
-	at_streaming	=	2, //< "Streaming..."
+	at_streaming	=	1, //< "Streaming ..."
+	at_listening	=	2, //< "Listening to..."
 	at_custom	=	3, //< Custom with emoji
 	at_competing	=	4  //< "Competing in..."
 };
@@ -121,6 +121,15 @@ public:
 
 	/** Constructor */
 	presence();
+
+	/**
+	 * @brief Construct a new presence object with some parameters for sending to a websocket
+	 * 
+	 * @param status 
+	 * @param type 
+	 * @param activity_description 
+	 */
+	presence(presence_status status, activity_type type, const std::string activity_description);
 
 	/** Destructor */
 	~presence();

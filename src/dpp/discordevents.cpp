@@ -172,8 +172,3 @@ void DiscordClient::HandleEvent(const std::string &event, json &j, const std::st
 	}
 }
 
-void DiscordClient::add_chunk_queue(uint64_t id)
-{
-	chunk_queue.push(id);
-}
-

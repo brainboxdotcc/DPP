@@ -77,7 +77,11 @@ void guild_create::handle(class DiscordClient* client, json &j, const std::strin
 	dpp::get_guild_cache()->store(g);
 	if ((client->intents & dpp::i_guild_members) || client->intents == 0) {
 		if (!g->is_unavailable()) {
-			client->add_chunk_queue(g->id);
+			json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(g->id)},{"query",""},{"limit",0}}}});
+			if (client->intents & dpp::i_guild_presences) {
+				chunk_req["d"]["presences"] = true;
+			}
+			client->QueueMessage(chunk_req.dump());
 		}
 	}
 

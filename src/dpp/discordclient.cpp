@@ -293,28 +293,48 @@ void DiscordClient::log(dpp::loglevel severity, const std::string &msg)
 	creator->log(severity, msg);
 }
 
+void DiscordClient::QueueMessage(const std::string &j, bool to_front)
+{
+	std::lock_guard<std::mutex> locker(queue_mutex);
+	if (to_front) {
+		message_queue.push_front(j);
+	} else {
+		message_queue.push_back(j);
+	}
+}
+
+void DiscordClient::ClearQueue()
+{
+	std::lock_guard<std::mutex> locker(queue_mutex);
+	message_queue.clear();
+}
+
+size_t DiscordClient::GetQueueSize()
+{
+	std::lock_guard<std::mutex> locker(queue_mutex);
+	return message_queue.size();
+}
+
 void DiscordClient::OneSecondTimer()
 {
+	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 	if (this->GetState() == CONNECTED) {
+		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
+			if (message_queue.size()) {
+				std::lock_guard<std::mutex> locker(queue_mutex);
+				std::string message = message_queue.front();
+				message_queue.pop_front();
+				this->write(message);
+			}
+		}
+
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 				log(dpp::ll_debug, fmt::format("Emit heartbeat, seq={}", last_seq));
-				this->write(json({{"op", 1}, {"d", last_seq}}).dump());
+				QueueMessage(json({{"op", 1}, {"d", last_seq}}).dump(), true);
 				last_heartbeat = time(NULL);
 				dpp::garbage_collection();
-			}
-		}
-		/* Rate limited chunk requests, 1 every odd second, 2 every even second */
-		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
-			if (chunk_queue.size()) {
-				uint64_t next_guild_chunk = chunk_queue.front();
-				chunk_queue.pop();
-				json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(next_guild_chunk)},{"query",""},{"limit",0}}}});
-				if (this->intents & dpp::i_guild_presences) {
-					chunk_req["d"]["presences"] = true;
-				}
-				this->write(chunk_req.dump());
 			}
 		}
 	}

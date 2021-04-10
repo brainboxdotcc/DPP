@@ -106,6 +106,12 @@ gateway::gateway(nlohmann::json* j) {
 	session_start_max_concurrency = Int32NotNull(&((*j)["session_start_limit"]), "max_concurrency");
 }
 
+void cluster::set_presence(const dpp::presence &p) {
+	std::string string_presence = p.build_json();
+	for (auto& s : shards) {
+		s.second->QueueMessage(string_presence, true);
+	}
+}
 
 void cluster::get_gateway_bot(command_completion_event_t callback) {
 	this->post_rest("/api/gateway", "bot", m_get, "", [callback](json &j, const http_request_completion_t& http) {

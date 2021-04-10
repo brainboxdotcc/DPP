@@ -196,6 +196,13 @@ public:
 	 */
 	void start();
 
+	/**
+	 * @brief Set the presence for all shards on the cluster
+	 * 
+	 * @param p The presence to set. Only the online status and the first activity are sent.
+	 */
+	void set_presence(const class dpp::presence &p);
+
 	/* Functions for attaching to event handlers */
 
 	/**

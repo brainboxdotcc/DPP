@@ -72,12 +72,14 @@ int main(int argc, char const *argv[])
 	/* This method call actually starts the bot by connecting all shards in the cluster */
 	bot.start();
 	
-	/* cluster::start() returns once all clusters are started. Clusters run in their own threads. */
+	/* cluster::start() returns once all clusters are started. Clusters run in their own threads.
+	 * Loop forever. We could do anything else we wanted here.
+	 * DO NOT just do `while(true);` as this will eat CPU.
+	 */
 	while (true) {
-		/* Loop forever. We could do anything else we wanted here.
-		 * DO NOT just do `while(true);` as this will eat CPU.
-		 */
-		std::this_thread::sleep_for(std::chrono::seconds(60));
+		bot.set_presence(dpp::presence(dpp::ps_online, dpp::at_listening, "the screams of tortured souls"));
+		
+		std::this_thread::sleep_for(std::chrono::seconds(20));
 	}
 	
 	/* Never reached */
