@@ -1,5 +1,6 @@
 #include <dpp/discord.h>
 #include <dpp/discordevents.h>
+#include <dpp/stringops.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -77,6 +78,14 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_CATEGORY) ? dpp::c_category : 0;
 	this->flags |= (type == GUILD_NEWS) ? dpp::c_news : 0;
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
+
+	if (j->find("recipients") != j->end()) {
+		recipients.clear();
+		for (auto & r : (*j)["recipients"]) {
+			recipients.push_back(from_string<uint64_t>(r["id"].get<std::string>(), std::dec));
+		}
+	}
+
 	return *this;
 }
 

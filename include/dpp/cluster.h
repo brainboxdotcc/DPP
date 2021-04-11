@@ -131,6 +131,16 @@ class cluster {
 	bool compressed;
 
 	/**
+	 * @brief Lock to prevent concurrent access to dm_channels
+	 */
+	std::mutex dm_list_lock;
+
+	/**
+	 * @brief Active DM channels for the bot
+	 */
+	std::unordered_map<snowflake, snowflake> dm_channels;
+
+	/**
 	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
 	 * 
 	 * @param shardinfo Received HTTP data from API call
@@ -193,6 +203,22 @@ public:
 	 * @param msg The log message to output
 	 */
 	void log(dpp::loglevel severity, const std::string &msg);
+
+	/**
+	 * @brief Get the dm channel for a user id
+	 * 
+	 * @param user_id the user id to get the dm channel for
+	 * @return Returns 0 on failure
+	 */
+	snowflake get_dm_channel(snowflake user_id);
+
+	/**
+	 * @brief Set the dm channel id for a user id
+	 * 
+	 * @param user_id user id to set the dm channel for
+	 * @param channel_id dm channel to set
+	 */
+	void set_dm_channel(snowflake user_id, snowflake channel_id);
 
 	/** 
 	 * @brief Start the cluster, connecting all its shards.
@@ -531,6 +557,15 @@ public:
 	 * @param filecontent 
 	 */
 	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
+
+	/**
+	 * @brief Create a direct message, also create the channel for the direct message if needed
+	 * 
+	 * @param user_id 
+	 * @param m 
+	 * @param callback 
+	 */
+	void direct_message_create(snowflake user_id, const message &m, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get a message

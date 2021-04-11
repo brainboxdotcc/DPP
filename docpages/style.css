@@ -6,3 +6,7 @@ img {
 #projectname {
 	font-size: 160% !important;
 }
+
+table.doxtable td, table.doxtable th {
+	width: 50% !important;
+}

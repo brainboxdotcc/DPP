@@ -61,6 +61,9 @@ public:
 	/** Timestamp of last pinned message */
 	time_t last_pin_timestamp;
 
+	/** DM recipients */
+	std::vector<snowflake> recipients;
+
 	/** Constructor */
 	channel();
 

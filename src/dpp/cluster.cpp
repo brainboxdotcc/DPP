@@ -80,13 +80,39 @@ void cluster::start(bool return_after) {
 				std::this_thread::sleep_for(std::chrono::seconds(5));
 			}
 		}
-	}
 
-	if (!return_after) {
-		while (true) {
-			std::this_thread::sleep_for(std::chrono::seconds(86400));
+		/* Get all active DM channels and map them to user id -> dm id */
+		this->current_user_get_dms([this](const dpp::confirmation_callback_t& completion) {
+			dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
+			for (auto & c : dmchannels) {
+				for (auto & u : c.second.recipients) {
+					this->set_dm_channel(u, c.second.id);
+					std::cout << "Add DM recipient uid=" << u << " cid=" << c.second.id << "\n";
+				}
+			}
+		});
+
+		if (!return_after) {
+			while (true) {
+				std::this_thread::sleep_for(std::chrono::seconds(86400));
+			}
 		}
 	}
+}
+
+snowflake cluster::get_dm_channel(snowflake user_id) {
+	std::lock_guard<std::mutex> lock(dm_list_lock);
+	auto i = dm_channels.find(user_id);
+	if (i != dm_channels.end()) {
+		return i->second;
+	} else {
+		return 0;
+	}
+}
+
+void cluster::set_dm_channel(snowflake user_id, snowflake channel_id) {
+	std::lock_guard<std::mutex> lock(dm_list_lock);
+	dm_channels[user_id] = channel_id;
 }
 
 void cluster::post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent) {
@@ -131,6 +157,27 @@ void cluster::get_gateway_bot(command_completion_event_t callback) {
 			callback(confirmation_callback_t("gateway", gateway(&j), http));
 		}
 	});
+}
+
+void cluster::direct_message_create(snowflake user_id, const message &m, command_completion_event_t callback) {
+	/* Find out if a DM channel already exists */
+	message msg = m;
+	snowflake dm_channel_id = this->get_dm_channel(user_id);
+	if (!dm_channel_id) {
+		std::cout << "New dm channel\n";
+		this->create_dm_channel(user_id, [user_id, this, msg, callback](const dpp::confirmation_callback_t& completion) {
+			message m2 = msg;
+			dpp::channel c = std::get<channel>(completion.value);
+			std::cout << "Got new dm channel " << c.id << "\n";
+			m2.channel_id = c.id;
+			this->set_dm_channel(user_id, c.id);
+			message_create(m2, callback);
+			std::cout << "Created\n";
+		});
+	} else {
+		msg.channel_id = dm_channel_id;
+		message_create(msg, callback);
+	}
 }
 
 void cluster::message_create(const message &m, command_completion_event_t callback) {

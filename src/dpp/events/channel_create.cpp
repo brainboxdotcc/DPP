@@ -9,6 +9,7 @@
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
 #include <nlohmann/json.hpp>
+#include <fmt/format.h>
 
 using json = nlohmann::json;
 
@@ -21,12 +22,19 @@ using json = nlohmann::json;
  */
 void channel_create::handle(class DiscordClient* client, json &j, const std::string &raw) {
 	json& d = j["d"];
+	
 	dpp::channel* c = dpp::find_channel(SnowflakeNotNull(&d, "id"));
 	if (!c) {
 		c = new dpp::channel();
 	}
 	c->fill_from_json(&d);
 	dpp::get_channel_cache()->store(c);
+	if (c->recipients.size()) {
+		for (auto & u : c->recipients) {
+			client->log(dpp::ll_debug, fmt::format("Got a DM channel {} for user {}", c->id, u));
+			client->creator->set_dm_channel(u, c->id);
+		}
+	}
 	dpp::guild* g = dpp::find_guild(c->guild_id);
 	if (g) {
 		g->channels.push_back(c->id);

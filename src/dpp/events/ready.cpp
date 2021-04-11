@@ -37,13 +37,5 @@ void ready::handle(class DiscordClient* client, json &j, const std::string &raw)
 		r.shard_id = client->shard_id;
 		client->creator->dispatch.ready(r);
 	}
-
-	/* Simulate GUILD_CREATE for each guild in the list.
-	 * These generally arrive as unavailable and are filled by separate GUILD_CREATEs */
-	for (auto & g : j["d"]["guilds"]) {
-		json gc;
-		gc["d"] = g;
-		client->HandleEvent("GUILD_CREATE", gc, "");
-	}
 }
 
