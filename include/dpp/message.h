@@ -230,6 +230,13 @@ struct message {
 	 */
 	message(snowflake channel_id, const std::string &content);
 
+	/**
+	 * @brief Construct a new message object with content
+	 * 
+	 * @param content The content of the message
+	 */
+	message(const std::string &content);
+
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
 	 * @return A reference to self

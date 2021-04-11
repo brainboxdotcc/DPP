@@ -223,7 +223,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 						obj["d"]["intents"] = this->intents;
 					}
 					this->write(obj.dump());
-					creator->last_identify = time(NULL);
+					this->connect_time = creator->last_identify = time(NULL);
 				}
 			break;
 			case 0: {
@@ -239,6 +239,16 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 		}
 	}
 	return true;
+}
+
+dpp::utility::uptime DiscordClient::Uptime()
+{
+	return dpp::utility::uptime(time(NULL) - connect_time);
+}
+
+bool DiscordClient::IsConnected()
+{
+	return (this->GetState() == CONNECTED) && (last_seq > 0);
 }
 
 void DiscordClient::Error(uint32_t errorcode)

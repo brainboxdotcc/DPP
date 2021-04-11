@@ -41,3 +41,6 @@ Yes! D++ supports sharding and also clustering (grouping of shards into one proc
 
 ## How do I contribute to the documentation and website?
 The documentation and website are built using Doxygen. To contribute to site pages, submit a Pull Request to the main repository. The site pages can be found within the `docpages` directory. Details of classes, variables, namespaces etc are auto generated from Doxygen comments within the library source code in the `include` and `src` folders.
+
+## What version of the Discord API does this library support?
+D++ Only supports Discord API v8, the latest version.

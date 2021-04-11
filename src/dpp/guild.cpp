@@ -197,6 +197,10 @@ bool guild::is_preview_enabled() const {
 	return this->flags & g_preview_enabled;
 }
 
+ bool guild::has_animated_icon_hash() const {
+	 return this->flags & g_has_animated_icon;
+ }
+
 std::string guild::build_json(bool with_id) const {
 	json j;
 	if (with_id) {
@@ -237,7 +241,12 @@ guild& guild::fill_from_json(nlohmann::json* d) {
 	this->id = SnowflakeNotNull(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
 		this->name = StringNotNull(d, "name");
-		this->icon = StringNotNull(d, "icon");
+		std::string _icon = StringNotNull(d, "icon");
+		if (_icon.length() > 2 && _icon.substr(0, 2) == "a_") {
+			_icon = _icon.substr(2, _icon.length());
+			this->flags |= g_has_animated_icon;
+		}
+		this->icon = _icon;
 		this->discovery_splash = StringNotNull(d, "discovery_splash");
 		this->owner_id = SnowflakeNotNull(d, "owner_id");
 		if (!(*d)["region"].is_null()) {

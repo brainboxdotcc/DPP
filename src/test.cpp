@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
 	configfile >> configdocument;
 
 	/* Create a D++ cluster. There are many more optional parameters but as this is a demo lets keep it simple. */
-	dpp::cluster bot(configdocument["token"], i_default_intents | dpp::i_guild_members);
+	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members);
 
 	/* Attach to the log event to log messages from the library.
 	 * You can attach much fancier loggers to this such as spdlog,

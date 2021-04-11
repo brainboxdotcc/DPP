@@ -34,91 +34,103 @@ user::~user()
 {
 }
 
-std::string user::get_avatar_url() {
-	/* Animated profile pictures hashes start with a_ */
-	std::string suffix = avatar.substr(0, 2) == "a_" ? ".gif" : ".png";
+std::string user::get_avatar_url()  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they havent.
 	 * At some point in the future this URL *will* change!
 	 */
-	return fmt::format("https://cdn.discordapp.com/avatars/{}/{}.{}", this->id, this->avatar, suffix); 
+	return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}", 
+		this->id, 
+		(has_animated_icon() ? "a_" : ""), 
+		this->avatar.to_string(), 
+		(has_animated_icon() ? "gif" : "png")
+	); 
 }
 
-bool user::is_bot() {
+bool user::is_bot() const {
 	 return this->flags & u_bot; 
 }
 
-bool user::is_system() {
+bool user::is_system() const {
 	 return this->flags & u_system; 
 }
 
-bool user::is_mfa_enabled() {
+bool user::is_mfa_enabled() const {
 	 return this->flags & u_mfa_enabled; 
 }
 
-bool user::is_verified() {
+bool user::is_verified() const {
 	 return this->flags & u_verified; 
 }
 
-bool user::has_nitro_full() {
+bool user::has_nitro_full() const {
 	 return this->flags & u_nitro_full; 
 }
 
-bool user::has_nitro_classic() {
+bool user::has_nitro_classic() const {
 	 return this->flags & u_nitro_classic; 
 }
 
-bool user::is_discord_employee() {
+bool user::is_discord_employee() const {
 	 return this->flags & u_discord_employee; 
 }
 
-bool user::is_partnered_owner() {
+bool user::is_partnered_owner() const {
 	 return this->flags & u_partnered_owner; 
 }
 
-bool user::has_hypesquad_events() {
+bool user::has_hypesquad_events() const {
 	 return this->flags & u_hypesquad_events; 
 }
 
-bool user::is_bughunter_1() {
+bool user::is_bughunter_1() const {
 	 return this->flags & u_bughunter_1; 
 }
 
-bool user::is_house_bravery() {
+bool user::is_house_bravery() const {
 	 return this->flags & u_house_bravery; 
 }
 
-bool user::is_house_brilliance() {
+bool user::is_house_brilliance() const {
 	 return this->flags & u_house_brilliance; 
 }
 
-bool user::is_house_balanace() {
+bool user::is_house_balanace() const {
 	 return this->flags & u_house_balanace; 
 }
 
-bool user::is_early_supporter() {
+bool user::is_early_supporter() const {
 	 return this->flags & u_early_supporter; 
 }
 
-bool user::is_team_user() {
+bool user::is_team_user() const {
 	 return this->flags & u_team_user; 
 }
 
-bool user::is_bughunter_2() {
+bool user::is_bughunter_2() const {
 	 return this->flags & u_bughunter_2; 
 }
 
-bool user::is_verified_bot() {
+bool user::is_verified_bot() const {
 	 return this->flags & u_verified_bot; 
 }
 
-bool user::is_verified_bot_dev() {
+bool user::is_verified_bot_dev() const {
 	 return this->flags & u_verified_bot_dev; 
+}
+
+bool user::has_animated_icon() const {
+	return this->flags & u_animated_icon;
 }
 
 user& user::fill_from_json(json* j) {
 	this->id = SnowflakeNotNull(j, "id");
 	this->username = StringNotNull(j, "username");
-	this->avatar = StringNotNull(j, "avatar");
+	std::string av = StringNotNull(j, "avatar");
+	if (av.length() > 2 && av.substr(0, 2) == "a_") {
+		av = av.substr(2, av.length());
+		this->flags |= u_animated_icon;
+	}
+	this->avatar = av;
 	this->discriminator = SnowflakeNotNull(j, "discriminator");
 	this->flags |= BoolNotNull(j, "bot") ? dpp::u_bot : 0;
 	this->flags |= BoolNotNull(j, "system") ? dpp::u_system : 0;

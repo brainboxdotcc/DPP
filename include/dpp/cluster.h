@@ -136,6 +136,11 @@ class cluster {
 	std::mutex dm_list_lock;
 
 	/**
+	 * @brief Start time of cluster
+	 */
+	time_t start_time;
+
+	/**
 	 * @brief Active DM channels for the bot
 	 */
 	std::unordered_map<snowflake, snowflake> dm_channels;
@@ -220,6 +225,13 @@ public:
 	 */
 	void set_dm_channel(snowflake user_id, snowflake channel_id);
 
+	/**
+	 * @brief Returns the uptime of the cluster
+	 * 
+	 * @return dpp::utility::uptime The uptime of the cluster
+	 */
+	dpp::utility::uptime uptime();
+
 	/** 
 	 * @brief Start the cluster, connecting all its shards.
 	 * Returns once all shards are connected.
@@ -234,6 +246,14 @@ public:
 	 * @param p The presence to set. Only the online status and the first activity are sent.
 	 */
 	void set_presence(const class dpp::presence &p);
+
+	/**
+	 * @brief Get a shard by id, returning the DiscordClient
+	 * 
+	 * @param id Shard ID
+	 * @return DiscordClient* shard, or null
+	 */
+	DiscordClient* get_shard(uint32_t id);
 
 	/* Functions for attaching to event handlers */
 

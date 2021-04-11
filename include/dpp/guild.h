@@ -26,26 +26,27 @@ enum region {
 
 /** The various flags that represent the status of a dpp::guild object */
 enum guild_flags {
-	g_large =				0b00000000000000000001,
-	g_unavailable = 			0b00000000000000000010,
-	g_widget_enabled =			0b00000000000000000100,
-	g_invite_splash =			0b00000000000000001000,
-	g_vip_regions =				0b00000000000000010000,
-	g_vanity_url =				0b00000000000000100000,
-	g_verified =				0b00000000000001000000,
-	g_partnered =				0b00000000000010000000,
-	g_community =				0b00000000000100000000,
-	g_commerce =				0b00000000001000000000,
-	g_news =				0b00000000010000000000,
-	g_discoverable =			0b00000000100000000000,
-	g_featureable =				0b00000001000000000000,
-	g_animated_icon =			0b00000010000000000000,
-	g_banner =				0b00000100000000000000,
-	g_welcome_screen_enabled =		0b00001000000000000000,
-	g_member_verification_gate =		0b00010000000000000000,
-	g_preview_enabled =			0b00100000000000000000,
-	g_no_join_notifications =		0b01000000000000000000,
-	g_no_boost_notifications =		0b10000000000000000000
+	g_large =				0b000000000000000000001,
+	g_unavailable = 			0b000000000000000000010,
+	g_widget_enabled =			0b000000000000000000100,
+	g_invite_splash =			0b000000000000000001000,
+	g_vip_regions =				0b000000000000000010000,
+	g_vanity_url =				0b000000000000000100000,
+	g_verified =				0b000000000000001000000,
+	g_partnered =				0b000000000000010000000,
+	g_community =				0b000000000000100000000,
+	g_commerce =				0b000000000001000000000,
+	g_news =				0b000000000010000000000,
+	g_discoverable =			0b000000000100000000000,
+	g_featureable =				0b000000001000000000000,
+	g_animated_icon =			0b000000010000000000000,
+	g_banner =				0b000000100000000000000,
+	g_welcome_screen_enabled =		0b000001000000000000000,
+	g_member_verification_gate =		0b000010000000000000000,
+	g_preview_enabled =			0b000100000000000000000,
+	g_no_join_notifications =		0b001000000000000000000,
+	g_no_boost_notifications =		0b010000000000000000000,
+	g_has_animated_icon =			0b100000000000000000000
 };
 
 /** Represents a guild object */
@@ -56,11 +57,11 @@ public:
 	/** Guild name */
 	std::string name;
 	/** Guild icon hash */
-	std::string icon;
+	utility::iconhash icon;
 	/** Guild splash hash */
-	std::string splash;
+	utility::iconhash splash;
 	/** Guild discovery splash hash */
-	std::string discovery_splash;
+	utility::iconhash discovery_splash;
 	/** Snowflake id of guild owner */
 	snowflake owner_id;
 	/** Guild voice region */
@@ -92,7 +93,7 @@ public:
 	/** Server description for communities */
 	std::string description;
 	/** Server banner hash */
-	std::string banner;
+	utility::iconhash banner;
 	/** Boost level */
 	uint8_t premium_tier;
 	/** Number of boosters */
@@ -176,7 +177,7 @@ public:
 	/** Guild is featureable */
 	bool is_featureable() const;
 
-	/** Guild has an animated icon */
+	/** Guild is allowed an animated icon */
 	bool has_animated_icon() const;
 
 	/** Guild has a banner image */
@@ -190,6 +191,9 @@ public:
 
 	/** Guild has preview enabled */
 	bool is_preview_enabled() const;
+
+	/** Server icon is actually an animated gif */
+	bool has_animated_icon_hash() const;
 
 };
 

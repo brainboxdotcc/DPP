@@ -27,6 +27,9 @@ message::message(snowflake _channel_id, const std::string &_content) : message()
 	content = _content;
 }
 
+message::message(const std::string &_content) : message() {
+	content = _content;
+}
 
 embed::embed(json* j) : embed() {
 	title = StringNotNull(j, "title");

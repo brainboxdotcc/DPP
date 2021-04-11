@@ -60,11 +60,18 @@ void cluster::log(dpp::loglevel severity, const std::string &msg) {
 	}
 }
 
+dpp::utility::uptime cluster::uptime()
+{
+	return dpp::utility::uptime(time(NULL) - start_time);
+}
+
 void cluster::start(bool return_after) {
 	/* Start up all shards */
 	if (numshards == 0) {
 		get_gateway_bot(std::bind(&cluster::auto_shard, this, std::placeholders::_1));
 	} else {
+		start_time = time(NULL);
+
 		for (uint32_t s = 0; s < numshards; ++s) {
 			/* Filter out shards that arent part of the current cluster, if the bot is clustered */
 			if (s % maxclusters == cluster_id) {
@@ -151,6 +158,15 @@ void cluster::set_presence(const dpp::presence &p) {
 	}
 }
 
+DiscordClient* cluster::get_shard(uint32_t id) {
+	auto i = shards.find(id);
+	if (i != shards.end()) {
+		return i->second;
+	} else {
+		return nullptr;
+	}
+}
+
 void cluster::get_gateway_bot(command_completion_event_t callback) {
 	this->post_rest("/api/gateway", "bot", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
@@ -164,15 +180,16 @@ void cluster::direct_message_create(snowflake user_id, const message &m, command
 	message msg = m;
 	snowflake dm_channel_id = this->get_dm_channel(user_id);
 	if (!dm_channel_id) {
-		std::cout << "New dm channel\n";
 		this->create_dm_channel(user_id, [user_id, this, msg, callback](const dpp::confirmation_callback_t& completion) {
+			/* NOTE: We are making copies in here for a REASON. Don't try and optimise out these
+			 * copies as if we use references, by the time the the thread completes for the callback
+			 * the reference is invalid and we get a crash or heap corruption!
+			 */
 			message m2 = msg;
 			dpp::channel c = std::get<channel>(completion.value);
-			std::cout << "Got new dm channel " << c.id << "\n";
 			m2.channel_id = c.id;
 			this->set_dm_channel(user_id, c.id);
 			message_create(m2, callback);
-			std::cout << "Created\n";
 		});
 	} else {
 		msg.channel_id = dm_channel_id;

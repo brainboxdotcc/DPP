@@ -37,11 +37,13 @@ enum user_flags {
 	/// User is a team user 
 	u_team_user =		0b00000000100000000000000,
 	/// User is has Bug Hunter level 2
-	u_bughunter_2 =		0b00000000000000000000000,
+	u_bughunter_2 =		0b00000001000000000000000,
 	/// User is a verified bot
 	u_verified_bot =	0b00000010000000000000000,
 	/// User has the Early Verified Bot Developer badge
 	u_verified_bot_dev =	0b00000100000000000000000,
+	/// User's icon is animated
+	u_animated_icon =	0b00001000000000000000000
 };
 
 /** Represents a user on discord. May or may not be a member of a dpp::guild.
@@ -53,7 +55,7 @@ public:
 	/** Discriminator (aka tag), 4 digits usually displayed with leading zeroes */
 	uint16_t discriminator;
 	/** Avatar hash */
-	std::string avatar;
+	utility::iconhash avatar;
 	/** Flags built from a bitmask of values in dpp::user_flags */
 	uint32_t flags;
 
@@ -78,118 +80,124 @@ public:
 	 * 
 	 * @return std::string avatar url
 	 */
-	std::string get_avatar_url();
+	std::string get_avatar_url() const;
 
 	/**
 	 * @brief User is a bot
 	 * 
 	 * @return True if the user is a bot
 	 */
-	bool is_bot();
+	bool is_bot() const;
 	/**
 	 * @brief User is a system user (Clyde)
 	 * 
 	 * @return true  if user is a system user
 	 */
-	bool is_system();
+	bool is_system() const;
 	/**
 	 * @brief User has multi-factor authentication enabled
 	 * 
 	 * @return true if multi-factor is enabled
 	 */
-	bool is_mfa_enabled();
+	bool is_mfa_enabled() const;
 	/**
 	 * @brief Return true if user has verified account
 	 * 
 	 * @return true if verified
 	 */
-	bool is_verified();
+	bool is_verified() const;
 	/**
 	 * @brief Return true if user has full nitro.
 	 * This is mutually exclusive with full nitro.
 	 * 
 	 * @return true if user has full nitro
 	 */
-	bool has_nitro_full();
+	bool has_nitro_full() const;
 	/**
 	 * @brief Return true if user has nitro classic.
 	 * This is mutually exclusive with nitro classic.
 	 * 
 	 * @return true  if user has nitro classic
 	 */
-	bool has_nitro_classic();
+	bool has_nitro_classic() const;
 	/**
 	 * @brief Return true if user is a discord employee
 	 * 
 	 * @return true if user is discord staff
 	 */
-	bool is_discord_employee();
+	bool is_discord_employee() const;
 	/**
 	 * @brief Return true if user owns a partnered server
 	 * 
 	 * @return true if user has partnered server
 	 */
-	bool is_partnered_owner();
+	bool is_partnered_owner() const;
 	/**
 	 * @brief Return true if user has hypesquad events
 	 * 
 	 * @return true if has hypesquad events
 	 */
-	bool has_hypesquad_events();
+	bool has_hypesquad_events() const;
 	/**
 	 * @brief Return true if user has the bughunter level 1 badge
 	 * 
 	 * @return true if has bughunter level 1
 	 */
-	bool is_bughunter_1();
+	bool is_bughunter_1() const;
 	/**
 	 * @brief Return true if user is in house bravery
 	 * 
 	 * @return true if in house bravery
 	 */
-	bool is_house_bravery();
+	bool is_house_bravery() const;
 	/**
 	 * @brief Return true if user is in house brilliance
 	 * 
 	 * @return true if in house brilliance
 	 */
-	bool is_house_brilliance();
+	bool is_house_brilliance() const;
 	/**
 	 * @brief Return true if user is in house balance
 	 * 
 	 * @return true if in house brilliance
 	 */
-	bool is_house_balanace();
+	bool is_house_balanace() const;
 	/**
 	 * @brief Return true if user is an early supporter
 	 * 
 	 * @return true if early supporter
 	 */
-	bool is_early_supporter();
+	bool is_early_supporter() const;
 	/**
 	 * @brief Return true if user is a team user
 	 * 
 	 * @return true if a team user
 	 */
-	bool is_team_user();
+	bool is_team_user() const;
 	/**
 	 * @brief Return true if user has the bughunter level 2 badge
 	 * 
 	 * @return true if has bughunter level 2
 	 */
-	bool is_bughunter_2();
+	bool is_bughunter_2() const;
 	/**
 	 * @brief Return true if user has the verified bot badge
 	 * 
 	 * @return true if verified bot
 	 */
-	bool is_verified_bot();
+	bool is_verified_bot() const;
 	/**
 	 * @brief Return true if user is an early verified bot developer
 	 * 
 	 * @return true if verified bot developer
 	 */
-	bool is_verified_bot_dev();
+	bool is_verified_bot_dev() const;
+	/**
+	 * @brief Return true if user has an animated icon
+	 * 
+	 * @return true if icon is animated (gif)
+	 */
+	bool has_animated_icon() const;
 };
 
 /** A group of users */

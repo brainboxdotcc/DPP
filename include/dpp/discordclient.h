@@ -49,7 +49,17 @@ class DiscordClient : public WSClient
 	/** Total decompressed received bytes */
 	uint64_t decompressed_total;
 
+	/** Last connect time of cluster */
+	time_t connect_time;
+
+	/**
+	 * @brief Initialise ZLib
+	 */
 	void SetupZLib();
+
+	/**
+	 * @brief Shut down ZLib
+	 */
 	void EndZLib();
 
 public:
@@ -123,6 +133,20 @@ public:
 	 * @return The size of the queue
 	 */
 	size_t GetQueueSize();
+
+	/**
+	 * @brief Returns true if the shard is connected
+	 * 
+	 * @return True if connected
+	 */
+	bool IsConnected();
+
+	/**
+	 * @brief Returns the connection time of the shard
+	 * 
+	 * @return dpp::utility::uptime Detail of how long the shard has been connected for
+	 */
+	dpp::utility::uptime Uptime();
 
 	/** Constructor takes shard id, max shards and token.
 	 * @param _cluster The owning cluster for this shard
