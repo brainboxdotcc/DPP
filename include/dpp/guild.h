@@ -222,13 +222,13 @@ enum guild_member_flags {
 
 /** Represents dpp::user membership upon a dpp::guild */
 class guild_member {
+	/** Nickname, or nullptr if they don't have a nickname on this guild */
+	char* nickname;
 public:
 	/** Guild id */
 	snowflake guild_id;
 	/** User id */
 	snowflake user_id;
-	/** Nickname, or empty string if they don't have a nickname on this guild */
-	std::string nickname;
 	/** List of roles this user has on this guild */
 	std::vector<snowflake> roles;
 	/** Date and time the user joined the guild */
@@ -243,6 +243,10 @@ public:
 
 	/** Default destructor */
 	~guild_member();
+
+	void set_nickname(const std::string &_nickname);
+
+	std::string get_nickname() const;
 
 	/** Fill this object from a json object.
 	 * @param j The json object to get data from

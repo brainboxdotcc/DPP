@@ -7,6 +7,13 @@ using json = nlohmann::json;
 
 int main(int argc, char const *argv[])
 {
+	std::cout << "guild: " << sizeof(dpp::guild) << "\n";
+	std::cout << "guild_member: " << sizeof(dpp::guild_member) << "\n";
+	std::cout << "user: " << sizeof(dpp::user) << "\n";
+	std::cout << "channel: " << sizeof(dpp::channel) << "\n";
+	std::cout << "role: " << sizeof(dpp::role) << "\n";
+	std::cout << "emoji: " << sizeof(dpp::emoji) << "\n";
+
 	/* Read config file */
 	json configdocument;
 	std::ifstream configfile("../config.json");

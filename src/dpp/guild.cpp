@@ -72,6 +72,7 @@ guild::~guild()
 }
 
 guild_member::guild_member() :
+	nickname(nullptr),
 	joined_at(0),
 	premium_since(0),
 	flags(0)
@@ -81,12 +82,33 @@ guild_member::guild_member() :
 
 guild_member::~guild_member()
 {
+	if (this->nickname) {
+		free(this->nickname);
+	}
+}
+
+void guild_member::set_nickname(const std::string &_nickname) {
+	if (this->nickname) {
+		free(this->nickname);
+	}
+	this->nickname = strdup(_nickname.c_str());
+}
+
+std::string guild_member::get_nickname() const {
+	if (this->nickname) {
+		return this->nickname;
+	} else {
+		return "";
+	}
 }
 
 guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user* u) {
 	this->guild_id = g->id;
 	this->user_id = u->id;
-	this->nickname = StringNotNull(j, "nickname");
+	std::string nick = StringNotNull(j, "nickname");
+	if (!nick.empty()) {
+		this->set_nickname(nick);
+	}
 	this->joined_at = TimestampNotNull(j, "joined_at");
 	this->premium_since = TimestampNotNull(j, "premium_since");
 	for (auto & role : (*j)["roles"]) {
@@ -100,8 +122,8 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, co
 
 std::string guild_member::build_json() const {
 	json j;
-	if (!this->nickname.empty())
-		j["nick"] = this->nickname;
+	if (this->nickname)
+		j["nick"] = this->get_nickname();
 	if (this->roles.size()) {
 		j["roles"] = {};
 		for (auto & role : roles) {
