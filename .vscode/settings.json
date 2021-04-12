@@ -2,6 +2,7 @@
 	"C_Cpp.errorSquiggles": "Disabled",
 	"cmake.configureOnOpen": true,
 	"files.associations": {
-		"functional": "cpp"
+		"functional": "cpp",
+		"new": "cpp"
 	}
 }

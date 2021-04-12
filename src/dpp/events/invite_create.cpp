@@ -11,6 +11,10 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
 /**
  * @brief Handle event
  * 
@@ -18,7 +22,7 @@ using json = nlohmann::json;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void invite_create::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void invite_create::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.invite_create) {
 		json& d = j["d"];
 		dpp::invite_create_t ci(raw);
@@ -27,3 +31,4 @@ void invite_create::handle(class DiscordClient* client, json &j, const std::stri
 	}
 }
 
+}};

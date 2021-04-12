@@ -17,7 +17,6 @@ using json = nlohmann::json;
 namespace dpp {
 	// Forward declaration
 	class cluster;
-};
 
 /** @brief Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
 class DiscordClient : public WSClient
@@ -179,3 +178,4 @@ public:
 	void Run();
 };
 
+};

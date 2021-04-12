@@ -12,6 +12,10 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
 /**
  * @brief Handle event
  * 
@@ -19,7 +23,7 @@ using json = nlohmann::json;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void webhooks_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void webhooks_update::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.webhooks_update) {
 		json& d = j["d"];
 		dpp::webhooks_update_t wu(raw);
@@ -29,3 +33,4 @@ void webhooks_update::handle(class DiscordClient* client, json &j, const std::st
 	}
 }
 
+}};

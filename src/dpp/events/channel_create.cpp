@@ -13,6 +13,10 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
 /**
  * @brief Handle event
  * 
@@ -20,7 +24,7 @@ using json = nlohmann::json;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void channel_create::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void channel_create::handle(DiscordClient* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	
 	dpp::channel* c = dpp::find_channel(SnowflakeNotNull(&d, "id"));
@@ -48,3 +52,4 @@ void channel_create::handle(class DiscordClient* client, json &j, const std::str
 	}
 }
 
+}};

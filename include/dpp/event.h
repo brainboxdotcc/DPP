@@ -3,7 +3,17 @@
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
-#define event_decl(x) class x : public event { public: virtual void handle(class DiscordClient* client, nlohmann::json &j, const std::string &raw); };
+#define event_decl(x) class x : public event { public: virtual void handle(dpp::DiscordClient* client, nlohmann::json &j, const std::string &raw); };
+
+namespace dpp { 
+
+class DiscordClient;
+
+/**
+ * @brief The events namespace holds the internal event handlers for each websocket event.
+ * These are handled internally and also dispatched to the user code if the event is hooked.
+ */
+namespace events {
 
 /** An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
  */
@@ -91,3 +101,4 @@ event_decl(integration_create);
 event_decl(integration_update);
 event_decl(integration_delete);
 
+}};

@@ -12,6 +12,11 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
+
 /**
  * @brief Handle event
  * 
@@ -19,7 +24,7 @@ using json = nlohmann::json;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void integration_create::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void integration_create::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.integration_create) {
 		json& d = j["d"];
 		dpp::integration_create_t ic(raw);
@@ -28,3 +33,4 @@ void integration_create::handle(class DiscordClient* client, json &j, const std:
 	}
 }
 
+}};

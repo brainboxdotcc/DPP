@@ -12,6 +12,10 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
 /**
  * @brief Handle event
  * 
@@ -28,3 +32,4 @@ void guild_integrations_update::handle(class DiscordClient* client, json &j, con
 	}
 }
 
+}};

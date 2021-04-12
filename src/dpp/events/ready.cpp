@@ -12,6 +12,10 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
 std::mutex protect_the_loot;
 
 /**
@@ -21,7 +25,7 @@ std::mutex protect_the_loot;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void ready::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void ready::handle(DiscordClient* client, json &j, const std::string &raw) {
 	client->log(dpp::ll_info, fmt::format("Shard {}/{} ready!", client->shard_id, client->max_shards));
 	client->sessionid = j["d"]["session_id"];
 
@@ -39,3 +43,4 @@ void ready::handle(class DiscordClient* client, json &j, const std::string &raw)
 	}
 }
 
+}};

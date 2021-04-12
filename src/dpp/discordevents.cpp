@@ -27,6 +27,8 @@ char* strptime(const char* s, const char* f, struct tm* tm) {
 }
 #endif
 
+namespace dpp {
+
 uint64_t SnowflakeNotNull(json* j, const char *keyname)
 {
 	/* Snowflakes are a special case. Pun intended.
@@ -116,60 +118,61 @@ time_t TimestampNotNull(json* j, const char* keyname)
 	return retval;
 }
 
-std::map<std::string, event*> events = {
-	{ "__LOG__", new logger() },
-	{ "GUILD_CREATE", new guild_create() },
-	{ "GUILD_UPDATE", new guild_update() },
-	{ "GUILD_DELETE", new guild_delete() },
-	{ "GUILD_MEMBER_UPDATE", new guild_member_update() },
-	{ "RESUMED", new resumed() },
-	{ "READY", new ready() },
-	{ "CHANNEL_CREATE", new channel_create() },
-	{ "CHANNEL_UPDATE", new channel_update() },
-	{ "CHANNEL_DELETE", new channel_delete() },
-	{ "PRESENCE_UPDATE", new presence_update() },
-	{ "TYPING_START", new typing_start() },
-	{ "MESSAGE_CREATE", new message_create() },
-	{ "MESSAGE_UPDATE", new message_update() },
-	{ "MESSAGE_DELETE", new message_delete() },
-	{ "MESSAGE_DELETE_BULK", new message_delete_bulk() },
-	{ "MESSAGE_REACTION_ADD", new message_reaction_add() },
-	{ "MESSAGE_REACTION_REMOVE", new message_reaction_remove() },
-	{ "MESSAGE_REACTION_REMOVE_ALL", new message_reaction_remove_all() },
-	{ "MESSAGE_REACTION_REMOVE_EMOJI", new message_reaction_remove_emoji() },
-	{ "CHANNEL_PINS_UPDATE", new channel_pins_update() },
-	{ "GUILD_BAN_ADD", new guild_ban_add() },
-	{ "GUILD_BAN_REMOVE", new guild_ban_remove() },
-	{ "GUILD_EMOJIS_UPDATE", new guild_emojis_update() },
-	{ "GUILD_INTEGRATIONS_UPDATE", new guild_integrations_update() },
-	{ "INTEGRATION_CREATE", new integration_create() },
-	{ "INTEGRATION_UPDATE", new integration_update() },
-	{ "INTEGRATION_DELETE", new integration_delete() },
-	{ "GUILD_MEMBER_ADD", new guild_member_add() },
-	{ "GUILD_MEMBER_REMOVE", new guild_member_remove() },
-	{ "GUILD_MEMBERS_CHUNK", new guild_members_chunk() },
-	{ "GUILD_ROLE_CREATE", new guild_role_create() },
-	{ "GUILD_ROLE_UPDATE", new guild_role_update() },
-	{ "GUILD_ROLE_DELETE", new guild_role_delete() },
-	{ "VOICE_STATE_UPDATE", new voice_state_update() },
-	{ "VOICE_SERVER_UPDATE", new voice_server_update() },
-	{ "WEBHOOKS_UPDATE", new webhooks_update() },
-	{ "INVITE_CREATE", new invite_create() },
-	{ "INVITE_DELETE", new invite_delete() },
-	{ "APPLICATION_COMMAND_CREATE", new application_command_create() },
-	{ "APPLICATION_COMMAND_UPDATE", new application_command_update() },
-	{ "APPLICATION_COMMAND_DELETE", new application_command_delete() },
-	{ "INTERACTION_CREATE", new interaction_create() },
-	{ "USER_UPDATE", new user_update() }
+std::map<std::string, dpp::events::event*> eventmap = {
+	{ "__LOG__", new dpp::events::logger() },
+	{ "GUILD_CREATE", new dpp::events::guild_create() },
+	{ "GUILD_UPDATE", new dpp::events::guild_update() },
+	{ "GUILD_DELETE", new dpp::events::guild_delete() },
+	{ "GUILD_MEMBER_UPDATE", new dpp::events::guild_member_update() },
+	{ "RESUMED", new dpp::events::resumed() },
+	{ "READY", new dpp::events::ready() },
+	{ "CHANNEL_CREATE", new dpp::events::channel_create() },
+	{ "CHANNEL_UPDATE", new dpp::events::channel_update() },
+	{ "CHANNEL_DELETE", new dpp::events::channel_delete() },
+	{ "PRESENCE_UPDATE", new dpp::events::presence_update() },
+	{ "TYPING_START", new dpp::events::typing_start() },
+	{ "MESSAGE_CREATE", new dpp::events::message_create() },
+	{ "MESSAGE_UPDATE", new dpp::events::message_update() },
+	{ "MESSAGE_DELETE", new dpp::events::message_delete() },
+	{ "MESSAGE_DELETE_BULK", new dpp::events::message_delete_bulk() },
+	{ "MESSAGE_REACTION_ADD", new dpp::events::message_reaction_add() },
+	{ "MESSAGE_REACTION_REMOVE", new dpp::events::message_reaction_remove() },
+	{ "MESSAGE_REACTION_REMOVE_ALL", new dpp::events::message_reaction_remove_all() },
+	{ "MESSAGE_REACTION_REMOVE_EMOJI", new dpp::events::message_reaction_remove_emoji() },
+	{ "CHANNEL_PINS_UPDATE", new dpp::events::channel_pins_update() },
+	{ "GUILD_BAN_ADD", new dpp::events::guild_ban_add() },
+	{ "GUILD_BAN_REMOVE", new dpp::events::guild_ban_remove() },
+	{ "GUILD_EMOJIS_UPDATE", new dpp::events::guild_emojis_update() },
+	{ "GUILD_INTEGRATIONS_UPDATE", new dpp::events::guild_integrations_update() },
+	{ "INTEGRATION_CREATE", new dpp::events::integration_create() },
+	{ "INTEGRATION_UPDATE", new dpp::events::integration_update() },
+	{ "INTEGRATION_DELETE", new dpp::events::integration_delete() },
+	{ "GUILD_MEMBER_ADD", new dpp::events::guild_member_add() },
+	{ "GUILD_MEMBER_REMOVE", new dpp::events::guild_member_remove() },
+	{ "GUILD_MEMBERS_CHUNK", new dpp::events::guild_members_chunk() },
+	{ "GUILD_ROLE_CREATE", new dpp::events::guild_role_create() },
+	{ "GUILD_ROLE_UPDATE", new dpp::events::guild_role_update() },
+	{ "GUILD_ROLE_DELETE", new dpp::events::guild_role_delete() },
+	{ "VOICE_STATE_UPDATE", new dpp::events::voice_state_update() },
+	{ "VOICE_SERVER_UPDATE", new dpp::events::voice_server_update() },
+	{ "WEBHOOKS_UPDATE", new dpp::events::webhooks_update() },
+	{ "INVITE_CREATE", new dpp::events::invite_create() },
+	{ "INVITE_DELETE", new dpp::events::invite_delete() },
+	{ "APPLICATION_COMMAND_CREATE", new dpp::events::application_command_create() },
+	{ "APPLICATION_COMMAND_UPDATE", new dpp::events::application_command_update() },
+	{ "APPLICATION_COMMAND_DELETE", new dpp::events::application_command_delete() },
+	{ "INTERACTION_CREATE", new dpp::events::interaction_create() },
+	{ "USER_UPDATE", new dpp::events::user_update() }
 };
 
 void DiscordClient::HandleEvent(const std::string &event, json &j, const std::string &raw)
 {
-	auto ev_iter = events.find(event);
-	if (ev_iter != events.end()) {
+	auto ev_iter = eventmap.find(event);
+	if (ev_iter != eventmap.end()) {
 		ev_iter->second->handle(this, j, raw);
 	} else {
 		log(dpp::ll_debug, fmt::format("Unhandled event: {}, {}", event, j.dump()));
 	}
 }
 
+};

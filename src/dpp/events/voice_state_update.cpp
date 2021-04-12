@@ -11,6 +11,10 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
 /**
  * @brief Handle event
  * 
@@ -18,7 +22,7 @@ using json = nlohmann::json;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void voice_state_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void voice_state_update::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.voice_state_update) {
 		json& d = j["d"];
 		dpp::voice_state_update_t vsu(raw);
@@ -27,3 +31,4 @@ void voice_state_update::handle(class DiscordClient* client, json &j, const std:
 	}
 }
 
+}};

@@ -17,6 +17,8 @@
 #define PATH_COMPRESSED		"/?v=8&encoding=json&compress=zlib-stream"
 #define DECOMP_BUFFER_SIZE	512 * 1024
 
+namespace dpp {
+
 DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
        : WSClient(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
 	creator(_cluster),
@@ -348,3 +350,5 @@ void DiscordClient::OneSecondTimer()
 		}
 	}
 }
+
+};

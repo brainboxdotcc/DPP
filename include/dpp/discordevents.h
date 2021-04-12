@@ -2,6 +2,8 @@
 
 #include <dpp/json_fwd.hpp>
 
+namespace dpp {
+
 /** @brief Returns a snowflake id from a json field value, if defined, else returns 0 
  * @param j nlohmann::json instance to retrieve value from
  * @param keyname key name to check for a value
@@ -57,3 +59,5 @@ time_t TimestampNotNull(nlohmann::json* j, const char *keyname);
  * @param buffer_length Buffer length to encode
  */
 std::string base64_encode(unsigned char const* buf, unsigned int buffer_length);
+
+};

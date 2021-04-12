@@ -11,6 +11,10 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
 /**
  * @brief Handle event
  * 
@@ -18,7 +22,7 @@ using json = nlohmann::json;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void message_delete::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void message_delete::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.message_delete) {
 		json d = j["d"];
 		dpp::message_delete_t msg(raw);
@@ -30,3 +34,4 @@ void message_delete::handle(class DiscordClient* client, json &j, const std::str
 
 }
 
+}};

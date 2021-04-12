@@ -12,6 +12,10 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
 /**
  * @brief Handle event
  * 
@@ -19,7 +23,7 @@ using json = nlohmann::json;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_member_remove::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void guild_member_remove::handle(DiscordClient* client, json &j, const std::string &raw) {
 	json d = j["d"];
 
 	dpp::guild_member_remove_t gmr(raw);
@@ -39,3 +43,4 @@ void guild_member_remove::handle(class DiscordClient* client, json &j, const std
 	}
 }
 
+}};

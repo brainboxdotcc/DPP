@@ -12,6 +12,10 @@
 
 using json = nlohmann::json;
 
+namespace dpp { namespace events {
+
+using namespace dpp;
+
 /**
  * @brief Handle event
  * 
@@ -19,7 +23,7 @@ using json = nlohmann::json;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void user_update::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void user_update::handle(DiscordClient* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 
 	dpp::snowflake user_id = SnowflakeNotNull(&d, "id");
@@ -36,3 +40,4 @@ void user_update::handle(class DiscordClient* client, json &j, const std::string
 	}
 }
 
+}};
