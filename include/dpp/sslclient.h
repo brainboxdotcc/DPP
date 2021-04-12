@@ -3,6 +3,8 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+namespace dpp {
+
 /** Implements a simple non-blocking SSL stream client.
  * Note that although the design is non-blocking the Run() method will
  * execute in an infinite loop until the socket disconnects. This is intended
@@ -86,3 +88,4 @@ public:
 	virtual void close();
 };
 
+};

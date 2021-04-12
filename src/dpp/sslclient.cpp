@@ -28,6 +28,8 @@
 #include <iostream>
 #include <dpp/sslclient.h>
 
+namespace dpp {
+
 /* You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
@@ -299,4 +301,4 @@ SSLClient::~SSLClient()
 	this->close();
 }
 
-
+};

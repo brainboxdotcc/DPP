@@ -4,6 +4,8 @@
 #include <dpp/wsclient.h>
 #include <fmt/format.h>
 
+namespace dpp {
+
 const unsigned char WS_MASKBIT = (1 << 7);
 const unsigned char WS_FINBIT = (1 << 7);
 const unsigned char WS_PAYLOAD_LENGTH_MAGIC_LARGE = 126;
@@ -285,3 +287,4 @@ void WSClient::close()
 	SSLClient::close();
 }
 
+};

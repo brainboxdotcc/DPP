@@ -5,6 +5,8 @@
 #include <variant>
 #include <dpp/sslclient.h>
 
+namespace dpp {
+
 /** Websocket connection status */
 enum WSState {
 	/** Sending/receiving HTTP headers prior to protocol switch */
@@ -110,3 +112,4 @@ public:
 	virtual void Error(uint32_t errorcode);
 };
 
+};
