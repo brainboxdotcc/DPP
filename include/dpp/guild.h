@@ -55,7 +55,9 @@ class guild : public managed {
 	char* description;
 	/** Vanity url code for verified or partnered servers and boost level 3 */
 	char* vanity_url_code;
-public:
+public:	
+	/** Shard ID of the guild */
+	uint16_t shard_id;
 	/** Flags bitmask as defined by values within dpp::guild_flags */
 	uint32_t flags;
 	/** Guild name */

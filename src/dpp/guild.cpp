@@ -45,6 +45,7 @@ namespace dpp {
 
 guild::guild() :
 	managed(),
+	shard_id(0),
 	vanity_url_code(nullptr),
 	description(nullptr),
 	flags(0),
