@@ -37,38 +37,74 @@ uint64_t SnowflakeNotNull(json* j, const char *keyname)
 	 * as string types, then converted from string to uint64_t. Checks for existence of the value, and that it is a string containing
 	 * a number. If not, then this function returns 0.
 	 */
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? from_string<uint64_t>((*j)[keyname].get<std::string>(), std::dec) : 0;
+	//return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? from_string<uint64_t>((*j)[keyname].get<std::string>(), std::dec) : 0;
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		return !k->is_null() && k->is_string() ? from_string<uint64_t>(k->get<std::string>(), std::dec) : 0;
+	} else {
+		return 0;
+	}
 }
 
 std::string StringNotNull(json* j, const char *keyname)
 {
 	/* Returns empty string if the value is not a string, or is null or not defined */
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? (*j)[keyname].get<std::string>() : "";
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		return !k->is_null() && k->is_string() ? k->get<std::string>() : "";
+	} else {
+		return "";
+	}
 }
 
 uint64_t Int64NotNull(json* j, const char *keyname)
 {
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && !(*j)[keyname].is_string() ? (*j)[keyname].get<uint64_t>() : 0;
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		return !k->is_null() && !k->is_string() ? k->get<uint64_t>() : 0;
+	} else {
+		return 0;
+	}
 }
 
 uint32_t Int32NotNull(json* j, const char *keyname)
 {
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && !(*j)[keyname].is_string() ? (*j)[keyname].get<uint32_t>() : 0;
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		return !k->is_null() && !k->is_string() ? k->get<uint32_t>() : 0;
+	} else {
+		return 0;
+	}
 }
 
 uint16_t Int16NotNull(json* j, const char *keyname)
 {
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && !(*j)[keyname].is_string() ? (*j)[keyname].get<uint16_t>() : 0;
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		return !k->is_null() && !k->is_string() ? k->get<uint16_t>() : 0;
+	} else {
+		return 0;
+	}
 }
 
 uint8_t Int8NotNull(json* j, const char *keyname)
 {
-	return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && !(*j)[keyname].is_string() ? (*j)[keyname].get<uint8_t>() : 0;
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		return !k->is_null() && !k->is_string() ? k->get<uint8_t>() : 0;
+	} else {
+		return 0;
+	}
 }
 
 bool BoolNotNull(json* j, const char *keyname)
 {
-	return (j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].get<bool>() == true);
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		return !k->is_null() ? (k->get<bool>() == true) : false;
+	} else {
+		return false;
+	}
 }
 
 std::string base64_encode(unsigned char const* buf, unsigned int buffer_length)
