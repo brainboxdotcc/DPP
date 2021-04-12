@@ -111,6 +111,10 @@ std::string guild_member::get_nickname() const {
 }
 
 guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user* u) {
+	if (this->nickname) {
+		free(this->nickname);
+		this->nickname = nullptr;
+	}
 	this->guild_id = g->id;
 	this->user_id = u->id;
 	std::string nick = StringNotNull(j, "nickname");
@@ -299,6 +303,14 @@ std::string guild::get_description() const {
 
 
 guild& guild::fill_from_json(nlohmann::json* d) {
+	if (this->vanity_url_code) {
+		free(this->vanity_url_code);
+		this->vanity_url_code = nullptr;
+	}
+	if (this->description) {
+		free(this->description);
+		this->description = nullptr;
+	}
 	this->id = SnowflakeNotNull(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
 		this->name = StringNotNull(d, "name");
