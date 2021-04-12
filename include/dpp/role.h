@@ -126,7 +126,7 @@ public:
 	bool has_attach_files() const;
 	/** True if has the read message history permission */
 	bool has_read_message_history() const;
-	/** True if has the mention @everyone and @here permission */
+	/** True if has the mention \@everyone and \@here permission */
 	bool has_mention_everyone() const;
 	/** True if has the use external emojis permission */
 	bool has_use_external_emojis() const;

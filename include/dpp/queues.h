@@ -103,6 +103,8 @@ public:
 	 * @param completion completion event to call when done
 	 * @param _postdata Data to send in POST and PUT requests
 	 * @param method The HTTP method to use from dpp::http_method
+	 * @param filename The filename (server side) of any uploaded file
+	 * @param filecontent The binary content of any uploaded file for the request
 	 */
 	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &filename = "", const std::string &filecontent = "");
 

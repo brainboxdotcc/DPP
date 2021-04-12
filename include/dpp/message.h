@@ -112,50 +112,55 @@ struct embed {
 	embed& set_description(const std::string &text);
 
 	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param col The colour of the embed
 	 * @return A reference to self
 	 */
 	embed& set_color(uint32_t col);
 
 	/** Set embed url. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param url the url of the embed
 	 * @return A reference to self
 	 */
 	embed& set_url(const std::string &url);
 
 	/** Add an embed field. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param name The name of the field
+	 * @param value The value of the field (max length 1000)
+	 * @param is_inline Wether or not to display the field 'inline' or on its own line
 	 * @return A reference to self
 	 */
 	embed& add_field(const std::string& name, const std::string &value, bool is_inline);
 
 	/** Set embed author. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param name The name of the author
+	 * @param url The url of the author
+	 * @param icon_url The icon URL of the author
 	 * @return A reference to self
 	 */
 
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 
 	/** Set embed provider. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param name The provider name
+	 * @param url The provider url
 	 * @return A reference to self
 	 */
 	embed& set_provider(const std::string& name, const std::string& url);
 
 	/** Set embed image. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param url The embed image URL
 	 * @return A reference to self
 	 */
 	embed& set_image(const std::string& url);
 
 	/** Set embed video. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param url The embed video url
 	 * @return A reference to self
 	 */
 	embed& set_video(const std::string& url);
 
 	/** Set embed thumbnail. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param url The embed thumbnail url
 	 * @return A reference to self
 	 */
 	embed& set_thumbnail(const std::string& url);

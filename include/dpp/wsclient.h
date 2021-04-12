@@ -81,6 +81,7 @@ public:
 	/** Connect to a specific websocket server.
 	 * @param hostname Hostname to connect to
 	 * @param port Port to connect to
+	 * @param urlpath The URL path components of the HTTP request to send
 	 */
         WSClient(const std::string &hostname, const std::string &port = "443", const std::string &urlpath = "");
 

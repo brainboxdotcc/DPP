@@ -141,7 +141,6 @@ public:
 	presence& fill_from_json(nlohmann::json* j);
 
 	/** Build JSON from this object.
-	 * @param with_id True if the ID is to be included in the built JSON
 	 * @return The JSON text of the presence
 	 */
 	std::string build_json() const;

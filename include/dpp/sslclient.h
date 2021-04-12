@@ -64,7 +64,7 @@ public:
 
 	/** Connect to a specified host and port. Throws std::runtime_error on fatal error.
 	 * @param _hostname The hostname to connect to
-	 * @param _post the Port number to connect to
+	 * @param _port the Port number to connect to
 	 */
 	SSLClient(const std::string &_hostname, const std::string &_port = "443");
 
