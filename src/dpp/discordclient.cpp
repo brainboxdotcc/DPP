@@ -351,4 +351,49 @@ void DiscordClient::OneSecondTimer()
 	}
 }
 
+uint64_t DiscordClient::GetGuildCount() {
+	uint64_t total = 0;
+	dpp::cache* c = dpp::get_guild_cache();
+	dpp::cache_container& gc = c->get_container();
+	/* IMPORTANT: We must lock the container to iterate it */
+	std::lock_guard<std::mutex> lock(c->get_mutex());
+	for (auto g = gc.begin(); g != gc.end(); ++g) {
+		dpp::guild* gp = (dpp::guild*)g->second;
+		if (gp->shard_id == this->shard_id) {
+			total++;
+		}
+	}
+	return total;
+}
+
+uint64_t DiscordClient::GetMemberCount() {
+	uint64_t total = 0;
+	dpp::cache* c = dpp::get_guild_cache();
+	dpp::cache_container& gc = c->get_container();
+	/* IMPORTANT: We must lock the container to iterate it */
+	std::lock_guard<std::mutex> lock(c->get_mutex());
+	for (auto g = gc.begin(); g != gc.end(); ++g) {
+		dpp::guild* gp = (dpp::guild*)g->second;
+		if (gp->shard_id == this->shard_id) {
+			total += gp->members.size();
+		}
+	}
+	return total;
+}
+
+uint64_t DiscordClient::GetChannelCount() {
+	uint64_t total = 0;
+	dpp::cache* c = dpp::get_guild_cache();
+	dpp::cache_container& gc = c->get_container();
+	/* IMPORTANT: We must lock the container to iterate it */
+	std::lock_guard<std::mutex> lock(c->get_mutex());
+	for (auto g = gc.begin(); g != gc.end(); ++g) {
+		dpp::guild* gp = (dpp::guild*)g->second;
+		if (gp->shard_id == this->shard_id) {
+			total += gp->channels.size();
+		}
+	}
+	return total;
+}
+
 };

@@ -6,6 +6,8 @@
 
 namespace dpp {
 
+	typedef std::unordered_map<uint64_t, managed*> cache_container;
+
 	/**
 	 * @brief A cache object maintains a cache of dpp::managed objects.
 	 * This is for example users, channels or guilds.
@@ -17,7 +19,7 @@ namespace dpp {
 		std::mutex cache_mutex;
 
 		/** Cached items */
-		std::unordered_map<uint64_t, managed*> cache_map;
+		cache_container cache_map;
 
 	public:
 
@@ -39,6 +41,26 @@ namespace dpp {
 		/** Return a count of the number of items in the cache.
 		 */
 		uint64_t count();
+
+		/** 
+		 * @brief Return the cache's locking mutex. Use this whenever
+		 * you manipulate or iterate raw elements in the cache!
+		 * 
+		 * @return The mutex used to protect the container
+		 */
+		std::mutex& get_mutex();
+
+		/**
+		 * @brief Get the container map
+		 * @warning Be sure to use cache::get_mutex() correctly if you
+		 * manipulate or iterate the map returned by this method! If you do
+		 * not, this is not thread safe and will casue crashes!
+		 * @see cache::get_mutex
+		 * 
+		 * @return cache_container& A reference to the cache's container map
+		 */
+		cache_container& get_container();
+
 	};
 
 	/** Run garbage collection across all caches removing deleted items

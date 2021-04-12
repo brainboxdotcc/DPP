@@ -51,6 +51,14 @@ uint64_t cache::count() {
 	return cache_map.size();
 }
 
+std::mutex& cache::get_mutex() {
+	return this->cache_mutex;
+}
+
+cache_container& cache::get_container() {
+	return this->cache_map;
+}
+
 void cache::store(managed* object) {
 	if (!object) {
 		return;

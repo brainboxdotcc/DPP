@@ -107,6 +107,27 @@ public:
 	 */
 	virtual void HandleEvent(const std::string &event, json &j, const std::string &raw);
 
+	/**
+	 * @brief Get the Guild Count for this shard
+	 * 
+	 * @return uint64_t guild count
+	 */
+	uint64_t GetGuildCount();
+
+	/**
+	 * @brief Get the Member Count for this shard
+	 * 
+	 * @return uint64_t member count
+	 */
+	uint64_t GetMemberCount();
+
+	/**
+	 * @brief Get the Channel Count for this shard
+	 * 
+	 * @return uint64_t channel count
+	 */
+	uint64_t GetChannelCount();
+
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
 	virtual void OneSecondTimer();
 
