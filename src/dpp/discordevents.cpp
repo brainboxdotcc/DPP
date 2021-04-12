@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include <stdlib.h>
 #include <dpp/discordclient.h>
 #include <dpp/discord.h>
 #include <dpp/event.h>
@@ -40,7 +41,7 @@ uint64_t SnowflakeNotNull(json* j, const char *keyname)
 	//return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? from_string<uint64_t>((*j)[keyname].get<std::string>(), std::dec) : 0;
 	auto k = j->find(keyname);
 	if (k != j->end()) {
-		return !k->is_null() && k->is_string() ? from_string<uint64_t>(k->get<std::string>(), std::dec) : 0;
+		return !k->is_null() && k->is_string() ? strtoull(k->get<std::string>().c_str(), nullptr, 10) : 0;
 	} else {
 		return 0;
 	}
