@@ -45,6 +45,8 @@ namespace dpp {
 
 guild::guild() :
 	managed(),
+	vanity_url_code(nullptr),
+	description(nullptr),
 	flags(0),
 	owner_id(0),
 	voice_region(r_us_central),
@@ -69,6 +71,12 @@ guild::guild() :
 
 guild::~guild()
 {
+	if (this->vanity_url_code) {
+		free(this->vanity_url_code);
+	}
+	if (this->description) {
+		free(this->description);
+	}
 }
 
 guild_member::guild_member() :
@@ -250,14 +258,45 @@ std::string guild::build_json(bool with_id) const {
 	if (rules_channel_id) {
 		j["rules_channel_id"] = rules_channel_id;
 	}
-	if (!vanity_url_code.empty()) {
-		j["vanity_url_code"] = vanity_url_code;
+	if (vanity_url_code) {
+		j["vanity_url_code"] = get_vanity_url();
 	}
-	if (!description.empty()) {
-		j["description"] = description;
+	if (description) {
+		j["description"] = get_description();
 	}
 	return j.dump();
 }
+
+void guild::set_vanity_url(const std::string &_url) {
+	if (this->vanity_url_code) {
+		free(this->vanity_url_code);
+	}
+	this->vanity_url_code = strdup(_url.c_str());
+}
+
+std::string guild::get_vanity_url() const {
+	if (this->vanity_url_code) {
+		return this->vanity_url_code;
+	} else {
+		return "";
+	}
+}
+
+void guild::set_description(const std::string &_desc) {
+	if (this->description) {
+		free(this->description);
+	}
+	this->description = strdup(_desc.c_str());
+}
+
+std::string guild::get_description() const {
+	if (this->description) {
+		return this->description;
+	} else {
+		return "";
+	}
+}
+
 
 guild& guild::fill_from_json(nlohmann::json* d) {
 	this->id = SnowflakeNotNull(d, "id");
@@ -295,7 +334,7 @@ guild& guild::fill_from_json(nlohmann::json* d) {
 		}
 
 		this->afk_channel_id = SnowflakeNotNull(d, "afk_channel_id");
-		this->afk_timeout = Int16NotNull(d, "afk_timeout");
+		this->afk_timeout = Int8NotNull(d, "afk_timeout");
 		this->widget_channel_id = SnowflakeNotNull(d, "widget_channel_id");
 		this->verification_level = Int8NotNull(d, "verification_level");
 		this->default_message_notifications = Int8NotNull(d, "default_message_notifications");
@@ -305,21 +344,24 @@ guild& guild::fill_from_json(nlohmann::json* d) {
 		this->system_channel_id = SnowflakeNotNull(d, "system_channel_id");
 		this->rules_channel_id = SnowflakeNotNull(d, "rules_channel_id");
 		this->member_count = Int32NotNull(d, "member_count");
-		this->vanity_url_code = StringNotNull(d, "vanity_url_code");
-		this->description = StringNotNull(d, "description");
+		std::string vanity = StringNotNull(d, "vanity_url_code");
+		if (!vanity.empty()) {
+			this->set_vanity_url(vanity);
+		}
+		std::string dsc = StringNotNull(d, "description");
+		if (!dsc.empty()) {
+			this->set_description(dsc);
+		}
 		this->banner = StringNotNull(d, "banner");
 		this->premium_tier = Int8NotNull(d, "premium_tier");
 		this->premium_subscription_count = Int16NotNull(d, "premium_subscription_count");
 		this->public_updates_channel_id = SnowflakeNotNull(d, "public_updates_channel_id");
-		this->max_video_channel_users = Int32NotNull(d, "max_video_channel_users");
+		this->max_video_channel_users = Int16NotNull(d, "max_video_channel_users");
 	} else {
 		this->flags |= dpp::g_unavailable;
 	}
 	return *this;
 }
-
-        bool enabled;
-	        snowflake channel_id;
 
 guild_widget::guild_widget() : enabled(false), channel_id(0)
 {

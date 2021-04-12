@@ -46,8 +46,8 @@ public:
 	/** ID of last message to be sent to the channel */
 	snowflake last_message_id;
 
-	/** Maximum user limit for voice channels */
-	uint32_t user_limit;
+	/** Maximum user limit for voice channels (0-99) */
+	uint8_t user_limit;
 
 	/** Rate limit in kilobits per second for voice channels */
 	uint16_t rate_limit_per_user;

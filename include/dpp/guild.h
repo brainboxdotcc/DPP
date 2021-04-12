@@ -7,7 +7,7 @@
 namespace dpp {
 
 /** Represents voice regions for guilds and channels */
-enum region {
+enum region : uint8_t {
 	r_brazil,
 	r_central_europe,
 	r_hong_kong,
@@ -51,6 +51,10 @@ enum guild_flags {
 
 /** Represents a guild object */
 class guild : public managed {
+	/** Server description for communities */
+	char* description;
+	/** Vanity url code for verified or partnered servers and boost level 3 */
+	char* vanity_url_code;
 public:
 	/** Flags bitmask as defined by values within dpp::guild_flags */
 	uint32_t flags;
@@ -69,7 +73,7 @@ public:
 	/** Snowflake ID of AFK voice channel or 0 */
 	snowflake afk_channel_id;
 	/** Voice AFK timeout before moving users to AFK channel */
-	uint32_t afk_timeout;
+	uint8_t afk_timeout;
 	/** Snowflake ID of widget channel, or 0 */
 	snowflake widget_channel_id;
 	/** Verification level of server */
@@ -88,10 +92,6 @@ public:
 	snowflake rules_channel_id;
 	/** Approximate member count. May be sent as zero */
 	uint32_t member_count;
-	/** Vanity url code for verified or partnered servers and boost level 3 */
-	std::string vanity_url_code;
-	/** Server description for communities */
-	std::string description;
 	/** Server banner hash */
 	utility::iconhash banner;
 	/** Boost level */
@@ -101,7 +101,7 @@ public:
 	/** Public updates channel id or 0 */
 	snowflake public_updates_channel_id;
 	/** Maximum users in a video channel, or 0 */
-	uint32_t max_video_channel_users;
+	uint16_t max_video_channel_users;
 
 	/** Roles defined on this server */
 	std::vector<snowflake> roles;
@@ -137,6 +137,34 @@ public:
 	 * @param with_id True if an ID is to be included in the JSON
 	 */
 	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the vanity url for the guild
+	 * 
+	 * @param _url the vanity url to set
+	 */
+	void set_vanity_url(const std::string &_url);
+
+	/**
+	 * @brief Get the vanity url of the guild
+	 * 
+	 * @return std::string Vanity url or guild or empty string
+	 */
+	std::string get_vanity_url() const;
+
+	/**
+	 * @brief Set the description of the guild (for communities)
+	 * 
+	 * @param _desc The community description to set
+	 */
+	void set_description(const std::string &_desc);
+
+	/**
+	 * @brief Get the description of the guild
+	 * 
+	 * @return std::string description of guild or empty string
+	 */
+	std::string get_description() const;
 
 	/** Is a large server (>250 users) */
 	bool is_large() const;

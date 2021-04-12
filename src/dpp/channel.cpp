@@ -64,7 +64,7 @@ channel& channel::fill_from_json(json* j) {
 	this->name = StringNotNull(j, "name");
 	this->topic = StringNotNull(j, "topic");
 	this->last_message_id = SnowflakeNotNull(j, "last_message_id");
-	this->user_limit = Int32NotNull(j, "user_limit");
+	this->user_limit = Int8NotNull(j, "user_limit");
 	this->rate_limit_per_user = Int16NotNull(j, "rate_limit_per_user");
 	this->owner_id = SnowflakeNotNull(j, "owner_id");
 	this->parent_id = SnowflakeNotNull(j, "parent_id");
