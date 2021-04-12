@@ -39,8 +39,7 @@ int main(int argc, char const *argv[])
 		/* event.msg->content contains the message text */
 		std::string content = event.msg->content;
 
-		dpp::DiscordClient* shard = bot.get_shard(0);
-		uint64_t member_count = shard->GetMemberCount();
+		uint64_t member_count = bot.get_shards().begin()->second->GetMemberCount();
 
 		/* Log some stats of the guild, user, role and channel counts, and the message content */
 		bot.log(dpp::ll_info, fmt::format("[G:{} U:{} R:{} C:{} M:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), member_count, event.msg->author->username, event.msg->author->discriminator, content));

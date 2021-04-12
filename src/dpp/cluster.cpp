@@ -167,6 +167,10 @@ DiscordClient* cluster::get_shard(uint32_t id) {
 	}
 }
 
+const shard_list& cluster::get_shards() {
+	return shards;
+}
+
 void cluster::get_gateway_bot(command_completion_event_t callback) {
 	this->post_rest("/api/gateway", "bot", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

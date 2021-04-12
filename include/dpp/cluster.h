@@ -13,6 +13,8 @@ using  json = nlohmann::json;
 
 namespace dpp {
 
+typedef std::map<uint32_t, class DiscordClient*> shard_list;
+
 /**
  * @brief Represents the various information from the 'get gateway bot' api call
  */
@@ -146,6 +148,12 @@ class cluster {
 	std::unordered_map<snowflake, snowflake> dm_channels;
 
 	/**
+	 * @brief Active shards on this cluster. Shard IDs may have gaps between if there 
+	 * are multiple clusters.
+	 */
+	shard_list shards;
+
+	/**
 	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
 	 * 
 	 * @param shardinfo Received HTTP data from API call
@@ -172,12 +180,6 @@ public:
 
 	/** Routes events from Discord back to user program code via std::functions */
 	dpp::dispatcher dispatch;
-
-	/**
-	 * @brief Active shards on this cluster. Shard IDs may have gaps between if there 
-	 * are multiple clusters.
-	 */
-	std::map<uint32_t, class DiscordClient*> shards;
 
 	/** 
 	 * @brief The details of the bot user. This is assumed to be identical across all shards
@@ -254,6 +256,13 @@ public:
 	 * @return DiscordClient* shard, or null
 	 */
 	DiscordClient* get_shard(uint32_t id);
+
+	/**
+	 * @brief Get the list of shards
+	 * 
+	 * @return shard_list& Reference to map of shards for this cluster
+	 */
+	const shard_list& get_shards();
 
 	/* Functions for attaching to event handlers */
 
