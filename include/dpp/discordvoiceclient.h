@@ -1,4 +1,26 @@
 #pragma once
+#include <errno.h>
+
+#ifdef _WIN32
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#include <io.h>
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#else
+#include <resolv.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <unistd.h>
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <string.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -63,12 +85,27 @@ class DiscordVoiceClient : public WSClient
 	 */
 	std::vector<std::string> modes;
 
+	std::vector<std::string> outbuf;
+	std::vector<std::string> inbuf;
+
 #ifdef HAVE_VOICE
 	OpusEncoder* encoder;
 	OpusDecoder* decoder;
 #endif
 
+	/** File descriptor for UDP connection
+	 */
+	int fd;
+
+	/** BSD Sockets address of voice server
+	 */
+	struct sockaddr_in servaddr;
+
 public:
+
+	fd_set readfds;
+	fd_set writefds;
+
 	/** Owning cluster */
 	class dpp::cluster* creator;
 
@@ -171,6 +208,17 @@ public:
 
 	/** Start and monitor I/O loop */
 	void Run();
+
+	int UDPSend(const char* data, size_t length);
+	int UDPRecv(char* data, size_t max_length);
+
+	int WantWrite();
+
+	int WantRead();
+
+	void WriteReady();
+
+	void ReadReady();
 };
 
 };

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <functional>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -61,6 +62,14 @@ public:
 	uint64_t GetBytesOut();
 	/** Get total bytes received */
 	uint64_t GetBytesIn();
+
+	std::function<int()> custom_readable_fd;
+
+	std::function<int()> custom_writeable_fd;
+
+	std::function<void()> custom_readable_ready;
+
+	std::function<void()> custom_writeable_ready;
 
 	/** Connect to a specified host and port. Throws std::runtime_error on fatal error.
 	 * @param _hostname The hostname to connect to

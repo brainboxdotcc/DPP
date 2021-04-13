@@ -3,6 +3,7 @@
 #include <fstream>
 #ifndef _WIN32
 #include <unistd.h>
+#include <arpa/inet.h>
 #endif
 #include <dpp/discordvoiceclient.h>
 #include <dpp/cache.h>
@@ -25,7 +26,8 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server
 	heartbeat_interval(0),
 	sessionid(_session_id),
 	runner(nullptr),
-	terminating(false)
+	terminating(false),
+	fd(-1)
 {
 	if (!DiscordVoiceClient::sodium_initialised) {
 		if (sodium_init() < 0) {
@@ -60,6 +62,18 @@ void DiscordVoiceClient::Run()
 {
 	this->runner = new std::thread(&DiscordVoiceClient::ThreadRun, this);
 	this->thread_id = runner->native_handle();
+}
+
+int DiscordVoiceClient::UDPSend(const char* data, size_t length)
+{
+	return sendto(this->fd, data, length, MSG_DONTWAIT, (const struct sockaddr*)&servaddr, sizeof(servaddr));
+}
+
+int DiscordVoiceClient::UDPRecv(char* data, size_t max_length)
+{
+	struct sockaddr sa;
+	socklen_t sl;
+	return recvfrom(this->fd, data, max_length, MSG_DONTWAIT, (struct sockaddr*)&sa, &sl);
 }
 
 bool DiscordVoiceClient::HandleFrame(const std::string &data)
@@ -125,7 +139,7 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 			}
 			break;
 			/* Voice ready */
-			case 2:
+			case 2: {
 				/* Video stream stuff comes in this frame too, but we can't use it (YET!) */
 				json &d = j["d"];
 				this->ip = d["ip"].get<std::string>();
@@ -136,10 +150,49 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 					this->modes.push_back(m.get<std::string>());
 				}
 				log(ll_debug, fmt::format("Voice websocket established; UDP endpoint: {}:{} [ssrc={}] with {} modes", ip, port, ssrc, modes.size()));
+				int newfd = -1;
+				if ((newfd = socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
+					memset(&servaddr, 0, sizeof(servaddr));
+					servaddr.sin_family = AF_INET;
+					servaddr.sin_port = htons(this->port);
+					servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
+#ifdef _WIN32
+					u_long mode = 1;
+					int result = ioctlsocket(newfd, FIONBIO, &mode);
+					if (result != NO_ERROR)
+						throw std::runtime_error("Can't switch socket to non-blocking mode!");
+#else
+					int ofcmode;
+					ofcmode = fcntl(newfd, F_GETFL, 0);
+					ofcmode |= O_NDELAY;
+					if (fcntl(newfd, F_SETFL, ofcmode)) {
+						throw std::runtime_error("Can't switch socket to non-blocking mode!");
+					}
+#endif
+					this->fd = newfd;
+					this->custom_writeable_fd = std::bind(&DiscordVoiceClient::WantWrite, this);
+					this->custom_readable_fd = std::bind(&DiscordVoiceClient::WantRead, this);
+					this->custom_writeable_ready = std::bind(&DiscordVoiceClient::WriteReady, this);
+					this->custom_readable_ready = std::bind(&DiscordVoiceClient::ReadReady, this);
+				}
+			}
 			break;
 		}
 	}
 	return true;
+}
+
+void DiscordVoiceClient::ReadReady()
+{
+	std::cout << "Readable ready!";
+	/* read from udp into buffer tail (push_back) */
+}
+
+void DiscordVoiceClient::WriteReady()
+{
+	if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
+		outbuf.erase(outbuf.begin());
+	}
 }
 
 dpp::utility::uptime DiscordVoiceClient::Uptime()
@@ -150,6 +203,18 @@ dpp::utility::uptime DiscordVoiceClient::Uptime()
 bool DiscordVoiceClient::IsConnected()
 {
 	return (this->GetState() == CONNECTED);
+}
+
+int DiscordVoiceClient::WantWrite() {
+	if (outbuf.size()) {
+		return fd;
+	} else {
+		return -1;
+	}
+}
+
+int DiscordVoiceClient::WantRead() {
+	return fd;
 }
 
 void DiscordVoiceClient::Error(uint32_t errorcode)

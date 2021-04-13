@@ -156,7 +156,7 @@ void SSLClient::ReadLoop()
 	}
 #endif
 	nonblocking = true;
-	width=sfd+1;
+	width = sfd + 1;
 	
 	/* Loop until there is a socket error */
 	while(true) {
@@ -170,6 +170,20 @@ void SSLClient::ReadLoop()
 		FD_ZERO(&writefds);
 
 		FD_SET(sfd,&readfds);
+		if (custom_readable_fd && custom_readable_fd() >= 0) {
+			int cfd = custom_readable_fd();
+			FD_SET(cfd, &readfds);
+			if (cfd > width + 1) {
+				width = cfd + 1;
+			}
+		}
+		if (custom_writeable_fd && custom_writeable_fd() >= 0) {
+			int cfd = custom_readable_fd();
+			FD_SET(cfd, &writefds);
+			if (cfd > width + 1) {
+				width = cfd + 1;
+			}
+		}
 
 		/* If we're waiting for a read on the socket don't try to write to the server */
 		if (!write_blocked_on_read) {
@@ -184,6 +198,13 @@ void SSLClient::ReadLoop()
 		r = select(width,&readfds,&writefds,0,&ts);
 		if (r == 0)
 			continue;
+
+		if (custom_writeable_fd && custom_writeable_fd() >= 0 && FD_ISSET(custom_writeable_fd(), &writefds)) {
+			custom_writeable_ready();
+		}
+		if (custom_readable_fd && custom_readable_fd() >= 0 && FD_ISSET(custom_readable_fd(), &readfds)) {
+			custom_readable_ready();
+		}
 
 		/* Now check if there's data to read */
 		if((FD_ISSET(sfd,&readfds) && !write_blocked_on_read) || (read_blocked_on_write && FD_ISSET(sfd,&writefds))) {
