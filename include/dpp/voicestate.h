@@ -25,7 +25,7 @@ enum voicestate_flags {
 class voicestate {
 public:
 	snowflake       guild_id;       //< Optional: the guild id this voice state is for
-	snowflake       channel_id;     //<the channel id this user is connected to (may be empty)
+	snowflake       channel_id;     //< the channel id this user is connected to (may be empty)
 	snowflake       user_id;        //< the user id this voice state is for
 	std::string     session_id;     //< the session id for this voice state
 	uint8_t		flags;		//< Voice state flags

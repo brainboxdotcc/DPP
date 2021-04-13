@@ -26,6 +26,7 @@
 #include <exception>
 #include <string>
 #include <iostream>
+#include <fmt/format.h>
 #include <dpp/sslclient.h>
 
 namespace dpp {
@@ -62,7 +63,7 @@ void SSLClient::Connect()
 	/* Resolve hostname to IP */
 	struct hostent *host;
 	if ((host = gethostbyname(hostname.c_str())) == nullptr)
-		throw std::runtime_error("Couldn't resolve hostname");
+		throw std::runtime_error(fmt::format("Couldn't resolve hostname '{}'", hostname));
 
 	struct addrinfo hints = {0}, *addrs;
 	hints.ai_family = AF_UNSPEC;
@@ -71,7 +72,7 @@ void SSLClient::Connect()
 
 	int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
 	if (status != 0)
-		throw std::runtime_error(gai_strerror(status));
+		throw std::runtime_error(fmt::format("getaddrinfo (host={}, port={}): ", hostname, port, gai_strerror(status)));
 
 	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 	int err;

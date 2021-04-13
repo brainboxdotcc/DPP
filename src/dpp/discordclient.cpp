@@ -396,4 +396,53 @@ uint64_t DiscordClient::GetChannelCount() {
 	return total;
 }
 
+void DiscordClient::ConnectVoice(snowflake guild_id, snowflake channel_id) {
+	std::lock_guard<std::mutex> lock(voice_mutex);
+	if (connecting_voice_channels.find(guild_id) == connecting_voice_channels.end()) {
+		connecting_voice_channels[guild_id] = new voiceconn(this, channel_id);
+		/* Once sent, this expects two events (in any order) on the websocket:
+		* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
+		*/
+		QueueMessage(json({
+			{ "op", 4 },
+			{ "d", {
+					{ "guild_id", std::to_string(guild_id) },
+					{ "channel_id", std::to_string(channel_id) },
+					{ "self_mute", false },
+					{ "self_deaf", false },
+				}
+			}
+		}).dump(), true);
+	}
+}
+
+voiceconn::voiceconn(DiscordClient* o, snowflake _channel_id) : creator(o), channel_id(_channel_id), voiceclient(nullptr) {
+}
+
+bool voiceconn::is_ready() {
+	return (!websocket_hostname.empty() && !session_id.empty() && !token.empty());
+}
+
+bool voiceconn::is_active() {
+	return voiceclient != nullptr;
+}
+
+voiceconn::~voiceconn() {
+	voiceclient->terminating = true;
+	delete voiceclient;
+}
+
+void voiceconn::connect(snowflake guild_id) {
+	if (is_ready()) {
+		try {
+			voiceclient = new DiscordVoiceClient(creator->creator, guild_id, token, session_id, websocket_hostname);
+			/* Note: Spawns thread! */
+			voiceclient->Run();
+		}
+		catch (std::exception &e) {
+			creator->log(ll_error, fmt::format("Can't connect to voice websocket (guild_id: {}, channel_id: {}): {}", guild_id, channel_id, e.what()));
+		}
+	}
+}
+
 };

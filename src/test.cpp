@@ -42,6 +42,11 @@ int main(int argc, char const *argv[])
 		/* Log some stats of the guild, user, role and channel counts, and the message content */
 		bot.log(dpp::ll_info, fmt::format("[G:{} U:{} R:{} C:{}] <{}#{:04d}> {}", dpp::get_guild_count(), dpp::get_user_count(), dpp::get_role_count(), dpp::get_channel_count(), event.msg->author->username, event.msg->author->discriminator, content));
 
+		if (content == ".voicetest" && event.msg->guild_id == 825407338755653642) {
+			dpp::DiscordClient* dc = bot.get_shard(0);
+			dc->ConnectVoice(event.msg->guild_id, 825411635631095858);
+		}
+
 		/* Crappy command handler example */
 		if (content == ".dotest" && (event.msg->guild_id == 825407338755653642 || event.msg->guild_id == 828433613343162459)) {
 
