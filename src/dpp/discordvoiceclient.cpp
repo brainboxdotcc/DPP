@@ -97,7 +97,6 @@ void DiscordVoiceClient::Run()
 
 int DiscordVoiceClient::UDPSend(const char* data, size_t length)
 {
-	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(this->port);
 	servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
@@ -201,19 +200,6 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 						throw std::runtime_error("Can't bind() client UDP socket");
 					}
 					
-#ifdef _WIN32
-					u_long mode = 1;
-					int result = ioctlsocket(newfd, FIONBIO, &mode);
-					if (result != NO_ERROR)
-						throw std::runtime_error("Can't switch socket to non-blocking mode!");
-#else
-					int ofcmode;
-					ofcmode = fcntl(newfd, F_GETFL, 0);
-					ofcmode |= O_NDELAY;
-					if (fcntl(newfd, F_SETFL, ofcmode)) {
-						throw std::runtime_error("Can't switch socket to non-blocking mode!");
-					}
-#endif
 					/* Hook select() in the SSLClient to add a new file descriptor */
 					this->fd = newfd;
 					std::cout << "FD: " << this->fd << "\n";
@@ -222,8 +208,43 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 					this->custom_writeable_ready = std::bind(&DiscordVoiceClient::WriteReady, this);
 					this->custom_readable_ready = std::bind(&DiscordVoiceClient::ReadReady, this);
 
+					struct hostent *he;
+					if ((he = gethostbyname(hostname.c_str())) == nullptr)
+						throw std::runtime_error(fmt::format("Couldn't resolve hostname '{}'", hostname));
+
+					struct in_addr** addr_list = (struct in_addr **) he->h_addr_list;
+					char ws_ip[30];
+					*ws_ip = 0;
+
+					for(int i = 0; addr_list[i] != NULL; i++) {
+						strcpy(ws_ip, inet_ntoa(*addr_list[i]));
+						break;
+					}
+					servaddr.sin_port = htons(this->port);
+					servaddr.sin_addr.s_addr = inet_addr(ws_ip);
 					ip_discovery_packet ipd(this->ssrc);
-					Send(std::string((const char*)&ipd, sizeof(ip_discovery_packet)));
+					int r = sendto(this->fd, &ipd, sizeof(ip_discovery_packet), 0, (const sockaddr*)&servaddr, sizeof(sockaddr_in));
+					std::cout << "sendto returned " << r << "\n";
+					struct sockaddr_in sa;
+					socklen_t sl = sizeof(sa);
+					char data[74];
+					int v = recvfrom(this->fd, data, 74, 0, (struct sockaddr*)&sa, &sl);
+					std::cout << "recvfrom=" << v << "\n";
+
+#ifdef _WIN32
+					u_long mode = 1;
+					int result = ioctlsocket(this->fd, FIONBIO, &mode);
+					if (result != NO_ERROR)
+						throw std::runtime_error("Can't switch socket to non-blocking mode!");
+#else
+					int ofcmode;
+					ofcmode = fcntl(this->fd, F_GETFL, 0);
+					ofcmode |= O_NDELAY;
+					if (fcntl(this->fd, F_SETFL, ofcmode)) {
+						throw std::runtime_error("Can't switch socket to non-blocking mode!");
+					}
+#endif
+
 				}
 			}
 			break;
@@ -356,6 +377,10 @@ void DiscordVoiceClient::OneSecondTimer()
 				message_queue.pop_front();
 				this->write(message);
 			}
+		}
+
+		if (fd > -1) {
+			ReadReady();
 		}
 
 		if (this->heartbeat_interval) {
