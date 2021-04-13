@@ -219,6 +219,8 @@ public:
 	void WriteReady();
 
 	void ReadReady();
+
+	void Send(const std::string &packet);
 };
 
 };

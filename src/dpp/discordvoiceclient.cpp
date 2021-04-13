@@ -15,6 +15,35 @@
 
 namespace dpp {
 
+#pragma pack(push,1)
+/**
+ * @brief IP discovery packet, sent to voice server.
+ * Reply comes back along the same route.
+ */
+struct ip_discovery_packet {
+	uint16_t type;		//< Type: 0x01 for request, 0x02 for response
+	uint16_t length;	//< Length excluding type and length fields (70)
+	uint32_t ssrc;		//< ssrc value
+	char address[64];	//< Address, in reply, null terminated
+	uint16_t port;		//< Port
+
+	/**
+	 * @brief Construct a new ip discovery packet object
+	 */
+	ip_discovery_packet() = default;
+
+	/**
+	 * @brief Construct a new ip discovery packet object
+	 * 
+	 * @param _ssrc The SSRC value to send
+	 */
+	ip_discovery_packet(uint32_t _ssrc) :type(0x01), length(htons(70)), ssrc(htonl(_ssrc)), port(0) {
+		std::cout << "ip_discovery_packet()\n";
+		memset(&address, 0, 64);
+	}
+};
+#pragma pack(pop)
+
 bool DiscordVoiceClient::sodium_initialised = false;
 
 DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
@@ -29,6 +58,7 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server
 	terminating(false),
 	fd(-1)
 {
+#if HAVE_VOICE
 	if (!DiscordVoiceClient::sodium_initialised) {
 		if (sodium_init() < 0) {
 			throw std::runtime_error("DiscordVoiceClient::DiscordVoiceClient; sodium_init() failed");
@@ -36,6 +66,7 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server
 		DiscordVoiceClient::sodium_initialised = true;
 	}
 	Connect();
+#endif
 }
 
 DiscordVoiceClient::~DiscordVoiceClient()
@@ -66,14 +97,19 @@ void DiscordVoiceClient::Run()
 
 int DiscordVoiceClient::UDPSend(const char* data, size_t length)
 {
-	return sendto(this->fd, data, length, MSG_DONTWAIT, (const struct sockaddr*)&servaddr, sizeof(servaddr));
+	memset(&servaddr, 0, sizeof(servaddr));
+	servaddr.sin_family = AF_INET;
+	servaddr.sin_port = htons(this->port);
+	servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
+	std::cout << "Send to: " << this->ip << " " << this->port << "\n";
+	return sendto(this->fd, data, length, 0, (const struct sockaddr*)&servaddr, sizeof(sockaddr_in));
 }
 
 int DiscordVoiceClient::UDPRecv(char* data, size_t max_length)
 {
 	struct sockaddr sa;
 	socklen_t sl;
-	return recvfrom(this->fd, data, max_length, MSG_DONTWAIT, (struct sockaddr*)&sa, &sl);
+	return recvfrom(this->fd, data, max_length, 0, (struct sockaddr*)&sa, &sl);
 }
 
 bool DiscordVoiceClient::HandleFrame(const std::string &data)
@@ -150,12 +186,21 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 					this->modes.push_back(m.get<std::string>());
 				}
 				log(ll_debug, fmt::format("Voice websocket established; UDP endpoint: {}:{} [ssrc={}] with {} modes", ip, port, ssrc, modes.size()));
+
 				int newfd = -1;
 				if ((newfd = socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
-					memset(&servaddr, 0, sizeof(servaddr));
+
+					sockaddr_in servaddr;
+					memset(&servaddr, 0, sizeof(sockaddr_in));
+
 					servaddr.sin_family = AF_INET;
-					servaddr.sin_port = htons(this->port);
-					servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
+					servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+					servaddr.sin_port = 0;
+
+					if (bind(newfd, (sockaddr*)&servaddr, sizeof(sockaddr_in)) < 0) {
+						throw std::runtime_error("Can't bind() client UDP socket");
+					}
+					
 #ifdef _WIN32
 					u_long mode = 1;
 					int result = ioctlsocket(newfd, FIONBIO, &mode);
@@ -169,11 +214,16 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 						throw std::runtime_error("Can't switch socket to non-blocking mode!");
 					}
 #endif
+					/* Hook select() in the SSLClient to add a new file descriptor */
 					this->fd = newfd;
+					std::cout << "FD: " << this->fd << "\n";
 					this->custom_writeable_fd = std::bind(&DiscordVoiceClient::WantWrite, this);
 					this->custom_readable_fd = std::bind(&DiscordVoiceClient::WantRead, this);
 					this->custom_writeable_ready = std::bind(&DiscordVoiceClient::WriteReady, this);
 					this->custom_readable_ready = std::bind(&DiscordVoiceClient::ReadReady, this);
+
+					ip_discovery_packet ipd(this->ssrc);
+					Send(std::string((const char*)&ipd, sizeof(ip_discovery_packet)));
 				}
 			}
 			break;
@@ -182,16 +232,27 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 	return true;
 }
 
+void DiscordVoiceClient::Send(const std::string &packet) {
+	outbuf.push_back(packet);
+}
+
 void DiscordVoiceClient::ReadReady()
 {
-	std::cout << "Readable ready!";
 	/* read from udp into buffer tail (push_back) */
+	char buffer[10];
+	int r = this->UDPRecv(buffer, sizeof(buffer));
+	std::cout << "Got " << r << "\n";
 }
 
 void DiscordVoiceClient::WriteReady()
 {
-	if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
-		outbuf.erase(outbuf.begin());
+	if (outbuf.size()) {
+		if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
+			std::cout << "Sent!\n";
+			outbuf.erase(outbuf.begin());
+		} else {
+			std::cout << "Send bad\n";
+		}
 	}
 }
 
