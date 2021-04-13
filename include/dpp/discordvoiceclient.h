@@ -10,7 +10,12 @@
 #include <thread>
 #include <deque>
 #include <mutex>
-#include <zlib.h>
+
+#ifdef HAVE_VOICE
+#include <sodium.h>
+#include <opus/opus.h>
+#endif
+
 
 using json = nlohmann::json;
 
@@ -18,7 +23,9 @@ namespace dpp {
 	// Forward declaration
 	class cluster;
 
-/** @brief Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
+/** @brief Implements a discord voice connection.
+ * Each DiscordVoiceClient connects to one voice channel and derives from a websocket client.
+ */
 class DiscordVoiceClient : public WSClient
 {
 	/** Mutex for message queue */
@@ -56,6 +63,11 @@ class DiscordVoiceClient : public WSClient
 	 */
 	std::vector<std::string> modes;
 
+#ifdef HAVE_VOICE
+	OpusEncoder* encoder;
+	OpusDecoder* decoder;
+#endif
+
 public:
 	/** Owning cluster */
 	class dpp::cluster* creator;
@@ -72,10 +84,10 @@ public:
 	/** Thread ID */
 	std::thread::native_handle_type thread_id;
 
-	/** Discord bot token */
+	/** Discord voice session token */
 	std::string token;
 
-	/** Discord session id */
+	/** Discord voice session id */
 	std::string sessionid;
 
 	/** Server ID */

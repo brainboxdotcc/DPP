@@ -16,7 +16,9 @@
 # limitations under the License.
 #
 
-cmake_minimum_required (VERSION 3.6)
+cmake_minimum_required (VERSION 3.12)
+
+include("cmake/colour.cmake")
 
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h version_h)
 if (NOT version_h MATCHES "DPP_VERSION_SHORT ([0-9][0-9])([0-9][0-9])([0-9][0-9])")
@@ -29,6 +31,26 @@ string(CONCAT DPP_VERSION ${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSIO
 
 
 project(libdpp VERSION ${DPP_VERSION} LANGUAGES CXX)
+
+include("cmake/FindSodium.cmake")
+include("cmake/FindOpus.cmake")
+
+if (OPUS_FOUND)
+	if (sodium_INCLUDE_DIR)
+		add_compile_definitions(HAVE_VOICE)
+		set(HAVE_VOICE)
+	else()
+		message("sodium_INCLUDE_DIR not set")
+	endif()
+else()
+	message("OPUS_FOUND = 0")
+endif()
+
+if (HAVE_VOICE)
+	message("-- Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
+else(HAVE_VOICE)
+	message("-- Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
+endif(HAVE_VOICE)
 
 aux_source_directory("src" coresrc)
 
