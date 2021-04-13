@@ -72,6 +72,11 @@ public:
 	/** Owning cluster */
 	class dpp::cluster* creator;
 
+	/* This needs to be static, we only initialise libsodium once per program start,
+	* so initialising it on first use in a voice connection is best.
+	*/
+	static bool sodium_initialised;
+
 	/** True when the thread is shutting down */
 	bool terminating;
 

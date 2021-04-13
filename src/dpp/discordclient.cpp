@@ -418,6 +418,28 @@ void DiscordClient::ConnectVoice(snowflake guild_id, snowflake channel_id) {
 #endif
 }
 
+void DiscordClient::DisconnectVoice(snowflake guild_id) {
+#ifdef HAVE_VOICE
+	std::lock_guard<std::mutex> lock(voice_mutex);
+	auto v = connecting_voice_channels.find(guild_id);
+	if (v != connecting_voice_channels.end()) {
+		delete v->second;
+		connecting_voice_channels.erase(v);
+		QueueMessage(json({
+			{ "op", 4 },
+			{ "d", {
+					{ "guild_id", std::to_string(guild_id) },
+					{ "channel_id", json::value_t::null },
+					{ "self_mute", false },
+					{ "self_deaf", false },
+				}
+			}
+		}).dump(), true);
+	}
+#endif
+}
+
+
 voiceconn::voiceconn(DiscordClient* o, snowflake _channel_id) : creator(o), channel_id(_channel_id), voiceclient(nullptr) {
 }
 

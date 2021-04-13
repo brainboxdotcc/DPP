@@ -14,6 +14,8 @@
 
 namespace dpp {
 
+bool DiscordVoiceClient::sodium_initialised = false;
+
 DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
        : WSClient(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4"),
 	creator(_cluster),
@@ -25,6 +27,12 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server
 	runner(nullptr),
 	terminating(false)
 {
+	if (!DiscordVoiceClient::sodium_initialised) {
+		if (sodium_init() < 0) {
+			throw std::runtime_error("DiscordVoiceClient::DiscordVoiceClient; sodium_init() failed");
+		}
+		DiscordVoiceClient::sodium_initialised = true;
+	}
 	Connect();
 }
 

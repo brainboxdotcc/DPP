@@ -291,6 +291,13 @@ public:
 	 * @param channel_id Channel ID of the voice channel
 	 */
 	void ConnectVoice(snowflake guild_id, snowflake channel_id);
+
+	/**
+	 * @brief Disconnect from the connected voice channel on a guild
+	 * 
+	 * @param guild_id The guild who's voice channel you wish to disconnect from
+	 */
+	void DisconnectVoice(snowflake guild_id);
 };
 
 };
