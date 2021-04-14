@@ -42,8 +42,9 @@
 using json = nlohmann::json;
 
 namespace dpp {
-	// Forward declaration
-	class cluster;
+
+// Forward declaration
+class cluster;
 
 /** @brief Implements a discord voice connection.
  * Each DiscordVoiceClient connects to one voice channel and derives from a websocket client.
@@ -101,10 +102,12 @@ class DiscordVoiceClient : public WSClient
 	 */
 	struct sockaddr_in servaddr;
 
-public:
+	uint8_t* secret_key;
 
-	fd_set readfds;
-	fd_set writefds;
+	uint16_t sequence;
+	uint32_t timestamp;
+
+public:
 
 	/** Owning cluster */
 	class dpp::cluster* creator;
@@ -145,6 +148,14 @@ public:
 
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
 	virtual void OneSecondTimer();
+
+	/**
+	 * @brief voice client is ready to stream audio.
+	 * The voice client is considered ready if it has a secret key.
+	 * 
+	 * @return true if ready to stream audio
+	 */
+	bool IsReady();
 
 	/**
 	 * @brief Queue a message to be sent via the websocket
@@ -221,6 +232,8 @@ public:
 	void ReadReady();
 
 	void Send(const std::string &packet);
+
+	void SendAudio(uint16_t* audio_data, const size_t length);
 };
 
 };

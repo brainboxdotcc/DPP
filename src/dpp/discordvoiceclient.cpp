@@ -15,6 +15,8 @@
 
 namespace dpp {
 
+std::string external_ip;
+
 #pragma pack(push,1)
 /**
  * @brief IP discovery packet, sent to voice server.
@@ -38,7 +40,6 @@ struct ip_discovery_packet {
 	 * @param _ssrc The SSRC value to send
 	 */
 	ip_discovery_packet(uint32_t _ssrc) :type(0x01), length(htons(70)), ssrc(htonl(_ssrc)), port(0) {
-		std::cout << "ip_discovery_packet()\n";
 		memset(&address, 0, 64);
 	}
 };
@@ -56,13 +57,22 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server
 	sessionid(_session_id),
 	runner(nullptr),
 	terminating(false),
-	fd(-1)
+	fd(-1),
+	secret_key(nullptr),
+	sequence(0),
+	timestamp(0)
 {
 #if HAVE_VOICE
 	if (!DiscordVoiceClient::sodium_initialised) {
 		if (sodium_init() < 0) {
 			throw std::runtime_error("DiscordVoiceClient::DiscordVoiceClient; sodium_init() failed");
 		}
+		int opusError = 0;
+		encoder = opus_encoder_create(48000, 2, OPUS_APPLICATION_VOIP, &opusError);
+		if (opusError) {
+			throw std::runtime_error(fmt::format("DiscordVoiceClient::DiscordVoiceClient; opus_encoder_create() failed: {}", opusError));
+		}
+		external_ip = utility::external_ip();
 		DiscordVoiceClient::sodium_initialised = true;
 	}
 	Connect();
@@ -75,6 +85,16 @@ DiscordVoiceClient::~DiscordVoiceClient()
 		runner->join();
 		delete runner;
 	}
+	if (encoder) {
+		opus_encoder_destroy(encoder);
+	}
+	if (secret_key) {
+		delete[] secret_key;
+	}
+}
+
+bool DiscordVoiceClient::IsReady() {
+	return secret_key != nullptr;
 }
 
 void DiscordVoiceClient::ThreadRun()
@@ -97,10 +117,10 @@ void DiscordVoiceClient::Run()
 
 int DiscordVoiceClient::UDPSend(const char* data, size_t length)
 {
+	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(this->port);
 	servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-	std::cout << "Send to: " << this->ip << " " << this->port << "\n";
 	return sendto(this->fd, data, length, 0, (const struct sockaddr*)&servaddr, sizeof(sockaddr_in));
 }
 
@@ -173,6 +193,20 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 				this->connect_time = time(NULL);
 			}
 			break;
+			/* Session description */
+			case 4: {
+				json &d = j["d"];
+				secret_key = new uint8_t[32];
+				size_t ofs = 0;
+				for (auto & c : d["secret_key"]) {
+					*(secret_key + ofs) = (uint8_t)c;
+					ofs++;
+					if (ofs > 31) {
+						break;
+					}
+				}
+			}
+			break;
 			/* Voice ready */
 			case 2: {
 				/* Video stream stuff comes in this frame too, but we can't use it (YET!) */
@@ -191,60 +225,54 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 
 					sockaddr_in servaddr;
 					memset(&servaddr, 0, sizeof(sockaddr_in));
-
 					servaddr.sin_family = AF_INET;
 					servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-					servaddr.sin_port = 0;
+					servaddr.sin_port = htons(0);
 
-					if (bind(newfd, (sockaddr*)&servaddr, sizeof(sockaddr_in)) < 0) {
+					if (bind(newfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
 						throw std::runtime_error("Can't bind() client UDP socket");
 					}
 					
+#ifdef _WIN32
+					u_long mode = 1;
+					int result = ioctlsocket(newfd, FIONBIO, &mode);
+					if (result != NO_ERROR)
+						throw std::runtime_error("Can't switch socket to non-blocking mode!");
+#else
+					int ofcmode;
+					ofcmode = fcntl(newfd, F_GETFL, 0);
+					ofcmode |= O_NDELAY;
+					if (fcntl(newfd, F_SETFL, ofcmode)) {
+						throw std::runtime_error("Can't switch socket to non-blocking mode!");
+					}
+#endif
 					/* Hook select() in the SSLClient to add a new file descriptor */
 					this->fd = newfd;
-					std::cout << "FD: " << this->fd << "\n";
 					this->custom_writeable_fd = std::bind(&DiscordVoiceClient::WantWrite, this);
 					this->custom_readable_fd = std::bind(&DiscordVoiceClient::WantRead, this);
 					this->custom_writeable_ready = std::bind(&DiscordVoiceClient::WriteReady, this);
 					this->custom_readable_ready = std::bind(&DiscordVoiceClient::ReadReady, this);
 
-					struct hostent *he;
-					if ((he = gethostbyname(hostname.c_str())) == nullptr)
-						throw std::runtime_error(fmt::format("Couldn't resolve hostname '{}'", hostname));
-
-					struct in_addr** addr_list = (struct in_addr **) he->h_addr_list;
-					char ws_ip[30];
-					*ws_ip = 0;
-
-					for(int i = 0; addr_list[i] != NULL; i++) {
-						strcpy(ws_ip, inet_ntoa(*addr_list[i]));
-						break;
+					int bound_port = 0;
+					struct sockaddr_in sin;
+					socklen_t len = sizeof(sin);
+					if (getsockname(this->fd, (struct sockaddr *)&sin, &len) > -1) {
+						bound_port = ntohs(sin.sin_port);
 					}
-					servaddr.sin_port = htons(this->port);
-					servaddr.sin_addr.s_addr = inet_addr(ws_ip);
-					ip_discovery_packet ipd(this->ssrc);
-					int r = sendto(this->fd, &ipd, sizeof(ip_discovery_packet), 0, (const sockaddr*)&servaddr, sizeof(sockaddr_in));
-					std::cout << "sendto returned " << r << "\n";
-					struct sockaddr_in sa;
-					socklen_t sl = sizeof(sa);
-					char data[74];
-					int v = recvfrom(this->fd, data, 74, 0, (struct sockaddr*)&sa, &sl);
-					std::cout << "recvfrom=" << v << "\n";
 
-#ifdef _WIN32
-					u_long mode = 1;
-					int result = ioctlsocket(this->fd, FIONBIO, &mode);
-					if (result != NO_ERROR)
-						throw std::runtime_error("Can't switch socket to non-blocking mode!");
-#else
-					int ofcmode;
-					ofcmode = fcntl(this->fd, F_GETFL, 0);
-					ofcmode |= O_NDELAY;
-					if (fcntl(this->fd, F_SETFL, ofcmode)) {
-						throw std::runtime_error("Can't switch socket to non-blocking mode!");
-					}
-#endif
-
+					this->write(json({
+						{ "op", 1 },
+							{ "d", {
+								{ "protocol", "udp" },
+								{ "data", {
+										{ "address", external_ip },
+										{ "port", bound_port },
+										{ "mode", "xsalsa20_poly1305" }
+									}
+								}
+							}
+						}
+					}).dump());
 				}
 			}
 			break;
@@ -259,20 +287,19 @@ void DiscordVoiceClient::Send(const std::string &packet) {
 
 void DiscordVoiceClient::ReadReady()
 {
-	/* read from udp into buffer tail (push_back) */
+	/* read from udp into buffer tail (push_back) -- XXX FIXME */
 	char buffer[10];
 	int r = this->UDPRecv(buffer, sizeof(buffer));
-	std::cout << "Got " << r << "\n";
 }
 
 void DiscordVoiceClient::WriteReady()
 {
 	if (outbuf.size()) {
 		if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
-			std::cout << "Sent!\n";
 			outbuf.erase(outbuf.begin());
-		} else {
-			std::cout << "Send bad\n";
+			if (outbuf.empty()) {
+				std::cout << "Buffer underrun!\n";
+			}
 		}
 	}
 }
@@ -379,8 +406,25 @@ void DiscordVoiceClient::OneSecondTimer()
 			}
 		}
 
-		if (fd > -1) {
-			ReadReady();
+		
+		this->write(json({
+		{"op", 5},
+		{"d", {
+			{"speaking", 1},
+			{"delay", 0},
+			{"ssrc", ssrc}
+		}}
+		}).dump());
+
+		srand(time(NULL));
+		if (IsReady()) {
+			uint16_t beep[11520];
+			for (int y = 0; y < 48; ++y) {
+				for (int x = 0; x < 11520; ++x) {
+					beep[x] = rand() % 65535;
+				}
+				SendAudio(beep, 11520);
+			}
 		}
 
 		if (this->heartbeat_interval) {
@@ -393,6 +437,55 @@ void DiscordVoiceClient::OneSecondTimer()
 		}
 	}
 }
+
+void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length)  {
+
+	int frameSize = 2880;
+
+	opus_int32 encodedAudioMaxLength = length;
+	unsigned char encodedAudioData[encodedAudioMaxLength];
+	// frame size * channels * 2
+	// 2880 * 2 * 2 = 11520
+	opus_int32 encodedAudioLength = opus_encode(encoder, (const opus_int16*)audio_data, frameSize, encodedAudioData, encodedAudioMaxLength);
+
+	if (encodedAudioLength < 1) {
+		return;
+	}
+
+	//sendAudioData(encodedAudioDataPointer, encodedAudioLength, frameSize);
+
+	++sequence;
+	const int headerSize = 12;
+	const int nonceSize = 24;
+	const uint8_t header[headerSize] = {
+		0x80,
+		0x78,
+		static_cast<uint8_t>((sequence  >> (8 * 1)) & 0xff),
+		static_cast<uint8_t>((sequence  >> (8 * 0)) & 0xff),
+		static_cast<uint8_t>((timestamp >> (8 * 3)) & 0xff),
+		static_cast<uint8_t>((timestamp >> (8 * 2)) & 0xff),
+		static_cast<uint8_t>((timestamp >> (8 * 1)) & 0xff),
+		static_cast<uint8_t>((timestamp >> (8 * 0)) & 0xff),
+		static_cast<uint8_t>((ssrc      >> (8 * 3)) & 0xff),
+		static_cast<uint8_t>((ssrc      >> (8 * 2)) & 0xff),
+		static_cast<uint8_t>((ssrc      >> (8 * 1)) & 0xff),
+		static_cast<uint8_t>((ssrc      >> (8 * 0)) & 0xff),
+	};
+
+	uint8_t nonce[nonceSize];
+	std::memcpy(nonce, header, sizeof(header));
+	std::memset(nonce + sizeof(header), 0, sizeof(nonce) - sizeof(header));
+
+	std::vector<uint8_t> audioDataPacket(sizeof(header) + encodedAudioLength + crypto_secretbox_MACBYTES);
+	std::memcpy(audioDataPacket.data(), header, sizeof(header));
+
+	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData, encodedAudioLength, nonce, secret_key);
+
+	Send(std::string((const char*)audioDataPacket.data(), audioDataPacket.size()));
+	timestamp += frameSize;
+
+}
+
 
 
 };

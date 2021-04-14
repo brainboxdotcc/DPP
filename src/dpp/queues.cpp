@@ -28,6 +28,18 @@
 
 namespace dpp {
 
+namespace utility {
+
+	std::string external_ip() {
+		httplib::Client cli("http://api.ipify.org:80");
+		if (auto res = cli.Get("/")) {
+			return res->body;
+		}
+		return "";
+	}
+
+};
+
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &filename, const std::string &filecontent) : endpoint(_endpoint), parameters(_parameters), complete_handler(completion), postdata(_postdata), method(_method), completed(false), file_name(filename), file_content(filecontent)
 {
 }

@@ -118,6 +118,13 @@ namespace dpp {
 		};
 
 		/**
+		 * @brief Get the external ip address for NAT systems
+		 * 
+		 * @return std::string external ip as a string
+		 */
+		std::string external_ip();
+
+		/**
 		 * @brief A class used to represent an uptime in hours, minutes,
 		 * seconds and days, with helper functions to convert from time_t
 		 * and display as a string.
