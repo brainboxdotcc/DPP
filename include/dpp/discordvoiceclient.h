@@ -107,6 +107,8 @@ class DiscordVoiceClient : public WSClient
 	uint16_t sequence;
 	uint32_t timestamp;
 
+	bool sending;
+
 public:
 
 	/** Owning cluster */

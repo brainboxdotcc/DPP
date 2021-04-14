@@ -575,6 +575,27 @@ public:
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
 
 	/**
+	 * @brief 
+	 * 
+	 * @param _voice_buffer_send User function to attach to event
+	 */
+	void on_voice_buffer_send (std::function<void(const voice_buffer_send_t& _event)> _voice_buffer_send);
+
+	/**
+	 * @brief 
+	 * 
+	 * @param _voice_user_talking User function to attach to event
+	 */
+	void on_voice_buffer_send (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking);
+
+	/**
+	 * @brief 
+	 * 
+	 * @param _voice_ready User function to attach to event
+	 */
+	void on_voice_ready (std::function<void(const voice_ready_t& _event)> _voice_ready);
+
+	/**
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create
 	 * 
 	 * @param endpoint 

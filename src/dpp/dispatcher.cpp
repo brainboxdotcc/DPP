@@ -183,4 +183,16 @@ guild_members_chunk_t::guild_members_chunk_t(const std::string &raw) : event_dis
 {
 }
 
+voice_buffer_send_t::voice_buffer_send_t(const std::string &raw) : event_dispatch_t(raw)
+{
+}
+
+voice_user_talking_t::voice_user_talking_t(const std::string &raw) : event_dispatch_t(raw)
+{
+}
+
+voice_ready_t::voice_ready_t(const std::string &raw) : event_dispatch_t(raw)
+{
+}
+
 };

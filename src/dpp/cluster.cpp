@@ -1333,5 +1333,18 @@ void cluster::on_integration_delete (std::function<void(const integration_delete
 	this->dispatch.integration_delete = _integration_delete;
 }
 
+void cluster::on_voice_buffer_send (std::function<void(const voice_buffer_send_t& _event)> _voice_buffer_send) {
+	this->dispatch.voice_buffer_send = _voice_buffer_send;
+}
+
+void cluster::on_voice_buffer_send (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking) {
+	this->dispatch.voice_user_talking = _voice_user_talking;
+}
+
+void cluster::on_voice_ready (std::function<void(const voice_ready_t& _event)> _voice_ready) {
+	this->dispatch.voice_ready = _voice_ready;
+}
+
+
 
 };

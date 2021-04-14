@@ -439,6 +439,17 @@ void DiscordClient::DisconnectVoice(snowflake guild_id) {
 #endif
 }
 
+voiceconn* DiscordClient::GetVoice(snowflake guild_id) {
+#ifdef HAVE_VOICE
+	std::lock_guard<std::mutex> lock(voice_mutex);
+	auto v = connecting_voice_channels.find(guild_id);
+	if (v != connecting_voice_channels.end()) {
+		return v->second;
+	}
+#endif
+	return nullptr;
+}
+
 
 voiceconn::voiceconn(DiscordClient* o, snowflake _channel_id) : creator(o), channel_id(_channel_id), voiceclient(nullptr) {
 }
@@ -472,5 +483,6 @@ void voiceconn::connect(snowflake guild_id) {
 		t.detach();
 	}
 }
+
 
 };

@@ -17,33 +17,18 @@ namespace dpp {
 
 std::string external_ip;
 
-#pragma pack(push,1)
 /**
- * @brief IP discovery packet, sent to voice server.
- * Reply comes back along the same route.
+ * @brief Represents an RTP packet. Size should always be exactly 12.
  */
-struct ip_discovery_packet {
-	uint16_t type;		//< Type: 0x01 for request, 0x02 for response
-	uint16_t length;	//< Length excluding type and length fields (70)
-	uint32_t ssrc;		//< ssrc value
-	char address[64];	//< Address, in reply, null terminated
-	uint16_t port;		//< Port
+struct rtp_header {
+	uint16_t constant;
+	uint16_t sequence;
+	uint32_t timestamp;
+	uint32_t ssrc;
 
-	/**
-	 * @brief Construct a new ip discovery packet object
-	 */
-	ip_discovery_packet() = default;
-
-	/**
-	 * @brief Construct a new ip discovery packet object
-	 * 
-	 * @param _ssrc The SSRC value to send
-	 */
-	ip_discovery_packet(uint32_t _ssrc) :type(0x01), length(htons(70)), ssrc(htonl(_ssrc)), port(0) {
-		memset(&address, 0, 64);
+	rtp_header(uint16_t _seq, uint32_t _ts, uint32_t _ssrc) : constant(htons(0x8078)), sequence(htons(_seq)), timestamp(htonl(_ts)), ssrc(htonl(_ssrc)) {
 	}
 };
-#pragma pack(pop)
 
 bool DiscordVoiceClient::sodium_initialised = false;
 
@@ -60,7 +45,8 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server
 	fd(-1),
 	secret_key(nullptr),
 	sequence(0),
-	timestamp(0)
+	timestamp(0),
+	sending(false)
 {
 #if HAVE_VOICE
 	if (!DiscordVoiceClient::sodium_initialised) {
@@ -207,6 +193,11 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 						break;
 					}
 				}
+				if (creator->dispatch.voice_ready) {
+					voice_ready_t rdy(data);
+					rdy.voice_client = this;
+					creator->dispatch.voice_ready(rdy);
+				}
 			}
 			break;
 			/* Voice ready */
@@ -299,8 +290,11 @@ void DiscordVoiceClient::WriteReady()
 	if (outbuf.size()) {
 		if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
 			outbuf.erase(outbuf.begin());
-			if (outbuf.empty()) {
-				std::cout << "Buffer underrun!\n";
+			if (creator->dispatch.voice_buffer_send) {
+				voice_buffer_send_t snd("");
+				snd.buffer_size = outbuf.size();
+				snd.voice_client = this;
+				creator->dispatch.voice_buffer_send(snd);
 			}
 		}
 	}
@@ -408,27 +402,6 @@ void DiscordVoiceClient::OneSecondTimer()
 			}
 		}
 
-		
-		this->write(json({
-		{"op", 5},
-		{"d", {
-			{"speaking", 1},
-			{"delay", 0},
-			{"ssrc", ssrc}
-		}}
-		}).dump());
-
-		srand(time(NULL));
-		if (IsReady()) {
-			uint16_t beep[11520];
-			for (int y = 0; y < 48; ++y) {
-				for (int x = 0; x < 11520; ++x) {
-					beep[x] = rand() % 65535;
-				}
-				SendAudio(beep, 11520);
-			}
-		}
-
 		if (this->heartbeat_interval) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
@@ -457,32 +430,32 @@ void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length)  {
 	++sequence;
 	const int headerSize = 12;
 	const int nonceSize = 24;
-	const uint8_t header[headerSize] = {
-		0x80,
-		0x78,
-		static_cast<uint8_t>((sequence  >> (8 * 1)) & 0xff),
-		static_cast<uint8_t>((sequence  >> (8 * 0)) & 0xff),
-		static_cast<uint8_t>((timestamp >> (8 * 3)) & 0xff),
-		static_cast<uint8_t>((timestamp >> (8 * 2)) & 0xff),
-		static_cast<uint8_t>((timestamp >> (8 * 1)) & 0xff),
-		static_cast<uint8_t>((timestamp >> (8 * 0)) & 0xff),
-		static_cast<uint8_t>((ssrc      >> (8 * 3)) & 0xff),
-		static_cast<uint8_t>((ssrc      >> (8 * 2)) & 0xff),
-		static_cast<uint8_t>((ssrc      >> (8 * 1)) & 0xff),
-		static_cast<uint8_t>((ssrc      >> (8 * 0)) & 0xff),
-	};
+	rtp_header header(sequence, timestamp, ssrc);
 
-	uint8_t nonce[nonceSize];
-	std::memcpy(nonce, header, sizeof(header));
+	int8_t nonce[nonceSize];
+	std::memcpy(nonce, &header, sizeof(header));
 	std::memset(nonce + sizeof(header), 0, sizeof(nonce) - sizeof(header));
 
 	std::vector<uint8_t> audioDataPacket(sizeof(header) + encodedAudioLength + crypto_secretbox_MACBYTES);
-	std::memcpy(audioDataPacket.data(), header, sizeof(header));
+	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
 
-	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData, encodedAudioLength, nonce, secret_key);
+	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData, encodedAudioLength, (const unsigned char*)nonce, secret_key);
 
 	Send(std::string((const char*)audioDataPacket.data(), audioDataPacket.size()));
 	timestamp += frameSize;
+
+	if (!this->sending) {		
+		this->QueueMessage(json({
+		{"op", 5},
+		{"d", {
+			{"speaking", 1},
+			{"delay", 0},
+			{"ssrc", ssrc}
+		}}
+		}).dump(), true);
+		sending = true;
+	}
+
 #endif
 }
 

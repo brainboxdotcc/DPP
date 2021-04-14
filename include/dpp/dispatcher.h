@@ -464,6 +464,39 @@ struct integration_delete_t : public event_dispatch_t {
 	integration deleted_integration;
 };
 
+/** @brief voice buffer send */
+struct voice_buffer_send_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param raw Raw event text as JSON
+	 */
+	voice_buffer_send_t(const std::string &raw);
+	class DiscordVoiceClient* voice_client;
+	int buffer_size;
+};
+
+/** @brief voice user talking */
+struct voice_user_talking_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param raw Raw event text as JSON
+	 */
+	voice_user_talking_t(const std::string &raw);
+	class DiscordVoiceClient* voice_client;
+	snowflake user_id;
+	uint8_t talking_flags;
+};
+
+/** @brief voice user talking */
+struct voice_ready_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param raw Raw event text as JSON
+	 */
+	voice_ready_t(const std::string &raw);
+	class DiscordVoiceClient* voice_client;
+};
+
 /** @brief The dispatcher class contains a set of std::functions representing hooked events
  * that the user code is interested in. These are modified via the on_eventname style
  * methods in the cluster class.
@@ -646,6 +679,18 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const integration_delete_t& event)> integration_delete;
+	/** @brief Event handler function pointer for voice buffer send event
+	 * @param event Event parameters
+	 */
+	std::function<void(const voice_buffer_send_t& event)> voice_buffer_send;
+	/** @brief Event handler function pointer for voice user talking event
+	 * @param event Event parameters
+	 */
+	std::function<void(const voice_user_talking_t& event)> voice_user_talking;
+	/** @brief Event handler function pointer for voice ready event
+	 * @param event Event parameters
+	 */
+	std::function<void(const voice_ready_t& event)> voice_ready;
 };
 
 };

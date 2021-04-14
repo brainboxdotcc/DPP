@@ -7,12 +7,7 @@ using json = nlohmann::json;
 
 int main(int argc, char const *argv[])
 {
-	std::cout << "guild: " << sizeof(dpp::guild) << "\n";
-	std::cout << "guild_member: " << sizeof(dpp::guild_member) << "\n";
-	std::cout << "user: " << sizeof(dpp::user) << "\n";
-	std::cout << "channel: " << sizeof(dpp::channel) << "\n";
-	std::cout << "role: " << sizeof(dpp::role) << "\n";
-	std::cout << "emoji: " << sizeof(dpp::emoji) << "\n";
+	srand(time(NULL));
 
 	/* Read config file */
 	json configdocument;
@@ -31,6 +26,22 @@ int main(int argc, char const *argv[])
 		if (event.severity >= dpp::ll_debug) {
 			std::cout << dpp::utility::current_date_time() << " [" << dpp::utility::loglevel(event.severity) << "] " << event.message << "\n";
 		}
+	});
+
+	bot.on_voice_ready([&bot](const dpp::voice_ready_t & event) {
+		uint16_t beep[11520];
+		for (int x = 0; x < 11520; ++x) {
+			beep[x] = rand() % 65535;
+		}
+		event.voice_client->SendAudio(beep, sizeof(beep));
+	});
+	
+	bot.on_voice_buffer_send([&bot](const dpp::voice_buffer_send_t & event) {
+		uint16_t beep[11520];
+		for (int x = 0; x < 11520; ++x) {
+			beep[x] = rand() % 65535;
+		}
+		event.voice_client->SendAudio(beep, sizeof(beep));
 	});
 
 	/* Attach to the message_create event to get notified of new messages */

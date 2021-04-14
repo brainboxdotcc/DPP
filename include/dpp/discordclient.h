@@ -298,6 +298,8 @@ public:
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
 	 */
 	void DisconnectVoice(snowflake guild_id);
+
+	voiceconn* GetVoice(snowflake guild_id);
 };
 
 };
