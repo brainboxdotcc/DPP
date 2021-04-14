@@ -439,7 +439,7 @@ void DiscordVoiceClient::OneSecondTimer()
 }
 
 void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length)  {
-
+#if HAVE_VOICE
 	int frameSize = 2880;
 
 	opus_int32 encodedAudioMaxLength = length;
@@ -451,8 +451,6 @@ void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length)  {
 	if (encodedAudioLength < 1) {
 		return;
 	}
-
-	//sendAudioData(encodedAudioDataPointer, encodedAudioLength, frameSize);
 
 	++sequence;
 	const int headerSize = 12;
@@ -483,7 +481,7 @@ void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length)  {
 
 	Send(std::string((const char*)audioDataPacket.data(), audioDataPacket.size()));
 	timestamp += frameSize;
-
+#endif
 }
 
 
