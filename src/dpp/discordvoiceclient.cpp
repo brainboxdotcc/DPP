@@ -85,11 +85,11 @@ DiscordVoiceClient::~DiscordVoiceClient()
 		runner->join();
 		delete runner;
 	}
-	if (encoder) {
 #if HAVE_VOICE
+	if (encoder) {
 		opus_encoder_destroy(encoder);
-#endif
 	}
+#endif
 	if (secret_key) {
 		delete[] secret_key;
 	}
