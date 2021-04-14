@@ -33,8 +33,8 @@ DPP is short for **D**iscord **P**lus **P**lus (D++), a play on the Discord and 
 ## Is D++ a single header library?
 No, D++ is a classically designed library which installs itself to your library directory/system directory as a shared object or dll. You must link to its .lib file and include its header files to make use of it. We have no plans for a single-header build.
 
-## Will this library support voice?
-Eventually it is our intent to support voice using `libopus`. This will follow once the rest of the library is complete and will be a `cmake` flag, so that if you don't need it, you don't need to include it.
+## Does this library support voice?
+Yes! This library supports voice and will automatically enable voice if your system has the libopus and libsodium libraries. When running `cmake` the script will identify if these libraries are found. At present only sending of audio is supported. Receiving of audio will come soon.
 
 ## Does this library support sharding?
 Yes! D++ supports sharding and also clustering (grouping of shards into one process) to ensure it is scalable for small and large bots alike.

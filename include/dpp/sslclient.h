@@ -60,15 +60,29 @@ protected:
 public:
 	/** Get total bytes sent */
 	uint64_t GetBytesOut();
+	
 	/** Get total bytes received */
 	uint64_t GetBytesIn();
 
+	/** Attaching an additional file descriptor to this function will send notifications when there is data to read.
+	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread!
+	 * Returning -1 means that you don't want to be notified.
+	 */
 	std::function<int()> custom_readable_fd;
 
+	/** Attaching an additional file descriptor to this function will send notifications when you are able to write
+	 * to the socket.
+	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread! You should toggle this
+	 * to -1 when you do not have anything to write otherwise it'll keep triggering repeatedly (it is level triggered).
+	 */
 	std::function<int()> custom_writeable_fd;
 
+	/** This event will be called when you can read from the custom fd
+	 */
 	std::function<void()> custom_readable_ready;
 
+	/** This event will be called when you can write to a custom fd
+	 */
 	std::function<void()> custom_writeable_ready;
 
 	/** Connect to a specified host and port. Throws std::runtime_error on fatal error.

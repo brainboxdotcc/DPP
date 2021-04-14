@@ -32,9 +32,10 @@ struct rtp_header {
 
 bool DiscordVoiceClient::sodium_initialised = false;
 
-DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
+DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
        : WSClient(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4"),
 	creator(_cluster),
+	channel_id(_channel_id),
 	server_id(_server_id),
 	token(_token),
 	last_heartbeat(time(NULL)),
@@ -58,6 +59,7 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _server
 		if (opusError) {
 			throw std::runtime_error(fmt::format("DiscordVoiceClient::DiscordVoiceClient; opus_encoder_create() failed: {}", opusError));
 		}
+		repacketizer = opus_repacketizer_create();
 		external_ip = utility::external_ip();
 		DiscordVoiceClient::sodium_initialised = true;
 	}
@@ -274,8 +276,8 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 	return true;
 }
 
-void DiscordVoiceClient::Send(const std::string &packet) {
-	outbuf.push_back(packet);
+void DiscordVoiceClient::Send(const char* packet, size_t len) {
+	outbuf.push_back(std::string(packet, len));
 }
 
 void DiscordVoiceClient::ReadReady()
@@ -413,18 +415,81 @@ void DiscordVoiceClient::OneSecondTimer()
 	}
 }
 
-void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length)  {
+size_t DiscordVoiceClient::encode(uint8_t *input, size_t inDataSize, uint8_t *output, size_t &outDataSize)
+{
+  outDataSize = 0;
+  int mEncFrameBytes = 11520;
+  int mEncFrameSize = 2880;
+  if (0 == (inDataSize % mEncFrameBytes)) {
+    bool isOk = true;
+    size_t cur = 0;
+    uint8_t *out = encode_buffer;
+
+    memset(out, 0, sizeof(encode_buffer));
+    repacketizer = opus_repacketizer_init(repacketizer);
+    for (size_t i = 0; i < (inDataSize / mEncFrameBytes); ++ i) {
+      const opus_int16* pcm = (opus_int16*)(input + i * mEncFrameBytes);
+      int ret = opus_encode(encoder, pcm, mEncFrameSize, out, 65536);
+      if (ret > 0) {
+        int retval = opus_repacketizer_cat(repacketizer, out, ret);
+        if (retval != OPUS_OK) {
+          isOk = false;
+	  log(ll_warning, fmt::format("opus_repacketizer_cat(): {}", opus_strerror(retval)));
+          break;
+        }
+        out += ret;
+	cur += ret;
+      } else {
+        isOk = false;
+	log(ll_warning, fmt::format("opus_encode(): {}", opus_strerror(ret)));
+        break;
+      }
+    }
+    if (isOk) {
+      int ret = opus_repacketizer_out(repacketizer, output, 65536);
+      if (ret > 0) {
+        outDataSize = ret;
+      } else {
+	log(ll_warning, fmt::format("opus_repacketizer_out(): {}", opus_strerror(ret)));
+      }
+    }
+  } else {
+      throw std::runtime_error(fmt::format("Invalid input data length: {}, must be n times of {}", inDataSize, mEncFrameBytes));
+  }
+  return outDataSize;
+}
+
+void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length, bool use_opus)  {
 #if HAVE_VOICE
-	int frameSize = 2880;
 
-	opus_int32 encodedAudioMaxLength = length;
-	unsigned char encodedAudioData[encodedAudioMaxLength];
-	// frame size * channels * 2
-	// 2880 * 2 * 2 = 11520
-	opus_int32 encodedAudioLength = opus_encode(encoder, (const opus_int16*)audio_data, frameSize, encodedAudioData, encodedAudioMaxLength);
+	const size_t max_frame_bytes = 11520;
+	uint8_t pad[max_frame_bytes] = { 0 };
+	if (length > max_frame_bytes && use_opus) {
+		
+		std::cout << "Splitting " << length << "\n";
+		std::string s_audio_data((const char*)audio_data, length);
 
-	if (encodedAudioLength < 1) {
+		while (s_audio_data.length() > max_frame_bytes) {
+			std::string packet(s_audio_data.substr(0, max_frame_bytes));
+			s_audio_data.erase(s_audio_data.begin(), s_audio_data.begin() + max_frame_bytes);
+			if (packet.size() < max_frame_bytes) {
+				packet.resize(max_frame_bytes, 0);
+			}
+			SendAudio((uint16_t*)packet.data(), max_frame_bytes, use_opus);
+		}
+
 		return;
+
+	}
+
+
+	int frameSize = 2880;
+	opus_int32 encodedAudioMaxLength = length;
+	uint8_t encodedAudioData[encodedAudioMaxLength];
+	size_t encodedAudioLength = encodedAudioMaxLength;
+	if (use_opus) {
+		encodedAudioLength = this->encode((uint8_t*)audio_data, length, encodedAudioData, encodedAudioLength);
+	} else {
 	}
 
 	++sequence;
@@ -441,7 +506,7 @@ void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length)  {
 
 	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData, encodedAudioLength, (const unsigned char*)nonce, secret_key);
 
-	Send(std::string((const char*)audioDataPacket.data(), audioDataPacket.size()));
+	Send((const char*)audioDataPacket.data(), audioDataPacket.size());
 	timestamp += frameSize;
 
 	if (!this->sending) {		

@@ -472,7 +472,7 @@ void voiceconn::connect(snowflake guild_id) {
 		/* This is wrapped in a thread because instantiating DiscordVoiceClient can initiate a blocking SSL_connect() */
 		auto t = std::thread([guild_id, this]() {
 			try {
-				this->voiceclient = new DiscordVoiceClient(creator->creator, guild_id, this->token, this->session_id, this->websocket_hostname);
+				this->voiceclient = new DiscordVoiceClient(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname);
 				/* Note: Spawns thread! */
 				this->voiceclient->Run();
 			}
