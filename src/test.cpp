@@ -10,6 +10,18 @@ int main(int argc, char const *argv[])
 {
 	srand(time(NULL));
 
+	std::ifstream input ("../Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	uint8_t* noise = nullptr;
+	size_t noise_size = 0;
+
+	if (input.is_open()) {
+		noise_size = input.tellg();
+		noise = new uint8_t[noise_size];
+		input.seekg (0, std::ios::beg);
+		input.read ((char*)noise, noise_size);
+		input.close();
+	}
+
 	json configdocument;
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
@@ -31,16 +43,10 @@ int main(int argc, char const *argv[])
 	});
 	
 	bot.on_voice_buffer_send([&bot](const dpp::voice_buffer_send_t & event) {
-		std::cout << "Sent!\n";
-		/*uint16_t beep[2880 * 2];
-		for (int x = 0; x < 2880 * 2; ++x) {
-			beep[x] = rand() % 65535;
-		}
-		event.voice_client->SendAudio(beep, sizeof(beep));*/
 	});
 
 	/* Attach to the message_create event to get notified of new messages */
-	bot.on_message_create([&bot](const dpp::message_create_t & event) {
+	bot.on_message_create([&bot, noise, noise_size](const dpp::message_create_t & event) {
 
 		std::stringstream ss(event.msg->content);
 		std::string command;
@@ -56,14 +62,13 @@ int main(int argc, char const *argv[])
 			}
 		}
 		if (command == ".noise") {
-			uint16_t beep[131057];
-			for (int x = 0; x < 131057; ++x) {
-				beep[x] = rand() % 65535;
-			}
+			/* This assumes that there is one shard and the voice channel's guild is is on it. 
+			 * Only for testing purposes, DO NOT make this assumption in the real world!
+			 */
 			dpp::DiscordClient* dc = bot.get_shard(0);
 			dpp::voiceconn* v = dc->GetVoice(event.msg->guild_id);
-			if (v && v->voiceclient->IsReady()) {
-				v->voiceclient->SendAudio(beep, sizeof(beep));
+			if (v && v->voiceclient && v->voiceclient->IsReady()) {
+				v->voiceclient->SendAudio((uint16_t*)noise, noise_size);
 			}
 
 		}

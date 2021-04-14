@@ -465,10 +465,7 @@ void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length, bo
 	const size_t max_frame_bytes = 11520;
 	uint8_t pad[max_frame_bytes] = { 0 };
 	if (length > max_frame_bytes && use_opus) {
-		
-		std::cout << "Splitting " << length << "\n";
 		std::string s_audio_data((const char*)audio_data, length);
-
 		while (s_audio_data.length() > max_frame_bytes) {
 			std::string packet(s_audio_data.substr(0, max_frame_bytes));
 			s_audio_data.erase(s_audio_data.begin(), s_audio_data.begin() + max_frame_bytes);
