@@ -86,7 +86,9 @@ DiscordVoiceClient::~DiscordVoiceClient()
 		delete runner;
 	}
 	if (encoder) {
+#if HAVE_VOICE
 		opus_encoder_destroy(encoder);
+#endif
 	}
 	if (secret_key) {
 		delete[] secret_key;

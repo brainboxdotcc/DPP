@@ -125,6 +125,13 @@ namespace dpp {
 		std::string external_ip();
 
 		/**
+		 * @brief Returns true if D++ was built with voice support
+		 * 
+		 * @return bool True if voice support is compiled in (libsodium/libopus) 
+		 */
+		bool has_voice();
+
+		/**
 		 * @brief A class used to represent an uptime in hours, minutes,
 		 * seconds and days, with helper functions to convert from time_t
 		 * and display as a string.

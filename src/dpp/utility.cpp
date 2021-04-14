@@ -9,6 +9,14 @@ namespace dpp {
 
 	namespace utility {
 
+		bool has_voice() {
+#if HAS_VOICE
+			return true;
+#else
+			return false;
+#endif
+		}
+
 		std::string current_date_time() {
 			auto t = std::time(nullptr);
 			struct tm timedata;
