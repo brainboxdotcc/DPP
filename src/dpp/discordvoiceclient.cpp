@@ -77,6 +77,9 @@ DiscordVoiceClient::~DiscordVoiceClient()
 	if (encoder) {
 		opus_encoder_destroy(encoder);
 	}
+	if (repacketizer) {
+		opus_repacketizer_destroy(repacketizer);
+	}
 #endif
 	if (secret_key) {
 		delete[] secret_key;
@@ -417,46 +420,48 @@ void DiscordVoiceClient::OneSecondTimer()
 
 size_t DiscordVoiceClient::encode(uint8_t *input, size_t inDataSize, uint8_t *output, size_t &outDataSize)
 {
-  outDataSize = 0;
-  int mEncFrameBytes = 11520;
-  int mEncFrameSize = 2880;
-  if (0 == (inDataSize % mEncFrameBytes)) {
-    bool isOk = true;
-    size_t cur = 0;
-    uint8_t *out = encode_buffer;
+#if HAVE_VOICE
+	outDataSize = 0;
+	int mEncFrameBytes = 11520;
+	int mEncFrameSize = 2880;
+	if (0 == (inDataSize % mEncFrameBytes)) {
+		bool isOk = true;
+		size_t cur = 0;
+		uint8_t *out = encode_buffer;
 
-    memset(out, 0, sizeof(encode_buffer));
-    repacketizer = opus_repacketizer_init(repacketizer);
-    for (size_t i = 0; i < (inDataSize / mEncFrameBytes); ++ i) {
-      const opus_int16* pcm = (opus_int16*)(input + i * mEncFrameBytes);
-      int ret = opus_encode(encoder, pcm, mEncFrameSize, out, 65536);
-      if (ret > 0) {
-        int retval = opus_repacketizer_cat(repacketizer, out, ret);
-        if (retval != OPUS_OK) {
-          isOk = false;
-	  log(ll_warning, fmt::format("opus_repacketizer_cat(): {}", opus_strerror(retval)));
-          break;
-        }
-        out += ret;
-	cur += ret;
-      } else {
-        isOk = false;
-	log(ll_warning, fmt::format("opus_encode(): {}", opus_strerror(ret)));
-        break;
-      }
-    }
-    if (isOk) {
-      int ret = opus_repacketizer_out(repacketizer, output, 65536);
-      if (ret > 0) {
-        outDataSize = ret;
-      } else {
-	log(ll_warning, fmt::format("opus_repacketizer_out(): {}", opus_strerror(ret)));
-      }
-    }
-  } else {
-      throw std::runtime_error(fmt::format("Invalid input data length: {}, must be n times of {}", inDataSize, mEncFrameBytes));
-  }
-  return outDataSize;
+		memset(out, 0, sizeof(encode_buffer));
+		repacketizer = opus_repacketizer_init(repacketizer);
+		for (size_t i = 0; i < (inDataSize / mEncFrameBytes); ++ i) {
+			const opus_int16* pcm = (opus_int16*)(input + i * mEncFrameBytes);
+			int ret = opus_encode(encoder, pcm, mEncFrameSize, out, 65536);
+			if (ret > 0) {
+				int retval = opus_repacketizer_cat(repacketizer, out, ret);
+				if (retval != OPUS_OK) {
+					isOk = false;
+					log(ll_warning, fmt::format("opus_repacketizer_cat(): {}", opus_strerror(retval)));
+					break;
+				}
+				out += ret;
+				cur += ret;
+			} else {
+				isOk = false;
+				log(ll_warning, fmt::format("opus_encode(): {}", opus_strerror(ret)));
+				break;
+			}
+		}
+		if (isOk) {
+			int ret = opus_repacketizer_out(repacketizer, output, 65536);
+			if (ret > 0) {
+				outDataSize = ret;
+			} else {
+				log(ll_warning, fmt::format("opus_repacketizer_out(): {}", opus_strerror(ret)));
+			}
+		}
+	} else {
+		throw std::runtime_error(fmt::format("Invalid input data length: {}, must be n times of {}", inDataSize, mEncFrameBytes));
+	}
+#endif
+	return outDataSize;
 }
 
 void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length, bool use_opus)  {
