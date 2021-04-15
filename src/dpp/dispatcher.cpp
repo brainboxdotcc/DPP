@@ -195,4 +195,8 @@ voice_ready_t::voice_ready_t(const std::string &raw) : event_dispatch_t(raw)
 {
 }
 
+voice_receive_t::voice_receive_t(const std::string &raw) : event_dispatch_t(raw)
+{
+}
+
 };

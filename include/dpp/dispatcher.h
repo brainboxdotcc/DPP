@@ -497,6 +497,18 @@ struct voice_ready_t : public event_dispatch_t {
 	class DiscordVoiceClient* voice_client;
 };
 
+/** @brief voice receive packet */
+struct voice_receive_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param raw Raw event text as JSON
+	 */
+	voice_receive_t(const std::string &raw);
+	class DiscordVoiceClient* voice_client;
+	uint8_t* audio;
+	size_t audio_size;
+};
+
 /** @brief The dispatcher class contains a set of std::functions representing hooked events
  * that the user code is interested in. These are modified via the on_eventname style
  * methods in the cluster class.
@@ -691,6 +703,10 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const voice_ready_t& event)> voice_ready;
+	/** @brief Event handler function pointer for voice receieve event
+	 * @param event Event parameters
+	 */
+	std::function<void(const voice_receive_t& event)> voice_receive;
 };
 
 };

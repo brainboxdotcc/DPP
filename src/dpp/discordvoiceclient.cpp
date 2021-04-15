@@ -59,6 +59,11 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _channe
 		if (opusError) {
 			throw std::runtime_error(fmt::format("DiscordVoiceClient::DiscordVoiceClient; opus_encoder_create() failed: {}", opusError));
 		}
+		opusError = 0;
+		decoder = opus_decoder_create(48000, 2, &opusError);
+		if (opusError) {
+			throw std::runtime_error(fmt::format("DiscordVoiceClient::DiscordVoiceClient; opus_decoder_create() failed: {}", opusError));
+		}
 		repacketizer = opus_repacketizer_create();
 		std::cout << "External IP: " << external_ip << "\n";
 		DiscordVoiceClient::sodium_initialised = true;
@@ -76,6 +81,9 @@ DiscordVoiceClient::~DiscordVoiceClient()
 #if HAVE_VOICE
 	if (encoder) {
 		opus_encoder_destroy(encoder);
+	}
+	if (decoder) {
+		opus_decoder_destroy(decoder);
 	}
 	if (repacketizer) {
 		opus_repacketizer_destroy(repacketizer);
@@ -290,8 +298,34 @@ void DiscordVoiceClient::Send(const char* packet, size_t len) {
 void DiscordVoiceClient::ReadReady()
 {
 	/* read from udp into buffer tail (push_back) -- XXX FIXME */
-	char buffer[10];
+	char buffer[65535];
+	char audio[65535];
+	const int headerSize = 12;
+	const int nonceSize = 24;
+	const opus_int32 frameSize = 2880;
 	int r = this->UDPRecv(buffer, sizeof(buffer));
+	std::cout << "Receive: " << r << "\n";
+	if (creator->dispatch.voice_receive) {
+		voice_receive_t vr(std::string(buffer, r));
+		uint8_t nonce[nonceSize];
+		std::memcpy(nonce, buffer, sizeof(nonce));
+		const std::size_t decrypt_size = r - sizeof(nonce);
+		uint8_t decrypted[decrypt_size];
+		uint8_t audio[decrypt_size];
+		if (!crypto_secretbox_open_easy(decrypted, decrypted + sizeof(nonce), decrypt_size, nonce, this->secret_key)) {
+			opus_int32 decode_len = opus_decode(decoder, decrypted, decrypt_size, (opus_int16*)audio, frameSize, 1);
+			if(decode_len == OPUS_OK) {
+				vr.voice_client = this;
+				vr.audio = audio;
+				vr.audio_size = decode_len;
+				creator->dispatch.voice_receive(vr);
+			} else {
+				log(ll_debug, fmt::format("opus_decode failed on inbound voice: {}", opus_strerror(decode_len)));
+			}
+		} else {
+			log(ll_debug, fmt::format("crypto_secretbox_open_easy failed on inbound voice"));
+		}
+	}
 }
 
 void DiscordVoiceClient::WriteReady()

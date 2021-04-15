@@ -596,6 +596,13 @@ public:
 	void on_voice_ready (std::function<void(const voice_ready_t& _event)> _voice_ready);
 
 	/**
+	 * @brief 
+	 * 
+	 * @param _voice_receieve User function to attach to event
+	 */
+	void on_voice_receieve (std::function<void(const voice_receive_t& _event)> _voice_receieve);
+
+	/**
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create
 	 * 
 	 * @param endpoint 

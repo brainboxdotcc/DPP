@@ -1345,6 +1345,8 @@ void cluster::on_voice_ready (std::function<void(const voice_ready_t& _event)> _
 	this->dispatch.voice_ready = _voice_ready;
 }
 
-
+void cluster::on_voice_receieve (std::function<void(const voice_receive_t& _event)> _voice_receive) {
+	this->dispatch.voice_receive = _voice_receive;
+}
 
 };
