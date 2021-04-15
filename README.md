@@ -11,8 +11,9 @@ This project is in alpha stages of development.
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
-* Pretty much the entire API is supported except for voice and slash commands
-* [Windows support](https://github.com/brainboxdotcc/DPP/wiki/Building-on-Windows)
+* Voice support
+* Pretty much the entire API is supported except for slash commands
+* [Windows support](https://dpp.brainbox.cc/a00006.html)
 
 Want to help? Drop me a line or send me a PR. I'll be choosy about what PRs i accept whilst the library is in such a heavy state of development.
 
@@ -33,6 +34,9 @@ The library may work fine in other operating systems too, but with no access to 
 * [cmake](https://cmake.org/) (version 3.13+)
 * [g++](https://gcc.gnu.org) (version 8+)
 * [OpenSSL](https://openssl.org/) (whichever `-dev` package comes with your OS)
+
+#### Optional Dependencies
+* [LibOpus](https://www.opus-codec.org) and [libsodium](https://github.com/jedisct1/libsodium) for voice support
 
 ### Included Dependencies (Packaged with the library)
 * [nlohmann::json](https://github.com/nlohmann/json)
