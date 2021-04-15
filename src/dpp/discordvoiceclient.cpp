@@ -317,6 +317,7 @@ void DiscordVoiceClient::WriteReady()
 {
 	if (outbuf.size()) {
 		if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(60));
 			outbuf.erase(outbuf.begin());
 			if (creator->dispatch.voice_buffer_send) {
 				voice_buffer_send_t snd("");
