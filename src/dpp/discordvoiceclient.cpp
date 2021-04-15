@@ -548,8 +548,10 @@ void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length, bo
  */
 std::string DiscordVoiceClient::DiscoverIP() {
 	int newfd = -1;
-	unsigned char packet[70] = { 0 };
-	(*(uint32_t*)(packet)) = htonl(this->ssrc);
+	unsigned char packet[74] = { 0 };
+	(*(uint16_t*)(packet)) = htons(0x01);
+	(*(uint16_t*)(packet + 2)) = htons(70);
+	(*(uint32_t*)(packet + 4)) = htonl(this->ssrc);
 	if ((newfd = socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
 		sockaddr_in servaddr;
 		socklen_t sl = sizeof(servaddr);
@@ -567,14 +569,14 @@ std::string DiscordVoiceClient::DiscoverIP() {
 		if (::connect(newfd, (const struct sockaddr*)&servaddr, sizeof(sockaddr_in)) < 0) {
 			return "";
 		}
-		if (send(newfd, packet, 70, 0) == -1) {
+		if (send(newfd, packet, 74, 0) == -1) {
 			return "";
 		}
-		if (recv(newfd, packet, 70, 0) == -1) {
+		if (recv(newfd, packet, 74, 0) == -1) {
 			return "";
 		}
 		::close(newfd);
-		return std::string((const char*)(packet + 4));
+		return std::string((const char*)(packet + 8)); // 4
 	}
 	return "";
 }
