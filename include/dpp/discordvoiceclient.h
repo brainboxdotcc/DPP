@@ -362,6 +362,11 @@ public:
 	 */
 	void SendAudio(uint16_t* audio_data, const size_t length, bool use_opus = true);
 
+	/**
+	 * @brief Discord external IP detection.
+	 * 
+	 * @return std::string Your external IP address
+	 */
 	std::string DiscoverIP();
 };
 

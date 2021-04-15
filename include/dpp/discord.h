@@ -154,6 +154,8 @@ namespace dpp {
 			 */
 			std::string to_string();
 		};
+
+		void debug_dump(uint8_t* data, size_t length);
 	};
 
 };

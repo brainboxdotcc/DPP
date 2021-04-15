@@ -26,7 +26,7 @@ int main(int argc, char const *argv[])
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
 
-	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members);
+	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members, 1);
 
 	bot.on_log([&bot](const dpp::log_t & event) {
 		if (event.severity >= dpp::ll_debug) {
@@ -42,7 +42,8 @@ int main(int argc, char const *argv[])
 		event.voice_client->SendAudio(beep, sizeof(beep));
 	});
 	
-	bot.on_voice_buffer_send([&bot](const dpp::voice_buffer_send_t & event) {
+	bot.on_voice_receive([&bot](const dpp::voice_receive_t & event) {
+		bot.log(dpp::ll_debug, fmt::format("Received {} bytes voice data", event.audio_size));
 	});
 
 	/* Attach to the message_create event to get notified of new messages */

@@ -598,9 +598,9 @@ public:
 	/**
 	 * @brief 
 	 * 
-	 * @param _voice_receieve User function to attach to event
+	 * @param _voice_receive User function to attach to event
 	 */
-	void on_voice_receieve (std::function<void(const voice_receive_t& _event)> _voice_receieve);
+	void on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive);
 
 	/**
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create

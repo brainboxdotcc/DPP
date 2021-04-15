@@ -72,6 +72,8 @@ void cluster::start(bool return_after) {
 	} else {
 		start_time = time(NULL);
 
+		log(ll_debug, fmt::format("Starting with {} shards...", numshards));
+
 		for (uint32_t s = 0; s < numshards; ++s) {
 			/* Filter out shards that arent part of the current cluster, if the bot is clustered */
 			if (s % maxclusters == cluster_id) {
@@ -94,11 +96,11 @@ void cluster::start(bool return_after) {
 			for (auto & c : dmchannels) {
 				for (auto & u : c.second.recipients) {
 					this->set_dm_channel(u, c.second.id);
-					std::cout << "Add DM recipient uid=" << u << " cid=" << c.second.id << "\n";
 				}
 			}
 		});
 
+		log(ll_debug, "Shards started.");
 		if (!return_after) {
 			while (true) {
 				std::this_thread::sleep_for(std::chrono::seconds(86400));
@@ -1345,7 +1347,7 @@ void cluster::on_voice_ready (std::function<void(const voice_ready_t& _event)> _
 	this->dispatch.voice_ready = _voice_ready;
 }
 
-void cluster::on_voice_receieve (std::function<void(const voice_receive_t& _event)> _voice_receive) {
+void cluster::on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive) {
 	this->dispatch.voice_receive = _voice_receive;
 }
 

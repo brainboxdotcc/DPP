@@ -297,34 +297,19 @@ void DiscordVoiceClient::Send(const char* packet, size_t len) {
 
 void DiscordVoiceClient::ReadReady()
 {
-	/* read from udp into buffer tail (push_back) -- XXX FIXME */
-	char buffer[65535];
-	char audio[65535];
-	const int headerSize = 12;
-	const int nonceSize = 24;
-	const opus_int32 frameSize = 2880;
-	int r = this->UDPRecv(buffer, sizeof(buffer));
-	std::cout << "Receive: " << r << "\n";
-	if (creator->dispatch.voice_receive) {
-		voice_receive_t vr(std::string(buffer, r));
-		uint8_t nonce[nonceSize];
-		std::memcpy(nonce, buffer, sizeof(nonce));
-		const std::size_t decrypt_size = r - sizeof(nonce);
-		uint8_t decrypted[decrypt_size];
-		uint8_t audio[decrypt_size];
-		if (!crypto_secretbox_open_easy(decrypted, decrypted + sizeof(nonce), decrypt_size, nonce, this->secret_key)) {
-			opus_int32 decode_len = opus_decode(decoder, decrypted, decrypt_size, (opus_int16*)audio, frameSize, 1);
-			if(decode_len == OPUS_OK) {
-				vr.voice_client = this;
-				vr.audio = audio;
-				vr.audio_size = decode_len;
-				creator->dispatch.voice_receive(vr);
-			} else {
-				log(ll_debug, fmt::format("opus_decode failed on inbound voice: {}", opus_strerror(decode_len)));
-			}
-		} else {
-			log(ll_debug, fmt::format("crypto_secretbox_open_easy failed on inbound voice"));
-		}
+	/* XXX Decoding of voice not currently supported.
+	 * Audio stream will always be a nullptr until then.
+	 * See: https://github.com/discord/discord-api-docs/issues/365
+	 * See also: https://github.com/discord/discord-api-docs/issues/1337
+	 */
+	uint8_t buffer[65535];
+	int r = this->UDPRecv((char*)buffer, sizeof(buffer));
+	if (r > 0 && creator->dispatch.voice_receive) {
+		voice_receive_t vr(std::string((const char*)buffer, r));
+		vr.voice_client = this;
+		vr.audio = nullptr;
+		vr.audio_size = 0;
+		creator->dispatch.voice_receive(vr);
 	}
 }
 
@@ -564,22 +549,6 @@ void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length, bo
 #endif
 }
 
-/**
- * @brief Discord external IP detection.
- * 
- * This is an older code, but it checks out.
- * 
- * |  Name                    | Length/Byte Order             |
- * |--------------------------|-------------------------------|
- * |  SSRC                    | 4 bytes network order         |
- * |  66 bytes padding        | all NULLs                     |
- * 
- * Sending what discord say to send will get you no reply. I've verified this errant behaviour on several different
- * libraries including discord.js, discordgo, and sleepy_discord. Discord updated to a newer format, but the newer
- * format doesn't seem to work right.
- * 
- * @return std::string Your external IP address
- */
 std::string DiscordVoiceClient::DiscoverIP() {
 	int newfd = -1;
 	unsigned char packet[74] = { 0 };
@@ -594,6 +563,7 @@ std::string DiscordVoiceClient::DiscoverIP() {
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		servaddr.sin_port = htons(0);
 		if (bind(newfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
+			log(ll_warning, "Could not bind socket for IP discovery");
 			return "";
 		}
 		memset(&servaddr, 0, sizeof(servaddr));
@@ -601,16 +571,20 @@ std::string DiscordVoiceClient::DiscoverIP() {
 		servaddr.sin_port = htons(this->port);
 		servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
 		if (::connect(newfd, (const struct sockaddr*)&servaddr, sizeof(sockaddr_in)) < 0) {
+			log(ll_warning, "Could not connect socket for IP discovery");
 			return "";
 		}
 		if (send(newfd, packet, 74, 0) == -1) {
+			log(ll_warning, "Could not send packet for IP discovery");
 			return "";
 		}
 		if (recv(newfd, packet, 74, 0) == -1) {
+			log(ll_warning, "Could not receive packet for IP discovery");
 			return "";
 		}
 		::close(newfd);
-		return std::string((const char*)(packet + 8)); // 4
+		//utility::debug_dump(packet, 74);
+		return std::string((const char*)(packet + 8));
 	}
 	return "";
 }
