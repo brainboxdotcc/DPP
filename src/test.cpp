@@ -42,10 +42,6 @@ int main(int argc, char const *argv[])
 		event.voice_client->SendAudio(beep, sizeof(beep));
 	});
 	
-	bot.on_voice_receive([&bot](const dpp::voice_receive_t & event) {
-		bot.log(dpp::ll_debug, fmt::format("Received {} bytes voice data", event.audio_size));
-	});
-
 	/* Attach to the message_create event to get notified of new messages */
 	bot.on_message_create([&bot, noise, noise_size](const dpp::message_create_t & event) {
 
