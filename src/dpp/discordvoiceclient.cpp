@@ -60,7 +60,7 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _channe
 			throw std::runtime_error(fmt::format("DiscordVoiceClient::DiscordVoiceClient; opus_encoder_create() failed: {}", opusError));
 		}
 		repacketizer = opus_repacketizer_create();
-		external_ip = utility::external_ip();
+		std::cout << "External IP: " << external_ip << "\n";
 		DiscordVoiceClient::sodium_initialised = true;
 	}
 	Connect();
@@ -218,6 +218,8 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 				}
 				log(ll_debug, fmt::format("Voice websocket established; UDP endpoint: {}:{} [ssrc={}] with {} modes", ip, port, ssrc, modes.size()));
 
+				external_ip = DiscoverIP();
+
 				int newfd = -1;
 				if ((newfd = socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
 
@@ -257,6 +259,8 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 					if (getsockname(this->fd, (struct sockaddr *)&sin, &len) > -1) {
 						bound_port = ntohs(sin.sin_port);
 					}
+
+					log(ll_debug, fmt::format("External IP address: {}", external_ip));
 
 					this->write(json({
 						{ "op", 1 },
@@ -524,6 +528,55 @@ void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length, bo
 	}
 
 #endif
+}
+
+/**
+ * @brief Discord external IP detection.
+ * 
+ * This is an older code, but it checks out.
+ * 
+ * |  Name                    | Length/Byte Order             |
+ * |--------------------------|-------------------------------|
+ * |  SSRC                    | 4 bytes network order         |
+ * |  66 bytes padding        | all NULLs                     |
+ * 
+ * Sending what discord say to send will get you no reply. I've verified this errant behaviour on several different
+ * libraries including discord.js, discordgo, and sleepy_discord. Discord updated to a newer format, but the newer
+ * format doesn't seem to work right.
+ * 
+ * @return std::string Your external IP address
+ */
+std::string DiscordVoiceClient::DiscoverIP() {
+	int newfd = -1;
+	unsigned char packet[70] = { 0 };
+	(*(uint32_t*)(packet)) = htonl(this->ssrc);
+	if ((newfd = socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
+		sockaddr_in servaddr;
+		socklen_t sl = sizeof(servaddr);
+		memset(&servaddr, 0, sizeof(sockaddr_in));
+		servaddr.sin_family = AF_INET;
+		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+		servaddr.sin_port = htons(0);
+		if (bind(newfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
+			return "";
+		}
+		memset(&servaddr, 0, sizeof(servaddr));
+		servaddr.sin_family = AF_INET;
+		servaddr.sin_port = htons(this->port);
+		servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
+		if (::connect(newfd, (const struct sockaddr*)&servaddr, sizeof(sockaddr_in)) < 0) {
+			return "";
+		}
+		if (send(newfd, packet, 70, 0) == -1) {
+			return "";
+		}
+		if (recv(newfd, packet, 70, 0) == -1) {
+			return "";
+		}
+		::close(newfd);
+		return std::string((const char*)(packet + 4));
+	}
+	return "";
 }
 
 

@@ -10,7 +10,7 @@ int main(int argc, char const *argv[])
 {
 	srand(time(NULL));
 
-	std::ifstream input ("../Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	std::ifstream input ("../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
 	uint8_t* noise = nullptr;
 	size_t noise_size = 0;
 

@@ -118,13 +118,6 @@ namespace dpp {
 		};
 
 		/**
-		 * @brief Get the external ip address for NAT systems
-		 * 
-		 * @return std::string external ip as a string
-		 */
-		std::string external_ip();
-
-		/**
 		 * @brief Returns true if D++ was built with voice support
 		 * 
 		 * @return bool True if voice support is compiled in (libsodium/libopus) 

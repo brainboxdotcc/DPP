@@ -361,6 +361,8 @@ public:
 	 * codec, only applying libsodium to the stream.
 	 */
 	void SendAudio(uint16_t* audio_data, const size_t length, bool use_opus = true);
+
+	std::string DiscoverIP();
 };
 
 };
