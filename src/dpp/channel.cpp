@@ -50,7 +50,7 @@ bool channel::is_category() const {
 }
 
 bool channel::is_stage_channel() const {
-	return (flags & dpp::c_stage) == dpp_stage;
+	return (flags & dpp::c_stage) == dpp::c_stage;
 }
 
 bool channel::is_news_channel() const {
