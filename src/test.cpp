@@ -8,20 +8,6 @@ using json = nlohmann::json;
 
 int main(int argc, char const *argv[])
 {
-	srand(time(NULL));
-
-	std::ifstream input ("../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
-	uint8_t* noise = nullptr;
-	size_t noise_size = 0;
-
-	if (input.is_open()) {
-		noise_size = input.tellg();
-		noise = new uint8_t[noise_size];
-		input.seekg (0, std::ios::beg);
-		input.read ((char*)noise, noise_size);
-		input.close();
-	}
-
 	json configdocument;
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
@@ -34,40 +20,27 @@ int main(int argc, char const *argv[])
 		}
 	});
 
-	bot.on_voice_ready([&bot](const dpp::voice_ready_t & event) {
-		uint16_t beep[131057];
-		for (int x = 0; x < 131057; ++x) {
-			beep[x] = rand() % 65535;
-		}
-		event.voice_client->SendAudio(beep, sizeof(beep));
-	});
-	
-	/* Attach to the message_create event to get notified of new messages */
-	bot.on_message_create([&bot, noise, noise_size](const dpp::message_create_t & event) {
-
+	bot.on_message_create([&bot](const dpp::message_create_t & event) {
 		std::stringstream ss(event.msg->content);
 		std::string command;
 		ss >> command;
 
-		if (command == ".voicetest") {
-			dpp::snowflake channel_id;
-			ss >> channel_id;
-			bot.log(dpp::ll_info, fmt::format("Starting voice test! Channel: {} Guild: {}", channel_id, event.msg->guild_id));
-			if (channel_id) {
-				dpp::DiscordClient* dc = bot.get_shard(0);
-				dc->ConnectVoice(event.msg->guild_id, channel_id);
-			}
-		}
-		if (command == ".noise") {
-			/* This assumes that there is one shard and the voice channel's guild is is on it. 
-			 * Only for testing purposes, DO NOT make this assumption in the real world!
-			 */
-			dpp::DiscordClient* dc = bot.get_shard(0);
-			dpp::voiceconn* v = dc->GetVoice(event.msg->guild_id);
-			if (v && v->voiceclient && v->voiceclient->IsReady()) {
-				v->voiceclient->SendAudio((uint16_t*)noise, noise_size);
-			}
-
+		if (command == ".createslash") {
+			dpp::slashcommand newcommand;
+			newcommand.set_name("blep").set_description("Send a random adorable animal photo").set_application_id(bot.me.id);
+			newcommand.add_option(
+				dpp::command_option(dpp::co_string, "animal", "The type of animal", true).
+					add_choice(dpp::command_option_choice("Dog", std::string("animal_dog"))).
+					add_choice(dpp::command_option_choice("Cat", std::string("animal_cat"))).
+					add_choice(dpp::command_option_choice("Penguin", std::string("animal_penguin"))
+				)
+			).add_option(
+				dpp::command_option(dpp::co_boolean, "only_smol", "Whether to show only baby animals")
+			);
+			std::cout << newcommand.build_json(false) << "\n";
+			bot.guild_command_create(newcommand, event.msg->guild_id, [&bot](const dpp::confirmation_callback_t & state) {
+				bot.log(dpp::ll_debug, fmt::format("Application command tried. Result: {} -> {}", state.http_info.status, state.http_info.body));
+			});
 		}
 	});
 

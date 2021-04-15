@@ -615,6 +615,24 @@ public:
 	 */
 	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
 
+
+	/**
+	 * @brief Create a global slash command (a bot can have a maximum of 100 of these)
+	 * 
+	 * @param s Slash command to create
+	 * @param callback Function to call when the API call completes
+	 */
+	void global_command_create(const slashcommand &s, command_completion_event_t callback);
+
+	/**
+	 * @brief Create a slash command local to a guild
+	 * 
+	 * @param s Slash command to create
+	 * @param guild_id Guild ID to create the slash command in
+	 * @param callback Function to call when the API call completes
+	 */
+	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback);
+
 	/**
 	 * @brief Create a direct message, also create the channel for the direct message if needed
 	 * 

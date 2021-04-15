@@ -171,12 +171,9 @@ This example script shows how to send a sound file to a voice channel.
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <nlohmann/json.hpp>
 #include <fmt/format.h>
 #include <iomanip>
 #include <sstream>
-
-using json = nlohmann::json;
 
 int main(int argc, char const *argv[])
 {

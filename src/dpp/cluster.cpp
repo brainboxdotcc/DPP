@@ -203,6 +203,22 @@ void cluster::direct_message_create(snowflake user_id, const message &m, command
 	}
 }
 
+void cluster::global_command_create(const slashcommand &s, command_completion_event_t callback) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id) + "/commands", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id) + "/guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
 void cluster::message_create(const message &m, command_completion_event_t callback) {
 	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages", m_post, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
