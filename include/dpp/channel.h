@@ -5,13 +5,14 @@
 namespace dpp {
 
 /** @brief Flag integers as received from and sent to discord */
-#define GUILD_TEXT	0	// a text channel within a server
-#define DM		1	// a direct message between users
-#define GUILD_VOICE	2	// a voice channel within a server
-#define GROUP_DM	3	// a direct message between multiple users
-#define GUILD_CATEGORY	4	// an organizational category that contains up to 50 channels
-#define GUILD_NEWS	5	// a channel that users can follow and crosspost into their own server
-#define GUILD_STORE	6	// a channel in which game developers can sell their game on Discord
+#define GUILD_TEXT	0	//< a text channel within a server
+#define DM		1	//< a direct message between users
+#define GUILD_VOICE	2	//< a voice channel within a server
+#define GROUP_DM	3	//< a direct message between multiple users
+#define GUILD_CATEGORY	4	//< an organizational category that contains up to 50 channels
+#define GUILD_NEWS	5	//< a channel that users can follow and crosspost into their own server
+#define GUILD_STORE	6	//< a channel in which game developers can sell their game on Discord
+#define GUILD_STAGE	13	//< a "stage" channel, like a voice channel with one authorised speaker
 
 /** @brief Our flags as stored in the object */
 enum channel_flags {
@@ -22,7 +23,8 @@ enum channel_flags {
 	c_group =		0b00010000,
 	c_category =		0b00100000,
 	c_news =		0b01000000,
-	c_store =		0b10000000
+	c_store =		0b10000000,
+	c_stage =		0b11000000
 };
 
 /** @brief A definition of a discord channel */
@@ -85,6 +87,7 @@ public:
 	bool is_category() const;
 	bool is_news_channel() const;
 	bool is_store_channel() const;
+	bool is_stage_channel() const;
 };
 
 /**

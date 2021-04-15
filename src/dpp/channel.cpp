@@ -49,12 +49,18 @@ bool channel::is_category() const {
 	return flags & dpp::c_category;
 }
 
+bool channel::is_stage_channel() const {
+	return (flags & dpp::c_stage) == dpp_stage;
+}
+
 bool channel::is_news_channel() const {
-	return flags & dpp::c_news;
+	/* Important: Stage/News overlap to pack more values in a byte */
+	return !is_stage_channel() && (flags & dpp::c_news);
 }
 
 bool channel::is_store_channel() const {
-	return flags & dpp::c_store;
+	/* Important: Stage/Store overlap to pack more values in a byte */
+	return !is_stage_channel() && (flags & dpp::c_store);
 }
 
 channel& channel::fill_from_json(json* j) {
@@ -78,6 +84,7 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_CATEGORY) ? dpp::c_category : 0;
 	this->flags |= (type == GUILD_NEWS) ? dpp::c_news : 0;
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
+	this->flags |= (type == GUILD_STAGE) ? dpp::c_stage : 0;
 
 	if (j->find("recipients") != j->end()) {
 		recipients.clear();
@@ -110,6 +117,9 @@ std::string channel::build_json(bool with_id) const {
 			j["type"] = GUILD_VOICE;
 		} else if (is_category()) {
 			j["type"] = GUILD_CATEGORY;
+		} else if (is_stage_channel()) {
+			/* Order is important, as GUILD_STAGE overlaps NEWS and STORE */
+			j["type"] = GUILD_STAGE;
 		} else if (is_news_channel()) {
 			j["type"] = GUILD_NEWS;
 		} else if (is_store_channel()) {
