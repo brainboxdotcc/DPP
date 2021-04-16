@@ -238,7 +238,9 @@ void request_queue::in_loop()
 	char n;
 	struct sockaddr_in client;
 	int notifier = accept(in_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
-	::close(in_queue_listen_sock);
+#ifndef _WIN32
+	close(in_queue_listen_sock);
+#endif
 	while (!terminating) {
 		while (recv(notifier, &n, 1, 0) > 0) {
 			/* New request to be sent! */
@@ -333,7 +335,7 @@ void request_queue::in_loop()
 			}
 		}
 	}
-	::close(notifier);
+	close(notifier);
 }
 
 void request_queue::out_loop()
@@ -342,7 +344,9 @@ void request_queue::out_loop()
 	char n;
 	struct sockaddr_in client;
 	int notifier = accept(out_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
-	::close(out_queue_listen_sock);
+#ifndef _WIN32
+	close(out_queue_listen_sock);
+#endif
 	while (!terminating) {
 		while (recv(notifier, &n, 1, 0) > 0) {
 			/* New request to be sent! */
