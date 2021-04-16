@@ -592,11 +592,11 @@ std::string DiscordVoiceClient::DiscoverIP() {
 			log(ll_warning, "Could not connect socket for IP discovery");
 			return "";
 		}
-		if (send(newfd, packet, 74, 0) == -1) {
+		if (send(newfd, (const char*)packet, 74, 0) == -1) {
 			log(ll_warning, "Could not send packet for IP discovery");
 			return "";
 		}
-		if (recv(newfd, packet, 74, 0) == -1) {
+		if (recv(newfd, (char*)packet, 74, 0) == -1) {
 			log(ll_warning, "Could not receive packet for IP discovery");
 			return "";
 		}

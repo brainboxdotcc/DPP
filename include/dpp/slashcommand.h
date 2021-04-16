@@ -165,7 +165,7 @@ struct interaction_response {
 	 * @brief A message object. This pointer is always valid
 	 * while the containing interaction_response exists.
 	 */
-	class message* msg;
+	struct message* msg;
 
 	/**
 	 * @brief Construct a new interaction response object
@@ -178,7 +178,7 @@ struct interaction_response {
 	 * @param t Type of reply
 	 * @param m Message to reply with
 	 */
-	interaction_response(interaction_response_type t, const class message& m);
+	interaction_response(interaction_response_type t, const struct message& m);
 
 	/**
 	 * @brief Fill object properties from JSON

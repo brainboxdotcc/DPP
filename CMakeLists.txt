@@ -18,6 +18,11 @@
 
 cmake_minimum_required (VERSION 3.12)
 
+if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+  set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      CACHE STRING "")
+endif()
+
 include("cmake/colour.cmake")
 
 file(READ ${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h version_h)
@@ -48,6 +53,15 @@ if (HAVE_VOICE)
 else(HAVE_VOICE)
 	message("-- Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
 endif(HAVE_VOICE)
+
+if (WIN32)
+	link_libraries("C:\\vckpg\\installed\\x64-windows\\lib\\libssl.lib")
+	link_libraries("C:\\vckpg\\installed\\x64-windows\\lib\\libcrypto.lib")
+	link_libraries("C:\\vckpg\\installed\\x64-windows\\lib\\zlib.lib")
+	include_directories("C:\\vckpg\\installed\\x64-windows\\include")
+	set(ZLIB_LIBRARY "C:\\vckpg\\installed\\x64-windows\\lib")
+	set(ZLIB_INCLUDE_DIR "C:\\vckpg\\installed\\x64-windows\\include")
+endif()
 
 aux_source_directory("src" coresrc)
 
@@ -105,10 +119,10 @@ foreach (fullmodname ${subdirlist})
 	file(GLOB modsrc ${modules_dir}/dpp/*.cpp ${modules_dir}/dpp/events/*.cpp)
         add_library(${modname} SHARED ${modsrc})
 if (WIN32)
-	target_link_libraries(${modname} PUBLIC "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\libssl64MTd.lib" "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\libcrypto64MTd.lib" nlohmann_json::nlohmann_json fmt z)
-else (WIN32)
+	target_link_libraries(${modname} PUBLIC nlohmann_json::nlohmann_json fmt "C:\\vckpg\\installed\\x64-windows\\lib\\libssl.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\libcrypto.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\zlib.lib")
+else()
 	target_link_libraries(${modname} PUBLIC ssl crypto nlohmann_json::nlohmann_json fmt z)
-endif (WIN32)
+endif()
 if (HAVE_VOICE)
 	target_link_libraries(${modname} PUBLIC sodium opus)
 endif()

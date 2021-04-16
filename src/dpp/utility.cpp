@@ -38,12 +38,17 @@ namespace dpp {
 		}
 
 		std::string current_date_time() {
+#ifdef _WIN32
+			std::time_t curr_time = time(nullptr);
+			return std::ctime(&curr_time);
+#else
 			auto t = std::time(nullptr);
 			struct tm timedata;
 			localtime_r(&t, &timedata);
 			std::stringstream s;
 			s << std::put_time(&timedata, "%Y-%m-%d %H:%M:%S");
 			return s.str();
+#endif
 		}
 
 		std::string loglevel(dpp::loglevel in) {
@@ -62,10 +67,10 @@ namespace dpp {
 		}
 
 		uptime::uptime(time_t diff) : uptime() {
-			days = (diff / (3600 * 24));
-			hours = (diff % (3600 * 24) / 3600);
-			mins = (diff % 3600 / 60);
-			secs = (diff % 60);
+			days = (uint16_t)(diff / (3600 * 24));
+			hours = (uint8_t)(diff % (3600 * 24) / 3600);
+			mins = (uint8_t)(diff % 3600 / 60);
+			secs = (uint8_t)(diff % 60);
 		}
 
 		std::string uptime::to_string() {

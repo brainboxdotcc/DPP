@@ -1269,7 +1269,7 @@ public:
 	 * @param pruneinfo 
 	 * @param callback Function to call when the API call completes
 	 */
-	void guild_get_prune_counts(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback);
+	void guild_get_prune_counts(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback);
 
 	/**
 	 * @brief Begin guild prune
@@ -1278,7 +1278,7 @@ public:
 	 * @param pruneinfo 
 	 * @param callback Function to call when the API call completes
 	 */
-	void guild_begin_prune(snowflake guild_id, const class prune& pruneinfo, command_completion_event_t callback = {});
+	void guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get guild voice regions
@@ -1437,7 +1437,7 @@ public:
 	 * @param m 
 	 * @param callback Function to call when the API call completes
 	 */
-	void execute_webhook(const class webhook &wh, const class message &m, command_completion_event_t callback = {});
+	void execute_webhook(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Edit webhook message
@@ -1446,7 +1446,7 @@ public:
 	 * @param m 
 	 * @param callback Function to call when the API call completes
 	 */
-	void edit_webhook_message(const class webhook &wh, const class message &m, command_completion_event_t callback = {});
+	void edit_webhook_message(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Delete webhook message
