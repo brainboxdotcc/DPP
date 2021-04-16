@@ -243,6 +243,24 @@ int main(int argc, char const *argv[])
 
 \page slashcommands Using Slash Commands and Interactions
 
+Slash commands and interactions are a newer feature of Discord which allow bot's commands to be registered centrally within the
+system and for users to easily explore and get help with avaialble commands through the client itself.
+
+To add a slash command you should use the dpp::cluster::global_command_create method for global commands (available to all guilds)
+or dpp::cluster::guild_command_create to create a local command (available only to one guild).
+
+When a user issues these commands the reply will arrive via the on_interaction_create event which you can hook, and take action
+when you see your commands. It is possible to reply to an interaction by using either the dpp::interaction_create_t::reply method,
+or by manually instantiating an object of type dpp::interaction_response and attaching a dpp::message object to it.
+
+dpp::interaction_create_t::reply has two overloaded versions of the method, one of which accepts simple std::string replies, for
+basic text-only messages (if your message is 'ephemeral' you must use this) and one which accepts a dpp::message for more advanced
+replies. Please note that at present, Discord only supports a small subset of message and embed features within an interaction
+response object.
+
+\note A later version of the library will include a built in command handler system which will be able to integrate with slash commands
+and interactions, making this process even more seamless.
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <fmt/format.h>
