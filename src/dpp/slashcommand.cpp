@@ -14,6 +14,8 @@ slashcommand::slashcommand() : managed()
 slashcommand::~slashcommand() {
 }
 
+
+
 slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	id = SnowflakeNotNull(j, "id");
 	return *this;
@@ -123,6 +125,86 @@ slashcommand& slashcommand::add_option(const command_option &o)
 	options.push_back(o);
 	return *this;
 }
+
+interaction& interaction::fill_from_json(nlohmann::json* j) {
+	id = SnowflakeNotNull(j, "id");
+	application_id = SnowflakeNotNull(j, "application_id");
+	channel_id = SnowflakeNotNull(j, "channel_id");
+	guild_id = SnowflakeNotNull(j, "guild_id");
+	token = StringNotNull(j, "token");
+	type = Int8NotNull(j, "type");
+	version = Int8NotNull(j, "version");
+	if (j->find("member") != j->end()) {
+		json& m = (*j)["member"];
+		member = guild_member().fill_from_json(&m, nullptr, nullptr);
+		usr = user().fill_from_json(&(m["user"]));
+	}
+	if (j->find("user") != j->end()) {
+		usr = user().fill_from_json(&((*j)["user"]));
+	}
+	if (j->find("data") != j->end()) {
+		json& param = (*j)["data"];
+		command_interaction ci;
+		ci.id = SnowflakeNotNull(&param, "id");
+		ci.name = StringNotNull(&param, "name");
+		//ci.resolved = BoolNotNull(&param, "resolved");
+		if (param.find("options") != param.end()) {
+			for (auto &opt : param["options"]) {
+				command_data_option cdo;
+				cdo.name = StringNotNull(&opt, "name");
+				cdo.type = (command_option_type)Int8NotNull(&opt, "type");
+				switch (cdo.type) {
+					case co_boolean:
+						cdo.value = BoolNotNull(&opt, "value");
+					break;
+					case co_channel:
+					case co_role:
+					case co_user:
+						cdo.value = SnowflakeNotNull(&opt, "value");
+					break;
+					case co_integer:
+						cdo.value = Int32NotNull(&opt, "value");
+					break;
+					case co_string:
+						cdo.value = StringNotNull(&opt, "value");
+					break;
+				}
+				ci.options.push_back(cdo);
+			}
+		}
+		data = ci;
+	}
+	return *this;
+}
+
+std::string interaction::build_json(bool with_id) const {
+	return "";
+}
+
+interaction_response::interaction_response() {
+	msg = new message();
+}
+
+interaction_response::~interaction_response() {
+	delete msg;
+}
+
+interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
+	type = (interaction_response_type)Int8NotNull(j, "type");
+	if (j->find("data") != j->end()) {
+		msg->fill_from_json(&((*j)["data"]));
+	}
+	return *this;
+}
+
+std::string interaction_response::build_json() const {
+	json j;
+	json msg_json = json::parse(msg->build_json());
+	j["type"] = this->type;
+	j["data"] = msg_json;
+	return j.dump();
+}
+
 
 };
 

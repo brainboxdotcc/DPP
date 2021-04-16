@@ -81,7 +81,9 @@ typedef std::variant<
 		webhook_map,
 		prune,
 		guild_widget,
-		gateway
+		gateway,
+		interaction,
+		interaction_response
 	> confirmable_t;
 
 /**
@@ -615,6 +617,23 @@ public:
 	 */
 	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
 
+	/**
+	 * @brief Respond to a slash command
+	 * 
+	 * @param interaction_id Interaction id to respond to
+	 * @param r Response to send
+	 * @param callback Function to call when the API call completes
+	 */
+	void interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback);
+
+	/**
+	 * @brief Respond to a slash command
+	 * 
+	 * @param interaction_id Interaction id to respond to
+	 * @param r Response to send
+	 * @param callback Function to call when the API call completes
+	 */
+	void interaction_response_edit(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these)
@@ -632,6 +651,41 @@ public:
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
+	 * 
+	 * @param s Slash command to change
+	 * @param callback Function to call when the API call completes
+	 */
+	void global_command_edit(const slashcommand &s, command_completion_event_t callback);
+
+	/**
+	 * @brief Edit a slash command local to a guild
+	 * 
+	 * @param s Slash command to edit
+	 * @param guild_id Guild ID to edit the slash command in
+	 * @param callback Function to call when the API call completes
+	 */
+	void guild_command_edit(const slashcommand &s, snowflake guild_id, command_completion_event_t callback);
+
+
+	/**
+	 * @brief Delete a global slash command (a bot can have a maximum of 100 of these)
+	 * 
+	 * @param id Slash command to delete
+	 * @param callback Function to call when the API call completes
+	 */
+	void global_command_delete(snowflake id, command_completion_event_t callback);
+
+	/**
+	 * @brief Delete a slash command local to a guild
+	 * 
+	 * @param id Slash command to delete
+	 * @param guild_id Guild ID to delete the slash command in
+	 * @param callback Function to call when the API call completes
+	 */
+	void guild_command_delete(snowflake id, snowflake guild_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a direct message, also create the channel for the direct message if needed

@@ -46,6 +46,7 @@ struct interaction_create_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	interaction_create_t(const std::string& raw);
+	interaction command;
 };
 
 /** @brief Delete guild */

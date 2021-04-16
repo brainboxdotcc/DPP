@@ -202,7 +202,6 @@ void SSLClient::ReadLoop()
 			custom_readable_ready();
 		}
 		if (custom_readable_fd && FD_ISSET(custom_readable_fd(), &efds)) {
-			std::cout << "Error set\n";
 		}
 
 		/* Now check if there's data to read */

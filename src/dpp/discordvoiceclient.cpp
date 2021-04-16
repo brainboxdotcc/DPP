@@ -65,7 +65,6 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _channe
 			throw std::runtime_error(fmt::format("DiscordVoiceClient::DiscordVoiceClient; opus_decoder_create() failed: {}", opusError));
 		}
 		repacketizer = opus_repacketizer_create();
-		std::cout << "External IP: " << external_ip << "\n";
 		DiscordVoiceClient::sodium_initialised = true;
 	}
 	Connect();
@@ -147,8 +146,6 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 
 	if (j.find("op") != j.end()) {
 		uint32_t op = j["op"];
-
-		std::cout << data << "\n";
 
 		switch (op) {
 			/* Voice resume */

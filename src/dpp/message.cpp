@@ -167,7 +167,8 @@ std::string message::build_json(bool with_id) const {
 		{"content", content},
 		{"channel_id", channel_id},
 		{"tts", tts},
-		{"nonce", nonce}
+		{"nonce", nonce},
+		{"flags", flags}
 	});
 	if (with_id) {
 		j["id"] = std::to_string(id);
@@ -213,10 +214,41 @@ std::string message::build_json(bool with_id) const {
 	return j.dump();
 }
 
+bool message::is_crossposted() const {
+	return flags & m_crossposted;
+}
+
+bool message::is_crosspost() const {
+	return flags & m_is_crosspost;
+
+}
+
+bool message::supress_embeds() const {
+	return flags & m_supress_embeds;
+}
+
+bool message::is_source_message_deleted() const {
+	return flags & m_source_message_deleted;
+}
+
+bool message::is_urgent() const {
+	return flags & m_urgent;
+}
+
+bool message::is_ephemeral() const {
+	return flags & m_ephemeral;
+}
+
+bool message::is_loading() const {
+	return flags & m_loading;
+}
+
+
 message& message::fill_from_json(json* d) {
 	this->id = SnowflakeNotNull(d, "id");
 	this->channel_id = SnowflakeNotNull(d, "channel_id");
 	this->guild_id = SnowflakeNotNull(d, "guild_id");
+	this->flags = Int8NotNull(d, "flags");
 	this->author = nullptr;
 	user* authoruser = nullptr;
 	/* May be null, if its null cache it from the partial */

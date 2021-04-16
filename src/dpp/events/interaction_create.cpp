@@ -23,6 +23,14 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void interaction_create::handle(DiscordClient* client, json &j, const std::string &raw) {
+	json& d = j["d"];
+	dpp::interaction i;
+	i.fill_from_json(&d);
+	if (client->creator->dispatch.interaction_create) {
+		dpp::interaction_create_t ic(raw);
+		ic.command = i;
+		client->creator->dispatch.interaction_create(ic);
+	}
 }
 
 }};
