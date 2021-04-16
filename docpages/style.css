@@ -10,3 +10,7 @@ img {
 table.doxtable td, table.doxtable th {
 	width: 50% !important;
 }
+
+dl.note {
+	background-color: #fcfcc0;
+}
