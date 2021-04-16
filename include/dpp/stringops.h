@@ -1,6 +1,6 @@
 /************************************************************************************
  * 
- * D++ - Lightweight C++ Discord Library
+ * D++ - A Lightweight C++ Library for Discord
  *
  * stringops.h taken from TriviaBot
  *

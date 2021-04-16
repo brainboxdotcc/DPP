@@ -3,7 +3,9 @@
 The best way to experiment with these example programs is to delete the content from `test.cpp` in the library repository, and replace it with program code as shown below. You can then use `cmake` and `make` to build the bot without having to mess around with installation, dependencies etc.
 
 * \subpage firstbot "Creating Your First Bot"
+* \subpage slashcommands "Using Slash Commands and Interactions"
 * \subpage soundboard "Creating a Sound Board"
+
 
 \page firstbot Creating Your First Bot
 
@@ -238,3 +240,53 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~
+
+\page slashcommands Using Slash Commands and Interactions
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+#include <fmt/format.h>
+#include <iomanip>
+
+int main(int argc, char const *argv[])
+{
+	dpp::cluster bot("token");
+
+	/* The interaction create event is fired when someone issues your commands */
+	bot.on_interaction_create([&bot](const dpp::interaction_create_t & cmd) {
+		/* Check which command they ran */
+		if (cmd.command.data.name == "blep") {
+			/* Fetch a parameter value from the command parameters */
+			std::string animal = std::get<std::string>(cmd.get_parameter("animal"));
+			/* Reply to the command. There is an overloaded version of this
+			 * call that accepts a dpp::message so you can send embeds.
+			 */
+			cmd.reply(dpp::ir_channel_message_with_source, fmt::format("Blep! You chose {}", animal));
+		}
+	});
+
+	bot.on_ready([&bot](const dpp::ready_t & event) {
+		dpp::slashcommand newcommand;
+
+		/* Create a new global command on ready event */
+		newcommand
+			.set_name("blep")
+			.set_description("Send a random adorable animal photo")
+			.set_application_id(bot.me.id);
+			.add_option(
+				dpp::command_option(dpp::co_string, "animal", "The type of animal", true).
+					add_choice(dpp::command_option_choice("Dog", std::string("animal_dog"))).
+					add_choice(dpp::command_option_choice("Cat", std::string("animal_cat"))).
+					add_choice(dpp::command_option_choice("Penguin", std::string("animal_penguin")
+				)
+			)
+		);
+
+		/* Register the command */
+		bot.global_command_create(newcommand, [&bot](const dpp::confirmation_callback_t & state));
+	});
+
+	bot.start(false);
+	return 0;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
