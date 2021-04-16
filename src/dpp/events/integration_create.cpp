@@ -27,7 +27,7 @@ using namespace dpp;
 void integration_create::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.integration_create) {
 		json& d = j["d"];
-		dpp::integration_create_t ic(raw);
+		dpp::integration_create_t ic(client, raw);
 		ic.created_integration = dpp::integration().fill_from_json(&d);
 		client->creator->dispatch.integration_create(ic);
 	}

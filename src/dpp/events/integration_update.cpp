@@ -26,7 +26,7 @@ using namespace dpp;
 void integration_update::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.integration_update) {
 		json& d = j["d"];
-		dpp::integration_update_t iu(raw);
+		dpp::integration_update_t iu(client, raw);
 		iu.updated_integration = dpp::integration().fill_from_json(&d);
 		client->creator->dispatch.integration_update(iu);
 	}

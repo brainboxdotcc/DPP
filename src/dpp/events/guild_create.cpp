@@ -91,7 +91,7 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 	}
 
 	if (client->creator->dispatch.guild_create) {
-		dpp::guild_create_t gc(raw);
+		dpp::guild_create_t gc(client, raw);
 		gc.created = g;
 		client->creator->dispatch.guild_create(gc);
 	}

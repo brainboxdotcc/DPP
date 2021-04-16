@@ -53,7 +53,7 @@ void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 void cluster::log(dpp::loglevel severity, const std::string &msg) {
 	if (dispatch.log) {
 		/* Pass to user if theyve hooked the event */
-		dpp::log_t logmsg(msg);
+		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
 		dispatch.log(logmsg);
@@ -204,14 +204,19 @@ void cluster::direct_message_create(snowflake user_id, const message &m, command
 }
 
 void cluster::interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback) {
-	this->post_rest("/api/interactions", std::to_string(interaction_id) + "/" + token + "/callback", m_post, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v8/interactions", std::to_string(interaction_id) + "/" + url_encode(token) + "/callback", m_post, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
 }
 
-void cluster::interaction_response_edit(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback) {
+void cluster::interaction_response_edit(snowflake application_id, const std::string &token, const interaction_response &r, command_completion_event_t callback) {
+	this->post_rest("/api/v8/interactions", std::to_string(application_id) + "/" + url_encode(token) + "/messages/@original", m_patch, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
 }
 
 

@@ -31,7 +31,7 @@ void guild_role_delete::handle(DiscordClient* client, json &j, const std::string
 		dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
 		if (r) {
 			if (client->creator->dispatch.guild_role_delete) {
-				dpp::guild_role_delete_t grd(raw);
+				dpp::guild_role_delete_t grd(client, raw);
 				grd.deleting_guild = g;
 				grd.deleted = r;
 				client->creator->dispatch.guild_role_delete(grd);

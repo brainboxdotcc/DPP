@@ -26,7 +26,7 @@ using namespace dpp;
 void message_delete_bulk::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.message_delete_bulk) {
 		json& d = j["d"];
-		dpp::message_delete_bulk_t msg(raw);
+		dpp::message_delete_bulk_t msg(client, raw);
 		msg.deleting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		msg.deleting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
 		msg.deleting_user = dpp::find_user(SnowflakeNotNull(&d, "user_id"));

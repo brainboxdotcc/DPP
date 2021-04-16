@@ -26,7 +26,7 @@ using namespace dpp;
 void integration_delete::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.integration_delete) {
 		json& d = j["d"];
-		dpp::integration_delete_t id(raw);
+		dpp::integration_delete_t id(client, raw);
 		id.deleted_integration = dpp::integration().fill_from_json(&d);
 		client->creator->dispatch.integration_delete(id);
 	}

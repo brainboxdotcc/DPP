@@ -2,6 +2,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
 #include <nlohmann/json.hpp>
+#include <iostream>
 
 namespace dpp {
 
@@ -44,8 +45,8 @@ std::string slashcommand::build_json(bool with_id) const {
 				for (auto & choice : opt.choices) {
 					json t;
 					t["name"] = choice.name;
-					if (std::holds_alternative<int>(choice.value)) {
-						t["value"] = std::get<int>(choice.value);
+					if (std::holds_alternative<uint32_t>(choice.value)) {
+						t["value"] = std::get<uint32_t>(choice.value);
 					} else {
 						t["value"] = std::get<std::string>(choice.value);
 					}
@@ -67,8 +68,12 @@ std::string slashcommand::build_json(bool with_id) const {
 						json &v = o["choices"];
 						for (auto & choice : opt.choices) {
 							v["name"] = choice.name;
-							if (std::holds_alternative<int>(choice.value)) {
-								v["value"] = std::get<int>(choice.value);
+							if (std::holds_alternative<uint32_t>(choice.value)) {
+								v["value"] = std::get<uint32_t>(choice.value);
+							} else if (std::holds_alternative<bool>(choice.value)) {
+								v["value"] = std::get<bool>(choice.value);
+							} else if (std::holds_alternative<snowflake>(choice.value)) {
+								v["value"] = std::to_string(std::get<uint64_t>(choice.value));
 							} else {
 								v["value"] = std::get<std::string>(choice.value);
 							}
@@ -99,7 +104,7 @@ slashcommand& slashcommand::set_application_id(snowflake i) {
 	return *this;
 }
 
-command_option_choice::command_option_choice(const std::string &n, std::variant<std::string, int32_t> v) : name(n), value(v)
+command_option_choice::command_option_choice(const std::string &n, command_value v) : name(n), value(v)
 {
 }
 
@@ -189,6 +194,11 @@ interaction_response::~interaction_response() {
 	delete msg;
 }
 
+interaction_response::interaction_response(interaction_response_type t, const message& m) : interaction_response() {
+	type = t;
+	*msg = m;
+}
+
 interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 	type = (interaction_response_type)Int8NotNull(j, "type");
 	if (j->find("data") != j->end()) {
@@ -201,6 +211,10 @@ std::string interaction_response::build_json() const {
 	json j;
 	json msg_json = json::parse(msg->build_json());
 	j["type"] = this->type;
+	auto cid = msg_json.find("channel_id");
+	if (cid != msg_json.end()) {
+		msg_json.erase(cid);
+	}
 	j["data"] = msg_json;
 	return j.dump();
 }

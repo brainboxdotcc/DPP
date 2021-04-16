@@ -27,7 +27,7 @@ using namespace dpp;
 void guild_ban_add::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.guild_ban_add) {
 		json &d = j["d"];
-		dpp::guild_ban_add_t gba(raw);
+		dpp::guild_ban_add_t gba(client, raw);
 		gba.banning_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		gba.banned = dpp::user().fill_from_json(&(d["user"]));
 		client->creator->dispatch.guild_ban_add(gba);

@@ -39,7 +39,7 @@ void guild_member_add::handle(DiscordClient* client, json &j, const std::string 
 		g->members[u->id] = gm;
 
 		if (client->creator->dispatch.guild_member_add) {
-			dpp::guild_member_add_t gmr(raw);
+			dpp::guild_member_add_t gmr(client, raw);
 			gmr.adding_guild = g;
 			gmr.added = gm;
 			client->creator->dispatch.guild_member_add(gmr);

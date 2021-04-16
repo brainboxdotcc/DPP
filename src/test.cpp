@@ -20,16 +20,10 @@ int main(int argc, char const *argv[])
 		}
 	});
 
-	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
-		bot.log(dpp::ll_debug, fmt::format("command id {} data.id {} name {}", event.command.id, event.command.data.id, event.command.data.name));
-		if (event.command.data.name == "blep") {
-			dpp::interaction_response ir;
-			dpp::message m(event.command.channel_id, "Blep!");
-			ir.type = dpp::ir_channel_message;
-			*(ir.msg) = m;
-			bot.interaction_response_create(event.command.id, event.command.token, ir, [&bot](const dpp::confirmation_callback_t & state) {
-				bot.log(dpp::ll_debug, fmt::format("Interaction Response Result: {} -> {}", state.http_info.status, state.http_info.body));
-			});
+	bot.on_interaction_create([&bot](const dpp::interaction_create_t & cmd) {
+		if (cmd.command.data.name == "blep") {
+			std::string animal = std::get<std::string>(cmd.get_parameter("animal"));
+			cmd.reply(dpp::ir_channel_message_with_source, fmt::format("Blep! You chose {}", animal));
 		}
 	});
 

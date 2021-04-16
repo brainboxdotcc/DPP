@@ -44,7 +44,7 @@ void http_request::complete(const http_request_completion_t &c) {
 /* Fill a http_request_completion_t from a HTTP result */
 void populate_result(http_request_completion_t& rv, const httplib::Result &res) {
 	rv.status = res->status;
-	rv.body = (res->status < 400) ? res->body : "";
+	rv.body = res->body;
 	for (auto &v : res->headers) {
 		rv.headers[v.first] = v.second;
 	}

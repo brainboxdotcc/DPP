@@ -301,7 +301,13 @@ void DiscordClient::Error(uint32_t errorcode)
 
 void DiscordClient::log(dpp::loglevel severity, const std::string &msg)
 {
-	creator->log(severity, msg);
+	if (creator->dispatch.log) {
+		/* Pass to user if theyve hooked the event */
+		dpp::log_t logmsg(this, msg);
+		logmsg.severity = severity;
+		logmsg.message = msg;
+		creator->dispatch.log(logmsg);
+	}
 }
 
 void DiscordClient::QueueMessage(const std::string &j, bool to_front)

@@ -26,7 +26,7 @@ using namespace dpp;
 void typing_start::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.typing_start) {
 		json& d = j["d"];
-		dpp::typing_start_t ts(raw);
+		dpp::typing_start_t ts(client, raw);
 		ts.typing_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		ts.typing_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
 		ts.typing_user = dpp::find_user(SnowflakeNotNull(&d, "user_id"));

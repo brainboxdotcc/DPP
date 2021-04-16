@@ -39,7 +39,7 @@ void guild_emojis_update::handle(DiscordClient* client, json &j, const std::stri
 			g->emojis.push_back(e->id);
 		}
 		if (client->creator->dispatch.guild_emojis_update) {
-			dpp::guild_emojis_update_t geu(raw);
+			dpp::guild_emojis_update_t geu(client, raw);
 			geu.emojis = g->emojis;
 			geu.updating_guild = g;
 			client->creator->dispatch.guild_emojis_update(geu);

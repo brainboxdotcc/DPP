@@ -26,7 +26,7 @@ using namespace dpp;
 void message_reaction_add::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.message_reaction_add) {
 		json &d = j["d"];
-		dpp::message_reaction_add_t mra(raw);
+		dpp::message_reaction_add_t mra(client, raw);
 		mra.reacting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		mra.reacting_user = dpp::find_user(SnowflakeNotNull(&d, "user_id"));
 		mra.reacting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));

@@ -27,7 +27,7 @@ void interaction_create::handle(DiscordClient* client, json &j, const std::strin
 	dpp::interaction i;
 	i.fill_from_json(&d);
 	if (client->creator->dispatch.interaction_create) {
-		dpp::interaction_create_t ic(raw);
+		dpp::interaction_create_t ic(client, raw);
 		ic.command = i;
 		client->creator->dispatch.interaction_create(ic);
 	}

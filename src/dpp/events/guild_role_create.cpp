@@ -36,7 +36,7 @@ void guild_role_create::handle(DiscordClient* client, json &j, const std::string
 		dpp::get_role_cache()->store(r);
 		g->roles.push_back(r->id);
 		if (client->creator->dispatch.guild_role_create) {
-			dpp::guild_role_create_t grc(raw);
+			dpp::guild_role_create_t grc(client, raw);
 			grc.creating_guild = g;
 			grc.created = r;
 			client->creator->dispatch.guild_role_create(grc);

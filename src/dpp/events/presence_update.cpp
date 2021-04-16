@@ -26,7 +26,7 @@ using namespace dpp;
 void presence_update::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.presence_update) {
 		json& d = j["d"];
-		dpp::presence_update_t pu(raw);
+		dpp::presence_update_t pu(client, raw);
 		pu.rich_presence = dpp::presence().fill_from_json(&d);
 		client->creator->dispatch.presence_update(pu);
 	}

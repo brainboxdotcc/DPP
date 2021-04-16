@@ -26,7 +26,7 @@ using namespace dpp;
 void message_reaction_remove_all::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.message_reaction_remove_all) {
 		json &d = j["d"];
-		dpp::message_reaction_remove_all_t mrra(raw);
+		dpp::message_reaction_remove_all_t mrra(client, raw);
 		mrra.reacting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		mrra.reacting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
 		mrra.message_id = SnowflakeNotNull(&d, "message_id");

@@ -32,7 +32,7 @@ void guild_role_update::handle(DiscordClient* client, json &j, const std::string
 		if (r) {
 			r->fill_from_json(g->id, &role);
 			if (client->creator->dispatch.guild_role_update) {
-				dpp::guild_role_update_t gru(raw);
+				dpp::guild_role_update_t gru(client, raw);
 				gru.updating_guild = g;
 				gru.updated = r;
 				client->creator->dispatch.guild_role_update(gru);

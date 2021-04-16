@@ -25,7 +25,7 @@ using namespace dpp;
 void voice_state_update::handle(DiscordClient* client, json &j, const std::string &raw) {
 
 	json& d = j["d"];
-	dpp::voice_state_update_t vsu(raw);
+	dpp::voice_state_update_t vsu(client, raw);
 	vsu.state = dpp::voicestate().fill_from_json(&d);
 	if (vsu.state.user_id == client->creator->me.id)
 	{

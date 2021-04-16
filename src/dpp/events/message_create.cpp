@@ -28,7 +28,7 @@ void message_create::handle(DiscordClient* client, json &j, const std::string &r
 
 	if (client->creator->dispatch.message_create) {
 		json d = j["d"];
-		dpp::message_create_t msg(raw);
+		dpp::message_create_t msg(client, raw);
 		dpp::message m;
 		m.fill_from_json(&d);	
 		msg.msg = &m;

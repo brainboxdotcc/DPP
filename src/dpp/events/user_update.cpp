@@ -32,7 +32,7 @@ void user_update::handle(DiscordClient* client, json &j, const std::string &raw)
 		u->fill_from_json(&d);
 
 		if (client->creator->dispatch.user_update) {
-			dpp::user_update_t uu(raw);
+			dpp::user_update_t uu(client, raw);
 			uu.updated = u;
 			client->creator->dispatch.user_update(uu);
 		}

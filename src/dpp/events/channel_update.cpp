@@ -28,7 +28,7 @@ void channel_update::handle(DiscordClient* client, json &j, const std::string &r
 	if (c) {
 		c->fill_from_json(&d);
 		if (client->creator->dispatch.channel_update) {
-			dpp::channel_update_t cu(raw);
+			dpp::channel_update_t cu(client, raw);
 	  		cu.updated = c;
   			cu.updating_guild = dpp::find_guild(c->guild_id);
 			client->creator->dispatch.channel_update(cu);

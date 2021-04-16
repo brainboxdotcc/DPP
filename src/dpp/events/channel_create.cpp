@@ -44,7 +44,7 @@ void channel_create::handle(DiscordClient* client, json &j, const std::string &r
 		g->channels.push_back(c->id);
 
 		if (client->creator->dispatch.channel_create) {
-			dpp::channel_create_t cc(raw);
+			dpp::channel_create_t cc(client, raw);
 			cc.created = c;
 			cc.creating_guild = g;
 			client->creator->dispatch.channel_create(cc);

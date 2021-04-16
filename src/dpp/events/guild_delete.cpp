@@ -34,7 +34,7 @@ void guild_delete::handle(DiscordClient* client, json &j, const std::string &raw
 		}
 
 		if (client->creator->dispatch.guild_delete) {
-			dpp::guild_delete_t gd(raw);
+			dpp::guild_delete_t gd(client, raw);
 			gd.deleted = g;
 			client->creator->dispatch.guild_delete(gd);
 		}

@@ -26,7 +26,7 @@ using namespace dpp;
 void webhooks_update::handle(DiscordClient* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.webhooks_update) {
 		json& d = j["d"];
-		dpp::webhooks_update_t wu(raw);
+		dpp::webhooks_update_t wu(client, raw);
 		wu.webhook_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		wu.webhook_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
 		client->creator->dispatch.webhooks_update(wu);

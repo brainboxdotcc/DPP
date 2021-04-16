@@ -204,7 +204,7 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 					}
 				}
 				if (creator->dispatch.voice_ready) {
-					voice_ready_t rdy(data);
+					voice_ready_t rdy(nullptr, data);
 					rdy.voice_client = this;
 					creator->dispatch.voice_ready(rdy);
 				}
@@ -302,7 +302,7 @@ void DiscordVoiceClient::ReadReady()
 	uint8_t buffer[65535];
 	int r = this->UDPRecv((char*)buffer, sizeof(buffer));
 	if (r > 0 && creator->dispatch.voice_receive) {
-		voice_receive_t vr(std::string((const char*)buffer, r));
+		voice_receive_t vr(nullptr, std::string((const char*)buffer, r));
 		vr.voice_client = this;
 		vr.audio = nullptr;
 		vr.audio_size = 0;
@@ -317,7 +317,7 @@ void DiscordVoiceClient::WriteReady()
 			std::this_thread::sleep_for(std::chrono::milliseconds(60));
 			outbuf.erase(outbuf.begin());
 			if (creator->dispatch.voice_buffer_send) {
-				voice_buffer_send_t snd("");
+				voice_buffer_send_t snd(nullptr, "");
 				snd.buffer_size = outbuf.size();
 				snd.voice_client = this;
 				creator->dispatch.voice_buffer_send(snd);

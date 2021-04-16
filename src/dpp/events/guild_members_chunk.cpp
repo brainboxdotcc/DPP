@@ -44,7 +44,7 @@ void guild_members_chunk::handle(DiscordClient* client, json &j, const std::stri
 				um[u->id] = *gm;
 		}
 		if (client->creator->dispatch.guild_members_chunk) {
-			dpp::guild_members_chunk_t gmc(raw);
+			dpp::guild_members_chunk_t gmc(client, raw);
 			gmc.adding = g;
 			gmc.members = &um;
 			client->creator->dispatch.guild_members_chunk(gmc);

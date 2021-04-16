@@ -16,19 +16,21 @@ embed::~embed() {
 embed::embed() {
 }
 
-message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), member(nullptr), sent(0), edited(0),
-	tts(false), mention_everyone(false), mentions(nullptr), mention_roles(nullptr), pinned(false), webhook_id(0)
+message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), member(nullptr), sent(0), edited(0), flags(0),
+	type(mt_default), tts(false), mention_everyone(false), mentions(nullptr), mention_roles(nullptr), pinned(false), webhook_id(0)
 {
 
 }
 
-message::message(snowflake _channel_id, const std::string &_content) : message() {
+message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
 	channel_id = _channel_id;
 	content = _content;
+	type = t;
 }
 
-message::message(const std::string &_content) : message() {
+message::message(const std::string &_content, message_type t) : message() {
 	content = _content;
+	type = t;
 }
 
 embed::embed(json* j) : embed() {
@@ -168,7 +170,8 @@ std::string message::build_json(bool with_id) const {
 		{"channel_id", channel_id},
 		{"tts", tts},
 		{"nonce", nonce},
-		{"flags", flags}
+		{"flags", flags},
+		{"type", type}
 	});
 	if (with_id) {
 		j["id"] = std::to_string(id);
@@ -249,6 +252,7 @@ message& message::fill_from_json(json* d) {
 	this->channel_id = SnowflakeNotNull(d, "channel_id");
 	this->guild_id = SnowflakeNotNull(d, "guild_id");
 	this->flags = Int8NotNull(d, "flags");
+	this->type = Int8NotNull(d, "type");
 	this->author = nullptr;
 	user* authoruser = nullptr;
 	/* May be null, if its null cache it from the partial */

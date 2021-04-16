@@ -36,7 +36,7 @@ void ready::handle(DiscordClient* client, json &j, const std::string &raw) {
 	}
 
 	if (client->creator->dispatch.ready) {
-		dpp::ready_t r(raw);
+		dpp::ready_t r(client, raw);
 		r.session_id = client->sessionid;
 		r.shard_id = client->shard_id;
 		client->creator->dispatch.ready(r);

@@ -42,7 +42,7 @@ void guild_update::handle(DiscordClient* client, json &j, const std::string &raw
 		}
 
 		if (client->creator->dispatch.guild_update) {
-			dpp::guild_update_t gu(raw);
+			dpp::guild_update_t gu(client, raw);
 			gu.updated = g;
 			client->creator->dispatch.guild_update(gu);
 		}

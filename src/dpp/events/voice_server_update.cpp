@@ -26,7 +26,7 @@ using namespace dpp;
 void voice_server_update::handle(DiscordClient* client, json &j, const std::string &raw) {
 
 	json &d = j["d"];
-	dpp::voice_server_update_t vsu(raw);
+	dpp::voice_server_update_t vsu(client, raw);
 	vsu.guild_id = SnowflakeNotNull(&d, "guild_id");
 	vsu.token = StringNotNull(&d, "token");
 	vsu.endpoint = StringNotNull(&d, "endpoint");

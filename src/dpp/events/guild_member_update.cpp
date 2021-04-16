@@ -33,7 +33,7 @@ void guild_member_update::handle(DiscordClient* client, json &j, const std::stri
 			gmi->second->fill_from_json(&user, g, u);
 
 			if (client->creator->dispatch.guild_member_update) {
-				dpp::guild_member_update_t gmu(raw);
+				dpp::guild_member_update_t gmu(client, raw);
 				gmu.updating_guild = g;
 				gmu.updated = gmi->second;
 				client->creator->dispatch.guild_member_update(gmu);

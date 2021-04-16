@@ -186,6 +186,29 @@ enum message_flags {
 	m_loading = 1 << 7			//< this message is an Interaction Response and the bot is "thinking"
 };
 
+enum message_type {
+	mt_default					= 0,
+	mt_recipient_add				= 1,
+	mt_recipient_remove				= 2,
+	mt_call						= 3,
+	mt_channel_name_change				= 4,
+	mt_channel_icon_change				= 5,
+	mt_channel_pinned_message			= 6,
+	mt_guild_member_join				= 7,
+	mt_user_premium_guild_subscription		= 8,
+	mt_user_premium_guild_subscription_tier_1	= 9,
+	mt_user_premium_guild_subscription_tier_2	= 10,
+	mt_user_premium_guild_subscription_tier_3	= 11,
+	mt_channel_follow_add				= 12,
+	mt_guild_discovery_disqualified			= 14,
+	mt_guild_discovery_requalified			= 15,
+	mt_guild_discovery_grace_period_initial_warning	= 16,
+	mt_guild_discovery_grace_period_final_warning	= 17,
+	mt_reply					= 19,
+	mt_application_command				= 20,
+	mt_guild_invite_reminder			= 22
+};
+
 /** Represents messages sent and received on Discord */
 struct message {
 	/** id of the message */
@@ -231,8 +254,12 @@ struct message {
 
 	/** Name of file to upload (for use server-side in discord's url) */
 	std::string	filename;
+
 	/** File content to upload (raw binary) */
 	std::string	filecontent;
+
+	/** Message type */
+	uint8_t		type;
 
 	/**
 	 * @brief Construct a new message object
@@ -244,15 +271,17 @@ struct message {
 	 * 
 	 * @param channel_id The channel to send the message to
 	 * @param content The content of the message
+	 * @param type The message type to create
 	 */
-	message(snowflake channel_id, const std::string &content);
+	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
 
 	/**
 	 * @brief Construct a new message object with content
 	 * 
 	 * @param content The content of the message
+	 * @param type The message type to create
 	 */
-	message(const std::string &content);
+	message(const std::string &content, message_type type = mt_default);
 
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
