@@ -238,7 +238,6 @@ struct command_interaction {
  * @brief An interaction represents a user running a command and arrives
  * via the dpp::cluster::on_interaction_create event.
  */
- * 
 class interaction : public managed {
 public:
 	snowflake	application_id;		//< id of the application this interaction is for
