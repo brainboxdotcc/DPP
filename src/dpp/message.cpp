@@ -111,7 +111,7 @@ embed::embed(json* j) : embed() {
 			embed_field f;
 			f.name = StringNotNull(&field, "name");
 			f.value = StringNotNull(&field, "value");
-			f.is_inline = StringNotNull(&field, "inline");
+			f.is_inline = BoolNotNull(&field, "inline");
 			fields.push_back(f);
 		}
 	}

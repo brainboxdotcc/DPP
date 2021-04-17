@@ -76,7 +76,7 @@ struct embed_field {
 	/** Value of field (max length 1000) */
 	std::string value;
 	/** True if the field is to be displayed inline */
-	std::string is_inline;
+	bool is_inline;
 };
 
 /** A rich embed for display within a dpp::message */
