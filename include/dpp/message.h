@@ -252,9 +252,9 @@ struct message {
 	/** whether this message mentions everyone */
 	bool   		mention_everyone;
 	/** users specifically mentioned in the message */
-	user*		mentions;
+	std::vector<snowflake>	mentions;
 	/** roles specifically mentioned in this message */
-	role*		mention_roles;
+	std::vector<snowflake> mention_roles;
 	/** Optional: channels specifically mentioned in this message */
 	std::vector<snowflake> mention_channels;
 	/** any attached files */

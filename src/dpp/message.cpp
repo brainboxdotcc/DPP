@@ -25,6 +25,7 @@
 #include <dpp/cache.h>
 #include <nlohmann/json.hpp>
 #include <dpp/discordevents.h>
+#include <dpp/stringops.h>
 
 using json = nlohmann::json;
 
@@ -37,7 +38,7 @@ embed::embed() {
 }
 
 message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), member(nullptr), sent(0), edited(0), flags(0),
-	type(mt_default), tts(false), mention_everyone(false), mentions(nullptr), mention_roles(nullptr), pinned(false), webhook_id(0)
+	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0)
 {
 
 }
@@ -287,6 +288,24 @@ message& message::fill_from_json(json* d) {
 		}
 		this->author = authoruser;
 	}
+	if (d->find("mentions") != d->end()) {
+		json &sub = (*d)["mentions"];
+		for (auto & m : sub) {
+			mentions.push_back(SnowflakeNotNull(&m, "id"));
+		}
+	}
+	if (d->find("mention_roles") != d->end()) {
+		json &sub = (*d)["mention_roles"];
+		for (auto & m : sub) {
+			mention_roles.push_back(from_string<snowflake>(m, std::dec));
+		}
+	}
+	if (d->find("mention_channels") != d->end()) {
+		json &sub = (*d)["mention_channels"];
+		for (auto & m : sub) {
+			mention_channels.push_back(SnowflakeNotNull(&m, "id"));
+		}
+	}
 	/* Fill in member record, cache uncached ones */
 	guild* g = find_guild(this->guild_id);
 	this->member = nullptr;
@@ -316,11 +335,8 @@ message& message::fill_from_json(json* d) {
 	this->edited = TimestampNotNull(d, "edited_timestamp");
 	this->tts = BoolNotNull(d, "tts");
 	this->mention_everyone = BoolNotNull(d, "mention_everyone");
-	/* TODO: Fix these */
-	this->mentions = nullptr;
-	this->mention_roles = nullptr;
 	/* TODO: Populate these */
-	/* this->mention_channels, this->attachments, this->reactions */
+	/* this->reactions */
 	if (((*d)["nonce"]).is_string()) {
 		this->nonce = StringNotNull(d, "nonce");
 	} else {
