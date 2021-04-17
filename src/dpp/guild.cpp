@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/discord.h>
+#include <dpp/cache.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <nlohmann/json.hpp>
@@ -411,6 +412,74 @@ guild_widget& guild_widget::fill_from_json(nlohmann::json* j) {
 std::string guild_widget::build_json() const {
 	return json({{"channel_id", channel_id}, {"enabled", enabled}}).dump();
 }
+
+
+uint64_t guild::base_permissions(const user* member) const
+{
+	if (owner_id == member->id)
+		return ~0;
+
+	role* everyone = dpp::find_role(id);
+	auto mi = members.find(member->id);
+	if (mi == members.end())
+		return 0;
+	guild_member* gm = mi->second;
+
+	uint64_t permissions = everyone->permissions;
+
+	for (auto& rid : gm->roles) {
+		role* r = dpp::find_role(rid);
+		permissions |= r->permissions;
+	}
+
+	if (permissions & p_administrator)
+		return ~0;
+
+	return permissions;
+}
+
+uint64_t guild::permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const
+{
+	if (base_permissions & p_administrator)
+		return ~0;
+
+	int64_t permissions = base_permissions;
+	for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
+		if (it->id == id && it->type == ot_role) {
+			permissions &= ~it->deny;
+			permissions |= it->allow;
+			break;
+		}
+	}
+
+	auto mi = members.find(member->id);
+	if (mi == members.end())
+		return 0;
+	guild_member* gm = mi->second;
+	uint64_t allow = 0;
+	uint64_t deny = 0;
+
+	for (auto& rid : gm->roles) {
+
+		/* Skip \@everyone, calculated above */
+		if (rid == id)
+			continue;
+
+		for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
+			if ((rid == it->id && it->type == ot_role) || (member->id == it->id && it->type == ot_member)) {
+				allow |= it->allow;
+				deny |= it->deny;
+				break;
+			}
+		}
+	}
+
+	permissions &= ~deny;
+	permissions |= allow;
+
+	return permissions;
+}
+
 
 
 };

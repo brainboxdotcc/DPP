@@ -19,6 +19,9 @@
  *
  ************************************************************************************/
 #include <dpp/discord.h>
+#include <dpp/cache.h>
+#include <dpp/guild.h>
+#include <dpp/user.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <nlohmann/json.hpp>
@@ -113,6 +116,17 @@ channel& channel::fill_from_json(json* j) {
 		}
 	}
 
+	if (j->find("permission_overwrites") != j->end()) {
+		for (auto & overwrite : (*j)["permission_overwrites"]) {
+			permission_overwrite po;
+			po.id = SnowflakeNotNull(&overwrite, "id");
+			po.allow = SnowflakeNotNull(&overwrite, "allow");
+			po.deny = SnowflakeNotNull(&overwrite, "deny");
+			po.type = Int8NotNull(&overwrite, "type");
+			permission_overwrites.push_back(po);
+		}
+	}
+
 	return *this;
 }
 
@@ -156,5 +170,19 @@ std::string channel::build_json(bool with_id) const {
 
 	return j.dump();
 }
+
+uint64_t channel::get_user_permissions(const user* member) const
+{
+	if (member == nullptr)
+		return 0;
+
+	guild* g = dpp::find_guild(guild_id);
+	if (g == nullptr)
+		return 0;
+
+	return g->permission_overwrites(g->base_permissions(member), member, this);
+}
+
+
 
 };

@@ -188,6 +188,29 @@ public:
 	 */
 	std::string get_description() const;
 
+	/**
+	 * @brief Get the base permissions for a member on this guild,
+	 * before permission overwrites are applied.
+	 * 
+	 * @param member member to get permissions for
+	 * @return uint64_t permissions bitmask
+	 */
+	uint64_t base_permissions(const class user* member) const;
+
+	/**
+	 * @brief Get the permission overwrites for a member
+	 * merged into a bitmask.
+	 * 
+	 * @param base_permissions base permissions before overwrites,
+	 * from channel::base_permissions
+	 * @param member Member to fetch permissions for
+	 * @param channel Channel to fetch permissions against
+	 * @return uint64_t Merged permissions bitmask of overwrites.
+	 */
+	uint64_t permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
+
+
+
 	/** Is a large server (>250 users) */
 	bool is_large() const;
 

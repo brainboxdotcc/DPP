@@ -48,6 +48,18 @@ enum channel_flags {
 	c_stage =		0b11000000
 };
 
+enum overwrite_type : uint8_t {
+	ot_role = 0,
+	ot_member = 1
+};
+
+struct permission_overwrite {
+	snowflake id;
+	uint8_t type;
+	uint64_t allow;
+	uint64_t deny;
+};
+
 /** @brief A definition of a discord channel */
 class channel : public managed {
 public:
@@ -87,6 +99,9 @@ public:
 	/** DM recipients */
 	std::vector<snowflake> recipients;
 
+	/** Permission overwrites to apply to base permissions */
+	std::vector<permission_overwrite> permission_overwrites;
+
 	/** Constructor */
 	channel();
 
@@ -98,7 +113,24 @@ public:
 	 * @return A reference to self
 	 */
 	channel& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this channel object
+	 * 
+	 * @param with_id include the ID in the json
+	 * @return std::string JSON string
+	 */
 	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Get the user permissions for a user on this channel
+	 * 
+	 * @param member The user to return permissions for
+	 * @return uint64_t Permissions bitmask made of bits in role_permissions.
+	 * Note that if the user is not on the channel or the guild is
+	 * not in the cache, the function will always return 0.
+	 */
+	uint64_t get_user_permissions(const class user* member) const;
 
 	bool is_nsfw() const;
 	bool is_text_channel() const;
