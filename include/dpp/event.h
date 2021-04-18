@@ -58,6 +58,7 @@ event_decl(guild_ban_add);
 event_decl(guild_ban_remove);
 event_decl(guild_emojis_update);
 event_decl(guild_integrations_update);
+event_decl(guild_join_request_delete);
 
 /* Guild members */
 event_decl(guild_member_add);

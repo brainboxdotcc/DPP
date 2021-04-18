@@ -1248,6 +1248,14 @@ void cluster::delete_webhook_message(const class webhook &wh, snowflake message_
 	});
 }
 
+void cluster::guild_auditlog_get(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/guilds", std::to_string(guild_id) + "/audit-logs", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("auditlog", auditlog().fill_from_json(&j), http));
+		}
+	});
+}
+
 void cluster::on_log (std::function<void(const log_t& _event)> _log) {
 	this->dispatch.log = _log;
 }
@@ -1434,6 +1442,10 @@ void cluster::on_voice_ready (std::function<void(const voice_ready_t& _event)> _
 
 void cluster::on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive) {
 	this->dispatch.voice_receive = _voice_receive;
+}
+
+void cluster::on_guild_join_request_delete(std::function<void(const guild_join_request_delete_t& _event)> _guild_join_request_delete) {
+	this->dispatch.guild_join_request_delete = _guild_join_request_delete;
 }
 
 };

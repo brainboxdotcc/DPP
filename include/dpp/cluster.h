@@ -104,7 +104,8 @@ typedef std::variant<
 		guild_widget,
 		gateway,
 		interaction,
-		interaction_response
+		interaction_response,
+		auditlog
 	> confirmable_t;
 
 /**
@@ -302,6 +303,14 @@ public:
 	 * @param _log  User function to attach to event
 	 */
 	void on_log (std::function<void(const log_t& _event)> _log);
+
+	/**
+	 * @brief on guild join request delete.
+	 * Triggered when a user declines the membership screening questionnaire for a guild.
+	 * 
+	 * @param _guild_join_request_delete User function to attach to event
+	 */
+	void on_guild_join_request_delete(std::function<void(const guild_join_request_delete_t& _event)> _guild_join_request_delete);
 
 	/**
 	 * @brief 
@@ -663,6 +672,14 @@ public:
 	 * @param callback Function to call when the API call completes
 	 */
 	void global_command_create(const slashcommand &s, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get the audit log for a guild
+	 * 
+	 * @param guild_id Guild to get the audit log of
+	 * @param callback Function to call when the API call completes
+	 */
+	void guild_auditlog_get(snowflake guild_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a slash command local to a guild

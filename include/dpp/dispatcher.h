@@ -119,6 +119,18 @@ struct guild_delete_t : public event_dispatch_t {
 	guild* deleted;
 };
 
+/** @brief Guild join request delete (user declined membership screening) */
+struct guild_join_request_delete_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	guild_join_request_delete_t(class DiscordClient* client, const std::string& raw);
+	/** Deleted guild */
+	snowflake guild_id;
+	snowflake user_id;
+};
+
 /** @brief Delete channel */
 struct channel_delete_t : public event_dispatch_t {
 	/** Constructor
@@ -816,6 +828,10 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const voice_receive_t& event)> voice_receive;
+	/** @brief Event handler function pointer for guild join request delete event
+	 * @param event Event parameters
+	 */
+	std::function<void(const guild_join_request_delete_t& event)> guild_join_request_delete;
 };
 
 };

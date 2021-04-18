@@ -31,6 +31,10 @@ event_dispatch_t::event_dispatch_t(DiscordClient* client, const std::string &raw
 {
 }
 
+guild_join_request_delete_t::guild_join_request_delete_t(DiscordClient* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
 log_t::log_t(DiscordClient* client, const std::string &raw) : event_dispatch_t(client, raw)
 {
 }
