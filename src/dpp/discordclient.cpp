@@ -47,6 +47,8 @@ DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_
 	token(_token),
 	last_heartbeat(time(NULL)),
 	heartbeat_interval(0),
+	reconnects(0),
+	resumes(0),
 	last_seq(0),
 	sessionid(""),
 	intents(_intents),
@@ -214,6 +216,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 						}
 					};
 					this->write(obj.dump());
+					resumes++;
 				} else {
 					/* Full connect */
 					while (time(NULL) < creator->last_identify + 5) {
@@ -246,6 +249,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 					}
 					this->write(obj.dump());
 					this->connect_time = creator->last_identify = time(NULL);
+					reconnects++;
 				}
 			break;
 			case 0: {

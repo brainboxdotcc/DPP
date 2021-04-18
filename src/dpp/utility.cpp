@@ -126,6 +126,20 @@ namespace dpp {
 			std::cout << "\n";
 		}
 
+		std::string bytes(uint64_t c) {
+			if (c > 1099511627776) {	// 1TB
+				return fmt::format("{:.2f}T", (c / 1099511627776.0));
+			} else if (c > 1073741824) {	// 1GB
+				return fmt::format("{:.2f}G", (c / 1073741824.0));
+			}  else if (c > 1048576) {	// 1MB
+				return fmt::format("{:.2f}M", (c / 1048576.0));
+			}  else if (c > 1024) {		// 1KB
+				return fmt::format("{:.2f}K", (c / 1024.0));
+			} else {			// Bytes
+				return std::to_string(c);
+			}
+		}
+
 	};
 
 };

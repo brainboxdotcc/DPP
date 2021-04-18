@@ -196,6 +196,12 @@ public:
 	/** Mutex for voice connections map */
 	std::mutex voice_mutex;
 
+	/** Resume count */
+	uint32_t resumes;
+
+	/** Reconnection count */
+	uint32_t reconnects;
+
 	/** List of voice channels we are connecting to keyed by guild id */
 	std::unordered_map<snowflake, voiceconn*> connecting_voice_channels;
 

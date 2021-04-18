@@ -145,6 +145,14 @@ namespace dpp {
 		bool has_voice();
 
 		/**
+		 * @brief Convert a byte count to display value
+		 * 
+		 * @param c number of bytes
+		 * @return std::string display value suffixed with M, G, T where neccessary
+		 */
+		std::string bytes(uint64_t c);
+
+		/**
 		 * @brief A class used to represent an uptime in hours, minutes,
 		 * seconds and days, with helper functions to convert from time_t
 		 * and display as a string.

@@ -58,7 +58,7 @@ namespace dpp {
 #define BUFSIZZ 1024 * 16
 const int ERROR_STATUS = -1;
 
-SSLClient::SSLClient(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port)
+SSLClient::SSLClient(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port), bytes_in(0), bytes_out(0)
 {
 	Connect();
 }
