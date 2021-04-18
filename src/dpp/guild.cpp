@@ -95,9 +95,11 @@ guild::~guild()
 {
 	if (this->vanity_url_code) {
 		free(this->vanity_url_code);
+		this->vanity_url_code = nullptr;
 	}
 	if (this->description) {
 		free(this->description);
+		this->description = nullptr;
 	}
 }
 
@@ -114,12 +116,14 @@ guild_member::~guild_member()
 {
 	if (this->nickname) {
 		free(this->nickname);
+		this->nickname = nullptr;
 	}
 }
 
 void guild_member::set_nickname(const std::string &_nickname) {
 	if (this->nickname) {
 		free(this->nickname);
+		this->nickname = nullptr;
 	}
 	this->nickname = strdup(_nickname.c_str());
 }
@@ -327,14 +331,6 @@ std::string guild::get_description() const {
 
 
 guild& guild::fill_from_json(nlohmann::json* d) {
-	if (this->vanity_url_code) {
-		free(this->vanity_url_code);
-		this->vanity_url_code = nullptr;
-	}
-	if (this->description) {
-		free(this->description);
-		this->description = nullptr;
-	}
 	this->id = SnowflakeNotNull(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
 		this->name = StringNotNull(d, "name");
