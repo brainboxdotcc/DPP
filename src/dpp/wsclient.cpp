@@ -37,7 +37,7 @@ const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 WSClient::WSClient(const std::string &hostname, const std::string &port, const std::string &urlpath)
 	: SSLClient(hostname, port),
 	state(HTTP_HEADERS),
-	key("DASFcazvbgest"),
+	key(fmt::format("{:16x}", time(nullptr))),
 	path(urlpath)
 {
 }
@@ -52,6 +52,7 @@ void WSClient::Connect()
 			"GET {} HTTP/1.1\r\n"
 			"Host: {}\r\n"
 			"pragma: no-cache\r\n"
+			"User-Agent: DPP/0.1\r\n"
 			"Upgrade: WebSocket\r\n"
 			"Connection: Upgrade\r\n"
 			"Sec-WebSocket-Key: {}\r\n"
