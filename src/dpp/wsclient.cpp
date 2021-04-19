@@ -305,6 +305,7 @@ void WSClient::Error(uint32_t errorcode)
 
 void WSClient::close()
 {
+	this->state = HTTP_HEADERS;
 	SSLClient::close();
 }
 

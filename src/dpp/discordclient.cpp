@@ -108,6 +108,7 @@ void DiscordClient::ThreadRun()
 		SetupZLib();
 		SSLClient::Connect();
 		WSClient::Connect();
+		message_queue.clear();
 	} while(true);
 }
 
@@ -260,6 +261,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 			break;
 			case 7:
 				log(dpp::ll_debug, fmt::format("Reconnection requested, closing socket {}", sessionid));
+				message_queue.clear();
 				::close(sfd);
 			break;
 		}
@@ -359,7 +361,7 @@ size_t DiscordClient::GetQueueSize()
 void DiscordClient::OneSecondTimer()
 {
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
-	if (this->GetState() == CONNECTED) {
+	if (this->IsConnected()) {
 		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
 			std::lock_guard<std::mutex> locker(queue_mutex);
 			if (message_queue.size()) {
