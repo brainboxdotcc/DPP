@@ -219,7 +219,10 @@ std::map<std::string, dpp::events::event*> eventmap = {
 	{ "APPLICATION_COMMAND_UPDATE", new dpp::events::application_command_update() },
 	{ "APPLICATION_COMMAND_DELETE", new dpp::events::application_command_delete() },
 	{ "INTERACTION_CREATE", new dpp::events::interaction_create() },
-	{ "USER_UPDATE", new dpp::events::user_update() }
+	{ "USER_UPDATE", new dpp::events::user_update() },
+	{ "GUILD_JOIN_REQUEST_DELETE", new dpp::events::guild_join_request_delete() },
+	{ "STAGE_INSTANCE_CREATE", new dpp::events::stage_instance_create() },
+	{ "STAGE_INSTANCE_DELETE", new dpp::events::stage_instance_delete() }
 };
 
 void DiscordClient::HandleEvent(const std::string &event, json &j, const std::string &raw)
@@ -231,6 +234,8 @@ void DiscordClient::HandleEvent(const std::string &event, json &j, const std::st
 		log(dpp::ll_debug, fmt::format("Unhandled event: {}, {}", event, j.dump()));
 	}
 }
+
+
 
 
 };

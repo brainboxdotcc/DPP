@@ -60,6 +60,10 @@ event_decl(guild_emojis_update);
 event_decl(guild_integrations_update);
 event_decl(guild_join_request_delete);
 
+/* Stage channels */
+event_decl(stage_instance_create);
+event_decl(stage_instance_delete);
+
 /* Guild members */
 event_decl(guild_member_add);
 event_decl(guild_member_remove);

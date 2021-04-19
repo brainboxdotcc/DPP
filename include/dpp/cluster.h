@@ -635,6 +635,20 @@ public:
 	void on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive);
 
 	/**
+	 * @brief 
+	 * 
+	 * @param _stage_instance_create User function to attach to event
+	 */
+	void on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create);
+
+	/**
+	 * @brief 
+	 * 
+	 * @param _stage_instance_delete User function to attach to event
+	 */
+	void on_stage_instance_delete (std::function<void(const stage_instance_delete_t& _event)> _stage_instance_delete);
+
+	/**
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create
 	 * 
 	 * @param endpoint 

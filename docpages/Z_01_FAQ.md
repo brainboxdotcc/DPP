@@ -28,7 +28,7 @@ If you don't understand something then feel free to ask in the [discord server](
 NO! Definitely not! We have tried to keep things as simple as possible. We only use language features where they make sense, not just because they exist. Take a look at the example program (`test.cpp` and you'll see just how simple it is to get up and running quickly). We use a small subset of C++17 and C++14 features.
 
 ## Why is D++ also called DPP
-DPP is short for **D**iscord **P**lus **P**lus (D++), a play on the Discord and C++ names.
+DPP is short for *Discord Plus Plus* (D++), a play on the Discord and C++ names.
 
 ## Is D++ a single header library?
 No, D++ is a classically designed library which installs itself to your library directory/system directory as a shared object or dll. You must link to its .lib file and include its header files to make use of it. We have no plans for a single-header build.

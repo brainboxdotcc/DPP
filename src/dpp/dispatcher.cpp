@@ -35,6 +35,14 @@ guild_join_request_delete_t::guild_join_request_delete_t(DiscordClient* client, 
 {
 }
 
+stage_instance_create_t::stage_instance_create_t(DiscordClient* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
+stage_instance_delete_t::stage_instance_delete_t(DiscordClient* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
 log_t::log_t(DiscordClient* client, const std::string &raw) : event_dispatch_t(client, raw)
 {
 }

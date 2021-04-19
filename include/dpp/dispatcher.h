@@ -58,6 +58,66 @@ struct log_t : public event_dispatch_t {
 	std::string message;
 };
 
+/** @brief Create stage instance */
+struct stage_instance_create_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	stage_instance_create_t(class DiscordClient* client, const std::string& raw);
+	/**
+	 * @brief stage instance id
+	 */
+	snowflake id;
+	/**
+	 * @brief Channel ID
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief Guild ID
+	 */
+	snowflake guild_id;
+	/**
+	 * @brief Privacy level
+	 */
+	uint8_t privacy_level;
+	/**
+	 * @brief Stage Topic
+	 */
+	std::string topic;
+};
+
+/** @brief Delete stage instance */
+struct stage_instance_delete_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	stage_instance_delete_t(class DiscordClient* client, const std::string& raw);
+	/**
+	 * @brief stage instance id
+	 */
+	snowflake id;
+	/**
+	 * @brief Channel ID
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief Guild ID
+	 */
+	snowflake guild_id;
+	/**
+	 * @brief Privacy level
+	 */
+	uint8_t privacy_level;
+	/**
+	 * @brief Stage Topic
+	 */
+	std::string topic;
+};
+
 /** @brief Voice state update */
 struct voice_state_update_t : public event_dispatch_t {
 	/** Constructor
@@ -832,6 +892,14 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_join_request_delete_t& event)> guild_join_request_delete;
+	/** @brief Event handler function pointer for stage instance create event
+	 * @param event Event parameters
+	 */
+	std::function<void(const stage_instance_create_t& event)> stage_instance_create;
+	/** @brief Event handler function pointer for stage instance delete event
+	 * @param event Event parameters
+	 */
+	std::function<void(const stage_instance_delete_t& event)> stage_instance_delete;
 };
 
 };

@@ -1264,6 +1264,14 @@ void cluster::on_voice_state_update (std::function<void(const voice_state_update
 	this->dispatch.voice_state_update = _voice_state_update; 
 }
 
+void cluster::on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create) {
+	this->dispatch.stage_instance_create = _stage_instance_create; 
+}
+
+void cluster::on_stage_instance_delete (std::function<void(const stage_instance_delete_t& _event)> _stage_instance_delete) {
+	this->dispatch.stage_instance_delete = _stage_instance_delete; 
+}
+
 void cluster::on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create) {
 	this->dispatch.interaction_create = _interaction_create; 
 }
