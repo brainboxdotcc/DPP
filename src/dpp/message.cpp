@@ -272,6 +272,13 @@ message& message::fill_from_json(json* d) {
 	this->id = SnowflakeNotNull(d, "id");
 	this->channel_id = SnowflakeNotNull(d, "channel_id");
 	this->guild_id = SnowflakeNotNull(d, "guild_id");
+	/* We didn't get a guild id. See if we can find one in the channel */
+	if (guild_id == 0 && channel_id != 0) {
+		dpp::channel* c = dpp::find_channel(this->channel_id);
+		if (c) {
+			this->guild_id = c->guild_id;
+		}
+	}
 	this->flags = Int8NotNull(d, "flags");
 	this->type = Int8NotNull(d, "type");
 	this->author = nullptr;

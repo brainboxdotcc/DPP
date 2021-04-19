@@ -71,6 +71,7 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 		for (auto & channel : d["channels"]) {
 			dpp::channel *c = new dpp::channel();
 			c->fill_from_json(&channel);
+			c->guild_id = g->id;
 			dpp::get_channel_cache()->store(c);
 			g->channels.push_back(c->id);
 		}
