@@ -310,13 +310,17 @@ int main(int argc, char const *argv[])
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-\subpage spdlog Integrating with spdlog
+\page spdlog Integrating with spdlog
 
 If you want to make your bot use spdlog, like aegis does, you can attach it to the on_log event. You can do this as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <fmt/format.h>
+#include <spdlog/spdlog.h>
+#include <spdlog/async.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 #include <iomanip>
 
 int main(int argc, char const *argv[])
@@ -330,10 +334,10 @@ int main(int argc, char const *argv[])
 	spdlog::init_thread_pool(8192, 2);
 	std::vector<spdlog::sink_ptr> sinks;
 	auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt >();
-	auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("sporks.log", 1024 * 1024 * 5, 10);
+	auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(log_name, 1024 * 1024 * 5, 10);
 	sinks.push_back(stdout_sink);
 	sinks.push_back(rotating);
-	log = std::make_shared<spdlog::async_logger>(log_name, sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+	log = std::make_shared<spdlog::async_logger>("logs", sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
 	spdlog::register_logger(log);
 	log->set_pattern("%^%Y-%m-%d %H:%M:%S.%e [%L] [th#%t]%$ : %v");
 	log->set_level(spdlog::level::level_enum::debug);
