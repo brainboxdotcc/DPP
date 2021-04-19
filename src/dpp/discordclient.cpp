@@ -372,7 +372,6 @@ void DiscordClient::OneSecondTimer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				log(dpp::ll_debug, fmt::format("Emit heartbeat, seq={}", last_seq));
 				QueueMessage(json({{"op", 1}, {"d", last_seq}}).dump(), true);
 				last_heartbeat = time(NULL);
 				dpp::garbage_collection();

@@ -451,7 +451,6 @@ void DiscordVoiceClient::OneSecondTimer()
 		if (this->heartbeat_interval) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				log(dpp::ll_debug, "Voice: Emit heartbeat");
 				QueueMessage(json({{"op", 3}, {"d", 12345678}}).dump(), true);
 				last_heartbeat = time(NULL);
 			}
