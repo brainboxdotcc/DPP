@@ -254,6 +254,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 					this->connect_time = creator->last_identify = time(NULL);
 					reconnects++;
 				}
+				this->last_heartbeat_ack = time(nullptr);
 			break;
 			case 0: {
 				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
@@ -265,6 +266,10 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 				log(dpp::ll_debug, fmt::format("Reconnection requested, closing socket {}", sessionid));
 				message_queue.clear();
 				::close(sfd);
+			break;
+			/* Heartbeat ack */
+			case 11:
+				this->last_heartbeat_ack = time(nullptr);
 			break;
 		}
 	}
@@ -362,8 +367,21 @@ size_t DiscordClient::GetQueueSize()
 
 void DiscordClient::OneSecondTimer()
 {
-	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
+	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
 	if (this->IsConnected()) {
+
+		/* If we stopped getting heartbeat acknowledgements, this means the connections is dead.
+		 * This can happen to TCP connections which is why we have heartbeats in the first place.
+		 * Miss two ACKS, forces a reconnection.
+		 */
+		if ((time(nullptr) - this->last_heartbeat_ack) > heartbeat_interval * 2) {
+			log(dpp::ll_warning, fmt::format("Missed heartbeat ACK, forcing reconnection to session {}", sessionid));
+			message_queue.clear();
+			::close(sfd);
+			return;
+		}
+
+		/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
 			std::lock_guard<std::mutex> locker(queue_mutex);
 			if (message_queue.size()) {
@@ -373,6 +391,9 @@ void DiscordClient::OneSecondTimer()
 			}
 		}
 
+		/* Send pings (heartbeat opcodes) before each interval. We send them slightly more regular than expected,
+		 * just to be safe.
+		 */
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
