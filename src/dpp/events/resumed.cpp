@@ -46,6 +46,8 @@ using namespace dpp;
 void resumed::handle(DiscordClient* client, json &j, const std::string &raw) {
 	client->log(dpp::ll_debug, fmt::format("Successfully resumed session id {}", client->sessionid));
 
+	client->ready = true;
+
 	if (client->creator->dispatch.resumed) {
 		dpp::resumed_t r(client, raw);
 		r.session_id = client->sessionid;

@@ -202,6 +202,9 @@ public:
 	/** Reconnection count */
 	uint32_t reconnects;
 
+	/** True if READY or RESUMED has been received */
+	bool ready;
+
 	/** List of voice channels we are connecting to keyed by guild id */
 	std::unordered_map<snowflake, voiceconn*> connecting_voice_channels;
 

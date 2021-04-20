@@ -49,6 +49,8 @@ void ready::handle(DiscordClient* client, json &j, const std::string &raw) {
 	client->log(dpp::ll_info, fmt::format("Shard {}/{} ready!", client->shard_id, client->max_shards));
 	client->sessionid = j["d"]["session_id"];
 
+	client->ready = true;
+
 	/* Mutex this to make sure multiple threads don't change it at the same time */
 	{
 		std::lock_guard<std::mutex> lockit(protect_the_loot);

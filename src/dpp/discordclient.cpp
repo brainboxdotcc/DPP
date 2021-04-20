@@ -55,7 +55,8 @@ DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_
 	runner(nullptr),
 	compressed(comp),
 	decompressed_total(0),
-	decomp_buffer(nullptr)
+	decomp_buffer(nullptr),
+	ready(false)
 {
 	Connect();
 }
@@ -104,11 +105,12 @@ void DiscordClient::ThreadRun()
 	do {
 		SSLClient::ReadLoop();
 		SSLClient::close();
+		ready = false;
+		message_queue.clear();
 		EndZLib();
 		SetupZLib();
 		SSLClient::Connect();
 		WSClient::Connect();
-		message_queue.clear();
 	} while(true);
 }
 
@@ -276,7 +278,7 @@ dpp::utility::uptime DiscordClient::Uptime()
 
 bool DiscordClient::IsConnected()
 {
-	return (this->GetState() == CONNECTED) && (last_seq > 0);
+	return (this->GetState() == CONNECTED) && (this->ready);
 }
 
 void DiscordClient::Error(uint32_t errorcode)
