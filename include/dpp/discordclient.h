@@ -214,7 +214,7 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	void log(dpp::loglevel severity, const std::string &msg);
+	virtual void log(dpp::loglevel severity, const std::string &msg);
 
 	/** Handle an event (opcode 0)
 	 * @param event Event name, e.g. MESSAGE_CREATE

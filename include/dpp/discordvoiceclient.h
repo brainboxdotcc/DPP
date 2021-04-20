@@ -302,7 +302,7 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	void log(dpp::loglevel severity, const std::string &msg);
+	virtual void log(dpp::loglevel severity, const std::string &msg);
 
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
 	virtual void OneSecondTimer();

@@ -48,6 +48,7 @@
 #include <iostream>
 #include <fmt/format.h>
 #include <dpp/sslclient.h>
+#include <dpp/discord.h>
 
 namespace dpp {
 
@@ -144,6 +145,10 @@ void SSLClient::OneSecondTimer()
 {
 }
 
+void SSLClient::log(dpp::loglevel severity, const std::string &msg)
+{
+}
+
 void SSLClient::ReadLoop()
 {
 	/* The read loop is non-blocking using select(). This method
@@ -191,6 +196,7 @@ void SSLClient::ReadLoop()
 		FD_ZERO(&efds);
 
 		FD_SET(sfd,&readfds);
+		FD_SET(sfd,&efds);
 		if (custom_readable_fd && custom_readable_fd() >= 0) {
 			int cfd = custom_readable_fd();
 			FD_SET(cfd, &readfds);
@@ -203,9 +209,9 @@ void SSLClient::ReadLoop()
 
 		/* If we're waiting for a read on the socket don't try to write to the server */
 		//if (!write_blocked_on_read) {
-			if (ClientToServerLength || read_blocked_on_write) {
-				FD_SET(sfd,&writefds);
-			}
+		if (ClientToServerLength || read_blocked_on_write) {
+			FD_SET(sfd,&writefds);
+		}
 		//}
 			
 		timeval ts;
@@ -222,6 +228,11 @@ void SSLClient::ReadLoop()
 			custom_readable_ready();
 		}
 		if (custom_readable_fd && FD_ISSET(custom_readable_fd(), &efds)) {
+		}
+
+		if (FD_ISSET(sfd, &efds)) {
+			this->log(dpp::ll_error, fmt::format("Error on SSL connection: {}", strerror(errno)));
+			return;
 		}
 
 		/* Now check if there's data to read */

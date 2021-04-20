@@ -23,6 +23,7 @@
 #include <functional>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <dpp/discord.h>
 
 namespace dpp {
 
@@ -129,6 +130,8 @@ public:
 
 	/** Close SSL connection */
 	virtual void close();
+
+	virtual void log(dpp::loglevel severity, const std::string &msg);
 };
 
 };
