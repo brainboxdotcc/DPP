@@ -23,6 +23,8 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include <thread>
+#include <functional>
 #include <fmt/format.h>
 
 namespace dpp {
@@ -139,6 +141,30 @@ namespace dpp {
 				return std::to_string(c);
 			}
 		}
+
+		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
+			auto t = std::thread([&cmd, &parameters, callback]() {
+				std::array<char, 128> buffer;
+				std::string result;
+				std::stringstream cmd_and_parameters(cmd);
+				for (auto & parameter : parameters) {
+					cmd_and_parameters << " \"" << std::quoted(parameter) << "\"";
+				}
+				std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd_and_parameters.str().c_str(), "r"), pclose);
+				if (!pipe) {
+					return "";
+				}
+				while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+					result += buffer.data();
+				}
+				if (callback) {
+					callback(result);
+				}
+				return "";
+			});
+			t.detach();
+		}
+
 
 	};
 

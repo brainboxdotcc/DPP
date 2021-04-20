@@ -24,6 +24,7 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
+#include <functional>
 
 /**
  * @brief The main namespace for D++ functions. classes and types
@@ -66,6 +67,25 @@ namespace dpp {
 
 	/** @brief Utility helper functions, generally for logging */
 	namespace utility {
+
+		typedef std::function<void(const std::string& output)> cmd_result_t;
+
+		/**
+		 * @brief Run a commandline program asyncronously. The command line program
+		 * is spawned in a separate std::thread, and when complete, its output from
+		 * stdout is passed to the callback function in its string prameter. For eample
+		 * ```
+		 * dpp::utility::exec("ls", [](const std::string& output) {
+		 *     std::cout << "Output of 'ls': " << output << "\n";
+		 * });
+		 * ```
+		 * 
+		 * @param cmd The command to run.
+		 * @param parameters Command line parameters. Each will be escaped using std::quoted.
+		 * @param callback The callback to call on completion.
+		 */
+		void exec(const std::string& cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
+
 		/**
 		 * @brief Returns urrent date and time
 		 * 
