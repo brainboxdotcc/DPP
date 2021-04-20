@@ -146,6 +146,12 @@ public:
 	/** Default constructor, zeroes all values */
 	guild();
 
+	/**
+	 * @brief Non-trivial copy constructor
+	 * @sideeffect Allocates raw pointers if needed
+	 */
+	guild(const guild&);
+
 	/** Destructor */
 	~guild();
 
@@ -313,6 +319,11 @@ public:
 
 	/** Default constructor */
 	guild_member();
+
+	/**
+	 * @brief Construct a new guild member object
+	 */
+	guild_member(const guild_member&);
 
 	/** Default destructor */
 	~guild_member();

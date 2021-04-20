@@ -160,6 +160,20 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, co
 	return *this;
 }
 
+guild_member::guild_member(const guild_member& o) :
+	guild_id(o.guild_id),
+	user_id(o.user_id),
+	roles(o.roles),
+	joined_at(o.joined_at),
+	premium_since(o.premium_since),
+	flags(o.flags),
+	nickname(nullptr)
+{
+	if (o.nickname) {
+		nickname = strdup(o.nickname);
+	}
+}
+
 std::string guild_member::build_json() const {
 	json j;
 	if (this->nickname)
@@ -326,6 +340,46 @@ std::string guild::get_description() const {
 		return this->description;
 	} else {
 		return "";
+	}
+}
+
+guild::guild(const guild& o) :
+	shard_id(o.shard_id),
+	flags(o.flags),
+	name(o.name),
+	icon(o.icon),
+	splash(o.splash),
+	discovery_splash(o.discovery_splash),
+	owner_id(o.owner_id),
+	voice_region(o.voice_region),
+	afk_channel_id(o.afk_channel_id),
+	afk_timeout(o.afk_timeout),
+	widget_channel_id(o.widget_channel_id),
+	verification_level(o.verification_level),
+	default_message_notifications(o.default_message_notifications),
+	explicit_content_filter(o.explicit_content_filter),
+	mfa_level(o.mfa_level),
+	application_id(o.application_id),
+	system_channel_id(o.system_channel_id),
+	rules_channel_id(o.rules_channel_id),
+	member_count(o.member_count),
+	banner(o.banner),
+	premium_tier(o.premium_tier),
+	premium_subscription_count(o.premium_subscription_count),
+	public_updates_channel_id(o.public_updates_channel_id),
+	max_video_channel_users(o.max_video_channel_users),
+	roles(o.roles),
+	channels(o.channels),
+	members(o.members),
+	emojis(o.emojis),
+	description(nullptr),
+	vanity_url_code(nullptr)
+{
+	if (o.description) {
+		description = strdup(o.description);
+	}
+	if (o.vanity_url_code) {
+		vanity_url_code = strdup(o.vanity_url_code);
 	}
 }
 
