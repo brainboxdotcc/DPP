@@ -218,17 +218,14 @@ int main(int argc, char const *argv[])
 			dpp::snowflake channel_id;
 			ss >> channel_id;
 			if (channel_id) {
-				dpp::DiscordClient* dc = bot.get_shard(0);
+				dpp::DiscordClient* dc = bot.get_shard(event.from);
 				dc->ConnectVoice(event.msg->guild_id, channel_id);
 			}
 		}
 
 		/* Tell the bot to play the sound file 'Robot.pcm'. Syntax: .robot */
 		if (command == ".robot") {
-			/* This assumes that there is one shard and the voice channel's guild is is on it. 
-			 * Only for demonstration purposes, DO NOT make this assumption in the real world!
-			 */
-			dpp::DiscordClient* dc = bot.get_shard(0);
+			dpp::DiscordClient* dc = bot.get_shard(event.from);
 			dpp::voiceconn* v = dc->GetVoice(event.msg->guild_id);
 			if (v && v->voiceclient && v->voiceclient->IsReady()) {
 				v->voiceclient->SendAudio((uint16_t*)robot, robot_size);
