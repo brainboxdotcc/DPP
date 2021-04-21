@@ -52,6 +52,14 @@ int main(int argc, char const *argv[])
 		std::string command;
 		ss >> command;
 
+		dpp::snowflake channel_id = event.msg->channel_id;
+
+		if (command == ".exectest") {
+			dpp::utility::exec("ping", {"-c", "4", "127.0.0.1"}, [&bot, channel_id](const std::string& output) {
+				bot.message_create(dpp::message(channel_id, output));
+			});
+		}
+
 		if (command == ".createslash") {
 			dpp::slashcommand newcommand;
 			newcommand.set_name("blep").set_description("Send a random adorable animal photo").set_application_id(bot.me.id);

@@ -1,13 +1,13 @@
 # Frequently Asked Questions (FAQ)
 
-## How will you ensure this library is ready for production use?
-We will be changing over our production bots [TriviaBot](https://triviabot.co.uk) which has 86,000 servers and 8.1 million users, and our second bot [Sporks](https://sporks.gg) which has 2600 servers to D++ from Aegis. The intent is for both these bots to be stable, so these will be the acid test to prove that the library is production ready for bots of all sizes.
+## Is this library in production use?
+This library powers the bot [Sporks](https://sporks.gg) which has over 2600 severs. We are also under progress of changing over our much larger bot [TriviaBot](https://triviabot.co.uk) which has 88,000 servers and 8.1 million users to D++ from Aegis. These bots server as the acid test to prove that the library is production ready for bots of all sizes.
 
 ## How much RAM does this library use?
 During testing this library takes approximately 32 megabytes of ram to cache 250,000 users and 2200 guilds, with their respective roles and emojis. We will update these figures as we continue to test.
 
 ## How much of the library is completed?
-All REST calls (outbound commands) are completed with the exception of *slash commands* and *audit log*, and all Discord events are available. We still need to add voice support, and we will update this as we progress.
+All REST calls (outbound commands) are completed including slash commands, and all Discord events are available. The library also has voice support.
 
 ## How do I chat with the developers or get help?
 The best place to do this is on the [discord server](https://discord.gg/RnG32Ctyq7). You most likely won't get an answer immediately (we have lives, and need to sleep sometimes), so feel free to lurk and join the community!
@@ -36,6 +36,9 @@ No, D++ is a classically designed library which installs itself to your library 
 ## Does this library support slash commands/interactions?
 Yes! This library supports slash commands. For more information please see \ref slashcommands "Using Slash Commands and Interactions".
 
+## Is the library asynchronous?
+All functions within D++ are multi-threaded. You should still avoid doing long operations within event handlers or within callbacks, to prevent starvation of the threads managing each shard. Various blocking operations such as running files and making HTTP requests are offered as library functions (for example dpp::utility::exec)
+
 ## Does this library support voice?
 Yes! This library supports voice and will automatically enable voice if your system has the libopus and libsodium libraries. When running `cmake` the script will identify if these libraries are found. See the example programs for information on how to send audio.
 
@@ -47,6 +50,9 @@ The documentation and website are built using Doxygen. To contribute to site pag
 
 ## What version of the Discord API does this library support?
 D++ Only supports Discord API v8, the latest version.
+
+## Does D++ require C++20 support?
+No, at present we do not use any C++20 features. Some C++17 features are used, which are available in all recent compilers.
 
 ## When I start my bot i get an error: "error while loading shared libraries: libdpp.so: cannot open shared object file: No such file or directory"
 To fix this issue, as root run `ldconfig`: `sudo ldconfig`. Log out if your SSH session and log back in, and the bot should be able to find the library.

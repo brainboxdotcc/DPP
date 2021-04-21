@@ -143,13 +143,17 @@ namespace dpp {
 		}
 
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
-			auto t = std::thread([&cmd, &parameters, callback]() {
+			auto t = std::thread([cmd, parameters, callback]() {
 				std::array<char, 128> buffer;
+				std::vector<std::string> my_parameters = parameters;
 				std::string result;
-				std::stringstream cmd_and_parameters(cmd);
-				for (auto & parameter : parameters) {
-					cmd_and_parameters << " \"" << std::quoted(parameter) << "\"";
+				std::stringstream cmd_and_parameters;
+				cmd_and_parameters << cmd;
+				for (auto & parameter : my_parameters) {
+					cmd_and_parameters << " " << std::quoted(parameter);
 				}
+				/* Capture stderr */
+				cmd_and_parameters << " 2>&1";
 				std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd_and_parameters.str().c_str(), "r"), pclose);
 				if (!pipe) {
 					return "";
