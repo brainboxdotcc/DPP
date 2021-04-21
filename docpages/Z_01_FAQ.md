@@ -47,3 +47,9 @@ The documentation and website are built using Doxygen. To contribute to site pag
 
 ## What version of the Discord API does this library support?
 D++ Only supports Discord API v8, the latest version.
+
+## When I start my bot i get an error: "error while loading shared libraries: libdpp.so: cannot open shared object file: No such file or directory"
+To fix this issue, as root run `ldconfig`: `sudo ldconfig`. Log out if your SSH session and log back in, and the bot should be able to find the library.
+
+## When compiling with voice support, i get an error: "No rule to make target 'sodium_LIBRARY_DEBUG-NOTFOUND', needed by 'libdpp.so'. Stop."
+The libsodium package requires pkg-config, but does not check for it when installed. Install it as root, e.g. `sudo apt install pkg-config`. Rerun cmake again, and rebuild the library.

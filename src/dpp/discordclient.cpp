@@ -71,7 +71,7 @@ DiscordClient::~DiscordClient()
 
 uint64_t DiscordClient::GetDeompressedBytesIn()
 {
-	return 0;
+	return decompressed_total;
 }
 
 void DiscordClient::SetupZLib()
