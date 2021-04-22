@@ -96,6 +96,10 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/json/CMakeLists.txt" OR NOT EXISTS "${
     message(FATAL_ERROR "The submodules were not downloaded! Please update submodules and try again.")
 endif()
 
+if (UNIX OR MSYS)
+	find_program(LDCONFIG_EXECUTABLE "ldconfig")
+endif()
+
 set(BUILD_SHARED_LIBS 1 CACHE BOOL "Build fmt::format as a shared library")
 add_subdirectory(deps/fmt)
 add_subdirectory(deps/json)
@@ -144,4 +148,5 @@ install(TARGETS fmt
  RUNTIME DESTINATION bin
  COMPONENT fmt
 )
+install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostInstall.cmake)")
 
