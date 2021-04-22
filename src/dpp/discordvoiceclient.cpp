@@ -118,6 +118,11 @@ bool DiscordVoiceClient::IsReady() {
 	return secret_key != nullptr;
 }
 
+bool DiscordVoiceClient::IsPlaying() {
+	std::lock_guard<std::mutex> lock(this->stream_mutex);
+	return (!this->outbuf.empty());
+}
+
 void DiscordVoiceClient::ThreadRun()
 {
 	do {
@@ -314,10 +319,12 @@ void DiscordVoiceClient::PauseAudio(bool pause) {
 }
 
 void DiscordVoiceClient::StopAudio() {
+	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	outbuf.clear();
 }
 
 void DiscordVoiceClient::Send(const char* packet, size_t len) {
+	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	outbuf.push_back(std::string(packet, len));
 }
 
@@ -341,16 +348,25 @@ void DiscordVoiceClient::ReadReady()
 
 void DiscordVoiceClient::WriteReady()
 {
-	if (!this->paused && outbuf.size()) {
-		if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(60));
-			outbuf.erase(outbuf.begin());
-			if (creator->dispatch.voice_buffer_send) {
-				voice_buffer_send_t snd(nullptr, "");
-				snd.buffer_size = outbuf.size();
-				snd.voice_client = this;
-				creator->dispatch.voice_buffer_send(snd);
+	bool call_event = false;
+	uint64_t bufsize = 0;
+	{
+		std::lock_guard<std::mutex> lock(this->stream_mutex);
+		if (!this->paused && outbuf.size()) {
+			if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
+				outbuf.erase(outbuf.begin());
+				call_event = true;
+				bufsize = outbuf.size();
 			}
+		}
+	}
+	if (call_event) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(60));
+		if (creator->dispatch.voice_buffer_send) {
+			voice_buffer_send_t snd(nullptr, "");
+			snd.buffer_size = bufsize;
+			snd.voice_client = this;
+			creator->dispatch.voice_buffer_send(snd);
 		}
 	}
 }
@@ -366,6 +382,7 @@ bool DiscordVoiceClient::IsConnected()
 }
 
 int DiscordVoiceClient::WantWrite() {
+	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	if (!this->paused && outbuf.size()) {
 		return fd;
 	} else {

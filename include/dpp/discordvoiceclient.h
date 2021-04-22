@@ -71,6 +71,9 @@ class cluster;
  */
 class DiscordVoiceClient : public WSClient
 {
+	/** Mutex for outbound packet stream */
+	std::mutex stream_mutex;
+
 	/** Mutex for message queue */
 	std::mutex queue_mutex;
 
@@ -398,6 +401,13 @@ public:
 	 * Clears the packet queue.
 	 */
 	void StopAudio();
+
+	/**
+	 * @brief Returns true if we are playing audio
+	 * 
+	 * @return true if audio is playing
+	 */
+	bool IsPlaying();
 
 	/**
 	 * @brief Discord external IP detection.
