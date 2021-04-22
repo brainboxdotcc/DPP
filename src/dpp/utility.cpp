@@ -76,7 +76,11 @@ namespace dpp {
 		}
 
 		std::string uptime::to_string() {
-			return fmt::format("{}{:02d}:{:02d}:{:02d}", (days ? fmt::format("{} day{}, ", days, (days > 1 ? "s" : "")) : ""), hours, mins, secs);
+			if (hours == 0 && days == 0) {
+				return fmt::format("{:02d}:{:02d}", mins, secs);
+			} else {
+				return fmt::format("{}{:02d}:{:02d}:{:02d}", (days ? fmt::format("{} day{}, ", days, (days > 1 ? "s" : "")) : ""), hours, mins, secs);
+			}
 		}
 
 		iconhash::iconhash() : first(0), second(0) {
