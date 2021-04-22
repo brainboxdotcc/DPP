@@ -116,6 +116,10 @@ class DiscordVoiceClient : public WSClient
 	 */
 	std::vector<std::string> inbuf;
 
+	/** If true, audio packet sending is paused
+	 */
+	bool paused;
+
 #ifdef HAVE_VOICE
 	/** libopus encoder
 	 */
@@ -383,6 +387,19 @@ public:
 	void SendAudio(uint16_t* audio_data, const size_t length, bool use_opus = true);
 
 	/**
+	 * @brief Pause sending of audio
+	 * 
+	 * @param pause True to pause, false to resume
+	 */
+	void PauseAudio(bool pause);
+
+	/**
+	 * @brief Immediately stop all audio.
+	 * Clears the packet queue.
+	 */
+	void StopAudio();
+
+	/**
 	 * @brief Discord external IP detection.
 	 * 
 	 * @return std::string Your external IP address
@@ -391,3 +408,4 @@ public:
 };
 
 };
+

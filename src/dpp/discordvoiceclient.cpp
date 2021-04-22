@@ -67,7 +67,8 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _channe
 	secret_key(nullptr),
 	sequence(0),
 	timestamp(0),
-	sending(false)
+	sending(false),
+	paused(false)
 {
 #if HAVE_VOICE
 	if (!DiscordVoiceClient::sodium_initialised) {
@@ -308,6 +309,14 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 	return true;
 }
 
+void DiscordVoiceClient::PauseAudio(bool pause) {
+	this->paused = pause;
+}
+
+void DiscordVoiceClient::StopAudio() {
+	outbuf.clear();
+}
+
 void DiscordVoiceClient::Send(const char* packet, size_t len) {
 	outbuf.push_back(std::string(packet, len));
 }
@@ -332,7 +341,7 @@ void DiscordVoiceClient::ReadReady()
 
 void DiscordVoiceClient::WriteReady()
 {
-	if (outbuf.size()) {
+	if (!this->paused && outbuf.size()) {
 		if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(60));
 			outbuf.erase(outbuf.begin());
@@ -357,7 +366,7 @@ bool DiscordVoiceClient::IsConnected()
 }
 
 int DiscordVoiceClient::WantWrite() {
-	if (outbuf.size()) {
+	if (!this->paused && outbuf.size()) {
 		return fd;
 	} else {
 		return -1;
