@@ -637,6 +637,13 @@ public:
 	/**
 	 * @brief 
 	 * 
+	 * @param _voice_receive User function to attach to event
+	 */
+	void on_voice_track_marker (std::function<void(const voice_track_marker_t& _event)> _voice_track_marker);
+
+	/**
+	 * @brief 
+	 * 
 	 * @param _stage_instance_create User function to attach to event
 	 */
 	void on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create);

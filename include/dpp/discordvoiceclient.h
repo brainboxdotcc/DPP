@@ -66,6 +66,8 @@ namespace dpp {
 // Forward declaration
 class cluster;
 
+#define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
+
 /** @brief Implements a discord voice connection.
  * Each DiscordVoiceClient connects to one voice channel and derives from a websocket client.
  */
@@ -168,6 +170,14 @@ class DiscordVoiceClient : public WSClient
 	 * client to send the 'talking' notification to the websocket.
 	 */
 	bool sending;
+
+	/** Number of track markers in the buffer. For example if there
+	 * are two track markers in the buffer there are 3 tracks.
+	 * Special case:
+	 * If the buffer is empty, there are zero tracks in the
+	 * buffer.
+	 */
+	uint32_t tracks;
 
 	/** Encoding buffer for opus repacketizer and encode
 	 */
@@ -410,9 +420,74 @@ public:
 	bool IsPlaying();
 
 	/**
-	 * @brief Discord external IP detection.
+	 * @brief Get the number of seconds remaining
+	 * of the audio output buffer
 	 * 
+	 * @return float number of seconds remaining 
+	 */
+	float GetSecsRemaining();
+
+	/**
+	 * @brief Get the number of tracks remaining
+	 * in the output buffer.
+	 * This is calculated by the number of track
+	 * markers plus one.
+	 * @return uint32_t Number of tracks in the
+	 * buffer
+	 */
+	uint32_t GetTracksRemaining();
+
+	/**
+	 * @brief Get the time remaining to send the
+	 * audio output buffer in hours:minutes:seconds
+	 * 
+	 * @return dpp::utility::uptime length of buffer
+	 */
+	dpp::utility::uptime GetRemaining();
+
+	/**
+	 * @brief Insert a track marker into the audio
+	 * output buffer.
+	 * A track marker is an arbitrary flag in the
+	 * buffer contents that indictes the end of some
+	 * block of audio of significance to the sender.
+	 * This may be a song from a streaming site, or
+	 * some voice audio/speech, a sound effect, or
+	 * whatever you choose. You can later skip
+	 * to the next marker using the
+	 * dpp::DiscordVoiceClient::SkipToNextMarker
+	 * function.
+	 */
+	void InsertMarker();
+
+	/**
+	 * @brief Skip tp the next track marker,
+	 * previously inserted by using the
+	 * dpp::DiscordVoiceClient::InsertMarker
+	 * function. If there are no markers in the
+	 * output buffer, then this skips to the end
+	 * of the buffer and is equivalent to the
+	 * dpp::DiscordVoiceClient::StopAudio
+	 * function.
+	 * @note It is possible to use this function
+	 * while the output stream is paused.
+	 */
+	void SkipToNextMarker();
+
+	/**
+	 * @brief Returns true if the audio is paused.
+	 * You can unpause with
+	 * dpp::DiscordVoiceClient::PauseAudio.
+	 * 
+	 * @return true if paused
+	 */
+	bool IsPaused();
+
+	/**
+	 * @brief Discord external IP detection.
 	 * @return std::string Your external IP address
+	 * @note This is a blocking operation that waits
+	 * for a single packet from Discord's voice servers.
 	 */
 	std::string DiscoverIP();
 };

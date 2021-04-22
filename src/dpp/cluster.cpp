@@ -1452,6 +1452,10 @@ void cluster::on_voice_receive (std::function<void(const voice_receive_t& _event
 	this->dispatch.voice_receive = _voice_receive;
 }
 
+void cluster::on_voice_track_marker (std::function<void(const voice_track_marker_t& _event)> _voice_track_marker) {
+	this->dispatch.voice_track_marker = _voice_track_marker;
+}
+
 void cluster::on_guild_join_request_delete(std::function<void(const guild_join_request_delete_t& _event)> _guild_join_request_delete) {
 	this->dispatch.guild_join_request_delete = _guild_join_request_delete;
 }

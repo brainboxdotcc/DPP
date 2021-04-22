@@ -68,7 +68,8 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _channe
 	sequence(0),
 	timestamp(0),
 	sending(false),
-	paused(false)
+	paused(false),
+	tracks(0)
 {
 #if HAVE_VOICE
 	if (!DiscordVoiceClient::sodium_initialised) {
@@ -318,6 +319,21 @@ void DiscordVoiceClient::PauseAudio(bool pause) {
 	this->paused = pause;
 }
 
+bool DiscordVoiceClient::IsPaused() {
+	return this->paused;
+}
+
+float DiscordVoiceClient::GetSecsRemaining() {
+	std::lock_guard<std::mutex> lock(this->stream_mutex);
+	/* Audio stream sends one packet every 60ms which means there are 16.666 packets per second */
+	return (outbuf.size() / 16.666666);
+}
+
+dpp::utility::uptime DiscordVoiceClient::GetRemaining() {
+	float fp_secs = GetSecsRemaining();
+	return dpp::utility::uptime((time_t)ceil(fp_secs));
+}
+
 void DiscordVoiceClient::StopAudio() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	outbuf.clear();
@@ -349,14 +365,24 @@ void DiscordVoiceClient::ReadReady()
 void DiscordVoiceClient::WriteReady()
 {
 	bool call_event = false;
+	bool track_marker_found = false;
 	uint64_t bufsize = 0;
 	{
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (!this->paused && outbuf.size()) {
-			if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
+
+			if (outbuf[0].size() == 2 && ((uint16_t)(*(outbuf[0].data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
-				call_event = true;
-				bufsize = outbuf.size();
+				track_marker_found = true;
+				if (tracks > 0)
+					tracks--;
+			}
+			if (outbuf.size()) {
+				if (this->UDPSend(outbuf[0].data(), outbuf[0].length()) == outbuf[0].length()) {
+					outbuf.erase(outbuf.begin());
+					call_event = true;
+					bufsize = outbuf.size();
+				}
 			}
 		}
 	}
@@ -367,6 +393,13 @@ void DiscordVoiceClient::WriteReady()
 			snd.buffer_size = bufsize;
 			snd.voice_client = this;
 			creator->dispatch.voice_buffer_send(snd);
+		}
+	}
+	if (track_marker_found) {
+		if (creator->dispatch.voice_track_marker) {
+			voice_track_marker_t vtm(nullptr, "");
+			vtm.voice_client = this;
+			creator->dispatch.voice_track_marker(vtm);
 		}
 	}
 }
@@ -431,7 +464,14 @@ void DiscordVoiceClient::Error(uint32_t errorcode)
 	if (i != errortext.end()) {
 		error = i->second;
 	}
-	log(dpp::ll_warning, fmt::format("OOF! Error from underlying websocket: {}: {}", errorcode, error));
+	log(dpp::ll_warning, fmt::format("Voice session error: {} on channel {}: {}", errorcode, channel_id, error));
+
+	/* Errors 4004...4016 except 4014 are fatal and cause termination of the voice session */
+	if (errorcode >= 4003 && errorcode != 4014) {
+		StopAudio();
+		this->terminating = true;
+		log(dpp::ll_error, "This is a non-recoverable error, giving up on voice connection");
+	}
 }
 
 void DiscordVoiceClient::log(dpp::loglevel severity, const std::string &msg)
@@ -477,7 +517,7 @@ void DiscordVoiceClient::OneSecondTimer()
 		if (this->heartbeat_interval) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				QueueMessage(json({{"op", 3}, {"d", 12345678}}).dump(), true);
+				QueueMessage(json({{"op", 3}, {"d", rand()}}).dump(), true);
 				last_heartbeat = time(NULL);
 			}
 		}
@@ -528,6 +568,38 @@ size_t DiscordVoiceClient::encode(uint8_t *input, size_t inDataSize, uint8_t *ou
 	}
 #endif
 	return outDataSize;
+}
+
+void DiscordVoiceClient::InsertMarker() {
+	/* Insert a track marker. A track marker is a single 16 bit value of 0xFFFF.
+	 * This is too small to be a valid RTP packet so the send function knows not
+	 * to actually send it, and instead to skip it
+	 */
+	uint16_t tm = AUDIO_TRACK_MARKER;
+	Send((const char*)&tm, sizeof(uint16_t));
+	tracks++;
+}
+
+uint32_t DiscordVoiceClient::GetTracksRemaining() {
+	std::lock_guard<std::mutex> lock(this->stream_mutex);
+	if (outbuf.size() == 0)
+		return 0;
+	else
+		return tracks + 1;
+}
+
+void DiscordVoiceClient::SkipToNextMarker() {
+	std::lock_guard<std::mutex> lock(this->stream_mutex);
+	/* Keep popping the first entry off the outbuf until the first entry is a track marker */
+	while (outbuf.size() && outbuf[0].size() != sizeof(uint16_t) && ((uint16_t)(*(outbuf[0].data()))) != AUDIO_TRACK_MARKER) {
+		outbuf.erase(outbuf.begin());
+	}
+	if (outbuf.size()) {
+		/* Remove the actual track marker out of the buffer */
+		outbuf.erase(outbuf.begin());
+	}
+	if (tracks > 0)
+		tracks--;
 }
 
 void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length, bool use_opus)  {

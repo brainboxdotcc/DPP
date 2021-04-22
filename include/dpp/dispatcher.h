@@ -300,6 +300,20 @@ struct typing_start_t : public event_dispatch_t {
 	time_t timestamp;
 };
 
+/** @brief Voice state update */
+struct voice_track_marker_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on.
+	 * Will always be null.
+	 * @param raw Raw event text as JSON.
+	 * Will always be empty.
+	 */
+	voice_track_marker_t(class DiscordClient* client, const std::string& raw);
+	/** Voice client */
+	class DiscordVoiceClient* voice_client;
+};
+
+
 /** @brief Message reaction add */
 struct message_reaction_add_t : public event_dispatch_t {
 	/** Constructor
@@ -888,6 +902,10 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const voice_receive_t& event)> voice_receive;
+	/** @brief Event handler function pointer for voice track marker event
+	 * @param event Event parameters
+	 */
+	std::function<void(const voice_track_marker_t& event)> voice_track_marker;
 	/** @brief Event handler function pointer for guild join request delete event
 	 * @param event Event parameters
 	 */

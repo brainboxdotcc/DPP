@@ -258,4 +258,8 @@ voice_receive_t::voice_receive_t(DiscordClient* client, const std::string &raw) 
 {
 }
 
+voice_track_marker_t::voice_track_marker_t(DiscordClient* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
 };
