@@ -399,6 +399,13 @@ void DiscordVoiceClient::WriteReady()
 		if (creator->dispatch.voice_track_marker) {
 			voice_track_marker_t vtm(nullptr, "");
 			vtm.voice_client = this;
+			{
+				std::lock_guard<std::mutex> lock(this->stream_mutex);
+				if (track_meta.size()) {
+					vtm.track_meta = track_meta[0];
+					track_meta.erase(track_meta.begin());
+				}
+			}
 			creator->dispatch.voice_track_marker(vtm);
 		}
 	}
@@ -501,6 +508,11 @@ size_t DiscordVoiceClient::GetQueueSize()
 	return message_queue.size();
 }
 
+const std::vector<std::string> DiscordVoiceClient::GetMarkerMetadata() {
+	std::lock_guard<std::mutex> locker(queue_mutex);
+	return track_meta;
+}
+
 void DiscordVoiceClient::OneSecondTimer()
 {
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
@@ -570,14 +582,18 @@ size_t DiscordVoiceClient::encode(uint8_t *input, size_t inDataSize, uint8_t *ou
 	return outDataSize;
 }
 
-void DiscordVoiceClient::InsertMarker() {
+void DiscordVoiceClient::InsertMarker(const std::string& metadata) {
 	/* Insert a track marker. A track marker is a single 16 bit value of 0xFFFF.
 	 * This is too small to be a valid RTP packet so the send function knows not
 	 * to actually send it, and instead to skip it
 	 */
 	uint16_t tm = AUDIO_TRACK_MARKER;
 	Send((const char*)&tm, sizeof(uint16_t));
-	tracks++;
+	{
+		std::lock_guard<std::mutex> lock(this->stream_mutex);
+		track_meta.push_back(metadata);
+		tracks++;
+	}
 }
 
 uint32_t DiscordVoiceClient::GetTracksRemaining() {
@@ -600,6 +616,9 @@ void DiscordVoiceClient::SkipToNextMarker() {
 	}
 	if (tracks > 0)
 		tracks--;
+	if (track_meta.size()) {
+		track_meta.erase(track_meta.begin());
+	}
 }
 
 void DiscordVoiceClient::SendAudio(uint16_t* audio_data, const size_t length, bool use_opus)  {

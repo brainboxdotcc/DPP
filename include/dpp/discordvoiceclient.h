@@ -179,6 +179,12 @@ class DiscordVoiceClient : public WSClient
 	 */
 	uint32_t tracks;
 
+	/** Meta data associated with each track.
+	 * Arbitrary string that the user can set via
+	 * dpp::DiscordVoiceClient::AddMarker
+	 */
+	std::vector<std::string> track_meta;
+
 	/** Encoding buffer for opus repacketizer and encode
 	 */
 	uint8_t encode_buffer[65536];
@@ -457,8 +463,10 @@ public:
 	 * to the next marker using the
 	 * dpp::DiscordVoiceClient::SkipToNextMarker
 	 * function.
+	 * @param metadata Arbitrary information related to this
+	 * track
 	 */
-	void InsertMarker();
+	void InsertMarker(const std::string& metadata = "");
 
 	/**
 	 * @brief Skip tp the next track marker,
@@ -473,6 +481,13 @@ public:
 	 * while the output stream is paused.
 	 */
 	void SkipToNextMarker();
+
+	/**
+	 * @brief Get the metdata string associated with each inserted marker.
+	 * 
+	 * @return const std::vector<std::string>& list of metadata strings
+	 */
+	const std::vector<std::string> GetMarkerMetadata();
 
 	/**
 	 * @brief Returns true if the audio is paused.

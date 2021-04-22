@@ -311,6 +311,8 @@ struct voice_track_marker_t : public event_dispatch_t {
 	voice_track_marker_t(class DiscordClient* client, const std::string& raw);
 	/** Voice client */
 	class DiscordVoiceClient* voice_client;
+	/** Track metadata */
+	std::string track_meta;
 };
 
 
