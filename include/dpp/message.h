@@ -149,7 +149,7 @@ struct embed {
 	 * @param is_inline Wether or not to display the field 'inline' or on its own line
 	 * @return A reference to self
 	 */
-	embed& add_field(const std::string& name, const std::string &value, bool is_inline);
+	embed& add_field(const std::string& name, const std::string &value, bool is_inline = false);
 
 	/** Set embed author. Returns the embed itself so these method calls may be "chained"
 	 * @param name The name of the author
