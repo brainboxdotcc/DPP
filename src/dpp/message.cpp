@@ -54,6 +54,11 @@ message::message(const std::string &_content, message_type t) : message() {
 	type = t;
 }
 
+message::message(snowflake _channel_id, const embed& _embed) : message() {
+	channel_id = _channel_id;
+	embeds.push_back(_embed);
+}
+
 embed::embed(json* j) : embed() {
 	title = StringNotNull(j, "title");
 	type = StringNotNull(j, "type");

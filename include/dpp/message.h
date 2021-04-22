@@ -296,6 +296,14 @@ struct message {
 	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
 
 	/**
+	 * @brief Construct a new message object with a channel and content
+	 * 
+	 * @param channel_id The channel to send the message to
+	 * @param _embed An embed to send
+	 */
+	message(snowflake channel_id, const embed & _embed);
+
+	/**
 	 * @brief Construct a new message object with content
 	 * 
 	 * @param content The content of the message
