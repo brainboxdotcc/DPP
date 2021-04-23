@@ -38,7 +38,7 @@ voicestate& voicestate::fill_from_json(nlohmann::json* j) {
 	channel_id = SnowflakeNotNull(j, "channel_id");
 	user_id = SnowflakeNotNull(j, "user_id");
 	session_id = StringNotNull(j, "session_id");
-	uint8_t flags = 0;
+	flags = 0;
 	if (BoolNotNull(j, "deaf"))
 		flags |= vs_deaf;
 	if (BoolNotNull(j, "mute"))
