@@ -4,25 +4,29 @@
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/RnG32Ctyq7) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) [![CircleCI](https://circleci.com/gh/brainboxdotcc/DPP.svg?style=svg)](https://circleci.com/gh/brainboxdotcc/DPP) 
 
 
-This project is in alpha stages of development.
+This project is in late alpha stages of development.
 
 ### Library features:
 
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
-* Slash Commands/Interactions suppport
-* Voice support
+* [Slash Commands/Interactions suppport](https://dpp.brainbox.cc/a00014.html)
+* [Voice support](https://dpp.brainbox.cc/a00012.html)
 * Pretty much the entire API is supported except for slash commands
 * [Windows support](https://dpp.brainbox.cc/a00006.html)
 
-Want to help? Drop me a line or send me a PR. I'll be choosy about what PRs i accept whilst the library is in such a heavy state of development.
+Want to help? Drop me a line or send a PR.
 
-It is my intention to get this stable enough to use on my production bot, [TriviaBot](https://github.com/brainboxdotcc/triviabot).
+This library is in use on the [Sporks bot](https://sporks.gg) and being tested on my other, larger production bot, [TriviaBot](https://github.com/brainboxdotcc/triviabot).
 
 ## Documentation
 
-Documentation is a work in progress. Want to contribute? Fork the wiki and submit a PR!
+The documentation is a work in progress, generated from the code comments and markdown using Doxygen.
+
+#### [View D++ library documentation](https://dpp.brainbox.cc/)
+
+Do you want to contribute? Fork the code and submit a PR!
 
 ## Supported OSes
 
