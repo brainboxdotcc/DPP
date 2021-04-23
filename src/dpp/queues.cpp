@@ -144,7 +144,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		}
 		break;
 		case m_patch: {
-			if (auto res = cli.Patch(_url.c_str())) {
+			if (auto res = cli.Patch(_url.c_str(), postdata.c_str(), "application/json")) {
 				populate_result(rv, res);
 			} else {
 				rv.error = (http_error)res.error();
