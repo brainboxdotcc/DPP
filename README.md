@@ -13,7 +13,7 @@ This project is in late alpha stages of development.
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
 * [Slash Commands/Interactions suppport](https://dpp.brainbox.cc/a00014.html)
 * [Voice support](https://dpp.brainbox.cc/a00012.html)
-* Pretty much the entire API is supported except for slash commands
+* Pretty much the entire Discord API is available for use in the library
 * [Windows support](https://dpp.brainbox.cc/a00006.html)
 
 Want to help? Drop me a line or send a PR.
