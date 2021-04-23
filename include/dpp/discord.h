@@ -208,6 +208,7 @@ namespace dpp {
 
 };
 
+#include <dpp/voicestate.h>
 #include <dpp/role.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>
@@ -220,7 +221,6 @@ namespace dpp {
 #include <dpp/voiceregion.h>
 #include <dpp/integration.h>
 #include <dpp/webhook.h>
-#include <dpp/voicestate.h>
 #include <dpp/presence.h>
 #include <dpp/intents.h>
 #include <dpp/slashcommand.h>

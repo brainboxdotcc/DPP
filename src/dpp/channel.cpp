@@ -199,6 +199,19 @@ std::map<snowflake, guild_member*> channel::get_members() {
 	return rv;
 }
 
+std::map<snowflake, voicestate> channel::get_voice_members() {
+	std::map<snowflake, voicestate> rv;
+	guild* g = dpp::find_guild(guild_id);
+	if (g) {
+		for (auto & m : g->voice_members) {
+			if (m.second.channel_id == this->id) {
+				rv[m.second.user_id] = m.second;
+			}
+		}
+	}
+	return rv;
+}
+
 
 
 };

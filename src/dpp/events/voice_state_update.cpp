@@ -47,6 +47,20 @@ void voice_state_update::handle(DiscordClient* client, json &j, const std::strin
 	json& d = j["d"];
 	dpp::voice_state_update_t vsu(client, raw);
 	vsu.state = dpp::voicestate().fill_from_json(&d);
+
+	/* Update guild voice states */
+	dpp::guild* g = dpp::find_guild(vsu.state.guild_id);
+	if (g) {
+		if (vsu.state.channel_id == 0) {
+			auto ve = g->voice_members.find(vsu.state.user_id);
+			if (ve != g->voice_members.end()) {
+				g->voice_members.erase(ve);	
+			}
+		} else {
+			g->voice_members[vsu.state.user_id] = vsu.state;
+		}
+	}
+
 	if (vsu.state.user_id == client->creator->me.id)
 	{
 		std::lock_guard<std::mutex> lock(client->voice_mutex);

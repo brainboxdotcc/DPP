@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/discord.h>
+#include <dpp/voicestate.h>
 #include <dpp/cache.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
@@ -438,6 +439,16 @@ guild& guild::fill_from_json(nlohmann::json* d) {
 		if (!dsc.empty()) {
 			this->set_description(dsc);
 		}
+		this->voice_members.clear();
+		if (d->find("voice_members") != d->end()) {
+			for (auto & vm : (*d)["voice_members"]) {
+				voicestate vs;
+				vs.fill_from_json(&vm);
+				vs.guild_id = this->id;
+				this->voice_members[vs.user_id] = vs;
+			}
+		}
+
 		this->banner = StringNotNull(d, "banner");
 		this->premium_tier = Int8NotNull(d, "premium_tier");
 		this->premium_subscription_count = Int16NotNull(d, "premium_subscription_count");

@@ -135,18 +135,81 @@ public:
 	/**
 	 * @brief Return a map of members on the channel, built from the guild's
 	 * member list based on which members have the VIEW_CHANNEL permission.
+	 * Does not return reliable information for voice channels, use
+	 * dpp::channel::get_voice_members() instead for this.
 	 * @return A map of guild members keyed by user id.
 	 */
 	std::map<snowflake, class guild_member*> get_members();
 
+	/**
+	 * @brief Get a map of members in this channel, if it is a voice channel.
+	 * The map is keyed by snowflake id of the user.
+	 * 
+	 * @return std::map<snowflake, voicestate> The voice members of the channel
+	 */
+	std::map<snowflake, voicestate> get_voice_members();
+
+	/**
+	 * @brief Returns true if the channel is NSFW gated
+	 * 
+	 * @return true if NSFW
+	 */
 	bool is_nsfw() const;
+
+	/**
+	 * @brief Returns true if the channel is a text channel
+	 * 
+	 * @return true if text channel
+	 */
 	bool is_text_channel() const;
+
+	/**
+	 * @brief Returns true if the channel is a DM
+	 * 
+	 * @return true if is a DM
+	 */
 	bool is_dm() const;
+
+	/**
+	 * @brief Returns true if the channel is a voice channel
+	 * 
+	 * @return true if voice channel
+	 */
 	bool is_voice_channel() const;
+
+	/**
+	 * @brief Returns true if the channel is a group DM channel
+	 * 
+	 * @return true if group DM
+	 */
 	bool is_group_dm() const;
+
+	/**
+	 * @brief Returns true if the channel is a category
+	 * 
+	 * @return true if a category
+	 */
 	bool is_category() const;
+
+	/**
+	 * @brief Returns true if the channel is a news channel
+	 * 
+	 * @return true if news channel
+	 */
 	bool is_news_channel() const;
+
+	/**
+	 * @brief Returns true if the channel is a store channel
+	 * 
+	 * @return true if store channel
+	 */
 	bool is_store_channel() const;
+
+	/**
+	 * @brief Returns true if the channel is a stage channel
+	 * 
+	 * @return true if stage channel
+	 */
 	bool is_stage_channel() const;
 };
 

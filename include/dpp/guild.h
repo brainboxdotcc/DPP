@@ -23,6 +23,7 @@
 #include <string>
 #include <unordered_map>
 #include <map>
+#include <dpp/voicestate.h>
 
 namespace dpp {
 
@@ -138,6 +139,9 @@ public:
 	 */
 	std::unordered_map<snowflake, class guild_member*> members;
 
+	/** List of members in voice channels in the guild.
+	 */
+	std::map<snowflake, voicestate> voice_members;
 
         /** List of emojis
 	 */
