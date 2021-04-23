@@ -132,6 +132,13 @@ public:
 	 */
 	uint64_t get_user_permissions(const class user* member) const;
 
+	/**
+	 * @brief Return a map of members on the channel, built from the guild's
+	 * member list based on which members have the VIEW_CHANNEL permission.
+	 * @return A map of guild members keyed by user id.
+	 */
+	std::map<snowflake, class guild_member*> get_members();
+
 	bool is_nsfw() const;
 	bool is_text_channel() const;
 	bool is_dm() const;

@@ -54,6 +54,13 @@ int main(int argc, char const *argv[])
 
 		dpp::snowflake channel_id = event.msg->channel_id;
 
+		if (command == ".cmtest") {
+			std::map<dpp::snowflake, dpp::guild_member*> ml = dpp::find_channel(825841181342171196)->get_members();
+			for (auto & m : ml) {
+				std::cout << m.second->user_id << "\n";
+			}
+		}
+
 		if (command == ".exectest") {
 			dpp::utility::exec("ping", {"-c", "4", "127.0.0.1"}, [&bot, channel_id](const std::string& output) {
 				bot.message_create(dpp::message(channel_id, output));
