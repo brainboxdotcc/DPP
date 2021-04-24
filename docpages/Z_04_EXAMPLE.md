@@ -171,7 +171,7 @@ Compile your bot using `cmake ..` and `make` from the build directory, and run i
 
 \page soundboard Creating a Sound Board
 
-This example script shows how to send a sound file to a voice channel. A few shortcuts are taken here, for more advanced techniques for connecting to a voice channel see the tutorial \subpage joinvc
+This example script shows how to send a sound file to a voice channel. A few shortcuts are taken here, for more advanced techniques for connecting to a voice channel see the tutorial \ref joinvc
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
