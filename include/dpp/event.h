@@ -35,7 +35,8 @@ class DiscordClient;
  */
 namespace events {
 
-/** An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
+/**
+ * @brief An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
  */
 class event {
 public:

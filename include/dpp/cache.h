@@ -27,6 +27,9 @@
 
 namespace dpp {
 
+	/**
+	 * @brief A set of cached managed objects
+	 */
 	typedef std::unordered_map<uint64_t, managed*> cache_container;
 
 	/**

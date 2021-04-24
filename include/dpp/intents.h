@@ -22,7 +22,9 @@
 
 namespace dpp {
 
-/** intents are a bitmask of allowed events on your websocket.
+/**
+ * @brief intents are a bitmask of allowed events on your websocket.
+ * 
  * Some of these are known as Privileged intents (GUILD_MEMBERS and GUILD_PRESENCES)
  * and require verification of a bot over 100 servers by discord via submission of
  * your real life ID.

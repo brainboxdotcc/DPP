@@ -39,7 +39,8 @@ enum voicestate_flags {
 
 /**
  * @brief Represents the voice state of a user on a guild
- * We don't cache these right now, but may do when we implement voice
+ * These are stored in the dpp::guild object, and accessible there,
+ * or via dpp::channel::get_voice_members
  */
 class voicestate {
 public:

@@ -24,11 +24,17 @@
 
 namespace dpp {
 
+/**
+ * @brief Defines types of webhook
+ */
 enum webhook_type {
 	w_incoming = 1,
 	w_channel_follower = 2
 };
 
+/**
+ * @brief Represents a discord webhook
+ */
 class webhook : public managed {
 public:
 	uint8_t type;   		//< the type of the webhook

@@ -25,7 +25,8 @@
 
 namespace dpp {
 
-/** Represents an invite to a discord guild or channel
+/**
+ * @brief Represents an invite to a discord guild or channel
  */
 class invite {
 public:

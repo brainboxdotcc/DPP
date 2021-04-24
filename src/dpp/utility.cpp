@@ -83,6 +83,14 @@ namespace dpp {
 			}
 		}
 
+		uint64_t uptime::to_secs() {
+			return secs + (mins * 60) + (hours * 60 * 60) + (days * 60 * 60 * 24);
+		}
+
+		uint64_t uptime::to_msecs() {
+			return to_secs() * 1000;
+		}
+
 		iconhash::iconhash() : first(0), second(0) {
 		}
 

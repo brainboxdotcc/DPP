@@ -201,8 +201,28 @@ namespace dpp {
 			 * @return std::string Uptime as string
 			 */
 			std::string to_string();
+
+			/**
+			 * @brief Get uptime as seconds
+			 * 
+			 * @return uint64_t Uptime as seconds
+			 */
+			uint64_t to_secs();
+
+			/**
+			 * @brief Get uptime as milliseconds
+			 * 
+			 * @return uint64_t Uptime as milliseconds
+			 */
+			uint64_t to_msecs();
 		};
 
+		/**
+		 * @brief Output hex values of a section of memory for debugging
+		 * 
+		 * @param data The start of the data to display
+		 * @param length The length of data to display
+		 */
 		void debug_dump(uint8_t* data, size_t length);
 	};
 

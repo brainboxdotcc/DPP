@@ -27,7 +27,9 @@
 
 namespace dpp {
 
-/** Websocket connection status */
+/**
+ * @brief Websocket connection status
+ */
 enum WSState {
 	/** Sending/receiving HTTP headers prior to protocol switch */
 	HTTP_HEADERS,
@@ -35,7 +37,9 @@ enum WSState {
 	CONNECTED
 };
 
-/** Low-level websocket opcodes for frames */
+/**
+ * @brief Low-level websocket opcodes for frames
+ */
 enum OpCode
 {
         OP_CONTINUATION = 0x00,	/* Continuation */
@@ -46,7 +50,9 @@ enum OpCode
         OP_PONG = 0x0a		/* Low level pong */
 };
 
-/** Implements a websocket client based on the SSL client */
+/**
+ * @brief Implements a websocket client based on the SSL client
+ */
 class WSClient : public SSLClient
 {
 	/** Connection key used in the HTTP headers */
@@ -108,26 +114,36 @@ public:
 	/** Destructor */
         virtual ~WSClient();
 
-	/** Write to websocket. Encapsulates data in frames if the status is CONNECTED.
+	/**
+	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.
+	 * 
 	 * @param data The data to send.
 	 */
         virtual void write(const std::string &data);
 
-	/** Processes incoming frames from the SSL socket input buffer.
+	/**
+	 * @brief Processes incoming frames from the SSL socket input buffer.
+	 * 
 	 * @param buffer The buffer contents. Can modify this value removing the head elements when processed.
 	 */
         virtual bool HandleBuffer(std::string &buffer);
 
-	/** Close websocket */
+	/**
+	 * @brief Close websocket
+	 */
         virtual void close();
 
-	/** Receives raw frame content only without headers
+	/**
+	 * @brief Receives raw frame content only without headers
+	 * 
 	 * @param buffer The buffer contents
 	 * @return True if the frame was successfully handled. False if no valid frame is in the buffer.
 	 */
 	virtual bool HandleFrame(const std::string &buffer);
 
-	/** Called upon error frame.
+	/**
+	 * @brief Called upon error frame.
+	 * 
 	 * @param errorcode The error code from the websocket server
 	 */
 	virtual void Error(uint32_t errorcode);

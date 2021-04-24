@@ -47,6 +47,12 @@ public:
 	 * @return A reference to self
 	 */
 	ban& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build json representation of a ban
+	 * 
+	 * @return std::string stringified json
+	 */
 	std::string build_json() const;
 };
 

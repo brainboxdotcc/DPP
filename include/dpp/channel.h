@@ -48,11 +48,17 @@ enum channel_flags {
 	c_stage =		0b11000000
 };
 
+/**
+ * @brief channel permission overwrite types
+ */
 enum overwrite_type : uint8_t {
 	ot_role = 0,
 	ot_member = 1
 };
 
+/**
+ * @brief channel permission overwrites
+ */
 struct permission_overwrite {
 	snowflake id;
 	uint8_t type;

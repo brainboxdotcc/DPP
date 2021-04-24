@@ -24,7 +24,9 @@
 
 namespace dpp {
 
-/** Various bitmask flags used to represent information about a dpp::user */
+/**
+ * @brief Various bitmask flags used to represent information about a dpp::user
+ */
 enum user_flags {
 	/// User is a bot
 	u_bot =			0b00000000000000000000001,
@@ -66,7 +68,8 @@ enum user_flags {
 	u_animated_icon =	0b00001000000000000000000
 };
 
-/** Represents a user on discord. May or may not be a member of a dpp::guild.
+/**
+ * @brief Represents a user on discord. May or may not be a member of a dpp::guild.
  */
 class user : public managed {
 public:

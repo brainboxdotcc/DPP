@@ -24,6 +24,9 @@
 
 namespace dpp {
 
+/**
+ * @brief Flags related to a voice region
+ */
 enum voiceregion_flags {
 	v_optimal	= 0x00000001,
 	v_deprecated	= 0x00000010,
@@ -36,8 +39,19 @@ enum voiceregion_flags {
  */
 class voiceregion {
 public:
+	/**
+	 * @brief Voice server ID
+	 */
 	std::string id;
+
+	/**
+	 * @brief Voice server name
+	 */
 	std::string name;
+
+	/**
+	 * @brief Flags bitmap
+	 */
 	uint8_t flags;
 
 	/**
@@ -65,9 +79,32 @@ public:
 	 */
 	std::string build_json() const;
 
+	/**
+	 * @brief True if is the optimal voice server
+	 * 
+	 * @return true if optimal 
+	 */
 	bool is_optimal() const;
+
+	/**
+	 * @brief True if is a deprecated voice server
+	 * 
+	 * @return true if deprecated
+	 */
 	bool is_deprecated() const;
+
+	/**
+	 * @brief True if is a custom voice server
+	 * 
+	 * @return true if custom
+	 */
 	bool is_custom() const;
+
+	/**
+	 * @brief True if is a VIP voice server
+	 * 
+	 * @return true if VIP 
+	 */
 	bool is_vip() const;
 };
 

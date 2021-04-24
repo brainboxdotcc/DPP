@@ -24,7 +24,8 @@
 
 namespace dpp {
 
-/** Defines a request to count prunable users, or start a prune operation
+/**
+ * @brief Defines a request to count prunable users, or start a prune operation
  */
 struct prune {
 	/** Number of days to include in the prune

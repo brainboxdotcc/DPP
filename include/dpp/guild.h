@@ -27,7 +27,10 @@
 
 namespace dpp {
 
-/** Represents voice regions for guilds and channels */
+/**
+ * @brief Represents voice regions for guilds and channels.
+ * @note Largely deprecated in favour of per-channel regions.
+ */
 enum region : uint8_t {
 	r_brazil,
 	r_central_europe,
@@ -45,7 +48,9 @@ enum region : uint8_t {
 	r_western_europe
 };
 
-/** The various flags that represent the status of a dpp::guild object */
+/**
+ * @brief The various flags that represent the status of a dpp::guild object
+ */
 enum guild_flags {
 	g_large =				0b000000000000000000001,
 	g_unavailable = 			0b000000000000000000010,
@@ -70,7 +75,9 @@ enum guild_flags {
 	g_has_animated_icon =			0b100000000000000000000
 };
 
-/** Represents a guild object */
+/**
+ * @brief Represents a guild on Discord (AKA a server)
+ */
 class guild : public managed {
 	/** Server description for communities */
 	char* description;

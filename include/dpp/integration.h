@@ -24,14 +24,18 @@
 
 namespace dpp {
 
-/** Integration types */
+/**
+ * @brief Integration types
+ */
 enum integration_type {
 	i_twitch,
 	i_youtube,
 	i_discord
 };
 
-/** Integration flags */
+/**
+ * @brief Integration flags
+ */
 enum integration_flags {
 	if_enabled =     0b00000001,
 	if_syncing =     0b00000010,
@@ -40,7 +44,9 @@ enum integration_flags {
 	if_expire_kick = 0b00010000,
 };
 
-/** An application that has been integrated */
+/**
+ * @brief An application that has been integrated
+ */
 struct integration_app {
 	snowflake id;
 	std::string name;

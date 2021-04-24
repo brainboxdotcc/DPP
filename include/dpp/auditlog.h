@@ -26,6 +26,9 @@
 
 namespace dpp {
 
+/**
+ * @brief Defines types of audit log entry
+ */
 enum audit_type {
 	ae_guild_update			=	1,
 	ae_channel_create		=	10,
@@ -64,12 +67,18 @@ enum audit_type {
 	ae_integration_delete		=	82
 };
 
+/**
+ * @brief Defines audit log changes
+ */
 struct audit_change {
 	std::string	new_value;      //< Optional: Serialised new value of the key
 	std::string	old_value;      //< Optional: Serialised old value of the key
 	std::string	key;    //< name of audit log change key
 };
 
+/**
+ * @brief Extra information for an audit log entry
+ */
 struct audit_extra {
 	std::string 	delete_member_days;	//< number of days after which inactive members were kicked
 	std::string	members_removed;	//< number of members removed by the prune
@@ -81,6 +90,9 @@ struct audit_extra {
 	std::string 	role_name;		//< name of the role if type is "0" (not present if type is "1")
 };
 
+/**
+ * @brief An individual audit log entry
+ */
 struct audit_entry {
 	snowflake			id;		//< id of the entry
 	snowflake			target_id;	//< id of the affected entity (webhook, user, role, etc.) (may be empty)

@@ -26,6 +26,9 @@ namespace dpp {
 
 #define MAX_EMOJI_SIZE 256 * 1024
 
+/**
+ * @brief Flags for dpp::emoji
+ */
 enum emoji_flags {
 	e_require_colons = 0b00000001,
 	e_managed =        0b00000010,
@@ -33,17 +36,41 @@ enum emoji_flags {
 	e_available =      0b00001000,
 };
 
+/**
+ * @brief Represents an emoji for a dpp::guild
+ */
 class emoji : public managed {
 public:
+	/**
+	 * @brief Emoji name
+	 */
 	std::string name;
+	/**
+	 * @brief User id who uploaded the emoji
+	 */
 	snowflake user_id;
+	/**
+	 * @brief Flags for the emoji from dpp::emoji_flags
+	 */
 	uint8_t flags;
+	/**
+	 * @brief Image data for the emoji if uploading
+	 */
 	std::string* image_data;
 	
+	/**
+	 * @brief Construct a new emoji object
+	 */
 	emoji();
+
+	/**
+	 * @brief Destroy the emoji object
+	 */
 	~emoji();
 
-	/** Read class values from json object
+	/**
+	 * @brief Read class values from json object
+	 * 
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */

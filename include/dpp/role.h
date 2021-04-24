@@ -32,7 +32,9 @@ enum role_flags {
 	r_premium_subscriber =	0b00001000, //< This is set for the role given to nitro 
 };
 
-/** Represents the various discord permissions */
+/**
+ * @brief Represents the various discord permissions
+ */
 enum role_permissions {
 	p_create_instant_invite	=	0x00000001,	//< allows creationboosters of instant invites
 	p_kick_members		=	0x00000002,	//< allows kicking members
@@ -67,7 +69,9 @@ enum role_permissions {
 	p_manage_emojis		=	0x40000000	//< allows management and editing of emojis 
 };
 
-/** Represents a role within a dpp::guild */
+/**
+ * @brief Represents a role within a dpp::guild
+ */
 class role : public managed {
 public:
 	/** Role name */

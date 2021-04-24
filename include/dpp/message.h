@@ -26,7 +26,9 @@
 
 namespace dpp {
 
-/** A footer in a dpp::embed */
+/**
+ * @brief A footer in a dpp::embed
+ */
 struct embed_footer {
 	/** Footer text */
 	std::string text;
@@ -36,7 +38,9 @@ struct embed_footer {
 	std::string proxy_url;
 };
 
-/** An video, image or thumbnail in a dpp::embed */
+/**
+ * @brief An video, image or thumbnail in a dpp::embed
+ */
 struct embed_image {
 	/** URL to image or video */
 	std::string url;
@@ -48,7 +52,8 @@ struct embed_image {
 	std::string width;
 };
 
-/** Embed provider in a dpp::embed. Received from discord but cannot be sent
+/**
+ * @brief Embed provider in a dpp::embed. Received from discord but cannot be sent
  */
 struct embed_provider {
 	/** Provider name */
@@ -57,7 +62,9 @@ struct embed_provider {
 	std::string url;
 };
 
-/** Author within a dpp::embed object */
+/**
+ * @brief Author within a dpp::embed object
+ */
 struct embed_author {
 	/** Author name */
 	std::string name;
@@ -69,7 +76,9 @@ struct embed_author {
 	std::string proxy_icon_url;
 };
 
-/** A dpp::embed may contain zero or more fields */
+/**
+ * @brief A dpp::embed may contain zero or more fields
+ */
 struct embed_field {
 	/** Name of field */
 	std::string name;
@@ -79,7 +88,9 @@ struct embed_field {
 	bool is_inline;
 };
 
-/** A rich embed for display within a dpp::message */
+/**
+ * @brief A rich embed for display within a dpp::message
+ */
 struct embed {
 	/** Optional: title of embed */
 	std::string			title;
@@ -186,7 +197,9 @@ struct embed {
 	embed& set_thumbnail(const std::string& url);
 };
 
-/** Represets a reaction to a dpp::message */
+/**
+ * @brief Represets a reaction to a dpp::message
+ */
 struct reaction {
 	/** Number of times this reaction has been added */
 	uint32_t count;
@@ -196,6 +209,9 @@ struct reaction {
 	snowflake emoji_id;
 };
 
+/**
+ * @brief Bitmask flags for a dpp::message
+ */
 enum message_flags {
 	m_crossposted = 1 << 0,			//< this message has been published to subscribed channels (via Channel Following)
 	m_is_crosspost =  1 << 1,		//< this message originated from a message in another channel (via Channel Following)
@@ -206,6 +222,9 @@ enum message_flags {
 	m_loading = 1 << 7			//< this message is an Interaction Response and the bot is "thinking"
 };
 
+/**
+ * @brief Mesage types for dpp::message::type
+ */
 enum message_type {
 	mt_default					= 0,
 	mt_recipient_add				= 1,
@@ -229,7 +248,9 @@ enum message_type {
 	mt_guild_invite_reminder			= 22
 };
 
-/** Represents messages sent and received on Discord */
+/**
+ * @brief Represents messages sent and received on Discord
+ */
 struct message {
 	/** id of the message */
 	snowflake       id;

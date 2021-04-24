@@ -25,7 +25,9 @@
 
 namespace dpp {
 
-/** Presence flags bitmask */
+/**
+ * @brief Presence flags bitmask
+ */
 enum presence_flags {
 	p_desktop_online	=	0b00000001,
 	p_desktop_dnd		=	0b00000010,
@@ -41,7 +43,9 @@ enum presence_flags {
 	p_status_idle		=	0b11000000
 };
 
-/** Online presence status values */
+/**
+ * @brief Online presence status values
+ */
 enum presence_status : uint8_t {
 	ps_offline	=	0,
 	ps_online	=	1,
@@ -49,7 +53,9 @@ enum presence_status : uint8_t {
 	ps_idle		=	3
 };
 
-/** Bit shift for desktop status */
+/**
+ * @brief Bit shift for desktop status
+ */
 #define PF_SHIFT_DESKTOP	0
 /** Bit shift for web status */
 #define PF_SHIFT_WEB		2
@@ -68,16 +74,20 @@ enum presence_status : uint8_t {
 /** Bit mask for clearing main status */
 #define PF_CLEAR_STATUS		0b00111111
 
-/** Game types */
+/**
+ * @brief Game types
+ */
 enum activity_type : uint8_t {
 	at_game		=	0, //< "Playing ..."
 	at_streaming	=	1, //< "Streaming ..."
 	at_listening	=	2, //< "Listening to..."
-	at_custom	=	3, //< Custom with emoji
+	at_custom	=	3, //< "Watching..."
 	at_competing	=	4  //< "Competing in..."
 };
 
-/** Activity types for rich presence */
+/**
+ * @brief Activity types for rich presence
+ */
 enum activity_flags {
 	af_instance	= 0b00000001,
 	af_join		= 0b00000010,
@@ -87,7 +97,8 @@ enum activity_flags {
 	af_play		= 0b00100000
 };
 
-/** An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
+/**
+ * @brief An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
  */
 class activity {
 public:
@@ -123,7 +134,8 @@ public:
 	uint8_t flags;
 };
 
-/** Represents user presence, e.g. what game they are playing and if they are online
+/**
+ * @brief Represents user presence, e.g. what game they are playing and if they are online
  */
 class presence {
 public:

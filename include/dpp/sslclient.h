@@ -27,7 +27,9 @@
 
 namespace dpp {
 
-/** Implements a simple non-blocking SSL stream client.
+/**
+ * @brief Implements a simple non-blocking SSL stream client.
+ * 
  * Note that although the design is non-blocking the Run() method will
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
@@ -85,52 +87,73 @@ public:
 	/** Get total bytes received */
 	uint64_t GetBytesIn();
 
-	/** Attaching an additional file descriptor to this function will send notifications when there is data to read.
+	/**
+	 * @brief Attaching an additional file descriptor to this function will send notifications when there is data to read.
+	 * 
 	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread!
 	 * Returning -1 means that you don't want to be notified.
 	 */
 	std::function<int()> custom_readable_fd;
 
-	/** Attaching an additional file descriptor to this function will send notifications when you are able to write
+	/**
+	 * @brief Attaching an additional file descriptor to this function will send notifications when you are able to write
 	 * to the socket.
+	 * 
 	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread! You should toggle this
 	 * to -1 when you do not have anything to write otherwise it'll keep triggering repeatedly (it is level triggered).
 	 */
 	std::function<int()> custom_writeable_fd;
 
-	/** This event will be called when you can read from the custom fd
+	/**
+	 * @brief This event will be called when you can read from the custom fd
 	 */
 	std::function<void()> custom_readable_ready;
 
-	/** This event will be called when you can write to a custom fd
+	/**
+	 * @brief This event will be called when you can write to a custom fd
 	 */
 	std::function<void()> custom_writeable_ready;
 
-	/** Connect to a specified host and port. Throws std::runtime_error on fatal error.
+	/**
+	 * @brief Connect to a specified host and port. Throws std::runtime_error on fatal error.
 	 * @param _hostname The hostname to connect to
 	 * @param _port the Port number to connect to
 	 */
 	SSLClient(const std::string &_hostname, const std::string &_port = "443");
 
-	/** Nonblocking I/O loop */
+	/**
+	 * @brief Nonblocking I/O loop
+	 */
 	void ReadLoop();
 
-	/** Destructor */
+	/**
+	 * @brief Destroy the SSLClient object
+	 */
 	virtual ~SSLClient();
 
-	/** Handle input from the input buffer.
+	/**
+	 * @brief Handle input from the input buffer.
 	 * @param buffer the buffer content. Will be modified removing any processed front elements
 	 */
 	virtual bool HandleBuffer(std::string &buffer);
 
-	/** Write to the output buffer.
+	/**
+	 * @brief Write to the output buffer.
 	 * @param data Data to be written to the buffer
 	 */
 	virtual void write(const std::string &data);
 
-	/** Close SSL connection */
+	/**
+	 * @brief Close SSL connection
+	 */
 	virtual void close();
 
+	/**
+	 * @brief Log a message
+	 * 
+	 * @param severity severity of log message
+	 * @param msg Log message to send
+	 */
 	virtual void log(dpp::loglevel severity, const std::string &msg);
 };
 

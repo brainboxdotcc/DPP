@@ -52,7 +52,8 @@ enum http_error {
 	h_compression,
 };
 
-/** The result of any HTTP request. Contains the headers, vital
+/**
+ * @brief The result of any HTTP request. Contains the headers, vital
  * rate limit figures, and returned request body.
  */
 struct http_request_completion_t {
@@ -78,8 +79,9 @@ struct http_request_completion_t {
 	std::string body;
 };
 
-/** Results of HTTP requests are called back to these std::function types.
- * NOTE: Returned http_completion_events are called ASYNCRONOUSLY in your
+/**
+ * @brief Results of HTTP requests are called back to these std::function types.
+ * @note Returned http_completion_events are called ASYNCRONOUSLY in your
  * code which means they execute in a separate thread. The completion events
  * arrive in order.
  */
@@ -91,10 +93,13 @@ enum http_method {
 	m_get, m_post, m_put, m_patch, m_delete
 };
 
-/** A HTTP request. You should instantiate one of these objects via its constructor,
+/**
+ * @brief A HTTP request.
+ * 
+ * You should instantiate one of these objects via its constructor,
  * and pass a pointer to it into an instance of request_queue. Although you can
- * directly call hthe Run() method of the object and it will make a HTTP call, be
- * aware that if you do this, it will be a BLOCKING call (not asynchronous) and
+ * directly call the Run() method of the object and it will make a HTTP call, be
+ * aware that if you do this, it will be a **BLOCKING call** (not asynchronous) and
  * will not respect rate limits, as both of these functions are managed by the
  * request_queue class.
  */
@@ -161,9 +166,11 @@ struct bucket_t {
 	time_t timestamp;
 };
 
-/** The request_queue class manages rate limits and marshalls HTTP requests that have
- * been built as http_request objects. It ensures asynchronous delivery of events and
- * queueing of requests.
+/**
+ * @brief The request_queue class manages rate limits and marshalls HTTP requests that have
+ * been built as http_request objects.
+ * 
+ * It ensures asynchronous delivery of events and queueing of requests.
  *
  * It will spawn two threads, one to make outbound HTTP requests and push the returned
  * results into a queue, and the second to call the callback methods with these results.
