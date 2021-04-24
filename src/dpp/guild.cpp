@@ -441,8 +441,8 @@ guild& guild::fill_from_json(DiscordClient* shard, nlohmann::json* d) {
 			this->set_description(dsc);
 		}
 		this->voice_members.clear();
-		if (d->find("voice_members") != d->end()) {
-			for (auto & vm : (*d)["voice_members"]) {
+		if (d->find("voice_states") != d->end()) {
+			for (auto & vm : (*d)["voice_states"]) {
 				voicestate vs;
 				vs.fill_from_json(&vm);
 				vs.shard = shard;
@@ -546,13 +546,20 @@ uint64_t guild::permission_overwrites(const uint64_t base_permissions, const use
 bool guild::ConnectMemberVoice(snowflake user_id) {
 	for (auto & c : channels) {
 		channel* ch = dpp::find_channel(c);
-		if (!ch || !ch->is_voice_channel() || !ch->is_stage_channel()) {
+		if (!ch || (!ch->is_voice_channel() && !ch->is_stage_channel())) {
+			if (ch) {
+				std::cout << "Skipped " << ch->name << " (not voice)\n";
+			}
 			continue;
 		}
+		std::cout << ch->name << " (voice)\n";
 		auto vcmembers = ch->get_voice_members();
+		std::cout << "member count: " << vcmembers.size() << "\n";
 		auto vsi = vcmembers.find(user_id);
 		if (vsi != vcmembers.end()) {
+			std::cout << "Found the member with id " << user_id << "\n";
 			if (vsi->second.shard) {
+				std::cout << "Has shard\n";
 				vsi->second.shard->ConnectVoice(this->id, vsi->second.channel_id);
 				return true;
 			}

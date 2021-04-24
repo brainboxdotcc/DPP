@@ -54,10 +54,10 @@ int main(int argc, char const *argv[])
 
 		dpp::snowflake channel_id = event.msg->channel_id;
 
-		if (command == ".cmtest") {
-			std::map<dpp::snowflake, dpp::guild_member*> ml = dpp::find_channel(825841181342171196)->get_members();
-			for (auto & m : ml) {
-				std::cout << m.second->user_id << "\n";
+		if (command == ".joinme") {
+			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
+			if (!g->ConnectMemberVoice(event.msg->author->id)) {
+				bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
 			}
 		}
 
