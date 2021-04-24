@@ -44,11 +44,12 @@ enum voicestate_flags {
  */
 class voicestate {
 public:
-	snowflake       guild_id;       //< Optional: the guild id this voice state is for
-	snowflake       channel_id;     //< the channel id this user is connected to (may be empty)
-	snowflake       user_id;        //< the user id this voice state is for
-	std::string     session_id;     //< the session id for this voice state
-	uint8_t		flags;		//< Voice state flags
+	class DiscordClient*	shard;
+	snowflake		guild_id;       //< Optional: the guild id this voice state is for
+	snowflake		channel_id;     //< the channel id this user is connected to (may be empty)
+	snowflake		user_id;        //< the user id this voice state is for
+	std::string		session_id;     //< the session id for this voice state
+	uint8_t			flags;		//< Voice state flags
 
 	/**
 	 * @brief Construct a new voicestate object
@@ -77,16 +78,22 @@ public:
 
 	/// Return true if user is deafened
 	bool is_deaf() const;
+
 	/// Return true if user is muted
 	bool is_mute() const;
+
 	/// Return true if user muted themselves
 	bool is_self_mute() const;
+
 	/// Return true if user deafened themselves
 	bool is_self_deaf() const;
+
 	/// Return true if the user is streamig
 	bool self_stream() const;
+
 	/// Return true if the user is in video
 	bool self_video() const;
+
 	/// Return true if user is surpressed.
 	/// "HELP HELP I'M BEING SUPRESSED!"
 	bool is_supressed() const;

@@ -81,55 +81,79 @@ enum guild_flags {
 class guild : public managed {
 	/** Server description for communities */
 	char* description;
+
 	/** Vanity url code for verified or partnered servers and boost level 3 */
 	char* vanity_url_code;
 public:	
 	/** Shard ID of the guild */
 	uint16_t shard_id;
+
 	/** Flags bitmask as defined by values within dpp::guild_flags */
 	uint32_t flags;
+
 	/** Guild name */
 	std::string name;
+
 	/** Guild icon hash */
 	utility::iconhash icon;
+
 	/** Guild splash hash */
 	utility::iconhash splash;
+
 	/** Guild discovery splash hash */
 	utility::iconhash discovery_splash;
+
 	/** Snowflake id of guild owner */
 	snowflake owner_id;
+
 	/** Guild voice region */
 	region voice_region;
+
 	/** Snowflake ID of AFK voice channel or 0 */
 	snowflake afk_channel_id;
+
 	/** Voice AFK timeout before moving users to AFK channel */
 	uint8_t afk_timeout;
+
 	/** Snowflake ID of widget channel, or 0 */
 	snowflake widget_channel_id;
+
 	/** Verification level of server */
 	uint8_t verification_level;
+
 	/** Setting for how notifications are to be delivered to users */
 	uint8_t default_message_notifications;
+
 	/** Wether or not explicit content filtering is enable and what setting it is */
 	uint8_t explicit_content_filter;
+
 	/** If multi factor authentication is required for moderators or not */
 	uint8_t mfa_level;
+
 	/** ID of creating application, if any, or 0 */
 	snowflake application_id;
+
 	/** ID of system channel where discord update messages are sent */
 	snowflake system_channel_id;
+
 	/** ID of rules channel for communities */
 	snowflake rules_channel_id;
+
 	/** Approximate member count. May be sent as zero */
 	uint32_t member_count;
+
 	/** Server banner hash */
 	utility::iconhash banner;
+
 	/** Boost level */
 	uint8_t premium_tier;
+
 	/** Number of boosters */
 	uint16_t premium_subscription_count;
+
 	/** Public updates channel id or 0 */
 	snowflake public_updates_channel_id;
+
 	/** Maximum users in a video channel, or 0 */
 	uint16_t max_video_channel_users;
 
@@ -167,10 +191,11 @@ public:
 	~guild();
 
 	/** Read class values from json object
+	 * @param shard originating shard
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	guild& fill_from_json(nlohmann::json* j);
+	guild& fill_from_json(class DiscordClient* shard, nlohmann::json* j);
 
 	/** Build a JSON string from this object.
 	 * @param with_id True if an ID is to be included in the JSON
@@ -226,7 +251,13 @@ public:
 	 */
 	uint64_t permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
 
-
+	/**
+	 * @brief Connect to a voice channel another guild member is in
+	 * 
+	 * @param user_id User id to join
+	 * @return True if the user specified is in a vc, false if they aren't
+	 */
+	bool ConnectMemberVoice(snowflake user_id);
 
 	/** Is a large server (>250 users) */
 	bool is_large() const;
@@ -290,17 +321,44 @@ public:
 /** A container of guilds */
 typedef std::unordered_map<snowflake, guild> guild_map;
 
+/**
+ * @brief Represents a guild widget, simple web widget of member list
+ */
 class guild_widget {
 public:
+	/**
+	 * @brief True if enabled
+	 */
 	bool enabled;
+	/**
+	 * @brief Channel widget points to
+	 */
 	snowflake channel_id;
 
+	/**
+	 * @brief Construct a new guild widget object
+	 */
 	guild_widget();
+
+	/**
+	 * @brief Build a guild widget from json
+	 * 
+	 * @param j json to build from
+	 * @return guild_widget& reference to self
+	 */
 	guild_widget& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for a guild widget
+	 * 
+	 * @return std::string guild widget stringified json
+	 */
 	std::string build_json() const;
 };
 
-/** Various flags that can be used to indicate the status of a guild member */
+/**
+ * @brief Various flags that can be used to indicate the status of a guild member
+ */
 enum guild_member_flags {
 	/** Member deafened */
 	gm_deaf =		0b00001,
@@ -310,7 +368,9 @@ enum guild_member_flags {
 	gm_pending =		0b00100
 };
 
-/** Represents dpp::user membership upon a dpp::guild */
+/**
+ * @brief Represents dpp::user membership upon a dpp::guild
+ */
 class guild_member {
 	/** Nickname, or nullptr if they don't have a nickname on this guild */
 	char* nickname;

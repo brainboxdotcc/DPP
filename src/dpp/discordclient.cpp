@@ -516,13 +516,20 @@ bool voiceconn::is_active() {
 	return voiceclient != nullptr;
 }
 
+void voiceconn::disconnect() {
+	if (this->is_active()) {
+		voiceclient->terminating = true;
+		delete voiceclient;
+		voiceclient = nullptr;
+	}
+}
+
 voiceconn::~voiceconn() {
-	voiceclient->terminating = true;
-	delete voiceclient;
+	this->disconnect();
 }
 
 void voiceconn::connect(snowflake guild_id) {
-	if (is_ready()) {
+	if (this->is_ready()) {
 		/* This is wrapped in a thread because instantiating DiscordVoiceClient can initiate a blocking SSL_connect() */
 		auto t = std::thread([guild_id, this]() {
 			try {

@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/discord.h>
+#include <dpp/discordclient.h>
 #include <dpp/voicestate.h>
 #include <dpp/cache.h>
 #include <dpp/discordevents.h>
@@ -385,7 +386,7 @@ guild::guild(const guild& o) :
 }
 
 
-guild& guild::fill_from_json(nlohmann::json* d) {
+guild& guild::fill_from_json(DiscordClient* shard, nlohmann::json* d) {
 	this->id = SnowflakeNotNull(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
 		this->name = StringNotNull(d, "name");
@@ -444,6 +445,7 @@ guild& guild::fill_from_json(nlohmann::json* d) {
 			for (auto & vm : (*d)["voice_members"]) {
 				voicestate vs;
 				vs.fill_from_json(&vm);
+				vs.shard = shard;
 				vs.guild_id = this->id;
 				this->voice_members[vs.user_id] = vs;
 			}
@@ -539,6 +541,24 @@ uint64_t guild::permission_overwrites(const uint64_t base_permissions, const use
 	permissions |= allow;
 
 	return permissions;
+}
+
+bool guild::ConnectMemberVoice(snowflake user_id) {
+	for (auto & c : channels) {
+		channel* ch = dpp::find_channel(c);
+		if (!ch || !ch->is_voice_channel() || !ch->is_stage_channel()) {
+			continue;
+		}
+		auto vcmembers = ch->get_voice_members();
+		auto vsi = vcmembers.find(user_id);
+		if (vsi != vcmembers.end()) {
+			if (vsi->second.shard) {
+				vsi->second.shard->ConnectVoice(this->id, vsi->second.channel_id);
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 

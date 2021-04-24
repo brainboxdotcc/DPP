@@ -51,7 +51,7 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 	if (!g) {
 		g = new dpp::guild();
 	}
-	g->fill_from_json(&d);
+	g->fill_from_json(client, &d);
 	g->shard_id = client->shard_id;
 	if (!g->is_unavailable()) {
 		/* Store guild roles */

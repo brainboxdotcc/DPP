@@ -47,6 +47,7 @@ void voice_state_update::handle(DiscordClient* client, json &j, const std::strin
 	json& d = j["d"];
 	dpp::voice_state_update_t vsu(client, raw);
 	vsu.state = dpp::voicestate().fill_from_json(&d);
+	vsu.state.shard = client;
 
 	/* Update guild voice states */
 	dpp::guild* g = dpp::find_guild(vsu.state.guild_id);

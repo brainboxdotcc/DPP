@@ -117,6 +117,11 @@ public:
 	 * @param guild_id Guild to connect to the voice channel on
 	 */
 	void connect(snowflake guild_id);
+
+	/**
+	 * @brief Disconnect from the currently connected voice channel
+	 */
+	void disconnect();
 };
 
 /** @brief Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
