@@ -547,19 +547,12 @@ bool guild::ConnectMemberVoice(snowflake user_id) {
 	for (auto & c : channels) {
 		channel* ch = dpp::find_channel(c);
 		if (!ch || (!ch->is_voice_channel() && !ch->is_stage_channel())) {
-			if (ch) {
-				std::cout << "Skipped " << ch->name << " (not voice)\n";
-			}
 			continue;
 		}
-		std::cout << ch->name << " (voice)\n";
 		auto vcmembers = ch->get_voice_members();
-		std::cout << "member count: " << vcmembers.size() << "\n";
 		auto vsi = vcmembers.find(user_id);
 		if (vsi != vcmembers.end()) {
-			std::cout << "Found the member with id " << user_id << "\n";
 			if (vsi->second.shard) {
-				std::cout << "Has shard\n";
 				vsi->second.shard->ConnectVoice(this->id, vsi->second.channel_id);
 				return true;
 			}

@@ -96,22 +96,28 @@ DiscordVoiceClient::DiscordVoiceClient(dpp::cluster* _cluster, snowflake _channe
 DiscordVoiceClient::~DiscordVoiceClient()
 {
 	if (runner) {
+		this->terminating = true;
 		runner->join();
 		delete runner;
+		runner = nullptr;
 	}
 #if HAVE_VOICE
 	if (encoder) {
 		opus_encoder_destroy(encoder);
+		encoder = nullptr;
 	}
 	if (decoder) {
 		opus_decoder_destroy(decoder);
+		decoder = nullptr;
 	}
 	if (repacketizer) {
 		opus_repacketizer_destroy(repacketizer);
+		repacketizer = nullptr;
 	}
 #endif
 	if (secret_key) {
 		delete[] secret_key;
+		secret_key = nullptr;
 	}
 }
 
@@ -515,6 +521,9 @@ const std::vector<std::string> DiscordVoiceClient::GetMarkerMetadata() {
 
 void DiscordVoiceClient::OneSecondTimer()
 {
+	if (terminating) {
+		throw std::runtime_error("Terminating voice connection");
+	}
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 	if (this->GetState() == CONNECTED) {
 		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {

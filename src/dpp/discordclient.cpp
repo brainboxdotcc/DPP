@@ -458,6 +458,7 @@ void DiscordClient::ConnectVoice(snowflake guild_id, snowflake channel_id) {
 		/* Once sent, this expects two events (in any order) on the websocket:
 		* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
 		*/
+		log(ll_debug, fmt::format("Sending op 4, guild {}", guild_id));
 		QueueMessage(json({
 			{ "op", 4 },
 			{ "d", {
@@ -477,8 +478,7 @@ void DiscordClient::DisconnectVoice(snowflake guild_id) {
 	std::lock_guard<std::mutex> lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
-		delete v->second;
-		connecting_voice_channels.erase(v);
+		log(ll_debug, fmt::format("Disconnecting voice, guild: {}", guild_id));
 		QueueMessage(json({
 			{ "op", 4 },
 			{ "d", {
@@ -489,6 +489,9 @@ void DiscordClient::DisconnectVoice(snowflake guild_id) {
 				}
 			}
 		}).dump(), true);
+		delete v->second;
+		v->second = nullptr;
+		connecting_voice_channels.erase(v);
 	}
 #endif
 }
@@ -519,6 +522,7 @@ bool voiceconn::is_active() {
 void voiceconn::disconnect() {
 	if (this->is_active()) {
 		voiceclient->terminating = true;
+		voiceclient->close();
 		delete voiceclient;
 		voiceclient = nullptr;
 	}
@@ -529,10 +533,11 @@ voiceconn::~voiceconn() {
 }
 
 void voiceconn::connect(snowflake guild_id) {
-	if (this->is_ready()) {
+	if (this->is_ready() && !this->is_active()) {
 		/* This is wrapped in a thread because instantiating DiscordVoiceClient can initiate a blocking SSL_connect() */
 		auto t = std::thread([guild_id, this]() {
 			try {
+				this->creator->log(ll_debug, fmt::format("Connecting voice for guild {} channel {}", guild_id, this->channel_id));
 				this->voiceclient = new DiscordVoiceClient(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname);
 				/* Note: Spawns thread! */
 				this->voiceclient->Run();

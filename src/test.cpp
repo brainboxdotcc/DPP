@@ -61,6 +61,10 @@ int main(int argc, char const *argv[])
 			}
 		}
 
+		if (command == ".leaveme") {
+			event.from->DisconnectVoice(event.msg->guild_id);			
+		}
+
 		if (command == ".exectest") {
 			dpp::utility::exec("ping", {"-c", "4", "127.0.0.1"}, [&bot, channel_id](const std::string& output) {
 				bot.message_create(dpp::message(channel_id, output));

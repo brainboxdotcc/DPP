@@ -183,140 +183,145 @@ void SSLClient::ReadLoop()
 	nonblocking = true;
 	width = sfd + 1;
 	
-	/* Loop until there is a socket error */
-	while(true) {
+	try {
+		/* Loop until there is a socket error */
+		while(true) {
 
-		if (last_tick != time(NULL)) {
-			this->OneSecondTimer();
-			last_tick = time(NULL);
-		}
+			if (last_tick != time(NULL)) {
+				this->OneSecondTimer();
+				last_tick = time(NULL);
+			}
 
-		FD_ZERO(&readfds);
-		FD_ZERO(&writefds);
-		FD_ZERO(&efds);
+			FD_ZERO(&readfds);
+			FD_ZERO(&writefds);
+			FD_ZERO(&efds);
 
-		FD_SET(sfd,&readfds);
-		FD_SET(sfd,&efds);
-		if (custom_readable_fd && custom_readable_fd() >= 0) {
-			int cfd = custom_readable_fd();
-			FD_SET(cfd, &readfds);
-			FD_SET(cfd, &efds);
-		}
-		if (custom_writeable_fd && custom_writeable_fd() >= 0) {
-			int cfd = custom_writeable_fd();
-			FD_SET(cfd, &writefds);
-		}
+			FD_SET(sfd,&readfds);
+			FD_SET(sfd,&efds);
+			if (custom_readable_fd && custom_readable_fd() >= 0) {
+				int cfd = custom_readable_fd();
+				FD_SET(cfd, &readfds);
+				FD_SET(cfd, &efds);
+			}
+			if (custom_writeable_fd && custom_writeable_fd() >= 0) {
+				int cfd = custom_writeable_fd();
+				FD_SET(cfd, &writefds);
+			}
 
-		/* If we're waiting for a read on the socket don't try to write to the server */
-		//if (!write_blocked_on_read) {
-		if (ClientToServerLength || read_blocked_on_write) {
-			FD_SET(sfd,&writefds);
-		}
-		//}
-			
-		timeval ts;
-		ts.tv_sec = 0;
-		ts.tv_usec = 50000;
-		r = select(FD_SETSIZE,&readfds,&writefds,&efds,&ts);
-		if (r == 0)
-			continue;
-
-		if (custom_writeable_fd && FD_ISSET(custom_writeable_fd(), &writefds)) {
-			custom_writeable_ready();
-		}
-		if (custom_readable_fd && FD_ISSET(custom_readable_fd(), &readfds)) {
-			custom_readable_ready();
-		}
-		if (custom_readable_fd && FD_ISSET(custom_readable_fd(), &efds)) {
-		}
-
-		if (FD_ISSET(sfd, &efds)) {
-			this->log(dpp::ll_error, fmt::format("Error on SSL connection: {}", strerror(errno)));
-			return;
-		}
-
-		/* Now check if there's data to read */
-		if((FD_ISSET(sfd,&readfds) && !write_blocked_on_read) || (read_blocked_on_write && FD_ISSET(sfd,&writefds))) {
-			do {
-				read_blocked_on_write = false;
-				read_blocked = false;
+			/* If we're waiting for a read on the socket don't try to write to the server */
+			//if (!write_blocked_on_read) {
+			if (ClientToServerLength || read_blocked_on_write) {
+				FD_SET(sfd,&writefds);
+			}
+			//}
 				
-				r = SSL_read(ssl,ServerToClientBuffer,BUFSIZZ);
+			timeval ts;
+			ts.tv_sec = 0;
+			ts.tv_usec = 50000;
+			r = select(FD_SETSIZE,&readfds,&writefds,&efds,&ts);
+			if (r == 0)
+				continue;
 
-				int e = SSL_get_error(ssl,r);
+			if (custom_writeable_fd && FD_ISSET(custom_writeable_fd(), &writefds)) {
+				custom_writeable_ready();
+			}
+			if (custom_readable_fd && FD_ISSET(custom_readable_fd(), &readfds)) {
+				custom_readable_ready();
+			}
+			if (custom_readable_fd && FD_ISSET(custom_readable_fd(), &efds)) {
+			}
 
-				switch (e) {
+			if (FD_ISSET(sfd, &efds)) {
+				this->log(dpp::ll_error, fmt::format("Error on SSL connection: {}", strerror(errno)));
+				return;
+			}
+
+			/* Now check if there's data to read */
+			if((FD_ISSET(sfd,&readfds) && !write_blocked_on_read) || (read_blocked_on_write && FD_ISSET(sfd,&writefds))) {
+				do {
+					read_blocked_on_write = false;
+					read_blocked = false;
+					
+					r = SSL_read(ssl,ServerToClientBuffer,BUFSIZZ);
+
+					int e = SSL_get_error(ssl,r);
+
+					switch (e) {
+						case SSL_ERROR_NONE:
+							/* Data received, add it to the buffer */
+							buffer.append(ServerToClientBuffer, r);
+							this->HandleBuffer(buffer);
+							bytes_in += r;
+						break;
+						case SSL_ERROR_ZERO_RETURN:
+							/* End of data */
+							SSL_shutdown(ssl);
+							return;
+						break;
+						case SSL_ERROR_WANT_READ:
+							read_blocked = true;
+						break;
+								
+						/* We get a WANT_WRITE if we're trying to rehandshake and we block on a write during that rehandshake.
+						* We need to wait on the socket to be writeable but reinitiate the read when it is
+						*/
+						case SSL_ERROR_WANT_WRITE:
+							read_blocked_on_write = true;
+						break;
+						default:
+							return;
+						break;
+					}
+
+					/* We need a check for read_blocked here because SSL_pending() doesn't work properly during the
+					* handshake. This check prevents a busy-wait loop around SSL_read()
+					*/
+				} while (SSL_pending(ssl) && !read_blocked);
+			}
+				
+			/* Check for input on the sendq */
+			if (obuffer.length() && ClientToServerLength == 0) {
+				memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length());
+				ClientToServerLength = obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length();
+				obuffer = obuffer.substr(ClientToServerLength, obuffer.length());
+				ClientToServerOffset = 0;
+			}
+
+			/* If the socket is writeable... */
+			if ((FD_ISSET(sfd,&writefds) && ClientToServerLength) || (write_blocked_on_read && FD_ISSET(sfd,&readfds))) {
+				write_blocked_on_read = false;
+				/* Try to write */
+				r = SSL_write(ssl, ClientToServerBuffer + ClientToServerOffset, ClientToServerLength);
+				
+				switch(SSL_get_error(ssl,r)){
+					/* We wrote something */
 					case SSL_ERROR_NONE:
-						/* Data received, add it to the buffer */
-						buffer.append(ServerToClientBuffer, r);
-						this->HandleBuffer(buffer);
-						bytes_in += r;
+						ClientToServerLength -= r;
+						ClientToServerOffset += r;
+						bytes_out += r;
 					break;
-					case SSL_ERROR_ZERO_RETURN:
-						/* End of data */
-						SSL_shutdown(ssl);
-						return;
+						
+					/* We would have blocked */
+					case SSL_ERROR_WANT_WRITE:
 					break;
+			
+					/* We get a WANT_READ if we're trying to rehandshake and we block onwrite during the current connection.
+					* We need to wait on the socket to be readable but reinitiate our write when it is
+					*/
 					case SSL_ERROR_WANT_READ:
-						read_blocked = true;
+						write_blocked_on_read = true;
 					break;
 							
-					/* We get a WANT_WRITE if we're trying to rehandshake and we block on a write during that rehandshake.
-					 * We need to wait on the socket to be writeable but reinitiate the read when it is
-					 */
-					case SSL_ERROR_WANT_WRITE:
-						read_blocked_on_write = true;
-					break;
+					/* Some other error */
 					default:
 						return;
 					break;
 				}
-
-				/* We need a check for read_blocked here because SSL_pending() doesn't work properly during the
-				 * handshake. This check prevents a busy-wait loop around SSL_read()
-				 */
-			} while (SSL_pending(ssl) && !read_blocked);
-		}
-			
-		/* Check for input on the sendq */
-		if (obuffer.length() && ClientToServerLength == 0) {
-			memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length());
-			ClientToServerLength = obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length();
-			obuffer = obuffer.substr(ClientToServerLength, obuffer.length());
-			ClientToServerOffset = 0;
-		}
-
-		/* If the socket is writeable... */
-		if ((FD_ISSET(sfd,&writefds) && ClientToServerLength) || (write_blocked_on_read && FD_ISSET(sfd,&readfds))) {
-			write_blocked_on_read = false;
-			/* Try to write */
-			r = SSL_write(ssl, ClientToServerBuffer + ClientToServerOffset, ClientToServerLength);
-			
-			switch(SSL_get_error(ssl,r)){
-				/* We wrote something */
-				case SSL_ERROR_NONE:
-					ClientToServerLength -= r;
-					ClientToServerOffset += r;
-					bytes_out += r;
-				break;
-					
-				/* We would have blocked */
-				case SSL_ERROR_WANT_WRITE:
-				break;
-		
-				/* We get a WANT_READ if we're trying to rehandshake and we block onwrite during the current connection.
-				 * We need to wait on the socket to be readable but reinitiate our write when it is
-				*/
-				case SSL_ERROR_WANT_READ:
-					write_blocked_on_read = true;
-				break;
-						
-				/* Some other error */
-				default:
-					return;
-				break;
 			}
 		}
+	}
+	catch (const std::exception &e) {
+		log(ll_warning, fmt::format("Read loop ended: {}", e.what()));
 	}
 }
 
