@@ -468,7 +468,7 @@ void DiscordClient::ConnectVoice(snowflake guild_id, snowflake channel_id) {
 					{ "self_deaf", false },
 				}
 			}
-		}).dump(), true);
+		}).dump(), false);
 	}
 #endif
 }
@@ -488,7 +488,7 @@ void DiscordClient::DisconnectVoice(snowflake guild_id) {
 					{ "self_deaf", false },
 				}
 			}
-		}).dump(), true);
+		}).dump(), false);
 		delete v->second;
 		v->second = nullptr;
 		connecting_voice_channels.erase(v);

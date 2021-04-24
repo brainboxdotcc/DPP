@@ -56,8 +56,33 @@ int main(int argc, char const *argv[])
 
 		if (command == ".joinme") {
 			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			if (!g->ConnectMemberVoice(event.msg->author->id)) {
-				bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
+			auto current_vc = event.from->GetVoice(event.msg->guild_id);
+			bool join_vc = true;
+			if (current_vc) {
+				auto users_vc = g->voice_members.find(event.msg->author->id);
+				if (users_vc != g->voice_members.end() && current_vc->channel_id == users_vc->second.channel_id) {
+					join_vc = false;
+					/* We are on this voice channel, at this point we can send any audio instantly to vc:
+					 * current_vc->SendAudio(...)
+					 */
+				} else {
+					/* We are on a different voice channel. Leave it, then join the new one 
+					 * by falling through to the join_vc branch below
+					 */
+					event.from->DisconnectVoice(event.msg->guild_id);
+					join_vc = true;
+				}
+			}
+			if (join_vc) {
+				if (!g->ConnectMemberVoice(event.msg->author->id)) {
+					/* The user issuing the command is not on any voice channel, we can't do anything */
+					bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
+				} else {
+					/* We are now connecting to a vc. Wait for on_voice_ready, 
+					 * event, and then send the audio within that event:
+					 * event.voice_client->SendAudio(...)
+					 */
+				}
 			}
 		}
 
