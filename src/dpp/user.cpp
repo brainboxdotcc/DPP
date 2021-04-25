@@ -46,7 +46,8 @@ namespace dpp {
 user::user() :
 	managed(),
 	discriminator(0),
-	flags(0)
+	flags(0),
+	refcount(1)
 {
 }
 

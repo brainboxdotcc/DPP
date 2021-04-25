@@ -49,6 +49,12 @@ void guild_emojis_update::handle(DiscordClient* client, json &j, const std::stri
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 	if (g) {
 		g->emojis.clear();
+		for (auto & ee : g->emojis) {
+			dpp::emoji* fe = dpp::find_emoji(ee);
+			if (fe) {
+				dpp::get_emoji_cache()->remove(fe);
+			}
+		}
 		for (auto & emoji : d["emojis"]) {
 			dpp::emoji* e = dpp::find_emoji(SnowflakeNotNull(&emoji, "id"));
 			if (!e) {

@@ -49,6 +49,36 @@ void guild_delete::handle(DiscordClient* client, json &j, const std::string &raw
 	if (g) {
 		if (!BoolNotNull(&d, "unavailable")) {
 			dpp::get_guild_cache()->remove(g);
+			for (auto & ee : g->emojis) {
+				dpp::emoji* fe = dpp::find_emoji(ee);
+				if (fe) {
+					dpp::get_emoji_cache()->remove(fe);
+				}
+			}
+			for (auto & rr : g->roles) {
+				dpp::role* role = dpp::find_role(rr);
+				if (role) {
+					dpp::get_role_cache()->remove(role);
+				}
+			}
+			for (auto & cc : g->channels) {
+				dpp::channel* ch = dpp::find_channel(cc);
+				if (ch) {
+					dpp::get_channel_cache()->remove(ch);
+				}
+			}
+			for (auto & gm : g->members) {
+				dpp::user* u = dpp::find_user(gm.second->user_id);
+				if (u) {
+					u->refcount--;
+					if (u->refcount < 1) {
+						dpp::get_user_cache()->remove(u);
+					}
+				}
+				delete gm.second;
+			}
+			g->members.clear();
+
 		} else {
 			g->flags |= dpp::g_unavailable;
 		}

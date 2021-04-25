@@ -81,6 +81,8 @@ public:
 	utility::iconhash avatar;
 	/** Flags built from a bitmask of values in dpp::user_flags */
 	uint32_t flags;
+	/** Reference count of how many guilds this user is in */
+	uint8_t refcount;
 
 	/**
 	 * @brief Construct a new user object

@@ -57,6 +57,13 @@ void guild_member_remove::handle(DiscordClient* client, json &j, const std::stri
 	if (gmr.removing_guild && gmr.removed) {
 		auto i = gmr.removing_guild->members.find(gmr.removed->id);
 		if (i != gmr.removing_guild->members.end()) {
+			dpp::user* u = dpp::find_user(gmr.removed->id);
+			if (u) {
+				u->refcount--;
+				if (u->refcount < 1) {
+					dpp::get_user_cache()->remove(u);
+				}
+			}
 			delete i->second;
 			gmr.removing_guild->members.erase(i);
 		}
