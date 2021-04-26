@@ -440,7 +440,6 @@ guild& guild::fill_from_json(DiscordClient* shard, nlohmann::json* d) {
 		if (!dsc.empty()) {
 			this->set_description(dsc);
 		}
-		this->voice_members.clear();
 		if (d->find("voice_states") != d->end()) {
 			for (auto & vm : (*d)["voice_states"]) {
 				voicestate vs;

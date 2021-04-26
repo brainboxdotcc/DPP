@@ -43,9 +43,19 @@ namespace dpp {
 		std::mutex cache_mutex;
 
 		/** Cached items */
-		cache_container cache_map;
+		cache_container* cache_map;
 
 	public:
+
+		/**
+		 * @brief Construct a new cache object
+		 */
+		cache();
+
+		/**
+		 * @brief Destroy the cache object
+		 */
+		~cache();
 
 		/** Store an object in the cache.
 		 * @param object object to store
@@ -84,6 +94,19 @@ namespace dpp {
 		 * @return cache_container& A reference to the cache's container map
 		 */
 		cache_container& get_container();
+
+		/**
+		 * @brief "Rehash" a cache by cleaning out used RAM
+		 * @warning May be time consuming!
+		 */
+		void rehash();
+
+		/**
+		 * @brief Get "real" size in RAM of the cache
+		 * 
+		 * @return size_t 
+		 */
+		size_t bytes();
 
 	};
 

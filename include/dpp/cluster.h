@@ -34,6 +34,9 @@ using  json = nlohmann::json;
 
 namespace dpp {
 
+/**
+ * @brief A list of shards
+ */
 typedef std::map<uint32_t, class DiscordClient*> shard_list;
 
 /**
@@ -298,7 +301,10 @@ public:
 	void on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when a log message is to be written to the log.
+	 * You can attach any logging system here you wish, e.g. spdlog, or even just a simple
+	 * use of std::cout or printf. If nothing attaches this log event, then the
+	 * library will be silent.
 	 * 
 	 * @param _log  User function to attach to event
 	 */
@@ -313,343 +319,400 @@ public:
 	void on_guild_join_request_delete(std::function<void(const guild_join_request_delete_t& _event)> _guild_join_request_delete);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new interaction is created.
+	 * Interactions are created by discord when commands you have registered are issued
+	 * by a user. For an example of this in action please see \ref slashcommands
 	 * 
 	 * @param _interaction_create  User function to attach to event
 	 */
 	void on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);
 
 	/**
-	 * @brief 
+	 * @brief Called when a guild is deleted.
+	 * A guild can be deleted via the bot being kicked, the bot leaving the guild
+	 * explicitly with dpp::guild_delete, or via the guild being unavaialble due to
+	 * an outage.
 	 * 
 	 * @param _guild_delete  User function to attach to event
 	 */
 	void on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete);
 
 	/**
-	 * @brief 
+	 * @brief Called when a channel is deleted from a guild.
+	 * The channel will still be temporarily avaialble in the cache. Pointers to the
+	 * channel should not be retained long-term as they will be deleted by the garbage
+	 * collector.
 	 * 
 	 * @param _channel_delete  User function to attach to event
 	 */
 	void on_channel_delete (std::function<void(const channel_delete_t& _event)> _channel_delete);
 
 	/**
-	 * @brief 
+	 * @brief Called when a channel is edited on a guild.
+	 * The new channel details have already been applied to the guild when you
+	 * receive this event.
 	 * 
 	 * @param _channel_update  User function to attach to event
 	 */
 	void on_channel_update (std::function<void(const channel_update_t& _event)> _channel_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when a shard is connected and ready.
+	 * A set of on_guild_create events will follow this event.
 	 * 
 	 * @param _ready  User function to attach to event
 	 */
 	void on_ready (std::function<void(const ready_t& _event)> _ready);
 
 	/**
-	 * @brief 
+	 * @brief Called when a message is deleted.
+	 * The message has already been deleted from Discord when you 
+	 * receive this event.
 	 * 
 	 * @param _message_delete  User function to attach to event
 	 */
 	void on_message_delete (std::function<void(const message_delete_t& _event)> _message_delete);
 
 	/**
-	 * @brief 
+	 * @brief Called when an application command (slash command) is deleted.
 	 * 
 	 * @param _application_command_delete  User function to attach to event
 	 */
 	void on_application_command_delete (std::function<void(const application_command_delete_t& _event)> _application_command_delete);
 
 	/**
-	 * @brief 
+	 * @brief Called when a user leaves a guild (either through being kicked, or choosing to leave)
 	 * 
 	 * @param _guild_member_remove  User function to attach to event
 	 */
 	void on_guild_member_remove (std::function<void(const guild_member_remove_t& _event)> _guild_member_remove);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new application command (slash command) is registered.
 	 * 
 	 * @param _application_command_create  User function to attach to event
 	 */
 	void on_application_command_create (std::function<void(const application_command_create_t& _event)> _application_command_create);
 
 	/**
-	 * @brief 
+	 * @brief Called when a connection to a shard successfully resumes.
+	 * A resumed session does not need to re-synchronise guilds, members, etc.
+	 * This is generally non-fatal and informational only.
 	 * 
 	 * @param _resumed  User function to attach to event
 	 */
 	void on_resumed (std::function<void(const resumed_t& _event)> _resumed);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new role is created on a guild.
 	 * 
 	 * @param _guild_role_create  User function to attach to event
 	 */
 	void on_guild_role_create (std::function<void(const guild_role_create_t& _event)> _guild_role_create);
 
 	/**
-	 * @brief 
+	 * @brief Called when a user is typing on a channel.
 	 * 
 	 * @param _typing_start  User function to attach to event
 	 */
 	void on_typing_start (std::function<void(const typing_start_t& _event)> _typing_start);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new reaction is added to a message.
 	 * 
 	 * @param _message_reaction_add  User function to attach to event
 	 */
 	void on_message_reaction_add (std::function<void(const message_reaction_add_t& _event)> _message_reaction_add);
 
 	/**
-	 * @brief 
+	 * @brief Called when a set of members is received for a guild.
+	 * D++ will request these for all new guilds if needed, after the on_guild_create
+	 * events.
 	 * 
 	 * @param _guild_members_chunk  User function to attach to event
 	 */
 	void on_guild_members_chunk (std::function<void(const guild_members_chunk_t& _event)> _guild_members_chunk);
 
 	/**
-	 * @brief 
+	 * @brief Called when a single reaction is removed from a message.
 	 * 
 	 * @param _message_reaction_remove  User function to attach to event
 	 */
 	void on_message_reaction_remove (std::function<void(const message_reaction_remove_t& _event)> _message_reaction_remove);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new guild is created.
+	 * D++ will request members for the guild for its cache using guild_members_chunk.
 	 * 
 	 * @param _guild_create  User function to attach to event
 	 */
 	void on_guild_create (std::function<void(const guild_create_t& _event)> _guild_create);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new channel is created on a guild.
 	 * 
 	 * @param _channel_create  User function to attach to event
 	 */
 	void on_channel_create (std::function<void(const channel_create_t& _event)> _channel_create);
 
 	/**
-	 * @brief 
+	 * @brief Called when all reactions for a particular emoji are removed from a message.
 	 * 
 	 * @param _message_reaction_remove_emoji  User function to attach to event
 	 */
 	void on_message_reaction_remove_emoji (std::function<void(const message_reaction_remove_emoji_t& _event)> _message_reaction_remove_emoji);
 
 	/**
-	 * @brief 
+	 * @brief Called when multiple messages are deleted from a channel or DM.
 	 * 
 	 * @param _message_delete_bulk  User function to attach to event
 	 */
 	void on_message_delete_bulk (std::function<void(const message_delete_bulk_t& _event)> _message_delete_bulk);
 
 	/**
-	 * @brief 
+	 * @brief Called when an existing role is updated on a guild.
 	 * 
 	 * @param _guild_role_update  User function to attach to event
 	 */
 	void on_guild_role_update (std::function<void(const guild_role_update_t& _event)> _guild_role_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when a role is deleted in a guild.
 	 * 
 	 * @param _guild_role_delete  User function to attach to event
 	 */
 	void on_guild_role_delete (std::function<void(const guild_role_delete_t& _event)> _guild_role_delete);
 
 	/**
-	 * @brief 
+	 * @brief Called when a message is pinned.
+	 * Note that the pinned message is not returned to this event, just the timestamp
+	 * of the last pinned message.
 	 * 
 	 * @param _channel_pins_update  User function to attach to event
 	 */
 	void on_channel_pins_update (std::function<void(const channel_pins_update_t& _event)> _channel_pins_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when all reactions are removed from a message.
 	 * 
 	 * @param _message_reaction_remove_all  User function to attach to event
 	 */
 	void on_message_reaction_remove_all (std::function<void(const message_reaction_remove_all_t& _event)> _message_reaction_remove_all);
 
 	/**
-	 * @brief 
+	 * @brief Called when we are told which voice server we can use.
+	 * This will be sent either when we establish a new voice channel connection,
+	 * or as discord rearrange their infrastructure.
 	 * 
 	 * @param _voice_server_update  User function to attach to event
 	 */
 	void on_voice_server_update (std::function<void(const voice_server_update_t& _event)> _voice_server_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when new emojis are added to a guild.
+	 * The complete set of emojis is sent every time.
 	 * 
 	 * @param _guild_emojis_update  User function to attach to event
 	 */
 	void on_guild_emojis_update (std::function<void(const guild_emojis_update_t& _event)> _guild_emojis_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when a user's presence is updated.
+	 * To receive these you will need the GUILD_PRESENCES privileged intent.
+	 * You will receive many of these, very often, and receiving them will significaintly
+	 * increase your bot's CPU usage. If you don't need them it is recommended to not ask
+	 * for them.
 	 * 
 	 * @param _presence_update  User function to attach to event
 	 */
 	void on_presence_update (std::function<void(const presence_update_t& _event)> _presence_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when the webhooks for a guild are updated.
 	 * 
 	 * @param _webhooks_update  User function to attach to event
 	 */
 	void on_webhooks_update (std::function<void(const webhooks_update_t& _event)> _webhooks_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new member joins a guild.
 	 * 
 	 * @param _guild_member_add  User function to attach to event
 	 */
 	void on_guild_member_add (std::function<void(const guild_member_add_t& _event)> _guild_member_add);
 
 	/**
-	 * @brief 
+	 * @brief Called when an invite is deleted from a guild.
 	 * 
 	 * @param _invite_delete  User function to attach to event
 	 */
 	void on_invite_delete (std::function<void(const invite_delete_t& _event)> _invite_delete);
 
 	/**
-	 * @brief 
+	 * @brief Called when details of a guild are updated.
 	 * 
 	 * @param _guild_update  User function to attach to event
 	 */
 	void on_guild_update (std::function<void(const guild_update_t& _event)> _guild_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when an integration is updated for a guild.
+	 * This returns the complete list.
+	 * An integration is a connection to a guild of a user's associated accounts,
+	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 * 
 	 * @param _guild_integrations_update  User function to attach to event
 	 */
 	void on_guild_integrations_update (std::function<void(const guild_integrations_update_t& _event)> _guild_integrations_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when details of a guild member (e.g. their roles or nickname) are updated.
 	 * 
 	 * @param _guild_member_update  User function to attach to event
 	 */
 	void on_guild_member_update (std::function<void(const guild_member_update_t& _event)> _guild_member_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when an application command (slash command) is updated.
+	 * You will only receive this event for application commands that belong to your bot/application.
 	 * 
 	 * @param _application_command_update  User function to attach to event
 	 */
 	void on_application_command_update (std::function<void(const application_command_update_t& _event)> _application_command_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new invite is created for a guild.
 	 * 
 	 * @param _invite_create  User function to attach to event
 	 */
 	void on_invite_create (std::function<void(const invite_create_t& _event)> _invite_create);
 
 	/**
-	 * @brief 
+	 * @brief Called when a message is updated (edited).
 	 * 
 	 * @param _message_update  User function to attach to event
 	 */
 	void on_message_update (std::function<void(const message_update_t& _event)> _message_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when a user is updated.
+	 * This is separate to guild_member_update and includes things such as an avatar change,
+	 * username change, discriminator change or change in subscription status for nitro.
 	 * 
 	 * @param _user_update  User function to attach to event
 	 */
 	void on_user_update (std::function<void(const user_update_t& _event)> _user_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new message arrives from discord.
+	 * Note that D++ does not cache messages. If you want to cache these objects you
+	 * should create something yourself within your bot. Caching of messages is not on
+	 * the roadmap to be supported as it consumes excessive amounts of RAM.
 	 * 
 	 * @param _message_create  User function to attach to event
 	 */
 	void on_message_create (std::function<void(const message_create_t& _event)> _message_create);
 
 	/**
-	 * @brief 
+	 * @brief Called when a ban is added to a guild.
 	 * 
 	 * @param _guild_ban_add  User function to attach to event
 	 */
 	void on_guild_ban_add (std::function<void(const guild_ban_add_t& _event)> _guild_ban_add);
 
 	/**
-	 * @brief 
+	 * @brief Called when a ban is removed from a guild.
 	 * 
 	 * @param _guild_ban_remove  User function to attach to event
 	 */
 	void on_guild_ban_remove (std::function<void(const guild_ban_remove_t& _event)> _guild_ban_remove);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new intgration is attached to a guild by a user.
+	 * An integration is a connection to a guild of a user's associated accounts,
+	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 * 
 	 * @param _integration_create User function to attach to event
 	 */
 	void on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create);
 
 	/**
-	 * @brief 
+	 * @brief Called when an integration is updated by a user.
+	 * This returns details of just the single integration that has changed.
+	 * An integration is a connection to a guild of a user's associated accounts,
+	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 * 
 	 * @param _integration_update User function to attach to event 
 	 */
 	void on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update);
 
 	/**
-	 * @brief 
+	 * @brief Called when an integration is removed by a user.
+	 * An integration is a connection to a guild of a user's associated accounts,
+	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 * 
 	 * @param _integration_delete User function to attach to event
 	 */
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
 
 	/**
-	 * @brief 
+	 * @brief Called when packets are sent from the voice buffer.
+	 * The voice buffer contains packets that are already encoded with Opus and encrypted
+	 * with Sodium, and merged into packets by the repacketizer, which is done in the
+	 * dpp::DiscordVoiceClient::SendAudio method. You should use the buffer size properties
+	 * of dpp::voice_buffer_send_t to determine if you should fill the buffer with more
+	 * content.
 	 * 
 	 * @param _voice_buffer_send User function to attach to event
 	 */
 	void on_voice_buffer_send (std::function<void(const voice_buffer_send_t& _event)> _voice_buffer_send);
 
 	/**
-	 * @brief 
+	 * @brief Called when a user is talking on a voice channel.
 	 * 
 	 * @param _voice_user_talking User function to attach to event
 	 */
-	void on_voice_buffer_send (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking);
+	void on_voice_user_talking (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking);
 
 	/**
-	 * @brief 
+	 * @brief Called when a voice channel is connected and ready to send audio.
+	 * Note that this is not directly attached to the READY event of the websocket,
+	 * as there is further connection that needs to be done before audio is ready to send.
 	 * 
 	 * @param _voice_ready User function to attach to event
 	 */
 	void on_voice_ready (std::function<void(const voice_ready_t& _event)> _voice_ready);
 
 	/**
-	 * @brief 
+	 * @brief Called when new audio data is received.
+	 * @note Receiveing audio for bots is not supported or documented, so this
+	 * endpoint will be triggered at the correct times but the audio buffer will
+	 * always be null and size zero.
 	 * 
 	 * @param _voice_receive User function to attach to event
 	 */
 	void on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive);
 
 	/**
-	 * @brief 
+	 * @brief Called when sending of audio passes over a track marker.
+	 * Track markers are arbitrarily placed "bookmarks" in the audio buffer, placed
+	 * by the bot developer. Each track marker can have a string value associated with it
+	 * which is specified in dpp::DiscordVoiceClient::InsertMarker and returned to this
+	 * event.
 	 * 
 	 * @param _voice_receive User function to attach to event
 	 */
 	void on_voice_track_marker (std::function<void(const voice_track_marker_t& _event)> _voice_track_marker);
 
 	/**
-	 * @brief 
+	 * @brief Called when a new stage instance is created on a stage channel. 
 	 * 
 	 * @param _stage_instance_create User function to attach to event
 	 */
 	void on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create);
 
 	/**
-	 * @brief 
+	 * @brief Called when an existing stage instance is deleted from a stage channel.
 	 * 
 	 * @param _stage_instance_delete User function to attach to event
 	 */
@@ -658,13 +721,13 @@ public:
 	/**
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create
 	 * 
-	 * @param endpoint 
-	 * @param parameters 
-	 * @param method 
-	 * @param postdata 
+	 * @param endpoint Endpoint to post to, e.g. /api/guilds
+	 * @param parameters Major and minor parameters for the API request
+	 * @param method Method, e.g. GET, POST
+	 * @param postdata Post data (usually JSON encoded)
 	 * @param callback Function to call when the HTTP call completes
-	 * @param filename 
-	 * @param filecontent 
+	 * @param filename Filename to post for POST requests (for uploading files)
+	 * @param filecontent File content to post for POST requests (for uploading files)
 	 */
 	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
 
@@ -749,17 +812,17 @@ public:
 	/**
 	 * @brief Create a direct message, also create the channel for the direct message if needed
 	 * 
-	 * @param user_id 
-	 * @param m 
-	 * @param callback 
+	 * @param user_id User ID of user to send message to
+	 * @param m Message object
+	 * @param callback Function to call when the API call completes
 	 */
 	void direct_message_create(snowflake user_id, const message &m, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get a message
 	 * 
-	 * @param message_id 
-	 * @param channel_id 
+	 * @param message_id Message ID
+	 * @param channel_id Channel ID
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
@@ -767,11 +830,11 @@ public:
 	/**
 	 * @brief Get multiple messages 
 	 * 
-	 * @param channel_id 
-	 * @param around 
-	 * @param before 
-	 * @param after 
-	 * @param limit 
+	 * @param channel_id Channel ID to retrieve messages for
+	 * @param around Messages should be retrieved around this ID if this is set to non-zero
+	 * @param before Messages before this ID should be retrieved if this is set to non-zero
+	 * @param after Messages before this ID should be retrieved if this is set to non-zero
+	 * @param limit This number of messages maximum should be returned
 	 * @param callback Function to call when the API call completes
 	 */
 	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
@@ -779,7 +842,7 @@ public:
 	/**
 	 * @brief Send a message to a channel. The callback function is called when the message has been sent
 	 * 
-	 * @param m 
+	 * @param m Message to send
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_create(const struct message &m, command_completion_event_t callback = {});
@@ -787,8 +850,8 @@ public:
 	/**
 	 * @brief Crosspost a message. The callback function is called when the message has been sent
 	 * 
-	 * @param message_id 
-	 * @param channel_id 
+	 * @param message_id Message to crosspost
+	 * @param channel_id Channel ID to crosspost from
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
@@ -796,7 +859,7 @@ public:
 	/**
 	 * @brief Edit a message on a channel. The callback function is called when the message has been edited
 	 * 
-	 * @param m 
+	 * @param m Message to edit
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_edit(const struct message &m, command_completion_event_t callback = {});
@@ -804,8 +867,8 @@ public:
 	/**
 	 * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
 	 * 
-	 * @param m 
-	 * @param reaction 
+	 * @param m Message to add a reaction to
+	 * @param reaction Reaction to add. Emojis should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
@@ -813,8 +876,8 @@ public:
 	/**
 	 * @brief Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character.
 	 * 
-	 * @param m 
-	 * @param reaction 
+	 * @param m Message to delete own reaction from
+	 * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
@@ -822,9 +885,9 @@ public:
 	/**
 	 * @brief Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character
 	 * 
-	 * @param m 
-	 * @param user_id 
-	 * @param reaction 
+	 * @param m Message to delete a user's reaction from
+	 * @param user_id User ID who's reaction you want to remove
+	 * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback = {});
@@ -832,11 +895,11 @@ public:
 	/**
 	 * @brief Get reactions on a message for a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
 	 * 
-	 * @param m 
-	 * @param reaction 
-	 * @param before 
-	 * @param after 
-	 * @param limit 
+	 * @param m Message to get reactions for
+	 * @param reaction Reaction should be in the form emojiname:id or a unicode character
+	 * @param before Reactions before this ID should be retrieved if this is set to non-zero
+	 * @param after Reactions before this ID should be retrieved if this is set to non-zero
+	 * @param limit This number of reactions maximum should be returned
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
@@ -844,7 +907,7 @@ public:
 	/**
 	 * @brief Delete all reactions on a message
 	 * 
-	 * @param m 
+	 * @param m Message to delete reactions from
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_delete_all_reactions(const struct message &m, command_completion_event_t callback = {});
@@ -852,8 +915,8 @@ public:
 	/**
 	 * @brief Delete all reactions on a message using a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
 	 * 
-	 * @param m 
-	 * @param reaction 
+	 * @param m Message to delete reactions from
+	 * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
@@ -861,8 +924,8 @@ public:
 	/**
 	 * @brief Delete a message from a channel. The callback function is called when the message has been edited
 	 * 
-	 * @param message_id 
-	 * @param channel_id 
+	 * @param message_id Message ID to delete
+	 * @param channel_id Channel to delete from
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
@@ -870,8 +933,8 @@ public:
 	/**
 	 * @brief Bulk delete messages from a channel. The callback function is called when the message has been edited
 	 * 
-	 * @param message_ids 
-	 * @param channel_id 
+	 * @param message_ids List of message IDs to delete (maximum of 100 message IDs)
+	 * @param channel_id Channel to delete from
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = {});
@@ -879,7 +942,7 @@ public:
 	/**
 	 * @brief Get a channel
 	 * 
-	 * @param c 
+	 * @param c Channel ID to retrieve
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_get(snowflake c, command_completion_event_t callback);
@@ -887,7 +950,7 @@ public:
 	/**
 	 * @brief Get all channels for a guild
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to retrieve channels for
 	 * @param callback Function to call when the API call completes
 	 */
 	void channels_get(snowflake guild_id, command_completion_event_t callback);
@@ -895,7 +958,7 @@ public:
 	/**
 	 * @brief Create a channel
 	 * 
-	 * @param c 
+	 * @param c Channel to create
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_create(const class channel &c, command_completion_event_t callback = {});
@@ -903,7 +966,7 @@ public:
 	/**
 	 * @brief Edit a channel
 	 * 
-	 * @param c 
+	 * @param c Channel to edit/update
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_edit(const class channel &c, command_completion_event_t callback = {});
@@ -911,7 +974,7 @@ public:
 	/**
 	 * @brief Edit a channel's position
 	 * 
-	 * @param c 
+	 * @param c Channel to change the position for
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_edit_position(const class channel &c, command_completion_event_t callback = {});
@@ -919,11 +982,11 @@ public:
 	/**
 	 * @brief Edit a channel's permissions
 	 * 
-	 * @param c 
-	 * @param overwrite_id 
-	 * @param allow 
-	 * @param deny 
-	 * @param member 
+	 * @param c Channel to set permissions for
+	 * @param overwrite_id Overwrite to change (a user or channel ID)
+	 * @param allow allow permissions
+	 * @param deny deny permissions
+	 * @param member true if the overwrite_id is a user id, false if it is a channel id
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback = {});
@@ -931,7 +994,7 @@ public:
 	/**
 	 * @brief Delete a channel
 	 * 
-	 * @param channel_id 
+	 * @param channel_id Channel id to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_delete(snowflake channel_id, command_completion_event_t callback = {});
@@ -939,7 +1002,7 @@ public:
 	/**
 	 * @brief Get details about an invite
 	 * 
-	 * @param invite 
+	 * @param invite Invite code to get information on
 	 * @param callback Function to call when the API call completes
 	 */
 	void invite_get(const std::string &invite, command_completion_event_t callback);
@@ -947,7 +1010,7 @@ public:
 	/**
 	 * @brief Delete an invite
 	 * 
-	 * @param invite 
+	 * @param invite Invite code to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void invite_delete(const std::string &invite, command_completion_event_t callback = {});
@@ -955,7 +1018,7 @@ public:
 	/**
 	 * @brief Get invites for a channel
 	 * 
-	 * @param c 
+	 * @param c Channel to get invites for
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_invites_get(const class channel &c, command_completion_event_t callback);
@@ -963,8 +1026,8 @@ public:
 	/**
 	 * @brief Create invite for a channel
 	 * 
-	 * @param c 
-	 * @param i 
+	 * @param c Channel to create an invite on
+	 * @param i Invite to create
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback = {});
@@ -972,7 +1035,7 @@ public:
 	/**
 	 * @brief Get a channel's pins
 	 * 
-	 * @param channel_id 
+	 * @param channel_id Channel ID to get pins for
 	 * @param callback Function to call when the API call completes
 	 */
 	void pins_get(snowflake channel_id, command_completion_event_t callback);
@@ -980,10 +1043,10 @@ public:
 	/**
 	 * @brief Adds a recipient to a Group DM using their access token
 	 * 
-	 * @param channel_id 
-	 * @param user_id 
-	 * @param access_token 
-	 * @param nick 
+	 * @param channel_id Channel id to add group DM recipients to
+	 * @param user_id User ID to add
+	 * @param access_token Access token from OAuth2
+	 * @param nick Nickname of user to apply to the chat
 	 * @param callback Function to call when the API call completes
 	 */
 	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback = {});
@@ -991,8 +1054,8 @@ public:
 	/**
 	 * @brief Removes a recipient from a Group DM
 	 * 
-	 * @param channel_id 
-	 * @param user_id 
+	 * @param channel_id Channel ID of group DM
+	 * @param user_id User ID to remove from group DM
 	 * @param callback Function to call when the API call completes
 	 */
 	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback = {});
@@ -1000,8 +1063,8 @@ public:
 	/**
 	 * @brief Remove a permission from a channel
 	 * 
-	 * @param c 
-	 * @param overwrite_id 
+	 * @param c Channel to remove permission from
+	 * @param overwrite_id Overwrite to remove, user or channel ID
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback = {});
@@ -1009,8 +1072,8 @@ public:
 	/**
 	 * @brief Follow a news channel
 	 * 
-	 * @param c 
-	 * @param target_channel_id 
+	 * @param c Channel id to follow
+	 * @param target_channel_id Channel to subscribe the channel to
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback = {});
@@ -1018,7 +1081,7 @@ public:
 	/**
 	 * @brief Trigger channel typing indicator
 	 * 
-	 * @param c 
+	 * @param c Channel to set as typing on
 	 * @param callback Function to call when the API call completes
 	 */
 	void channel_typing(const class channel &c, command_completion_event_t callback = {});
@@ -1026,8 +1089,8 @@ public:
 	/**
 	 * @brief Pin a message
 	 * 
-	 * @param channel_id 
-	 * @param message_id 
+	 * @param channel_id Channel id to pin message on
+	 * @param message_id Message id to pin message on
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
@@ -1035,8 +1098,8 @@ public:
 	/**
 	 * @brief Unpin a message
 	 * 
-	 * @param channel_id 
-	 * @param message_id 
+	 * @param channel_id Channel id to unpin message on
+	 * @param message_id Message id to unpin message on
 	 * @param callback Function to call when the API call completes
 	 */
 	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
@@ -1044,7 +1107,7 @@ public:
 	/**
 	 * @brief Get a guild
 	 * 
-	 * @param g 
+	 * @param g Guild ID to retrieve
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get(snowflake g, command_completion_event_t callback);
@@ -1052,7 +1115,7 @@ public:
 	/**
 	 * @brief Get a guild preview. Returns a guild object but only a subset of the fields will be populated.
 	 * 
-	 * @param g 
+	 * @param g Guild ID to retrieve
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_preview(snowflake g, command_completion_event_t callback);
@@ -1060,8 +1123,8 @@ public:
 	/**
 	 * @brief Get a guild member
 	 * 
-	 * @param guild_id 
-	 * @param user_id 
+	 * @param guild_id Guild ID to get member for
+	 * @param user_id User ID of member to get
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
@@ -1069,7 +1132,7 @@ public:
 	/**
 	 * @brief Get all guild members
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get all members for
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_members(snowflake guild_id, command_completion_event_t callback);
@@ -1077,8 +1140,8 @@ public:
 	/**
 	 * @brief Add guild member. Needs a specific oauth2 scope, from which you get the access_token.
 	 * 
-	 * @param gm 
-	 * @param access_token 
+	 * @param gm Guild member to add
+	 * @param access_token Access token from Oauth2 scope
 	 * @param callback Function to call when the API call completes 
 	 */
 	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback = {});
@@ -1086,7 +1149,7 @@ public:
 	/**
 	 * @brief Edit the properties of an existing guild member
 	 * 
-	 * @param gm 
+	 * @param gm Guild member to edit
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = {});
@@ -1094,8 +1157,8 @@ public:
 	/**
 	 * @brief Change current user nickname
 	 * 
-	 * @param guild_id 
-	 * @param nickname 
+	 * @param guild_id Guild ID to change nickanem on
+	 * @param nickname New nickname, or empty string to clear nickname
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
@@ -1103,9 +1166,9 @@ public:
 	/**
 	 * @brief Add role to guild member
 	 * 
-	 * @param guild_id 
-	 * @param user_id 
-	 * @param role_id 
+	 * @param guild_id Guild ID to add a role to
+	 * @param user_id User ID to add role to
+	 * @param role_id Role ID to add to the user
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
@@ -1113,9 +1176,9 @@ public:
 	/**
 	 * @brief Remove role from guild member
 	 * 
-	 * @param guild_id 
-	 * @param user_id 
-	 * @param role_id 
+	 * @param guild_id Guild ID to remove role from user on
+	 * @param user_id User ID to remove role from
+	 * @param role_id Role to remove
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
@@ -1123,8 +1186,8 @@ public:
 	/**
 	 * @brief Remove (kick) a guild member
 	 * 
-	 * @param guild_id 
-	 * @param user_id 
+	 * @param guild_id Guild ID to kick member from
+	 * @param user_id User ID to kick
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
@@ -1132,10 +1195,10 @@ public:
 	/**
 	 * @brief Add guild ban
 	 * 
-	 * @param guild_id 
-	 * @param user_id 
-	 * @param delete_message_days 
-	 * @param reason 
+	 * @param guild_id Guild ID to add ban to
+	 * @param user_id User ID to ban
+	 * @param delete_message_days How many days of ther user's messages to also delete
+	 * @param reason Reason for ban
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback = {});
@@ -1143,8 +1206,8 @@ public:
 	/**
 	 * @brief Delete guild ban
 	 * 
-	 * @param guild_id 
-	 * @param user_id 
+	 * @param guild_id Guild to delete ban from
+	 * @param user_id User ID to delete ban for
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
@@ -1152,7 +1215,7 @@ public:
 	/**
 	 * @brief Get guild ban list
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get bans for
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_bans(snowflake guild_id, command_completion_event_t callback);
@@ -1160,8 +1223,8 @@ public:
 	/**
 	 * @brief Get single guild ban
 	 * 
-	 * @param guild_id 
-	 * @param user_id 
+	 * @param guild_id Guild ID to get ban for
+	 * @param user_id User ID of ban to retrieve
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_ban(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
@@ -1177,8 +1240,8 @@ public:
 	/**
 	 * @brief Create a new guild based on a template.
 	 * 
-	 * @param code 
-	 * @param name 
+	 * @param code Template code to create guild from
+	 * @param name Guild name to create
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback = {});
@@ -1186,7 +1249,7 @@ public:
 	/**
 	 * @brief Get guild templates
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get templates for
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_templates_get(snowflake guild_id, command_completion_event_t callback);
@@ -1194,9 +1257,9 @@ public:
 	/**
 	 * @brief Creates a template for the guild
 	 * 
-	 * @param guild_id 
-	 * @param name 
-	 * @param description 
+	 * @param guild_id Guild to create template from
+	 * @param name Template name to create
+	 * @param description Description of template to create
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback);
@@ -1204,8 +1267,8 @@ public:
 	/**
 	 * @brief Syncs the template to the guild's current state.
 	 * 
-	 * @param guild_id 
-	 * @param code 
+	 * @param guild_id Guild to synchronise template for
+	 * @param code Code of template to synchronise
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
@@ -1213,10 +1276,10 @@ public:
 	/**
 	 * @brief Modifies the template's metadata.
 	 * 
-	 * @param guild_id 
-	 * @param code 
-	 * @param name 
-	 * @param description 
+	 * @param guild_id Guild ID of template to modify
+	 * @param code Template code to modify
+	 * @param name New name of template
+	 * @param description New description of template
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback = {});
@@ -1224,8 +1287,8 @@ public:
 	/**
 	 * @brief Deletes the template
 	 * 
-	 * @param guild_id 
-	 * @param code 
+	 * @param guild_id Guild ID of template to delete
+	 * @param code Template code to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
@@ -1233,7 +1296,7 @@ public:
 	/**
 	 * @brief Create a guild
 	 * 
-	 * @param g 
+	 * @param g Guild to create
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_create(const class guild &g, command_completion_event_t callback = {});
@@ -1241,7 +1304,7 @@ public:
 	/**
 	 * @brief Edit a guild
 	 * 
-	 * @param g 
+	 * @param g Guild to edit
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_edit(const class guild &g, command_completion_event_t callback = {});
@@ -1249,7 +1312,7 @@ public:
 	/**
 	 * @brief Delete a guild
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_delete(snowflake guild_id, command_completion_event_t callback = {});
@@ -1257,7 +1320,7 @@ public:
 	/**
 	 * @brief Get all emojis for a guild
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get emojis for
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_emojis_get(snowflake guild_id, command_completion_event_t callback);
@@ -1265,8 +1328,8 @@ public:
 	/**
 	 * @brief Get a single emoji
 	 * 
-	 * @param guild_id 
-	 * @param emoji_id 
+	 * @param guild_id Guild ID to get emoji for
+	 * @param emoji_id Emoji ID to get
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_emoji_get(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback);
@@ -1275,8 +1338,8 @@ public:
 	 * @brief Create single emoji.
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
 	 * 
-	 * @param guild_id 
-	 * @param newemoji 
+	 * @param guild_id Guild ID to create emoji om
+	 * @param newemoji Emoji to create
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
@@ -1285,8 +1348,8 @@ public:
 	 * @brief Edit a single emoji.
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
 	 * 
-	 * @param guild_id 
-	 * @param newemoji 
+	 * @param guild_id Guild ID to edit emoji on
+	 * @param newemoji Emoji to edit
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
@@ -1294,8 +1357,8 @@ public:
 	/**
 	 * @brief Delete a guild emoji
 	 * 
-	 * @param guild_id 
-	 * @param emoji_id 
+	 * @param guild_id Guild ID to delete emoji on
+	 * @param emoji_id Emoji ID to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = {});
@@ -1303,8 +1366,8 @@ public:
 	/**
 	 * @brief Get prune counts
 	 * 
-	 * @param guild_id 
-	 * @param pruneinfo 
+	 * @param guild_id Guild ID to count for pruning
+	 * @param pruneinfo Pruning info
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_prune_counts(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback);
@@ -1312,24 +1375,25 @@ public:
 	/**
 	 * @brief Begin guild prune
 	 * 
-	 * @param guild_id 
-	 * @param pruneinfo 
+	 * @param guild_id Guild ID to prune
+	 * @param pruneinfo Pruning info
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Get guild voice regions
+	 * @brief Get guild voice regions.
+	 * Voice regions per guild are somewhat deprecated in preference of per-channel voice regions.
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get voice regions for
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_voice_regions(snowflake guild_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Get the guild invites objectGet guild invites
+	 * @brief Get guild invites
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get invites for
 	 * @param callback Function to call when the API call completes
 	 */
 	void get_guild_invites(snowflake guild_id, command_completion_event_t callback);
@@ -1337,7 +1401,7 @@ public:
 	/**
 	 * @brief Get guild itegrations
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get integrations for
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_integrations(snowflake guild_id, command_completion_event_t callback);
@@ -1345,8 +1409,8 @@ public:
 	/**
 	 * @brief Modify guild integration
 	 * 
-	 * @param guild_id 
-	 * @param i 
+	 * @param guild_id Guild ID to modify integration for
+	 * @param i Integration to modify
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback = {}); 
@@ -1354,8 +1418,8 @@ public:
 	/**
 	 * @brief Delete guild integration
 	 * 
-	 * @param guild_id 
-	 * @param integration_id 
+	 * @param guild_id Guild ID to delete integration for
+	 * @param integration_id Integration ID to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
@@ -1363,8 +1427,8 @@ public:
 	/**
 	 * @brief Sync guild integration
 	 * 
-	 * @param guild_id 
-	 * @param integration_id 
+	 * @param guild_id Guild ID to sync integration on
+	 * @param integration_id Integration ID to synchronise
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
@@ -1372,7 +1436,7 @@ public:
 	/**
 	 * @brief Get guild widget
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get widget for
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_widget(snowflake guild_id, command_completion_event_t callback);
@@ -1380,8 +1444,8 @@ public:
 	/**
 	 * @brief Edit guild widget
 	 * 
-	 * @param guild_id 
-	 * @param gw 
+	 * @param guild_id Guild ID to edit widget for
+	 * @param gw New guild widget information
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback = {});
@@ -1389,7 +1453,7 @@ public:
 	/**
 	 * @brief Get guild vanity url, if enabled
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild to get vanity URL for
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_get_vanity(snowflake guild_id, command_completion_event_t callback);
@@ -1397,40 +1461,40 @@ public:
 	/**
 	 * @brief Create a webhook
 	 * 
-	 * @param w 
+	 * @param w Webhook to create
 	 * @param callback Function to call when the API call completes
 	 */
 	void create_webhook(const class webhook &w, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Get the guild webhooks objectGet guild webhooks
+	 * @brief Get guild webhooks
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get webhooks for
 	 * @param callback Function to call when the API call completes
 	 */
 	void get_guild_webhooks(snowflake guild_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Get the channel webhooks objectGet channel webhooks
+	 * @brief Get channel webhooks
 	 * 
-	 * @param channel_id 
+	 * @param channel_id Channel ID to get webhooks for
 	 * @param callback Function to call when the API call completes
 	 */
 	void get_channel_webhooks(snowflake channel_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Get the webhook objectGet webhook
+	 * @brief Get webhook
 	 * 
-	 * @param webhook_id 
+	 * @param webhook_id Webhook ID to get
 	 * @param callback Function to call when the API call completes
 	 */
 	void get_webhook(snowflake webhook_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Get the webhook with token objectGet webhook using token
+	 * @brief Get webhook using token
 	 * 
-	 * @param webhook_id 
-	 * @param token 
+	 * @param webhook_id Webhook ID to retrieve
+	 * @param token Token of webhook
 	 * @param callback Function to call when the API call completes
 	 */
 	void get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback);
@@ -1438,7 +1502,7 @@ public:
 	/**
 	 * @brief Edit webhook
 	 * 
-	 * @param wh 
+	 * @param wh Webhook to edit
 	 * @param callback Function to call when the API call completes
 	 */
 	void edit_webhook(const class webhook& wh, command_completion_event_t callback = {});
@@ -1446,7 +1510,7 @@ public:
 	/**
 	 * @brief Edit webhook with token (token is encapsulated in the webhook object)
 	 * 
-	 * @param wh 
+	 * @param wh Wehook to edit (should include token)
 	 * @param callback Function to call when the API call completes
 	 */
 	void edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback = {});
@@ -1454,7 +1518,7 @@ public:
 	/**
 	 * @brief Delete a webhook
 	 * 
-	 * @param webhook_id 
+	 * @param webhook_id Webhook ID to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void delete_webhook(snowflake webhook_id, command_completion_event_t callback = {});
@@ -1462,8 +1526,8 @@ public:
 	/**
 	 * @brief Delete webhook with token
 	 * 
-	 * @param webhook_id 
-	 * @param token 
+	 * @param webhook_id Webhook ID to delete
+	 * @param token Token of webhook to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback = {});
@@ -1471,8 +1535,8 @@ public:
 	/**
 	 * @brief Execute webhook
 	 * 
-	 * @param wh 
-	 * @param m 
+	 * @param wh Webhook to execute
+	 * @param m Message to send
 	 * @param callback Function to call when the API call completes
 	 */
 	void execute_webhook(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
@@ -1480,8 +1544,8 @@ public:
 	/**
 	 * @brief Edit webhook message
 	 * 
-	 * @param wh 
-	 * @param m 
+	 * @param wh Webhook to edit message for
+	 * @param m New message
 	 * @param callback Function to call when the API call completes
 	 */
 	void edit_webhook_message(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
@@ -1489,8 +1553,8 @@ public:
 	/**
 	 * @brief Delete webhook message
 	 * 
-	 * @param wh 
-	 * @param message_id 
+	 * @param wh Webhook to delete message for
+	 * @param message_id Message ID to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = {});
@@ -1498,7 +1562,7 @@ public:
 	/**
 	 * @brief Get a role for a guild
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to get role for
 	 * @param callback Function to call when the API call completes
 	 */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
@@ -1506,7 +1570,7 @@ public:
 	/**
 	 * @brief Create a role on a guild
 	 * 
-	 * @param r 
+	 * @param r Role to create (guild ID is encapsulated in the role object)
 	 * @param callback Function to call when the API call completes
 	 */
 	void role_create(const class role &r, command_completion_event_t callback = {});
@@ -1514,7 +1578,7 @@ public:
 	/**
 	 * @brief Edit a role on a guild
 	 * 
-	 * @param r 
+	 * @param r Role to edit
 	 * @param callback Function to call when the API call completes
 	 */
 	void role_edit(const class role &r, command_completion_event_t callback = {});
@@ -1522,7 +1586,7 @@ public:
 	/**
 	 * @brief Edit a role's position in a guild
 	 * 
-	 * @param r 
+	 * @param r Role to change position of
 	 * @param callback Function to call when the API call completes
 	 */
 	void role_edit_position(const class role &r, command_completion_event_t callback = {});
@@ -1530,8 +1594,8 @@ public:
 	/**
 	 * @brief Delete a role
 	 * 
-	 * @param guild_id 
-	 * @param role_id 
+	 * @param guild_id Guild ID to delete the role on
+	 * @param role_id Role ID to delete
 	 * @param callback Function to call when the API call completes
 	 */
 	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback = {});
@@ -1539,7 +1603,7 @@ public:
 	/**
 	 * @brief Get a user by id
 	 * 
-	 * @param user_id 
+	 * @param user_id User ID to retrieve
 	 * @param callback Function to call when the API call completes
 	 */
 	void user_get(snowflake user_id, command_completion_event_t callback);
@@ -1561,9 +1625,9 @@ public:
 	/**
 	 * @brief Edit current (bot) user
 	 * 
-	 * @param nickname 
-	 * @param image_blob 
-	 * @param type 
+	 * @param nickname Nickname to set
+	 * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
+	 * @param type Type of image for avatar
 	 * @param callback Function to call when the API call completes
 	 */
 	void current_user_edit(const std::string &nickname, const std::string& image_blob, image_type type, command_completion_event_t callback = {});
@@ -1578,7 +1642,7 @@ public:
 	/**
 	 * @brief Create a dm channel
 	 * 
-	 * @param user_id 
+	 * @param user_id User ID to create DM channel with
 	 * @param callback Function to call when the API call completes
 	 */
 	void create_dm_channel(snowflake user_id, command_completion_event_t callback = {});
@@ -1586,7 +1650,7 @@ public:
 	/**
 	 * @brief Leave a guild
 	 * 
-	 * @param guild_id 
+	 * @param guild_id Guild ID to leave
 	 * @param callback Function to call when the API call completes
 	 */
 	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = {});

@@ -56,6 +56,7 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 	if (!g->is_unavailable()) {
 		/* Store guild roles */
 		g->roles.clear();
+		g->roles.reserve(d["roles"].size());
 		for (auto & role : d["roles"]) {
 			dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
 			if (!r) {
@@ -68,6 +69,7 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 
 		/* Store guild channels */
 		g->channels.clear();
+		g->channels.reserve(d["channels"].size());
 		for (auto & channel : d["channels"]) {
 			dpp::channel *c = new dpp::channel();
 			c->fill_from_json(&channel);
@@ -78,6 +80,7 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 
 		/* Store guild members */
 		g->members.clear();
+		g->members.reserve(d["members"].size());
 		for (auto & user : d["members"]) {
 			dpp::user* u = dpp::find_user(SnowflakeNotNull(&(user["user"]), "id"));
 			if (!u) {
@@ -91,6 +94,7 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 			g->members[u->id] = gm;
 		}
 		/* Store emojis */
+		g->emojis.reserve(d["emojis"].size());
 		g->emojis.clear();
 		for (auto & emoji : d["emojis"]) {
 			dpp::emoji* e = dpp::find_emoji(SnowflakeNotNull(&emoji, "id"));

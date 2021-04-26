@@ -367,6 +367,31 @@ size_t DiscordClient::GetQueueSize()
 
 void DiscordClient::OneSecondTimer()
 {
+	/* This is important because unordered_map doesnt actually free its buckets
+	 * until it's members are swapped out. Creating an entirely new hash_map
+	 * is an effective way to completely clear this out without argument from STL.
+	 */
+	if (shard_id == 0 && (time(NULL) % 3600) == 0) {
+		/* Every hour, rehash all containers from first shard */
+		size_t old_bytes =	dpp::get_user_cache()->bytes() + 
+					dpp::get_channel_cache()->bytes() +
+					dpp::get_guild_cache()->bytes() +
+					dpp::get_role_cache()->bytes() + 
+					dpp::get_emoji_cache()->bytes();
+		log(dpp::ll_debug, fmt::format("Rehashing; size before rehash={}", old_bytes));
+		dpp::get_user_cache()->rehash();
+		dpp::get_channel_cache()->rehash();
+		dpp::get_guild_cache()->rehash();
+		dpp::get_role_cache()->rehash();
+		dpp::get_emoji_cache()->rehash();
+		size_t new_bytes =	dpp::get_user_cache()->bytes() + 
+					dpp::get_channel_cache()->bytes() +
+					dpp::get_guild_cache()->bytes() +
+					dpp::get_role_cache()->bytes() + 
+					dpp::get_emoji_cache()->bytes();
+		log(dpp::ll_debug, fmt::format("Rehash complete; size after rehash={}", new_bytes));
+	}
+
 	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
 	if (this->IsConnected()) {
 

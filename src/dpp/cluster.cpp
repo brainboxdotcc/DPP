@@ -1440,7 +1440,7 @@ void cluster::on_voice_buffer_send (std::function<void(const voice_buffer_send_t
 	this->dispatch.voice_buffer_send = _voice_buffer_send;
 }
 
-void cluster::on_voice_buffer_send (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking) {
+void cluster::on_voice_user_talking (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking) {
 	this->dispatch.voice_user_talking = _voice_user_talking;
 }
 
