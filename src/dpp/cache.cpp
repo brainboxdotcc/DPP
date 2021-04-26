@@ -64,7 +64,6 @@ void garbage_collection() {
 			}
 		}
 	} while (repeat);
-	deletion_queue = {};
 }
 
 cache::cache() {
