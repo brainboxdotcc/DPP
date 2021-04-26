@@ -64,6 +64,9 @@ void garbage_collection() {
 			}
 		}
 	} while (repeat);
+	if (deletion_queue.size() == 0) {
+		deletion_queue = {};
+	}
 }
 
 cache::cache() {
