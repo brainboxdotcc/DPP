@@ -23,6 +23,7 @@
 #include <iostream>
 #include <variant>
 #include <dpp/cache.h>
+#include <dpp/guild.h>
 
 namespace dpp {
 
@@ -45,28 +46,49 @@ uint64_t counter () { \
 }
 
 
-/* Because other threads and sBecauseystems may run for a short while after an event is received, we don't immediately
+/* Because other threads and systems may run for a short while after an event is received, we don't immediately
  * delete pointers when objects are replaced. We put them into a queue, and periodically delete pointers in the
- * queue.
+ * queue. This also rehashes unordered_maps to ensure they free their memory.
  */
 void garbage_collection() {
 	time_t now = time(NULL);
 	bool repeat = false;
-	std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-	do {
-		repeat = false;
-		for (auto g = deletion_queue.begin(); g != deletion_queue.end(); ++g) {
-			if (now > g->second + 60) {
-				delete g->first;
-				deletion_queue.erase(g);
-				repeat = true;
-				break;
+	{
+		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
+		do {
+			repeat = false;
+			for (auto g = deletion_queue.begin(); g != deletion_queue.end(); ++g) {
+				if (now > g->second + 60) {
+					delete g->first;
+					deletion_queue.erase(g);
+					repeat = true;
+					break;
+				}
 			}
+		} while (repeat);
+		if (deletion_queue.size() == 0) {
+			deletion_queue = {};
 		}
-	} while (repeat);
-	if (deletion_queue.size() == 0) {
-		deletion_queue = {};
 	}
+	dpp::get_user_cache()->rehash();
+	dpp::get_channel_cache()->rehash();
+	dpp::get_guild_cache()->rehash();
+	dpp::get_role_cache()->rehash();
+	dpp::get_emoji_cache()->rehash();
+
+	dpp::cache* c = dpp::get_guild_cache();
+	dpp::cache_container& gc = c->get_container();
+	/* IMPORTANT: We must lock the container to iterate it.
+	 * Only clear these hourly as they are really expensive to do.
+	 */
+	if ((time(NULL) % 3600) == 0) {
+		std::lock_guard<std::mutex> lock(c->get_mutex());
+		for (auto g = gc.begin(); g != gc.end(); ++g) {
+			dpp::guild* gp = (dpp::guild*)g->second;
+			gp->rehash_members();
+		}
+	}
+
 }
 
 cache::cache() {

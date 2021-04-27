@@ -324,12 +324,12 @@ message& message::fill_from_json(json* d) {
 	if (g && d->find("member") != d->end()) {
 		json& mi = (*d)["member"];
 		snowflake uid = SnowflakeNotNull(&mi, "id");
-		auto thismember = g->members.find(uid);
-		if (thismember == g->members.end()) {
+		auto thismember = g->members->find(uid);
+		if (thismember == g->members->end()) {
 			if (authoruser) {
 				guild_member* gm = new guild_member();
 				gm->fill_from_json(&mi, g, authoruser);
-				g->members[authoruser->id] = gm;
+				g->members->insert(std::make_pair(authoruser->id, gm));
 				this->member = gm;
 			}
 		} else {

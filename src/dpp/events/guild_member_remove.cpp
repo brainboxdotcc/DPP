@@ -55,8 +55,8 @@ void guild_member_remove::handle(DiscordClient* client, json &j, const std::stri
 		client->creator->dispatch.guild_member_remove(gmr);
 
 	if (gmr.removing_guild && gmr.removed) {
-		auto i = gmr.removing_guild->members.find(gmr.removed->id);
-		if (i != gmr.removing_guild->members.end()) {
+		auto i = gmr.removing_guild->members->find(gmr.removed->id);
+		if (i != gmr.removing_guild->members->end()) {
 			dpp::user* u = dpp::find_user(gmr.removed->id);
 			if (u) {
 				u->refcount--;
@@ -65,8 +65,9 @@ void guild_member_remove::handle(DiscordClient* client, json &j, const std::stri
 				}
 			}
 			delete i->second;
-			gmr.removing_guild->members.erase(i);
+			gmr.removing_guild->members->erase(i);
 		}
+
 	}
 }
 

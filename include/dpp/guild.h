@@ -75,6 +75,10 @@ enum guild_flags {
 	g_has_animated_icon =			0b100000000000000000000
 };
 
+/** @brief Guild members container
+ */
+typedef std::unordered_map<snowflake, class guild_member*> members_container;
+
 /**
  * @brief Represents a guild on Discord (AKA a server)
  */
@@ -84,6 +88,7 @@ class guild : public managed {
 
 	/** Vanity url code for verified or partnered servers and boost level 3 */
 	char* vanity_url_code;
+
 public:	
 	/** Shard ID of the guild */
 	uint16_t shard_id;
@@ -168,7 +173,7 @@ public:
 	 * This depends upon your dpp::intents and the size of your bot.
 	 * It will be filled by guild member chunk requests.
 	 */
-	std::unordered_map<snowflake, class guild_member*> members;
+	members_container* members;
 
 	/** List of members in voice channels in the guild.
 	 */
@@ -250,6 +255,11 @@ public:
 	 * @return uint64_t Merged permissions bitmask of overwrites.
 	 */
 	uint64_t permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
+
+	/**
+	 * @brief Rehash members map
+	 */
+	void rehash_members();
 
 	/**
 	 * @brief Connect to a voice channel another guild member is in

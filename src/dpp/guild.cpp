@@ -88,9 +88,11 @@ guild::guild() :
 	premium_tier(0),
 	premium_subscription_count(0),
 	public_updates_channel_id(0),
-	max_video_channel_users(0)
+	max_video_channel_users(0),
+	members(nullptr)
 
 {
+	members = new members_container();
 }
 
 guild::~guild()
@@ -102,6 +104,10 @@ guild::~guild()
 	if (this->description) {
 		free(this->description);
 		this->description = nullptr;
+	}
+	if (this->members) {
+		delete members;
+		this->members = nullptr;
 	}
 }
 
@@ -383,6 +389,23 @@ guild::guild(const guild& o) :
 	if (o.vanity_url_code) {
 		vanity_url_code = strdup(o.vanity_url_code);
 	}
+	if (o.members) {
+		members = new members_container();
+		members->reserve(o.members->size());
+		for (auto t = o.members->begin(); t != o.members->end(); ++t) {
+			members->insert(*t);
+		}
+	}
+}
+
+void guild::rehash_members() {
+	members_container* n = new members_container();
+	n->reserve(members->size());
+	for (auto t = members->begin(); t != members->end(); ++t) {
+		n->insert(*t);
+	}
+	delete members;
+	members = n;
 }
 
 
@@ -482,8 +505,8 @@ uint64_t guild::base_permissions(const user* member) const
 		return ~0;
 
 	role* everyone = dpp::find_role(id);
-	auto mi = members.find(member->id);
-	if (mi == members.end())
+	auto mi = members->find(member->id);
+	if (mi == members->end())
 		return 0;
 	guild_member* gm = mi->second;
 
@@ -514,8 +537,8 @@ uint64_t guild::permission_overwrites(const uint64_t base_permissions, const use
 		}
 	}
 
-	auto mi = members.find(member->id);
-	if (mi == members.end())
+	auto mi = members->find(member->id);
+	if (mi == members->end())
 		return 0;
 	guild_member* gm = mi->second;
 	uint64_t allow = 0;

@@ -371,25 +371,9 @@ void DiscordClient::OneSecondTimer()
 	 * until it's members are swapped out. Creating an entirely new hash_map
 	 * is an effective way to completely clear this out without argument from STL.
 	 */
-	if (shard_id == 0 && (time(NULL) % 600) == 0) {
-		/* Every 10 mins, rehash all containers from first shard */
-		size_t old_bytes =	dpp::get_user_cache()->bytes() + 
-					dpp::get_channel_cache()->bytes() +
-					dpp::get_guild_cache()->bytes() +
-					dpp::get_role_cache()->bytes() + 
-					dpp::get_emoji_cache()->bytes();
-		log(dpp::ll_debug, fmt::format("Rehashing; size before rehash={}", old_bytes));
-		dpp::get_user_cache()->rehash();
-		dpp::get_channel_cache()->rehash();
-		dpp::get_guild_cache()->rehash();
-		dpp::get_role_cache()->rehash();
-		dpp::get_emoji_cache()->rehash();
-		size_t new_bytes =	dpp::get_user_cache()->bytes() + 
-					dpp::get_channel_cache()->bytes() +
-					dpp::get_guild_cache()->bytes() +
-					dpp::get_role_cache()->bytes() + 
-					dpp::get_emoji_cache()->bytes();
-		log(dpp::ll_debug, fmt::format("Rehash complete; size after rehash={}", new_bytes));
+	if (shard_id == 0 && (time(NULL) % 60) == 0) {
+		/* Every minute, rehash all containers from first shard */
+		dpp::garbage_collection();
 	}
 
 	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
@@ -424,7 +408,6 @@ void DiscordClient::OneSecondTimer()
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 				QueueMessage(json({{"op", 1}, {"d", last_seq}}).dump(), true);
 				last_heartbeat = time(NULL);
-				dpp::garbage_collection();
 			}
 		}
 	}
@@ -454,7 +437,7 @@ uint64_t DiscordClient::GetMemberCount() {
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
-			total += gp->members.size();
+			total += gp->members->size();
 		}
 	}
 	return total;

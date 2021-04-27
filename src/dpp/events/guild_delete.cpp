@@ -67,18 +67,17 @@ void guild_delete::handle(DiscordClient* client, json &j, const std::string &raw
 					dpp::get_channel_cache()->remove(ch);
 				}
 			}
-			for (auto & gm : g->members) {
-				dpp::user* u = dpp::find_user(gm.second->user_id);
+			for (auto gm = g->members->begin(); gm != g->members->end(); ++gm) {
+				dpp::user* u = dpp::find_user(gm->second->user_id);
 				if (u) {
 					u->refcount--;
 					if (u->refcount < 1) {
 						dpp::get_user_cache()->remove(u);
 					}
 				}
-				delete gm.second;
+				delete gm->second;
 			}
-			g->members.clear();
-
+			g->members->clear();
 		} else {
 			g->flags |= dpp::g_unavailable;
 		}
