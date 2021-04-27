@@ -81,6 +81,17 @@ include_directories( "include" )
 target_link_libraries(test)
 
 find_package(Git QUIET)
+
+if(NOT GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+	message(FATAL_ERROR "You are using a git version of D++ but do not have git installed. Install git (not 'gh') and try again.")
+endif()
+
+if (EXISTS "${PROJECT_SOURCE_DIR}/.git")
+	message("-- Building ${Green}git${ColourReset} version. ${Green}Be aware git versions may be unstable!${ColourReset}")
+else()
+	message("-- Building ${Green}stable${ColourReset} version ${Green}${DPP_VERSION}${ColourReset}")
+endif()
+
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 # Update submodules as needed
         message(STATUS "Submodule update")
@@ -134,6 +145,11 @@ endforeach(fullmodname)
 
 target_compile_features(dpp PRIVATE cxx_std_17)
 target_link_libraries(test PUBLIC dpp fmt)
+
+# message("Type ${Green}make -j${ColourReset} to build D++ then ${Green}sudo make install${ColourReset}")
+
+add_custom_command(TARGET dpp
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostBuild.cmake)
 
 # Installation
 
