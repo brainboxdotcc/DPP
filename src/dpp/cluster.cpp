@@ -176,7 +176,9 @@ gateway::gateway(nlohmann::json* j) {
 void cluster::set_presence(const dpp::presence &p) {
 	std::string string_presence = p.build_json();
 	for (auto& s : shards) {
-		s.second->QueueMessage(string_presence, true);
+		if (s.second->IsConnected()) {
+			s.second->QueueMessage(string_presence);
+		}
 	}
 }
 

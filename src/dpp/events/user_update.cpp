@@ -49,12 +49,14 @@ void user_update::handle(DiscordClient* client, json &j, const std::string &raw)
 	dpp::snowflake user_id = SnowflakeNotNull(&d, "id");
 	if (user_id) {
 		dpp::user* u = dpp::find_user(user_id);
-		u->fill_from_json(&d);
+		if (u) {
+			u->fill_from_json(&d);
 
-		if (client->creator->dispatch.user_update) {
-			dpp::user_update_t uu(client, raw);
-			uu.updated = u;
-			client->creator->dispatch.user_update(uu);
+			if (client->creator->dispatch.user_update) {
+				dpp::user_update_t uu(client, raw);
+				uu.updated = u;
+				client->creator->dispatch.user_update(uu);
+			}
 		}
 
 	}

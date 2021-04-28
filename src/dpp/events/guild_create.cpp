@@ -94,6 +94,8 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 					u = new dpp::user();
 					u->fill_from_json(&(user["user"]));
 					dpp::get_user_cache()->store(u);
+				} else {
+					u->refcount++;
 				}
 				dpp::guild_member* gm = new dpp::guild_member();
 				gm->fill_from_json(&(user["user"]), g, u);
