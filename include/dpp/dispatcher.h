@@ -690,6 +690,7 @@ struct voice_ready_t : public event_dispatch_t {
 	 */
 	voice_ready_t(class DiscordClient* client, const std::string &raw);
 	class DiscordVoiceClient* voice_client;
+	snowflake voice_channel_id;
 };
 
 /** @brief voice receive packet */

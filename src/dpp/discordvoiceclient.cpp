@@ -239,6 +239,7 @@ bool DiscordVoiceClient::HandleFrame(const std::string &data)
 				if (creator->dispatch.voice_ready) {
 					voice_ready_t rdy(nullptr, data);
 					rdy.voice_client = this;
+					rdy.voice_channel_id = this->channel_id;
 					creator->dispatch.voice_ready(rdy);
 				}
 			}
