@@ -83,12 +83,6 @@ typedef std::unordered_map<snowflake, class guild_member*> members_container;
  * @brief Represents a guild on Discord (AKA a server)
  */
 class guild : public managed {
-	/** Server description for communities */
-	char* description;
-
-	/** Vanity url code for verified or partnered servers and boost level 3 */
-	char* vanity_url_code;
-
 public:	
 	/** Shard ID of the guild */
 	uint16_t shard_id;
@@ -98,6 +92,12 @@ public:
 
 	/** Guild name */
 	std::string name;
+
+	/** Server description for communities */
+	std::string description;
+
+	/** Vanity url code for verified or partnered servers and boost level 3 */
+	std::string vanity_url_code;
 
 	/** Guild icon hash */
 	utility::iconhash icon;
@@ -173,7 +173,7 @@ public:
 	 * This depends upon your dpp::intents and the size of your bot.
 	 * It will be filled by guild member chunk requests.
 	 */
-	members_container* members;
+	members_container members;
 
 	/** List of members in voice channels in the guild.
 	 */
@@ -186,15 +186,6 @@ public:
 	/** Default constructor, zeroes all values */
 	guild();
 
-	/**
-	 * @brief Non-trivial copy constructor
-	 * @sideeffect Allocates raw pointers if needed
-	 */
-	guild(const guild&);
-
-	/** Destructor */
-	~guild();
-
 	/** Read class values from json object
 	 * @param shard originating shard
 	 * @param j A json object to read from
@@ -206,34 +197,6 @@ public:
 	 * @param with_id True if an ID is to be included in the JSON
 	 */
 	std::string build_json(bool with_id = false) const;
-
-	/**
-	 * @brief Set the vanity url for the guild
-	 * 
-	 * @param _url the vanity url to set
-	 */
-	void set_vanity_url(const std::string &_url);
-
-	/**
-	 * @brief Get the vanity url of the guild
-	 * 
-	 * @return std::string Vanity url or guild or empty string
-	 */
-	std::string get_vanity_url() const;
-
-	/**
-	 * @brief Set the description of the guild (for communities)
-	 * 
-	 * @param _desc The community description to set
-	 */
-	void set_description(const std::string &_desc);
-
-	/**
-	 * @brief Get the description of the guild
-	 * 
-	 * @return std::string description of guild or empty string
-	 */
-	std::string get_description() const;
 
 	/**
 	 * @brief Get the base permissions for a member on this guild,
@@ -382,9 +345,9 @@ enum guild_member_flags {
  * @brief Represents dpp::user membership upon a dpp::guild
  */
 class guild_member {
-	/** Nickname, or nullptr if they don't have a nickname on this guild */
-	char* nickname;
 public:
+	/** Nickname, or nullptr if they don't have a nickname on this guild */
+	std::string nickname;
 	/** Guild id */
 	snowflake guild_id;
 	/** User id */
@@ -400,18 +363,6 @@ public:
 
 	/** Default constructor */
 	guild_member();
-
-	/**
-	 * @brief Construct a new guild member object
-	 */
-	guild_member(const guild_member&);
-
-	/** Default destructor */
-	~guild_member();
-
-	void set_nickname(const std::string &_nickname);
-
-	std::string get_nickname() const;
 
 	/** Fill this object from a json object.
 	 * @param j The json object to get data from

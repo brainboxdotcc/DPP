@@ -88,28 +88,10 @@ guild::guild() :
 	premium_tier(0),
 	premium_subscription_count(0),
 	public_updates_channel_id(0),
-	max_video_channel_users(0),
-	members(nullptr)
-
+	max_video_channel_users(0)
 {
-	members = new members_container();
 }
 
-guild::~guild()
-{
-	if (this->vanity_url_code) {
-		free(this->vanity_url_code);
-		this->vanity_url_code = nullptr;
-	}
-	if (this->description) {
-		free(this->description);
-		this->description = nullptr;
-	}
-	if (this->members) {
-		delete members;
-		this->members = nullptr;
-	}
-}
 
 guild_member::guild_member() :
 	nickname(nullptr),
@@ -120,42 +102,14 @@ guild_member::guild_member() :
 {
 }
 
-guild_member::~guild_member()
-{
-	if (this->nickname) {
-		free(this->nickname);
-		this->nickname = nullptr;
-	}
-}
-
-void guild_member::set_nickname(const std::string &_nickname) {
-	if (this->nickname) {
-		free(this->nickname);
-		this->nickname = nullptr;
-	}
-	this->nickname = strdup(_nickname.c_str());
-}
-
-std::string guild_member::get_nickname() const {
-	if (this->nickname) {
-		return this->nickname;
-	} else {
-		return "";
-	}
-}
-
 guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user* u) {
-	if (this->nickname) {
-		free(this->nickname);
-		this->nickname = nullptr;
-	}
 	if (g)
 		this->guild_id = g->id;
 	if (u)
 		this->user_id = u->id;
 	std::string nick = StringNotNull(j, "nickname");
 	if (!nick.empty()) {
-		this->set_nickname(nick);
+		this->nickname = nick;
 	}
 	this->joined_at = TimestampNotNull(j, "joined_at");
 	this->premium_since = TimestampNotNull(j, "premium_since");
@@ -168,24 +122,10 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, co
 	return *this;
 }
 
-guild_member::guild_member(const guild_member& o) :
-	guild_id(o.guild_id),
-	user_id(o.user_id),
-	roles(o.roles),
-	joined_at(o.joined_at),
-	premium_since(o.premium_since),
-	flags(o.flags),
-	nickname(nullptr)
-{
-	if (o.nickname) {
-		nickname = strdup(o.nickname);
-	}
-}
-
 std::string guild_member::build_json() const {
 	json j;
-	if (this->nickname)
-		j["nick"] = this->get_nickname();
+	if (!this->nickname.empty())
+		j["nick"] = this->nickname;
 	if (this->roles.size()) {
 		j["roles"] = {};
 		for (auto & role : roles) {
@@ -312,99 +252,21 @@ std::string guild::build_json(bool with_id) const {
 	if (rules_channel_id) {
 		j["rules_channel_id"] = rules_channel_id;
 	}
-	if (vanity_url_code) {
-		j["vanity_url_code"] = get_vanity_url();
+	if (!vanity_url_code.empty()) {
+		j["vanity_url_code"] = vanity_url_code;
 	}
-	if (description) {
-		j["description"] = get_description();
+	if (!description.empty()) {
+		j["description"] = description;
 	}
 	return j.dump();
 }
 
-void guild::set_vanity_url(const std::string &_url) {
-	if (this->vanity_url_code) {
-		free(this->vanity_url_code);
-	}
-	this->vanity_url_code = strdup(_url.c_str());
-}
-
-std::string guild::get_vanity_url() const {
-	if (this->vanity_url_code) {
-		return this->vanity_url_code;
-	} else {
-		return "";
-	}
-}
-
-void guild::set_description(const std::string &_desc) {
-	if (this->description) {
-		free(this->description);
-	}
-	this->description = strdup(_desc.c_str());
-}
-
-std::string guild::get_description() const {
-	if (this->description) {
-		return this->description;
-	} else {
-		return "";
-	}
-}
-
-guild::guild(const guild& o) :
-	shard_id(o.shard_id),
-	flags(o.flags),
-	name(o.name),
-	icon(o.icon),
-	splash(o.splash),
-	discovery_splash(o.discovery_splash),
-	owner_id(o.owner_id),
-	voice_region(o.voice_region),
-	afk_channel_id(o.afk_channel_id),
-	afk_timeout(o.afk_timeout),
-	widget_channel_id(o.widget_channel_id),
-	verification_level(o.verification_level),
-	default_message_notifications(o.default_message_notifications),
-	explicit_content_filter(o.explicit_content_filter),
-	mfa_level(o.mfa_level),
-	application_id(o.application_id),
-	system_channel_id(o.system_channel_id),
-	rules_channel_id(o.rules_channel_id),
-	member_count(o.member_count),
-	banner(o.banner),
-	premium_tier(o.premium_tier),
-	premium_subscription_count(o.premium_subscription_count),
-	public_updates_channel_id(o.public_updates_channel_id),
-	max_video_channel_users(o.max_video_channel_users),
-	roles(o.roles),
-	channels(o.channels),
-	members(o.members),
-	emojis(o.emojis),
-	description(nullptr),
-	vanity_url_code(nullptr)
-{
-	if (o.description) {
-		description = strdup(o.description);
-	}
-	if (o.vanity_url_code) {
-		vanity_url_code = strdup(o.vanity_url_code);
-	}
-	if (o.members) {
-		members = new members_container();
-		members->reserve(o.members->size());
-		for (auto t = o.members->begin(); t != o.members->end(); ++t) {
-			members->insert(*t);
-		}
-	}
-}
-
 void guild::rehash_members() {
-	members_container* n = new members_container();
-	n->reserve(members->size());
-	for (auto t = members->begin(); t != members->end(); ++t) {
-		n->insert(*t);
+	members_container n;
+	n.reserve(members.size());
+	for (auto t = members.begin(); t != members.end(); ++t) {
+		n.insert(*t);
 	}
-	delete members;
 	members = n;
 }
 
@@ -457,11 +319,11 @@ guild& guild::fill_from_json(DiscordClient* shard, nlohmann::json* d) {
 		this->member_count = Int32NotNull(d, "member_count");
 		std::string vanity = StringNotNull(d, "vanity_url_code");
 		if (!vanity.empty()) {
-			this->set_vanity_url(vanity);
+			this->vanity_url_code = vanity;
 		}
 		std::string dsc = StringNotNull(d, "description");
 		if (!dsc.empty()) {
-			this->set_description(dsc);
+			this->description = dsc;
 		}
 		if (d->find("voice_states") != d->end()) {
 			for (auto & vm : (*d)["voice_states"]) {
@@ -505,8 +367,8 @@ uint64_t guild::base_permissions(const user* member) const
 		return ~0;
 
 	role* everyone = dpp::find_role(id);
-	auto mi = members->find(member->id);
-	if (mi == members->end())
+	auto mi = members.find(member->id);
+	if (mi == members.end())
 		return 0;
 	guild_member* gm = mi->second;
 
@@ -537,8 +399,8 @@ uint64_t guild::permission_overwrites(const uint64_t base_permissions, const use
 		}
 	}
 
-	auto mi = members->find(member->id);
-	if (mi == members->end())
+	auto mi = members.find(member->id);
+	if (mi == members.end())
 		return 0;
 	guild_member* gm = mi->second;
 	uint64_t allow = 0;

@@ -437,7 +437,7 @@ uint64_t DiscordClient::GetMemberCount() {
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
-			total += gp->members->size();
+			total += gp->members.size();
 		}
 	}
 	return total;

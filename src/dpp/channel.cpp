@@ -187,7 +187,7 @@ std::map<snowflake, guild_member*> channel::get_members() {
 	std::map<snowflake, guild_member*> rv;
 	guild* g = dpp::find_guild(guild_id);
 	if (g) {
-		for (auto m = g->members->begin(); m != g->members->end(); ++m) {
+		for (auto m = g->members.begin(); m != g->members.end(); ++m) {
 			user* u = dpp::find_user(m->second->user_id);
 			if (u) {
 				if (get_user_permissions(u) & p_view_channel) {

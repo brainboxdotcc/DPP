@@ -84,11 +84,11 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 		}
 
 		/* Store guild members */
-		g->members->reserve(d["members"].size());
+		g->members.reserve(d["members"].size());
 		for (auto & user : d["members"]) {
 			snowflake userid = SnowflakeNotNull(&(user["user"]), "id");
 			/* Only store ones we don't have already otherwise gm will leak */
-			if (g->members->find(userid) == g->members->end()) {
+			if (g->members.find(userid) == g->members.end()) {
 				dpp::user* u = dpp::find_user(userid);
 				if (!u) {
 					u = new dpp::user();
@@ -99,7 +99,7 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 				}
 				dpp::guild_member* gm = new dpp::guild_member();
 				gm->fill_from_json(&(user["user"]), g, u);
-				g->members->insert(std::make_pair(u->id, gm));
+				g->members.insert(std::make_pair(u->id, gm));
 			}
 		}
 		/* Store emojis */

@@ -57,10 +57,10 @@ void guild_members_chunk::handle(DiscordClient* client, json &j, const std::stri
 				u->fill_from_json(&userspart);
 				dpp::get_user_cache()->store(u);
 			}
-			if (g->members->find(u->id) == g->members->end()) {
+			if (g->members.find(u->id) == g->members.end()) {
 				dpp::guild_member* gm = new dpp::guild_member();
 				gm->fill_from_json(&userrec, g, u);
-				g->members->insert(std::make_pair(u->id, gm));
+				g->members.insert(std::make_pair(u->id, gm));
 				if (client->creator->dispatch.guild_members_chunk)
 					um[u->id] = *gm;
 			}

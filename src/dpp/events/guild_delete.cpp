@@ -67,7 +67,7 @@ void guild_delete::handle(DiscordClient* client, json &j, const std::string &raw
 					dpp::get_channel_cache()->remove(ch);
 				}
 			}
-			for (auto gm = g->members->begin(); gm != g->members->end(); ++gm) {
+			for (auto gm = g->members.begin(); gm != g->members.end(); ++gm) {
 				dpp::user* u = dpp::find_user(gm->second->user_id);
 				if (u) {
 					u->refcount--;
@@ -77,7 +77,7 @@ void guild_delete::handle(DiscordClient* client, json &j, const std::string &raw
 				}
 				delete gm->second;
 			}
-			g->members->clear();
+			g->members.clear();
 		} else {
 			g->flags |= dpp::g_unavailable;
 		}
