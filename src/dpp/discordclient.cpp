@@ -103,10 +103,10 @@ void DiscordClient::ThreadRun()
 {
 	SetupZLib();
 	do {
-		SSLClient::ReadLoop();
-		SSLClient::close();
 		ready = false;
 		message_queue.clear();
+		SSLClient::ReadLoop();
+		SSLClient::close();
 		EndZLib();
 		SetupZLib();
 		SSLClient::Connect();

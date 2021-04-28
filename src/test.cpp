@@ -32,7 +32,7 @@ int main(int argc, char const *argv[])
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
 
-	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members, 1);
+	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members, 48, 0, 12);
 
 	bot.on_log([&bot](const dpp::log_t & event) {
 		if (event.severity >= dpp::ll_debug) {
@@ -40,79 +40,10 @@ int main(int argc, char const *argv[])
 		}
 	});
 
-	bot.on_interaction_create([&bot](const dpp::interaction_create_t & cmd) {
-		if (cmd.command.data.name == "blep") {
-			std::string animal = std::get<std::string>(cmd.get_parameter("animal"));
-			cmd.reply(dpp::ir_channel_message_with_source, fmt::format("Blep! You chose {}", animal));
-		}
-	});
-
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
 		std::stringstream ss(event.msg->content);
 		std::string command;
 		ss >> command;
-
-		dpp::snowflake channel_id = event.msg->channel_id;
-
-		if (command == ".joinme") {
-			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			auto current_vc = event.from->GetVoice(event.msg->guild_id);
-			bool join_vc = true;
-			if (current_vc) {
-				auto users_vc = g->voice_members.find(event.msg->author->id);
-				if (users_vc != g->voice_members.end() && current_vc->channel_id == users_vc->second.channel_id) {
-					join_vc = false;
-					/* We are on this voice channel, at this point we can send any audio instantly to vc:
-					 * current_vc->SendAudio(...)
-					 */
-				} else {
-					/* We are on a different voice channel. Leave it, then join the new one 
-					 * by falling through to the join_vc branch below
-					 */
-					event.from->DisconnectVoice(event.msg->guild_id);
-					join_vc = true;
-				}
-			}
-			if (join_vc) {
-				if (!g->ConnectMemberVoice(event.msg->author->id)) {
-					/* The user issuing the command is not on any voice channel, we can't do anything */
-					bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
-				} else {
-					/* We are now connecting to a vc. Wait for on_voice_ready, 
-					 * event, and then send the audio within that event:
-					 * event.voice_client->SendAudio(...)
-					 */
-				}
-			}
-		}
-
-		if (command == ".leaveme") {
-			event.from->DisconnectVoice(event.msg->guild_id);			
-		}
-
-		if (command == ".exectest") {
-			dpp::utility::exec("ping", {"-c", "4", "127.0.0.1"}, [&bot, channel_id](const std::string& output) {
-				bot.message_create(dpp::message(channel_id, output));
-			});
-		}
-
-		if (command == ".createslash") {
-			dpp::slashcommand newcommand;
-			newcommand.set_name("blep").set_description("Send a random adorable animal photo").set_application_id(bot.me.id);
-			newcommand.add_option(
-				dpp::command_option(dpp::co_string, "animal", "The type of animal", true).
-					add_choice(dpp::command_option_choice("Dog", std::string("animal_dog"))).
-					add_choice(dpp::command_option_choice("Cat", std::string("animal_cat"))).
-					add_choice(dpp::command_option_choice("Penguin", std::string("animal_penguin"))
-				)
-			).add_option(
-				dpp::command_option(dpp::co_boolean, "only_smol", "Whether to show only baby animals")
-			);
-			std::cout << newcommand.build_json(false) << "\n";
-			bot.guild_command_create(newcommand, event.msg->guild_id, [&bot](const dpp::confirmation_callback_t & state) {
-				bot.log(dpp::ll_debug, fmt::format("Application command tried. Result: {} -> {}", state.http_info.status, state.http_info.body));
-			});
-		}
 	});
 
 	/* This method call actually starts the bot by connecting all shards in the cluster */
