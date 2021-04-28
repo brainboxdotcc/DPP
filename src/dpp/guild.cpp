@@ -69,8 +69,6 @@ namespace dpp {
 guild::guild() :
 	managed(),
 	shard_id(0),
-	vanity_url_code(nullptr),
-	description(nullptr),
 	flags(0),
 	owner_id(0),
 	voice_region(r_us_central),
@@ -94,11 +92,9 @@ guild::guild() :
 
 
 guild_member::guild_member() :
-	nickname(nullptr),
 	joined_at(0),
 	premium_since(0),
 	flags(0)
-
 {
 }
 
