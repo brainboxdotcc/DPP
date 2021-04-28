@@ -84,19 +84,21 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 		}
 
 		/* Store guild members */
-		g->members->clear();
 		g->members->reserve(d["members"].size());
 		for (auto & user : d["members"]) {
-			dpp::user* u = dpp::find_user(SnowflakeNotNull(&(user["user"]), "id"));
-			if (!u) {
-				u = new dpp::user();
-				u->fill_from_json(&(user["user"]));
-				dpp::get_user_cache()->store(u);
+			snowflake userid = SnowflakeNotNull(&(user["user"]), "id");
+			/* Only store ones we don't have already otherwise gm will leak */
+			if (g->members->find(userid) == g->members->end()) {
+				dpp::user* u = dpp::find_user(userid);
+				if (!u) {
+					u = new dpp::user();
+					u->fill_from_json(&(user["user"]));
+					dpp::get_user_cache()->store(u);
+				}
+				dpp::guild_member* gm = new dpp::guild_member();
+				gm->fill_from_json(&(user["user"]), g, u);
+				g->members->insert(std::make_pair(u->id, gm));
 			}
-			dpp::guild_member* gm = new dpp::guild_member();
-			gm->fill_from_json(&(user["user"]), g, u);
-
-			g->members->insert(std::make_pair(u->id, gm));
 		}
 		/* Store emojis */
 		g->emojis.reserve(d["emojis"].size());
