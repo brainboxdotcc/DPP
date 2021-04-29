@@ -166,11 +166,16 @@ time_t TimestampNotNull(json* j, const char* keyname)
 	if (j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string()) {
 		tm timestamp;
 		std::string timedate = (*j)[keyname].get<std::string>();
-		std::string tzpart = timedate.substr(timedate.find('+'), timedate.length());
-		timedate = timedate.substr(0, timedate.find('.')) + tzpart ;
-		strptime(timedate.substr(0, 19).c_str(), "%FT%TZ%z", &timestamp);
-		timestamp.tm_isdst = 0;
-		retval = mktime(&timestamp);
+		if (timedate.find('+') != std::string::npos && timedate.find('.') != std::string::npos) {
+			std::string tzpart = timedate.substr(timedate.find('+'), timedate.length());
+			timedate = timedate.substr(0, timedate.find('.')) + tzpart ;
+			strptime(timedate.substr(0, 19).c_str(), "%FT%TZ%z", &timestamp);
+			timestamp.tm_isdst = 0;
+			retval = mktime(&timestamp);
+		} else {
+			strptime(timedate.substr(0, 19).c_str(), "%F %T", &timestamp);
+			retval = mktime(&timestamp);
+		}
 	}
 	return retval;
 }
