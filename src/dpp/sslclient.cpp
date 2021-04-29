@@ -349,6 +349,8 @@ void SSLClient::close()
 		ctx = nullptr;
 		ssl = nullptr;
 		sfd = 0;
+		obuffer.clear();
+		buffer.clear();
 	}
 }
 
