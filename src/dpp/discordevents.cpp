@@ -164,7 +164,7 @@ time_t TimestampNotNull(json* j, const char* keyname)
 	 */
 	time_t retval = 0;
 	if (j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string()) {
-		tm timestamp;
+		tm timestamp = {};
 		std::string timedate = (*j)[keyname].get<std::string>();
 		if (timedate.find('+') != std::string::npos && timedate.find('.') != std::string::npos) {
 			std::string tzpart = timedate.substr(timedate.find('+'), timedate.length());

@@ -110,13 +110,14 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_STAGE) ? dpp::c_stage : 0;
 
 	if (j->find("recipients") != j->end()) {
-		recipients.clear();
+		recipients = {};
 		for (auto & r : (*j)["recipients"]) {
 			recipients.push_back(from_string<uint64_t>(r["id"].get<std::string>(), std::dec));
 		}
 	}
 
 	if (j->find("permission_overwrites") != j->end()) {
+		permission_overwrites = {};
 		for (auto & overwrite : (*j)["permission_overwrites"]) {
 			permission_overwrite po;
 			po.id = SnowflakeNotNull(&overwrite, "id");

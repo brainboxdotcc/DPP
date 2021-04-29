@@ -104,7 +104,7 @@ void guild_create::handle(DiscordClient* client, json &j, const std::string &raw
 		}
 		/* Store emojis */
 		g->emojis.reserve(d["emojis"].size());
-		g->emojis.clear();
+		g->emojis = {};
 		for (auto & emoji : d["emojis"]) {
 			dpp::emoji* e = dpp::find_emoji(SnowflakeNotNull(&emoji, "id"));
 			if (!e) {

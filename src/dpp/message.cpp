@@ -323,10 +323,10 @@ message& message::fill_from_json(json* d) {
 	this->member = nullptr;
 	if (g && d->find("member") != d->end()) {
 		json& mi = (*d)["member"];
-		snowflake uid = SnowflakeNotNull(&mi, "id");
+		snowflake uid = SnowflakeNotNull(&(mi["user"]), "id");
 		auto thismember = g->members.find(uid);
 		if (thismember == g->members.end()) {
-			if (authoruser) {
+			if (uid != 0 && authoruser) {
 				guild_member* gm = new guild_member();
 				gm->fill_from_json(&mi, g, authoruser);
 				g->members.insert(std::make_pair(authoruser->id, gm));
