@@ -4,3 +4,13 @@ cmake -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE -DBUILD_SHARED_LIBS=TRUE-DCMAKE_TO
 "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe" test.sln
 copy /y bin\Debug\fmtd.dll Debug\fmtd.dll
 copy /y C:\vckpg\installed\x64-windows\bin\zlib1.dll Debug\zlib1.dll
+copy /y C:\vckpg\installed\x64-windows\bin\openssl.dll Debug\openssl.dll
+rd /q /y package
+md package
+md package\bin
+md package\lib
+md package\include
+xcopy /s/q Debug\*.dll package\bin\
+xcopy /s/q Debug\*.pdb package\lib\
+xcopy /s/q Debug\*.lib package\lib\
+xcopy /s/q ..\include\*.* package\include\
