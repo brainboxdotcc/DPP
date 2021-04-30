@@ -155,6 +155,7 @@ namespace dpp {
 		}
 
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
+#ifndef _WIN32
 			auto t = std::thread([cmd, parameters, callback]() {
 				std::array<char, 128> buffer;
 				std::vector<std::string> my_parameters = parameters;
@@ -179,6 +180,7 @@ namespace dpp {
 				return "";
 			});
 			t.detach();
+#endif
 		}
 
 
