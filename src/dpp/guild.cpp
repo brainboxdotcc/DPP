@@ -109,6 +109,7 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, co
 	}
 	this->joined_at = TimestampNotNull(j, "joined_at");
 	this->premium_since = TimestampNotNull(j, "premium_since");
+	roles = {};
 	for (auto & role : (*j)["roles"]) {
 		this->roles.push_back(from_string<uint64_t>(role.get<std::string>(), std::dec));
 	}
