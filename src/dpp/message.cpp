@@ -324,6 +324,9 @@ message& message::fill_from_json(json* d) {
 	if (g && d->find("member") != d->end()) {
 		json& mi = (*d)["member"];
 		snowflake uid = SnowflakeNotNull(&(mi["user"]), "id");
+		if (!uid && authoruser) {
+			uid = authoruser->id;
+		}
 		auto thismember = g->members.find(uid);
 		if (thismember == g->members.end()) {
 			if (uid != 0 && authoruser) {

@@ -44,6 +44,16 @@ int main(int argc, char const *argv[])
 		std::stringstream ss(event.msg->content);
 		std::string command;
 		ss >> command;
+
+		std::cout << "M: ";
+		if (event.msg->member) {
+			for (auto r = event.msg->member->roles.begin(); r != event.msg->member->roles.end(); ++r) {
+				std::cout << "r=" << *r << " ";
+			}
+		} else {
+			std::cout << "Non-member: " << event.msg->content;
+		}
+		std::cout << "\n";
 	});
 
 	/* This method call actually starts the bot by connecting all shards in the cluster */
