@@ -77,21 +77,20 @@ embed::embed(json* j) : embed() {
 	std::vector<std::string> type_list = { "image", "video", "thumbnail" };
 	for (auto& s : type_list) {
 		if (j->find(s) != j->end()) {
-			std::optional<embed_image> & curr = image;
-			if (s == "image") {
-				curr = image;
-			} else if (s == "video") {
-				curr = video;
-			} else if (s == "thumbnail") {
-				curr = thumbnail;
-			}
+			embed_image curr;
 			json& fi = (*j)[s];
-			dpp::embed_image f;
-			f.url = StringNotNull(&fi, "url");
-			f.height = StringNotNull(&fi, "height");
-			f.width = StringNotNull(&fi, "width");
-			f.proxy_url = StringNotNull(&fi, "proxy_url");
-			curr = f;
+			curr.url = StringNotNull(&fi, "url");
+			curr.height = StringNotNull(&fi, "height");
+			curr.width = StringNotNull(&fi, "width");
+			curr.proxy_url = StringNotNull(&fi, "proxy_url");
+			if (s == "image") {
+				image = curr;
+			} else if (s == "video") {
+				video = curr;
+			} else if (s == "thumbnail") {
+				thumbnail = curr;
+			}
+			
 	       	}
 	}
 	if (j->find("provider") != j->end()) {
