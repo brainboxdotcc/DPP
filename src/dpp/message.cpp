@@ -333,7 +333,11 @@ message& message::fill_from_json(json* d) {
 				this->member = gm;
 			}
 		} else {
+			/* Update roles etc */
 			this->member = thismember->second;
+			if (authoruser) {
+				this->member->fill_from_json(&mi, g, authoruser);
+			}
 		}
 	}
 	if (d->find("embeds") != d->end()) {
