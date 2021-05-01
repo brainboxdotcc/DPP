@@ -46,10 +46,11 @@ role::~role()
 role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 {
 	this->guild_id = _guild_id;
+	this->name = StringNotNull(j, "name");
 	this->id = SnowflakeNotNull(j, "id");
 	this->colour = Int32NotNull(j, "color");
 	this->position = Int8NotNull(j, "position");
-	this->permissions = Int32NotNull(j, "permissions");
+	this->permissions = SnowflakeNotNull(j, "permissions");
 	this->flags |= BoolNotNull(j, "hoist") ? dpp::r_hoist : 0;
 	this->flags |= BoolNotNull(j, "managed") ? dpp::r_managed : 0;
 	this->flags |= BoolNotNull(j, "mentionable") ? dpp::r_mentionable : 0;
