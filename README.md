@@ -17,7 +17,7 @@ This project is in late alpha stages of development.
 
 Want to help? Drop me a line or send a PR.
 
-This library is in use on the [Sporks bot](https://sporks.gg) and being tested on my other, larger production bot, [TriviaBot](https://github.com/brainboxdotcc/triviabot).
+This library is in use on [TriviaBot](https://triviabot.co.uk/) and [Sporks bot](https://sporks.gg).
 
 ## Documentation
 
