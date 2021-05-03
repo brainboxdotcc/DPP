@@ -8,7 +8,7 @@ memory to do so, even when caching large amounts of the data to cut down on HTTP
 
 It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contributed to by a dedicated team of developers.
 
-This project is in alpha stages of development.
+This project is in beta stages of development.
 
 ## Library features:
 
