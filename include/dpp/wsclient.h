@@ -147,6 +147,9 @@ public:
 	 * @param errorcode The error code from the websocket server
 	 */
 	virtual void Error(uint32_t errorcode);
+
+	/** Fires every second from the underlying socket I/O loop, used for sending webscocket pings */
+	virtual void OneSecondTimer();
 };
 
 };

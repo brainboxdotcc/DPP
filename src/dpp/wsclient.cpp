@@ -287,11 +287,24 @@ bool WSClient::parseheader(std::string &data)
 	return false;
 }
 
+void WSClient::OneSecondTimer()
+{
+	if (((time(NULL) % 20) == 0) && (state == CONNECTED)) {
+		/* For sending pings, we send with payload */
+		unsigned char out[MAXHEADERSIZE];
+		std::string payload = "keepalive";
+		size_t s = this->FillHeader(out, payload.length(), OP_PING);
+		std::string header((const char*)out, s);
+		SSLClient::write(header);
+		SSLClient::write(payload);
+	}
+}
+
 void WSClient::HandlePingPong(bool ping, const std::string &payload)
 {
+	unsigned char out[MAXHEADERSIZE];
 	if (ping) {
-		/* For pings we echo back their payload with the type OP_PONG */
-		unsigned char out[MAXHEADERSIZE];
+		/* For receving pings we echo back their payload with the type OP_PONG */
 		size_t s = this->FillHeader(out, payload.length(), OP_PONG);
 		std::string header((const char*)out, s);
 		SSLClient::write(header);

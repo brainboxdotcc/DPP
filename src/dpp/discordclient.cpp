@@ -367,6 +367,9 @@ size_t DiscordClient::GetQueueSize()
 
 void DiscordClient::OneSecondTimer()
 {
+
+	WSClient::OneSecondTimer();
+
 	/* This is important because unordered_map doesnt actually free its buckets
 	 * until it's members are swapped out. Creating an entirely new hash_map
 	 * is an effective way to completely clear this out without argument from STL.
