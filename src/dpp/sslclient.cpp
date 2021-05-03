@@ -342,16 +342,18 @@ bool SSLClient::HandleBuffer(std::string &buffer)
 
 void SSLClient::close()
 {
-	if (ctx && ssl && sfd) {
+	if (ssl) {
 		SSL_free(ssl);
-		::close(sfd);
+		ssl = nullptr;
+	}
+	::close(sfd);
+	if (ctx) {
 		SSL_CTX_free(ctx);
 		ctx = nullptr;
-		ssl = nullptr;
-		sfd = 0;
-		obuffer.clear();
-		buffer.clear();
 	}
+	sfd = -1;
+	obuffer.clear();
+	buffer.clear();
 }
 
 SSLClient::~SSLClient()

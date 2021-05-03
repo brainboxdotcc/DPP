@@ -16,7 +16,8 @@ This project is in alpha stages of development.
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
 * Voice support
-* Pretty much the entire API is supported except for slash commands
+* Slash command/interaction support
+* Pretty much the entire API is supported
 * Windows support
 
 Want to help? Drop me a line or send me a PR. I'll be choosy about what PRs i accept whilst the library is in such a heavy state of development.
