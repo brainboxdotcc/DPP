@@ -31,6 +31,50 @@ using json = nlohmann::json;
 
 namespace dpp {
 
+component::component() : type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""), disabled(false)
+{
+}
+
+component::~component() {
+}
+
+
+component& component::fill_from_json(nlohmann::json* j) {
+
+    type = static_cast<component_type>(Int8NotNull(j, "type"));
+	if (type == ActionRow) {
+        std::vector<component> components;
+        for (json sub_component : (*j)["components"]) {
+            components.push_back(this->fill_from_json(&sub_component));
+        }
+    } else {
+        label = StringNotNull(j, "label");
+        style = static_cast<component_style>(Int8NotNull(j, "style"));
+        custom_id = StringNotNull(j, "custom_id");
+        disabled = BoolNotNull(j, "disabled");
+    }
+	return *this;
+}
+
+std::string component::build_json() const {
+	json j;
+	if (type == component_type::ActionRow) {
+        j["type"] = 1;
+        json new_components;
+        for (component new_component : components) {
+            new_components.push_back(new_component.build_json());
+        }
+        j["components"] = new_components;
+    } else {
+        j["type"] = 2;
+        j["label"] = label;
+        j["style"] = int(style);
+        j["custom_id"] = custom_id;
+        j["disabled"] = disabled;
+    }
+	return j.dump();
+}
+
 embed::~embed() {
 }
 
@@ -41,6 +85,12 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), member(
 	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0)
 {
 
+}
+
+message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
+	channel_id = _channel_id;
+	content = _content;
+	type = t;
 }
 
 message::message(snowflake _channel_id, const std::string &_content, std::vector<component> _components, message_type t) : message() {
@@ -202,7 +252,7 @@ std::string message::build_json(bool with_id) const {
 	if (with_id) {
 		j["id"] = std::to_string(id);
 	}
-	json new_new_components = json.array();
+	json new_new_components = json::array();
 	for (component new_component : components) {
 		new_new_components.push_back(new_component.build_json());
 	}

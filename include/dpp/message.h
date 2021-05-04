@@ -21,11 +21,79 @@
 #pragma once
 
 #include <dpp/discord.h>
-#include <dpp/component.h>
 #include <optional>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {
+
+/**
+ * @brief Represents the type of component
+ */
+enum component_type : uint8_t {
+	ActionRow = 1,
+	Button
+};
+
+/**
+ * @brief Represents the style of the button
+ */
+enum component_style : uint8_t {
+    Primary = 1,
+    Secondary,
+    Success,
+    Danger,
+    Link
+};
+
+/**
+ * @brief Represents the component object
+ */
+class component {
+public:
+	/** Component type
+	 */
+	component_type type;
+
+    /** Sub commponents
+     */
+    std::vector<component> components;
+
+    /** Component label (for buttons)
+     */
+    std::string label;
+
+    /** Component style (for buttons)
+     */
+    component_style style;
+
+    /** Component Id
+     */
+    std::string custom_id;
+
+    /** Disabled (for buttons)
+     */
+    bool disabled;
+
+	/** Constructor
+	 */
+	component();
+
+	/** Destructor
+	 */
+	~component();
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	component& fill_from_json(nlohmann::json* j);
+
+	/** Build JSON from this object.
+	 * @return The JSON text of the invite
+	 */
+	std::string build_json() const;
+
+};
 
 /**
  * @brief A footer in a dpp::embed
@@ -309,6 +377,15 @@ struct message {
 	 * @brief Construct a new message object
 	 */
 	message();
+
+    /**
+	 * @brief Construct a new message object with a channel and content
+	 * 
+	 * @param channel_id The channel to send the message to
+	 * @param content The content of the message
+	 * @param type The message type to create
+	 */
+	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
 
 	/**
 	 * @brief Construct a new message object with a channel and content
