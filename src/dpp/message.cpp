@@ -43,10 +43,11 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), member(
 
 }
 
-message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
+message::message(snowflake _channel_id, const std::string &_content, std::vector<component> _components, message_type t) : message() {
 	channel_id = _channel_id;
 	content = _content;
 	type = t;
+	components = _components;
 }
 
 message::message(const std::string &_content, message_type t) : message() {
@@ -201,6 +202,11 @@ std::string message::build_json(bool with_id) const {
 	if (with_id) {
 		j["id"] = std::to_string(id);
 	}
+	json new_new_components = json.array();
+	for (component new_component : components) {
+		new_new_components.push_back(new_component.build_json());
+	}
+	j["components"] = new_new_components;
 	if (embeds.size()) {
 		for (auto& embed : embeds) {
 			json e;

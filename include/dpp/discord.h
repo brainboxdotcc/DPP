@@ -245,3 +245,4 @@ namespace dpp {
 #include <dpp/intents.h>
 #include <dpp/slashcommand.h>
 #include <dpp/auditlog.h>
+#include <dpp/component.h>

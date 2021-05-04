@@ -21,6 +21,7 @@
 #pragma once
 
 #include <dpp/discord.h>
+#include <dpp/component.h>
 #include <optional>
 #include <dpp/json_fwd.hpp>
 
@@ -264,6 +265,8 @@ struct message {
 	guild_member*	member;	
 	/** contents of the message */
 	std::string	content;
+	/** message components */
+	std::vector<dpp::component> components;
 	/** when this message was sent */
 	time_t		sent;
 	/** when this message was edited (may be 0 if never edited) */
@@ -314,7 +317,7 @@ struct message {
 	 * @param content The content of the message
 	 * @param type The message type to create
 	 */
-	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
+	message(snowflake channel_id, const std::string &content, std::vector<component> components, message_type type = mt_default);
 
 	/**
 	 * @brief Construct a new message object with a channel and content
