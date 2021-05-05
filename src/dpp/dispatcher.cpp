@@ -69,13 +69,24 @@ const command_value& interaction_create_t::get_parameter(const std::string& name
 {
 	/* Dummy STATIC return value for unknown options so we arent returning a value off the stack */
 	static command_value dummy_value = {};
-
-	for (auto i = command.data.options.begin(); i != command.data.options.end(); ++i) {
+	command_interaction ci = std::get<command_interaction>(command.data);
+	for (auto i = ci.options.begin(); i != ci.options.end(); ++i) {
 		if (i->name == name) {
 			return i->value;
 		}
 	}
 	return dummy_value;
+}
+
+button_click_t::button_click_t(DiscordClient* client, const std::string &raw) : interaction_create_t(client, raw)
+{
+}
+
+const command_value& button_click_t::get_parameter(const std::string& name) const
+{
+	/* Buttons don't have parameters, so override this */
+	static command_value dummy_b_value = {};
+	return dummy_b_value;
 }
 
 guild_delete_t::guild_delete_t(DiscordClient* client, const std::string &raw) : event_dispatch_t(client, raw)

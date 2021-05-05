@@ -328,6 +328,15 @@ public:
 	void on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);
 
 	/**
+	 * @brief Called when a button is clicked attached to a message.
+	 * Button clicks are triggered by discord when buttons are clicked which you have
+	 * associated with a message using dpp::component.
+	 * 
+	 * @param _interaction_create  User function to attach to event
+	 */
+	void on_button_click (std::function<void(const button_click_t& _event)> _button_click);
+
+	/**
 	 * @brief Called when a guild is deleted.
 	 * A guild can be deleted via the bot being kicked, the bot leaving the guild
 	 * explicitly with dpp::guild_delete, or via the guild being unavaialble due to

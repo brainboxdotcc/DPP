@@ -30,19 +30,19 @@ namespace dpp {
  * @brief Represents the type of component
  */
 enum component_type : uint8_t {
-	ActionRow = 1,
-	Button
+	cot_action_row = 1,
+	cot_button
 };
 
 /**
  * @brief Represents the style of the button
  */
 enum component_style : uint8_t {
-    Primary = 1,
-    Secondary,
-    Success,
-    Danger,
-    Link
+    cos_primary = 1,
+    cos_econdary,
+    cos_success,
+    cos_danger,
+    cos_link
 };
 
 /**
@@ -54,25 +54,25 @@ public:
 	 */
 	component_type type;
 
-    /** Sub commponents
-     */
-    std::vector<component> components;
+	/** Sub commponents
+	 */
+	std::vector<component> components;
 
-    /** Component label (for buttons)
-     */
-    std::string label;
+	/** Component label (for buttons)
+	 */
+	std::string label;
 
-    /** Component style (for buttons)
-     */
-    component_style style;
+	/** Component style (for buttons)
+	 */
+	component_style style;
 
-    /** Component Id
-     */
-    std::string custom_id;
+	/** Component Id
+	 */
+	std::string custom_id;
 
-    /** Disabled (for buttons)
-     */
-    bool disabled;
+	/** Disabled (for buttons)
+	 */
+	bool disabled;
 
 	/** Constructor
 	 */
@@ -81,6 +81,18 @@ public:
 	/** Destructor
 	 */
 	~component();
+
+	component& set_type(component_type ct);
+
+	component& set_label(const std::string &label);
+
+	component& set_style(component_style cs);
+
+	component& set_id(const std::string &id);
+
+	component& set_disabled(bool disable);
+
+	component& add_component(const component& c);
 
 	/** Read class values from json object
 	 * @param j A json object to read from
@@ -391,15 +403,6 @@ struct message {
 	 * @brief Construct a new message object with a channel and content
 	 * 
 	 * @param channel_id The channel to send the message to
-	 * @param content The content of the message
-	 * @param type The message type to create
-	 */
-	message(snowflake channel_id, const std::string &content, std::vector<component> components, message_type type = mt_default);
-
-	/**
-	 * @brief Construct a new message object with a channel and content
-	 * 
-	 * @param channel_id The channel to send the message to
 	 * @param _embed An embed to send
 	 */
 	message(snowflake channel_id, const embed & _embed);
@@ -431,6 +434,9 @@ struct message {
 	bool is_urgent() const;
 	bool is_ephemeral() const;
 	bool is_loading() const;
+
+	message& add_component(const component& c);
+	message& add_embed(const embed& e);
 };
 
 /** A group of messages */

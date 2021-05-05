@@ -42,14 +42,14 @@ component::~component() {
 component& component::fill_from_json(nlohmann::json* j) {
 
 	type = static_cast<component_type>(Int8NotNull(j, "type"));
-	if (type == 1) {
+	if (type == cot_action_row) {
 		components;
 		for (json sub_component : (*j)["components"]) {
 			dpp::component new_component;
 			new_component.fill_from_json(&sub_component);
 			components.push_back(new_component);
 		}
-	} else {
+	} else if (type == cot_button) {
 		label = StringNotNull(j, "label");
 		style = static_cast<component_style>(Int8NotNull(j, "style"));
 		custom_id = StringNotNull(j, "custom_id");
@@ -58,9 +58,49 @@ component& component::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
+component& component::add_component(const component& c)
+{
+	set_type(cot_action_row);
+	components.push_back(c);
+	return *this;
+}
+
+component& component::set_type(component_type ct)
+{
+	type = ct;
+	return *this;
+}
+
+component& component::set_label(const std::string &l)
+{
+	set_type(cot_button);
+	label = l;
+	return *this;
+}
+
+component& component::set_style(component_style cs)
+{
+	set_type(cot_button);
+	style = cs;
+	return *this;
+}
+
+component& component::set_id(const std::string &id)
+{
+	custom_id = id;
+	return *this;
+}
+
+component& component::set_disabled(bool disable)
+{
+	set_type(cot_button);
+	disabled = disable;
+	return *this;
+}
+
 std::string component::build_json() const {
 	json j;
-	if (type == component_type::ActionRow) {
+	if (type == component_type::cot_action_row) {
 		j["type"] = 1;
 		json new_components;
 		for (component new_component : components) {
@@ -95,11 +135,16 @@ message::message(snowflake _channel_id, const std::string &_content, message_typ
 	type = t;
 }
 
-message::message(snowflake _channel_id, const std::string &_content, std::vector<component> _components, message_type t) : message() {
-	channel_id = _channel_id;
-	content = _content;
-	type = t;
-	components = _components;
+message& message::add_component(const component& c)
+{
+	components.push_back(c);
+	return *this;
+}
+
+message& message::add_embed(const embed& e)
+{
+	embeds.push_back(e);
+	return *this;
 }
 
 message::message(const std::string &_content, message_type t) : message() {

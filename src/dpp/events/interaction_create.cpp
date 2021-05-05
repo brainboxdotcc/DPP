@@ -46,10 +46,21 @@ void interaction_create::handle(DiscordClient* client, json &j, const std::strin
 	json& d = j["d"];
 	dpp::interaction i;
 	i.fill_from_json(&d);
-	if (client->creator->dispatch.interaction_create) {
-		dpp::interaction_create_t ic(client, raw);
-		ic.command = i;
-		client->creator->dispatch.interaction_create(ic);
+	if (i.type == it_application_command) {
+		if (client->creator->dispatch.interaction_create) {
+			dpp::interaction_create_t ic(client, raw);
+			ic.command = i;
+			client->creator->dispatch.interaction_create(ic);
+		}
+	} else if (i.type == it_component_button) {
+		if (client->creator->dispatch.button_click) {
+			dpp::button_click_t ic(client, raw);
+			dpp::button_interaction bi = std::get<button_interaction>(i.data);
+			ic.command = i;
+			ic.custom_id = bi.component_type;
+			ic.component_type = bi.component_type;
+			client->creator->dispatch.button_click(ic);
+		}
 	}
 }
 

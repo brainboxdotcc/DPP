@@ -1278,6 +1278,10 @@ void cluster::on_interaction_create (std::function<void(const interaction_create
 	this->dispatch.interaction_create = _interaction_create; 
 }
 
+void cluster::on_button_click (std::function<void(const button_click_t& _event)> _button_click) {
+	this->dispatch.button_click = _button_click; 
+}
+
 void cluster::on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete) {
 	this->dispatch.guild_delete = _guild_delete; 
 }

@@ -167,37 +167,47 @@ interaction& interaction::fill_from_json(nlohmann::json* j) {
 	if (j->find("user") != j->end()) {
 		usr = user().fill_from_json(&((*j)["user"]));
 	}
-	if (j->find("data") != j->end()) {
-		json& param = (*j)["data"];
+	if (type == it_application_command) {
 		command_interaction ci;
-		ci.id = SnowflakeNotNull(&param, "id");
-		ci.name = StringNotNull(&param, "name");
-		//ci.resolved = BoolNotNull(&param, "resolved");
-		if (param.find("options") != param.end()) {
-			for (auto &opt : param["options"]) {
-				command_data_option cdo;
-				cdo.name = StringNotNull(&opt, "name");
-				cdo.type = (command_option_type)Int8NotNull(&opt, "type");
-				switch (cdo.type) {
-					case co_boolean:
-						cdo.value = BoolNotNull(&opt, "value");
-					break;
-					case co_channel:
-					case co_role:
-					case co_user:
-						cdo.value = SnowflakeNotNull(&opt, "value");
-					break;
-					case co_integer:
-						cdo.value = Int32NotNull(&opt, "value");
-					break;
-					case co_string:
-						cdo.value = StringNotNull(&opt, "value");
-					break;
+		if (j->find("data") != j->end()) {
+			json& param = (*j)["data"];
+			ci.id = SnowflakeNotNull(&param, "id");
+			ci.name = StringNotNull(&param, "name");
+			//ci.resolved = BoolNotNull(&param, "resolved");
+			if (param.find("options") != param.end()) {
+				for (auto &opt : param["options"]) {
+					command_data_option cdo;
+					cdo.name = StringNotNull(&opt, "name");
+					cdo.type = (command_option_type)Int8NotNull(&opt, "type");
+					switch (cdo.type) {
+						case co_boolean:
+							cdo.value = BoolNotNull(&opt, "value");
+						break;
+						case co_channel:
+						case co_role:
+						case co_user:
+							cdo.value = SnowflakeNotNull(&opt, "value");
+						break;
+						case co_integer:
+							cdo.value = Int32NotNull(&opt, "value");
+						break;
+						case co_string:
+							cdo.value = StringNotNull(&opt, "value");
+						break;
+					}
+					ci.options.push_back(cdo);
 				}
-				ci.options.push_back(cdo);
 			}
 		}
 		data = ci;
+	} else if (type == it_component_button) {
+		button_interaction bi;
+		if (j->find("data") != j->end()) {
+			json& param = (*j)["data"];
+			bi.component_type = Int8NotNull(&param, "component_type");
+			bi.custom_id = StringNotNull(&param, "custom_id");
+		}
+		data = bi;
 	}
 	return *this;
 }

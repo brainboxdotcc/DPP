@@ -222,6 +222,14 @@ struct command_data_option {
 	std::vector<command_data_option>	options;	//< Optional: present if this option is a group or subcommand
 };
 
+/** Types of interaction in the dpp::interaction class
+ */
+enum interaction_type {
+	it_ping = 1,
+	it_application_command = 2,
+	it_component_button = 3
+};
+
 /**
  * @brief Details of a command within an interaction.
  * This subobject represents the application command associated
@@ -235,20 +243,28 @@ struct command_interaction {
 };
 
 /**
+ * @brief A button click for a button component
+ */
+struct button_interaction {
+	uint8_t component_type;
+	std::string custom_id;
+};
+
+/**
  * @brief An interaction represents a user running a command and arrives
  * via the dpp::cluster::on_interaction_create event.
  */
 class interaction : public managed {
 public:
-	snowflake	application_id;		//< id of the application this interaction is for
-	uint8_t		type;			//< the type of interaction
-	command_interaction data;		//< Optional: the command data payload
-	snowflake	guild_id;		//< Optional: the guild it was sent from
-	snowflake	channel_id;		//< Optional: the channel it was sent from
-	guild_member	member;			//< Optional: guild member data for the invoking user, including permissions
-	user		usr;			//< Optional: user object for the invoking user, if invoked in a DM
-	std::string	token;			//< a continuation token for responding to the interaction
-	uint8_t		version;		//< read-only property, always 1
+	snowflake	application_id;					//< id of the application this interaction is for
+	uint8_t		type;						//< the type of interaction
+	std::variant<command_interaction, button_interaction> data;	//< Optional: the command data payload
+	snowflake	guild_id;					//< Optional: the guild it was sent from
+	snowflake	channel_id;					//< Optional: the channel it was sent from
+	guild_member	member;						//< Optional: guild member data for the invoking user, including permissions
+	user		usr;						//< Optional: user object for the invoking user, if invoked in a DM
+	std::string	token;						//< a continuation token for responding to the interaction
+	uint8_t		version;					//< read-only property, always 1
 
 	/**
 	 * @brief Fill object properties from JSON

@@ -163,10 +163,34 @@ struct interaction_create_t : public event_dispatch_t {
 	 * @return const command_value& If the command line parameter does not 
 	 * exist, an empty variant is returned.
 	 */
-	const command_value& get_parameter(const std::string& name) const;
+	const virtual command_value& get_parameter(const std::string& name) const;
 
 	interaction command;
 };
+
+/**
+ * @brief Click on button
+ */
+struct button_click_t : public interaction_create_t {
+
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	button_click_t(class DiscordClient* client, const std::string& raw);
+
+	/**
+	 * @brief Get a command line parameter
+	 * 
+	 * @param name The command line parameter to retrieve
+	 * @return Always returns an empty parameter as buttons dont have parameters!
+	 */
+	const virtual command_value& get_parameter(const std::string& name) const;
+
+	std::string custom_id;
+	uint8_t component_type;
+};
+
 
 /** @brief Delete guild */
 struct guild_delete_t : public event_dispatch_t {
@@ -725,6 +749,10 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const interaction_create_t& event)> interaction_create;
+	/** @brief Event handler function pointer for button click event
+	 * @param event Event parameters
+	 */
+	std::function<void(const button_click_t& event)> button_click;
 	/** @brief Event handler function pointer for guild delete event
 	 * @param event Event parameters
 	 */
