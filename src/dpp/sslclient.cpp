@@ -210,7 +210,7 @@ void SSLClient::ReadLoop()
 
 			/* If we're waiting for a read on the socket don't try to write to the server */
 			//if (!write_blocked_on_read) {
-			if (ClientToServerLength || read_blocked_on_write) {
+			if (ClientToServerLength || obuffer.length() || read_blocked_on_write) {
 				FD_SET(sfd,&writefds);
 			}
 			//}
@@ -278,7 +278,7 @@ void SSLClient::ReadLoop()
 					*/
 				} while (SSL_pending(ssl) && !read_blocked);
 			}
-				
+
 			/* Check for input on the sendq */
 			if (obuffer.length() && ClientToServerLength == 0) {
 				memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length());
@@ -293,7 +293,7 @@ void SSLClient::ReadLoop()
 				/* Try to write */
 				r = SSL_write(ssl, ClientToServerBuffer + ClientToServerOffset, ClientToServerLength);
 				
-				switch(SSL_get_error(ssl,r)){
+				switch(SSL_get_error(ssl,r)) {
 					/* We wrote something */
 					case SSL_ERROR_NONE:
 						ClientToServerLength -= r;
