@@ -70,6 +70,7 @@
 		"memory": "cpp",
 		"memory_resource": "cpp",
 		"random": "cpp",
-		"variant": "cpp"
+		"variant": "cpp",
+		"unordered_set": "cpp"
 	}
 }

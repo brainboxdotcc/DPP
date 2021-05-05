@@ -42,10 +42,12 @@ component::~component() {
 component& component::fill_from_json(nlohmann::json* j) {
 
 	type = static_cast<component_type>(Int8NotNull(j, "type"));
-	if (type == ActionRow) {
-		std::vector<component> components;
+	if (type == 1) {
+		components;
 		for (json sub_component : (*j)["components"]) {
-			components.push_back(this->fill_from_json(&sub_component));
+			dpp::component new_component;
+			new_component.fill_from_json(&sub_component);
+			components.push_back(new_component);
 		}
 	} else {
 		label = StringNotNull(j, "label");
@@ -253,32 +255,23 @@ std::string message::build_json(bool with_id) const {
 	}
 
 	if (components.size()) {
-		j["components"] = {};
+		j["components"] = json::array();
 	}
 	for (auto & component : components) {
 		json n;
-		if (component.type == component_type::ActionRow) {
-			n["type"] = 1;
-			n["components"] = {};
-			json sn;
-			for (auto & subcomponent  : component.components) {
-				sn["type"] = 2;
-				sn["label"] = subcomponent.label;
-				sn["style"] = int(subcomponent.style);
-				sn["custom_id"] = subcomponent.custom_id;
-				sn["disabled"] = subcomponent.disabled;
+		n["type"] = 1;
+		n["components"] = {};
+		json sn;
+		for (auto & subcomponent  : component.components) {
+			sn["type"] = 2;
+			sn["label"] = subcomponent.label;
+			sn["style"] = int(subcomponent.style);
+			sn["custom_id"] = subcomponent.custom_id;
+			sn["disabled"] = subcomponent.disabled;
 
-				n["components"].push_back(sn);
-			}
-		} else {
-			n["type"] = 2;
-			n["label"] = component.label;
-			n["style"] = int(component.style);
-			n["custom_id"] = component.custom_id;
-			n["disabled"] = component.disabled;
-
-			j["components"].push_back(n);
+			n["components"].push_back(sn);
 		}
+		j["components"].push_back(n);
 	}
 	if (embeds.size()) {
 		for (auto& embed : embeds) {
