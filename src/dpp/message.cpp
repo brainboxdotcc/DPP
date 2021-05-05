@@ -41,37 +41,37 @@ component::~component() {
 
 component& component::fill_from_json(nlohmann::json* j) {
 
-    type = static_cast<component_type>(Int8NotNull(j, "type"));
+	type = static_cast<component_type>(Int8NotNull(j, "type"));
 	if (type == ActionRow) {
-        std::vector<component> components;
-        for (json sub_component : (*j)["components"]) {
-            components.push_back(this->fill_from_json(&sub_component));
-        }
-    } else {
-        label = StringNotNull(j, "label");
-        style = static_cast<component_style>(Int8NotNull(j, "style"));
-        custom_id = StringNotNull(j, "custom_id");
-        disabled = BoolNotNull(j, "disabled");
-    }
+		std::vector<component> components;
+		for (json sub_component : (*j)["components"]) {
+			components.push_back(this->fill_from_json(&sub_component));
+		}
+	} else {
+		label = StringNotNull(j, "label");
+		style = static_cast<component_style>(Int8NotNull(j, "style"));
+		custom_id = StringNotNull(j, "custom_id");
+		disabled = BoolNotNull(j, "disabled");
+	}
 	return *this;
 }
 
 std::string component::build_json() const {
 	json j;
 	if (type == component_type::ActionRow) {
-        j["type"] = 1;
-        json new_components;
-        for (component new_component : components) {
-            new_components.push_back(new_component.build_json());
-        }
-        j["components"] = new_components;
-    } else {
-        j["type"] = 2;
-        j["label"] = label;
-        j["style"] = int(style);
-        j["custom_id"] = custom_id;
-        j["disabled"] = disabled;
-    }
+		j["type"] = 1;
+		json new_components;
+		for (component new_component : components) {
+			new_components.push_back(new_component.build_json());
+		}
+		j["components"] = new_components;
+	} else {
+		j["type"] = 2;
+		j["label"] = label;
+		j["style"] = int(style);
+		j["custom_id"] = custom_id;
+		j["disabled"] = disabled;
+	}
 	return j.dump();
 }
 
@@ -140,9 +140,8 @@ embed::embed(json* j) : embed() {
 				video = curr;
 			} else if (s == "thumbnail") {
 				thumbnail = curr;
-			}
-			
-	       	}
+			}			
+		}
 	}
 	if (j->find("provider") != j->end()) {
 		json &p = (*j)["provider"];
@@ -252,11 +251,35 @@ std::string message::build_json(bool with_id) const {
 	if (with_id) {
 		j["id"] = std::to_string(id);
 	}
-	json new_new_components = json::array();
-	for (component new_component : components) {
-		new_new_components.push_back(new_component.build_json());
+
+	if (components.size()) {
+		j["components"] = {};
 	}
-	j["components"] = new_new_components;
+	for (auto & component : components) {
+		json n;
+		if (component.type == component_type::ActionRow) {
+			n["type"] = 1;
+			n["components"] = {};
+			json sn;
+			for (auto & subcomponent  : component.components) {
+				sn["type"] = 2;
+				sn["label"] = subcomponent.label;
+				sn["style"] = int(subcomponent.style);
+				sn["custom_id"] = subcomponent.custom_id;
+				sn["disabled"] = subcomponent.disabled;
+
+				n["components"].push_back(sn);
+			}
+		} else {
+			n["type"] = 2;
+			n["label"] = component.label;
+			n["style"] = int(component.style);
+			n["custom_id"] = component.custom_id;
+			n["disabled"] = component.disabled;
+
+			j["components"].push_back(n);
+		}
+	}
 	if (embeds.size()) {
 		for (auto& embed : embeds) {
 			json e;
