@@ -28,7 +28,7 @@ The library runs best on Linux. Windows is supported via cmake and Visual Studio
 
 ## Getting started
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)
-* [Discord Server](https://discord.gg/RnG32Ctyq7)
+* [Discord Server](https://discord.gg/dpp)
 * [Frequently Asked Questions](docpages/Z_01_FAQ.md)
 * [Building on Linux](docpages/Z_02_BUILD_LINUX.md)
 * [Building on Windows](docpages/Z_03_BUILD_WIN.md)

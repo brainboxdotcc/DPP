@@ -10,10 +10,10 @@ During testing this library takes approximately 400 megabytes of ram to cache 1,
 All REST calls (outbound commands) are completed including slash commands, and all Discord events are available. The library also has voice support.
 
 ## How do I chat with the developers or get help?
-The best place to do this is on the [discord server](https://discord.gg/RnG32Ctyq7). You most likely won't get an answer immediately (we have lives, and need to sleep sometimes), so feel free to lurk and join the community!
+The best place to do this is on the [discord server](https://discord.gg/dpp). You most likely won't get an answer immediately (we have lives, and need to sleep sometimes), so feel free to lurk and join the community!
 
 ## How can I contribute to development?
-Just star and fork a copy of the repository, and submit a Pull Request! We won't bite! Authors of accepted pull requests get a special role on [the support server](https://discord.gg/RnG32Ctyq7).
+Just star and fork a copy of the repository, and submit a Pull Request! We won't bite! Authors of accepted pull requests get a special role on [the support server](https://discord.gg/dpp).
 
 ## Whats the best way to learn C++?
 A simple search can find some learning tools, however not all are good. Here is a list of learning resources:
@@ -22,7 +22,7 @@ A simple search can find some learning tools, however not all are good. Here is 
 * [Learn CPP](https://www.learncpp.com/)
 * [Learn CPP (Very Basic)](https://www.learn-cpp.org/)
 
-If you don't understand something then feel free to ask in the [discord server](https://discord.gg/RnG32Ctyq7) ...*we don't bite!*
+If you don't understand something then feel free to ask in the [discord server](https://discord.gg/dpp) ...*we don't bite!*
 
 ## Do I need to be an expert in C++ to use this library?
 NO! Definitely not! We have tried to keep things as simple as possible. We only use language features where they make sense, not just because they exist. Take a look at the example program (`test.cpp` and you'll see just how simple it is to get up and running quickly). We use a small subset of C++17 and C++14 features.

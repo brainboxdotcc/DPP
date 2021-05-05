@@ -1,7 +1,7 @@
 # D++
 ## An incredibly lightweight C++ Discord library
 
-[![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/RnG32Ctyq7) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) [![CircleCI](https://circleci.com/gh/brainboxdotcc/DPP.svg?style=svg)](https://circleci.com/gh/brainboxdotcc/DPP) [![GitHub Actions](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fbrainboxdotcc%2FDPP%2Fbadge&label=build&logo=none)](https://actions-badge.atrox.dev/brainboxdotcc/DPP/goto)
+[![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) [![CircleCI](https://circleci.com/gh/brainboxdotcc/DPP.svg?style=svg)](https://circleci.com/gh/brainboxdotcc/DPP) [![GitHub Actions](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fbrainboxdotcc%2FDPP%2Fbadge&label=build&logo=none)](https://actions-badge.atrox.dev/brainboxdotcc/DPP/goto)
 
 This project is in late alpha stages of development.
 
