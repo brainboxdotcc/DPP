@@ -7,6 +7,7 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage soundboard "Creating a Sound Board"
 * \subpage joinvc "Join or switch to the voice channel of the user issuing a command"
 * \subpage spdlog "Integrating with spdlog"
+* \subpage components "Using component interactions"
 
 
 \page firstbot Creating Your First Bot
@@ -443,3 +444,53 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\page components Using component interactions
+
+Discord's newest features support sending buttons alongside messages, which when clicked by the user trigger an interaction which is routed by
+D++ as an on_button_click event. To make use of this, use code like the example below.
+
+\note	Please be aware that this feature is currently in a **closed beta**. There is no way to get access to this at present to test this or
+	see buttons in your bot. When this is released, this functionality of the library will work as expected.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+#include <iostream>
+#include <dpp/message.h>
+
+int main()
+{
+	dpp::cluster bot("token");
+
+	/* Message handler to look for a command called !button */
+	bot.on_message_create([&bot](const dpp::message_create_t & event) {
+		if (event.msg->content == "!button") {
+			/* Create a message containing an action row, and a button within the action row. */
+			bot.message_create(
+				dpp::message(event.msg->channel_id, "this text has buttons").add_component(
+					dpp::component().add_component(
+						dpp::component().set_label("Click me!").
+						set_emoji("😄").
+						set_style(dpp::cos_danger).
+						set_id("myid")
+					)
+				)
+			);
+		}
+	});
+
+	/* When a user clicks your button, the on_button_click event will fire,
+	 * containing the custom_id you defined in your button.
+	 */
+	bot.on_button_click([&bot](const dpp::button_click_t & event) {
+		/* Button clicks are still interactions, and must be replied to in some form to
+		 * prevent the "this interaction has failed" message from Discord to the user.
+ 		 */
+		event.reply(dpp::ir_channel_message_with_source, "You clicked: " + event.custom_id);
+	});
+
+	bot.start(false);
+
+	return 0;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
