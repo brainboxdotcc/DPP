@@ -33,6 +33,9 @@ namespace dpp {
 
 component::component() : type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""), disabled(false)
 {
+	emoji.animated = false;
+	emoji.id = 0;
+	emoji.name = "";
 }
 
 component::~component() {
@@ -95,6 +98,14 @@ component& component::set_disabled(bool disable)
 {
 	set_type(cot_button);
 	disabled = disable;
+	return *this;
+}
+
+component& component::set_emoji(const std::string& name, dpp::snowflake id, bool animated)
+{
+	this->emoji.id = id;
+	this->emoji.name = name;
+	this->emoji.animated = animated;
 	return *this;
 }
 
@@ -304,15 +315,26 @@ std::string message::build_json(bool with_id) const {
 	}
 	for (auto & component : components) {
 		json n;
-		n["type"] = 1;
+		n["type"] = cot_action_row;
 		n["components"] = {};
 		json sn;
 		for (auto & subcomponent  : component.components) {
-			sn["type"] = 2;
+			sn["type"] = cot_button;
 			sn["label"] = subcomponent.label;
 			sn["style"] = int(subcomponent.style);
 			sn["custom_id"] = subcomponent.custom_id;
 			sn["disabled"] = subcomponent.disabled;
+
+			if (subcomponent.emoji.id || !subcomponent.emoji.name.empty()) {
+				sn["emoji"] = {};
+				sn["emoji"]["animated"] = subcomponent.emoji.animated;
+			}
+			if (subcomponent.emoji.id) {
+				sn["emoji"]["id"] = std::to_string(subcomponent.emoji.id);
+			}
+			if (!subcomponent.emoji.name.empty()) {
+				sn["emoji"]["name"] = subcomponent.emoji.name;
+			}
 
 			n["components"].push_back(sn);
 		}

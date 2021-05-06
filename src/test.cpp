@@ -28,7 +28,8 @@ int main()
 			bot.message_create(
 				dpp::message(event.msg->channel_id, "this text has buttons").add_component(
 					dpp::component().add_component(
-						dpp::component().set_label("Click me! 🐓").
+						dpp::component().set_label("Click me!").
+						set_emoji("😄").
 						set_style(dpp::cos_danger).
 						set_id("myid")
 					)

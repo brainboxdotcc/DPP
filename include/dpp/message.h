@@ -74,6 +74,12 @@ public:
 	 */
 	bool disabled;
 
+	struct inner_emoji {
+		std::string name;
+		dpp::snowflake id;
+		bool animated;
+	} emoji;
+
 	/** Constructor
 	 */
 	component();
@@ -93,6 +99,8 @@ public:
 	component& set_disabled(bool disable);
 
 	component& add_component(const component& c);
+
+	component& set_emoji(const std::string& name, dpp::snowflake id = 0, bool animated = false);
 
 	/** Read class values from json object
 	 * @param j A json object to read from
