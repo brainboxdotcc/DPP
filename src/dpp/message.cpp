@@ -35,9 +35,6 @@ component::component() : type(static_cast<component_type>(1)), label(""), style(
 {
 }
 
-component::~component() {
-}
-
 
 component& component::fill_from_json(nlohmann::json* j) {
 

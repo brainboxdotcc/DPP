@@ -80,7 +80,7 @@ public:
 
 	/** Destructor
 	 */
-	~component();
+	~component() = default;
 
 	component& set_type(component_type ct);
 
