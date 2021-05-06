@@ -448,7 +448,7 @@ int main(int argc, char const *argv[])
 \page components Using component interactions
 
 Discord's newest features support sending buttons alongside messages, which when clicked by the user trigger an interaction which is routed by
-D++ as an on_button_click event. To make use of this, use code like the example below.
+D++ as an on_button_click event. To make use of this, use code as in this example.
 
 \note	Please be aware that this feature is currently in a **closed beta**. There is no way to get access to this at present to test this or
 	see buttons in your bot. When this is released, this functionality of the library will work as expected.
@@ -494,3 +494,7 @@ int main()
 	return 0;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When the feature is functioning, the code below will produce buttons on the reply message like in the image below:
+
+\image html button.png
