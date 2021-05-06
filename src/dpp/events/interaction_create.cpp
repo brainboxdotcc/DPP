@@ -46,6 +46,10 @@ void interaction_create::handle(DiscordClient* client, json &j, const std::strin
 	json& d = j["d"];
 	dpp::interaction i;
 	i.fill_from_json(&d);
+	/* There are two types of interactions, component interactions and
+	 * slash command interactions. Both fire different library events
+	 * so ensure they are dispatched properly.
+	 */
 	if (i.type == it_application_command) {
 		if (client->creator->dispatch.interaction_create) {
 			dpp::interaction_create_t ic(client, raw);
@@ -57,7 +61,7 @@ void interaction_create::handle(DiscordClient* client, json &j, const std::strin
 			dpp::button_click_t ic(client, raw);
 			dpp::button_interaction bi = std::get<button_interaction>(i.data);
 			ic.command = i;
-			ic.custom_id = bi.component_type;
+			ic.custom_id = bi.custom_id;
 			ic.component_type = bi.component_type;
 			client->creator->dispatch.button_click(ic);
 		}
