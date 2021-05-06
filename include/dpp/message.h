@@ -27,38 +27,52 @@
 namespace dpp {
 
 /**
- * @brief Represents the type of component
+ * @brief Represents the type of a component
  */
 enum component_type : uint8_t {
-	cot_action_row = 1,
-	cot_button
+	cot_action_row = 1,	//< Action row, a container for other components
+	cot_button		//< Clickable button
 };
 
 /**
- * @brief Represents the style of the button
+ * @brief Represents the style of a button
  */
 enum component_style : uint8_t {
-    cos_primary = 1,
-    cos_econdary,
-    cos_success,
-    cos_danger,
-    cos_link
+    cos_primary = 1,	//< Blurple
+    cos_secondary,	//< Grey
+    cos_success,	//< Green
+    cos_danger,		//< Red
+    cos_link		//< An external hyperlink to a website
 };
 
 /**
- * @brief Represents the component object
+ * @brief Represents the component object.
+ * A component is a clickable button or drop down list
+ * within a discord message, where the buttons emit
+ * on_button_click events when the user interacts with
+ * them.
+ * 
+ * You should generally define one component object and
+ * then insert one or more additional components into it
+ * using component::add_component(), so that the parent
+ * object is an action row and the child objects are buttons.
+ * 
+ * @note At present this only works for whitelisted
+ * guilds. The beta is **closed**. When this feature is
+ * released, then the functionality will work correctly.
  */
 class component {
 public:
-	/** Component type
+	/** Component type, either a button or action row
 	 */
 	component_type type;
 
-	/** Sub commponents
+	/** Sub commponents, buttons on an action row
 	 */
 	std::vector<component> components;
 
-	/** Component label (for buttons)
+	/** Component label (for buttons).
+	 * Maximum of 80 characters.
 	 */
 	std::string label;
 
@@ -66,17 +80,43 @@ public:
 	 */
 	component_style style;
 
-	/** Component Id
+	/** Component id (for buttons).
+	 * Maximum of 100 characters.
 	 */
 	std::string custom_id;
 
-	/** Disabled (for buttons)
+	/** URL for link types (dpp::cos_link).
+	 * Maximum of 512 characters.
+	 */
+	std::string url;
+
+	/** Disabled flag (for buttons)
 	 */
 	bool disabled;
 
+	/** Emoji definition. To set an emoji on your button
+	 * you must set one of either the name or id fields.
+	 * The easiest way is to use the component::set_emoji
+	 * method.
+	 */
 	struct inner_emoji {
+		/** Set the name field to the name of the emoji.
+		 * For built in unicode emojis, set this to the
+		 * actual unicode value of the emoji e.g. "😄"
+		 * and not for example ":smile:"
+		 */
 		std::string name;
+		/** The emoji ID value for emojis that are custom
+		 * ones belonging to a guild. The same rules apply
+		 * as with other emojis, that the bot must be on
+		 * the guild where the emoji resides and it must
+		 * be available for use (e.g. not disabled due to
+		 * lack of boosts etc)
+		 */
 		dpp::snowflake id;
+		/** True if the emoji is animated. Only applies to
+		 * custom emojis.
+		 */
 		bool animated;
 	} emoji;
 
@@ -88,18 +128,96 @@ public:
 	 */
 	~component();
 
+	/**
+	 * @brief Set the type of the component. Button components
+	 * (type dpp::cot_button) should always be contained within
+	 * an action row (type dpp::cot_action_row). As described
+	 * below, many of the other methods automatically set this
+	 * to the correct type so usually you should not need to
+	 * manually  call component::set_type().
+	 * 
+	 * @param ct The component type 
+	 * @return component& reference to self
+	 */
 	component& set_type(component_type ct);
 
+	/**
+	 * @brief Set the label of the component, e.g. button text.
+	 * For action rows, this field is ignored. Setting the
+	 * label will auto-set the type to dpp::cot_button.
+	 * 
+	 * @param label Label text to set
+	 * @return component& Reference to self
+	 */
 	component& set_label(const std::string &label);
 
+	/**
+	 * @brief Set the url for dpp::cos_link types.
+	 * Calling this function sets the style to dpp::cos_link
+	 * and the type to dpp::cot_button.
+	 * 
+	 * @param url URL to set, maximum length of 512 characters
+	 * @return component& reference to self.
+	 */
+	component& set_url(const std::string &url);
+
+	/**
+	 * @brief Set the style of the component, e.g. button colour.
+	 * For action rows, this field is ignored. Setting the
+	 * style will auto-set the type to dpp::cot_button.
+	 * 
+	 * @param cs Component style to set
+	 * @return component& reference to self
+	 */
 	component& set_style(component_style cs);
 
+	/**
+	 * @brief Set the id of the component.
+	 * For action rows, this field is ignored. Setting the
+	 * id will auto-set the type to dpp::cot_button.
+	 * 
+	 * @param id Custom ID string to set. This ID will be sent
+	 * for any on_button_click events related to the button.
+	 * @return component& Reference to self
+	 */
 	component& set_id(const std::string &id);
 
+	/**
+	 * @brief Set the component to disabled.
+	 * Defaults to false on all created components.
+	 * 
+	 * @param disable True to disable, false to disable.
+	 * @return component& 
+	 */
 	component& set_disabled(bool disable);
 
+	/**
+	 * @brief Add a sub-component, only valid for action rows.
+	 * Adding subcomponents to a component will automatically
+	 * set this component's type to dpp::cot_action_row.
+	 * 
+	 * @param c The sub-component to add
+	 * @return component& reference to self
+	 */
 	component& add_component(const component& c);
 
+	/**
+	 * @brief Set the emoji of the current sub-component.
+	 * Only valid for buttons. Adding an emoji to a component
+	 * will automatically set this components type to
+	 * dpp::cot_button. One or both of name and id must be set.
+	 * For a built in unicode emoji, you only need set name,
+	 * and should set it to a unicode character e.g. "😄".
+	 * For custom emojis, set the name to the name of the emoji
+	 * on the guild, and the id to the emoji's ID.
+	 * Setting the animated boolean is only valid for custom
+	 * emojis.
+	 * 
+	 * @param name Emoji name, or unicode character to use
+	 * @param id Emoji id, for custom emojis only.
+	 * @param animated True if the custom emoji is animated.
+	 * @return component& Reference to self
+	 */
 	component& set_emoji(const std::string& name, dpp::snowflake id = 0, bool animated = false);
 
 	/** Read class values from json object

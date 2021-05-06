@@ -77,7 +77,7 @@ component& component::set_type(component_type ct)
 component& component::set_label(const std::string &l)
 {
 	set_type(cot_button);
-	label = l;
+	label = l.substr(0, 80);
 	return *this;
 }
 
@@ -88,9 +88,18 @@ component& component::set_style(component_style cs)
 	return *this;
 }
 
+component& component::set_url(const std::string& u)
+{
+	set_type(cot_button);
+	set_style(cos_link);
+	url = u.substr(0, 512);
+	return *this;
+}
+
 component& component::set_id(const std::string &id)
 {
-	custom_id = id;
+	set_type(cot_button);
+	custom_id = id.substr(0, 100);
 	return *this;
 }
 
@@ -103,6 +112,7 @@ component& component::set_disabled(bool disable)
 
 component& component::set_emoji(const std::string& name, dpp::snowflake id, bool animated)
 {
+	set_type(cot_button);
 	this->emoji.id = id;
 	this->emoji.name = name;
 	this->emoji.animated = animated;
@@ -319,10 +329,16 @@ std::string message::build_json(bool with_id) const {
 		n["components"] = {};
 		json sn;
 		for (auto & subcomponent  : component.components) {
-			sn["type"] = cot_button;
+			sn["type"] = subcomponent.type;
 			sn["label"] = subcomponent.label;
 			sn["style"] = int(subcomponent.style);
-			sn["custom_id"] = subcomponent.custom_id;
+			if (subcomponent.type == cot_button && subcomponent.style != cos_link && !subcomponent.custom_id.empty()) {
+				/* Links cannot have a custom id */
+				sn["custom_id"] = subcomponent.custom_id;
+			}
+			if (subcomponent.type == cot_button && subcomponent.style == cos_link && !subcomponent.url.empty()) {
+				sn["url"] = subcomponent.url;
+			}
 			sn["disabled"] = subcomponent.disabled;
 
 			if (subcomponent.emoji.id || !subcomponent.emoji.name.empty()) {
