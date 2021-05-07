@@ -70,7 +70,7 @@ DiscordClient::~DiscordClient()
 	}
 }
 
-uint64_t DiscordClient::GetDeompressedBytesIn()
+uint64_t DiscordClient::GetDecompressedBytesIn()
 {
 	return decompressed_total;
 }

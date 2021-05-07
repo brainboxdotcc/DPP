@@ -306,7 +306,7 @@ public:
 	virtual ~DiscordClient();
 
 	/** Get decompressed total bytes received */
-	uint64_t GetDeompressedBytesIn();
+	uint64_t GetDecompressedBytesIn();
 
 	/** Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
