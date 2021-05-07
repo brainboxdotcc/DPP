@@ -126,7 +126,7 @@ public:
 
 	/** Destructor
 	 */
-	~component();
+	~component() = default;
 
 	/**
 	 * @brief Set the type of the component. Button components
