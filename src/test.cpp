@@ -25,27 +25,6 @@ int main()
 
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
 
-		if (event.msg->content == "!rltest") {
-			bot.message_create(dpp::message(828681546533437471, "rate limit spam test"));
-			bot.message_create(dpp::message(828681546533437471, "rate limit spam test"));
-			bot.message_create(dpp::message(828681546533437471, "rate limit spam test"));
-			bot.message_create(dpp::message(828681546533437471, "rate limit spam test"));
-			bot.message_create(dpp::message(828681546533437471, "rate limit spam test"));
-			bot.message_create(dpp::message(828681546533437471, "rate limit spam test"));
-			bot.message_create(dpp::message(828681546533437471, "rate limit spam test"));
-			bot.message_create(dpp::message(828681546533437471, "rate limit spam test"));
-			bot.message_create(dpp::message(828681546533437471, "rate limit spam test"));
-			bot.message_create(dpp::message(737090587248820246, "rate limit spam test"));
-			bot.message_create(dpp::message(737090587248820246, "rate limit spam test"));
-			bot.message_create(dpp::message(737090587248820246, "rate limit spam test"));
-			bot.message_create(dpp::message(737090587248820246, "rate limit spam test"));
-			bot.message_create(dpp::message(737090587248820246, "rate limit spam test"));
-			bot.message_create(dpp::message(737090587248820246, "rate limit spam test"));
-			bot.message_create(dpp::message(737090587248820246, "rate limit spam test"));
-			bot.message_create(dpp::message(737090587248820246, "rate limit spam test"));
-			bot.message_create(dpp::message(737090587248820246, "rate limit spam test"));
-		}
-
 		if (event.msg->content == "!ping2") {
 			bot.message_create(
 				dpp::message(event.msg->channel_id, "this text has buttons").add_component(
