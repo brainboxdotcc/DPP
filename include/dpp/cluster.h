@@ -236,7 +236,7 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	void log(dpp::loglevel severity, const std::string &msg);
+	void log(dpp::loglevel severity, const std::string &msg) const;
 
 	/**
 	 * @brief Get the dm channel for a user id
@@ -731,14 +731,15 @@ public:
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create
 	 * 
 	 * @param endpoint Endpoint to post to, e.g. /api/guilds
-	 * @param parameters Major and minor parameters for the API request
+	 * @param major_parameters Major parameters for the endpoint e.g. a guild id
+	 * @param parameters Minor parameters for the API request
 	 * @param method Method, e.g. GET, POST
 	 * @param postdata Post data (usually JSON encoded)
 	 * @param callback Function to call when the HTTP call completes
 	 * @param filename Filename to post for POST requests (for uploading files)
 	 * @param filecontent File content to post for POST requests (for uploading files)
 	 */
-	void post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
+	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
 
 	/**
 	 * @brief Respond to a slash command

@@ -44,6 +44,7 @@
 #include <dpp/cluster.h>
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <dpp/httplib.h>
+#include <fmt/format.h>
 #include <dpp/stringops.h>
 
 namespace dpp {
@@ -62,7 +63,7 @@ void http_request::complete(const http_request_completion_t &c) {
 }
 
 /* Fill a http_request_completion_t from a HTTP result */
-void populate_result(http_request_completion_t& rv, const httplib::Result &res) {
+void populate_result(const cluster* owner, http_request_completion_t& rv, const httplib::Result &res) {
 	rv.status = res->status;
 	rv.body = res->body;
 	for (auto &v : res->headers) {
@@ -72,9 +73,17 @@ void populate_result(http_request_completion_t& rv, const httplib::Result &res) 
 	rv.ratelimit_remaining = from_string<uint64_t>(res->get_header_value("X-RateLimit-Remaining"), std::dec);
 	rv.ratelimit_reset_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Reset-After"), std::dec);
 	rv.ratelimit_bucket = res->get_header_value("X-RateLimit-Bucket");
-	rv.ratelimit_global = (res->get_header_value("X-RateLimit-Global") == "true"); 
+	rv.ratelimit_global = (res->get_header_value("X-RateLimit-Global") == "true");
 	if (res->get_header_value("X-RateLimit-Retry-After") != "") {
 		rv.ratelimit_retry_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Retry-After"), std::dec);
+	}
+	if (rv.status == 429) {
+		owner->log(ll_warning, fmt::format("Rate limited on endpoint, reset after {}s!", rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
+	}
+	if (rv.ratelimit_global) {
+		owner->log(ll_warning, fmt::format("At global rate limit, reset after {}s", rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
+	} else if (rv.ratelimit_limit == 1) {
+		owner->log(ll_warning, fmt::format("Near bucket '{}' rate limit, reset after {}s", rv.ratelimit_bucket, rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
 	}
 }
 
@@ -116,7 +125,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 	switch (method) {
 		case m_get: {
 			if (auto res = cli.Get(_url.c_str())) {
-				populate_result(rv, res);
+				populate_result(owner, rv, res);
 			} else {
 				rv.error = (http_error)res.error();
 			}
@@ -130,13 +139,13 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 					{ "file", file_content, file_name, "application/octet-stream" }
 				};
 				if (auto res = cli.Post(_url.c_str(), items)) {
-					populate_result(rv, res);
+					populate_result(owner, rv, res);
 				} else {
 					rv.error = (http_error)res.error();
 				}
 			} else {
 				if (auto res = cli.Post(_url.c_str(), postdata.c_str(), "application/json")) {
-					populate_result(rv, res);
+					populate_result(owner, rv, res);
 				} else {
 					rv.error = (http_error)res.error();
 				}
@@ -145,7 +154,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		break;
 		case m_patch: {
 			if (auto res = cli.Patch(_url.c_str(), postdata.c_str(), "application/json")) {
-				populate_result(rv, res);
+				populate_result(owner, rv, res);
 			} else {
 				rv.error = (http_error)res.error();
 			}
@@ -154,7 +163,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		case m_put: {
 			/* PUT supports post data body */
 			if (auto res = cli.Put(_url.c_str(), postdata.c_str(), "application/json")) {
-				populate_result(rv, res);
+				populate_result(owner, rv, res);
 			} else {
 				rv.error = (http_error)res.error();
 			}
@@ -163,7 +172,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		break;
 		case m_delete: {
 			if (auto res = cli.Delete(_url.c_str())) {
-				populate_result(rv, res);
+				populate_result(owner, rv, res);
 			} else {
 				rv.error = (http_error)res.error();
 			}

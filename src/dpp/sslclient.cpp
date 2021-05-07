@@ -145,7 +145,7 @@ void SSLClient::OneSecondTimer()
 {
 }
 
-void SSLClient::log(dpp::loglevel severity, const std::string &msg)
+void SSLClient::log(dpp::loglevel severity, const std::string &msg) const
 {
 }
 

@@ -333,11 +333,11 @@ void DiscordClient::Error(uint32_t errorcode)
 	log(dpp::ll_warning, fmt::format("OOF! Error from underlying websocket: {}: {}", errorcode, error));
 }
 
-void DiscordClient::log(dpp::loglevel severity, const std::string &msg)
+void DiscordClient::log(dpp::loglevel severity, const std::string &msg) const
 {
 	if (creator->dispatch.log) {
 		/* Pass to user if theyve hooked the event */
-		dpp::log_t logmsg(this, msg);
+		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
 		creator->dispatch.log(logmsg);

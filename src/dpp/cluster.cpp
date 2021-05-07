@@ -70,7 +70,7 @@ void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 	}
 }
 
-void cluster::log(dpp::loglevel severity, const std::string &msg) {
+void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 	if (dispatch.log) {
 		/* Pass to user if theyve hooked the event */
 		dpp::log_t logmsg(nullptr, msg);
@@ -144,9 +144,9 @@ void cluster::set_dm_channel(snowflake user_id, snowflake channel_id) {
 	dm_channels[user_id] = channel_id;
 }
 
-void cluster::post_rest(const std::string &endpoint, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent) {
+void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent) {
 	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	rest->post_request(new http_request(endpoint, parameters, [endpoint, callback, this](const http_request_completion_t& rv) {
+	rest->post_request(new http_request(endpoint + "/" + major_parameters, parameters, [endpoint, callback, this](const http_request_completion_t& rv) {
 		json j;
 		if (rv.error == h_success && !rv.body.empty()) {
 			try {
@@ -196,7 +196,7 @@ const shard_list& cluster::get_shards() {
 }
 
 void cluster::get_gateway_bot(command_completion_event_t callback) {
-	this->post_rest("/api/gateway", "bot", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/gateway", "bot", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("gateway", gateway(&j), http));
 		}
@@ -226,7 +226,7 @@ void cluster::direct_message_create(snowflake user_id, const message &m, command
 }
 
 void cluster::interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback) {
-	this->post_rest("/api/v8/interactions", std::to_string(interaction_id) + "/" + url_encode(token) + "/callback", m_post, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v8/interactions", std::to_string(interaction_id), url_encode(token) + "/callback", m_post, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -234,7 +234,7 @@ void cluster::interaction_response_create(snowflake interaction_id, const std::s
 }
 
 void cluster::interaction_response_edit(snowflake application_id, const std::string &token, const interaction_response &r, command_completion_event_t callback) {
-	this->post_rest("/api/v8/interactions", std::to_string(application_id) + "/" + url_encode(token) + "/messages/@original", m_patch, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v8/interactions", std::to_string(application_id), url_encode(token) + "/messages/@original", m_patch, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -243,7 +243,7 @@ void cluster::interaction_response_edit(snowflake application_id, const std::str
 
 
 void cluster::global_command_create(const slashcommand &s, command_completion_event_t callback) {
-	this->post_rest("/api/v8/applications", std::to_string(me.id) + "/commands", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id), "commands", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -251,7 +251,7 @@ void cluster::global_command_create(const slashcommand &s, command_completion_ev
 }
 
 void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/v8/applications", std::to_string(me.id) + "/guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -259,7 +259,7 @@ void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, co
 }
 
 void cluster::global_command_edit(const slashcommand &s, command_completion_event_t callback) {
-	this->post_rest("/api/v8/applications", std::to_string(me.id) + "/commands/" + std::to_string(s.id), m_delete, s.build_json(true), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id), "commands/" + std::to_string(s.id), m_delete, s.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -267,7 +267,7 @@ void cluster::global_command_edit(const slashcommand &s, command_completion_even
 }
 
 void cluster::guild_command_edit(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/v8/applications", std::to_string(me.id) + "/guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id), m_delete, s.build_json(true), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id), m_delete, s.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -275,7 +275,7 @@ void cluster::guild_command_edit(const slashcommand &s, snowflake guild_id, comm
 }
 
 void cluster::global_command_delete(snowflake id, command_completion_event_t callback) {
-	this->post_rest("/api/v8/applications", std::to_string(me.id) + "/commands/" + std::to_string(id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id), "commands/" + std::to_string(id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -283,7 +283,7 @@ void cluster::global_command_delete(snowflake id, command_completion_event_t cal
 }
 
 void cluster::guild_command_delete(snowflake id, snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/v8/applications", std::to_string(me.id) + "/guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -291,7 +291,7 @@ void cluster::guild_command_delete(snowflake id, snowflake guild_id, command_com
 }
 
 void cluster::message_create(const message &m, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages", m_post, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id), "messages", m_post, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
@@ -299,7 +299,7 @@ void cluster::message_create(const message &m, command_completion_event_t callba
 }
 
 void cluster::message_edit(const message &m, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(true), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id), m_patch, m.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
@@ -307,7 +307,7 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 }
 
 void cluster::message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/" + std::to_string(message_id) + "/crosspost", m_post, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id) + "/crosspost", m_post, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
@@ -315,7 +315,7 @@ void cluster::message_crosspost(snowflake message_id, snowflake channel_id, comm
 }
 
 void cluster::message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + reaction + "/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + reaction + "/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -323,7 +323,7 @@ void cluster::message_add_reaction(const struct message &m, const std::string &r
 }
 
 void cluster::message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/@me", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/@me", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -331,7 +331,7 @@ void cluster::message_delete_own_reaction(const struct message &m, const std::st
 }
 
 void cluster::message_delete_all_reactions(const struct message &m, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions",  m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions",  m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -339,7 +339,7 @@ void cluster::message_delete_all_reactions(const struct message &m, command_comp
 }
 
 void cluster::message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -348,7 +348,7 @@ void cluster::message_delete_reaction_emoji(const struct message &m, const std::
 
 
 void cluster::message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -369,7 +369,7 @@ void cluster::message_get_reactions(const struct message &m, const std::string &
 	if (!parameters.empty()) {
 		parameters[0] = '?';
 	}
-	this->post_rest("/api/channels", std::to_string(m.channel_id) + "/messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			user_map users;
 			for (auto & curr_user : j) {
@@ -381,7 +381,7 @@ void cluster::message_get_reactions(const struct message &m, const std::string &
 }
 
 void cluster::message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/" + std::to_string(message_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
@@ -389,7 +389,7 @@ void cluster::message_get(snowflake message_id, snowflake channel_id, command_co
 }
 
 void cluster::message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -401,7 +401,7 @@ void cluster::message_delete_bulk(const std::vector<snowflake>& message_ids, sno
 	for (auto & m : message_ids) {
 		j.push_back(std::to_string(m));
 	}
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages/bulk-delete", m_delete, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "messages/bulk-delete", m_delete, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -409,7 +409,7 @@ void cluster::message_delete_bulk(const std::vector<snowflake>& message_ids, sno
 }
 
 void cluster::channel_create(const class channel &c, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(c.guild_id) + "/channels", m_post, c.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(c.guild_id), "channels", m_post, c.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
@@ -422,7 +422,7 @@ void cluster::channel_edit(const class channel &c, command_completion_event_t ca
 	if (p != j.end()) {
 		j.erase(p);
 	}
-	this->post_rest("/api/channels", std::to_string(c.id), m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c.id), "", m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
@@ -430,7 +430,7 @@ void cluster::channel_edit(const class channel &c, command_completion_event_t ca
 }
 
 void cluster::channel_get(snowflake c, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(c), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
@@ -438,7 +438,7 @@ void cluster::channel_get(snowflake c, command_completion_event_t callback) {
 }
 
 void cluster::channel_typing(const class channel &c, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(c.id) + "/typing", m_post, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c.id), "typing", m_post, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -446,7 +446,7 @@ void cluster::channel_typing(const class channel &c, command_completion_event_t 
 }
 
 void cluster::message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/pins/" + std::to_string(message_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "pins/" + std::to_string(message_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -454,7 +454,7 @@ void cluster::message_pin(snowflake channel_id, snowflake message_id, command_co
 }
 
 void cluster::message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/pins/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "pins/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -463,7 +463,7 @@ void cluster::message_unpin(snowflake channel_id, snowflake message_id, command_
 
 void cluster::channel_edit_position(const class channel &c, command_completion_event_t callback) {
 	json j({ {"id", c.id}, {"position", c.position}  });
-	this->post_rest("/api/guilds", std::to_string(c.guild_id) + "/channels/" + std::to_string(c.id), m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(c.guild_id), "channels/" + std::to_string(c.id), m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
@@ -472,7 +472,7 @@ void cluster::channel_edit_position(const class channel &c, command_completion_e
 
 void cluster::channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback) {
 	json j({ {"allow", std::to_string(allow)}, {"deny", std::to_string(deny)}, {"type", member ? 1 : 0}  });
-	this->post_rest("/api/channels", std::to_string(c.id) + "/permissions/" + std::to_string(overwrite_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c.id), "permissions/" + std::to_string(overwrite_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -481,7 +481,7 @@ void cluster::channel_edit_permissions(const class channel &c, snowflake overwri
 
 void cluster::channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback) {
 	json j({ {"webhook_channel_id", target_channel_id} });
-	this->post_rest("/api/channels", std::to_string(c.id) + "/followers", m_post, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c.id), "followers", m_post, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -489,7 +489,7 @@ void cluster::channel_follow_news(const class channel &c, snowflake target_chann
 }
 
 void cluster::channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(c.id) + "/permissions/" + std::to_string(overwrite_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c.id), "permissions/" + std::to_string(overwrite_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -497,7 +497,7 @@ void cluster::channel_delete_permission(const class channel &c, snowflake overwr
 }
 
 void cluster::invite_get(const std::string &invitecode, command_completion_event_t callback) {
-	this->post_rest("/api/invites", dpp::url_encode(invitecode) + "?with_counts=true", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/invites", dpp::url_encode(invitecode), "?with_counts=true", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("invite", invite().fill_from_json(&j), http));
 		}
@@ -505,7 +505,7 @@ void cluster::invite_get(const std::string &invitecode, command_completion_event
 }
 
 void cluster::channel_invites_get(const class channel &c, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(c.id) + "/invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c.id), "invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		invite_map invites;
 		for (auto & curr_invite : j) {
 			invites[StringNotNull(&curr_invite, "code")] = invite().fill_from_json(&curr_invite);
@@ -517,7 +517,7 @@ void cluster::channel_invites_get(const class channel &c, command_completion_eve
 }
 
 void cluster::get_guild_invites(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		invite_map invites;
 		for (auto & curr_invite : j) {
 			invites[StringNotNull(&curr_invite, "code")] = invite().fill_from_json(&curr_invite);
@@ -529,7 +529,7 @@ void cluster::get_guild_invites(snowflake guild_id, command_completion_event_t c
 }
 
 void cluster::guild_get_integrations(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/integrations", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "integrations", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		integration_map integrations;
 		for (auto & curr_integration : j) {
 			integrations[SnowflakeNotNull(&curr_integration, "id")] = integration().fill_from_json(&curr_integration);
@@ -541,7 +541,7 @@ void cluster::guild_get_integrations(snowflake guild_id, command_completion_even
 }
 
 void cluster::guild_get_widget(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/widget", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "widget", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild_widget", guild_widget().fill_from_json(&j), http));
 		}
@@ -549,7 +549,7 @@ void cluster::guild_get_widget(snowflake guild_id, command_completion_event_t ca
 }
 
 void cluster::guild_get_vanity(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/vanity-url", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "vanity-url", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("invite", invite().fill_from_json(&j), http));
 		}
@@ -557,7 +557,7 @@ void cluster::guild_get_vanity(snowflake guild_id, command_completion_event_t ca
 }
 
 void cluster::guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/widget", m_patch, gw.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "widget", m_patch, gw.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild_widget", guild_widget().fill_from_json(&j), http));
 		}
@@ -565,7 +565,7 @@ void cluster::guild_edit_widget(snowflake guild_id, const class guild_widget &gw
 }
 
 void cluster::guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/integrations/" + std::to_string(i.id), m_patch, i.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "integrations/" + std::to_string(i.id), m_patch, i.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -573,7 +573,7 @@ void cluster::guild_modify_integration(snowflake guild_id, const class integrati
 }
 
 void cluster::guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/integrations/" + std::to_string(integration_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "integrations/" + std::to_string(integration_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -581,7 +581,7 @@ void cluster::guild_delete_integration(snowflake guild_id, snowflake integration
 }
 
 void cluster::guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/integrations/" + std::to_string(integration_id), m_post, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "integrations/" + std::to_string(integration_id), m_post, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -591,7 +591,7 @@ void cluster::guild_sync_integration(snowflake guild_id, snowflake integration_i
 
 
 void cluster::channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(c.id) + "/invites", m_post, i.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(c.id), "invites", m_post, i.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("invite", invite().fill_from_json(&j), http));
 		}
@@ -599,7 +599,7 @@ void cluster::channel_invite_create(const class channel &c, const class invite &
 }
 
 void cluster::pins_get(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/pins", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "pins", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		message_map pins_messages;
 		for (auto & curr_message : j) {
 			pins_messages[SnowflakeNotNull(&curr_message, "id")] = message().fill_from_json(&curr_message);
@@ -614,7 +614,7 @@ void cluster::gdm_add(snowflake channel_id, snowflake user_id, const std::string
 	json params;
 	params["access_token"] = access_token;
 	params["nick"] = nick;
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/recipients/" + std::to_string(user_id), m_put, params.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_put, params.dump(), [callback](json &j, const http_request_completion_t& http) {
 	if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -622,7 +622,7 @@ void cluster::gdm_add(snowflake channel_id, snowflake user_id, const std::string
 }
 
 void cluster::gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/recipients/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -630,7 +630,7 @@ void cluster::gdm_remove(snowflake channel_id, snowflake user_id, command_comple
 }
 
 void cluster::invite_delete(const std::string &invitecode, command_completion_event_t callback) {
-	this->post_rest("/api/invites", dpp::url_encode(invitecode), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/invites", dpp::url_encode(invitecode), "", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("invite", invite().fill_from_json(&j), http));
 		}
@@ -638,7 +638,7 @@ void cluster::invite_delete(const std::string &invitecode, command_completion_ev
 }
 
 void cluster::channel_delete(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(channel_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -646,7 +646,7 @@ void cluster::channel_delete(snowflake channel_id, command_completion_event_t ca
 }
 
 void cluster::guild_create(const class guild &g, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", "", m_post, g.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", "", "", m_post, g.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild", guild().fill_from_json(nullptr, &j), http));
 		}
@@ -654,7 +654,7 @@ void cluster::guild_create(const class guild &g, command_completion_event_t call
 }
 
 void cluster::guild_edit(const class guild &g, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(g.id), m_patch, g.build_json(true), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(g.id), "", m_patch, g.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild", guild().fill_from_json(nullptr, &j), http));
 		}
@@ -662,7 +662,7 @@ void cluster::guild_edit(const class guild &g, command_completion_event_t callba
 }
 
 void cluster::guild_get(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild", guild().fill_from_json(nullptr, &j), http));
 		}
@@ -670,7 +670,7 @@ void cluster::guild_get(snowflake guild_id, command_completion_event_t callback)
 }
 
 void cluster::guild_get_preview(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/preview", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "preview", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild", guild().fill_from_json(nullptr, &j), http));
 		}
@@ -678,7 +678,7 @@ void cluster::guild_get_preview(snowflake guild_id, command_completion_event_t c
 }
 
 void cluster::guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/member/" + std::to_string(user_id), m_get, "", [callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "member/" + std::to_string(user_id), m_get, "", [callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(guild_id), dpp::find_user(user_id)), http));
 		}
@@ -695,7 +695,7 @@ void cluster::guild_add_member(const guild_member& gm, const std::string &access
 		return;
 	}
 	j["access_token"] = access_token;
-	this->post_rest("/api/guilds", std::to_string(gm.guild_id) + "/members/" + std::to_string(gm.user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -703,7 +703,7 @@ void cluster::guild_add_member(const guild_member& gm, const std::string &access
 }
 
 void cluster::guild_edit_member(const guild_member& gm, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(gm.guild_id) + "/members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [&gm, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [&gm, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(gm.guild_id), dpp::find_user(gm.user_id)), http));
 		}
@@ -717,7 +717,7 @@ void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname
 	} else {
 		o = json({{"nickname", nickname}}).dump();
 	}
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members/@me/nick", m_patch, o, [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "members/@me/nick", m_patch, o, [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -725,7 +725,7 @@ void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname
 }
 
 void cluster::guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -733,7 +733,7 @@ void cluster::guild_member_add_role(snowflake guild_id, snowflake user_id, snowf
 }
 
 void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -741,7 +741,7 @@ void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, sn
 }
 
 void cluster::guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -756,7 +756,7 @@ void cluster::guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t dele
 		j["reason"] = reason;
 	if (delete_message_days)
 		j["delete_message_days"] = delete_message_days;
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/bans/" + std::to_string(user_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -764,7 +764,7 @@ void cluster::guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t dele
 }
 
 void cluster::guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/bans/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -774,7 +774,7 @@ void cluster::guild_ban_delete(snowflake guild_id, snowflake user_id, command_co
 
 
 void cluster::guild_get_members(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/members", m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "members", m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
 		guild_member_map guild_members;
 		for (auto & curr_member : j) {
 			guild_member gm;
@@ -792,7 +792,7 @@ void cluster::guild_get_members(snowflake guild_id, command_completion_event_t c
 
 
 void cluster::template_get(const std::string &code, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", "templates/" + code, m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", "templates", code, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
 		}
@@ -802,7 +802,7 @@ void cluster::template_get(const std::string &code, command_completion_event_t c
 void cluster::guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback) {
 	json params;
 	params["name"] = name;
-	this->post_rest("/api/guilds", "templates/" + code, m_post, params.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", "templates", code, m_post, params.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild", guild().fill_from_json(nullptr, &j), http));
 		}
@@ -810,7 +810,7 @@ void cluster::guild_create_from_template(const std::string &code, const std::str
 }
 
 void cluster::guild_templates_get(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "templates", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		dtemplate_map dtemplates;
 		for (auto & curr_dtemplate : j) {
 			dtemplates[SnowflakeNotNull(&curr_dtemplate, "id")] = dtemplate().fill_from_json(&curr_dtemplate);
@@ -825,7 +825,7 @@ void cluster::guild_template_create(snowflake guild_id, const std::string &name,
 	json params;
 	params["name"] = name;
 	params["description"] = description;
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates", m_post, params.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "templates", m_post, params.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
 		}
@@ -833,7 +833,7 @@ void cluster::guild_template_create(snowflake guild_id, const std::string &name,
 }
 
 void cluster::guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates/" + code, m_put, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "templates/" + code, m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
 		}
@@ -844,7 +844,7 @@ void cluster::guild_template_modify(snowflake guild_id, const std::string &code,
 	json params;
 	params["name"] = name;
 	params["description"] = description;
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates/" + code, m_patch, params.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "templates/" + code, m_patch, params.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
 		}
@@ -852,7 +852,7 @@ void cluster::guild_template_modify(snowflake guild_id, const std::string &code,
 }
 
 void cluster::guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/templates/" + code, m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "templates/" + code, m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("dtemplate", dtemplate().fill_from_json(&j), http));
 		}
@@ -860,7 +860,7 @@ void cluster::guild_template_delete(snowflake guild_id, const std::string &code,
 }
 
 void cluster::user_get(snowflake user_id, command_completion_event_t callback) {
-	this->post_rest("/api/users", std::to_string(user_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/users", std::to_string(user_id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
 		}
@@ -868,7 +868,7 @@ void cluster::user_get(snowflake user_id, command_completion_event_t callback) {
 }
 
 void cluster::current_user_get(command_completion_event_t callback) {
-	this->post_rest("/api/users", "@me", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/users", "@me", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
 		}
@@ -876,7 +876,7 @@ void cluster::current_user_get(command_completion_event_t callback) {
 }
 
 void cluster::current_user_get_guilds(command_completion_event_t callback) {
-	this->post_rest("/api/users", "@me/guilds", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/users", "@me", "guilds", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			guild_map guilds;
 			for (auto & curr_guild : j) {
@@ -888,7 +888,7 @@ void cluster::current_user_get_guilds(command_completion_event_t callback) {
 }
 
 void cluster::guild_delete(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -896,7 +896,7 @@ void cluster::guild_delete(snowflake guild_id, command_completion_event_t callba
 }
 
 void cluster::role_create(const class role &r, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(r.guild_id) + "/roles", m_post, r.build_json(), [r, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(r.guild_id), "roles", m_post, r.build_json(), [r, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}
@@ -909,7 +909,7 @@ void cluster::role_edit(const class role &r, command_completion_event_t callback
 	if (p != j.end()) {
 		j.erase(p);
 	}
-	this->post_rest("/api/guilds", std::to_string(r.guild_id) + "/roles/" + std::to_string(r.id) , m_patch, j.dump(), [r, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(r.guild_id), "roles/" + std::to_string(r.id) , m_patch, j.dump(), [r, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}
@@ -917,7 +917,7 @@ void cluster::role_edit(const class role &r, command_completion_event_t callback
 }
 
 void cluster::guild_get_bans(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/bans", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "bans", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		ban_map bans;
 		for (auto & curr_ban : j) {
 			bans[SnowflakeNotNull(&curr_ban, "user_id")] = ban().fill_from_json(&curr_ban);
@@ -929,7 +929,7 @@ void cluster::guild_get_bans(snowflake guild_id, command_completion_event_t call
 }
 
 void cluster::guild_get_ban(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/bans/" + std::to_string(user_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("ban", ban().fill_from_json(&j), http));
 		}
@@ -937,7 +937,7 @@ void cluster::guild_get_ban(snowflake guild_id, snowflake user_id, command_compl
 }
 
 void cluster::guild_emojis_get(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "emojis", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			emoji_map emojis;
 			for (auto & curr_emoji : j) {
@@ -949,7 +949,7 @@ void cluster::guild_emojis_get(snowflake guild_id, command_completion_event_t ca
 }
 
 void cluster::guild_emoji_get(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis/" + std::to_string(emoji_id), m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "emojis/" + std::to_string(emoji_id), m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("emoji", emoji().fill_from_json(&j), http));
 		}
@@ -957,7 +957,7 @@ void cluster::guild_emoji_get(snowflake guild_id, snowflake emoji_id, command_co
 }
 
 void cluster::guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis", m_post, newemoji.build_json(), [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "emojis", m_post, newemoji.build_json(), [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("emoji", emoji().fill_from_json(&j), http));
 		}
@@ -965,7 +965,7 @@ void cluster::guild_emoji_create(snowflake guild_id, const class emoji& newemoji
 }
 
 void cluster::guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis/" + std::to_string(newemoji.id), m_patch, newemoji.build_json(), [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "emojis/" + std::to_string(newemoji.id), m_patch, newemoji.build_json(), [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("emoji", emoji().fill_from_json(&j), http));
 		}
@@ -973,7 +973,7 @@ void cluster::guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, 
 }
 
 void cluster::guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/emojis/" + std::to_string(emoji_id), m_delete, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "emojis/" + std::to_string(emoji_id), m_delete, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -981,7 +981,7 @@ void cluster::guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command
 }
 
 void cluster::guild_get_prune_counts(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/prune", m_get, pruneinfo.build_json(false), [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "prune", m_get, pruneinfo.build_json(false), [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("prune", prune().fill_from_json(&j), http));
 		}
@@ -989,7 +989,7 @@ void cluster::guild_get_prune_counts(snowflake guild_id, const struct prune& pru
 }
 
 void cluster::guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/prune", m_get, pruneinfo.build_json(true), [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "prune", m_get, pruneinfo.build_json(true), [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("prune", prune().fill_from_json(&j), http));
 		}
@@ -997,7 +997,7 @@ void cluster::guild_begin_prune(snowflake guild_id, const struct prune& pruneinf
 }
 
 void cluster::guild_get_voice_regions(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/regions", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "regions", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
 		voiceregion_map voiceregions;
 		for (auto & curr_region : j) {
 			voiceregions[StringNotNull(&curr_region, "id")] = voiceregion().fill_from_json(&j);
@@ -1007,7 +1007,7 @@ void cluster::guild_get_voice_regions(snowflake guild_id, command_completion_eve
 }
 
 void cluster::get_voice_regions(command_completion_event_t callback) {
-	this->post_rest("/voice/regions", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/voice/regions", "", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		voiceregion_map voiceregions;
 		for (auto & curr_region : j) {
 			voiceregions[StringNotNull(&curr_region, "id")] = voiceregion().fill_from_json(&j);
@@ -1018,7 +1018,7 @@ void cluster::get_voice_regions(command_completion_event_t callback) {
 
 
 void cluster::roles_get(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "roles", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			role_map roles;
 			for (auto & curr_role : j) {
@@ -1030,7 +1030,7 @@ void cluster::roles_get(snowflake guild_id, command_completion_event_t callback)
 }
 
 void cluster::channels_get(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map channels;
 			for (auto & curr_channel: j) {
@@ -1058,7 +1058,7 @@ void cluster::messages_get(snowflake channel_id, snowflake around, snowflake bef
 	if (!parameters.empty()) {
 		parameters[0] = '?';
 	}
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/messages" + parameters, m_get, json(), [channel_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "messages" + parameters, m_get, json(), [channel_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			message_map messages;
 			for (auto & curr_message : j) {
@@ -1071,7 +1071,7 @@ void cluster::messages_get(snowflake channel_id, snowflake around, snowflake bef
 
 void cluster::role_edit_position(const class role &r, command_completion_event_t callback) {
 	json j({ {"id", r.id}, {"position", r.position}  });
-	this->post_rest("/api/guilds", std::to_string(r.guild_id) + "/roles/" + std::to_string(r.id), m_patch, j.dump(), [r, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(r.guild_id), "roles/" + std::to_string(r.id), m_patch, j.dump(), [r, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}
@@ -1079,7 +1079,7 @@ void cluster::role_edit_position(const class role &r, command_completion_event_t
 }
 
 void cluster::role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -1102,7 +1102,7 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 		}
 		j["avatar"] = "data:" + mimetypes[type] + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length());
 	}
-	this->post_rest("/api/users", "@me", m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/users", "@me", "", m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
 		}
@@ -1110,13 +1110,13 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 }
 
 void cluster::current_user_leave_guild(snowflake guild_id, command_completion_event_t callback) {
-	 this->post_rest("/api/users", "@me/guilds/" + std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	 this->post_rest("/api/users", "@me", "guilds/" + std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		callback(confirmation_callback_t("confirmation", confirmation(), http));
 	 });
 }
 
 void cluster::current_user_get_dms(command_completion_event_t callback) {
-	this->post_rest("/api/users", "@me/channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/users", "@me", "channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map channels;
 			for (auto & curr_channel: j) {
@@ -1128,7 +1128,7 @@ void cluster::current_user_get_dms(command_completion_event_t callback) {
 }
 
 void cluster::create_dm_channel(snowflake user_id, command_completion_event_t callback) {
-	this->post_rest("/api/users", "@me/channels", m_post, json({{"recipient_id", std::to_string(user_id)}}).dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/users", "@me", "channels", m_post, json({{"recipient_id", std::to_string(user_id)}}).dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
@@ -1136,7 +1136,7 @@ void cluster::create_dm_channel(snowflake user_id, command_completion_event_t ca
 }
 
 void cluster::create_webhook(const class webhook &w, command_completion_event_t callback) {
-	this->post_rest("/api/channnels", std::to_string(w.channel_id) + "/webhooks", m_post, w.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channnels", std::to_string(w.channel_id), "webhooks", m_post, w.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
 		}
@@ -1144,7 +1144,7 @@ void cluster::create_webhook(const class webhook &w, command_completion_event_t 
 }
 
 void cluster::get_guild_webhooks(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			webhook_map webhooks;
 			for (auto & curr_webhook: j) {
@@ -1156,7 +1156,7 @@ void cluster::get_guild_webhooks(snowflake guild_id, command_completion_event_t 
 }
 
 void cluster::get_channel_webhooks(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(channel_id) + "/webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/channels", std::to_string(channel_id), "webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			webhook_map webhooks;
 			for (auto & curr_webhook: j) {
@@ -1168,7 +1168,7 @@ void cluster::get_channel_webhooks(snowflake channel_id, command_completion_even
 }
 
 void cluster::get_webhook(snowflake webhook_id, command_completion_event_t callback) {
-	this->post_rest("/api/webhooks", std::to_string(webhook_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/webhooks", std::to_string(webhook_id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
 		}
@@ -1176,7 +1176,7 @@ void cluster::get_webhook(snowflake webhook_id, command_completion_event_t callb
 }
 
 void cluster::get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
-	this->post_rest("/api/webhooks", std::to_string(webhook_id) + "/" + dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/webhooks", std::to_string(webhook_id), dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
 		}
@@ -1184,7 +1184,7 @@ void cluster::get_webhook_with_token(snowflake webhook_id, const std::string &to
 }
 
 void cluster::edit_webhook(const class webhook& wh, command_completion_event_t callback) {
-	this->post_rest("/api/webhooks", std::to_string(wh.id), m_patch, wh.build_json(true), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/webhooks", std::to_string(wh.id), "", m_patch, wh.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
 		}
@@ -1203,7 +1203,7 @@ void cluster::edit_webhook_with_token(const class webhook& wh, command_completio
 	if (jwh.find("channel_id") != jwh.end()) {
 		jwh.erase(jwh.find("channel_id"));
 	}
-	this->post_rest("/api/webhooks", std::to_string(wh.id)+ "/" + dpp::url_encode(wh.token), m_patch, jwh.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/webhooks", std::to_string(wh.id), dpp::url_encode(wh.token), m_patch, jwh.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
 		}
@@ -1211,7 +1211,7 @@ void cluster::edit_webhook_with_token(const class webhook& wh, command_completio
 }
 
 void cluster::delete_webhook(snowflake webhook_id, command_completion_event_t callback) {
-	this->post_rest("/api/webhooks", std::to_string(webhook_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/webhooks", std::to_string(webhook_id), "", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -1219,7 +1219,7 @@ void cluster::delete_webhook(snowflake webhook_id, command_completion_event_t ca
 }
 
 void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
-	this->post_rest("/api/webhooks", std::to_string(webhook_id) + "/" + dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/webhooks", std::to_string(webhook_id), dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -1227,7 +1227,7 @@ void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string 
 }
 
 void cluster::execute_webhook(const class webhook &wh, const struct message& m, command_completion_event_t callback) {
-	this->post_rest("/api/webhooks", std::to_string(wh.id) + "/" + dpp::url_encode(token), m_post, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/webhooks", std::to_string(wh.id), dpp::url_encode(token), m_post, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
@@ -1235,7 +1235,7 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 }
 
 void cluster::edit_webhook_message(const class webhook &wh, const struct message& m, command_completion_event_t callback) {
-	this->post_rest("/api/webhooks", std::to_string(wh.id) + "/" + dpp::url_encode(token) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/webhooks", std::to_string(wh.id), dpp::url_encode(token) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
@@ -1243,7 +1243,7 @@ void cluster::edit_webhook_message(const class webhook &wh, const struct message
 }
 
 void cluster::delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback) {
-	this->post_rest("/api/webhooks", std::to_string(wh.id) + "/" + dpp::url_encode(token) + "/messages/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/webhooks", std::to_string(wh.id), dpp::url_encode(token) + "/messages/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -1251,7 +1251,7 @@ void cluster::delete_webhook_message(const class webhook &wh, snowflake message_
 }
 
 void cluster::guild_auditlog_get(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest("/api/guilds", std::to_string(guild_id) + "/audit-logs", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/guilds", std::to_string(guild_id), "audit-logs", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("auditlog", auditlog().fill_from_json(&j), http));
 		}

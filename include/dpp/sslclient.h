@@ -154,7 +154,7 @@ public:
 	 * @param severity severity of log message
 	 * @param msg Log message to send
 	 */
-	virtual void log(dpp::loglevel severity, const std::string &msg);
+	virtual void log(dpp::loglevel severity, const std::string &msg) const;
 };
 
 };
