@@ -414,6 +414,62 @@ struct reaction {
 	bool me;
 	/** ID of emoji for reaction */
 	snowflake emoji_id;
+	/** Name of emoji, if applicable */
+	std::string emoji_name;
+
+	/**
+	 * @brief Constructs a new reaction object.
+	 */
+	reaction();
+
+	/**
+	 * @brief Constructs a new reaction object from a JSON object.
+	 * @param j The JSON to read data from
+	 */
+	reaction(nlohmann::json* j);
+
+	/**
+	 * @brief Destructs the reaction object.
+	 */
+	~reaction() = default;
+};
+
+/**
+ * @brief Represents an attachment in a dpp::message
+ */
+struct attachment {
+	/** ID of attachment */
+	snowflake id;
+	/** Size of the attachment in bytes */
+	uint32_t size;
+	/** File name of the attachment */
+	std::string filename;
+	/** URL which points to the attachment */
+	std::string url;
+	/** Proxied URL which points to the attachment */
+	std::string proxy_url;
+	/** Width of the attachment, if applicable */
+	uint32_t width;
+	/** Height of the attachment, if applicable */
+	uint32_t height;
+	/** MIME type of the attachment, if applicable */
+	std::string content_type;
+
+	/**
+	 * @brief Constructs a new attachment object.
+	 */
+	attachment();
+
+	/**
+	 * @brief Constructs a new attachment object from a JSON object.
+	 * @param j JSON to read information from
+	 */
+	attachment(nlohmann::json* j);
+
+	/**
+	 * @brief Destructs the attachment object.
+	 */
+	~attachment() = default;
 };
 
 /**
@@ -488,7 +544,7 @@ struct message {
 	/** Optional: channels specifically mentioned in this message */
 	std::vector<snowflake> mention_channels;
 	/** any attached files */
-	std::vector<const unsigned char*> attachments;
+	std::vector<attachment> attachments;
 	/** zero or more dpp::embed objects */
 	std::vector<embed> embeds;
 	/** Optional: reactions to the message */
