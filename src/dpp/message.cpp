@@ -282,6 +282,38 @@ embed& embed::set_url(const std::string &u) {
 	return *this;
 }
 
+reaction::reaction() {
+	count = 0;
+	me = false;
+	emoji_id = 0;
+}
+
+reaction::reaction(json* j) {
+	count = (*j)["count"];
+	me = (*j)["me"];
+	json emoji = (*j)["emoji"];
+	emoji_id = SnowflakeNotNull(&emoji, "id");
+	emoji_name = StringNotNull(&emoji, "name");
+}
+
+attachment::attachment() {
+	id = 0;
+	size = 0;
+	width = 0;
+	height = 0;
+}
+
+attachment::attachment(json *j) : attachment() {
+	this->id = SnowflakeNotNull(j, "id");
+	this->size = (*j)["size"];
+	this->filename = (*j)["filename"];
+	this->url = (*j)["url"];
+	this->proxy_url = (*j)["proxy_url"];
+	this->width = Int32NotNull(j, "width");
+	this->height = Int32NotNull(j, "height");
+	this->content_type = StringNotNull(j, "content_type");
+}
+
 std::string message::build_json(bool with_id) const {
 	/* This is the basics. once it works, expand on it. */
 	json j({
@@ -467,8 +499,12 @@ message& message::fill_from_json(json* d) {
 	this->edited = TimestampNotNull(d, "edited_timestamp");
 	this->tts = BoolNotNull(d, "tts");
 	this->mention_everyone = BoolNotNull(d, "mention_everyone");
-	/* TODO: Populate these */
-	/* this->reactions */
+	if (d->find("reactions") != d->end()) {
+		json & el = (*d)["reactions"];
+		for (auto& e : el) {
+			this->reactions.push_back(reaction(&e));
+		}
+	}
 	if (((*d)["nonce"]).is_string()) {
 		this->nonce = StringNotNull(d, "nonce");
 	} else {
@@ -476,6 +512,9 @@ message& message::fill_from_json(json* d) {
 	}
 	this->pinned = BoolNotNull(d, "pinned");
 	this->webhook_id = SnowflakeNotNull(d, "webhook_id");
+	for (auto& e : (*d)["attachments"]) {
+		this->attachments.push_back(attachment(&e));
+	}
 	return *this;
 }
 
