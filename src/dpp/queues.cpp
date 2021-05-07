@@ -82,7 +82,7 @@ void populate_result(const cluster* owner, http_request_completion_t& rv, const 
 	}
 	if (rv.ratelimit_global) {
 		owner->log(ll_warning, fmt::format("At global rate limit, reset after {}s", rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
-	} else if (rv.ratelimit_limit == 1) {
+	} else if (rv.ratelimit_remaining == 1) {
 		owner->log(ll_warning, fmt::format("Near bucket '{}' rate limit, reset after {}s", rv.ratelimit_bucket, rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
 	}
 }
