@@ -142,8 +142,6 @@ endforeach(fullmodname)
 target_compile_features(dpp PRIVATE cxx_std_17)
 target_link_libraries(test PUBLIC dpp fmt)
 
-# message("Type ${Green}make -j${ColourReset} to build D++ then ${Green}sudo make install${ColourReset}")
-
 add_custom_command(TARGET dpp
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostBuild.cmake)
 

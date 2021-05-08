@@ -373,8 +373,7 @@ int main(int argc, char const *argv[])
 		);
 
 		/* Register the command */
-		bot.global_command_create(newcommand, [&bot](const dpp::confirmation_callback_t & state));
-	});
+		bot.global_command_create(newcommand);
 
 	bot.start(false);
 	return 0;
