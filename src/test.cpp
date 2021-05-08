@@ -1,6 +1,6 @@
 #include <dpp/dpp.h>
 #include <iostream>
-#include <nlohmann/json.hpp>
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/message.h>
 
 using json = nlohmann::json;

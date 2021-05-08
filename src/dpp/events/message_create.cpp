@@ -27,7 +27,7 @@
 #include <dpp/discord.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
-#include <nlohmann/json.hpp>
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/dispatcher.h>
 #include <dpp/discordevents.h>
 

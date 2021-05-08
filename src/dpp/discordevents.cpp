@@ -29,7 +29,7 @@
 #include <dpp/event.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
-#include <nlohmann/json.hpp>
+#include <dpp/nlohmann/json.hpp>
 #include <fmt/format.h>
 
 #ifdef _WIN32

@@ -28,7 +28,7 @@
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
 #include <thread>
-#include <nlohmann/json.hpp>
+#include <dpp/nlohmann/json.hpp>
 #include <fmt/format.h>
 #include <zlib.h>
 

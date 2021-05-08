@@ -21,7 +21,7 @@
 #include <dpp/auditlog.h>
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
-#include <nlohmann/json.hpp>
+#include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
 

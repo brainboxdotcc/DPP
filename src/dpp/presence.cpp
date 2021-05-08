@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/presence.h>
 #include <dpp/discordevents.h>
-#include <nlohmann/json.hpp>
+#include <dpp/nlohmann/json.hpp>
 
 using json = nlohmann::json;
 

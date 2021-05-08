@@ -27,7 +27,7 @@
 #include <dpp/cache.h>
 #include <chrono>
 #include <iostream>
-#include <nlohmann/json.hpp>
+#include <dpp/nlohmann/json.hpp>
 #include <fmt/format.h>
 
 namespace dpp {

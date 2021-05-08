@@ -21,7 +21,7 @@
 #include <dpp/slashcommand.h>
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
-#include <nlohmann/json.hpp>
+#include <dpp/nlohmann/json.hpp>
 #include <iostream>
 
 namespace dpp {
