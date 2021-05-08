@@ -103,7 +103,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
         endif()
 endif()
 
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/json/CMakeLists.txt" OR NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/fmt/CMakeLists.txt")
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/fmt/CMakeLists.txt")
     message(FATAL_ERROR "The submodules were not downloaded! Please update submodules and try again.")
 endif()
 
@@ -113,15 +113,11 @@ endif()
 
 set(BUILD_SHARED_LIBS 1 CACHE BOOL "Build fmt::format as a shared library")
 add_subdirectory(deps/fmt)
-add_subdirectory(deps/json)
 
 include_directories("deps/fmt/include")
-include_directories("deps/json/single_include")
 if (WIN32)
 	include_directories("C:/Program Files/OpenSSL-Win64/include")
 endif (WIN32)
-
-execute_process(COMMAND "g++ -c deps/json/single_include/nlohmann/json.hpp -o deps/json/single_include/nlohmann/json.hpp.gch")
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread -g -O2 -fPIC -rdynamic")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2")
@@ -134,9 +130,9 @@ foreach (fullmodname ${subdirlist})
 	file(GLOB modsrc ${modules_dir}/dpp/*.cpp ${modules_dir}/dpp/events/*.cpp)
         add_library(${modname} SHARED ${modsrc})
 if (WIN32)
-	target_link_libraries(${modname} PUBLIC nlohmann_json::nlohmann_json fmt "C:\\vckpg\\installed\\x64-windows\\lib\\libssl.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\libcrypto.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\zlib.lib")
+	target_link_libraries(${modname} PUBLIC fmt "C:\\vckpg\\installed\\x64-windows\\lib\\libssl.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\libcrypto.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\zlib.lib")
 else()
-	target_link_libraries(${modname} PUBLIC ssl crypto nlohmann_json::nlohmann_json fmt z)
+	target_link_libraries(${modname} PUBLIC ssl crypto fmt z)
 endif()
 if (HAVE_VOICE)
 	target_link_libraries(${modname} PUBLIC sodium opus)
@@ -155,7 +151,6 @@ add_custom_command(TARGET dpp
 
 include(GNUInstallDirs)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/fmt/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/json/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libdpp.so DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(TARGETS fmt
