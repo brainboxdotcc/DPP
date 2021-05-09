@@ -6,7 +6,7 @@ NEWMINOR=$((MINOR + 1))
 NEWVER="$MAJOR.$NEWMINOR"
 echo "Building and tagging release $NEWVER"
 git tag -a "$NEWVER" -m "Release $NEWVER"
-git push
+git push --tags
 cd /tmp
 rm -rf /tmp/DPP
 git clone --depth=1 --branch "$NEWVER" --recursive git@github.com:brainboxdotcc/DPP.git
