@@ -74,7 +74,7 @@ component& component::set_type(component_type ct)
 component& component::set_label(const std::string &l)
 {
 	set_type(cot_button);
-	label = l.substr(0, 80);
+	label = utility::utf8substr(l, 0, 80);
 	return *this;
 }
 
@@ -89,14 +89,14 @@ component& component::set_url(const std::string& u)
 {
 	set_type(cot_button);
 	set_style(cos_link);
-	url = u.substr(0, 512);
+	url = utility::utf8substr(u, 0, 512);
 	return *this;
 }
 
 component& component::set_id(const std::string &id)
 {
 	set_type(cot_button);
-	custom_id = id.substr(0, 100);
+	custom_id = utility::utf8substr(id, 0, 100);
 	return *this;
 }
 
@@ -149,7 +149,7 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), member(
 
 message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
 	channel_id = _channel_id;
-	content = _content;
+	content = utility::utf8substr(_content, 0, 2000);
 	type = t;
 }
 
@@ -166,7 +166,7 @@ message& message::add_embed(const embed& e)
 }
 
 message::message(const std::string &_content, message_type t) : message() {
-	content = _content;
+	content = utility::utf8substr(_content, 0, 2000);
 	type = t;
 }
 
@@ -237,17 +237,19 @@ embed::embed(json* j) : embed() {
 }
 
 embed& embed::add_field(const std::string& name, const std::string &value, bool is_inline) {
-	embed_field f;
-	f.name = name;
-	f.value = value;
-	f.is_inline = is_inline;
-	fields.push_back(f);
+	if (fields.size() < 25) {
+		embed_field f;
+		f.name = utility::utf8substr(name, 0, 256);
+		f.value = utility::utf8substr(value, 0, 1024);
+		f.is_inline = is_inline;
+		fields.push_back(f);
+	}
 	return *this;
 }
 
 embed& embed::set_author(const std::string& name, const std::string& url, const std::string& icon_url) {
 	dpp::embed_author a;
-	a.name = name;
+	a.name = utility::utf8substr(name, 0, 256);
 	a.url = url;
 	a.icon_url = icon_url;
 	author = a;
@@ -256,7 +258,7 @@ embed& embed::set_author(const std::string& name, const std::string& url, const 
 
 embed& embed::set_provider(const std::string& name, const std::string& url) {
 	dpp::embed_provider p;
-	p.name = name;
+	p.name = utility::utf8substr(name, 0, 256);
 	p.url = url;
 	provider = p;
 	return *this;
@@ -284,17 +286,18 @@ embed& embed::set_thumbnail(const std::string& url) {
 }
 
 embed& embed::set_title(const std::string &text) {
-	title = text;
+	title = utility::utf8substr(text, 0, 256);
 	return *this;
 }
 
 embed& embed::set_description(const std::string &text) {
-	description = text;
+	description = utility::utf8substr(text, 0, 2048);
 	return *this;
 }
 
 embed& embed::set_color(uint32_t col) {
-	color = col;
+	// Mask off alpha, as discord doesn't use it
+	color = col & 0x00FFFFFF;
 	return *this;
 }
 

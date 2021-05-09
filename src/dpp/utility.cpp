@@ -183,7 +183,79 @@ namespace dpp {
 #endif
 		}
 
+		size_t utf8len(const std::string &str)
+		{
+			size_t i = 0, iBefore = 0, count = 0;
+			const char* s = str.c_str();
+			if (*s == 0)
+				return 0;
 
+			while (s[i] > 0) {
+		ascii:
+				i++;
+			}
+
+			count += i - iBefore;
+
+			while (s[i]) {
+				if (s[i] > 0) {
+					iBefore = i;
+					goto ascii;
+				} else {
+					switch (0xF0 & s[i]) {
+					case 0xE0:
+						i += 3;
+						break;
+					case 0xF0:
+						i += 4;
+						break;
+					default:
+						i += 2;
+						break;
+					}
+				}
+
+				count++;
+			}
+
+			return count;
+		}
+
+		std::string utf8substr(const std::string& str, std::string::size_type start, std::string::size_type leng)
+		{
+			if (leng == 0) {
+				return "";
+			}
+			if (start == 0 && leng >= utf8len(str)) {
+				return str;
+			}
+			std::string::size_type i, ix, q, min = std::string::npos, max = std::string::npos;
+			for (q = 0, i = 0, ix = str.length(); i < ix; i++, q++)
+			{
+				if (q == start)
+					min = i;
+				if (q <= start + leng || leng == std::string::npos)
+					max = i;
+
+				unsigned char c = (unsigned char)str[i];
+				if (c < 0x80)
+					i += 0;
+				else if ((c & 0xE0) == 0xC0)
+					i += 1;
+				else if ((c & 0xF0) == 0xE0)
+					i += 2;
+				else if ((c & 0xF8) == 0xF0)
+					i += 3;
+				else
+					return "";	//invalid utf8
+			}
+			if (q <= start + leng || leng == std::string::npos)
+				max = i;
+			if (min == std::string::npos || max == std::string::npos)
+				return "";
+
+			return str.substr(min, max);
+		}
 	};
 
 };

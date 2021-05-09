@@ -224,6 +224,24 @@ namespace dpp {
 		 * @param length The length of data to display
 		 */
 		void debug_dump(uint8_t* data, size_t length);
+
+		/**
+		 * @brief Returns the length of a UTF-8 string in codepoints
+		 * 
+		 * @param str string to count length of
+		 * @return size_t length of string (0 for invalid utf8)
+		 */
+		size_t utf8len(const std::string &str);
+
+		/**
+		 * @brief Return substring of a UTF-8 encoded string in codepoints
+		 * 
+		 * @param str string to return substring from
+		 * @param start start codepoint offset
+		 * @param length length in codepoints
+		 * @return std::string Substring in UTF-8 or emtpy string if invalid UTF-8 passed in
+		 */
+		std::string utf8substr(const std::string& str, std::string::size_type start, std::string::size_type length);
 	};
 
 };
