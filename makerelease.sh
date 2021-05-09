@@ -5,6 +5,7 @@ MAJOR=`echo -n $LASTVER | sed "s/\.[0-9]*$//"`
 NEWMINOR=$((MINOR + 1))
 NEWVER="$MAJOR.$NEWMINOR"
 echo "Building and tagging release $NEWVER"
+git checkout master
 git tag -a "$NEWVER" -m "Release $NEWVER"
 git push --tags
 cd /tmp
