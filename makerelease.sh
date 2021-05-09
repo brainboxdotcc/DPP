@@ -16,4 +16,4 @@ rm -rf /tmp/DPP/.circleci /tmp/DPP/.gdbargs /tmp/DPP/.vscode /tmp/DPP/makereleas
 cd /tmp
 tar cvj /tmp/DPP > /tmp/DPP-Release.tar.bz2
 mkdir ~/releases
-cp /tmp/DPP-Release.tar.bz2 "~/releases/DPP-$NEWVER.tar.bz2"
+cp /tmp/DPP-Release.tar.bz2 ~/releases/DPP-$NEWVER.tar.bz2
