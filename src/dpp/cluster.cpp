@@ -57,16 +57,16 @@ confirmation_callback_t::confirmation_callback_t(const std::string &_type, const
 void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 	gateway g = std::get<gateway>(shardinfo.value);
 	numshards = g.shards;
-	log(ll_info, fmt::format("Bot requires {} shard{}", g.shards, g.shards > 1 ? "s" : ""));
+	log(ll_info, fmt::format("Auto Shard: Bot requires {} shard{}", g.shards, g.shards > 1 ? "s" : ""));
 	if (g.shards) {
 		if (g.session_start_remaining < g.shards) {
-			log(ll_critical, fmt::format("Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later."));
+			log(ll_critical, fmt::format("Auto Shard: Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later."));
 		} else {
-			log(ll_debug, fmt::format("{} of {} session starts remaining", g.session_start_remaining, g.session_start_total));
-			cluster::start();
+			log(ll_debug, fmt::format("Auto Shard: {} of {} session starts remaining", g.session_start_remaining, g.session_start_total));
+			cluster::start(true);
 		}
 	} else {
-		log(ll_critical, "Could not auto detect shard count! Cluster startup aborted.");
+		log(ll_critical, "Auto Shard: Could not auto detect shard count! Cluster startup aborted.");
 	}
 }
 
@@ -89,6 +89,11 @@ void cluster::start(bool return_after) {
 	/* Start up all shards */
 	if (numshards == 0) {
 		get_gateway_bot(std::bind(&cluster::auto_shard, this, std::placeholders::_1));
+		if (!return_after) {
+			while (true) {
+				std::this_thread::sleep_for(std::chrono::seconds(86400));
+			}
+		}
 	} else {
 		start_time = time(NULL);
 
@@ -121,6 +126,7 @@ void cluster::start(bool return_after) {
 		});
 
 		log(ll_debug, "Shards started.");
+
 		if (!return_after) {
 			while (true) {
 				std::this_thread::sleep_for(std::chrono::seconds(86400));

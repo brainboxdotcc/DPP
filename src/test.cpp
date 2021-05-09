@@ -11,7 +11,7 @@ int main()
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
 
-	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members, 1);
+	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members);
 
 	bot.on_log([](const dpp::log_t & event) {
 		if (event.severity > dpp::ll_trace) {
