@@ -103,7 +103,7 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, co
 		this->guild_id = g->id;
 	if (u)
 		this->user_id = u->id;
-	std::string nick = StringNotNull(j, "nickname");
+	std::string nick = StringNotNull(j, "nick");
 	if (!nick.empty()) {
 		this->nickname = nick;
 	}
