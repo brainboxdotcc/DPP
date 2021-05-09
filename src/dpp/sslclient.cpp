@@ -21,6 +21,7 @@
 #include <errno.h>
 
 #ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>

@@ -1111,7 +1111,9 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 
 void cluster::current_user_leave_guild(snowflake guild_id, command_completion_event_t callback) {
 	 this->post_rest("/api/users", "@me", "guilds/" + std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		callback(confirmation_callback_t("confirmation", confirmation(), http));
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
 	 });
 }
 
