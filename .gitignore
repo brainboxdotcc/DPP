@@ -2,3 +2,4 @@ test
 build
 config.json
 docs
+docs/doxygen_sqlite3.db
