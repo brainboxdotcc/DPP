@@ -29,7 +29,7 @@
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 

@@ -45,7 +45,7 @@
 #include <dpp/cluster.h>
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <dpp/httplib.h>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 #include <dpp/stringops.h>
 
 namespace dpp {

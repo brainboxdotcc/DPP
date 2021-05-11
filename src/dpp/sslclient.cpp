@@ -47,7 +47,7 @@
 #include <exception>
 #include <string>
 #include <iostream>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 #include <dpp/sslclient.h>
 #include <dpp/discord.h>
 

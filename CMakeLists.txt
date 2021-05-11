@@ -92,29 +92,10 @@ else()
 	message("-- Building ${Green}stable${ColourReset} version ${Green}${DPP_VERSION}${ColourReset}")
 endif()
 
-if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-# Update submodules as needed
-        message(STATUS "Submodule update")
-        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
-        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
-        endif()
-endif()
-
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/deps/fmt/CMakeLists.txt")
-    message(FATAL_ERROR "The submodules were not downloaded! Please update submodules and try again.")
-endif()
-
 if (UNIX OR MSYS)
 	find_program(LDCONFIG_EXECUTABLE "ldconfig")
 endif()
 
-set(BUILD_SHARED_LIBS 1 CACHE BOOL "Build fmt::format as a shared library")
-add_subdirectory(deps/fmt)
-
-include_directories("deps/fmt/include")
 if (WIN32)
 	include_directories("C:/Program Files/OpenSSL-Win64/include")
 endif (WIN32)
@@ -130,9 +111,9 @@ foreach (fullmodname ${subdirlist})
 	file(GLOB modsrc ${modules_dir}/dpp/*.cpp ${modules_dir}/dpp/events/*.cpp)
         add_library(${modname} SHARED ${modsrc})
 if (WIN32)
-	target_link_libraries(${modname} PUBLIC fmt "C:\\vckpg\\installed\\x64-windows\\lib\\libssl.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\libcrypto.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\zlib.lib")
+	target_link_libraries(${modname} PUBLIC "C:\\vckpg\\installed\\x64-windows\\lib\\libssl.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\libcrypto.lib" "C:\\vckpg\\installed\\x64-windows\\lib\\zlib.lib")
 else()
-	target_link_libraries(${modname} PUBLIC ssl crypto fmt z)
+	target_link_libraries(${modname} PUBLIC ssl crypto z)
 endif()
 if (HAVE_VOICE)
 	target_link_libraries(${modname} PUBLIC sodium opus)
@@ -140,7 +121,7 @@ endif()
 endforeach(fullmodname)
 
 target_compile_features(dpp PRIVATE cxx_std_17)
-target_link_libraries(test PUBLIC dpp fmt)
+target_link_libraries(test PUBLIC dpp)
 
 add_custom_command(TARGET dpp
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostBuild.cmake)
@@ -148,14 +129,7 @@ add_custom_command(TARGET dpp
 # Installation
 
 include(GNUInstallDirs)
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/fmt/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libdpp.so DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(TARGETS fmt
- ARCHIVE DESTINATION lib
- LIBRARY DESTINATION lib
- RUNTIME DESTINATION bin
- COMPONENT fmt
-)
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostInstall.cmake)")
 

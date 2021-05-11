@@ -22,7 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <dpp/wsclient.h>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 
 namespace dpp {
 

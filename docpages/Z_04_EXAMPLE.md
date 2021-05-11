@@ -176,7 +176,7 @@ This example script shows how to send a sound file to a voice channel. A few sho
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 #include <iomanip>
 #include <sstream>
 
@@ -246,7 +246,7 @@ When a user issues a command you may want to join their voice channel, e.g. in a
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 #include <iomanip>
 #include <sstream>
 
@@ -335,7 +335,7 @@ and interactions, making this process even more seamless.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 
 int main()
 {
@@ -389,7 +389,7 @@ If you want to make your bot use spdlog, like aegis does, you can attach it to t
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>

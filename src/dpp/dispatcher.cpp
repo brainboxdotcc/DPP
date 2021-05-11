@@ -22,7 +22,7 @@
 #include <dpp/slashcommand.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 #include <variant>
 
 namespace dpp {

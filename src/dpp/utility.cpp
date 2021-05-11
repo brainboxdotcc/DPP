@@ -25,7 +25,7 @@
 #include <sstream>
 #include <thread>
 #include <functional>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 
 namespace dpp {
 

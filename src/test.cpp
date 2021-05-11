@@ -1,5 +1,5 @@
 #include <dpp/dpp.h>
-#include <fmt/format.h>
+#include <dpp/fmt/format.h>
 
 int main()
 {
