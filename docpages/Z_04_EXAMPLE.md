@@ -176,7 +176,6 @@ This example script shows how to send a sound file to a voice channel. A few sho
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <dpp/fmt/format.h>
 #include <iomanip>
 #include <sstream>
 
@@ -246,7 +245,6 @@ When a user issues a command you may want to join their voice channel, e.g. in a
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <dpp/fmt/format.h>
 #include <iomanip>
 #include <sstream>
 
