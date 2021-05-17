@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,12 +74,22 @@ struct command_option_choice {
 
 	/**
 	 * @brief Construct a new command option choice object
-	 * 
+	 *
 	 * @param n name to initialise with
 	 * @param v value to initialise with
 	 */
 	command_option_choice(const std::string &n, command_value v);
 };
+
+/**
+ * @brief helper function to serialize a command_option_choice to json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param choice command_option_choice to be serialized
+ */
+void to_json(nlohmann::json& j, const command_option_choice& choice);
 
 /**
  * @brief Each command option is a command line parameter.
@@ -104,7 +114,7 @@ struct command_option {
 
 	/**
 	 * @brief Construct a new command option object
-	 * 
+	 *
 	 * @param t Option type
 	 * @param name Option name
 	 * @param description Option description
@@ -114,7 +124,7 @@ struct command_option {
 
 	/**
 	 * @brief Add a multiple choice option
-	 * 
+	 *
 	 * @param o choice to add
 	 * @return command_option& returns a reference to self for chaining of calls
 	 */
@@ -122,12 +132,22 @@ struct command_option {
 
 	/**
 	 * @brief Add a sub-command option
-	 * 
+	 *
 	 * @param o Sub-command option to add
 	 * @return command_option& return a reference to self for chaining of calls
 	 */
 	command_option& add_option(const command_option &o);
 };
+
+/**
+ * @brief helper function to serialize a command_option to json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param opt command_option to be serialized
+ */
+void to_json(nlohmann::json& j, const command_option& opt);
 
 /**
  * @brief Response types when responding to an interaction within on_interaction_create.
@@ -145,11 +165,11 @@ enum interaction_response_type {
 /**
  * @brief A response to an interaction, used to reply to a command and initiate
  * a message, which can be hidden from others (ephemeral) or visible to all.
- * 
+ *
  * The dpp::interaction_response object wraps a dpp::message object. To set the
  * message as 'ephemeral' (e.g. only the command issuer can see it) you should
  * add the dpp::m_ephemeral flag to the dpp::message::flags field. e.g.:
- * 
+ *
  * `mymessage.flags |= dpp::m_ephemeral;`
  */
 struct interaction_response {
@@ -174,7 +194,7 @@ struct interaction_response {
 
 	/**
 	 * @brief Construct a new interaction response object
-	 * 
+	 *
 	 * @param t Type of reply
 	 * @param m Message to reply with
 	 */
@@ -182,7 +202,7 @@ struct interaction_response {
 
 	/**
 	 * @brief Fill object properties from JSON
-	 * 
+	 *
 	 * @param j JSON to fill from
 	 * @return interaction_response& Reference to self
 	 */
@@ -190,7 +210,7 @@ struct interaction_response {
 
 	/**
 	 * @brief Build a json string for this object
-	 * 
+	 *
 	 * @return std::string JSON string
 	 */
 	std::string build_json() const;
@@ -268,7 +288,7 @@ public:
 
 	/**
 	 * @brief Fill object properties from JSON
-	 * 
+	 *
 	 * @param j JSON to fill from
 	 * @return interaction& Reference to self
 	 */
@@ -276,7 +296,7 @@ public:
 
 	/**
 	 * @brief Build a json string for this object
-	 * 
+	 *
 	 * @param with_id True if to include the ID in the JSON
 	 * @return std::string JSON string
 	 */
@@ -322,7 +342,7 @@ public:
 
 	/**
 	 * @brief Add an option (parameter)
-	 * 
+	 *
 	 * @param o option (parameter) to add
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
@@ -330,7 +350,7 @@ public:
 
 	/**
 	 * @brief Set the name of the command
-	 * 
+	 *
 	 * @param n name of command
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
@@ -338,7 +358,7 @@ public:
 
 	/**
 	 * @brief Set the description of the command
-	 * 
+	 *
 	 * @param d description
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
@@ -346,7 +366,7 @@ public:
 
 	/**
 	 * @brief Set the application id of the command
-	 * 
+	 *
 	 * @param i application id
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
@@ -354,7 +374,7 @@ public:
 
 	/**
 	 * @brief Fill object properties from JSON
-	 * 
+	 *
 	 * @param j JSON to fill from
 	 * @return slashcommand& Reference to self
 	 */
@@ -362,12 +382,22 @@ public:
 
 	/**
 	 * @brief Build a json string for this object
-	 * 
+	 *
 	 * @param with_id True if to include the ID in the JSON
 	 * @return std::string JSON string
 	 */
 	std::string build_json(bool with_id = false) const;
 };
+
+/**
+ * @brief helper function to serialize a slashcommand to json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param cmd slashcommand to be serialized
+ */
+void to_json(nlohmann::json& j, const slashcommand& cmd);
 
 /**
  * @brief A group of application slash commands
