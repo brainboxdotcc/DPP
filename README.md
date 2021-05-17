@@ -1,7 +1,11 @@
 # D++
 ## An incredibly lightweight C++ Discord library
 
-[![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) [![CircleCI](https://circleci.com/gh/brainboxdotcc/DPP.svg?style=svg)](https://circleci.com/gh/brainboxdotcc/DPP) [![GitHub Actions](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fbrainboxdotcc%2FDPP%2Fbadge&label=build&logo=none)](https://actions-badge.atrox.dev/brainboxdotcc/DPP/goto)
+[![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp) 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) 
+![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) 
+[![CircleCI](https://circleci.com/gh/brainboxdotcc/DPP.svg?style=svg)](https://circleci.com/gh/brainboxdotcc/DPP) 
+[![GitHub Actions](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fbrainboxdotcc%2FDPP%2Fbadge&label=build&logo=none)](https://actions-badge.atrox.dev/brainboxdotcc/DPP/goto)
 
 This project is in late alpha stages of development.
 
@@ -25,12 +29,30 @@ The documentation is a work in progress, generated from the code comments and ma
 
 #### [View D++ library documentation](https://dpp.brainbox.cc/)
 
-Do you want to contribute? Fork the code and submit a PR!
-
 ## Supported OSes
 
 The library runs best on **Linux**. **Windows** is supported via cmake and Visual Studio 2019 but not encouraged for production use.
 The library may work fine in other operating systems too, but with no access to these we cannot support them.
+
+## 🤝 Contributing
+
+Contributions, issues and feature requests are welcome. After cloning & setting up project locally, you can just submit 
+a PR to this repo and it will be deployed once it's accepted.
+
+⚠️ It’s good to have descriptive commit messages, or PR titles so that other contributors can understand about your 
+commit or the PR Created. Read [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.3/) before 
+making the commit message.
+
+## 💬 Get in touch
+
+If you have various suggestions, questions or want to discuss things with our community, Join our discord server!
+
+[![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp)
+
+## Show your support
+
+We love people's support in growing and improving. Be sure to leave a ⭐️ if you like the project and 
+also be sure to contribute, if you're interested!
 
 ## Dependencies
 
