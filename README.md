@@ -45,7 +45,7 @@ making the commit message.
 
 ## 💬 Get in touch
 
-If you have various suggestions, questions or want to discuss things wit our community, Join our discord server!
+If you have various suggestions, questions or want to discuss things with our community, Join our discord server!
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp)
 
