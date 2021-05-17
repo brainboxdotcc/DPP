@@ -55,6 +55,7 @@ else(HAVE_VOICE)
 endif(HAVE_VOICE)
 
 if (WIN32)
+	add_compile_definitions(OPENSSL_SYS_WIN32)
 	link_libraries("C:\\vcpkg\\installed\\x64-windows\\lib\\libssl.lib")
 	link_libraries("C:\\vcpkg\\installed\\x64-windows\\lib\\libcrypto.lib")
 	link_libraries("C:\\vcpkg\\installed\\x64-windows\\lib\\zlib.lib")
