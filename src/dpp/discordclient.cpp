@@ -104,14 +104,26 @@ void DiscordClient::ThreadRun()
 {
 	SetupZLib();
 	do {
+		bool error = false;
 		ready = false;
 		message_queue.clear();
 		SSLClient::ReadLoop();
 		SSLClient::close();
 		EndZLib();
 		SetupZLib();
-		SSLClient::Connect();
-		WSClient::Connect();
+		do {
+			error = false;
+			try {
+				SSLClient::Connect();
+				WSClient::Connect();
+			}
+			catch (const std::exception &e) {
+				log(dpp::ll_error, std::string("Error establishing connection, retry in 5 seconds: ") + e.what());
+				SSLClient::close();
+				std::this_thread::sleep_for(std::chrono::seconds(5));
+				error = true;
+			}
+		} while (error);
 	} while(true);
 }
 

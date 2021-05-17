@@ -36,6 +36,7 @@
 #include <unistd.h>
 #endif
 
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -62,6 +63,13 @@ const int ERROR_STATUS = -1;
 
 SSLClient::SSLClient(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port), bytes_in(0), bytes_out(0)
 {
+#ifndef WIN32
+        signal(SIGALRM, SIG_IGN);
+        signal(SIGHUP, SIG_IGN);
+        signal(SIGPIPE, SIG_IGN);
+        signal(SIGCHLD, SIG_IGN);
+        signal(SIGXFSZ, SIG_IGN);
+#endif
 	Connect();
 }
 
