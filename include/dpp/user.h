@@ -65,7 +65,9 @@ enum user_flags {
 	/// User has the Early Verified Bot Developer badge
 	u_verified_bot_dev =	0b00000100000000000000000,
 	/// User's icon is animated
-	u_animated_icon =	0b00001000000000000000000
+	u_animated_icon =	0b00001000000000000000000,
+	/// User is a certified moderator
+	u_certified_moderator =	0b00010000000000000000000
 };
 
 /**
@@ -217,6 +219,12 @@ public:
 	 * @return true if verified bot developer
 	 */
 	bool is_verified_bot_dev() const;
+	/**
+	 * @brief Return true if user is a certified moderator
+	 * 
+	 * @return true if certified moderator
+	 */
+	bool is_certified_moderator() const;
 	/**
 	 * @brief Return true if user has an animated icon
 	 * 
