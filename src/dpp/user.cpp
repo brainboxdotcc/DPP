@@ -38,7 +38,8 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 10,      dpp::u_team_user },
 	{ 1 << 14,      dpp::u_bughunter_2 },
 	{ 1 << 16,      dpp::u_verified_bot },
-	{ 1 << 17,      dpp::u_verified_bot_dev }
+	{ 1 << 17,      dpp::u_verified_bot_dev },
+	{ 1 << 18,	dpp::u_certified_moderator }
 };
 
 namespace dpp {
@@ -137,6 +138,10 @@ bool user::is_verified_bot() const {
 
 bool user::is_verified_bot_dev() const {
 	 return this->flags & u_verified_bot_dev; 
+}
+
+bool user::is_certified_moderator() const {
+	 return this->flags & u_certified_moderator; 
 }
 
 bool user::has_animated_icon() const {
