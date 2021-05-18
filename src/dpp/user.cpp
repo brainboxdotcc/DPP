@@ -39,7 +39,7 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 14,      dpp::u_bughunter_2 },
 	{ 1 << 16,      dpp::u_verified_bot },
 	{ 1 << 17,      dpp::u_verified_bot_dev },
-	{ 1 << 18,		dpp::u_certified_moderator }
+	{ 1 << 18,	dpp::u_certified_moderator }
 };
 
 namespace dpp {
