@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -83,7 +83,7 @@ typedef std::unordered_map<snowflake, class guild_member*> members_container;
  * @brief Represents a guild on Discord (AKA a server)
  */
 class guild : public managed {
-public:	
+public:
 	/** Shard ID of the guild */
 	uint16_t shard_id;
 
@@ -201,7 +201,7 @@ public:
 	/**
 	 * @brief Get the base permissions for a member on this guild,
 	 * before permission overwrites are applied.
-	 * 
+	 *
 	 * @param member member to get permissions for
 	 * @return uint64_t permissions bitmask
 	 */
@@ -210,7 +210,7 @@ public:
 	/**
 	 * @brief Get the permission overwrites for a member
 	 * merged into a bitmask.
-	 * 
+	 *
 	 * @param base_permissions base permissions before overwrites,
 	 * from channel::base_permissions
 	 * @param member Member to fetch permissions for
@@ -226,7 +226,7 @@ public:
 
 	/**
 	 * @brief Connect to a voice channel another guild member is in
-	 * 
+	 *
 	 * @param user_id User id to join
 	 * @return True if the user specified is in a vc, false if they aren't
 	 */
@@ -315,7 +315,7 @@ public:
 
 	/**
 	 * @brief Build a guild widget from json
-	 * 
+	 *
 	 * @param j json to build from
 	 * @return guild_widget& reference to self
 	 */
@@ -323,7 +323,7 @@ public:
 
 	/**
 	 * @brief Build json for a guild widget
-	 * 
+	 *
 	 * @return std::string guild widget stringified json
 	 */
 	std::string build_json() const;
@@ -382,9 +382,18 @@ public:
 
 };
 
+/**
+ * @brief helper function to deserialize a guild_member from json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param gm guild_member to be deserialized
+ */
+void from_json(const nlohmann::json& j, guild_member& gm);
+
 /** A container of guild members */
 typedef std::unordered_map<snowflake, guild_member> guild_member_map;
 
 
 };
-
