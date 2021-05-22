@@ -100,12 +100,12 @@ void to_json(nlohmann::json& j, const command_option_choice& choice);
  * options.
  */
 struct command_option {
-	command_option_type type;			//< Option type (what type of value is accepted)
-	std::string name;				//< Option name (1-32 chars)
-	std::string description;			//< Option description (1-100 chars)
-	bool required;					//< True if this is a mandatory parameter
-	std::vector<command_option_choice> choices;	//< List of choices for multiple choice command
-	std::vector<command_option> options;		//< Sub-commands
+	command_option_type type;                    //!< Option type (what type of value is accepted)
+	std::string name;                            //!< Option name (1-32 chars)
+	std::string description;                     //!< Option description (1-100 chars)
+	bool required;                               //!< True if this is a mandatory parameter
+	std::vector<command_option_choice> choices;  //!< List of choices for multiple choice command
+	std::vector<command_option> options;         //!< Sub-commands
 
 	/**
 	 * @brief Construct a new command option object
@@ -236,11 +236,21 @@ struct command_resolved {
  * the command on a channel or in DM.
  */
 struct command_data_option {
-	std::string				name;		//< the name of the parameter
-	command_option_type			type;		//< value of ApplicationCommandOptionType
-	command_value				value;		//< Optional: the value of the pair
-	std::vector<command_data_option>	options;	//< Optional: present if this option is a group or subcommand
+	std::string name;                          //!< the name of the parameter
+	command_option_type type;                  //!< value of ApplicationCommandOptionType
+	command_value value;                       //!< Optional: the value of the pair
+	std::vector<command_data_option> options;  //!< Optional: present if this option is a group or subcommand
 };
+
+/**
+ * @brief helper function to deserialize a command_data_option from json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param cdo command_data_option to be deserialized
+ */
+void from_json(const nlohmann::json& j, command_data_option& cdo);
 
 /** Types of interaction in the dpp::interaction class
  */
@@ -256,11 +266,21 @@ enum interaction_type {
  * with the interaction.
  */
 struct command_interaction {
-	snowflake id;					//< the ID of the invoked command
-	std::string name;				//< the name of the invoked command
-	command_resolved resolved;			//< Optional: converted users + roles + channels
-	std::vector<command_data_option> options;	//< Optional: the params + values from the user
+	snowflake id;                              //!< the ID of the invoked command
+	std::string name;                          //!< the name of the invoked command
+	command_resolved resolved;                 //!< Optional: converted users + roles + channels
+	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
 };
+
+/**
+ * @brief helper function to deserialize a command_interaction from json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param ci command_interaction to be deserialized
+ */
+void from_json(const nlohmann::json& j, command_interaction& ci);
 
 /**
  * @brief A button click for a button component
@@ -271,20 +291,30 @@ struct button_interaction {
 };
 
 /**
+ * @brief helper function to deserialize a button_interaction from json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param bi button_interaction to be deserialized
+ */
+void from_json(const nlohmann::json& j, button_interaction& bi);
+
+/**
  * @brief An interaction represents a user running a command and arrives
  * via the dpp::cluster::on_interaction_create event.
  */
 class interaction : public managed {
 public:
-	snowflake	application_id;					//< id of the application this interaction is for
-	uint8_t		type;						//< the type of interaction
-	std::variant<command_interaction, button_interaction> data;	//< Optional: the command data payload
-	snowflake	guild_id;					//< Optional: the guild it was sent from
-	snowflake	channel_id;					//< Optional: the channel it was sent from
-	guild_member	member;						//< Optional: guild member data for the invoking user, including permissions
-	user		usr;						//< Optional: user object for the invoking user, if invoked in a DM
-	std::string	token;						//< a continuation token for responding to the interaction
-	uint8_t		version;					//< read-only property, always 1
+	snowflake application_id;                                   //!< id of the application this interaction is for
+	uint8_t	type;                                               //!< the type of interaction
+	std::variant<command_interaction, button_interaction> data; //!< Optional: the command data payload
+	snowflake guild_id;                                         //!< Optional: the guild it was sent from
+	snowflake channel_id;                                       //!< Optional: the channel it was sent from
+	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions
+	user usr;                                                   //!< Optional: user object for the invoking user, if invoked in a DM
+	std::string token;                                          //!< a continuation token for responding to the interaction
+	uint8_t version;                                            //!< read-only property, always 1
 
 	/**
 	 * @brief Fill object properties from JSON
@@ -301,8 +331,17 @@ public:
 	 * @return std::string JSON string
 	 */
 	std::string build_json(bool with_id = false) const;
-
 };
+
+/**
+ * @brief helper function to deserialize an interaction from json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param i interaction to be deserialized
+ */
+void from_json(const nlohmann::json& j, interaction& i);
 
 /**
  * @brief Represents an application command, created by your bot

@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,8 +50,7 @@ char* strptime(const char* s, const char* f, struct tm* tm) {
 
 namespace dpp {
 
-uint64_t SnowflakeNotNull(json* j, const char *keyname)
-{
+uint64_t SnowflakeNotNull(const json* j, const char *keyname) {
 	/* Snowflakes are a special case. Pun intended.
 	 * Because discord drinks the javascript kool-aid, they have to send 64 bit integers as strings as js can't deal with them
 	 * even though we can. So, all snowflakes are sent and received wrapped as string values and must be read by nlohmann::json
@@ -67,8 +66,7 @@ uint64_t SnowflakeNotNull(json* j, const char *keyname)
 	}
 }
 
-std::string StringNotNull(json* j, const char *keyname)
-{
+std::string StringNotNull(const json* j, const char *keyname) {
 	/* Returns empty string if the value is not a string, or is null or not defined */
 	auto k = j->find(keyname);
 	if (k != j->end()) {
@@ -78,8 +76,7 @@ std::string StringNotNull(json* j, const char *keyname)
 	}
 }
 
-uint64_t Int64NotNull(json* j, const char *keyname)
-{
+uint64_t Int64NotNull(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && !k->is_string() ? k->get<uint64_t>() : 0;
@@ -88,8 +85,7 @@ uint64_t Int64NotNull(json* j, const char *keyname)
 	}
 }
 
-uint32_t Int32NotNull(json* j, const char *keyname)
-{
+uint32_t Int32NotNull(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && !k->is_string() ? k->get<uint32_t>() : 0;
@@ -98,8 +94,7 @@ uint32_t Int32NotNull(json* j, const char *keyname)
 	}
 }
 
-uint16_t Int16NotNull(json* j, const char *keyname)
-{
+uint16_t Int16NotNull(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && !k->is_string() ? k->get<uint16_t>() : 0;
@@ -108,8 +103,7 @@ uint16_t Int16NotNull(json* j, const char *keyname)
 	}
 }
 
-uint8_t Int8NotNull(json* j, const char *keyname)
-{
+uint8_t Int8NotNull(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && !k->is_string() ? k->get<uint8_t>() : 0;
@@ -118,8 +112,7 @@ uint8_t Int8NotNull(json* j, const char *keyname)
 	}
 }
 
-bool BoolNotNull(json* j, const char *keyname)
-{
+bool BoolNotNull(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() ? (k->get<bool>() == true) : false;
@@ -128,8 +121,7 @@ bool BoolNotNull(json* j, const char *keyname)
 	}
 }
 
-std::string base64_encode(unsigned char const* buf, unsigned int buffer_length)
-{
+std::string base64_encode(unsigned char const* buf, unsigned int buffer_length) {
 	/* Quick and dirty base64 encode */
 	static const char to_base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 	size_t ret_size = buffer_length + 2;
@@ -156,7 +148,7 @@ std::string base64_encode(unsigned char const* buf, unsigned int buffer_length)
 	return ret;
 }
 
-time_t TimestampNotNull(json* j, const char* keyname)
+time_t TimestampNotNull(const json* j, const char* keyname)
 {
 	/* Parses discord ISO 8061 timestamps to time_t, accounting for local time adjustment.
 	 * Note that discord timestamps contain a decimal seconds part, which time_t and struct tm
@@ -239,8 +231,5 @@ void DiscordClient::HandleEvent(const std::string &event, json &j, const std::st
 		log(dpp::ll_debug, fmt::format("Unhandled event: {}, {}", event, j.dump()));
 	}
 }
-
-
-
 
 };

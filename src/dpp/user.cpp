@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +39,7 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 14,      dpp::u_bughunter_2 },
 	{ 1 << 16,      dpp::u_verified_bot },
 	{ 1 << 17,      dpp::u_verified_bot_dev },
-	{ 1 << 18,	dpp::u_certified_moderator }
+	{ 1 << 18,      dpp::u_certified_moderator }
 };
 
 namespace dpp {
@@ -60,88 +60,88 @@ std::string user::get_avatar_url()  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they havent.
 	 * At some point in the future this URL *will* change!
 	 */
-	return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}", 
-		this->id, 
-		(has_animated_icon() ? "a_" : ""), 
-		this->avatar.to_string(), 
+	return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}",
+		this->id,
+		(has_animated_icon() ? "a_" : ""),
+		this->avatar.to_string(),
 		(has_animated_icon() ? "gif" : "png")
-	); 
+	);
 }
 
 bool user::is_bot() const {
-	 return this->flags & u_bot; 
+	 return this->flags & u_bot;
 }
 
 bool user::is_system() const {
-	 return this->flags & u_system; 
+	 return this->flags & u_system;
 }
 
 bool user::is_mfa_enabled() const {
-	 return this->flags & u_mfa_enabled; 
+	 return this->flags & u_mfa_enabled;
 }
 
 bool user::is_verified() const {
-	 return this->flags & u_verified; 
+	 return this->flags & u_verified;
 }
 
 bool user::has_nitro_full() const {
-	 return this->flags & u_nitro_full; 
+	 return this->flags & u_nitro_full;
 }
 
 bool user::has_nitro_classic() const {
-	 return this->flags & u_nitro_classic; 
+	 return this->flags & u_nitro_classic;
 }
 
 bool user::is_discord_employee() const {
-	 return this->flags & u_discord_employee; 
+	 return this->flags & u_discord_employee;
 }
 
 bool user::is_partnered_owner() const {
-	 return this->flags & u_partnered_owner; 
+	 return this->flags & u_partnered_owner;
 }
 
 bool user::has_hypesquad_events() const {
-	 return this->flags & u_hypesquad_events; 
+	 return this->flags & u_hypesquad_events;
 }
 
 bool user::is_bughunter_1() const {
-	 return this->flags & u_bughunter_1; 
+	 return this->flags & u_bughunter_1;
 }
 
 bool user::is_house_bravery() const {
-	 return this->flags & u_house_bravery; 
+	 return this->flags & u_house_bravery;
 }
 
 bool user::is_house_brilliance() const {
-	 return this->flags & u_house_brilliance; 
+	 return this->flags & u_house_brilliance;
 }
 
 bool user::is_house_balanace() const {
-	 return this->flags & u_house_balanace; 
+	 return this->flags & u_house_balanace;
 }
 
 bool user::is_early_supporter() const {
-	 return this->flags & u_early_supporter; 
+	 return this->flags & u_early_supporter;
 }
 
 bool user::is_team_user() const {
-	 return this->flags & u_team_user; 
+	 return this->flags & u_team_user;
 }
 
 bool user::is_bughunter_2() const {
-	 return this->flags & u_bughunter_2; 
+	 return this->flags & u_bughunter_2;
 }
 
 bool user::is_verified_bot() const {
-	 return this->flags & u_verified_bot; 
+	 return this->flags & u_verified_bot;
 }
 
 bool user::is_verified_bot_dev() const {
-	 return this->flags & u_verified_bot_dev; 
+	 return this->flags & u_verified_bot_dev;
 }
 
 bool user::is_certified_moderator() const {
-	 return this->flags & u_certified_moderator; 
+	 return this->flags & u_certified_moderator;
 }
 
 bool user::has_animated_icon() const {
@@ -149,28 +149,35 @@ bool user::has_animated_icon() const {
 }
 
 user& user::fill_from_json(json* j) {
-	this->id = SnowflakeNotNull(j, "id");
-	this->username = StringNotNull(j, "username");
-	std::string av = StringNotNull(j, "avatar");
+	j->get_to(*this);
+	return *this;
+}
+
+void from_json(const nlohmann::json& j, user& u) {
+	u.id = SnowflakeNotNull(&j, "id");
+	u.username = StringNotNull(&j, "username");
+
+	std::string av = StringNotNull(&j, "avatar");
 	if (av.length() > 2 && av.substr(0, 2) == "a_") {
 		av = av.substr(2, av.length());
-		this->flags |= u_animated_icon;
+		u.flags |= u_animated_icon;
 	}
-	this->avatar = av;
-	this->discriminator = SnowflakeNotNull(j, "discriminator");
-	this->flags |= BoolNotNull(j, "bot") ? dpp::u_bot : 0;
-	this->flags |= BoolNotNull(j, "system") ? dpp::u_system : 0;
-	this->flags |= BoolNotNull(j, "mfa_enabled") ? dpp::u_mfa_enabled : 0;
-	this->flags |= BoolNotNull(j, "verified") ? dpp::u_verified : 0;
-	this->flags |= BoolNotNull(j, "premium_type") == 1 ? dpp::u_nitro_classic : 0;
-	this->flags |= BoolNotNull(j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
-	uint32_t flags = Int32NotNull(j, "flags");
+	u.avatar = av;
+
+	u.discriminator = SnowflakeNotNull(&j, "discriminator");
+
+	u.flags |= BoolNotNull(&j, "bot") ? dpp::u_bot : 0;
+	u.flags |= BoolNotNull(&j, "system") ? dpp::u_system : 0;
+	u.flags |= BoolNotNull(&j, "mfa_enabled") ? dpp::u_mfa_enabled : 0;
+	u.flags |= BoolNotNull(&j, "verified") ? dpp::u_verified : 0;
+	u.flags |= BoolNotNull(&j, "premium_type") == 1 ? dpp::u_nitro_classic : 0;
+	u.flags |= BoolNotNull(&j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
+	uint32_t flags = Int32NotNull(&j, "flags");
 	for (auto & flag : usermap) {
 		if (flags & flag.first) {
-			this->flags |= flag.second;
+			u.flags |= flag.second;
 		}
 	}
-	return *this;
 }
 
 };

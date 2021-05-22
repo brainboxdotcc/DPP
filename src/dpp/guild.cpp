@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,24 +99,33 @@ guild_member::guild_member() :
 }
 
 guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user* u) {
-	if (g)
+	if (g) {
 		this->guild_id = g->id;
-	if (u)
+	}
+
+	if (u) {
 		this->user_id = u->id;
-	std::string nick = StringNotNull(j, "nick");
-	if (!nick.empty()) {
-		this->nickname = nick;
 	}
-	this->joined_at = TimestampNotNull(j, "joined_at");
-	this->premium_since = TimestampNotNull(j, "premium_since");
-	roles = {};
-	for (auto & role : (*j)["roles"]) {
-		this->roles.push_back(from_string<uint64_t>(role.get<std::string>(), std::dec));
-	}
-	this->flags |= BoolNotNull(j, "deaf") ? dpp::gm_deaf : 0;
-	this->flags |= BoolNotNull(j, "mute") ? dpp::gm_mute : 0;
-	this->flags |= BoolNotNull(j, "pending") ? dpp::gm_pending : 0;
+
+	j->get_to(*this);
 	return *this;
+}
+
+void from_json(const nlohmann::json& j, guild_member& gm) {
+	gm.nickname = StringNotNull(&j, "nick");
+	gm.joined_at = TimestampNotNull(&j, "joined_at");
+	gm.premium_since = TimestampNotNull(&j, "premium_since");
+
+	gm.roles.clear();
+	if (j.contains("roles") && !j.at("roles").is_null()) {
+		for (auto& role : j.at("roles")) {
+			gm.roles.push_back(std::stoull(role.get<std::string>()));
+		}
+	}
+
+	gm.flags |= BoolNotNull(&j, "deaf") ? gm_deaf : 0;
+	gm.flags |= BoolNotNull(&j, "mute") ? gm_mute : 0;
+	gm.flags |= BoolNotNull(&j, "pending") ? gm_pending : 0;
 }
 
 std::string guild_member::build_json() const {
@@ -445,4 +454,3 @@ bool guild::ConnectMemberVoice(snowflake user_id) {
 
 
 };
-

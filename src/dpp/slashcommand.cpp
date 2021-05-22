@@ -145,68 +145,84 @@ slashcommand& slashcommand::add_option(const command_option &o)
 }
 
 interaction& interaction::fill_from_json(nlohmann::json* j) {
-	id = SnowflakeNotNull(j, "id");
-	application_id = SnowflakeNotNull(j, "application_id");
-	channel_id = SnowflakeNotNull(j, "channel_id");
-	guild_id = SnowflakeNotNull(j, "guild_id");
-	token = StringNotNull(j, "token");
-	type = Int8NotNull(j, "type");
-	version = Int8NotNull(j, "version");
-	if (j->find("member") != j->end()) {
-		json& m = (*j)["member"];
-		member = guild_member().fill_from_json(&m, nullptr, nullptr);
-		usr = user().fill_from_json(&(m["user"]));
-	}
-	if (j->find("user") != j->end()) {
-		usr = user().fill_from_json(&((*j)["user"]));
-	}
-	if (type == it_application_command) {
-		command_interaction ci;
-		if (j->find("data") != j->end()) {
-			json& param = (*j)["data"];
-			ci.id = SnowflakeNotNull(&param, "id");
-			ci.name = StringNotNull(&param, "name");
-			//ci.resolved = BoolNotNull(&param, "resolved");
-			if (param.find("options") != param.end()) {
-				for (auto &opt : param["options"]) {
-					command_data_option cdo;
-					cdo.name = StringNotNull(&opt, "name");
-					cdo.type = (command_option_type)Int8NotNull(&opt, "type");
-					switch (cdo.type) {
-						case co_boolean:
-							cdo.value = BoolNotNull(&opt, "value");
-						break;
-						case co_channel:
-						case co_role:
-						case co_user:
-							cdo.value = SnowflakeNotNull(&opt, "value");
-						break;
-						case co_integer:
-							cdo.value = Int32NotNull(&opt, "value");
-						break;
-						case co_string:
-							cdo.value = StringNotNull(&opt, "value");
-						break;
-					}
-					ci.options.push_back(cdo);
-				}
-			}
-		}
-		data = ci;
-	} else if (type == it_component_button) {
-		button_interaction bi;
-		if (j->find("data") != j->end()) {
-			json& param = (*j)["data"];
-			bi.component_type = Int8NotNull(&param, "component_type");
-			bi.custom_id = StringNotNull(&param, "custom_id");
-		}
-		data = bi;
-	}
+	j->get_to(*this);
 	return *this;
 }
 
 std::string interaction::build_json(bool with_id) const {
 	return "";
+}
+
+void from_json(const nlohmann::json& j, command_data_option& cdo) {
+	cdo.name = StringNotNull(&j, "name");
+	cdo.type = (command_option_type)Int8NotNull(&j, "type");
+
+	if (j.contains("options") && !j.at("options").is_null()) {
+		j.at("options").get_to(cdo.options);
+	}
+
+	if (j.contains("value") && !j.at("value").is_null()) {
+		switch (cdo.type) {
+		case co_boolean:
+			cdo.value = j.at("value").get<bool>();
+			break;
+		case co_channel:
+		case co_role:
+		case co_user:
+			cdo.value = SnowflakeNotNull(&j, "value");
+			break;
+		case co_integer:
+			cdo.value = j.at("value").get<uint32_t>();
+			break;
+		case co_string:
+			cdo.value = j.at("value").get<std::string>();
+			break;
+		}
+	}
+}
+
+void from_json(const nlohmann::json& j, command_interaction& ci) {
+	ci.id = SnowflakeNotNull(&j, "id");
+	ci.name = StringNotNull(&j, "name");
+
+	if (j.contains("options") && !j.at("options").is_null()) {
+		j.at("options").get_to(ci.options);
+	}
+}
+
+void from_json(const nlohmann::json& j, button_interaction& bi) {
+	bi.component_type = Int8NotNull(&j, "component_type");
+	bi.custom_id = StringNotNull(&j, "custom_id");
+}
+
+void from_json(const nlohmann::json& j, interaction& i) {
+	i.id = SnowflakeNotNull(&j, "id");
+	i.application_id = SnowflakeNotNull(&j, "application_id");
+	i.channel_id = SnowflakeNotNull(&j, "channel_id");
+	i.guild_id = SnowflakeNotNull(&j, "guild_id");
+
+	i.type = Int8NotNull(&j, "type");
+	i.token = StringNotNull(&j, "token");
+	i.version = Int8NotNull(&j, "version");
+
+	if (j.contains("member") && !j.at("member").is_null()) {
+		j.at("member").get_to(i.member);
+		if (j.at("member").contains("user") && !j.at("member").at("user").is_null()) {
+			j.at("member").at("user").get_to(i.usr);
+		}
+	}
+
+	if (j.contains("data") && !j.at("data").is_null()) {
+		if (i.type == it_application_command) {
+			command_interaction ci;
+			j.at("data").get_to(ci);
+			i.data = ci;
+		} else if (i.type == it_component_button) {
+			button_interaction bi;
+			j.at("data").get_to(bi);
+			i.data = bi;
+		}
+	}
 }
 
 interaction_response::interaction_response() {
