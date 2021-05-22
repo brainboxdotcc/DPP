@@ -42,7 +42,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void application_command_update::handle(DiscordClient* client, json &j, const std::string &raw) {
+void application_command_update::handle(discord_client* client, json &j, const std::string &raw) {
 }
 
 }};

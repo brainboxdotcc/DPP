@@ -34,7 +34,7 @@ namespace dpp {
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
  */
-class SSLClient
+class ssl_client
 {
 protected:
 	/** Input buffer received from openssl */
@@ -82,10 +82,10 @@ protected:
 	virtual void Connect();
 public:
 	/** Get total bytes sent */
-	uint64_t GetBytesOut();
+	uint64_t get_bytes_out();
 	
 	/** Get total bytes received */
-	uint64_t GetBytesIn();
+	uint64_t get_bytes_in();
 
 	/**
 	 * @brief Attaching an additional file descriptor to this function will send notifications when there is data to read.
@@ -119,7 +119,7 @@ public:
 	 * @param _hostname The hostname to connect to
 	 * @param _port the Port number to connect to
 	 */
-	SSLClient(const std::string &_hostname, const std::string &_port = "443");
+	ssl_client(const std::string &_hostname, const std::string &_port = "443");
 
 	/**
 	 * @brief Nonblocking I/O loop
@@ -127,9 +127,9 @@ public:
 	void ReadLoop();
 
 	/**
-	 * @brief Destroy the SSLClient object
+	 * @brief Destroy the ssl_client object
 	 */
-	virtual ~SSLClient();
+	virtual ~ssl_client();
 
 	/**
 	 * @brief Handle input from the input buffer.

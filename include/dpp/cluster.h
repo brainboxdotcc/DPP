@@ -37,7 +37,7 @@ namespace dpp {
 /**
  * @brief A list of shards
  */
-typedef std::map<uint32_t, class DiscordClient*> shard_list;
+typedef std::map<uint32_t, class discord_client*> shard_list;
 
 /**
  * @brief Represents the various information from the 'get gateway bot' api call
@@ -277,12 +277,12 @@ public:
 	void set_presence(const class dpp::presence &p);
 
 	/**
-	 * @brief Get a shard by id, returning the DiscordClient
+	 * @brief Get a shard by id, returning the discord_client
 	 * 
 	 * @param id Shard ID
-	 * @return DiscordClient* shard, or null
+	 * @return discord_client* shard, or null
 	 */
-	DiscordClient* get_shard(uint32_t id);
+	discord_client* get_shard(uint32_t id);
 
 	/**
 	 * @brief Get the list of shards
@@ -668,7 +668,7 @@ public:
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
 	 * with Sodium, and merged into packets by the repacketizer, which is done in the
-	 * dpp::DiscordVoiceClient::SendAudio method. You should use the buffer size properties
+	 * dpp::discord_voice_client::SendAudio method. You should use the buffer size properties
 	 * of dpp::voice_buffer_send_t to determine if you should fill the buffer with more
 	 * content.
 	 * 
@@ -706,7 +706,7 @@ public:
 	 * @brief Called when sending of audio passes over a track marker.
 	 * Track markers are arbitrarily placed "bookmarks" in the audio buffer, placed
 	 * by the bot developer. Each track marker can have a string value associated with it
-	 * which is specified in dpp::DiscordVoiceClient::InsertMarker and returned to this
+	 * which is specified in dpp::discord_voice_client::InsertMarker and returned to this
 	 * event.
 	 * 
 	 * @param _voice_receive User function to attach to event

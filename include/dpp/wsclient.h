@@ -30,7 +30,7 @@ namespace dpp {
 /**
  * @brief Websocket connection status
  */
-enum WSState {
+enum ws_state {
 	/** Sending/receiving HTTP headers prior to protocol switch */
 	HTTP_HEADERS,
 	/** Connected, upgraded and sending/receiving frames */
@@ -40,7 +40,7 @@ enum WSState {
 /**
  * @brief Low-level websocket opcodes for frames
  */
-enum OpCode
+enum ws_opcode
 {
         OP_CONTINUATION = 0x00,	/* Continuation */
         OP_TEXT = 0x01,		/* Text frame */
@@ -53,13 +53,13 @@ enum OpCode
 /**
  * @brief Implements a websocket client based on the SSL client
  */
-class WSClient : public SSLClient
+class websocket_client : public ssl_client
 {
 	/** Connection key used in the HTTP headers */
 	std::string key;
 
 	/** Current websocket state */
-	WSState state;
+	ws_state state;
 
 	/** Path part of URL for websocket */
 	std::string path;
@@ -82,9 +82,9 @@ class WSClient : public SSLClient
 	/** Fill a header for outbound messages
 	 * @param outbuf The raw frame to fill
 	 * @param sendlength The size of the data to encapsulate
-	 * @param OpCode the opcode to send in the header
+	 * @param ws_opcode the opcode to send in the header
 	 */
-	size_t FillHeader(unsigned char* outbuf, size_t sendlength, OpCode opcode);
+	size_t FillHeader(unsigned char* outbuf, size_t sendlength, ws_opcode opcode);
 
 	/** Handle ping and pong requests.
 	 * @param ping True if this is a ping, false if it is a pong 
@@ -100,7 +100,7 @@ protected:
 	/** Get websocket state
 	 * @return websocket state
 	 */
-	WSState GetState();
+	ws_state GetState();
 
 public:
 
@@ -109,10 +109,10 @@ public:
 	 * @param port Port to connect to
 	 * @param urlpath The URL path components of the HTTP request to send
 	 */
-        WSClient(const std::string &hostname, const std::string &port = "443", const std::string &urlpath = "");
+        websocket_client(const std::string &hostname, const std::string &port = "443", const std::string &urlpath = "");
 
 	/** Destructor */
-        virtual ~WSClient();
+        virtual ~websocket_client();
 
 	/**
 	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.

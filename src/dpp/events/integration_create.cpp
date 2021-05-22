@@ -44,7 +44,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void integration_create::handle(DiscordClient* client, json &j, const std::string &raw) {
+void integration_create::handle(discord_client* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.integration_create) {
 		json& d = j["d"];
 		dpp::integration_create_t ic(client, raw);

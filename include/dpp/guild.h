@@ -191,7 +191,7 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	guild& fill_from_json(class DiscordClient* shard, nlohmann::json* j);
+	guild& fill_from_json(class discord_client* shard, nlohmann::json* j);
 
 	/** Build a JSON string from this object.
 	 * @param with_id True if an ID is to be included in the JSON

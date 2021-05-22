@@ -44,13 +44,13 @@ class cluster;
 /**
  * @brief Represents a connection to a voice channel.
  * A client can only connect to one voice channel per guild at a time, so these are stored in a map
- * in the dpp::DiscordClient keyed by guild_id.
+ * in the dpp::discord_client keyed by guild_id.
  */
 class voiceconn {
 	/**
-	 * @brief Owning dpp::DiscordClient instance
+	 * @brief Owning dpp::discord_client instance
 	 */
-	class DiscordClient* creator;
+	class discord_client* creator;
 public:
 	/**
 	 * @brief Voice Channel ID
@@ -75,7 +75,7 @@ public:
 	/**
 	 * @brief voice websocket client
 	 */
-	class DiscordVoiceClient* voiceclient;
+	class discord_voice_client* voiceclient;
 
 	/**
 	 * @brief Construct a new voiceconn object
@@ -88,7 +88,7 @@ public:
 	 * @param o owner
 	 * @param _channel_id voice channel id
 	 */
-	voiceconn(class DiscordClient* o, snowflake _channel_id);
+	voiceconn(class discord_client* o, snowflake _channel_id);
 
 	/**
 	 * @brief Destroy the voiceconn object
@@ -124,8 +124,8 @@ public:
 	void disconnect();
 };
 
-/** @brief Implements a discord client. Each DiscordClient connects to one shard and derives from a websocket client. */
-class DiscordClient : public WSClient
+/** @brief Implements a discord client. Each discord_client connects to one shard and derives from a websocket client. */
+class discord_client : public websocket_client
 {
 	/** Mutex for message queue */
 	std::mutex queue_mutex;
@@ -236,21 +236,21 @@ public:
 	 * 
 	 * @return uint64_t guild count
 	 */
-	uint64_t GetGuildCount();
+	uint64_t get_guild_count();
 
 	/**
 	 * @brief Get the Member Count for this shard
 	 * 
 	 * @return uint64_t member count
 	 */
-	uint64_t GetMemberCount();
+	uint64_t get_member_count();
 
 	/**
 	 * @brief Get the Channel Count for this shard
 	 * 
 	 * @return uint64_t channel count
 	 */
-	uint64_t GetChannelCount();
+	uint64_t get_channel_count();
 
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
 	virtual void OneSecondTimer();
@@ -283,14 +283,14 @@ public:
 	 * 
 	 * @return True if connected
 	 */
-	bool IsConnected();
+	bool is_connected();
 
 	/**
 	 * @brief Returns the connection time of the shard
 	 * 
 	 * @return dpp::utility::uptime Detail of how long the shard has been connected for
 	 */
-	dpp::utility::uptime Uptime();
+	dpp::utility::uptime get_uptime();
 
 	/** Constructor takes shard id, max shards and token.
 	 * @param _cluster The owning cluster for this shard
@@ -300,13 +300,13 @@ public:
 	 * @param intents Privileged intents to use, a bitmask of values from dpp::intents
 	 * @param compressed True if the received data will be gzip compressed
 	 */
-	DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true);
+	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true);
 
 	/** Destructor */
-	virtual ~DiscordClient();
+	virtual ~discord_client();
 
 	/** Get decompressed total bytes received */
-	uint64_t GetDecompressedBytesIn();
+	uint64_t get_decompressed_bytes_in();
 
 	/** Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
@@ -328,16 +328,16 @@ public:
 	 * @param guild_id Guild where the voice channel is
 	 * @param channel_id Channel ID of the voice channel
 	 */
-	void ConnectVoice(snowflake guild_id, snowflake channel_id);
+	void connect_voice(snowflake guild_id, snowflake channel_id);
 
 	/**
 	 * @brief Disconnect from the connected voice channel on a guild
 	 * 
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
 	 */
-	void DisconnectVoice(snowflake guild_id);
+	void disconnect_voice(snowflake guild_id);
 
-	voiceconn* GetVoice(snowflake guild_id);
+	voiceconn* get_voice(snowflake guild_id);
 };
 
 };

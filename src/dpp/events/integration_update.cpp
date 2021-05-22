@@ -43,7 +43,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void integration_update::handle(DiscordClient* client, json &j, const std::string &raw) {
+void integration_update::handle(discord_client* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.integration_update) {
 		json& d = j["d"];
 		dpp::integration_update_t iu(client, raw);

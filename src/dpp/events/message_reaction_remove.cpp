@@ -43,7 +43,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void message_reaction_remove::handle(DiscordClient* client, json &j, const std::string &raw) {
+void message_reaction_remove::handle(discord_client* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.message_reaction_remove) {
 		json &d = j["d"];
 		dpp::message_reaction_remove_t mrr(client, raw);

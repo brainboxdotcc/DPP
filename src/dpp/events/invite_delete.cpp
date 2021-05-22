@@ -42,7 +42,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void invite_delete::handle(DiscordClient* client, json &j, const std::string &raw) {
+void invite_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.invite_delete) {
 		json& d = j["d"];
 		dpp::invite_delete_t cd(client, raw);

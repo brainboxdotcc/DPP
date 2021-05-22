@@ -44,7 +44,7 @@ enum voicestate_flags {
  */
 class voicestate {
 public:
-	class DiscordClient*	shard;
+	class discord_client*	shard;
 	snowflake		guild_id;       //< Optional: the guild id this voice state is for
 	snowflake		channel_id;     //< the channel id this user is connected to (may be empty)
 	snowflake		user_id;        //< the user id this voice state is for

@@ -43,7 +43,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void message_reaction_add::handle(DiscordClient* client, json &j, const std::string &raw) {
+void message_reaction_add::handle(discord_client* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.message_reaction_add) {
 		json &d = j["d"];
 		dpp::message_reaction_add_t mra(client, raw);

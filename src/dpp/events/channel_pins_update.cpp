@@ -43,7 +43,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void channel_pins_update::handle(DiscordClient* client, json &j, const std::string &raw) {
+void channel_pins_update::handle(discord_client* client, json &j, const std::string &raw) {
 
 	if (client->creator->dispatch.channel_pins_update) {
 		json& d = j["d"];

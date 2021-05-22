@@ -102,9 +102,9 @@ void cluster::start(bool return_after) {
 		for (uint32_t s = 0; s < numshards; ++s) {
 			/* Filter out shards that arent part of the current cluster, if the bot is clustered */
 			if (s % maxclusters == cluster_id) {
-				/* Each DiscordClient spawns its own thread in its Run() */
+				/* Each discord_client spawns its own thread in its Run() */
 				try {
-					this->shards[s] = new DiscordClient(this, s, numshards, token, intents, compressed);
+					this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed);
 					this->shards[s]->Run();
 				}
 				catch (const std::exception &e) {
@@ -182,13 +182,13 @@ gateway::gateway(nlohmann::json* j) {
 void cluster::set_presence(const dpp::presence &p) {
 	std::string string_presence = p.build_json();
 	for (auto& s : shards) {
-		if (s.second->IsConnected()) {
+		if (s.second->is_connected()) {
 			s.second->QueueMessage(string_presence);
 		}
 	}
 }
 
-DiscordClient* cluster::get_shard(uint32_t id) {
+discord_client* cluster::get_shard(uint32_t id) {
 	auto i = shards.find(id);
 	if (i != shards.end()) {
 		return i->second;

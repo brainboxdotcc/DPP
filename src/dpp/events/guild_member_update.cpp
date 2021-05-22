@@ -42,7 +42,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_member_update::handle(DiscordClient* client, json &j, const std::string &raw) {
+void guild_member_update::handle(discord_client* client, json &j, const std::string &raw) {
        json& d = j["d"];
 	dpp::guild* g = dpp::find_guild(from_string<uint64_t>(d["guild_id"].get<std::string>(), std::dec));
 	dpp::user* u = dpp::find_user(from_string<uint64_t>(d["user"]["id"].get<std::string>(), std::dec));

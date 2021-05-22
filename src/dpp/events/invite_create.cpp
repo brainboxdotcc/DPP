@@ -42,7 +42,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void invite_create::handle(DiscordClient* client, json &j, const std::string &raw) {
+void invite_create::handle(discord_client* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.invite_create) {
 		json& d = j["d"];
 		dpp::invite_create_t ci(client, raw);

@@ -40,8 +40,8 @@
 
 namespace dpp {
 
-DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
-       : WSClient(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
+discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
+       : websocket_client(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
 	creator(_cluster),
 	shard_id(_shard_id),
 	max_shards(_max_shards),
@@ -62,7 +62,7 @@ DiscordClient::DiscordClient(dpp::cluster* _cluster, uint32_t _shard_id, uint32_
 	Connect();
 }
 
-DiscordClient::~DiscordClient()
+discord_client::~discord_client()
 {
 	if (runner) {
 		runner->join();
@@ -70,12 +70,12 @@ DiscordClient::~DiscordClient()
 	}
 }
 
-uint64_t DiscordClient::GetDecompressedBytesIn()
+uint64_t discord_client::get_decompressed_bytes_in()
 {
 	return decompressed_total;
 }
 
-void DiscordClient::SetupZLib()
+void discord_client::SetupZLib()
 {
 	if (compressed) {
 		d_stream.zalloc = (alloc_func)0;
@@ -89,7 +89,7 @@ void DiscordClient::SetupZLib()
 
 }
 
-void DiscordClient::EndZLib()
+void discord_client::EndZLib()
 {
 	if (compressed) {
 		inflateEnd(&d_stream);
@@ -100,26 +100,26 @@ void DiscordClient::EndZLib()
 	}
 }
 
-void DiscordClient::ThreadRun()
+void discord_client::ThreadRun()
 {
 	SetupZLib();
 	do {
 		bool error = false;
 		ready = false;
 		message_queue.clear();
-		SSLClient::ReadLoop();
-		SSLClient::close();
+		ssl_client::ReadLoop();
+		ssl_client::close();
 		EndZLib();
 		SetupZLib();
 		do {
 			error = false;
 			try {
-				SSLClient::Connect();
-				WSClient::Connect();
+				ssl_client::Connect();
+				websocket_client::Connect();
 			}
 			catch (const std::exception &e) {
 				log(dpp::ll_error, std::string("Error establishing connection, retry in 5 seconds: ") + e.what());
-				SSLClient::close();
+				ssl_client::close();
 				std::this_thread::sleep_for(std::chrono::seconds(5));
 				error = true;
 			}
@@ -127,13 +127,13 @@ void DiscordClient::ThreadRun()
 	} while(true);
 }
 
-void DiscordClient::Run()
+void discord_client::Run()
 {
-	this->runner = new std::thread(&DiscordClient::ThreadRun, this);
+	this->runner = new std::thread(&discord_client::ThreadRun, this);
 	this->thread_id = runner->native_handle();
 }
 
-bool DiscordClient::HandleFrame(const std::string &buffer)
+bool discord_client::HandleFrame(const std::string &buffer)
 {
 	std::string& data = (std::string&)buffer;
 
@@ -194,7 +194,7 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 		j = json::parse(data);
 	}
 	catch (const std::exception &e) {
-		log(dpp::ll_error, fmt::format("DiscordClient::HandleFrame {} [{}]", e.what(), data));
+		log(dpp::ll_error, fmt::format("discord_client::HandleFrame {} [{}]", e.what(), data));
 		return true;
 	}
 
@@ -289,17 +289,17 @@ bool DiscordClient::HandleFrame(const std::string &buffer)
 	return true;
 }
 
-dpp::utility::uptime DiscordClient::Uptime()
+dpp::utility::uptime discord_client::get_uptime()
 {
 	return dpp::utility::uptime(time(NULL) - connect_time);
 }
 
-bool DiscordClient::IsConnected()
+bool discord_client::is_connected()
 {
 	return (this->GetState() == CONNECTED) && (this->ready);
 }
 
-void DiscordClient::Error(uint32_t errorcode)
+void discord_client::Error(uint32_t errorcode)
 {
 	std::map<uint32_t, std::string> errortext = {
 		{ 1000, "Socket shutdown" },
@@ -345,7 +345,7 @@ void DiscordClient::Error(uint32_t errorcode)
 	log(dpp::ll_warning, fmt::format("OOF! Error from underlying websocket: {}: {}", errorcode, error));
 }
 
-void DiscordClient::log(dpp::loglevel severity, const std::string &msg) const
+void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 {
 	if (creator->dispatch.log) {
 		/* Pass to user if theyve hooked the event */
@@ -356,7 +356,7 @@ void DiscordClient::log(dpp::loglevel severity, const std::string &msg) const
 	}
 }
 
-void DiscordClient::QueueMessage(const std::string &j, bool to_front)
+void discord_client::QueueMessage(const std::string &j, bool to_front)
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	if (to_front) {
@@ -366,22 +366,22 @@ void DiscordClient::QueueMessage(const std::string &j, bool to_front)
 	}
 }
 
-void DiscordClient::ClearQueue()
+void discord_client::ClearQueue()
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	message_queue.clear();
 }
 
-size_t DiscordClient::GetQueueSize()
+size_t discord_client::GetQueueSize()
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	return message_queue.size();
 }
 
-void DiscordClient::OneSecondTimer()
+void discord_client::OneSecondTimer()
 {
 
-	WSClient::OneSecondTimer();
+	websocket_client::OneSecondTimer();
 
 	/* This is important because unordered_map doesnt actually free its buckets
 	 * until it's members are swapped out. Creating an entirely new hash_map
@@ -393,7 +393,7 @@ void DiscordClient::OneSecondTimer()
 	}
 
 	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
-	if (this->IsConnected()) {
+	if (this->is_connected()) {
 
 		/* If we stopped getting heartbeat acknowledgements, this means the connections is dead.
 		 * This can happen to TCP connections which is why we have heartbeats in the first place.
@@ -429,7 +429,7 @@ void DiscordClient::OneSecondTimer()
 	}
 }
 
-uint64_t DiscordClient::GetGuildCount() {
+uint64_t discord_client::get_guild_count() {
 	uint64_t total = 0;
 	dpp::cache* c = dpp::get_guild_cache();
 	dpp::cache_container& gc = c->get_container();
@@ -444,7 +444,7 @@ uint64_t DiscordClient::GetGuildCount() {
 	return total;
 }
 
-uint64_t DiscordClient::GetMemberCount() {
+uint64_t discord_client::get_member_count() {
 	uint64_t total = 0;
 	dpp::cache* c = dpp::get_guild_cache();
 	dpp::cache_container& gc = c->get_container();
@@ -459,7 +459,7 @@ uint64_t DiscordClient::GetMemberCount() {
 	return total;
 }
 
-uint64_t DiscordClient::GetChannelCount() {
+uint64_t discord_client::get_channel_count() {
 	uint64_t total = 0;
 	dpp::cache* c = dpp::get_guild_cache();
 	dpp::cache_container& gc = c->get_container();
@@ -474,7 +474,7 @@ uint64_t DiscordClient::GetChannelCount() {
 	return total;
 }
 
-void DiscordClient::ConnectVoice(snowflake guild_id, snowflake channel_id) {
+void discord_client::connect_voice(snowflake guild_id, snowflake channel_id) {
 #ifdef HAVE_VOICE
 	std::lock_guard<std::mutex> lock(voice_mutex);
 	if (connecting_voice_channels.find(guild_id) == connecting_voice_channels.end()) {
@@ -497,7 +497,7 @@ void DiscordClient::ConnectVoice(snowflake guild_id, snowflake channel_id) {
 #endif
 }
 
-void DiscordClient::DisconnectVoice(snowflake guild_id) {
+void discord_client::disconnect_voice(snowflake guild_id) {
 #ifdef HAVE_VOICE
 	std::lock_guard<std::mutex> lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
@@ -520,7 +520,7 @@ void DiscordClient::DisconnectVoice(snowflake guild_id) {
 #endif
 }
 
-voiceconn* DiscordClient::GetVoice(snowflake guild_id) {
+voiceconn* discord_client::get_voice(snowflake guild_id) {
 #ifdef HAVE_VOICE
 	std::lock_guard<std::mutex> lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
@@ -532,7 +532,7 @@ voiceconn* DiscordClient::GetVoice(snowflake guild_id) {
 }
 
 
-voiceconn::voiceconn(DiscordClient* o, snowflake _channel_id) : creator(o), channel_id(_channel_id), voiceclient(nullptr) {
+voiceconn::voiceconn(discord_client* o, snowflake _channel_id) : creator(o), channel_id(_channel_id), voiceclient(nullptr) {
 }
 
 bool voiceconn::is_ready() {
@@ -558,11 +558,11 @@ voiceconn::~voiceconn() {
 
 void voiceconn::connect(snowflake guild_id) {
 	if (this->is_ready() && !this->is_active()) {
-		/* This is wrapped in a thread because instantiating DiscordVoiceClient can initiate a blocking SSL_connect() */
+		/* This is wrapped in a thread because instantiating discord_voice_client can initiate a blocking SSL_connect() */
 		auto t = std::thread([guild_id, this]() {
 			try {
 				this->creator->log(ll_debug, fmt::format("Connecting voice for guild {} channel {}", guild_id, this->channel_id));
-				this->voiceclient = new DiscordVoiceClient(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname);
+				this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname);
 				/* Note: Spawns thread! */
 				this->voiceclient->Run();
 			}

@@ -35,13 +35,13 @@ struct event_dispatch_t {
 	std::string raw_event;
 
 	/** Shard the event came from */
-	class DiscordClient* from; 
+	class discord_client* from; 
 	
 	/** Constructor
  	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	event_dispatch_t(class DiscordClient* client, const std::string& raw);
+	event_dispatch_t(class discord_client* client, const std::string& raw);
 };
 
 /** @brief Log messages */
@@ -51,7 +51,7 @@ struct log_t : public event_dispatch_t {
 	 * for log events originating from the cluster object
 	 * @param raw Raw event text as JSON
 	 */
-	log_t(class DiscordClient* client, const std::string& raw);
+	log_t(class discord_client* client, const std::string& raw);
 	/** Severity */
 	loglevel severity;
 	/** Log Message */
@@ -65,7 +65,7 @@ struct stage_instance_create_t : public event_dispatch_t {
 	 * for log events originating from the cluster object
 	 * @param raw Raw event text as JSON
 	 */
-	stage_instance_create_t(class DiscordClient* client, const std::string& raw);
+	stage_instance_create_t(class discord_client* client, const std::string& raw);
 	/**
 	 * @brief stage instance id
 	 */
@@ -95,7 +95,7 @@ struct stage_instance_delete_t : public event_dispatch_t {
 	 * for log events originating from the cluster object
 	 * @param raw Raw event text as JSON
 	 */
-	stage_instance_delete_t(class DiscordClient* client, const std::string& raw);
+	stage_instance_delete_t(class discord_client* client, const std::string& raw);
 	/**
 	 * @brief stage instance id
 	 */
@@ -124,7 +124,7 @@ struct voice_state_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	voice_state_update_t(class DiscordClient* client, const std::string& raw);
+	voice_state_update_t(class discord_client* client, const std::string& raw);
 	/** Voice state */
 	voicestate state;
 };
@@ -138,7 +138,7 @@ struct interaction_create_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	interaction_create_t(class DiscordClient* client, const std::string& raw);
+	interaction_create_t(class discord_client* client, const std::string& raw);
 
 	/**
 	 * @brief Send a reply for this interaction
@@ -177,7 +177,7 @@ struct button_click_t : public interaction_create_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	button_click_t(class DiscordClient* client, const std::string& raw);
+	button_click_t(class discord_client* client, const std::string& raw);
 
 	/**
 	 * @brief Get a command line parameter
@@ -198,7 +198,7 @@ struct guild_delete_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_delete_t(class DiscordClient* client, const std::string& raw);
+	guild_delete_t(class discord_client* client, const std::string& raw);
 	/** Deleted guild */
 	guild* deleted;
 };
@@ -209,7 +209,7 @@ struct guild_join_request_delete_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_join_request_delete_t(class DiscordClient* client, const std::string& raw);
+	guild_join_request_delete_t(class discord_client* client, const std::string& raw);
 	/** Deleted guild */
 	snowflake guild_id;
 	snowflake user_id;
@@ -221,7 +221,7 @@ struct channel_delete_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	channel_delete_t(class DiscordClient* client, const std::string& raw);
+	channel_delete_t(class discord_client* client, const std::string& raw);
 	guild* deleting_guild;
 	channel* deleted;
 };
@@ -232,7 +232,7 @@ struct channel_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	channel_update_t(class DiscordClient* client, const std::string& raw);
+	channel_update_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
 	channel* updated;
 };
@@ -243,7 +243,7 @@ struct ready_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	ready_t(class DiscordClient* client, const std::string& raw);
+	ready_t(class discord_client* client, const std::string& raw);
 	std::string session_id;
 	uint32_t shard_id;
 };
@@ -254,7 +254,7 @@ struct message_delete_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	message_delete_t(class DiscordClient* client, const std::string& raw);
+	message_delete_t(class discord_client* client, const std::string& raw);
 	message* deleted;
 };
 
@@ -263,7 +263,7 @@ struct application_command_delete_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	application_command_delete_t(class DiscordClient* client, const std::string& raw);
+	application_command_delete_t(class discord_client* client, const std::string& raw);
 };
 
 /** @brief Guild member remove */
@@ -272,7 +272,7 @@ struct guild_member_remove_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_member_remove_t(class DiscordClient* client, const std::string& raw);
+	guild_member_remove_t(class discord_client* client, const std::string& raw);
 	guild* removing_guild;
 	user* removed;
 };
@@ -286,7 +286,7 @@ struct application_command_create_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	application_command_create_t(class DiscordClient* client, const std::string& raw);
+	application_command_create_t(class discord_client* client, const std::string& raw);
 };
 
 /** @brief Session resumed */
@@ -295,7 +295,7 @@ struct resumed_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	resumed_t(class DiscordClient* client, const std::string& raw);
+	resumed_t(class discord_client* client, const std::string& raw);
 	std::string session_id;
 	uint32_t shard_id;
 };
@@ -306,7 +306,7 @@ struct guild_role_create_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_role_create_t(class DiscordClient* client, const std::string& raw);
+	guild_role_create_t(class discord_client* client, const std::string& raw);
 	guild* creating_guild;
 	role* created;
 };
@@ -317,7 +317,7 @@ struct typing_start_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	typing_start_t(class DiscordClient* client, const std::string& raw);
+	typing_start_t(class discord_client* client, const std::string& raw);
 	guild* typing_guild;
 	channel* typing_channel;
 	user* typing_user;
@@ -332,9 +332,9 @@ struct voice_track_marker_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON.
 	 * Will always be empty.
 	 */
-	voice_track_marker_t(class DiscordClient* client, const std::string& raw);
+	voice_track_marker_t(class discord_client* client, const std::string& raw);
 	/** Voice client */
-	class DiscordVoiceClient* voice_client;
+	class discord_voice_client* voice_client;
 	/** Track metadata */
 	std::string track_meta;
 };
@@ -346,7 +346,7 @@ struct message_reaction_add_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	message_reaction_add_t(class DiscordClient* client, const std::string& raw);
+	message_reaction_add_t(class discord_client* client, const std::string& raw);
 	guild* reacting_guild;
 	user* reacting_user;
 	channel* reacting_channel;
@@ -360,7 +360,7 @@ struct guild_members_chunk_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_members_chunk_t(class DiscordClient* client, const std::string& raw);
+	guild_members_chunk_t(class discord_client* client, const std::string& raw);
 	guild* adding;
 	guild_member_map* members;
 };
@@ -371,7 +371,7 @@ struct message_reaction_remove_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	message_reaction_remove_t(class DiscordClient* client, const std::string& raw);
+	message_reaction_remove_t(class discord_client* client, const std::string& raw);
         guild* reacting_guild;
         user* reacting_user;
         channel* reacting_channel;
@@ -385,7 +385,7 @@ struct guild_create_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_create_t(class DiscordClient* client, const std::string& raw);
+	guild_create_t(class discord_client* client, const std::string& raw);
 	guild* created;
 };
 
@@ -395,7 +395,7 @@ struct channel_create_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	channel_create_t(class DiscordClient* client, const std::string& raw);
+	channel_create_t(class discord_client* client, const std::string& raw);
 	guild* creating_guild;
 	channel* created;
 };
@@ -406,7 +406,7 @@ struct message_reaction_remove_emoji_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	message_reaction_remove_emoji_t(class DiscordClient* client, const std::string& raw);
+	message_reaction_remove_emoji_t(class discord_client* client, const std::string& raw);
         guild* reacting_guild;
         channel* reacting_channel;
         emoji* reacting_emoji;
@@ -419,7 +419,7 @@ struct message_delete_bulk_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	message_delete_bulk_t(class DiscordClient* client, const std::string& raw);
+	message_delete_bulk_t(class discord_client* client, const std::string& raw);
 	guild* deleting_guild;
 	user* deleting_user;
 	channel* deleting_channel;
@@ -432,7 +432,7 @@ struct guild_role_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_role_update_t(class DiscordClient* client, const std::string& raw);
+	guild_role_update_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
 	role* updated;
 };
@@ -443,7 +443,7 @@ struct guild_role_delete_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_role_delete_t(class DiscordClient* client, const std::string& raw);
+	guild_role_delete_t(class discord_client* client, const std::string& raw);
 	guild* deleting_guild;
 	role* deleted;
 };
@@ -454,7 +454,7 @@ struct channel_pins_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	channel_pins_update_t(class DiscordClient* client, const std::string& raw);
+	channel_pins_update_t(class discord_client* client, const std::string& raw);
 	guild* pin_guild;
 	channel* pin_channel;
 	time_t timestamp;
@@ -466,7 +466,7 @@ struct message_reaction_remove_all_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	message_reaction_remove_all_t(class DiscordClient* client, const std::string& raw);
+	message_reaction_remove_all_t(class discord_client* client, const std::string& raw);
         guild* reacting_guild;
         channel* reacting_channel;
         snowflake message_id;
@@ -478,7 +478,7 @@ struct voice_server_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	voice_server_update_t(class DiscordClient* client, const std::string& raw);
+	voice_server_update_t(class discord_client* client, const std::string& raw);
 	snowflake guild_id;
 	std::string token;
 	std::string endpoint;
@@ -490,7 +490,7 @@ struct guild_emojis_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_emojis_update_t(class DiscordClient* client, const std::string& raw);
+	guild_emojis_update_t(class discord_client* client, const std::string& raw);
 	std::vector<snowflake> emojis;
 	guild* updating_guild;
 };
@@ -504,7 +504,7 @@ struct presence_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	presence_update_t(class DiscordClient* client, const std::string& raw);
+	presence_update_t(class discord_client* client, const std::string& raw);
 	presence rich_presence;
 };
 
@@ -514,7 +514,7 @@ struct webhooks_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	webhooks_update_t(class DiscordClient* client, const std::string& raw);
+	webhooks_update_t(class discord_client* client, const std::string& raw);
 	guild* webhook_guild;
 	channel* webhook_channel;
 };
@@ -525,7 +525,7 @@ struct guild_member_add_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_member_add_t(class DiscordClient* client, const std::string& raw);
+	guild_member_add_t(class discord_client* client, const std::string& raw);
 	guild* adding_guild;
 	guild_member* added;
 };
@@ -536,7 +536,7 @@ struct invite_delete_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	invite_delete_t(class DiscordClient* client, const std::string& raw);
+	invite_delete_t(class discord_client* client, const std::string& raw);
 	invite deleted_invite;
 };
 
@@ -546,7 +546,7 @@ struct guild_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_update_t(class DiscordClient* client, const std::string& raw);
+	guild_update_t(class discord_client* client, const std::string& raw);
 	guild* updated;
 };
 
@@ -556,7 +556,7 @@ struct guild_integrations_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_integrations_update_t(class DiscordClient* client, const std::string& raw);
+	guild_integrations_update_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
 };
 
@@ -566,7 +566,7 @@ struct guild_member_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_member_update_t(class DiscordClient* client, const std::string& raw);
+	guild_member_update_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
 	guild_member* updated;
 };
@@ -580,7 +580,7 @@ struct application_command_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	application_command_update_t(class DiscordClient* client, const std::string& raw);
+	application_command_update_t(class discord_client* client, const std::string& raw);
 };
 
 /** @brief Invite create */
@@ -589,7 +589,7 @@ struct invite_create_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	invite_create_t(class DiscordClient* client, const std::string& raw);
+	invite_create_t(class discord_client* client, const std::string& raw);
 	invite created_invite;
 };
 
@@ -599,7 +599,7 @@ struct message_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	message_update_t(class DiscordClient* client, const std::string& raw);
+	message_update_t(class discord_client* client, const std::string& raw);
 	message* updated;
 };
 
@@ -609,7 +609,7 @@ struct user_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	user_update_t(class DiscordClient* client, const std::string& raw);
+	user_update_t(class discord_client* client, const std::string& raw);
 	user* updated;
 };
 
@@ -619,7 +619,7 @@ struct message_create_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	message_create_t(class DiscordClient* client, const std::string& raw);
+	message_create_t(class discord_client* client, const std::string& raw);
 	message* msg;
 };
 
@@ -629,7 +629,7 @@ struct guild_ban_add_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_ban_add_t(class DiscordClient* client, const std::string& raw);
+	guild_ban_add_t(class discord_client* client, const std::string& raw);
 	guild* banning_guild;
 	user banned;
 };
@@ -640,7 +640,7 @@ struct guild_ban_remove_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	guild_ban_remove_t(class DiscordClient* client, const std::string& raw);
+	guild_ban_remove_t(class discord_client* client, const std::string& raw);
 	guild* unbanning_guild;
 	user unbanned;
 };
@@ -651,7 +651,7 @@ struct integration_create_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	integration_create_t(class DiscordClient* client, const std::string& raw);
+	integration_create_t(class discord_client* client, const std::string& raw);
 	integration created_integration;
 };
 
@@ -662,7 +662,7 @@ struct integration_update_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	integration_update_t(class DiscordClient* client, const std::string& raw);
+	integration_update_t(class discord_client* client, const std::string& raw);
 	integration updated_integration;
 };
 
@@ -673,7 +673,7 @@ struct integration_delete_t : public event_dispatch_t {
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	integration_delete_t(class DiscordClient* client, const std::string& raw);
+	integration_delete_t(class discord_client* client, const std::string& raw);
 	integration deleted_integration;
 };
 
@@ -685,8 +685,8 @@ struct voice_buffer_send_t : public event_dispatch_t {
 	 * WILL ALWAYS be NULL.
 	 * @param raw Raw event text as JSON
 	 */
-	voice_buffer_send_t(class DiscordClient* client, const std::string &raw);
-	class DiscordVoiceClient* voice_client;
+	voice_buffer_send_t(class discord_client* client, const std::string &raw);
+	class discord_voice_client* voice_client;
 	int buffer_size;
 };
 
@@ -698,8 +698,8 @@ struct voice_user_talking_t : public event_dispatch_t {
 	 * WILL ALWAYS be NULL.
 	 * @param raw Raw event text as JSON
 	 */
-	voice_user_talking_t(class DiscordClient* client, const std::string &raw);
-	class DiscordVoiceClient* voice_client;
+	voice_user_talking_t(class discord_client* client, const std::string &raw);
+	class discord_voice_client* voice_client;
 	snowflake user_id;
 	uint8_t talking_flags;
 };
@@ -712,8 +712,8 @@ struct voice_ready_t : public event_dispatch_t {
 	 * WILL ALWAYS be NULL.
 	 * @param raw Raw event text as JSON
 	 */
-	voice_ready_t(class DiscordClient* client, const std::string &raw);
-	class DiscordVoiceClient* voice_client;
+	voice_ready_t(class discord_client* client, const std::string &raw);
+	class discord_voice_client* voice_client;
 	snowflake voice_channel_id;
 };
 
@@ -725,8 +725,8 @@ struct voice_receive_t : public event_dispatch_t {
 	 * WILL ALWAYS be NULL.
 	 * @param raw Raw event text as JSON
 	 */
-	voice_receive_t(class DiscordClient* client, const std::string &raw);
-	class DiscordVoiceClient* voice_client;
+	voice_receive_t(class discord_client* client, const std::string &raw);
+	class discord_voice_client* voice_client;
 	uint8_t* audio;
 	size_t audio_size;
 };

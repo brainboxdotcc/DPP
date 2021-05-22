@@ -43,7 +43,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void guild_join_request_delete::handle(class DiscordClient* client, json &j, const std::string &raw) {
+void guild_join_request_delete::handle(class discord_client* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.guild_join_request_delete) {
 		json& d = j["d"];
 		dpp::guild_join_request_delete_t grd(client, raw);

@@ -69,9 +69,9 @@ class cluster;
 #define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
 
 /** @brief Implements a discord voice connection.
- * Each DiscordVoiceClient connects to one voice channel and derives from a websocket client.
+ * Each discord_voice_client connects to one voice channel and derives from a websocket client.
  */
-class DiscordVoiceClient : public WSClient
+class discord_voice_client : public websocket_client
 {
 	/** Mutex for outbound packet stream */
 	std::mutex stream_mutex;
@@ -181,7 +181,7 @@ class DiscordVoiceClient : public WSClient
 
 	/** Meta data associated with each track.
 	 * Arbitrary string that the user can set via
-	 * dpp::DiscordVoiceClient::AddMarker
+	 * dpp::discord_voice_client::AddMarker
 	 */
 	std::vector<std::string> track_meta;
 
@@ -209,7 +209,7 @@ class DiscordVoiceClient : public WSClient
 	int UDPRecv(char* data, size_t max_length);
 
 	/**
-	 * @brief This hooks the SSLClient, returning the file
+	 * @brief This hooks the ssl_client, returning the file
 	 * descriptor if we want to send buffered data, or
 	 * -1 if there is nothing to send
 	 * 
@@ -218,7 +218,7 @@ class DiscordVoiceClient : public WSClient
 	int WantWrite();
 
 	/**
-	 * @brief This hooks the SSLClient, returning the file
+	 * @brief This hooks the ssl_client, returning the file
 	 * descriptor if we want to receive buffered data, or
 	 * -1 if we are not wanting to receive
 	 * 
@@ -227,7 +227,7 @@ class DiscordVoiceClient : public WSClient
 	int WantRead();
 
 	/**
-	 * @brief Called by SSLClient when the socket is ready
+	 * @brief Called by ssl_client when the socket is ready
 	 * for writing, at this point we pick the head item off
 	 * the buffer and send it. So long as it doesnt error
 	 * completely, we pop it off the head of the queue.
@@ -235,7 +235,7 @@ class DiscordVoiceClient : public WSClient
 	void WriteReady();
 
 	/**
-	 * @brief Called by SSLClient when there is data to be
+	 * @brief Called by ssl_client when there is data to be
 	 * read. At this point we insert that data into the
 	 * input queue.
 	 */
@@ -350,7 +350,7 @@ public:
 	 * 
 	 * @return dpp::utility::uptime Detail of how long the voice client has been connected for
 	 */
-	dpp::utility::uptime Uptime();
+	dpp::utility::uptime get_uptime();
 
 	/** Constructor takes shard id, max shards and token.
 	 * @param _cluster The owning cluster for this shard
@@ -359,10 +359,10 @@ public:
 	 * @param _session_id The voice session id to identify with
 	 * @param _host The voice server hostname to connect to (hostname:port format)
 	 */
-	DiscordVoiceClient(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host);
+	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host);
 
 	/** Destructor */
-	virtual ~DiscordVoiceClient();
+	virtual ~discord_voice_client();
 
 	/** Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
@@ -461,7 +461,7 @@ public:
 	 * some voice audio/speech, a sound effect, or
 	 * whatever you choose. You can later skip
 	 * to the next marker using the
-	 * dpp::DiscordVoiceClient::SkipToNextMarker
+	 * dpp::discord_voice_client::SkipToNextMarker
 	 * function.
 	 * @param metadata Arbitrary information related to this
 	 * track
@@ -471,11 +471,11 @@ public:
 	/**
 	 * @brief Skip tp the next track marker,
 	 * previously inserted by using the
-	 * dpp::DiscordVoiceClient::InsertMarker
+	 * dpp::discord_voice_client::InsertMarker
 	 * function. If there are no markers in the
 	 * output buffer, then this skips to the end
 	 * of the buffer and is equivalent to the
-	 * dpp::DiscordVoiceClient::StopAudio
+	 * dpp::discord_voice_client::StopAudio
 	 * function.
 	 * @note It is possible to use this function
 	 * while the output stream is paused.
@@ -492,7 +492,7 @@ public:
 	/**
 	 * @brief Returns true if the audio is paused.
 	 * You can unpause with
-	 * dpp::DiscordVoiceClient::PauseAudio.
+	 * dpp::discord_voice_client::PauseAudio.
 	 * 
 	 * @return true if paused
 	 */

@@ -42,7 +42,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void interaction_create::handle(DiscordClient* client, json &j, const std::string &raw) {
+void interaction_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	dpp::interaction i;
 	i.fill_from_json(&d);

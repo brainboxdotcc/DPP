@@ -277,7 +277,7 @@ void guild::rehash_members() {
 }
 
 
-guild& guild::fill_from_json(DiscordClient* shard, nlohmann::json* d) {
+guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	this->id = SnowflakeNotNull(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
 		this->name = StringNotNull(d, "name");
@@ -443,7 +443,7 @@ bool guild::ConnectMemberVoice(snowflake user_id) {
 		auto vsi = vcmembers.find(user_id);
 		if (vsi != vcmembers.end()) {
 			if (vsi->second.shard) {
-				vsi->second.shard->ConnectVoice(this->id, vsi->second.channel_id);
+				vsi->second.shard->connect_voice(this->id, vsi->second.channel_id);
 				return true;
 			}
 		}

@@ -34,15 +34,15 @@ const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 const size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-WSClient::WSClient(const std::string &hostname, const std::string &port, const std::string &urlpath)
-	: SSLClient(hostname, port),
+websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath)
+	: ssl_client(hostname, port),
 	state(HTTP_HEADERS),
 	key(fmt::format("{:16x}", time(nullptr))),
 	path(urlpath)
 {
 }
 
-void WSClient::Connect()
+void websocket_client::Connect()
 {
 	state = HTTP_HEADERS;
 	/* Send headers synchronously */
@@ -63,17 +63,17 @@ void WSClient::Connect()
 	);
 }
 
-WSClient::~WSClient()
+websocket_client::~websocket_client()
 {
 }
 
-bool WSClient::HandleFrame(const std::string &buffer)
+bool websocket_client::HandleFrame(const std::string &buffer)
 {
 	/* This is a stub for classes that derive the websocket client */
 	return true;
 }
 
-size_t WSClient::FillHeader(unsigned char* outbuf, size_t sendlength, OpCode opcode)
+size_t websocket_client::FillHeader(unsigned char* outbuf, size_t sendlength, ws_opcode opcode)
 {
 	size_t pos = 0;
 	outbuf[pos++] = WS_FINBIT | opcode;
@@ -109,17 +109,17 @@ size_t WSClient::FillHeader(unsigned char* outbuf, size_t sendlength, OpCode opc
 }
 
 
-void WSClient::write(const std::string &data)
+void websocket_client::write(const std::string &data)
 {
 	if (state == HTTP_HEADERS) {
 		/* Simple write */
-		SSLClient::write(data);
+		ssl_client::write(data);
 	} else {
 		unsigned char out[MAXHEADERSIZE];
 		size_t s = this->FillHeader(out, data.length(), OP_TEXT);
 		std::string header((const char*)out, s);
-		SSLClient::write(header);
-		SSLClient::write(data);
+		ssl_client::write(header);
+		ssl_client::write(data);
 	}
 }
 
@@ -135,7 +135,7 @@ std::vector<std::string> tokenize(std::string const &in, const char* sep = "\r\n
 	return result;
 }
 
-bool WSClient::HandleBuffer(std::string &buffer)
+bool websocket_client::HandleBuffer(std::string &buffer)
 {
 	switch (state) {
 		case HTTP_HEADERS:
@@ -180,12 +180,12 @@ bool WSClient::HandleBuffer(std::string &buffer)
 	return true;
 }
 
-WSState WSClient::GetState()
+ws_state websocket_client::GetState()
 {
 	return this->state;
 }
 
-bool WSClient::parseheader(std::string &data)
+bool websocket_client::parseheader(std::string &data)
 {
 	if (data.size() < 4) {
 		/* Not enough data to form a frame yet */
@@ -287,7 +287,7 @@ bool WSClient::parseheader(std::string &data)
 	return false;
 }
 
-void WSClient::OneSecondTimer()
+void websocket_client::OneSecondTimer()
 {
 	if (((time(NULL) % 20) == 0) && (state == CONNECTED)) {
 		/* For sending pings, we send with payload */
@@ -295,31 +295,31 @@ void WSClient::OneSecondTimer()
 		std::string payload = "keepalive";
 		size_t s = this->FillHeader(out, payload.length(), OP_PING);
 		std::string header((const char*)out, s);
-		SSLClient::write(header);
-		SSLClient::write(payload);
+		ssl_client::write(header);
+		ssl_client::write(payload);
 	}
 }
 
-void WSClient::HandlePingPong(bool ping, const std::string &payload)
+void websocket_client::HandlePingPong(bool ping, const std::string &payload)
 {
 	unsigned char out[MAXHEADERSIZE];
 	if (ping) {
 		/* For receving pings we echo back their payload with the type OP_PONG */
 		size_t s = this->FillHeader(out, payload.length(), OP_PONG);
 		std::string header((const char*)out, s);
-		SSLClient::write(header);
-		SSLClient::write(payload);
+		ssl_client::write(header);
+		ssl_client::write(payload);
 	}
 }
 
-void WSClient::Error(uint32_t errorcode)
+void websocket_client::Error(uint32_t errorcode)
 {
 }
 
-void WSClient::close()
+void websocket_client::close()
 {
 	this->state = HTTP_HEADERS;
-	SSLClient::close();
+	ssl_client::close();
 }
 
 };

@@ -43,7 +43,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void stage_instance_create::handle(DiscordClient* client, json &j, const std::string &raw) {
+void stage_instance_create::handle(discord_client* client, json &j, const std::string &raw) {
 	if (client->creator->dispatch.stage_instance_create) {
 		json& d = j["d"];
 		dpp::stage_instance_create_t sic(client, raw);

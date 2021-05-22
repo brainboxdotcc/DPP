@@ -43,7 +43,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void voice_server_update::handle(DiscordClient* client, json &j, const std::string &raw) {
+void voice_server_update::handle(discord_client* client, json &j, const std::string &raw) {
 
 	json &d = j["d"];
 	dpp::voice_server_update_t vsu(client, raw);

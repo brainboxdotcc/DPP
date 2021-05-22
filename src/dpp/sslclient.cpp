@@ -61,7 +61,7 @@ namespace dpp {
 #define BUFSIZZ 1024 * 16
 const int ERROR_STATUS = -1;
 
-SSLClient::SSLClient(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port), bytes_in(0), bytes_out(0)
+ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port), bytes_in(0), bytes_out(0)
 {
 #ifndef WIN32
         signal(SIGALRM, SIG_IGN);
@@ -74,7 +74,7 @@ SSLClient::SSLClient(const std::string &_hostname, const std::string &_port) : l
 }
 
 /* SSL Client constructor throws std::runtime_error if it can't connect to the host */
-void SSLClient::Connect()
+void ssl_client::Connect()
 {
 	/* Initial connection is done in blocking mode. There is a timeout on it. */
 	nonblocking = false;
@@ -135,7 +135,7 @@ void SSLClient::Connect()
 	this->cipher = SSL_get_cipher(ssl);
 }
 
-void SSLClient::write(const std::string &data)
+void ssl_client::write(const std::string &data)
 {
 	/* If we are in nonblocking mode, append to the buffer,
 	 * otherwise just use SSL_write directly. The only time we
@@ -150,15 +150,15 @@ void SSLClient::write(const std::string &data)
 	}
 }
 
-void SSLClient::OneSecondTimer()
+void ssl_client::OneSecondTimer()
 {
 }
 
-void SSLClient::log(dpp::loglevel severity, const std::string &msg) const
+void ssl_client::log(dpp::loglevel severity, const std::string &msg) const
 {
 }
 
-void SSLClient::ReadLoop()
+void ssl_client::ReadLoop()
 {
 	/* The read loop is non-blocking using select(). This method
 	 * cannot read while it is waiting for write, or write while it is
@@ -334,22 +334,22 @@ void SSLClient::ReadLoop()
 	}
 }
 
-uint64_t SSLClient::GetBytesOut()
+uint64_t ssl_client::get_bytes_out()
 {
 	return bytes_out;
 }
 
-uint64_t SSLClient::GetBytesIn()
+uint64_t ssl_client::get_bytes_in()
 {
 	return bytes_in;
 }
 
-bool SSLClient::HandleBuffer(std::string &buffer)
+bool ssl_client::HandleBuffer(std::string &buffer)
 {
 	return true;
 }
 
-void SSLClient::close()
+void ssl_client::close()
 {
 	if (ssl) {
 		SSL_free(ssl);
@@ -365,7 +365,7 @@ void SSLClient::close()
 	buffer.clear();
 }
 
-SSLClient::~SSLClient()
+ssl_client::~ssl_client()
 {
 	this->close();
 }

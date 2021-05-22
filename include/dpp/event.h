@@ -23,11 +23,11 @@
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
-#define event_decl(x) class x : public event { public: virtual void handle(dpp::DiscordClient* client, nlohmann::json &j, const std::string &raw); };
+#define event_decl(x) class x : public event { public: virtual void handle(dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
 
 namespace dpp { 
 
-class DiscordClient;
+class discord_client;
 
 /**
  * @brief The events namespace holds the internal event handlers for each websocket event.
@@ -45,7 +45,7 @@ public:
 	 * @param j The json data of the event
 	 * @param raw The raw event json
 	 */
-	virtual void handle(class DiscordClient* client, nlohmann::json &j, const std::string &raw) = 0;
+	virtual void handle(class discord_client* client, nlohmann::json &j, const std::string &raw) = 0;
 };
 
 /* Internal logger */
