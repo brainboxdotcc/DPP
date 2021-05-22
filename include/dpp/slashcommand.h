@@ -54,7 +54,7 @@ enum command_option_type : uint8_t {
  * native data types represented by the enum above.
  * It is used in interactions.
  */
-typedef std::variant<std::string, uint32_t, bool, snowflake> command_value;
+typedef std::variant<std::string, int32_t, bool, snowflake> command_value;
 
 /**
  * @brief This struct represents choices in a multiple choice option

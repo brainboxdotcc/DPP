@@ -42,8 +42,8 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 
 void to_json(json& j, const command_option_choice& choice) {
 	j["name"] = choice.name;
-	if (std::holds_alternative<uint32_t>(choice.value)) {
-		j["value"] = std::get<uint32_t>(choice.value);
+	if (std::holds_alternative<int32_t>(choice.value)) {
+		j["value"] = std::get<int32_t>(choice.value);
 	} else if (std::holds_alternative<bool>(choice.value)) {
 		j["value"] = std::get<bool>(choice.value);
 	} else if (std::holds_alternative<snowflake>(choice.value)) {
@@ -172,7 +172,7 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 			cdo.value = SnowflakeNotNull(&j, "value");
 			break;
 		case co_integer:
-			cdo.value = j.at("value").get<uint32_t>();
+			cdo.value = j.at("value").get<int32_t>();
 			break;
 		case co_string:
 			cdo.value = j.at("value").get<std::string>();
