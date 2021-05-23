@@ -121,11 +121,11 @@ discord_voice_client::~discord_voice_client()
 	}
 }
 
-bool discord_voice_client::IsReady() {
+bool discord_voice_client::is_ready() {
 	return secret_key != nullptr;
 }
 
-bool discord_voice_client::IsPlaying() {
+bool discord_voice_client::is_playing() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	return (!this->outbuf.empty());
 }
@@ -257,7 +257,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 				}
 				log(ll_debug, fmt::format("Voice websocket established; UDP endpoint: {}:{} [ssrc={}] with {} modes", ip, port, ssrc, modes.size()));
 
-				external_ip = DiscoverIP();
+				external_ip = discover_ip();
 
 				int newfd = -1;
 				if ((newfd = socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
@@ -322,26 +322,26 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 	return true;
 }
 
-void discord_voice_client::PauseAudio(bool pause) {
+void discord_voice_client::pause_audio(bool pause) {
 	this->paused = pause;
 }
 
-bool discord_voice_client::IsPaused() {
+bool discord_voice_client::is_paused() {
 	return this->paused;
 }
 
-float discord_voice_client::GetSecsRemaining() {
+float discord_voice_client::get_secs_remaining() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	/* Audio stream sends one packet every 60ms which means there are 16.666 packets per second */
 	return (outbuf.size() / 16.666666);
 }
 
-dpp::utility::uptime discord_voice_client::GetRemaining() {
-	float fp_secs = GetSecsRemaining();
+dpp::utility::uptime discord_voice_client::get_remaining() {
+	float fp_secs = get_secs_remaining();
 	return dpp::utility::uptime((time_t)ceil(fp_secs));
 }
 
-void discord_voice_client::StopAudio() {
+void discord_voice_client::stop_audio() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	outbuf.clear();
 }
@@ -423,7 +423,7 @@ dpp::utility::uptime discord_voice_client::get_uptime()
 	return dpp::utility::uptime(time(NULL) - connect_time);
 }
 
-bool discord_voice_client::IsConnected()
+bool discord_voice_client::is_connected()
 {
 	return (this->GetState() == CONNECTED);
 }
@@ -482,7 +482,7 @@ void discord_voice_client::Error(uint32_t errorcode)
 
 	/* Errors 4004...4016 except 4014 are fatal and cause termination of the voice session */
 	if (errorcode >= 4003 && errorcode != 4014) {
-		StopAudio();
+		stop_audio();
 		this->terminating = true;
 		log(dpp::ll_error, "This is a non-recoverable error, giving up on voice connection");
 	}
@@ -515,7 +515,7 @@ size_t discord_voice_client::GetQueueSize()
 	return message_queue.size();
 }
 
-const std::vector<std::string> discord_voice_client::GetMarkerMetadata() {
+const std::vector<std::string> discord_voice_client::get_marker_metadata() {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	return track_meta;
 }
@@ -592,7 +592,7 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 	return outDataSize;
 }
 
-void discord_voice_client::InsertMarker(const std::string& metadata) {
+void discord_voice_client::insert_marker(const std::string& metadata) {
 	/* Insert a track marker. A track marker is a single 16 bit value of 0xFFFF.
 	 * This is too small to be a valid RTP packet so the send function knows not
 	 * to actually send it, and instead to skip it
@@ -606,7 +606,7 @@ void discord_voice_client::InsertMarker(const std::string& metadata) {
 	}
 }
 
-uint32_t discord_voice_client::GetTracksRemaining() {
+uint32_t discord_voice_client::get_tracks_remaining() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	if (outbuf.size() == 0)
 		return 0;
@@ -614,7 +614,7 @@ uint32_t discord_voice_client::GetTracksRemaining() {
 		return tracks + 1;
 }
 
-void discord_voice_client::SkipToNextMarker() {
+void discord_voice_client::skip_to_next_marker() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	/* Keep popping the first entry off the outbuf until the first entry is a track marker */
 	while (outbuf.size() && outbuf[0].size() != sizeof(uint16_t) && ((uint16_t)(*(outbuf[0].data()))) != AUDIO_TRACK_MARKER) {
@@ -631,7 +631,7 @@ void discord_voice_client::SkipToNextMarker() {
 	}
 }
 
-void discord_voice_client::SendAudio(uint16_t* audio_data, const size_t length, bool use_opus)  {
+void discord_voice_client::send_audio(uint16_t* audio_data, const size_t length, bool use_opus)  {
 #if HAVE_VOICE
 
 	const size_t max_frame_bytes = 11520;
@@ -644,7 +644,7 @@ void discord_voice_client::SendAudio(uint16_t* audio_data, const size_t length, 
 			if (packet.size() < max_frame_bytes) {
 				packet.resize(max_frame_bytes, 0);
 			}
-			SendAudio((uint16_t*)packet.data(), max_frame_bytes, use_opus);
+			send_audio((uint16_t*)packet.data(), max_frame_bytes, use_opus);
 		}
 
 		return;
@@ -693,7 +693,7 @@ void discord_voice_client::SendAudio(uint16_t* audio_data, const size_t length, 
 #endif
 }
 
-std::string discord_voice_client::DiscoverIP() {
+std::string discord_voice_client::discover_ip() {
 	int newfd = -1;
 	unsigned char packet[74] = { 0 };
 	(*(uint16_t*)(packet)) = htons(0x01);

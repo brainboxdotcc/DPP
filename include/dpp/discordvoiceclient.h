@@ -336,14 +336,14 @@ public:
 	 * 
 	 * @return true if ready to stream audio
 	 */
-	bool IsReady();
+	bool is_ready();
 
 	/**
 	 * @brief Returns true if the voice client is connected to the websocket
 	 * 
 	 * @return True if connected
 	 */
-	bool IsConnected();
+	bool is_connected();
 
 	/**
 	 * @brief Returns the connection time of the voice client
@@ -403,27 +403,27 @@ public:
 	 * frames using opus here. We can set use_opus to false and bypass the
 	 * codec, only applying libsodium to the stream.
 	 */
-	void SendAudio(uint16_t* audio_data, const size_t length, bool use_opus = true);
+	void send_audio(uint16_t* audio_data, const size_t length, bool use_opus = true);
 
 	/**
 	 * @brief Pause sending of audio
 	 * 
 	 * @param pause True to pause, false to resume
 	 */
-	void PauseAudio(bool pause);
+	void pause_audio(bool pause);
 
 	/**
 	 * @brief Immediately stop all audio.
 	 * Clears the packet queue.
 	 */
-	void StopAudio();
+	void stop_audio();
 
 	/**
 	 * @brief Returns true if we are playing audio
 	 * 
 	 * @return true if audio is playing
 	 */
-	bool IsPlaying();
+	bool is_playing();
 
 	/**
 	 * @brief Get the number of seconds remaining
@@ -431,7 +431,7 @@ public:
 	 * 
 	 * @return float number of seconds remaining 
 	 */
-	float GetSecsRemaining();
+	float get_secs_remaining();
 
 	/**
 	 * @brief Get the number of tracks remaining
@@ -441,7 +441,7 @@ public:
 	 * @return uint32_t Number of tracks in the
 	 * buffer
 	 */
-	uint32_t GetTracksRemaining();
+	uint32_t get_tracks_remaining();
 
 	/**
 	 * @brief Get the time remaining to send the
@@ -449,7 +449,7 @@ public:
 	 * 
 	 * @return dpp::utility::uptime length of buffer
 	 */
-	dpp::utility::uptime GetRemaining();
+	dpp::utility::uptime get_remaining();
 
 	/**
 	 * @brief Insert a track marker into the audio
@@ -461,42 +461,42 @@ public:
 	 * some voice audio/speech, a sound effect, or
 	 * whatever you choose. You can later skip
 	 * to the next marker using the
-	 * dpp::discord_voice_client::SkipToNextMarker
+	 * dpp::discord_voice_client::skip_to_next_marker
 	 * function.
 	 * @param metadata Arbitrary information related to this
 	 * track
 	 */
-	void InsertMarker(const std::string& metadata = "");
+	void insert_marker(const std::string& metadata = "");
 
 	/**
 	 * @brief Skip tp the next track marker,
 	 * previously inserted by using the
-	 * dpp::discord_voice_client::InsertMarker
+	 * dpp::discord_voice_client::insert_marker
 	 * function. If there are no markers in the
 	 * output buffer, then this skips to the end
 	 * of the buffer and is equivalent to the
-	 * dpp::discord_voice_client::StopAudio
+	 * dpp::discord_voice_client::stop_audio
 	 * function.
 	 * @note It is possible to use this function
 	 * while the output stream is paused.
 	 */
-	void SkipToNextMarker();
+	void skip_to_next_marker();
 
 	/**
 	 * @brief Get the metdata string associated with each inserted marker.
 	 * 
 	 * @return const std::vector<std::string>& list of metadata strings
 	 */
-	const std::vector<std::string> GetMarkerMetadata();
+	const std::vector<std::string> get_marker_metadata();
 
 	/**
 	 * @brief Returns true if the audio is paused.
 	 * You can unpause with
-	 * dpp::discord_voice_client::PauseAudio.
+	 * dpp::discord_voice_client::pause_audio.
 	 * 
 	 * @return true if paused
 	 */
-	bool IsPaused();
+	bool is_paused();
 
 	/**
 	 * @brief Discord external IP detection.
@@ -504,7 +504,7 @@ public:
 	 * @note This is a blocking operation that waits
 	 * for a single packet from Discord's voice servers.
 	 */
-	std::string DiscoverIP();
+	std::string discover_ip();
 };
 
 };

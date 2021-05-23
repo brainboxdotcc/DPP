@@ -668,7 +668,7 @@ public:
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
 	 * with Sodium, and merged into packets by the repacketizer, which is done in the
-	 * dpp::discord_voice_client::SendAudio method. You should use the buffer size properties
+	 * dpp::discord_voice_client::send_audio method. You should use the buffer size properties
 	 * of dpp::voice_buffer_send_t to determine if you should fill the buffer with more
 	 * content.
 	 * 
@@ -706,7 +706,7 @@ public:
 	 * @brief Called when sending of audio passes over a track marker.
 	 * Track markers are arbitrarily placed "bookmarks" in the audio buffer, placed
 	 * by the bot developer. Each track marker can have a string value associated with it
-	 * which is specified in dpp::discord_voice_client::InsertMarker and returned to this
+	 * which is specified in dpp::discord_voice_client::insert_marker and returned to this
 	 * event.
 	 * 
 	 * @param _voice_receive User function to attach to event
