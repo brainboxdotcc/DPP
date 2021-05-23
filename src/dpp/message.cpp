@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -205,7 +205,7 @@ embed::embed(json* j) : embed() {
 				video = curr;
 			} else if (s == "thumbnail") {
 				thumbnail = curr;
-			}			
+			}
 		}
 	}
 	if (j->find("provider") != j->end()) {
@@ -338,18 +338,22 @@ attachment::attachment(json *j) : attachment() {
 	this->content_type = StringNotNull(j, "content_type");
 }
 
-std::string message::build_json(bool with_id) const {
+std::string message::build_json(bool with_id, bool is_interaction_response) const {
 	/* This is the basics. once it works, expand on it. */
 	json j({
-		{"content", content},
 		{"channel_id", channel_id},
 		{"tts", tts},
 		{"nonce", nonce},
 		{"flags", flags},
 		{"type", type}
 	});
+
 	if (with_id) {
 		j["id"] = std::to_string(id);
+	}
+
+	if (!content.empty()) {
+		j["content"] = content;
 	}
 
 	if (components.size()) {
@@ -389,6 +393,10 @@ std::string message::build_json(bool with_id) const {
 		j["components"].push_back(n);
 	}
 	if (embeds.size()) {
+		if (is_interaction_response) {
+			j["embeds"] = json::array();
+		}
+
 		for (auto& embed : embeds) {
 			json e;
 			if (!embed.description.empty())
@@ -421,9 +429,13 @@ std::string message::build_json(bool with_id) const {
 				}
 			}
 
-			/* Sending embeds only accepts the first entry */
-			j["embed"] = e;
-			break;
+			if (is_interaction_response) {
+				j["embeds"].push_back(e);
+			} else {
+				/* Sending embeds on normal messages only accepts the first entry */
+				j["embed"] = e;
+				break;
+			}
 		}
 	}
 	return j.dump();
@@ -560,4 +572,3 @@ message& message::fill_from_json(json* d) {
 }
 
 };
-

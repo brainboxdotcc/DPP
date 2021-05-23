@@ -248,7 +248,7 @@ interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 
 std::string interaction_response::build_json() const {
 	json j;
-	json msg_json = json::parse(msg->build_json());
+	json msg_json = json::parse(msg->build_json(false, true));
 	j["type"] = this->type;
 	auto cid = msg_json.find("channel_id");
 	if (cid != msg_json.end()) {
