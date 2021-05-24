@@ -22,6 +22,7 @@
 #include <dpp/commandhandler.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
+#include <dpp/dispatcher.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
 #include <sstream>
@@ -118,25 +119,155 @@ void commandhandler::route(const dpp::message& msg)
 		/* Prefixed command, the prefix was removed */
 		auto found_cmd = commands.find(lowercase(command));
 		if (found_cmd != commands.end()) {
+			/* Filter out guild specific commands that are not for the current guild */
+			if (found_cmd->second.guild_id && found_cmd->second.guild_id != msg.guild_id) {
+				return;
+			}
+
+			parameter_list_t call_params;
+
 			/* Command found; parse parameters */
+			for (auto& p : found_cmd->second.parameters) {
+				command_parameter param;
+
+				/* Check for end of stream */
+				if (!ss) {
+					/* If it's an optional param, we dont care */
+					if (!p.second.optional) {
+						/* Trigger missing parameter handler? */
+					}
+					break;
+				}
+
+				switch (p.second.type) {
+					case pt_string: {
+						std::string x;
+						ss >> x;
+						param = x;
+					}
+					break;
+					case pt_role: {
+						std::string x;
+						if (x.length() > 4 && x[0] == '<' && x[1] == '&') {
+							snowflake rid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
+							role* r = dpp::find_role(rid);
+							if (r) {
+								param = *r;
+							}
+						}
+					}
+					break;
+					case pt_channel: {
+						std::string x;
+						if (x.length() > 4 && x[0] == '<' && x[1] == '#') {
+							snowflake cid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
+							channel* c = dpp::find_channel(cid);
+							if (c) {
+								param = *c;
+							}
+						}
+					}
+					break;
+					case pt_user: {
+						std::string x;
+						if (x.length() > 4 && x[0] == '<' && x[1] == '@') {
+							snowflake uid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
+							user* u = dpp::find_user(uid);
+							if (u) {
+								param = *u;
+							}
+						}
+					}
+					break;
+					case pt_integer: {
+						int32_t x = 0;
+						ss >> x;
+						param = x;
+					}
+					case pt_boolean: {
+						std::string x;
+						bool y = false;
+						ss >> x;
+						x = lowercase(x);
+						if (x == "yes" || x == "1" || x == "true") {
+							y = true;
+						}
+						param = y;
+					}
+					break;
+				}
+
+				/* Add parameter to the list */
+				call_params.push_back(std::make_pair(p.first, param));
+			}
 
 			/* Call command handler */
-			found_cmd->second.func(command, {});
+			found_cmd->second.func(command, call_params);
 		}
 	}
 }
 
-void commandhandler::route(const dpp::command_interaction& cmd)
+void commandhandler::route(const interaction_create_t & event)
 {
 	/* We don't need to check for prefixes here, slash command interactions
 	 * dont have prefixes at all.
 	 */
+	command_interaction cmd = std::get<command_interaction>(event.command.data);
 	auto found_cmd = commands.find(lowercase(cmd.name));
 	if (found_cmd != commands.end()) {
 		/* Command found; parse parameters */
+		parameter_list_t call_params;
+		for (auto& p : found_cmd->second.parameters) {
+			command_parameter param;
+			const command_value& slash_parameter = event.get_parameter(p.first);
+			
+			switch (p.second.type) {
+				case pt_string: {
+					std::string s = std::get<std::string>(slash_parameter);
+					param = s;
+				}
+				break;
+				case pt_role: {
+					snowflake rid = std::get<snowflake>(slash_parameter);
+					role* r = dpp::find_role(rid);
+					if (r) {
+						param = *r;
+					}
+				}
+				break;
+				case pt_channel: {
+					snowflake cid = std::get<snowflake>(slash_parameter);
+					channel* c = dpp::find_channel(cid);
+					if (c) {
+						param = *c;
+					}
+				}
+				break;
+				case pt_user: {
+					snowflake uid = std::get<snowflake>(slash_parameter);
+					user* u = dpp::find_user(uid);
+					if (u) {
+						param = *u;
+					}
+				}
+				break;
+				case pt_integer: {
+					int32_t i = std::get<int32_t>(slash_parameter);
+					param = i;
+				}
+				case pt_boolean: {
+					bool b = std::get<bool>(slash_parameter);
+					param = b;
+				}
+				break;
+			}
+
+			/* Add parameter to the list */
+			call_params.push_back(std::make_pair(p.first, param));
+		}
 
 		/* Call command handler */
-		found_cmd->second.func(cmd.name, {});
+		found_cmd->second.func(cmd.name, call_params);
 	}
 }
 

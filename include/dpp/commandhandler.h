@@ -33,7 +33,7 @@ namespace dpp {
  * @brief Represents a received parameter.
  * We use variant so that multiple non-related types can be contained within.
  */
-typedef std::variant<std::string, dpp::role, dpp::channel, dpp::user, int32_t> command_parameter;
+typedef std::variant<std::string, dpp::role, dpp::channel, dpp::user, int32_t, bool> command_parameter;
 
 /**
  * @brief Parameter types when registering a command.
@@ -46,7 +46,8 @@ enum parameter_type {
 	pt_role,
 	pt_channel,
 	pt_user,
-	pt_integer
+	pt_integer,
+	pt_boolean
 };
 
 /**
@@ -204,12 +205,12 @@ public:
 
 	/**
 	 * @brief Route a command from the on_interaction_create function.
-	 * Call this method from your on_interaction_create with the recieved
-	 * dpp::command_interaction object.
+	 * Call this method from your on_interaction_create with the received
+	 * dpp::interaction_create_t object.
 	 * 
-	 * @param cmd command interaction to parse
+	 * @param event command interaction event to parse
 	 */
-	void route(const class dpp::command_interaction& cmd);
+	void route(const class interaction_create_t & event);
 
 	/**
 	 * @brief Reply to a message.
