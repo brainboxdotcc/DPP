@@ -206,6 +206,15 @@ using socket_t = int;
 #include <sys/stat.h>
 #include <thread>
 
+#ifdef OPENSSL_SYS_WIN32
+#undef X509_NAME
+#undef X509_EXTENSIONS
+#undef X509_CERT_PAIR
+#undef PKCS7_ISSUER_AND_SERIAL
+#undef OCSP_REQUEST
+#undef OCSP_RESPONSE
+#endif
+
 #ifdef CPPHTTPLIB_OPENSSL_SUPPORT
 #include <openssl/err.h>
 #include <openssl/md5.h>
