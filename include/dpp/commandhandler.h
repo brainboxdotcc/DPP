@@ -55,8 +55,19 @@ enum parameter_type {
  * the list of parameters.
  */
 struct command_reg_param_t {
+	/**
+	 * @brief Type of parameter
+	 */
 	parameter_type type;
+	/**
+	 * @brief True if the parameter is optional.
+	 * For non-slash commands optional parameters may only be on the end of the list.
+	 */
 	bool optional;
+	/**
+	 * @brief Construct a new command_reg_param_t object
+	 */
+	command_reg_param_t(parameter_type, bool);
 };
 
 /**

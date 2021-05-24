@@ -26,6 +26,10 @@
 
 namespace dpp {
 
+command_reg_param_t::command_reg_param_t(parameter_type t, bool o) : type(t), optional(o)
+{
+}
+
 commandhandler::commandhandler()
 {
 }
