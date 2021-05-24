@@ -55,22 +55,39 @@ enum parameter_type {
  * the list of parameters.
  */
 struct command_reg_param_t {
+
 	/**
 	 * @brief Type of parameter
 	 */
 	parameter_type type;
+
 	/**
 	 * @brief True if the parameter is optional.
 	 * For non-slash commands optional parameters may only be on the end of the list.
 	 */
 	bool optional;
+
+	/**
+	 * @brief Description of command. Displayed only for slash commands
+	 */
+	std::string description;
+
+	/**
+	 * @brief Allowed multiple choice options.
+	 * The key name is the string passed to the command handler
+	 * and the key value is its description displayed to the user.
+	 */
+	std::map<std::string, std::string> choices;
+
 	/**
 	 * @brief Construct a new command_reg_param_t object
 	 * 
 	 * @param t Type of parameter
 	 * @param o True if parameter is optional
+	 * @param description The parameter description
+	 * @param opts The options for a multiple choice parameter
 	 */
-	command_reg_param_t(parameter_type t, bool o);
+	command_reg_param_t(parameter_type t, bool o, const std::string &description, const std::map<std::string, std::string> &opts = {});
 };
 
 /**
@@ -114,13 +131,45 @@ class commandhandler {
 	 * @brief Valid prefixes
 	 */
 	std::vector<std::string> prefixes;
+
+	/**
+	 * @brief Set to true automatically if one of the prefixes added is "/"
+	 */
+	bool slash_commands_enabled;
+
+	/**
+	 * @brief Cluster we are attached to for issuing REST calls
+	 */
+	class cluster* owner;
+
+	/**
+	 * @brief Returns true if the string has a known prefix on the start.
+	 * Modifies string to remove prefix if it returns true.
+	 * 
+	 * @param str String to check and modify
+	 * @return true string contained a prefix, prefix removed from string
+	 * @return false string did not contain a prefix
+	 */
+	bool string_has_prefix(std::string &str);
+
 public:
 
-	/** Constructor */
-	commandhandler();
+	/**
+	 * @brief Construct a new commandhandler object
+	 * 
+	 * @param o Owning cluster to attach to
+	 */
+	commandhandler(class cluster* o);
 
 	/** Destructor */
 	~commandhandler();
+
+	/**
+	 * @brief Set the application id after construction
+	 * 
+	 * @param o Owning cluster to attach to
+	 */
+	commandhandler& set_owner(class cluster* o);
 
 	/**
 	 * @brief Add a prefix to the command handler
@@ -142,7 +191,7 @@ public:
 	 * @param parameters Parameters to use for the command
 	 * @return commandhandler& reference to self
 	 */
-	commandhandler& add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, snowflake guild_id = 0);
+	commandhandler& add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, const std::string &description = "", snowflake guild_id = 0);
 
 	/**
 	 * @brief Route a command from the on_message_create function.
