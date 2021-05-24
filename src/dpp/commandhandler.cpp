@@ -239,6 +239,7 @@ void commandhandler::route(const dpp::message& msg)
 			source.command_id = 0;
 			source.guild_id = msg.guild_id;
 			source.channel_id = msg.channel_id;
+			source.issuer = msg.author;
 			found_cmd->second.func(command, call_params, source);
 		}
 	}
@@ -309,6 +310,7 @@ void commandhandler::route(const interaction_create_t & event)
 		source.command_token = event.command.token;
 		source.guild_id = event.command.guild_id;
 		source.channel_id = event.command.channel_id;
+		source.issuer = (user*)&event.command.usr;
 		found_cmd->second.func(cmd.name, call_params, source);
 	}
 }

@@ -130,6 +130,10 @@ struct command_source {
 	 * @brief Token for sending a slash command reply
 	 */
 	std::string command_token;
+	/**
+	 * @brief The user who issued the command
+	 */
+	user* issuer;
 };
 
 /**
