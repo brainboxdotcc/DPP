@@ -93,6 +93,12 @@ typedef std::vector<std::pair<std::string, command_parameter>> parameter_list_t;
  */
 typedef std::function<void(const std::string&, const parameter_list_t&)> command_handler;
 
+struct command_info_t {
+	command_handler func;
+	parameter_registration_t parameters;
+	snowflake guild_id;
+};
+
 
 /**
  * @brief The commandhandler class represents a group of commands, prefixed or slash commands with handling functions.
@@ -102,7 +108,7 @@ class commandhandler {
 	/**
 	 * @brief Commands in the handler
 	 */
-	std::unordered_map<std::string, command_handler> commands;
+	std::unordered_map<std::string, command_info_t> commands;
 
 	/**
 	 * @brief Valid prefixes
