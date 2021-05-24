@@ -39,7 +39,7 @@ commandhandler& commandhandler::add_prefix(const std::string &prefix)
 	return *this;
 }
 
-commandhandler& commandhandler::add_command(const std::string &command, command_handler handler)
+commandhandler& commandhandler::add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, snowflake guild_id)
 {
 	return *this;
 }

@@ -22,11 +22,63 @@
 #pragma once
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
-#include <map>
+#include <unordered_map>
+#include <vector>
+#include <functional>
+#include <variant>
 
 namespace dpp {
 
-typedef std::function<void(const std::string&, std::map<std::string, std::string>)> command_handler;
+/**
+ * @brief Represents a received parameter.
+ * We use variant so that multiple non-related types can be contained within.
+ */
+typedef std::variant<std::string, dpp::role, dpp::channel, dpp::user, int32_t> command_parameter;
+
+/**
+ * @brief Parameter types when registering a command.
+ * We don't pass these in when triggering the command in the handler, because it is
+ * expected the developer added the command so they know what types to expect for each named
+ * parameter.
+ */
+enum parameter_type {
+	pt_string,
+	pt_role,
+	pt_channel,
+	pt_user,
+	pt_integer
+};
+
+/**
+ * @brief Details of a command parameter used in registration.
+ * Note that for non-slash commands optional parameters can only be at the end of
+ * the list of parameters.
+ */
+struct command_reg_param_t {
+	parameter_type type;
+	bool optional;
+};
+
+/**
+ * @brief Parameter list used during registration.
+ * Note that use of vector/pair is important here to preserve parameter order,
+ * as opposed to unordered_map (which doesnt guarantee any order at all) and 
+ * std::map, which reorders keys alphabetically.
+ */
+typedef std::vector<std::pair<std::string, command_reg_param_t>> parameter_registration_t;
+
+/**
+ * @brief Parameter list for a called command.
+ * See dpp::parameter_registration_t for an explaination as to why vector is used.
+ */
+typedef std::vector<std::pair<std::string, command_parameter>> parameter_list_t;
+
+/**
+ * @brief The function definition for a command handler. Expects a command name string,
+ * and a list of command parameters.
+ */
+typedef std::function<void(const std::string&, const parameter_list_t&)> command_handler;
+
 
 /**
  * @brief The commandhandler class represents a group of commands, prefixed or slash commands with handling functions.
@@ -35,9 +87,8 @@ typedef std::function<void(const std::string&, std::map<std::string, std::string
 class commandhandler {
 	/**
 	 * @brief Commands in the handler
-	 * 
 	 */
-	std::map<std::string, command_handler> commands;
+	std::unordered_map<std::string, command_handler> commands;
 
 	/**
 	 * @brief Valid prefixes
@@ -66,10 +117,12 @@ public:
 	 * Note that if any one of your prefixes is "/" this will attempt to register
 	 * a global command using the API and you will receive notification of this command
 	 * via an interaction event.
+	 * 
 	 * @param handler Handler function
+	 * @param parameters Parameters to use for the command
 	 * @return commandhandler& reference to self
 	 */
-	commandhandler& add_command(const std::string &command, command_handler handler);
+	commandhandler& add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, snowflake guild_id = 0);
 
 	/**
 	 * @brief Route a command from the on_message_create function.
@@ -82,7 +135,7 @@ public:
 
 	/**
 	 * @brief Route a command from the on_interaction_create function.
-	 * Call this method from yuor on_interaction_create with the recieved
+	 * Call this method from your on_interaction_create with the recieved
 	 * dpp::command_interaction object.
 	 * 
 	 * @param cmd command interaction to parse
