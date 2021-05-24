@@ -32,3 +32,4 @@
 #include <dpp/cluster.h>
 #include <dpp/cache.h>
 #include <dpp/queues.h>
+#include <dpp/commandhandler.h>

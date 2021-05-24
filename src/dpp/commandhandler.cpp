@@ -202,7 +202,11 @@ void commandhandler::route(const dpp::message& msg)
 			}
 
 			/* Call command handler */
-			found_cmd->second.func(command, call_params);
+			command_source source;
+			source.command_id = 0;
+			source.guild_id = msg.guild_id;
+			source.channel_id = msg.channel_id;
+			found_cmd->second.func(command, call_params, source);
 		}
 	}
 }
@@ -267,12 +271,25 @@ void commandhandler::route(const interaction_create_t & event)
 		}
 
 		/* Call command handler */
-		found_cmd->second.func(cmd.name, call_params);
+		command_source source;
+		source.command_id = event.command.id;
+		source.command_token = event.command.token;
+		source.guild_id = event.command.guild_id;
+		source.channel_id = event.command.channel_id;
+		found_cmd->second.func(cmd.name, call_params, source);
 	}
 }
 
-void commandhandler::reply(const dpp::message &m)
+void commandhandler::reply(const dpp::message &m, command_source source)
 {
+	dpp::message msg = m;
+	msg.guild_id = source.guild_id;
+	msg.channel_id = source.channel_id;
+	if (!source.command_token.empty() && source.command_id) {
+		owner->interaction_response_create(source.command_id, source.command_token, dpp::interaction_response(ir_channel_message_with_source, msg));
+	} else {
+		owner->message_create(msg);
+	}
 }
 
 };

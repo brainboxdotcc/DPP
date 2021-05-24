@@ -11,6 +11,20 @@ int main()
 	configfile >> configdocument;
 
 	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members);
+	dpp::commandhandler command_handler(&bot);
+
+	command_handler.add_prefix(".");
+
+	command_handler.add_command("ping", {
+		{"testparameter", dpp::command_reg_param_t(dpp::pt_string, true, "Optional test parameter") }
+	},
+	[&command_handler](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
+		std::string got_param;
+		if (!parameters.empty()) {
+			got_param = std::get<std::string>(parameters[0].second);
+		}
+		command_handler.reply(dpp::message("Pong! -> " + got_param), src);
+	});
 
 	bot.on_log([](const dpp::log_t & event) {
 		if (event.severity > dpp::ll_trace) {
@@ -18,27 +32,10 @@ int main()
 		}
 	});
 
-	bot.on_button_click([&bot](const dpp::button_click_t & event) {
-		event.reply(dpp::ir_channel_message_with_source, "Clicky McClickface");
-	});
-
-	bot.on_message_create([&bot](const dpp::message_create_t & event) {
-
-		if (event.msg->content == "!ping2") {
-			bot.message_create(
-				dpp::message(event.msg->channel_id, "this text has buttons").add_component(
-					dpp::component().add_component(
-						dpp::component().set_label("Click me!").
-						set_emoji("😄").
-						set_style(dpp::cos_danger).
-						set_id("myid")
-					)
-				)
-			);
-		}
+	bot.on_message_create([&bot, &command_handler](const dpp::message_create_t & event) {
+		command_handler.route(*event.msg);
 	});
 
 	bot.start(false);
-
 	return 0;
 }
