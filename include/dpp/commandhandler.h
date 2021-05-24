@@ -55,7 +55,7 @@ enum parameter_type {
  * Note that for non-slash commands optional parameters can only be at the end of
  * the list of parameters.
  */
-struct command_reg_param_t {
+struct param_info {
 
 	/**
 	 * @brief Type of parameter
@@ -81,14 +81,14 @@ struct command_reg_param_t {
 	std::map<std::string, std::string> choices;
 
 	/**
-	 * @brief Construct a new command_reg_param_t object
+	 * @brief Construct a new param_info object
 	 * 
 	 * @param t Type of parameter
 	 * @param o True if parameter is optional
 	 * @param description The parameter description
 	 * @param opts The options for a multiple choice parameter
 	 */
-	command_reg_param_t(parameter_type t, bool o, const std::string &description, const std::map<std::string, std::string> &opts = {});
+	param_info(parameter_type t, bool o, const std::string &description, const std::map<std::string, std::string> &opts = {});
 };
 
 /**
@@ -97,7 +97,7 @@ struct command_reg_param_t {
  * as opposed to unordered_map (which doesnt guarantee any order at all) and 
  * std::map, which reorders keys alphabetically.
  */
-typedef std::vector<std::pair<std::string, command_reg_param_t>> parameter_registration_t;
+typedef std::vector<std::pair<std::string, param_info>> parameter_registration_t;
 
 /**
  * @brief Parameter list for a called command.
@@ -184,6 +184,11 @@ class commandhandler {
 	class cluster* owner;
 
 	/**
+	 * @brief Application ID
+	 */
+	snowflake app_id;
+
+	/**
 	 * @brief Returns true if the string has a known prefix on the start.
 	 * Modifies string to remove prefix if it returns true.
 	 * 
@@ -199,8 +204,13 @@ public:
 	 * @brief Construct a new commandhandler object
 	 * 
 	 * @param o Owning cluster to attach to
+	 * @param auto_hook_events Set to true to automatically hook the on_interaction_create
+	 * and on_message events. Only do this if you have no other use for these events than
+	 * commands that are handled by the command handler (this is usually the case).
+	 * @param application_id The application id of the bot. If not specified, the class will
+	 * look within the cluster object and use cluster::me::id instead.
 	 */
-	commandhandler(class cluster* o);
+	commandhandler(class cluster* o, bool auto_hook_events = true, snowflake application_id = 0);
 
 	/**
 	 * @brief Destroy the commandhandler object

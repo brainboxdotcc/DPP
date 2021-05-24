@@ -29,12 +29,24 @@
 
 namespace dpp {
 
-command_reg_param_t::command_reg_param_t(parameter_type t, bool o, const std::string &d, const std::map<std::string, std::string> &opts) : type(t), optional(o), description(d), choices(opts)
+param_info::param_info(parameter_type t, bool o, const std::string &d, const std::map<std::string, std::string> &opts) : type(t), optional(o), description(d), choices(opts)
 {
 }
 
-commandhandler::commandhandler(cluster* o) : slash_commands_enabled(false), owner(o)
+commandhandler::commandhandler(cluster* o, bool auto_hook_events, snowflake application_id) : slash_commands_enabled(false), owner(o), app_id(application_id)
 {
+	if (!application_id && o->me.id) {
+		app_id = o->me.id;
+	}
+	if (auto_hook_events) {
+		o->on_interaction_create([this](const dpp::interaction_create_t &event) {
+			this->route(event);
+		});
+		o->on_message_create([this](const dpp::message_create_t & event) {
+			this->route(*event.msg);
+		});
+	}
+
 }
 
 commandhandler& commandhandler::set_owner(cluster* o)
@@ -69,13 +81,34 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 	i.parameters = parameters;
 	commands[lowercase(command)] = i;
 	if (slash_commands_enabled) {
+		if (this->app_id == 0) {
+			throw std::runtime_error("Command handler not ready (i don't know my application ID)");
+		}
 		dpp::slashcommand newcommand;
 		/* Create a new global command on ready event */
-		newcommand.set_name(lowercase(command)).set_description(description).set_application_id(owner->me.id);
+		newcommand.set_name(lowercase(command)).set_description(description).set_application_id(this->app_id);
 
 		for (auto& parameter : parameters) {
-			/* TODO: Add support for other types! */
-			dpp::command_option opt(dpp::co_string, parameter.first, parameter.second.description, !parameter.second.optional);
+			command_option_type cot;
+			switch (parameter.second.type) {
+				case pt_boolean:
+					cot = co_boolean;
+				break;
+				case pt_string:
+					cot = co_string;
+				break;
+				case pt_user:
+					cot = co_user;
+				break;
+				case pt_role:
+					cot = co_role;
+				break;
+				case pt_channel:
+					cot = co_channel;
+				break;
+			}
+
+			command_option opt(cot, parameter.first, parameter.second.description, !parameter.second.optional);
 			if (!parameter.second.choices.empty()) {
 				for (auto& c : parameter.second.choices) {
 					opt.add_choice(dpp::command_option_choice(c.second, c.first));
