@@ -66,8 +66,11 @@ struct command_reg_param_t {
 	bool optional;
 	/**
 	 * @brief Construct a new command_reg_param_t object
+	 * 
+	 * @param t Type of parameter
+	 * @param o True if parameter is optional
 	 */
-	command_reg_param_t(parameter_type, bool);
+	command_reg_param_t(parameter_type t, bool o);
 };
 
 /**
