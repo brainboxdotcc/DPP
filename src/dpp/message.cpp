@@ -165,6 +165,36 @@ message& message::add_embed(const embed& e)
 	return *this;
 }
 
+message& message::set_flags(uint8_t f)
+{
+	flags = f;
+	return *this;
+}
+
+message& message::set_type(message_type t)
+{
+	type = t;
+	return *this;
+}
+
+message& message::set_filename(const std::string &fn)
+{
+	filename = fn;
+	return *this;
+}
+
+message& message::set_file_content(const std::string &fc)
+{
+	filecontent = fc;
+	return *this;
+}
+
+message& message::set_content(const std::string &c)
+{
+	content = utility::utf8substr(c, 0, 2000);
+	return *this;
+}
+
 message::message(const std::string &_content, message_type t) : message() {
 	content = utility::utf8substr(_content, 0, 2000);
 	type = t;

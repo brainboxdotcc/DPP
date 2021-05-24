@@ -609,16 +609,110 @@ struct message {
 	 */
 	std::string build_json(bool with_id = false, bool is_interaction_response = false) const;
 
+	/**
+	 * @brief Returns true if the message was crossposted to other servers
+	 * 
+	 * @return true if crossposted
+	 */
 	bool is_crossposted() const;
+
+	/**
+	 * @brief Returns true if posted from other servers news channel via webhook
+	 * 
+	 * @return true if posted from other server
+	 */
 	bool is_crosspost() const;
+
+	/**
+	 * @brief True if embeds have been removed
+	 * 
+	 * @return true if embeds removed
+	 */
 	bool supress_embeds() const;
+
+	/**
+	 * @brief True if source message was deleted
+	 * 
+	 * @return true if source message deleted
+	 */
 	bool is_source_message_deleted() const;
+
+	/**
+	 * @brief True if urgent
+	 * 
+	 * @return true if urgent
+	 */
 	bool is_urgent() const;
+
+	/**
+	 * @brief True if ephemeral (visible only to issuer of a slash command)
+	 * 
+	 * @return true if ephemeral
+	 */
 	bool is_ephemeral() const;
+
+	/**
+	 * @brief True if loading
+	 * 
+	 * @return true if loading
+	 */
 	bool is_loading() const;
 
+	/**
+	 * @brief Add a component (button) to message
+	 * 
+	 * @param c component to add
+	 * @return message& reference to self
+	 */
 	message& add_component(const component& c);
+
+	/**
+	 * @brief Add an embed to message
+	 * 
+	 * @param e embed to add
+	 * @return message& reference to self
+	 */
 	message& add_embed(const embed& e);
+
+	/**
+	 * @brief Set the flags
+	 * 
+	 * @param f flags to set
+	 * @return message& reference to self
+	 */
+	message& set_flags(uint8_t f);
+
+	/**
+	 * @brief Set the message type
+	 * 
+	 * @param t type to set
+	 * @return message& reference to self
+	 */
+	message& set_type(message_type t);
+
+	/**
+	 * @brief Set the filename
+	 * 
+	 * @param fn filename
+	 * @return message& reference to self
+	 */
+	message& set_filename(const std::string &fn);
+
+	/**
+	 * @brief Set the file content
+	 * 
+	 * @param fc raw file content contained in std::string
+	 * @return message& reference to self
+	 */
+	message& set_file_content(const std::string &fc);
+
+	/**
+	 * @brief Set the message content
+	 * 
+	 * @param c message content
+	 * @return message& reference to self
+	 */
+	message& set_content(const std::string &c);
 };
 
 /** A group of messages */
