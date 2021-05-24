@@ -428,6 +428,11 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 					e["fields"].push_back(f);
 				}
 			}
+			if (embed.timestamp != 0) {
+				std::ostringstream ss;
+				ss << std::put_time(gmtime(&embed.timestamp), "%FT%TZ");
+				e["timestamp"] = ss.str();
+			}
 
 			if (is_interaction_response) {
 				j["embeds"].push_back(e);
