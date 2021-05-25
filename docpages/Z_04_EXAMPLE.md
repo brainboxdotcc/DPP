@@ -571,6 +571,8 @@ This example demonstrates receiving button clicks and sending response messages.
 	see buttons in your bot. When this is released, this functionality of the library will work as expected.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
 using json = nlohmann::json;
 
 int main()
