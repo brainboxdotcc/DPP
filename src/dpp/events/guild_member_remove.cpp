@@ -64,7 +64,6 @@ void guild_member_remove::handle(discord_client* client, json &j, const std::str
 					dpp::get_user_cache()->remove(u);
 				}
 			}
-			delete i->second;
 			gmr.removing_guild->members.erase(i);
 		}
 

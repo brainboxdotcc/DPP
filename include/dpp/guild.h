@@ -75,9 +75,62 @@ enum guild_flags {
 	g_has_animated_icon =			0b100000000000000000000
 };
 
+/**
+ * @brief Various flags that can be used to indicate the status of a guild member
+ */
+enum guild_member_flags {
+	/** Member deafened */
+	gm_deaf =		0b00001,
+	/** Member muted */
+	gm_mute =		0b00010,
+	/** Member pending verification by membership screening */
+	gm_pending =		0b00100
+};
+
+/**
+ * @brief Represents dpp::user membership upon a dpp::guild
+ */
+class guild_member {
+public:
+	/** Nickname, or nullptr if they don't have a nickname on this guild */
+	std::string nickname;
+	/** Guild id */
+	snowflake guild_id;
+	/** User id */
+	snowflake user_id;
+	/** List of roles this user has on this guild */
+	std::vector<snowflake> roles;
+	/** Date and time the user joined the guild */
+	time_t joined_at;
+	/** Boosting since */
+	time_t premium_since;
+	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
+	uint8_t flags;
+
+	/** Default constructor */
+	guild_member();
+
+	/** Fill this object from a json object.
+	 * @param j The json object to get data from
+	 * @param g The guild to associate the member with
+	 * @param u The user to associate the member with
+	 */
+	guild_member& fill_from_json(nlohmann::json* j, const class guild* g, const class user* u);
+
+	/** Build json string for the member object */
+	std::string build_json() const;
+
+	/** Returns true if the user is deafened */
+	bool is_deaf() const;
+
+	/** Returns true if the user is muted */
+	bool is_muted() const;
+
+};
+
 /** @brief Guild members container
  */
-typedef std::unordered_map<snowflake, class guild_member*> members_container;
+typedef std::unordered_map<snowflake, guild_member> members_container;
 
 /**
  * @brief Represents a guild on Discord (AKA a server)
@@ -327,59 +380,6 @@ public:
 	 * @return std::string guild widget stringified json
 	 */
 	std::string build_json() const;
-};
-
-/**
- * @brief Various flags that can be used to indicate the status of a guild member
- */
-enum guild_member_flags {
-	/** Member deafened */
-	gm_deaf =		0b00001,
-	/** Member muted */
-	gm_mute =		0b00010,
-	/** Member pending verification by membership screening */
-	gm_pending =		0b00100
-};
-
-/**
- * @brief Represents dpp::user membership upon a dpp::guild
- */
-class guild_member {
-public:
-	/** Nickname, or nullptr if they don't have a nickname on this guild */
-	std::string nickname;
-	/** Guild id */
-	snowflake guild_id;
-	/** User id */
-	snowflake user_id;
-	/** List of roles this user has on this guild */
-	std::vector<snowflake> roles;
-	/** Date and time the user joined the guild */
-	time_t joined_at;
-	/** Boosting since */
-	time_t premium_since;
-	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
-	uint8_t flags;
-
-	/** Default constructor */
-	guild_member();
-
-	/** Fill this object from a json object.
-	 * @param j The json object to get data from
-	 * @param g The guild to associate the member with
-	 * @param u The user to associate the member with
-	 */
-	guild_member& fill_from_json(nlohmann::json* j, const class guild* g, const class user* u);
-
-	/** Build json string for the member object */
-	std::string build_json() const;
-
-	/** Returns true if the user is deafened */
-	bool is_deaf() const;
-
-	/** Returns true if the user is muted */
-	bool is_muted() const;
-
 };
 
 /**

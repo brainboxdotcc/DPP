@@ -141,7 +141,7 @@ embed::~embed() {
 embed::embed() {
 }
 
-message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), member(nullptr), sent(0), edited(0), flags(0),
+message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), flags(0),
 	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0)
 {
 
@@ -553,7 +553,7 @@ message& message::fill_from_json(json* d) {
 	}
 	/* Fill in member record, cache uncached ones */
 	guild* g = find_guild(this->guild_id);
-	this->member = nullptr;
+	this->member = {};
 	if (g && d->find("member") != d->end()) {
 		json& mi = (*d)["member"];
 		snowflake uid = SnowflakeNotNull(&(mi["user"]), "id");
@@ -563,16 +563,17 @@ message& message::fill_from_json(json* d) {
 		auto thismember = g->members.find(uid);
 		if (thismember == g->members.end()) {
 			if (uid != 0 && authoruser) {
-				guild_member* gm = new guild_member();
-				gm->fill_from_json(&mi, g, authoruser);
-				g->members.insert(std::make_pair(authoruser->id, gm));
+				guild_member gm;
+				gm.fill_from_json(&mi, g, authoruser);
+				g->members[authoruser->id] = gm;
 				this->member = gm;
 			}
 		} else {
 			/* Update roles etc */
 			this->member = thismember->second;
 			if (authoruser) {
-				this->member->fill_from_json(&mi, g, authoruser);
+				this->member.fill_from_json(&mi, g, authoruser);
+				g->members[authoruser->id] = this->member;
 			}
 		}
 	}

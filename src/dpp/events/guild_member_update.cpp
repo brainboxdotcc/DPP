@@ -48,16 +48,15 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 	dpp::user* u = dpp::find_user(from_string<uint64_t>(d["user"]["id"].get<std::string>(), std::dec));
 	if (g && u) {
 		auto& user = d["user"];
-		auto gmi = g->members.find(u->id);
-		if (gmi != g->members.end()) {
-			gmi->second->fill_from_json(&user, g, u);
+		guild_member m;
+		m.fill_from_json(&user, g, u);
+		g->members[u->id] = m;
 
-			if (client->creator->dispatch.guild_member_update) {
-				dpp::guild_member_update_t gmu(client, raw);
-				gmu.updating_guild = g;
-				gmu.updated = gmi->second;
-				client->creator->dispatch.guild_member_update(gmu);
-			}
+		if (client->creator->dispatch.guild_member_update) {
+			dpp::guild_member_update_t gmu(client, raw);
+			gmu.updating_guild = g;
+			gmu.updated = m;
+			client->creator->dispatch.guild_member_update(gmu);
 		}
 	}
 }

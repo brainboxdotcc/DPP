@@ -527,7 +527,7 @@ struct guild_member_add_t : public event_dispatch_t {
 	 */
 	guild_member_add_t(class discord_client* client, const std::string& raw);
 	guild* adding_guild;
-	guild_member* added;
+	guild_member added;
 };
 
 /** @brief Invite delete */
@@ -568,7 +568,7 @@ struct guild_member_update_t : public event_dispatch_t {
 	 */
 	guild_member_update_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
-	guild_member* updated;
+	guild_member updated;
 };
 
 /**

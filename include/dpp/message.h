@@ -524,7 +524,7 @@ struct message {
 	/** the author of this message (not guaranteed to be a valid user) */
 	user*		author;
 	/** Optional: member properties for this message's author */
-	guild_member*	member;
+	guild_member	member;
 	/** contents of the message */
 	std::string	content;
 	/** message components */

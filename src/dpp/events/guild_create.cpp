@@ -97,9 +97,9 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 				} else {
 					u->refcount++;
 				}
-				dpp::guild_member* gm = new dpp::guild_member();
-				gm->fill_from_json(&(user["user"]), g, u);
-				g->members.insert(std::make_pair(u->id, gm));
+				dpp::guild_member gm;
+				gm.fill_from_json(&(user["user"]), g, u);
+				g->members[u->id] = gm;
 			}
 		}
 		/* Store emojis */

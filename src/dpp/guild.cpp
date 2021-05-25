@@ -376,11 +376,11 @@ uint64_t guild::base_permissions(const user* member) const
 	auto mi = members.find(member->id);
 	if (mi == members.end())
 		return 0;
-	guild_member* gm = mi->second;
+	guild_member gm = mi->second;
 
 	uint64_t permissions = everyone->permissions;
 
-	for (auto& rid : gm->roles) {
+	for (auto& rid : gm.roles) {
 		role* r = dpp::find_role(rid);
 		permissions |= r->permissions;
 	}
@@ -408,11 +408,11 @@ uint64_t guild::permission_overwrites(const uint64_t base_permissions, const use
 	auto mi = members.find(member->id);
 	if (mi == members.end())
 		return 0;
-	guild_member* gm = mi->second;
+	guild_member gm = mi->second;
 	uint64_t allow = 0;
 	uint64_t deny = 0;
 
-	for (auto& rid : gm->roles) {
+	for (auto& rid : gm.roles) {
 
 		/* Skip \@everyone, calculated above */
 		if (rid == id)
