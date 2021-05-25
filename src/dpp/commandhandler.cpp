@@ -82,7 +82,11 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 	commands[lowercase(command)] = i;
 	if (slash_commands_enabled) {
 		if (this->app_id == 0) {
-			throw std::runtime_error("Command handler not ready (i don't know my application ID)");
+			if (owner->me.id == 0) {
+				throw std::runtime_error("Command handler not ready (i don't know my application ID)");
+			} else {
+				this->app_id = owner->me.id;
+			}
 		}
 		dpp::slashcommand newcommand;
 		/* Create a new global command on ready event */
