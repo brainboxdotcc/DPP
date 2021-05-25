@@ -498,3 +498,70 @@ int main()
 When the feature is functioning, the code below will produce buttons on the reply message like in the image below:
 
 \image html button.png
+
+
+\page components Using component interactions (advanced)
+
+This example demonstrates receiving button clicks and sending response messages.
+
+\note	Please be aware that this feature is currently in a **closed beta**. There is no way to get access to this at present to test this or
+	see buttons in your bot. When this is released, this functionality of the library will work as expected.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+using json = nlohmann::json;
+
+int main()
+{
+
+	dpp::cluster bot("token");
+
+	bot.on_log([](const dpp::log_t & event) {
+		if (event.severity > dpp::ll_trace) {
+			std::cout << event.message << "\n";
+		}
+	});
+
+	bot.on_button_click([&bot](const dpp::button_click_t & event) {
+        std::cout << "Got a CLICK with value: " << event.custom_id << "\n";
+		if (event.custom_id == "10") {
+			dpp::message message = dpp::message("Correct");
+			message.flags = 1 << 6;
+			event.reply(dpp::ir_channel_message_with_source, message);
+		} else {
+			dpp::message message = dpp::message("Incorrect");
+			message.flags = 1 << 6;
+			event.reply(dpp::ir_channel_message_with_source, message);
+		}
+	});
+
+	bot.on_message_create([&bot](const dpp::message_create_t & event) {
+		if (event.msg->content == "!ping2") {
+			bot.message_create(
+				dpp::message(event.msg->channel_id, "What is 5+5?").add_component(
+					dpp::component().add_component(
+						dpp::component().set_label("9").
+						set_style(dpp::cos_primary).
+						set_id("9")
+					).add_component(
+							dpp::component().set_label("10").
+							set_style(dpp::cos_primary).
+							set_id("10")
+					).add_component(
+							dpp::component().set_label("11").
+							set_style(dpp::cos_primary).
+							set_id("11")
+					)
+				)
+			);
+		}
+	});
+
+	bot.start(false);
+
+	return 0;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This code will send a different message for correct and incorrect answers.
+
+\image html button_2.png
