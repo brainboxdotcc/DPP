@@ -344,11 +344,66 @@ public:
 void from_json(const nlohmann::json& j, interaction& i);
 
 /**
+ * @brief type of permission in the dpp::command_permission class
+ */
+enum command_permission_type {
+	cpt_role = 1,
+	cpt_user = 2,
+};
+
+/**
+ * @brief Application command permissions allow you to enable or
+ * disable commands for specific users or roles within a guild
+ */
+class command_permission {
+public:
+	snowflake id;                  //!< the ID of the role or uses
+	command_permission_type type;  //!< the type of permission
+	bool permission;               //!< true to allow, false, to disallow
+};
+
+/**
+ * @brief helper function to serialize a command_permission to json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param cp command_permission to be serialized
+ */
+void to_json(nlohmann::json& j, const command_permission& cp);
+
+/**
+ * @brief Returned when fetching the permissions for a command in a guild.
+ */
+class guild_command_permissions {
+public:
+	snowflake id;                                 //!< the id of the command
+	snowflake application_id;                     //!< the id of the application the command belongs to
+	snowflake guild_id;                           //!< the id of the guild
+	std::vector<command_permission> permissions;  //!< the permissions for the command in the guild
+};
+
+/**
+ * @brief helper function to serialize a guild_command_permissions to json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param gcp guild_command_permissions to be serialized
+ */
+void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
+
+/**
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
  */
 class slashcommand : public managed {
 public:
+	/**
+	 * @brief Command id (returned from discord api upon registering)
+	 */
+	snowflake id;
+
 	/**
 	 * @brief Application id (usually matches your bots id)
 	 */
@@ -368,6 +423,16 @@ public:
 	 * @brief Command options (parameters)
 	 */
 	std::vector<command_option> options;
+
+	/**
+	 * @brief whether the command is enabled by default when the app is added to a guild
+	 */
+	bool default_permission;
+
+	/**
+	 * @brief command permissions
+	 */
+	std::vector<command_permission> permissions;
 
 	/**
 	 * @brief Construct a new slashcommand object
@@ -410,6 +475,23 @@ public:
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_application_id(snowflake i);
+
+	/**
+	 * @brief Adds a permission to the command
+	 *
+	 * @param p permission to add
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& add_permission(const command_permission& p);
+
+	/**
+	 * @brief Disable default permissions, command will be unusable unless
+	 *        permissions are overriden with add_permission and
+	 *        dpp::guild_command_edit_permissions
+	 *
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& disable_default_permissions();
 
 	/**
 	 * @brief Fill object properties from JSON
