@@ -580,14 +580,7 @@ int main()
 
 	dpp::cluster bot("token");
 
-	bot.on_log([](const dpp::log_t & event) {
-		if (event.severity > dpp::ll_trace) {
-			std::cout << event.message << "\n";
-		}
-	});
-
 	bot.on_button_click([&bot](const dpp::button_click_t & event) {
-        std::cout << "Got a CLICK with value: " << event.custom_id << "\n";
 		if (event.custom_id == "10") {
 			event.reply(dpp::ir_channel_message_with_source, dpp::message("Correct").set_flags(dpp::m_ephemeral));
 		} else {
@@ -604,13 +597,13 @@ int main()
 						set_style(dpp::cos_primary).
 						set_id("9")
 					).add_component(
-							dpp::component().set_label("10").
-							set_style(dpp::cos_primary).
-							set_id("10")
+						dpp::component().set_label("10").
+						set_style(dpp::cos_primary).
+						set_id("10")
 					).add_component(
-							dpp::component().set_label("11").
-							set_style(dpp::cos_primary).
-							set_id("11")
+						dpp::component().set_label("11").
+						set_style(dpp::cos_primary).
+						set_id("11")
 					)
 				)
 			);
