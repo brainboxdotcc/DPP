@@ -8,7 +8,7 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage joinvc "Join or switch to the voice channel of the user issuing a command"
 * \subpage spdlog "Integrating with spdlog"
 * \subpage components "Using component interactions"
-* \subpage components2 Using component interactions (advanced)
+* \subpage components2 "Using component interactions (advanced)"
 * \subpage commandhandler "Using a command handler object"
 
 
@@ -563,7 +563,7 @@ int main()
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-\page components22 Using component interactions (advanced)
+\page components2 Using component interactions (advanced)
 
 This example demonstrates receiving button clicks and sending response messages.
 
@@ -587,13 +587,9 @@ int main()
 	bot.on_button_click([&bot](const dpp::button_click_t & event) {
         std::cout << "Got a CLICK with value: " << event.custom_id << "\n";
 		if (event.custom_id == "10") {
-			dpp::message message = dpp::message("Correct");
-			message.flags = 1 << 6;
-			event.reply(dpp::ir_channel_message_with_source, message);
+			event.reply(dpp::ir_channel_message_with_source, dpp::message("Correct").set_flags(dpp::m_ephemeral));
 		} else {
-			dpp::message message = dpp::message("Incorrect");
-			message.flags = 1 << 6;
-			event.reply(dpp::ir_channel_message_with_source, message);
+			event.reply(dpp::ir_channel_message_with_source, dpp::message("Incorrect").set_flags(dpp::m_ephemeral));
 		}
 	});
 
