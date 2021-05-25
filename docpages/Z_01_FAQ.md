@@ -36,6 +36,9 @@ No, D++ is a classically designed library which installs itself to your library 
 ## Does this library support slash commands/interactions?
 Yes! This library supports slash commands. For more information please see \ref slashcommands "Using Slash Commands and Interactions".
 
+## Does this library support buttons (message components)?
+Yes! This library supports button message components, e.g. interactive buttons on the bottom of messages. For more information please see our \ref components "Using component interactions" and \ref components2 "Using component interactions (advanced)" examples.
+
 ## Is the library asynchronous?
 All functions within D++ are multi-threaded. You should still avoid doing long operations within event handlers or within callbacks, to prevent starvation of the threads managing each shard. Various blocking operations such as running files and making HTTP requests are offered as library functions (for example dpp::utility::exec)
 
