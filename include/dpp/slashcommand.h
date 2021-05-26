@@ -400,11 +400,6 @@ void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
 class slashcommand : public managed {
 public:
 	/**
-	 * @brief Command id (returned from discord api upon registering)
-	 */
-	snowflake id;
-
-	/**
 	 * @brief Application id (usually matches your bots id)
 	 */
 	snowflake application_id;
