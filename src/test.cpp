@@ -1,6 +1,7 @@
 #include <dpp/dpp.h>
 #include <iostream>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 
@@ -18,6 +19,8 @@ int main()
 
 	bot.on_ready([&command_handler](const dpp::ready_t &event) {
 
+		dpp::discord_client* d = event.from;
+
 		command_handler.add_command(
 			/* Command name */
 			"ping",
@@ -28,12 +31,9 @@ int main()
 			},
 
 			/* Command handler */
-			[&command_handler](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
-				std::string got_param;
-				if (!parameters.empty()) {
-					got_param = std::get<std::string>(parameters[0].second);
-				}
-				command_handler.reply(dpp::message("Pong! -> " + got_param), src);
+			[&command_handler, d](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
+
+				command_handler.reply(dpp::message(fmt::format("Pong! {0:.3f}", d->websocket_ping)), src);
 			},
 
 			/* Command description */

@@ -158,6 +158,15 @@ namespace dpp {
 		};
 
 		/**
+		 * @brief Return the current time with fractions of seconds.
+		 * This is a unix epoch time with the fractional seconds part
+		 * after the decimal place.
+		 * 
+		 * @return double time with fractional seconds
+		 */
+		double time_f();
+
+		/**
 		 * @brief Returns true if D++ was built with voice support
 		 * 
 		 * @return bool True if voice support is compiled in (libsodium/libopus) 
