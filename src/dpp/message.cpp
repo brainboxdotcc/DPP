@@ -460,7 +460,9 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 			}
 			if (embed.timestamp != 0) {
 				std::ostringstream ss;
-				ss << std::put_time(gmtime(&embed.timestamp), "%FT%TZ");
+				struct tm t;
+				gmtime_r(&embed.timestamp, &t);
+				ss << std::put_time(&t, "%FT%TZ");
 				e["timestamp"] = ss.str();
 			}
 
