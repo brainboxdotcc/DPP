@@ -218,11 +218,9 @@ void ssl_client::ReadLoop()
 			}
 
 			/* If we're waiting for a read on the socket don't try to write to the server */
-			//if (!write_blocked_on_read) {
 			if (ClientToServerLength || obuffer.length() || read_blocked_on_write) {
 				FD_SET(sfd,&writefds);
 			}
-			//}
 				
 			timeval ts;
 			ts.tv_sec = 0;
