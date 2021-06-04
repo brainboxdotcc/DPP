@@ -69,7 +69,7 @@ const command_value& interaction_create_t::get_parameter(const std::string& name
 {
 	/* Dummy STATIC return value for unknown options so we arent returning a value off the stack */
 	static command_value dummy_value = {};
-	command_interaction ci = std::get<command_interaction>(command.data);
+	const command_interaction& ci = std::get<command_interaction>(command.data);
 	for (auto i = ci.options.begin(); i != ci.options.end(); ++i) {
 		if (i->name == name) {
 			return i->value;
