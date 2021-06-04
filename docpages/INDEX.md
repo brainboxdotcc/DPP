@@ -32,16 +32,17 @@ The library runs best on Linux. Windows is supported via cmake and Visual Studio
 * [Frequently Asked Questions](docpages/Z_01_FAQ.md)
 * [Building on Linux](docpages/Z_02_BUILD_LINUX.md)
 * [Building on Windows](docpages/Z_03_BUILD_WIN.md)
-* [Example Programs](docpages/Z_04_EXAMPLE.md)
+* [Building on macOS](docpages/Z_04_BUILD_MAC.md)
+* [Example Programs](docpages/Z_05_EXAMPLE.md)
 
 ## Reference
 * Library Types, Classes and Structs
-* [REST Calls](docpages/Z_07_REST.md)
-* [Event Handlers](docpages/Z_06_EVENT.md)
+* [REST Calls](docpages/Z_08_REST.md)
+* [Event Handlers](docpages/Z_07_EVENT.md)
 
 ## Architecture
-* [Clusters, Shards and Guilds](docpages/Z_05_CLUSTERS.md)
-* [Thread model](docpages/Z_06_THREADMODEL.md)
+* [Clusters, Shards and Guilds](docpages/Z_06_CLUSTERS.md)
+* [Thread model](docpages/Z_07_THREADMODEL.md)
 
 ## Learning Resources
 * [C++ for JavaScript Developers](https://pawelgrzybek.com/cpp-for-javascript-developers/)
