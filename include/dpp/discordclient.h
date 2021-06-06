@@ -157,6 +157,9 @@ class discord_client : public websocket_client
 	/** Last connect time of cluster */
 	time_t connect_time;
 
+	/** Time last ping sent to websocket */
+	double ping_start;
+
 	/**
 	 * @brief Initialise ZLib
 	 */
@@ -206,6 +209,9 @@ public:
 
 	/** Reconnection count */
 	uint32_t reconnects;
+
+	/** Websocket latency in fractional seconds */
+	double websocket_ping;
 
 	/** True if READY or RESUMED has been received */
 	bool ready;

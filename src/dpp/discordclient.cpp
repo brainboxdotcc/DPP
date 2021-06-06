@@ -57,7 +57,9 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	compressed(comp),
 	decompressed_total(0),
 	decomp_buffer(nullptr),
-	ready(false)
+	ready(false),
+	ping_start(0.0),
+	websocket_ping(0.0)
 {
 	Connect();
 }
@@ -268,6 +270,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 					reconnects++;
 				}
 				this->last_heartbeat_ack = time(nullptr);
+				websocket_ping = 0;
 			break;
 			case 0: {
 				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
@@ -283,6 +286,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 			/* Heartbeat ack */
 			case 11:
 				this->last_heartbeat_ack = time(nullptr);
+				websocket_ping = utility::time_f() - ping_start;
 			break;
 		}
 	}
@@ -412,6 +416,13 @@ void discord_client::OneSecondTimer()
 			if (message_queue.size()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();
+				/* Checking here with .find() saves us having to deserialise the json
+				 * to find pings in our queue. The assumption is that the format of the
+				 * ping isn't going to change.
+				 */
+				if (message.find("\"op\":1}") != std::string::npos) {
+					ping_start = utility::time_f();
+				}
 				this->write(message);
 			}
 		}

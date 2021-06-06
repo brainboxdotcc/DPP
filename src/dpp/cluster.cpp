@@ -251,7 +251,7 @@ void cluster::interaction_response_edit(snowflake application_id, const std::str
 void cluster::global_command_create(const slashcommand &s, command_completion_event_t callback) {
 	this->post_rest("/api/v8/applications", std::to_string(me.id), "commands", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
+			callback(confirmation_callback_t("slashcommand", slashcommand().fill_from_json(&j), http));
 		}
 	});
 }
@@ -259,7 +259,7 @@ void cluster::global_command_create(const slashcommand &s, command_completion_ev
 void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/v8/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
+			callback(confirmation_callback_t("slashcommand", slashcommand().fill_from_json(&j), http));
 		}
 	});
 }
@@ -521,6 +521,31 @@ void cluster::channel_invites_get(const class channel &c, command_completion_eve
 		}
 	});
 }
+
+void cluster::guild_commands_get(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id), "/guilds/" + std::to_string(guild_id) + "/commands", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		slashcommand_map slashcommands;
+		for (auto & curr_slashcommand : j) {
+			slashcommands[StringNotNull(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
+		}
+		if (callback) {
+			callback(confirmation_callback_t("slashcommand_map", slashcommands, http));
+		}
+	});
+}
+
+void cluster::global_commands_get(command_completion_event_t callback) {
+	this->post_rest("/api/v8/applications", std::to_string(me.id), "commands", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		slashcommand_map slashcommands;
+		for (auto & curr_slashcommand : j) {
+			slashcommands[StringNotNull(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
+		}
+		if (callback) {
+			callback(confirmation_callback_t("slashcommand_map", slashcommands, http));
+		}
+	});
+}
+
 
 void cluster::get_guild_invites(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id), "invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {

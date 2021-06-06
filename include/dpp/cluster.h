@@ -108,7 +108,9 @@ typedef std::variant<
 		gateway,
 		interaction,
 		interaction_response,
-		auditlog
+		auditlog,
+		slashcommand,
+		slashcommand_map
 	> confirmable_t;
 
 /**
@@ -818,6 +820,21 @@ public:
 	 * @param callback Function to call when the API call completes
 	 */
 	void guild_command_delete(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get the application's slash commands for a guild
+	 * 
+	 * @param guild_id Guild ID to get the slash commands for
+	 * @param callback Function to call when the API call completes
+	 */
+	void guild_commands_get(snowflake guild_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get the application's global slash commands
+	 * 
+	 * @param callback Function to call when the API call completes
+	 */
+	void global_commands_get(command_completion_event_t callback);
 
 	/**
 	 * @brief Create a direct message, also create the channel for the direct message if needed

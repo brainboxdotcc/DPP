@@ -452,9 +452,6 @@ int main(int argc, char const *argv[])
 Discord's newest features support sending buttons alongside messages, which when clicked by the user trigger an interaction which is routed by
 D++ as an on_button_click event. To make use of this, use code as in this example.
 
-\note	Please be aware that this feature is currently in a **closed beta**. There is no way to get access to this at present to test this or
-	see buttons in your bot. When this is released, this functionality of the library will work as expected.
-
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <iostream>
@@ -566,9 +563,6 @@ int main()
 \page components2 Using component interactions (advanced)
 
 This example demonstrates receiving button clicks and sending response messages.
-
-\note	Please be aware that this feature is currently in a **closed beta**. There is no way to get access to this at present to test this or
-	see buttons in your bot. When this is released, this functionality of the library will work as expected.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
