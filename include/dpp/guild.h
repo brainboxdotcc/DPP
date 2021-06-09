@@ -96,6 +96,8 @@ public:
 	std::string nickname;
 	/** Guild id */
 	snowflake guild_id;
+	/** id of channel to move user to (if they are connected to voice) */
+    snowflake channel_id;
 	/** User id */
 	snowflake user_id;
 	/** List of roles this user has on this guild */

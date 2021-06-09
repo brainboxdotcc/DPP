@@ -144,6 +144,7 @@ std::string guild_member::build_json() const {
 	if (is_deaf()) {
 		j["deaf"] = true;
 	}
+    j["channel_id"] = this->channel_id; // id: 0 is disconnecting a user, therefore cannot be checked if it needs to be included
 	return j.dump();
 }
 
