@@ -138,7 +138,7 @@ std::string component::build_json() const {
 embed::~embed() {
 }
 
-embed::embed() {
+embed::embed() : timestamp(0), color(0) {
 }
 
 message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), flags(0),
