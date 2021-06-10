@@ -1182,12 +1182,20 @@ public:
 	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Change current user nickname
-	 * 
-	 * @param guild_id Guild ID to change nickanem on
-	 * @param nickname New nickname, or empty string to clear nickname
+	 * @brief Moves the guild member to a other voice channel, if member is connected to one
+	 * @param channel_id Id of the channel to which the user is used
+	 * @param gm guild_member reference, for referencing the user_id and the guild_id (no other attributes will be used)
 	 * @param callback Function to call when the API call completes
 	 */
+    void guild_member_move(const snowflake channel_id, const guild_member &gm, command_completion_event_t callback = {});
+
+    /**
+     * @brief Change current user nickname
+     *
+     * @param guild_id Guild ID to change nickanem on
+     * @param nickname New nickname, or empty string to clear nickname
+     * @param callback Function to call when the API call completes
+     */
 	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
 
 	/**

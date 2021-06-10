@@ -741,6 +741,17 @@ void cluster::guild_edit_member(const guild_member& gm, command_completion_event
 	});
 }
 
+void cluster::guild_member_move(const snowflake channel_id, const guild_member &gm, command_completion_event_t callback) {
+    json j;
+    j["channel_id"] = channel_id;
+
+    this->post_rest("/api/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_patch, j.dump(), [&gm, callback](json &j, const http_request_completion_t& http) {
+        if (callback) {
+            callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(gm.guild_id), dpp::find_user(gm.user_id)), http));
+        }
+    });
+}
+
 void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
 	std::string o;
 	if (nickname.empty()) {
