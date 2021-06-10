@@ -1184,10 +1184,11 @@ public:
 	/**
 	 * @brief Moves the guild member to a other voice channel, if member is connected to one
 	 * @param channel_id Id of the channel to which the user is used
-	 * @param gm guild_member reference, for referencing the user_id and the guild_id (no other attributes will be used)
+	 * @param guild_id Guild id to which the user is connected
+	 * @param user_id User id, who should be moved
 	 * @param callback Function to call when the API call completes
 	 */
-    void guild_member_move(const snowflake channel_id, const guild_member &gm, command_completion_event_t callback = {});
+    void guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback = {});
 
     /**
      * @brief Change current user nickname
