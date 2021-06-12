@@ -391,7 +391,7 @@ void discord_client::OneSecondTimer()
 	 * until it's members are swapped out. Creating an entirely new hash_map
 	 * is an effective way to completely clear this out without argument from STL.
 	 */
-	if (shard_id == 0 && (time(NULL) % 60) == 0) {
+	if ((time(NULL) % 60) == 0) {
 		/* Every minute, rehash all containers from first shard */
 		dpp::garbage_collection();
 	}
