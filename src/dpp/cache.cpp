@@ -52,34 +52,6 @@ uint64_t counter () { \
  */
 void garbage_collection() {
 	time_t now = time(NULL);
-
-	/*dpp::cache* c = dpp::get_user_cache();
-	dpp::cache* c2 = dpp::get_guild_cache();
-	dpp::cache_container& uc = c->get_container();
-	dpp::cache_container& gc = c2->get_container();
-	if ((time(NULL) % 60) == 0) {
-		std::lock_guard<std::mutex> lock(c->get_mutex());
-		for (auto usr = uc.begin(); usr != uc.end(); ++usr) {
-			dpp::user* u = (dpp::user*)usr->second;
-			dpp::snowflake user_id = u->id;
-
-			std::lock_guard<std::mutex> lock(c2->get_mutex());
-			bool found = false;
-			for (auto g = gc.begin(); g != gc.end(); ++g) {
-				dpp::guild* gcheck = (dpp::guild*)g->second;
-				if (gcheck->members.find(user_id) != gcheck->members.end()) {
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-				deletion_queue[u] = now - 120;
-				std::cout << "Purge user\n";
-			}
-		}
-	}*/
-
 	bool repeat = false;
 	{
 		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
@@ -103,6 +75,20 @@ void garbage_collection() {
 	dpp::get_guild_cache()->rehash();
 	dpp::get_role_cache()->rehash();
 	dpp::get_emoji_cache()->rehash();
+
+	dpp::cache* c = dpp::get_guild_cache();
+	dpp::cache_container& gc = c->get_container();
+	/* IMPORTANT: We must lock the container to iterate it.
+	 * Only clear these hourly as they are really expensive to do.
+	 */
+	if ((time(NULL) % 3600) == 0) {
+		std::lock_guard<std::mutex> lock(c->get_mutex());
+		for (auto g = gc.begin(); g != gc.end(); ++g) {
+			dpp::guild* gp = (dpp::guild*)g->second;
+			gp->rehash_members();
+		}
+	}
+
 }
 
 cache::cache() {
