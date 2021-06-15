@@ -512,6 +512,27 @@ enum message_type {
 };
 
 /**
+ * @brief Represents the user caching policy of the cluster.
+ */
+enum cache_policy_t : uint8_t {
+	/**
+	 * @brief request whole member lists on seeing new guilds, and also store users when they message us
+	 */
+	cp_aggressive = 0,
+	/**
+	 * @brief only cache users/members when they message the bot
+	 * (NOT IMPLEMENTED YET)
+	 */
+	cp_lazy = 1,
+	/**
+	 * @brief Don't cache anything. Fill member details when we see them.
+	 * (NOT IMPLEMENTED YET)
+	 */
+	cp_none = 2
+};
+
+
+/**
  * @brief Represents messages sent and received on Discord
  */
 struct message {
@@ -567,10 +588,15 @@ struct message {
 	/** Message type */
 	uint8_t		type;
 
+	/** True if the message object allocated its own author user */
+	bool		self_allocated;
+
 	/**
 	 * @brief Construct a new message object
 	 */
 	message();
+
+	~message();
 
     /**
 	 * @brief Construct a new message object with a channel and content
@@ -599,9 +625,10 @@ struct message {
 
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
+	 * @param cp Cache policy for user records, wether or not we cache users when a message is received
 	 * @return A reference to self
 	 */
-	message& fill_from_json(nlohmann::json* j);
+	message& fill_from_json(nlohmann::json* j, cache_policy_t cp = dpp::cp_aggressive);
 
 	/** Build JSON from this object.
 	 * @param with_id True if the ID is to be included in the built JSON
