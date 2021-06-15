@@ -521,7 +521,6 @@ enum cache_policy_t : uint8_t {
 	cp_aggressive = 0,
 	/**
 	 * @brief only cache users/members when they message the bot
-	 * (NOT IMPLEMENTED YET)
 	 */
 	cp_lazy = 1,
 	/**
