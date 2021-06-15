@@ -32,9 +32,9 @@
 
 namespace dpp {
 
-cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp)
+cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy)
 	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id),
-	maxclusters(_maxclusters), last_identify(time(NULL) - 5), compressed(comp)
+	maxclusters(_maxclusters), last_identify(time(NULL) - 5), compressed(comp), cache_policy(policy)
 {
 	rest = new request_queue(this);
 }
@@ -739,6 +739,17 @@ void cluster::guild_edit_member(const guild_member& gm, command_completion_event
 			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(gm.guild_id), dpp::find_user(gm.user_id)), http));
 		}
 	});
+}
+
+void cluster::guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback) {
+    json j;
+    j["channel_id"] = channel_id;
+
+    this->post_rest("/api/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(), [guild_id, user_id, callback](json &j, const http_request_completion_t& http) {
+        if (callback) {
+            callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(guild_id), dpp::find_user(user_id)), http));
+        }
+    });
 }
 
 void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {

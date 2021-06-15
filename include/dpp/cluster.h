@@ -216,6 +216,8 @@ public:
 	 */
 	dpp::user me;
 
+	cache_policy_t cache_policy;
+
 	/** 
 	 * @brief Constructor for creating a cluster. All but the token are optional.
 	 * @param token The bot token to use for all HTTP commands and websocket connections
@@ -225,8 +227,19 @@ public:
 	 * @param cluster_id The ID of this cluster, should be between 0 and MAXCLUSTERS-1
 	 * @param maxclusters The total number of clusters that are active, which may be on seperate processes or even separate machines.
 	 * @param compressed Wether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
+	 * @param policy Set the user caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
 	 */
-	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true);
+	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cp_aggressive);
+
+	/**
+	 * @brief dpp::cluster is non-copyable
+	 */
+	cluster(const cluster&) = delete;
+
+	/**
+	 * @brief dpp::cluster is non-moveable
+	 */
+	cluster(const cluster&&) = delete;
 
 	/** Destructor */
 	~cluster();
@@ -1182,12 +1195,21 @@ public:
 	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Change current user nickname
-	 * 
-	 * @param guild_id Guild ID to change nickanem on
-	 * @param nickname New nickname, or empty string to clear nickname
+	 * @brief Moves the guild member to a other voice channel, if member is connected to one
+	 * @param channel_id Id of the channel to which the user is used
+	 * @param guild_id Guild id to which the user is connected
+	 * @param user_id User id, who should be moved
 	 * @param callback Function to call when the API call completes
 	 */
+    void guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback = {});
+
+    /**
+     * @brief Change current user nickname
+     *
+     * @param guild_id Guild ID to change nickanem on
+     * @param nickname New nickname, or empty string to clear nickname
+     * @param callback Function to call when the API call completes
+     */
 	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
 
 	/**

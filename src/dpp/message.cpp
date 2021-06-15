@@ -138,11 +138,11 @@ std::string component::build_json() const {
 embed::~embed() {
 }
 
-embed::embed() {
+embed::embed() : timestamp(0), color(0) {
 }
 
 message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), flags(0),
-	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0)
+	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0), self_allocated(false)
 {
 
 }
@@ -507,8 +507,14 @@ bool message::is_loading() const {
 	return flags & m_loading;
 }
 
+message::~message() {
+	if (self_allocated) {
+		delete this->author;
+	}
+}
 
-message& message::fill_from_json(json* d) {
+
+message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->id = SnowflakeNotNull(d, "id");
 	this->channel_id = SnowflakeNotNull(d, "channel_id");
 	this->guild_id = SnowflakeNotNull(d, "guild_id");
@@ -526,14 +532,24 @@ message& message::fill_from_json(json* d) {
 	/* May be null, if its null cache it from the partial */
 	if (d->find("author") != d->end()) {
 		json &author = (*d)["author"];
-		authoruser = find_user(SnowflakeNotNull(&author, "id"));
-		if (!authoruser) {
-			/* User does not exist yet, cache the partial as a user record */
+		if (cp == dpp::cp_none) {
+			/* User caching off! Allocate a temp user to be deleted in destructor */
 			authoruser = new user();
+			this->author = authoruser;
 			authoruser->fill_from_json(&author);
-			get_user_cache()->store(authoruser);
+			self_allocated = true;
+		} else {
+			/* User caching on - aggressive or lazy - create a cached user entry */
+			self_allocated = false;
+			authoruser = find_user(SnowflakeNotNull(&author, "id"));
+			if (!authoruser) {
+				/* User does not exist yet, cache the partial as a user record */
+				authoruser = new user();
+				authoruser->fill_from_json(&author);
+				get_user_cache()->store(authoruser);
+			}
+			this->author = authoruser;
 		}
-		this->author = authoruser;
 	}
 	if (d->find("mentions") != d->end()) {
 		json &sub = (*d)["mentions"];
@@ -562,20 +578,26 @@ message& message::fill_from_json(json* d) {
 		if (!uid && authoruser) {
 			uid = authoruser->id;
 		}
-		auto thismember = g->members.find(uid);
-		if (thismember == g->members.end()) {
-			if (uid != 0 && authoruser) {
-				guild_member gm;
-				gm.fill_from_json(&mi, g, authoruser);
-				g->members[authoruser->id] = gm;
-				this->member = gm;
-			}
+		if (cp == dpp::cp_none) {
+			/* User caching off! Just fill in directly but dont store member to guild */
+			this->member.fill_from_json(&mi, g, authoruser);
 		} else {
-			/* Update roles etc */
-			this->member = thismember->second;
-			if (authoruser) {
-				this->member.fill_from_json(&mi, g, authoruser);
-				g->members[authoruser->id] = this->member;
+			/* User caching on, lazy or aggressive - cache the member information */
+			auto thismember = g->members.find(uid);
+			if (thismember == g->members.end()) {
+				if (uid != 0 && authoruser) {
+					guild_member gm;
+					gm.fill_from_json(&mi, g, authoruser);
+					g->members[authoruser->id] = gm;
+					this->member = gm;
+				}
+			} else {
+				/* Update roles etc */
+				this->member = thismember->second;
+				if (authoruser) {
+					this->member.fill_from_json(&mi, g, authoruser);
+					g->members[authoruser->id] = this->member;
+				}
 			}
 		}
 	}

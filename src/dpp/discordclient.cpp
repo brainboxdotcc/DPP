@@ -391,7 +391,7 @@ void discord_client::OneSecondTimer()
 	 * until it's members are swapped out. Creating an entirely new hash_map
 	 * is an effective way to completely clear this out without argument from STL.
 	 */
-	if (shard_id == 0 && (time(NULL) % 60) == 0) {
+	if ((time(NULL) % 60) == 0) {
 		/* Every minute, rehash all containers from first shard */
 		dpp::garbage_collection();
 	}
@@ -464,7 +464,13 @@ uint64_t discord_client::get_member_count() {
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
-			total += gp->members.size();
+			if (creator->cache_policy == dpp::cp_aggressive) {
+				/* We can use actual member count if we are using full user caching */
+				total += gp->members.size();
+			} else {
+				/* Otherwise we use approximate guild member counts from guild_create */
+				total += gp->member_count;
+			}
 		}
 	}
 	return total;
