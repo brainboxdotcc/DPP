@@ -231,6 +231,16 @@ public:
 	 */
 	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cp_aggressive);
 
+	/**
+	 * @brief dpp::cluster is non-copyable
+	 */
+	cluster(const cluster&) = delete;
+
+	/**
+	 * @brief dpp::cluster is non-moveable
+	 */
+	cluster(const cluster&&) = delete;
+
 	/** Destructor */
 	~cluster();
 
