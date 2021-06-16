@@ -52,26 +52,47 @@ enum region : uint8_t {
  * @brief The various flags that represent the status of a dpp::guild object
  */
 enum guild_flags {
+	/** Large guild */
 	g_large =				0b000000000000000000001,
+	/** Unavailable guild (inaccessible due to an outage) */
 	g_unavailable = 			0b000000000000000000010,
+	/** Guild has widget enabled */
 	g_widget_enabled =			0b000000000000000000100,
+	/** Guild can  have an invite splash image */
 	g_invite_splash =			0b000000000000000001000,
+	/** Guild can have VIP regions */
 	g_vip_regions =				0b000000000000000010000,
+	/** Guild can have a vanity url */
 	g_vanity_url =				0b000000000000000100000,
+	/** Guild is verified */
 	g_verified =				0b000000000000001000000,
+	/** Guild is partnered */
 	g_partnered =				0b000000000000010000000,
+	/** Community features enabled */
 	g_community =				0b000000000000100000000,
+	/** Guild has commerce features enabled */
 	g_commerce =				0b000000000001000000000,
+	/** Guild has news features enabled */
 	g_news =				0b000000000010000000000,
+	/** Guild is discoverable in discovery */
 	g_discoverable =			0b000000000100000000000,
+	/** Guild is featureable */
 	g_featureable =				0b000000001000000000000,
+	/** Guild can have an animated icon (doesn't mean it actually has one though) */
 	g_animated_icon =			0b000000010000000000000,
+	/** Guild can have a banner image */
 	g_banner =				0b000000100000000000000,
+	/** Guild has a welcome screen */
 	g_welcome_screen_enabled =		0b000001000000000000000,
+	/** Guild has a member verification gate */
 	g_member_verification_gate =		0b000010000000000000000,
+	/** Guild has a preview */
 	g_preview_enabled =			0b000100000000000000000,
+	/** Guild join notifications are off */
 	g_no_join_notifications =		0b001000000000000000000,
+	/** Guild boost notifications are off */
 	g_no_boost_notifications =		0b010000000000000000000,
+	/** Guild has an actual animated icon (set by the icon hash starting with 'a_') */
 	g_has_animated_icon =			0b100000000000000000000
 };
 

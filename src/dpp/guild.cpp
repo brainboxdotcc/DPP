@@ -278,9 +278,21 @@ void guild::rehash_members() {
 
 
 guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
+	/* NOTE: This can be called by GUILD_UPDATE and also GUILD_CREATE.
+	 * GUILD_UPDATE sends a partial guild object, so we use Set*NotNull functions
+	 * for a lot of the values under the assumption they may sometimes be missing.
+	 */
 	this->id = SnowflakeNotNull(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
+		/* Clear unavailable flag if set */
+		if (this->flags & dpp::g_unavailable) {
+			this->flags -= dpp::g_unavailable;
+		}
 		SetStringNotNull(d, "name", this->name);
+		/* Special case for guild icon to allow for animated icons.
+		 * Animated icons start with a_ on the name, so we use this to set a flag
+		 * in the flags field and then just store the iconhash separately.
+		 */
 		std::string _icon = StringNotNull(d, "icon");
 		if (!_icon.empty()) {
 			if (_icon.length() > 2 && _icon.substr(0, 2) == "a_") {
