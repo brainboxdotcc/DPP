@@ -1,7 +1,7 @@
 # Frequently Asked Questions (FAQ)
 
 ## Is this library in production use?
-This library powers the bot [TriviaBot](https://triviabot.co.uk) which has over **92,000 servers**, and [Sporks](https://sporks.gg) which has over **2,600 severs**. The library's use in these bots shows that the library is production ready for bots of all sizes.
+This library powers the bot [TriviaBot](https://triviabot.co.uk) which has over **100,000 servers**, and [Sporks](https://sporks.gg) which has over **2,700 severs**. The library's use in these bots shows that the library is production ready for bots of all sizes.
 
 ## How much RAM does this library use?
 During testing this library takes approximately 400 megabytes of ram to cache 1,000,000 (1 million) users and 7700 guilds, with their respective roles and emojis, in production. This is half the memory of a similar C++ Discord library, **Aegis.cpp** (version 2).
