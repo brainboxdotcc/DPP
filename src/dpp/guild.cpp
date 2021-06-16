@@ -280,15 +280,20 @@ void guild::rehash_members() {
 guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	this->id = SnowflakeNotNull(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
-		this->name = StringNotNull(d, "name");
+		SetStringNotNull(d, "name", this->name);
 		std::string _icon = StringNotNull(d, "icon");
-		if (_icon.length() > 2 && _icon.substr(0, 2) == "a_") {
-			_icon = _icon.substr(2, _icon.length());
-			this->flags |= g_has_animated_icon;
+		if (!_icon.empty()) {
+			if (_icon.length() > 2 && _icon.substr(0, 2) == "a_") {
+				_icon = _icon.substr(2, _icon.length());
+				this->flags |= g_has_animated_icon;
+			}
+			this->icon = _icon;
 		}
-		this->icon = _icon;
-		this->discovery_splash = StringNotNull(d, "discovery_splash");
-		this->owner_id = SnowflakeNotNull(d, "owner_id");
+		std::string _dsplash = StringNotNull(d, "discovery_splash");
+		if (!_dsplash.empty()) {
+			this->discovery_splash = _dsplash;
+		}
+		SetSnowflakeNotNull(d, "owner_id", this->owner_id);
 		if (!(*d)["region"].is_null()) {
 			auto r = regionmap.find((*d)["region"].get<std::string>());
 			if (r != regionmap.end()) {
@@ -312,25 +317,19 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			this->flags |= dpp::g_no_boost_notifications;
 		}
 
-		this->afk_channel_id = SnowflakeNotNull(d, "afk_channel_id");
-		this->afk_timeout = Int8NotNull(d, "afk_timeout");
-		this->widget_channel_id = SnowflakeNotNull(d, "widget_channel_id");
-		this->verification_level = Int8NotNull(d, "verification_level");
-		this->default_message_notifications = Int8NotNull(d, "default_message_notifications");
-		this->explicit_content_filter = Int8NotNull(d, "explicit_content_filter");
-		this->mfa_level = Int8NotNull(d, "mfa_level");
-		this->application_id = SnowflakeNotNull(d, "application_id");
-		this->system_channel_id = SnowflakeNotNull(d, "system_channel_id");
-		this->rules_channel_id = SnowflakeNotNull(d, "rules_channel_id");
-		this->member_count = Int32NotNull(d, "member_count");
-		std::string vanity = StringNotNull(d, "vanity_url_code");
-		if (!vanity.empty()) {
-			this->vanity_url_code = vanity;
-		}
-		std::string dsc = StringNotNull(d, "description");
-		if (!dsc.empty()) {
-			this->description = dsc;
-		}
+		SetSnowflakeNotNull(d, "afk_channel_id", this->afk_channel_id);
+		SetInt8NotNull(d, "afk_timeout", this->afk_timeout);
+		SetSnowflakeNotNull(d, "widget_channel_id", this->widget_channel_id);
+		SetInt8NotNull(d, "verification_level", this->verification_level);
+		SetInt8NotNull(d, "default_message_notifications", this->default_message_notifications);
+		SetInt8NotNull(d, "explicit_content_filter", this->explicit_content_filter);
+		SetInt8NotNull(d, "mfa_level", this->mfa_level);
+		SetSnowflakeNotNull(d, "application_id", this->application_id);
+		SetSnowflakeNotNull(d, "system_channel_id", this->system_channel_id);
+		SetSnowflakeNotNull(d, "rules_channel_id", this->rules_channel_id);
+		SetInt32NotNull(d, "member_count", this->member_count);
+		SetStringNotNull(d, "vanity_url_code", this->vanity_url_code);
+		SetStringNotNull(d, "description", this->description);
 		if (d->find("voice_states") != d->end()) {
 			for (auto & vm : (*d)["voice_states"]) {
 				voicestate vs;
@@ -341,11 +340,14 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			}
 		}
 
-		this->banner = StringNotNull(d, "banner");
-		this->premium_tier = Int8NotNull(d, "premium_tier");
-		this->premium_subscription_count = Int16NotNull(d, "premium_subscription_count");
-		this->public_updates_channel_id = SnowflakeNotNull(d, "public_updates_channel_id");
-		this->max_video_channel_users = Int16NotNull(d, "max_video_channel_users");
+		std::string _banner = StringNotNull(d, "banner");
+		if (!_banner.empty()) {
+			this->banner = _banner;
+		}
+		SetInt8NotNull(d, "premium_tier", this->premium_tier);
+		SetInt16NotNull(d, "premium_subscription_count", this->premium_subscription_count);
+		SetSnowflakeNotNull(d, "public_updates_channel_id", this->public_updates_channel_id);
+		SetInt16NotNull(d, "max_video_channel_users", this->max_video_channel_users);
 	} else {
 		this->flags |= dpp::g_unavailable;
 	}

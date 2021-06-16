@@ -88,15 +88,15 @@ bool channel::is_store_channel() const {
 
 channel& channel::fill_from_json(json* j) {
 	this->id = SnowflakeNotNull(j, "id");
-	this->guild_id = SnowflakeNotNull(j, "guild_id");
-	this->position = Int16NotNull(j, "position");
-	this->name = StringNotNull(j, "name");
-	this->topic = StringNotNull(j, "topic");
-	this->last_message_id = SnowflakeNotNull(j, "last_message_id");
-	this->user_limit = Int8NotNull(j, "user_limit");
-	this->rate_limit_per_user = Int16NotNull(j, "rate_limit_per_user");
-	this->owner_id = SnowflakeNotNull(j, "owner_id");
-	this->parent_id = SnowflakeNotNull(j, "parent_id");
+	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
+	SetInt16NotNull(j, "position", this->position);
+	SetStringNotNull(j, "name", this->name);
+	SetStringNotNull(j, "topic", this->topic);
+	SetSnowflakeNotNull(j, "last_message_id", this->last_message_id);
+	SetInt8NotNull(j, "user_limit", this->user_limit);
+	SetInt16NotNull(j, "rate_limit_per_user", this->rate_limit_per_user);
+	SetSnowflakeNotNull(j, "owner_id", this->owner_id);
+	SetSnowflakeNotNull(j, "parent_id", this->parent_id);
 	//this->last_pin_timestamp
 	uint8_t type = Int8NotNull(j, "type");
 	this->flags |= BoolNotNull(j, "nsfw") ? dpp::c_nsfw : 0;
