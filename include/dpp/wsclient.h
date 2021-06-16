@@ -42,12 +42,12 @@ enum ws_state {
  */
 enum ws_opcode
 {
-        OP_CONTINUATION = 0x00,	/* Continuation */
-        OP_TEXT = 0x01,		/* Text frame */
-        OP_BINARY = 0x02,	/* Binary frame */
-        OP_CLOSE = 0x08,	/* Close notification with close code */
-        OP_PING = 0x09,		/* Low level ping */
-        OP_PONG = 0x0a		/* Low level pong */
+        OP_CONTINUATION = 0x00,	//!< Continuation
+        OP_TEXT = 0x01,		//!< Text frame
+        OP_BINARY = 0x02,	//!< Binary frame
+        OP_CLOSE = 0x08,	//!< Close notification with close code
+        OP_PING = 0x09,		//!< Low level ping
+        OP_PONG = 0x0a		//!< Low level pong
 };
 
 /**

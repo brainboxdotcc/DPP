@@ -28,13 +28,13 @@ namespace dpp {
  * @brief Bit mask flags relating to voice states
  */
 enum voicestate_flags {
-	vs_deaf		=	0b00000001,
-	vs_mute		=	0b00000010,
-	vs_self_mute	=	0b00000100,
-	vs_self_deaf	=	0b00001000,
-	vs_self_stream	=	0b00010000,
-	vs_self_video	=	0b00100000,
-	vs_supress	=	0b01000000
+	vs_deaf		=	0b00000001,	//!< Deafened
+	vs_mute		=	0b00000010,	//!< Muted
+	vs_self_mute	=	0b00000100,	//!< Self Muted
+	vs_self_deaf	=	0b00001000,	//!< Self Deafened
+	vs_self_stream	=	0b00010000,	//!< Self Streaming
+	vs_self_video	=	0b00100000,	//!< Self Video
+	vs_supress	=	0b01000000	//!< Supression
 };
 
 /**
@@ -44,12 +44,12 @@ enum voicestate_flags {
  */
 class voicestate {
 public:
-	class discord_client*	shard;
-	snowflake		guild_id;       //< Optional: the guild id this voice state is for
-	snowflake		channel_id;     //< the channel id this user is connected to (may be empty)
-	snowflake		user_id;        //< the user id this voice state is for
-	std::string		session_id;     //< the session id for this voice state
-	uint8_t			flags;		//< Voice state flags
+	class discord_client*	shard;		//!< Owning shard
+	snowflake		guild_id;       //!< Optional: the guild id this voice state is for
+	snowflake		channel_id;     //!< the channel id this user is connected to (may be empty)
+	snowflake		user_id;        //!< the user id this voice state is for
+	std::string		session_id;     //!< the session id for this voice state
+	uint8_t			flags;		//!< Voice state flags
 
 	/**
 	 * @brief Construct a new voicestate object

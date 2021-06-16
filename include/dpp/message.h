@@ -30,19 +30,26 @@ namespace dpp {
  * @brief Represents the type of a component
  */
 enum component_type : uint8_t {
-	cot_action_row = 1,	//< Action row, a container for other components
-	cot_button		//< Clickable button
+	/// Action row, a container for other components
+	cot_action_row = 1,
+	/// Clickable button
+	cot_button
 };
 
 /**
  * @brief Represents the style of a button
  */
 enum component_style : uint8_t {
-    cos_primary = 1,	//< Blurple
-    cos_secondary,	//< Grey
-    cos_success,	//< Green
-    cos_danger,		//< Red
-    cos_link		//< An external hyperlink to a website
+	/// Blurple
+	cos_primary = 1,
+	/// Grey
+	cos_secondary,
+	/// Green
+	cos_success,
+	/// Red
+	cos_danger,
+	/// An external hyperlink to a website
+	cos_link
 };
 
 /**
@@ -476,38 +483,65 @@ struct attachment {
  * @brief Bitmask flags for a dpp::message
  */
 enum message_flags {
-	m_crossposted = 1 << 0,			//< this message has been published to subscribed channels (via Channel Following)
-	m_is_crosspost =  1 << 1,		//< this message originated from a message in another channel (via Channel Following)
-	m_supress_embeds = 1 << 2,		//< do not include any embeds when serializing this message
-	m_source_message_deleted = 1 << 3,	//< the source message for this crosspost has been deleted (via Channel Following)
-	m_urgent = 1 << 4,			//< this message came from the urgent message system
-	m_ephemeral = 1 << 6,			//< this message is only visible to the user who invoked the Interaction
-	m_loading = 1 << 7			//< this message is an Interaction Response and the bot is "thinking"
+	/// this message has been published to subscribed channels (via Channel Following)
+	m_crossposted = 1 << 0,
+	//!< this message originated from a message in another channel (via Channel Following)
+	m_is_crosspost =  1 << 1,
+	/// do not include any embeds when serializing this message
+	m_supress_embeds = 1 << 2,
+	/// the source message for this crosspost has been deleted (via Channel Following)
+	m_source_message_deleted = 1 << 3,
+	/// this message came from the urgent message system
+	m_urgent = 1 << 4,
+	/// this message is only visible to the user who invoked the Interaction
+	m_ephemeral = 1 << 6,
+	/// this message is an Interaction Response and the bot is "thinking"
+	m_loading = 1 << 7
 };
 
 /**
  * @brief Mesage types for dpp::message::type
  */
 enum message_type {
+	/// Default
 	mt_default					= 0,
+	/// Add recipient
 	mt_recipient_add				= 1,
+	/// Remove recipient
 	mt_recipient_remove				= 2,
+	/// Call
 	mt_call						= 3,
+	/// Channel name change
 	mt_channel_name_change				= 4,
+	/// Channel icon change
 	mt_channel_icon_change				= 5,
+	/// Message pinned
 	mt_channel_pinned_message			= 6,
+	/// Member joined
 	mt_guild_member_join				= 7,
+	/// Boost
 	mt_user_premium_guild_subscription		= 8,
+	/// Boost level 1
 	mt_user_premium_guild_subscription_tier_1	= 9,
+	/// Boost level 2
 	mt_user_premium_guild_subscription_tier_2	= 10,
+	/// Boost level 3
 	mt_user_premium_guild_subscription_tier_3	= 11,
+	/// Follow channel
 	mt_channel_follow_add				= 12,
+	/// Disqualified from discovery
 	mt_guild_discovery_disqualified			= 14,
+	/// Re-qualified for discovery
 	mt_guild_discovery_requalified			= 15,
+	/// Discovery grace period warning 1
 	mt_guild_discovery_grace_period_initial_warning	= 16,
+	/// Discovery grace period warning 2
 	mt_guild_discovery_grace_period_final_warning	= 17,
+	/// Reply
 	mt_reply					= 19,
+	/// Application command
 	mt_application_command				= 20,
+	/// Invite reminder
 	mt_guild_invite_reminder			= 22
 };
 

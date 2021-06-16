@@ -26,25 +26,34 @@
 namespace dpp {
 
 /** @brief Flag integers as received from and sent to discord */
-#define GUILD_TEXT	0	//< a text channel within a server
-#define DM		1	//< a direct message between users
-#define GUILD_VOICE	2	//< a voice channel within a server
-#define GROUP_DM	3	//< a direct message between multiple users
-#define GUILD_CATEGORY	4	//< an organizational category that contains up to 50 channels
-#define GUILD_NEWS	5	//< a channel that users can follow and crosspost into their own server
-#define GUILD_STORE	6	//< a channel in which game developers can sell their game on Discord
-#define GUILD_STAGE	13	//< a "stage" channel, like a voice channel with one authorised speaker
+#define GUILD_TEXT	0	//!< a text channel within a server
+#define DM		1	//!< a direct message between users
+#define GUILD_VOICE	2	//!< a voice channel within a server
+#define GROUP_DM	3	//!< a direct message between multiple users
+#define GUILD_CATEGORY	4	//!< an organizational category that contains up to 50 channels
+#define GUILD_NEWS	5	//!< a channel that users can follow and crosspost into their own server
+#define GUILD_STORE	6	//!< a channel in which game developers can sell their game on Discord
+#define GUILD_STAGE	13	//!< a "stage" channel, like a voice channel with one authorised speaker
 
 /** @brief Our flags as stored in the object */
 enum channel_flags {
+	/// NSFW Gated Channel
 	c_nsfw =		0b00000001,
+	/// Text channel
 	c_text =		0b00000010,
+	/// Direct Message
 	c_dm =			0b00000100,
+	/// Voice channel
 	c_voice =		0b00001000,
+	/// Group
 	c_group =		0b00010000,
+	/// Category
 	c_category =		0b00100000,
+	/// News channel
 	c_news =		0b01000000,
+	/// Store page
 	c_store =		0b10000000,
+	/// Stage channel
 	c_stage =		0b11000000
 };
 
@@ -52,7 +61,9 @@ enum channel_flags {
  * @brief channel permission overwrite types
  */
 enum overwrite_type : uint8_t {
+	/// Role
 	ot_role = 0,
+	/// Member
 	ot_member = 1
 };
 
@@ -60,9 +71,13 @@ enum overwrite_type : uint8_t {
  * @brief channel permission overwrites
  */
 struct permission_overwrite {
+	/// Overwrite id
 	snowflake id;
+	/// Overwrite type
 	uint8_t type;
+	/// Allow mask
 	uint64_t allow;
+	/// Deny mask
 	uint64_t deny;
 };
 

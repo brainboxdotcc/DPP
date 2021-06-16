@@ -64,8 +64,8 @@ typedef std::variant<std::string, int32_t, bool, snowflake> command_value;
  * that you can retrieve with std::get().
  */
 struct command_option_choice {
-	std::string name;	//< Option name (1-32 chars)
-	command_value value;	//< Option value
+	std::string name;	//!< Option name (1-32 chars)
+	command_value value;	//!< Option value
 
 	/**
 	 * @brief Construct a new command option choice object
@@ -155,11 +155,11 @@ void to_json(nlohmann::json& j, const command_option& opt);
  * Discord API spec. They are listed in this enum for completeness.
  */
 enum interaction_response_type {
-	ir_pong = 1,					//< ACK a Ping
-	ir_acknowledge = 2,				//< DEPRECATED ACK a command without sending a message, eating the user's input
-	ir_channel_message = 3,				//< DEPRECATED respond with a message, eating the user's input
-	ir_channel_message_with_source = 4,		//< respond to an interaction with a message
-	ir_deferred_channel_message_with_source = 5	//< ACK an interaction and edit a response later, the user sees a loading state
+	ir_pong = 1,					//!< ACK a Ping
+	ir_acknowledge = 2,				//!< DEPRECATED ACK a command without sending a message, eating the user's input
+	ir_channel_message = 3,				//!< DEPRECATED respond with a message, eating the user's input
+	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
+	ir_deferred_channel_message_with_source = 5	//!< ACK an interaction and edit a response later, the user sees a loading state
 };
 
 /**
@@ -255,9 +255,9 @@ void from_json(const nlohmann::json& j, command_data_option& cdo);
 /** Types of interaction in the dpp::interaction class
  */
 enum interaction_type {
-	it_ping = 1,
-	it_application_command = 2,
-	it_component_button = 3
+	it_ping = 1,			//!< ping
+	it_application_command = 2,	//!< application command (slash command)
+	it_component_button = 3		//!< button click (component interaction)
 };
 
 /**

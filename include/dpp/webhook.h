@@ -28,8 +28,8 @@ namespace dpp {
  * @brief Defines types of webhook
  */
 enum webhook_type {
-	w_incoming = 1,
-	w_channel_follower = 2
+	w_incoming = 1,		//!< Incoming webhook
+	w_channel_follower = 2	//!< Channel following webhook
 };
 
 /**
@@ -37,15 +37,15 @@ enum webhook_type {
  */
 class webhook : public managed {
 public:
-	uint8_t type;   		//< the type of the webhook
-	snowflake guild_id;     	//< Optional: the guild id this webhook is for
-	snowflake channel_id;   	//< the channel id this webhook is for
-	snowflake user_id;		//< Optional: the user this webhook was created by (not returned when getting a webhook with its token)
-	std::string name;		//< the default name of the webhook (may be empty)
-	std::string avatar;		//< the default avatar of the webhook (may be empty)
-	std::string token;		//< Optional: the secure token of the webhook (returned for Incoming Webhooks)
-	snowflake application_id;	//< the bot/OAuth2 application that created this webhook (may be empty)
-	std::string* image_data;	//< base64 encoded image data if uploading a new image
+	uint8_t type;   		//!< the type of the webhook
+	snowflake guild_id;     	//!< Optional: the guild id this webhook is for
+	snowflake channel_id;   	//!< the channel id this webhook is for
+	snowflake user_id;		//!< Optional: the user this webhook was created by (not returned when getting a webhook with its token)
+	std::string name;		//!< the default name of the webhook (may be empty)
+	std::string avatar;		//!< the default avatar of the webhook (may be empty)
+	std::string token;		//!< Optional: the secure token of the webhook (returned for Incoming Webhooks)
+	snowflake application_id;	//!< the bot/OAuth2 application that created this webhook (may be empty)
+	std::string* image_data;	//!< base64 encoded image data if uploading a new image
 
 	/**
 	 * @brief Construct a new webhook object

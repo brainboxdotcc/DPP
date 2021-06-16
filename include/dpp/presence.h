@@ -29,17 +29,29 @@ namespace dpp {
  * @brief Presence flags bitmask
  */
 enum presence_flags {
+	/// Desktop: Online
 	p_desktop_online	=	0b00000001,
+	/// Desktop: DND
 	p_desktop_dnd		=	0b00000010,
+	/// Desktop: Idle
 	p_desktop_idle		=	0b00000011,
+	/// Web: Online
 	p_web_online		=	0b00000100,
+	/// Web: DND
 	p_web_dnd		=	0b00001000,
+	/// Web: Idle
 	p_web_idle		=	0b00001100,
+	/// Mobile: Online
 	p_mobile_online		=	0b00010000,
+	/// Mobile: DND
 	p_mobile_dnd		=	0b00100000,
+	/// Mobile: Idle
 	p_mobile_idle		=	0b00110000,
+	/// General: Online
 	p_status_online		=	0b01000000,
+	/// General: DND
 	p_status_dnd		=	0b10000000,
+	/// General: Idle
 	p_status_idle		=	0b11000000
 };
 
@@ -47,9 +59,13 @@ enum presence_flags {
  * @brief Online presence status values
  */
 enum presence_status : uint8_t {
+	/// Offline
 	ps_offline	=	0,
+	/// Online
 	ps_online	=	1,
+	/// DND
 	ps_dnd		=	2,
+	/// Idle
 	ps_idle		=	3
 };
 
@@ -78,22 +94,33 @@ enum presence_status : uint8_t {
  * @brief Game types
  */
 enum activity_type : uint8_t {
-	at_game		=	0, //< "Playing ..."
-	at_streaming	=	1, //< "Streaming ..."
-	at_listening	=	2, //< "Listening to..."
-	at_custom	=	3, //< "Watching..."
-	at_competing	=	4  //< "Competing in..."
+	/// "Playing ..."
+	at_game		=	0,
+	/// "Streaming ..."
+	at_streaming	=	1,
+	/// "Listening to..."
+	at_listening	=	2,
+	/// "Watching..."
+	at_custom	=	3,
+	/// "Competing in..."
+	at_competing	=	4
 };
 
 /**
  * @brief Activity types for rich presence
  */
 enum activity_flags {
+	/// In an instance
 	af_instance	= 0b00000001,
+	/// Joining
 	af_join		= 0b00000010,
+	/// Spectating
 	af_spectate	= 0b00000100,
+	/// Sending join request
 	af_join_request	= 0b00001000,
+	/// Synchronising
 	af_sync		= 0b00010000,
+	/// Playing
 	af_play		= 0b00100000
 };
 

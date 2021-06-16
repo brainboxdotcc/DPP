@@ -37,18 +37,31 @@ std::string url_encode(const std::string &value);
  * as they map onto the error values of cpp-httplib
  */
 enum http_error {
+	/// Request successful
 	h_success = 0,
+	/// Status unknown
 	h_unknown,
+	/// Connect failed
 	h_connection,
+	/// Invalid local ip address
 	h_bind_ip_address,
+	/// Read error
 	h_read,
+	/// Write error
 	h_write,
+	/// Too many 30x redirects
 	h_exceed_redirect_count,
+	/// Request cancelled
 	h_canceled,
+	/// SSL connection error
 	h_ssl_connection,
+	/// SSL cert loading error
 	h_ssl_loading_certs,
+	/// SSL server verification error
 	h_ssl_server_verification,
+	/// Unsupported multipart boundary characters
 	h_unsupported_multipart_boundary_chars,
+	/// Compression error
 	h_compression,
 };
 
@@ -90,7 +103,16 @@ typedef std::function<void(const http_request_completion_t&)> http_completion_ev
 /** Various types of http method supported by the Discord API
  */
 enum http_method {
-	m_get, m_post, m_put, m_patch, m_delete
+	/// GET
+	m_get,
+	/// POST
+	m_post,
+	/// PUT
+	m_put,
+	/// PATCH
+	m_patch,
+	/// DELETE
+	m_delete
 };
 
 /**

@@ -30,40 +30,75 @@ namespace dpp {
  * @brief Defines types of audit log entry
  */
 enum audit_type {
+	/// Guild update
 	ae_guild_update			=	1,
+	/// Channel create
 	ae_channel_create		=	10,
+	/// Channel update
 	ae_channel_update		=	11,
+	/// Channel delete
 	ae_channel_delete		=	12,
+	/// Channel overwrite create
 	ae_channel_overwrite_create	=	13,
+	/// Channel overwrite update
 	ae_channel_overwrite_update	=	14,
+	/// Channel overwrite delete
 	ae_channel_overwrite_delete	=	15,
+	/// Channel member kick
 	ae_member_kick			=	20,
+	/// Channel member prune
 	ae_member_prune			=	21,
+	/// Channel member ban add
 	ae_member_ban_add		=	22,
+	/// Channel member ban remove
 	ae_member_ban_remove		=	23,
+	/// Guild member update
 	ae_member_update		=	24,
+	/// Guild member role update
 	ae_member_role_update		=	25,
+	/// Guild member move
 	ae_member_move			=	26,
+	/// Guild member voice disconnect
 	ae_member_disconnect		=	27,
+	/// Guild bot add
 	ae_bot_add			=	28,
+	/// Guild role create
 	ae_role_create			=	30,
+	/// Guild role update
 	ae_role_update			=	31,
+	/// Guild role delete
 	ae_role_delete			=	32,
+	/// Guild invite create
 	ae_invite_create		=	40,
+	/// Guild invite update
 	ae_invite_update		=	41,
+	/// Guild invite delete
 	ae_invite_delete		=	42,
+	/// Guild webhook create
 	ae_webhook_create		=	50,
+	/// Guild webhook update
 	ae_webhook_update		=	51,
+	/// Guild webhook delete
 	ae_webhook_delete		=	52,
+	/// Guild emoji create
 	ae_emoji_create			=	60,
+	/// Guild emoji update
 	ae_emoji_update			=	61,
+	/// Guild emoji delete
 	ae_emoji_delete			=	62,
+	/// Guild message delete
 	ae_message_delete		=	72,
+	/// Guild message bulk delete
 	ae_message_bulk_delete		=	73,
+	/// Guild message pin
 	ae_message_pin			=	74,
+	/// Guild message unpin
 	ae_message_unpin		=	75,
+	/// Guild integration create
 	ae_integration_create		=	80,
+	/// Guild integration update
 	ae_integration_update		=	81,
+	/// Guild integration delete
 	ae_integration_delete		=	82
 };
 
@@ -71,36 +106,39 @@ enum audit_type {
  * @brief Defines audit log changes
  */
 struct audit_change {
-	std::string	new_value;      //< Optional: Serialised new value of the key
-	std::string	old_value;      //< Optional: Serialised old value of the key
-	std::string	key;    //< name of audit log change key
+	/// Optional: Serialised new value of the key
+	std::string	new_value;
+	/// Optional: Serialised old value of the key
+	std::string	old_value;
+	/// name of audit log change key
+	std::string	key;
 };
 
 /**
  * @brief Extra information for an audit log entry
  */
 struct audit_extra {
-	std::string 	delete_member_days;	//< number of days after which inactive members were kicked
-	std::string	members_removed;	//< number of members removed by the prune
-	snowflake	channel_id;		//< channel in which the entities were targeted
-	snowflake	message_id;		//< id of the message that was targeted
-	std::string	count;			//< number of entities that were targeted
-	snowflake	id;			//< id of the overwritten entity
-	std::string	type;			//< type of overwritten entity - "0" for "role" or "1" for "member"
-	std::string 	role_name;		//< name of the role if type is "0" (not present if type is "1")
+	std::string 	delete_member_days;	//!< number of days after which inactive members were kicked
+	std::string	members_removed;	//!< number of members removed by the prune
+	snowflake	channel_id;		//!< channel in which the entities were targeted
+	snowflake	message_id;		//!< id of the message that was targeted
+	std::string	count;			//!< number of entities that were targeted
+	snowflake	id;			//!< id of the overwritten entity
+	std::string	type;			//!< type of overwritten entity - "0" for "role" or "1" for "member"
+	std::string 	role_name;		//!< name of the role if type is "0" (not present if type is "1")
 };
 
 /**
  * @brief An individual audit log entry
  */
 struct audit_entry {
-	snowflake			id;		//< id of the entry
-	snowflake			target_id;	//< id of the affected entity (webhook, user, role, etc.) (may be empty)
-	std::vector<audit_change>	changes;	//< Optional: changes made to the target_id
-	snowflake			user_id;	//< the user who made the changes (may be empty)
-	audit_type			event;		//< type of action that occurred
-	std::optional<audit_extra>	options;	//< Optional: additional info for certain action types
-	std::string			reason;		//< Optional: the reason for the change (0-512 characters)	
+	snowflake			id;		//!< id of the entry
+	snowflake			target_id;	//!< id of the affected entity (webhook, user, role, etc.) (may be empty)
+	std::vector<audit_change>	changes;	//!< Optional: changes made to the target_id
+	snowflake			user_id;	//!< the user who made the changes (may be empty)
+	audit_type			event;		//!< type of action that occurred
+	std::optional<audit_extra>	options;	//!< Optional: additional info for certain action types
+	std::string			reason;		//!< Optional: the reason for the change (0-512 characters)	
 };
 
 /**
@@ -108,7 +146,7 @@ struct audit_entry {
  */
 class auditlog {
 public:
-	std::vector<audit_entry> entries;	//< Audit log entries
+	std::vector<audit_entry> entries;	//!< Audit log entries
 	
 	/** Constructor */
 	auditlog();

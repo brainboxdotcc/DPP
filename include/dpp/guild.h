@@ -32,20 +32,20 @@ namespace dpp {
  * @note Largely deprecated in favour of per-channel regions.
  */
 enum region : uint8_t {
-	r_brazil,
-	r_central_europe,
-	r_hong_kong,
-	r_india,
-	r_japan,
-	r_russia,
-	r_singapore,
-	r_south_africa,
-	r_sydney,
-	r_us_central,
-	r_us_east,
-	r_us_south,
-	r_us_west,
-	r_western_europe
+	r_brazil,		//!< Brazil
+	r_central_europe,	//!< Central Europe
+	r_hong_kong,		//!< Hong Kong
+	r_india,		//!< India
+	r_japan,		//!< Japan
+	r_russia,		//!< Russia
+	r_singapore,		//!< Singapore
+	r_south_africa,		//!< South Africa
+	r_sydney,		//!< Sydney
+	r_us_central,		//!< US Central
+	r_us_east,		//!< US East Coast
+	r_us_south,		//!< US South
+	r_us_west,		//!< US West Coast
+	r_western_europe	//!< Western Europe
 };
 
 /**
