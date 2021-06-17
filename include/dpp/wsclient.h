@@ -126,7 +126,7 @@ public:
 	 * 
 	 * @param buffer The buffer contents. Can modify this value removing the head elements when processed.
 	 */
-        virtual bool HandleBuffer(std::string &buffer);
+        virtual bool handle_buffer(std::string &buffer);
 
 	/**
 	 * @brief Close websocket
@@ -149,7 +149,7 @@ public:
 	virtual void Error(uint32_t errorcode);
 
 	/** Fires every second from the underlying socket I/O loop, used for sending webscocket pings */
-	virtual void OneSecondTimer();
+	virtual void one_second_timer();
 };
 
 };

@@ -133,7 +133,7 @@ bool discord_voice_client::is_playing() {
 void discord_voice_client::ThreadRun()
 {
 	do {
-		ssl_client::ReadLoop();
+		ssl_client::read_loop();
 		ssl_client::close();
 		if (!terminating) {
 			ssl_client::Connect();
@@ -520,7 +520,7 @@ const std::vector<std::string> discord_voice_client::get_marker_metadata() {
 	return track_meta;
 }
 
-void discord_voice_client::OneSecondTimer()
+void discord_voice_client::one_second_timer()
 {
 	if (terminating) {
 		throw std::runtime_error("Terminating voice connection");

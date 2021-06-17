@@ -328,7 +328,7 @@ public:
 	virtual void log(dpp::loglevel severity, const std::string &msg);
 
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
-	virtual void OneSecondTimer();
+	virtual void one_second_timer();
 
 	/**
 	 * @brief voice client is ready to stream audio.

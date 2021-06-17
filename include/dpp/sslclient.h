@@ -87,7 +87,7 @@ protected:
 	uint64_t bytes_in;
 
 	/** Called every second */
-	virtual void OneSecondTimer();
+	virtual void one_second_timer();
 
 	/** Start connection */
 	virtual void Connect();
@@ -135,7 +135,7 @@ public:
 	/**
 	 * @brief Nonblocking I/O loop
 	 */
-	void ReadLoop();
+	void read_loop();
 
 	/**
 	 * @brief Destroy the ssl_client object
@@ -146,7 +146,7 @@ public:
 	 * @brief Handle input from the input buffer.
 	 * @param buffer the buffer content. Will be modified removing any processed front elements
 	 */
-	virtual bool HandleBuffer(std::string &buffer);
+	virtual bool handle_buffer(std::string &buffer);
 
 	/**
 	 * @brief Write to the output buffer.

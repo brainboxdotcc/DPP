@@ -109,7 +109,7 @@ void discord_client::ThreadRun()
 		bool error = false;
 		ready = false;
 		message_queue.clear();
-		ssl_client::ReadLoop();
+		ssl_client::read_loop();
 		ssl_client::close();
 		EndZLib();
 		SetupZLib();
@@ -382,10 +382,10 @@ size_t discord_client::GetQueueSize()
 	return message_queue.size();
 }
 
-void discord_client::OneSecondTimer()
+void discord_client::one_second_timer()
 {
 
-	websocket_client::OneSecondTimer();
+	websocket_client::one_second_timer();
 
 	/* This is important because unordered_map doesnt actually free its buckets
 	 * until it's members are swapped out. Creating an entirely new hash_map

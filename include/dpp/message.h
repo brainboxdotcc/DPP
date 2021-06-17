@@ -485,7 +485,7 @@ struct attachment {
 enum message_flags {
 	/// this message has been published to subscribed channels (via Channel Following)
 	m_crossposted = 1 << 0,
-	//!< this message originated from a message in another channel (via Channel Following)
+	/// this message originated from a message in another channel (via Channel Following)
 	m_is_crosspost =  1 << 1,
 	/// do not include any embeds when serializing this message
 	m_supress_embeds = 1 << 2,

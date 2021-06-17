@@ -29,10 +29,10 @@ The library runs best on Linux. Windows is supported via cmake and Visual Studio
 ## Getting started
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)
 * [Discord Server](https://discord.gg/dpp)
-* [Frequently Asked Questions](docpages/Z_01_FAQ.md)
-* [Building on Linux](docpages/Z_02_BUILD_LINUX.md)
-* [Building on Windows](docpages/Z_03_BUILD_WIN.md)
-* [Building on macOS](docpages/Z_04_BUILD_MAC.md)
+* [Frequently Asked Questions](docpages/Z_01_frequently_asked_questions.md)
+* \ref buildlinux
+* \ref buildwindows
+* \ref buildosx
 * [Example Programs](docpages/Z_05_EXAMPLE.md)
 
 ## Reference

@@ -150,7 +150,7 @@ void ssl_client::write(const std::string &data)
 	}
 }
 
-void ssl_client::OneSecondTimer()
+void ssl_client::one_second_timer()
 {
 }
 
@@ -158,7 +158,7 @@ void ssl_client::log(dpp::loglevel severity, const std::string &msg) const
 {
 }
 
-void ssl_client::ReadLoop()
+void ssl_client::read_loop()
 {
 	/* The read loop is non-blocking using select(). This method
 	 * cannot read while it is waiting for write, or write while it is
@@ -197,7 +197,7 @@ void ssl_client::ReadLoop()
 		while(true) {
 
 			if (last_tick != time(NULL)) {
-				this->OneSecondTimer();
+				this->one_second_timer();
 				last_tick = time(NULL);
 			}
 
@@ -257,7 +257,7 @@ void ssl_client::ReadLoop()
 						case SSL_ERROR_NONE:
 							/* Data received, add it to the buffer */
 							buffer.append(ServerToClientBuffer, r);
-							this->HandleBuffer(buffer);
+							this->handle_buffer(buffer);
 							bytes_in += r;
 						break;
 						case SSL_ERROR_ZERO_RETURN:
@@ -342,7 +342,7 @@ uint64_t ssl_client::get_bytes_in()
 	return bytes_in;
 }
 
-bool ssl_client::HandleBuffer(std::string &buffer)
+bool ssl_client::handle_buffer(std::string &buffer)
 {
 	return true;
 }

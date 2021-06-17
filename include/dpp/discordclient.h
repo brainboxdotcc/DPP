@@ -259,7 +259,7 @@ public:
 	uint64_t get_channel_count();
 
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
-	virtual void OneSecondTimer();
+	virtual void one_second_timer();
 
 	/**
 	 * @brief Queue a message to be sent via the websocket
