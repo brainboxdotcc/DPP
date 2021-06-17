@@ -1,4 +1,9 @@
-# Clusters, Shards and Guilds
+# Advanced Reference
+
+* \subpage clusters-shards-guilds "Clusters, Shards and Guilds"
+* \subpage thread-model "Thread Model"
+
+\page clusters-shards-guilds Clusters, Shards and Guilds
 
 D++ takes a three-tiered highly scalable approach to bots, with three levels known as Clusters, Shards and Guilds as documented below.
 
@@ -17,3 +22,7 @@ Small bots require only one shard. You may however create as many as you wish. O
 ## Guilds
 
 Guilds are what servers are known as to the API. There can be up to **2500** of these per shard. Each of these is usually a distinct community and will contain a collection of guild members (users with a membership of this guild), channels and roles, emojis and various other pieces of data.
+
+\page thread-model Thread Model
+
+\image html DPP_Architecture.svg
