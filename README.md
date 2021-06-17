@@ -14,10 +14,10 @@ This project is in beta stages of development.
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
-* [Slash Commands/Interactions suppport](https://dpp.brainbox.cc/a00016.html)
-* [Voice support](https://dpp.brainbox.cc/a00014.html)
+* [Slash Commands/Interactions suppport](https://dpp.brainbox.cc/slashcommands.html)
+* [Voice support](https://dpp.brainbox.cc/soundboard.html)
 * Pretty much the entire Discord API is available for use in the library
-* [Windows support](https://dpp.brainbox.cc/a00006.html)
+* [Windows support](https://dpp.brainbox.cc/buildwindows.html)
 
 Want to help? Drop me a line or send a PR.
 
