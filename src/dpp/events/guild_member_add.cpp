@@ -60,7 +60,7 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 		dpp::guild_member gm;
 		gmr.added = {};
 		if (u && u->id && g->members.find(u->id) == g->members.end()) {
-			gm.fill_from_json(&d, g, u);
+			gm.fill_from_json(&d, g->id, u->id);
 			g->members[u->id] = gm;
 			gmr.added = gm;
 		} else if (u && u->id) {

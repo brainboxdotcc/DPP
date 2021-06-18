@@ -133,10 +133,10 @@ public:
 
 	/** Fill this object from a json object.
 	 * @param j The json object to get data from
-	 * @param g The guild to associate the member with
-	 * @param u The user to associate the member with
+	 * @param g_id The guild id to associate the member with
+	 * @param u_id The user id to associate the member with
 	 */
-	guild_member& fill_from_json(nlohmann::json* j, const class guild* g, const class user* u);
+	guild_member& fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id);
 
 	/** Build json string for the member object */
 	std::string build_json() const;

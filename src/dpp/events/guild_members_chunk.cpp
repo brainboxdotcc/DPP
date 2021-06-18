@@ -60,7 +60,7 @@ void guild_members_chunk::handle(discord_client* client, json &j, const std::str
 				}
 				if (g->members.find(u->id) == g->members.end()) {
 					dpp::guild_member gm;
-					gm.fill_from_json(&userrec, g, u);
+					gm.fill_from_json(&userrec, g->id, u->id);
 					g->members[u->id] = gm;
 					if (client->creator->dispatch.guild_members_chunk)
 						um[u->id] = gm;

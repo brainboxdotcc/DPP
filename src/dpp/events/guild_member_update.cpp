@@ -49,7 +49,7 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 	if (g && u) {
 		auto& user = d["user"];
 		guild_member m;
-		m.fill_from_json(&user, g, u);
+		m.fill_from_json(&user, g->id, u->id);
 		g->members[u->id] = m;
 
 		if (client->creator->dispatch.guild_member_update) {

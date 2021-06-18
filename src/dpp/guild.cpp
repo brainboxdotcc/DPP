@@ -98,15 +98,9 @@ guild_member::guild_member() :
 {
 }
 
-guild_member& guild_member::fill_from_json(nlohmann::json* j, const guild* g, const user* u) {
-	if (g) {
-		this->guild_id = g->id;
-	}
-
-	if (u) {
-		this->user_id = u->id;
-	}
-
+guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id) {
+	this->guild_id = g_id;
+	this->user_id = u_id;
 	j->get_to(*this);
 	return *this;
 }
