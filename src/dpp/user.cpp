@@ -170,8 +170,8 @@ void from_json(const nlohmann::json& j, user& u) {
 	u.flags |= BoolNotNull(&j, "system") ? dpp::u_system : 0;
 	u.flags |= BoolNotNull(&j, "mfa_enabled") ? dpp::u_mfa_enabled : 0;
 	u.flags |= BoolNotNull(&j, "verified") ? dpp::u_verified : 0;
-	u.flags |= BoolNotNull(&j, "premium_type") == 1 ? dpp::u_nitro_classic : 0;
-	u.flags |= BoolNotNull(&j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
+	u.flags |= Int8NotNull(&j, "premium_type") == 1 ? dpp::u_nitro_classic : 0;
+	u.flags |= Int8NotNull(&j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
 	uint32_t flags = Int32NotNull(&j, "flags");
 	for (auto & flag : usermap) {
 		if (flags & flag.first) {

@@ -98,6 +98,9 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 				case pt_boolean:
 					cot = co_boolean;
 				break;
+				case pt_integer:
+					cot = co_integer;
+				break;
 				case pt_string:
 					cot = co_string;
 				break;
