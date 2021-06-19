@@ -30,7 +30,7 @@ run `./test` for unit test cases. You will need to create a `config.json` file i
 
 ## 4. Installation to a different directory
 
-If you want to install the library, its dependendancies and header files to a different directory, specify this directory when running `cmake`:
+If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
     cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
 
@@ -164,7 +164,7 @@ cmake version 3.20.4
 
 ## 2. Create a CMake project
 
-In an empty directory, created differents directories and files like below:
+In an empty directory, create different directories and files like below:
 ```
 - your_project/
     |-- libs/
@@ -177,7 +177,7 @@ In the `libs/` directory, clone the sources with: `git clone https://github.com/
 
 ## 3. Configure CMake
 
-Here an example of a CMake configuration, adapt it according to your needs:
+Here is an example of a CMake configuration, adapt it according to your needs:
 
 ~~~~~~~~~~~~~~{.cmake}
 # minimum CMake version required
