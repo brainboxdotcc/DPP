@@ -188,6 +188,7 @@ void commandhandler::route(const dpp::message& msg)
 					break;
 					case pt_role: {
 						std::string x;
+						ss >> x;
 						if (x.length() > 4 && x[0] == '<' && x[1] == '&') {
 							snowflake rid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
 							role* r = dpp::find_role(rid);
@@ -199,6 +200,7 @@ void commandhandler::route(const dpp::message& msg)
 					break;
 					case pt_channel: {
 						std::string x;
+						ss >> x;
 						if (x.length() > 4 && x[0] == '<' && x[1] == '#') {
 							snowflake cid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
 							channel* c = dpp::find_channel(cid);
@@ -210,6 +212,7 @@ void commandhandler::route(const dpp::message& msg)
 					break;
 					case pt_user: {
 						std::string x;
+						ss >> x;
 						if (x.length() > 4 && x[0] == '<' && x[1] == '@') {
 							snowflake uid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
 							user* u = dpp::find_user(uid);
