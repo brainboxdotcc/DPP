@@ -5,6 +5,7 @@ The way D++ is built varies from system to system. Please follow the guides belo
 * \subpage buildlinux "Building on Linux"
 * \subpage buildwindows "Building on Windows"
 * \subpage buildosx "Building on OSX"
+* \subpage buildcmake "Building with CMake"
 
 \page buildlinux Building on Linux
 
@@ -29,7 +30,7 @@ run `./test` for unit test cases. You will need to create a `config.json` file i
 
 ## 4. Installation to a different directory
 
-If you want to install the library, its dependendancies and header files to a different directory, specify this directory when running `cmake`:
+If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
     cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
 
@@ -48,7 +49,7 @@ The important flags in this command-line are:
  * `mydppbot.cpp` - Your source code
  * `dppbot` - The name of the executable to make
 
-Of course, this is just a proof of concept - you should really use a more robust build system like GNU `make` or `cmake`.
+Of course, this is just a proof of concept - you should really use a more robust build system like GNU `make` or [`cmake`](@ref buildcmake).
 
 **Have fun!**
 
@@ -145,6 +146,83 @@ The important flags in this command-line are:
  * `mydppbot.cpp` - Your source code
  * `dppbot` - The name of the executable to make
 
-Of course, this is just a proof of concept - you should really use a more robust build system like GNU `make` or `cmake`.
+Of course, this is just a proof of concept - you should really use a more robust build system like GNU `make` or [`cmake`](@ref buildcmake).
+
+**Have fun!**
+
+
+\page buildcmake Building with CMake
+# Building with CMake
+
+## 1. Toolchain
+Before compiling, you will need to install `cmake` on your system.
+To be sure that `cmake` is installed, you can type the following command:
+```sh
+$ cmake --version
+cmake version 3.20.4
+```
+
+## 2. Create a CMake project
+
+In an empty directory, create different directories and files like below:
+```
+- your_project/
+    |-- libs/
+    |-- src/
+        |-- main.cpp
+    |-- CMakeLists.txt
+```
+
+In the `libs/` directory, clone the sources with: `git clone https://github.com/brainboxdotcc/DPP.git`
+
+## 3. Configure CMake
+
+Here is an example of a CMake configuration, adapt it according to your needs:
+
+~~~~~~~~~~~~~~{.cmake}
+# minimum CMake version required
+cmake_minimum_required(VERSION 3.15)
+# Project name, version and description
+project(discord-bot VERSION 1.0 DESCRIPTION "A discord bot")
+
+# Add DPP as dependency
+add_subdirectory(libs/DPP)
+
+# Create an executable
+add_executable(${PROJECT_NAME}
+    src/main.cpp
+    # your others files...
+)
+
+# Linking libraries
+target_link_libraries(${PROJECT_NAME}
+    dpp
+    spdlog # if you need a logger. Don't forget to clone sources
+           # in the `libs/` directory
+)
+
+# Specify includes
+target_include_directories(${PROJECT_NAME} PRIVATE
+    libs/DPP/include
+    libs/spdlog/include # Like before, if you need spdlog
+)
+
+# Set C++ version
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 17 # or 20 if you want something more recent
+    CXX_STANDARD_REQUIRED ON
+)
+~~~~~~~~~~~~~~
+
+Your project directory should look like this:
+```
+- your_project/
+    |-- libs/
+        |-- DPP
+        |-- spdlog # again, only if you need it
+    |-- src/
+        |-- main.cpp
+    |-- CMakeLists.txt
+```
 
 **Have fun!**
