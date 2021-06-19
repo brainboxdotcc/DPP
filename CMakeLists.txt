@@ -16,11 +16,12 @@
 # limitations under the License.
 #
 
-cmake_minimum_required (VERSION 3.15)
+cmake_minimum_required (VERSION 3.12)
+
+set(BUILD_SHARED_LIBS TRUE)
 
 if(WIN32)
 	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-    set(BUILD_SHARED_LIBS TRUE)
 	set(VCPKG_INSTALLATION_64_BITS_FOLDER "$ENV{VCPKG_ROOT}/installed/x64-windows")
 	set(ZLIB_LIBRARIES "${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib")
 	set(ZLIB_INCLUDE_DIR "${VCPKG_INSTALLATION_64_BITS_FOLDER}/include")
