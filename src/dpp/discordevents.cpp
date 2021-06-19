@@ -32,7 +32,7 @@
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>
 
-#ifdef _WIN32
+#ifdef WIN32
 #include <time.h>
 #include <iomanip>
 #include <sstream>
