@@ -17,4 +17,4 @@ jobs:
           command: 'cmake --build build'
       - run:
           name: Testing installation
-          command: 'cmake --install build'
+          command: 'cmake --build build --target install'
