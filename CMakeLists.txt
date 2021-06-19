@@ -184,8 +184,6 @@ if(WIN32)
 endif()
 
 if(NOT WIN32)
-	add_custom_command(TARGET dpp COMMAND "${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostBuild.cmake")
-
 	# Installation
 
 	include(GNUInstallDirs)
