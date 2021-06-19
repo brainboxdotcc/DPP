@@ -461,7 +461,13 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 			if (embed.timestamp != 0) {
 				std::ostringstream ss;
 				struct tm t;
+			
+			#ifdef WIN32
+				gmtime_s(&t, &embed.timestamp);
+			#else
 				gmtime_r(&embed.timestamp, &t);
+			#endif
+				
 				ss << std::put_time(&t, "%FT%TZ");
 				e["timestamp"] = ss.str();
 			}
@@ -580,14 +586,14 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		}
 		if (cp == dpp::cp_none) {
 			/* User caching off! Just fill in directly but dont store member to guild */
-			this->member.fill_from_json(&mi, g, authoruser);
+			this->member.fill_from_json(&mi, g->id, uid);
 		} else {
 			/* User caching on, lazy or aggressive - cache the member information */
 			auto thismember = g->members.find(uid);
 			if (thismember == g->members.end()) {
 				if (uid != 0 && authoruser) {
 					guild_member gm;
-					gm.fill_from_json(&mi, g, authoruser);
+					gm.fill_from_json(&mi, g->id, uid);
 					g->members[authoruser->id] = gm;
 					this->member = gm;
 				}
@@ -595,7 +601,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 				/* Update roles etc */
 				this->member = thismember->second;
 				if (authoruser) {
-					this->member.fill_from_json(&mi, g, authoruser);
+					this->member.fill_from_json(&mi, g->id, authoruser->id);
 					g->members[authoruser->id] = this->member;
 				}
 			}

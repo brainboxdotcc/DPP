@@ -21,11 +21,10 @@
 #pragma once
 #include <errno.h>
 
-#ifdef _WIN32
+#ifdef WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #else
 #include <resolv.h>
 #include <netdb.h>

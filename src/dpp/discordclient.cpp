@@ -21,7 +21,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#ifndef _WIN32
+#ifndef WIN32
 #include <unistd.h>
 #endif
 #include <dpp/discordclient.h>
@@ -281,7 +281,13 @@ bool discord_client::HandleFrame(const std::string &buffer)
 			case 7:
 				log(dpp::ll_debug, fmt::format("Reconnection requested, closing socket {}", sessionid));
 				message_queue.clear();
+
+			#ifdef WIN32
+				::_close(sfd);
+			#else
 				::close(sfd);
+			#endif
+
 			break;
 			/* Heartbeat ack */
 			case 11:
@@ -387,13 +393,17 @@ void discord_client::one_second_timer()
 
 	websocket_client::one_second_timer();
 
-	/* This is important because unordered_map doesnt actually free its buckets
-	 * until it's members are swapped out. Creating an entirely new hash_map
-	 * is an effective way to completely clear this out without argument from STL.
+	/* Every minute, rehash all containers from first shard.
+	 * We can't just get shard with the id 0 because this won't
+	 * work on a clustered environment
 	 */
-	if ((time(NULL) % 60) == 0) {
-		/* Every minute, rehash all containers from first shard */
-		dpp::garbage_collection();
+	auto shards = creator->get_shards();
+	auto first_iter = shards.begin();
+	if (first_iter != shards.end()) {
+		dpp::discord_client* first_shard = first_iter->second;
+		if ((time(NULL) % 60) == 0 && first_shard == this) {
+			dpp::garbage_collection();
+		}
 	}
 
 	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
@@ -406,7 +416,13 @@ void discord_client::one_second_timer()
 		if ((time(nullptr) - this->last_heartbeat_ack) > heartbeat_interval * 2) {
 			log(dpp::ll_warning, fmt::format("Missed heartbeat ACK, forcing reconnection to session {}", sessionid));
 			message_queue.clear();
+		
+		#ifdef WIN32
+			::_close(sfd);
+		#else
 			::close(sfd);
+		#endif
+			
 			return;
 		}
 

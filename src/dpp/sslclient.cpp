@@ -20,13 +20,11 @@
  ************************************************************************************/
 #include <errno.h>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
+#ifdef WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#pragma  comment(lib,"ws2_32")
+#pragma comment(lib,"ws2_32")
 #else
 #include <resolv.h>
 #include <netdb.h>
@@ -116,7 +114,11 @@ void ssl_client::Connect()
 		}
 		err = errno;
 		sfd = ERROR_STATUS;
+	#ifdef WIN32
+		::_close(sfd);
+	#else
 		::close(sfd);
+	#endif
 	}
 	freeaddrinfo(addrs);
 
@@ -176,7 +178,7 @@ void ssl_client::read_loop()
 	char ClientToServerBuffer[BUFSIZZ],ServerToClientBuffer[BUFSIZZ];
 	
 	/* Make the socket nonblocking */
-#ifdef _WIN32
+#ifdef WIN32
 	u_long mode = 1;
 	int result = ioctlsocket(sfd, FIONBIO, &mode);
 	if (result != NO_ERROR)

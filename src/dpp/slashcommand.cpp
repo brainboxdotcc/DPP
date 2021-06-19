@@ -163,19 +163,23 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 
 	if (j.contains("value") && !j.at("value").is_null()) {
 		switch (cdo.type) {
-		case co_boolean:
-			cdo.value = j.at("value").get<bool>();
-			break;
-		case co_channel:
-		case co_role:
-		case co_user:
-			cdo.value = SnowflakeNotNull(&j, "value");
-			break;
-		case co_integer:
-			cdo.value = j.at("value").get<int32_t>();
-			break;
-		case co_string:
-			cdo.value = j.at("value").get<std::string>();
+			case co_boolean:
+				cdo.value = j.at("value").get<bool>();
+				break;
+			case co_channel:
+			case co_role:
+			case co_user:
+				cdo.value = SnowflakeNotNull(&j, "value");
+				break;
+			case co_integer:
+				cdo.value = j.at("value").get<int32_t>();
+				break;
+			case co_string:
+				cdo.value = j.at("value").get<std::string>();
+				break;
+			case co_sub_command:
+			case co_sub_command_group:
+				/* Silences warning on clang, handled elsewhere */
 			break;
 		}
 	}

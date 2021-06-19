@@ -99,8 +99,8 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 						u->refcount++;
 					}
 					dpp::guild_member gm;
-					gm.fill_from_json(&(user["user"]), g, u);
-					g->members[u->id] = gm;
+					gm.fill_from_json(&(user["user"]), g->id, userid);
+					g->members[userid] = gm;
 				}
 			}
 		}

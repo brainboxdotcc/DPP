@@ -711,7 +711,7 @@ void cluster::guild_get_preview(snowflake guild_id, command_completion_event_t c
 void cluster::guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(guild_id), "member/" + std::to_string(user_id), m_get, "", [callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(guild_id), dpp::find_user(user_id)), http));
+			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, guild_id, user_id), http));
 		}
 	});
 }
@@ -736,7 +736,7 @@ void cluster::guild_add_member(const guild_member& gm, const std::string &access
 void cluster::guild_edit_member(const guild_member& gm, command_completion_event_t callback) {
 	this->post_rest("/api/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [&gm, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(gm.guild_id), dpp::find_user(gm.user_id)), http));
+			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, gm.guild_id, gm.user_id), http));
 		}
 	});
 }
@@ -747,7 +747,7 @@ void cluster::guild_member_move(const snowflake channel_id, const snowflake guil
 
     this->post_rest("/api/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(), [guild_id, user_id, callback](json &j, const http_request_completion_t& http) {
         if (callback) {
-            callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, dpp::find_guild(guild_id), dpp::find_user(user_id)), http));
+            callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, guild_id, user_id), http));
         }
     });
 }
@@ -824,7 +824,7 @@ void cluster::guild_get_members(snowflake guild_id, command_completion_event_t c
 			if (curr_member.find("user") != curr_member.end()) {
 				user_id = SnowflakeNotNull(&(curr_member["user"]), "id");
 			}
-			guild_members[SnowflakeNotNull(&curr_member, "id")] = guild_member().fill_from_json(&curr_member, dpp::find_guild(guild_id), dpp::find_user(user_id));
+			guild_members[SnowflakeNotNull(&curr_member, "id")] = guild_member().fill_from_json(&curr_member, guild_id, user_id);
 		}
 		if (callback) {
 				callback(confirmation_callback_t("guild_member_map", guild_members, http));

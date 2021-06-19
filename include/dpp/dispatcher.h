@@ -610,7 +610,7 @@ struct user_update_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	user_update_t(class discord_client* client, const std::string& raw);
-	user* updated;
+	user updated;
 };
 
 /** @brief Create message */
