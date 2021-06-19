@@ -21,7 +21,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#ifndef _WIN32
+#ifndef WIN32
 #include <unistd.h>
 #endif
 #include <dpp/discordclient.h>
@@ -281,7 +281,13 @@ bool discord_client::HandleFrame(const std::string &buffer)
 			case 7:
 				log(dpp::ll_debug, fmt::format("Reconnection requested, closing socket {}", sessionid));
 				message_queue.clear();
+
+			#ifdef WIN32
+				::_close(sfd);
+			#else
 				::close(sfd);
+			#endif
+
 			break;
 			/* Heartbeat ack */
 			case 11:
@@ -410,7 +416,13 @@ void discord_client::one_second_timer()
 		if ((time(nullptr) - this->last_heartbeat_ack) > heartbeat_interval * 2) {
 			log(dpp::ll_warning, fmt::format("Missed heartbeat ACK, forcing reconnection to session {}", sessionid));
 			message_queue.clear();
+		
+		#ifdef WIN32
+			::_close(sfd);
+		#else
 			::close(sfd);
+		#endif
+			
 			return;
 		}
 

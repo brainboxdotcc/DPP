@@ -23,13 +23,11 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
+#ifdef WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#pragma  comment(lib,"ws2_32")
+#pragma comment(lib,"ws2_32")
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>

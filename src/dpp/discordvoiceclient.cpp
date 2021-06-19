@@ -21,7 +21,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#ifndef _WIN32
+#ifndef WIN32
 #include <unistd.h>
 #include <arpa/inet.h>
 #endif
@@ -272,7 +272,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 						throw std::runtime_error("Can't bind() client UDP socket");
 					}
 					
-#ifdef _WIN32
+#ifdef WIN32
 					u_long mode = 1;
 					int result = ioctlsocket(newfd, FIONBIO, &mode);
 					if (result != NO_ERROR)
@@ -726,7 +726,13 @@ std::string discord_voice_client::discover_ip() {
 			log(ll_warning, "Could not receive packet for IP discovery");
 			return "";
 		}
+
+	#ifdef WIN32
+		::_close(newfd);
+	#else
 		::close(newfd);
+	#endif
+
 		//utility::debug_dump(packet, 74);
 		return std::string((const char*)(packet + 8));
 	}

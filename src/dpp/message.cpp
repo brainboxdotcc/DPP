@@ -461,7 +461,13 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 			if (embed.timestamp != 0) {
 				std::ostringstream ss;
 				struct tm t;
+			
+			#ifdef WIN32
+				gmtime_s(&t, &embed.timestamp);
+			#else
 				gmtime_r(&embed.timestamp, &t);
+			#endif
+				
 				ss << std::put_time(&t, "%FT%TZ");
 				e["timestamp"] = ss.str();
 			}
