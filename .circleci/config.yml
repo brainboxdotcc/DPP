@@ -7,20 +7,14 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Installing SUDO
-          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
-      - run:
-          name: Installing GCC
-          command: 'apt-get update && apt-get install -y gcc g++ build-essential git'
-      - run:
-          name: Install CMAKE
-          command: 'apt-get update && apt-get install -y cmake'
-      - run:
-          name: Installing other dependencies
-          command: 'apt-get update && apt-get install -y libssl-dev zlib1g-dev curl wget'
+          name: Installing build dependencies
+          command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*' && apt-get install -y gcc g++ build-essential git cmake libssl-dev zlib1g-dev curl wget'
       - run:
           name: Creating Build Files
           command: 'cmake -H. -Bbuild'
       - run:
           name: Creating Binary Files
           command: 'cmake --build build'
+      - run:
+          name: Testing installation
+          command: 'cmake --install build'
