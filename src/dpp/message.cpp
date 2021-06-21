@@ -150,6 +150,14 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0)
 	message_reference.fail_if_not_exists = false;
 }
 
+message& message::set_reference(snowflake _message_id, snowflake _guild_id, snowflake _channel_id, bool fail_if_not_exists) {
+	message_reference.channel_id = _channel_id;
+	message_reference.guild_id = _guild_id;
+	message_reference.message_id = _message_id;
+	message_reference.fail_if_not_exists = fail_if_not_exists;
+	return *this;
+}
+
 message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
 	channel_id = _channel_id;
 	content = utility::utf8substr(_content, 0, 2000);

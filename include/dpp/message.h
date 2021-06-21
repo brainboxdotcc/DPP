@@ -662,6 +662,17 @@ struct message {
 	 */
 	message(const std::string &content, message_type type = mt_default);
 
+	/**
+	 * @brief Set the original message reference for replies/crossposts
+	 * 
+	 * @param _message_id message id to reply to
+	 * @param _guild_id guild id to reply to (optional)
+	 * @param _channel_id channel id to reply to (optional)
+	 * @param fail_if_not_exists true if the message send should fail if these values are invalid (optional)
+	 * @return message& 
+	 */
+	message& set_reference(snowflake _message_id, snowflake _guild_id = 0, snowflake _channel_id = 0, bool fail_if_not_exists = false);
+
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
 	 * @param cp Cache policy for user records, wether or not we cache users when a message is received
