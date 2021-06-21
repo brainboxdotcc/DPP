@@ -162,7 +162,8 @@ foreach (fullmodname ${subdirlist})
 	endif()
 
 	if (WIN32)
-		target_link_libraries(${modname} PUBLIC "${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libssl.lib"												      "${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libcrypto.lib"
+		target_link_libraries(${modname} PUBLIC "${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libssl.lib"
+												"${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libcrypto.lib"
 												"${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/zlib.lib")
 	else()
 		target_link_libraries(${modname} PUBLIC ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${ZLIB_LIBRARIES})
