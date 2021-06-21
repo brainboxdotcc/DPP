@@ -144,7 +144,10 @@ embed::embed() : timestamp(0), color(0) {
 message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), flags(0),
 	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0), self_allocated(false)
 {
-
+	message_reference.channel_id = 0;
+	message_reference.guild_id = 0;
+	message_reference.message_id = 0;
+	message_reference.fail_if_not_exists = false;
 }
 
 message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
@@ -384,6 +387,21 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 
 	if (!content.empty()) {
 		j["content"] = content;
+	}
+
+	/* Populate message reference */
+	if (message_reference.channel_id || message_reference.guild_id || message_reference.message_id) {
+		j["message_reference"] = json::array();
+		if (message_reference.channel_id) {
+			j["message_reference"]["channel_id"] = std::to_string(message_reference.channel_id);
+		}
+		if (message_reference.guild_id) {
+			j["message_reference"]["channel_id"] = std::to_string(message_reference.guild_id);
+		}
+		if (message_reference.message_id) {
+			j["message_reference"]["channel_id"] = std::to_string(message_reference.message_id);
+		}
+		j["message_reference"]["fail_if_not_exists"] = message_reference.fail_if_not_exists;
 	}
 
 	if (components.size()) {

@@ -564,7 +564,6 @@ enum cache_policy_t : uint8_t {
 	cp_none = 2
 };
 
-
 /**
  * @brief Represents messages sent and received on Discord
  */
@@ -623,6 +622,13 @@ struct message {
 
 	/** True if the message object allocated its own author user */
 	bool		self_allocated;
+
+	struct message_ref {
+		snowflake message_id;		// id of the originating message
+		snowflake channel_id;		// id of the originating message's channel
+		snowflake guild_id;		// id of the originating message's guild
+		bool fail_if_not_exists;	// when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
+	} message_reference;
 
 	/**
 	 * @brief Construct a new message object
