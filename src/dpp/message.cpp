@@ -399,7 +399,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 
 	/* Populate message reference */
 	if (message_reference.channel_id || message_reference.guild_id || message_reference.message_id) {
-		j["message_reference"] = json::array();
+		j["message_reference"] = json::object();
 		if (message_reference.channel_id) {
 			j["message_reference"]["channel_id"] = std::to_string(message_reference.channel_id);
 		}
