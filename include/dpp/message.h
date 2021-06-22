@@ -564,7 +564,6 @@ enum cache_policy_t : uint8_t {
 	cp_none = 2
 };
 
-
 /**
  * @brief Represents messages sent and received on Discord
  */
@@ -624,6 +623,13 @@ struct message {
 	/** True if the message object allocated its own author user */
 	bool		self_allocated;
 
+	struct message_ref {
+		snowflake message_id;		// id of the originating message
+		snowflake channel_id;		// id of the originating message's channel
+		snowflake guild_id;		// id of the originating message's guild
+		bool fail_if_not_exists;	// when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
+	} message_reference;
+
 	/**
 	 * @brief Construct a new message object
 	 */
@@ -655,6 +661,17 @@ struct message {
 	 * @param type The message type to create
 	 */
 	message(const std::string &content, message_type type = mt_default);
+
+	/**
+	 * @brief Set the original message reference for replies/crossposts
+	 * 
+	 * @param _message_id message id to reply to
+	 * @param _guild_id guild id to reply to (optional)
+	 * @param _channel_id channel id to reply to (optional)
+	 * @param fail_if_not_exists true if the message send should fail if these values are invalid (optional)
+	 * @return message& 
+	 */
+	message& set_reference(snowflake _message_id, snowflake _guild_id = 0, snowflake _channel_id = 0, bool fail_if_not_exists = false);
 
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
