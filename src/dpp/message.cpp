@@ -404,10 +404,10 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 			j["message_reference"]["channel_id"] = std::to_string(message_reference.channel_id);
 		}
 		if (message_reference.guild_id) {
-			j["message_reference"]["channel_id"] = std::to_string(message_reference.guild_id);
+			j["message_reference"]["guild_id"] = std::to_string(message_reference.guild_id);
 		}
 		if (message_reference.message_id) {
-			j["message_reference"]["channel_id"] = std::to_string(message_reference.message_id);
+			j["message_reference"]["message_id"] = std::to_string(message_reference.message_id);
 		}
 		j["message_reference"]["fail_if_not_exists"] = message_reference.fail_if_not_exists;
 	}
