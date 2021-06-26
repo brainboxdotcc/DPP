@@ -23,24 +23,19 @@ int main()
 
 		command_handler.add_command(
 			/* Command name */
-			"ping",
+			"channelid",
 
 			/* Parameters */
-			{
-				{"testparameter", dpp::param_info(dpp::pt_string, true, "Optional test parameter") }
-			},
+			{},
 
 			/* Command handler */
 			[&command_handler, d](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
-
-				command_handler.reply(dpp::message(fmt::format("Pong! {0:.3f}", d->websocket_ping)), src);
+				std::cout << src.channel_id << std::endl;
+				command_handler.reply(dpp::message(fmt::format("Channel ID is `{0}`", src.channel_id)), src);
 			},
 
 			/* Command description */
-			"A test ping command",
-
-			/* Guild id (omit for a global command) */
-			819556414099554344
+			"Checks what the channel ID is"
 		);
 
 	});
