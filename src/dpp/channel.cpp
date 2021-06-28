@@ -40,7 +40,9 @@ channel::channel() :
 	rate_limit_per_user(0),
 	owner_id(0),
 	parent_id(0),
-	last_pin_timestamp(0)
+	last_pin_timestamp(0),
+	message_count(0),
+	member_count(0)
 {
 }
 
