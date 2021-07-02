@@ -56,3 +56,19 @@ jobs:
 
       - name: Build Project
         run: cmake --build main/build --target libdpp --config Release
+
+  macos:
+    name: macOS x64
+    runs-on: macos-latest
+    steps:
+      - name: Checkout D++
+        uses: actions/checkout@v2
+
+      - name: Install homebrew packages
+        run: brew install cmake ninja libsodium opus
+
+      - name: Generate CMake
+        run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+
+      - name: Build Project
+        run: cd build && ninja
