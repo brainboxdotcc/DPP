@@ -16,179 +16,106 @@
 # limitations under the License.
 #
 
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.15)
 
-set(BUILD_SHARED_LIBS TRUE)
+include(cmake/DetermineVersion.cmake)
+include(cmake/colour.cmake)
 
-if(WIN32)
-	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-	set(VCPKG_INSTALLATION_64_BITS_FOLDER "$ENV{VCPKG_ROOT}/installed/x64-windows")
-	set(ZLIB_LIBRARIES "${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib")
-	set(ZLIB_INCLUDE_DIR "${VCPKG_INSTALLATION_64_BITS_FOLDER}/include")
+# Initial Project Setup
+project(D++
+		VERSION ${DPP_VERSION}
+		HOMEPAGE_URL https://github.com/brainboxdotcc/DPP/
+		LANGUAGES CXX)
 
-	link_libraries("${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libssl.lib")
-	link_libraries("${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libcrypto.lib")
-	link_libraries("${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/zlib.lib")
+## CMake and Compiler Setup
+set(CMAKE_CXX_STANDARD 17)                                      # Minimum C++ Version
+set(CMAKE_CXX_EXTENSIONS OFF)                                   # True if compiler extensions are necessary. (Changes -std flag)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)                             # True to require minimum C++ version to compile
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/modules)  # Tell CMake where to access FindXXX.cmake files
 
-	include_directories("${VCPKG_INSTALLATION_64_BITS_FOLDER}/include")
-	include_directories("C:/Program Files/OpenSSL-Win64/include")
+# Project options
+option(BUILD_SHARED_LIBS "Should the library be built shared (YES) or static (NO)" YES)
+option(DPP_BUILD_TESTS   "Should testing be compiled?" FALSE)
 
-	add_compile_definitions(OPENSSL_SYS_WIN32)
-	add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
-	add_compile_definitions(WIN32_LEAN_AND_MEAN)
-	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-	add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
-endif()
-
-if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-	set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
-endif()
-
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h" version_h)
-
-if(NOT version_h MATCHES "DPP_VERSION_SHORT ([0-9][0-9])([0-9][0-9])([0-9][0-9])")
-	message(FATAL_ERROR "Cannot get DPP_VERSION_SHORT from version.h")
-endif()
-
-math(EXPR DPP_VERSION_MAJOR ${CMAKE_MATCH_1})
-math(EXPR DPP_VERSION_MINOR ${CMAKE_MATCH_2})
-math(EXPR DPP_VERSION_PATCH ${CMAKE_MATCH_3})
-
-string(CONCAT DPP_VERSION ${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSION_PATCH})
-
-project(libdpp VERSION ${DPP_VERSION} LANGUAGES CXX)
-
-if(NOT BUILD_SHARED_LIBS)
-	if(UNIX)
-		message("-- Building static library.")
-		
-		if(UNIX AND NOT APPLE)
-			set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-		endif()
-		
-		set(OPENSSL_USE_STATIC_LIBS ON)
-		set(sodium_USE_STATIC_LIBS ON)
-		set(OPUS_USE_STATIC_LIBS TRUE)
-	else()
-		message(WARNING "-- Building of static library not supported on non UNIX systems.")
-	endif()
-endif()
-
-include("cmake/colour.cmake")
-include("cmake/FindSodium.cmake")
-include("cmake/FindOpus.cmake")
-
-if(DEFINED OPUS_FOUND)
-	if(DEFINED sodium_VERSION_STRING)
-		add_compile_definitions(HAVE_VOICE)
-		
-		message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
-		
-		set(HAVE_VOICE 1)
-	endif()
-endif()
-
-if(HAVE_VOICE)
-	message("-- Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
-else(HAVE_VOICE)
-	message("-- Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
-endif(HAVE_VOICE)
-
-aux_source_directory("src" coresrc)
-
-add_executable(test ${coresrc})
-
-string(ASCII 27 Esc)
-
+# Project variable defaults
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-find_package(Threads REQUIRED)
-find_package(ZLIB REQUIRED)
-
-if(APPLE)
-	set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
-
-	find_package(OpenSSL REQUIRED)
+# Project Build Targets
+if(BUILD_SHARED_LIBS)
+	add_library(libdpp SHARED)
 else()
-	find_package(OpenSSL REQUIRED)
+	message("-- Building static library.")
+
+	add_library(libdpp STATIC)
+	set(OPENSSL_USE_STATIC_LIBS ON)
+	set(sodium_USE_STATIC_LIBS ON)
+	set(OPUS_USE_STATIC_LIBS TRUE)
 endif()
+target_include_directories(libdpp PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-include_directories(${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS})
-
-target_compile_features(test PRIVATE cxx_std_17)
-
-include_directories("include")
-
-find_package(Git QUIET)
-
-if(NOT GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-	message(FATAL_ERROR "You are using a git version of D++ but do not have git installed. Install git (not 'gh') and try again.")
-endif()
-
-if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
-	message("-- Building ${Green}git${ColourReset} version. ${Green}Be aware git versions may be unstable!${ColourReset}")
-else()
-	message("-- Building ${Green}stable${ColourReset} version ${Green}${DPP_VERSION}${ColourReset}")
-endif()
-
-if(UNIX OR MSYS)
-	find_program(LDCONFIG_EXECUTABLE "ldconfig")
-endif()
-
-if(MSVC)
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /Od /DEBUG /Zi /W4 /sdl /MP")
-	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /O2 /Oi /Oy /GL /Gy /W4 /sdl /MP")
-	endif()
-else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread -g -O3 -fPIC -rdynamic")
-endif()
-
-set(modules_dir "src")
-
-file(GLOB subdirlist ${modules_dir}/dpp)
-
-foreach (fullmodname ${subdirlist})
-    get_filename_component(modname ${fullmodname} NAME)
-    set (modsrc "")
-	
-	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp")
-	
-	if(BUILD_SHARED_LIBS)
-        add_library(${modname} SHARED ${modsrc})
-	else()
-		add_library(${modname} STATIC ${modsrc})
-	endif()
-
-	if (WIN32)
-		target_link_libraries(${modname} PUBLIC "${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libssl.lib"
-												"${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libcrypto.lib"
-												"${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/zlib.lib")
-	else()
-		target_link_libraries(${modname} PUBLIC ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${ZLIB_LIBRARIES})
-	endif()
-
-	if (HAVE_VOICE)
-		target_link_libraries(${modname} PUBLIC ${sodium_LIBRARY_RELEASE} ${OPUS_LIBRARIES})
-		
-		include_directories(${OPUS_INCLUDE_DIRS} ${sodium_INCLUDE_DIR})
-	endif()
-endforeach()
-
-target_compile_features(dpp PRIVATE cxx_std_17)
-
-target_link_libraries(test PUBLIC ${modname})
-
+# OS Specific Initialization
 if(WIN32)
-	configure_file("${VCPKG_INSTALLATION_64_BITS_FOLDER}/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+	include(cmake/CMakeWindows.cmake)
+elseif(APPLE)
+	set(OPENSSL_ROOT_DIR /usr/local/opt/openssl)
 endif()
 
-if(NOT WIN32)
-	# Installation
-
-	include(GNUInstallDirs)
-	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-	install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostInstall.cmake)")
+# Find packages
+find_package(Git QUIET)
+find_package(OpenSSL REQUIRED)
+find_package(Threads REQUIRED)
+find_package(Sodium)
+if(NOT WIN32) # These libs are found differently on windows
+	find_package(ZLIB REQUIRED)
+	find_package(Opus)
 endif()
+
+# Collect sources
+file(GLOB sources CONFIGURE_DEPENDS src/dpp/*.cpp src/dpp/events/*.cpp)
+target_sources(libdpp PRIVATE ${sources})
+
+# Link available libraries
+target_link_libraries(libdpp PRIVATE OpenSSL::SSL)
+target_link_libraries(libdpp PRIVATE Threads::Threads)
+target_link_libraries(libdpp PRIVATE zlib)
+
+# Determine if voice support will be enabled
+if(Sodium_FOUND AND Opus_FOUND)
+	target_link_libraries(libdpp PRIVATE sodium)
+	target_link_libraries(libdpp PRIVATE opus)
+
+	message(STATUS "Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
+	target_compile_definitions(libdpp PRIVATE HAVE_VOICE)
+else()
+	message(STATUS "Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
+endif()
+
+# Build tests
+if(DPP_BUILD_TESTS)
+	add_executable(test src/test/test.cpp)
+	target_link_libraries(test PRIVATE libdpp)
+endif()
+
+return()
+###################################################################################
+###################################################################################
+###################################################################################
+###################################################################################
+#
+#if(UNIX OR MSYS)
+#	find_program(LDCONFIG_EXECUTABLE "ldconfig")
+#endif()
+#
+#
+#if(WIN32)
+#	configure_file("${VCPKG_INSTALLATION_64_BITS_FOLDER}/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+#endif()
+#
+#if(NOT WIN32)
+#	# Installation
+#
+#	include(GNUInstallDirs)
+#	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+#	install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+#	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostInstall.cmake)")
+#endif()

@@ -1,0 +1,11 @@
+file(READ ${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h version_h)
+
+if(NOT version_h MATCHES "DPP_VERSION_SHORT ([0-9][0-9])([0-9][0-9])([0-9][0-9])")
+	message(FATAL_ERROR "Cannot get DPP_VERSION_SHORT from version.h")
+endif()
+
+math(EXPR DPP_VERSION_MAJOR ${CMAKE_MATCH_1})
+math(EXPR DPP_VERSION_MINOR ${CMAKE_MATCH_2})
+math(EXPR DPP_VERSION_PATCH ${CMAKE_MATCH_3})
+
+string(CONCAT DPP_VERSION ${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSION_PATCH})
