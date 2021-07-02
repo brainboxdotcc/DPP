@@ -11,9 +11,12 @@ jobs:
         cfg:
           - { os: ubuntu-20.04, cpp-version: g++-8 }
           - { os: ubuntu-20.04, cpp-version: g++-9 }
+          - { os: ubuntu-20.04, cpp-version: clang-7 }
+          - { os: ubuntu-20.04, cpp-version: clang-8 }
+          - { os: ubuntu-20.04, cpp-version: clang-9 }
 
     steps:
-      - name: Checkout D++
+      - name: Checkout Etterna
         uses: actions/checkout@v2
 
       - name: Install apt packages
@@ -27,29 +30,29 @@ jobs:
       - name: Build Project
         run: cd build && ninja
 
-      - name: Package distributable
-        if: ${{ matrix.cfg.cpp-version == 'clang-9' }}
-        run: cd build && cpack
+  windows: # Windows x64 and x86 build matrix
+    strategy:
+      fail-fast: false # Don't cancel other matrix jobs if one fails
+      matrix:
+        cfg:
+        - { name: x64,  arch: x64,   ssl-dir: 'C:\Program Files\OpenSSL-Win64'}
 
-      - name: Upload Binary
-        if: ${{ matrix.cfg.cpp-version == 'clang-9' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: "libdpp - Debian Package ${{matrix.cfg.name}}"
-          path: '${{github.workspace}}/build/*.deb'
-
-  macos:
-    name: macOS x64
-    runs-on: macos-latest
+    name: "Windows ${{matrix.cfg.name}}"
+    runs-on: windows-2019
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2
+        with:
+          path: main
 
-      - name: Install homebrew packages
-        run: brew install cmake ninja libsodium opus
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Install chocolatey packages (x64)
+        run: choco install ninja -y
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir main/build && cd main/build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR="${{matrix.cfg.ssl-dir}}" ..
 
       - name: Build Project
-        run: cd build && ninja
+        run: cmake --build main/build --target libdpp
