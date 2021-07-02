@@ -39,7 +39,6 @@ if(MSVC)
 
 		# Release mode only options
 		$<$<NOT:$<CONFIG:Debug>>:/O2>  # Optimize for speed (Equivalent to /Og /Oi /Ot /Oy /Ob2 /GF /Gy)
-		$<$<NOT:$<CONFIG:Debug>>:/ZI>  # Create Debug Information (Forces /Gy and /FC)
 		$<$<NOT:$<CONFIG:Debug>>:/GL>  # Whole program optimization
 	)
 endif()
