@@ -91,7 +91,9 @@ if (UNIX)
 ########################################################################
 # Windows
 elseif (WIN32)
-    set(sodium_DIR "$ENV{sodium_DIR}" CACHE FILEPATH "sodium install directory")
+    if(NOT DEFINED sodium_DIR)
+        set(sodium_DIR "$ENV{sodium_DIR}" CACHE FILEPATH "sodium install directory")
+    endif()
     mark_as_advanced(sodium_DIR)
 
     find_path(sodium_INCLUDE_DIR sodium.h
