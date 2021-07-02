@@ -77,7 +77,7 @@ target_sources(libdpp PRIVATE ${sources})
 # Link available libraries
 target_link_libraries(libdpp PRIVATE OpenSSL::SSL)
 target_link_libraries(libdpp PRIVATE Threads::Threads)
-target_link_libraries(libdpp PRIVATE zlib)
+target_link_libraries(libdpp PRIVATE ZLIB::ZLIB)
 
 # Determine if voice support will be enabled
 if(Sodium_FOUND AND Opus_FOUND)

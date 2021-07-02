@@ -6,6 +6,7 @@ include(cmake/PrepareOpusWindows.cmake)
 
 # Precompiled 64bit zlib added from https://www.bruot.org/hp/libraries/
 add_library(zlib INTERFACE)
+add_library(ZLIB::ZLIB ALIAS zlib) # Added to keep a single target_link_libraries for both windows and linux
 target_include_directories(zlib INTERFACE ${PROJECT_SOURCE_DIR}/libs/zlib/include)
 file(GLOB zlib_libs ${PROJECT_SOURCE_DIR}/libs/zlib/lib/*.lib)
 target_link_libraries(zlib INTERFACE ${zlib_libs})

@@ -52,7 +52,7 @@ jobs:
         run: choco install ninja -y
 
       - name: Generate CMake
-        run: mkdir main/build && cd main/build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DOPENSSL_ROOT_DIR="${{matrix.cfg.ssl-dir}}" ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" -DOPENSSL_ROOT_DIR="${{matrix.cfg.ssl-dir}}" ..
 
       - name: Build Project
-        run: cmake --build main/build --target libdpp
+        run: cmake --build main/build --target libdpp --config Release
