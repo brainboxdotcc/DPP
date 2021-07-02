@@ -42,16 +42,16 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # Project Build Targets
 if(BUILD_SHARED_LIBS)
-	add_library(libdpp SHARED)
+	add_library(dpp SHARED)
 else()
 	message("-- Building static library.")
 
-	add_library(libdpp STATIC)
+	add_library(dpp STATIC)
 	set(OPENSSL_USE_STATIC_LIBS ON)
 	set(sodium_USE_STATIC_LIBS ON)
 	set(OPUS_USE_STATIC_LIBS TRUE)
 endif()
-target_include_directories(libdpp PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(dpp PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 # OS Specific Initialization
 if(WIN32)
@@ -72,20 +72,20 @@ endif()
 
 # Collect sources
 file(GLOB sources CONFIGURE_DEPENDS src/dpp/*.cpp src/dpp/events/*.cpp)
-target_sources(libdpp PRIVATE ${sources})
+target_sources(dpp PRIVATE ${sources})
 
 # Link available libraries
-target_link_libraries(libdpp PUBLIC OpenSSL::SSL)
-target_link_libraries(libdpp PRIVATE Threads::Threads)
-target_link_libraries(libdpp PRIVATE ZLIB::ZLIB)
+target_link_libraries(dpp PUBLIC OpenSSL::SSL)
+target_link_libraries(dpp PRIVATE Threads::Threads)
+target_link_libraries(dpp PRIVATE ZLIB::ZLIB)
 
 # Determine if voice support will be enabled
 if(Sodium_FOUND AND Opus_FOUND)
-	target_link_libraries(libdpp PRIVATE sodium)
-	target_link_libraries(libdpp PRIVATE opus)
+	target_link_libraries(dpp PRIVATE sodium)
+	target_link_libraries(dpp PRIVATE opus)
 
 	message(STATUS "Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
-	target_compile_definitions(libdpp PRIVATE HAVE_VOICE)
+	target_compile_definitions(dpp PRIVATE HAVE_VOICE)
 else()
 	message(STATUS "Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
 endif()
@@ -94,7 +94,7 @@ endif()
 if(DPP_BUILD_TESTS)
 	message(STATUS D++ Tests enabled. Adding test targets)
 	add_executable(test src/test/test.cpp)
-	target_link_libraries(test PRIVATE libdpp)
+	target_link_libraries(test PRIVATE dpp)
 endif()
 
 # CPack Initialization
