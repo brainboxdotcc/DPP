@@ -332,7 +332,7 @@ embed& embed::set_title(const std::string &text) {
 }
 
 embed& embed::set_description(const std::string &text) {
-	description = utility::utf8substr(text, 0, 2048);
+	description = utility::utf8substr(text, 0, 4096);
 	return *this;
 }
 
