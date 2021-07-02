@@ -16,13 +16,13 @@
 # limitations under the License.
 #
 
-cmake_minimum_required (VERSION 3.15)
+cmake_minimum_required (VERSION 3.12)
 
 include(cmake/DetermineVersion.cmake)
 include(cmake/colour.cmake)
 
 # Initial Project Setup
-project(D++
+project(DPP
 		VERSION ${DPP_VERSION}
 		HOMEPAGE_URL https://github.com/brainboxdotcc/DPP/
 		LANGUAGES CXX)
@@ -75,7 +75,7 @@ file(GLOB sources CONFIGURE_DEPENDS src/dpp/*.cpp src/dpp/events/*.cpp)
 target_sources(libdpp PRIVATE ${sources})
 
 # Link available libraries
-target_link_libraries(libdpp PRIVATE OpenSSL::SSL)
+target_link_libraries(libdpp PUBLIC OpenSSL::SSL)
 target_link_libraries(libdpp PRIVATE Threads::Threads)
 target_link_libraries(libdpp PRIVATE ZLIB::ZLIB)
 
@@ -92,9 +92,14 @@ endif()
 
 # Build tests
 if(DPP_BUILD_TESTS)
+	message(STATUS D++ Tests enabled. Adding test targets)
 	add_executable(test src/test/test.cpp)
 	target_link_libraries(test PRIVATE libdpp)
 endif()
+
+# CPack Initialization
+include(cmake/CPackSetup.cmake)
+include(CPack)
 
 return()
 ###################################################################################
