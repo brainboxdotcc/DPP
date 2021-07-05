@@ -297,6 +297,11 @@ embed& embed::set_author(const std::string& name, const std::string& url, const 
 	return *this;
 }
 
+embed& embed::set_footer(const embed_footer& f) {
+	footer = f;
+	return *this;
+}
+
 embed& embed::set_provider(const std::string& name, const std::string& url) {
 	dpp::embed_provider p;
 	p.name = utility::utf8substr(name, 0, 256);

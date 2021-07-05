@@ -356,6 +356,14 @@ struct embed {
 	 */
 	embed& set_description(const std::string &text);
 
+	/**
+	 * @brief Set the footer of the embed
+	 * 
+	 * @param f the footer to set
+	 * @return embed& a reference to self
+	 */
+	embed& set_footer(const embed_footer& f);
+
 	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
 	 * @param col The colour of the embed
 	 * @return A reference to self
