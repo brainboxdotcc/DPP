@@ -10,7 +10,6 @@ add_library(ZLIB::ZLIB ALIAS zlib) # Added to keep a single target_link_librarie
 target_include_directories(zlib INTERFACE ${PROJECT_SOURCE_DIR}/libs/zlib/include)
 file(GLOB zlib_libs ${PROJECT_SOURCE_DIR}/libs/zlib/lib/*.lib)
 target_link_libraries(zlib INTERFACE ${zlib_libs})
-set(Opus_FOUND TRUE) # Set manually since we know we have it, and the find_package command won't run
 
 # Precompiled 32 and 64bit sodium added from https://download.libsodium.org/libsodium/releases/
 set(sodium_DIR ${PROJECT_SOURCE_DIR}/libs/libsodium)

@@ -25,3 +25,4 @@ if(NOT EXISTS ${OPUS_SRC}/include/opus)
 
 endif()
 target_include_directories(opus PRIVATE ${OPUS_SRC}/include/)
+set(Opus_FOUND TRUE) # Set manually since we know we have it, and the find_package command won't run
