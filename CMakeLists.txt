@@ -92,7 +92,7 @@ endif()
 
 # Build tests
 if(DPP_BUILD_TESTS)
-	message(STATUS D++ Tests enabled. Adding test targets)
+	message(STATUS "D++ Tests enabled. Adding test targets...")
 	add_executable(test src/test/test.cpp)
 	target_link_libraries(test PRIVATE libdpp)
 endif()
