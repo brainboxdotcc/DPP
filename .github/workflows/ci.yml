@@ -30,6 +30,17 @@ jobs:
       - name: Build Project
         run: cd build && ninja
 
+      - name: Package distributable
+        if: ${{ matrix.cfg.cpp-version == 'clang-9' }}
+        run: cd build && cpack
+
+      - name: Upload Binary
+        if: ${{ matrix.cfg.cpp-version == 'clang-9' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - Debian Package ${{matrix.cfg.name}}"
+          path: '${{github.workspace}}/build/*.deb'
+
   windows: # Windows x64 and x86 build matrix
     strategy:
       fail-fast: false # Don't cancel other matrix jobs if one fails
