@@ -16,7 +16,7 @@ set(Opus_FOUND TRUE) # Set manually since we know we have it, and the find_packa
 set(sodium_DIR ${PROJECT_SOURCE_DIR}/libs/libsodium)
 
 # Windows specific compile definitions and options
-target_compile_definitions(dpp PRIVATE
+target_compile_definitions(libdpp PRIVATE
 	OPENSSL_SYS_WIN32
 	WIN32_LEAN_AND_MEAN
 	_CRT_SECURE_NO_WARNINGS
@@ -26,7 +26,7 @@ target_compile_definitions(dpp PRIVATE
 
 
 if(MSVC)
-	target_compile_options(dpp PRIVATE
+	target_compile_options(libdpp PRIVATE
 		# Universal Options
 		/W4	   					  # Display up to level 4 warnings
 		/sdl					  # Enable additional security checks
