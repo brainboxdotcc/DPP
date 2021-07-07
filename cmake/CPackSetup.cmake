@@ -1,5 +1,6 @@
 # Configure what will be included in a project output
 ## Export related directories
+include(GNUInstallDirs)
 set(DPP_EXPORT_NAME libdpp)
 set(DPP_VERSIONED ${DPP_EXPORT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
 set(DPP_VERSION_FILE ${PROJECT_BINARY_DIR}/${DPP_EXPORT_NAME}-config-version.cmake)
