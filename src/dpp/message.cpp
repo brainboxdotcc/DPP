@@ -569,7 +569,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	/* May be null, if its null cache it from the partial */
 	if (d->find("author") != d->end()) {
 		json &author = (*d)["author"];
-		if (cp == dpp::cp_none) {
+		if (cp.user_policy == dpp::cp_none) {
 			/* User caching off! Allocate a temp user to be deleted in destructor */
 			authoruser = new user();
 			this->author = authoruser;
@@ -615,7 +615,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		if (!uid && authoruser) {
 			uid = authoruser->id;
 		}
-		if (cp == dpp::cp_none) {
+		if (cp.user_policy == dpp::cp_none) {
 			/* User caching off! Just fill in directly but dont store member to guild */
 			this->member.fill_from_json(&mi, g->id, uid);
 		} else {

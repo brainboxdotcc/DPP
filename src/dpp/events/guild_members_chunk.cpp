@@ -49,7 +49,7 @@ void guild_members_chunk::handle(discord_client* client, json &j, const std::str
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 	if (g) {
 		/* Store guild members */
-		if (client->creator->cache_policy == cp_aggressive) {
+		if (client->creator->cache_policy.user_policy == cp_aggressive) {
 			for (auto & userrec : d["members"]) {
 				json & userspart = userrec["user"];
 				dpp::user* u = dpp::find_user(SnowflakeNotNull(&userspart, "id"));

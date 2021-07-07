@@ -553,23 +553,30 @@ enum message_type {
 	mt_guild_invite_reminder			= 22
 };
 
-/**
- * @brief Represents the user caching policy of the cluster.
- */
-enum cache_policy_t : uint8_t {
+enum cache_policy_setting_t {
 	/**
-	 * @brief request whole member lists on seeing new guilds, and also store users when they message us
+	 * @brief request aggressively on seeing new guilds, and also store missing data from messages.
+	 * This is the default behaviour.
 	 */
 	cp_aggressive = 0,
 	/**
-	 * @brief only cache users/members when they message the bot
+	 * @brief only cache when there is relavent activity, e.g. a message to the bot.
 	 */
 	cp_lazy = 1,
 	/**
-	 * @brief Don't cache anything. Fill member details when we see them.
+	 * @brief Don't cache anything. Fill details when we see them.
 	 * (NOT IMPLEMENTED YET)
 	 */
 	cp_none = 2
+};
+
+/**
+ * @brief Represents the caching policy of the cluster.
+ */
+struct cache_policy_t {
+	cache_policy_setting_t user_policy = cp_aggressive;
+	cache_policy_setting_t emoji_policy = cp_aggressive;
+	cache_policy_setting_t role_policy = cp_aggressive;
 };
 
 /**
@@ -686,7 +693,7 @@ struct message {
 	 * @param cp Cache policy for user records, wether or not we cache users when a message is received
 	 * @return A reference to self
 	 */
-	message& fill_from_json(nlohmann::json* j, cache_policy_t cp = dpp::cp_aggressive);
+	message& fill_from_json(nlohmann::json* j, cache_policy_t cp = {cp_aggressive, cp_aggressive, cp_aggressive});
 
 	/** Build JSON from this object.
 	 * @param with_id True if the ID is to be included in the built JSON

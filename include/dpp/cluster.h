@@ -229,7 +229,7 @@ public:
 	 * @param compressed Wether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
 	 * @param policy Set the user caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
 	 */
-	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cp_aggressive);
+	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = {cp_aggressive, cp_aggressive, cp_aggressive});
 
 	/**
 	 * @brief dpp::cluster is non-copyable
