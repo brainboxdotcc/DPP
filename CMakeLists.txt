@@ -51,7 +51,14 @@ else()
 	set(sodium_USE_STATIC_LIBS ON)
 	set(OPUS_USE_STATIC_LIBS TRUE)
 endif()
-target_include_directories(libdpp PUBLIC ${PROJECT_SOURCE_DIR}/include)
+set_target_properties(libdpp PROPERTIES PREFIX "")  # Remove "lib" prefix when exporting.
+include(cmake/CPackSetup.cmake)						# Setup information for packaging and distribution
+
+# Conditionally include based on build type
+target_include_directories(libdpp PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>  # Include directory to use when building the binary
+		$<INSTALL_INTERFACE:${DPP_INSTALL_INCLUDE_DIR}>	  # Include directory to use when installing on a system
+        )
 
 # OS Specific Initialization
 if(WIN32)
@@ -97,8 +104,7 @@ if(DPP_BUILD_TESTS)
 	target_link_libraries(test PRIVATE libdpp)
 endif()
 
-# CPack Initialization
-include(cmake/CPackSetup.cmake)
+# CPack initialization for distribution
 include(CPack)
 
 return()
