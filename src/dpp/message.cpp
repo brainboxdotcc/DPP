@@ -142,7 +142,7 @@ embed::embed() : timestamp(0), color(0) {
 }
 
 message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), flags(0),
-	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0), self_allocated(false)
+	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0)
 {
 	message_reference.channel_id = 0;
 	message_reference.guild_id = 0;
@@ -545,9 +545,6 @@ bool message::is_loading() const {
 }
 
 message::~message() {
-	if (self_allocated) {
-		delete this->author;
-	}
 }
 
 
@@ -568,21 +565,19 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	user* authoruser = nullptr;
 	/* May be null, if its null cache it from the partial */
 	if (d->find("author") != d->end()) {
-		json &author = (*d)["author"];
+		json &j_author = (*d)["author"];
 		if (cp.user_policy == dpp::cp_none) {
 			/* User caching off! Allocate a temp user to be deleted in destructor */
-			authoruser = new user();
-			this->author = authoruser;
-			authoruser->fill_from_json(&author);
-			self_allocated = true;
+			authoruser = &self_author;
+			this->author = &self_author;
+			self_author.fill_from_json(&j_author);
 		} else {
 			/* User caching on - aggressive or lazy - create a cached user entry */
-			self_allocated = false;
-			authoruser = find_user(SnowflakeNotNull(&author, "id"));
+			authoruser = find_user(SnowflakeNotNull(&j_author, "id"));
 			if (!authoruser) {
 				/* User does not exist yet, cache the partial as a user record */
 				authoruser = new user();
-				authoruser->fill_from_json(&author);
+				authoruser->fill_from_json(&j_author);
 				get_user_cache()->store(authoruser);
 			}
 			this->author = authoruser;

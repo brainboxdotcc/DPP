@@ -635,8 +635,8 @@ struct message {
 	/** Message type */
 	uint8_t		type;
 
-	/** True if the message object allocated its own author user */
-	bool		self_allocated;
+	/** Self allocated user for caching being off */
+	user		self_author;
 
 	struct message_ref {
 		snowflake message_id;		// id of the originating message
