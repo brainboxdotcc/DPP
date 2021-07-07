@@ -40,5 +40,8 @@ set(CPACK_PACKAGE_VENDOR Brainbox.cc)       # Maker of the application
 if(WIN32)
     set(CPACK_GENERATOR ZIP)
 elseif(UNIX)
-    set(CPACK_GENERATOR TGZ)
+    set(CPACK_GENERATOR DEB)
+    set(CPACK_PACKAGE_CONTACT "https://discord.gg/dpp") # D++ Development Discord
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "")  # Explicitly defined as empty string to show we have no required deps
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "An incredibly lightweight C++ Discord library")
 endif()
