@@ -42,6 +42,6 @@ if(WIN32)
 elseif(UNIX)
     set(CPACK_GENERATOR DEB)
     set(CPACK_PACKAGE_CONTACT "https://discord.gg/dpp") # D++ Development Discord
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "")  # Explicitly defined as empty string to show we have no required deps
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsodium23 (>= 1.0.17-1), libopus0 (>= 1.3-1)")
     set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "An incredibly lightweight C++ Discord library")
 endif()
