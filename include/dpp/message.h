@@ -572,10 +572,28 @@ enum cache_policy_setting_t {
 
 /**
  * @brief Represents the caching policy of the cluster.
+ * 
+ * Channels and guilds are always cached as these caches are used
+ * interally by the library. The memory usage of these is minimal.
+ * 
+ * All default to 'aggressive' which means to actively attempt to cache,
+ * going out of the way to fill the caches completely. On large bots this
+ * can take a LOT of RAM.
  */
 struct cache_policy_t {
+	/**
+	 * @brief Caching policy for users and guild members
+	 */
 	cache_policy_setting_t user_policy = cp_aggressive;
+
+	/**
+	 * @brief Caching policy for emojis
+	 */
 	cache_policy_setting_t emoji_policy = cp_aggressive;
+
+	/**
+	 * @brief Caching policy for roles
+	 */
 	cache_policy_setting_t role_policy = cp_aggressive;
 };
 
@@ -639,10 +657,14 @@ struct message {
 	user		self_author;
 
 	struct message_ref {
-		snowflake message_id;		// id of the originating message
-		snowflake channel_id;		// id of the originating message's channel
-		snowflake guild_id;		// id of the originating message's guild
-		bool fail_if_not_exists;	// when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
+		/// id of the originating message
+		snowflake message_id;
+		/// id of the originating message's channel
+		snowflake channel_id;
+		/// id of the originating message's guild
+		snowflake guild_id;
+		/// when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
+		bool fail_if_not_exists;
 	} message_reference;
 
 	/**
@@ -650,9 +672,12 @@ struct message {
 	 */
 	message();
 
+	/**
+	 * @brief Destroy the message object
+	 */
 	~message();
 
-    /**
+	/**
 	 * @brief Construct a new message object with a channel and content
 	 *
 	 * @param channel_id The channel to send the message to
