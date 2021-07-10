@@ -469,9 +469,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		j["components"].push_back(n);
 	}
 	if (embeds.size()) {
-		if (is_interaction_response) {
-			j["embeds"] = json::array();
-		}
+		j["embeds"] = json::array();
 
 		for (auto& embed : embeds) {
 			json e;
@@ -518,13 +516,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 				e["timestamp"] = ss.str();
 			}
 
-			if (is_interaction_response) {
 				j["embeds"].push_back(e);
-			} else {
-				/* Sending embeds on normal messages only accepts the first entry */
-				j["embed"] = e;
-				break;
-			}
 		}
 	}
 	return j.dump();
