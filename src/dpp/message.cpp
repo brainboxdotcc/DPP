@@ -352,6 +352,21 @@ embed& embed::set_url(const std::string &u) {
 	return *this;
 }
 
+embed_footer& embed_footer::set_text(const std::string& t){
+    text = t; 
+	return *this;     
+}
+
+embed_footer& embed_footer::set_icon(const std::string& i){     
+	icon_url;
+    return *this;           
+}                                                                                  
+
+embed_footer& embed_footer::set_proxy(const std::string& p){     
+	proxy_url = p;          
+	return *this;
+}
+
 reaction::reaction() {
 	count = 0;
 	me = false;
