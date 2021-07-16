@@ -145,7 +145,9 @@ std::string channel::build_json(bool with_id) const {
 		j["rate_limit_per_user"] = rate_limit_per_user;
 	}
 	if (!is_dm()) {
-		j["parent_id"] = parent_id;
+		if (parent_id) {
+			j["parent_id"] = parent_id;
+		}
 		if (is_text_channel()) {
 			j["type"] = GUILD_TEXT;
 		} else if (is_voice_channel()) {
