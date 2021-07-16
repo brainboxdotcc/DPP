@@ -239,8 +239,8 @@ void cluster::interaction_response_create(snowflake interaction_id, const std::s
 	});
 }
 
-void cluster::interaction_response_edit(snowflake application_id, const std::string &token, const interaction_response &r, command_completion_event_t callback) {
-	this->post_rest("/api/v8/interactions", std::to_string(application_id), url_encode(token) + "/messages/@original", m_patch, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
+void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
+	this->post_rest("/api/v8/webhooks", std::to_string(me.id), url_encode(token) + "/messages/@original", m_patch, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}

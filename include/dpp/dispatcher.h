@@ -157,6 +157,20 @@ struct interaction_create_t : public event_dispatch_t {
 	void reply(interaction_response_type t, const std::string & mt) const;
 
 	/**
+	 * @brief Edit the response for this interaction
+	 *
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 */
+	void edit_response(const message & m) const;
+
+	/**
+	 * @brief Edit the response for this interaction
+	 *
+	 * @param mt The string value to send, for simple text only messages
+	 */
+	void edit_response(const std::string & mt) const;
+
+	/**
 	 * @brief Get a command line parameter
 	 * 
 	 * @param name The command line parameter to retrieve
