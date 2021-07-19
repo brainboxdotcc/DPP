@@ -33,7 +33,9 @@ enum component_type : uint8_t {
 	/// Action row, a container for other components
 	cot_action_row = 1,
 	/// Clickable button
-	cot_button
+	cot_button = 2,
+	/// Select menu
+	cot_selectmenu = 3
 };
 
 /**
@@ -50,6 +52,48 @@ enum component_style : uint8_t {
 	cos_danger,
 	/// An external hyperlink to a website
 	cos_link
+};
+
+struct select_option {
+	std::string label;
+	std::string value;
+	std::string description;
+	bool is_default;
+	/** Emoji definition. To set an emoji on your button
+	 * you must set one of either the name or id fields.
+	 * The easiest way is to use the component::set_emoji
+	 * method.
+	 */
+	struct inner_select_emoji {
+		/** Set the name field to the name of the emoji.
+		 * For built in unicode emojis, set this to the
+		 * actual unicode value of the emoji e.g. "😄"
+		 * and not for example ":smile:"
+		 */
+		std::string name;
+		/** The emoji ID value for emojis that are custom
+		 * ones belonging to a guild. The same rules apply
+		 * as with other emojis, that the bot must be on
+		 * the guild where the emoji resides and it must
+		 * be available for use (e.g. not disabled due to
+		 * lack of boosts etc)
+		 */
+		dpp::snowflake id = 0;
+	} emoji;
+
+	select_option();
+
+	select_option(const std::string &label, const std::string &value, const std::string &description);
+
+	select_option& set_label(const std::string &l);
+
+	select_option& set_value(const std::string &v);
+
+	select_option& set_description(const std::string &d);
+	
+	select_option& set_emoji(const std::string &n, dpp::snowflake id = 0);
+
+	select_option& set_default(bool def);
 };
 
 /**
@@ -96,6 +140,24 @@ public:
 	 * Maximum of 512 characters.
 	 */
 	std::string url;
+
+	/** Placeholder text for select menus
+	 */
+	std::string placeholder;
+
+	/** Minimum number of selectable values for a select menu.
+	 * -1 to not set this
+	 */
+	int32_t min_values;
+
+	/** Maximum number of selectable values for a select menu.
+	 * -1 to not set this.
+	 */
+	int32_t max_values;
+
+	/** Select options for select menus
+	 */
+	std::vector<select_option> options;
 
 	/** Disabled flag (for buttons)
 	 */
@@ -197,6 +259,15 @@ public:
 	 * @return component&
 	 */
 	component& set_disabled(bool disable);
+
+
+	component& set_placeholder(const std::string &placeholder);
+
+	component& set_min_values(uint32_t min_values);
+
+	component& set_max_values(uint32_t max_values);
+
+	component& add_select_option(const select_option &option);
 
 	/**
 	 * @brief Add a sub-component, only valid for action rows.

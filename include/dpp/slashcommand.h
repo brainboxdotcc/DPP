@@ -282,23 +282,29 @@ struct command_interaction {
  */
 void from_json(const nlohmann::json& j, command_interaction& ci);
 
-/**
- * @brief A button click for a button component
- */
-struct button_interaction {
-	uint8_t component_type;
-	std::string custom_id;
+enum component_type_t {
+	cotype_button = 2,
+	cotype_select = 3
 };
 
 /**
- * @brief helper function to deserialize a button_interaction from json
+ * @brief A button click for a button component
+ */
+struct component_interaction {
+	uint8_t component_type;
+	std::string custom_id;
+	std::vector<std::string> values;
+};
+
+/**
+ * @brief helper function to deserialize a component_interaction from json
  *
  * @see https://github.com/nlohmann/json#arbitrary-types-conversions
  *
  * @param j output json object
  * @param bi button_interaction to be deserialized
  */
-void from_json(const nlohmann::json& j, button_interaction& bi);
+void from_json(const nlohmann::json& j, component_interaction& bi);
 
 /**
  * @brief An interaction represents a user running a command and arrives
@@ -308,7 +314,7 @@ class interaction : public managed {
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
 	uint8_t	type;                                               //!< the type of interaction
-	std::variant<command_interaction, button_interaction> data; //!< Optional: the command data payload
+	std::variant<command_interaction, component_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
 	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions

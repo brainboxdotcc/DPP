@@ -89,6 +89,17 @@ const command_value& button_click_t::get_parameter(const std::string& name) cons
 	return dummy_b_value;
 }
 
+select_click_t::select_click_t(discord_client* client, const std::string &raw) : interaction_create_t(client, raw)
+{
+}
+
+const command_value& select_click_t::get_parameter(const std::string& name) const
+{
+	/* Selects don't have parameters, so override this */
+	static command_value dummy_b_value = {};
+	return dummy_b_value;
+}
+
 guild_delete_t::guild_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
 {
 }

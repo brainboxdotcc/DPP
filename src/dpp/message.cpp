@@ -31,7 +31,7 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-component::component() : type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""), disabled(false)
+component::component() : type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""), disabled(false), min_values(-1), max_values(-1)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -40,7 +40,6 @@ component::component() : type(static_cast<component_type>(1)), label(""), style(
 
 
 component& component::fill_from_json(nlohmann::json* j) {
-
 	type = static_cast<component_type>(Int8NotNull(j, "type"));
 	if (type == cot_action_row) {
 		components;
@@ -52,6 +51,10 @@ component& component::fill_from_json(nlohmann::json* j) {
 	} else if (type == cot_button) {
 		label = StringNotNull(j, "label");
 		style = static_cast<component_style>(Int8NotNull(j, "style"));
+		custom_id = StringNotNull(j, "custom_id");
+		disabled = BoolNotNull(j, "disabled");
+	} else if (type == cot_selectmenu) {
+		label = "";
 		custom_id = StringNotNull(j, "custom_id");
 		disabled = BoolNotNull(j, "disabled");
 	}
@@ -73,7 +76,9 @@ component& component::set_type(component_type ct)
 
 component& component::set_label(const std::string &l)
 {
-	set_type(cot_button);
+	if (type == cot_action_row) {
+		set_type(cot_button);
+	}
 	label = utility::utf8substr(l, 0, 80);
 	return *this;
 }
@@ -95,21 +100,27 @@ component& component::set_url(const std::string& u)
 
 component& component::set_id(const std::string &id)
 {
-	set_type(cot_button);
+	if (type == cot_action_row) {
+		set_type(cot_button);
+	}
 	custom_id = utility::utf8substr(id, 0, 100);
 	return *this;
 }
 
 component& component::set_disabled(bool disable)
 {
-	set_type(cot_button);
+	if (type == cot_action_row) {
+		set_type(cot_button);
+	}
 	disabled = disable;
 	return *this;
 }
 
 component& component::set_emoji(const std::string& name, dpp::snowflake id, bool animated)
 {
-	set_type(cot_button);
+	if (type == cot_action_row) {
+		set_type(cot_button);
+	}
 	this->emoji.id = id;
 	this->emoji.name = name;
 	this->emoji.animated = animated;
@@ -125,14 +136,103 @@ std::string component::build_json() const {
 			new_components.push_back(new_component.build_json());
 		}
 		j["components"] = new_components;
-	} else {
+	} else if (type == component_type::cot_button) {
 		j["type"] = 2;
 		j["label"] = label;
 		j["style"] = int(style);
 		j["custom_id"] = custom_id;
 		j["disabled"] = disabled;
+	} else if (type == component_type::cot_selectmenu) {
+		j["type"] = 3;
+		j["custom_id"] = custom_id;
+		//j["disabled"] = disabled;
+		if (!placeholder.empty()) {
+			j["placeholder"] = placeholder;
+		}
+		if (min_values >= 0) {
+			j["min_values"] = min_values;
+		}
+		if (max_values >= 0) {
+			j["max_values"] = max_values;
+		}
+		j["options"] = json::array();
+		for (auto opt : options) {
+			json o;
+			if (!opt.description.empty()) {
+				o["description"] = opt.description;
+			}
+			if (!opt.label.empty()) {
+				o["label"] = opt.label;
+			}
+			if (!opt.value.empty()) {
+				o["value"] = opt.value;
+			}
+			if (opt.is_default) {
+				o["default"] = true;
+			}
+			if (!opt.emoji.name.empty()) {
+				o["emoji"] = json::object();
+				o["emoji"]["name"] = opt.emoji.name;
+				if (opt.emoji.id) {
+					o["emoji"]["id"] = std::to_string(opt.emoji.id);
+				}
+			}
+			j["options"].push_back(o);
+		}
 	}
 	return j.dump();
+}
+
+select_option::select_option() : is_default(false) {
+}
+
+select_option::select_option(const std::string &_label, const std::string &_value, const std::string &_description) : is_default(false), label(_label), value(_value), description(_description) {
+}
+
+select_option& select_option::set_label(const std::string &l) {
+	label = l;
+	return *this;
+}
+
+select_option& select_option::set_default(bool def) {
+	is_default = def;
+	return *this;
+}
+
+select_option& select_option::set_value(const std::string &v) {
+	value = v;
+	return *this;
+}
+
+select_option& select_option::set_description(const std::string &d) {
+	description = d;
+	return *this;
+}
+
+select_option& select_option::set_emoji(const std::string &n, dpp::snowflake id) {
+	emoji.name = n;
+	emoji.id = id;
+	return *this;
+}
+
+component& component::set_placeholder(const std::string &_placeholder) {
+	placeholder = _placeholder;
+	return *this;
+}
+
+component& component::set_min_values(uint32_t _min_values) {
+	min_values = _min_values;
+	return *this;
+}
+
+component& component::set_max_values(uint32_t _max_values) {
+	max_values = _max_values;
+	return *this;
+}
+
+component& component::add_select_option(const select_option &option) {
+	options.push_back(option);
+	return *this;
 }
 
 embed::~embed() {
@@ -441,27 +541,67 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		n["components"] = {};
 		json sn;
 		for (auto & subcomponent  : component.components) {
-			sn["type"] = subcomponent.type;
-			sn["label"] = subcomponent.label;
-			sn["style"] = int(subcomponent.style);
-			if (subcomponent.type == cot_button && subcomponent.style != cos_link && !subcomponent.custom_id.empty()) {
-				/* Links cannot have a custom id */
-				sn["custom_id"] = subcomponent.custom_id;
-			}
-			if (subcomponent.type == cot_button && subcomponent.style == cos_link && !subcomponent.url.empty()) {
-				sn["url"] = subcomponent.url;
-			}
-			sn["disabled"] = subcomponent.disabled;
+			if (subcomponent.type == cot_button) {
+				sn["type"] = subcomponent.type;
+				sn["label"] = subcomponent.label;
+				sn["style"] = int(subcomponent.style);
+				if (subcomponent.type == cot_button && subcomponent.style != cos_link && !subcomponent.custom_id.empty()) {
+					/* Links cannot have a custom id */
+					sn["custom_id"] = subcomponent.custom_id;
+				}
+				if (subcomponent.type == cot_button && subcomponent.style == cos_link && !subcomponent.url.empty()) {
+					sn["url"] = subcomponent.url;
+				}
+				sn["disabled"] = subcomponent.disabled;
 
-			if (subcomponent.emoji.id || !subcomponent.emoji.name.empty()) {
-				sn["emoji"] = {};
-				sn["emoji"]["animated"] = subcomponent.emoji.animated;
-			}
-			if (subcomponent.emoji.id) {
-				sn["emoji"]["id"] = std::to_string(subcomponent.emoji.id);
-			}
-			if (!subcomponent.emoji.name.empty()) {
-				sn["emoji"]["name"] = subcomponent.emoji.name;
+				if (subcomponent.emoji.id || !subcomponent.emoji.name.empty()) {
+					sn["emoji"] = {};
+					sn["emoji"]["animated"] = subcomponent.emoji.animated;
+				}
+				if (subcomponent.emoji.id) {
+					sn["emoji"]["id"] = std::to_string(subcomponent.emoji.id);
+				}
+				if (!subcomponent.emoji.name.empty()) {
+					sn["emoji"]["name"] = subcomponent.emoji.name;
+				}
+			} else if (subcomponent.type == cot_selectmenu) {
+
+				sn["type"] = subcomponent.type;
+				sn["custom_id"] = subcomponent.custom_id;
+				//sn["disabled"] = subcomponent.disabled;
+				if (!subcomponent.placeholder.empty()) {
+					sn["placeholder"] = subcomponent.placeholder;
+				}
+				if (subcomponent.min_values >= 0) {
+					sn["min_values"] = subcomponent.min_values;
+				}
+				if (subcomponent.max_values >= 0) {
+					sn["max_values"] = subcomponent.max_values;
+				}
+				sn["options"] = json::array();
+				for (auto opt : subcomponent.options) {
+					json o;
+					if (!opt.description.empty()) {
+						o["description"] = opt.description;
+					}
+					if (!opt.label.empty()) {
+						o["label"] = opt.label;
+					}
+					if (!opt.value.empty()) {
+						o["value"] = opt.value;
+					}
+					if (opt.is_default) {
+						o["default"] = true;
+					}
+					if (!opt.emoji.name.empty()) {
+						o["emoji"] = json::object();
+						o["emoji"]["name"] = opt.emoji.name;
+						if (opt.emoji.id) {
+							o["emoji"]["id"] = std::to_string(opt.emoji.id);
+						}
+					}
+					sn["options"].push_back(o);
+				}
 			}
 
 			n["components"].push_back(sn);

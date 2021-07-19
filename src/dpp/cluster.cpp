@@ -357,7 +357,7 @@ void cluster::guild_command_delete(snowflake id, snowflake guild_id, command_com
 }
 
 void cluster::message_create(const message &m, command_completion_event_t callback) {
-	this->post_rest("/api/channels", std::to_string(m.channel_id), "messages", m_post, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest("/api/v9/channels", std::to_string(m.channel_id), "messages", m_post, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
@@ -1384,6 +1384,10 @@ void cluster::on_interaction_create (std::function<void(const interaction_create
 
 void cluster::on_button_click (std::function<void(const button_click_t& _event)> _button_click) {
 	this->dispatch.button_click = _button_click; 
+}
+
+void cluster::on_select_click (std::function<void(const select_click_t& _event)> _select_click) {
+	this->dispatch.select_click = _select_click; 
 }
 
 void cluster::on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete) {

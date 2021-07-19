@@ -194,9 +194,15 @@ void from_json(const nlohmann::json& j, command_interaction& ci) {
 	}
 }
 
-void from_json(const nlohmann::json& j, button_interaction& bi) {
+void from_json(const nlohmann::json& j, component_interaction& bi) {
 	bi.component_type = Int8NotNull(&j, "component_type");
 	bi.custom_id = StringNotNull(&j, "custom_id");
+	if (bi.component_type == cotype_select && j.find("values") != j.end()) {
+		/* Get values */
+		for (auto& entry : j["values"]) {
+			bi.values.push_back(entry.get<std::string>());
+		}
+	}
 }
 
 void from_json(const nlohmann::json& j, interaction& i) {
@@ -222,7 +228,7 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			j.at("data").get_to(ci);
 			i.data = ci;
 		} else if (i.type == it_component_button) {
-			button_interaction bi;
+			component_interaction bi;
 			j.at("data").get_to(bi);
 			i.data = bi;
 		}

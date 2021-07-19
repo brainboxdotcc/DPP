@@ -406,9 +406,18 @@ public:
 	 * Button clicks are triggered by discord when buttons are clicked which you have
 	 * associated with a message using dpp::component.
 	 * 
-	 * @param _interaction_create  User function to attach to event
+	 * @param _button_click  User function to attach to event
 	 */
 	void on_button_click (std::function<void(const button_click_t& _event)> _button_click);
+
+	/**
+	 * @brief Called when a select menu is clicked attached to a message.
+	 * Select menu clicks are triggered by discord when select menus are clicked which you have
+	 * associated with a message using dpp::component.
+	 * 
+	 * @param _select_click  User function to attach to event
+	 */
+	void on_select_click (std::function<void(const select_click_t& _event)> _select_click);
 
 	/**
 	 * @brief Called when a guild is deleted.
