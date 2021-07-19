@@ -219,16 +219,16 @@ int main(int argc, char const *argv[])
 		/* Tell the bot to join the discord voice channel the user is on. Syntax: .join */
 		if (command == ".join") {
 			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			if (!g->ConnectMemberVoice(event.msg->author->id)) {
+			if (!g->connect_member_voice(event.msg->author->id)) {
 				bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
 			}
 		}
 
 		/* Tell the bot to play the sound file 'Robot.pcm'. Syntax: .robot */
 		if (command == ".robot") {
-			dpp::voiceconn* v = event.from->GetVoice(event.msg->guild_id);
-			if (v && v->voiceclient && v->voiceclient->IsReady()) {
-				v->voiceclient->SendAudio((uint16_t*)robot, robot_size);
+			dpp::voiceconn* v = event.from->get_voice(event.msg->guild_id);
+			if (v && v->voiceclient && v->voiceclient->is_ready()) {
+				v->voiceclient->send_audio((uint16_t*)robot, robot_size);
 			}
 		}
 	});
@@ -266,7 +266,7 @@ int main(int argc, char const *argv[])
 		/* Switch to or join the vc the user is on. Syntax: .join  */
 		if (command == ".join") {
 			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			auto current_vc = event.from->GetVoice(event.msg->guild_id);
+			auto current_vc = event.from->get_voice(event.msg->guild_id);
 			bool join_vc = true;
 			/* Check if we are currently on any vc */
 			if (current_vc) {
@@ -277,26 +277,26 @@ int main(int argc, char const *argv[])
 					join_vc = false;
 					/* We are on this voice channel, at this point we can send any audio instantly to vc:
 
-					 * current_vc->SendAudio(...)
+					 * current_vc->send_audio(...)
 					 */
 				} else {
 					/* We are on a different voice channel. Leave it, then join the new one 
 					 * by falling through to the join_vc branch below.
 					 */
-					event.from->DisconnectVoice(event.msg->guild_id);
+					event.from->disconnect_voice(event.msg->guild_id);
 					join_vc = true;
 				}
 			}
 			/* If we need to join a vc at all, join it here if join_vc == true */
 			if (join_vc) {
-				if (!g->ConnectMemberVoice(event.msg->author->id)) {
+				if (!g->connect_member_voice(event.msg->author->id)) {
 					/* The user issuing the command is not on any voice channel, we can't do anything */
 					bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
 				} else {
 					/* We are now connecting to a vc. Wait for on_voice_ready 
 					 * event, and then send the audio within that event:
 					 * 
-					 * event.voice_client->SendAudio(...);
+					 * event.voice_client->send_audio(...);
 					 * 
 					 * NOTE: We can't instantly send audio, as we have to wait for
 					 * the connection to the voice server to be established!
