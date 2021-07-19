@@ -18,57 +18,9 @@ In this example we will create a C++ version of the [discord.js](https://discord
 
 The two programs can be seen side by side below:
 
-<table>
-<tr>
-<th>C++/DPP</th>
-<th>JavaScript/Discord.js</th>
-</tr>
-<tr>
-<td>
-
-```cpp
-#include <dpp/dpp.h>
-#include <iostream>
-
-int main ()
-{
-	dpp::cluster bot("token");
-
-	bot.on_ready([&bot](const dpp::ready_t & event) {
-		std::cout << "Logged in as " << bot.me.username << "!\n";
-	});
-
-	bot.on_message_create([&bot](const dpp::message_create_t & event) {
-		if (event.msg->content == "!ping") {
-			bot.message_create(dpp::message(event.msg->channel_id, "Pong!"));
-		}
-	});
-
-	bot.start(false);
-	return 0;
-}
-```
-</td>
-<td>
-
-```js
-const Discord = require('discord.js');
-const client = new Discord.Client();
-
-client.on('ready', () => {
-	console.log(`Logged in as ${client.user.tag}!`);
-});
-
-client.on('message', msg => {
-	if (msg.content == '!ping') {
-		msg.reply('Pong!');
-	}
-});
-
-client.login('token');
-```
-</td>
-</table>
+| C++/DPP               | JavaScript/Discord.js      |
+|-----------------------|----------------------------|
+| <img src="cprog.png" align="right" style="max-width: 100% !important"/> | <img src="jsprog.png" align="right" style="max-width: 100% !important"/> |
 
 Let's break this program down step by step:
 
@@ -268,15 +220,15 @@ int main(int argc, char const *argv[])
 		if (command == ".join") {
 			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
 			if (!g->ConnectMemberVoice(event.msg->author->id)) {
-				bot.message_create(dpp::message(event.msg->channel_id, "You don't seem to be on a voice channel! :("));
+				bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
 			}
 		}
 
 		/* Tell the bot to play the sound file 'Robot.pcm'. Syntax: .robot */
 		if (command == ".robot") {
-			dpp::voiceconn* v = event.from->get_voice(event.msg->guild_id);
-			if (v && v->voiceclient && v->voiceclient->is_ready()) {
-				v->voiceclient->send_audio((uint16_t*)robot, robot_size);
+			dpp::voiceconn* v = event.from->GetVoice(event.msg->guild_id);
+			if (v && v->voiceclient && v->voiceclient->IsReady()) {
+				v->voiceclient->SendAudio((uint16_t*)robot, robot_size);
 			}
 		}
 	});
@@ -304,7 +256,7 @@ int main(int argc, char const *argv[])
 	dpp::cluster bot("token");
 
 	/* Use the on_message_create event to look for commands */
-	bot.on_message_create([&bot](const dpp::message_create_t & event) {
+	bot.on_message_create([&bot, robot, robot_size](const dpp::message_create_t & event) {
 
 		std::stringstream ss(event.msg->content);
 		std::string command;
@@ -314,7 +266,7 @@ int main(int argc, char const *argv[])
 		/* Switch to or join the vc the user is on. Syntax: .join  */
 		if (command == ".join") {
 			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			auto current_vc = event.from->get_voice(event.msg->guild_id);
+			auto current_vc = event.from->GetVoice(event.msg->guild_id);
 			bool join_vc = true;
 			/* Check if we are currently on any vc */
 			if (current_vc) {
@@ -325,13 +277,13 @@ int main(int argc, char const *argv[])
 					join_vc = false;
 					/* We are on this voice channel, at this point we can send any audio instantly to vc:
 
-					 * current_vc->send_audio(...)
+					 * current_vc->SendAudio(...)
 					 */
 				} else {
 					/* We are on a different voice channel. Leave it, then join the new one 
 					 * by falling through to the join_vc branch below.
 					 */
-					event.from->disconnect_voice(event.msg->guild_id);
+					event.from->DisconnectVoice(event.msg->guild_id);
 					join_vc = true;
 				}
 			}
@@ -339,7 +291,7 @@ int main(int argc, char const *argv[])
 			if (join_vc) {
 				if (!g->ConnectMemberVoice(event.msg->author->id)) {
 					/* The user issuing the command is not on any voice channel, we can't do anything */
-					bot.message_create(dpp::message(event.msg->channel_id, "You don't seem to be on a voice channel! :("));
+					bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
 				} else {
 					/* We are now connecting to a vc. Wait for on_voice_ready 
 					 * event, and then send the audio within that event:
