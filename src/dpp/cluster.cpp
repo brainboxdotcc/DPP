@@ -70,54 +70,6 @@ bool confirmation_callback_t::is_error() const {
 	return false;
 }
 
-/*
-Array Error
-
-{
-    "code": 50035,
-    "errors": {
-        "activities": {
-            "0": {
-                "platform": {
-                    "_errors": [
-                        {
-                            "code": "BASE_TYPE_CHOICES",
-                            "message": "Value must be one of ('desktop', 'android', 'ios')."
-                        }
-                    ]
-                },
-                "type": {
-                    "_errors": [
-                        {
-                            "code": "BASE_TYPE_CHOICES",
-                            "message": "Value must be one of (0, 1, 2, 3, 4, 5)."
-                        }
-                    ]
-                }
-            }
-        }
-    },
-    "message": "Invalid Form Body"
-}
-
-Object Error
-
-{
-    "code": 50035,
-    "errors": {
-        "access_token": {
-            "_errors": [
-                {
-                    "code": "BASE_TYPE_REQUIRED",
-                    "message": "This field is required"
-                }
-            ]
-        }
-    },
-    "message": "Invalid Form Body"
-}
- */
-
 error_info confirmation_callback_t::get_error() {
 	if (is_error()) {
 		json j = json::parse(this->http_info.body);
