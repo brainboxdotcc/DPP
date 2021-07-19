@@ -79,11 +79,15 @@ struct select_option {
 		 * lack of boosts etc)
 		 */
 		dpp::snowflake id = 0;
+		/** True if the emoji is animated. Only applies to
+		 * custom emojis.
+		 */
+		bool animated = false;
 	} emoji;
 
 	select_option();
 
-	select_option(const std::string &label, const std::string &value, const std::string &description);
+	select_option(const std::string &label, const std::string &value, const std::string &description = "");
 
 	select_option& set_label(const std::string &l);
 
@@ -91,9 +95,11 @@ struct select_option {
 
 	select_option& set_description(const std::string &d);
 	
-	select_option& set_emoji(const std::string &n, dpp::snowflake id = 0);
+	select_option& set_emoji(const std::string &n, dpp::snowflake id = 0, bool animated = false);
 
 	select_option& set_default(bool def);
+
+	select_option& set_animated(bool anim);
 };
 
 /**

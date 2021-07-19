@@ -190,7 +190,7 @@ select_option::select_option(const std::string &_label, const std::string &_valu
 }
 
 select_option& select_option::set_label(const std::string &l) {
-	label = l;
+	label = dpp::utility::utf8substr(l, 0, 25);
 	return *this;
 }
 
@@ -200,23 +200,30 @@ select_option& select_option::set_default(bool def) {
 }
 
 select_option& select_option::set_value(const std::string &v) {
-	value = v;
+	value = dpp::utility::utf8substr(v, 0, 100);
 	return *this;
 }
 
 select_option& select_option::set_description(const std::string &d) {
-	description = d;
+	description = dpp::utility::utf8substr(d, 0, 50);
 	return *this;
 }
 
-select_option& select_option::set_emoji(const std::string &n, dpp::snowflake id) {
+select_option& select_option::set_emoji(const std::string &n, dpp::snowflake id, bool animated) {
 	emoji.name = n;
 	emoji.id = id;
+	emoji.animated = animated;
 	return *this;
 }
 
+select_option& select_option::set_animated(bool anim) {
+	emoji.animated = anim;
+	return *this;
+}
+
+
 component& component::set_placeholder(const std::string &_placeholder) {
-	placeholder = _placeholder;
+	placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
 	return *this;
 }
 
@@ -231,7 +238,9 @@ component& component::set_max_values(uint32_t _max_values) {
 }
 
 component& component::add_select_option(const select_option &option) {
-	options.push_back(option);
+	if (options.size() <= 25) {
+		options.push_back(option);
+	}
 	return *this;
 }
 
@@ -598,6 +607,9 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 						o["emoji"]["name"] = opt.emoji.name;
 						if (opt.emoji.id) {
 							o["emoji"]["id"] = std::to_string(opt.emoji.id);
+						}
+						if (opt.emoji.animated) {
+							o["emoji"]["animated"] = true;
 						}
 					}
 					sn["options"].push_back(o);
