@@ -114,6 +114,47 @@ typedef std::variant<
 	> confirmable_t;
 
 /**
+ * @brief The details of a field in an error response
+ */
+struct error_detail {
+	/**
+	 * @brief Object name which is in error
+	 */
+	std::string object;
+	/**
+	 * @brief Field name which is in error
+	 */
+	std::string field;
+	/**
+	 * @brief Error code
+	 */
+	std::string code;
+	/**
+	 * @brief Error reason (full message)
+	 */
+	std::string reason;
+};
+
+/**
+ * @brief The full details of an error from a REST response
+ */
+struct error_info {
+	/**
+	 * @brief Error code
+	 */
+	uint32_t code = 0;
+	/**
+	 * @brief Error message
+	 * 
+	 */
+	std::string message;
+	/**
+	 * @brief Field specific error descriptions
+	 */
+	std::vector<error_detail> errors;
+};
+
+/**
  * @brief The results of a REST call wrapped in a convenient struct
  */
 struct confirmation_callback_t {
@@ -137,6 +178,24 @@ struct confirmation_callback_t {
 	 * @param _http The HTTP metadata from the REST call
 	 */
 	confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http);
+
+	/**
+	 * @brief Returns true if the call resulted in an error rather than a legitimate value in the
+	 * confirmation_callback_t::value member.
+	 * 
+	 * @return true There was an error who's details can be obtained by get_error()
+	 * @return false There was no error
+	 */
+	bool is_error() const;
+
+	/**
+	 * @brief Get the error_info object.
+	 * The error_info object contains the details of any REST error, if there is an error
+	 * (to find out if there is an error check confirmation_callback_t::is_error())
+	 * 
+	 * @return error_info The details of the error message
+	 */
+	error_info get_error();
 };
 
 /**

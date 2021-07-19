@@ -54,6 +54,114 @@ confirmation_callback_t::confirmation_callback_t(const std::string &_type, const
 	}
 }
 
+bool confirmation_callback_t::is_error() const {
+	if (http_info.status >= 400) {
+		/* Invalid JSON or 4xx/5xx response */
+		return true;
+	}
+	json j = json::parse(this->http_info.body);
+	if (j.find("code") != j.end() && j.find("errors") != j.end() && j.find("message") != j.end()) {
+		if (j["code"].is_number_unsigned() && j["errors"].is_object() && j["message"].is_string()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	return false;
+}
+
+/*
+Array Error
+
+{
+    "code": 50035,
+    "errors": {
+        "activities": {
+            "0": {
+                "platform": {
+                    "_errors": [
+                        {
+                            "code": "BASE_TYPE_CHOICES",
+                            "message": "Value must be one of ('desktop', 'android', 'ios')."
+                        }
+                    ]
+                },
+                "type": {
+                    "_errors": [
+                        {
+                            "code": "BASE_TYPE_CHOICES",
+                            "message": "Value must be one of (0, 1, 2, 3, 4, 5)."
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "message": "Invalid Form Body"
+}
+
+Object Error
+
+{
+    "code": 50035,
+    "errors": {
+        "access_token": {
+            "_errors": [
+                {
+                    "code": "BASE_TYPE_REQUIRED",
+                    "message": "This field is required"
+                }
+            ]
+        }
+    },
+    "message": "Invalid Form Body"
+}
+ */
+
+error_info confirmation_callback_t::get_error() {
+	if (is_error()) {
+		json j = json::parse(this->http_info.body);
+		error_info e;
+
+		SetInt32NotNull(&j, "code", e.code);
+		SetStringNotNull(&j, "message", e.message);
+		json& errors = j["errors"];
+		for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
+
+			if (obj->find("0") != obj->end()) {
+				/* An array of error messages */
+				for (auto index = obj->begin(); index != obj->end(); ++index) {
+					for (auto fields = index->begin(); fields != index->end(); ++fields) {
+						for (auto errordetails = (*fields)["_errors"].begin(); errordetails != (*fields)["_errors"].end(); ++errordetails) {
+							error_detail detail;
+							detail.code = (*errordetails)["code"].get<std::string>();
+							detail.reason = (*errordetails)["message"].get<std::string>();
+							detail.field = fields.key();
+							detail.object = obj.key();
+							e.errors.push_back(detail);
+						}
+					}
+				}
+
+			} else if (obj->find("_errors") != obj->end()) {
+				/* An object of error messages */
+				for (auto errordetails = (*obj)["_errors"].begin(); errordetails != (*obj)["_errors"].end(); ++errordetails) {
+					error_detail detail;
+					detail.code = (*errordetails)["code"].get<std::string>();
+					detail.reason = (*errordetails)["message"].get<std::string>();
+					detail.object = "";
+					detail.field = obj.key();
+					e.errors.push_back(detail);
+				}
+			}
+		}
+
+		return e;
+	}
+	return error_info();
+}
+
+
 void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 	gateway g = std::get<gateway>(shardinfo.value);
 	numshards = g.shards;
