@@ -7,7 +7,8 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage soundboard "Creating a Sound Board"
 * \subpage joinvc "Join or switch to the voice channel of the user issuing a command"
 * \subpage spdlog "Integrating with spdlog"
-* \subpage components "Using component interactions"
+* \subpage components "Using component interactions (buttons)"
+* \subpage components3 "Using component interactions (select menus)"
 * \subpage components2 "Using component interactions (advanced)"
 * \subpage commandhandler "Using a command handler object"
 
@@ -447,7 +448,7 @@ int main(int argc, char const *argv[])
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-\page components Using component interactions
+\page components Using component interactions (buttons)
 
 Discord's newest features support sending buttons alongside messages, which when clicked by the user trigger an interaction which is routed by
 D++ as an on_button_click event. To make use of this, use code as in this example.
@@ -559,6 +560,63 @@ int main()
 	return 0;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\page components3 Using component interactions (select menus)
+
+This example demonstrates receiving select menu clicks and sending response messages.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
+using json = nlohmann::json;
+
+int main()
+{
+
+	dpp::cluster bot("token");
+
+	/* Message handler to look for a command called !select */
+	bot.on_message_create([&bot](const dpp::message_create_t & event) {
+		if (event.msg->content == "!select") {
+			/* Create a message containing an action row, and a select menu within the action row. */
+			dpp::message m(event.msg->channel_id, "this text has a select menu");
+			m.add_component(
+				dpp::component().add_component(
+					dpp::component().set_type(dpp::cot_selectmenu).
+					set_placeholder("Pick something").
+					add_select_option(dpp::select_option("label1","value1","description1").set_emoji("😄")).
+					add_select_option(dpp::select_option("label2","value2","description2").set_emoji("🙂")).
+					set_id("myselid")
+				)
+			);
+			bot.message_create(m);
+		}
+	});
+	/* When a user clicks your select menu , the on_select_click event will fire,
+	 * containing the custom_id you defined in your select menu.
+	 */
+	bot.on_select_click([&bot](const dpp::select_click_t & event) {
+		/* Select clicks are still interactions, and must be replied to in some form to
+		 * prevent the "this interaction has failed" message from Discord to the user.
+		 */
+		event.reply(dpp::ir_channel_message_with_source, "You clicked " + event.custom_id + " and chose: " + event.values[0]);
+	});
+
+	bot.on_log([](const dpp::log_t & event) {
+		if (event.severity > dpp::ll_trace) {
+			std::cout << event.message << "\n";
+		}
+	});
+
+	bot.start(false);
+
+	return 0;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This code will send a different message for correct and incorrect answers.
+
+\image html button_2.png
 
 \page components2 Using component interactions (advanced)
 
