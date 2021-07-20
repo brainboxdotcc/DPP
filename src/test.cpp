@@ -36,7 +36,7 @@ int main()
 		/* Select clicks are still interactions, and must be replied to in some form to
 		 * prevent the "this interaction has failed" message from Discord to the user.
 		 */
-		std::cout << event.command.message_id << "\n";
+		bot.message_delete(event.command.message_id, event.command.channel_id);
 		event.reply(dpp::ir_channel_message_with_source, "You clicked " + event.custom_id + " and chose: " + event.values[0]);
 	});
 
