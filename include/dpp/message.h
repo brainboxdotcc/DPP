@@ -468,13 +468,18 @@ struct embed {
 	 */
 	embed& add_field(const std::string& name, const std::string &value, bool is_inline = false);
 
+	/** Set embed author. Returns the embed itself so these method calls may be "chained" 
+	 * @param a The author to set
+	 * @return A reference to self
+	 */ 
+	embed& set_author(const dpp::embed_author& a);
+
 	/** Set embed author. Returns the embed itself so these method calls may be "chained"
 	 * @param name The name of the author
 	 * @param url The url of the author
 	 * @param icon_url The icon URL of the author
 	 * @return A reference to self
 	 */
-
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 
 	/** Set embed provider. Returns the embed itself so these method calls may be "chained"
