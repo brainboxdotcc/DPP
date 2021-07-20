@@ -317,6 +317,7 @@ public:
 	std::variant<command_interaction, component_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
+	snowflake message_id;					    //!< Originating message id
 	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions
 	user usr;                                                   //!< Optional: user object for the invoking user, if invoked in a DM
 	std::string token;                                          //!< a continuation token for responding to the interaction

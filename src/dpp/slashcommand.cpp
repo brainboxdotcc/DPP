@@ -211,6 +211,12 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.channel_id = SnowflakeNotNull(&j, "channel_id");
 	i.guild_id = SnowflakeNotNull(&j, "guild_id");
 
+	if (j.find("message") != j.end()) {
+		const json& m = j["message"];
+		SetSnowflakeNotNull(&m, "id", i.message_id);
+	}
+
+
 	i.type = Int8NotNull(&j, "type");
 	i.token = StringNotNull(&j, "token");
 	i.version = Int8NotNull(&j, "version");
