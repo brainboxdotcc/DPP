@@ -328,11 +328,22 @@ struct embed_footer {
 	/** Proxied icon url */
 	std::string proxy_url;
 
-	/**Set footer's text**/
+	/** Set footer's text. Returns footer itself so these methods may be "chained"
+	 * @param t string to set as footer text
+	 * @return A reference to self
+	 */
 	embed_footer& set_text(const std::string& t);
-	/**Set footer's icon url**/
+
+	/** Set footer's icon url. Returns footer itself so these methods may be "chained"
+	 * @param i url to set as footer icon url
+	 * @return A reference to self
+	 */
 	embed_footer& set_icon(const std::string& i);
-	/**Set footer's proxied icon url**/
+
+	/** Set footer's proxied icon url. Returns footer itself so these methods may be "chained"
+	 * @param p url to set as footer proxied icon url
+	 * @return A reference to self
+	 */
 	embed_footer& set_proxy(const std::string& p);
 };
 
