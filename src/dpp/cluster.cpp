@@ -1338,6 +1338,15 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 	});
 }
 
+void cluster::get_webhook_message(const class webhook &wh, command_completion_event_t callback)
+{
+	this->post_rest("/api/v9/webhooks", std::to_string(wh.id), dpp::url_encode(token) + "/messages/@original", m_get, "", [callback](json &j, const http_request_completion_t &http){
+		if (callback){
+			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
+		}
+	});
+}
+
 void cluster::edit_webhook_message(const class webhook &wh, const struct message& m, command_completion_event_t callback) {
 	this->post_rest("/api/v9/webhooks", std::to_string(wh.id), dpp::url_encode(token) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
