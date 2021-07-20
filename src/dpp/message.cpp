@@ -462,13 +462,13 @@ embed& embed::set_url(const std::string &u) {
 }
 
 embed_footer& embed_footer::set_text(const std::string& t){
-    text = t; 
+	text = t; 
 	return *this;     
 }
 
 embed_footer& embed_footer::set_icon(const std::string& i){     
-	icon_url;
-    return *this;           
+	icon_url = i;
+	return *this;           
 }                                                                                  
 
 embed_footer& embed_footer::set_proxy(const std::string& p){     

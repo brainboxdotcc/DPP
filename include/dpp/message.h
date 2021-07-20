@@ -329,11 +329,11 @@ struct embed_footer {
 	std::string proxy_url;
 
 	/**Set footer's text**/
-    embed_footer& set_text(const std::string& t);
+	embed_footer& set_text(const std::string& t);
 	/**Set footer's icon url**/
 	embed_footer& set_icon(const std::string& i);
-    /**Set footer's proxied icon url**/
-    embed_footer& set_proxy(const std::string& p);
+	/**Set footer's proxied icon url**/
+	embed_footer& set_proxy(const std::string& p);
 };
 
 /**
