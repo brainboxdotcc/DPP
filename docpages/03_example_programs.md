@@ -614,10 +614,6 @@ int main()
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This code will send a different message for correct and incorrect answers.
-
-\image html button_2.png
-
 \page components2 Using component interactions (advanced)
 
 This example demonstrates receiving button clicks and sending response messages.
