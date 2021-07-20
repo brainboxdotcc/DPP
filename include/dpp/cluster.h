@@ -1658,6 +1658,14 @@ public:
 	void execute_webhook(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Get webhook message
+	 *
+	 * @param Webhook to get the original message for
+	 * @param callback Function to call when the API call completes 
+	 */
+	void get_webhook_message(const class webhook &wh, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Edit webhook message
 	 * 
 	 * @param wh Webhook to edit message for

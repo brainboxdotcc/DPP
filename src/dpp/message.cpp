@@ -397,6 +397,12 @@ embed& embed::add_field(const std::string& name, const std::string &value, bool 
 	return *this;
 }
 
+embed& embed::set_author(const embed_author& a)
+{
+	author = a;
+	return *this;
+}
+
 embed& embed::set_author(const std::string& name, const std::string& url, const std::string& icon_url) {
 	dpp::embed_author a;
 	a.name = utility::utf8substr(name, 0, 256);
@@ -462,13 +468,13 @@ embed& embed::set_url(const std::string &u) {
 }
 
 embed_footer& embed_footer::set_text(const std::string& t){
-    text = t; 
+	text = t; 
 	return *this;     
 }
 
 embed_footer& embed_footer::set_icon(const std::string& i){     
-	icon_url;
-    return *this;           
+	icon_url = i;
+	return *this;           
 }                                                                                  
 
 embed_footer& embed_footer::set_proxy(const std::string& p){     
