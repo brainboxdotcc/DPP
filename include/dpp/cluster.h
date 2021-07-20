@@ -835,12 +835,11 @@ public:
 
 	/**
 	 * @brief Respond to a slash command
-	 * 
-	 * @param interaction_id Interaction id to respond to
-	 * @param r Response to send
+	 *
+	 * @param m Message to send
 	 * @param callback Function to call when the API call completes
 	 */
-	void interaction_response_edit(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback = {});
+	void interaction_response_edit(const std::string &token, const message &r, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these)
