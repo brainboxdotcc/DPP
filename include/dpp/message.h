@@ -328,12 +328,23 @@ struct embed_footer {
 	/** Proxied icon url */
 	std::string proxy_url;
 
-	/**Set footer's text**/
-    embed_footer& set_text(const std::string& t);
-	/**Set footer's icon url**/
+	/** Set footer's text. Returns footer itself so these methods may be "chained"
+	 * @param t string to set as footer text
+	 * @return A reference to self
+	 */
+	embed_footer& set_text(const std::string& t);
+
+	/** Set footer's icon url. Returns footer itself so these methods may be "chained"
+	 * @param i url to set as footer icon url
+	 * @return A reference to self
+	 */
 	embed_footer& set_icon(const std::string& i);
-    /**Set footer's proxied icon url**/
-    embed_footer& set_proxy(const std::string& p);
+
+	/** Set footer's proxied icon url. Returns footer itself so these methods may be "chained"
+	 * @param p url to set as footer proxied icon url
+	 * @return A reference to self
+	 */
+	embed_footer& set_proxy(const std::string& p);
 };
 
 /**
@@ -468,13 +479,18 @@ struct embed {
 	 */
 	embed& add_field(const std::string& name, const std::string &value, bool is_inline = false);
 
+	/** Set embed author. Returns the embed itself so these method calls may be "chained" 
+	 * @param a The author to set
+	 * @return A reference to self
+	 */ 
+	embed& set_author(const dpp::embed_author& a);
+
 	/** Set embed author. Returns the embed itself so these method calls may be "chained"
 	 * @param name The name of the author
 	 * @param url The url of the author
 	 * @param icon_url The icon URL of the author
 	 * @return A reference to self
 	 */
-
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 
 	/** Set embed provider. Returns the embed itself so these method calls may be "chained"
