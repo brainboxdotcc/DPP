@@ -190,7 +190,7 @@ select_option::select_option(const std::string &_label, const std::string &_valu
 }
 
 select_option& select_option::set_label(const std::string &l) {
-	label = dpp::utility::utf8substr(l, 0, 25);
+	label = dpp::utility::utf8substr(l, 0, 100);
 	return *this;
 }
 
@@ -205,7 +205,7 @@ select_option& select_option::set_value(const std::string &v) {
 }
 
 select_option& select_option::set_description(const std::string &d) {
-	description = dpp::utility::utf8substr(d, 0, 50);
+	description = dpp::utility::utf8substr(d, 0, 100);
 	return *this;
 }
 
