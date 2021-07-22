@@ -652,7 +652,7 @@ enum message_type {
 	/// Application command
 	mt_application_command				= 20,
 	/// Thread starter message
-	mt_thread_starter_message	= 21
+	mt_thread_starter_message	= 21,
 	/// Invite reminder
 	mt_guild_invite_reminder			= 22
 };

@@ -1220,95 +1220,95 @@ void cluster::current_user_leave_guild(snowflake guild_id, command_completion_ev
 }
 
 void cluster::current_user_join_thread(snowflake thread_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels",thread_id, "/thread-members/@me", m_put, "", [callback](json &j, const http_request_completion_t& http {
+	this->post_rest("/api/v9/channels", std::to_string(thread_id), "/thread-members/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
-	}));
+	});
 }
 
 void cluster::current_user_leave_thread(snowflake thread_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels",thread_id, "/thread-members/@me" m_delete, "", [callback](json &j, const http_request_completion_t& http {
+	this->post_rest("/api/v9/channels", std::to_string(thread_id), "/thread-members/@me", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
-	}));
+	});
 }
 
 void cluster::thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels",thread_id, "/thread-members/" + std::to_string(user_id), m_put, "", [callback](json &j, const http_request_completion_t& http {
+	this->post_rest("/api/v9/channels", std::to_string(thread_id), "/thread-members/" + std::to_string(user_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
-	}));
+	});
 }
 
 void cluster::thread_member_remove(snowflake thread_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels",thread_id, "/thread-members/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http {
+	this->post_rest("/api/v9/channels", std::to_string(thread_id), "/thread-members/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
-	}));
+	});
 }
 
 void cluster::get_thread_members(snowflake thread_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels", thread_id, "/threads-members", m_get, "", [callback](json &j, const http_request_completion_t& http {
+	this->post_rest("/api/v9/channels", std::to_string(thread_id), "/threads-members", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			thread_member_map thread_members;
 			for (auto& curr_member : j) {
-				thread_members[SnowflakeNotNull(&curr_member, "user_id")] = thread_member.fill_from_json(&curr_member);
+				thread_members[SnowflakeNotNull(&curr_member, "user_id")] = thread_member().fill_from_json(&curr_member);
 			}
 			callback(confirmation_callback_t("thread_member_map", thread_members, http));
 		}
-	}));
+	});
 }
 
 void cluster::get_active_threads(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels", channel_id, "/threads/active", m_get, "", [callback](json &j, const http_request_completion_t& http {
+	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/threads/active", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map threads;
 			for (auto &curr_thread : j) {
-				threads[SnowflakeNotNull(&curr_thread, "id")] = channel().fill_from_json(&curr_channel);
+				threads[SnowflakeNotNull(&curr_thread, "id")] = channel().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("channel_map", threads, http));
 		}
-	}));
+	});
 }
 
 void cluster::get_public_archived_threads(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels", channel_id, "/threads/archived/public", m_get, "", [callback](json &j, const http_request_completion_t& http {
+	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/threads/archived/public", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map threads;
 			for (auto &curr_thread : j) {
-				threads[SnowflakeNotNull(&curr_thread, "id")] = channel().fill_from_json(&curr_channel);
+				threads[SnowflakeNotNull(&curr_thread, "id")] = channel().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("channel_map", threads, http));
 		}
-	}));
+		});
 }
 
 void cluster::get_private_archived_threads(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels", channel_id, "/threads/archived/private", m_get, "", [callback](json &j, const http_request_completion_t& http {
+	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/threads/archived/private", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map threads;
 			for (auto &curr_thread : j) {
-				threads[SnowflakeNotNull(&curr_thread, "id")] = channel().fill_from_json(&curr_channel);
+				threads[SnowflakeNotNull(&curr_thread, "id")] = channel().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("channel_map", threads, http));
 		}
-	}));
+	});
 }
 
 void cluster::get_joined_private_archived_threads(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels", channel_id, "/users/@me/threads/archived/private", m_get, "", [callback](json &j, const http_request_completion_t& http {
+	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/users/@me/threads/archived/private", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map threads;
 			for (auto &curr_thread : j) {
-				threads[SnowflakeNotNull(&curr_thread, "id")] = channel().fill_from_json(&curr_channel);
+				threads[SnowflakeNotNull(&curr_thread, "id")] = channel().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("channel_map", threads, http));
 		}
-	}));
+	});
 }
 void cluster::current_user_get_dms(command_completion_event_t callback) {
 	this->post_rest("/api/v9/users", "@me", "channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {

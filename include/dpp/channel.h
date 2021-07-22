@@ -113,8 +113,8 @@ struct thread_member
 	snowflake thread_id;
 	snowflake user_id;
 	time_t joined;
-	int32_t flags;
-}
+	uint32_t flags;
+};
 /** @brief A group of thread member objects*/
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 

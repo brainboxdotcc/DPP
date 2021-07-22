@@ -721,7 +721,7 @@ struct thread_create_t : public event_dispatch_t {
 	 */
 	thread_create_t(class discord_client* client, const std::string& raw);
 	guild* creating_guild;
-	channel* created;
+	channel created;
 };
 
 /** */
@@ -730,7 +730,7 @@ struct thread_update_t : public event_dispatch_t {
 	 */
 	thread_update_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
-	channel* updated;
+	channel updated;
 };
 
 /** */
@@ -739,7 +739,37 @@ struct thread_delete_t : public event_dispatch_t {
 	 */
 	thread_delete_t(class discord_client* client, const std::string& raw);
 	guild* deleting_guild;
-	channel* deleted;
+	channel deleted;
+};
+
+/** */
+struct thread_list_sync_t : public event_dispatch_t {
+	/**
+	 */
+	thread_list_sync_t(class discord_client* client, const std::string& raw);
+	guild* updating_guild;
+	std::vector<channel> thread_list;
+};
+
+/** */
+struct thread_member_update_t : public event_dispatch_t {
+	/**
+	 */
+	thread_member_update_t(class discord_client* client, const std::string& raw);
+	guild* updating_guild;
+	thread_member updated;
+};
+
+/** */
+struct thread_members_update_t : public event_dispatch_t {
+	/**
+	 */
+	thread_members_update_t(class discord_client* client, const std::string& raw);
+	snowflake thread_id;
+	guild* updating_guild;
+	uint8_t member_count;
+	std::vector<thread_member> added;
+	std::vector<thread_member> removed;
 };
 
 /** @brief voice buffer send */
@@ -998,6 +1028,18 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const thread_delete_t& event)> thread_delete;
+	/** @brief Event handler function pointer for thread list sync event
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_list_sync_t& event)> thread_list_sync;
+	/** @brief Event handler function pointer for thread member update event
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_member_update_t& event)> thread_member_update;
+	/** @brief Event handler function pointer for thread members update event
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_members_update_t& event)> thread_members_update;
 	/** @brief Event handler function pointer for voice buffer send event
 	 * @param event Event parameters
 	 */

@@ -85,6 +85,7 @@ typedef std::variant<
 		guild_member_map,
 		channel,
 		channel_map,
+		thread_member_map,
 		guild,
 		guild_map,
 		role,
@@ -1837,11 +1838,11 @@ public:
 
 	void get_active_threads(snowflake channel_id, command_completion_event_t callback = {});
 
-	void get_public_archived_threads();
+	void get_public_archived_threads(snowflake channel_id, command_completion_event_t callback = {});
 
-	void get_private_archived_threads();
+	void get_private_archived_threads(snowflake channel_id, command_completion_event_t callback = {});
 
-	void get_joined_private_archived_threads(); 
+	void get_joined_private_archived_threads(snowflake channel_id, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get all voice regions

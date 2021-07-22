@@ -89,14 +89,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 		g->threads.clear();
 		g->threads.reserve(d["threads"].size());
 		for (auto & channel : d["threads"]) {
-			dpp::channel* c = dpp::find_channel(SnowflakeNotNull(&channel, "id"));
-			if (!c) {
-				c = new dpp::channel();
-			}
-			c->fill_from_json(&channel);
-			c->guild_id = g->id;
-			dpp::get_channel_cache()->store(c);
-			g->threads.push_back(c->id);
+			g->threads.push_back(channel->id);
 		}
 
 		/* Store guild members */
