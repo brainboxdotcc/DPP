@@ -65,6 +65,16 @@ void interaction_create_t::reply(interaction_response_type t, const std::string 
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command));
 }
 
+void interaction_create_t::edit_response(const message & m) const
+{
+	from->creator->interaction_response_edit(this->command.token, m);
+}
+
+void interaction_create_t::edit_response(const std::string & mt) const
+{
+	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command));
+}
+
 const command_value& interaction_create_t::get_parameter(const std::string& name) const
 {
 	/* Dummy STATIC return value for unknown options so we arent returning a value off the stack */
@@ -85,6 +95,17 @@ button_click_t::button_click_t(discord_client* client, const std::string &raw) :
 const command_value& button_click_t::get_parameter(const std::string& name) const
 {
 	/* Buttons don't have parameters, so override this */
+	static command_value dummy_b_value = {};
+	return dummy_b_value;
+}
+
+select_click_t::select_click_t(discord_client* client, const std::string &raw) : interaction_create_t(client, raw)
+{
+}
+
+const command_value& select_click_t::get_parameter(const std::string& name) const
+{
+	/* Selects don't have parameters, so override this */
 	static command_value dummy_b_value = {};
 	return dummy_b_value;
 }

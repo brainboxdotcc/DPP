@@ -157,21 +157,21 @@ Of course, this is just a proof of concept - you should really use a more robust
 ## 1. Toolchain
 Before compiling, you will need to install `cmake` on your system.
 To be sure that `cmake` is installed, you can type the following command:
-```sh
-$ cmake --version
-cmake version 3.20.4
-```
+
+    $ cmake --version
+    cmake version 3.20.4
+
 
 ## 2. Create a CMake project
 
 In an empty directory, create different directories and files like below:
-```
-- your_project/
-    |-- libs/
-    |-- src/
-        |-- main.cpp
-    |-- CMakeLists.txt
-```
+
+    - your_project/
+        |-- libs/
+        |-- src/
+            |-- main.cpp
+        |-- CMakeLists.txt
+
 
 In the `libs/` directory, clone the sources with: `git clone https://github.com/brainboxdotcc/DPP.git`
 
@@ -215,14 +215,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 ~~~~~~~~~~~~~~
 
 Your project directory should look like this:
-```
-- your_project/
-    |-- libs/
-        |-- DPP
-        |-- spdlog # again, only if you need it
-    |-- src/
-        |-- main.cpp
-    |-- CMakeLists.txt
-```
+
+    - your_project/
+        |-- libs/
+            |-- DPP
+            |-- spdlog # again, only if you need it
+        |-- src/
+            |-- main.cpp
+        |-- CMakeLists.txt
+
 
 **Have fun!**

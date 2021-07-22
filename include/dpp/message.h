@@ -33,7 +33,9 @@ enum component_type : uint8_t {
 	/// Action row, a container for other components
 	cot_action_row = 1,
 	/// Clickable button
-	cot_button
+	cot_button = 2,
+	/// Select menu
+	cot_selectmenu = 3
 };
 
 /**
@@ -50,6 +52,54 @@ enum component_style : uint8_t {
 	cos_danger,
 	/// An external hyperlink to a website
 	cos_link
+};
+
+struct select_option {
+	std::string label;
+	std::string value;
+	std::string description;
+	bool is_default;
+	/** Emoji definition. To set an emoji on your button
+	 * you must set one of either the name or id fields.
+	 * The easiest way is to use the component::set_emoji
+	 * method.
+	 */
+	struct inner_select_emoji {
+		/** Set the name field to the name of the emoji.
+		 * For built in unicode emojis, set this to the
+		 * actual unicode value of the emoji e.g. "😄"
+		 * and not for example ":smile:"
+		 */
+		std::string name;
+		/** The emoji ID value for emojis that are custom
+		 * ones belonging to a guild. The same rules apply
+		 * as with other emojis, that the bot must be on
+		 * the guild where the emoji resides and it must
+		 * be available for use (e.g. not disabled due to
+		 * lack of boosts etc)
+		 */
+		dpp::snowflake id = 0;
+		/** True if the emoji is animated. Only applies to
+		 * custom emojis.
+		 */
+		bool animated = false;
+	} emoji;
+
+	select_option();
+
+	select_option(const std::string &label, const std::string &value, const std::string &description = "");
+
+	select_option& set_label(const std::string &l);
+
+	select_option& set_value(const std::string &v);
+
+	select_option& set_description(const std::string &d);
+	
+	select_option& set_emoji(const std::string &n, dpp::snowflake id = 0, bool animated = false);
+
+	select_option& set_default(bool def);
+
+	select_option& set_animated(bool anim);
 };
 
 /**
@@ -96,6 +146,24 @@ public:
 	 * Maximum of 512 characters.
 	 */
 	std::string url;
+
+	/** Placeholder text for select menus
+	 */
+	std::string placeholder;
+
+	/** Minimum number of selectable values for a select menu.
+	 * -1 to not set this
+	 */
+	int32_t min_values;
+
+	/** Maximum number of selectable values for a select menu.
+	 * -1 to not set this.
+	 */
+	int32_t max_values;
+
+	/** Select options for select menus
+	 */
+	std::vector<select_option> options;
 
 	/** Disabled flag (for buttons)
 	 */
@@ -198,6 +266,15 @@ public:
 	 */
 	component& set_disabled(bool disable);
 
+
+	component& set_placeholder(const std::string &placeholder);
+
+	component& set_min_values(uint32_t min_values);
+
+	component& set_max_values(uint32_t max_values);
+
+	component& add_select_option(const select_option &option);
+
 	/**
 	 * @brief Add a sub-component, only valid for action rows.
 	 * Adding subcomponents to a component will automatically
@@ -250,6 +327,24 @@ struct embed_footer {
 	std::string icon_url;
 	/** Proxied icon url */
 	std::string proxy_url;
+
+	/** Set footer's text. Returns footer itself so these methods may be "chained"
+	 * @param t string to set as footer text
+	 * @return A reference to self
+	 */
+	embed_footer& set_text(const std::string& t);
+
+	/** Set footer's icon url. Returns footer itself so these methods may be "chained"
+	 * @param i url to set as footer icon url
+	 * @return A reference to self
+	 */
+	embed_footer& set_icon(const std::string& i);
+
+	/** Set footer's proxied icon url. Returns footer itself so these methods may be "chained"
+	 * @param p url to set as footer proxied icon url
+	 * @return A reference to self
+	 */
+	embed_footer& set_proxy(const std::string& p);
 };
 
 /**
@@ -356,6 +451,14 @@ struct embed {
 	 */
 	embed& set_description(const std::string &text);
 
+	/**
+	 * @brief Set the footer of the embed
+	 * 
+	 * @param f the footer to set
+	 * @return embed& a reference to self
+	 */
+	embed& set_footer(const embed_footer& f);
+
 	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
 	 * @param col The colour of the embed
 	 * @return A reference to self
@@ -376,13 +479,18 @@ struct embed {
 	 */
 	embed& add_field(const std::string& name, const std::string &value, bool is_inline = false);
 
+	/** Set embed author. Returns the embed itself so these method calls may be "chained" 
+	 * @param a The author to set
+	 * @return A reference to self
+	 */ 
+	embed& set_author(const dpp::embed_author& a);
+
 	/** Set embed author. Returns the embed itself so these method calls may be "chained"
 	 * @param name The name of the author
 	 * @param url The url of the author
 	 * @param icon_url The icon URL of the author
 	 * @return A reference to self
 	 */
-
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 
 	/** Set embed provider. Returns the embed itself so these method calls may be "chained"
@@ -549,23 +657,48 @@ enum message_type {
 	mt_guild_invite_reminder			= 22
 };
 
-/**
- * @brief Represents the user caching policy of the cluster.
- */
-enum cache_policy_t : uint8_t {
+enum cache_policy_setting_t {
 	/**
-	 * @brief request whole member lists on seeing new guilds, and also store users when they message us
+	 * @brief request aggressively on seeing new guilds, and also store missing data from messages.
+	 * This is the default behaviour.
 	 */
 	cp_aggressive = 0,
 	/**
-	 * @brief only cache users/members when they message the bot
+	 * @brief only cache when there is relavent activity, e.g. a message to the bot.
 	 */
 	cp_lazy = 1,
 	/**
-	 * @brief Don't cache anything. Fill member details when we see them.
+	 * @brief Don't cache anything. Fill details when we see them.
 	 * (NOT IMPLEMENTED YET)
 	 */
 	cp_none = 2
+};
+
+/**
+ * @brief Represents the caching policy of the cluster.
+ * 
+ * Channels and guilds are always cached as these caches are used
+ * interally by the library. The memory usage of these is minimal.
+ * 
+ * All default to 'aggressive' which means to actively attempt to cache,
+ * going out of the way to fill the caches completely. On large bots this
+ * can take a LOT of RAM.
+ */
+struct cache_policy_t {
+	/**
+	 * @brief Caching policy for users and guild members
+	 */
+	cache_policy_setting_t user_policy = cp_aggressive;
+
+	/**
+	 * @brief Caching policy for emojis
+	 */
+	cache_policy_setting_t emoji_policy = cp_aggressive;
+
+	/**
+	 * @brief Caching policy for roles
+	 */
+	cache_policy_setting_t role_policy = cp_aggressive;
 };
 
 /**
@@ -624,14 +757,18 @@ struct message {
 	/** Message type */
 	uint8_t		type;
 
-	/** True if the message object allocated its own author user */
-	bool		self_allocated;
+	/** Self allocated user for caching being off */
+	user		self_author;
 
 	struct message_ref {
-		snowflake message_id;		// id of the originating message
-		snowflake channel_id;		// id of the originating message's channel
-		snowflake guild_id;		// id of the originating message's guild
-		bool fail_if_not_exists;	// when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
+		/// id of the originating message
+		snowflake message_id;
+		/// id of the originating message's channel
+		snowflake channel_id;
+		/// id of the originating message's guild
+		snowflake guild_id;
+		/// when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
+		bool fail_if_not_exists;
 	} message_reference;
 
 	/**
@@ -639,9 +776,12 @@ struct message {
 	 */
 	message();
 
+	/**
+	 * @brief Destroy the message object
+	 */
 	~message();
 
-    /**
+	/**
 	 * @brief Construct a new message object with a channel and content
 	 *
 	 * @param channel_id The channel to send the message to
@@ -682,7 +822,7 @@ struct message {
 	 * @param cp Cache policy for user records, wether or not we cache users when a message is received
 	 * @return A reference to self
 	 */
-	message& fill_from_json(nlohmann::json* j, cache_policy_t cp = dpp::cp_aggressive);
+	message& fill_from_json(nlohmann::json* j, cache_policy_t cp = {cp_aggressive, cp_aggressive, cp_aggressive});
 
 	/** Build JSON from this object.
 	 * @param with_id True if the ID is to be included in the built JSON

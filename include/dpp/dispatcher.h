@@ -157,6 +157,20 @@ struct interaction_create_t : public event_dispatch_t {
 	void reply(interaction_response_type t, const std::string & mt) const;
 
 	/**
+	 * @brief Edit the response for this interaction
+	 *
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 */
+	void edit_response(const message & m) const;
+
+	/**
+	 * @brief Edit the response for this interaction
+	 *
+	 * @param mt The string value to send, for simple text only messages
+	 */
+	void edit_response(const std::string & mt) const;
+
+	/**
 	 * @brief Get a command line parameter
 	 * 
 	 * @param name The command line parameter to retrieve
@@ -188,6 +202,30 @@ struct button_click_t : public interaction_create_t {
 	const virtual command_value& get_parameter(const std::string& name) const;
 
 	std::string custom_id;
+	uint8_t component_type;
+};
+
+/**
+ * @brief Click on select
+ */
+struct select_click_t : public interaction_create_t {
+
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	select_click_t(class discord_client* client, const std::string& raw);
+
+	/**
+	 * @brief Get a command line parameter
+	 * 
+	 * @param name The command line parameter to retrieve
+	 * @return Always returns an empty parameter as buttons dont have parameters!
+	 */
+	const virtual command_value& get_parameter(const std::string& name) const;
+
+	std::string custom_id;
+	std::vector<std::string> values;
 	uint8_t component_type;
 };
 
@@ -780,6 +818,10 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const button_click_t& event)> button_click;
+	/** @brief Event handler function pointer for button click event
+	 * @param event Event parameters
+	 */
+	std::function<void(const select_click_t& event)> select_click;
 	/** @brief Event handler function pointer for guild delete event
 	 * @param event Event parameters
 	 */

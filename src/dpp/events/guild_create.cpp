@@ -56,17 +56,19 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 	g->fill_from_json(client, &d);
 	g->shard_id = client->shard_id;
 	if (!g->is_unavailable() && newguild) {
-		/* Store guild roles */
-		g->roles.clear();
-		g->roles.reserve(d["roles"].size());
-		for (auto & role : d["roles"]) {
-			dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
-			if (!r) {
-				r = new dpp::role();
+		if (client->creator->cache_policy.role_policy != dpp::cp_none) {
+			/* Store guild roles */
+			g->roles.clear();
+			g->roles.reserve(d["roles"].size());
+			for (auto & role : d["roles"]) {
+				dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
+				if (!r) {
+					r = new dpp::role();
+				}
+				r->fill_from_json(g->id, &role);
+				dpp::get_role_cache()->store(r);
+				g->roles.push_back(r->id);
 			}
-			r->fill_from_json(g->id, &role);
-			dpp::get_role_cache()->store(r);
-			g->roles.push_back(r->id);
 		}
 
 		/* Store guild channels */
@@ -98,7 +100,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 		}
 
 		/* Store guild members */
-		if (client->creator->cache_policy == cp_aggressive) {
+		if (client->creator->cache_policy.user_policy == cp_aggressive) {
 			g->members.reserve(d["members"].size());
 			for (auto & user : d["members"]) {
 				snowflake userid = SnowflakeNotNull(&(user["user"]), "id");
@@ -118,22 +120,24 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 				}
 			}
 		}
-		/* Store emojis */
-		g->emojis.reserve(d["emojis"].size());
-		g->emojis = {};
-		for (auto & emoji : d["emojis"]) {
-			dpp::emoji* e = dpp::find_emoji(SnowflakeNotNull(&emoji, "id"));
-			if (!e) {
-				e = new dpp::emoji();
-				e->fill_from_json(&emoji);
-				dpp::get_emoji_cache()->store(e);
+		if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
+			/* Store emojis */
+			g->emojis.reserve(d["emojis"].size());
+			g->emojis = {};
+			for (auto & emoji : d["emojis"]) {
+				dpp::emoji* e = dpp::find_emoji(SnowflakeNotNull(&emoji, "id"));
+				if (!e) {
+					e = new dpp::emoji();
+					e->fill_from_json(&emoji);
+					dpp::get_emoji_cache()->store(e);
+				}
+				g->emojis.push_back(e->id);
 			}
-			g->emojis.push_back(e->id);
 		}
 	}
 	dpp::get_guild_cache()->store(g);
 	if (newguild && g->id && (client->intents & dpp::i_guild_members)) {
-		if (client->creator->cache_policy == cp_aggressive) {
+		if (client->creator->cache_policy.user_policy == cp_aggressive) {
 			json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(g->id)},{"query",""},{"limit",0}}}});
 			if (client->intents & dpp::i_guild_presences) {
 				chunk_req["d"]["presences"] = true;

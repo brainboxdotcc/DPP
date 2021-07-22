@@ -114,6 +114,47 @@ typedef std::variant<
 	> confirmable_t;
 
 /**
+ * @brief The details of a field in an error response
+ */
+struct error_detail {
+	/**
+	 * @brief Object name which is in error
+	 */
+	std::string object;
+	/**
+	 * @brief Field name which is in error
+	 */
+	std::string field;
+	/**
+	 * @brief Error code
+	 */
+	std::string code;
+	/**
+	 * @brief Error reason (full message)
+	 */
+	std::string reason;
+};
+
+/**
+ * @brief The full details of an error from a REST response
+ */
+struct error_info {
+	/**
+	 * @brief Error code
+	 */
+	uint32_t code = 0;
+	/**
+	 * @brief Error message
+	 * 
+	 */
+	std::string message;
+	/**
+	 * @brief Field specific error descriptions
+	 */
+	std::vector<error_detail> errors;
+};
+
+/**
  * @brief The results of a REST call wrapped in a convenient struct
  */
 struct confirmation_callback_t {
@@ -137,6 +178,24 @@ struct confirmation_callback_t {
 	 * @param _http The HTTP metadata from the REST call
 	 */
 	confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http);
+
+	/**
+	 * @brief Returns true if the call resulted in an error rather than a legitimate value in the
+	 * confirmation_callback_t::value member.
+	 * 
+	 * @return true There was an error who's details can be obtained by get_error()
+	 * @return false There was no error
+	 */
+	bool is_error() const;
+
+	/**
+	 * @brief Get the error_info object.
+	 * The error_info object contains the details of any REST error, if there is an error
+	 * (to find out if there is an error check confirmation_callback_t::is_error())
+	 * 
+	 * @return error_info The details of the error message
+	 */
+	error_info get_error();
 };
 
 /**
@@ -229,7 +288,7 @@ public:
 	 * @param compressed Wether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
 	 * @param policy Set the user caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
 	 */
-	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cp_aggressive);
+	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = {cp_aggressive, cp_aggressive, cp_aggressive});
 
 	/**
 	 * @brief dpp::cluster is non-copyable
@@ -347,9 +406,18 @@ public:
 	 * Button clicks are triggered by discord when buttons are clicked which you have
 	 * associated with a message using dpp::component.
 	 * 
-	 * @param _interaction_create  User function to attach to event
+	 * @param _button_click  User function to attach to event
 	 */
 	void on_button_click (std::function<void(const button_click_t& _event)> _button_click);
+
+	/**
+	 * @brief Called when a select menu is clicked attached to a message.
+	 * Select menu clicks are triggered by discord when select menus are clicked which you have
+	 * associated with a message using dpp::component.
+	 * 
+	 * @param _select_click  User function to attach to event
+	 */
+	void on_select_click (std::function<void(const select_click_t& _event)> _select_click);
 
 	/**
 	 * @brief Called when a guild is deleted.
@@ -782,12 +850,11 @@ public:
 
 	/**
 	 * @brief Respond to a slash command
-	 * 
-	 * @param interaction_id Interaction id to respond to
-	 * @param r Response to send
+	 *
+	 * @param m Message to send
 	 * @param callback Function to call when the API call completes
 	 */
-	void interaction_response_edit(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback = {});
+	void interaction_response_edit(const std::string &token, const message &r, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these)
@@ -1604,6 +1671,14 @@ public:
 	 * @param callback Function to call when the API call completes
 	 */
 	void execute_webhook(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get webhook message
+	 *
+	 * @param Webhook to get the original message for
+	 * @param callback Function to call when the API call completes 
+	 */
+	void get_webhook_message(const class webhook &wh, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Edit webhook message
