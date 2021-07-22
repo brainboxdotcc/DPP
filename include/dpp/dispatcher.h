@@ -677,6 +677,33 @@ struct integration_delete_t : public event_dispatch_t {
 	integration deleted_integration;
 };
 
+/** */
+struct thread_create_t : public event_dispatch_t {
+	/**
+	 */
+	thread_create_t(class discord_client* client, const std::string& raw);
+	guild* creating_guild;
+	channel* created;
+};
+
+/** */
+struct thread_update_t : public event_dispatch_t {
+	/**
+	 */
+	thread_update_t(class discord_client* client, const std::string& raw);
+	guild* updating_guild;
+	channel* updated;
+};
+
+/** */
+struct thread_delete_t : public event_dispatch_t {
+	/**
+	 */
+	thread_delete_t(class discord_client* client, const std::string& raw);
+	guild* deleting_guild;
+	channel* deleted;
+};
+
 /** @brief voice buffer send */
 struct voice_buffer_send_t : public event_dispatch_t {
 	/** 
@@ -916,7 +943,19 @@ public:
 	/** @brief Event handler function pointer for integration delete event
 	 * @param event Event parameters
 	 */
-	std::function<void(const integration_delete_t& event)> integration_delete;
+	std::function<void(const integration_delete_t& event)> integration_delete;	
+	/** @brief Event handler function pointer for thread create event 
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_create_t& event)> thread_create;
+	/** @brief Event handler function pointer for thread update event 
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_update_t& event)> thread_update;
+	/** @brief Event handler function pointer for thread delete event 
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_delete_t& event)> thread_delete;
 	/** @brief Event handler function pointer for voice buffer send event
 	 * @param event Event parameters
 	 */

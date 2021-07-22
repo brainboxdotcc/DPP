@@ -86,6 +86,14 @@ event_decl(channel_update);
 event_decl(channel_delete);
 event_decl(channel_pins_update);
 
+/* Threads */
+event_decl(thread_create);
+event_decl(thread_update);
+event_decl(thread_delete);
+event_decl(thread_list_sync);
+event_decl(thread_member_update);
+event_decl(thread_members_update);
+
 /* Messages */
 event_decl(message_create);
 event_decl(message_update);

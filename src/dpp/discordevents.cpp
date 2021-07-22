@@ -294,7 +294,10 @@ std::map<std::string, dpp::events::event*> eventmap = {
 	{ "USER_UPDATE", new dpp::events::user_update() },
 	{ "GUILD_JOIN_REQUEST_DELETE", new dpp::events::guild_join_request_delete() },
 	{ "STAGE_INSTANCE_CREATE", new dpp::events::stage_instance_create() },
-	{ "STAGE_INSTANCE_DELETE", new dpp::events::stage_instance_delete() }
+	{ "STAGE_INSTANCE_DELETE", new dpp::events::stage_instance_delete() },
+	{ "THREAD_CREATE", new dpp::events::thread_create() },
+	{ "THREAD_UPDATE", new dpp::events::thread_update() },
+	{ "THREAD_UPDATE", new dpp::events::thread_delete() }
 };
 
 void discord_client::HandleEvent(const std::string &event, json &j, const std::string &raw)

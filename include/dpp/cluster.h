@@ -680,6 +680,21 @@ public:
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
 
 	/**
+	 *
+	 */
+	void on_thread_create (std::function<void(const thread_create_t& _event)> _thread_create);
+
+	/**
+	 *
+	 */
+	void on_thread_update (std::function<void(const thread_update_t& _event)> _thread_update);
+
+	/**
+	 *
+	 */
+	void on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete);
+
+	/**
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
 	 * with Sodium, and merged into packets by the repacketizer, which is done in the
@@ -1703,6 +1718,22 @@ public:
 	 * @param callback Function to call when the API call completes
 	 */
 	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Leave a thread
+	 *
+	 * @param thread_id Thread ID to leave
+	 * @param callback Function to call when the API call completes 
+	 */
+	void current_user_leave_thread(snowflake thread_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Remove a member from a thread 
+	 * 
+	 * @param thread_id Thread ID to remove from
+	 * @param user_id Member ID to remove
+	 */
+	void thread_member_delete(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {}); 
 
 	/**
 	 * @brief Get all voice regions

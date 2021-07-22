@@ -1414,6 +1414,18 @@ void cluster::on_message_reaction_remove_all (std::function<void(const message_r
 	this->dispatch.message_reaction_remove_all = _message_reaction_remove_all; 
 }
 
+void cluster::on_thread_create (std::function<void(const thread_create_t& _event)> _thread_create) {
+	this->dispatch.thread_create = _thread_create;
+}
+
+void cluster::on_thread_update (std::function<void(const thread_update_t& _event)> _thread_update) {
+	this->dispatch.thread_update = _thread_update;
+}
+
+void cluster::on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete) {
+	this->dispatch.thread_delete = _thread_delete;
+}
+
 void cluster::on_voice_server_update (std::function<void(const voice_server_update_t& _event)> _voice_server_update) {
 	this->dispatch.voice_server_update = _voice_server_update; 
 }
