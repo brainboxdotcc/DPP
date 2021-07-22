@@ -21,9 +21,9 @@ void thread_delete::handle(discord_client* client, json& j, const std::string& r
 
 	dpp::channel t;
 	t.fill_from_json(&d);
-	dpp::guild* g = dpp::find_guild(t->guild_id);
+	dpp::guild* g = dpp::find_guild(t.guild_id);
 	if (g) {
-		auto gt = std::find(g->threads.begin(), threads.end(), t->id);
+		auto gt = std::find(g->threads.begin(), g->threads.end(), t.id);
 		if (gt != g->threads.end()) {
 			g->threads.erase(gt);
 		}

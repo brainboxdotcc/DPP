@@ -21,9 +21,9 @@ void thread_create::handle(discord_client* client, json& j, const std::string& r
 
 	dpp::channel t;
 	t.fill_from_json(&d);
-	dpp::guild* g = dpp::find_guild(t->guild_id);
+	dpp::guild* g = dpp::find_guild(t.guild_id);
 	if (g) {
-		g->threads.push_back(t->id);
+		g->threads.push_back(t.id);
 		if (client->creator->dispatch.thread_create) {
 			dpp::thread_create_t tc(client, raw);
 			tc.created = t;
