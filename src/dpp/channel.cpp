@@ -30,6 +30,14 @@ using json = nlohmann::json;
 
 namespace dpp {
 
+thread_member& thread_member::fill_from_json(nlohmann::json* j) {
+	SetSnowflakeNotNull(j, "id", this->thread_id);
+	SetSnowflakeNotNull(j, "user_id", this->user_id);
+	SetTimestampNotNull(j, "join_timestamp", this->joined);
+	SetInt32NotNull(j, "flags", this->flags);
+	return *this;
+}
+
 channel::channel() :
 	managed(),
 	flags(0),

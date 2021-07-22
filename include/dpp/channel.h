@@ -114,6 +114,8 @@ struct thread_member
 	snowflake user_id;
 	time_t joined;
 	uint32_t flags;
+
+	thread_member& fill_from_json(nlohmann::json* j);
 };
 /** @brief A group of thread member objects*/
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
