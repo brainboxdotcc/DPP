@@ -1720,6 +1720,14 @@ public:
 	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Join a thread
+	 *
+	 * @param thread_id Thread ID to join
+	 * @param callback Function to call when the API call completes 
+	 */
+	void current_user_join_thread(snowflake thread_id, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Leave a thread
 	 *
 	 * @param thread_id Thread ID to leave
@@ -1728,12 +1736,37 @@ public:
 	void current_user_leave_thread(snowflake thread_id, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Add a member to a thread 
+	 * 
+	 * @param thread_id Thread ID to add to
+	 * @param user_id Member ID to add
+	 * @param callback Function to call when the API call completes
+	 */
+	void thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Remove a member from a thread 
 	 * 
 	 * @param thread_id Thread ID to remove from
 	 * @param user_id Member ID to remove
+	 * @param callback Function to call when the API call completes
 	 */
-	void thread_member_delete(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {}); 
+	void thread_member_remove(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get members of a thread
+	 *
+	 * @param thread_id
+	 */
+	void get_thread_members(snowflake thread_id, command_completion_event_t callback = {});
+
+	void get_active_threads(snowflake channel_id, command_completion_event_t callback = {});
+
+	void get_public_archived_threads();
+
+	void get_private_archived_threads();
+
+	void get_joined_private_archived_threads(); 
 
 	/**
 	 * @brief Get all voice regions
