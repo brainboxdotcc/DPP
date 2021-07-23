@@ -36,37 +36,42 @@ enum role_flags {
  * @brief Represents the various discord permissions
  */
 enum role_permissions {
-	p_create_instant_invite	=	0x00000001,	//!< allows creationboosters of instant invites
-	p_kick_members		=	0x00000002,	//!< allows kicking members
-	p_ban_members		=	0x00000004,	//!< allows banning members
-	p_administrator		=	0x00000008,	//!< allows all permissions and bypasses channel permission overwrites
-	p_manage_channels	=	0x00000010,	//!< allows management and editing of channels
-	p_manage_guild		=	0x00000020,	//!< allows management and editing of the guild
-	p_add_reactions		=	0x00000040,	//!< allows for the addition of reactions to messages
-	p_view_audit_log	=	0x00000080,	//!< allows for viewing of audit logs
-	p_priority_speaker	=	0x00000100,	//!< allows for using priority speaker in a voice channel
-	p_stream		=	0x00000200,	//!< allows the user to go live
-	p_view_channel		=	0x00000400,	//!< allows guild members to view a channel, which includes reading messages in text channels
-	p_send_messages		=	0x00000800,	//!< allows for sending messages in a channel
-	p_send_tts_messages	=	0x00001000,	//!< allows for sending of /tts messages
-	p_manage_messages	=	0x00002000,	//!< allows for deletion of other users messages
-	p_embed_links		=	0x00004000,	//!< links sent by users with this permission will be auto-embedded
-	p_attach_files		=	0x00008000,	//!< allows for uploading images and files
-	p_read_message_history	=	0x00010000,	//!< allows for reading of message history
-	p_mention_everyone	=	0x00020000,	//!< allows for using the @everyone and the @here tag to notify users in a channel
-	p_use_external_emojis	=	0x00040000,	//!< allows the usage of custom emojis from other servers
-	p_view_guild_insights	=	0x00080000,	//!< allows for viewing guild insights
-	p_connect		=	0x00100000,	//!< allows for joining of a voice channel
-	p_speak			=	0x00200000,	//!< allows for speaking in a voice channel
-	p_mute_members		=	0x00400000,	//!< allows for muting members in a voice channel
-	p_deafen_members	=	0x00800000,	//!< allows for deafening of members in a voice channel
-	p_move_members		=	0x01000000,	//!< allows for moving of members between voice channels
-	p_use_vad		=	0x02000000,	//!< allows for using voice-activity-detection in a voice channel
-	p_change_nickname	=	0x04000000,	//!< allows for modification of own nickname 
-	p_manage_nicknames	=	0x08000000,	//!< allows for modification of other users nicknames 
-	p_manage_roles		=	0x10000000,	//!< allows management and editing of roles 
-	p_manage_webhooks	=	0x20000000,	//!< allows management and editing of webhooks
-	p_manage_emojis		=	0x40000000	//!< allows management and editing of emojis 
+	p_create_instant_invite	=	(1<<0),	//!< allows creationboosters of instant invites
+	p_kick_members		=	(1<<1),	//!< allows kicking members
+	p_ban_members		=	(1<<2),	//!< allows banning members
+	p_administrator		=	(1<<3),	//!< allows all permissions and bypasses channel permission overwrites
+	p_manage_channels	=	(1<<4),	//!< allows management and editing of channels
+	p_manage_guild		=	(1<<5),	//!< allows management and editing of the guild
+	p_add_reactions		=	(1<<6),	//!< allows for the addition of reactions to messages
+	p_view_audit_log	=	(1<<7),	//!< allows for viewing of audit logs
+	p_priority_speaker	=	(1<<8),	//!< allows for using priority speaker in a voice channel
+	p_stream		=	(1<<9),	//!< allows the user to go live
+	p_view_channel		=	(1<<10),	//!< allows guild members to view a channel, which includes reading messages in text channels
+	p_send_messages		=	(1<<11),	//!< allows for sending messages in a channel
+	p_send_tts_messages	=	(1<<12),	//!< allows for sending of /tts messages
+	p_manage_messages	=	(1<<13),	//!< allows for deletion of other users messages
+	p_embed_links		=	(1<<14),	//!< links sent by users with this permission will be auto-embedded
+	p_attach_files		=	(1<<15),	//!< allows for uploading images and files
+	p_read_message_history	=	(1<<16),	//!< allows for reading of message history
+	p_mention_everyone	=	(1<<17),	//!< allows for using the @everyone and the @here tag to notify users in a channel
+	p_use_external_emojis	=	(1<<18),	//!< allows the usage of custom emojis from other servers
+	p_view_guild_insights	=	(1<<19),	//!< allows for viewing guild insights
+	p_connect		=	(1<<20),	//!< allows for joining of a voice channel
+	p_speak			=	(1<<21),	//!< allows for speaking in a voice channel
+	p_mute_members		=	(1<<22),	//!< allows for muting members in a voice channel
+	p_deafen_members	=	(1<<23),	//!< allows for deafening of members in a voice channel
+	p_move_members		=	(1<<24),	//!< allows for moving of members between voice channels
+	p_use_vad		=	(1<<25),	//!< allows for using voice-activity-detection in a voice channel
+	p_change_nickname	=	(1<<26),	//!< allows for modification of own nickname 
+	p_manage_nicknames	=	(1<<27),	//!< allows for modification of other users nicknames 
+	p_manage_roles		=	(1<<28),	//!< allows management and editing of roles 
+	p_manage_webhooks	=	(1<<29),	//!< allows management and editing of webhooks
+	p_manage_emojis		=	(1<<30),	//!< allows management and editing of emojis 
+	p_use_slash_commands	=	(1<<31),	//!< allows members to use slash commands in text channels
+	p_request_to_speak	=	(1<<32),	//!< allows for requesting to speak in stage channels. (Discord: This permission is under active development and may be changed or removed.)
+	p_manage_threads	=	(1<<34),	//!< allows for deleting and archiving threads, and viewing all private threads
+	p_use_public_threads	=	(1<<35),	//!< allows for creating and participating in thread
+	p_use_private_threads	=	(1<<36),	//!< allows for creating and participating in private thread
 };
 
 /**
@@ -178,6 +183,16 @@ public:
 	bool has_manage_webhooks() const;
 	/** True if has the manage emojis permission */
 	bool has_manage_emojis() const;
+	/** True if has the use slash commands permission*/
+	bool has_use_slash_commands() const;
+	/** True if has the request to speak permission*/
+	bool has_request_to_speak() const;
+	/** True if has the manage threads permission*/
+	bool has_manage_threads() const;
+	/** True if has the use public threads permission*/
+	bool has_use_public_threads() const;
+	/** True if has the use private threads permission*/
+	bool has_use_private_threads() const;
 };
 
 /** A group of roles */
