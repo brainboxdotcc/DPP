@@ -286,6 +286,18 @@ thread_delete_t::thread_delete_t(discord_client* client, const std::string &raw)
 {
 }
 
+thread_list_sync_t::thread_list_sync_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
+thread_member_update_t::thread_member_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
+thread_members_update_t::thread_members_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
 voice_buffer_send_t::voice_buffer_send_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
 {
 }

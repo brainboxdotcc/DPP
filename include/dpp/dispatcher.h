@@ -748,7 +748,8 @@ struct thread_list_sync_t : public event_dispatch_t {
 	 */
 	thread_list_sync_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
-	std::vector<channel> thread_list;
+	std::vector<channel> threads;
+	std::vector<thread_member> members;
 };
 
 /** */
@@ -756,7 +757,6 @@ struct thread_member_update_t : public event_dispatch_t {
 	/**
 	 */
 	thread_member_update_t(class discord_client* client, const std::string& raw);
-	guild* updating_guild;
 	thread_member updated;
 };
 
@@ -769,7 +769,7 @@ struct thread_members_update_t : public event_dispatch_t {
 	guild* updating_guild;
 	uint8_t member_count;
 	std::vector<thread_member> added;
-	std::vector<thread_member> removed;
+	std::vector<snowflake> removed_ids;
 };
 
 /** @brief voice buffer send */

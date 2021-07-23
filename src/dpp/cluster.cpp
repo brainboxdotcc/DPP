@@ -1590,6 +1590,18 @@ void cluster::on_thread_delete (std::function<void(const thread_delete_t& _event
 	this->dispatch.thread_delete = _thread_delete;
 }
 
+void cluster::on_thread_list_sync (std::function<void(const thread_list_sync_t& _event)> _thread_list_sync) {
+	this->dispatch.thread_list_sync = _thread_list_sync;
+}
+
+void cluster::on_thread_member_update (std::function<void(const thread_member_update_t& _event)> _thread_member_update) {
+	this->dispatch.thread_member_update = _thread_member_update;
+}
+
+void cluster::on_thread_members_update (std::function<void(const thread_members_update_t& _event)> _thread_members_update) {
+	this->dispatch.thread_members_update = _thread_members_update;
+}
+
 void cluster::on_voice_server_update (std::function<void(const voice_server_update_t& _event)> _voice_server_update) {
 	this->dispatch.voice_server_update = _voice_server_update; 
 }

@@ -764,6 +764,21 @@ public:
 	void on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete);
 
 	/**
+	 *
+	 */
+	void on_thread_list_sync (std::function<void(const thread_list_sync_t& _event)> _thread_list_sync);
+
+	/**
+	 *
+	 */
+	void on_thread_member_update (std::function<void(const thread_member_update_t& _event)> _thread_member_update);
+
+	/**
+	 *
+	 */
+	void on_thread_members_update (std::function<void(const thread_members_update_t& _event)> _thread_members_update);
+
+	/**
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
 	 * with Sodium, and merged into packets by the repacketizer, which is done in the
