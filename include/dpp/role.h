@@ -35,7 +35,7 @@ enum role_flags {
 /**
  * @brief Represents the various discord permissions
  */
-enum role_permissions {
+enum role_permissions : uint64_t {
 	p_create_instant_invite	=	(1<<0),	//!< allows creationboosters of instant invites
 	p_kick_members		=	(1<<1),	//!< allows kicking members
 	p_ban_members		=	(1<<2),	//!< allows banning members
