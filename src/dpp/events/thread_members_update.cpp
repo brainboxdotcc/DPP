@@ -32,8 +32,12 @@ void thread_members_update::handle(discord_client* client, json& j, const std::s
 				}
 			}
 			if (d.find("removed_member_ids") != d.end()) {
-				for (auto& rm : d["removed_member_ids"]) {
-					tms.removed_ids.push_back(std::stoull(static_cast<std::string>(rm)));
+				try {
+					for (auto& rm : d["removed_member_ids"]) {
+						tms.removed_ids.push_back(std::stoull(static_cast<std::string>(rm)));
+					}
+				} catch (const std::exception& e) {
+					client->creator->log(dpp::ll_error, fmt::format("thread_members_update: {}", e.what()));
 				}
 			}
 			client->creator->dispatch.thread_members_update(tms);
