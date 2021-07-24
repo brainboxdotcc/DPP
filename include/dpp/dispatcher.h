@@ -715,36 +715,48 @@ struct integration_delete_t : public event_dispatch_t {
 	integration deleted_integration;
 };
 
-/** */
+/** @brief Thread Create*/
 struct thread_create_t : public event_dispatch_t {
-	/**
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
 	 */
 	thread_create_t(class discord_client* client, const std::string& raw);
 	guild* creating_guild;
 	channel created;
 };
 
-/** */
+/** @brief Thread Update*/
 struct thread_update_t : public event_dispatch_t {
-	/**
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
 	 */
 	thread_update_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
 	channel updated;
 };
 
-/** */
+/** @bried Thread Delete*/
 struct thread_delete_t : public event_dispatch_t {
-	/**
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
 	 */
 	thread_delete_t(class discord_client* client, const std::string& raw);
 	guild* deleting_guild;
 	channel deleted;
 };
 
-/** */
+/** @brief Thread List Sync*/
 struct thread_list_sync_t : public event_dispatch_t {
-	/**
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
 	 */
 	thread_list_sync_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
@@ -752,17 +764,23 @@ struct thread_list_sync_t : public event_dispatch_t {
 	std::vector<thread_member> members;
 };
 
-/** */
+/** @brief Thread Member Update*/
 struct thread_member_update_t : public event_dispatch_t {
-	/**
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
 	 */
 	thread_member_update_t(class discord_client* client, const std::string& raw);
 	thread_member updated;
 };
 
-/** */
+/** @brief Thread Members Update*/
 struct thread_members_update_t : public event_dispatch_t {
-	/**
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
 	 */
 	thread_members_update_t(class discord_client* client, const std::string& raw);
 	snowflake thread_id;

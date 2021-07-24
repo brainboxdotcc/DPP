@@ -111,13 +111,23 @@ struct thread_metadata {
  */
 struct thread_member 
 {
+	/// ID of the thread member is part of
 	snowflake thread_id;
+	/// ID of the member 
 	snowflake user_id;
+	/// When the user joined the thread
 	time_t joined;
+	/// Flags bitmap
 	uint32_t flags;
 
+	/**
+	 * @brief Read struct values from a json object 
+	 * @param j json to read values from
+	 * @return A reference to self	
+	 */
 	thread_member& fill_from_json(nlohmann::json* j);
 };
+
 /** @brief A group of thread member objects*/
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 

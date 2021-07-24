@@ -21,6 +21,7 @@ void thread_list_sync::handle(discord_client* client, json& j, const std::string
 
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 	if (g) {
+		/** Store thread IDs*/
 		if (d.find("threads") != d.end()) {
 			for (auto& t : d["threads"]) {
 				g->threads.push_back(SnowflakeNotNull(&t, "id"));

@@ -749,32 +749,46 @@ public:
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
 
 	/**
+	 * @brief Called when a thread is created 
+	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
+	 * @param _thread_create User function to attach to event
 	 */
 	void on_thread_create (std::function<void(const thread_create_t& _event)> _thread_create);
 
 	/**
+	 * @brief Called when a thread is updated
 	 *
+	 * @param _thread_update User function to attach to event
 	 */
 	void on_thread_update (std::function<void(const thread_update_t& _event)> _thread_update);
 
 	/**
+	 * @brief Called when a thread is deleted
 	 *
+	 * @param _thread_delete User function to attach to event
 	 */
 	void on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete);
 
 	/**
+	 * @brief Called when thread list is synced (upon gaining access to a channel)
+	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
+	 * @param _thread_list_sync User function to attach to event
 	 */
 	void on_thread_list_sync (std::function<void(const thread_list_sync_t& _event)> _thread_list_sync);
 
 	/**
+	 * @brief Called when current user's thread member object is updated
 	 *
+	 * @param _thread_member_update User function to attach to event
 	 */
 	void on_thread_member_update (std::function<void(const thread_member_update_t& _event)> _thread_member_update);
 
 	/**
+	 * @brief Called when a thread's member list is updated (without GUILD_MEMBERS intent, is only called for current user)
 	 *
+	 * @param _thread_members_update User function to attach to event
 	 */
 	void on_thread_members_update (std::function<void(const thread_members_update_t& _event)> _thread_members_update);
 
@@ -1824,7 +1838,7 @@ public:
 	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Create a thread with a message 
+	 * @brief Create a thread with a message (Discord: ID of a thread is same as mesage ID)
 	 * 
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
