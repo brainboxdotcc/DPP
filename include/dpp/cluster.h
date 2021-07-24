@@ -1890,14 +1890,14 @@ public:
 	void get_thread_members(snowflake thread_id, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Get active threads in a channel
+	 * @brief Get active threads in a channel (Sorted by ID in descending order)
 	 *
 	 * @param channel_id Channel to get active threads for
 	 */
 	void get_active_threads(snowflake channel_id, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Get public archived threads in a channel
+	 * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
 	 *
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
@@ -1906,7 +1906,7 @@ public:
 	void get_public_archived_threads(snowflake channel_id, time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Get private archived threads in a channel
+	 * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
 	 *
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
@@ -1915,7 +1915,8 @@ public:
 	void get_private_archived_threads(snowflake channel_id,  time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Get private archived threads in a channel which current user has joined 
+	 * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
+
 	 *
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_id Get threads before this id
