@@ -1299,8 +1299,15 @@ void cluster::get_active_threads(snowflake channel_id, command_completion_event_
 	});
 }
 
-void cluster::get_public_archived_threads(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/threads/archived/public", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+void cluster::get_public_archived_threads(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback) {
+	std::string parameters;
+	if (before_timestamp) {
+		parameters.append("&before=" + std::to_string(before_timestamp));
+	}
+	if (limit) {
+		parameters.append("&limit=" + std::to_string(limit));
+	}
+	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/threads/archived/public" + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map threads;
 			for (auto &curr_thread : j) {
@@ -1311,8 +1318,15 @@ void cluster::get_public_archived_threads(snowflake channel_id, command_completi
 		});
 }
 
-void cluster::get_private_archived_threads(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/threads/archived/private", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+void cluster::get_private_archived_threads(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback) {
+	std::string parameters;
+	if (before_timestamp) {
+		parameters.append("&before=" + std::to_string(before_timestamp));
+	}
+	if (limit) {
+		parameters.append("&limit=" + std::to_string(limit));
+	}
+	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/threads/archived/private" + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map threads;
 			for (auto &curr_thread : j) {
@@ -1323,8 +1337,15 @@ void cluster::get_private_archived_threads(snowflake channel_id, command_complet
 	});
 }
 
-void cluster::get_joined_private_archived_threads(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/users/@me/threads/archived/private", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+void cluster::get_joined_private_archived_threads(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback) {
+	std::string parameters;
+	if (before_id) {
+		parameters.append("&before=" + std::to_string(before_id));
+	}
+	if (limit) {
+		parameters.append("&limit=" + std::to_string(limit));
+	}
+	this->post_rest("/api/v9/channels", std::to_string(channel_id), "/users/@me/threads/archived/private" + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map threads;
 			for (auto &curr_thread : j) {
@@ -1445,7 +1466,14 @@ void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string 
 	});
 }
 
-void cluster::execute_webhook(const class webhook &wh, const struct message& m, command_completion_event_t callback) {
+void cluster::execute_webhook(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, command_completion_event_t callback) {
+	std::string parameters;
+	if (wait) {
+		parameters.append("&wait=true");
+	}
+	if (thread_id) {
+		parameters.append("&thread_id=" + std::to_string(thread_id));
+	}
 	this->post_rest("/api/v9/webhooks", std::to_string(wh.id), dpp::url_encode(token), m_post, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));

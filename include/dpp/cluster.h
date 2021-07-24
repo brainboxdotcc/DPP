@@ -1684,9 +1684,11 @@ public:
 	 * 
 	 * @param wh Webhook to execute
 	 * @param m Message to send
+	 * @param wait waits for server confirmation of message send before response, and returns the created message body
+	 * @param thread_id Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived
 	 * @param callback Function to call when the API call completes
 	 */
-	void execute_webhook(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
+	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get webhook message
@@ -1869,17 +1871,43 @@ public:
 	/**
 	 * @brief Get members of a thread
 	 *
-	 * @param thread_id
+	 * @param thread_id Thread to get members for
 	 */
 	void get_thread_members(snowflake thread_id, command_completion_event_t callback = {});
 
+	/**
+	 * @brief Get active threads in a channel
+	 *
+	 * @param channel_id Channel to get active threads for
+	 */
 	void get_active_threads(snowflake channel_id, command_completion_event_t callback = {});
 
-	void get_public_archived_threads(snowflake channel_id, command_completion_event_t callback = {});
+	/**
+	 * @brief Get public archived threads in a channel
+	 *
+	 * @param channel_id Channel to get public archived threads for
+	 * @param before_timestamp Get threads before this timestamp
+	 * @param limit Number of threads to get 
+	 */
+	void get_public_archived_threads(snowflake channel_id, time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
 
-	void get_private_archived_threads(snowflake channel_id, command_completion_event_t callback = {});
+	/**
+	 * @brief Get private archived threads in a channel
+	 *
+	 * @param channel_id Channel to get public archived threads for
+	 * @param before_timestamp Get threads before this timestamp
+	 * @param limit Number of threads to get 
+	 */
+	void get_private_archived_threads(snowflake channel_id,  time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
 
-	void get_joined_private_archived_threads(snowflake channel_id, command_completion_event_t callback = {});
+	/**
+	 * @brief Get private archived threads in a channel which current user has joined 
+	 *
+	 * @param channel_id Channel to get public archived threads for
+	 * @param before_id Get threads before this id
+	 * @param limit Number of threads to get 
+	 */
+	void get_joined_private_archived_threads(snowflake channel_id, snowflake before_id = 0, uint16_t limit = 0, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get all voice regions
