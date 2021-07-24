@@ -1219,6 +1219,30 @@ void cluster::current_user_leave_guild(snowflake guild_id, command_completion_ev
 	 });
 }
 
+void cluster::thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, command_completion_event_t callback)
+{
+	json j;
+	j["name"] = thread_name;
+	j["auto_archive_duration"] = auto_archive_duration;
+	j["type"] = thread_type;
+	this->post_rest("/api/v9/channels", std::to_string(channel_id), "threads", m_post, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
+		}
+	});
+}
+void cluster::thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, command_completion_event_t callback)
+{
+	json j;
+	j["name"] = thread_name;
+	j["auto_archive_duration"] = auto_archive_duration;
+	this->post_rest("/api/v9/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id) + "/threads", m_post, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
+		}
+	});
+}
+
 void cluster::current_user_join_thread(snowflake thread_id, command_completion_event_t callback) {
 	this->post_rest("/api/v9/channels", std::to_string(thread_id), "/thread-members/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

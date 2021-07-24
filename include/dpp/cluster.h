@@ -1811,6 +1811,28 @@ public:
 	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Create a thread 
+	 * 
+	 * @param thread_name Name of the thread
+	 * @param channel_id Channel in which thread to create
+	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
+	 * @param thread_type Type of thread - GUILD_PUBLIC_THREAD, GUILD_NEWS_THREAD, GUILD_PRIVATE_THREAD
+	 * @param callback Function to call when the API call completes
+	 */
+	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Create a thread with a message 
+	 * 
+	 * @param thread_name Name of the thread
+	 * @param channel_id Channel in which thread to create
+	 * @param message_id message to start thread with
+	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
+	 * @param callback Function to call when the API call completes
+	 */
+	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Join a thread
 	 *
 	 * @param thread_id Thread ID to join
