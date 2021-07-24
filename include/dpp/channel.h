@@ -26,35 +26,45 @@
 namespace dpp {
 
 /** @brief Flag integers as received from and sent to discord */
-#define GUILD_TEXT	0	//!< a text channel within a server
-#define DM		1	//!< a direct message between users
-#define GUILD_VOICE	2	//!< a voice channel within a server
-#define GROUP_DM	3	//!< a direct message between multiple users
-#define GUILD_CATEGORY	4	//!< an organizational category that contains up to 50 channels
-#define GUILD_NEWS	5	//!< a channel that users can follow and crosspost into their own server
-#define GUILD_STORE	6	//!< a channel in which game developers can sell their game on Discord
-#define GUILD_STAGE	13	//!< a "stage" channel, like a voice channel with one authorised speaker
-
+enum channel_type {
+GUILD_TEXT	= 0,	//!< a text channel within a server
+DM		= 1,	//!< a direct message between users
+GUILD_VOICE	= 2,	//!< a voice channel within a server
+GROUP_DM	= 3,	//!< a direct message between multiple users
+GUILD_CATEGORY	= 4,	//!< an organizational category that contains up to 50 channels
+GUILD_NEWS	= 5,	//!< a channel that users can follow and crosspost into their own server
+GUILD_STORE	= 6,	//!< a channel in which game developers can sell their game on Discord
+GUILD_NEWS_THREAD	= 10, //!< a temporary sub-channel within a GUILD_NEWS channel
+GUILD_PUBLIC_THREAD	= 11, //!< a temporary sub-channel within a GUILD_TEXT channel
+GUILD_PRIVATE_THREAD	= 12, //!< a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
+GUILD_STAGE	= 13	//!< a "stage" channel, like a voice channel with one authorised speaker
+};
 /** @brief Our flags as stored in the object */
 enum channel_flags {
 	/// NSFW Gated Channel
-	c_nsfw =		0b00000001,
+	c_nsfw =			0b00000001,
 	/// Text channel
-	c_text =		0b00000010,
+	c_text =			0b00000010,
 	/// Direct Message
-	c_dm =			0b00000100,
+	c_dm =				0b00000100,
 	/// Voice channel
-	c_voice =		0b00001000,
+	c_voice =			0b00001000,
 	/// Group
-	c_group =		0b00010000,
+	c_group =			0b00010000,
 	/// Category
 	c_category =		0b00100000,
 	/// News channel
-	c_news =		0b01000000,
+	c_news =			0b01000000,
 	/// Store page
-	c_store =		0b10000000,
+	c_store =			0b10000000,
 	/// Stage channel
-	c_stage =		0b11000000
+	c_stage =			0b11000000,
+	/// News thread
+	c_news_thread =		0b11100000,
+	/// Public thread
+	c_public_thread = 	0b11110000,
+	/// Private thread
+	c_private_thread =	0b11111000
 };
 
 /**
@@ -80,6 +90,46 @@ struct permission_overwrite {
 	/// Deny mask
 	uint64_t deny;
 };
+
+
+/**
+ * @brief metadata for threads
+ */
+struct thread_metadata {
+	/// Whether a thread is archived
+	bool archived;
+	/// When the thread was archived
+	time_t archive_timestamp;
+	/// The duration after a thread will archive
+	uint16_t auto_archive_duration;
+	/// Whether a thread is locked
+	bool locked;
+};
+
+/**
+ * @brief represents membership of a user with a thread
+ */
+struct thread_member 
+{
+	/// ID of the thread member is part of
+	snowflake thread_id;
+	/// ID of the member 
+	snowflake user_id;
+	/// When the user joined the thread
+	time_t joined;
+	/// Flags bitmap
+	uint32_t flags;
+
+	/**
+	 * @brief Read struct values from a json object 
+	 * @param j json to read values from
+	 * @return A reference to self	
+	 */
+	thread_member& fill_from_json(nlohmann::json* j);
+};
+
+/** @brief A group of thread member objects*/
+typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
 /** @brief A definition of a discord channel */
 class channel : public managed {
@@ -122,6 +172,15 @@ public:
 
 	/** Permission overwrites to apply to base permissions */
 	std::vector<permission_overwrite> permission_overwrites;
+
+	/** Approximate count of messages in a thread (threads) */
+	uint8_t message_count;
+
+	/** Approximate count of members in a thread (threads) */
+	uint8_t member_count;
+
+	/** Thread metadata (threads) */
+	thread_metadata metadata;
 
 	/** Constructor */
 	channel();

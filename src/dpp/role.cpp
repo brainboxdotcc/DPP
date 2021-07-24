@@ -216,4 +216,23 @@ bool role::has_manage_emojis() const {
 	return ((this->permissions & p_administrator) | (this->permissions & p_manage_emojis));
 }
 
+bool role::has_use_slash_commands() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_use_slash_commands));
+}
+
+bool role::has_request_to_speak() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_request_to_speak));
+}
+
+bool role::has_manage_threads() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_threads));
+}
+
+bool role::has_use_public_threads() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_use_public_threads));
+}
+
+bool role::has_use_private_threads() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_use_private_threads));
+}
 };

@@ -645,10 +645,14 @@ enum message_type {
 	mt_guild_discovery_grace_period_initial_warning	= 16,
 	/// Discovery grace period warning 2
 	mt_guild_discovery_grace_period_final_warning	= 17,
+	/// Thread Created 
+	mt_thread_created			= 18,
 	/// Reply
 	mt_reply					= 19,
 	/// Application command
 	mt_application_command				= 20,
+	/// Thread starter message
+	mt_thread_starter_message	= 21,
 	/// Invite reminder
 	mt_guild_invite_reminder			= 22
 };

@@ -85,6 +85,13 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			g->channels.push_back(c->id);
 		}
 
+		/* Store guild threads */
+		g->threads.clear();
+		g->threads.reserve(d["threads"].size());
+		for (auto & channel : d["threads"]) {
+			g->threads.push_back(SnowflakeNotNull(&channel, "id"));
+		}
+
 		/* Store guild members */
 		if (client->creator->cache_policy.user_policy == cp_aggressive) {
 			g->members.reserve(d["members"].size());

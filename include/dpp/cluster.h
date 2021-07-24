@@ -85,6 +85,7 @@ typedef std::variant<
 		guild_member_map,
 		channel,
 		channel_map,
+		thread_member_map,
 		guild,
 		guild_map,
 		role,
@@ -746,6 +747,50 @@ public:
 	 * @param _integration_delete User function to attach to event
 	 */
 	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
+
+	/**
+	 * @brief Called when a thread is created 
+	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
+	 *
+	 * @param _thread_create User function to attach to event
+	 */
+	void on_thread_create (std::function<void(const thread_create_t& _event)> _thread_create);
+
+	/**
+	 * @brief Called when a thread is updated
+	 *
+	 * @param _thread_update User function to attach to event
+	 */
+	void on_thread_update (std::function<void(const thread_update_t& _event)> _thread_update);
+
+	/**
+	 * @brief Called when a thread is deleted
+	 *
+	 * @param _thread_delete User function to attach to event
+	 */
+	void on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete);
+
+	/**
+	 * @brief Called when thread list is synced (upon gaining access to a channel)
+	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
+	 *
+	 * @param _thread_list_sync User function to attach to event
+	 */
+	void on_thread_list_sync (std::function<void(const thread_list_sync_t& _event)> _thread_list_sync);
+
+	/**
+	 * @brief Called when current user's thread member object is updated
+	 *
+	 * @param _thread_member_update User function to attach to event
+	 */
+	void on_thread_member_update (std::function<void(const thread_member_update_t& _event)> _thread_member_update);
+
+	/**
+	 * @brief Called when a thread's member list is updated (without GUILD_MEMBERS intent, is only called for current user)
+	 *
+	 * @param _thread_members_update User function to attach to event
+	 */
+	void on_thread_members_update (std::function<void(const thread_members_update_t& _event)> _thread_members_update);
 
 	/**
 	 * @brief Called when packets are sent from the voice buffer.
@@ -1653,9 +1698,11 @@ public:
 	 * 
 	 * @param wh Webhook to execute
 	 * @param m Message to send
+	 * @param wait waits for server confirmation of message send before response, and returns the created message body
+	 * @param thread_id Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived
 	 * @param callback Function to call when the API call completes
 	 */
-	void execute_webhook(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
+	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get webhook message
@@ -1778,6 +1825,104 @@ public:
 	 * @param callback Function to call when the API call completes
 	 */
 	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Create a thread 
+	 * 
+	 * @param thread_name Name of the thread
+	 * @param channel_id Channel in which thread to create
+	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
+	 * @param thread_type Type of thread - GUILD_PUBLIC_THREAD, GUILD_NEWS_THREAD, GUILD_PRIVATE_THREAD
+	 * @param callback Function to call when the API call completes
+	 */
+	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Create a thread with a message (Discord: ID of a thread is same as mesage ID)
+	 * 
+	 * @param thread_name Name of the thread
+	 * @param channel_id Channel in which thread to create
+	 * @param message_id message to start thread with
+	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
+	 * @param callback Function to call when the API call completes
+	 */
+	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Join a thread
+	 *
+	 * @param thread_id Thread ID to join
+	 * @param callback Function to call when the API call completes 
+	 */
+	void current_user_join_thread(snowflake thread_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Leave a thread
+	 *
+	 * @param thread_id Thread ID to leave
+	 * @param callback Function to call when the API call completes 
+	 */
+	void current_user_leave_thread(snowflake thread_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Add a member to a thread 
+	 * 
+	 * @param thread_id Thread ID to add to
+	 * @param user_id Member ID to add
+	 * @param callback Function to call when the API call completes
+	 */
+	void thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Remove a member from a thread 
+	 * 
+	 * @param thread_id Thread ID to remove from
+	 * @param user_id Member ID to remove
+	 * @param callback Function to call when the API call completes
+	 */
+	void thread_member_remove(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get members of a thread
+	 *
+	 * @param thread_id Thread to get members for
+	 */
+	void get_thread_members(snowflake thread_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get active threads in a channel (Sorted by ID in descending order)
+	 *
+	 * @param channel_id Channel to get active threads for
+	 */
+	void get_active_threads(snowflake channel_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
+	 *
+	 * @param channel_id Channel to get public archived threads for
+	 * @param before_timestamp Get threads before this timestamp
+	 * @param limit Number of threads to get 
+	 */
+	void get_public_archived_threads(snowflake channel_id, time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
+	 *
+	 * @param channel_id Channel to get public archived threads for
+	 * @param before_timestamp Get threads before this timestamp
+	 * @param limit Number of threads to get 
+	 */
+	void get_private_archived_threads(snowflake channel_id,  time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
+
+	 *
+	 * @param channel_id Channel to get public archived threads for
+	 * @param before_id Get threads before this id
+	 * @param limit Number of threads to get 
+	 */
+	void get_joined_private_archived_threads(snowflake channel_id, snowflake before_id = 0, uint16_t limit = 0, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get all voice regions
