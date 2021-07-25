@@ -257,6 +257,14 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0)
 	message_reference.guild_id = 0;
 	message_reference.message_id = 0;
 	message_reference.fail_if_not_exists = false;
+	allowed_mentions.parse_users = false;
+	allowed_mentions.parse_everyone = false;
+	allowed_mentions.parse_roles = false;
+	/* The documentation for discord is INCORRECT. This defaults to true, and must be set to false.
+	 * The default ctor reflects this.
+	 */
+	allowed_mentions.replied_user = true;
+
 }
 
 message& message::set_reference(snowflake _message_id, snowflake _guild_id, snowflake _channel_id, bool fail_if_not_exists) {
@@ -557,9 +565,9 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		j["message_reference"]["fail_if_not_exists"] = message_reference.fail_if_not_exists;
 	}
 
-	if (allowed_mentions.parse_everyone || allowed_mentions.parse_roles || allowed_mentions.parse_users || allowed_mentions.replied_user || allowed_mentions.users.size() || allowed_mentions.roles.size()) {
-		j["allowed_mentions"] = json::object();
-		j["allowed_mentions"]["parse"] = json::array();
+	j["allowed_mentions"] = json::object();
+	j["allowed_mentions"]["parse"] = json::array();
+	if (allowed_mentions.parse_everyone || allowed_mentions.parse_roles || allowed_mentions.parse_users || !allowed_mentions.replied_user || allowed_mentions.users.size() || allowed_mentions.roles.size()) {
 		if (allowed_mentions.parse_everyone) {
 			j["allowed_mentions"]["parse"].push_back("everyone");
 		}
@@ -569,8 +577,8 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		if (allowed_mentions.parse_users) {
 			j["allowed_mentions"]["parse"].push_back("users");
 		}
-		if (allowed_mentions.replied_user) {
-			j["allowed_mentions"]["replied_user"] = true;
+		if (!allowed_mentions.replied_user) {
+			j["allowed_mentions"]["replied_user"] = false;
 		}
 		if (allowed_mentions.users.size()) {
 			j["allowed_mentions"]["users"] = json::array();
