@@ -267,6 +267,16 @@ message& message::set_reference(snowflake _message_id, snowflake _guild_id, snow
 	return *this;
 }
 
+message& message::set_allowed_mentions(bool _parse_users, bool _parse_roles, bool _parse_everyone, bool _replied_user, const std::vector<snowflake> &users, const std::vector<snowflake> &roles) {
+	allowed_mentions.parse_users = _parse_users;
+	allowed_mentions.parse_everyone = _parse_everyone;
+	allowed_mentions.parse_roles = _parse_roles;
+	allowed_mentions.replied_user = _replied_user;
+	allowed_mentions.users = users;
+	allowed_mentions.roles = roles;
+	return *this;
+}
+
 message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
 	channel_id = _channel_id;
 	content = utility::utf8substr(_content, 0, 2000);
@@ -546,6 +556,36 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		}
 		j["message_reference"]["fail_if_not_exists"] = message_reference.fail_if_not_exists;
 	}
+
+	if (allowed_mentions.parse_everyone || allowed_mentions.parse_roles || allowed_mentions.parse_users || allowed_mentions.replied_user || allowed_mentions.users.size() || allowed_mentions.roles.size()) {
+		j["allowed_mentions"] = json::object();
+		j["allowed_mentions"]["parse"] = json::array();
+		if (allowed_mentions.parse_everyone) {
+			j["allowed_mentions"]["parse"].push_back("everyone");
+		}
+		if (allowed_mentions.parse_roles) {
+			j["allowed_mentions"]["parse"].push_back("roles");
+		}
+		if (allowed_mentions.parse_users) {
+			j["allowed_mentions"]["parse"].push_back("users");
+		}
+		if (allowed_mentions.replied_user) {
+			j["allowed_mentions"]["replied_user"] = true;
+		}
+		if (allowed_mentions.users.size()) {
+			j["allowed_mentions"]["users"] = json::array();
+			for (auto& user : allowed_mentions.users) {
+				j["allowed_mentions"]["users"].push_back(std::to_string(user));
+			}
+		}
+		if (allowed_mentions.roles.size()) {
+			j["allowed_mentions"]["roles"] = json::array();
+			for (auto& role : allowed_mentions.roles) {
+				j["allowed_mentions"]["roles"].push_back(std::to_string(role));
+			}
+		}
+	}
+
 
 	if (components.size()) {
 		j["components"] = json::array();

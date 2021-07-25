@@ -771,6 +771,15 @@ struct message {
 		bool fail_if_not_exists;
 	} message_reference;
 
+	struct allowed_ref {
+		bool parse_users;
+		bool parse_everyone;
+		bool parse_roles;
+		bool replied_user;
+		std::vector<snowflake> users;
+		std::vector<snowflake> roles;
+	} allowed_mentions;
+
 	/**
 	 * @brief Construct a new message object
 	 */
@@ -813,9 +822,22 @@ struct message {
 	 * @param _guild_id guild id to reply to (optional)
 	 * @param _channel_id channel id to reply to (optional)
 	 * @param fail_if_not_exists true if the message send should fail if these values are invalid (optional)
-	 * @return message& 
+	 * @return message& reference to self
 	 */
 	message& set_reference(snowflake _message_id, snowflake _guild_id = 0, snowflake _channel_id = 0, bool fail_if_not_exists = false);
+
+	/**
+	 * @brief Set the allowed mentions object for pings on the message
+	 * 
+	 * @param _parse_users wether or not to parse users in the message content or embeds
+	 * @param _parse_roles wether or not to parse roles in the message content or embeds
+	 * @param _parse_everyone wether or not to parse everyone/here in the message content or embeds 
+	 * @param _replied_user if set to true and this is a reply, then ping the user we reply to
+	 * @param users list of user ids to allow pings for
+	 * @param roles list of role ids to allow pings for
+	 * @return message& reference to self
+	 */
+	message& set_allowed_mentions(bool _parse_users, bool _parse_roles, bool _parse_everyone, bool _replied_user, const std::vector<snowflake> &users, const std::vector<snowflake> &roles);
 
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
