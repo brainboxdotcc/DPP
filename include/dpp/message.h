@@ -30,19 +30,76 @@ namespace dpp {
  * @brief Represents the type of a component
  */
 enum component_type : uint8_t {
-	cot_action_row = 1,	//< Action row, a container for other components
-	cot_button		//< Clickable button
+	/// Action row, a container for other components
+	cot_action_row = 1,
+	/// Clickable button
+	cot_button = 2,
+	/// Select menu
+	cot_selectmenu = 3
 };
 
 /**
  * @brief Represents the style of a button
  */
 enum component_style : uint8_t {
-    cos_primary = 1,	//< Blurple
-    cos_secondary,	//< Grey
-    cos_success,	//< Green
-    cos_danger,		//< Red
-    cos_link		//< An external hyperlink to a website
+	/// Blurple
+	cos_primary = 1,
+	/// Grey
+	cos_secondary,
+	/// Green
+	cos_success,
+	/// Red
+	cos_danger,
+	/// An external hyperlink to a website
+	cos_link
+};
+
+struct select_option {
+	std::string label;
+	std::string value;
+	std::string description;
+	bool is_default;
+	/** Emoji definition. To set an emoji on your button
+	 * you must set one of either the name or id fields.
+	 * The easiest way is to use the component::set_emoji
+	 * method.
+	 */
+	struct inner_select_emoji {
+		/** Set the name field to the name of the emoji.
+		 * For built in unicode emojis, set this to the
+		 * actual unicode value of the emoji e.g. "😄"
+		 * and not for example ":smile:"
+		 */
+		std::string name;
+		/** The emoji ID value for emojis that are custom
+		 * ones belonging to a guild. The same rules apply
+		 * as with other emojis, that the bot must be on
+		 * the guild where the emoji resides and it must
+		 * be available for use (e.g. not disabled due to
+		 * lack of boosts etc)
+		 */
+		dpp::snowflake id = 0;
+		/** True if the emoji is animated. Only applies to
+		 * custom emojis.
+		 */
+		bool animated = false;
+	} emoji;
+
+	select_option();
+
+	select_option(const std::string &label, const std::string &value, const std::string &description = "");
+
+	select_option& set_label(const std::string &l);
+
+	select_option& set_value(const std::string &v);
+
+	select_option& set_description(const std::string &d);
+	
+	select_option& set_emoji(const std::string &n, dpp::snowflake id = 0, bool animated = false);
+
+	select_option& set_default(bool def);
+
+	select_option& set_animated(bool anim);
 };
 
 /**
@@ -89,6 +146,24 @@ public:
 	 * Maximum of 512 characters.
 	 */
 	std::string url;
+
+	/** Placeholder text for select menus
+	 */
+	std::string placeholder;
+
+	/** Minimum number of selectable values for a select menu.
+	 * -1 to not set this
+	 */
+	int32_t min_values;
+
+	/** Maximum number of selectable values for a select menu.
+	 * -1 to not set this.
+	 */
+	int32_t max_values;
+
+	/** Select options for select menus
+	 */
+	std::vector<select_option> options;
 
 	/** Disabled flag (for buttons)
 	 */
@@ -191,6 +266,15 @@ public:
 	 */
 	component& set_disabled(bool disable);
 
+
+	component& set_placeholder(const std::string &placeholder);
+
+	component& set_min_values(uint32_t min_values);
+
+	component& set_max_values(uint32_t max_values);
+
+	component& add_select_option(const select_option &option);
+
 	/**
 	 * @brief Add a sub-component, only valid for action rows.
 	 * Adding subcomponents to a component will automatically
@@ -243,6 +327,24 @@ struct embed_footer {
 	std::string icon_url;
 	/** Proxied icon url */
 	std::string proxy_url;
+
+	/** Set footer's text. Returns footer itself so these methods may be "chained"
+	 * @param t string to set as footer text
+	 * @return A reference to self
+	 */
+	embed_footer& set_text(const std::string& t);
+
+	/** Set footer's icon url. Returns footer itself so these methods may be "chained"
+	 * @param i url to set as footer icon url
+	 * @return A reference to self
+	 */
+	embed_footer& set_icon(const std::string& i);
+
+	/** Set footer's proxied icon url. Returns footer itself so these methods may be "chained"
+	 * @param p url to set as footer proxied icon url
+	 * @return A reference to self
+	 */
+	embed_footer& set_proxy(const std::string& p);
 };
 
 /**
@@ -349,6 +451,14 @@ struct embed {
 	 */
 	embed& set_description(const std::string &text);
 
+	/**
+	 * @brief Set the footer of the embed
+	 * 
+	 * @param f the footer to set
+	 * @return embed& a reference to self
+	 */
+	embed& set_footer(const embed_footer& f);
+
 	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
 	 * @param col The colour of the embed
 	 * @return A reference to self
@@ -369,13 +479,18 @@ struct embed {
 	 */
 	embed& add_field(const std::string& name, const std::string &value, bool is_inline = false);
 
+	/** Set embed author. Returns the embed itself so these method calls may be "chained" 
+	 * @param a The author to set
+	 * @return A reference to self
+	 */ 
+	embed& set_author(const dpp::embed_author& a);
+
 	/** Set embed author. Returns the embed itself so these method calls may be "chained"
 	 * @param name The name of the author
 	 * @param url The url of the author
 	 * @param icon_url The icon URL of the author
 	 * @return A reference to self
 	 */
-
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 
 	/** Set embed provider. Returns the embed itself so these method calls may be "chained"
@@ -476,39 +591,114 @@ struct attachment {
  * @brief Bitmask flags for a dpp::message
  */
 enum message_flags {
-	m_crossposted = 1 << 0,			//< this message has been published to subscribed channels (via Channel Following)
-	m_is_crosspost =  1 << 1,		//< this message originated from a message in another channel (via Channel Following)
-	m_supress_embeds = 1 << 2,		//< do not include any embeds when serializing this message
-	m_source_message_deleted = 1 << 3,	//< the source message for this crosspost has been deleted (via Channel Following)
-	m_urgent = 1 << 4,			//< this message came from the urgent message system
-	m_ephemeral = 1 << 6,			//< this message is only visible to the user who invoked the Interaction
-	m_loading = 1 << 7			//< this message is an Interaction Response and the bot is "thinking"
+	/// this message has been published to subscribed channels (via Channel Following)
+	m_crossposted = 1 << 0,
+	/// this message originated from a message in another channel (via Channel Following)
+	m_is_crosspost =  1 << 1,
+	/// do not include any embeds when serializing this message
+	m_supress_embeds = 1 << 2,
+	/// the source message for this crosspost has been deleted (via Channel Following)
+	m_source_message_deleted = 1 << 3,
+	/// this message came from the urgent message system
+	m_urgent = 1 << 4,
+	/// this message is only visible to the user who invoked the Interaction
+	m_ephemeral = 1 << 6,
+	/// this message is an Interaction Response and the bot is "thinking"
+	m_loading = 1 << 7
 };
 
 /**
  * @brief Mesage types for dpp::message::type
  */
 enum message_type {
+	/// Default
 	mt_default					= 0,
+	/// Add recipient
 	mt_recipient_add				= 1,
+	/// Remove recipient
 	mt_recipient_remove				= 2,
+	/// Call
 	mt_call						= 3,
+	/// Channel name change
 	mt_channel_name_change				= 4,
+	/// Channel icon change
 	mt_channel_icon_change				= 5,
+	/// Message pinned
 	mt_channel_pinned_message			= 6,
+	/// Member joined
 	mt_guild_member_join				= 7,
+	/// Boost
 	mt_user_premium_guild_subscription		= 8,
+	/// Boost level 1
 	mt_user_premium_guild_subscription_tier_1	= 9,
+	/// Boost level 2
 	mt_user_premium_guild_subscription_tier_2	= 10,
+	/// Boost level 3
 	mt_user_premium_guild_subscription_tier_3	= 11,
+	/// Follow channel
 	mt_channel_follow_add				= 12,
+	/// Disqualified from discovery
 	mt_guild_discovery_disqualified			= 14,
+	/// Re-qualified for discovery
 	mt_guild_discovery_requalified			= 15,
+	/// Discovery grace period warning 1
 	mt_guild_discovery_grace_period_initial_warning	= 16,
+	/// Discovery grace period warning 2
 	mt_guild_discovery_grace_period_final_warning	= 17,
+	/// Thread Created 
+	mt_thread_created			= 18,
+	/// Reply
 	mt_reply					= 19,
+	/// Application command
 	mt_application_command				= 20,
+	/// Thread starter message
+	mt_thread_starter_message	= 21,
+	/// Invite reminder
 	mt_guild_invite_reminder			= 22
+};
+
+enum cache_policy_setting_t {
+	/**
+	 * @brief request aggressively on seeing new guilds, and also store missing data from messages.
+	 * This is the default behaviour.
+	 */
+	cp_aggressive = 0,
+	/**
+	 * @brief only cache when there is relavent activity, e.g. a message to the bot.
+	 */
+	cp_lazy = 1,
+	/**
+	 * @brief Don't cache anything. Fill details when we see them.
+	 * (NOT IMPLEMENTED YET)
+	 */
+	cp_none = 2
+};
+
+/**
+ * @brief Represents the caching policy of the cluster.
+ * 
+ * Channels and guilds are always cached as these caches are used
+ * interally by the library. The memory usage of these is minimal.
+ * 
+ * All default to 'aggressive' which means to actively attempt to cache,
+ * going out of the way to fill the caches completely. On large bots this
+ * can take a LOT of RAM.
+ */
+struct cache_policy_t {
+	/**
+	 * @brief Caching policy for users and guild members
+	 */
+	cache_policy_setting_t user_policy = cp_aggressive;
+
+	/**
+	 * @brief Caching policy for emojis
+	 */
+	cache_policy_setting_t emoji_policy = cp_aggressive;
+
+	/**
+	 * @brief Caching policy for roles
+	 */
+	cache_policy_setting_t role_policy = cp_aggressive;
 };
 
 /**
@@ -524,7 +714,7 @@ struct message {
 	/** the author of this message (not guaranteed to be a valid user) */
 	user*		author;
 	/** Optional: member properties for this message's author */
-	guild_member*	member;
+	guild_member	member;
 	/** contents of the message */
 	std::string	content;
 	/** message components */
@@ -567,12 +757,40 @@ struct message {
 	/** Message type */
 	uint8_t		type;
 
+	/** Self allocated user for caching being off */
+	user		self_author;
+
+	struct message_ref {
+		/// id of the originating message
+		snowflake message_id;
+		/// id of the originating message's channel
+		snowflake channel_id;
+		/// id of the originating message's guild
+		snowflake guild_id;
+		/// when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
+		bool fail_if_not_exists;
+	} message_reference;
+
+	struct allowed_ref {
+		bool parse_users;
+		bool parse_everyone;
+		bool parse_roles;
+		bool replied_user;
+		std::vector<snowflake> users;
+		std::vector<snowflake> roles;
+	} allowed_mentions;
+
 	/**
 	 * @brief Construct a new message object
 	 */
 	message();
 
-    /**
+	/**
+	 * @brief Destroy the message object
+	 */
+	~message();
+
+	/**
 	 * @brief Construct a new message object with a channel and content
 	 *
 	 * @param channel_id The channel to send the message to
@@ -597,11 +815,36 @@ struct message {
 	 */
 	message(const std::string &content, message_type type = mt_default);
 
+	/**
+	 * @brief Set the original message reference for replies/crossposts
+	 * 
+	 * @param _message_id message id to reply to
+	 * @param _guild_id guild id to reply to (optional)
+	 * @param _channel_id channel id to reply to (optional)
+	 * @param fail_if_not_exists true if the message send should fail if these values are invalid (optional)
+	 * @return message& reference to self
+	 */
+	message& set_reference(snowflake _message_id, snowflake _guild_id = 0, snowflake _channel_id = 0, bool fail_if_not_exists = false);
+
+	/**
+	 * @brief Set the allowed mentions object for pings on the message
+	 * 
+	 * @param _parse_users wether or not to parse users in the message content or embeds
+	 * @param _parse_roles wether or not to parse roles in the message content or embeds
+	 * @param _parse_everyone wether or not to parse everyone/here in the message content or embeds 
+	 * @param _replied_user if set to true and this is a reply, then ping the user we reply to
+	 * @param users list of user ids to allow pings for
+	 * @param roles list of role ids to allow pings for
+	 * @return message& reference to self
+	 */
+	message& set_allowed_mentions(bool _parse_users, bool _parse_roles, bool _parse_everyone, bool _replied_user, const std::vector<snowflake> &users, const std::vector<snowflake> &roles);
+
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
+	 * @param cp Cache policy for user records, wether or not we cache users when a message is received
 	 * @return A reference to self
 	 */
-	message& fill_from_json(nlohmann::json* j);
+	message& fill_from_json(nlohmann::json* j, cache_policy_t cp = {cp_aggressive, cp_aggressive, cp_aggressive});
 
 	/** Build JSON from this object.
 	 * @param with_id True if the ID is to be included in the built JSON

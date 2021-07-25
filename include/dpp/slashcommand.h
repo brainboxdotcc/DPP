@@ -64,8 +64,8 @@ typedef std::variant<std::string, int32_t, bool, snowflake> command_value;
  * that you can retrieve with std::get().
  */
 struct command_option_choice {
-	std::string name;	//< Option name (1-32 chars)
-	command_value value;	//< Option value
+	std::string name;	//!< Option name (1-32 chars)
+	command_value value;	//!< Option value
 
 	/**
 	 * @brief Construct a new command option choice object
@@ -155,11 +155,11 @@ void to_json(nlohmann::json& j, const command_option& opt);
  * Discord API spec. They are listed in this enum for completeness.
  */
 enum interaction_response_type {
-	ir_pong = 1,					//< ACK a Ping
-	ir_acknowledge = 2,				//< DEPRECATED ACK a command without sending a message, eating the user's input
-	ir_channel_message = 3,				//< DEPRECATED respond with a message, eating the user's input
-	ir_channel_message_with_source = 4,		//< respond to an interaction with a message
-	ir_deferred_channel_message_with_source = 5	//< ACK an interaction and edit a response later, the user sees a loading state
+	ir_pong = 1,					//!< ACK a Ping
+	ir_acknowledge = 2,				//!< DEPRECATED ACK a command without sending a message, eating the user's input
+	ir_channel_message = 3,				//!< DEPRECATED respond with a message, eating the user's input
+	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
+	ir_deferred_channel_message_with_source = 5	//!< ACK an interaction and edit a response later, the user sees a loading state
 };
 
 /**
@@ -255,9 +255,9 @@ void from_json(const nlohmann::json& j, command_data_option& cdo);
 /** Types of interaction in the dpp::interaction class
  */
 enum interaction_type {
-	it_ping = 1,
-	it_application_command = 2,
-	it_component_button = 3
+	it_ping = 1,			//!< ping
+	it_application_command = 2,	//!< application command (slash command)
+	it_component_button = 3		//!< button click (component interaction)
 };
 
 /**
@@ -282,23 +282,29 @@ struct command_interaction {
  */
 void from_json(const nlohmann::json& j, command_interaction& ci);
 
-/**
- * @brief A button click for a button component
- */
-struct button_interaction {
-	uint8_t component_type;
-	std::string custom_id;
+enum component_type_t {
+	cotype_button = 2,
+	cotype_select = 3
 };
 
 /**
- * @brief helper function to deserialize a button_interaction from json
+ * @brief A button click for a button component
+ */
+struct component_interaction {
+	uint8_t component_type;
+	std::string custom_id;
+	std::vector<std::string> values;
+};
+
+/**
+ * @brief helper function to deserialize a component_interaction from json
  *
  * @see https://github.com/nlohmann/json#arbitrary-types-conversions
  *
  * @param j output json object
  * @param bi button_interaction to be deserialized
  */
-void from_json(const nlohmann::json& j, button_interaction& bi);
+void from_json(const nlohmann::json& j, component_interaction& bi);
 
 /**
  * @brief An interaction represents a user running a command and arrives
@@ -308,9 +314,10 @@ class interaction : public managed {
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
 	uint8_t	type;                                               //!< the type of interaction
-	std::variant<command_interaction, button_interaction> data; //!< Optional: the command data payload
+	std::variant<command_interaction, component_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
+	snowflake message_id;					    //!< Originating message id
 	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions
 	user usr;                                                   //!< Optional: user object for the invoking user, if invoked in a DM
 	std::string token;                                          //!< a continuation token for responding to the interaction

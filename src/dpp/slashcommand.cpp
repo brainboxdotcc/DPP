@@ -187,19 +187,23 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 
 	if (j.contains("value") && !j.at("value").is_null()) {
 		switch (cdo.type) {
-		case co_boolean:
-			cdo.value = j.at("value").get<bool>();
-			break;
-		case co_channel:
-		case co_role:
-		case co_user:
-			cdo.value = SnowflakeNotNull(&j, "value");
-			break;
-		case co_integer:
-			cdo.value = j.at("value").get<int32_t>();
-			break;
-		case co_string:
-			cdo.value = j.at("value").get<std::string>();
+			case co_boolean:
+				cdo.value = j.at("value").get<bool>();
+				break;
+			case co_channel:
+			case co_role:
+			case co_user:
+				cdo.value = SnowflakeNotNull(&j, "value");
+				break;
+			case co_integer:
+				cdo.value = j.at("value").get<int32_t>();
+				break;
+			case co_string:
+				cdo.value = j.at("value").get<std::string>();
+				break;
+			case co_sub_command:
+			case co_sub_command_group:
+				/* Silences warning on clang, handled elsewhere */
 			break;
 		}
 	}
@@ -214,9 +218,15 @@ void from_json(const nlohmann::json& j, command_interaction& ci) {
 	}
 }
 
-void from_json(const nlohmann::json& j, button_interaction& bi) {
+void from_json(const nlohmann::json& j, component_interaction& bi) {
 	bi.component_type = Int8NotNull(&j, "component_type");
 	bi.custom_id = StringNotNull(&j, "custom_id");
+	if (bi.component_type == cotype_select && j.find("values") != j.end()) {
+		/* Get values */
+		for (auto& entry : j["values"]) {
+			bi.values.push_back(entry.get<std::string>());
+		}
+	}
 }
 
 void from_json(const nlohmann::json& j, interaction& i) {
@@ -224,6 +234,12 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.application_id = SnowflakeNotNull(&j, "application_id");
 	i.channel_id = SnowflakeNotNull(&j, "channel_id");
 	i.guild_id = SnowflakeNotNull(&j, "guild_id");
+
+	if (j.find("message") != j.end()) {
+		const json& m = j["message"];
+		SetSnowflakeNotNull(&m, "id", i.message_id);
+	}
+
 
 	i.type = Int8NotNull(&j, "type");
 	i.token = StringNotNull(&j, "token");
@@ -242,7 +258,7 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			j.at("data").get_to(ci);
 			i.data = ci;
 		} else if (i.type == it_component_button) {
-			button_interaction bi;
+			component_interaction bi;
 			j.at("data").get_to(bi);
 			i.data = bi;
 		}

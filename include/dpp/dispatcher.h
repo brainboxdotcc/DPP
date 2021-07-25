@@ -157,6 +157,20 @@ struct interaction_create_t : public event_dispatch_t {
 	void reply(interaction_response_type t, const std::string & mt) const;
 
 	/**
+	 * @brief Edit the response for this interaction
+	 *
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 */
+	void edit_response(const message & m) const;
+
+	/**
+	 * @brief Edit the response for this interaction
+	 *
+	 * @param mt The string value to send, for simple text only messages
+	 */
+	void edit_response(const std::string & mt) const;
+
+	/**
 	 * @brief Get a command line parameter
 	 * 
 	 * @param name The command line parameter to retrieve
@@ -188,6 +202,30 @@ struct button_click_t : public interaction_create_t {
 	const virtual command_value& get_parameter(const std::string& name) const;
 
 	std::string custom_id;
+	uint8_t component_type;
+};
+
+/**
+ * @brief Click on select
+ */
+struct select_click_t : public interaction_create_t {
+
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	select_click_t(class discord_client* client, const std::string& raw);
+
+	/**
+	 * @brief Get a command line parameter
+	 * 
+	 * @param name The command line parameter to retrieve
+	 * @return Always returns an empty parameter as buttons dont have parameters!
+	 */
+	const virtual command_value& get_parameter(const std::string& name) const;
+
+	std::string custom_id;
+	std::vector<std::string> values;
 	uint8_t component_type;
 };
 
@@ -527,7 +565,7 @@ struct guild_member_add_t : public event_dispatch_t {
 	 */
 	guild_member_add_t(class discord_client* client, const std::string& raw);
 	guild* adding_guild;
-	guild_member* added;
+	guild_member added;
 };
 
 /** @brief Invite delete */
@@ -568,7 +606,7 @@ struct guild_member_update_t : public event_dispatch_t {
 	 */
 	guild_member_update_t(class discord_client* client, const std::string& raw);
 	guild* updating_guild;
-	guild_member* updated;
+	guild_member updated;
 };
 
 /**
@@ -610,7 +648,7 @@ struct user_update_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	user_update_t(class discord_client* client, const std::string& raw);
-	user* updated;
+	user updated;
 };
 
 /** @brief Create message */
@@ -675,6 +713,81 @@ struct integration_delete_t : public event_dispatch_t {
 	 */
 	integration_delete_t(class discord_client* client, const std::string& raw);
 	integration deleted_integration;
+};
+
+/** @brief Thread Create*/
+struct thread_create_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	thread_create_t(class discord_client* client, const std::string& raw);
+	guild* creating_guild;
+	channel created;
+};
+
+/** @brief Thread Update*/
+struct thread_update_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	thread_update_t(class discord_client* client, const std::string& raw);
+	guild* updating_guild;
+	channel updated;
+};
+
+/** @bried Thread Delete*/
+struct thread_delete_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	thread_delete_t(class discord_client* client, const std::string& raw);
+	guild* deleting_guild;
+	channel deleted;
+};
+
+/** @brief Thread List Sync*/
+struct thread_list_sync_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	thread_list_sync_t(class discord_client* client, const std::string& raw);
+	guild* updating_guild;
+	std::vector<channel> threads;
+	std::vector<thread_member> members;
+};
+
+/** @brief Thread Member Update*/
+struct thread_member_update_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	thread_member_update_t(class discord_client* client, const std::string& raw);
+	thread_member updated;
+};
+
+/** @brief Thread Members Update*/
+struct thread_members_update_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	thread_members_update_t(class discord_client* client, const std::string& raw);
+	snowflake thread_id;
+	guild* updating_guild;
+	uint8_t member_count;
+	std::vector<thread_member> added;
+	std::vector<snowflake> removed_ids;
 };
 
 /** @brief voice buffer send */
@@ -753,6 +866,10 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const button_click_t& event)> button_click;
+	/** @brief Event handler function pointer for button click event
+	 * @param event Event parameters
+	 */
+	std::function<void(const select_click_t& event)> select_click;
 	/** @brief Event handler function pointer for guild delete event
 	 * @param event Event parameters
 	 */
@@ -916,7 +1033,31 @@ public:
 	/** @brief Event handler function pointer for integration delete event
 	 * @param event Event parameters
 	 */
-	std::function<void(const integration_delete_t& event)> integration_delete;
+	std::function<void(const integration_delete_t& event)> integration_delete;	
+	/** @brief Event handler function pointer for thread create event 
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_create_t& event)> thread_create;
+	/** @brief Event handler function pointer for thread update event 
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_update_t& event)> thread_update;
+	/** @brief Event handler function pointer for thread delete event 
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_delete_t& event)> thread_delete;
+	/** @brief Event handler function pointer for thread list sync event
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_list_sync_t& event)> thread_list_sync;
+	/** @brief Event handler function pointer for thread member update event
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_member_update_t& event)> thread_member_update;
+	/** @brief Event handler function pointer for thread members update event
+	 * @param event Event parameters
+	 */
+	std::function<void(const thread_members_update_t& event)> thread_members_update;
 	/** @brief Event handler function pointer for voice buffer send event
 	 * @param event Event parameters
 	 */

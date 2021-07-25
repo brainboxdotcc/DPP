@@ -75,20 +75,6 @@ void garbage_collection() {
 	dpp::get_guild_cache()->rehash();
 	dpp::get_role_cache()->rehash();
 	dpp::get_emoji_cache()->rehash();
-
-	dpp::cache* c = dpp::get_guild_cache();
-	dpp::cache_container& gc = c->get_container();
-	/* IMPORTANT: We must lock the container to iterate it.
-	 * Only clear these hourly as they are really expensive to do.
-	 */
-	if ((time(NULL) % 3600) == 0) {
-		std::lock_guard<std::mutex> lock(c->get_mutex());
-		for (auto g = gc.begin(); g != gc.end(); ++g) {
-			dpp::guild* gp = (dpp::guild*)g->second;
-			gp->rehash_members();
-		}
-	}
-
 }
 
 cache::cache() {

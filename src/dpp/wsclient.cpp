@@ -135,7 +135,7 @@ std::vector<std::string> tokenize(std::string const &in, const char* sep = "\r\n
 	return result;
 }
 
-bool websocket_client::HandleBuffer(std::string &buffer)
+bool websocket_client::handle_buffer(std::string &buffer)
 {
 	switch (state) {
 		case HTTP_HEADERS:
@@ -287,7 +287,7 @@ bool websocket_client::parseheader(std::string &data)
 	return false;
 }
 
-void websocket_client::OneSecondTimer()
+void websocket_client::one_second_timer()
 {
 	if (((time(NULL) % 20) == 0) && (state == CONNECTED)) {
 		/* For sending pings, we send with payload */

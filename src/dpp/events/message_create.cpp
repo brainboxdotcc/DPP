@@ -50,7 +50,7 @@ void message_create::handle(discord_client* client, json &j, const std::string &
 		json d = j["d"];
 		dpp::message_create_t msg(client, raw);
 		dpp::message m;
-		m.fill_from_json(&d);	
+		m.fill_from_json(&d, client->creator->cache_policy);	
 		msg.msg = &m;
 		client->creator->dispatch.message_create(msg);
 	}

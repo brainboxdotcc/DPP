@@ -20,13 +20,11 @@
  ************************************************************************************/
 #include <errno.h>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
+#ifdef WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#pragma  comment(lib,"ws2_32")
+#pragma comment(lib,"ws2_32")
 #else
 #include <resolv.h>
 #include <netdb.h>
@@ -116,7 +114,11 @@ void ssl_client::Connect()
 		}
 		err = errno;
 		sfd = ERROR_STATUS;
+	#ifdef WIN32
+		::_close(sfd);
+	#else
 		::close(sfd);
+	#endif
 	}
 	freeaddrinfo(addrs);
 
@@ -150,7 +152,7 @@ void ssl_client::write(const std::string &data)
 	}
 }
 
-void ssl_client::OneSecondTimer()
+void ssl_client::one_second_timer()
 {
 }
 
@@ -158,7 +160,7 @@ void ssl_client::log(dpp::loglevel severity, const std::string &msg) const
 {
 }
 
-void ssl_client::ReadLoop()
+void ssl_client::read_loop()
 {
 	/* The read loop is non-blocking using select(). This method
 	 * cannot read while it is waiting for write, or write while it is
@@ -176,7 +178,7 @@ void ssl_client::ReadLoop()
 	char ClientToServerBuffer[BUFSIZZ],ServerToClientBuffer[BUFSIZZ];
 	
 	/* Make the socket nonblocking */
-#ifdef _WIN32
+#ifdef WIN32
 	u_long mode = 1;
 	int result = ioctlsocket(sfd, FIONBIO, &mode);
 	if (result != NO_ERROR)
@@ -197,7 +199,7 @@ void ssl_client::ReadLoop()
 		while(true) {
 
 			if (last_tick != time(NULL)) {
-				this->OneSecondTimer();
+				this->one_second_timer();
 				last_tick = time(NULL);
 			}
 
@@ -218,11 +220,9 @@ void ssl_client::ReadLoop()
 			}
 
 			/* If we're waiting for a read on the socket don't try to write to the server */
-			//if (!write_blocked_on_read) {
 			if (ClientToServerLength || obuffer.length() || read_blocked_on_write) {
 				FD_SET(sfd,&writefds);
 			}
-			//}
 				
 			timeval ts;
 			ts.tv_sec = 0;
@@ -259,7 +259,7 @@ void ssl_client::ReadLoop()
 						case SSL_ERROR_NONE:
 							/* Data received, add it to the buffer */
 							buffer.append(ServerToClientBuffer, r);
-							this->HandleBuffer(buffer);
+							this->handle_buffer(buffer);
 							bytes_in += r;
 						break;
 						case SSL_ERROR_ZERO_RETURN:
@@ -344,7 +344,7 @@ uint64_t ssl_client::get_bytes_in()
 	return bytes_in;
 }
 
-bool ssl_client::HandleBuffer(std::string &buffer)
+bool ssl_client::handle_buffer(std::string &buffer)
 {
 	return true;
 }

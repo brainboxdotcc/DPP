@@ -23,13 +23,11 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
+#ifdef WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#pragma  comment(lib,"ws2_32")
+#pragma comment(lib,"ws2_32")
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -81,7 +79,7 @@ void populate_result(const std::string &url, const cluster* owner, http_request_
 	if (rv.status == 429) {
 		owner->log(ll_warning, fmt::format("Rate limited on endpoint {}, reset after {}s!", url, rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
 	}
-	if (url != "/api/gateway/bot") {	// Squelch this particular api endpoint or it generates a warning the minute we boot a cluster
+	if (url != "/api/v9/gateway/bot") {	// Squelch this particular api endpoint or it generates a warning the minute we boot a cluster
 		if (rv.ratelimit_global) {
 			owner->log(ll_warning, fmt::format("At global rate limit on endpoint {}, reset after {}s", url, rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
 		} else if (rv.ratelimit_remaining == 1) {
@@ -353,6 +351,8 @@ void request_queue::in_loop()
 void request_queue::out_loop()
 {
 	int c = sizeof(struct sockaddr_in);
+	fd_set readfds;
+	timeval ts;
 	char n;
 	struct sockaddr_in client;
 	int notifier = accept(out_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
@@ -360,32 +360,42 @@ void request_queue::out_loop()
 	close(out_queue_listen_sock);
 #endif
 	while (!terminating) {
-		while (recv(notifier, &n, 1, 0) > 0) {
-			/* New request to be sent! */
 
-			std::pair<http_request_completion_t*, http_request*> queue_head = {};
-			{
-				std::lock_guard<std::mutex> lock(out_mutex);
-				if (responses_out.size()) {
-					queue_head = responses_out.front();
-					responses_out.pop();
+		/* select for one second, waiting for new data */
+		FD_ZERO(&readfds);
+		FD_SET(notifier, &readfds);
+		ts.tv_sec = 1;
+		ts.tv_usec = 0;
+		int r = select(FD_SETSIZE, &readfds, 0, 0, &ts);
+		time_t now = time(nullptr);
+
+		if (r > 0 && FD_ISSET(notifier, &readfds)) {
+			if (recv(notifier, &n, 1, 0) > 0) {
+
+				/* A request has been completed! */
+				std::pair<http_request_completion_t*, http_request*> queue_head = {};
+				{
+					std::lock_guard<std::mutex> lock(out_mutex);
+					if (responses_out.size()) {
+						queue_head = responses_out.front();
+						responses_out.pop();
+					}
 				}
-			}
 
-			if (queue_head.first && queue_head.second) {
-				queue_head.second->complete(*queue_head.first);
-			}
+				if (queue_head.first && queue_head.second) {
+					queue_head.second->complete(*queue_head.first);
+				}
 
-			/* Queue deletions for 60 seconds from now */
-			time_t now = time(nullptr);
-			responses_to_delete.insert(std::make_pair(now + 60, queue_head));
-
-			/* Check for deletable items */
-			while (responses_to_delete.size() && now >= responses_to_delete.begin()->first) {
-				delete responses_to_delete.begin()->second.first;
-				delete responses_to_delete.begin()->second.second;
-				responses_to_delete.erase(responses_to_delete.begin());
+				/* Queue deletions for 60 seconds from now */
+				responses_to_delete.insert(std::make_pair(now + 60, queue_head));
 			}
+		}
+
+		/* Check for deletable items every second regardless of select status */
+		while (responses_to_delete.size() && now >= responses_to_delete.begin()->first) {
+			delete responses_to_delete.begin()->second.first;
+			delete responses_to_delete.begin()->second.second;
+			responses_to_delete.erase(responses_to_delete.begin());
 		}
 	}
 	::close(notifier);

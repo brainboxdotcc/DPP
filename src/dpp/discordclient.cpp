@@ -21,7 +21,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#ifndef _WIN32
+#ifndef WIN32
 #include <unistd.h>
 #endif
 #include <dpp/discordclient.h>
@@ -57,7 +57,9 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	compressed(comp),
 	decompressed_total(0),
 	decomp_buffer(nullptr),
-	ready(false)
+	ready(false),
+	ping_start(0.0),
+	websocket_ping(0.0)
 {
 	Connect();
 }
@@ -107,7 +109,7 @@ void discord_client::ThreadRun()
 		bool error = false;
 		ready = false;
 		message_queue.clear();
-		ssl_client::ReadLoop();
+		ssl_client::read_loop();
 		ssl_client::close();
 		EndZLib();
 		SetupZLib();
@@ -268,6 +270,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 					reconnects++;
 				}
 				this->last_heartbeat_ack = time(nullptr);
+				websocket_ping = 0;
 			break;
 			case 0: {
 				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
@@ -278,11 +281,18 @@ bool discord_client::HandleFrame(const std::string &buffer)
 			case 7:
 				log(dpp::ll_debug, fmt::format("Reconnection requested, closing socket {}", sessionid));
 				message_queue.clear();
+
+			#ifdef WIN32
+				::_close(sfd);
+			#else
 				::close(sfd);
+			#endif
+
 			break;
 			/* Heartbeat ack */
 			case 11:
 				this->last_heartbeat_ack = time(nullptr);
+				websocket_ping = utility::time_f() - ping_start;
 			break;
 		}
 	}
@@ -378,18 +388,22 @@ size_t discord_client::GetQueueSize()
 	return message_queue.size();
 }
 
-void discord_client::OneSecondTimer()
+void discord_client::one_second_timer()
 {
 
-	websocket_client::OneSecondTimer();
+	websocket_client::one_second_timer();
 
-	/* This is important because unordered_map doesnt actually free its buckets
-	 * until it's members are swapped out. Creating an entirely new hash_map
-	 * is an effective way to completely clear this out without argument from STL.
+	/* Every minute, rehash all containers from first shard.
+	 * We can't just get shard with the id 0 because this won't
+	 * work on a clustered environment
 	 */
-	if (shard_id == 0 && (time(NULL) % 60) == 0) {
-		/* Every minute, rehash all containers from first shard */
-		dpp::garbage_collection();
+	auto shards = creator->get_shards();
+	auto first_iter = shards.begin();
+	if (first_iter != shards.end()) {
+		dpp::discord_client* first_shard = first_iter->second;
+		if ((time(NULL) % 60) == 0 && first_shard == this) {
+			dpp::garbage_collection();
+		}
 	}
 
 	/* This all only triggers if we are connected (have completed websocket, and received READY or RESUMED) */
@@ -402,7 +416,13 @@ void discord_client::OneSecondTimer()
 		if ((time(nullptr) - this->last_heartbeat_ack) > heartbeat_interval * 2) {
 			log(dpp::ll_warning, fmt::format("Missed heartbeat ACK, forcing reconnection to session {}", sessionid));
 			message_queue.clear();
+		
+		#ifdef WIN32
+			::_close(sfd);
+		#else
 			::close(sfd);
+		#endif
+			
 			return;
 		}
 
@@ -412,6 +432,13 @@ void discord_client::OneSecondTimer()
 			if (message_queue.size()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();
+				/* Checking here with .find() saves us having to deserialise the json
+				 * to find pings in our queue. The assumption is that the format of the
+				 * ping isn't going to change.
+				 */
+				if (message.find("\"op\":1}") != std::string::npos) {
+					ping_start = utility::time_f();
+				}
 				this->write(message);
 			}
 		}
@@ -453,7 +480,13 @@ uint64_t discord_client::get_member_count() {
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
-			total += gp->members.size();
+			if (creator->cache_policy.user_policy == dpp::cp_aggressive) {
+				/* We can use actual member count if we are using full user caching */
+				total += gp->members.size();
+			} else {
+				/* Otherwise we use approximate guild member counts from guild_create */
+				total += gp->member_count;
+			}
 		}
 	}
 	return total;

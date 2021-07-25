@@ -30,9 +30,13 @@ namespace dpp {
  * @brief Flags for dpp::emoji
  */
 enum emoji_flags {
+	/// Emoji requires colons
 	e_require_colons = 0b00000001,
+	/// Managed (introduced by application)
 	e_managed =        0b00000010,
+	/// Animated
 	e_animated =       0b00000100,
+	/// Available (false if the guild doesn't meet boosting criteria, etc)
 	e_available =      0b00001000,
 };
 

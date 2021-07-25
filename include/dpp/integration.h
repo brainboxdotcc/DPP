@@ -28,8 +28,11 @@ namespace dpp {
  * @brief Integration types
  */
 enum integration_type {
+	/// Twitch integration
 	i_twitch,
+	/// YouTube integration
 	i_youtube,
+	/// Discord integration
 	i_discord
 };
 
@@ -37,10 +40,15 @@ enum integration_type {
  * @brief Integration flags
  */
 enum integration_flags {
+	/// Integration enabled
 	if_enabled =     0b00000001,
+	/// Integration synching
 	if_syncing =     0b00000010,
+	/// Emoji integration
 	if_emoticons =   0b00000100,
+	/// Integration revoked
 	if_revoked =     0b00001000,
+	/// Kick users when their subscription expires
 	if_expire_kick = 0b00010000,
 };
 
@@ -48,11 +56,17 @@ enum integration_flags {
  * @brief An application that has been integrated
  */
 struct integration_app {
+	/// Inegration id
 	snowflake id;
+	/// Name
 	std::string name;
+	/// Icon
 	std::string icon;
+	/// Description
 	std::string description;
+	/// Integration summary
 	std::string summary;
+	/// Pointer to bot user
 	user* bot;
 };
 

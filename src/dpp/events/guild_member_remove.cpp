@@ -49,25 +49,34 @@ void guild_member_remove::handle(discord_client* client, json &j, const std::str
 	dpp::guild_member_remove_t gmr(client, raw);
 
 	gmr.removing_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
-	gmr.removed = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));
 
-	if (client->creator->dispatch.guild_member_remove)
-		client->creator->dispatch.guild_member_remove(gmr);
+	if (client->creator->cache_policy.user_policy == dpp::cp_none) {
+		dpp::user u;
+		u.fill_from_json(&(d["user"]));
+		gmr.removed = &u;
+		if (client->creator->dispatch.guild_member_remove)
+			client->creator->dispatch.guild_member_remove(gmr);
+	} else {
 
-	if (gmr.removing_guild && gmr.removed) {
-		auto i = gmr.removing_guild->members.find(gmr.removed->id);
-		if (i != gmr.removing_guild->members.end()) {
-			dpp::user* u = dpp::find_user(gmr.removed->id);
-			if (u) {
-				u->refcount--;
-				if (u->refcount < 1) {
-					dpp::get_user_cache()->remove(u);
+		gmr.removed = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));
+
+		if (client->creator->dispatch.guild_member_remove)
+			client->creator->dispatch.guild_member_remove(gmr);
+
+		if (gmr.removing_guild && gmr.removed) {
+			auto i = gmr.removing_guild->members.find(gmr.removed->id);
+			if (i != gmr.removing_guild->members.end()) {
+				dpp::user* u = dpp::find_user(gmr.removed->id);
+				if (u) {
+					u->refcount--;
+					if (u->refcount < 1) {
+						dpp::get_user_cache()->remove(u);
+					}
 				}
+				gmr.removing_guild->members.erase(i);
 			}
-			delete i->second;
-			gmr.removing_guild->members.erase(i);
-		}
 
+		}
 	}
 }
 

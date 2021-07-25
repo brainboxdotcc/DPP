@@ -21,7 +21,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#ifndef _WIN32
+#ifndef WIN32
 #include <unistd.h>
 #include <arpa/inet.h>
 #endif
@@ -133,7 +133,7 @@ bool discord_voice_client::is_playing() {
 void discord_voice_client::ThreadRun()
 {
 	do {
-		ssl_client::ReadLoop();
+		ssl_client::read_loop();
 		ssl_client::close();
 		if (!terminating) {
 			ssl_client::Connect();
@@ -272,7 +272,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 						throw std::runtime_error("Can't bind() client UDP socket");
 					}
 					
-#ifdef _WIN32
+#ifdef WIN32
 					u_long mode = 1;
 					int result = ioctlsocket(newfd, FIONBIO, &mode);
 					if (result != NO_ERROR)
@@ -520,7 +520,7 @@ const std::vector<std::string> discord_voice_client::get_marker_metadata() {
 	return track_meta;
 }
 
-void discord_voice_client::OneSecondTimer()
+void discord_voice_client::one_second_timer()
 {
 	if (terminating) {
 		throw std::runtime_error("Terminating voice connection");
@@ -726,7 +726,13 @@ std::string discord_voice_client::discover_ip() {
 			log(ll_warning, "Could not receive packet for IP discovery");
 			return "";
 		}
+
+	#ifdef WIN32
+		::_close(newfd);
+	#else
 		::close(newfd);
+	#endif
+
 		//utility::debug_dump(packet, 74);
 		return std::string((const char*)(packet + 8));
 	}

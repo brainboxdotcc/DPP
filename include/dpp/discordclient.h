@@ -157,6 +157,9 @@ class discord_client : public websocket_client
 	/** Last connect time of cluster */
 	time_t connect_time;
 
+	/** Time last ping sent to websocket */
+	double ping_start;
+
 	/**
 	 * @brief Initialise ZLib
 	 */
@@ -207,6 +210,9 @@ public:
 	/** Reconnection count */
 	uint32_t reconnects;
 
+	/** Websocket latency in fractional seconds */
+	double websocket_ping;
+
 	/** True if READY or RESUMED has been received */
 	bool ready;
 
@@ -253,7 +259,7 @@ public:
 	uint64_t get_channel_count();
 
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
-	virtual void OneSecondTimer();
+	virtual void one_second_timer();
 
 	/**
 	 * @brief Queue a message to be sent via the websocket

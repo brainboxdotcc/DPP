@@ -32,52 +32,126 @@ namespace dpp {
  * @note Largely deprecated in favour of per-channel regions.
  */
 enum region : uint8_t {
-	r_brazil,
-	r_central_europe,
-	r_hong_kong,
-	r_india,
-	r_japan,
-	r_russia,
-	r_singapore,
-	r_south_africa,
-	r_sydney,
-	r_us_central,
-	r_us_east,
-	r_us_south,
-	r_us_west,
-	r_western_europe
+	r_brazil,		//!< Brazil
+	r_central_europe,	//!< Central Europe
+	r_hong_kong,		//!< Hong Kong
+	r_india,		//!< India
+	r_japan,		//!< Japan
+	r_russia,		//!< Russia
+	r_singapore,		//!< Singapore
+	r_south_africa,		//!< South Africa
+	r_sydney,		//!< Sydney
+	r_us_central,		//!< US Central
+	r_us_east,		//!< US East Coast
+	r_us_south,		//!< US South
+	r_us_west,		//!< US West Coast
+	r_western_europe	//!< Western Europe
 };
 
 /**
  * @brief The various flags that represent the status of a dpp::guild object
  */
 enum guild_flags {
+	/** Large guild */
 	g_large =				0b000000000000000000001,
+	/** Unavailable guild (inaccessible due to an outage) */
 	g_unavailable = 			0b000000000000000000010,
+	/** Guild has widget enabled */
 	g_widget_enabled =			0b000000000000000000100,
+	/** Guild can  have an invite splash image */
 	g_invite_splash =			0b000000000000000001000,
+	/** Guild can have VIP regions */
 	g_vip_regions =				0b000000000000000010000,
+	/** Guild can have a vanity url */
 	g_vanity_url =				0b000000000000000100000,
+	/** Guild is verified */
 	g_verified =				0b000000000000001000000,
+	/** Guild is partnered */
 	g_partnered =				0b000000000000010000000,
+	/** Community features enabled */
 	g_community =				0b000000000000100000000,
+	/** Guild has commerce features enabled */
 	g_commerce =				0b000000000001000000000,
+	/** Guild has news features enabled */
 	g_news =				0b000000000010000000000,
+	/** Guild is discoverable in discovery */
 	g_discoverable =			0b000000000100000000000,
+	/** Guild is featureable */
 	g_featureable =				0b000000001000000000000,
+	/** Guild can have an animated icon (doesn't mean it actually has one though) */
 	g_animated_icon =			0b000000010000000000000,
+	/** Guild can have a banner image */
 	g_banner =				0b000000100000000000000,
+	/** Guild has a welcome screen */
 	g_welcome_screen_enabled =		0b000001000000000000000,
+	/** Guild has a member verification gate */
 	g_member_verification_gate =		0b000010000000000000000,
+	/** Guild has a preview */
 	g_preview_enabled =			0b000100000000000000000,
+	/** Guild join notifications are off */
 	g_no_join_notifications =		0b001000000000000000000,
+	/** Guild boost notifications are off */
 	g_no_boost_notifications =		0b010000000000000000000,
+	/** Guild has an actual animated icon (set by the icon hash starting with 'a_') */
 	g_has_animated_icon =			0b100000000000000000000
+};
+
+/**
+ * @brief Various flags that can be used to indicate the status of a guild member
+ */
+enum guild_member_flags {
+	/** Member deafened */
+	gm_deaf =		0b00001,
+	/** Member muted */
+	gm_mute =		0b00010,
+	/** Member pending verification by membership screening */
+	gm_pending =		0b00100
+};
+
+/**
+ * @brief Represents dpp::user membership upon a dpp::guild
+ */
+class guild_member {
+public:
+	/** Nickname, or nullptr if they don't have a nickname on this guild */
+	std::string nickname;
+	/** Guild id */
+	snowflake guild_id;
+	/** User id */
+	snowflake user_id;
+	/** List of roles this user has on this guild */
+	std::vector<snowflake> roles;
+	/** Date and time the user joined the guild */
+	time_t joined_at;
+	/** Boosting since */
+	time_t premium_since;
+	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
+	uint8_t flags;
+
+	/** Default constructor */
+	guild_member();
+
+	/** Fill this object from a json object.
+	 * @param j The json object to get data from
+	 * @param g_id The guild id to associate the member with
+	 * @param u_id The user id to associate the member with
+	 */
+	guild_member& fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id);
+
+	/** Build json string for the member object */
+	std::string build_json() const;
+
+	/** Returns true if the user is deafened */
+	bool is_deaf() const;
+
+	/** Returns true if the user is muted */
+	bool is_muted() const;
+
 };
 
 /** @brief Guild members container
  */
-typedef std::unordered_map<snowflake, class guild_member*> members_container;
+typedef std::unordered_map<snowflake, guild_member> members_container;
 
 /**
  * @brief Represents a guild on Discord (AKA a server)
@@ -167,6 +241,9 @@ public:
 
 	/** List of channels on this server */
 	std::vector<snowflake> channels;
+
+	/** List of threads on this server */
+	std::vector<snowflake> threads;
 
 	/** List of guild members. Note that when you first receive the
 	 * guild create event, this may be empty or near empty.
@@ -327,59 +404,6 @@ public:
 	 * @return std::string guild widget stringified json
 	 */
 	std::string build_json() const;
-};
-
-/**
- * @brief Various flags that can be used to indicate the status of a guild member
- */
-enum guild_member_flags {
-	/** Member deafened */
-	gm_deaf =		0b00001,
-	/** Member muted */
-	gm_mute =		0b00010,
-	/** Member pending verification by membership screening */
-	gm_pending =		0b00100
-};
-
-/**
- * @brief Represents dpp::user membership upon a dpp::guild
- */
-class guild_member {
-public:
-	/** Nickname, or nullptr if they don't have a nickname on this guild */
-	std::string nickname;
-	/** Guild id */
-	snowflake guild_id;
-	/** User id */
-	snowflake user_id;
-	/** List of roles this user has on this guild */
-	std::vector<snowflake> roles;
-	/** Date and time the user joined the guild */
-	time_t joined_at;
-	/** Boosting since */
-	time_t premium_since;
-	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
-	uint8_t flags;
-
-	/** Default constructor */
-	guild_member();
-
-	/** Fill this object from a json object.
-	 * @param j The json object to get data from
-	 * @param g The guild to associate the member with
-	 * @param u The user to associate the member with
-	 */
-	guild_member& fill_from_json(nlohmann::json* j, const class guild* g, const class user* u);
-
-	/** Build json string for the member object */
-	std::string build_json() const;
-
-	/** Returns true if the user is deafened */
-	bool is_deaf() const;
-
-	/** Returns true if the user is muted */
-	bool is_muted() const;
-
 };
 
 /**

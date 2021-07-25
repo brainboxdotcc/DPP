@@ -42,12 +42,12 @@ enum ws_state {
  */
 enum ws_opcode
 {
-        OP_CONTINUATION = 0x00,	/* Continuation */
-        OP_TEXT = 0x01,		/* Text frame */
-        OP_BINARY = 0x02,	/* Binary frame */
-        OP_CLOSE = 0x08,	/* Close notification with close code */
-        OP_PING = 0x09,		/* Low level ping */
-        OP_PONG = 0x0a		/* Low level pong */
+        OP_CONTINUATION = 0x00,	//!< Continuation
+        OP_TEXT = 0x01,		//!< Text frame
+        OP_BINARY = 0x02,	//!< Binary frame
+        OP_CLOSE = 0x08,	//!< Close notification with close code
+        OP_PING = 0x09,		//!< Low level ping
+        OP_PONG = 0x0a		//!< Low level pong
 };
 
 /**
@@ -126,7 +126,7 @@ public:
 	 * 
 	 * @param buffer The buffer contents. Can modify this value removing the head elements when processed.
 	 */
-        virtual bool HandleBuffer(std::string &buffer);
+        virtual bool handle_buffer(std::string &buffer);
 
 	/**
 	 * @brief Close websocket
@@ -149,7 +149,7 @@ public:
 	virtual void Error(uint32_t errorcode);
 
 	/** Fires every second from the underlying socket I/O loop, used for sending webscocket pings */
-	virtual void OneSecondTimer();
+	virtual void one_second_timer();
 };
 
 };

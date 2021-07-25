@@ -65,11 +65,21 @@ void interaction_create_t::reply(interaction_response_type t, const std::string 
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command));
 }
 
+void interaction_create_t::edit_response(const message & m) const
+{
+	from->creator->interaction_response_edit(this->command.token, m);
+}
+
+void interaction_create_t::edit_response(const std::string & mt) const
+{
+	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command));
+}
+
 const command_value& interaction_create_t::get_parameter(const std::string& name) const
 {
 	/* Dummy STATIC return value for unknown options so we arent returning a value off the stack */
 	static command_value dummy_value = {};
-	command_interaction ci = std::get<command_interaction>(command.data);
+	const command_interaction& ci = std::get<command_interaction>(command.data);
 	for (auto i = ci.options.begin(); i != ci.options.end(); ++i) {
 		if (i->name == name) {
 			return i->value;
@@ -85,6 +95,17 @@ button_click_t::button_click_t(discord_client* client, const std::string &raw) :
 const command_value& button_click_t::get_parameter(const std::string& name) const
 {
 	/* Buttons don't have parameters, so override this */
+	static command_value dummy_b_value = {};
+	return dummy_b_value;
+}
+
+select_click_t::select_click_t(discord_client* client, const std::string &raw) : interaction_create_t(client, raw)
+{
+}
+
+const command_value& select_click_t::get_parameter(const std::string& name) const
+{
+	/* Selects don't have parameters, so override this */
 	static command_value dummy_b_value = {};
 	return dummy_b_value;
 }
@@ -250,6 +271,30 @@ guild_member_remove_t::guild_member_remove_t(discord_client* client, const std::
 }
 
 guild_members_chunk_t::guild_members_chunk_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
+thread_create_t::thread_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
+thread_update_t::thread_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
+thread_delete_t::thread_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
+thread_list_sync_t::thread_list_sync_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
+thread_member_update_t::thread_member_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+{
+}
+
+thread_members_update_t::thread_members_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
 {
 }
 

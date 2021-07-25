@@ -82,7 +82,11 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 	commands[lowercase(command)] = i;
 	if (slash_commands_enabled) {
 		if (this->app_id == 0) {
-			throw std::runtime_error("Command handler not ready (i don't know my application ID)");
+			if (owner->me.id == 0) {
+				throw std::runtime_error("Command handler not ready (i don't know my application ID)");
+			} else {
+				this->app_id = owner->me.id;
+			}
 		}
 		dpp::slashcommand newcommand;
 		/* Create a new global command on ready event */
@@ -93,6 +97,9 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 			switch (parameter.second.type) {
 				case pt_boolean:
 					cot = co_boolean;
+				break;
+				case pt_integer:
+					cot = co_integer;
 				break;
 				case pt_string:
 					cot = co_string;
@@ -181,6 +188,7 @@ void commandhandler::route(const dpp::message& msg)
 					break;
 					case pt_role: {
 						std::string x;
+						ss >> x;
 						if (x.length() > 4 && x[0] == '<' && x[1] == '&') {
 							snowflake rid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
 							role* r = dpp::find_role(rid);
@@ -192,6 +200,7 @@ void commandhandler::route(const dpp::message& msg)
 					break;
 					case pt_channel: {
 						std::string x;
+						ss >> x;
 						if (x.length() > 4 && x[0] == '<' && x[1] == '#') {
 							snowflake cid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
 							channel* c = dpp::find_channel(cid);
@@ -203,6 +212,7 @@ void commandhandler::route(const dpp::message& msg)
 					break;
 					case pt_user: {
 						std::string x;
+						ss >> x;
 						if (x.length() > 4 && x[0] == '<' && x[1] == '@') {
 							snowflake uid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
 							user* u = dpp::find_user(uid);

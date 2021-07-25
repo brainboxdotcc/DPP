@@ -49,20 +49,22 @@ void guild_members_chunk::handle(discord_client* client, json &j, const std::str
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 	if (g) {
 		/* Store guild members */
-		for (auto & userrec : d["members"]) {
-			json & userspart = userrec["user"];
-			dpp::user* u = dpp::find_user(SnowflakeNotNull(&userspart, "id"));
-			if (!u) {
-				u = new dpp::user();
-				u->fill_from_json(&userspart);
-				dpp::get_user_cache()->store(u);
-			}
-			if (g->members.find(u->id) == g->members.end()) {
-				dpp::guild_member* gm = new dpp::guild_member();
-				gm->fill_from_json(&userrec, g, u);
-				g->members.insert(std::make_pair(u->id, gm));
-				if (client->creator->dispatch.guild_members_chunk)
-					um[u->id] = *gm;
+		if (client->creator->cache_policy.user_policy == cp_aggressive) {
+			for (auto & userrec : d["members"]) {
+				json & userspart = userrec["user"];
+				dpp::user* u = dpp::find_user(SnowflakeNotNull(&userspart, "id"));
+				if (!u) {
+					u = new dpp::user();
+					u->fill_from_json(&userspart);
+					dpp::get_user_cache()->store(u);
+				}
+				if (g->members.find(u->id) == g->members.end()) {
+					dpp::guild_member gm;
+					gm.fill_from_json(&userrec, g->id, u->id);
+					g->members[u->id] = gm;
+					if (client->creator->dispatch.guild_members_chunk)
+						um[u->id] = gm;
+				}
 			}
 		}
 		if (client->creator->dispatch.guild_members_chunk) {

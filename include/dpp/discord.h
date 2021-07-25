@@ -50,18 +50,27 @@ namespace dpp {
 
 	/** @brief Supported image types for profile pictures */
 	enum image_type {
+		/// image/png
 		i_png,
+		/// image/jpeg
 		i_jpg,
+		/// image/gif
 		i_gif
 	};
 
 	/** @brief Log levels */
 	enum loglevel {
+		/// Trace
 		ll_trace = 0,
+		/// Debug
 		ll_debug,
+		/// Information
 		ll_info,
+		/// Warning
 		ll_warning,
+		/// Error
 		ll_error,
+		/// Critical
 		ll_critical
 	};
 
@@ -108,8 +117,8 @@ namespace dpp {
 		 */
 		struct iconhash {
 
-			uint64_t first;		//< High 64 bits
-			uint64_t second;	//< Low 64 bits
+			uint64_t first;		//!< High 64 bits
+			uint64_t second;	//!< Low 64 bits
 
 			/**
 			 * @brief Construct a new iconcash object
@@ -158,6 +167,15 @@ namespace dpp {
 		};
 
 		/**
+		 * @brief Return the current time with fractions of seconds.
+		 * This is a unix epoch time with the fractional seconds part
+		 * after the decimal place.
+		 * 
+		 * @return double time with fractional seconds
+		 */
+		double time_f();
+
+		/**
 		 * @brief Returns true if D++ was built with voice support
 		 * 
 		 * @return bool True if voice support is compiled in (libsodium/libopus) 
@@ -178,10 +196,10 @@ namespace dpp {
 		 * and display as a string.
 		 */
 		struct uptime {
-			uint16_t days;	//< Number of days
-			uint8_t hours;	//< Number of hours
-			uint8_t mins;	//< Number of minutes
-			uint8_t secs;	//< Number of seconds
+			uint16_t days;	//!< Number of days
+			uint8_t hours;	//!< Number of hours
+			uint8_t mins;	//!< Number of minutes
+			uint8_t secs;	//!< Number of seconds
 
 			/**
 			 * @brief Construct a new uptime object

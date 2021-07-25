@@ -21,11 +21,10 @@
 #pragma once
 #include <errno.h>
 
-#ifdef _WIN32
+#ifdef WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #else
 #include <resolv.h>
 #include <netdb.h>
@@ -328,7 +327,7 @@ public:
 	virtual void log(dpp::loglevel severity, const std::string &msg);
 
 	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
-	virtual void OneSecondTimer();
+	virtual void one_second_timer();
 
 	/**
 	 * @brief voice client is ready to stream audio.

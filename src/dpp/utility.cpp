@@ -25,11 +25,24 @@
 #include <sstream>
 #include <thread>
 #include <functional>
+#include <chrono>
+#include <ctime>
+#include <algorithm>
+#include <iomanip>
 #include <dpp/fmt/format.h>
+
+using namespace std::literals;
 
 namespace dpp {
 
 	namespace utility {
+
+		double time_f()
+		{
+			using namespace std::chrono;
+			auto tp = system_clock::now() + 0ns;
+			return tp.time_since_epoch().count() / 1000000000.0;
+		}
 
 		bool has_voice() {
 #if HAS_VOICE
@@ -40,7 +53,7 @@ namespace dpp {
 		}
 
 		std::string current_date_time() {
-#ifdef _WIN32
+#ifdef WIN32
 			std::time_t curr_time = time(nullptr);
 			return std::ctime(&curr_time);
 #else

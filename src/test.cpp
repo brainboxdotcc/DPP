@@ -1,6 +1,7 @@
 #include <dpp/dpp.h>
 #include <iostream>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 
@@ -11,40 +12,33 @@ int main()
 	configfile >> configdocument;
 	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members);
 
-	/* Create command handler, and specify prefixes */
-	dpp::commandhandler command_handler(&bot);
-	/* Specifying a prefix of "/" tells the command handler it should also expect slash commands */
-	command_handler.add_prefix(".").add_prefix("/");
-
-	bot.on_ready([&command_handler](const dpp::ready_t &event) {
-
-		command_handler.add_command(
-			/* Command name */
-			"ping",
-
-			/* Parameters */
-			{
-				{"testparameter", dpp::param_info(dpp::pt_string, true, "Optional test parameter") }
-			},
-
-			/* Command handler */
-			[&command_handler](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
-				std::string got_param;
-				if (!parameters.empty()) {
-					got_param = std::get<std::string>(parameters[0].second);
-				}
-				command_handler.reply(dpp::message("Pong! -> " + got_param), src);
-			},
-
-			/* Command description */
-			"A test ping command",
-
-			/* Guild id (omit for a global command) */
-			819556414099554344
-		);
-
+	/* Message handler to look for a command called !button */
+	bot.on_message_create([&bot](const dpp::message_create_t & event) {
+		if (event.msg->content == "!button") {
+			/* Create a message containing an action row, and a button within the action row. */
+			dpp::message m(event.msg->channel_id, "this text has buttons");
+			m.add_component(
+				dpp::component().add_component(
+					dpp::component().set_type(dpp::cot_selectmenu).
+					set_placeholder("Pick something").
+					add_select_option(dpp::select_option("label1","value1","description1").set_emoji("😄")).
+					add_select_option(dpp::select_option("label2","value2","description2").set_emoji("🙂")).
+					set_id("myselid")
+				)
+			);
+			bot.message_create(m);
+		}
 	});
-
+	/* When a user clicks your button, the on_button_click event will fire,
+	 * containing the custom_id you defined in your button.
+	 */
+	bot.on_select_click([&bot](const dpp::select_click_t & event) {
+		/* Select clicks are still interactions, and must be replied to in some form to
+		 * prevent the "this interaction has failed" message from Discord to the user.
+		 */
+		bot.message_delete(event.command.message_id, event.command.channel_id);
+		event.reply(dpp::ir_channel_message_with_source, "You clicked " + event.custom_id + " and chose: " + event.values[0]);
+	});
 
 	bot.on_log([](const dpp::log_t & event) {
 		if (event.severity > dpp::ll_trace) {

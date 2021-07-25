@@ -30,6 +30,14 @@ using json = nlohmann::json;
 
 namespace dpp {
 
+thread_member& thread_member::fill_from_json(nlohmann::json* j) {
+	SetSnowflakeNotNull(j, "id", this->thread_id);
+	SetSnowflakeNotNull(j, "user_id", this->user_id);
+	SetTimestampNotNull(j, "join_timestamp", this->joined);
+	SetInt32NotNull(j, "flags", this->flags);
+	return *this;
+}
+
 channel::channel() :
 	managed(),
 	flags(0),
@@ -40,7 +48,9 @@ channel::channel() :
 	rate_limit_per_user(0),
 	owner_id(0),
 	parent_id(0),
-	last_pin_timestamp(0)
+	last_pin_timestamp(0),
+	message_count(0),
+	member_count(0)
 {
 }
 
@@ -88,15 +98,15 @@ bool channel::is_store_channel() const {
 
 channel& channel::fill_from_json(json* j) {
 	this->id = SnowflakeNotNull(j, "id");
-	this->guild_id = SnowflakeNotNull(j, "guild_id");
-	this->position = Int16NotNull(j, "position");
-	this->name = StringNotNull(j, "name");
-	this->topic = StringNotNull(j, "topic");
-	this->last_message_id = SnowflakeNotNull(j, "last_message_id");
-	this->user_limit = Int8NotNull(j, "user_limit");
-	this->rate_limit_per_user = Int16NotNull(j, "rate_limit_per_user");
-	this->owner_id = SnowflakeNotNull(j, "owner_id");
-	this->parent_id = SnowflakeNotNull(j, "parent_id");
+	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
+	SetInt16NotNull(j, "position", this->position);
+	SetStringNotNull(j, "name", this->name);
+	SetStringNotNull(j, "topic", this->topic);
+	SetSnowflakeNotNull(j, "last_message_id", this->last_message_id);
+	SetInt8NotNull(j, "user_limit", this->user_limit);
+	SetInt16NotNull(j, "rate_limit_per_user", this->rate_limit_per_user);
+	SetSnowflakeNotNull(j, "owner_id", this->owner_id);
+	SetSnowflakeNotNull(j, "parent_id", this->parent_id);
 	//this->last_pin_timestamp
 	uint8_t type = Int8NotNull(j, "type");
 	this->flags |= BoolNotNull(j, "nsfw") ? dpp::c_nsfw : 0;
@@ -108,6 +118,9 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_NEWS) ? dpp::c_news : 0;
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
 	this->flags |= (type == GUILD_STAGE) ? dpp::c_stage : 0;
+	this->flags |= (type == GUILD_NEWS_THREAD) ? dpp::c_news_thread : 0;
+	this->flags |= (type == GUILD_PUBLIC_THREAD) ? dpp::c_public_thread : 0;
+	this->flags |= (type == GUILD_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
 
 	if (j->find("recipients") != j->end()) {
 		recipients = {};
@@ -127,6 +140,18 @@ channel& channel::fill_from_json(json* j) {
 			permission_overwrites.push_back(po);
 		}
 	}
+	
+	if (type == GUILD_NEWS_THREAD || type == GUILD_PUBLIC_THREAD || type == GUILD_PRIVATE_THREAD) {
+		SetInt8NotNull(j, "message_count", this->message_count);
+		SetInt8NotNull(j, "memeber_count", this->member_count);
+		dpp::thread_metadata metadata;
+		auto json_metadata = (*j)["thread_metadata"];
+		metadata.archived = BoolNotNull(&json_metadata, "archived");
+		metadata.archive_timestamp = TimestampNotNull(&json_metadata, "archive_timestamp");
+		metadata.auto_archive_duration = Int16NotNull(&json_metadata, "auto_archive_duration");
+		metadata.locked = BoolNotNull(&json_metadata, "locked");
+
+	}
 
 	return *this;
 }
@@ -145,7 +170,9 @@ std::string channel::build_json(bool with_id) const {
 		j["rate_limit_per_user"] = rate_limit_per_user;
 	}
 	if (!is_dm()) {
-		j["parent_id"] = parent_id;
+		if (parent_id) {
+			j["parent_id"] = parent_id;
+		}
 		if (is_text_channel()) {
 			j["type"] = GUILD_TEXT;
 		} else if (is_voice_channel()) {
@@ -189,10 +216,10 @@ std::map<snowflake, guild_member*> channel::get_members() {
 	guild* g = dpp::find_guild(guild_id);
 	if (g) {
 		for (auto m = g->members.begin(); m != g->members.end(); ++m) {
-			user* u = dpp::find_user(m->second->user_id);
+			user* u = dpp::find_user(m->second.user_id);
 			if (u) {
 				if (get_user_permissions(u) & p_view_channel) {
-					rv[m->second->user_id] = m->second;
+					rv[m->second.user_id] = &(m->second);
 				}
 			}
 		}

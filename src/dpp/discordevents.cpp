@@ -32,7 +32,7 @@
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>
 
-#ifdef _WIN32
+#ifdef WIN32
 #include <time.h>
 #include <iomanip>
 #include <sstream>
@@ -57,7 +57,6 @@ uint64_t SnowflakeNotNull(const json* j, const char *keyname) {
 	 * as string types, then converted from string to uint64_t. Checks for existence of the value, and that it is a string containing
 	 * a number. If not, then this function returns 0.
 	 */
-	//return j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string() ? from_string<uint64_t>((*j)[keyname].get<std::string>(), std::dec) : 0;
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && k->is_string() ? strtoull(k->get<std::string>().c_str(), nullptr, 10) : 0;
@@ -66,6 +65,14 @@ uint64_t SnowflakeNotNull(const json* j, const char *keyname) {
 	}
 }
 
+void SetSnowflakeNotNull(const json* j, const char *keyname, uint64_t &v) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && k->is_string() ? strtoull(k->get<std::string>().c_str(), nullptr, 10) : 0;
+	}
+}
+
+
 std::string StringNotNull(const json* j, const char *keyname) {
 	/* Returns empty string if the value is not a string, or is null or not defined */
 	auto k = j->find(keyname);
@@ -73,6 +80,14 @@ std::string StringNotNull(const json* j, const char *keyname) {
 		return !k->is_null() && k->is_string() ? k->get<std::string>() : "";
 	} else {
 		return "";
+	}
+}
+
+void SetStringNotNull(const json* j, const char *keyname, std::string &v) {
+	/* Returns empty string if the value is not a string, or is null or not defined */
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && k->is_string() ? k->get<std::string>() : "";
 	}
 }
 
@@ -85,12 +100,27 @@ uint64_t Int64NotNull(const json* j, const char *keyname) {
 	}
 }
 
+void SetInt64NotNull(const json* j, const char *keyname, uint64_t &v) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && !k->is_string() ? k->get<uint64_t>() : 0;
+	}
+}
+
+
 uint32_t Int32NotNull(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && !k->is_string() ? k->get<uint32_t>() : 0;
 	} else {
 		return 0;
+	}
+}
+
+void SetInt32NotNull(const json* j, const char *keyname, uint32_t &v) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && !k->is_string() ? k->get<uint32_t>() : 0;
 	}
 }
 
@@ -103,6 +133,13 @@ uint16_t Int16NotNull(const json* j, const char *keyname) {
 	}
 }
 
+void SetInt16NotNull(const json* j, const char *keyname, uint16_t &v) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && !k->is_string() ? k->get<uint16_t>() : 0;
+	}
+}
+
 uint8_t Int8NotNull(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
@@ -112,12 +149,26 @@ uint8_t Int8NotNull(const json* j, const char *keyname) {
 	}
 }
 
+void SetInt8NotNull(const json* j, const char *keyname, uint8_t &v) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && !k->is_string() ? k->get<uint8_t>() : 0;
+	}
+}
+
 bool BoolNotNull(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() ? (k->get<bool>() == true) : false;
 	} else {
 		return false;
+	}
+}
+
+void SetBoolNotNull(const json* j, const char *keyname, bool &v) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() ? (k->get<bool>() == true) : false;
 	}
 }
 
@@ -172,6 +223,30 @@ time_t TimestampNotNull(const json* j, const char* keyname)
 	return retval;
 }
 
+void SetTimestampNotNull(const json* j, const char* keyname, time_t &v)
+{
+	/* Parses discord ISO 8061 timestamps to time_t, accounting for local time adjustment.
+	 * Note that discord timestamps contain a decimal seconds part, which time_t and struct tm
+	 * can't handle. We strip these out.
+	 */
+	time_t retval = 0;
+	if (j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string()) {
+		tm timestamp = {};
+		std::string timedate = (*j)[keyname].get<std::string>();
+		if (timedate.find('+') != std::string::npos && timedate.find('.') != std::string::npos) {
+			std::string tzpart = timedate.substr(timedate.find('+'), timedate.length());
+			timedate = timedate.substr(0, timedate.find('.')) + tzpart ;
+			strptime(timedate.substr(0, 19).c_str(), "%FT%TZ%z", &timestamp);
+			timestamp.tm_isdst = 0;
+			retval = mktime(&timestamp);
+		} else {
+			strptime(timedate.substr(0, 19).c_str(), "%F %T", &timestamp);
+			retval = mktime(&timestamp);
+		}
+		v = retval;
+	}
+}
+
 std::map<std::string, dpp::events::event*> eventmap = {
 	{ "__LOG__", new dpp::events::logger() },
 	{ "GUILD_CREATE", new dpp::events::guild_create() },
@@ -219,7 +294,13 @@ std::map<std::string, dpp::events::event*> eventmap = {
 	{ "USER_UPDATE", new dpp::events::user_update() },
 	{ "GUILD_JOIN_REQUEST_DELETE", new dpp::events::guild_join_request_delete() },
 	{ "STAGE_INSTANCE_CREATE", new dpp::events::stage_instance_create() },
-	{ "STAGE_INSTANCE_DELETE", new dpp::events::stage_instance_delete() }
+	{ "STAGE_INSTANCE_DELETE", new dpp::events::stage_instance_delete() },
+	{ "THREAD_CREATE", new dpp::events::thread_create() },
+	{ "THREAD_UPDATE", new dpp::events::thread_update() },
+	{ "THREAD_DELETE", new dpp::events::thread_delete() },
+	{ "THREAD_LIST_SYNC", new dpp::events::thread_list_sync() },
+	{ "THREAD_MEMBER_UPDATE", new dpp::events::thread_member_update() },
+	{ "THREAD_MEMBERS_UPDATE", new dpp::events::thread_members_update() },
 };
 
 void discord_client::HandleEvent(const std::string &event, json &j, const std::string &raw)
