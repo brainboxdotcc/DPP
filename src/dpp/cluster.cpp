@@ -326,12 +326,12 @@ void cluster::guild_command_create(slashcommand &s, snowflake guild_id, command_
 			s.id = SnowflakeNotNull(&j, "id");
 		}
 
-		if (http.status < 300 && s.permissions.size()) {
-			guild_command_edit_permissions(s, guild_id, callback);
-		} else {
-			if (callback) {
+		if (callback) {
 				callback(confirmation_callback_t("slashcommand", slashcommand().fill_from_json(&j), http));
 			}
+
+		if (http.status < 300 && s.permissions.size()) {
+			guild_command_edit_permissions(s, guild_id, callback);
 		}
 	});
 }
@@ -358,7 +358,7 @@ void cluster::guild_command_edit_permissions(const slashcommand &s, snowflake gu
 
 	this->post_rest("/api/v9/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id) + "/permissions", m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("slashcommand", slashcommand().fill_from_json(&j), http));
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
 }
