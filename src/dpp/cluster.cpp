@@ -327,11 +327,11 @@ void cluster::guild_command_create(slashcommand &s, snowflake guild_id, command_
 		}
 
 		if (callback) {
-				callback(confirmation_callback_t("slashcommand", slashcommand().fill_from_json(&j), http));
-			}
+			callback(confirmation_callback_t("slashcommand", slashcommand().fill_from_json(&j), http));
+		}
 
 		if (http.status < 300 && s.permissions.size()) {
-			guild_command_edit_permissions(s, guild_id, callback);
+			guild_command_edit_permissions(s, guild_id);
 		}
 	});
 }
