@@ -1402,7 +1402,7 @@ void cluster::create_dm_channel(snowflake user_id, command_completion_event_t ca
 }
 
 void cluster::create_webhook(const class webhook &w, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channnels", std::to_string(w.channel_id), "webhooks", m_post, w.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(w.channel_id), "webhooks", m_post, w.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
 		}
