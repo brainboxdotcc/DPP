@@ -36,6 +36,9 @@
 
 using json = nlohmann::json;
 
+#define DISCORD_API_VERSION	"9"
+#define DEFAULT_GATEWAY		"gateway.discord.gg"
+
 namespace dpp {
 
 // Forward declaration

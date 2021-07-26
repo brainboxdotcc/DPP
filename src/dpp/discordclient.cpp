@@ -32,8 +32,6 @@
 #include <dpp/fmt/format.h>
 #include <zlib.h>
 
-#define DISCORD_API_VERSION	"9"
-#define DEFAULT_GATEWAY		"gateway.discord.gg"
 #define PATH_UNCOMPRESSED	"/?v=" DISCORD_API_VERSION "&encoding=json"
 #define PATH_COMPRESSED		"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
 #define DECOMP_BUFFER_SIZE	512 * 1024
