@@ -28,8 +28,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-slashcommand::slashcommand() : managed()
-{
+slashcommand::slashcommand() : managed(), default_permission(true) {
 }
 
 slashcommand::~slashcommand() {
@@ -78,6 +77,19 @@ void to_json(json& j, const command_option& opt) {
 	}
 }
 
+void to_json(nlohmann::json& j, const command_permission& cp) {
+	j["id"] = std::to_string(cp.id);
+	j["type"] = cp.type;
+	j["permission"] =  cp.permission;
+}
+
+void to_json(nlohmann::json& j, const guild_command_permissions& gcp) {
+	j["id"] = std::to_string(gcp.id);
+	j["application_id"] = std::to_string(gcp.application_id);
+	j["guild_id"] = std::to_string(gcp.guild_id);
+	j["permissions"] =  gcp.permissions;
+}
+
 void to_json(json& j, const slashcommand& p) {
 	j["name"] = p.name;
 	j["description"] = p.description;
@@ -90,6 +102,8 @@ void to_json(json& j, const slashcommand& p) {
 			j["options"].push_back(jopt);
 		}
 	}
+
+	j["default_permission"] = p.default_permission;
 }
 
 std::string slashcommand::build_json(bool with_id) const {
@@ -114,6 +128,16 @@ slashcommand& slashcommand::set_description(const std::string &d) {
 
 slashcommand& slashcommand::set_application_id(snowflake i) {
 	application_id = i;
+	return *this;
+}
+
+slashcommand& slashcommand::add_permission(const command_permission& p) {
+	this->permissions.push_back(p);
+	return *this;
+}
+
+slashcommand& slashcommand::disable_default_permissions() {
+	this->default_permission = false;
 	return *this;
 }
 
