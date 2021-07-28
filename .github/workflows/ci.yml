@@ -11,9 +11,6 @@ jobs:
         cfg:
           - { os: ubuntu-20.04, cpp-version: g++-8 }
           - { os: ubuntu-20.04, cpp-version: g++-9 }
-          - { os: ubuntu-20.04, cpp-version: clang-7 }
-          - { os: ubuntu-20.04, cpp-version: clang-8 }
-          - { os: ubuntu-20.04, cpp-version: clang-9 }
 
     steps:
       - name: Checkout D++
@@ -40,33 +37,6 @@ jobs:
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: '${{github.workspace}}/build/*.deb'
-
-  windows: # Windows x64 and x86 build matrix
-    strategy:
-      fail-fast: false # Don't cancel other matrix jobs if one fails
-      matrix:
-        cfg:
-        - { name: x64,  arch: x64,   ssl-dir: 'C:\Program Files\OpenSSL-Win64'}
-
-    name: "Windows ${{matrix.cfg.name}}"
-    runs-on: windows-2019
-    steps:
-      - name: Checkout D++
-        uses: actions/checkout@v2
-        with:
-          path: main
-
-      - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
-
-      - name: Install chocolatey packages (x64)
-        run: choco install ninja openssl -y
-
-      - name: Generate CMake
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" -DOPENSSL_ROOT_DIR="${{matrix.cfg.ssl-dir}}" ..
-
-      - name: Build Project
-        run: cmake --build main/build --target libdpp --config Release
 
   macos:
     name: macOS x64
