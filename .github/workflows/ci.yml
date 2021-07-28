@@ -68,6 +68,9 @@ jobs:
       - name: Build Project
         run: cmake --build main/build --target libdpp --config Release
 
+      - name: Package distributable
+        run: cd main/build && cpack
+
   macos:
     name: macOS x64
     runs-on: macos-latest
