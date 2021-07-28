@@ -75,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: "libdpp - Windows ${{matrix.cfg.name}}"
-          path: '${{github.workspace}}/build/*.zip'
+          path: '${{github.workspace}}/main/build/*.zip'
 
   macos:
     name: macOS x64
