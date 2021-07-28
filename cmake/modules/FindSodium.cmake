@@ -102,24 +102,10 @@ elseif (WIN32)
     )
 
     if (MSVC)
-        # detect target architecture
-        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/arch.cpp" [=[
-            #if defined _M_IX86
-            #error ARCH_VALUE x86_32
-            #elif defined _M_X64
-            #error ARCH_VALUE x86_64
-            #endif
-            #error ARCH_VALUE unknown
-        ]=])
-        try_compile(_UNUSED_VAR "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/arch.cpp"
-            OUTPUT_VARIABLE _COMPILATION_LOG
-        )
-        string(REGEX REPLACE ".*ARCH_VALUE ([a-zA-Z0-9_]+).*" "\\1" _TARGET_ARCH "${_COMPILATION_LOG}")
-
-        # construct library path
-        if (_TARGET_ARCH STREQUAL "x86_32")
+        # detect target architecture and construct library path
+        if(${CMAKE_SIZEOF_VOID_P} STREQUAL 4)
             string(APPEND _PLATFORM_PATH "Win32")
-        elseif(_TARGET_ARCH STREQUAL "x86_64")
+        elseif(${CMAKE_SIZEOF_VOID_P} STREQUAL 8)
             string(APPEND _PLATFORM_PATH "x64")
         else()
             message(FATAL_ERROR "the ${_TARGET_ARCH} architecture is not supported by Findsodium.cmake.")
