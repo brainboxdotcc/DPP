@@ -103,6 +103,15 @@ void to_json(json& j, const slashcommand& p) {
 		}
 	}
 
+	if(p.permissions.size())  {
+		j["permissions"] = json();
+
+		for(const auto& perm : p.permissions) {
+			json jperm = perm;
+			j["permissions"].push_back(jperm);
+		}
+	}
+
 	j["default_permission"] = p.default_permission;
 }
 
