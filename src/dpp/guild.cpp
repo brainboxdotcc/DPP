@@ -149,6 +149,10 @@ bool guild_member::is_muted() const {
 	return flags & dpp::gm_mute;
 }
 
+bool guild_member::is_pending() const {
+	return flags & dpp::gm_pending;
+}
+
 bool guild::is_large() const {
 	return this->flags & g_large;
 }
