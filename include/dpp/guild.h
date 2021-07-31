@@ -147,6 +147,9 @@ public:
 	/** Returns true if the user is muted */
 	bool is_muted() const;
 
+	/** Returns true if pending verification by membership screening */
+	bool is_pending() const;
+	
 };
 
 /** @brief Guild members container
