@@ -324,7 +324,7 @@ void cluster::global_command_create(slashcommand &s, command_completion_event_t 
 }
 
 void cluster::guild_command_create(slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [&s, this, guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [s, this, guild_id, callback] (json &j, const http_request_completion_t& http) mutable {
 		if (j.contains("id")) {
 			s.id = SnowflakeNotNull(&j, "id");
 		}

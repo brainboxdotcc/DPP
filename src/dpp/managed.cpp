@@ -22,7 +22,7 @@
 
 namespace dpp {
 
-managed::managed() : id(0)
+managed::managed(const snowflake nid) : id(nid)
 {
 }
 
