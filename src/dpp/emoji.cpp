@@ -22,43 +22,17 @@
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
 #include <dpp/nlohmann/json.hpp>
-#include <sstream>
-#include <iomanip>
 
 namespace dpp {
 
 using json = nlohmann::json;
-
-std::string emoji::encoded_name() const
-{
-	std::ostringstream escaped;
-	escaped.fill('0');
-	escaped << std::hex;
-
-	for (std::string::value_type c : name)
-	{
-		// Keep alphanumeric and other accepted characters intact
-		if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
-		{
-			escaped << c;
-			continue;
-		}
-
-		// Any other characters are percent-encoded
-		escaped << std::uppercase;
-		escaped << '%' << std::setw(2) << int((unsigned char)c);
-		escaped << std::nouppercase;
-	}
-
-	return escaped.str();
-}
 
 emoji::emoji() : managed(), user_id(0), flags(0), image_data(nullptr)
 {
 }
 
 emoji::emoji(const std::string n, const snowflake i, const uint8_t f)
-	: managed(i), user_id(0), flags(f), image_data(nullptr)
+	: managed(i), user_id(0), flags(f), image_data(nullptr), name(n)
 {	
 }
 
@@ -134,7 +108,7 @@ emoji& emoji::load_image(const std::string &image_blob, image_type type) {
 
 std::string emoji::format() const
 {
-	return id ? (name + ":" + std::to_string(id)) : encoded_name();
+	return id ? (name + ":" + std::to_string(id)) : name;
 }
 
 };

@@ -52,7 +52,7 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 			dpp::guild_member_update_t gmu(client, raw);
 			gmu.updating_guild = g;
 			guild_member m;
-			auto& user = d["user"];
+			auto& user = d;//d["user"]; // d contains roles and other member stuff already
 			m.fill_from_json(&user, g->id, u.id);
 			gmu.updated = m;
 			client->creator->dispatch.guild_member_update(gmu);
@@ -60,7 +60,7 @@ void guild_member_update::handle(discord_client* client, json &j, const std::str
 	} else {
 		dpp::user* u = dpp::find_user(from_string<uint64_t>(d["user"]["id"].get<std::string>(), std::dec));
 		if (g && u) {
-			auto& user = d["user"];
+			auto& user = d;//d["user"]; // d contains roles and other member stuff already
 			guild_member m;
 			m.fill_from_json(&user, g->id, u->id);
 			g->members[u->id] = m;

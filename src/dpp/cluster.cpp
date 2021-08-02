@@ -415,7 +415,7 @@ void cluster::message_crosspost(snowflake message_id, snowflake channel_id, comm
 }
 
 void cluster::message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + reaction + "/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
