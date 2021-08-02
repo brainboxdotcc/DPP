@@ -43,7 +43,7 @@ namespace dpp {
 		/** Unique ID of object */
 		snowflake id;
 		/** Constructor, initialises id to 0 */
-		managed();
+		managed(const snowflake = 0);
 		/** Default destructor */
 		~managed() = default;
 	};
