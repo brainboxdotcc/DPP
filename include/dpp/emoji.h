@@ -44,11 +44,6 @@ enum emoji_flags {
  * @brief Represents an emoji for a dpp::guild
  */
 class emoji : public managed {
-	/**
-	 * @brief Escape name with this
-	 * @return The name, but escaped
-	 */ 
-	std::string encoded_name() const;
 public:
 	/**
 	 * @brief Emoji name

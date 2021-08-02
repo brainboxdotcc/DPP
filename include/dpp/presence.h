@@ -139,6 +139,7 @@ public:
 	std::string state;
 	/** URL.
 	 * Only applicable for certain sites such a YouTube
+	 * Alias: details
 	 */
 	std::string url;
 	/** Activity type
@@ -159,6 +160,18 @@ public:
 	/** Flags bitmask from activity_flags
 	 */
 	uint8_t flags;
+
+	activity() = default;
+
+	/**
+	 * @brief Construct a new activity
+	 * 
+	 * @param typ 
+	 * @param nam 
+	 * @param stat
+	 * @param url_
+	 */
+	activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_);
 };
 
 /**
@@ -188,7 +201,15 @@ public:
 	 * @param type 
 	 * @param activity_description 
 	 */
-	presence(presence_status status, activity_type type, const std::string activity_description);
+	presence(presence_status status, activity_type type, const std::string& activity_description);
+
+	/**
+	 * @brief Construct a new presence object with some parameters for sending to a websocket
+	 * 
+	 * @param status 
+	 * @param a Activity itself 
+	 */
+	presence(presence_status status, activity a);
 
 	/** Destructor */
 	~presence();
