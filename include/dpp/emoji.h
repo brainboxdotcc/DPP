@@ -44,6 +44,11 @@ enum emoji_flags {
  * @brief Represents an emoji for a dpp::guild
  */
 class emoji : public managed {
+	/**
+	 * @brief Escape name with this
+	 * @return The name, but escaped
+	 */ 
+	std::string encoded_name() const;
 public:
 	/**
 	 * @brief Emoji name
@@ -66,6 +71,15 @@ public:
 	 * @brief Construct a new emoji object
 	 */
 	emoji();
+
+	/**
+	 * @brief Construct a new emoji object with name, ID and flags
+	 * 
+	 * @param name The emoji's name
+	 * @param id ID, if it has one (unicode does not)
+	 * @param flags Emoji flags (emoji_flags)
+	 */
+	emoji(const std::string, const snowflake = 0, const uint8_t = 0);
 
 	/**
 	 * @brief Destroy the emoji object
@@ -128,6 +142,13 @@ public:
 	 * @return emoji& Reference to self
 	 */
 	emoji& load_image(const std::string &image_blob, image_type type);
+
+	/**
+	 * @brief Format to name if unicode, name:id if has id or a:name:id if animated
+	 * 
+	 * @return Formatted name for reactions
+	 */
+	std::string format() const;
 };
 
 /**
