@@ -312,7 +312,7 @@ void cluster::interaction_response_edit(const std::string &token, const message 
 
 
 void cluster::global_command_create(slashcommand &s, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/applications", std::to_string(me.id), "commands", m_post, s.build_json(false), [&s, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/applications", std::to_string(me.id), "commands", m_post, s.build_json(false), [s, callback] (json &j, const http_request_completion_t& http) mutable {
 		if (j.contains("id")) {
 			s.id = SnowflakeNotNull(&j, "id");
 		}
