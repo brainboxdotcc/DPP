@@ -240,6 +240,7 @@ struct command_data_option {
 	command_option_type type;                  //!< value of ApplicationCommandOptionType
 	command_value value;                       //!< Optional: the value of the pair
 	std::vector<command_data_option> options;  //!< Optional: present if this option is a group or subcommand
+	dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions
 };
 
 /**
@@ -400,6 +401,13 @@ public:
  */
 void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
 
+enum slashcommand_contextmenu_type {
+	ctxm_none = 0,
+	ctxm_chat_input = 1,	//!< DEFAULT, these are the slash commands you're used to
+	ctxm_user = 2,		//!< Add command to user context menu
+	ctxm_message = 3	//!< Add command to message context menu
+};
+
 /**
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
@@ -410,6 +418,12 @@ public:
 	 * @brief Application id (usually matches your bots id)
 	 */
 	snowflake application_id;
+
+	/**
+	 * @brief Context menu type, defaults to none
+	 * 
+	 */
+	slashcommand_contextmenu_type type;
 
 	/**
 	 * @brief Command name (1-32 chars)
@@ -453,6 +467,14 @@ public:
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& add_option(const command_option &o);
+
+	/**
+	 * @brief Set the type of the slash command (only for context menu entries)
+	 * 
+	 * @param _type Type of context menu entry this command represents
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& set_type(slashcommand_contextmenu_type _type);
 
 	/**
 	 * @brief Set the name of the command

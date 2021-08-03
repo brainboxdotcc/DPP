@@ -28,7 +28,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-slashcommand::slashcommand() : managed(), default_permission(true) {
+slashcommand::slashcommand() : managed(), default_permission(true), type(ctxm_none) {
 }
 
 slashcommand::~slashcommand() {
@@ -94,6 +94,11 @@ void to_json(json& j, const slashcommand& p) {
 	j["name"] = p.name;
 	j["description"] = p.description;
 
+	/* Only send this if set to something other than ctxm_none */
+	if (p.type != ctxm_none) {
+		j["type"] = p.type;
+	}
+
 	if (p.options.size()) {
 		j["options"] = json();
 
@@ -123,6 +128,11 @@ std::string slashcommand::build_json(bool with_id) const {
 	}
 
 	return j.dump();
+}
+
+slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
+	type = t;
+	return *this;
 }
 
 slashcommand& slashcommand::set_name(const std::string &n) {
@@ -192,6 +202,11 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 
 	if (j.contains("options") && !j.at("options").is_null()) {
 		j.at("options").get_to(cdo.options);
+	}
+
+	/* If there's a target ID, define it */
+	if (j.contains("target_id") && !j.at("target_id").is_null()) {
+		cdo.target_id = (dpp::snowflake)SnowflakeNotNull(&j, "target_id");
 	}
 
 	if (j.contains("value") && !j.at("value").is_null()) {
