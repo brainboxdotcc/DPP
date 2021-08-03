@@ -12,32 +12,29 @@ int main()
 	configfile >> configdocument;
 	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members);
 
-	/* Message handler to look for a command called !button */
-	bot.on_message_create([&bot](const dpp::message_create_t & event) {
-		if (event.msg->content == "!button") {
-			/* Create a message containing an action row, and a button within the action row. */
-			dpp::message m(event.msg->channel_id, "this text has buttons");
-			m.add_component(
-				dpp::component().add_component(
-					dpp::component().set_type(dpp::cot_selectmenu).
-					set_placeholder("Pick something").
-					add_select_option(dpp::select_option("label1","value1","description1").set_emoji("😄")).
-					add_select_option(dpp::select_option("label2","value2","description2").set_emoji("🙂")).
-					set_id("myselid")
-				)
-			);
-			bot.message_create(m);
+	/* The interaction create event is fired when someone issues your commands */
+	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
+		if (event.command.type == dpp::it_application_command) {
+			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
+			/* Check which command they ran */
+			if (cmd_data.name == "testaction") {
+				/* Fetch a parameter value from the command parameters */
+				event.reply(dpp::ir_channel_message_with_source, "You chose this bot's application context menu action!");
+			}
 		}
 	});
-	/* When a user clicks your button, the on_button_click event will fire,
-	 * containing the custom_id you defined in your button.
-	 */
-	bot.on_select_click([&bot](const dpp::select_click_t & event) {
-		/* Select clicks are still interactions, and must be replied to in some form to
-		 * prevent the "this interaction has failed" message from Discord to the user.
-		 */
-		bot.message_delete(event.command.message_id, event.command.channel_id);
-		event.reply(dpp::ir_channel_message_with_source, "You clicked " + event.custom_id + " and chose: " + event.values[0]);
+
+	bot.on_ready([&bot](const dpp::ready_t & event) {
+		dpp::slashcommand newcommand;
+		/* Create a new global command on ready event */
+		newcommand.set_name("testaction")
+			.set_description("Test context menu")
+			.set_type(dpp::ctxm_user)
+			.set_application_id(bot.me.id);
+		/* Register the command */
+		bot.guild_command_create(newcommand, 633212509242785792, [&bot](const dpp::confirmation_callback_t &callback) {
+			std::cout << callback.http_info.body << "\n";
+		});
 	});
 
 	bot.on_log([](const dpp::log_t & event) {

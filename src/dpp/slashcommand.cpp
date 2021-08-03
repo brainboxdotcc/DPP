@@ -92,19 +92,24 @@ void to_json(nlohmann::json& j, const guild_command_permissions& gcp) {
 
 void to_json(json& j, const slashcommand& p) {
 	j["name"] = p.name;
-	j["description"] = p.description;
+
+	if (p.type != ctxm_user && p.type != ctxm_message) {
+		j["description"] = p.description;
+	}
 
 	/* Only send this if set to something other than ctxm_none */
 	if (p.type != ctxm_none) {
 		j["type"] = p.type;
 	}
 
-	if (p.options.size()) {
-		j["options"] = json();
+	if (p.type != ctxm_user && p.type != ctxm_message) {
+		if (p.options.size()) {
+			j["options"] = json();
 
-		for (const auto& opt : p.options) {
-			json jopt = opt;
-			j["options"].push_back(jopt);
+			for (const auto& opt : p.options) {
+				json jopt = opt;
+				j["options"].push_back(jopt);
+			}
 		}
 	}
 
