@@ -796,6 +796,16 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			this->author = authoruser;
 		}
 	}
+	if (d->find("sticker_items") != d->end()) {
+		json &sub = (*d)["sticker_items"];
+		for (auto & sticker_raw : sub) {
+			dpp::sticker new_sticker;
+			new_sticker.name = StringNotNull(&sticker_raw, "name");
+			new_sticker.id = SnowflakeNotNull(&sticker_raw, "id");
+			new_sticker.type = static_cast<sticker_type>(Int8NotNull(&sticker_raw, "format_type"));
+			stickers.push_back(new_sticker);
+		}
+	}
 	if (d->find("mentions") != d->end()) {
 		json &sub = (*d)["mentions"];
 		for (auto & m : sub) {

@@ -588,6 +588,30 @@ struct attachment {
 };
 
 /**
+ * @brief The file format (png, apng, lottie) of a sticker
+ */
+enum sticker_type {
+	/// PNG sticker type
+	sticker_png = 1,
+	/// APNG sticker type
+	sticker_apng = 2,
+	/// LOTTIE sticker type
+	sticker_lottie = 3
+};
+
+/**
+ * @brief Represents stickers received in messages
+ */
+struct sticker {
+	/** The ID of the sticker */
+	dpp::snowflake id;
+	/** The name of the sticker */
+	std::string name;
+	/** The type of sticker */
+	sticker_type type;
+};
+
+/**
  * @brief Bitmask flags for a dpp::message
  */
 enum message_flags {
@@ -747,6 +771,8 @@ struct message {
 	snowflake	webhook_id;
 	/** Flags */
 	uint8_t		flags;
+	/** Stickers */
+	std::vector<sticker> stickers;
 
 	/** Name of file to upload (for use server-side in discord's url) */
 	std::string	filename;

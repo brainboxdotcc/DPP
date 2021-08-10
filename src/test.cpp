@@ -12,6 +12,25 @@ int main()
 	configfile >> configdocument;
 	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members);
 
+	/* Create command handler, and specify prefixes */
+	dpp::commandhandler command_handler(&bot);
+	/* Specifying a prefix of "/" tells the command handler it should also expect slash commands */
+	command_handler.add_prefix(".").add_prefix("/");
+
+	bot.on_ready([&command_handler](const dpp::ready_t &event) {
+
+		dpp::discord_client* d = event.from;
+
+	});
+
+	
+	bot.on_message_create([&bot](const dpp::message_create_t & event) {
+		if (std::size(event.msg->stickers) > 0) {
+			std::cout << event.msg->stickers[0].name << std::endl;
+		}
+    });
+
+
 	/* The interaction create event is fired when someone issues your commands */
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
 		if (event.command.type == dpp::it_application_command) {
