@@ -149,6 +149,10 @@ bool guild_member::is_muted() const {
 	return flags & dpp::gm_mute;
 }
 
+bool guild_member::is_pending() const {
+	return flags & dpp::gm_pending;
+}
+
 bool guild::is_large() const {
 	return this->flags & g_large;
 }
@@ -337,6 +341,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		SetStringNotNull(d, "vanity_url_code", this->vanity_url_code);
 		SetStringNotNull(d, "description", this->description);
 		if (d->find("voice_states") != d->end()) {
+			this->voice_members.clear();
 			for (auto & vm : (*d)["voice_states"]) {
 				voicestate vs;
 				vs.fill_from_json(&vm);

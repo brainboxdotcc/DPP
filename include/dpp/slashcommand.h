@@ -240,6 +240,7 @@ struct command_data_option {
 	command_option_type type;                  //!< value of ApplicationCommandOptionType
 	command_value value;                       //!< Optional: the value of the pair
 	std::vector<command_data_option> options;  //!< Optional: present if this option is a group or subcommand
+	dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions
 };
 
 /**
@@ -282,23 +283,29 @@ struct command_interaction {
  */
 void from_json(const nlohmann::json& j, command_interaction& ci);
 
-/**
- * @brief A button click for a button component
- */
-struct button_interaction {
-	uint8_t component_type;
-	std::string custom_id;
+enum component_type_t {
+	cotype_button = 2,
+	cotype_select = 3
 };
 
 /**
- * @brief helper function to deserialize a button_interaction from json
+ * @brief A button click for a button component
+ */
+struct component_interaction {
+	uint8_t component_type;
+	std::string custom_id;
+	std::vector<std::string> values;
+};
+
+/**
+ * @brief helper function to deserialize a component_interaction from json
  *
  * @see https://github.com/nlohmann/json#arbitrary-types-conversions
  *
  * @param j output json object
  * @param bi button_interaction to be deserialized
  */
-void from_json(const nlohmann::json& j, button_interaction& bi);
+void from_json(const nlohmann::json& j, component_interaction& bi);
 
 /**
  * @brief An interaction represents a user running a command and arrives
@@ -308,9 +315,10 @@ class interaction : public managed {
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
 	uint8_t	type;                                               //!< the type of interaction
-	std::variant<command_interaction, button_interaction> data; //!< Optional: the command data payload
+	std::variant<command_interaction, component_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
+	snowflake message_id;					    //!< Originating message id
 	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions
 	user usr;                                                   //!< Optional: user object for the invoking user, if invoked in a DM
 	std::string token;                                          //!< a continuation token for responding to the interaction
@@ -344,6 +352,63 @@ public:
 void from_json(const nlohmann::json& j, interaction& i);
 
 /**
+ * @brief type of permission in the dpp::command_permission class
+ */
+enum command_permission_type {
+	cpt_role = 1,
+	cpt_user = 2,
+};
+
+/**
+ * @brief Application command permissions allow you to enable or
+ * disable commands for specific users or roles within a guild
+ */
+class command_permission {
+public:
+	snowflake id;                  //!< the ID of the role or uses
+	command_permission_type type;  //!< the type of permission
+	bool permission;               //!< true to allow, false, to disallow
+};
+
+/**
+ * @brief helper function to serialize a command_permission to json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param cp command_permission to be serialized
+ */
+void to_json(nlohmann::json& j, const command_permission& cp);
+
+/**
+ * @brief Returned when fetching the permissions for a command in a guild.
+ */
+class guild_command_permissions {
+public:
+	snowflake id;                                 //!< the id of the command
+	snowflake application_id;                     //!< the id of the application the command belongs to
+	snowflake guild_id;                           //!< the id of the guild
+	std::vector<command_permission> permissions;  //!< the permissions for the command in the guild
+};
+
+/**
+ * @brief helper function to serialize a guild_command_permissions to json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param gcp guild_command_permissions to be serialized
+ */
+void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
+
+enum slashcommand_contextmenu_type {
+	ctxm_none = 0,
+	ctxm_chat_input = 1,	//!< DEFAULT, these are the slash commands you're used to
+	ctxm_user = 2,		//!< Add command to user context menu
+	ctxm_message = 3	//!< Add command to message context menu
+};
+
+/**
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
  */
@@ -353,6 +418,12 @@ public:
 	 * @brief Application id (usually matches your bots id)
 	 */
 	snowflake application_id;
+
+	/**
+	 * @brief Context menu type, defaults to none
+	 * 
+	 */
+	slashcommand_contextmenu_type type;
 
 	/**
 	 * @brief Command name (1-32 chars)
@@ -368,6 +439,16 @@ public:
 	 * @brief Command options (parameters)
 	 */
 	std::vector<command_option> options;
+
+	/**
+	 * @brief whether the command is enabled by default when the app is added to a guild
+	 */
+	bool default_permission;
+
+	/**
+	 * @brief command permissions
+	 */
+	std::vector<command_permission> permissions;
 
 	/**
 	 * @brief Construct a new slashcommand object
@@ -386,6 +467,14 @@ public:
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& add_option(const command_option &o);
+
+	/**
+	 * @brief Set the type of the slash command (only for context menu entries)
+	 * 
+	 * @param _type Type of context menu entry this command represents
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& set_type(slashcommand_contextmenu_type _type);
 
 	/**
 	 * @brief Set the name of the command
@@ -410,6 +499,23 @@ public:
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_application_id(snowflake i);
+
+	/**
+	 * @brief Adds a permission to the command
+	 *
+	 * @param p permission to add
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& add_permission(const command_permission& p);
+
+	/**
+	 * @brief Disable default permissions, command will be unusable unless
+	 *        permissions are overriden with add_permission and
+	 *        dpp::guild_command_edit_permissions
+	 *
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& disable_default_permissions();
 
 	/**
 	 * @brief Fill object properties from JSON

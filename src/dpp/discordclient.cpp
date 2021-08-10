@@ -32,8 +32,6 @@
 #include <dpp/fmt/format.h>
 #include <zlib.h>
 
-#define DISCORD_API_VERSION	"9"
-#define DEFAULT_GATEWAY		"gateway.discord.gg"
 #define PATH_UNCOMPRESSED	"/?v=" DISCORD_API_VERSION "&encoding=json"
 #define PATH_COMPRESSED		"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
 #define DECOMP_BUFFER_SIZE	512 * 1024
@@ -480,7 +478,7 @@ uint64_t discord_client::get_member_count() {
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
-			if (creator->cache_policy == dpp::cp_aggressive) {
+			if (creator->cache_policy.user_policy == dpp::cp_aggressive) {
 				/* We can use actual member count if we are using full user caching */
 				total += gp->members.size();
 			} else {

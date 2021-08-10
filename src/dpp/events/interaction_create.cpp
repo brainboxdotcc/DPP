@@ -57,13 +57,25 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 			client->creator->dispatch.interaction_create(ic);
 		}
 	} else if (i.type == it_component_button) {
-		if (client->creator->dispatch.button_click) {
-			dpp::button_click_t ic(client, raw);
-			dpp::button_interaction bi = std::get<button_interaction>(i.data);
-			ic.command = i;
-			ic.custom_id = bi.custom_id;
-			ic.component_type = bi.component_type;
-			client->creator->dispatch.button_click(ic);
+		dpp::component_interaction bi = std::get<component_interaction>(i.data);
+		if (bi.component_type == cotype_button) {
+			if (client->creator->dispatch.button_click) {
+				dpp::button_click_t ic(client, raw);
+				ic.command = i;
+				ic.custom_id = bi.custom_id;
+				ic.component_type = bi.component_type;
+				client->creator->dispatch.button_click(ic);
+			}
+		}
+		if (bi.component_type == cotype_select) {
+			if (client->creator->dispatch.select_click) {
+				dpp::select_click_t ic(client, raw);
+				ic.command = i;
+				ic.custom_id = bi.custom_id;
+				ic.component_type = bi.component_type;
+				ic.values = bi.values;
+				client->creator->dispatch.select_click(ic);
+			}
 		}
 	}
 }

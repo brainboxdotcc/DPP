@@ -49,16 +49,20 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 	if (g) {
 		if (!BoolNotNull(&d, "unavailable")) {
 			dpp::get_guild_cache()->remove(g);
-			for (auto & ee : g->emojis) {
-				dpp::emoji* fe = dpp::find_emoji(ee);
-				if (fe) {
-					dpp::get_emoji_cache()->remove(fe);
+			if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
+				for (auto & ee : g->emojis) {
+					dpp::emoji* fe = dpp::find_emoji(ee);
+					if (fe) {
+						dpp::get_emoji_cache()->remove(fe);
+					}
 				}
 			}
-			for (auto & rr : g->roles) {
-				dpp::role* role = dpp::find_role(rr);
-				if (role) {
-					dpp::get_role_cache()->remove(role);
+			if (client->creator->cache_policy.role_policy != dpp::cp_none) {
+				for (auto & rr : g->roles) {
+					dpp::role* role = dpp::find_role(rr);
+					if (role) {
+						dpp::get_role_cache()->remove(role);
+					}
 				}
 			}
 			for (auto & cc : g->channels) {
@@ -67,12 +71,14 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 					dpp::get_channel_cache()->remove(ch);
 				}
 			}
-			for (auto gm = g->members.begin(); gm != g->members.end(); ++gm) {
-				dpp::user* u = dpp::find_user(gm->second.user_id);
-				if (u) {
-					u->refcount--;
-					if (u->refcount < 1) {
-						dpp::get_user_cache()->remove(u);
+			if (client->creator->cache_policy.user_policy != dpp::cp_none) {
+				for (auto gm = g->members.begin(); gm != g->members.end(); ++gm) {
+					dpp::user* u = dpp::find_user(gm->second.user_id);
+					if (u) {
+						u->refcount--;
+						if (u->refcount < 1) {
+							dpp::get_user_cache()->remove(u);
+						}
 					}
 				}
 			}

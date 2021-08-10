@@ -147,6 +147,9 @@ public:
 	/** Returns true if the user is muted */
 	bool is_muted() const;
 
+	/** Returns true if pending verification by membership screening */
+	bool is_pending() const;
+	
 };
 
 /** @brief Guild members container
@@ -241,6 +244,9 @@ public:
 
 	/** List of channels on this server */
 	std::vector<snowflake> channels;
+
+	/** List of threads on this server */
+	std::vector<snowflake> threads;
 
 	/** List of guild members. Note that when you first receive the
 	 * guild create event, this may be empty or near empty.

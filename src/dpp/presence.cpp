@@ -26,16 +26,32 @@ using json = nlohmann::json;
 
 namespace dpp {
 
+activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) : type(typ), name(nam), state(stat), url(url_)
+{	
+}
+
 presence::presence() : guild_id(0), user_id(0), flags(0)
 {
 }
 
-presence::presence(presence_status status, activity_type type, const std::string activity_description) {
+presence::presence(presence_status status, activity_type type, const std::string& activity_description) {
 	dpp::activity a;
 	a.name = activity_description;
 	a.type = type;
 	activities.clear();
 	activities.push_back(a);
+	flags &= PF_CLEAR_STATUS;
+	if (status == ps_online)
+		flags |= p_status_online;
+	else if (status == ps_idle)
+		flags |= p_status_idle;
+	else if (status == ps_dnd)
+		flags |= p_status_dnd;
+}
+
+presence::presence(presence_status status, activity a) {
+	activities.clear();
+	activities.push_back(std::move(a));
 	flags &= PF_CLEAR_STATUS;
 	if (status == ps_online)
 		flags |= p_status_online;
@@ -119,7 +135,8 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 		for (auto & act : (*j)["activities"]) {
 			activity a;
 			a.name = StringNotNull(&act, "name");
-			a.state = StringNotNull(&act, "state");
+			a.state = StringNotNull(&act, "state"); // if user
+			if (a.state.empty()) a.state = StringNotNull(&act, "details"); // if activity from bot, maybe?
 			a.type = (activity_type)Int8NotNull(&act, "type");
 			a.url = StringNotNull(&act, "url");
 			a.created_at = Int64NotNull(&act, "created_at");
@@ -156,10 +173,20 @@ std::string presence::build_json() const {
 		}
 	});
 	if (activities.size()) {
-		j["d"]["game"] = json({
+		for(const auto& i : activities){
+			json j2({
+				{ "name", i.name },
+				{ "type", i.type }
+			});
+			if (!i.url.empty()) j2["url"] = i.url;
+			if (!i.state.empty()) j2["details"] = i.state; // bot activity is details, not state
+
+			j["d"]["activities"].push_back(j2);
+		}
+		/*j["d"]["game"] = json({ // use activities instead.
 			{ "name", activities[0].name },
 			{ "type", activities[0].type }
-		});
+		});*/
 	}
 
 	return j.dump();

@@ -68,6 +68,15 @@ public:
 	emoji();
 
 	/**
+	 * @brief Construct a new emoji object with name, ID and flags
+	 * 
+	 * @param name The emoji's name
+	 * @param id ID, if it has one (unicode does not)
+	 * @param flags Emoji flags (emoji_flags)
+	 */
+	emoji(const std::string, const snowflake = 0, const uint8_t = 0);
+
+	/**
 	 * @brief Destroy the emoji object
 	 */
 	~emoji();
@@ -128,6 +137,13 @@ public:
 	 * @return emoji& Reference to self
 	 */
 	emoji& load_image(const std::string &image_blob, image_type type);
+
+	/**
+	 * @brief Format to name if unicode, name:id if has id or a:name:id if animated
+	 * 
+	 * @return Formatted name for reactions
+	 */
+	std::string format() const;
 };
 
 /**

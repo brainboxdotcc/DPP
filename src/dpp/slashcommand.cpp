@@ -28,8 +28,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-slashcommand::slashcommand() : managed()
-{
+slashcommand::slashcommand() : managed(), default_permission(true), type(ctxm_none) {
 }
 
 slashcommand::~slashcommand() {
@@ -78,18 +77,52 @@ void to_json(json& j, const command_option& opt) {
 	}
 }
 
+void to_json(nlohmann::json& j, const command_permission& cp) {
+	j["id"] = std::to_string(cp.id);
+	j["type"] = cp.type;
+	j["permission"] =  cp.permission;
+}
+
+void to_json(nlohmann::json& j, const guild_command_permissions& gcp) {
+	j["id"] = std::to_string(gcp.id);
+	j["application_id"] = std::to_string(gcp.application_id);
+	j["guild_id"] = std::to_string(gcp.guild_id);
+	j["permissions"] =  gcp.permissions;
+}
+
 void to_json(json& j, const slashcommand& p) {
 	j["name"] = p.name;
-	j["description"] = p.description;
 
-	if (p.options.size()) {
-		j["options"] = json();
+	if (p.type != ctxm_user && p.type != ctxm_message) {
+		j["description"] = p.description;
+	}
 
-		for (const auto& opt : p.options) {
-			json jopt = opt;
-			j["options"].push_back(jopt);
+	/* Only send this if set to something other than ctxm_none */
+	if (p.type != ctxm_none) {
+		j["type"] = p.type;
+	}
+
+	if (p.type != ctxm_user && p.type != ctxm_message) {
+		if (p.options.size()) {
+			j["options"] = json();
+
+			for (const auto& opt : p.options) {
+				json jopt = opt;
+				j["options"].push_back(jopt);
+			}
 		}
 	}
+
+	if(p.permissions.size())  {
+		j["permissions"] = json();
+
+		for(const auto& perm : p.permissions) {
+			json jperm = perm;
+			j["permissions"].push_back(jperm);
+		}
+	}
+
+	j["default_permission"] = p.default_permission;
 }
 
 std::string slashcommand::build_json(bool with_id) const {
@@ -100,6 +133,11 @@ std::string slashcommand::build_json(bool with_id) const {
 	}
 
 	return j.dump();
+}
+
+slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
+	type = t;
+	return *this;
 }
 
 slashcommand& slashcommand::set_name(const std::string &n) {
@@ -114,6 +152,16 @@ slashcommand& slashcommand::set_description(const std::string &d) {
 
 slashcommand& slashcommand::set_application_id(snowflake i) {
 	application_id = i;
+	return *this;
+}
+
+slashcommand& slashcommand::add_permission(const command_permission& p) {
+	this->permissions.push_back(p);
+	return *this;
+}
+
+slashcommand& slashcommand::disable_default_permissions() {
+	this->default_permission = false;
 	return *this;
 }
 
@@ -161,6 +209,11 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 		j.at("options").get_to(cdo.options);
 	}
 
+	/* If there's a target ID, define it */
+	if (j.contains("target_id") && !j.at("target_id").is_null()) {
+		cdo.target_id = (dpp::snowflake)SnowflakeNotNull(&j, "target_id");
+	}
+
 	if (j.contains("value") && !j.at("value").is_null()) {
 		switch (cdo.type) {
 			case co_boolean:
@@ -194,9 +247,15 @@ void from_json(const nlohmann::json& j, command_interaction& ci) {
 	}
 }
 
-void from_json(const nlohmann::json& j, button_interaction& bi) {
+void from_json(const nlohmann::json& j, component_interaction& bi) {
 	bi.component_type = Int8NotNull(&j, "component_type");
 	bi.custom_id = StringNotNull(&j, "custom_id");
+	if (bi.component_type == cotype_select && j.find("values") != j.end()) {
+		/* Get values */
+		for (auto& entry : j["values"]) {
+			bi.values.push_back(entry.get<std::string>());
+		}
+	}
 }
 
 void from_json(const nlohmann::json& j, interaction& i) {
@@ -204,6 +263,12 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.application_id = SnowflakeNotNull(&j, "application_id");
 	i.channel_id = SnowflakeNotNull(&j, "channel_id");
 	i.guild_id = SnowflakeNotNull(&j, "guild_id");
+
+	if (j.find("message") != j.end()) {
+		const json& m = j["message"];
+		SetSnowflakeNotNull(&m, "id", i.message_id);
+	}
+
 
 	i.type = Int8NotNull(&j, "type");
 	i.token = StringNotNull(&j, "token");
@@ -222,7 +287,7 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			j.at("data").get_to(ci);
 			i.data = ci;
 		} else if (i.type == it_component_button) {
-			button_interaction bi;
+			component_interaction bi;
 			j.at("data").get_to(bi);
 			i.data = bi;
 		}

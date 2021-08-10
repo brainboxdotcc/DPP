@@ -31,6 +31,11 @@ emoji::emoji() : managed(), user_id(0), flags(0), image_data(nullptr)
 {
 }
 
+emoji::emoji(const std::string n, const snowflake i, const uint8_t f)
+	: managed(i), user_id(0), flags(f), image_data(nullptr), name(n)
+{	
+}
+
 emoji::~emoji() {
 	if (image_data) {
 		delete image_data;
@@ -99,6 +104,11 @@ emoji& emoji::load_image(const std::string &image_blob, image_type type) {
 	image_data = new std::string("data:" + mimetypes[type] + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length()));
 
 	return *this;
+}
+
+std::string emoji::format() const
+{
+	return id ? (name + ":" + std::to_string(id)) : name;
 }
 
 };

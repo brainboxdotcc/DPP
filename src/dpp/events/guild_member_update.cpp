@@ -43,20 +43,34 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void guild_member_update::handle(discord_client* client, json &j, const std::string &raw) {
-       json& d = j["d"];
+	json& d = j["d"];
 	dpp::guild* g = dpp::find_guild(from_string<uint64_t>(d["guild_id"].get<std::string>(), std::dec));
-	dpp::user* u = dpp::find_user(from_string<uint64_t>(d["user"]["id"].get<std::string>(), std::dec));
-	if (g && u) {
-		auto& user = d["user"];
-		guild_member m;
-		m.fill_from_json(&user, g->id, u->id);
-		g->members[u->id] = m;
-
-		if (client->creator->dispatch.guild_member_update) {
+	if (client->creator->cache_policy.user_policy == dpp::cp_none) {
+		dpp::user u;
+		u.fill_from_json(&(d["user"]));
+		if (g && client->creator->dispatch.guild_member_update) {
 			dpp::guild_member_update_t gmu(client, raw);
 			gmu.updating_guild = g;
+			guild_member m;
+			auto& user = d;//d["user"]; // d contains roles and other member stuff already
+			m.fill_from_json(&user, g->id, u.id);
 			gmu.updated = m;
 			client->creator->dispatch.guild_member_update(gmu);
+		}
+	} else {
+		dpp::user* u = dpp::find_user(from_string<uint64_t>(d["user"]["id"].get<std::string>(), std::dec));
+		if (g && u) {
+			auto& user = d;//d["user"]; // d contains roles and other member stuff already
+			guild_member m;
+			m.fill_from_json(&user, g->id, u->id);
+			g->members[u->id] = m;
+
+			if (client->creator->dispatch.guild_member_update) {
+				dpp::guild_member_update_t gmu(client, raw);
+				gmu.updating_guild = g;
+				gmu.updated = m;
+				client->creator->dispatch.guild_member_update(gmu);
+			}
 		}
 	}
 }

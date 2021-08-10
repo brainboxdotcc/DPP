@@ -47,28 +47,38 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 	json d = j["d"];
 
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	dpp::guild_member_add_t gmr(client, raw);
 	if (g) {
-		dpp::user* u = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));
-		if (!u) {
-			u = new dpp::user();
-			u->fill_from_json(&(d["user"]));
-			dpp::get_user_cache()->store(u);
-		} else {
-			u->refcount++;
-		}
-		dpp::guild_member_add_t gmr(client, raw);
-		dpp::guild_member gm;
-		gmr.added = {};
-		if (u && u->id && g->members.find(u->id) == g->members.end()) {
-			gm.fill_from_json(&d, g->id, u->id);
-			g->members[u->id] = gm;
+		if (client->creator->cache_policy.user_policy == dpp::cp_none) {
+			dpp::guild_member gm;
+			gm.fill_from_json(&d, g->id, SnowflakeNotNull(&(d["user"]), "id"));
 			gmr.added = gm;
-		} else if (u && u->id) {
-			gmr.added = g->members.find(u->id)->second;
-		}
-		if (client->creator->dispatch.guild_member_add) {
-			gmr.adding_guild = g;
-			client->creator->dispatch.guild_member_add(gmr);
+			if (client->creator->dispatch.guild_member_add) {
+				gmr.adding_guild = g;
+				client->creator->dispatch.guild_member_add(gmr);
+			}
+		} else {
+			dpp::user* u = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));
+			if (!u) {
+				u = new dpp::user();
+				u->fill_from_json(&(d["user"]));
+				dpp::get_user_cache()->store(u);
+			} else {
+				u->refcount++;
+			}
+			dpp::guild_member gm;
+			gmr.added = {};
+			if (u && u->id && g->members.find(u->id) == g->members.end()) {
+				gm.fill_from_json(&d, g->id, u->id);
+				g->members[u->id] = gm;
+				gmr.added = gm;
+			} else if (u && u->id) {
+				gmr.added = g->members.find(u->id)->second;
+			}
+			if (client->creator->dispatch.guild_member_add) {
+				gmr.adding_guild = g;
+				client->creator->dispatch.guild_member_add(gmr);
+			}
 		}
 	}
 }

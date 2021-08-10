@@ -294,14 +294,29 @@ std::map<std::string, dpp::events::event*> eventmap = {
 	{ "USER_UPDATE", new dpp::events::user_update() },
 	{ "GUILD_JOIN_REQUEST_DELETE", new dpp::events::guild_join_request_delete() },
 	{ "STAGE_INSTANCE_CREATE", new dpp::events::stage_instance_create() },
-	{ "STAGE_INSTANCE_DELETE", new dpp::events::stage_instance_delete() }
+	{ "STAGE_INSTANCE_DELETE", new dpp::events::stage_instance_delete() },
+	{ "THREAD_CREATE", new dpp::events::thread_create() },
+	{ "THREAD_UPDATE", new dpp::events::thread_update() },
+	{ "THREAD_DELETE", new dpp::events::thread_delete() },
+	{ "THREAD_LIST_SYNC", new dpp::events::thread_list_sync() },
+	{ "THREAD_MEMBER_UPDATE", new dpp::events::thread_member_update() },
+	{ "THREAD_MEMBERS_UPDATE", new dpp::events::thread_members_update() },
+	{ "GUILD_APPLICATION_COMMAND_COUNTS_UPDATE", nullptr },
+	{ "GUILD_STICKERS_UPDATE", nullptr },
+	{ "APPLICATION_COMMAND_PERMISSIONS_UPDATE", nullptr },
 };
 
 void discord_client::HandleEvent(const std::string &event, json &j, const std::string &raw)
 {
 	auto ev_iter = eventmap.find(event);
 	if (ev_iter != eventmap.end()) {
-		ev_iter->second->handle(this, j, raw);
+		/* A handler with nullptr is silently ignored. We don't plan to make a handler for it
+		 * so this usually some user-only thing thats crept into the API and shown to bots
+		 * that we dont care about.
+		 */
+		if (ev_iter->second != nullptr) {
+			ev_iter->second->handle(this, j, raw);
+		}
 	} else {
 		log(dpp::ll_debug, fmt::format("Unhandled event: {}, {}", event, j.dump()));
 	}

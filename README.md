@@ -60,9 +60,12 @@ also be sure to contribute, if you're interested!
 * [cmake](https://cmake.org/) (version 3.13+)
 * [g++](https://gcc.gnu.org) (version 8+)
 * [OpenSSL](https://openssl.org/) (whichever `-dev` package comes with your OS)
+* [zlib](https://zlib.net) (whichever `-dev` package comes with your OS)
 
 #### Optional Dependencies
-* [LibOpus](https://www.opus-codec.org) and [libsodium](https://github.com/jedisct1/libsodium) for voice support
+For voice support you require both of:
+* [LibOpus](https://www.opus-codec.org)
+* [libsodium](https://github.com/jedisct1/libsodium)
 
 ### Included Dependencies (Packaged with the library)
 * [nlohmann::json](https://github.com/nlohmann/json)

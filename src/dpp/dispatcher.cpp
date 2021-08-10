@@ -25,33 +25,11 @@
 #include <dpp/fmt/format.h>
 #include <variant>
 
+#define event_ctor(a, b) a::a(discord_client* client, const std::string &raw) : b(client, raw) {}
+
 namespace dpp {
 
 event_dispatch_t::event_dispatch_t(discord_client* client, const std::string &raw) : from(client), raw_event(raw)
-{
-}
-
-guild_join_request_delete_t::guild_join_request_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-stage_instance_create_t::stage_instance_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-stage_instance_delete_t::stage_instance_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-log_t::log_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-voice_state_update_t::voice_state_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-interaction_create_t::interaction_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
 {
 }
 
@@ -63,6 +41,16 @@ void interaction_create_t::reply(interaction_response_type t, const message & m)
 void interaction_create_t::reply(interaction_response_type t, const std::string & mt) const
 {
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command));
+}
+
+void interaction_create_t::edit_response(const message & m) const
+{
+	from->creator->interaction_response_edit(this->command.token, m);
+}
+
+void interaction_create_t::edit_response(const std::string & mt) const
+{
+	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command));
 }
 
 const command_value& interaction_create_t::get_parameter(const std::string& name) const
@@ -78,10 +66,6 @@ const command_value& interaction_create_t::get_parameter(const std::string& name
 	return dummy_value;
 }
 
-button_click_t::button_click_t(discord_client* client, const std::string &raw) : interaction_create_t(client, raw)
-{
-}
-
 const command_value& button_click_t::get_parameter(const std::string& name) const
 {
 	/* Buttons don't have parameters, so override this */
@@ -89,188 +73,73 @@ const command_value& button_click_t::get_parameter(const std::string& name) cons
 	return dummy_b_value;
 }
 
-guild_delete_t::guild_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
+const command_value& select_click_t::get_parameter(const std::string& name) const
 {
+	/* Selects don't have parameters, so override this */
+	static command_value dummy_b_value = {};
+	return dummy_b_value;
 }
 
-channel_delete_t::channel_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-channel_update_t::channel_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-ready_t::ready_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-message_delete_t::message_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-application_command_delete_t::application_command_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-application_command_create_t::application_command_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-resumed_t::resumed_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_role_create_t::guild_role_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-typing_start_t::typing_start_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-message_reaction_add_t::message_reaction_add_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-message_reaction_remove_t::message_reaction_remove_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_create_t::guild_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-channel_create_t::channel_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-message_reaction_remove_emoji_t::message_reaction_remove_emoji_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-message_delete_bulk_t::message_delete_bulk_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_role_update_t::guild_role_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_role_delete_t::guild_role_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-channel_pins_update_t::channel_pins_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-message_reaction_remove_all_t::message_reaction_remove_all_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-voice_server_update_t::voice_server_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_emojis_update_t::guild_emojis_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-presence_update_t::presence_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-webhooks_update_t::webhooks_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_member_add_t::guild_member_add_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-invite_delete_t::invite_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_update_t::guild_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_integrations_update_t::guild_integrations_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_member_update_t::guild_member_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-application_command_update_t::application_command_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-invite_create_t::invite_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-message_update_t::message_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-user_update_t::user_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-message_create_t::message_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_ban_add_t::guild_ban_add_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_ban_remove_t::guild_ban_remove_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-integration_create_t::integration_create_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-integration_update_t::integration_update_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-integration_delete_t::integration_delete_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_member_remove_t::guild_member_remove_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-guild_members_chunk_t::guild_members_chunk_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-voice_buffer_send_t::voice_buffer_send_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-voice_user_talking_t::voice_user_talking_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-voice_ready_t::voice_ready_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-voice_receive_t::voice_receive_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
-
-voice_track_marker_t::voice_track_marker_t(discord_client* client, const std::string &raw) : event_dispatch_t(client, raw)
-{
-}
+/* Standard default constructors that call the parent constructor, for events */
+event_ctor(guild_join_request_delete_t, event_dispatch_t);
+event_ctor(stage_instance_create_t, event_dispatch_t);
+event_ctor(stage_instance_delete_t, event_dispatch_t);
+event_ctor(log_t, event_dispatch_t);
+event_ctor(voice_state_update_t, event_dispatch_t);
+event_ctor(interaction_create_t, event_dispatch_t);
+event_ctor(button_click_t, interaction_create_t);
+event_ctor(select_click_t, interaction_create_t);
+event_ctor(guild_delete_t, event_dispatch_t);
+event_ctor(channel_delete_t, event_dispatch_t);
+event_ctor(channel_update_t, event_dispatch_t);
+event_ctor(ready_t, event_dispatch_t);
+event_ctor(message_delete_t, event_dispatch_t);
+event_ctor(application_command_delete_t, event_dispatch_t);
+event_ctor(application_command_create_t, event_dispatch_t);
+event_ctor(resumed_t, event_dispatch_t);
+event_ctor(guild_role_create_t, event_dispatch_t);
+event_ctor(typing_start_t, event_dispatch_t);
+event_ctor(message_reaction_add_t, event_dispatch_t);
+event_ctor(message_reaction_remove_t, event_dispatch_t);
+event_ctor(guild_create_t, event_dispatch_t);
+event_ctor(channel_create_t, event_dispatch_t);
+event_ctor(message_reaction_remove_emoji_t, event_dispatch_t);
+event_ctor(message_delete_bulk_t, event_dispatch_t);
+event_ctor(guild_role_update_t, event_dispatch_t);
+event_ctor(guild_role_delete_t, event_dispatch_t);
+event_ctor(channel_pins_update_t, event_dispatch_t);
+event_ctor(message_reaction_remove_all_t, event_dispatch_t);
+event_ctor(voice_server_update_t, event_dispatch_t);
+event_ctor(guild_emojis_update_t, event_dispatch_t);
+event_ctor(presence_update_t, event_dispatch_t);
+event_ctor(webhooks_update_t, event_dispatch_t);
+event_ctor(guild_member_add_t, event_dispatch_t);
+event_ctor(invite_delete_t, event_dispatch_t);
+event_ctor(guild_update_t, event_dispatch_t);
+event_ctor(guild_integrations_update_t, event_dispatch_t);
+event_ctor(guild_member_update_t, event_dispatch_t);
+event_ctor(application_command_update_t, event_dispatch_t);
+event_ctor(invite_create_t, event_dispatch_t);
+event_ctor(message_update_t, event_dispatch_t);
+event_ctor(user_update_t, event_dispatch_t);
+event_ctor(message_create_t, event_dispatch_t);
+event_ctor(guild_ban_add_t, event_dispatch_t);
+event_ctor(guild_ban_remove_t, event_dispatch_t);
+event_ctor(integration_create_t, event_dispatch_t);
+event_ctor(integration_update_t, event_dispatch_t);
+event_ctor(integration_delete_t, event_dispatch_t);
+event_ctor(guild_member_remove_t, event_dispatch_t);
+event_ctor(guild_members_chunk_t, event_dispatch_t);
+event_ctor(thread_create_t, event_dispatch_t);
+event_ctor(thread_update_t, event_dispatch_t);
+event_ctor(thread_delete_t, event_dispatch_t);
+event_ctor(thread_list_sync_t, event_dispatch_t);
+event_ctor(thread_member_update_t, event_dispatch_t);
+event_ctor(thread_members_update_t, event_dispatch_t);
+event_ctor(voice_buffer_send_t, event_dispatch_t);
+event_ctor(voice_user_talking_t, event_dispatch_t);
+event_ctor(voice_ready_t, event_dispatch_t);
+event_ctor(voice_receive_t, event_dispatch_t);
+event_ctor(voice_track_marker_t, event_dispatch_t);
 
 };
