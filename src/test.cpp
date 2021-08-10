@@ -21,34 +21,18 @@ int main()
 
 		dpp::discord_client* d = event.from;
 
-		command_handler.add_command(
-			/* Command name */
-			"ping",
-
-			/* Parameters */
-			{
-				{"testparameter", dpp::param_info(dpp::pt_string, true, "Optional test parameter") }
-			},
-
-			/* Command handler */
-			[&command_handler, d](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
-
-				command_handler.reply(dpp::message(fmt::format("Pong! {0:.3f}", d->websocket_ping)), src);
-			},
-
-			/* Command description */
-			"A test ping command",
-
-			/* Guild id (omit for a global command) */
-			819556414099554344
-		);
-
 	});
+
+	
+	bot.on_message_create([&bot](const dpp::message_create_t & event) {
+		if (std::size(event.msg->stickers) > 0) {
+			std::cout << event.msg->stickers[0].name << std::endl;
+		}
+    });
 
 
 	bot.on_log([](const dpp::log_t & event) {
 		if (event.severity > dpp::ll_trace) {
-			std::cout << event.message << "\n";
 		}
 	});
 
