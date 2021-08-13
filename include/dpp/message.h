@@ -621,7 +621,12 @@ struct sticker {
 	 * for standard stickers, a comma-separated list of related expressions.
 	 */
 	std::string     tags;
-	/// Deprecated previously the sticker asset hash, now an empty string
+	/**
+	 * @brief Asset ID
+	 * @deprecated now an empty string but still sent by discord.
+	 * While discord still send this empty string value we will still have a field
+	 * here in the library.
+	 */
 	std::string     asset;
 	/** The type of sticker */
 	sticker_type	type;
