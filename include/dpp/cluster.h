@@ -614,6 +614,14 @@ public:
 	void on_guild_emojis_update (std::function<void(const guild_emojis_update_t& _event)> _guild_emojis_update);
 
 	/**
+	 * @brief Called when new stickers are added to a guild.
+	 * The complete set of stickers is sent every time.
+	 *
+	 * @param _guild_stickers_update  User function to attach to event
+	 */
+	void on_guild_stickers_update (std::function<void(const guild_stickers_update_t& _event)> _guild_stickers_update);
+
+	/**
 	 * @brief Called when a user's presence is updated.
 	 * To receive these you will need the GUILD_PRESENCES privileged intent.
 	 * You will receive many of these, very often, and receiving them will significaintly

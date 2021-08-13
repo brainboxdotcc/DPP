@@ -1761,6 +1761,10 @@ void cluster::on_guild_emojis_update (std::function<void(const guild_emojis_upda
 	this->dispatch.guild_emojis_update = _guild_emojis_update;
 }
 
+void cluster::on_guild_stickers_update (std::function<void(const guild_stickers_update_t& _event)> _guild_stickers_update) {
+	this->dispatch.stickers_update = _guild_stickers_update;
+}
+
 void cluster::on_presence_update (std::function<void(const presence_update_t& _event)> _presence_update) {
 	this->dispatch.presence_update = _presence_update;
 }
