@@ -111,7 +111,11 @@ typedef std::variant<
 		interaction_response,
 		auditlog,
 		slashcommand,
-		slashcommand_map
+		slashcommand_map,
+		sticker,
+		sticker_map,
+		sticker_pack,
+		sticker_pack_map
 	> confirmable_t;
 
 /**
@@ -1953,6 +1957,70 @@ public:
 	 * @param limit Number of threads to get
 	 */
 	void get_joined_private_archived_threads(snowflake channel_id, snowflake before_id = 0, uint16_t limit = 0, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Create a sticker in a guild
+	 *
+	 * @param s Sticker to create. Must have its guild ID set.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_sticker_create(sticker &s, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Modify a sticker in a guild
+	 *
+	 * @param s Sticker to modify. Must have its guild ID and sticker ID set.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_sticker_modify(sticker &s, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Delete a sticker from a guild
+	 *
+	 * @param sticker_id sticker ID to delete
+	 * @param guild_id guild ID to delete from
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_sticker_delete(snowflake sticker_id, snowflake guild_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get a nitro sticker
+	 *
+	 * @param id Id of sticker to get.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void nitro_sticker_get(snowflake id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get a guild sticker
+	 *
+	 * @param id Id of sticker to get.
+	 * @param guild_id Guild ID of the guild where the sticker is
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_sticker_get(snowflake id, snowflake guild_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get all guild stickers
+	 *
+	 * @param guild_id Guild ID of the guild where the sticker is
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_stickers_get(snowflake guild_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get sticker packs
+	 *
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void sticker_packs_get(command_completion_event_t callback);
 
 	/**
 	 * @brief Get all voice regions

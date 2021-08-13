@@ -799,11 +799,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	if (d->find("sticker_items") != d->end()) {
 		json &sub = (*d)["sticker_items"];
 		for (auto & sticker_raw : sub) {
-			dpp::sticker new_sticker;
-			new_sticker.name = StringNotNull(&sticker_raw, "name");
-			new_sticker.id = SnowflakeNotNull(&sticker_raw, "id");
-			new_sticker.type = static_cast<sticker_type>(Int8NotNull(&sticker_raw, "format_type"));
-			stickers.push_back(new_sticker);
+			stickers.push_back(dpp::sticker().fill_from_json(&sticker_raw));
 		}
 	}
 	if (d->find("mentions") != d->end()) {
@@ -885,5 +881,106 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	}
 	return *this;
 }
+
+sticker::sticker() : id(0), pack_id(0), guild_id(0), type(st_standard), format_type(sf_png), available(true), sort_value(0) {
+}
+
+sticker& sticker::fill_from_json(nlohmann::json* j) {
+	this->id = SnowflakeNotNull(j, "id");
+	this->pack_id = SnowflakeNotNull(j, "pack_id");
+	this->name = StringNotNull(j, "name");
+	this->description = StringNotNull(j, "description");
+	this->tags = StringNotNull(j, "tags");
+	this->asset = StringNotNull(j, "asset");
+	this->guild_id = SnowflakeNotNull(j, "guild_id");
+	this->type = static_cast<sticker_type>(Int8NotNull(j, "type"));
+	this->format_type = static_cast<sticker_format>(Int8NotNull(j, "format_type"));
+	this->available = BoolNotNull(j, "available");
+	this->sort_value = Int8NotNull(j, "sort_value");
+	if (j->find("user") != j->end()) {
+		sticker_user.fill_from_json(&((*j)["user"]));
+	}
+
+	return *this;
+}
+
+std::string sticker::build_json(bool with_id) const {
+	json j;
+
+	if (with_id) {
+		j["id"] = std::to_string(this->id);
+	}
+	j["pack_id"] = std::to_string(this->pack_id);
+	if (this->guild_id) {
+		j["guild_id"] = std::to_string(this->guild_id);
+	}
+	j["name"] = this->name;
+	j["description"] = this->description;
+	if (!this->tags.empty()) {
+		j["tags"] = this->tags;
+	}
+	if (!this->asset.empty()) {
+		j["asset"] = this->asset;
+	}
+	j["type"] = this->type;
+	j["format_type"] = this->format_type;
+	j["available"] = this->available;
+	j["sort_value"] = this->sort_value;
+
+	return j.dump();
+}
+
+sticker_pack::sticker_pack() : id(0), sku_id(0), cover_sticker_id(0), banner_asset_id(0) {
+}
+
+sticker_pack& sticker_pack::fill_from_json(nlohmann::json* j) {
+	this->id = SnowflakeNotNull(j, "id");
+	this->sku_id = SnowflakeNotNull(j, "sku_id");
+	this->cover_sticker_id = SnowflakeNotNull(j, "cover_sticker_id");
+	this->banner_asset_id = SnowflakeNotNull(j, "banner_asset_id");
+	this->name = StringNotNull(j, "name");
+	this->description = StringNotNull(j, "description");
+	if (j->find("stickers") != j->end()) {
+		json & sl = (*j)["stickers"];
+		for (auto& s : sl) {
+			this->stickers[SnowflakeNotNull(&s, "id")] = sticker().fill_from_json(&s);
+		}
+	}
+	return *this;
+}
+
+std::string sticker_pack::build_json(bool with_id) const {
+	json j;
+	if (with_id) {
+		j["id"] = std::to_string(this->id);
+	}
+	if (sku_id) {
+		j["sku_id"] = std::to_string(sku_id);
+	}
+	if (cover_sticker_id) {
+		j["cover_sticker_id"] = std::to_string(cover_sticker_id);
+	}
+	if (banner_asset_id) {
+		j["banner_asset_id"] = std::to_string(banner_asset_id);
+	}
+	j["name"] = name;
+	j["description"] = description;
+	j["stickers"] = json::array();
+	for (auto& s : stickers) {
+		j["stickers"].push_back(json::parse(s.second.build_json(with_id)));
+	}
+	return j.dump();
+}
+
+sticker& sticker::set_filename(const std::string &fn) {
+	filename = fn;
+	return *this;
+}
+
+sticker& sticker::set_file_content(const std::string &fc) {
+	filecontent = fc;
+	return *this;
+}
+
 
 };

@@ -587,28 +587,127 @@ struct attachment {
 	~attachment() = default;
 };
 
+enum sticker_type : uint8_t {
+	/// Nitro pack sticker
+	st_standard = 1,
+	/// Guild sticker
+	st_guild = 2
+};
+
 /**
  * @brief The file format (png, apng, lottie) of a sticker
  */
-enum sticker_type {
-	/// PNG sticker type
-	sticker_png = 1,
-	/// APNG sticker type
-	sticker_apng = 2,
-	/// LOTTIE sticker type
-	sticker_lottie = 3
+enum sticker_format : uint8_t {
+	sf_png = 1,
+	sf_apng = 2,
+	sf_lottie = 3
 };
 
 /**
  * @brief Represents stickers received in messages
  */
 struct sticker {
-	/** The ID of the sticker */
-	dpp::snowflake id;
+	/** @brief The ID of the sticker
+	 */
+	snowflake	id;
+	/** Optional: for standard stickers, id of the pack the sticker is from
+	 */
+	snowflake	pack_id;
 	/** The name of the sticker */
-	std::string name;
+	std::string	name;
+	/// description of the sticker (may be empty)
+	std::string     description;    
+	/** for guild stickers, the Discord name of a unicode emoji representing the sticker's expression.
+	 * for standard stickers, a comma-separated list of related expressions.
+	 */
+	std::string     tags;
+	/// Deprecated previously the sticker asset hash, now an empty string
+	std::string     asset;
 	/** The type of sticker */
-	sticker_type type;
+	sticker_type	type;
+	/// type of sticker format
+	sticker_format	format_type;
+	/// Optional: whether this guild sticker can be used, may be false due to loss of Server Boosts
+	bool		available;
+	/// Optional: id of the guild that owns this sticker
+	snowflake	guild_id;
+	/// Optional: the user that uploaded the guild sticker
+	user		sticker_user;
+	/// Optional: the standard sticker's sort order within its pack
+	uint8_t		sort_value;
+	/** Name of file to upload (when adding or editing a sticker) */
+	std::string	filename;
+	/** File content to upload (raw binary) */
+	std::string	filecontent;
+
+	/**
+	 * @brief Construct a new sticker object
+	 */
+	sticker();
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	sticker& fill_from_json(nlohmann::json* j);
+
+	/** Build JSON from this object.
+	 * @param with_id True if the ID is to be set in the JSON structure
+	 * @return The JSON text of the invite
+	 */
+	std::string build_json(bool with_id = true) const;
+
+	/**
+	 * @brief Set the filename
+	 * 
+	 * @param fn filename
+	 * @return message& reference to self
+	 */
+	sticker& set_filename(const std::string &fn);
+
+	/**
+	 * @brief Set the file content
+	 * 
+	 * @param fc raw file content contained in std::string
+	 * @return message& reference to self
+	 */
+	sticker& set_file_content(const std::string &fc);
+
+};
+
+struct sticker_pack {
+	/// id of the sticker pack
+	snowflake       id;
+	/// the stickers in the pack
+	std::map<snowflake, sticker> stickers;
+	/// name of the sticker pack
+	std::string     name;
+	/// id of the pack's SKU
+	snowflake       sku_id;
+	/// Optional: id of a sticker in the pack which is shown as the pack's icon
+	snowflake       cover_sticker_id;
+	/// description of the sticker pack
+	std::string     description;
+	/// id of the sticker pack's banner image
+	snowflake       banner_asset_id;
+
+	/**
+	 * @brief Construct a new sticker pack object
+	 */
+	sticker_pack();
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	sticker_pack& fill_from_json(nlohmann::json* j);
+
+	/** Build JSON from this object.
+	 * @param with_id True if the ID is to be set in the JSON structure
+	 * @return The JSON text of the invite
+	 */
+	std::string build_json(bool with_id = true) const;
+
 };
 
 /**
@@ -986,5 +1085,11 @@ struct message {
 
 /** A group of messages */
 typedef std::unordered_map<snowflake, message> message_map;
+
+/** A group of stickers */
+typedef std::unordered_map<snowflake, sticker> sticker_map;
+
+/** A group of sticker packs */
+typedef std::unordered_map<snowflake, sticker_pack> sticker_pack_map;
 
 };
