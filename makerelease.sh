@@ -2,7 +2,7 @@
 LASTVER=`git tag | sort -t "." -k1,1n -k2,2n -k3,3n | tail -n1`
 MINOR=`echo -n $LASTVER | sed "s/v[0-9]*\.[0-9]*\.//"`
 MAJOR=`echo -n $LASTVER | sed "s/\.[0-9]*$//"`
-NEWMINOR=$((MINOR))
+NEWMINOR=$((MINOR + 1))
 NEWVER="$MAJOR.$NEWMINOR"
 echo "Building and tagging release $NEWVER"
 git checkout master
