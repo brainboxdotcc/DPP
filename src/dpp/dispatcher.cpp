@@ -141,5 +141,6 @@ event_ctor(voice_user_talking_t, event_dispatch_t);
 event_ctor(voice_ready_t, event_dispatch_t);
 event_ctor(voice_receive_t, event_dispatch_t);
 event_ctor(voice_track_marker_t, event_dispatch_t);
+event_ctor(guild_stickers_update_t, event_dispatch_t);
 
 };

@@ -406,6 +406,71 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 	});
 }
 
+void cluster::guild_sticker_create(sticker &s, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/guilds", std::to_string(s.guild_id), "stickers", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("sticker", sticker().fill_from_json(&j), http));
+		}
+	}, s.filename, s.filecontent);
+}
+
+void cluster::guild_sticker_modify(sticker &s, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/guilds", std::to_string(s.guild_id), "stickers/" + std::to_string(s.id), m_patch, s.build_json(true), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("sticker", sticker().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_sticker_delete(snowflake sticker_id, snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "stickers/" + std::to_string(sticker_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::nitro_sticker_get(snowflake id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/stickers", std::to_string(id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("sticker", sticker().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_sticker_get(snowflake id, snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "stickers/" + std::to_string(id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("sticker", sticker().fill_from_json(&j), http));
+		}
+	});
+}
+
+void cluster::guild_stickers_get(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "stickers", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		sticker_map stickers;
+		for (auto & curr_sticker : j) {
+			stickers[SnowflakeNotNull(&curr_sticker, "id")] = sticker().fill_from_json(&curr_sticker);
+		}
+		if (callback) {
+			callback(confirmation_callback_t("sticker_map", stickers, http));
+		}
+	});
+}
+
+void cluster::sticker_packs_get(command_completion_event_t callback) {
+	this->post_rest(API_PATH "/sticker-packs", "", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		sticker_pack_map stickerpacks;
+		for (auto & curr_stickerpack : j) {
+			stickerpacks[SnowflakeNotNull(&curr_stickerpack, "id")] = sticker_pack().fill_from_json(&curr_stickerpack);
+		}
+		if (callback) {
+			callback(confirmation_callback_t("sticker_pack_map", stickerpacks, http));
+		}
+	});
+}
+
+
 void cluster::message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id) + "/crosspost", m_post, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
@@ -1694,6 +1759,10 @@ void cluster::on_voice_server_update (std::function<void(const voice_server_upda
 
 void cluster::on_guild_emojis_update (std::function<void(const guild_emojis_update_t& _event)> _guild_emojis_update) {
 	this->dispatch.guild_emojis_update = _guild_emojis_update;
+}
+
+void cluster::on_guild_stickers_update (std::function<void(const guild_stickers_update_t& _event)> _guild_stickers_update) {
+	this->dispatch.stickers_update = _guild_stickers_update;
 }
 
 void cluster::on_presence_update (std::function<void(const presence_update_t& _event)> _presence_update) {

@@ -241,6 +241,18 @@ struct guild_delete_t : public event_dispatch_t {
 	guild* deleted;
 };
 
+/** @brief Update guild stickers */
+struct guild_stickers_update_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	guild_stickers_update_t(class discord_client* client, const std::string& raw);
+	/** Deleted guild */
+	guild* updating_guild;
+	std::vector<sticker> stickers;
+};
+
 /** @brief Guild join request delete (user declined membership screening) */
 struct guild_join_request_delete_t : public event_dispatch_t {
 	/** Constructor
@@ -1090,6 +1102,10 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const stage_instance_delete_t& event)> stage_instance_delete;
+	/** @brief Event handler function pointer for guild sticker update event
+	 * @param event Event parameters
+	 */
+	std::function<void(const guild_stickers_update_t& event)> stickers_update;
 };
 
 };
