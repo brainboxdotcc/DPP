@@ -1849,6 +1849,10 @@ void cluster::on_guild_ban_add (std::function<void(const guild_ban_add_t& _event
 	this->dispatch.guild_ban_add = _guild_ban_add;
 }
 
+void cluster::on_guild_ban_remove (std::function<void(const guild_ban_remove_t& _event)> _guild_ban_remove) {
+	this->dispatch.guild_ban_remove = _guild_ban_remove;
+}
+
 void cluster::on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create) {
 	this->dispatch.integration_create = _integration_create;
 }
