@@ -928,6 +928,29 @@ public:
 	 */
 	void guild_command_create(slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
+
+	/**
+	 * @brief Create/overwrite guild slash commands
+	 *
+	 * @param s Vector of slash commands to create/update.
+	 * New guild commands will be available in the guild immediately. If the command did not already exist, it will count toward daily application command create limits.
+	 * @param guild_id Guild ID to create/update the slash commands in
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a list of dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Create/overwrite global slash commands
+	 *
+	 * @param s Vector of slash commands to create/update.
+	 * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
+	 * Commands that do not already exist will count toward daily application command create limits.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a list of dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback = {});
+
 	/**
 	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
 	 *

@@ -547,6 +547,6 @@ void to_json(nlohmann::json& j, const slashcommand& cmd);
 /**
  * @brief A group of application slash commands
  */
-typedef std::unordered_map<std::string, slashcommand> slashcommand_map;
+typedef std::unordered_map<snowflake, slashcommand> slashcommand_map;
 
 };
