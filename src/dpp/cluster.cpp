@@ -62,15 +62,23 @@ bool confirmation_callback_t::is_error() const {
 		/* Invalid JSON or 4xx/5xx response */
 		return true;
 	}
-	json j = json::parse(this->http_info.body);
-	if (j.find("code") != j.end() && j.find("errors") != j.end() && j.find("message") != j.end()) {
-		if (j["code"].is_number_unsigned() && j["errors"].is_object() && j["message"].is_string()) {
-			return true;
-		} else {
-			return false;
+	try {
+		json j = json::parse(this->http_info.body);
+		if (j.find("code") != j.end() && j.find("errors") != j.end() && j.find("message") != j.end()) {
+			if (j["code"].is_number_unsigned() && j["errors"].is_object() && j["message"].is_string()) {
+				return true;
+			} else {
+				return false;
+			}
 		}
+		return false;
 	}
-	return false;
+	catch (const std::exception &e) {
+		/* JSON parse error indicates the content is not JSON.
+		 * This means that its an empty body e.g. 204 response, and not an actual error.
+		 */
+		return false;
+	}
 }
 
 error_info confirmation_callback_t::get_error() {
