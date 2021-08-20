@@ -200,7 +200,7 @@ struct confirmation_callback_t {
 	 *
 	 * @return error_info The details of the error message
 	 */
-	error_info get_error();
+	error_info get_error() const;
 };
 
 /**

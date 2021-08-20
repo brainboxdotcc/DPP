@@ -81,7 +81,7 @@ bool confirmation_callback_t::is_error() const {
 	}
 }
 
-error_info confirmation_callback_t::get_error() {
+error_info confirmation_callback_t::get_error() const {
 	if (is_error()) {
 		json j = json::parse(this->http_info.body);
 		error_info e;
