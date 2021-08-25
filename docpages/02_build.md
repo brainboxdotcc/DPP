@@ -40,12 +40,12 @@ Then once the build is complete, run `make install` to install to the location y
 
 Once installed to the /usr/local directory, you can make use of the library in standalone programs simply by including it and linking to it:
 
-    g++ -std=c++17 -ldpp -lfmt mydppbot.cpp -o dppbot
+    g++ -std=c++17 mydppbot.cpp -o dppbot -ldpp
 
 The important flags in this command-line are:
 
  * `-std=c++17` - Required to compile the headers
- * `-ldpp -lfmt` - Link to libdpp.so and its dependencies, also in /usr/local
+ * `-lfmt` - Link to libdpp.so in /usr/local
  * `mydppbot.cpp` - Your source code
  * `dppbot` - The name of the executable to make
 
@@ -64,28 +64,27 @@ To build on windows follow these steps *exactly*. The build process depends on s
 
 __Instructions here are subject to change!__
 
-1. Make sure you have Visual Studio 2019 Community. **NOT** Visual Studio Code. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
-2. Download and install cmake from [here](https://cmake.org/download/) and install it to the system path.
-3. Download windows version of git [here](https://git-scm.com/download/win) install it to your path.
-4. [Download and install vcpkg](https://docs.microsoft.com/en-us/cpp/build/install-vcpkg?view=msvc-160&tabs=windows) to the default recommended path
-5. Open a command prompt window.
-6. Use the following command to install `openssl` and `zlib` via vcpkg: `c:\vckpg\vcpkg.exe install openssl:x64-windows zlib:x64-windows`
-7. Change to the directory where you want to clone the sources.
-8. Issue the command: `git clone https://github.com/brainboxdotcc/DPP.git`
-9.  Issue the command: `cd DPP`
-10. Issue the command: `build.bat`
-11. Build a `config.json` file in the directory above the `test.exe` containing a valid bot token and shard count.
-12. Start the test bot!
-
-\image html runbot.png
+1. Make sure you have Visual Studio 2019. Community, Professional or Enterprise work fine. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
+2. [Download and install vcpkg](https://docs.microsoft.com/en-us/cpp/build/install-vcpkg?view=msvc-160&tabs=windows) to the default recommended path if you do not have it already.
+3. Use the following command to install `openssl` and `zlib` via vcpkg: `c:\vcpkg\vcpkg.exe install openssl:x64-windows zlib:x64-windows`
+   \image html winbuild_0.png
+4. Check out the DPP project source using git
+5. From within Visual Studio 2019, click the "File" menu, choose "Open" then "CMake", and select the CMakeLists.txt within the project folder
+   \image html winbuild_1.png
+   \image html winbuild_2.png
+6. Go to the "Build" menu and choose "Build all" or just press F7
+   \image html winbuild_3.png 
+7. Check that compilation succeeded. You may now use the library in your projects!
+   \image html winbuild_4.png
 
 ## Troubleshooting
 
-If the program fails to build, you may need to adjust build.bat to suit paths on your system, notably the path to msbuild.
+* If you do not have an option to open the CMakeLists.txt, ensure that you have installed the C++ development portions of visual studio (not just web development portions) with at least the default options.
+* If the project does not build, please ask for help on the [official discord server](https://discord.gg/dpp)
 
 ## After compiling
 
-After compilation you can take the .dll, .lib, .pdb and .exp files and copy them into your project as needed. You can also just start changing test.cpp to suit your needs, and build the entire project around the code you cloned from git as a template.
+After compilation you can directly reference the compiled project in your own CMakeLists.txt as a library or use the lib/dll/headers as you wish. Note that openssl will also be a dependency of your program and should be copied alongside `libdpp.dll`.
 
 
 \page buildosx Building on OSX

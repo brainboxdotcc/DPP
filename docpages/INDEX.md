@@ -47,10 +47,10 @@ The library runs best on Linux. Windows is supported via cmake and Visual Studio
 # Frequently Asked Questions (FAQ)
 
 ## Is this library in production use?
-This library powers the bot [TriviaBot](https://triviabot.co.uk) which has over **100,000 servers**, and [Sporks](https://sporks.gg) which has over **2,700 severs**. The library's use in these bots shows that the library is production ready for bots of all sizes.
+This library powers the bot [TriviaBot](https://triviabot.co.uk) which has over **111,000 servers**, and [Sporks](https://sporks.gg) which has over **2,800 severs**. The library's use in these bots shows that the library is production ready for bots of all sizes.
 
 ## How much RAM does this library use?
-During testing this library takes approximately 400 megabytes of ram to cache 1,000,000 (1 million) users and 7700 guilds, with their respective roles and emojis, in production. This is half the memory of a similar C++ Discord library, **Aegis.cpp** (version 2).
+In production on TriviaBot, the bot takes approximately 2gb of ram to run 18 separate processes (this is approximately **140mb** per process) on a production bot with 11 million users and 111,000 guilds. Each process takes under 1% CPU. This is less than a quarter of the memory of a similar C++ Discord library, **Aegis.cpp** (version 2).
 
 ## How much of the library is completed?
 All REST calls (outbound commands) are completed including slash commands, and all Discord events are available. The library also has voice support.
@@ -111,3 +111,8 @@ To fix this issue, as root run `ldconfig`: `sudo ldconfig`. Log out if your SSH 
 
 ## When compiling with voice support, i get an error: "No rule to make target 'sodium_LIBRARY_DEBUG-NOTFOUND', needed by 'libdpp.so'. Stop."
 The libsodium package requires pkg-config, but does not check for it when installed. Install it as root, e.g. `sudo apt install pkg-config`. Rerun cmake again, and rebuild the library.
+
+## When using precompiled libraries in Windows, the program runs but is just a black console window and the bot doesnt come online?
+If this happens, switch your project to release mode. Our precompiled binaries are built in release mode for x64 vs2019 only.
+If you require a debug build, or a build for a newer visual studio, you will have to compile it yourself from the github sources.
+Please see the section about \ref buildwindows for more information on how to do this.
