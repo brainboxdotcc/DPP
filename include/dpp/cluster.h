@@ -1139,6 +1139,64 @@ public:
 	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
+	 *
+	 * @param m Message to add a reaction to
+	 * @param reaction Reaction to add. Emojis should be in the form emojiname:id
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void message_add_reaction(snowflake message_id, const std::string &reaction, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Delete own reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
+	 *
+	 * @param m Message to delete own reaction from
+	 * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
+	 * @param callback Function to call when the API call completes.
+	 */
+	void message_delete_own_reaction(snowflake message_id, const std::string &reaction, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Delete a user's reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character
+	 *
+	 * @param m Message to delete a user's reaction from
+	 * @param user_id User ID who's reaction you want to remove
+	 * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
+	 * @param callback Function to call when the API call completes.
+	 */
+	void message_delete_reaction(snowflake message_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get reactions on a message for a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
+	 *
+	 * @param m Message to get reactions for
+	 * @param reaction Reaction should be in the form emojiname:id or a unicode character
+	 * @param before Reactions before this ID should be retrieved if this is set to non-zero
+	 * @param after Reactions before this ID should be retrieved if this is set to non-zero
+	 * @param limit This number of reactions maximum should be returned
+	 * @param callback Function to call when the API call completes.
+	 */
+	void message_get_reactions(snowflake message_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
+
+	/**
+	 * @brief Delete all reactions on a message by id
+	 *
+	 * @param m Message to delete reactions from
+	 * @param callback Function to call when the API call completes.
+	 */
+	void message_delete_all_reactions(snowflake message_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Delete all reactions on a message using a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
+	 *
+	 * @param m Message to delete reactions from
+	 * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
+	 * @param callback Function to call when the API call completes.
+	 */
+	void message_delete_reaction_emoji(snowflake message_id, const std::string &reaction, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Delete a message from a channel. The callback function is called when the message has been edited
 	 *
 	 * @param message_id Message ID to delete

@@ -585,6 +585,42 @@ void cluster::message_get_reactions(const struct message &m, const std::string &
 	});
 }
 
+void cluster::message_add_reaction(snowflake message_id, const std::string &reaction, command_completion_event_t callback) {
+	message m;
+	m.id = message_id;
+	message_add_reaction(m, reaction, callback);
+}
+
+void cluster::message_delete_own_reaction(snowflake message_id, const std::string &reaction, command_completion_event_t callback) {
+	message m;
+	m.id = message_id;
+	message_delete_own_reaction(m, reaction, callback);
+}
+
+void cluster::message_delete_reaction(snowflake message_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback) {
+	message m;
+	m.id = message_id;
+	message_delete_reaction(m, user_id, reaction, callback);
+}
+
+void cluster::message_get_reactions(snowflake message_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
+	message m;
+	m.id = message_id;
+	message_get_reactions(m, reaction, before, after, limit, callback);
+}
+
+void cluster::message_delete_all_reactions(snowflake message_id, command_completion_event_t callback) {
+	message m;
+	m.id = message_id;
+	message_delete_all_reactions(m, callback);
+}
+
+void cluster::message_delete_reaction_emoji(snowflake message_id, const std::string &reaction, command_completion_event_t callback) {
+	message m;
+	m.id = message_id;
+	message_delete_reaction_emoji(m, reaction, callback);
+}
+
 void cluster::message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
