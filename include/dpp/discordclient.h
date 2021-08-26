@@ -32,7 +32,6 @@
 #include <thread>
 #include <deque>
 #include <mutex>
-#include <zlib.h>
 
 using json = nlohmann::json;
 
@@ -41,8 +40,14 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-// Forward declaration
+// Forward declarations
 class cluster;
+
+/** This is an opaque class containing zlib library specific structures.
+ * We define it this way so that the public facing D++ library doesnt require
+ * the zlib headers be available to build against it.
+ */
+class zlibcontext;
 
 /**
  * @brief Represents a connection to a voice channel.
@@ -152,7 +157,7 @@ class discord_client : public websocket_client
 	std::string decompressed;
 
 	/** Frame decompression stream */
-	z_stream d_stream;
+	zlibcontext* zlib;
 
 	/** Total decompressed received bytes */
 	uint64_t decompressed_total;

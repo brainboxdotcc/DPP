@@ -21,22 +21,15 @@
 #pragma once
 #include <string>
 #include <functional>
-
-#ifdef OPENSSL_SYS_WIN32
-#undef X509_NAME
-#undef X509_EXTENSIONS
-#undef X509_CERT_PAIR
-#undef PKCS7_ISSUER_AND_SERIAL
-#undef OCSP_REQUEST
-#undef OCSP_RESPONSE
-#endif
-
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-
 #include <dpp/discord.h>
 
 namespace dpp {
+
+/** This is an opaque class containing openssl library specific structures.
+ * We define it this way so that the public facing D++ library doesnt require
+ * the openssl headers be available to build against it.
+ */
+class opensslcontext;
 
 /**
  * @brief Implements a simple non-blocking SSL stream client.
@@ -62,11 +55,8 @@ protected:
 	/** Raw file descriptor of connection */
 	int sfd;
 
-	/** OpenSSL session */
-	SSL* ssl;
-
-	/** OpenSSL context */
-	SSL_CTX* ctx;
+	/** Openssl opaque contexts */
+	opensslcontext* ssl;
 
 	/** SSL cipher in use */
 	std::string cipher;
@@ -97,6 +87,9 @@ public:
 	
 	/** Get total bytes received */
 	uint64_t get_bytes_in();
+
+	/** Get SSL cipher name */
+	std::string get_cipher();
 
 	/**
 	 * @brief Attaching an additional file descriptor to this function will send notifications when there is data to read.

@@ -38,6 +38,14 @@
 
 namespace dpp {
 
+/* This is an internal class, defined externally as just a forward declaration for an opaque pointer.
+ * This is because we don't want an external dependency on zlib's headers
+ */
+class zlibcontext {
+public:
+	z_stream d_stream;
+};
+
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
        : websocket_client(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
 	creator(_cluster),
@@ -59,6 +67,7 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	ping_start(0.0),
 	websocket_ping(0.0)
 {
+	zlib = new zlibcontext();
 	Connect();
 }
 
@@ -68,6 +77,7 @@ discord_client::~discord_client()
 		runner->join();
 		delete runner;
 	}
+	delete zlib;
 }
 
 uint64_t discord_client::get_decompressed_bytes_in()
@@ -78,10 +88,10 @@ uint64_t discord_client::get_decompressed_bytes_in()
 void discord_client::SetupZLib()
 {
 	if (compressed) {
-		d_stream.zalloc = (alloc_func)0;
-		d_stream.zfree = (free_func)0;
-		d_stream.opaque = (voidpf)0;
-		if (inflateInit(&d_stream) != Z_OK) {
+		zlib->d_stream.zalloc = (alloc_func)0;
+		zlib->d_stream.zfree = (free_func)0;
+		zlib->d_stream.opaque = (voidpf)0;
+		if (inflateInit(&(zlib->d_stream)) != Z_OK) {
 			throw std::runtime_error("Can't initialise stream compression!");
 		}
 		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
@@ -92,7 +102,7 @@ void discord_client::SetupZLib()
 void discord_client::EndZLib()
 {
 	if (compressed) {
-		inflateEnd(&d_stream);
+		inflateEnd(&(zlib->d_stream));
 		if (this->decomp_buffer) {
 			delete[] this->decomp_buffer;
 			this->decomp_buffer = nullptr;
@@ -144,14 +154,14 @@ bool discord_client::HandleFrame(const std::string &buffer)
 		&& (uint8_t)buffer[buffer.size() - 1] == 0xFF) {
 			/* Decompress buffer */
 			decompressed.clear();
-			d_stream.next_in = (Bytef *)buffer.c_str();
-			d_stream.avail_in = buffer.size();
+			zlib->d_stream.next_in = (Bytef *)buffer.c_str();
+			zlib->d_stream.avail_in = buffer.size();
 			do {
 				int have = 0;
-				d_stream.next_out = (Bytef*)decomp_buffer;
-				d_stream.avail_out = DECOMP_BUFFER_SIZE;
-				int ret = inflate(&d_stream, Z_NO_FLUSH);
-				have = DECOMP_BUFFER_SIZE - d_stream.avail_out;
+				zlib->d_stream.next_out = (Bytef*)decomp_buffer;
+				zlib->d_stream.avail_out = DECOMP_BUFFER_SIZE;
+				int ret = inflate(&(zlib->d_stream), Z_NO_FLUSH);
+				have = DECOMP_BUFFER_SIZE - zlib->d_stream.avail_out;
 				switch (ret)
 				{
 					case Z_NEED_DICT:
@@ -178,7 +188,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 						/* Stub */
 					break;
 				}
-			} while (d_stream.avail_out == 0);
+			} while (zlib->d_stream.avail_out == 0);
 			data = decompressed;
 		} else {
 			/* No complete compressed frame yet */

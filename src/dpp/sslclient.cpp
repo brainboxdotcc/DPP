@@ -34,6 +34,15 @@
 #include <unistd.h>
 #endif
 
+#ifdef OPENSSL_SYS_WIN32
+#undef X509_NAME
+#undef X509_EXTENSIONS
+#undef X509_CERT_PAIR
+#undef PKCS7_ISSUER_AND_SERIAL
+#undef OCSP_REQUEST
+#undef OCSP_RESPONSE
+#endif
+
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,6 +61,15 @@
 
 namespace dpp {
 
+class opensslcontext {
+public:
+	/** OpenSSL session */
+	SSL* ssl;
+
+	/** OpenSSL context */
+	SSL_CTX* ctx;
+};
+
 /* You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
@@ -68,6 +86,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) :
         signal(SIGCHLD, SIG_IGN);
         signal(SIGXFSZ, SIG_IGN);
 #endif
+	ssl = new opensslcontext();
 	Connect();
 }
 
@@ -79,13 +98,13 @@ void ssl_client::Connect()
 	const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
 
 	/* Create SSL context */
-	ctx = SSL_CTX_new(method);
-	if (ctx == nullptr)
+	ssl->ctx = SSL_CTX_new(method);
+	if (ssl->ctx == nullptr)
 		throw std::runtime_error("Failed to create SSL client context!");
 
 	/* Create SSL session */
-	ssl = SSL_new(ctx);
-	if (ssl == nullptr)
+	ssl->ssl = SSL_new(ssl->ctx);
+	if (ssl->ssl == nullptr)
 		throw std::runtime_error("SSL_new failed!");
 
 	/* Resolve hostname to IP */
@@ -127,14 +146,14 @@ void ssl_client::Connect()
 		throw std::runtime_error(strerror(err));
 
 	/* We're good to go - hand the fd over to openssl */
-	SSL_set_fd(ssl, sfd);
+	SSL_set_fd(ssl->ssl, sfd);
 
-	status = SSL_connect(ssl);
+	status = SSL_connect(ssl->ssl);
 	if (status != 1) {
 		throw std::runtime_error("SSL_connect error");
 	}
 
-	this->cipher = SSL_get_cipher(ssl);
+	this->cipher = SSL_get_cipher(ssl->ssl);
 }
 
 void ssl_client::write(const std::string &data)
@@ -148,12 +167,16 @@ void ssl_client::write(const std::string &data)
 	if (nonblocking) {
 		obuffer += data;
 	} else {
-		SSL_write(ssl, data.data(), data.length());
+		SSL_write(ssl->ssl, data.data(), data.length());
 	}
 }
 
 void ssl_client::one_second_timer()
 {
+}
+
+std::string ssl_client::get_cipher() {
+	return cipher;
 }
 
 void ssl_client::log(dpp::loglevel severity, const std::string &msg) const
@@ -175,7 +198,7 @@ void ssl_client::read_loop()
 	size_t ClientToServerLength = 0, ClientToServerOffset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
 	fd_set readfds, writefds, efds;
-	char ClientToServerBuffer[BUFSIZZ],ServerToClientBuffer[BUFSIZZ];
+	char ClientToServerBuffer[BUFSIZZ], ServerToClientBuffer[BUFSIZZ];
 	
 	/* Make the socket nonblocking */
 #ifdef WIN32
@@ -227,7 +250,7 @@ void ssl_client::read_loop()
 			timeval ts;
 			ts.tv_sec = 0;
 			ts.tv_usec = 50000;
-			r = select(FD_SETSIZE,&readfds,&writefds,&efds,&ts);
+			r = select(FD_SETSIZE, &readfds, &writefds, &efds, &ts);
 			if (r == 0)
 				continue;
 
@@ -251,9 +274,9 @@ void ssl_client::read_loop()
 					read_blocked_on_write = false;
 					read_blocked = false;
 					
-					r = SSL_read(ssl,ServerToClientBuffer,BUFSIZZ);
+					r = SSL_read(ssl->ssl,ServerToClientBuffer,BUFSIZZ);
 
-					int e = SSL_get_error(ssl,r);
+					int e = SSL_get_error(ssl->ssl,r);
 
 					switch (e) {
 						case SSL_ERROR_NONE:
@@ -264,7 +287,7 @@ void ssl_client::read_loop()
 						break;
 						case SSL_ERROR_ZERO_RETURN:
 							/* End of data */
-							SSL_shutdown(ssl);
+							SSL_shutdown(ssl->ssl);
 							return;
 						break;
 						case SSL_ERROR_WANT_READ:
@@ -285,7 +308,7 @@ void ssl_client::read_loop()
 					/* We need a check for read_blocked here because SSL_pending() doesn't work properly during the
 					* handshake. This check prevents a busy-wait loop around SSL_read()
 					*/
-				} while (SSL_pending(ssl) && !read_blocked);
+				} while (SSL_pending(ssl->ssl) && !read_blocked);
 			}
 
 			/* Check for input on the sendq */
@@ -300,9 +323,9 @@ void ssl_client::read_loop()
 			if ((FD_ISSET(sfd,&writefds) && ClientToServerLength) || (write_blocked_on_read && FD_ISSET(sfd,&readfds))) {
 				write_blocked_on_read = false;
 				/* Try to write */
-				r = SSL_write(ssl, ClientToServerBuffer + ClientToServerOffset, ClientToServerLength);
+				r = SSL_write(ssl->ssl, ClientToServerBuffer + ClientToServerOffset, ClientToServerLength);
 				
-				switch(SSL_get_error(ssl,r)) {
+				switch(SSL_get_error(ssl->ssl,r)) {
 					/* We wrote something */
 					case SSL_ERROR_NONE:
 						ClientToServerLength -= r;
@@ -351,14 +374,14 @@ bool ssl_client::handle_buffer(std::string &buffer)
 
 void ssl_client::close()
 {
-	if (ssl) {
-		SSL_free(ssl);
-		ssl = nullptr;
+	if (ssl->ssl) {
+		SSL_free(ssl->ssl);
+		ssl->ssl = nullptr;
 	}
 	::close(sfd);
-	if (ctx) {
-		SSL_CTX_free(ctx);
-		ctx = nullptr;
+	if (ssl->ctx) {
+		SSL_CTX_free(ssl->ctx);
+		ssl->ctx = nullptr;
 	}
 	sfd = -1;
 	obuffer.clear();
@@ -368,6 +391,7 @@ void ssl_client::close()
 ssl_client::~ssl_client()
 {
 	this->close();
+	delete ssl;
 }
 
 };
