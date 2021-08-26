@@ -446,7 +446,7 @@ uint64_t guild::permission_overwrites(const uint64_t base_permissions, const use
 	return permissions;
 }
 
-bool guild::ConnectMemberVoice(snowflake user_id) {
+bool guild::connect_member_voice(snowflake user_id) {
 	for (auto & c : channels) {
 		channel* ch = dpp::find_channel(c);
 		if (!ch || (!ch->is_voice_channel() && !ch->is_stage_channel())) {

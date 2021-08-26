@@ -310,7 +310,7 @@ public:
 	 * @param user_id User id to join
 	 * @return True if the user specified is in a vc, false if they aren't
 	 */
-	bool ConnectMemberVoice(snowflake user_id);
+	bool connect_member_voice(snowflake user_id);
 
 	/** Is a large server (>250 users) */
 	bool is_large() const;
