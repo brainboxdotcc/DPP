@@ -159,7 +159,9 @@ enum interaction_response_type {
 	ir_acknowledge = 2,				//!< DEPRECATED ACK a command without sending a message, eating the user's input
 	ir_channel_message = 3,				//!< DEPRECATED respond with a message, eating the user's input
 	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
-	ir_deferred_channel_message_with_source = 5	//!< ACK an interaction and edit a response later, the user sees a loading state
+	ir_deferred_channel_message_with_source = 5,	//!< ACK an interaction and edit a response later, the user sees a loading state
+	ir_deferred_update_message = 6,			//!< for components, ACK an interaction and edit the original message later; the user does not see a loading state
+	ir_update_message = 7				//!< for components, edit the message the component was attached to
 };
 
 /**
