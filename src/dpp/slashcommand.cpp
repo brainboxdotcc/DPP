@@ -36,6 +36,8 @@ slashcommand::~slashcommand() {
 
 slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	id = SnowflakeNotNull(j, "id");
+	name = StringNotNull(j, "name");
+	description = StringNotNull(j, "description");
 	return *this;
 }
 
@@ -93,7 +95,7 @@ void to_json(nlohmann::json& j, const guild_command_permissions& gcp) {
 void to_json(json& j, const slashcommand& p) {
 	j["name"] = p.name;
 
-	if (p.type != ctxm_user && p.type != ctxm_message) {
+	if (p.type != ctxm_user && p.type != ctxm_message) {Maybe 
 		j["description"] = p.description;
 	}
 
