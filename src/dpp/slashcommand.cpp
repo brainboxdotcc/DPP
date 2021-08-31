@@ -95,7 +95,7 @@ void to_json(nlohmann::json& j, const guild_command_permissions& gcp) {
 void to_json(json& j, const slashcommand& p) {
 	j["name"] = p.name;
 
-	if (p.type != ctxm_user && p.type != ctxm_message) {Maybe 
+	if (p.type != ctxm_user && p.type != ctxm_message) { 
 		j["description"] = p.description;
 	}
 
