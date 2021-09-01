@@ -204,3 +204,4 @@ if(NOT WIN32)
 	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostInstall.cmake)")
 endif()
 
+include("cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
