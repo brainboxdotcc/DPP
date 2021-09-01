@@ -32,6 +32,8 @@
 
 namespace dpp {
 
+	bool winsock_initialised = false;
+
 /* This is the API version for all REST calls. DISCORD_API_VERSION is pulled from discordclient.h */
 #define API_PATH	"/api/v" DISCORD_API_VERSION
 
@@ -40,6 +42,14 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	maxclusters(_maxclusters), last_identify(time(NULL) - 5), compressed(comp), cache_policy(policy)
 {
 	rest = new request_queue(this);
+#ifdef _WIN32
+	if (!winsock_initialised) {
+		// Set up winsock.
+		WSADATA wsadata;
+		WSAStartup(MAKEWORD(2, 2), &wsadata);
+		winsock_initialised = true;
+	}
+#endif
 }
 
 cluster::~cluster()

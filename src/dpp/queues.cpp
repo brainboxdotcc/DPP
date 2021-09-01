@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
@@ -398,8 +398,10 @@ void request_queue::out_loop()
 			responses_to_delete.erase(responses_to_delete.begin());
 		}
 	}
-	#ifdef WIN32
-		closesocket(notifier);
+	#ifdef _WIN32
+		if (notifier >= 0 && notifier < FD_SETSIZE) {
+			closesocket(notifier);
+		}
 	#else
 		::close(notifier);
 	#endif

@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <errno.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
@@ -133,8 +133,10 @@ void ssl_client::Connect()
 		}
 		err = errno;
 		sfd = ERROR_STATUS;
-	#ifdef WIN32
-		closesocket(sfd);
+	#ifdef _WIN32
+		if (sfd >= 0 && sfd < FD_SETSIZE) {
+			closesocket(sfd);
+		}
 	#else
 		::close(sfd);
 	#endif
@@ -201,7 +203,7 @@ void ssl_client::read_loop()
 	char ClientToServerBuffer[BUFSIZZ], ServerToClientBuffer[BUFSIZZ];
 	
 	/* Make the socket nonblocking */
-#ifdef WIN32
+#ifdef _WIN32
 	u_long mode = 1;
 	int result = ioctlsocket(sfd, FIONBIO, &mode);
 	if (result != NO_ERROR)
@@ -378,8 +380,10 @@ void ssl_client::close()
 		SSL_free(ssl->ssl);
 		ssl->ssl = nullptr;
 	}
-	#ifdef WIN32
-		closesocket(sfd);
+	#ifdef _WIN32
+		if (sfd >= 0 && sfd < FD_SETSIZE) {
+			closesocket(sfd);
+		}
 	#else
 		::close(sfd);
 	#endif

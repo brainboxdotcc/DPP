@@ -383,7 +383,9 @@ private:
 
 int close_socket(socket_t sock) {
 #ifdef _WIN32
-  return closesocket(sock);
+    if (sock >= 0 && sock < FD_SETSIZE) {
+        return closesocket(sock);
+    }
 #else
   return close(sock);
 #endif

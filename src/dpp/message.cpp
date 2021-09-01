@@ -712,7 +712,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 				std::ostringstream ss;
 				struct tm t;
 			
-			#ifdef WIN32
+			#ifdef _WIN32
 				gmtime_s(&t, &embed.timestamp);
 			#else
 				gmtime_r(&embed.timestamp, &t);

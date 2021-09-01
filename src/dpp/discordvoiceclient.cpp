@@ -272,7 +272,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 						throw std::runtime_error("Can't bind() client UDP socket");
 					}
 					
-#ifdef WIN32
+#ifdef _WIN32
 					u_long mode = 1;
 					int result = ioctlsocket(newfd, FIONBIO, &mode);
 					if (result != NO_ERROR)
@@ -727,8 +727,10 @@ std::string discord_voice_client::discover_ip() {
 			return "";
 		}
 
-	#ifdef WIN32
-		::_close(newfd);
+	#ifdef _WIN32
+		if (newfd >= 0 && newfd < FD_SETSIZE) {
+			closesocket(newfd);
+		}
 	#else
 		::close(newfd);
 	#endif

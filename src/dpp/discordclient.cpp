@@ -290,8 +290,10 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				log(dpp::ll_debug, fmt::format("Reconnection requested, closing socket {}", sessionid));
 				message_queue.clear();
 
-			#ifdef WIN32
-				closesocket(sfd);
+			#ifdef _WIN32
+				if (sfd >= 0 && sfd < FD_SETSIZE) {
+					closesocket(sfd);
+				}
 			#else
 				::close(sfd);
 			#endif
@@ -424,9 +426,11 @@ void discord_client::one_second_timer()
 		if ((time(nullptr) - this->last_heartbeat_ack) > heartbeat_interval * 2) {
 			log(dpp::ll_warning, fmt::format("Missed heartbeat ACK, forcing reconnection to session {}", sessionid));
 			message_queue.clear();
-		
-		#ifdef WIN32
-			closesocket(sfd);
+
+		#ifdef _WIN32
+			if (sfd >= 0 && sfd < FD_SETSIZE) {
+				closesocket(sfd);
+			}
 		#else
 			::close(sfd);
 		#endif

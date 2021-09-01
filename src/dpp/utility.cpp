@@ -53,7 +53,7 @@ namespace dpp {
 		}
 
 		std::string current_date_time() {
-#ifdef WIN32
+#ifdef _WIN32
 			std::time_t curr_time = time(nullptr);
 			return std::ctime(&curr_time);
 #else
