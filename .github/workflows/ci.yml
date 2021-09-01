@@ -79,7 +79,7 @@ jobs:
         run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" ..
 
       - name: Build Project
-        run: cmake --build main/build --config Release
+        run: cmake --build main/build --target dpp --config Release
 
       - name: Package distributable
         run: cd main/build && cpack
