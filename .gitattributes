@@ -1,0 +1,4 @@
+*.c linguist-detectable=false
+*.sh linguist-detectable=false
+*.pl linguist-detectable=false
+*.html linguist-detectable=false
