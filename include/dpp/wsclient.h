@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -53,7 +54,7 @@ enum ws_opcode
 /**
  * @brief Implements a websocket client based on the SSL client
  */
-class websocket_client : public ssl_client
+class CoreExport websocket_client : public ssl_client
 {
 	/** Connection key used in the HTTP headers */
 	std::string key;

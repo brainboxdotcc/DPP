@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {
@@ -73,7 +73,7 @@ enum user_flags {
 /**
  * @brief Represents a user on discord. May or may not be a member of a dpp::guild.
  */
-class user : public managed {
+class CoreExport user : public managed {
 public:
 	/** Discord username */
 	std::string username;

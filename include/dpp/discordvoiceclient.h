@@ -19,6 +19,9 @@
  *
  ************************************************************************************/
 #pragma once
+
+#include <dpp/export.h>
+
 #include <errno.h>
 
 #ifdef _WIN32
@@ -70,7 +73,7 @@ class cluster;
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
  */
-class discord_voice_client : public websocket_client
+class CoreExport discord_voice_client : public websocket_client
 {
 	/** Mutex for outbound packet stream */
 	std::mutex stream_mutex;

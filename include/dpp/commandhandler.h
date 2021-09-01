@@ -20,6 +20,7 @@
  ************************************************************************************/
 
 #pragma once
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 #include <unordered_map>
@@ -55,7 +56,7 @@ enum parameter_type {
  * Note that for non-slash commands optional parameters can only be at the end of
  * the list of parameters.
  */
-struct param_info {
+struct CoreExport param_info {
 
 	/**
 	 * @brief Type of parameter
@@ -113,7 +114,7 @@ typedef std::vector<std::pair<std::string, command_parameter>> parameter_list_t;
  * response facilities but we want this to be transparent if you use the command
  * handler class.
  */
-struct command_source {
+struct CoreExport command_source {
 	/**
 	 * @brief Sending guild id
 	 */
@@ -145,7 +146,7 @@ typedef std::function<void(const std::string&, const parameter_list_t&, command_
 /**
  * @brief Represents the details of a command added to the command handler class.
  */
-struct command_info_t {
+struct CoreExport command_info_t {
 	/**
 	 * @brief Function reference for the handler. This is std::function so it can represent
 	 * a class member, a lambda or a raw C function pointer.
@@ -166,7 +167,7 @@ struct command_info_t {
  * @brief The commandhandler class represents a group of commands, prefixed or slash commands with handling functions.
  * 
  */
-class commandhandler {
+class CoreExport commandhandler {
 	/**
 	 * @brief Commands in the handler
 	 */

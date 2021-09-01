@@ -1,3 +1,5 @@
+#undef DPP_BUILD
+
 #include <dpp/dpp.h>
 #include <iostream>
 #include <dpp/nlohmann/json.hpp>

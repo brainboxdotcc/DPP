@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
@@ -28,7 +28,7 @@ namespace dpp {
 /**
  * @brief Represents a guild template
  */
-class dtemplate {
+class CoreExport dtemplate {
 public:	
 	/**
 	 * @brief Template code

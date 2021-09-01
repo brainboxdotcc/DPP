@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <dpp/version.h>
 #include <string>
 #include <map>

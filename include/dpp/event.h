@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
@@ -38,7 +38,7 @@ namespace events {
 /**
  * @brief An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
  */
-class event {
+class CoreExport event {
 public:
 	/** Pure virtual method for event handler code
 	 * @param client The creating shard

@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {
@@ -42,7 +42,7 @@ enum voicestate_flags {
  * These are stored in the dpp::guild object, and accessible there,
  * or via dpp::channel::get_voice_members
  */
-class voicestate {
+class CoreExport voicestate {
 public:
 	class discord_client*	shard;		//!< Owning shard
 	snowflake		guild_id;       //!< Optional: the guild id this voice state is for

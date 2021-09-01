@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <optional>
 #include <dpp/json_fwd.hpp>
@@ -54,7 +54,7 @@ enum component_style : uint8_t {
 	cos_link
 };
 
-struct select_option {
+struct CoreExport select_option {
 	std::string label;
 	std::string value;
 	std::string description;
@@ -118,7 +118,7 @@ struct select_option {
  * guilds. The beta is **closed**. When this feature is
  * released, then the functionality will work correctly.
  */
-class component {
+class CoreExport component {
 public:
 	/** Component type, either a button or action row
 	 */
@@ -320,7 +320,7 @@ public:
 /**
  * @brief A footer in a dpp::embed
  */
-struct embed_footer {
+struct CoreExport embed_footer {
 	/** Footer text */
 	std::string text;
 	/** Footer icon url */
@@ -350,7 +350,7 @@ struct embed_footer {
 /**
  * @brief An video, image or thumbnail in a dpp::embed
  */
-struct embed_image {
+struct CoreExport embed_image {
 	/** URL to image or video */
 	std::string url;
 	/** Proxied image url */
@@ -364,7 +364,7 @@ struct embed_image {
 /**
  * @brief Embed provider in a dpp::embed. Received from discord but cannot be sent
  */
-struct embed_provider {
+struct CoreExport embed_provider {
 	/** Provider name */
 	std::string name;
 	/** Provider URL */
@@ -374,7 +374,7 @@ struct embed_provider {
 /**
  * @brief Author within a dpp::embed object
  */
-struct embed_author {
+struct CoreExport embed_author {
 	/** Author name */
 	std::string name;
 	/** Author url */
@@ -388,7 +388,7 @@ struct embed_author {
 /**
  * @brief A dpp::embed may contain zero or more fields
  */
-struct embed_field {
+struct CoreExport embed_field {
 	/** Name of field */
 	std::string name;
 	/** Value of field (max length 1000) */
@@ -400,7 +400,7 @@ struct embed_field {
 /**
  * @brief A rich embed for display within a dpp::message
  */
-struct embed {
+struct CoreExport embed {
 	/** Optional: title of embed */
 	std::string			title;
 	/** Optional: type of embed (always "rich" for webhook embeds) */
@@ -522,7 +522,7 @@ struct embed {
 /**
  * @brief Represets a reaction to a dpp::message
  */
-struct reaction {
+struct CoreExport reaction {
 	/** Number of times this reaction has been added */
 	uint32_t count;
 	/** Reaction was from the bot's id */
@@ -552,7 +552,7 @@ struct reaction {
 /**
  * @brief Represents an attachment in a dpp::message
  */
-struct attachment {
+struct CoreExport attachment {
 	/** ID of attachment */
 	snowflake id;
 	/** Size of the attachment in bytes */
@@ -606,7 +606,7 @@ enum sticker_format : uint8_t {
 /**
  * @brief Represents stickers received in messages
  */
-struct sticker {
+struct CoreExport sticker {
 	/** @brief The ID of the sticker
 	 */
 	snowflake	id;
@@ -680,7 +680,7 @@ struct sticker {
 
 };
 
-struct sticker_pack {
+struct CoreExport sticker_pack {
 	/// id of the sticker pack
 	snowflake       id;
 	/// the stickers in the pack
@@ -812,7 +812,7 @@ enum cache_policy_setting_t {
  * going out of the way to fill the caches completely. On large bots this
  * can take a LOT of RAM.
  */
-struct cache_policy_t {
+struct CoreExport cache_policy_t {
 	/**
 	 * @brief Caching policy for users and guild members
 	 */
@@ -832,7 +832,7 @@ struct cache_policy_t {
 /**
  * @brief Represents messages sent and received on Discord
  */
-struct message {
+struct CoreExport message {
 	/** id of the message */
 	snowflake       id;
 	/** id of the channel the message was sent in */

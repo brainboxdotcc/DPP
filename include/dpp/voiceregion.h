@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
@@ -37,7 +38,7 @@ enum voiceregion_flags {
 /**
  * @brief Represents a voice region on discord
  */
-class voiceregion {
+class CoreExport voiceregion {
 public:
 	/**
 	 * @brief Voice server ID

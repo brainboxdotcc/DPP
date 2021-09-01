@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {
@@ -77,7 +77,7 @@ enum role_permissions : uint64_t {
 /**
  * @brief Represents a role within a dpp::guild
  */
-class role : public managed {
+class CoreExport role : public managed {
 public:
 	/** Role name */
 	std::string name;

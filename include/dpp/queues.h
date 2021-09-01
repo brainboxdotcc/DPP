@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <unordered_map>
 #include <string>
 #include <queue>
@@ -69,7 +70,7 @@ enum http_error {
  * @brief The result of any HTTP request. Contains the headers, vital
  * rate limit figures, and returned request body.
  */
-struct http_request_completion_t {
+struct CoreExport http_request_completion_t {
 	/** HTTP headers of response */
 	std::map<std::string, std::string> headers;
 	/** HTTP status, e.g. 200 = OK, 404 = Not found, 429 = Rate limited */
@@ -125,7 +126,7 @@ enum http_method {
  * will not respect rate limits, as both of these functions are managed by the
  * request_queue class.
  */
-class http_request {
+class CoreExport http_request {
 	/** Completion callback */
 	http_completion_event complete_handler;
 	/** True if request has been made */
@@ -175,7 +176,7 @@ public:
 /** A rate limit bucket. The library builds one of these for
  * each endpoint.
  */
-struct bucket_t {
+struct CoreExport bucket_t {
 	/** Request limit */
 	uint64_t limit;
 	/** Requests remaining */
@@ -203,7 +204,7 @@ struct bucket_t {
  * There is usually only one request_queue object in each dpp::cluster, which is used
  * internally for the various REST methods such as sending messages.
  */
-class request_queue {
+class CoreExport request_queue {
 private:
 	/** The cluster that owns this request_queue */
 	const class cluster* creator;

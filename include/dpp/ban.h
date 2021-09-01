@@ -20,6 +20,7 @@
  ************************************************************************************/
 
 #pragma once
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
@@ -29,7 +30,7 @@ namespace dpp {
  * @brief The ban class represents a ban on a guild.
  * 
  */
-class ban {
+class CoreExport ban {
 public:
 	/** The ban reason */
 	std::string reason;

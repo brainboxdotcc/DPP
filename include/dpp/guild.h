@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -111,7 +112,7 @@ enum guild_member_flags {
 /**
  * @brief Represents dpp::user membership upon a dpp::guild
  */
-class guild_member {
+class CoreExport guild_member {
 public:
 	/** Nickname, or nullptr if they don't have a nickname on this guild */
 	std::string nickname;
@@ -159,7 +160,7 @@ typedef std::unordered_map<snowflake, guild_member> members_container;
 /**
  * @brief Represents a guild on Discord (AKA a server)
  */
-class guild : public managed {
+class CoreExport guild : public managed {
 public:
 	/** Shard ID of the guild */
 	uint16_t shard_id;
@@ -377,7 +378,7 @@ typedef std::unordered_map<snowflake, guild> guild_map;
 /**
  * @brief Represents a guild widget, simple web widget of member list
  */
-class guild_widget {
+class CoreExport guild_widget {
 public:
 	/**
 	 * @brief True if enabled
