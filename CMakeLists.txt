@@ -205,3 +205,6 @@ if(NOT WIN32)
 endif()
 
 include("cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
+
+# CPack initialization for distribution
+include(CPack)
