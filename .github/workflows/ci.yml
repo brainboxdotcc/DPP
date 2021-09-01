@@ -78,7 +78,11 @@ jobs:
       - name: Generate CMake
         run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" ..
 
-      - name: Build Project
+      - name: Build Project Step 1
+        continue-on-error: true
+        run: cmake --build main/build --target dpp --config Release
+
+      - name: Build Project Step 2
         run: cmake --build main/build --target dpp --config Release
 
       - name: Package distributable
