@@ -20,6 +20,7 @@
  ************************************************************************************/
 
 #pragma once
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 #include <optional>
@@ -105,7 +106,7 @@ enum audit_type {
 /**
  * @brief Defines audit log changes
  */
-struct audit_change {
+struct CoreExport audit_change {
 	/// Optional: Serialised new value of the key
 	std::string	new_value;
 	/// Optional: Serialised old value of the key
@@ -117,7 +118,7 @@ struct audit_change {
 /**
  * @brief Extra information for an audit log entry
  */
-struct audit_extra {
+struct CoreExport audit_extra {
 	std::string 	delete_member_days;	//!< number of days after which inactive members were kicked
 	std::string	members_removed;	//!< number of members removed by the prune
 	snowflake	channel_id;		//!< channel in which the entities were targeted
@@ -131,7 +132,7 @@ struct audit_extra {
 /**
  * @brief An individual audit log entry
  */
-struct audit_entry {
+struct CoreExport audit_entry {
 	snowflake			id;		//!< id of the entry
 	snowflake			target_id;	//!< id of the affected entity (webhook, user, role, etc.) (may be empty)
 	std::vector<audit_change>	changes;	//!< Optional: changes made to the target_id
@@ -144,7 +145,7 @@ struct audit_entry {
 /**
  * @brief The auditlog class represents the audit log entry of a guild.
  */
-class auditlog {
+class CoreExport auditlog {
 public:
 	std::vector<audit_entry> entries;	//!< Audit log entries
 	

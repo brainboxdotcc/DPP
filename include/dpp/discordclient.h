@@ -20,6 +20,7 @@
  ************************************************************************************/
 
 #pragma once
+#include <dpp/export.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -54,7 +55,7 @@ class zlibcontext;
  * A client can only connect to one voice channel per guild at a time, so these are stored in a map
  * in the dpp::discord_client keyed by guild_id.
  */
-class voiceconn {
+class CoreExport voiceconn {
 	/**
 	 * @brief Owning dpp::discord_client instance
 	 */
@@ -133,7 +134,7 @@ public:
 };
 
 /** @brief Implements a discord client. Each discord_client connects to one shard and derives from a websocket client. */
-class discord_client : public websocket_client
+class CoreExport discord_client : public websocket_client
 {
 	/** Mutex for message queue */
 	std::mutex queue_mutex;

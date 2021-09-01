@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
@@ -127,7 +127,7 @@ enum activity_flags {
 /**
  * @brief An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
  */
-class activity {
+class CoreExport activity {
 public:
 	/** Name of ativity
 	 * e.g. "Fortnite"
@@ -177,7 +177,7 @@ public:
 /**
  * @brief Represents user presence, e.g. what game they are playing and if they are online
  */
-class presence {
+class CoreExport presence {
 public:
 	/** The user the presence applies to */
 	snowflake	user_id;

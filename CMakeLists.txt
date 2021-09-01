@@ -20,21 +20,22 @@ cmake_minimum_required (VERSION 3.12)
 
 set(BUILD_SHARED_LIBS TRUE)
 
+add_compile_definitions(DPP_BUILD)
+
 if(WIN32)
-	set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-	set(VCPKG_INSTALLATION_64_BITS_FOLDER "$ENV{VCPKG_ROOT}/installed/x64-windows")
-	set(ZLIB_LIBRARIES "${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib")
-	set(ZLIB_INCLUDE_DIR "${VCPKG_INSTALLATION_64_BITS_FOLDER}/include")
-	set(OPENSSL_INCLUDE_DIR "${VCPKG_INSTALLATION_64_BITS_FOLDER}/include")
-	set(OPENSSL_LIBRARIES "${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib")
+	message("-- Building for windows with precompiled packaged dependencies")
+	#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+	set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib")
+	set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
+	set(OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
+	set(OPENSSL_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib")
 	ADD_DEFINITIONS(/bigobj)
 
-	link_libraries("${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libssl.lib")
-	link_libraries("${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libcrypto.lib")
-	link_libraries("${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/zlib.lib")
+	link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libssl.lib")
+	link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libcrypto.lib")
+	link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/zlib.lib")
 
-	include_directories("${VCPKG_INSTALLATION_64_BITS_FOLDER}/include")
-	include_directories("C:/Program Files/OpenSSL-Win64/include")
+	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
 
 	add_compile_definitions(OPENSSL_SYS_WIN32)
 	add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
@@ -43,9 +44,9 @@ if(WIN32)
 	add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
 endif()
 
-if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-	set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
-endif()
+#if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+#	set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+#endif()
 
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h" version_h)
 
@@ -170,9 +171,9 @@ foreach (fullmodname ${subdirlist})
 	endif()
 
 	if (WIN32)
-		target_link_libraries(${modname} PUBLIC "${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libssl.lib"
-												"${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/libcrypto.lib"
-												"${VCPKG_INSTALLATION_64_BITS_FOLDER}/lib/zlib.lib")
+		target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libssl.lib"
+												"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libcrypto.lib"
+												"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/zlib.lib")
 	else()
 		target_link_libraries(${modname} PUBLIC ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${ZLIB_LIBRARIES})
 	endif()
@@ -189,7 +190,11 @@ target_compile_features(dpp PRIVATE cxx_std_17)
 target_link_libraries(test PUBLIC ${modname})
 
 if(WIN32)
-	configure_file("${VCPKG_INSTALLATION_64_BITS_FOLDER}/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+	#configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+	#configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 endif()
 
 if(NOT WIN32)
@@ -201,3 +206,7 @@ if(NOT WIN32)
 	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostInstall.cmake)")
 endif()
 
+include("cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
+
+# CPack initialization for distribution
+include(CPack)

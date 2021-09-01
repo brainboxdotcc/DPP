@@ -28,11 +28,11 @@ jobs:
         run: cd build && ninja
 
       - name: Package distributable
-        if: ${{ matrix.cfg.cpp-version == 'clang-9' }}
+        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
         run: cd build && cpack
 
       - name: Upload Binary
-        if: ${{ matrix.cfg.cpp-version == 'clang-9' }}
+        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
         uses: actions/upload-artifact@v2
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
@@ -53,3 +53,39 @@ jobs:
 
       - name: Build Project
         run: cd build && ninja
+
+  windows: # Windows x64 and x86 build matrix
+    strategy:
+      fail-fast: false # Don't cancel other matrix jobs if one fails
+      matrix:
+        cfg:
+        - { name: x64,  arch: x64 }
+
+    name: "Windows ${{matrix.cfg.name}}"
+    runs-on: windows-2019
+    steps:
+      - name: Checkout D++
+        uses: actions/checkout@v2
+        with:
+          path: main
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Install chocolatey packages (x64)
+        run: choco install ninja -y
+
+      - name: Generate CMake
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" ..
+
+      - name: Build Project
+        run: cmake --build main/build --target dpp --config Release
+
+      - name: Package distributable
+        run: cd main/build && cpack
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - Windows ${{matrix.cfg.name}}"
+          path: '${{github.workspace}}/main/build/*.zip'

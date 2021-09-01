@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <dpp/export.h>
 #include <string>
 #include <map>
 #include <variant>
@@ -42,7 +43,7 @@ typedef std::map<uint32_t, class discord_client*> shard_list;
 /**
  * @brief Represents the various information from the 'get gateway bot' api call
  */
-struct gateway {
+struct CoreExport gateway {
 	/// Gateway websocket url
 	std::string url;
 	/// Number of suggested shards to start
@@ -67,7 +68,7 @@ struct gateway {
  * @brief Confirmation object represents any true or false simple REST request
  *
  */
-struct confirmation {
+struct CoreExport confirmation {
 	bool success;
 };
 
@@ -121,7 +122,7 @@ typedef std::variant<
 /**
  * @brief The details of a field in an error response
  */
-struct error_detail {
+struct CoreExport error_detail {
 	/**
 	 * @brief Object name which is in error
 	 */
@@ -143,7 +144,7 @@ struct error_detail {
 /**
  * @brief The full details of an error from a REST response
  */
-struct error_info {
+struct CoreExport error_info {
 	/**
 	 * @brief Error code
 	 */
@@ -162,7 +163,7 @@ struct error_info {
 /**
  * @brief The results of a REST call wrapped in a convenient struct
  */
-struct confirmation_callback_t {
+struct CoreExport confirmation_callback_t {
 	/** Returned data type in confirmable_t, used to double check to avoid an exception if you wish */
 	std::string type;
 	/** Information about the HTTP call used to make the request */
@@ -217,7 +218,7 @@ typedef std::function<void(json&, const http_request_completion_t&)> json_encode
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
  */
-class cluster {
+class CoreExport cluster {
 
 	/** queue system for commands sent to Discord, and any replies */
 	request_queue* rest;

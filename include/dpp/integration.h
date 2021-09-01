@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {
@@ -55,7 +55,7 @@ enum integration_flags {
 /**
  * @brief An application that has been integrated
  */
-struct integration_app {
+struct CoreExport integration_app {
 	/// Inegration id
 	snowflake id;
 	/// Name
@@ -71,7 +71,7 @@ struct integration_app {
 };
 
 /** Represents an integration within a dpp::guild */
-class integration : public managed {
+class CoreExport integration : public managed {
 public:
 	/** Integration name */
 	std::string name;

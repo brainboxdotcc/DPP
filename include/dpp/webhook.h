@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
@@ -35,7 +36,7 @@ enum webhook_type {
 /**
  * @brief Represents a discord webhook
  */
-class webhook : public managed {
+class CoreExport webhook : public managed {
 public:
 	uint8_t type;   		//!< the type of the webhook
 	snowflake guild_id;     	//!< Optional: the guild id this webhook is for

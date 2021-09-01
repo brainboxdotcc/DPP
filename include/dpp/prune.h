@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
@@ -27,7 +28,7 @@ namespace dpp {
 /**
  * @brief Defines a request to count prunable users, or start a prune operation
  */
-struct prune {
+struct CoreExport prune {
 	/** Number of days to include in the prune
 	 */
 	uint32_t days = 0;

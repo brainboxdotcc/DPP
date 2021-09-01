@@ -20,7 +20,7 @@
  ************************************************************************************/
 
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {
@@ -80,7 +80,7 @@ enum overwrite_type : uint8_t {
 /**
  * @brief channel permission overwrites
  */
-struct permission_overwrite {
+struct CoreExport permission_overwrite {
 	/// Overwrite id
 	snowflake id;
 	/// Overwrite type
@@ -95,7 +95,7 @@ struct permission_overwrite {
 /**
  * @brief metadata for threads
  */
-struct thread_metadata {
+struct CoreExport thread_metadata {
 	/// Whether a thread is archived
 	bool archived;
 	/// When the thread was archived
@@ -109,7 +109,7 @@ struct thread_metadata {
 /**
  * @brief represents membership of a user with a thread
  */
-struct thread_member 
+struct CoreExport thread_member 
 {
 	/// ID of the thread member is part of
 	snowflake thread_id;
@@ -132,7 +132,7 @@ struct thread_member
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
 /** @brief A definition of a discord channel */
-class channel : public managed {
+class CoreExport channel : public managed {
 public:
 	/** Flags bitmap */
 	uint8_t flags;

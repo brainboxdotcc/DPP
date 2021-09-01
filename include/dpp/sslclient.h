@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <string>
 #include <functional>
 #include <dpp/discord.h>
@@ -38,7 +39,7 @@ class opensslcontext;
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
  */
-class ssl_client
+class CoreExport ssl_client
 {
 protected:
 	/** Input buffer received from openssl */

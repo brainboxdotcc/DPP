@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
@@ -28,7 +28,7 @@ namespace dpp {
 /**
  * @brief Represents an invite to a discord guild or channel
  */
-class invite {
+class CoreExport invite {
 public:
 	/** Invite code
 	 */

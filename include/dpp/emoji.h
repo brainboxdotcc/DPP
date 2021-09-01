@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
@@ -43,7 +44,7 @@ enum emoji_flags {
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class emoji : public managed {
+class CoreExport emoji : public managed {
 public:
 	/**
 	 * @brief Emoji name
