@@ -65,16 +65,13 @@ To build on windows follow these steps *exactly*. The build process depends on s
 __Instructions here are subject to change!__
 
 1. Make sure you have Visual Studio 2019. Community, Professional or Enterprise work fine. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
-2. [Download and install vcpkg](https://docs.microsoft.com/en-us/cpp/build/install-vcpkg?view=msvc-160&tabs=windows) to the default recommended path if you do not have it already.
-3. Use the following command to install `openssl` and `zlib` via vcpkg: `c:\vcpkg\vcpkg.exe install openssl:x64-windows zlib:x64-windows`
-   \image html winbuild_0.png
-4. Check out the DPP project source using git
-5. From within Visual Studio 2019, click the "File" menu, choose "Open" then "CMake", and select the CMakeLists.txt within the project folder
+2. Check out the DPP project source using git
+3. From within Visual Studio 2019, click the "File" menu, choose "Open" then "CMake", and select the CMakeLists.txt within the project folder
    \image html winbuild_1.png
    \image html winbuild_2.png
-6. Go to the "Build" menu and choose "Build all" or just press F7
+4. Go to the "Build" menu and choose "Build all" or just press F7
    \image html winbuild_3.png 
-7. Check that compilation succeeded. You may now use the library in your projects!
+5. Check that compilation succeeded. You may now use the library in your projects!
    \image html winbuild_4.png
 
 ## Troubleshooting
@@ -84,7 +81,7 @@ __Instructions here are subject to change!__
 
 ## After compiling
 
-After compilation you can directly reference the compiled project in your own CMakeLists.txt as a library or use the lib/dll/headers as you wish. Note that openssl will also be a dependency of your program and should be copied alongside `libdpp.dll`.
+After compilation you can directly reference the compiled project in your own CMakeLists.txt as a library or use the lib/dll/headers as you wish. Note that `openssl` and `zlib` will also be an indirect dependency of your program (as `DLL` files) and should be copied alongside `dpp.dll`.
 
 
 \page buildosx Building on OSX
