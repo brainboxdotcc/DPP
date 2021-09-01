@@ -1,8 +1,14 @@
 name: D++ CI
-on: [push, pull_request]:
-  paths-ignore:
-    - 'docs/**'
-    - 'docpages/**'
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - 'docpages/**'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'docpages/**'
+
 
 jobs:
   linux-x64:
