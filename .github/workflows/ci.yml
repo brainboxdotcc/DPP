@@ -72,6 +72,9 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
 
+      - name: Install chocolatey packages (x64)
+        run: choco install ninja -y
+
       - name: Generate CMake
         run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" ..
 
