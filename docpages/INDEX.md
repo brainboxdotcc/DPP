@@ -116,3 +116,6 @@ The libsodium package requires pkg-config, but does not check for it when instal
 If this happens, switch your project to release mode. Our precompiled binaries are built in release mode for x64 vs2019 only.
 If you require a debug build, or a build for a newer visual studio, you will have to compile it yourself from the github sources.
 Please see the section about \ref buildwindows for more information on how to do this.
+
+## Does this library build on Raspberry Pi?
+Yes! This project will build and run on Raspberry Pi and is very much suited to this kind of system. It may take some time (read: hours) to compile the project on your Raspberry Pi unless you build it using a cross compiler. We plan to offer pre-built `.deb` files for arm7 and arm64 soon, stay tuned for further updates!
