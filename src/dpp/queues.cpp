@@ -398,7 +398,11 @@ void request_queue::out_loop()
 			responses_to_delete.erase(responses_to_delete.begin());
 		}
 	}
-	::close(notifier);
+	#ifdef WIN32
+		closesocket(notifier);
+	#else
+		::close(notifier);
+	#endif
 }
 
 

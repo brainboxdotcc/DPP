@@ -134,7 +134,7 @@ void ssl_client::Connect()
 		err = errno;
 		sfd = ERROR_STATUS;
 	#ifdef WIN32
-		::_close(sfd);
+		closesocket(sfd);
 	#else
 		::close(sfd);
 	#endif
@@ -378,7 +378,11 @@ void ssl_client::close()
 		SSL_free(ssl->ssl);
 		ssl->ssl = nullptr;
 	}
-	::close(sfd);
+	#ifdef WIN32
+		closesocket(sfd);
+	#else
+		::close(sfd);
+	#endif
 	if (ssl->ctx) {
 		SSL_CTX_free(ssl->ctx);
 		ssl->ctx = nullptr;

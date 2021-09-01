@@ -291,7 +291,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				message_queue.clear();
 
 			#ifdef WIN32
-				::_close(sfd);
+				closesocket(sfd);
 			#else
 				::close(sfd);
 			#endif
@@ -426,7 +426,7 @@ void discord_client::one_second_timer()
 			message_queue.clear();
 		
 		#ifdef WIN32
-			::_close(sfd);
+			closesocket(sfd);
 		#else
 			::close(sfd);
 		#endif
