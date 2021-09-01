@@ -59,7 +59,7 @@ jobs:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
         cfg:
-        - { name: x64,  arch: x64,   ssl-dir: 'C:\Program Files\OpenSSL-Win64'}
+        - { name: x64,  arch: x64 }
 
     name: "Windows ${{matrix.cfg.name}}"
     runs-on: windows-2019
@@ -72,14 +72,11 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Install chocolatey packages (x64)
-        run: choco install ninja openssl -y
-
       - name: Generate CMake
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" -DOPENSSL_ROOT_DIR="${{matrix.cfg.ssl-dir}}" ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" ..
 
       - name: Build Project
-        run: cmake --build main/build --target libdpp --config Release
+        run: cmake --build main/build --config Release
 
       - name: Package distributable
         run: cd main/build && cpack
