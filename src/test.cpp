@@ -26,10 +26,32 @@ int main()
 	});
 
 	
-	bot.on_message_create([&bot](const dpp::message_create_t & event) {
-		if (std::size(event.msg->stickers) > 0) {
-			std::cout << event.msg->stickers[0].name << std::endl;
-		}
+    bot.on_message_create([&bot](const dpp::message_create_t & event) {
+        if (event.msg->content == "!select") {
+            /* Create a message containing an action row, and a select menu within the action row. */
+            dpp::message m(event.msg->channel_id, "this text has a select menu");
+            m.add_component(
+                dpp::component().add_component(
+                    dpp::component().set_type(dpp::cot_selectmenu).
+                    set_placeholder("Pick something").
+                    add_select_option(dpp::select_option("label1","value1","description1").set_emoji("😄")).
+                    add_select_option(dpp::select_option("label2","value2","description2").set_emoji("🙂")).
+                    set_id("myselid")
+                )
+            );
+            bot.message_create(m, [&bot](const dpp::confirmation_callback_t &callback) {
+                std::cout << callback.http_info.body << "\n";
+            });
+        }
+    });
+    /* When a user clicks your select menu , the on_select_click event will fire,
+     * containing the custom_id you defined in your select menu.
+     */
+    bot.on_select_click([&bot](const dpp::select_click_t & event) {
+        /* Select clicks are still interactions, and must be replied to in some form to
+         * prevent the "this interaction has failed" message from Discord to the user.
+         */
+        event.reply(dpp::ir_channel_message_with_source, "You clicked " + event.custom_id + " and chose: " + event.values[0]);
     });
 
 
