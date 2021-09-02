@@ -5,12 +5,17 @@ mkdir temp
 cd temp
 echo "Download assets from CI..."
 gh run list -w "D++ CI" -L 1
-gh run download `gh run list -w "D++ CI" -L 1 | grep master | sed 's/\|/ /'|awk '{print $9}'`
+gh run download `gh run list -w "D++ CI" -L 1 | grep master | awk '{ printf $(NF-2) }'`
 echo "Move assets..."
 mkdir assets
 mv ./libdpp*/* assets/
+cd assets
+mkdir -p libdpp-$NEWVER-win64/bin
+cp ../../win32/bin/*.dll libdpp-$NEWVER-win64/bin
+zip -g *.zip libdpp-$NEWVER-win64/bin/*
+cd ..
 echo "Create release..."
-gh release create "v$NEWVER-test" --draft --title "v$NEWVER release" --notes "Please populate changelog/notes" ./assets/*.zip ./assets/*.deb
+gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "Please populate changelog/notes" ./assets/*.zip ./assets/*.deb
 echo "Cleaning up..."
 cd ..
 rm -rf temp
