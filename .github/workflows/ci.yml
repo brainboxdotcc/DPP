@@ -98,3 +98,35 @@ jobs:
         with:
           name: "libdpp - Windows ${{matrix.cfg.name}}"
           path: '${{github.workspace}}/main/build/*.zip'
+
+
+
+  rpi:
+    name: armhf (${{matrix.cfg.cpp-version}})
+    runs-on: ${{matrix.cfg.os}}
+    strategy:
+      fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
+      matrix:
+        cfg:
+          - { os: ubuntu-20.04, cpp-version: g++-8 }
+    steps:
+      - name: Determine architecture to use from package info
+        run: |
+          target_architecture=amd64
+          if grep '^Architecture:' debian/control | grep -q -v 'all'; then
+            target_architecture=armhf
+          fi
+          echo "TARGET_ARCHITECTURE=${target_architecture}" >> $GITHUB_ENV
+
+      - name: Build Debian package
+        uses: pi-top/debian-package-build-action@master
+        with:
+          target_architecture: ${{ env.TARGET_ARCHITECTURE }}
+          docker_image: debian:stable
+          build_directory: artifacts
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb
+          path: artifacts/*.deb
