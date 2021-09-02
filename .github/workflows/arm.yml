@@ -1,0 +1,68 @@
+name: D++ ARM CI
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - 'docpages/**'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'docpages/**'
+
+
+jobs:
+  arm:
+    # The host should always be linux
+    runs-on: ubuntu-18.04
+    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
+
+    # Run steps on a matrix of 3 arch/distro combinations
+    strategy:
+      fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
+      matrix:
+        include:
+          - arch: arm64
+            distro: ubuntu-20.04
+          - arch: armhf
+            distro: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2.1.0
+      - uses: uraimo/run-on-arch-action@v2.0.5
+        name: Build artifact
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+
+          # Pass some environment variables to the container
+          env: | # YAML, but pipe character is necessary
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+
+          # The shell to run commands with in the container
+          shell: /bin/sh
+
+          install: |
+                apt-get update -q -y
+                apt-get install -q -y git g++-8 ninja-build libsodium-dev libopus-dev zlib1g-dev
+
+          # Produce a binary artifact and place it in the mounted volume
+          run: |
+            mkdir build && cd build && cmake -G Ninja ..
+            cd build && ninja && cpack
+            cp *.deb "/artifacts/${artifact_name}"
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - Debian ${{ matrix.arch }} Package"
+          path: '${PWD}/artifacts/*.deb'
+
