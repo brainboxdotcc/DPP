@@ -53,11 +53,8 @@ jobs:
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v1
-
-    # ℹ️ Command-line programs to run using the OS shell.
-    # 📚 https://git.io/JvXDl
+    #- name: Autobuild
+    #  uses: github/codeql-action/autobuild@v1
 
     # ✏️ If the Autobuild fails above, remove it and uncomment the following three lines
     #    and modify them (or add more) to build your code if your project
@@ -66,6 +63,17 @@ jobs:
     #- run: |
     #   make bootstrap
     #   make release
+
+    - name: Install apt packages
+      run: sudo apt update && sudo apt install g++-8 ninja-build libsodium-dev libopus-dev zlib1g-dev
+
+    - name: Generate CMake
+      run: mkdir build && cd build && cmake -G Ninja ..
+      env:
+        CXX: g++-8
+
+    - name: Build Project
+      run: cd build && ninja
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
