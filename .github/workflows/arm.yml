@@ -22,9 +22,13 @@ jobs:
       matrix:
         include:
           - arch: arm64
-            distro: ubuntu-20.04
-          - arch: armhf
-            distro: ubuntu-20.04
+            distro: bullseye
+          - arch: armv7
+            distro: bullseye
+          - arch: arm64
+            distro: buster
+          - arch: armv7
+            distro: buster
 
     steps:
       - uses: actions/checkout@v2.1.0
