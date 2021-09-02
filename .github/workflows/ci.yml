@@ -47,6 +47,63 @@ jobs:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: '${{github.workspace}}/build/*.deb'
 
+on: [push, pull_request]
+
+jobs:
+  build_job:
+    # The host should always be linux
+    runs-on: ubuntu-18.04
+    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
+
+    # Run steps on a matrix of 3 arch/distro combinations
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            distro: ubuntu-20.04
+          - arch: armhf
+            distro: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2.1.0
+      - uses: uraimo/run-on-arch-action@v2.0.5
+        name: Build artifact
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+
+          # Pass some environment variables to the container
+          env: | # YAML, but pipe character is necessary
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+
+          # The shell to run commands with in the container
+          shell: /bin/sh
+
+          install: |
+                apt-get update -q -y
+                apt-get install -q -y git g++-8 ninja-build libsodium-dev libopus-dev zlib1g-dev
+
+          # Produce a binary artifact and place it in the mounted volume
+          run: |
+            mkdir build && cd build && cmake -G Ninja ..
+            cd build && ninja && cpack
+            cp *.deb "/artifacts/${artifact_name}"
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - Debian ${{ matrix.arch }} Package"
+          path: '${PWD}/artifacts/*.deb'
+
   macos:
     name: macOS x64
     runs-on: macos-latest
@@ -100,33 +157,3 @@ jobs:
           path: '${{github.workspace}}/main/build/*.zip'
 
 
-
-  rpi:
-    name: armhf (${{matrix.cfg.cpp-version}})
-    runs-on: ${{matrix.cfg.os}}
-    strategy:
-      fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
-      matrix:
-        cfg:
-          - { os: ubuntu-20.04, cpp-version: g++-8 }
-    steps:
-      - name: Determine architecture to use from package info
-        run: |
-          target_architecture=amd64
-          if grep '^Architecture:' debian/control | grep -q -v 'all'; then
-            target_architecture=armhf
-          fi
-          echo "TARGET_ARCHITECTURE=${target_architecture}" >> $GITHUB_ENV
-
-      - name: Build Debian package
-        uses: pi-top/debian-package-build-action@master
-        with:
-          target_architecture: ${{ env.TARGET_ARCHITECTURE }}
-          docker_image: debian:stable
-          build_directory: artifacts
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: deb
-          path: artifacts/*.deb
