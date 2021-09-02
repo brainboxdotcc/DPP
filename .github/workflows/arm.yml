@@ -21,11 +21,11 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         include:
-          - arch: arm64
+          - arch: aarch64
             distro: bullseye
           - arch: armv7
             distro: bullseye
-          - arch: arm64
+          - arch: aarch64
             distro: buster
           - arch: armv7
             distro: buster
@@ -56,7 +56,7 @@ jobs:
 
           install: |
                 apt-get update -q -y
-                apt-get install -q -y git g++-8 ninja-build libsodium-dev libopus-dev zlib1g-dev
+                apt-get install -q -y git cmake g++-8 ninja-build libssl-dev zlib1g-dev
 
           # Produce a binary artifact and place it in the mounted volume
           run: |
