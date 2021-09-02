@@ -1,20 +1,17 @@
 #!/bin/bash
-LASTVER=`git tag | sort -t "." -k1,1n -k2,2n -k3,3n | tail -n1`
-MINOR=`echo -n $LASTVER | sed "s/v[0-9]*\.[0-9]*\.//"`
-MAJOR=`echo -n $LASTVER | sed "s/\.[0-9]*$//"`
-NEWMINOR=$((MINOR + 1))
-NEWVER="$MAJOR.$NEWMINOR"
+NEWVER=`cat include/dpp/version.h  | grep DPP_VERSION_TEXT | sed 's/\|/ /' |awk '{print $4}'`
 echo "Building and tagging release $NEWVER"
-git checkout master
-git tag -a "$NEWVER" -m "Release $NEWVER"
-git push --tags
-cd /tmp
-rm -rf /tmp/DPP
-git clone --depth=1 --branch "$NEWVER" --recursive git@github.com:brainboxdotcc/DPP.git
-cd /tmp/DPP
-rm -rf /tmp/DPP/.git*
-rm -rf /tmp/DPP/.circleci /tmp/DPP/.gdbargs /tmp/DPP/.vscode /tmp/DPP/makerelease.sh
-cd /tmp
-tar cvj /tmp/DPP > /tmp/DPP-Release.tar.bz2
-mkdir ~/releases
-cp /tmp/DPP-Release.tar.bz2 ~/releases/DPP-$NEWVER.tar.bz2
+mkdir temp
+cd temp
+echo "Download assets from CI..."
+gh run list -w "D++ CI" -L 1
+gh run download `gh run list -w "D++ CI" -L 1 | grep master | sed 's/\|/ /'|awk '{print $9}'`
+echo "Move assets..."
+mkdir assets
+mv ./libdpp*/* assets/
+echo "Create release..."
+gh release create "v$NEWVER-test" --draft --title "v$NEWVER release" --notes "Please populate changelog/notes" ./assets/*.zip ./assets/*.deb
+echo "Cleaning up..."
+cd ..
+rm -rf temp
+
