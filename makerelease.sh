@@ -4,8 +4,8 @@ echo "Building and tagging release $NEWVER"
 mkdir temp
 cd temp
 echo "Download assets from CI..."
-gh run list -w "D++ CI" -L 1
-gh run download `gh run list -w "D++ CI" -L 1 | grep master | awk '{ printf $(NF-2) }'`
+gh run list -w "D++ CI" | grep master | head -n1
+gh run download `gh run list -w "D++ CI" | grep master | head -n1 | awk '{ printf $(NF-2) }'`
 echo "Move assets..."
 mkdir assets
 mv ./libdpp*/* assets/
