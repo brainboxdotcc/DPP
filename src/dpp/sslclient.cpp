@@ -132,7 +132,7 @@ void ssl_client::Connect()
 			break;
 		}
 		err = errno;
-		sfd = ERROR_STATUS;
+		shutdown(sfd, 2);
 	#ifdef _WIN32
 		if (sfd >= 0 && sfd < FD_SETSIZE) {
 			closesocket(sfd);
@@ -140,6 +140,7 @@ void ssl_client::Connect()
 	#else
 		::close(sfd);
 	#endif
+		sfd = ERROR_STATUS;
 	}
 	freeaddrinfo(addrs);
 
@@ -380,6 +381,7 @@ void ssl_client::close()
 		SSL_free(ssl->ssl);
 		ssl->ssl = nullptr;
 	}
+	shutdown(sfd, 2);
 	#ifdef _WIN32
 		if (sfd >= 0 && sfd < FD_SETSIZE) {
 			closesocket(sfd);

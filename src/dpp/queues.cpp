@@ -240,6 +240,8 @@ request_queue::~request_queue()
 	terminating = true;
 	in_thread->join();
 	out_thread->join();
+	delete in_thread;
+	delete out_thread;
 }
 
 void request_queue::in_loop()
@@ -398,6 +400,7 @@ void request_queue::out_loop()
 			responses_to_delete.erase(responses_to_delete.begin());
 		}
 	}
+	shutdown(notifier, 2);
 	#ifdef _WIN32
 		if (notifier >= 0 && notifier < FD_SETSIZE) {
 			closesocket(notifier);

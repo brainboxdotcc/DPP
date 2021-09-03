@@ -727,6 +727,7 @@ std::string discord_voice_client::discover_ip() {
 			return "";
 		}
 
+		shutdown(newfd, 2);
 	#ifdef _WIN32
 		if (newfd >= 0 && newfd < FD_SETSIZE) {
 			closesocket(newfd);
