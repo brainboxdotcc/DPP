@@ -331,8 +331,7 @@ basic text-only messages (if your message is 'ephemeral' you must use this) and 
 replies. Please note that at present, Discord only supports a small subset of message and embed features within an interaction
 response object.
 
-\note A later version of the library will include a built in command handler system which will be able to integrate with slash commands
-and interactions, making this process even more seamless.
+\note You can also use the unified command handler, which lets you combine channel based message commands and slash commands under the same lambda with the same code like they were one and the same. Note that after April of 2022 Discord will be discouraging bots from using commands that are prefixed messages via means of a privileged message intent. It is advised that you exclusively use slash commands, or the unified handler with only a prefix of "/" going forward for any new bots you create and look to migrating existing bots to this setup.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>

@@ -25,6 +25,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt/format.h>
 #include <sstream>
 
 namespace dpp {
@@ -125,9 +126,17 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 		}
 		/* Register the command */
 		if (guild_id) {
-			owner->guild_command_create(newcommand, guild_id);
+			owner->guild_command_create(newcommand, guild_id, [command, this](const dpp::confirmation_callback_t &callback) {
+				if (callback.is_error()) {
+					this->owner->log(dpp::ll_error, fmt::format("Failed to register guild slash command '{}': {}", command, callback.http_info.body));
+				}
+			});
 		} else {
-			owner->global_command_create(newcommand);
+			owner->global_command_create(newcommand, [command, this](const dpp::confirmation_callback_t &callback) {
+				if (callback.is_error()) {
+					this->owner->log(dpp::ll_error, fmt::format("Failed to register global slash command '{}': {}", command, callback.http_info.body));
+				}
+			});
 		}
 	}
 	return *this;
@@ -268,46 +277,57 @@ void commandhandler::route(const interaction_create_t & event)
 		for (auto& p : found_cmd->second.parameters) {
 			command_parameter param;
 			const command_value& slash_parameter = event.get_parameter(p.first);
+
+			if (p.second.optional && slash_parameter.valueless_by_exception()) {
+				/* Missing optional parameter, skip this */
+				continue;
+			}
 			
-			switch (p.second.type) {
-				case pt_string: {
-					std::string s = std::get<std::string>(slash_parameter);
-					param = s;
-				}
-				break;
-				case pt_role: {
-					snowflake rid = std::get<snowflake>(slash_parameter);
-					role* r = dpp::find_role(rid);
-					if (r) {
-						param = *r;
+			try {
+				switch (p.second.type) {
+					case pt_string: {
+						std::string s = std::get<std::string>(slash_parameter);
+						param = s;
 					}
-				}
-				break;
-				case pt_channel: {
-					snowflake cid = std::get<snowflake>(slash_parameter);
-					channel* c = dpp::find_channel(cid);
-					if (c) {
-						param = *c;
+					break;
+					case pt_role: {
+						snowflake rid = std::get<snowflake>(slash_parameter);
+						role* r = dpp::find_role(rid);
+						if (r) {
+							param = *r;
+						}
 					}
-				}
-				break;
-				case pt_user: {
-					snowflake uid = std::get<snowflake>(slash_parameter);
-					user* u = dpp::find_user(uid);
-					if (u) {
-						param = *u;
+					break;
+					case pt_channel: {
+						snowflake cid = std::get<snowflake>(slash_parameter);
+						channel* c = dpp::find_channel(cid);
+						if (c) {
+							param = *c;
+						}
 					}
+					break;
+					case pt_user: {
+						snowflake uid = std::get<snowflake>(slash_parameter);
+						user* u = dpp::find_user(uid);
+						if (u) {
+							param = *u;
+						}
+					}
+					break;
+					case pt_integer: {
+						int32_t i = std::get<int32_t>(slash_parameter);
+						param = i;
+					}
+					case pt_boolean: {
+						bool b = std::get<bool>(slash_parameter);
+						param = b;
+					}
+					break;
 				}
-				break;
-				case pt_integer: {
-					int32_t i = std::get<int32_t>(slash_parameter);
-					param = i;
-				}
-				case pt_boolean: {
-					bool b = std::get<bool>(slash_parameter);
-					param = b;
-				}
-				break;
+			}
+			catch (const std::bad_variant_access& e) {
+				/* Missing optional parameter, skip this */
+				continue;
 			}
 
 			/* Add parameter to the list */
