@@ -54,7 +54,7 @@ protected:
 	bool nonblocking;
 
 	/** Raw file descriptor of connection */
-	int sfd;
+	SOCKET sfd;
 
 	/** Openssl opaque contexts */
 	opensslcontext* ssl;

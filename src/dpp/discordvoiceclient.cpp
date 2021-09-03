@@ -694,7 +694,7 @@ void discord_voice_client::send_audio(uint16_t* audio_data, const size_t length,
 }
 
 std::string discord_voice_client::discover_ip() {
-	int newfd = -1;
+	SOCKET newfd = -1;
 	unsigned char packet[74] = { 0 };
 	(*(uint16_t*)(packet)) = htons(0x01);
 	(*(uint16_t*)(packet + 2)) = htons(70);

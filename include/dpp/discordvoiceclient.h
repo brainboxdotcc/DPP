@@ -144,7 +144,7 @@ class CoreExport discord_voice_client : public websocket_client
 
 	/** File descriptor for UDP connection
 	 */
-	int fd;
+	SOCKET fd;
 
 	/** Socket address of voice server
 	 */

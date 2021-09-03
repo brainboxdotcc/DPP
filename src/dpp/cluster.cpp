@@ -32,8 +32,6 @@
 
 namespace dpp {
 
-	bool winsock_initialised = false;
-
 /* This is the API version for all REST calls. DISCORD_API_VERSION is pulled from discordclient.h */
 #define API_PATH	"/api/v" DISCORD_API_VERSION
 
@@ -43,11 +41,10 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 {
 	rest = new request_queue(this);
 #ifdef _WIN32
-	if (!winsock_initialised) {
-		// Set up winsock.
-		WSADATA wsadata;
-		WSAStartup(MAKEWORD(2, 2), &wsadata);
-		winsock_initialised = true;
+	// Set up winsock.
+	WSADATA wsadata;
+	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
+		throw std::exception("WSAStartup failure");
 	}
 #endif
 }
@@ -55,6 +52,9 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 cluster::~cluster()
 {
 	delete rest;
+#ifdef _WIN32
+	WSACleanup();
+#endif
 }
 
 confirmation_callback_t::confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http)

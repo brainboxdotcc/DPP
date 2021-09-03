@@ -355,7 +355,7 @@ void request_queue::out_loop()
 	timeval ts;
 	char n;
 	struct sockaddr_in client;
-	int notifier = accept(out_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
+	SOCKET notifier = accept(out_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
 #ifndef _WIN32
 	close(out_queue_listen_sock);
 #endif
