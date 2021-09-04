@@ -654,10 +654,10 @@ void discord_voice_client::send_audio(uint16_t* audio_data, const size_t length,
 
 	int frameSize = 2880;
 	opus_int32 encodedAudioMaxLength = length;
-	uint8_t encodedAudioData[encodedAudioMaxLength];
+	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
 	size_t encodedAudioLength = encodedAudioMaxLength;
 	if (use_opus) {
-		encodedAudioLength = this->encode((uint8_t*)audio_data, length, encodedAudioData, encodedAudioLength);
+		encodedAudioLength = this->encode((uint8_t*)audio_data, length, encodedAudioData.data(), encodedAudioLength);
 	} else {
 	}
 
@@ -673,12 +673,12 @@ void discord_voice_client::send_audio(uint16_t* audio_data, const size_t length,
 	std::vector<uint8_t> audioDataPacket(sizeof(header) + encodedAudioLength + crypto_secretbox_MACBYTES);
 	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
 
-	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData, encodedAudioLength, (const unsigned char*)nonce, secret_key);
+	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
 
 	Send((const char*)audioDataPacket.data(), audioDataPacket.size());
 	timestamp += frameSize;
 
-	if (!this->sending) {		
+	if (!this->sending) {
 		this->QueueMessage(json({
 		{"op", 5},
 		{"d", {
