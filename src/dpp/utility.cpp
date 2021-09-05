@@ -45,7 +45,7 @@ namespace dpp {
 		}
 
 		bool has_voice() {
-#if HAS_VOICE
+#if HAVE_VOICE
 			return true;
 #else
 			return false;

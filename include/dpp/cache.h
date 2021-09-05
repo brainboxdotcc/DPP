@@ -115,7 +115,7 @@ namespace dpp {
 	 */
 	void CoreExport garbage_collection();
 
-	#define cache_decl(type, setter, getter, counter) type * CoreExport setter (snowflake id); cache * CoreExport getter (); uint64_t CoreExport counter ();
+	#define cache_decl(type, setter, getter, counter) CoreExport type * setter (snowflake id); CoreExport cache * getter ();  CoreExport uint64_t counter ();
 
 	/* Declare major caches */
 	cache_decl(user, find_user, get_user_cache, get_user_count);

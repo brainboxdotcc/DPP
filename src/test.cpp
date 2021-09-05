@@ -25,6 +25,10 @@ int main()
 			[](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
 				std::cout << "Command triggered: " << command << "\n";
 		}, "Get the avatar from user", 825407338755653642);
+
+		/* This is a dummy for testing export */
+		dpp::user* u = dpp::find_user(1234567890123);
+
 	});
 
 	bot.on_log([](const dpp::log_t & event) {
@@ -32,6 +36,8 @@ int main()
 			std::cout << event.message << "\n";
 		}
 	});
+
+	bot.log(dpp::ll_debug, fmt::format("Voice support: {}", dpp::utility::has_voice()));
 
 	bot.start(false);
 	return 0;
