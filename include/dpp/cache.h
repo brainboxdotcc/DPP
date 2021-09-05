@@ -20,7 +20,7 @@
  ************************************************************************************/
 
 #pragma once
-
+#include <dpp/export.h>
 #include <dpp/discord.h>
 #include <map>
 #include <mutex>
@@ -36,7 +36,7 @@ namespace dpp {
 	 * @brief A cache object maintains a cache of dpp::managed objects.
 	 * This is for example users, channels or guilds.
 	 */
-	class cache {
+	class CoreExport cache {
 	private:
 
 		/** Mutex to protect the cache */
@@ -113,9 +113,9 @@ namespace dpp {
 	/** Run garbage collection across all caches removing deleted items
 	 * that have been deleted over 60 seconds ago.
 	 */
-	void garbage_collection();
+	void CoreExport garbage_collection();
 
-	#define cache_decl(type, setter, getter, counter) type * setter (snowflake id); cache * getter (); uint64_t counter ();
+	#define cache_decl(type, setter, getter, counter) type * CoreExport setter (snowflake id); cache * CoreExport getter (); uint64_t CoreExport counter ();
 
 	/* Declare major caches */
 	cache_decl(user, find_user, get_user_cache, get_user_count);
