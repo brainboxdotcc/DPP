@@ -267,6 +267,11 @@ public:
 	/** Default constructor, zeroes all values */
 	guild();
 
+	/**
+	 * @brief Destroy the guild object
+	 */
+	virtual ~guild() = default;
+
 	/** Read class values from json object
 	 * @param shard originating shard
 	 * @param j A json object to read from

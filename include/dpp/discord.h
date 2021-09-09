@@ -45,7 +45,7 @@ namespace dpp {
 		/** Constructor, initialises id to 0 */
 		managed(const snowflake = 0);
 		/** Default destructor */
-		~managed() = default;
+		virtual ~managed() = default;
 	};
 
 	/** @brief Supported image types for profile pictures */

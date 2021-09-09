@@ -100,7 +100,7 @@ public:
 	role();
 
 	/** Default destructor */
-	~role();
+	virtual ~role();
 
 	/** Fill this role from json.
 	 * @param guild_id the guild id to place in the json

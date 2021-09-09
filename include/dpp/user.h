@@ -94,7 +94,7 @@ public:
 	/**
 	 * @brief Destroy the user object
 	 */
-	~user();
+	virtual ~user();
 
 	/** Fill this record from json.
 	 * @param j The json to fill this record from

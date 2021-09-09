@@ -80,7 +80,7 @@ public:
 	/**
 	 * @brief Destroy the emoji object
 	 */
-	~emoji();
+	virtual ~emoji();
 
 	/**
 	 * @brief Read class values from json object
