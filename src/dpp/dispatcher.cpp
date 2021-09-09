@@ -43,6 +43,13 @@ void interaction_create_t::reply(interaction_response_type t, const std::string 
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command));
 }
 
+void interaction_create_t::get_original_response(command_completion_event_t callback) const
+{
+	from->creator->post_rest(API_PATH "/webhooks", std::to_string(from->creator->me.id), command.token + "/messages/@original", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
+	});
+}
+
 void interaction_create_t::edit_response(const message & m) const
 {
 	from->creator->interaction_response_edit(this->command.token, m);

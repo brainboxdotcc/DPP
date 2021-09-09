@@ -28,6 +28,11 @@
 
 namespace dpp {
 
+#define API_PATH	"/api/v" DISCORD_API_VERSION
+
+struct CoreExport confirmation_callback_t;
+typedef std::function<void(const confirmation_callback_t&)> command_completion_event_t;
+
 /** @brief Base event parameter struct */
 struct CoreExport event_dispatch_t {
 
@@ -155,6 +160,14 @@ struct CoreExport interaction_create_t : public event_dispatch_t {
 	 * @param mt The string value to send, for simple text only messages
 	 */
 	void reply(interaction_response_type t, const std::string & mt) const;
+
+	/**
+	 * @brief Get original response message for this interaction
+	 *
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void get_original_response(command_completion_event_t callback) const;
 
 	/**
 	 * @brief Edit the response for this interaction
