@@ -25,6 +25,7 @@
 #include <dpp/slashcommand.h>
 #include <functional>
 #include <variant>
+#include <exception>
 
 namespace dpp {
 
@@ -1106,6 +1107,70 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_stickers_update_t& event)> stickers_update;
+};
+
+/**
+ * @brief The dpp::exception class derives from std::exception and supports some other
+ * ways of passing in error details such as via std::string.
+ */
+class exception : public std::exception
+{
+	/**
+	 * @brief Exception message
+	 */
+	std::string msg;
+
+public:
+
+	using std::exception::exception;
+
+	/**
+	 * @brief Construct a new exception object
+	 */
+	exception() = default;
+
+	explicit exception(const char* what) : msg(what) { }
+	exception(const char* what, size_t len) : msg(what, len) { }
+
+	explicit exception(const std::string& what) : msg(what) { }
+	explicit exception(std::string&& what) : msg(std::move(what)) { }
+
+	/**
+	 * @brief Construct a new exception object (copy constructor)
+	 */
+	exception(const exception&) = default;
+
+	/**
+	 * @brief Construct a new exception object (move constructor)
+	 */
+	exception(exception&&) = default;
+
+	/**
+	 * @brief Destroy the exception object
+	 */
+	~exception() override = default;
+
+	/**
+	 * @brief Copy assignment operator
+	 * 
+	 * @return exception& reference to self
+	 */
+	exception & operator = (const exception &) = default;
+
+	/**
+	 * @brief Move assignment operator
+	 * 
+	 * @return exception& reference to self
+	 */
+	exception & operator = (exception&&) = default;
+
+	/**
+	 * @brief Get exception message
+	 * 
+	 * @return const char* error message
+	 */
+	[[nodiscard]] const char* what() const noexcept override { return msg.c_str(); };
+
 };
 
 };
