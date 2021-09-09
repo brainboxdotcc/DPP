@@ -79,7 +79,7 @@ void populate_result(const std::string &url, const cluster* owner, http_request_
 	if (rv.status == 429) {
 		owner->log(ll_warning, fmt::format("Rate limited on endpoint {}, reset after {}s!", url, rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
 	}
-	if (url != "/api/v9/gateway/bot") {	// Squelch this particular api endpoint or it generates a warning the minute we boot a cluster
+	if (url != "/api/v" DISCORD_API_VERSION "/gateway/bot") {	// Squelch this particular api endpoint or it generates a warning the minute we boot a cluster
 		if (rv.ratelimit_global) {
 			owner->log(ll_warning, fmt::format("At global rate limit on endpoint {}, reset after {}s", url, rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
 		} else if (rv.ratelimit_remaining == 1) {
