@@ -58,6 +58,7 @@
 #include <dpp/fmt/format.h>
 #include <dpp/sslclient.h>
 #include <dpp/discord.h>
+#include <dpp/dispatcher.h>
 
 namespace dpp {
 
@@ -100,17 +101,17 @@ void ssl_client::Connect()
 	/* Create SSL context */
 	ssl->ctx = SSL_CTX_new(method);
 	if (ssl->ctx == nullptr)
-		throw std::runtime_error("Failed to create SSL client context!");
+		throw dpp::exception("Failed to create SSL client context!");
 
 	/* Create SSL session */
 	ssl->ssl = SSL_new(ssl->ctx);
 	if (ssl->ssl == nullptr)
-		throw std::runtime_error("SSL_new failed!");
+		throw dpp::exception("SSL_new failed!");
 
 	/* Resolve hostname to IP */
 	struct hostent *host;
 	if ((host = gethostbyname(hostname.c_str())) == nullptr)
-		throw std::runtime_error(fmt::format("Couldn't resolve hostname '{}'", hostname));
+		throw dpp::exception(fmt::format("Couldn't resolve hostname '{}'", hostname));
 
 	struct addrinfo hints = {0}, *addrs;
 	hints.ai_family = AF_UNSPEC;
@@ -119,7 +120,7 @@ void ssl_client::Connect()
 
 	int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
 	if (status != 0)
-		throw std::runtime_error(fmt::format("getaddrinfo (host={}, port={}): ", hostname, port, gai_strerror(status)));
+		throw dpp::exception(fmt::format("getaddrinfo (host={}, port={}): ", hostname, port, gai_strerror(status)));
 
 	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 	int err;
@@ -146,14 +147,14 @@ void ssl_client::Connect()
 
 	/* Check if none of the IPs yielded a valid connection */
 	if (sfd == ERROR_STATUS)
-		throw std::runtime_error(strerror(err));
+		throw dpp::exception(strerror(err));
 
 	/* We're good to go - hand the fd over to openssl */
 	SSL_set_fd(ssl->ssl, sfd);
 
 	status = SSL_connect(ssl->ssl);
 	if (status != 1) {
-		throw std::runtime_error("SSL_connect error");
+		throw dpp::exception("SSL_connect error");
 	}
 
 	this->cipher = SSL_get_cipher(ssl->ssl);
@@ -208,13 +209,13 @@ void ssl_client::read_loop()
 	u_long mode = 1;
 	int result = ioctlsocket(sfd, FIONBIO, &mode);
 	if (result != NO_ERROR)
-		throw std::runtime_error("Can't switch socket to non-blocking mode!");
+		throw dpp::exception("Can't switch socket to non-blocking mode!");
 #else
 	int ofcmode;
 	ofcmode = fcntl(sfd, F_GETFL, 0);
 	ofcmode |= O_NDELAY;
 	if (fcntl(sfd, F_SETFL, ofcmode)) {
-		throw std::runtime_error("Can't switch socket to non-blocking mode!");
+		throw dpp::exception("Can't switch socket to non-blocking mode!");
 	}
 #endif
 	nonblocking = true;

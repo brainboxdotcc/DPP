@@ -44,7 +44,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	// Set up winsock.
 	WSADATA wsadata;
 	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
-		throw std::runtime_error("WSAStartup failure");
+		throw dpp::exception("WSAStartup failure");
 	}
 #endif
 }
@@ -1385,7 +1385,7 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 			{ i_png, "image/png" }
 		};
 		if (image_blob.size() > MAX_EMOJI_SIZE) {
-			throw std::runtime_error("User icon file exceeds discord limit of 256 kilobytes");
+			throw dpp::exception("User icon file exceeds discord limit of 256 kilobytes");
 		}
 		j["avatar"] = "data:" + mimetypes[type] + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length());
 	}

@@ -22,6 +22,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/dispatcher.h>
 
 namespace dpp {
 
@@ -81,7 +82,7 @@ webhook& webhook::load_image(const std::string &image_blob, image_type type) {
 		{ i_png, "image/png" }
 	};
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
-		throw std::runtime_error("Webhook icon file exceeds discord limit of 256 kilobytes");
+		throw dpp::exception("Webhook icon file exceeds discord limit of 256 kilobytes");
 	}
 	if (image_data) {
 		/* If there's already image data defined, free the old data, to prevent a memory leak */

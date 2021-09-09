@@ -74,17 +74,17 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 #if HAVE_VOICE
 	if (!discord_voice_client::sodium_initialised) {
 		if (sodium_init() < 0) {
-			throw std::runtime_error("discord_voice_client::discord_voice_client; sodium_init() failed");
+			throw dpp::exception("discord_voice_client::discord_voice_client; sodium_init() failed");
 		}
 		int opusError = 0;
 		encoder = opus_encoder_create(48000, 2, OPUS_APPLICATION_VOIP, &opusError);
 		if (opusError) {
-			throw std::runtime_error(fmt::format("discord_voice_client::discord_voice_client; opus_encoder_create() failed: {}", opusError));
+			throw dpp::exception(fmt::format("discord_voice_client::discord_voice_client; opus_encoder_create() failed: {}", opusError));
 		}
 		opusError = 0;
 		decoder = opus_decoder_create(48000, 2, &opusError);
 		if (opusError) {
-			throw std::runtime_error(fmt::format("discord_voice_client::discord_voice_client; opus_decoder_create() failed: {}", opusError));
+			throw dpp::exception(fmt::format("discord_voice_client::discord_voice_client; opus_decoder_create() failed: {}", opusError));
 		}
 		repacketizer = opus_repacketizer_create();
 		discord_voice_client::sodium_initialised = true;
@@ -269,20 +269,20 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					servaddr.sin_port = htons(0);
 
 					if (bind(newfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
-						throw std::runtime_error("Can't bind() client UDP socket");
+						throw dpp::exception("Can't bind() client UDP socket");
 					}
 					
 #ifdef _WIN32
 					u_long mode = 1;
 					int result = ioctlsocket(newfd, FIONBIO, &mode);
 					if (result != NO_ERROR)
-						throw std::runtime_error("Can't switch socket to non-blocking mode!");
+						throw dpp::exception("Can't switch socket to non-blocking mode!");
 #else
 					int ofcmode;
 					ofcmode = fcntl(newfd, F_GETFL, 0);
 					ofcmode |= O_NDELAY;
 					if (fcntl(newfd, F_SETFL, ofcmode)) {
-						throw std::runtime_error("Can't switch socket to non-blocking mode!");
+						throw dpp::exception("Can't switch socket to non-blocking mode!");
 					}
 #endif
 					/* Hook select() in the ssl_client to add a new file descriptor */
@@ -523,7 +523,7 @@ const std::vector<std::string> discord_voice_client::get_marker_metadata() {
 void discord_voice_client::one_second_timer()
 {
 	if (terminating) {
-		throw std::runtime_error("Terminating voice connection");
+		throw dpp::exception("Terminating voice connection");
 	}
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 	if (this->GetState() == CONNECTED) {
@@ -586,7 +586,7 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 			}
 		}
 	} else {
-		throw std::runtime_error(fmt::format("Invalid input data length: {}, must be n times of {}", inDataSize, mEncFrameBytes));
+		throw dpp::exception(fmt::format("Invalid input data length: {}, must be n times of {}", inDataSize, mEncFrameBytes));
 	}
 #endif
 	return outDataSize;

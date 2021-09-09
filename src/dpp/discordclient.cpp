@@ -92,7 +92,7 @@ void discord_client::SetupZLib()
 		zlib->d_stream.zfree = (free_func)0;
 		zlib->d_stream.opaque = (voidpf)0;
 		if (inflateInit(&(zlib->d_stream)) != Z_OK) {
-			throw std::runtime_error("Can't initialise stream compression!");
+			throw dpp::exception("Can't initialise stream compression!");
 		}
 		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
 	}
