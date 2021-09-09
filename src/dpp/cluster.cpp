@@ -44,7 +44,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	// Set up winsock.
 	WSADATA wsadata;
 	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
-		throw std::exception("WSAStartup failure");
+		throw std::runtime_error("WSAStartup failure");
 	}
 #endif
 }
