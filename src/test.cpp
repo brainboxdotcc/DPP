@@ -39,6 +39,10 @@ int main()
 
 	bot.log(dpp::ll_debug, fmt::format("Voice support: {}", dpp::utility::has_voice()));
 
-	bot.start(false);
+	bot.start(true);
+
+	::sleep(20);
+
+	std::cout << "Exiting\n";
 	return 0;
 }
