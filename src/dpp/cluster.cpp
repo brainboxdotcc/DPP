@@ -32,9 +32,6 @@
 
 namespace dpp {
 
-/* This is the API version for all REST calls. DISCORD_API_VERSION is pulled from discordclient.h */
-#define API_PATH	"/api/v" DISCORD_API_VERSION
-
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy)
 	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id),
 	maxclusters(_maxclusters), last_identify(time(NULL) - 5), compressed(comp), cache_policy(policy)

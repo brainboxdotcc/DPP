@@ -28,9 +28,8 @@
 
 namespace dpp {
 
-#define API_PATH	"/api/v" DISCORD_API_VERSION
-
 struct CoreExport confirmation_callback_t;
+
 typedef std::function<void(const confirmation_callback_t&)> command_completion_event_t;
 
 /** @brief Base event parameter struct */
