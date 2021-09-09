@@ -257,6 +257,9 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0)
 	message_reference.guild_id = 0;
 	message_reference.message_id = 0;
 	message_reference.fail_if_not_exists = false;
+	interaction.id = 0;
+	interaction.type = interaction_type::it_ping;
+	interaction.usr.id = 0;
 	allowed_mentions.parse_users = false;
 	allowed_mentions.parse_everyone = false;
 	allowed_mentions.parse_roles = false;
@@ -795,6 +798,13 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			}
 			this->author = authoruser;
 		}
+	}
+	if (d->find("interaction") != d->end()) {
+		json& inter = (*d)["interaction"];
+		interaction.id = SnowflakeNotNull(&inter, "id");
+		interaction.name = StringNotNull(&inter, "name");
+		interaction.type = Int8NotNull(&inter, "type");
+		if (inter.contains("user") && !inter["user"].is_null()) from_json(inter["user"], interaction.usr);
 	}
 	if (d->find("sticker_items") != d->end()) {
 		json &sub = (*d)["sticker_items"];

@@ -901,6 +901,17 @@ struct CoreExport message {
 		bool fail_if_not_exists;
 	} message_reference;
 
+	struct message_interaction_struct{
+		// id of the interaction
+		snowflake id;
+		// type of interaction
+		uint8_t type;
+		// name of the application command
+		std::string name;
+		// the user who invoked the interaction
+		user usr;
+	} interaction;
+
 	struct allowed_ref {
 		bool parse_users;
 		bool parse_everyone;
