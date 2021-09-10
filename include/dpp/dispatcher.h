@@ -166,7 +166,7 @@ struct CoreExport interaction_create_t : public event_dispatch_t {
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_original_response(command_completion_event_t callback) const;
+	void get_original_response(command_completion_event_t callback = {}) const;
 
 	/**
 	 * @brief Edit the response for this interaction
