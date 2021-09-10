@@ -79,7 +79,7 @@ std::string StringNotNull(const json* j, const char *keyname) {
 	if (k != j->end()) {
 		return !k->is_null() && k->is_string() ? k->get<std::string>() : "";
 	} else {
-		return "";
+		return const_cast< char* >("");
 	}
 }
 
