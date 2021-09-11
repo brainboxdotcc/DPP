@@ -14,7 +14,8 @@
 * [Slash Commands/Interactions suppport](https://dpp.brainbox.cc/slashcommands.html)
 * [Voice support](https://dpp.brainbox.cc/soundboard.html)
 * Pretty much the entire Discord API is available for use in the library
-* [Windows support](https://dpp.brainbox.cc/buildwindows.html)
+* Stable [Windows support](https://dpp.brainbox.cc/buildwindows.html)
+* Ready-made compiled packages for Windows, Raspberry Pi (ARM64) and Debian x64
 
 Want to help? Drop me a line or send a PR.
 
@@ -28,9 +29,10 @@ The documentation is a work in progress, generated from the code comments and ma
 
 ## Supported Systems
 
-The library runs best on **Linux**. **Windows** is supported via cmake and Visual Studio 2019 but not encouraged for production use.
-**Mac OS X** is also functional and stable, as is running your bot on a **Raspberry Pi** (but be prepared to wait a while for it to compile!)
-The library may work fine in other operating systems too, but with no access to these we cannot support them.
+The library runs great on **Linux**. **Windows** is also supported and we offer ready made compiled DLL and LIB files for easy integration into any windows visual studio 2019 project.
+**Mac OS X** is also functional and stable, as is running your bot on a **Raspberry Pi** - we offer a prebuilt .deb for ARM64 to save on having to wait for it to compile.
+
+The library may work fine in other operating systems too, if you run a D++ bot on something not listed here please let us know!
 
 ## 🤝 Contributing
 
