@@ -10,6 +10,7 @@ echo "Move assets..."
 mkdir assets
 mv "./libdpp - Debian Package/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-x64.deb"
 mv "./libdpp - Debian Package AArch64/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-aarch64.deb"
+mv "./libdpp - Debian Package ARM HF/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-armhf.deb"
 mv "./libdpp - Windows x64/libdpp-$NEWVER-win64.zip" "./assets/libdpp-$NEWVER-win64-release-vs2019.zip"
 cd assets
 mkdir -p libdpp-$NEWVER-win64/bin
