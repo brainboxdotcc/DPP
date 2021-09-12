@@ -8,7 +8,9 @@ gh run list -w "D++ CI" | grep $'\t'master$'\t' | grep ^completed | head -n1
 gh run download `gh run list -w "D++ CI" | grep $'\t'master$'\t' | grep ^completed | head -n1 | awk '{ printf $(NF-2) }'`
 echo "Move assets..."
 mkdir assets
-mv ./libdpp*/* assets/
+mv "./libdpp - Debian Package/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-x64.deb"
+mv "./libdpp - Debian Package AArch64/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-aarch64.deb"
+mv "./libdpp - Windows x64/libdpp-$NEWVER-win64.zip" "./assets/libdpp-$NEWVER-win64-release-vs2019.zip"
 cd assets
 mkdir -p libdpp-$NEWVER-win64/bin
 cp ../../win32/bin/*.dll libdpp-$NEWVER-win64/bin

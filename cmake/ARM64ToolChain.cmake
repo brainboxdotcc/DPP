@@ -5,6 +5,7 @@ SET(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++-9)
 
 # Below call is necessary to avoid non-RT problem.
 SET(CMAKE_LIBRARY_ARCHITECTURE aarch64-linux-gnu)
+SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE aarch64)
 
 SET(RASPBERRY_ROOT_PATH ${CMAKE_CURRENT_LIST_DIR}/arm_raspberry)
 SET(RASPBERRY_KINETIC_PATH ${RASPBERRY_ROOT_PATH}/opt/ros/kinetic)
