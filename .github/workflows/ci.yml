@@ -9,8 +9,10 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'x86_64', os: ubuntu-20.04, cpp-version: g++-8 }
+          - { arch: 'x86', os: ubuntu-20.04, cpp-version: g++-8 }
           - { arch: 'x86', os: ubuntu-20.04, cpp-version: g++-9 }
+          - { arch: 'x86_64', os: ubuntu-20.04, cpp-version: g++-8 }
+          - { arch: 'x86_64', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:
       - name: Checkout D++
