@@ -30,11 +30,16 @@
 
 namespace dpp {
 
+struct CoreExport resolved_user {
+	dpp::user user;
+	dpp::guild_member member;
+};
+
 /**
  * @brief Represents a received parameter.
  * We use variant so that multiple non-related types can be contained within.
  */
-typedef std::variant<std::string, dpp::role, dpp::channel, dpp::user, int32_t, bool> command_parameter;
+typedef std::variant<std::monostate, std::string, dpp::role, dpp::channel, dpp::resolved_user, int32_t, bool> command_parameter;
 
 /**
  * @brief Parameter types when registering a command.

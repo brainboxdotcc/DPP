@@ -155,6 +155,10 @@ bool commandhandler::string_has_prefix(std::string &str)
 	return false;
 }
 
+/* Note that message based command routing relies on cache to resolve ping types (e.g. user, channel ping).
+ * There isn't really a way around this for many things because there is no 'resolved' member for it.
+ * We only get resolved information for the user issuing the command.
+ */
 void commandhandler::route(const dpp::message& msg)
 {
 	std::string msg_content = msg.content;
@@ -226,8 +230,15 @@ void commandhandler::route(const dpp::message& msg)
 							snowflake uid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
 							user* u = dpp::find_user(uid);
 							if (u) {
-								param = *u;
+								dpp::resolved_user m;
+								m.user = *u;
+								dpp::guild* g = dpp::find_guild(msg.guild_id);
+								if (g->members.find(uid) != g->members.end()) {
+									m.member = g->members[uid];
+								}
+								param = m;
 							}
+
 						}
 					}
 					break;
@@ -270,6 +281,7 @@ void commandhandler::route(const interaction_create_t & event)
 	 * dont have prefixes at all.
 	 */
 	command_interaction cmd = std::get<command_interaction>(event.command.data);
+
 	auto found_cmd = commands.find(lowercase(cmd.name));
 	if (found_cmd != commands.end()) {
 		/* Command found; parse parameters */
@@ -277,57 +289,86 @@ void commandhandler::route(const interaction_create_t & event)
 		for (auto& p : found_cmd->second.parameters) {
 			command_parameter param;
 			const command_value& slash_parameter = event.get_parameter(p.first);
+			dpp::command_resolved res = event.command.resolved;
 
-			if (p.second.optional && slash_parameter.valueless_by_exception()) {
+			if (p.second.optional && slash_parameter.index() == 0 /* std::monostate */) {
 				/* Missing optional parameter, skip this */
 				continue;
 			}
 			
-			try {
-				switch (p.second.type) {
-					case pt_string: {
-						std::string s = std::get<std::string>(slash_parameter);
-						param = s;
-					}
-					break;
-					case pt_role: {
-						snowflake rid = std::get<snowflake>(slash_parameter);
-						role* r = dpp::find_role(rid);
-						if (r) {
-							param = *r;
-						}
-					}
-					break;
-					case pt_channel: {
-						snowflake cid = std::get<snowflake>(slash_parameter);
-						channel* c = dpp::find_channel(cid);
-						if (c) {
-							param = *c;
-						}
-					}
-					break;
-					case pt_user: {
-						snowflake uid = std::get<snowflake>(slash_parameter);
-						user* u = dpp::find_user(uid);
-						if (u) {
-							param = *u;
-						}
-					}
-					break;
-					case pt_integer: {
-						int32_t i = std::get<int32_t>(slash_parameter);
-						param = i;
-					}
-					case pt_boolean: {
-						bool b = std::get<bool>(slash_parameter);
-						param = b;
-					}
-					break;
+			switch (p.second.type) {
+				case pt_string: {
+					std::string s = std::get<std::string>(slash_parameter);
+					param = s;
 				}
-			}
-			catch (const std::bad_variant_access& e) {
-				/* Missing optional parameter, skip this */
-				continue;
+				break;
+				case pt_role: {
+					snowflake rid = std::get<snowflake>(slash_parameter);
+					role* r = dpp::find_role(rid);
+					if (r) {
+						/* Use cache if the role is in the cache */
+						param = *r;
+					} else {
+						/* Otherwise use interaction resolved fields */
+						if (res.roles.find(rid) != res.roles.end()) {
+							param = res.roles[rid];
+						}
+					}
+				}
+				break;
+				case pt_channel: {
+					snowflake cid = std::get<snowflake>(slash_parameter);
+					channel* c = dpp::find_channel(cid);
+					if (c) {
+						/* Use cache if the channel is in the cache */
+						param = *c;
+					} else {
+						/* Otherwise use interaction resolved fields */
+						if (res.channels.find(cid) != res.channels.end()) {
+							param = res.channels[cid];
+						}
+					}
+				}
+				break;
+				case pt_user: {
+					snowflake uid = std::get<snowflake>(slash_parameter);
+					/* TODO: Make this used resolved, not cache */
+					user* u = dpp::find_user(uid);
+					if (u) {
+						/* Use the cache if the user is in the cache */
+						dpp::resolved_user m;
+						m.user = *u;
+						dpp::guild* g = dpp::find_guild(event.command.guild_id);
+						if (g->members.find(uid) != g->members.end()) {
+							m.member = g->members[uid];
+						}
+						param = m;
+					} else {
+						/* Otherwise use interaction resolved fields */
+						if (
+							event.command.resolved.users.find(uid) != event.command.resolved.users.end()
+							&&
+							event.command.resolved.members.find(uid) != event.command.resolved.members.end()
+						) {
+							/* Fill in both member and user info */
+							dpp::resolved_user m;
+							m.member = res.members[uid];
+							m.user = res.users[uid];
+							param = m;
+						}
+					}
+				}
+				break;
+				case pt_integer: {
+					int32_t i = std::get<int32_t>(slash_parameter);
+					param = i;
+				}
+				break;
+				case pt_boolean: {
+					bool b = std::get<bool>(slash_parameter);
+					param = b;
+				}
+				break;
 			}
 
 			/* Add parameter to the list */

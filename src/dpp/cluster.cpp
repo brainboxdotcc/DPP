@@ -1040,7 +1040,7 @@ void cluster::guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t dele
 		j["reason"] = reason;
 	if (delete_message_days)
 		j["delete_message_days"] = delete_message_days;
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}

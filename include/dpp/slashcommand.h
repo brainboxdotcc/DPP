@@ -54,8 +54,10 @@ enum command_option_type : uint8_t {
  * @brief This type is a variant that can hold any of the potential
  * native data types represented by the enum above.
  * It is used in interactions.
+ * 
+ * std::monostate indicates an invalid parameter value, e.g. an unfilled optional parameter.
  */
-typedef std::variant<std::string, int32_t, bool, snowflake> command_value;
+typedef std::variant<std::monostate, std::string, int32_t, bool, snowflake> command_value;
 
 /**
  * @brief This struct represents choices in a multiple choice option
@@ -226,11 +228,13 @@ struct CoreExport interaction_response {
 };
 
 /**
- * @brief Resolved snowflake ids to usernames.
- * TODO: Needs implementation. Not needed something that
- * functions as we have cache.
+ * @brief Resolved snowflake ids to users, guild members, roles and channels.
  */
 struct CoreExport command_resolved {
+	std::map<dpp::snowflake, dpp::user> users;
+	std::map<dpp::snowflake, dpp::guild_member> members;
+	std::map<dpp::snowflake, dpp::role> roles;
+	std::map<dpp::snowflake, dpp::channel> channels;
 };
 
 /**
@@ -326,6 +330,7 @@ public:
 	user usr;                                                   //!< Optional: user object for the invoking user, if invoked in a DM
 	std::string token;                                          //!< a continuation token for responding to the interaction
 	uint8_t version;                                            //!< read-only property, always 1
+	command_resolved resolved;				    //!< Resolved user/role etc
 
 	/**
 	 * @brief Fill object properties from JSON
