@@ -2,15 +2,15 @@ name: D++ CI
 on: [push, pull_request]
 
 jobs:
-  linux-x64:
+  linux:
     name: Linux x64 (${{matrix.cfg.cpp-version}})
     runs-on: ${{matrix.cfg.os}}
     strategy:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { os: ubuntu-20.04, cpp-version: g++-8 }
-          - { os: ubuntu-20.04, cpp-version: g++-9 }
+          - { arch: 'x86_64', os: ubuntu-20.04, cpp-version: g++-8 }
+          - { arch: 'x86', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:
       - name: Checkout D++
@@ -35,7 +35,7 @@ jobs:
         if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
         uses: actions/upload-artifact@v2
         with:
-          name: "libdpp - Debian Package ${{matrix.cfg.name}}"
+          name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.deb'
 
   macos:
