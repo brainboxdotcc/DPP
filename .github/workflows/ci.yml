@@ -9,17 +9,17 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'x86', os: ubuntu-20.04, cpp-version: g++-8 }
-          - { arch: 'x86', os: ubuntu-20.04, cpp-version: g++-9 }
-          - { arch: 'x86_64', os: ubuntu-20.04, cpp-version: g++-8 }
-          - { arch: 'x86_64', os: ubuntu-20.04, cpp-version: g++-9 }
+          - { arch: 'i386', os: ubuntu-20.04, cpp-version: g++-8 }
+          - { arch: 'i386', os: ubuntu-20.04, cpp-version: g++-9 }
+          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-8 }
+          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2
 
       - name: Install apt packages
-        run: sudo apt update && sudo apt install ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev
+        run: dpkg --add-architecture i386 && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }}:${{ matrix.cfg.arch }} ninja-build libsodium-dev:${{ matrix.cfg.arch }} libopus-dev:${{ matrix.cfg.arch }} zlib1g-dev:${{ matrix.cfg.arch }}
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -G Ninja ..
