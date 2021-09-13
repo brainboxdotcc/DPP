@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   linux:
-    name: Linux x64 (${{matrix.cfg.cpp-version}})
+    name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
     runs-on: ${{matrix.cfg.os}}
     strategy:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
