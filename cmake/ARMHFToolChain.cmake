@@ -1,13 +1,13 @@
 SET(CMAKE_SYSTEM_NAME Linux)
 # Possibly needed tweak
-#SET(CMAKE_SYSTEM_PROCESSOR aarch64)
+#SET(CMAKE_SYSTEM_PROCESSOR armhf)
 
-SET(CMAKE_C_COMPILER aarch64-linux-gnu-gcc-9)
-SET(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++-9)
+SET(CMAKE_C_COMPILER arm-linux-gnueabihf-gcc-8)
+SET(CMAKE_CXX_COMPILER arm-linux-gnueabihf-g++-8)
 
 # Below call is necessary to avoid non-RT problem.
-SET(CMAKE_LIBRARY_ARCHITECTURE aarch64-linux-gnu)
-SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE aarch64)
+SET(CMAKE_LIBRARY_ARCHITECTURE arm-linux-gnueabihf)
+SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE armhf)
 
 SET(RASPBERRY_ROOT_PATH ${CMAKE_CURRENT_LIST_DIR}/arm_raspberry)
 SET(RASPBERRY_KINETIC_PATH ${RASPBERRY_ROOT_PATH}/opt/ros/kinetic)
@@ -15,7 +15,7 @@ SET(RASPBERRY_KINETIC_PATH ${RASPBERRY_ROOT_PATH}/opt/ros/kinetic)
 SET(CMAKE_FIND_ROOT_PATH ${RASPBERRY_ROOT_PATH} ${CATKIN_DEVEL_PREFIX})
 
 #If you have installed cross compiler to somewhere else, please specify that path.
-SET(COMPILER_ROOT /usr/aarch64-linux-gnu) 
+SET(COMPILER_ROOT /usr/arm-linux-gnueabihf) 
 
 #Have to set this one to BOTH, to allow CMake to find rospack
 #This set of variables controls whether the CMAKE_FIND_ROOT_PATH and CMAKE_SYSROOT are used for find_xxx() operations.

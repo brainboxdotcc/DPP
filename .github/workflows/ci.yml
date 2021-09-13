@@ -90,30 +90,31 @@ jobs:
           name: "libdpp - Windows ${{matrix.cfg.name}}"
           path: '${{github.workspace}}/main/build/*.zip'
 
-  arm64:
+  arm:
     strategy:
       fail-fast: false
       matrix:
         cfg:
-        - {name: "64"}
+          - {name: "ARM64", arch: arm64, compilers: gcc-9-aarch64-linux-gnu g++-9-aarch64-linux-gnu, path-prefix: aarch64-linux-gnu}
+          - {name: "ARMHF", arch: armhf, compilers: gcc-8-arm-linux-gnueabihf g++-8-arm-linux-gnueabihf, path-prefix: arm-linux-gnueabihf}
 
-    name: "ARM${{matrix.cfg.name}}"
+    name: ${{matrix.cfg.name}}
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2
 
-      - name: Setup ARM64
-        run: printf "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main multiverse restricted universe\ndeb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main multiverse restricted universe\ndeb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://security.ubuntu.com/ubuntu/ focal-security main multiverse restricted universe" > a && sudo mv a /etc/apt/sources.list && sudo dpkg --add-architecture arm64 && sudo apt update
+      - name: Setup ${{matrix.cfg.name}}
+        run: printf "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main multiverse restricted universe\ndeb [arch=${{matrix.cfg.arch}}] http://ports.ubuntu.com/ubuntu-ports/ focal main multiverse restricted universe\ndeb [arch=${{matrix.cfg.arch}}] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://security.ubuntu.com/ubuntu/ focal-security main multiverse restricted universe" > a && sudo mv a /etc/apt/sources.list && sudo dpkg --add-architecture ${{matrix.cfg.arch}} && sudo apt update
 
       - name: Install Packages
-        run: sudo apt-get install -y zlib1g-dev:arm64 libssl-dev:arm64 g++-9-aarch64-linux-gnu gcc-9-aarch64-linux-gnu ninja-build libopus-dev:arm64 libsodium-dev:arm64 
+        run: sudo apt-get install -y zlib1g-dev:${{matrix.cfg.arch}} libssl-dev:${{matrix.cfg.arch}} ${{matrix.cfg.compilers}} ninja-build libopus-dev:${{matrix.cfg.arch}} libsodium-dev:${{matrix.cfg.arch}} 
 
       - name: Prepare System for CMake
-        run: export PATH=$PATH:/usr/include:/usr/lib/aarch64-linux-gnu/:/usr/bin && sudo mv /usr/include/x86_64-linux-gnu/openssl/opensslconf.h /usr/include/openssl/ && sudo rm /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/x86_64-linux-gnu/libcrypto.a /usr/lib/x86_64-linux-gnu/libssl.a && sudo mv /usr/lib/aarch64-linux-gnu/pkgconfig/libsodium.pc /usr/lib/pkgconfig/
+        run: export PATH=$PATH:/usr/include:/usr/lib/${{matrix.cfg.path-prefix}}/:/usr/bin && sudo mv /usr/include/x86_64-linux-gnu/openssl/opensslconf.h /usr/include/openssl/ && sudo rm /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/x86_64-linux-gnu/libcrypto.a /usr/lib/x86_64-linux-gnu/libssl.a && sudo mv /usr/lib/${{matrix.cfg.path-prefix}}/pkgconfig/libsodium.pc /usr/lib/pkgconfig/
 
       - name: Generate CMakeFiles
-        run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake -G Ninja ..
+        run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=cmake/${{matrix.cfg.name}}ToolChain.cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 
       - name: Compile Source
         run: cd build && sudo ninja
@@ -124,6 +125,6 @@ jobs:
       - name: Upload Binaries
         uses: actions/upload-artifact@v2
         with:
-          name: "libdpp - Debian Package AArch64"
+          name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.deb"
 
