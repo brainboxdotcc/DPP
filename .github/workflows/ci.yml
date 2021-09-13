@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install apt packages
-        run: dpkg --add-architecture i386 && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }}:${{ matrix.cfg.arch }} ninja-build libsodium-dev:${{ matrix.cfg.arch }} libopus-dev:${{ matrix.cfg.arch }} zlib1g-dev:${{ matrix.cfg.arch }}
+        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }}:${{ matrix.cfg.arch }} ninja-build libsodium-dev:${{ matrix.cfg.arch }} libopus-dev:${{ matrix.cfg.arch }} zlib1g-dev:${{ matrix.cfg.arch }}
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -G Ninja ..
