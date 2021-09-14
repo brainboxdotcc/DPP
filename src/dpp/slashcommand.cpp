@@ -125,6 +125,7 @@ void to_json(json& j, const slashcommand& p) {
 	}
 
 	j["default_permission"] = p.default_permission;
+	j["application_id"] = std::to_string(p.application_id);
 }
 
 std::string slashcommand::build_json(bool with_id) const {
