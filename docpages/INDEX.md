@@ -52,6 +52,9 @@ This library powers the bot [TriviaBot](https://triviabot.co.uk) which has over 
 ## How much RAM does this library use?
 In production on TriviaBot, the bot takes approximately 2gb of ram to run 18 separate processes (this is approximately **140mb** per process) on a production bot with 11 million users and 111,000 guilds. Each process takes under 1% CPU. This is less than a quarter of the memory of a similar C++ Discord library, **Aegis.cpp** (version 2).
 
+## How do I use this library in Windows?
+The easiest way is to download the precompiled latest release from our github releases, and take the dlls, .lib file, and header files (`bin`, `lib` and `include` directories), put them in a place on your hard disk where you know where they are. Go into visual studio project settings in a new project, and point the project directories (notably the library directories and and include directories) at the correct locations. Add the `include` folder you extracted to your include directories, and add  `dpp.lib` to your library directories. Ensure the project is set to C++17 standard in the settings. You should then be able to compile example programs within that project. When you run the program you have compiled you must ensure that all the dll files from the `bin` directory exist in the same directory as your executable.
+
 ## How much of the library is completed?
 All REST calls (outbound commands) are completed including slash commands, and all Discord events are available. The library also has voice support.
 
@@ -82,7 +85,7 @@ No, D++ is a classically designed library which installs itself to your library 
 ## Does this library support slash commands/interactions?
 Yes! This library supports slash commands. For more information please see \ref slashcommands "Using Slash Commands and Interactions".
 
-## Does this library support buttons (message components)?
+## Does this library support buttons/drop down menus (message components)?
 Yes! This library supports button message components, e.g. interactive buttons on the bottom of messages. For more information please see our \ref components "Using component interactions" and \ref components2 "Using component interactions (advanced)" examples.
 
 ## Is the library asynchronous?
@@ -117,5 +120,5 @@ If this happens, switch your project to release mode. Our precompiled binaries a
 If you require a debug build, or a build for a newer visual studio, you will have to compile it yourself from the github sources.
 Please see the section about \ref buildwindows for more information on how to do this.
 
-## Does this library build on Raspberry Pi?
-Yes! This project will build and run on Raspberry Pi and is very much suited to this kind of system. It may take some time (read: hours) to compile the project on your Raspberry Pi unless you build it using a cross compiler. We plan to offer pre-built `.deb` files for arm7 and arm64 soon, stay tuned for further updates!
+## Does this library build/run on Raspberry Pi?
+Yes! This project will build and run on Raspberry Pi and is very much suited to this kind of system. It may take some time (read: hours) to compile the project on your Raspberry Pi unless you build it using a cross compiler. We offer pre-built `.deb` files for arm7 and arm64, you should use these where possible to avoid having to compile it by hand, or you can use a cross-compiler to build it on your PC then transfer the compiled binaries across.

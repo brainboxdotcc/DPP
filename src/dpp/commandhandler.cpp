@@ -409,4 +409,9 @@ void commandhandler::thinking(command_source source)
 	}
 }
 
+void commandhandler::thonk(command_source source)
+{
+	thinking(source);
+}
+
 };

@@ -13,9 +13,9 @@
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
 * [Slash Commands/Interactions suppport](https://dpp.brainbox.cc/slashcommands.html)
 * [Voice support](https://dpp.brainbox.cc/soundboard.html)
-* Pretty much the entire Discord API is available for use in the library
+* The entire Discord API is available for use in the library
 * Stable [Windows support](https://dpp.brainbox.cc/buildwindows.html)
-* Ready-made compiled packages for Windows, Raspberry Pi (ARM64) and Debian x64
+* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7) and Debian x86/x64
 
 Want to help? Drop me a line or send a PR.
 
