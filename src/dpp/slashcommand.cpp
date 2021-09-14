@@ -286,30 +286,39 @@ void from_json(const nlohmann::json& j, interaction& i) {
 
 		const json& data = j["data"];
 
+		/* Deal with 'resolved' data, e.g. users, members, roles, channels */
 		if (data.find("resolved") != data.end()) {
 			const json& d_resolved = data["resolved"];
+			/* Users */
 			if (d_resolved.find("users") != d_resolved.end()) {
 				for (auto v = d_resolved["users"].begin(); v != d_resolved["users"].end(); ++v) {
 					json f = *v;
-					i.resolved.users[strtoull(v.key().c_str(), nullptr, 10)] = dpp::user().fill_from_json(&f);
+					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					i.resolved.users[id] = dpp::user().fill_from_json(&f);
 				}
 			}
+			/* Roles */
 			if (d_resolved.find("roles") != d_resolved.end()) {
 				for (auto v = d_resolved["roles"].begin(); v != d_resolved["roles"].end(); ++v) {
 					json f = *v;
-					i.resolved.roles[strtoull(v.key().c_str(), nullptr, 10)] = dpp::role().fill_from_json(i.guild_id, &f);
+					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					i.resolved.roles[id] = dpp::role().fill_from_json(i.guild_id, &f);
 				}
 			}
+			/* Channels */
 			if (d_resolved.find("channels") != d_resolved.end()) {
 				for (auto v = d_resolved["channels"].begin(); v != d_resolved["channels"].end(); ++v) {
 					json f = *v;
-					i.resolved.channels[strtoull(v.key().c_str(), nullptr, 10)] = dpp::channel().fill_from_json(&f);
+					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					i.resolved.channels[id] = dpp::channel().fill_from_json(&f);
 				}
 			}
+			/* Members */
 			if (d_resolved.find("members") != d_resolved.end()) {
 				for (auto v = d_resolved["members"].begin(); v != d_resolved["members"].end(); ++v) {
 					json f = *v;
-					i.resolved.members[strtoull(v.key().c_str(), nullptr, 10)] = dpp::guild_member().fill_from_json(&f, i.guild_id, strtoull(v.key().c_str(), nullptr, 10));
+					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					i.resolved.members[id] = dpp::guild_member().fill_from_json(&f, i.guild_id, id);
 				}
 			}
 		}

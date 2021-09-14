@@ -159,8 +159,6 @@ void to_json(nlohmann::json& j, const command_option& opt);
  */
 enum interaction_response_type {
 	ir_pong = 1,					//!< ACK a Ping
-	ir_acknowledge = 2,				//!< DEPRECATED ACK a command without sending a message, eating the user's input
-	ir_channel_message = 3,				//!< DEPRECATED respond with a message, eating the user's input
 	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
 	ir_deferred_channel_message_with_source = 5,	//!< ACK an interaction and edit a response later, the user sees a loading state
 	ir_deferred_update_message = 6,			//!< for components, ACK an interaction and edit the original message later; the user does not see a loading state
@@ -231,9 +229,21 @@ struct CoreExport interaction_response {
  * @brief Resolved snowflake ids to users, guild members, roles and channels.
  */
 struct CoreExport command_resolved {
+	/**
+	 * @brief Resolved users
+	 */
 	std::map<dpp::snowflake, dpp::user> users;
+	/**
+	 * @brief Resolved guild members
+	 */
 	std::map<dpp::snowflake, dpp::guild_member> members;
+	/**
+	 * @brief Resolved roles
+	 */
 	std::map<dpp::snowflake, dpp::role> roles;
+	/**
+	 * @brief Resolved channels
+	 */
 	std::map<dpp::snowflake, dpp::channel> channels;
 };
 
@@ -276,7 +286,6 @@ enum interaction_type {
 struct CoreExport command_interaction {
 	snowflake id;                              //!< the ID of the invoked command
 	std::string name;                          //!< the name of the invoked command
-	command_resolved resolved;                 //!< Optional: converted users + roles + channels
 	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
 };
 

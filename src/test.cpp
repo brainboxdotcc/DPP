@@ -22,7 +22,8 @@ int main()
 	bot.on_ready([&bot, &command_handler](const dpp::ready_t & event) {
 		command_handler.add_command("avatar", /*avatar*/
 		{ {"user", dpp::param_info(dpp::pt_user, true, "Optional user parameter")} },
-			[](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
+			[&command_handler](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
+				command_handler.thinking(src);
 				std::cout << "Command triggered: " << command << "\n";
 				std::cout << "Parameter: \n";
 				if (parameters.size() == 0) {

@@ -398,4 +398,15 @@ void commandhandler::reply(const dpp::message &m, command_source source)
 	}
 }
 
+void commandhandler::thinking(command_source source)
+{
+	dpp::message msg;
+	msg.content = "*";
+	msg.guild_id = source.guild_id;
+	msg.channel_id = source.channel_id;
+	if (!source.command_token.empty() && source.command_id) {
+		owner->interaction_response_create(source.command_id, source.command_token, dpp::interaction_response(ir_deferred_channel_message_with_source, msg));
+	}
+}
+
 };
