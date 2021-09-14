@@ -92,13 +92,14 @@ jobs:
           name: "libdpp - Windows ${{matrix.cfg.name}}"
           path: '${{github.workspace}}/main/build/*.zip'
 
-  arm:
+  cross-compiles:
     strategy:
       fail-fast: false
       matrix:
         cfg:
-          - {name: "ARM64", arch: arm64, compilers: gcc-9-aarch64-linux-gnu g++-9-aarch64-linux-gnu, path-prefix: aarch64-linux-gnu}
-          - {name: "ARMHF", arch: armhf, compilers: gcc-8-arm-linux-gnueabihf g++-8-arm-linux-gnueabihf, path-prefix: arm-linux-gnueabihf}
+          - {name: "ARM64", arch: arm64, packages: gcc-9-aarch64-linux-gnu g++-9-aarch64-linux-gnu, path-prefix: aarch64-linux-gnu, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake, spec-repo: true}
+          - {name: "ARMHF", arch: armhf, packages: gcc-8-arm-linux-gnueabihf g++-8-arm-linux-gnueabihf, path-prefix: arm-linux-gnueabihf, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMHFToolChain.cmake, spec-repo: true}
+          - {name: "Linux x86", arch: i386, packages: 'g++-8 gcc-8-multilib glibc-*:i386 libc6-dev-i386 g++-8-multilib', path-prefix: i386-linux-gnu, cmake-options: -DCMAKE_CXX_COMPILER=/usr/bin/g++-8 -DCMAKE_CXX_FLAGS=-m32 -DCPACK_PACKAGE_ARCHITECTURE=i386, spec-repo: false}
 
     name: ${{matrix.cfg.name}}
     runs-on: ubuntu-20.04
@@ -106,17 +107,18 @@ jobs:
       - name: Checkout D++
         uses: actions/checkout@v2
 
-      - name: Setup ${{matrix.cfg.name}}
-        run: printf "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main multiverse restricted universe\ndeb [arch=${{matrix.cfg.arch}}] http://ports.ubuntu.com/ubuntu-ports/ focal main multiverse restricted universe\ndeb [arch=${{matrix.cfg.arch}}] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://security.ubuntu.com/ubuntu/ focal-security main multiverse restricted universe" > a && sudo mv a /etc/apt/sources.list && sudo dpkg --add-architecture ${{matrix.cfg.arch}} && sudo apt update
+      - name: Setup ${{matrix.cfg.name}} Repositories 
+        if: ${{matrix.cfg.spec-repo == true}}
+        run: printf "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main multiverse restricted universe\ndeb [arch=${{matrix.cfg.arch}}] http://ports.ubuntu.com/ubuntu-ports/ focal main multiverse restricted universe\ndeb [arch=${{matrix.cfg.arch}}] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://security.ubuntu.com/ubuntu/ focal-security main multiverse restricted universe" > a && sudo mv a /etc/apt/sources.list
 
       - name: Install Packages
-        run: sudo apt-get install -y zlib1g-dev:${{matrix.cfg.arch}} libssl-dev:${{matrix.cfg.arch}} ${{matrix.cfg.compilers}} ninja-build libopus-dev:${{matrix.cfg.arch}} libsodium-dev:${{matrix.cfg.arch}} 
+        run: sudo dpkg --add-architecture ${{matrix.cfg.arch}} && sudo apt update && sudo apt install -y zlib1g-dev:${{matrix.cfg.arch}} libssl-dev:${{matrix.cfg.arch}} ${{matrix.cfg.packages}} ninja-build libopus-dev:${{matrix.cfg.arch}} libsodium-dev:${{matrix.cfg.arch}} 
 
       - name: Prepare System for CMake
         run: export PATH=$PATH:/usr/include:/usr/lib/${{matrix.cfg.path-prefix}}/:/usr/bin && sudo mv /usr/include/x86_64-linux-gnu/openssl/opensslconf.h /usr/include/openssl/ && sudo rm /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/x86_64-linux-gnu/libcrypto.a /usr/lib/x86_64-linux-gnu/libssl.a && sudo mv /usr/lib/${{matrix.cfg.path-prefix}}/pkgconfig/libsodium.pc /usr/lib/pkgconfig/
 
       - name: Generate CMakeFiles
-        run: mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=cmake/${{matrix.cfg.name}}ToolChain.cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir build && cd build && cmake ${{matrix.cfg.cmake-options}} -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 
       - name: Compile Source
         run: cd build && sudo ninja
@@ -129,4 +131,5 @@ jobs:
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.deb"
+
 
