@@ -59,9 +59,10 @@ jobs:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
         cfg:
-        - { name: x64,  arch: x64 }
+        - { name: x64,  arch: x64, config: Release }
+        - { name: x64,  arch: x64, config: Debug }
 
-    name: "Windows ${{matrix.cfg.name}}"
+    name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}"
     runs-on: windows-2019
     steps:
       - name: Checkout D++
@@ -79,7 +80,7 @@ jobs:
         run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" ..
 
       - name: Build Project
-        run: cmake --build main/build --target dpp --config Release
+        run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}}
 
       - name: Package distributable
         run: cd main/build && cpack
@@ -87,7 +88,7 @@ jobs:
       - name: Upload Binary
         uses: actions/upload-artifact@v2
         with:
-          name: "libdpp - Windows ${{matrix.cfg.name}}"
+          name: "libdpp - Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}"
           path: '${{github.workspace}}/main/build/*.zip'
 
   cross-compiles:
