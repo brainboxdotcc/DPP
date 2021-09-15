@@ -745,8 +745,8 @@ bool message::is_crosspost() const {
 
 }
 
-bool message::supress_embeds() const {
-	return flags & m_supress_embeds;
+bool message::suppress_embeds() const {
+	return flags & m_suppress_embeds;
 }
 
 bool message::is_source_message_deleted() const {

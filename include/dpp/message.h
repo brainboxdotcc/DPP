@@ -474,7 +474,7 @@ struct CoreExport embed {
 	/** Add an embed field. Returns the embed itself so these method calls may be "chained"
 	 * @param name The name of the field
 	 * @param value The value of the field (max length 1000)
-	 * @param is_inline Wether or not to display the field 'inline' or on its own line
+	 * @param is_inline Whether or not to display the field 'inline' or on its own line
 	 * @return A reference to self
 	 */
 	embed& add_field(const std::string& name, const std::string &value, bool is_inline = false);
@@ -724,7 +724,7 @@ enum message_flags {
 	/// this message originated from a message in another channel (via Channel Following)
 	m_is_crosspost =  1 << 1,
 	/// do not include any embeds when serializing this message
-	m_supress_embeds = 1 << 2,
+	m_suppress_embeds = 1 << 2,
 	/// the source message for this crosspost has been deleted (via Channel Following)
 	m_source_message_deleted = 1 << 3,
 	/// this message came from the urgent message system
@@ -736,7 +736,7 @@ enum message_flags {
 };
 
 /**
- * @brief Mesage types for dpp::message::type
+ * @brief Message types for dpp::message::type
  */
 enum message_type {
 	/// Default
@@ -970,9 +970,9 @@ struct CoreExport message {
 	/**
 	 * @brief Set the allowed mentions object for pings on the message
 	 * 
-	 * @param _parse_users wether or not to parse users in the message content or embeds
-	 * @param _parse_roles wether or not to parse roles in the message content or embeds
-	 * @param _parse_everyone wether or not to parse everyone/here in the message content or embeds 
+	 * @param _parse_users whether or not to parse users in the message content or embeds
+	 * @param _parse_roles whether or not to parse roles in the message content or embeds
+	 * @param _parse_everyone whether or not to parse everyone/here in the message content or embeds 
 	 * @param _replied_user if set to true and this is a reply, then ping the user we reply to
 	 * @param users list of user ids to allow pings for
 	 * @param roles list of role ids to allow pings for
@@ -982,7 +982,7 @@ struct CoreExport message {
 
 	/** Fill this object from json.
 	 * @param j JSON object to fill from
-	 * @param cp Cache policy for user records, wether or not we cache users when a message is received
+	 * @param cp Cache policy for user records, whether or not we cache users when a message is received
 	 * @return A reference to self
 	 */
 	message& fill_from_json(nlohmann::json* j, cache_policy_t cp = {cp_aggressive, cp_aggressive, cp_aggressive});
@@ -1012,7 +1012,7 @@ struct CoreExport message {
 	 * 
 	 * @return true if embeds removed
 	 */
-	bool supress_embeds() const;
+	bool suppress_embeds() const;
 
 	/**
 	 * @brief True if source message was deleted

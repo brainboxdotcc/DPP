@@ -290,8 +290,8 @@ public:
 	 * @param shards The total number of shards on this bot. If there are multiple clusters, then (shards / clusters) actual shards will run on this cluster.
 	 * If you omit this value, the library will attempt to query the Discord API for the correct number of shards to start.
 	 * @param cluster_id The ID of this cluster, should be between 0 and MAXCLUSTERS-1
-	 * @param maxclusters The total number of clusters that are active, which may be on seperate processes or even separate machines.
-	 * @param compressed Wether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
+	 * @param maxclusters The total number of clusters that are active, which may be on separate processes or even separate machines.
+	 * @param compressed Whether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
 	 * @param policy Set the user caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
 	 */
 	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = {cp_aggressive, cp_aggressive, cp_aggressive});
@@ -1968,7 +1968,7 @@ public:
 	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Create a thread with a message (Discord: ID of a thread is same as mesage ID)
+	 * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
 	 *
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
