@@ -26,7 +26,7 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) : type(typ), name(nam), state(stat), url(url_)
+activity::activity(const activity_type typ, const std::string& name, const std::string& stat, const std::string& url_) : type(typ), name(name), state(stat), url(url_)
 {	
 }
 

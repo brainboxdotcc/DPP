@@ -207,7 +207,7 @@ public:
 	/** Setting for how notifications are to be delivered to users */
 	uint8_t default_message_notifications;
 
-	/** Wether or not explicit content filtering is enable and what setting it is */
+	/** Whether or not explicit content filtering is enable and what setting it is */
 	uint8_t explicit_content_filter;
 
 	/** If multi factor authentication is required for moderators or not */

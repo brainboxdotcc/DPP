@@ -167,11 +167,11 @@ public:
 	 * @brief Construct a new activity
 	 * 
 	 * @param typ 
-	 * @param nam 
+	 * @param name 
 	 * @param stat
 	 * @param url_
 	 */
-	activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_);
+	activity(const activity_type typ, const std::string& name, const std::string& stat, const std::string& url_);
 };
 
 /**

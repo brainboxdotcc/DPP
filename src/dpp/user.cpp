@@ -25,7 +25,7 @@
 
 using json = nlohmann::json;
 
-/* A mapping of discord's flag values to our bitmap (theyre different bit positions to fit other stuff in) */
+/* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
 std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 0,       dpp::u_discord_employee },
 	{ 1 << 1,       dpp::u_partnered_owner },
@@ -57,7 +57,7 @@ user::~user()
 }
 
 std::string user::get_avatar_url()  const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they havent.
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
 	return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}",

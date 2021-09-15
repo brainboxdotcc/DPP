@@ -285,7 +285,7 @@ void request_queue::in_loop()
 							auto currbucket = buckets.find(bucket.first);
 
 							if (currbucket != buckets.end()) {
-								/* Theres a bucket for this request. Check its status. If the bucket says to wait,
+								/* There's a bucket for this request. Check its status. If the bucket says to wait,
 								* skip all requests in this bucket till its ok.
 								*/
 								if (currbucket->second.remaining < 1) {

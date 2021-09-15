@@ -201,7 +201,7 @@ class CoreExport discord_voice_client : public websocket_client
 	int UDPSend(const char* data, size_t length);
 
 	/**
-	 * @brief Receieve data from UDP socket immediately.
+	 * @brief Receive data from UDP socket immediately.
 	 * 
 	 * @param data data to receive
 	 * @param max_length size of data receiving buffer

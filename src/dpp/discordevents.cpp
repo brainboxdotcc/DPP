@@ -311,7 +311,7 @@ void discord_client::HandleEvent(const std::string &event, json &j, const std::s
 	auto ev_iter = eventmap.find(event);
 	if (ev_iter != eventmap.end()) {
 		/* A handler with nullptr is silently ignored. We don't plan to make a handler for it
-		 * so this usually some user-only thing thats crept into the API and shown to bots
+		 * so this usually some user-only thing that's crept into the API and shown to bots
 		 * that we dont care about.
 		 */
 		if (ev_iter->second != nullptr) {

@@ -34,7 +34,7 @@ enum voicestate_flags {
 	vs_self_deaf	=	0b00001000,	//!< Self Deafened
 	vs_self_stream	=	0b00010000,	//!< Self Streaming
 	vs_self_video	=	0b00100000,	//!< Self Video
-	vs_supress	=	0b01000000	//!< Supression
+	vs_suppress	=	0b01000000	//!< Suppression
 };
 
 /**
@@ -94,9 +94,9 @@ public:
 	/// Return true if the user is in video
 	bool self_video() const;
 
-	/// Return true if user is surpressed.
-	/// "HELP HELP I'M BEING SUPRESSED!"
-	bool is_supressed() const;
+	/// Return true if user is suppressed.
+	/// "HELP HELP I'M BEING SUPPRESSED!"
+	bool is_suppressed() const;
 };
 
 /** A container of voicestates */

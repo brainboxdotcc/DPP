@@ -120,7 +120,7 @@ typedef std::vector<std::pair<std::string, param_info>> parameter_registration_t
 
 /**
  * @brief Parameter list for a called command.
- * See dpp::parameter_registration_t for an explaination as to why vector is used.
+ * See dpp::parameter_registration_t for an explanation as to why vector is used.
  */
 typedef std::vector<std::pair<std::string, command_parameter>> parameter_list_t;
 
