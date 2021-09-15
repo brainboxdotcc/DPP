@@ -355,6 +355,9 @@ void cluster::guild_command_create(slashcommand &s, snowflake guild_id, command_
 }
 
 void cluster::guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback) {
+	if (commands.empty()) {
+		return;
+	}
 	json j = json::array();
 	for (auto & s : commands) {
 		j.push_back(json::parse(s.build_json(false)));
@@ -371,6 +374,9 @@ void cluster::guild_bulk_command_create(const std::vector<slashcommand> &command
 }
 
 void cluster::global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback) {
+	if (commands.empty()) {
+		return;
+	}
 	json j = json::array();
 	for (auto & s : commands) {
 		j.push_back(json::parse(s.build_json(false)));
