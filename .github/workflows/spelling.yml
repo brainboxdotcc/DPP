@@ -16,7 +16,14 @@ jobs:
         echo "REF_BRANCH=${REF_BRANCH//refs\/heads\//}" >> $GITHUB_ENV
     - name: Whitelist some directories and files
       run: |
-        echo "^./.github/workflows" > ${{ runner.workspace }}/DPP/.misspell-fixer.ignore
+        echo "\
+        ^./.github/workflows
+        ^./include/dpp/nlohmann/json.hpp
+        ^./include/dpp/presence.h:.*:nam
+        ^./src/dpp/presence.cpp:.*:nam
+        ^./src/dpp/httplib.cpp
+        ^./win32\
+        " > ${{ runner.workspace }}/DPP/.misspell-fixer.ignore
     - uses: sobolevn/misspell-fixer-action@master
       with:
         options: '-rvnfuRVD .'

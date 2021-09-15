@@ -232,7 +232,7 @@ DECLARE_ASN1_ITEM(PKCS7_ATTR_VERIFY)
 DECLARE_ASN1_NDEF_FUNCTION(PKCS7)
 DECLARE_ASN1_PRINT_FUNCTION(PKCS7)
 
-long PKCS7_ctrl(PKCS7 *p7, int cmd, long large, char *parg);
+long PKCS7_ctrl(PKCS7 *p7, int cmd, long larg, char *parg);
 
 int PKCS7_set_type(PKCS7 *p7, int type);
 int PKCS7_set0_type_other(PKCS7 *p7, int type, ASN1_TYPE *other);
