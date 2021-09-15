@@ -51,8 +51,8 @@ voicestate& voicestate::fill_from_json(nlohmann::json* j) {
 		flags |= vs_self_stream;
 	if (BoolNotNull(j, "self_video"))
 		flags |= vs_self_video;
-	if (BoolNotNull(j, "supress"))
-		flags |= vs_supress;
+	if (BoolNotNull(j, "suppress"))
+		flags |= vs_suppress;
 	return *this;
 }
 
@@ -80,8 +80,8 @@ bool voicestate::self_video() const {
 	return flags & vs_self_video;
 }
 
-bool voicestate::is_supressed() const {
-	return flags & vs_supress;
+bool voicestate::is_suppressed() const {
+	return flags & vs_suppress;
 }
 
 std::string voicestate::build_json() const {

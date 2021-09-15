@@ -1095,7 +1095,7 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const voice_ready_t& event)> voice_ready;
-	/** @brief Event handler function pointer for voice receieve event
+	/** @brief Event handler function pointer for voice receive event
 	 * @param event Event parameters
 	 */
 	std::function<void(const voice_receive_t& event)> voice_receive;

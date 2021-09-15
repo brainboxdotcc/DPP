@@ -304,7 +304,7 @@ void websocket_client::HandlePingPong(bool ping, const std::string &payload)
 {
 	unsigned char out[MAXHEADERSIZE];
 	if (ping) {
-		/* For receving pings we echo back their payload with the type OP_PONG */
+		/* For receiving pings we echo back their payload with the type OP_PONG */
 		size_t s = this->FillHeader(out, payload.length(), OP_PONG);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);

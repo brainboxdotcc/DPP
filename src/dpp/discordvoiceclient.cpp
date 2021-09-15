@@ -450,7 +450,7 @@ void discord_voice_client::Error(uint32_t errorcode)
 		{ 1003, "Endpoint received an unsupported frame" },
 		{ 1004, "Reserved code" },
 		{ 1005, "Expected close status, received none" },
-		{ 1006, "No close code frame has been receieved" },
+		{ 1006, "No close code frame has been received" },
 		{ 1007, "Endpoint received inconsistent message (e.g. malformed UTF-8)" },
 		{ 1008, "Generic error" },
 		{ 1009, "Endpoint won't process large frame" },

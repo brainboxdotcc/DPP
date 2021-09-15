@@ -123,7 +123,7 @@ run `./test` for unit test cases. You will need to create a `config.json` file i
 
 ## 6. Installation to a different directory
 
-If you want to install the library, its dependendancies and header files to a different directory, specify this directory when running `cmake`:
+If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
     cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
 

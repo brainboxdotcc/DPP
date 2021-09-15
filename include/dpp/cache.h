@@ -88,7 +88,7 @@ namespace dpp {
 		 * @brief Get the container map
 		 * @warning Be sure to use cache::get_mutex() correctly if you
 		 * manipulate or iterate the map returned by this method! If you do
-		 * not, this is not thread safe and will casue crashes!
+		 * not, this is not thread safe and will cause crashes!
 		 * @see cache::get_mutex
 		 * 
 		 * @return cache_container& A reference to the cache's container map

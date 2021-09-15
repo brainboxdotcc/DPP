@@ -186,7 +186,7 @@ namespace dpp {
 		 * @brief Convert a byte count to display value
 		 * 
 		 * @param c number of bytes
-		 * @return std::string display value suffixed with M, G, T where neccessary
+		 * @return std::string display value suffixed with M, G, T where necessary
 		 */
 		std::string CoreExport bytes(uint64_t c);
 
@@ -257,7 +257,7 @@ namespace dpp {
 		 * @param str string to return substring from
 		 * @param start start codepoint offset
 		 * @param length length in codepoints
-		 * @return std::string Substring in UTF-8 or emtpy string if invalid UTF-8 passed in
+		 * @return std::string Substring in UTF-8 or empty string if invalid UTF-8 passed in
 		 */
 		std::string CoreExport utf8substr(const std::string& str, std::string::size_type start, std::string::size_type length);
 	};

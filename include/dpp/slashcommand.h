@@ -527,7 +527,7 @@ public:
 
 	/**
 	 * @brief Disable default permissions, command will be unusable unless
-	 *        permissions are overriden with add_permission and
+	 *        permissions are overridden with add_permission and
 	 *        dpp::guild_command_edit_permissions
 	 *
 	 * @return slashcommand& reference to self for chaining of calls
