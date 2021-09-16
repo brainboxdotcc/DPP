@@ -27,6 +27,13 @@
 
 using json = nlohmann::json;
 
+static const std::map<presence_status, std::string> status_name_mapping = {
+	{ps_online, "online"},
+	{ps_offline, "offline"},
+	{ps_idle, "idle"},
+	{ps_dnd, "dnd"}
+};
+
 namespace dpp {
 
 integration::integration() :
