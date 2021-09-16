@@ -533,6 +533,7 @@ attachment::attachment(json *j) : attachment() {
 	this->width = Int32NotNull(j, "width");
 	this->height = Int32NotNull(j, "height");
 	this->content_type = StringNotNull(j, "content_type");
+	this->ephemeral = BoolNotNull(j, "ephemeral");
 }
 
 std::string message::build_json(bool with_id, bool is_interaction_response) const {
