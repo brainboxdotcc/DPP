@@ -34,6 +34,13 @@ static const std::map<presence_status, std::string> status_name_mapping = {
 	{ps_dnd, "dnd"}
 };
 
+static const std::map<std::string, integration_type> type_map = {
+	{ "", i_discord },
+	{ "youtube", i_youtube },
+	{ "twitch", i_twitch },
+	{ "discord", i_discord }
+};
+
 namespace dpp {
 
 integration::integration() :
@@ -56,12 +63,6 @@ integration::~integration()
 
 integration& integration::fill_from_json(nlohmann::json* j)
 {
-	std::map<std::string, integration_type> type_map = {
-		{ "", i_discord },
-		{ "youtube", i_youtube },
-		{ "twitch", i_twitch },
-		{ "discord", i_discord }
-	};
 	this->id = SnowflakeNotNull(j, "id");
 	this->name = StringNotNull(j, "name");
 	this->type = type_map[StringNotNull(j, "type")];
