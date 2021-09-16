@@ -30,6 +30,12 @@
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>
 
+static const std::map<image_type, std::string> mimetypes = {
+	{ i_gif, "image/gif" },
+	{ i_jpg, "image/jpeg" },
+	{ i_png, "image/png" }
+};
+
 namespace dpp {
 
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy)
@@ -1376,11 +1382,6 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 		j["nickname"] = nickname;
 	}
 	if (!image_blob.empty()) {
-		static std::map<image_type, std::string> mimetypes = {
-			{ i_gif, "image/gif" },
-			{ i_jpg, "image/jpeg" },
-			{ i_png, "image/png" }
-		};
 		if (image_blob.size() > MAX_EMOJI_SIZE) {
 			throw dpp::exception("User icon file exceeds discord limit of 256 kilobytes");
 		}
