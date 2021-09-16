@@ -247,7 +247,7 @@ void SetTimestampNotNull(const json* j, const char* keyname, time_t &v)
 	}
 }
 
-static const std::map<std::string, dpp::events::event*> eventmap = {
+const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "__LOG__", new dpp::events::logger() },
 	{ "GUILD_CREATE", new dpp::events::guild_create() },
 	{ "GUILD_UPDATE", new dpp::events::guild_update() },

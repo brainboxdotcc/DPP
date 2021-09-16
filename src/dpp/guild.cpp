@@ -28,7 +28,7 @@
 
 using json = nlohmann::json;
 
-static const std::map<std::string, dpp::guild_flags> featuremap = {
+const std::map<std::string, dpp::guild_flags> featuremap = {
 	{"INVITE_SPLASH", dpp::g_invite_splash },
 	{"VIP_REGIONS", dpp::g_vip_regions },
 	{"VANITY_URL", dpp::g_vanity_url },
@@ -46,7 +46,7 @@ static const std::map<std::string, dpp::guild_flags> featuremap = {
 	{"PREVIEW_ENABLED", dpp::g_preview_enabled }
 };
 
-std::map<std::string, dpp::region> regionmap = {
+const std::map<std::string, dpp::region> regionmap = {
 	{ "brazil", dpp::r_brazil },
 	{ "central-europe", dpp::r_central_europe },
 	{ "hong-kong", dpp::r_hong_kong },
