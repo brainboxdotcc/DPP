@@ -24,6 +24,12 @@
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/dispatcher.h>
 
+static const std::map<image_type, std::string> mimetypes = {
+	{ i_gif, "image/gif" },
+	{ i_jpg, "image/jpeg" },
+	{ i_png, "image/png" }
+};
+
 namespace dpp {
 
 using json = nlohmann::json;
@@ -76,11 +82,6 @@ std::string webhook::build_json(bool with_id) const {
 }
 
 webhook& webhook::load_image(const std::string &image_blob, image_type type) {
-	static std::map<image_type, std::string> mimetypes = {
-		{ i_gif, "image/gif" },
-		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" }
-	};
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
 		throw dpp::exception("Webhook icon file exceeds discord limit of 256 kilobytes");
 	}
