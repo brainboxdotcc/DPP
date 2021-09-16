@@ -28,7 +28,7 @@
 
 using json = nlohmann::json;
 
-std::map<std::string, dpp::guild_flags> featuremap = {
+static const std::map<std::string, dpp::guild_flags> featuremap = {
 	{"INVITE_SPLASH", dpp::g_invite_splash },
 	{"VIP_REGIONS", dpp::g_vip_regions },
 	{"VANITY_URL", dpp::g_vanity_url },
