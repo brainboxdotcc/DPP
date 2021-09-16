@@ -517,11 +517,13 @@ reaction::reaction(json* j) {
 	emoji_name = StringNotNull(&emoji, "name");
 }
 
-attachment::attachment() {
-	id = 0;
-	size = 0;
-	width = 0;
-	height = 0;
+attachment::attachment() 
+	: id(0)
+	, size(0)
+	, width(0)
+	, height(0)
+	, ephemeral(false)
+{
 }
 
 attachment::attachment(json *j) : attachment() {

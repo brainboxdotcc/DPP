@@ -569,7 +569,7 @@ struct CoreExport attachment {
 	uint32_t height;
 	/** MIME type of the attachment, if applicable */
 	std::string content_type;
-	//** Whether this attachment is ephemeral, if applicable */
+	/** Whether this attachment is ephemeral, if applicable */
 	bool ephemeral;
 
 	/**
