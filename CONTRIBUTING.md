@@ -1,10 +1,6 @@
 # Contributing
 
-When contributing to this repository, please first discuss the change you wish to make via issue
-or Discord before making a change. 
-
-Please note we have a code of conduct, please follow it in all your interactions with the project.
-
+When contributing to this repository, please do not feel intimidated! We welcome PRs from developers of all levels of experience and we were all new once.
 
 ## Pull Request Process
 
@@ -17,3 +13,7 @@ Please note we have a code of conduct, please follow it in all your interactions
 5. Ensure that you do not break any existing API calls without discussing on Discord first!
 6. Be sure to follow the coding style guide (if you are not sure, match the code style of existing files
    including indent style etc).
+7. Your PR must pass the CI actions before being allowed to be merged. Our PR actions check that the
+   build will compile on various platforms before release and makes precompiled versions of the library.
+8. If you are on the discord server for the project and your PR is accepted, let a moderator know and we
+   will grant you the 'Contributors' role.
