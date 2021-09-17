@@ -30,13 +30,13 @@
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>
 
+namespace dpp {
+
 static const std::map<image_type, std::string> mimetypes = {
 	{ i_gif, "image/gif" },
 	{ i_jpg, "image/jpeg" },
 	{ i_png, "image/png" }
 };
-
-namespace dpp {
 
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy)
 	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id),
