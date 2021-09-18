@@ -2,3 +2,5 @@
 *.sh linguist-detectable=false
 *.pl linguist-detectable=false
 *.html linguist-detectable=false
+*.h linguist-language=C++
+win32/* linguist-vendored
