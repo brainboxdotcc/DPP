@@ -760,6 +760,10 @@ bool message::is_urgent() const {
 	return flags & m_urgent;
 }
 
+bool message::has_thread() const {
+	return flags & m_has_thread;
+}
+
 bool message::is_ephemeral() const {
 	return flags & m_ephemeral;
 }
