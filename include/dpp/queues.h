@@ -91,6 +91,8 @@ struct CoreExport http_request_completion_t {
 	bool ratelimit_global = false;
 	/** Reply body */
 	std::string body;
+	/** Ping latency */
+	double latency;
 };
 
 /**
@@ -167,7 +169,7 @@ public:
 	/** Execute the HTTP request and mark the request complete.
 	 * @param owner creating cluster
 	 */
-	http_request_completion_t Run(const class cluster* owner);
+	http_request_completion_t Run(class cluster* owner);
 
 	/** Returns true if the request is complete */
 	bool is_completed();
@@ -207,7 +209,7 @@ struct CoreExport bucket_t {
 class CoreExport request_queue {
 private:
 	/** The cluster that owns this request_queue */
-	const class cluster* creator;
+	class cluster* creator;
 	/** Mutexes for thread safety */
 	std::mutex in_mutex;
 	std::mutex out_mutex;
@@ -255,7 +257,7 @@ public:
 	/** Constructor
 	 * @param owner The creating cluster
 	 */
-	request_queue(const class cluster* owner);
+	request_queue(class cluster* owner);
 
 	/** Destructor */
 	~request_queue();

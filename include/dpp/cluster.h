@@ -272,6 +272,9 @@ public:
 	/** Total number of clusters that are active */
 	uint32_t maxclusters;
 
+	/** REST latency (HTTPS ping) */
+	double rest_ping;
+
 	/** Routes events from Discord back to user program code via std::functions */
 	dpp::dispatcher dispatch;
 
