@@ -38,6 +38,7 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	id = SnowflakeNotNull(j, "id");
 	name = StringNotNull(j, "name");
 	description = StringNotNull(j, "description");
+	version = SnowflakeNotNull(j, "version");
 	return *this;
 }
 

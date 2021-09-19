@@ -731,6 +731,8 @@ enum message_flags {
 	m_source_message_deleted = 1 << 3,
 	/// this message came from the urgent message system
 	m_urgent = 1 << 4,
+	/// this message has an associated thread, with the same id as the message
+	m_has_thread = 1 << 5,
 	/// this message is only visible to the user who invoked the Interaction
 	m_ephemeral = 1 << 6,
 	/// this message is an Interaction Response and the bot is "thinking"
@@ -784,7 +786,9 @@ enum message_type {
 	/// Thread starter message
 	mt_thread_starter_message	= 21,
 	/// Invite reminder
-	mt_guild_invite_reminder			= 22
+	mt_guild_invite_reminder			= 22,
+	/// Context Menu Command
+	mt_context_menu_command 	= 23
 };
 
 enum cache_policy_setting_t {
@@ -1029,6 +1033,13 @@ struct CoreExport message {
 	 * @return true if urgent
 	 */
 	bool is_urgent() const;
+
+	/**
+	 * @brief True if has thread attached
+	 *
+	 * @return true if has thread attached
+	 */
+	bool has_thread() const;
 
 	/**
 	 * @brief True if ephemeral (visible only to issuer of a slash command)

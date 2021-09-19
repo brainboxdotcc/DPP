@@ -212,12 +212,12 @@ bool role::has_manage_webhooks() const {
 	return ((this->permissions & p_administrator) | (this->permissions & p_manage_webhooks));
 }
 
-bool role::has_manage_emojis() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_emojis));
+bool role::has_manage_emojis_and_stickers() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_emojis_and_stickers));
 }
 
-bool role::has_use_slash_commands() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_use_slash_commands));
+bool role::has_use_application_commands() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_use_application_commands));
 }
 
 bool role::has_request_to_speak() const {
@@ -228,11 +228,23 @@ bool role::has_manage_threads() const {
 	return ((this->permissions & p_administrator) | (this->permissions & p_manage_threads));
 }
 
-bool role::has_use_public_threads() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_use_public_threads));
+bool role::has_create_public_threads() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_create_public_threads));
 }
 
-bool role::has_use_private_threads() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_use_private_threads));
+bool role::has_create_private_threads() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_create_private_threads));
+}
+
+bool role::has_use_external_stickers() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_use_external_stickers));
+}
+
+bool role::has_send_messages_in_threads() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_send_messages_in_threads));
+}
+
+bool role::has_start_embedded_activities() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_start_embedded_activities));
 }
 };
