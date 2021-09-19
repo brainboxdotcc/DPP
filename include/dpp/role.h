@@ -66,12 +66,15 @@ enum role_permissions : uint64_t {
 	p_manage_nicknames	=	0x0008000000,	//!< allows for modification of other users nicknames 
 	p_manage_roles		=	0x0010000000,	//!< allows management and editing of roles 
 	p_manage_webhooks	=	0x0020000000,	//!< allows management and editing of webhooks
-	p_manage_emojis		=	0x0040000000,	//!< allows management and editing of emojis 
-	p_use_slash_commands	=	0x0080000000,	//!< allows members to use slash commands
+	p_manage_emojis_and_stickers		=	0x0040000000,	//!< allows management and editing of emojis and stickers
+	p_use_application_commands	=	0x0080000000,	//!< allows members to use application commands, including slash commands and context menus 
 	p_request_to_speak	=	0x0100000000,	//!< allows for requesting to speak in stage channels. (Discord: This permission is under active development and may be changed or removed.)
 	p_manage_threads	=	0x0400000000,	//!< allows for deleting and archiving threads, and viewing all private threads
-	p_use_public_threads	=	0x0800000000,	//!< allows for creating and participating in thread
-	p_use_private_threads	=	0x1000000000,	//!< allows for creating and participating in private thread
+	p_create_public_threads	=	0x0800000000,	//!< allows for creating threads
+	p_create_private_threads	=	0x1000000000,	//!< allows for creating private threads
+	p_use_external_stickers		=	0x2000000000,	//!< allows the usage of custom stickers from other servers
+	p_send_messages_in_threads	=	0x4000000000,	//!< allows for sending messages in threads
+	p_start_embedded_activities	=	0x8000000000,	//!< allows for launching activities (applications with the EMBEDDED flag) in a voice channel
 };
 
 /**
@@ -181,18 +184,24 @@ public:
 	bool has_manage_roles() const;
 	/** True if has the manage webhooks permission */
 	bool has_manage_webhooks() const;
-	/** True if has the manage emojis permission */
-	bool has_manage_emojis() const;
-	/** True if has the use slash commands permission*/
-	bool has_use_slash_commands() const;
+	/** True if has the manage emojis and stickers permission */
+	bool has_manage_emojis_and_stickers() const;
+	/** True if has the use application commands permission*/
+	bool has_use_application_commands() const;
 	/** True if has the request to speak permission*/
 	bool has_request_to_speak() const;
 	/** True if has the manage threads permission*/
 	bool has_manage_threads() const;
-	/** True if has the use public threads permission*/
-	bool has_use_public_threads() const;
-	/** True if has the use private threads permission*/
-	bool has_use_private_threads() const;
+	/** True if has the create public threads permission*/
+	bool has_create_public_threads() const;
+	/** True if has the create private threads permission*/
+	bool has_create_private_threads() const;
+	/** True if has the use external stickers permission*/
+	bool has_use_external_stickers() const;
+	/** True if has the send messages in threads permission*/
+	bool has_send_messages_in_threads() const;
+	/** True if has the start embedded activities permission*/
+	bool has_start_embedded_activities() const;
 };
 
 /** A group of roles */
