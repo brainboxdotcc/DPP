@@ -47,7 +47,11 @@ enum command_option_type : uint8_t {
 	/** A channel snowflake id */
 	co_channel = 7,
 	/** A role snowflake id */
-	co_role = 8
+	co_role = 8,
+	/** A mentionable */
+	co_mentionable = 9,
+	/** Any double between -2^53 and 2^53 */
+	co_number = 10
 };
 
 /**
