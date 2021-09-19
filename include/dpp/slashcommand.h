@@ -47,7 +47,11 @@ enum command_option_type : uint8_t {
 	/** A channel snowflake id */
 	co_channel = 7,
 	/** A role snowflake id */
-	co_role = 8
+	co_role = 8,
+	/** A mentionable */
+	co_mentionable = 9,
+	/** Any double between -2^53 and 2^53 */
+	co_number = 10
 };
 
 /**
@@ -466,6 +470,11 @@ public:
 	 * @brief command permissions
 	 */
 	std::vector<command_permission> permissions;
+
+	/**
+	 * @brief autoincrementing version identifier updated during substantial record changes
+	 */
+	snowflake version;
 
 	/**
 	 * @brief Construct a new slashcommand object
