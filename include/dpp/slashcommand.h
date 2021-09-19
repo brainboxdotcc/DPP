@@ -472,6 +472,11 @@ public:
 	std::vector<command_permission> permissions;
 
 	/**
+	 * @brief autoincrementing version identifier updated during substantial record changes
+	 */
+	snowflake version;
+
+	/**
 	 * @brief Construct a new slashcommand object
 	 */
 	slashcommand();
