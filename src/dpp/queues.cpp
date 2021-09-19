@@ -45,8 +45,11 @@
 #include <dpp/httplib.h>
 #include <dpp/fmt/format.h>
 #include <dpp/stringops.h>
+#include <dpp/version.h>
 
 namespace dpp {
+
+static std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, " + std::to_string(DPP_VERSION_MAJOR) + "." + std::to_string(DPP_VERSION_MINOR) + "." + std::to_string(DPP_VERSION_PATCH) + ")";
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &filename, const std::string &filecontent) : endpoint(_endpoint), parameters(_parameters), complete_handler(completion), postdata(_postdata), method(_method), completed(false), file_name(filename), file_content(filecontent)
 {
@@ -62,7 +65,7 @@ void http_request::complete(const http_request_completion_t &c) {
 }
 
 /* Fill a http_request_completion_t from a HTTP result */
-void populate_result(const std::string &url, const cluster* owner, http_request_completion_t& rv, const httplib::Result &res) {
+void populate_result(const std::string &url, cluster* owner, http_request_completion_t& rv, const httplib::Result &res) {
 	rv.status = res->status;
 	rv.body = res->body;
 	for (auto &v : res->headers) {
@@ -73,6 +76,7 @@ void populate_result(const std::string &url, const cluster* owner, http_request_
 	rv.ratelimit_reset_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Reset-After"), std::dec);
 	rv.ratelimit_bucket = res->get_header_value("X-RateLimit-Bucket");
 	rv.ratelimit_global = (res->get_header_value("X-RateLimit-Global") == "true");
+	owner->rest_ping = rv.latency;
 	if (res->get_header_value("X-RateLimit-Retry-After") != "") {
 		rv.ratelimit_retry_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Retry-After"), std::dec);
 	}
@@ -95,9 +99,10 @@ bool http_request::is_completed()
 }
 
 /* Execute a HTTP request */
-http_request_completion_t http_request::Run(const cluster* owner) {
+http_request_completion_t http_request::Run(cluster* owner) {
 
 	http_request_completion_t rv;
+	double start = dpp::utility::time_f();
 
 	httplib::Client cli("https://discord.com");
 	/* This is for a reason :( - Some systems have really out of date cert stores */
@@ -106,12 +111,13 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 	/* TODO: Once we have a version number header, use it here */
 	httplib::Headers headers = {
 		{"Authorization", std::string("Bot ") + owner->token},
-		{"User-Agent", "DiscordBot (https://github.com/brainboxdotcc/DPP, 0.0.1)"}
+		{"User-Agent", http_version}
 	};
 	cli.set_default_headers(headers);
 
 	rv.ratelimit_limit = rv.ratelimit_remaining = rv.ratelimit_reset_after = rv.ratelimit_retry_after = 0;
 	rv.status = 0;
+	rv.latency = 0;
 	rv.ratelimit_global = false;
 
 	std::string _url = endpoint;
@@ -126,6 +132,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 	switch (method) {
 		case m_get: {
 			if (auto res = cli.Get(_url.c_str())) {
+				rv.latency = dpp::utility::time_f() - start;
 				populate_result(_url, owner, rv, res);
 			} else {
 				rv.error = (http_error)res.error();
@@ -140,12 +147,14 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 					{ "file", file_content, file_name, "application/octet-stream" }
 				};
 				if (auto res = cli.Post(_url.c_str(), items)) {
+					rv.latency = dpp::utility::time_f() - start;
 					populate_result(_url, owner, rv, res);
 				} else {
 					rv.error = (http_error)res.error();
 				}
 			} else {
 				if (auto res = cli.Post(_url.c_str(), postdata.c_str(), "application/json")) {
+					rv.latency = dpp::utility::time_f() - start;
 					populate_result(_url, owner, rv, res);
 				} else {
 					rv.error = (http_error)res.error();
@@ -155,6 +164,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		break;
 		case m_patch: {
 			if (auto res = cli.Patch(_url.c_str(), postdata.c_str(), "application/json")) {
+				rv.latency = dpp::utility::time_f() - start;
 				populate_result(_url, owner, rv, res);
 			} else {
 				rv.error = (http_error)res.error();
@@ -164,6 +174,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		case m_put: {
 			/* PUT supports post data body */
 			if (auto res = cli.Put(_url.c_str(), postdata.c_str(), "application/json")) {
+				rv.latency = dpp::utility::time_f() - start;
 				populate_result(_url, owner, rv, res);
 			} else {
 				rv.error = (http_error)res.error();
@@ -173,6 +184,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 		break;
 		case m_delete: {
 			if (auto res = cli.Delete(_url.c_str())) {
+				rv.latency = dpp::utility::time_f() - start;
 				populate_result(_url, owner, rv, res);
 			} else {
 				rv.error = (http_error)res.error();
@@ -186,7 +198,7 @@ http_request_completion_t http_request::Run(const cluster* owner) {
 	return rv;
 }
 
-request_queue::request_queue(const class cluster* owner) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0)
+request_queue::request_queue(class cluster* owner) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0)
 {
 	in_queue_listen_sock = socket(AF_INET, SOCK_STREAM, 0);
 	out_queue_listen_sock = socket(AF_INET, SOCK_STREAM, 0);
