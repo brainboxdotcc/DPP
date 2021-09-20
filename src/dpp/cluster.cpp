@@ -1003,9 +1003,9 @@ void cluster::guild_member_move(const snowflake channel_id, const snowflake guil
 void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
 	std::string o;
 	if (nickname.empty()) {
-		o = "{\"nickname\": null}";
+		o = "{\"nick\": null}";
 	} else {
-		o = json({{"nickname", nickname}}).dump();
+		o = json({{"nick", nickname}}).dump();
 	}
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/@me/nick", m_patch, o, [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
