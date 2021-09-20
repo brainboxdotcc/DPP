@@ -11,6 +11,8 @@ The way D++ is built varies from system to system. Please follow the guides belo
 
 # Building on Linux
 
+\note You might not need to build a copy of the library for Linux - precompiled deb files for 64 bit and 32 bit Debian and Ubuntu are provided in the github version releases. Unless you are on a different Linux distribution which cannot install deb files, or wish to submit fixes and enhancements to the library itself you may have an easier time installing the precompiled version instead.
+
 ## 1. Build Source Code
 
     mkdir build
@@ -45,8 +47,7 @@ Once installed to the /usr/local directory, you can make use of the library in s
 The important flags in this command-line are:
 
  * `-std=c++17` - Required to compile the headers
- * `-lfmt` - Link to libdpp.so in /usr/local
- * `mydppbot.cpp` - Your source code
+  * `mydppbot.cpp` - Your source code
  * `dppbot` - The name of the executable to make
 
 Of course, this is just a proof of concept - you should really use a more robust build system like GNU `make` or [`cmake`](@ref buildcmake).
@@ -60,7 +61,7 @@ Of course, this is just a proof of concept - you should really use a more robust
 
 To build on windows follow these steps *exactly*. The build process depends on specific libraries being installed on your system in specific locations.
 
-\note You should not need to build a copy of the library for windows - DLL, LIB and EXP files for Windows and visual studio 2019 64-bit will be provided in the github version releases. Unless you wish to submit fixes and enhancements to the library itself you should use these releases instead.
+\note You should not need to build a copy of the library for windows - DLL and LIB files for Windows and visual studio 2019 64-bit are be provided in the github version releases. Unless you wish to submit fixes and enhancements to the library itself (or are running on 32 bit windows) you may find it easier to use these releases instead.
 
 __Instructions here are subject to change!__
 

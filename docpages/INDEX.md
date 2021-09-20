@@ -8,23 +8,25 @@ memory to do so, even when caching large amounts of the data to cut down on HTTP
 
 It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contributed to by a dedicated team of developers.
 
-This project is in beta stages of development.
+*This project is now in stable development and accepting PRs and feature requests -- Don't be a stranger! If you want to contribute, just get in touch via [github](https://github.com/brainboxdotcc/DPP) or our [Discord server](https://discord.gg/dpp)!*
 
 ## Library features:
 
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
-* Voice support
-* Slash command/interaction support
-* Pretty much the entire API is supported
-* Windows support
-
-Want to help? Drop me a line or send me a PR. I'll be choosy about what PRs i accept whilst the library is in such a heavy state of development.
+* [Slash Commands/Interactions support](https://dpp.brainbox.cc/slashcommands.html)
+* [Voice support](https://dpp.brainbox.cc/soundboard.html)
+* The entire Discord API is available for use in the library
+* Stable [Windows support](https://dpp.brainbox.cc/buildwindows.html)
+* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7) and Debian x86/x64
 
 ## Supported Operating Systems
 
-The library runs best on Linux. Windows is supported via cmake and Visual Studio 2019 but not encouraged for production use. The library may work fine in other operating systems too, but with no access to these we cannot support them.
+The library runs great on **Linux**. **Windows** is also supported and we offer ready made compiled DLL and LIB files for easy integration into any windows visual studio 2019 project.
+**Mac OS X** is also functional and stable, as is running your bot on a **Raspberry Pi** - we offer a prebuilt .deb for ARM64, ARM6 and ARM7 to save on having to wait for it to compile.
+
+The library may work fine in other operating systems too, if you run a D++ bot on something not listed here please let us know!
 
 ## Getting started
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)
@@ -51,6 +53,8 @@ This library powers the bot [TriviaBot](https://triviabot.co.uk) which has over 
 
 ## How much RAM does this library use?
 In production on TriviaBot, the bot takes approximately 2gb of ram to run 18 separate processes (this is approximately **140mb** per process) on a production bot with 11 million users and 111,000 guilds. Each process takes under 1% CPU. This is less than a quarter of the memory of a similar C++ Discord library, **Aegis.cpp** (version 2).
+
+For a very small bot, you can get the memory usage as low as **6 megabytes** on a Raspberry Pi.
 
 ## How do I use this library in Windows?
 The easiest way is to download the precompiled latest release from our github releases, and take the dlls, .lib file, and header files (`bin`, `lib` and `include` directories), put them in a place on your hard disk where you know where they are. Go into visual studio project settings in a new project, and point the project directories (notably the library directories and and include directories) at the correct locations. Add the `include` folder you extracted to your include directories, and add  `dpp.lib` to your library directories. Ensure the project is set to C++17 standard in the settings. You should then be able to compile example programs within that project. When you run the program you have compiled you must ensure that all the dll files from the `bin` directory exist in the same directory as your executable.
@@ -116,9 +120,8 @@ To fix this issue, as root run `ldconfig`: `sudo ldconfig`. Log out if your SSH 
 The libsodium package requires pkg-config, but does not check for it when installed. Install it as root, e.g. `sudo apt install pkg-config`. Rerun cmake again, and rebuild the library.
 
 ## When using precompiled libraries in Windows, the program runs but is just a black console window and the bot doesnt come online?
-If this happens, switch your project to release mode. Our precompiled binaries are built in release mode for x64 vs2019 only.
-If you require a debug build, or a build for a newer visual studio, you will have to compile it yourself from the github sources.
-Please see the section about \ref buildwindows for more information on how to do this.
+If this happens, ensure you are using the correct precompiled build of the library. Our precompiled binaries are built in two forms, release mode and debug mode, for x64 vs2019 only.
+If you require a build for a newer visual studio, you will have to compile it yourself from the github sources. Please see the section about \ref buildwindows for more information on how to do this.
 
 ## Does this library build/run on Raspberry Pi?
 Yes! This project will build and run on Raspberry Pi and is very much suited to this kind of system. It may take some time (read: hours) to compile the project on your Raspberry Pi unless you build it using a cross compiler. We offer pre-built `.deb` files for arm6, arm7 and arm64, you should use these where possible to avoid having to compile it by hand, or you can use a cross-compiler to build it on your PC then transfer the compiled binaries across.
@@ -128,13 +131,13 @@ Depending on which Raspberry Pi version you have, you will need to download a di
 <table>
 <tr>
 	<th>Raspberry Pi Model</th>
-	<th>Architecture</th>
 	<th>Deb file to install</th>
+	<th>Arch</th>
 </tr>
-<tr><td>Raspberry Pi Zero/Zero W</td><td>ARMv6</td><td>`libdpp-x.x.x-linux-rpi-arm6.deb`</td></tr>
-<tr><td>Raspberry Pi 3</td><td>ARMv7HF</td><td>`libdpp-x.x.x-linux-rpi-arm7hf.deb`</td></tr>
-<tr><td>Raspberry Pi 4</td><td>ARMv7HF</td><td>`libdpp-x.x.x-linux-rpi-arm7hf.deb`</td></tr>
-<tr><td>Raspberry Pi 4 with 64 Bit Linux</td><td>ARM64</td><td>`libdpp-x.x.x-linux-rpi-arm64.deb`</td></tr>
+<tr><td>Raspberry Pi Zero/Zero W</td><td>`libdpp-x.x.x-linux-rpi-arm6.deb`</td><td>ARMv6</td></tr>
+<tr><td>Raspberry Pi 3</td><td>`libdpp-x.x.x-linux-rpi-arm7hf.deb`</td><td>ARMv7HF</td></tr>
+<tr><td>Raspberry Pi 4</td><td>`libdpp-x.x.x-linux-rpi-arm7hf.deb`</td><td>ARMv7HF</td></tr>
+<tr><td>Raspberry Pi 4 with 64 Bit Linux</td><td>`libdpp-x.x.x-linux-rpi-arm64.deb`</td><td>ARM64</td></tr>
 </table>
 
 ## Are other ARM devices supported?
