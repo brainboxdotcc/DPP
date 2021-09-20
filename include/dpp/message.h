@@ -629,6 +629,7 @@ struct CoreExport sticker {
 	 * While discord still send this empty string value we will still have a field
 	 * here in the library.
 	 */
+	[[deprecated("Will always be an empty string")]]
 	std::string     asset;
 	/** The type of sticker */
 	sticker_type	type;
