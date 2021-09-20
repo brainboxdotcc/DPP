@@ -121,4 +121,21 @@ If you require a debug build, or a build for a newer visual studio, you will hav
 Please see the section about \ref buildwindows for more information on how to do this.
 
 ## Does this library build/run on Raspberry Pi?
-Yes! This project will build and run on Raspberry Pi and is very much suited to this kind of system. It may take some time (read: hours) to compile the project on your Raspberry Pi unless you build it using a cross compiler. We offer pre-built `.deb` files for arm7 and arm64, you should use these where possible to avoid having to compile it by hand, or you can use a cross-compiler to build it on your PC then transfer the compiled binaries across.
+Yes! This project will build and run on Raspberry Pi and is very much suited to this kind of system. It may take some time (read: hours) to compile the project on your Raspberry Pi unless you build it using a cross compiler. We offer pre-built `.deb` files for arm6, arm7 and arm64, you should use these where possible to avoid having to compile it by hand, or you can use a cross-compiler to build it on your PC then transfer the compiled binaries across.
+
+## There are so many versions! Which deb file do i need for my Raspberry Pi?
+Depending on which Raspberry Pi version you have, you will need to download a different release binary:
+<table>
+<tr>
+	<th>Raspberry Pi Model</th>
+	<th>Architecture</th>
+	<th>Deb file to install</th>
+</tr>
+<tr><td>Raspberry Pi Zero/Zero W</td><td>ARMv6</td><td>`libdpp-x.x.x-linux-rpi-arm6.deb`</td></tr>
+<tr><td>Raspberry Pi 3</td><td>ARMv7HF</td><td>`libdpp-x.x.x-linux-rpi-arm7hf.deb`</td></tr>
+<tr><td>Raspberry Pi 4</td><td>ARMv7HF</td><td>`libdpp-x.x.x-linux-rpi-arm7hf.deb`</td></tr>
+<tr><td>Raspberry Pi 4 with 64 Bit Linux</td><td>ARM64</td><td>`libdpp-x.x.x-linux-rpi-arm64.deb`</td></tr>
+</table>
+
+## Are other ARM devices supported?
+Yes! We have confirmed that the D++ deb file will successfully install and operate on various forms of cellphone or non-pi ARM devices. If you get it working on any other devices please let us know and we can build a compatibility chart.
