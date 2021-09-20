@@ -314,7 +314,7 @@ void cluster::interaction_response_create(snowflake interaction_id, const std::s
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
-	});
+	}, r.msg->filename, r.msg->filecontent);
 }
 
 void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
@@ -322,7 +322,7 @@ void cluster::interaction_response_edit(const std::string &token, const message 
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
-	});
+	}, m.filename, m.filecontent);
 }
 
 
@@ -456,7 +456,7 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
-	});
+	}, m.filename, m.filecontent);
 }
 
 void cluster::guild_sticker_create(sticker &s, command_completion_event_t callback) {
@@ -1003,9 +1003,9 @@ void cluster::guild_member_move(const snowflake channel_id, const snowflake guil
 void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
 	std::string o;
 	if (nickname.empty()) {
-		o = "{\"nickname\": null}";
+		o = "{\"nick\": null}";
 	} else {
-		o = json({{"nickname", nickname}}).dump();
+		o = json({{"nick", nickname}}).dump();
 	}
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/@me/nick", m_patch, o, [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
