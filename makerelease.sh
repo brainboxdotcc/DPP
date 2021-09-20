@@ -32,4 +32,3 @@ gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(git l
 echo "Cleaning up..."
 cd ..
 rm -rf temp
-
