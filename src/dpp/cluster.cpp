@@ -314,7 +314,7 @@ void cluster::interaction_response_create(snowflake interaction_id, const std::s
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
-	});
+	}, r.msg->filename, r.msg->filecontent);
 }
 
 void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
@@ -322,7 +322,7 @@ void cluster::interaction_response_edit(const std::string &token, const message 
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
-	});
+	}, m.filename, m.filecontent);
 }
 
 
@@ -456,7 +456,7 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
-	});
+	}, m.filename, m.filecontent);
 }
 
 void cluster::guild_sticker_create(sticker &s, command_completion_event_t callback) {

@@ -23,7 +23,6 @@ int main()
 		command_handler.add_command("avatar", /*avatar*/
 		{ {"user", dpp::param_info(dpp::pt_user, true, "Optional user parameter")} },
 			[&command_handler, &bot](const std::string& command, const dpp::parameter_list_t& parameters, dpp::command_source src) {
-				command_handler.thinking(src);
 				std::cout << "Command triggered: " << command << "\n";
 				std::cout << "REST ping: " << bot.rest_ping << "\n";
 				std::cout << "Parameter: \n";
@@ -36,6 +35,7 @@ int main()
 					std::cout << "User id: " << ru.user.id << "\n";
 					std::cout << "User detail: " << ru.user.username << "#" << ru.user.discriminator << "\n";
 				}
+				command_handler.reply(dpp::message(src.channel_id, "This is a reply with attachment").set_file_content("Ooga Booga").set_filename("ooga_booga.txt").set_flags(dpp::m_ephemeral), src);
 		}, "Get the avatar from user", 825407338755653642);
 
 		/* This is a dummy for testing export */
