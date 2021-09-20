@@ -391,11 +391,15 @@ public:
 	 * pushing them onto the output queue, if you have a complete stream
 	 * ready to send and know its length it is advisable to call this
 	 * method multiple times to enqueue the entire stream audio so that
-	 * it is all encoded at once. Constantly calling this from the
-	 * dpp::on_voice_buffer_send callback can and will eat a TON of cpu!
+	 * it is all encoded at once (unless you have set use_opus to false).
+	 * Constantly calling this from the dpp::on_voice_buffer_send callback
+	 * can and will eat a TON of cpu!
 	 * 
 	 * @param audio_data Raw PCM audio data. Channels are interleaved,
 	 * with each channel's amplitude being a 16 bit value.
+	 * 
+	 * The audio data should be 48000Khz signed 16 bit audio.
+	 * 
 	 * @param length The length of the audio data. The length should
 	 * be a multiple of 4 (2x 16 bit stero channels) with a maximum
 	 * length of 11520, which is a complete opus frame at highest
@@ -404,6 +408,12 @@ public:
 	 * encoded data already. In this case, we don't need to encode the
 	 * frames using opus here. We can set use_opus to false and bypass the
 	 * codec, only applying libsodium to the stream.
+	 * 
+	 * @note If you set use_opus to false, it is your responsibility to ensure
+	 * that packets of data sent to send_audio are correctly repacketized
+	 * for streaming, e.g. that audio frames are not too large or contain
+	 * an incorrect format. Discord will still expect the same frequency
+	 * and bit width of audio and the same signedness.
 	 */
 	void send_audio(uint16_t* audio_data, const size_t length, bool use_opus = true);
 
