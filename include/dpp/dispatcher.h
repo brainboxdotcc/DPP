@@ -875,6 +875,8 @@ struct CoreExport voice_receive_t : public event_dispatch_t {
  */
 class CoreExport dispatcher {
 public:
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdocumentation"
 	/** @brief Event handler function pointer for log event
 	 * @param event Event parameters
 	 */
@@ -1119,6 +1121,7 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const guild_stickers_update_t& event)> stickers_update;
+#pragma GCC diagnostic pop
 };
 
 /**

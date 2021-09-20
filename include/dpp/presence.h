@@ -166,10 +166,10 @@ public:
 	/**
 	 * @brief Construct a new activity
 	 * 
-	 * @param typ 
-	 * @param nam 
-	 * @param stat
-	 * @param url_
+	 * @param typ activity type
+	 * @param nam Name of the activity
+	 * @param stat State of the activity
+	 * @param url_ url of the activity, only works for certain sites, such as YouTube
 	 */
 	activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_);
 };
@@ -197,16 +197,16 @@ public:
 	/**
 	 * @brief Construct a new presence object with some parameters for sending to a websocket
 	 * 
-	 * @param status 
-	 * @param type 
-	 * @param activity_description 
+	 * @param status Status of the activity
+	 * @param type Type of activity
+	 * @param activity_description Description of the activity
 	 */
 	presence(presence_status status, activity_type type, const std::string& activity_description);
 
 	/**
 	 * @brief Construct a new presence object with some parameters for sending to a websocket
 	 * 
-	 * @param status 
+	 * @param status Status of the activity
 	 * @param a Activity itself 
 	 */
 	presence(presence_status status, activity a);

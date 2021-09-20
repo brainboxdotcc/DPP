@@ -659,6 +659,9 @@ void discord_voice_client::send_audio(uint16_t* audio_data, const size_t length,
 	if (use_opus) {
 		encodedAudioLength = this->encode((uint8_t*)audio_data, length, encodedAudioData.data(), encodedAudioLength);
 	} else {
+		encodedAudioLength = length;
+		encodedAudioData.reserve(length);
+		memcpy(encodedAudioData.data(), audio_data, length);
 	}
 
 	++sequence;

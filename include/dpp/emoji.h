@@ -71,11 +71,11 @@ public:
 	/**
 	 * @brief Construct a new emoji object with name, ID and flags
 	 * 
-	 * @param name The emoji's name
-	 * @param id ID, if it has one (unicode does not)
-	 * @param flags Emoji flags (emoji_flags)
+	 * @param n The emoji's name
+	 * @param i ID, if it has one (unicode does not)
+	 * @param f Emoji flags (emoji_flags)
 	 */
-	emoji(const std::string, const snowflake = 0, const uint8_t = 0);
+	emoji(const std::string n, const snowflake i = 0, const uint8_t f = 0);
 
 	/**
 	 * @brief Destroy the emoji object

@@ -83,7 +83,7 @@ class CoreExport websocket_client : public ssl_client
 	/** Fill a header for outbound messages
 	 * @param outbuf The raw frame to fill
 	 * @param sendlength The size of the data to encapsulate
-	 * @param ws_opcode the opcode to send in the header
+	 * @param opcode the ws_opcode to send in the header
 	 */
 	size_t FillHeader(unsigned char* outbuf, size_t sendlength, ws_opcode opcode);
 
