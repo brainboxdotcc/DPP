@@ -142,3 +142,6 @@ Depending on which Raspberry Pi version you have, you will need to download a di
 
 ## Are other ARM devices supported?
 Yes! We have confirmed that the D++ deb file will successfully install and operate on various forms of cellphone or non-pi ARM devices. If you get it working on any other devices please let us know and we can build a compatibility chart.
+
+## Can i run a D++ bot in repl.it?
+No, unfortunately Repl.it has too outdated a version of g++, clang and cmake to compile the library. Even if you could get it to build, chances are that it would exceed the permitted maximum run time and go to sleep before completing compilation of the library. Repl.it and similar services are designed more for experimentation with interpreted langauges such as javascript, and heavily team based development. If at a later date Repl.it directly include the library as a pre-built install on their docker images, this could change matters and you would be able to use it there.
