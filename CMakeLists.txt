@@ -240,6 +240,9 @@ if(NOT WIN32)
 	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 	install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostInstall.cmake)")
+
+	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/dpp.pc.in" "${CMAKE_BINARY_DIR}/dpp.pc" @ONLY)
+	install(FILES "${CMAKE_BINARY_DIR}/dpp.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 endif()
 
 include("cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
