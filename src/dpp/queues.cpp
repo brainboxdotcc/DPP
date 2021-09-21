@@ -222,8 +222,9 @@ request_queue::request_queue(class cluster* owner) : creator(owner), terminating
 		throw dpp::exception("Can't bind request queue sockets");
 	}
 	/* Backlog is only 1, because we only expect our own system to connect back to this once */
-	listen(in_queue_listen_sock, 1);
-	listen(out_queue_listen_sock, 1);
+	if (listen(in_queue_listen_sock, 1) == -1 || listen(out_queue_listen_sock, 1) == -1) {
+		throw dpp::exception("Can't listen() on request queue sockets");
+	}
 
 	in_thread = new std::thread(&request_queue::in_loop, this);
 	out_thread = new std::thread(&request_queue::out_loop, this);
@@ -249,6 +250,7 @@ request_queue::request_queue(class cluster* owner) : creator(owner), terminating
 
 request_queue::~request_queue()
 {
+	creator->log(ll_debug, "REST request_queue shutting down");
 	terminating = true;
 	in_thread->join();
 	out_thread->join();
@@ -264,6 +266,9 @@ void request_queue::in_loop()
 	char n;
 	struct sockaddr_in client;
 	int notifier = accept(in_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
+	if (notifier < 0) {
+		throw dpp::exception("Failed to initialise REST in queue - can't accept notifier connection");
+	}
 #ifndef _WIN32
 	close(in_queue_listen_sock);
 #endif
@@ -372,7 +377,15 @@ void request_queue::in_loop()
 			}
 		}
 	}
-	close(notifier);
+	creator->log(ll_debug, "REST in-queue shutting down");
+	shutdown(notifier, 2);
+	#ifdef _WIN32
+		if (sfd >= 0 && sfd < FD_SETSIZE) {
+			closesocket(notifier);
+		}
+	#else
+		::close(notifier);
+	#endif
 }
 
 void request_queue::out_loop()
@@ -383,6 +396,9 @@ void request_queue::out_loop()
 	char n;
 	struct sockaddr_in client;
 	SOCKET notifier = accept(out_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
+	if (notifier < 0) {
+		throw dpp::exception("Failed to initialise REST out queue - can't accept notifier connection");
+	}
 #ifndef _WIN32
 	close(out_queue_listen_sock);
 #endif
@@ -425,6 +441,7 @@ void request_queue::out_loop()
 			responses_to_delete.erase(responses_to_delete.begin());
 		}
 	}
+	creator->log(ll_debug, "REST out-queue shutting down");
 	shutdown(notifier, 2);
 	#ifdef _WIN32
 		if (notifier >= 0 && notifier < FD_SETSIZE) {
