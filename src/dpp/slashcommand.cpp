@@ -346,7 +346,7 @@ interaction_response::~interaction_response() {
 	delete msg;
 }
 
-interaction_response::interaction_response(interaction_response_type t, const message& m) : interaction_response() {
+interaction_response::interaction_response(interaction_response_type t, const struct message& m) : interaction_response() {
 	type = t;
 	*msg = m;
 }

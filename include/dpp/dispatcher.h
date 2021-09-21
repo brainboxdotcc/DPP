@@ -752,7 +752,8 @@ struct CoreExport thread_create_t : public event_dispatch_t {
 	channel created;
 };
 
-/** @brief Thread Update*/
+/** @brief Thread Update
+*/
 struct CoreExport thread_update_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
@@ -764,7 +765,8 @@ struct CoreExport thread_update_t : public event_dispatch_t {
 	channel updated;
 };
 
-/** @bried Thread Delete*/
+/** @brief Thread Delete
+ */
 struct CoreExport thread_delete_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
@@ -776,7 +778,8 @@ struct CoreExport thread_delete_t : public event_dispatch_t {
 	channel deleted;
 };
 
-/** @brief Thread List Sync*/
+/** @brief Thread List Sync
+ */
 struct CoreExport thread_list_sync_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
@@ -789,7 +792,8 @@ struct CoreExport thread_list_sync_t : public event_dispatch_t {
 	std::vector<thread_member> members;
 };
 
-/** @brief Thread Member Update*/
+/** @brief Thread Member Update
+ */
 struct CoreExport thread_member_update_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
@@ -800,7 +804,8 @@ struct CoreExport thread_member_update_t : public event_dispatch_t {
 	thread_member updated;
 };
 
-/** @brief Thread Members Update*/
+/** @brief Thread Members Update
+ */
 struct CoreExport thread_members_update_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
@@ -815,7 +820,8 @@ struct CoreExport thread_members_update_t : public event_dispatch_t {
 	std::vector<snowflake> removed_ids;
 };
 
-/** @brief voice buffer send */
+/** @brief voice buffer send
+ */
 struct CoreExport voice_buffer_send_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor

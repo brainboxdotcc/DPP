@@ -995,6 +995,8 @@ struct CoreExport message {
 
 	/** Build JSON from this object.
 	 * @param with_id True if the ID is to be included in the built JSON
+	 * @param is_interaction_response Set to true if this message is intended to be included in an interaction response.
+	 * This will exclude some fields that are not valid in interactions at this time.
 	 * @return The JSON text of the message
 	 */
 	std::string build_json(bool with_id = false, bool is_interaction_response = false) const;

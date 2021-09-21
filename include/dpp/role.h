@@ -28,7 +28,7 @@ namespace dpp {
 enum role_flags {
 	r_hoist =		0b00000001, //!< Hoisted role
 	r_managed =		0b00000010, //!< Managed role (introduced by a bot or application)
-	r_mentionable =		0b00000100, //!< Mentionable with an @ping
+	r_mentionable =		0b00000100, //!< Mentionable with a ping
 	r_premium_subscriber =	0b00001000, //!< This is set for the role given to nitro 
 };
 
@@ -53,7 +53,7 @@ enum role_permissions : uint64_t {
 	p_embed_links		=	0x00004000,	//!< links sent by users with this permission will be auto-embedded
 	p_attach_files		=	0x0000008000,	//!< allows for uploading images and files
 	p_read_message_history	=	0x0000010000,	//!< allows for reading of message history
-	p_mention_everyone	=	0x0000020000,	//!< allows for using the @everyone and the @here tag to notify users in a channel
+	p_mention_everyone	=	0x0000020000,	//!< allows for using the everyone and the here tag to notify users in a channel
 	p_use_external_emojis	=	0x0000040000,	//!< allows the usage of custom emojis from other servers
 	p_view_guild_insights	=	0x0000080000,	//!< allows for viewing guild insights
 	p_connect		=	0x0000100000,	//!< allows for joining of a voice channel

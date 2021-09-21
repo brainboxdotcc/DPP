@@ -807,7 +807,19 @@ EXCLUDE_SYMLINKS       = YES
 # exclude all test directories for example use the pattern */test/*
 
 EXCLUDE_PATTERNS       = httplib.h \
-			json_fwd.hpp
+			httplib.cpp \
+			json_fwd.hpp \
+			json.hpp \
+			format.cpp \
+			format.h \
+			printf.h \
+			os.h \
+			os.cpp \
+			color.h \
+			compile.h \
+			ostream.h \
+			ranges.h \
+			format-inl.h
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the

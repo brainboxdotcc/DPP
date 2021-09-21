@@ -889,6 +889,7 @@ public:
 	 * @brief Respond to a slash command
 	 *
 	 * @param interaction_id Interaction id to respond to
+	 * @param token Token for the interaction webhook
 	 * @param r Response to send
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -898,6 +899,7 @@ public:
 	/**
 	 * @brief Respond to a slash command
 	 *
+	 * @param token Token for the interaction webhook
 	 * @param r Message to send
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2019,6 +2021,7 @@ public:
 	 * @brief Get members of a thread
 	 *
 	 * @param thread_id Thread to get members for
+	 * @param callback Function to call when the API call completes
 	 */
 	void get_thread_members(snowflake thread_id, command_completion_event_t callback = {});
 
@@ -2026,6 +2029,7 @@ public:
 	 * @brief Get active threads in a channel (Sorted by ID in descending order)
 	 *
 	 * @param channel_id Channel to get active threads for
+	 * @param callback Function to call when the API call completes
 	 */
 	void get_active_threads(snowflake channel_id, command_completion_event_t callback = {});
 
@@ -2035,6 +2039,7 @@ public:
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
+	 * @param callback Function to call when the API call completes
 	 */
 	void get_public_archived_threads(snowflake channel_id, time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
 
@@ -2044,6 +2049,7 @@ public:
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
+	 * @param callback Function to call when the API call completes
 	 */
 	void get_private_archived_threads(snowflake channel_id,  time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
 
@@ -2054,6 +2060,7 @@ public:
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_id Get threads before this id
 	 * @param limit Number of threads to get
+	 * @param callback Function to call when the API call completes
 	 */
 	void get_joined_private_archived_threads(snowflake channel_id, snowflake before_id = 0, uint16_t limit = 0, command_completion_event_t callback = {});
 

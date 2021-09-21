@@ -27,7 +27,7 @@ Let's break this program down step by step:
 
 ### 1. Start with an empty C++ program
 
-Make sure to include the header file for the D++ library with the instruction `#include <dpp/dpp.h>`!
+Make sure to include the header file for the D++ library with the instruction \#include `<dpp/dpp.h>`!
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>

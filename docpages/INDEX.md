@@ -145,3 +145,7 @@ Yes! We have confirmed that the D++ deb file will successfully install and opera
 
 ## Can i run a D++ bot in repl.it?
 No, unfortunately Repl.it has too outdated a version of g++, clang and cmake to compile the library. Even if you could get it to build, chances are that it would exceed the permitted maximum run time and go to sleep before completing compilation of the library. Repl.it and similar services are designed more for experimentation with interpreted langauges such as javascript, and heavily team based development. If at a later date Repl.it directly include the library as a pre-built install on their docker images, this could change matters and you would be able to use it there.
+
+## Why do the "get" functions like "messages_get" return void rather than what I'm after?
+All the functions that obtain data directly from Discord (as opposed to the cache) perform HTTPS requests and may have to wait, either for the request itself or for their turn in a queue to respect rate limits. As such, it does not make sense that they should return a value, as this would mean they block execution of your event. Instead, each has a lambda, a function handler which receives the result of the request, which you can then read from within that function to get the data you are interested in. Note that this result will arrive on a different thread to the one which made the request.
+

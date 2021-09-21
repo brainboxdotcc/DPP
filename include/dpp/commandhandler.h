@@ -262,9 +262,10 @@ public:
 	 * Note that if any one of your prefixes is "/" this will attempt to register
 	 * a global command using the API and you will receive notification of this command
 	 * via an interaction event.
-	 * 
 	 * @param handler Handler function
 	 * @param parameters Parameters to use for the command
+	 * @param description The description of the command, shown for slash commands
+	 * @param guild_id The guild ID to restrict the command to. For slash commands causes registration of a guild command as opposed to a global command.
 	 * @return commandhandler& reference to self
 	 */
 	commandhandler& add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, const std::string &description = "", snowflake guild_id = 0);
