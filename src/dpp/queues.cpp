@@ -380,7 +380,7 @@ void request_queue::in_loop()
 	creator->log(ll_debug, "REST in-queue shutting down");
 	shutdown(notifier, 2);
 	#ifdef _WIN32
-		if (sfd >= 0 && sfd < FD_SETSIZE) {
+		if (notifier >= 0 && notifier < FD_SETSIZE) {
 			closesocket(notifier);
 		}
 	#else
