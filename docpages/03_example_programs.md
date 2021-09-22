@@ -719,7 +719,7 @@ int main() {
 						/* Checks if the subcommand has any options. */
 						if(cmd_data.options[0].options.size() > 0) {
 							/* Get the user option as a snowflake. */
-            	            dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
+							dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
 							event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a dog.", user)); 
 						} else {
 						/* Reply if there were no options.. */
@@ -731,7 +731,7 @@ int main() {
 						/* Checks if the subcommand has any options. */
 						if(cmd_data.options[0].options.size() > 0) {
 							/* Get the user option as a snowflake. */
-            	            dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
+							dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
 							event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a cat.", user));
 						} else {
 						/* Reply if there were no options.. */
