@@ -698,14 +698,16 @@ bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
 			if(cmd_data.name == "image") {
 				if(cmd_data.options[0].name == "dog") {	
 					if(cmd_data.options[0].options.size() > 0) {
-						event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a dog.", cmd_data.options[0].options[0].value)) 
+                        dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
+						event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a dog.", user)); 
 					} else {
 					event.reply(dpp::ir_channel_message_with_source, "<A picture of a dog.>");
 					}
 				}
 				if(cmd_data.options[0].name == "cat") {
 					if(cmd_data.options[0].options.size() > 0) {
-						event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a cat.", cmd_data.options[0].options[0].value)) 
+                        dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
+						event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a cat.", user));
 					} else {
 					event.reply(dpp::ir_channel_message_with_source, "<A picture of a cat.>");
 					}
