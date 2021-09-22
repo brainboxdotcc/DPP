@@ -15,7 +15,7 @@
 * [Voice support](https://dpp.brainbox.cc/soundboard.html)
 * The entire Discord API is available for use in the library
 * Stable [Windows support](https://dpp.brainbox.cc/buildwindows.html)
-* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7) and Debian x86/x64
+* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6) and Debian x86/x64
 
 Want to help? Drop me a line or send a PR.
 
@@ -46,6 +46,7 @@ making the commit message.
 ## 💬 Get in touch
 
 If you have various suggestions, questions or want to discuss things with our community, Join our discord server!
+Make a humorous reference to brains in your nickname to get access to a secret brain cult channel! :)
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp)
 
