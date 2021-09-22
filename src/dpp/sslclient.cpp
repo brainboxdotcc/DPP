@@ -258,13 +258,13 @@ void ssl_client::read_loop()
 			if (r == 0)
 				continue;
 
-			if (custom_writeable_fd && FD_ISSET(custom_writeable_fd(), &writefds)) {
+			if (custom_writeable_fd && custom_writeable_fd() >= 0 && FD_ISSET(custom_writeable_fd(), &writefds)) {
 				custom_writeable_ready();
 			}
-			if (custom_readable_fd && FD_ISSET(custom_readable_fd(), &readfds)) {
+			if (custom_readable_fd && custom_readable_fd() >= 0 && FD_ISSET(custom_readable_fd(), &readfds)) {
 				custom_readable_ready();
 			}
-			if (custom_readable_fd && FD_ISSET(custom_readable_fd(), &efds)) {
+			if (custom_readable_fd && custom_readable_fd() >= 0 && FD_ISSET(custom_readable_fd(), &efds)) {
 			}
 
 			if (FD_ISSET(sfd, &efds)) {
