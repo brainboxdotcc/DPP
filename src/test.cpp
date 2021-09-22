@@ -12,7 +12,7 @@ int main()
 	json configdocument;
 	std::ifstream configfile("../config.json");
 	configfile >> configdocument;
-	dpp::cluster bot(configdocument["token"], dpp::i_default_intents | dpp::i_guild_members, 1, 0, 1, true, {dpp::cp_none, dpp::cp_none, dpp::cp_none});
+	dpp::cluster bot(configdocument["token"]);
 
 	/* Create command handler, and specify prefixes */
 	dpp::commandhandler command_handler(&bot);

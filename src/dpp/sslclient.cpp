@@ -71,6 +71,9 @@ public:
 	SSL_CTX* ctx;
 };
 
+#define SAFE_FD_SET(a, b) { if (a >= 0 && a <= FD_SETSIZE) { FD_SET(a, b); }}
+#define SAFE_FD_ISSET(a, b) ((a >= 0 && a <= FD_SETSIZE) ? FD_ISSET(a, b) : 0)
+
 /* You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
@@ -234,21 +237,21 @@ void ssl_client::read_loop()
 			FD_ZERO(&writefds);
 			FD_ZERO(&efds);
 
-			FD_SET(sfd,&readfds);
-			FD_SET(sfd,&efds);
+			SAFE_FD_SET(sfd,&readfds);
+			SAFE_FD_SET(sfd,&efds);
 			if (custom_readable_fd && custom_readable_fd() >= 0) {
 				int cfd = custom_readable_fd();
-				FD_SET(cfd, &readfds);
-				FD_SET(cfd, &efds);
+				SAFE_FD_SET(cfd, &readfds);
+				SAFE_FD_SET(cfd, &efds);
 			}
 			if (custom_writeable_fd && custom_writeable_fd() >= 0) {
 				int cfd = custom_writeable_fd();
-				FD_SET(cfd, &writefds);
+				SAFE_FD_SET(cfd, &writefds);
 			}
 
 			/* If we're waiting for a read on the socket don't try to write to the server */
 			if (ClientToServerLength || obuffer.length() || read_blocked_on_write) {
-				FD_SET(sfd,&writefds);
+				SAFE_FD_SET(sfd,&writefds);
 			}
 				
 			timeval ts;
@@ -258,22 +261,22 @@ void ssl_client::read_loop()
 			if (r == 0)
 				continue;
 
-			if (custom_writeable_fd && custom_writeable_fd() >= 0 && FD_ISSET(custom_writeable_fd(), &writefds)) {
+			if (custom_writeable_fd && custom_writeable_fd() >= 0 && SAFE_FD_ISSET(custom_writeable_fd(), &writefds)) {
 				custom_writeable_ready();
 			}
-			if (custom_readable_fd && custom_readable_fd() >= 0 && FD_ISSET(custom_readable_fd(), &readfds)) {
+			if (custom_readable_fd && custom_readable_fd() >= 0 && SAFE_FD_ISSET(custom_readable_fd(), &readfds)) {
 				custom_readable_ready();
 			}
-			if (custom_readable_fd && custom_readable_fd() >= 0 && FD_ISSET(custom_readable_fd(), &efds)) {
+			if (custom_readable_fd && custom_readable_fd() >= 0 && SAFE_FD_ISSET(custom_readable_fd(), &efds)) {
 			}
 
-			if (FD_ISSET(sfd, &efds)) {
+			if (SAFE_FD_ISSET(sfd, &efds) || sfd == -1) {
 				this->log(dpp::ll_error, fmt::format("Error on SSL connection: {}", strerror(errno)));
 				return;
 			}
 
 			/* Now check if there's data to read */
-			if((FD_ISSET(sfd,&readfds) && !write_blocked_on_read) || (read_blocked_on_write && FD_ISSET(sfd,&writefds))) {
+			if((SAFE_FD_ISSET(sfd,&readfds) && !write_blocked_on_read) || (read_blocked_on_write && SAFE_FD_ISSET(sfd,&writefds))) {
 				do {
 					read_blocked_on_write = false;
 					read_blocked = false;
@@ -324,7 +327,7 @@ void ssl_client::read_loop()
 			}
 
 			/* If the socket is writeable... */
-			if ((FD_ISSET(sfd,&writefds) && ClientToServerLength) || (write_blocked_on_read && FD_ISSET(sfd,&readfds))) {
+			if ((SAFE_FD_ISSET(sfd,&writefds) && ClientToServerLength) || (write_blocked_on_read && SAFE_FD_ISSET(sfd,&readfds))) {
 				write_blocked_on_read = false;
 				/* Try to write */
 				r = SSL_write(ssl->ssl, ClientToServerBuffer + ClientToServerOffset, ClientToServerLength);
