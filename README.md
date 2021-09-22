@@ -46,7 +46,7 @@ making the commit message.
 ## 💬 Get in touch
 
 If you have various suggestions, questions or want to discuss things with our community, Join our discord server!
-The general theme of the discord server is "brain" Remember this if you join :)
+Make a humorous reference to brains in your nickname to get access to a secret brain cult channel! :)
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp)
 
