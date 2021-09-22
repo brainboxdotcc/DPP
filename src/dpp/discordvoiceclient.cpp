@@ -33,6 +33,15 @@
 #include <dpp/fmt/format.h>
 #include <zlib.h>
 
+#ifdef HAVE_VOICE
+#include <sodium.h>
+#include <opus/opus.h>
+#else
+struct OpusDecoder {};
+struct OpusEncoder {};
+struct OpusRepacketizer {};
+#endif
+
 namespace dpp {
 
 std::string external_ip;

@@ -55,13 +55,11 @@
 #include <deque>
 #include <mutex>
 
-#ifdef HAVE_VOICE
-#include <sodium.h>
-#include <opus/opus.h>
-#endif
-
-
 using json = nlohmann::json;
+
+struct OpusDecoder;
+struct OpusEncoder;
+struct OpusRepacketizer;
 
 namespace dpp {
 
