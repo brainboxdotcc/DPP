@@ -15,9 +15,12 @@ mv "./libdpp - Debian Package ARMv7 HF/libdpp-$NEWVER-Linux.deb" "./assets/libdp
 mv "./libdpp - Debian Package ARMv6/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm6.deb"
 mv "./libdpp - Windows x64-Release/libdpp-$NEWVER-win64.zip" "./assets/libdpp-$NEWVER-win64-release-vs2019.zip"
 mv "./libdpp - Windows x64-Debug/libdpp-$NEWVER-win64.zip" "./assets/libdpp-$NEWVER-win64-debug-vs2019.zip"
+mv "./libdpp - Windows x86-Release/libdpp-$NEWVER-win32.zip" "./assets/libdpp-$NEWVER-win32-release-vs2019.zip"
+mv "./libdpp - Windows x86-Debug/libdpp-$NEWVER-win32.zip" "./assets/libdpp-$NEWVER-win32-debug-vs2019.zip"
 
 cd assets
 
+# 64 bit windows
 mkdir -p libdpp-$NEWVER-win64-release/bin
 cp ../../win32/bin/*.dll libdpp-$NEWVER-win64-release/bin
 zip -g libdpp-$NEWVER-win64-release-vs2019.zip libdpp-$NEWVER-win64-release/bin/*
@@ -26,9 +29,19 @@ mkdir -p libdpp-$NEWVER-win64-debug/bin
 cp ../../win32/bin/*.dll libdpp-$NEWVER-win64-debug/bin
 zip -g libdpp-$NEWVER-win64-debug-vs2019.zip libdpp-$NEWVER-win64-debug/bin/*
 
+# 32 bit windows
+mkdir -p libdpp-$NEWVER-win32-release/bin
+cp ../../win32/32/bin/*.dll libdpp-$NEWVER-win32-release/bin
+zip -g libdpp-$NEWVER-win32-release-vs2019.zip libdpp-$NEWVER-win32-release/bin/*
+
+mkdir -p libdpp-$NEWVER-win32-debug/bin
+cp ../../win32/32/bin/*.dll libdpp-$NEWVER-win32-debug/bin
+zip -g libdpp-$NEWVER-win32-debug-vs2019.zip libdpp-$NEWVER-win32-debug/bin/*
+
 cd ..
 echo "Create release..."
 gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(git log --format="- %s" $(git show-ref | grep refs/tags | tail -n 1 | cut -d ' ' -f 1)..HEAD)" ./assets/*.zip ./assets/*.deb
 echo "Cleaning up..."
 cd ..
 rm -rf temp
+
