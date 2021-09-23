@@ -24,7 +24,7 @@ It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contr
 ## Supported Operating Systems
 
 The library runs great on **Linux**. **Windows** is also supported and we offer ready made compiled DLL and LIB files for easy integration into any windows visual studio 2019 project.
-**Mac OS X** is also functional and stable, as is running your bot on a **Raspberry Pi** - we offer a prebuilt .deb for ARM64, ARM6 and ARM7 to save on having to wait for it to compile.
+**Mac OS X** and **FreeBSD** is also functional and stable, as is running your bot on a **Raspberry Pi** - we offer a prebuilt .deb for ARM64, ARM6 and ARM7 to save on having to wait for it to compile.
 
 The library may work fine in other operating systems too, if you run a D++ bot on something not listed here please let us know!
 
@@ -35,6 +35,7 @@ The library may work fine in other operating systems too, if you run a D++ bot o
 * \ref buildlinux
 * \ref buildwindows
 * \ref buildosx
+* \ref buildfreebsd
 
 ## Architecture
 * \ref clusters-shards-guilds
