@@ -1936,7 +1936,7 @@ public:
 	 * @param type Type of image for avatar
 	 * @param callback Function to call when the API call completes.
 	 */
-	void current_user_edit(const std::string &nickname, const std::string& image_blob, image_type type, command_completion_event_t callback = {});
+	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get current user DM channels

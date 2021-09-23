@@ -81,7 +81,7 @@ public:
 	 * @param type Image type
 	 * @return webhook& Reference to self
 	 */
-	webhook& load_image(const std::string &image_blob, image_type type);
+	webhook& load_image(const std::string &image_blob, const image_type type);
 };
 
 /**

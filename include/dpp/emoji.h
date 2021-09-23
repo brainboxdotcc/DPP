@@ -137,7 +137,7 @@ public:
 	 * @param type Type of image
 	 * @return emoji& Reference to self
 	 */
-	emoji& load_image(const std::string &image_blob, image_type type);
+	emoji& load_image(const std::string &image_blob, const image_type type);
 
 	/**
 	 * @brief Format to name if unicode, name:id if has id or a:name:id if animated
