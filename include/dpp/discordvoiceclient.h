@@ -29,10 +29,10 @@
 #include <WS2tcpip.h>
 #include <io.h>
 #else
+#include <netinet/in.h>
 #include <resolv.h>
 #include <netdb.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
 #endif
