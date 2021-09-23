@@ -188,17 +188,17 @@ foreach (fullmodname ${subdirlist})
 
 	if (WIN32)
 		if (NOT WINDOWS_32_BIT)
-			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libssl.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libcrypto.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libsodium.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/opus.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/zlib.lib")
+			target_link_libraries(${modname} PUBLIC "${PROJECT_SOURCE_DIR}/win32/lib/libssl.lib"
+				"${PROJECT_SOURCE_DIR}/win32/lib/libcrypto.lib"
+				"${PROJECT_SOURCE_DIR}/win32/lib/libsodium.lib"
+				"${PROJECT_SOURCE_DIR}/win32/lib/opus.lib"
+				"${PROJECT_SOURCE_DIR}/win32/lib/zlib.lib")
 		else()
-			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/libssl.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/libcrypto.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/libsodium.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/opus.lib"
-				"${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/zlib.lib")
+			target_link_libraries(${modname} PUBLIC "${PROJECT_SOURCE_DIR}/win32/32/lib/libssl.lib"
+				"${PROJECT_SOURCE_DIR}/win32/32/lib/libcrypto.lib"
+				"${PROJECT_SOURCE_DIR}/win32/32/lib/libsodium.lib"
+				"${PROJECT_SOURCE_DIR}/win32/32/lib/opus.lib"
+				"${PROJECT_SOURCE_DIR}/win32/32/lib/zlib.lib")
 		endif()
 
 	else()
@@ -218,17 +218,17 @@ target_link_libraries(test PUBLIC ${modname})
 
 if(WIN32)
 	if (NOT WINDOWS_32_BIT)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 	else()
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${PROJECT_SOURCE_DIR}/win32/32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 	endif()
 endif()
 
