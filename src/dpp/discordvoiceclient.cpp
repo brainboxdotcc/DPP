@@ -452,7 +452,7 @@ int discord_voice_client::WantRead() {
 
 void discord_voice_client::Error(uint32_t errorcode)
 {
-	std::map<uint32_t, std::string> errortext = {
+	const static std::map<uint32_t, std::string> errortext = {
 		{ 1000, "Socket shutdown" },
 		{ 1001, "Client is leaving" },
 		{ 1002, "Endpoint received a malformed frame" },

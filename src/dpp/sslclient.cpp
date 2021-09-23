@@ -71,14 +71,14 @@ public:
 	SSL_CTX* ctx;
 };
 
-#define SAFE_FD_SET(a, b) { if (a >= 0 && a <= FD_SETSIZE) { FD_SET(a, b); }}
-#define SAFE_FD_ISSET(a, b) ((a >= 0 && a <= FD_SETSIZE) ? FD_ISSET(a, b) : 0)
+#define SAFE_FD_SET(a, b) { if (a >= 0 && a < FD_SETSIZE) { FD_SET(a, b); }}
+#define SAFE_FD_ISSET(a, b) ((a >= 0 && a < FD_SETSIZE) ? FD_ISSET(a, b) : 0)
 
 /* You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
  */
-#define BUFSIZZ 1024 * 16
+#define BUFSIZZ 16 * 1240
 const int ERROR_STATUS = -1;
 
 ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port), bytes_in(0), bytes_out(0)
@@ -206,6 +206,10 @@ void ssl_client::read_loop()
 	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
 	fd_set readfds, writefds, efds;
 	char ClientToServerBuffer[BUFSIZZ], ServerToClientBuffer[BUFSIZZ];
+
+	if (sfd == -1)  {
+		throw dpp::exception("Invalid file descriptor in read_loop()");
+	}
 	
 	/* Make the socket nonblocking */
 #ifdef _WIN32
