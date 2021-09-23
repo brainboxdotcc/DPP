@@ -23,36 +23,38 @@ set(BUILD_SHARED_LIBS TRUE)
 add_compile_definitions(DPP_BUILD)
 
 if(WIN32)
-	message("-- Building for windows with precompiled packaged dependencies")
-	#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-	set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib")
-	set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
-	set(OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
-	set(OPENSSL_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib")
-	ADD_DEFINITIONS(/bigobj)
+	if (NOT WINDOWS_32_BIT)
+		message("-- Building for windows with precompiled packaged dependencies")
+		#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+		set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib")
+		set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
+		set(OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
+		set(OPENSSL_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib")
+		ADD_DEFINITIONS(/bigobj)
 
-	link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libssl.lib")
-	link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libcrypto.lib")
-	link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/zlib.lib")
-	link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libsodium.lib")
-	link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/opus.lib")
+		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libssl.lib")
+		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libcrypto.lib")
+		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/zlib.lib")
+		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libsodium.lib")
+		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/opus.lib")
 
-	set(OPUS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
-	set(OPUS_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/opus.lib")
-	set(sodium_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
-	set(sodium_LIBRARY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libsodium.lib")
-	set(sodium_LIBRARY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libsodium.lib")
-	set(HAVE_OPUS_OPUS_H "${CMAKE_CURRENT_SOURCE_DIR}/win32/include/opus/opus.h")
-	set(OPUS_FOUND 1)
-	SET(sodium_VERSION_STRING "win32 bundled")
-	
-	include_directories("${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
+		set(OPUS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
+		set(OPUS_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/opus.lib")
+		set(sodium_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
+		set(sodium_LIBRARY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libsodium.lib")
+		set(sodium_LIBRARY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libsodium.lib")
+		set(HAVE_OPUS_OPUS_H "${CMAKE_CURRENT_SOURCE_DIR}/win32/include/opus/opus.h")
+		set(OPUS_FOUND 1)
+		SET(sodium_VERSION_STRING "win32 bundled")
+		
+		include_directories("${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
 
-	add_compile_definitions(OPENSSL_SYS_WIN32)
-	add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
-	add_compile_definitions(WIN32_LEAN_AND_MEAN)
-	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-	add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
+		add_compile_definitions(OPENSSL_SYS_WIN32)
+		add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
+		add_compile_definitions(WIN32_LEAN_AND_MEAN)
+		add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+		add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
+	endif()
 endif()
 
 #if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -185,11 +187,20 @@ foreach (fullmodname ${subdirlist})
 	endif()
 
 	if (WIN32)
-		target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libssl.lib"
-												"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libcrypto.lib"
-												"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libsodium.lib"
-												"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/opus.lib"
-												"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/zlib.lib")
+		if (NOT WINDOWS_32_BIT)
+			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libssl.lib"
+				"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libcrypto.lib"
+				"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/libsodium.lib"
+				"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/opus.lib"
+				"${CMAKE_CURRENT_SOURCE_DIR}/win32/lib/zlib.lib")
+		else()
+			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/libssl.lib"
+				"${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/libcrypto.lib"
+				"${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/libsodium.lib"
+				"${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/opus.lib"
+				"${CMAKE_CURRENT_SOURCE_DIR}/win32/32/lib/zlib.lib")
+		endif()
+
 	else()
 		target_link_libraries(${modname} PUBLIC ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${ZLIB_LIBRARIES})
 	endif()
@@ -206,11 +217,19 @@ target_compile_features(dpp PRIVATE cxx_std_17)
 target_link_libraries(test PUBLIC ${modname})
 
 if(WIN32)
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+	if (NOT WINDOWS_32_BIT)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+	else()
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/libssl-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/libsodium.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/win32/32/bin/opus.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
+	endif()
 endif()
 
 if(NOT WIN32)

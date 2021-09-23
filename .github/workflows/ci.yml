@@ -61,6 +61,8 @@ jobs:
         cfg:
         - { name: x64,  arch: x64, config: Release }
         - { name: x64,  arch: x64, config: Debug }
+        - { name: x86,  arch: x86, config: Release }
+        - { name: x86,  arch: x86, config: Debug }
 
     name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}"
     runs-on: windows-2019
@@ -76,8 +78,13 @@ jobs:
       - name: Install chocolatey packages (x64)
         run: choco install ninja -y
 
-      - name: Generate CMake
+      - name: Generate CMake (x64)
+        if: ${{ matrix.cfg.arch == 'x64' }}
         run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" ..
+
+      - name: Generate CMake (x86)
+        if: ${{ matrix.cfg.arch == 'x86' }}
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" -A Win32 -T host=x86 -DCMAKE_TOOLCHAIN_FILE=cmake/Win32ToolChain.cmake ..
 
       - name: Build Project
         run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}}
