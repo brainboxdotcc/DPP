@@ -52,7 +52,7 @@ struct CoreExport resolved_user {
  * @brief Represents a received parameter.
  * We use variant so that multiple non-related types can be contained within.
  */
-typedef std::variant<std::monostate, std::string, dpp::role, dpp::channel, dpp::resolved_user, int64_t, bool> command_parameter;
+typedef std::variant<std::monostate, std::string, dpp::role, dpp::channel, dpp::resolved_user, int64_t, bool, double> command_parameter;
 
 /**
  * @brief Parameter types when registering a command.
@@ -65,7 +65,8 @@ enum parameter_type {
 	pt_role,	//!< Role object
 	pt_channel,	//!< Channel object
 	pt_user,	//!< User object
-	pt_integer,	//!< 32 bit signed integer
+	pt_integer,	//!< 64 bit signed integer
+	pt_double,	//!< double floating point
 	pt_boolean	//!< boolean
 };
 

@@ -226,6 +226,7 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 			case co_channel:
 			case co_role:
 			case co_user:
+			case co_mentionable:
 				cdo.value = SnowflakeNotNull(&j, "value");
 				break;
 			case co_integer:
@@ -233,6 +234,9 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 				break;
 			case co_string:
 				cdo.value = j.at("value").get<std::string>();
+				break;
+			case co_number:
+				cdo.value = j.at("value").get<double>();
 				break;
 			case co_sub_command:
 			case co_sub_command_group:
