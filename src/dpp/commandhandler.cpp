@@ -243,7 +243,7 @@ void commandhandler::route(const class dpp::message& msg)
 					}
 					break;
 					case pt_integer: {
-						int32_t x = 0;
+						int64_t x = 0;
 						ss >> x;
 						param = x;
 					}
@@ -360,7 +360,7 @@ void commandhandler::route(const class interaction_create_t & event)
 				}
 				break;
 				case pt_integer: {
-					int32_t i = std::get<int32_t>(slash_parameter);
+					int64_t i = std::get<int64_t>(slash_parameter);
 					param = i;
 				}
 				break;

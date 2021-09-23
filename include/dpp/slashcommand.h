@@ -61,7 +61,7 @@ enum command_option_type : uint8_t {
  * 
  * std::monostate indicates an invalid parameter value, e.g. an unfilled optional parameter.
  */
-typedef std::variant<std::monostate, std::string, int32_t, bool, snowflake> command_value;
+typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake> command_value;
 
 /**
  * @brief This struct represents choices in a multiple choice option
