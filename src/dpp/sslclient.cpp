@@ -90,6 +90,9 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) :
         signal(SIGCHLD, SIG_IGN);
         signal(SIGXFSZ, SIG_IGN);
 #endif
+	if (FD_SETSIZE < 1024) {
+		throw dpp::exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
+	}
 	ssl = new opensslcontext();
 	Connect();
 }
@@ -227,7 +230,7 @@ void ssl_client::read_loop()
 #endif
 	nonblocking = true;
 	width = sfd + 1;
-	
+
 	try {
 		/* Loop until there is a socket error */
 		while(true) {
