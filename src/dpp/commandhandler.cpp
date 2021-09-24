@@ -250,11 +250,13 @@ void commandhandler::route(const class dpp::message& msg)
 						ss >> x;
 						param = x;
 					}
+					break;
 					case pt_double: {
 						double x = 0;
 						ss >> x;
 						param = x;
 					}
+					break;
 					case pt_boolean: {
 						std::string x;
 						bool y = false;
