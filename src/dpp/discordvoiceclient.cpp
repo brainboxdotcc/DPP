@@ -79,25 +79,31 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	sending(false),
 	paused(false),
 	tracks(0)
+#if HAVE_VOICE
+	,
+	encoder(nullptr),
+	decoder(nullptr),
+	repacketizer(nullptr)
+#endif
 {
 #if HAVE_VOICE
 	if (!discord_voice_client::sodium_initialised) {
 		if (sodium_init() < 0) {
 			throw dpp::exception("discord_voice_client::discord_voice_client; sodium_init() failed");
 		}
-		int opusError = 0;
-		encoder = opus_encoder_create(48000, 2, OPUS_APPLICATION_VOIP, &opusError);
-		if (opusError) {
-			throw dpp::exception(fmt::format("discord_voice_client::discord_voice_client; opus_encoder_create() failed: {}", opusError));
-		}
-		opusError = 0;
-		decoder = opus_decoder_create(48000, 2, &opusError);
-		if (opusError) {
-			throw dpp::exception(fmt::format("discord_voice_client::discord_voice_client; opus_decoder_create() failed: {}", opusError));
-		}
-		repacketizer = opus_repacketizer_create();
 		discord_voice_client::sodium_initialised = true;
 	}
+	int opusError = 0;
+	encoder = opus_encoder_create(48000, 2, OPUS_APPLICATION_VOIP, &opusError);
+	if (opusError) {
+		throw dpp::exception(fmt::format("discord_voice_client::discord_voice_client; opus_encoder_create() failed: {}", opusError));
+	}
+	opusError = 0;
+	decoder = opus_decoder_create(48000, 2, &opusError);
+	if (opusError) {
+		throw dpp::exception(fmt::format("discord_voice_client::discord_voice_client; opus_decoder_create() failed: {}", opusError));
+	}
+	repacketizer = opus_repacketizer_create();
 	Connect();
 #endif
 }
