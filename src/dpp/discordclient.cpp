@@ -529,7 +529,7 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id) {
 		/* Once sent, this expects two events (in any order) on the websocket:
 		* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
 		*/
-		log(ll_debug, fmt::format("Sending op 4, guild {}", guild_id));
+		log(ll_debug, fmt::format("Sending op 4 to join VC, guild {} channel {} ", guild_id, channel_id));
 		QueueMessage(json({
 			{ "op", 4 },
 			{ "d", {
@@ -540,31 +540,39 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id) {
 				}
 			}
 		}).dump(), false);
+	} else {
+		log(ll_debug, fmt::format("Requested the bot connect to voice channel {} on guild {}, but it seems we are already on this VC", channel_id, guild_id));
 	}
 #endif
 }
 
-void discord_client::disconnect_voice(snowflake guild_id) {
+void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_json) {
 #ifdef HAVE_VOICE
 	std::lock_guard<std::mutex> lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
 		log(ll_debug, fmt::format("Disconnecting voice, guild: {}", guild_id));
-		QueueMessage(json({
-			{ "op", 4 },
-			{ "d", {
-					{ "guild_id", std::to_string(guild_id) },
-					{ "channel_id", json::value_t::null },
-					{ "self_mute", false },
-					{ "self_deaf", false },
+		if (emit_json) {
+			QueueMessage(json({
+				{ "op", 4 },
+				{ "d", {
+						{ "guild_id", std::to_string(guild_id) },
+						{ "channel_id", json::value_t::null },
+						{ "self_mute", false },
+						{ "self_deaf", false },
+					}
 				}
-			}
-		}).dump(), false);
+			}).dump(), false);
+		}
 		delete v->second;
 		v->second = nullptr;
 		connecting_voice_channels.erase(v);
 	}
 #endif
+}
+
+void discord_client::disconnect_voice(snowflake guild_id) {
+	disconnect_voice_internal(guild_id, true);
 }
 
 voiceconn* discord_client::get_voice(snowflake guild_id) {
