@@ -138,6 +138,19 @@ class CoreExport discord_voice_client : public websocket_client
 	 * (merges frames into one packet)
 	 */
 	OpusRepacketizer* repacketizer;
+#else
+	/** libopus encoder
+	 */
+	void* encoder;
+
+	/** libopus decoder
+	 */
+	void* decoder;
+
+	/** libopus repacketizer
+	 * (merges frames into one packet)
+	 */
+	void* repacketizer;
 #endif
 
 	/** File descriptor for UDP connection
