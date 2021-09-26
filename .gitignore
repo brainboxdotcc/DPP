@@ -2,6 +2,7 @@ test
 build
 config.json
 docs
+testdata/maxpower.pcm
 docs/doxygen_sqlite3.db
 .vs
 .misspell-fixer.ignore

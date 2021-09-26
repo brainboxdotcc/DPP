@@ -29,6 +29,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/discordvoiceclient.h>
+#include <dpp/event.h>
 #include <queue>
 #include <thread>
 #include <deque>
@@ -136,6 +137,17 @@ public:
 /** @brief Implements a discord client. Each discord_client connects to one shard and derives from a websocket client. */
 class CoreExport discord_client : public websocket_client
 {
+protected:
+	friend class dpp::events::voice_state_update;
+	/**
+	 * @brief Disconnect from the connected voice channel on a guild
+	 * 
+	 * @param guild_id The guild who's voice channel you wish to disconnect from
+	 * @param send_json True if we shold send a json message confirming we are leaving the VC
+	 * Should be set to false if we already receive this message in an event.
+	 */
+	void disconnect_voice_internal(snowflake guild_id, bool send_json = true);
+private:
 	/** Mutex for message queue */
 	std::mutex queue_mutex;
 
