@@ -21,7 +21,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#ifndef WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #endif
 #include <dpp/discordclient.h>
