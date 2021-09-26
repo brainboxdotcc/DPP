@@ -71,8 +71,9 @@ public:
 	SSL_CTX* ctx;
 };
 
-#define SAFE_FD_SET(a, b) { if (a >= 0 && a < FD_SETSIZE) { FD_SET(a, b); }}
-#define SAFE_FD_ISSET(a, b) ((a >= 0 && a < FD_SETSIZE) ? FD_ISSET(a, b) : 0)
+/* NOTE: Upper bounds check not required: https://docs.microsoft.com/en-us/windows/win32/winsock/select-and-fd---2 */
+#define SAFE_FD_SET(a, b) { if (a >= 0) { FD_SET(a, b); }}
+#define SAFE_FD_ISSET(a, b) ((a >= 0) ? FD_ISSET(a, b) : 0)
 
 /* You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
