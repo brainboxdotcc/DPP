@@ -496,7 +496,7 @@ void discord_voice_client::Error(uint32_t errorcode)
 	log(dpp::ll_warning, fmt::format("Voice session error: {} on channel {}: {}", errorcode, channel_id, error));
 
 	/* Errors 4004...4016 except 4014 are fatal and cause termination of the voice session */
-	if (errorcode >= 4003 && errorcode != 4014) {
+	if (errorcode >= 4003) {
 		stop_audio();
 		this->terminating = true;
 		log(dpp::ll_error, "This is a non-recoverable error, giving up on voice connection");
