@@ -23,7 +23,7 @@ int main(int argc, char const *argv[])
 	*/
 	uint8_t* robot = nullptr;
 	size_t robot_size = 0;
-	std::ifstream input ("../testdata/maxpower.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	std::ifstream input ("../testdata/onandon.pcm", std::ios::in|std::ios::binary|std::ios::ate);
 	if (input.is_open()) {
 		robot_size = input.tellg();
 		robot = new uint8_t[robot_size];
