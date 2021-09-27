@@ -348,7 +348,7 @@ bool discord_voice_client::is_paused() {
 
 float discord_voice_client::get_secs_remaining() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	float ret;
+	float ret = 0;
 
 	for (auto packet : outbuf)
 		ret += packet.duration * (timescale / 1000000000.0);
@@ -368,10 +368,9 @@ void discord_voice_client::stop_audio() {
 
 void discord_voice_client::Send(const char* packet, size_t len, uint64_t duration) {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	voice_out_packet frame = {
-		.packet = std::string(packet, len),
-		.duration = duration
-	};
+	voice_out_packet frame
+	frame.packet = std::string(packet, len);
+	frame.duration = duration;
 	outbuf.push_back(frame);
 }
 
