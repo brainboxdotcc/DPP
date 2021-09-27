@@ -368,7 +368,7 @@ void discord_voice_client::stop_audio() {
 
 void discord_voice_client::Send(const char* packet, size_t len, uint64_t duration) {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	voice_out_packet frame
+	voice_out_packet frame;
 	frame.packet = std::string(packet, len);
 	frame.duration = duration;
 	outbuf.push_back(frame);
