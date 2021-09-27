@@ -76,7 +76,7 @@ struct CoreExport voice_out_packet {
 	 * @brief Duration of packet
 	 */
 	uint64_t duration;
-}
+};
 
 #define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
 

@@ -402,7 +402,7 @@ void discord_voice_client::WriteReady()
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (!this->paused && outbuf.size()) {
 
-			if (outbuf[0].size() == 2 && ((uint16_t)(*(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
+			if (outbuf[0].packet.size() == 2 && ((uint16_t)(*(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
 				track_marker_found = true;
 				if (tracks > 0)
@@ -622,7 +622,7 @@ void discord_voice_client::insert_marker(const std::string& metadata) {
 	 * to actually send it, and instead to skip it
 	 */
 	uint16_t tm = AUDIO_TRACK_MARKER;
-	Send((const char*)&tm, sizeof(uint16_t));
+	Send((const char*)&tm, sizeof(uint16_t), 0);
 	{
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		track_meta.push_back(metadata);
@@ -641,7 +641,7 @@ uint32_t discord_voice_client::get_tracks_remaining() {
 void discord_voice_client::skip_to_next_marker() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	/* Keep popping the first entry off the outbuf until the first entry is a track marker */
-	while (outbuf.size() && outbuf[0].size() != sizeof(uint16_t) && ((uint16_t)(*(outbuf[0].data()))) != AUDIO_TRACK_MARKER) {
+	while (outbuf.size() && outbuf[0].packet.size() != sizeof(uint16_t) && ((uint16_t)(*(outbuf[0].packet.data()))) != AUDIO_TRACK_MARKER) {
 		outbuf.erase(outbuf.begin());
 	}
 	if (outbuf.size()) {
@@ -660,7 +660,7 @@ void discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t len
 
 	const size_t max_frame_bytes = 11520;
 	uint8_t pad[max_frame_bytes] = { 0 };
-	if (length > max_frame_bytes && use_opus) {
+	if (length > max_frame_bytes) {
 		std::string s_audio_data((const char*)audio_data, length);
 		while (s_audio_data.length() > max_frame_bytes) {
 			std::string packet(s_audio_data.substr(0, max_frame_bytes));
@@ -668,7 +668,7 @@ void discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t len
 			if (packet.size() < max_frame_bytes) {
 				packet.resize(max_frame_bytes, 0);
 			}
-			send_audio((uint16_t*)packet.data(), max_frame_bytes, use_opus);
+			send_audio_raw((uint16_t*)packet.data(), max_frame_bytes);
 		}
 
 		return;

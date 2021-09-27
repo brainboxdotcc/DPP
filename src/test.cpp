@@ -55,7 +55,7 @@ int main(int argc, char const *argv[])
 		if (command == ".maxpower") {
 			dpp::voiceconn* v = event.from->get_voice(event.msg->guild_id);
 			if (v && v->voiceclient && v->voiceclient->is_ready()) {
-				v->voiceclient->send_audio((uint16_t*)robot, robot_size);
+				v->voiceclient->send_audio_raw((uint16_t*)robot, robot_size);
 			}
 		}
 	});
