@@ -470,6 +470,7 @@ int main()
 				dpp::message(event.msg->channel_id, "this text has buttons").add_component(
 					dpp::component().add_component(
 						dpp::component().set_label("Click me!").
+						set_type(dpp::cot_button).
 						set_emoji("😄").
 						set_style(dpp::cos_danger).
 						set_id("myid")
