@@ -66,6 +66,18 @@ namespace dpp {
 // Forward declaration
 class cluster;
 
+struct CoreExport voice_out_packet {
+	/** 
+	 * @brief Each string is a UDP packet.
+	 * Generally these will be RTP.
+	 */
+	std::string packet;
+	/**
+	 * @brief Duration of packet
+	 */
+	uint64_t duration;
+}
+
 #define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
 
 /** @brief Implements a discord voice connection.
@@ -111,10 +123,15 @@ class CoreExport discord_voice_client : public websocket_client
 	 */
 	std::vector<std::string> modes;
 
-	/** Output buffer. Each string is a UDP packet.
-	 * Generally these will be RTP.
+	/**
+	 * @brief Timescale in nanoseconds
 	 */
-	std::vector<std::string> outbuf;
+	uint64_t timescale;
+
+	/**
+	 * @brief Output buffer
+	 */
+	std::vector<voice_out_packet> outbuf;
 
 	/** Input  buffer. Each string is a received UDP
 	 * packet. These will usually be RTP.
@@ -259,8 +276,9 @@ class CoreExport discord_voice_client : public websocket_client
 	 * 
 	 * @param packet packet data
 	 * @param len length of packet
+	 * @param duration duration of opus packet
 	 */
-	void Send(const char* packet, size_t len);
+	void Send(const char* packet, size_t len, uint64_t duration);
 
 	/**
 	 * @brief Queue a message to be sent via the websocket
@@ -394,7 +412,7 @@ public:
 	void Run();
 
 	/**
-	 * @brief Send audio to the voice channel.
+	 * @brief Send raw audio to the voice channel.
 	 * 
 	 * You should send an audio packet of n11520 bytes.
 	 * Note that this function can be costly as it has to opus encode
@@ -411,24 +429,38 @@ public:
 	 * @param audio_data Raw PCM audio data. Channels are interleaved,
 	 * with each channel's amplitude being a 16 bit value.
 	 * 
-	 * The audio data should be 48000Khz signed 16 bit audio.
+	 * The audio data should be 48000Hz signed 16 bit audio.
 	 * 
 	 * @param length The length of the audio data. The length should
 	 * be a multiple of 4 (2x 16 bit stero channels) with a maximum
 	 * length of 11520, which is a complete opus frame at highest
 	 * quality.
-	 * @param use_opus Some containers such as .ogg may contain OPUS
-	 * encoded data already. In this case, we don't need to encode the
-	 * frames using opus here. We can set use_opus to false and bypass the
-	 * codec, only applying libsodium to the stream.
+	 */
+	void send_audio_raw(uint16_t* audio_data, const size_t length);
+
+	/**
+	 * @brief Send opus packets to the voice channel
 	 * 
-	 * @note If you set use_opus to false, it is your responsibility to ensure
-	 * that packets of data sent to send_audio are correctly repacketized
-	 * for streaming, e.g. that audio frames are not too large or contain
+	 * Some containers such as .ogg may contain OPUS
+	 * encoded data already. In this case, we don't need to encode the
+	 * frames using opus here. We can bypass the codec, only applying 
+	 * libsodium to the stream.
+	 * 
+	 * @param opus_packet Opus packets. Discord expects opus frames 
+	 * to be encoded at 48000Hz
+	 * 
+	 * @param length The length of the audio data. 
+	 * 
+	 * @param duration Generally duration is 2.5, 5, 10, 20, 40 or 60
+	 * if the timescale is 1000000 (1ms) 
+	 * 
+	 * @note It is your responsibility to ensure that packets of data 
+	 * sent to send_audio are correctly repacketized for streaming, 
+	 * e.g. that audio frames are not too large or contain
 	 * an incorrect format. Discord will still expect the same frequency
 	 * and bit width of audio and the same signedness.
 	 */
-	void send_audio(uint16_t* audio_data, const size_t length, bool use_opus = true);
+	void send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration);
 
 	/**
 	 * @brief Pause sending of audio
