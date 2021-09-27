@@ -175,9 +175,7 @@ int discord_voice_client::UDPSend(const char* data, size_t length)
 
 int discord_voice_client::UDPRecv(char* data, size_t max_length)
 {
-	struct sockaddr sa;
-	socklen_t sl;
-	return recvfrom(this->fd, data, max_length, 0, (struct sockaddr*)&sa, &sl);
+	return recv(this->fd, data, max_length, 0);
 }
 
 bool discord_voice_client::HandleFrame(const std::string &data)
