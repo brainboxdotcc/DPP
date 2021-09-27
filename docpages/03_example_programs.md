@@ -230,7 +230,7 @@ int main(int argc, char const *argv[])
 		if (command == ".robot") {
 			dpp::voiceconn* v = event.from->get_voice(event.msg->guild_id);
 			if (v && v->voiceclient && v->voiceclient->is_ready()) {
-				v->voiceclient->send_audio((uint16_t*)robot, robot_size);
+				v->voiceclient->send_audio_raw((uint16_t*)robot, robot_size);
 			}
 		}
 	});
@@ -279,7 +279,7 @@ int main(int argc, char const *argv[])
 					join_vc = false;
 					/* We are on this voice channel, at this point we can send any audio instantly to vc:
 
-					 * current_vc->send_audio(...)
+					 * current_vc->send_audio_raw(...)
 					 */
 				} else {
 					/* We are on a different voice channel. Leave it, then join the new one 
@@ -298,7 +298,7 @@ int main(int argc, char const *argv[])
 					/* We are now connecting to a vc. Wait for on_voice_ready 
 					 * event, and then send the audio within that event:
 					 * 
-					 * event.voice_client->send_audio(...);
+					 * event.voice_client->send_audio_raw(...);
 					 * 
 					 * NOTE: We can't instantly send audio, as we have to wait for
 					 * the connection to the voice server to be established!
