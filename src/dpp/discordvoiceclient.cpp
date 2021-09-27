@@ -77,6 +77,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	sequence(0),
 	timestamp(0),
 	timescale(1000000),
+	last_timestamp(std::chrono::high_resolution_clock::now()),
 	sending(false),
 	paused(false),
 	tracks(0)
@@ -197,6 +198,23 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 		uint32_t op = j["op"];
 
 		switch (op) {
+			// TODO: Client Disconnect remove ssrc from map
+			/* Speaking */ 
+			case 5:
+			/* Client Connect */
+			case 12:
+			{
+				if (j.find("d") != j.end() 
+				    && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()
+					&& j["d"].find("ssrc") != j["d"].end() && !j["d"]["ssrc"].is_null()) 
+				{
+					uint32_t u_ssrc = j["d"]["ssrc"].get<uint32_t>();
+					snowflake u_id = SnowflakeNotNull(&j["d"], "user_id");
+					std::cout << "U_SSRC: " << u_ssrc << "\n";
+					ssrcMap[u_ssrc] = u_id;
+				}
+			}
+			break;
 			/* Voice resume */
 			case 9:
 				log(ll_debug, "Voice connection resumed");
@@ -383,6 +401,50 @@ void discord_voice_client::ReadReady()
 	 */
 	uint8_t buffer[65535];
 	int r = this->UDPRecv((char*)buffer, sizeof(buffer));
+	
+	if (r < 12) return;
+
+	uint32_t speaker_ssrc;
+
+	memcpy(&speaker_ssrc, buffer + 8, sizeof(uint32_t));
+	speaker_ssrc = ntohl(speaker_ssrc);
+
+	std::cout << "SSRC: " << speaker_ssrc << "\n";
+	std::cout << "UserID: " << ssrcMap[speaker_ssrc] << "\n";
+
+	uint8_t nonce[12];
+	memcpy(nonce, buffer, 12);
+
+	uint8_t *packet = buffer + 12;
+
+	if (crypto_secretbox_open_easy(packet, packet, r - 12, nonce, secret_key)) return;
+
+	uint32_t packet_len = r - 12 - crypto_box_MACBYTES;
+
+	if (packet[0] == 0xbe && packet[1] == 0xde && packet_len > 4)
+	{
+		uint16_t header_extension_len;
+		memcpy(&header_extension_len, packet + 2, sizeof(uint16_t));
+		header_extension_len = ntohs(header_extension_len);
+
+		size_t offset = 4;
+		for (size_t i = 0; i < header_extension_len; i++) {
+			uint8_t byte = packet[offset];
+			offset++;
+			if (byte == 0) continue;
+			offset += 1 + (byte >> 4);
+		}
+		uint8_t byte = packet[offset];
+		if (byte == 0x00 || byte == 0x02) offset++;
+
+		packet = packet + offset;
+		packet_len -= offset;
+
+		int samples = opus_packet_get_samples_per_frame(packet, 48000);
+		
+		std::cout << samples << "\n";
+	}
+
 	if (r > 0 && creator->dispatch.voice_receive) {
 		voice_receive_t vr(nullptr, std::string((const char*)buffer, r));
 		vr.voice_client = this;
@@ -417,7 +479,11 @@ void discord_voice_client::WriteReady()
 		}
 	}
 	if (duration) {
-		std::this_thread::sleep_for(std::chrono::nanoseconds(duration));
+		std::chrono::nanoseconds latency = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last_timestamp);
+		std::chrono::nanoseconds sleep_time = std::chrono::nanoseconds(duration) - latency;
+		if (sleep_time.count() > 0)
+			std::this_thread::sleep_for(sleep_time);
+		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (creator->dispatch.voice_buffer_send) {
 			voice_buffer_send_t snd(nullptr, "");
 			snd.buffer_size = bufsize;
