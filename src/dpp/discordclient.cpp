@@ -521,7 +521,7 @@ uint64_t discord_client::get_channel_count() {
 	return total;
 }
 
-void discord_client::connect_voice(snowflake guild_id, snowflake channel_id) {
+void discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf) {
 #ifdef HAVE_VOICE
 	std::lock_guard<std::mutex> lock(voice_mutex);
 	if (connecting_voice_channels.find(guild_id) == connecting_voice_channels.end()) {
@@ -535,8 +535,8 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id) {
 			{ "d", {
 					{ "guild_id", std::to_string(guild_id) },
 					{ "channel_id", std::to_string(channel_id) },
-					{ "self_mute", false },
-					{ "self_deaf", false },
+					{ "self_mute", self_mute },
+					{ "self_deaf", self_deaf },
 				}
 			}
 		}).dump(), false);

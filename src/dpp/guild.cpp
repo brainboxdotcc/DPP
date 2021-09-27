@@ -446,7 +446,7 @@ uint64_t guild::permission_overwrites(const uint64_t base_permissions, const use
 	return permissions;
 }
 
-bool guild::connect_member_voice(snowflake user_id) {
+bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_deaf) {
 	for (auto & c : channels) {
 		channel* ch = dpp::find_channel(c);
 		if (!ch || (!ch->is_voice_channel() && !ch->is_stage_channel())) {
@@ -456,7 +456,7 @@ bool guild::connect_member_voice(snowflake user_id) {
 		auto vsi = vcmembers.find(user_id);
 		if (vsi != vcmembers.end()) {
 			if (vsi->second.shard) {
-				vsi->second.shard->connect_voice(this->id, vsi->second.channel_id);
+				vsi->second.shard->connect_voice(this->id, vsi->second.channel_id, self_mute, self_deaf);
 				return true;
 			}
 		}

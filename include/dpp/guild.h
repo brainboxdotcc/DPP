@@ -314,9 +314,11 @@ public:
 	 * @brief Connect to a voice channel another guild member is in
 	 *
 	 * @param user_id User id to join
+	 * @param self_mute True if the bot should mute itself
+	 * @param self_deaf True if the bot should deafen itself
 	 * @return True if the user specified is in a vc, false if they aren't
 	 */
-	bool connect_member_voice(snowflake user_id);
+	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false);
 
 	/** Is a large server (>250 users) */
 	bool is_large() const;

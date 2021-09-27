@@ -354,8 +354,10 @@ public:
 	 * 
 	 * @param guild_id Guild where the voice channel is
 	 * @param channel_id Channel ID of the voice channel
+	 * @param self_mute True if the bot should mute itself
+	 * @param self_deaf True if the bot should deafen itself
 	 */
-	void connect_voice(snowflake guild_id, snowflake channel_id);
+	void connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false);
 
 	/**
 	 * @brief Disconnect from the connected voice channel on a guild
