@@ -463,6 +463,31 @@ public:
 	void send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration);
 
 	/**
+	 * @brief Set the timescale in nanoseconds.
+	 * 
+	 * @param new_timescale Timescale to set. This defaults to 1000000,
+	 * which means 1 millisecond.
+	 * @return discord_voice_client& Reference to self
+	 */
+	discord_voice_client& set_timescale(uint64_t new_timescale);
+
+	/**
+	 * @brief Get the current timescale, this will default to 1000000
+	 * which means 1 millisecond.
+	 * 
+	 * @return uint64_t timescale in nanoseconds
+	 */
+	uint64_t get_timescale();
+
+	/**
+	 * @brief Mark the voice connection as 'speaking'.
+	 * This sends a JSON message to the voice websocket which tells discord
+	 * that the user is speaking. The library automatically calls this for you
+	 * whenever you send audio.
+	 */
+	void speak();
+
+	/**
 	 * @brief Pause sending of audio
 	 * 
 	 * @param pause True to pause, false to resume

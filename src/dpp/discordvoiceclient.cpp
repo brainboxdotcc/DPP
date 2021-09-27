@@ -699,18 +699,7 @@ void discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t len
 	Send((const char*)audioDataPacket.data(), audioDataPacket.size(), 60000000 / timescale);
 	timestamp += frameSize;
 
-	if (!this->sending) {
-		this->QueueMessage(json({
-		{"op", 5},
-		{"d", {
-			{"speaking", 1},
-			{"delay", 0},
-			{"ssrc", ssrc}
-		}}
-		}).dump(), true);
-		sending = true;
-	}
-
+	speak();
 #endif
 }
 
@@ -742,6 +731,11 @@ void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t le
 	Send((const char*)audioDataPacket.data(), audioDataPacket.size(), duration);
 	timestamp += frameSize;
 
+	speak();
+#endif
+}
+
+void discord_voice_client::speak() {
 	if (!this->sending) {
 		this->QueueMessage(json({
 		{"op", 5},
@@ -753,7 +747,15 @@ void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t le
 		}).dump(), true);
 		sending = true;
 	}
-#endif
+}
+
+discord_voice_client& discord_voice_client::set_timescale(uint64_t new_timescale) {
+	timescale = new_timescale;
+	return *this;
+}
+
+uint64_t discord_voice_client::get_timescale() {
+	return timescale;
 }
 
 std::string discord_voice_client::discover_ip() {
