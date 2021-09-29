@@ -385,9 +385,8 @@ public:
 
 	/** Constructor takes shard id, max shards and token.
 	 * @param _cluster The cluster which owns this voice connection, for related logging, REST requests etc
-	 * @param _server_id The server id (guild id) to identify the voice connection as
 	 * @param _channel_id The channel id to identify the voice connection as
-	 * @param _server_id The server id to identify the voice connection as
+	 * @param _server_id The server id (guild id) to identify the voice connection as
 	 * @param _token The voice session token to use for identifying to the websocket
 	 * @param _session_id The voice session id to identify with
 	 * @param _host The voice server hostname to connect to (hostname:port format)
