@@ -289,7 +289,7 @@ public:
 	 * 
 	 * @return commandhandler& Reference to self for chaining method calls
 	 */
-	commandhandler& finish();
+	commandhandler& register_commands();
 
 	/**
 	 * @brief Route a command from the on_message_create function.
