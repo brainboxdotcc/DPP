@@ -11,10 +11,10 @@
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
-* [Slash Commands/Interactions support](https://dpp.brainbox.cc/slashcommands.html)
-* [Voice support](https://dpp.brainbox.cc/soundboard.html)
+* [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
+* [Voice support](https://dpp.dev/soundboard.html)
 * The entire Discord API is available for use in the library
-* Stable [Windows support](https://dpp.brainbox.cc/buildwindows.html)
+* Stable [Windows support](https://dpp.dev/buildwindows.html)
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6) and Debian x86/x64
 
 Want to help? Drop me a line or send a PR.
@@ -25,7 +25,7 @@ This library is in use on [TriviaBot](https://triviabot.co.uk/) and [Sporks bot]
 
 The documentation is a work in progress, generated from the code comments and markdown using Doxygen.
 
-#### [View D++ library documentation](https://dpp.brainbox.cc/)
+#### [View D++ library documentation](https://dpp.dev/)
 
 ## Supported Systems
 
