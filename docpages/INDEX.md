@@ -20,10 +20,10 @@ You can download the latest releases and check out our source code from the [Git
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
-* [Slash Commands/Interactions support](https://dpp.brainbox.cc/slashcommands.html)
-* [Voice support](https://dpp.brainbox.cc/soundboard.html)
+* [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
+* [Voice support](https://dpp.dev/soundboard.html)
 * The entire Discord API is available for use in the library
-* Stable [Windows support](https://dpp.brainbox.cc/buildwindows.html)
+* Stable [Windows support](https://dpp.dev/buildwindows.html)
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7) and Debian x86/x64
 
 ## Supported Operating Systems
