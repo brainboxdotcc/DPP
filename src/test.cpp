@@ -65,7 +65,12 @@ int main(int argc, char const *argv[])
 		bot.log(dpp::ll_critical, std::to_string(ev.voice_client->channel_id) +" vc cid");
 		bot.log(dpp::ll_critical, std::to_string(ev.voice_client->server_id)+" vc sid");
 	});
-	
+
+        bot.on_voice_track_marker([&](const dpp::voice_track_marker_t &ev) {
+                bot.message_create(dpp::message(last_ch_id, "Song ended, leaving voice channel."));
+		ev.track_meta
+        });
+
 	bot.on_log([](const dpp::log_t & event) {
 		if (event.severity > dpp::ll_trace) {
 			std::cout << event.message << "\n";
