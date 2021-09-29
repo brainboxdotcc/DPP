@@ -19,7 +19,7 @@ jobs:
         run: sudo apt install -y doxygen
       - name: set up site
         run: |
-          sudo apt install dot
+          sudo apt install graphviz
           echo "Clone repository"
           git clone https://github.com/brainboxdotcc/DPP.git
           echo "Run Doxygen"
@@ -57,7 +57,7 @@ jobs:
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          sudo apt install dot
+          sudo apt install graphviz
           mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           echo "${{ secrets.GH_PAGES_DEPLOY }}" > ~/.ssh/id_ed25519
