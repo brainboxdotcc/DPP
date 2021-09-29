@@ -1,0 +1,104 @@
+name: documentation
+
+on:
+  pull_request:
+    branches: [dev, master]
+  push:
+    branches: [dev]
+
+jobs:
+  checks:
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: install dependency packages
+        run: sudo apt install -y doxygen
+      - name: set up site
+        run: |
+          echo "Clone repository"
+          git clone https://github.com/brainboxdotcc/DPP.git
+          echo "Run Doxygen"
+          doxygen
+          echo "Move Doxygen Files"
+          mkdir docs/xml
+          mv xml/* docs/xml
+          echo "Download Doxybook2"
+          curl -o doxybook2.zip -LO "https://github.com/matusnovak/doxybook2/releases/download/v1.3.3/doxybook2-linux-amd64-v1.3.3.zip"
+          unzip -j "doxybook2.zip" "bin/doxybook2" -d "."
+          echo "Run Doxybook2"
+          mkdir docs/reference
+          ./doxybook2 --input ./xml --output ./docs --config ./doxybook.config.json --templates templates/
+      - name: Test Build
+        run: |
+          cd DPP
+          if [ -e yarn.lock ]; then
+          yarn install --frozen-lockfile
+          elif [ -e package-lock.json ]; then
+          npm ci
+          else
+          npm i
+          fi
+          npx tsc --p reference-generator-tsconfig.json
+          npx tsc
+          npm run build
+  gh-release:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Add key to allow access to repository
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          echo "${{ secrets.GH_PAGES_DEPLOY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          cat <<EOT >> ~/.ssh/config
+          Host github.com
+          HostName github.com
+          IdentityFile ~/.ssh/id_ed25519
+          EOT
+      - name: install dependency packages
+        run: sudo apt install -y doxygen
+      - name: set up site
+        run: |
+          echo "Clone repository"
+          git clone https://github.com/brainboxdotcc/DPP.git
+          echo "Run Doxygen"
+          doxygen
+          echo "Move Doxygen Files"
+          mkdir docs/xml
+          mv xml/* docs/xml
+          echo "Download Doxybook2"
+          curl -o doxybook2.zip -LO "https://github.com/matusnovak/doxybook2/releases/download/v1.3.3/doxybook2-linux-amd64-v1.3.3.zip"
+          unzip -j "doxybook2.zip" "bin/doxybook2" -d "."
+          echo "Run Doxybook2"
+          mkdir docs/reference
+          ./doxybook2 --input ./xml --output ./docs --config ./doxybook.config.json --templates templates/              
+      - name: Release to GitHub Pages
+        env:
+          USE_SSH: true
+          GIT_USER: git
+          GIT_PASS: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd DPP
+          git config --global user.email "actions@gihub.com"
+          git config --global user.name "gh-actions"
+          if [ -e yarn.lock ]; then
+          yarn install --frozen-lockfile
+          elif [ -e package-lock.json ]; then
+          npm ci
+          else
+          npm i
+          fi
+          npx tsc --p reference-generator-tsconfig.json
+          npx tsc
+          npx docusaurus deploy
