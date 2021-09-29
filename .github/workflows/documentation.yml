@@ -19,6 +19,7 @@ jobs:
         run: sudo apt install -y doxygen
       - name: set up site
         run: |
+          sudo apt install dot
           echo "Clone repository"
           git clone https://github.com/brainboxdotcc/DPP.git
           echo "Run Doxygen"
@@ -30,7 +31,6 @@ jobs:
           curl -o doxybook2.zip -LO "https://github.com/matusnovak/doxybook2/releases/download/v1.3.3/doxybook2-linux-amd64-v1.3.3.zip"
           unzip -j "doxybook2.zip" "bin/doxybook2" -d "."
           echo "Run Doxybook2"
-          mkdir docs/reference
           ./doxybook2 --input ./xml --output ./docs --config ./doxybook.config.json --templates templates/
       - name: Test Build
         run: |
@@ -57,6 +57,7 @@ jobs:
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
+          sudo apt install dot
           mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           echo "${{ secrets.GH_PAGES_DEPLOY }}" > ~/.ssh/id_ed25519
@@ -75,13 +76,11 @@ jobs:
           echo "Run Doxygen"
           doxygen
           echo "Move Doxygen Files"
-          mkdir docs/xml
           mv xml/* docs/xml
           echo "Download Doxybook2"
           curl -o doxybook2.zip -LO "https://github.com/matusnovak/doxybook2/releases/download/v1.3.3/doxybook2-linux-amd64-v1.3.3.zip"
           unzip -j "doxybook2.zip" "bin/doxybook2" -d "."
           echo "Run Doxybook2"
-          mkdir docs/reference
           ./doxybook2 --input ./xml --output ./docs --config ./doxybook.config.json --templates templates/              
       - name: Release to GitHub Pages
         env:
