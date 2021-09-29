@@ -76,7 +76,7 @@ jobs:
           echo "Run Doxygen"
           doxygen
           echo "Move Doxygen Files"
-          mv xml/* docs/xml
+          mv docs/xml/* xml
           echo "Download Doxybook2"
           curl -o doxybook2.zip -LO "https://github.com/matusnovak/doxybook2/releases/download/v1.3.3/doxybook2-linux-amd64-v1.3.3.zip"
           unzip -j "doxybook2.zip" "bin/doxybook2" -d "."
