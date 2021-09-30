@@ -1,8 +1,7 @@
-# Welcome to the D++ developer wiki!
+# D++ Developer Documentation
 
 ## What is D++ (DPP)?
 
-<img src="DPP-Logo.png" align="right" style="max-width: 20% !important"/>
 D++ is a lightweight and simple library for Discord written in modern C++. It is designed to cover as much of the API specification as possible and take very little 
 memory to do so, even when caching large amounts of the data to cut down on HTTP requests.
 
@@ -10,15 +9,21 @@ It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contr
 
 *This project is now in stable development and accepting PRs and feature requests -- Don't be a stranger! If you want to contribute, just get in touch via [github](https://github.com/brainboxdotcc/DPP) or our [Discord server](https://discord.gg/dpp)!*
 
-## Library features:
+<img src="code_editor.png" style="margin-top: 2rem; margin-bottom: 2rem"/><br />
+
+## Downloads
+
+You can download the latest releases and check out our source code from the [GitHub page](https://github.com/brainboxdotcc/DPP/releases).
+
+## Library features
 
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
-* [Slash Commands/Interactions support](https://dpp.brainbox.cc/slashcommands.html)
-* [Voice support](https://dpp.brainbox.cc/soundboard.html)
+* [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
+* [Voice support](https://dpp.dev/soundboard.html)
 * The entire Discord API is available for use in the library
-* Stable [Windows support](https://dpp.brainbox.cc/buildwindows.html)
+* Stable [Windows support](https://dpp.dev/buildwindows.html)
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7) and Debian x86/x64
 
 ## Supported Operating Systems
@@ -48,6 +53,8 @@ The library may work fine in other operating systems too, if you run a D++ bot o
 \page frequently-asked-questions Frequently Asked Questions
 
 # Frequently Asked Questions (FAQ)
+
+[TOC] 
 
 ## Is this library in production use?
 This library powers the bot [TriviaBot](https://triviabot.co.uk) which has over **111,000 servers**, and [Sporks](https://sporks.gg) which has over **2,800 severs**. The library's use in these bots shows that the library is production ready for bots of all sizes.
@@ -121,7 +128,7 @@ To fix this issue, as root run `ldconfig`: `sudo ldconfig`. Log out if your SSH 
 The libsodium package requires pkg-config, but does not check for it when installed. Install it as root, e.g. `sudo apt install pkg-config`. Rerun cmake again, and rebuild the library.
 
 ## When using precompiled libraries in Windows, the program runs but is just a black console window and the bot doesnt come online?
-If this happens, ensure you are using the correct precompiled build of the library. Our precompiled binaries are built in two forms, release mode and debug mode, for x64 vs2019 only.
+If this happens, ensure you are using the correct precompiled build of the library. Our precompiled binaries are built in two forms, release mode and debug mode for visual studio 2019.
 If you require a build for a newer visual studio, you will have to compile it yourself from the github sources. Please see the section about \ref buildwindows for more information on how to do this.
 
 ## Does this library build/run on Raspberry Pi?

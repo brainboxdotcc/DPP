@@ -129,19 +129,31 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 		}
 		/* Register the command */
 		if (guild_id) {
-			owner->guild_command_create(newcommand, guild_id, [command, this](const dpp::confirmation_callback_t &callback) {
-				if (callback.is_error()) {
-					this->owner->log(dpp::ll_error, fmt::format("Failed to register guild slash command '{}': {}", command, callback.http_info.body));
-				}
-			});
+			if (bulk_registration_list_guild.find(guild_id) == bulk_registration_list_guild.end()) {
+				bulk_registration_list_guild[guild_id] = {};
+			}
+			bulk_registration_list_guild[guild_id].push_back(newcommand);
 		} else {
-			owner->global_command_create(newcommand, [command, this](const dpp::confirmation_callback_t &callback) {
-				if (callback.is_error()) {
-					this->owner->log(dpp::ll_error, fmt::format("Failed to register global slash command '{}': {}", command, callback.http_info.body));
-				}
-			});
+			bulk_registration_list_global.push_back(newcommand);
 		}
 	}
+	return *this;
+}
+
+commandhandler& commandhandler::register_commands()
+{
+	for(auto & guild_commands : bulk_registration_list_guild) {
+		owner->guild_bulk_command_create(guild_commands.second, guild_commands.first, [guild_commands, this](const dpp::confirmation_callback_t &callback) {
+			if (callback.is_error()) {
+				this->owner->log(dpp::ll_error, fmt::format("Failed to register guild slash commands for guild id '{}': {}", guild_commands.first, callback.http_info.body));
+			}
+		});
+	}
+	owner->global_bulk_command_create(bulk_registration_list_global, [this](const dpp::confirmation_callback_t &callback) {
+		if (callback.is_error()) {
+			this->owner->log(dpp::ll_error, fmt::format("Failed to register global slash commands: {}", callback.http_info.body));
+		}
+	});	
 	return *this;
 }
 

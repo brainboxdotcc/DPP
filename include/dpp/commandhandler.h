@@ -187,6 +187,16 @@ struct CoreExport command_info_t {
  * 
  */
 class CoreExport commandhandler {
+private:
+	/**
+	 * @brief List of guild commands to bulk register
+	 */
+	std::map<dpp::snowflake, std::vector<dpp::slashcommand>> bulk_registration_list_guild;
+	/**
+	 * @brief List of global commands to bulk register
+	 */
+	std::vector<dpp::slashcommand> bulk_registration_list_global;
+public:
 	/**
 	 * @brief Commands in the handler
 	 */
@@ -270,6 +280,16 @@ public:
 	 * @return commandhandler& reference to self
 	 */
 	commandhandler& add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, const std::string &description = "", snowflake guild_id = 0);
+
+	/**
+	 * @brief Register all slash commands with Discord
+	 * This method must be called if you are using the "/" prefix to mark the end of commands
+	 * being added to the handler. Note that this uses bulk registration and will replace any
+	 * existing slash commands.
+	 * 
+	 * @return commandhandler& Reference to self for chaining method calls
+	 */
+	commandhandler& register_commands();
 
 	/**
 	 * @brief Route a command from the on_message_create function.

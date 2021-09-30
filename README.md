@@ -11,10 +11,10 @@
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding (Many shards, one process: specify the number of shards, or let the library decide)
-* [Slash Commands/Interactions support](https://dpp.brainbox.cc/slashcommands.html)
-* [Voice support](https://dpp.brainbox.cc/soundboard.html)
+* [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
+* [Voice support](https://dpp.dev/soundboard.html)
 * The entire Discord API is available for use in the library
-* Stable [Windows support](https://dpp.brainbox.cc/buildwindows.html)
+* Stable [Windows support](https://dpp.dev/buildwindows.html)
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6) and Debian x86/x64
 
 Want to help? Drop me a line or send a PR.
@@ -25,7 +25,7 @@ This library is in use on [TriviaBot](https://triviabot.co.uk/) and [Sporks bot]
 
 The documentation is a work in progress, generated from the code comments and markdown using Doxygen.
 
-#### [View D++ library documentation](https://dpp.brainbox.cc/)
+#### [View D++ library documentation](https://dpp.dev/)
 
 ## Supported Systems
 
@@ -39,9 +39,7 @@ The library may work fine in other operating systems too, if you run a D++ bot o
 Contributions, issues and feature requests are welcome. After cloning and setting up project locally, you can just submit 
 a PR to this repo and it will be deployed once it's accepted.
 
-⚠️ It’s good to have descriptive commit messages, or PR titles so that other contributors can understand about your 
-commit or the PR Created. Read [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.3/) before 
-making the commit message.
+Please read the [D++ Code Style Guide](https://dpp.dev/coding-standards.html) for more information on how we format pull requests.
 
 ## 💬 Get in touch
 

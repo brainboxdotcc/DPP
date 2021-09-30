@@ -135,8 +135,8 @@ error_info confirmation_callback_t::get_error() const {
 void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 	gateway g = std::get<gateway>(shardinfo.value);
 	numshards = g.shards;
-	log(ll_info, fmt::format("Auto Shard: Bot requires {} shard{}", g.shards, g.shards > 1 ? "s" : ""));
 	if (g.shards) {
+		log(ll_info, fmt::format("Auto Shard: Bot requires {} shard{}", g.shards, (g.shards > 1) ? "s" : ""));
 		if (g.session_start_remaining < g.shards) {
 			log(ll_critical, fmt::format("Auto Shard: Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later."));
 		} else {
@@ -144,7 +144,11 @@ void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 			cluster::start(true);
 		}
 	} else {
-		log(ll_critical, "Auto Shard: Could not auto detect shard count! Cluster startup aborted.");
+		if (shardinfo.is_error()) {
+			throw dpp::exception(fmt::format("Auto Shard: Could not get shard count ({} [code: {}]). Cluster startup aborted.", shardinfo.get_error().message, shardinfo.get_error().code));
+		} else {
+			throw dpp::exception("Auto Shard: Could not get shard count (unknown error, check your connection). Cluster startup aborted.");
+		}
 	}
 }
 
