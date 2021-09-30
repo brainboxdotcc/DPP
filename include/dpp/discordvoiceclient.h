@@ -50,10 +50,12 @@
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
+#include <dpp/discordevents.h>
 #include <queue>
 #include <thread>
 #include <deque>
 #include <mutex>
+#include <chrono>
 
 using json = nlohmann::json;
 
@@ -195,6 +197,13 @@ class CoreExport discord_voice_client : public websocket_client
 	 */
 	uint32_t timestamp;
 
+	std::chrono::high_resolution_clock::time_point last_timestamp;
+
+	/**
+	 * Maps receiving ssrc to user id
+	 */
+	std::unordered_map<uint32_t, snowflake> ssrcMap;
+
 	/** This is set to true if we have started sending audio.
 	 * When this moves from false to true, this causes the
 	 * client to send the 'talking' notification to the websocket.
@@ -328,6 +337,9 @@ public:
 
 	/** True when the thread is shutting down */
 	bool terminating;
+
+	/** Decode received voice packets to PCM */
+	bool decode_voice_recv;
 
 	/** Heartbeat interval for sending heartbeat keepalive */
 	uint32_t heartbeat_interval;

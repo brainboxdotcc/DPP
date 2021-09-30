@@ -18,7 +18,8 @@
 
 cmake_minimum_required (VERSION 3.12)
 
-set(BUILD_SHARED_LIBS TRUE)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(DPP_BUILD_TEST "Build the test program" ON)
 
 add_compile_definitions(DPP_BUILD)
 
@@ -116,8 +117,6 @@ endif(HAVE_VOICE)
 
 aux_source_directory("src" coresrc)
 
-add_executable(test ${coresrc})
-
 string(ASCII 27 Esc)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -138,8 +137,6 @@ else()
 endif()
 
 include_directories(${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS})
-
-target_compile_features(test PRIVATE cxx_std_17)
 
 include_directories("include")
 
@@ -215,7 +212,11 @@ endforeach()
 
 target_compile_features(dpp PRIVATE cxx_std_17)
 
-target_link_libraries(test PUBLIC ${modname})
+if (DPP_BUILD_TEST)
+	add_executable(test ${coresrc})
+	target_compile_features(test PRIVATE cxx_std_17)
+	target_link_libraries(test PUBLIC ${modname})
+endif()
 
 if(WIN32)
 	if (NOT WINDOWS_32_BIT)

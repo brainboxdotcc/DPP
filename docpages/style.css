@@ -8,9 +8,7 @@ img {
 }
 
 #top {
-/*	background: rgb(231,231,232);
-	background: linear-gradient(0deg, rgba(231,231,232,0.8099440459777661) 35%, rgba(153,170,181,1) 100%);
-*/
+	background: linear-gradient(0deg, var(--separator-color) 35%, var(--primary-lighter-color) 100%);
 }
 
 @media only screen and (max-width: 600px) {
