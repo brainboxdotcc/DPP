@@ -9,7 +9,7 @@ It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contr
 
 *This project is now in stable development and accepting PRs and feature requests -- Don't be a stranger! If you want to contribute, just get in touch via [github](https://github.com/brainboxdotcc/DPP) or our [Discord server](https://discord.gg/dpp)!*
 
-<img src="code_editor.png" style="margin: 2rem"/><br />
+<img src="code_editor.png" style="margin-top: 2rem; margin-bottom: 2rem"/><br />
 
 ## Downloads
 
