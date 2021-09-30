@@ -39,9 +39,7 @@ The library may work fine in other operating systems too, if you run a D++ bot o
 Contributions, issues and feature requests are welcome. After cloning and setting up project locally, you can just submit 
 a PR to this repo and it will be deployed once it's accepted.
 
-⚠️ It’s good to have descriptive commit messages, or PR titles so that other contributors can understand about your 
-commit or the PR Created. Read [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.3/) before 
-making the commit message.
+Please read the [D++ Code Style Guide](https://dpp.dev/coding-standards.html) for more information on how we format pull requests.
 
 ## 💬 Get in touch
 

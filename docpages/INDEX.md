@@ -128,7 +128,7 @@ To fix this issue, as root run `ldconfig`: `sudo ldconfig`. Log out if your SSH 
 The libsodium package requires pkg-config, but does not check for it when installed. Install it as root, e.g. `sudo apt install pkg-config`. Rerun cmake again, and rebuild the library.
 
 ## When using precompiled libraries in Windows, the program runs but is just a black console window and the bot doesnt come online?
-If this happens, ensure you are using the correct precompiled build of the library. Our precompiled binaries are built in two forms, release mode and debug mode, for x64 vs2019 only.
+If this happens, ensure you are using the correct precompiled build of the library. Our precompiled binaries are built in two forms, release mode and debug mode for visual studio 2019.
 If you require a build for a newer visual studio, you will have to compile it yourself from the github sources. Please see the section about \ref buildwindows for more information on how to do this.
 
 ## Does this library build/run on Raspberry Pi?
