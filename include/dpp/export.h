@@ -21,7 +21,8 @@
 #pragma once
 
 /* Compile-time assertion check for C++17 */
-static_assert(__cplusplus >= 201703L, "D++ Requires a C++17 compatible compiler. Please ensure that you have enabled C++17 in your compiler flags.");
+// Investigate: MSVC doesnt like this
+//static_assert(__cplusplus >= 201703L, "D++ Requires a C++17 compatible compiler. Please ensure that you have enabled C++17 in your compiler flags.");
 
 #ifdef DPP_BUILD
 	#ifdef _WIN32
