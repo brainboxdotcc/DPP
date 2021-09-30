@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install homebrew packages
-        run: brew install cmake ninja libsodium opus
+        run: brew install cmake ninja libsodium opus openssl
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
