@@ -113,4 +113,4 @@ All types for the library should be within the `dpp` namespace. There are a coup
 
 All pull requests ("PRs") should be submitted against the `dev` branch in GitHub. It’s good to have descriptive commit messages, or PR titles so that other contributors can understand about your commit or the PR Created. Read [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.3/) for information on how we like to format commit messages.
 
-All PRs must pass the [GitHub Actions](https://github.com/brainboxdotcc/DPP/actions) tests before being allowed to be merged. This is to ensure that no code committed into the project fails to compile on any of our officially supported platforms or architectures/
+All PRs must pass the [GitHub Actions](https://github.com/brainboxdotcc/DPP/actions) tests before being allowed to be merged. This is to ensure that no code committed into the project fails to compile on any of our officially supported platforms or architectures.
