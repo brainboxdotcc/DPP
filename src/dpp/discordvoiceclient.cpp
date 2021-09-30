@@ -78,7 +78,11 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	timestamp(0),
 	timescale(1000000),
 	last_timestamp(std::chrono::high_resolution_clock::now()),
+#ifdef HAVE_VOICE
 	decode_voice_recv(true),
+#else
+	decode_voice_recv(false),
+#endif
 	sending(false),
 	paused(false),
 	tracks(0)
@@ -464,6 +468,7 @@ void discord_voice_client::ReadReady()
 		packet = packet + offset;
 		packet_len -= offset;
 
+#ifdef HAVE_VOICE
 		if (decode_voice_recv)
 		{
 			opus_int16 pcm[23040];
@@ -475,6 +480,7 @@ void discord_voice_client::ReadReady()
 			creator->dispatch.voice_receive(vr);
 		}
 		else
+#endif
 		{
 			vr.audio = packet;
 			vr.audio_size = packet_len;
