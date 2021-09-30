@@ -410,11 +410,7 @@ void discord_voice_client::Send(const char* packet, size_t len, uint64_t duratio
 
 void discord_voice_client::ReadReady()
 {
-	/* XXX Decoding of voice not currently supported.
-	 * Audio stream will always be a nullptr until then.
-	 * See: https://github.com/discord/discord-api-docs/issues/365
-	 * See also: https://github.com/discord/discord-api-docs/issues/1337
-	 */
+#ifdef HAVE_VOICE
 	uint8_t buffer[65535];
 	int r = this->UDPRecv((char*)buffer, sizeof(buffer));
 
@@ -468,7 +464,6 @@ void discord_voice_client::ReadReady()
 		packet = packet + offset;
 		packet_len -= offset;
 
-#ifdef HAVE_VOICE
 		if (decode_voice_recv)
 		{
 			opus_int16 pcm[23040];
@@ -480,13 +475,13 @@ void discord_voice_client::ReadReady()
 			creator->dispatch.voice_receive(vr);
 		}
 		else
-#endif
 		{
 			vr.audio = packet;
 			vr.audio_size = packet_len;
 			creator->dispatch.voice_receive(vr);
 		}
 	}
+#endif
 }
 
 void discord_voice_client::WriteReady()
