@@ -871,8 +871,18 @@ struct CoreExport voice_receive_t : public event_dispatch_t {
 	 */
 	voice_receive_t(class discord_client* client, const std::string &raw);
 	class discord_voice_client* voice_client;
+	/**
+	 * @brief Audio data, encoded as 48kHz stereo PCM or Opus
+	 */
 	uint8_t* audio;
+	/**
+	 * @brief Size of audio buffer
+	 */
 	size_t audio_size;
+	/**
+	 * @brief User ID of speaker (zero if unknown)
+	 */
+	snowflake user_id;
 };
 
 /** @brief The dispatcher class contains a set of std::functions representing hooked events

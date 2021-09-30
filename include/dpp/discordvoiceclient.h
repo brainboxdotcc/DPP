@@ -338,6 +338,9 @@ public:
 	/** True when the thread is shutting down */
 	bool terminating;
 
+	/** Decode received voice packets to PCM */
+	bool decode_voice_recv;
+
 	/** Heartbeat interval for sending heartbeat keepalive */
 	uint32_t heartbeat_interval;
 
