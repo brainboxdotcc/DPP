@@ -55,8 +55,7 @@ http_request::http_request(const std::string &_endpoint, const std::string &_par
 {
 }
 
-http_request::~http_request() {
-}
+http_request::~http_request() = default;
 
 void http_request::complete(const http_request_completion_t &c) {
 	/* Call completion handler only if the request has been completed */

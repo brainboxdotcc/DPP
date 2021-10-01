@@ -56,9 +56,7 @@ commandhandler& commandhandler::set_owner(cluster* o)
 	return *this;
 }
 
-commandhandler::~commandhandler()
-{
-}
+commandhandler::~commandhandler() = default;
 
 commandhandler& commandhandler::add_prefix(const std::string &prefix)
 {
@@ -68,7 +66,7 @@ commandhandler& commandhandler::add_prefix(const std::string &prefix)
 			/* Register existing slash commands */
 			slash_commands_enabled = true;
 		} else {
-			slash_commands_enabled = true;
+			slash_commands_enabled = false;
 		}
 	}
 	return *this;
@@ -283,7 +281,7 @@ void commandhandler::route(const class dpp::message& msg)
 				}
 
 				/* Add parameter to the list */
-				call_params.push_back(std::make_pair(p.first, param));
+				call_params.emplace_back(p.first, param);
 			}
 
 			/* Call command handler */
@@ -398,7 +396,7 @@ void commandhandler::route(const class interaction_create_t & event)
 			}
 
 			/* Add parameter to the list */
-			call_params.push_back(std::make_pair(p.first, param));
+			call_params.emplace_back(p.first, param);
 		}
 
 		/* Call command handler */

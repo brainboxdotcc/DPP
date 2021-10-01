@@ -30,8 +30,7 @@ dtemplate::dtemplate() : code(""), name(""), description(""), usage_count(0), cr
 {
 }
 
-dtemplate::~dtemplate() {
-}
+dtemplate::~dtemplate() = default;
 
 
 dtemplate& dtemplate::fill_from_json(nlohmann::json* j) {

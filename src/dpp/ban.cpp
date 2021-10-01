@@ -31,8 +31,7 @@ ban::ban() : user_id(0)
 {
 }
 
-ban::~ban() {
-}
+ban::~ban() = default;
 
 ban& ban::fill_from_json(nlohmann::json* j) {
 	reason = StringNotNull(j, "reason");
