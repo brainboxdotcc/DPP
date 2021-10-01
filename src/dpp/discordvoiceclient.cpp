@@ -62,7 +62,7 @@ struct rtp_header {
 bool discord_voice_client::sodium_initialised = false;
 
 discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
-       : websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4"),
+	   : websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4"),
 	creator(_cluster),
 	channel_id(_channel_id),
 	server_id(_server_id),
@@ -208,7 +208,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 				{
 					snowflake u_id = SnowflakeNotNull(&j["d"], "user_id");
 					auto it = std::find_if(ssrcMap.begin(), ssrcMap.end(),
-                       [&u_id](const auto & p) { return p.second == u_id; });
+					   [&u_id](const auto & p) { return p.second == u_id; });
 
 					if (it != ssrcMap.end()) 
 						ssrcMap.erase(it);
@@ -220,7 +220,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 			case 12:
 			{
 				if (j.find("d") != j.end() 
-				    && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()
+					&& j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()
 					&& j["d"].find("ssrc") != j["d"].end() && !j["d"]["ssrc"].is_null()) 
 				{
 					uint32_t u_ssrc = j["d"]["ssrc"].get<uint32_t>();
@@ -284,6 +284,11 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 						break;
 					}
 				}
+
+				/* This is needed to start voice receiving and make sure that the start of sending isnt cut off */
+				send_silence(20);
+
+				/* Fire on_voice_ready */
 				if (creator->dispatch.voice_ready) {
 					voice_ready_t rdy(nullptr, data);
 					rdy.voice_client = this;
@@ -509,8 +514,9 @@ void discord_voice_client::WriteReady()
 	if (duration) {
 		std::chrono::nanoseconds latency = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last_timestamp);
 		std::chrono::nanoseconds sleep_time = std::chrono::nanoseconds(duration) - latency;
-		if (sleep_time.count() > 0)
+		if (sleep_time.count() > 0) {
 			std::this_thread::sleep_for(sleep_time);
+		}
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (creator->dispatch.voice_buffer_send) {
 			voice_buffer_send_t snd(nullptr, "");
@@ -748,9 +754,14 @@ void discord_voice_client::skip_to_next_marker() {
 	}
 }
 
-void discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t length)  {
-#if HAVE_VOICE
+discord_voice_client& discord_voice_client::send_silence(const uint64_t duration) {
+	uint8_t silence_packet[3] = { 0xf8, 0xff, 0xfe };
+	send_audio_opus(silence_packet, 3, duration);
+	return *this;
+}
 
+discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t length)  {
+#if HAVE_VOICE
 	const size_t max_frame_bytes = 11520;
 	uint8_t pad[max_frame_bytes] = { 0 };
 	if (length > max_frame_bytes) {
@@ -764,47 +775,31 @@ void discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t len
 			send_audio_raw((uint16_t*)packet.data(), max_frame_bytes);
 		}
 
-		return;
+		return *this;
 
 	}
 
-
-	int frameSize = 2880;
 	opus_int32 encodedAudioMaxLength = length;
 	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
 	size_t encodedAudioLength = encodedAudioMaxLength;
 
 	encodedAudioLength = this->encode((uint8_t*)audio_data, length, encodedAudioData.data(), encodedAudioLength);
 
-	++sequence;
-	const int headerSize = 12;
-	const int nonceSize = 24;
-	rtp_header header(sequence, timestamp, ssrc);
-
-	int8_t nonce[nonceSize];
-	std::memcpy(nonce, &header, sizeof(header));
-
-	std::vector<uint8_t> audioDataPacket(sizeof(header) + encodedAudioLength + crypto_secretbox_MACBYTES);
-	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
-
-	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
-
-	Send((const char*)audioDataPacket.data(), audioDataPacket.size(), 60000000 / timescale);
-	timestamp += frameSize;
-
-	speak();
+	send_audio_opus(encodedAudioData.data(), encodedAudioLength);
 #endif
+	return *this;
 }
 
-void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
+discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
 #if HAVE_VOICE
 	int samples = opus_packet_get_nb_samples(opus_packet, length, 48000);
 	uint64_t duration = (samples / 48) / (timescale / 1000000);
 	send_audio_opus(opus_packet, length, duration);
 #endif
+	return *this;
 }
 
-void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
+discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
 #if HAVE_VOICE
 	int frameSize = 48 * duration * (timescale / 1000000);
 	opus_int32 encodedAudioMaxLength = length;
@@ -834,9 +829,10 @@ void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t le
 
 	speak();
 #endif
+	return *this;
 }
 
-void discord_voice_client::speak() {
+discord_voice_client& discord_voice_client::speak() {
 	if (!this->sending) {
 		this->QueueMessage(json({
 		{"op", 5},
@@ -848,6 +844,7 @@ void discord_voice_client::speak() {
 		}).dump(), true);
 		sending = true;
 	}
+	return *this;
 }
 
 discord_voice_client& discord_voice_client::set_timescale(uint64_t new_timescale) {

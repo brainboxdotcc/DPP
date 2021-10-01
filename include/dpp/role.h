@@ -103,7 +103,7 @@ public:
 	/** The role icon hash, can be an empty string */
 	utility::iconhash icon;
 	/** Image data for the role icon (if any) */
-	std::string image_data;
+	std::string* image_data;
 
 	/** Default constructor */
 	role();
@@ -123,6 +123,15 @@ public:
 	 * @return The json of the role
 	 */
 	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Load an image into the object as base64
+	 * 
+	 * @param image_blob Image binary data
+	 * @param type Type of image
+	 * @return emoji& Reference to self
+	 */
+	role& load_image(const std::string &image_blob, const image_type type);
 
 	/** True if the role is hoisted */
 	bool is_hoisted() const;

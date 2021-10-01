@@ -38,6 +38,28 @@ All class, variable/member, function and method names should use `snake_case`, s
 ## Enums
 Enums and their values should be `snake_case` as with class, function and method names. You do not need to use `enum class`, so make sure that enum values are prefixed with a prefix to make them unique and grouped within the IDE, e.g. `ll_debug`, `ll_trace` etc.
 
+
+## Curly Braces, Brackets etc
+
+Open curly braces on the same line as the keyword, for example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+if (a == b) {
+	c();
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use a space after the comma in parameter lists, and after closing brackets and before opening brackes except when calling a function, e.g.:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+std::vector<std::string> clowns = { "pennywise", "bobo" };
+
+evaluate_clown(clowns[0], evilness(2.5, factor));
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Indentation
+Indentation should always be tab characters. It is up to you how wide you set tab characters in your editor for your personal tastes. All code blocks delimited within curly braces should be indented neatly and uniformly.
+
 ## Constants and \#define macros
 Constants and macros should be all `UPPERCASE` with `SNAKE_CASE` to separate words. Macros should not have any unexpected side effects.
 
