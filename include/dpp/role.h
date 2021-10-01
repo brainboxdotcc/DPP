@@ -103,7 +103,7 @@ public:
 	/** The role icon hash, can be an empty string */
 	utility::iconhash icon;
 	/** Image data for the role icon (if any) */
-	std::string* image_data;
+	std::string image_data;
 
 	/** Default constructor */
 	role();
