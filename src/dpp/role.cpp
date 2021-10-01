@@ -35,14 +35,12 @@ role::role() :
 	permissions(0),
 	flags(0),
 	integration_id(0),
-	bot_id(0),
-	image_data(nullptr)
+	bot_id(0)
 {
 }
 
 role::~role()
 {
-	delete image_data;
 }
 
 role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
@@ -80,8 +78,8 @@ std::string role::build_json(bool with_id) const {
 	j["permissions"] = permissions;
 	j["hoist"] = is_hoisted();
 	j["mentionable"] = is_mentionable();
-	if (image_data) {
-		j["icon"] = *image_data;
+	if (!image_data.empty()) {
+		j["icon"] = image_data;
 	}
 	if (!unicode_emoji.empty()) {
 		j["unicode_emoji"] = unicode_emoji;
