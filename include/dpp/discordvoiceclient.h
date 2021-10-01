@@ -474,6 +474,29 @@ public:
 	void send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration);
 
 	/**
+	 * @brief Send opus packets to the voice channel
+	 * 
+	 * Some containers such as .ogg may contain OPUS
+	 * encoded data already. In this case, we don't need to encode the
+	 * frames using opus here. We can bypass the codec, only applying 
+	 * libsodium to the stream.
+	 * 
+	 * Duration is calculated internally
+	 * 
+	 * @param opus_packet Opus packets. Discord expects opus frames 
+	 * to be encoded at 48000Hz
+	 * 
+	 * @param length The length of the audio data. 
+	 * 
+	 * @note It is your responsibility to ensure that packets of data 
+	 * sent to send_audio are correctly repacketized for streaming, 
+	 * e.g. that audio frames are not too large or contain
+	 * an incorrect format. Discord will still expect the same frequency
+	 * and bit width of audio and the same signedness.
+	 */
+	void send_audio_opus(uint8_t* opus_packet, const size_t length);
+
+	/**
 	 * @brief Set the timescale in nanoseconds.
 	 * 
 	 * @param new_timescale Timescale to set. This defaults to 1000000,
