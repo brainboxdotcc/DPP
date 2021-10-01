@@ -98,6 +98,10 @@ public:
 	snowflake integration_id;
 	/** Bot id if any (e.g. role is a bot's role created when it was invited) */
 	snowflake bot_id;
+	/** The unicode emoji used for the role's icon, can be an empty string */
+	std::string unicode_emoji;
+	/** The role icon hash, can be an empty string */
+	std::string icon;
 
 	/** Default constructor */
 	role();
