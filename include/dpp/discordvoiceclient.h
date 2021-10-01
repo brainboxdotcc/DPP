@@ -446,8 +446,10 @@ public:
 	 * be a multiple of 4 (2x 16 bit stero channels) with a maximum
 	 * length of 11520, which is a complete opus frame at highest
 	 * quality.
+	 * 
+	 * @return discord_voice_client& Reference to self
 	 */
-	void send_audio_raw(uint16_t* audio_data, const size_t length);
+	discord_voice_client& send_audio_raw(uint16_t* audio_data, const size_t length);
 
 	/**
 	 * @brief Send opus packets to the voice channel
@@ -465,13 +467,15 @@ public:
 	 * @param duration Generally duration is 2.5, 5, 10, 20, 40 or 60
 	 * if the timescale is 1000000 (1ms) 
 	 * 
+	 * @return discord_voice_client& Reference to self
+	 * 
 	 * @note It is your responsibility to ensure that packets of data 
 	 * sent to send_audio are correctly repacketized for streaming, 
 	 * e.g. that audio frames are not too large or contain
 	 * an incorrect format. Discord will still expect the same frequency
 	 * and bit width of audio and the same signedness.
 	 */
-	void send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration);
+	discord_voice_client& send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration);
 
 	/**
 	 * @brief Send opus packets to the voice channel
@@ -488,13 +492,25 @@ public:
 	 * 
 	 * @param length The length of the audio data. 
 	 * 
+	 * @return discord_voice_client& Reference to self
+	 * 
 	 * @note It is your responsibility to ensure that packets of data 
 	 * sent to send_audio are correctly repacketized for streaming, 
 	 * e.g. that audio frames are not too large or contain
 	 * an incorrect format. Discord will still expect the same frequency
 	 * and bit width of audio and the same signedness.
 	 */
-	void send_audio_opus(uint8_t* opus_packet, const size_t length);
+	discord_voice_client& send_audio_opus(uint8_t* opus_packet, const size_t length);
+
+	/**
+	 * @brief Send silence to the voice channel
+	 * 
+	 * @param duration How long to send silence for. With the standard
+	 * timescale this is in milliseconds. Allowed values are 2.5,
+	 * 5, 10, 20, 40 or 60 milliseconds.
+	 * @return discord_voice_client& Reference to self
+	 */
+	discord_voice_client& send_silence(const uint64_t duration);
 
 	/**
 	 * @brief Set the timescale in nanoseconds.
@@ -518,8 +534,10 @@ public:
 	 * This sends a JSON message to the voice websocket which tells discord
 	 * that the user is speaking. The library automatically calls this for you
 	 * whenever you send audio.
+	 * 
+	 * @return discord_voice_client& Reference to self
 	 */
-	void speak();
+	discord_voice_client& speak();
 
 	/**
 	 * @brief Pause sending of audio

@@ -1043,19 +1043,19 @@ DPP supports receiving audio. This examples show how to use it to record some us
 
 int main(int argc, char const *argv[])
 {
-    /* Example to record a user in a VC
-     * 
-     * Recording is output as './me.pcm' and you can play it via the soundboard example
-     * or use ffmpeg 'ffplay -f s16le -ar 48000 -ac 2 -i ./me.pcm'
-     */
+	/* Example to record a user in a VC
+	* 
+	* Recording is output as './me.pcm' and you can play it via the soundboard example
+	* or use ffmpeg 'ffplay -f s16le -ar 48000 -ac 2 -i ./me.pcm'
+	*/
 
-    /* Replace with the user's id you wish to record */
-    dpp::snowflake user_id = 407877550216314882;
+	/* Replace with the user's id you wish to record */
+	dpp::snowflake user_id = 407877550216314882;
 
 	dpp::cluster bot("token");
 
-    FILE *fd;
-    fd = fopen("./me.pcm", "wb");
+	FILE *fd;
+	fd = fopen("./me.pcm", "wb");
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, &fd](const dpp::message_create_t & event) {
@@ -1070,31 +1070,24 @@ int main(int argc, char const *argv[])
 			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
 			if (!g->connect_member_voice(event.msg->author->id)) {
 				bot.message_create(dpp::message(
-                    event.msg->channel_id, 
-                    "You don't seem to be on a voice channel! :("
-                ));
+					event.msg->channel_id, 
+					"You don't seem to be on a voice channel! :("
+				));
 			}
 		}
 
-        /* Tell the bot to stop recording */
-        if (command == ".stop") {
-            event.from->disconnect_voice(event.msg->guild_id);
-            fclose(fd);
+		/* Tell the bot to stop recording */
+		if (command == ".stop") {
+			event.from->disconnect_voice(event.msg->guild_id);
+			fclose(fd);
 		}
 	});
 
-    bot.on_voice_ready([&bot](const dpp::voice_ready_t &event) {
-        // Send a packet of silence to initialize the voice receive
-        uint8_t silence_packet[3] = { 0xf8, 0xff, 0xfe };
-        event.voice_client->send_audio_opus(silence_packet, 3, 20);
-    });
-
-    bot.on_voice_receive([&bot, &fd, &user_id](const dpp::voice_receive_t &event) {
-        if (event.user_id == user_id)
-        {
-            fwrite((char *)event.audio, 1, event.audio_size, fd);
-        }
-    });
+	bot.on_voice_receive([&bot, &fd, &user_id](const dpp::voice_receive_t &event) {
+		if (event.user_id == user_id) {
+			fwrite((char *)event.audio, 1, event.audio_size, fd);
+		}
+	});
 
 	/* Start bot */
 	bot.start(false);
