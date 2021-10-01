@@ -35,7 +35,8 @@ role::role() :
 	permissions(0),
 	flags(0),
 	integration_id(0),
-	bot_id(0)
+	bot_id(0),
+	image_data(nullptr)
 {
 }
 
@@ -78,8 +79,12 @@ std::string role::build_json(bool with_id) const {
 	j["permissions"] = permissions;
 	j["hoist"] = is_hoisted();
 	j["mentionable"] = is_mentionable();
-	j["icon"] = icon;
-	j["unicode_emoji"] = unicode_emoji;
+	if (image_data) {
+		j["icon"] = *image_data;
+	}
+	if (!unicode_emoji.empty()) {
+		j["unicode_emoji"] = unicode_emoji;
+	}
 
 	return j.dump();
 }

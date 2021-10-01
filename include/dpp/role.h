@@ -101,7 +101,9 @@ public:
 	/** The unicode emoji used for the role's icon, can be an empty string */
 	std::string unicode_emoji;
 	/** The role icon hash, can be an empty string */
-	std::string icon;
+	utility::iconhash icon;
+	/** Image data for the role icon (if any) */
+	std::string* image_data;
 
 	/** Default constructor */
 	role();
