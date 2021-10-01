@@ -48,6 +48,7 @@ user::user() :
 	managed(),
 	discriminator(0),
 	flags(0),
+	public_flags(0),
 	refcount(1)
 {
 }
@@ -69,83 +70,83 @@ std::string user::get_avatar_url()  const {
 }
 
 bool user::is_bot() const {
-	 return this->flags & u_bot;
+	 return this->public_flags & u_bot;
 }
 
 bool user::is_system() const {
-	 return this->flags & u_system;
+	 return this->public_flags & u_system;
 }
 
 bool user::is_mfa_enabled() const {
-	 return this->flags & u_mfa_enabled;
+	 return this->public_flags & u_mfa_enabled;
 }
 
 bool user::is_verified() const {
-	 return this->flags & u_verified;
+	 return this->public_flags & u_verified;
 }
 
 bool user::has_nitro_full() const {
-	 return this->flags & u_nitro_full;
+	 return this->public_flags & u_nitro_full;
 }
 
 bool user::has_nitro_classic() const {
-	 return this->flags & u_nitro_classic;
+	 return this->public_flags & u_nitro_classic;
 }
 
 bool user::is_discord_employee() const {
-	 return this->flags & u_discord_employee;
+	 return this->public_flags & u_discord_employee;
 }
 
 bool user::is_partnered_owner() const {
-	 return this->flags & u_partnered_owner;
+	 return this->public_flags & u_partnered_owner;
 }
 
 bool user::has_hypesquad_events() const {
-	 return this->flags & u_hypesquad_events;
+	 return this->public_flags & u_hypesquad_events;
 }
 
 bool user::is_bughunter_1() const {
-	 return this->flags & u_bughunter_1;
+	 return this->public_flags & u_bughunter_1;
 }
 
 bool user::is_house_bravery() const {
-	 return this->flags & u_house_bravery;
+	 return this->public_flags & u_house_bravery;
 }
 
 bool user::is_house_brilliance() const {
-	 return this->flags & u_house_brilliance;
+	 return this->public_flags & u_house_brilliance;
 }
 
 bool user::is_house_balanace() const {
-	 return this->flags & u_house_balanace;
+	 return this->public_flags & u_house_balanace;
 }
 
 bool user::is_early_supporter() const {
-	 return this->flags & u_early_supporter;
+	 return this->public_flags & u_early_supporter;
 }
 
 bool user::is_team_user() const {
-	 return this->flags & u_team_user;
+	 return this->public_flags & u_team_user;
 }
 
 bool user::is_bughunter_2() const {
-	 return this->flags & u_bughunter_2;
+	 return this->public_flags & u_bughunter_2;
 }
 
 bool user::is_verified_bot() const {
-	 return this->flags & u_verified_bot;
+	 return this->public_flags & u_verified_bot;
 }
 
 bool user::is_verified_bot_dev() const {
-	 return this->flags & u_verified_bot_dev;
+	 return this->public_flags & u_verified_bot_dev;
 }
 
 bool user::is_certified_moderator() const {
-	 return this->flags & u_certified_moderator;
+	 return this->public_flags & u_certified_moderator;
 }
 
 bool user::has_animated_icon() const {
-	return this->flags & u_animated_icon;
+	return this->public_flags & u_animated_icon;
 }
 
 user& user::fill_from_json(json* j) {
@@ -160,22 +161,23 @@ void from_json(const nlohmann::json& j, user& u) {
 	std::string av = StringNotNull(&j, "avatar");
 	if (av.length() > 2 && av.substr(0, 2) == "a_") {
 		av = av.substr(2, av.length());
-		u.flags |= u_animated_icon;
+		u.public_flags |= u_animated_icon;
 	}
 	u.avatar = av;
 
 	u.discriminator = SnowflakeNotNull(&j, "discriminator");
 
-	u.flags |= BoolNotNull(&j, "bot") ? dpp::u_bot : 0;
-	u.flags |= BoolNotNull(&j, "system") ? dpp::u_system : 0;
-	u.flags |= BoolNotNull(&j, "mfa_enabled") ? dpp::u_mfa_enabled : 0;
-	u.flags |= BoolNotNull(&j, "verified") ? dpp::u_verified : 0;
-	u.flags |= Int8NotNull(&j, "premium_type") == 1 ? dpp::u_nitro_classic : 0;
-	u.flags |= Int8NotNull(&j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
+	u.public_flags |= BoolNotNull(&j, "bot") ? dpp::u_bot : 0;
+	u.public_flags |= BoolNotNull(&j, "system") ? dpp::u_system : 0;
+	u.public_flags |= BoolNotNull(&j, "mfa_enabled") ? dpp::u_mfa_enabled : 0;
+	u.public_flags |= BoolNotNull(&j, "verified") ? dpp::u_verified : 0;
+	u.public_flags |= Int8NotNull(&j, "premium_type") == 1 ? dpp::u_nitro_classic : 0;
+	u.public_flags |= Int8NotNull(&j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
 	uint32_t flags = Int32NotNull(&j, "flags");
+	uint32_t public_flags = Int32NotNull(&j, "public_flags");
 	for (auto & flag : usermap) {
-		if (flags & flag.first) {
-			u.flags |= flag.second;
+		if (public_flags & flag.first) {
+			u.public_flags |= flag.second;
 		}
 	}
 }
