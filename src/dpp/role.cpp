@@ -42,6 +42,7 @@ role::role() :
 
 role::~role()
 {
+	delete image_data;
 }
 
 role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
