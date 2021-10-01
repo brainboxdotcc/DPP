@@ -284,6 +284,11 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 						break;
 					}
 				}
+
+				/* This is needed to start voice receiving and make sure that the start of sending isnt cut off */
+				send_silence(20);
+
+				/* Fire on_voice_ready */
 				if (creator->dispatch.voice_ready) {
 					voice_ready_t rdy(nullptr, data);
 					rdy.voice_client = this;
@@ -748,7 +753,13 @@ void discord_voice_client::skip_to_next_marker() {
 	}
 }
 
-void discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t length)  {
+discord_voice_client& discord_voice_client::send_silence(const uint64_t duration) {
+	uint8_t silence_packet[3] = { 0xf8, 0xff, 0xfe };
+	send_audio_opus(silence_packet, 3, duration);
+	return *this;
+}
+
+discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t length)  {
 #if HAVE_VOICE
 
 	const size_t max_frame_bytes = 11520;
@@ -764,7 +775,7 @@ void discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t len
 			send_audio_raw((uint16_t*)packet.data(), max_frame_bytes);
 		}
 
-		return;
+		return *this;
 
 	}
 
@@ -794,17 +805,19 @@ void discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t len
 
 	speak();
 #endif
+	return *this;
 }
 
-void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
+discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
 #if HAVE_VOICE
 	int samples = opus_packet_get_nb_samples(opus_packet, length, 48000);
 	uint64_t duration = (samples / 48) / (timescale / 1000000);
 	send_audio_opus(opus_packet, length, duration);
 #endif
+	return *this;
 }
 
-void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
+discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
 #if HAVE_VOICE
 	int frameSize = 48 * duration * (timescale / 1000000);
 	opus_int32 encodedAudioMaxLength = length;
@@ -834,9 +847,10 @@ void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t le
 
 	speak();
 #endif
+	return *this;
 }
 
-void discord_voice_client::speak() {
+discord_voice_client& discord_voice_client::speak() {
 	if (!this->sending) {
 		this->QueueMessage(json({
 		{"op", 5},
@@ -848,6 +862,7 @@ void discord_voice_client::speak() {
 		}).dump(), true);
 		sending = true;
 	}
+	return *this;
 }
 
 discord_voice_client& discord_voice_client::set_timescale(uint64_t new_timescale) {
