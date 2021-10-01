@@ -47,6 +47,8 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 {
 	this->guild_id = _guild_id;
 	this->name = StringNotNull(j, "name");
+	this->icon = StringNotNull(j, "icon");
+	this->unicode_emoji = StringNotNull(j, "unicode_emoji");
 	this->id = SnowflakeNotNull(j, "id");
 	this->colour = Int32NotNull(j, "color");
 	this->position = Int8NotNull(j, "position");
@@ -76,6 +78,12 @@ std::string role::build_json(bool with_id) const {
 	j["permissions"] = permissions;
 	j["hoist"] = is_hoisted();
 	j["mentionable"] = is_mentionable();
+	if (!image_data.empty()) {
+		j["icon"] = image_data;
+	}
+	if (!unicode_emoji.empty()) {
+		j["unicode_emoji"] = unicode_emoji;
+	}
 
 	return j.dump();
 }
