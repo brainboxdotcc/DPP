@@ -35,12 +35,16 @@ role::role() :
 	permissions(0),
 	flags(0),
 	integration_id(0),
-	bot_id(0)
+	bot_id(0),
+	image_data(nullptr)
 {
 }
 
 role::~role()
 {
+	if (image_data) {
+		delete image_data;
+	}
 }
 
 role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
@@ -78,8 +82,8 @@ std::string role::build_json(bool with_id) const {
 	j["permissions"] = permissions;
 	j["hoist"] = is_hoisted();
 	j["mentionable"] = is_mentionable();
-	if (!image_data.empty()) {
-		j["icon"] = image_data;
+	if (image_data) {
+		j["icon"] = *image_data;
 	}
 	if (!unicode_emoji.empty()) {
 		j["unicode_emoji"] = unicode_emoji;
@@ -87,6 +91,22 @@ std::string role::build_json(bool with_id) const {
 
 	return j.dump();
 }
+
+role& role::load_image(const std::string &image_blob, const image_type type) {
+	static const std::map<image_type, std::string> mimetypes = {
+		{ i_gif, "image/gif" },
+		{ i_jpg, "image/jpeg" },
+		{ i_png, "image/png" }
+	};
+	if (image_data) {
+		/* If there's already image data defined, free the old data, to prevent a memory leak */
+		delete image_data;
+	}
+	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length()));
+
+	return *this;
+}
+
 
 bool role::is_hoisted() const {
 	return this->flags & dpp::r_hoist;
