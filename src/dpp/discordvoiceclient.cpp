@@ -796,6 +796,14 @@ void discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t len
 #endif
 }
 
+void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
+#if HAVE_VOICE
+	int samples = opus_packet_get_nb_samples(opus_packet, length, 48000);
+	uint64_t duration = (samples / 48) / (timescale / 1000000);
+	send_audio_opus(opus_packet, length, duration);
+#endif
+}
+
 void discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
 #if HAVE_VOICE
 	int frameSize = 48 * duration * (timescale / 1000000);
