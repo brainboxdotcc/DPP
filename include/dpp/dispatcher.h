@@ -411,9 +411,10 @@ struct CoreExport message_reaction_add_t : public event_dispatch_t {
 	 */
 	message_reaction_add_t(class discord_client* client, const std::string& raw);
 	guild* reacting_guild;
-	user* reacting_user;
+	user reacting_user;
+	guild_member reacting_member;
 	channel* reacting_channel;
-	emoji* reacting_emoji;
+	emoji reacting_emoji;
 	snowflake message_id;
 };
 
@@ -435,11 +436,12 @@ struct CoreExport message_reaction_remove_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	message_reaction_remove_t(class discord_client* client, const std::string& raw);
-        guild* reacting_guild;
-        user* reacting_user;
-        channel* reacting_channel;
-        emoji* reacting_emoji;
-        snowflake message_id;
+	guild* reacting_guild;
+	user reacting_user;
+	guild_member reacting_member;
+	channel* reacting_channel;
+	emoji reacting_emoji;
+	snowflake message_id;
 };
 
 /** @brief Create guild */
@@ -470,10 +472,10 @@ struct CoreExport message_reaction_remove_emoji_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	message_reaction_remove_emoji_t(class discord_client* client, const std::string& raw);
-        guild* reacting_guild;
-        channel* reacting_channel;
-        emoji* reacting_emoji;
-        snowflake message_id;
+	guild* reacting_guild;
+	channel* reacting_channel;
+	emoji reacting_emoji;
+	snowflake message_id;
 };
 
 /** @brief Message delete bulk */

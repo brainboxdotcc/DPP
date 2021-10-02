@@ -48,11 +48,12 @@ void message_reaction_remove::handle(discord_client* client, json &j, const std:
 		json &d = j["d"];
 		dpp::message_reaction_remove_t mrr(client, raw);
 		mrr.reacting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
-		mrr.reacting_user = dpp::find_user(SnowflakeNotNull(&d, "user_id"));
+		mrr.reacting_user = dpp::user().fill_from_json(&(d["member"]["user"]));
+		mrr.reacting_member = dpp::guild_member().fill_from_json(&(d["member"]), mrr.reacting_guild->id, mrr.reacting_user.id);
 		mrr.reacting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
 		mrr.message_id = SnowflakeNotNull(&d, "message_id");
-		mrr.reacting_emoji = dpp::find_emoji(SnowflakeNotNull(&(d["emoji"]), "id"));
-		if (mrr.reacting_user && mrr.reacting_channel && mrr.message_id) {
+		mrr.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
+		if (mrr.reacting_channel && mrr.message_id) {
 			client->creator->dispatch.message_reaction_remove(mrr);
 		}
 	}
