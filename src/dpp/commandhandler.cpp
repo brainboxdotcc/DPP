@@ -62,12 +62,8 @@ commandhandler& commandhandler::add_prefix(const std::string &prefix)
 {
 	prefixes.push_back(prefix);
 	if (prefix == "/") {
-		if (!slash_commands_enabled) {
-			/* Register existing slash commands */
-			slash_commands_enabled = true;
-		} else {
-			slash_commands_enabled = false;
-		}
+		/* Register existing slash commands */
+		slash_commands_enabled = true;
 	}
 	return *this;
 }
