@@ -1,6 +1,6 @@
 # Building D++
 
-The way D++ is built varies from system to system. Please follow the guides below depending on if you are building the library on Linux, Windows, or OSX:
+The way you build D++ varies from system to system. Please follow the guide below for your OS:
 
 * \subpage buildlinux "Building on Linux"
 * \subpage buildwindows "Building on Windows"
@@ -11,7 +11,7 @@ The way D++ is built varies from system to system. Please follow the guides belo
 
 # Building on Linux
 
-\note You might not need to build a copy of the library for Linux - precompiled deb files for 64 bit and 32 bit Debian and Ubuntu are provided in the github version releases. Unless you are on a different Linux distribution which cannot install deb files, or wish to submit fixes and enhancements to the library itself you may have an easier time installing the precompiled version instead.
+\note You might not need to build a copy of the library for Linux - precompiled deb files for 64 bit and 32 bit Debian and Ubuntu are provided in the GitHub version releases. Unless you are on a different Linux distribution which does not support the installation of deb files, or wish to submit fixes and enhancements to the library itself you should have an easier time installing the precompiled version instead.
 
 ## 1. Build Source Code
 
@@ -24,7 +24,7 @@ Replace the number after -j with a number suitable for your setup, usually the s
 
 ## 2. Optional: Run test cases
 
-run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
+Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
 
 ## 3. Install to /usr/local/include and /usr/local/lib
 
@@ -50,7 +50,9 @@ The important flags in this command-line are:
   * `mydppbot.cpp` - Your source code
  * `dppbot` - The name of the executable to make
 
-Of course, this is just a proof of concept - you should really use a more robust build system like GNU `make` or [`cmake`](@ref buildcmake).
+Of course, this is just a proof of concept — you should really use a more robust build system like GNU `make` or [`cmake`](@ref buildcmake).
+
+If you are having trouble setting up CMake, you can try [our template bot](https://github.com/brainboxdotcc/templatebot).
 
 **Have fun!**
 
@@ -61,9 +63,9 @@ Of course, this is just a proof of concept - you should really use a more robust
 
 To build on windows follow these steps *exactly*. The build process depends on specific libraries being installed on your system in specific locations.
 
-\note You should not need to build a copy of the library for windows - DLL and LIB files for Windows and visual studio 2019 are be provided in the github version releases. Unless you wish to submit fixes and enhancements to the library itself, you may find it easier to use these releases instead.
+\note You should not need to build a copy of the library for windows — DLL and LIB files for Windows and Visual Studio 2019 are be provided in the GitHub version releases. Unless you wish to submit fixes and enhancements to the library itself, you may find it easier to use these releases instead.
 
-1. Make sure you have Visual Studio 2019. Community, Professional or Enterprise work fine. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
+1. Make sure you have Visual Studio 2019. The Community, Professional or Enterprise versionals all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
 2. Check out the DPP project source using git
 3. From within Visual Studio 2019, click the "File" menu, choose "Open" then "CMake", and select the CMakeLists.txt within the project folder
    \image html winbuild_1.png
@@ -76,7 +78,7 @@ To build on windows follow these steps *exactly*. The build process depends on s
 ## Troubleshooting
 
 * If you do not have an option to open the CMakeLists.txt, ensure that you have installed the C++ development portions of visual studio (not just web development portions) with at least the default options.
-* If the project does not build, please ask for help on the [official discord server](https://discord.gg/dpp)
+* If the project does not build, please ask for help on the [official discord server](https://discord.gg/dpp).
 
 ## After compiling
 
@@ -90,20 +92,19 @@ After compilation you can directly reference the compiled project in your own CM
 ## 1. Toolchain
 Before compiling make sure you have all the tools installed.
 
-1. To install the dependencies, this guide will use homebrew which has [installation instructions on their project page](https://brew.sh/)
+1. To install the dependencies, this guide will use homebrew which has [installation instructions on their project page](https://brew.sh/).
 
-2. This project uses CMake to generate the makefiles. Install it with `brew install cmake`
+2. This project uses CMake to generate the makefiles. Install it with `brew install cmake`.
 
 ## 2. Install External Dependencies
 
     brew install openssl
     
-For voice support, additional dependencies are required
+For voice support, additional dependencies are required:
 
     brew install libsodium opus
 
 ## 3. Build Source Code
-Download the source code via Github or get the archive from the releases. Then navigate to the root directory of the project and run the commands below.
 
     mkdir build
     cd build
@@ -114,7 +115,7 @@ Replace the number after -j with a number suitable for your setup, usually the s
 
 ## 4. Optional: Run test cases
 
-run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
+Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
 
 ## 5. Install globally
 
@@ -143,6 +144,8 @@ The important flags in this command-line are:
 
 Of course, this is just a proof of concept - you should really use a more robust build system like GNU `make` or [`cmake`](@ref buildcmake).
 
+If you are having trouble setting up CMake, you can try [our template bot](https://github.com/brainboxdotcc/templatebot).
+
 **Have fun!**
 
 \page buildfreebsd Building on FreeBSD
@@ -160,7 +163,6 @@ For voice support, additional dependencies are required
     pkg install libsodium opus pkgconf
 
 ## 3. Build Source Code
-Download the source code via Github or get the archive from the releases. Then navigate to the root directory of the project and run the commands below.
 
     mkdir build
     cd build
@@ -171,7 +173,7 @@ Replace the number after -j with a number suitable for your setup, usually the s
 
 ## 4. Optional: Run test cases
 
-run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
+Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
 
 ## 5. Install globally
 
@@ -199,6 +201,8 @@ The important flags in this command-line are:
  * `dppbot` - The name of the executable to make
 
 Of course, this is just a proof of concept - you should really use a more robust build system like [`cmake`](@ref buildcmake).
+
+If you are having trouble setting up CMake, you can try [our template bot](https://github.com/brainboxdotcc/templatebot).
 
 **Have fun!**
 

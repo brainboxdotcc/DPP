@@ -1,8 +1,8 @@
 # Creating a Discord Bot
 
-If you are wanting to build a bot using C++, you're in the right place! The fast and easy tutorials below will guide you through how to build a bot using the D++ library on either a UNIX-like (e.g. Linux) system with CMake or in Windows with Visual Studio 2019.
+If you are wanting to build a bot using C++, you're in the right place! The fast and easy tutorials below will guide you through how to build a bot using the D++ library on either a UNIX-like (e.g. Linux) system with CMake or with Windows using Visual Studio 2019.
 
-Click a link below for a guide on your system of choice:
+Click on a link below for a guide specifically for your system:
 
 * \subpage build-a-discord-bot-windows-visual-studio "Building a discord bot in Windows"
 * \subpage buildcmake "Building a Discord Bot using CMake/UNIX"
@@ -21,7 +21,7 @@ To be sure that `cmake` is installed, you can type the following command:
 
 ## 2. Create a CMake project
 
-In an empty directory, create different directories and files like below:
+In an empty directory, create the following files and directories:
 
     - your_project/
         |-- libs/
@@ -30,11 +30,11 @@ In an empty directory, create different directories and files like below:
         |-- CMakeLists.txt
 
 
-In the `libs/` directory, clone the sources with: `git clone https://github.com/brainboxdotcc/DPP.git`
+In the `libs/` directory, clone D++ with: `git clone https://github.com/brainboxdotcc/DPP.git`
 
 ## 3. Configure CMake
 
-Here is an example of a CMake configuration, adapt it according to your needs:
+Here is an example CMake configuration, adapt it according to your needs:
 
 ~~~~~~~~~~~~~~{.cmake}
 # minimum CMake version required

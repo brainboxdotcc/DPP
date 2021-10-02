@@ -104,7 +104,7 @@ int main()
 
 ### 5 . Add some content to the events
 
-Attaching to an event is a good start, but to make a bot you should actually put some program code into the events. Lets add some simple things into the events. We will add some code to the `on_ready` event to output the bot's nickname (dpp::cluster::me) and some code into the `on_message_create` to look for messages that are the text `!ping` and reply with `!pong`:
+Attaching to an event is a good start, but to make a bot you should actually put some program code into the events. We will add some code to the `on_ready` event to output the bot's nickname (dpp::cluster::me) and some code into the `on_message_create` to look for messages that are the text `!ping` and reply with `!pong`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
