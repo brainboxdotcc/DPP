@@ -411,9 +411,10 @@ struct CoreExport message_reaction_add_t : public event_dispatch_t {
 	 */
 	message_reaction_add_t(class discord_client* client, const std::string& raw);
 	guild* reacting_guild;
-	user* reacting_user;
+	user reacting_user;
+	guild_member reacting_member;
 	channel* reacting_channel;
-	emoji* reacting_emoji;
+	emoji reacting_emoji;
 	snowflake message_id;
 };
 
@@ -435,11 +436,12 @@ struct CoreExport message_reaction_remove_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	message_reaction_remove_t(class discord_client* client, const std::string& raw);
-        guild* reacting_guild;
-        user* reacting_user;
-        channel* reacting_channel;
-        emoji* reacting_emoji;
-        snowflake message_id;
+	guild* reacting_guild;
+	user reacting_user;
+	guild_member reacting_member;
+	channel* reacting_channel;
+	emoji reacting_emoji;
+	snowflake message_id;
 };
 
 /** @brief Create guild */
@@ -470,10 +472,10 @@ struct CoreExport message_reaction_remove_emoji_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	message_reaction_remove_emoji_t(class discord_client* client, const std::string& raw);
-        guild* reacting_guild;
-        channel* reacting_channel;
-        emoji* reacting_emoji;
-        snowflake message_id;
+	guild* reacting_guild;
+	channel* reacting_channel;
+	emoji reacting_emoji;
+	snowflake message_id;
 };
 
 /** @brief Message delete bulk */
@@ -885,6 +887,33 @@ struct CoreExport voice_receive_t : public event_dispatch_t {
 	snowflake user_id;
 };
 
+/** @brief voice client speaking event */
+struct CoreExport voice_client_speaking_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on.
+	 * WILL ALWAYS be NULL.
+	 * @param raw Raw event text as JSON
+	 */
+	voice_client_speaking_t(class discord_client* client, const std::string &raw);
+	class discord_voice_client* voice_client;
+	snowflake user_id;
+	uint32_t ssrc;
+};
+
+/** @brief voice client disconnect event */
+struct CoreExport voice_client_disconnect_t : public event_dispatch_t {
+	/** 
+	 * @brief Constructor
+	 * @param client The shard the event originated on.
+	 * WILL ALWAYS be NULL.
+	 * @param raw Raw event text as JSON
+	 */
+	voice_client_disconnect_t(class discord_client* client, const std::string &raw);
+	class discord_voice_client* voice_client;
+	snowflake user_id;
+};
+
 /** @brief The dispatcher class contains a set of std::functions representing hooked events
  * that the user code is interested in. These are modified via the on_eventname style
  * methods in the cluster class.
@@ -899,6 +928,14 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const voice_state_update_t& event)> voice_state_update;
+	/** @brief Event handler function pointer for voice client speaking event
+	 * @param event Event parameters
+	 */
+	std::function<void(const voice_client_speaking_t& event)> voice_client_speaking;
+	/** @brief Event handler function pointer for voice client disconnect event
+	 * @param event Event parameters
+	 */
+	std::function<void(const voice_client_disconnect_t& event)> voice_client_disconnect;
 	/** @brief Event handler function pointer for interaction create event
 	 * @param event Event parameters
 	 */

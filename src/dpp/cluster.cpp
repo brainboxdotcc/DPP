@@ -119,7 +119,7 @@ error_info confirmation_callback_t::get_error() const {
 					error_detail detail;
 					detail.code = (*errordetails)["code"].get<std::string>();
 					detail.reason = (*errordetails)["message"].get<std::string>();
-					detail.object = "";
+					detail.object.clear();
 					detail.field = obj.key();
 					e.errors.push_back(detail);
 				}
@@ -1190,7 +1190,7 @@ void cluster::guild_delete(snowflake guild_id, command_completion_event_t callba
 }
 
 void cluster::role_create(const class role &r, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(r.guild_id), "roles", m_post, r.build_json(), [r, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(r.guild_id), "roles", m_post, r.build_json(), [r, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}
@@ -1712,6 +1712,14 @@ void cluster::on_log (std::function<void(const log_t& _event)> _log) {
 
 void cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {
 	this->dispatch.voice_state_update = _voice_state_update;
+}
+
+void cluster::on_voice_client_disconnect (std::function<void(const voice_client_disconnect_t& _event)> _voice_client_disconnect) {
+	this->dispatch.voice_client_disconnect = _voice_client_disconnect;
+}
+
+void cluster::on_voice_client_speaking (std::function<void(const voice_client_speaking_t& _event)> _voice_client_speaking) {
+	this->dispatch.voice_client_speaking = _voice_client_speaking;
 }
 
 void cluster::on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create) {
