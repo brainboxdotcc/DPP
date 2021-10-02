@@ -65,7 +65,7 @@ To build on windows follow these steps *exactly*. The build process depends on s
 
 \note You should not need to build a copy of the library for windows — DLL and LIB files for Windows and Visual Studio 2019 are be provided in the GitHub version releases. Unless you wish to submit fixes and enhancements to the library itself, you may find it easier to use these releases instead.
 
-1. Make sure you have Visual Studio 2019. The Community, Professional or Enterprise versionals all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
+1. Make sure you have Visual Studio 2019. The Community, Professional or Enterprise versions all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
 2. Check out the DPP project source using git
 3. From within Visual Studio 2019, click the "File" menu, choose "Open" then "CMake", and select the CMakeLists.txt within the project folder
    \image html winbuild_1.png
