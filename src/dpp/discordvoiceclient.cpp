@@ -212,11 +212,20 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 
 					if (it != ssrcMap.end()) 
 						ssrcMap.erase(it);
+
+					if (creator->dispatch.voice_client_disconnect)
+					{
+						voice_client_disconnect_t vcd(nullptr, data);
+						vcd.voice_client = this;
+						vcd.user_id = u_id;
+						creator->dispatch.voice_client_disconnect(vcd);
+					}
 				}
 			}
+			break;
 			/* Speaking */ 
 			case 5:
-			/* Client Connect */
+			/* Client Connect (doesn't seem to work) */
 			case 12:
 			{
 				if (j.find("d") != j.end() 
@@ -226,6 +235,12 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					uint32_t u_ssrc = j["d"]["ssrc"].get<uint32_t>();
 					snowflake u_id = SnowflakeNotNull(&j["d"], "user_id");
 					ssrcMap[u_ssrc] = u_id;
+					
+					voice_client_speaking_t vcs(nullptr, data);
+					vcs.voice_client = this;
+					vcs.user_id = u_id;
+					vcs.ssrc = u_ssrc;
+					creator->dispatch.voice_client_speaking(vcs);
 				}
 			}
 			break;
