@@ -31,8 +31,7 @@ voiceregion::voiceregion() : flags(0)
 {
 }
 
-voiceregion::~voiceregion() {
-}
+voiceregion::~voiceregion() = default;
 
 voiceregion& voiceregion::fill_from_json(nlohmann::json* j) {
 	id = StringNotNull(j, "id");

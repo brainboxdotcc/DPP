@@ -61,8 +61,7 @@ presence::presence(presence_status status, activity a) {
 		flags |= p_status_dnd;
 }
 
-presence::~presence() {
-}
+presence::~presence() = default;
 
 presence& presence::fill_from_json(nlohmann::json* j) {
 	guild_id = SnowflakeNotNull(j, "guild_id");

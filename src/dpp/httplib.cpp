@@ -5803,7 +5803,7 @@ Client::Client(const std::string &host, int port,
     : cli_(detail::make_unique<ClientImpl>(host, port, client_cert_path,
                                            client_key_path)) {}
 
-Client::~Client() {}
+Client::~Client() = default;
 
 bool Client::is_valid() const {
   return cli_ != nullptr && cli_->is_valid();

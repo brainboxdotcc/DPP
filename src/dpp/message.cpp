@@ -42,7 +42,6 @@ component::component() : type(static_cast<component_type>(1)), label(""), style(
 component& component::fill_from_json(nlohmann::json* j) {
 	type = static_cast<component_type>(Int8NotNull(j, "type"));
 	if (type == cot_action_row) {
-		components;
 		for (json sub_component : (*j)["components"]) {
 			dpp::component new_component;
 			new_component.fill_from_json(&sub_component);
@@ -244,8 +243,7 @@ component& component::add_select_option(const select_option &option) {
 	return *this;
 }
 
-embed::~embed() {
-}
+embed::~embed() = default;
 
 embed::embed() : timestamp(0), color(0) {
 }
@@ -772,8 +770,7 @@ bool message::is_loading() const {
 	return flags & m_loading;
 }
 
-message::~message() {
-}
+message::~message() = default;
 
 
 message& message::fill_from_json(json* d, cache_policy_t cp) {

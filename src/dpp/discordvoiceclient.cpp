@@ -778,7 +778,6 @@ discord_voice_client& discord_voice_client::send_silence(const uint64_t duration
 discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t length)  {
 #if HAVE_VOICE
 	const size_t max_frame_bytes = 11520;
-	uint8_t pad[max_frame_bytes] = { 0 };
 	if (length > max_frame_bytes) {
 		std::string s_audio_data((const char*)audio_data, length);
 		while (s_audio_data.length() > max_frame_bytes) {

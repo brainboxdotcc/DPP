@@ -30,8 +30,7 @@ invite::invite() : guild_id(0), channel_id(0), inviter_id(0), target_user_id(0),
 {
 }
 
-invite::~invite() {
-}
+invite::~invite() = default;
 
 
 invite& invite::fill_from_json(nlohmann::json* j) {

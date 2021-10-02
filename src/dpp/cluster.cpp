@@ -119,7 +119,7 @@ error_info confirmation_callback_t::get_error() const {
 					error_detail detail;
 					detail.code = (*errordetails)["code"].get<std::string>();
 					detail.reason = (*errordetails)["message"].get<std::string>();
-					detail.object = "";
+					detail.object.clear();
 					detail.field = obj.key();
 					e.errors.push_back(detail);
 				}
