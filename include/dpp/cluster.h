@@ -384,6 +384,20 @@ public:
 	void on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
 
 	/**
+	 * @brief on voice client disconnect event
+	 *
+	 * @param _voice_state_update User function to attach to event
+	 */
+	void on_voice_client_disconnect (std::function<void(const voice_client_disconnect_t& _event)> _voice_client_disconnect);
+
+	/**
+	 * @brief on voice client speaking event
+	 *
+	 * @param _voice_state_update User function to attach to event
+	 */
+	void on_voice_client_speaking (std::function<void(const voice_client_speaking_t& _event)> _voice_client_speaking);
+
+	/**
 	 * @brief Called when a log message is to be written to the log.
 	 * You can attach any logging system here you wish, e.g. spdlog, or even just a simple
 	 * use of std::cout or printf. If nothing attaches this log event, then the
