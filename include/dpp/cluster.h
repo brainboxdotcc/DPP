@@ -838,10 +838,11 @@ public:
 
 	/**
 	 * @brief Called when new audio data is received.
-	 * @note Receiveing audio for bots is not supported or documented, so this
-	 * endpoint will be triggered at the correct times but the audio buffer will
-	 * always be null and size zero.
-	 *
+	 * Each separate user's audio from the voice channel will arrive tagged with
+	 * their user id in the event, if a user can be attributed to the received audio.
+	 * 
+	 * @note Receiveing audio for bots is not officially supported by discord.
+	 * 
 	 * @param _voice_receive User function to attach to event
 	 */
 	void on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive);
