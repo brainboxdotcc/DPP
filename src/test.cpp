@@ -1,3 +1,4 @@
+#undef DPP_BUILD
 #include <dpp/dpp.h>
 #include <dpp/fmt/format.h>
  

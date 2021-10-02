@@ -31,6 +31,14 @@
 #include <iomanip>
 #include <dpp/fmt/format.h>
 
+#ifdef _WIN32
+	#include <array>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#define popen _popen
+	#define pclose _pclose
+#endif
+
 using namespace std::literals;
 
 namespace dpp {
@@ -168,7 +176,6 @@ namespace dpp {
 		}
 
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
-#ifndef _WIN32
 			auto t = std::thread([cmd, parameters, callback]() {
 				std::array<char, 128> buffer;
 				std::vector<std::string> my_parameters = parameters;
@@ -182,7 +189,7 @@ namespace dpp {
 				cmd_and_parameters << " 2>&1";
 				std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd_and_parameters.str().c_str(), "r"), pclose);
 				if (!pipe) {
-					return "";
+					return;
 				}
 				while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
 					result += buffer.data();
@@ -190,10 +197,9 @@ namespace dpp {
 				if (callback) {
 					callback(result);
 				}
-				return "";
+				return;
 			});
 			t.detach();
-#endif
 		}
 
 		size_t utf8len(const std::string &str)
