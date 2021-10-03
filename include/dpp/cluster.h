@@ -1432,12 +1432,23 @@ public:
 	void guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
 
 	/**
+	 * @brief Search for guild members based on whether their username or nickname starts with the given string.
+	 *
+	 * @param guild_id Guild ID to search in
+	 * @param query Query string to match username(s) and nickname(s) against
+	 * @param limit max number of members to return (1-1000)
+	 */
+	void guild_search_members(snowflake guild_id, const std::string& query, uint16_t limit, command_completion_event_t callback);
+
+	/**
 	 * @brief Get all guild members
 	 *
 	 * @param guild_id Guild ID to get all members for
+	 * @param limit max number of members to return (1-1000)
+	 * @param after the highest user id in the previous page
 	 * @param callback Function to call when the API call completes.
 	 */
-	void guild_get_members(snowflake guild_id, command_completion_event_t callback);
+	void guild_get_members(snowflake guild_id, uint16_t limit, snowflake after, command_completion_event_t callback);
 
 	/**
 	 * @brief Add guild member. Needs a specific oauth2 scope, from which you get the access_token.
