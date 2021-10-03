@@ -50,7 +50,7 @@ void message_reaction_remove_emoji::handle(discord_client* client, json &j, cons
 		mrre.reacting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		mrre.reacting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
 		mrre.message_id = SnowflakeNotNull(&d, "message_id");
-		mrre.reacting_emoji = dpp::find_emoji(SnowflakeNotNull(&(d["emoji"]), "id"));
+		mrre.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
 		if (mrre.reacting_channel && mrre.message_id) {
 			client->creator->dispatch.message_reaction_remove_emoji(mrre);
 		}

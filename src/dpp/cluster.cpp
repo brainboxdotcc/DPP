@@ -1203,7 +1203,7 @@ void cluster::guild_delete(snowflake guild_id, command_completion_event_t callba
 }
 
 void cluster::role_create(const class role &r, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(r.guild_id), "roles", m_post, r.build_json(), [r, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(r.guild_id), "roles", m_post, r.build_json(), [r, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}
