@@ -1066,9 +1066,9 @@ void cluster::guild_ban_delete(snowflake guild_id, snowflake user_id, command_co
 }
 
 
-
-void cluster::guild_get_members(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members", m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
+void cluster::guild_get_members(snowflake guild_id, uint16_t limit, snowflake after, command_completion_event_t callback) {
+	std::string parameters;
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), fmt::format("members?limit={}&after={}", limit, after), m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
 		guild_member_map guild_members;
 		for (auto & curr_member : j) {
 			guild_member gm;
@@ -1083,7 +1083,6 @@ void cluster::guild_get_members(snowflake guild_id, command_completion_event_t c
 		}
 	});
 }
-
 
 void cluster::template_get(const std::string &code, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", "templates", code, m_get, "", [callback](json &j, const http_request_completion_t& http) {
