@@ -862,11 +862,12 @@ struct CoreExport message {
 	/** whether this message mentions everyone */
 	bool   		mention_everyone;
 	/** users specifically mentioned in the message */
-	std::vector<snowflake>	mentions;
-	/** roles specifically mentioned in this message */
+	std::vector<std::pair<user, guild_member>>	mentions;
+	/** roles specifically mentioned in this message (only IDs currently)*/
 	std::vector<snowflake> mention_roles;
-	/** Optional: channels specifically mentioned in this message */
-	std::vector<snowflake> mention_channels;
+	/** Channels mentioned in the message. (Discord: not all types supported)
+	 * Discord: Only textual channels that are visible to everyone in a lurkable guild will ever be included. Only crossposted messages (via Channel Following) currently include mention_channels at all. (includes ID, Guild ID, Type, Name)*/
+	std::vector<channel> mention_channels;
 	/** any attached files */
 	std::vector<attachment> attachments;
 	/** zero or more dpp::embed objects */

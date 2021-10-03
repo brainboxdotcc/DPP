@@ -824,19 +824,23 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	if (d->find("mentions") != d->end()) {
 		json &sub = (*d)["mentions"];
 		for (auto & m : sub) {
-			mentions.push_back(SnowflakeNotNull(&m, "id"));
+			dpp::user u = dpp::user().fill_from_json(&m);
+			dpp::guild_member gm = dpp::guild_member().fill_from_json(static_cast<json*>(&m["member"]), this->guild_id, u.id);
+			mentions.push_back({u, gm});
 		}
 	}
 	if (d->find("mention_roles") != d->end()) {
-		json &sub = (*d)["mention_roles"];
-		for (auto & m : sub) {
-			mention_roles.push_back(from_string<snowflake>(m, std::dec));
+		for (auto & m : (*d)["mention_roles"]) {
+			try {
+				snowflake rid = std::stoull(static_cast<const std::string&>(m));
+				mention_roles.push_back(rid);
+			} catch (const std::exception& c) {}
 		}
 	}
 	if (d->find("mention_channels") != d->end()) {
 		json &sub = (*d)["mention_channels"];
 		for (auto & m : sub) {
-			mention_channels.push_back(SnowflakeNotNull(&m, "id"));
+			mention_channels.push_back(dpp::channel().fill_from_json(&m));
 		}
 	}
 	/* Fill in member record, cache uncached ones */
