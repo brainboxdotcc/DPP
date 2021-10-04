@@ -50,8 +50,14 @@
 namespace dpp {
 
 static std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, " + std::to_string(DPP_VERSION_MAJOR) + "." + std::to_string(DPP_VERSION_MINOR) + "." + std::to_string(DPP_VERSION_PATCH) + ")";
+static const char* DISCORD_HOST = "https://discord.com";
 
-http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &filename, const std::string &filecontent) : endpoint(_endpoint), parameters(_parameters), complete_handler(completion), postdata(_postdata), method(_method), completed(false), file_name(filename), file_content(filecontent)
+http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &filename, const std::string &filecontent) : non_discord(false), endpoint(_endpoint), parameters(_parameters), complete_handler(completion), postdata(_postdata), method(_method), completed(false), file_name(filename), file_content(filecontent), mimetype("application/json")
+{
+}
+
+http_request::http_request(const std::string &_url, http_completion_event completion, http_method _method, const std::string &_postdata, const std::string &_mimetype, const std::multimap<std::string, std::string> &_headers)
+ : non_discord(true), endpoint(_url), complete_handler(completion), postdata(_postdata), method(_method), completed(false), mimetype(_mimetype), req_headers(_headers)
 {
 }
 
@@ -70,6 +76,9 @@ void populate_result(const std::string &url, cluster* owner, http_request_comple
 	for (auto &v : res->headers) {
 		rv.headers[v.first] = v.second;
 	}
+
+	/* This will be ignored for non-discord requests without rate limit headers */
+
 	rv.ratelimit_limit = from_string<uint64_t>(res->get_header_value("X-RateLimit-Limit"), std::dec);
 	rv.ratelimit_remaining = from_string<uint64_t>(res->get_header_value("X-RateLimit-Remaining"), std::dec);
 	rv.ratelimit_reset_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Reset-After"), std::dec);
@@ -102,26 +111,46 @@ http_request_completion_t http_request::Run(cluster* owner) {
 
 	http_request_completion_t rv;
 	double start = dpp::utility::time_f();
+	std::string _host = DISCORD_HOST;
+	std::string _url = endpoint;
 
-	httplib::Client cli("https://discord.com");
+	if (non_discord) {
+		std::size_t s_start = endpoint.find("://", 0);
+		if (s_start != std::string::npos) {
+			s_start += 3; /* "://" */
+			std::size_t s_end = endpoint.find("/", s_start + 1);
+			_host = endpoint.substr(0, s_end);
+			_url = endpoint.substr(s_end);	
+		}
+	}
+
+	httplib::Client cli(_host.c_str());
 	/* This is for a reason :( - Some systems have really out of date cert stores */
 	cli.enable_server_certificate_verification(false);
 	cli.set_follow_location(true);
-	/* TODO: Once we have a version number header, use it here */
-	httplib::Headers headers = {
-		{"Authorization", std::string("Bot ") + owner->token},
-		{"User-Agent", http_version}
-	};
-	cli.set_default_headers(headers);
 
 	rv.ratelimit_limit = rv.ratelimit_remaining = rv.ratelimit_reset_after = rv.ratelimit_retry_after = 0;
 	rv.status = 0;
 	rv.latency = 0;
 	rv.ratelimit_global = false;
 
-	std::string _url = endpoint;
-	if (!empty(parameters)) {
-		_url = endpoint + "/" +parameters;
+	if (non_discord) {
+		/* Requests outside of Discord have their own headers an NEVER EVER send a bot token! */
+		httplib::Headers headers;
+		for (auto& r : req_headers) {
+			headers.emplace(r.first, r.second);
+		};
+		cli.set_default_headers(headers);
+	} else {
+		/* Always attach token and correct user agent when sending REST to Discord */
+		httplib::Headers headers = {
+			{"Authorization", std::string("Bot ") + owner->token},
+			{"User-Agent", http_version}
+		};
+		cli.set_default_headers(headers);
+		if (!empty(parameters)) {
+			_url = endpoint + "/" +parameters;
+		}
 	}
 
 	/* Because of the design of cpp-httplib we can't create a httplib::Result once and make this code
@@ -141,18 +170,30 @@ http_request_completion_t http_request::Run(cluster* owner) {
 		case m_post: {
 			/* POST supports post data body */
 			if (!file_name.empty() && !file_content.empty()) {
-				httplib::MultipartFormDataItems items = {
-					{ "payload_json", postdata, "", "application/json" },
-					{ "file", file_content, file_name, "application/octet-stream" }
-				};
-				if (auto res = cli.Post(_url.c_str(), items)) {
-					rv.latency = dpp::utility::time_f() - start;
-					populate_result(_url, owner, rv, res);
+				if (non_discord) {
+					/* Outside Discord just post a standard non-multipart POST body */
+					if (auto res = cli.Post(_url.c_str(), postdata, mimetype.c_str())) {
+						rv.latency = dpp::utility::time_f() - start;
+						populate_result(_url, owner, rv, res);
+					} else {
+						rv.error = (http_error)res.error();
+					}
 				} else {
-					rv.error = (http_error)res.error();
+					/* Special multipart mime body for Discord */
+					httplib::MultipartFormDataItems items = {
+						{ "payload_json", postdata, "", mimetype.c_str() },
+						{ "file", file_content, file_name, "application/octet-stream" }
+					};
+					if (auto res = cli.Post(_url.c_str(), items)) {
+						rv.latency = dpp::utility::time_f() - start;
+						populate_result(_url, owner, rv, res);
+					} else {
+						rv.error = (http_error)res.error();
+					}
 				}
 			} else {
-				if (auto res = cli.Post(_url.c_str(), postdata.c_str(), "application/json")) {
+				/* Without a filename attached, use the same for both */
+				if (auto res = cli.Post(_url.c_str(), postdata, mimetype.c_str())) {
 					rv.latency = dpp::utility::time_f() - start;
 					populate_result(_url, owner, rv, res);
 				} else {
@@ -162,7 +203,7 @@ http_request_completion_t http_request::Run(cluster* owner) {
 		}
 		break;
 		case m_patch: {
-			if (auto res = cli.Patch(_url.c_str(), postdata.c_str(), "application/json")) {
+			if (auto res = cli.Patch(_url.c_str(), postdata.c_str(), mimetype.c_str())) {
 				rv.latency = dpp::utility::time_f() - start;
 				populate_result(_url, owner, rv, res);
 			} else {
@@ -172,7 +213,7 @@ http_request_completion_t http_request::Run(cluster* owner) {
 		break;
 		case m_put: {
 			/* PUT supports post data body */
-			if (auto res = cli.Put(_url.c_str(), postdata.c_str(), "application/json")) {
+			if (auto res = cli.Put(_url.c_str(), postdata.c_str(), mimetype.c_str())) {
 				rv.latency = dpp::utility::time_f() - start;
 				populate_result(_url, owner, rv, res);
 			} else {
@@ -205,7 +246,7 @@ request_queue::request_queue(class cluster* owner) : creator(owner), terminating
 		throw dpp::exception("Can't initialise request queue sockets");
 	}
 
-	std::mt19937 generator(time(NULL));
+	std::mt19937 generator(dpp::utility::time_f() * 100000 + (size_t)this);
 	std::uniform_real_distribution<double> distribution(8192, 32760);
 
 	in_queue_port = distribution(generator);

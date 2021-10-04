@@ -223,6 +223,9 @@ class CoreExport cluster {
 	/** queue system for commands sent to Discord, and any replies */
 	request_queue* rest;
 
+	/** queue system for arbitrary HTTP requests sent by the user to sites other than Discord */
+	request_queue* raw_rest;
+
 	/** True if to use compression on shards */
 	bool compressed;
 
@@ -899,6 +902,18 @@ public:
 	 * @param filecontent File content to post for POST requests (for uploading files)
 	 */
 	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
+
+	/**
+	 * @brief Make a HTTP(S) request. For use when wanting asnyncronous access to HTTP APIs outside of Discord.
+	 *
+	 * @param url Endpoint to post to, e.g. /api/guilds
+	 * @param method Method, e.g. GET, POST
+	 * @param callback Function to call when the HTTP call completes. No processing is done on the returned data.
+	 * @param postdata POST data
+	 * @param mimetype MIME type of POST data
+	 * @param headers Headers to send with the request
+	 */
+	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {});
 
 	/**
 	 * @brief Respond to a slash command

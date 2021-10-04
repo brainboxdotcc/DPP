@@ -37,6 +37,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	maxclusters(_maxclusters), last_identify(time(NULL) - 5), compressed(comp), cache_policy(policy), rest_ping(0.0)
 {
 	rest = new request_queue(this);
+	raw_rest = new request_queue(this);
 #ifdef _WIN32
 	// Set up winsock.
 	WSADATA wsadata;
@@ -49,6 +50,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 cluster::~cluster()
 {
 	delete rest;
+	delete raw_rest;
 #ifdef _WIN32
 	WSACleanup();
 #endif
@@ -250,6 +252,11 @@ void cluster::post_rest(const std::string &endpoint, const std::string &major_pa
 			callback(j, rv);
 		}
 	}, postdata, method, filename, filecontent));
+}
+
+void cluster::request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers) {
+	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
+	raw_rest->post_request(new http_request(url, callback, method, postdata, mimetype, headers));
 }
 
 gateway::gateway(nlohmann::json* j) {
