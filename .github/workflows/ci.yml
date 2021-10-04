@@ -136,18 +136,3 @@ jobs:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.deb"
 
-  updater:
-    name: Update windows bot template
-    runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false # Don't fail everything if one fails.
-
-    needs: [windows]
-
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-      - name: Run workflow dispatch
-        run: curl --request POST --url 'https://api.github.com/repos/brainboxdotcc/windows-bot-template/dispatches' --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --data '{"event_type": "Library Binaries Update"}'
-
