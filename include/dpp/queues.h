@@ -133,6 +133,8 @@ class CoreExport http_request {
 	http_completion_event complete_handler;
 	/** True if request has been made */
 	bool completed;
+	/** True for requests that are not going to discord (rate limits code skipped) */
+	bool non_discord;
 public:
 	/** Endpoint name e.g. /api/users */
 	std::string endpoint;
@@ -146,6 +148,10 @@ public:
 	std::string file_name;
 	/** Upload file contents (binary) */
 	std::string file_content;
+	/** Request mime type */
+	std::string mimetype;
+	/** Request headers (non-discord requests only) */
+	std::multimap<std::string, std::string> req_headers;
 
 	/** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _endpoint The API endpoint, e.g. /api/guilds
@@ -157,6 +163,16 @@ public:
 	 * @param filecontent The binary content of any uploaded file for the request
 	 */
 	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &filename = "", const std::string &filecontent = "");
+
+	/** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
+	 * @param _url Raw HTTP url
+	 * @param completion completion event to call when done
+	 * @param method The HTTP method to use from dpp::http_method
+	 * @param _postdata Data to send in POST and PUT requests
+	 * @param _mimetype POST data mime type
+	 * @param _headers HTTP headers to send
+	 */
+	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {});
 
 	/** Destructor */
 	~http_request();
