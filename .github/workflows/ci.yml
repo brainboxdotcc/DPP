@@ -142,12 +142,12 @@ jobs:
     strategy:
       fail-fast: false # Don't fail everything if one fails.
 
-    needs: [linux, windows, macos, cross-compiles]
+    needs: [windows]
 
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Run workflow dispatch
-        run: gh workflow run brainboxdotcc/windows-bot-template "Library Binaries Update"
+        run: curl --request POST --url 'https://api.github.com/repos/brainboxdotcc/windows-bot-template/dispatches' --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' --data '{"event_type": "Library Binaries Update"}'
 
