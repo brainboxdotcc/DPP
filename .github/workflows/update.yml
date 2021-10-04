@@ -1,5 +1,6 @@
 name: Library Binaries Update
-  on: [push]
+on:
+  push:
     branches:
       - master
 
