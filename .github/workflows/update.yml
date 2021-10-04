@@ -1,6 +1,8 @@
-name: Library Binaries Update
-on: [push]
-  branches: [master]
+name: bot-template-update
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   updater:
