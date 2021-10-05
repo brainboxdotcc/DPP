@@ -3,6 +3,16 @@ img {
 	max-height: auto;
 }
 
+select[name=vsv] {
+	background: none;
+	border: 1px solid var(--primary-dark-color);
+	color: var(--primary-dark-color);
+	border-radius: 6px;
+	padding: 5px;
+	margin-left: 1rem;
+	margin-right: 1rem;
+}
+
 #searchBoxPos1 {
 	top: 0px !important;
 }
