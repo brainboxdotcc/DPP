@@ -10,8 +10,8 @@ file_put_contents("header.html", $header);
 
 chdir("..");
 system("/usr/local/bin/doxygen");
-system("cp -r docs/* ~/dpp-web/");
-chdir("~/dpp-web");
+system("cp -r docs/* /home/brain/dpp-web/");
+chdir("/home/brain/dpp-web");
 system("git add -A");
 system("git commit -a -m \"automatic commit\"");
 system("git push");

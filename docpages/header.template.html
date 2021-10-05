@@ -25,9 +25,7 @@ $extrastylesheet
 <body>
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <script>
-	console.log("here");
 	setTimeout(function() {
-		console.log("here 2");
 		$("#main-menu").html($("#main-menu").html() + "<li><select name='vsv' onchange='window.location.href=this.options[this.selectedIndex].value'>##VERSION_OPTIONS##</select></li>");
 	}, 500);
 </script>
