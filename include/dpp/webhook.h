@@ -79,9 +79,10 @@ public:
 	 * 
 	 * @param image_blob Binary image data
 	 * @param type Image type
+	 * @param is_base64_encoded True if the image data is already base64 encoded
 	 * @return webhook& Reference to self
 	 */
-	webhook& load_image(const std::string &image_blob, const image_type type);
+	webhook& load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded = false);
 };
 
 /**

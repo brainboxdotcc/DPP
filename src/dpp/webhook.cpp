@@ -75,7 +75,7 @@ std::string webhook::build_json(bool with_id) const {
 	return j.dump();
 }
 
-webhook& webhook::load_image(const std::string &image_blob, const image_type type) {
+webhook& webhook::load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded) {
 	static const std::map<image_type, std::string> mimetypes = {
 		{ i_gif, "image/gif" },
 		{ i_jpg, "image/jpeg" },
@@ -88,7 +88,7 @@ webhook& webhook::load_image(const std::string &image_blob, const image_type typ
 		/* If there's already image data defined, free the old data, to prevent a memory leak */
 		delete image_data;
 	}
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length()));
+	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + (is_base64_encoded ? image_blob : base64_encode((unsigned char const*)image_blob.data(), image_blob.length())));
 
 	return *this;
 }
