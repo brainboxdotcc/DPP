@@ -126,36 +126,46 @@ component& component::set_emoji(const std::string& name, dpp::snowflake id, bool
 	return *this;
 }
 
-std::string component::build_json() const {
-	json j;
-	if (type == component_type::cot_action_row) {
-		j["type"] = 1;
-		json new_components;
-		for (component new_component : components) {
-			new_components.push_back(new_component.build_json());
+void to_json(json& j, const component& cp) {
+	if (cp.type == cot_button) {
+		j["type"] = cp.type;
+		j["label"] = cp.label;
+		j["style"] = int(cp.style);
+		if (cp.type == cot_button && cp.style != cos_link && !cp.custom_id.empty()) {
+			/* Links cannot have a custom id */
+			j["custom_id"] = cp.custom_id;
 		}
-		j["components"] = new_components;
-	} else if (type == component_type::cot_button) {
-		j["type"] = 2;
-		j["label"] = label;
-		j["style"] = int(style);
-		j["custom_id"] = custom_id;
-		j["disabled"] = disabled;
-	} else if (type == component_type::cot_selectmenu) {
-		j["type"] = 3;
-		j["custom_id"] = custom_id;
-		//j["disabled"] = disabled;
-		if (!placeholder.empty()) {
-			j["placeholder"] = placeholder;
+		if (cp.type == cot_button && cp.style == cos_link && !cp.url.empty()) {
+			j["url"] = cp.url;
 		}
-		if (min_values >= 0) {
-			j["min_values"] = min_values;
+		j["disabled"] = cp.disabled;
+
+		if (cp.emoji.id || !cp.emoji.name.empty()) {
+			j["emoji"] = {};
+			j["emoji"]["animated"] = cp.emoji.animated;
 		}
-		if (max_values >= 0) {
-			j["max_values"] = max_values;
+		if (cp.emoji.id) {
+			j["emoji"]["id"] = std::to_string(cp.emoji.id);
+		}
+		if (!cp.emoji.name.empty()) {
+			j["emoji"]["name"] = cp.emoji.name;
+		}
+	} else if (cp.type == cot_selectmenu) {
+
+		j["type"] = cp.type;
+		j["custom_id"] = cp.custom_id;
+		//j["disabled"] = cp.disabled;
+		if (!cp.placeholder.empty()) {
+			j["placeholder"] = cp.placeholder;
+		}
+		if (cp.min_values >= 0) {
+			j["min_values"] = cp.min_values;
+		}
+		if (cp.max_values >= 0) {
+			j["max_values"] = cp.max_values;
 		}
 		j["options"] = json::array();
-		for (auto opt : options) {
+		for (auto opt : cp.options) {
 			json o;
 			if (!opt.description.empty()) {
 				o["description"] = opt.description;
@@ -175,11 +185,13 @@ std::string component::build_json() const {
 				if (opt.emoji.id) {
 					o["emoji"]["id"] = std::to_string(opt.emoji.id);
 				}
+				if (opt.emoji.animated) {
+					o["emoji"]["animated"] = true;
+				}
 			}
 			j["options"].push_back(o);
 		}
 	}
-	return j.dump();
 }
 
 select_option::select_option() : is_default(false) {
@@ -612,73 +624,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		n["type"] = cot_action_row;
 		n["components"] = {};
 		for (auto & subcomponent  : component.components) {
-			json sn;
-			if (subcomponent.type == cot_button) {
-				sn["type"] = subcomponent.type;
-				sn["label"] = subcomponent.label;
-				sn["style"] = int(subcomponent.style);
-				if (subcomponent.type == cot_button && subcomponent.style != cos_link && !subcomponent.custom_id.empty()) {
-					/* Links cannot have a custom id */
-					sn["custom_id"] = subcomponent.custom_id;
-				}
-				if (subcomponent.type == cot_button && subcomponent.style == cos_link && !subcomponent.url.empty()) {
-					sn["url"] = subcomponent.url;
-				}
-				sn["disabled"] = subcomponent.disabled;
-
-				if (subcomponent.emoji.id || !subcomponent.emoji.name.empty()) {
-					sn["emoji"] = {};
-					sn["emoji"]["animated"] = subcomponent.emoji.animated;
-				}
-				if (subcomponent.emoji.id) {
-					sn["emoji"]["id"] = std::to_string(subcomponent.emoji.id);
-				}
-				if (!subcomponent.emoji.name.empty()) {
-					sn["emoji"]["name"] = subcomponent.emoji.name;
-				}
-			} else if (subcomponent.type == cot_selectmenu) {
-
-				sn["type"] = subcomponent.type;
-				sn["custom_id"] = subcomponent.custom_id;
-				//sn["disabled"] = subcomponent.disabled;
-				if (!subcomponent.placeholder.empty()) {
-					sn["placeholder"] = subcomponent.placeholder;
-				}
-				if (subcomponent.min_values >= 0) {
-					sn["min_values"] = subcomponent.min_values;
-				}
-				if (subcomponent.max_values >= 0) {
-					sn["max_values"] = subcomponent.max_values;
-				}
-				sn["options"] = json::array();
-				for (auto opt : subcomponent.options) {
-					json o;
-					if (!opt.description.empty()) {
-						o["description"] = opt.description;
-					}
-					if (!opt.label.empty()) {
-						o["label"] = opt.label;
-					}
-					if (!opt.value.empty()) {
-						o["value"] = opt.value;
-					}
-					if (opt.is_default) {
-						o["default"] = true;
-					}
-					if (!opt.emoji.name.empty()) {
-						o["emoji"] = json::object();
-						o["emoji"]["name"] = opt.emoji.name;
-						if (opt.emoji.id) {
-							o["emoji"]["id"] = std::to_string(opt.emoji.id);
-						}
-						if (opt.emoji.animated) {
-							o["emoji"]["animated"] = true;
-						}
-					}
-					sn["options"].push_back(o);
-				}
-			}
-
+			json sn = subcomponent;
 			n["components"].push_back(sn);
 		}
 		j["components"].push_back(n);

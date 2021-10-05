@@ -44,7 +44,7 @@ enum emoji_flags {
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class CoreExport emoji : public managed {
+class DPP_EXPORT emoji : public managed {
 public:
 	/**
 	 * @brief Emoji name

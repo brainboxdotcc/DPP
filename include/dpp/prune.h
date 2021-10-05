@@ -28,7 +28,7 @@ namespace dpp {
 /**
  * @brief Defines a request to count prunable users, or start a prune operation
  */
-struct CoreExport prune {
+struct DPP_EXPORT prune {
 	/** Number of days to include in the prune
 	 */
 	uint32_t days = 0;

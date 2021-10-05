@@ -73,7 +73,7 @@ enum user_flags {
 /**
  * @brief Represents a user on discord. May or may not be a member of a dpp::guild.
  */
-class CoreExport user : public managed {
+class DPP_EXPORT user : public managed {
 public:
 	/** Discord username */
 	std::string username;

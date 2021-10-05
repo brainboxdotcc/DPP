@@ -29,12 +29,12 @@
 
 namespace dpp {
 
-struct CoreExport confirmation_callback_t;
+struct DPP_EXPORT confirmation_callback_t;
 
 typedef std::function<void(const confirmation_callback_t&)> command_completion_event_t;
 
 /** @brief Base event parameter struct */
-struct CoreExport event_dispatch_t {
+struct DPP_EXPORT event_dispatch_t {
 
 	/** Raw event text */
 	std::string raw_event;
@@ -50,7 +50,7 @@ struct CoreExport event_dispatch_t {
 };
 
 /** @brief Log messages */
-struct CoreExport log_t : public event_dispatch_t {
+struct DPP_EXPORT log_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on. CAN BE NULL
 	 * for log events originating from the cluster object
@@ -64,7 +64,7 @@ struct CoreExport log_t : public event_dispatch_t {
 };
 
 /** @brief Create stage instance */
-struct CoreExport stage_instance_create_t : public event_dispatch_t {
+struct DPP_EXPORT stage_instance_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on. CAN BE NULL
 	 * for log events originating from the cluster object
@@ -94,7 +94,7 @@ struct CoreExport stage_instance_create_t : public event_dispatch_t {
 };
 
 /** @brief Delete stage instance */
-struct CoreExport stage_instance_delete_t : public event_dispatch_t {
+struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on. CAN BE NULL
 	 * for log events originating from the cluster object
@@ -124,7 +124,7 @@ struct CoreExport stage_instance_delete_t : public event_dispatch_t {
 };
 
 /** @brief Voice state update */
-struct CoreExport voice_state_update_t : public event_dispatch_t {
+struct DPP_EXPORT voice_state_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -137,7 +137,7 @@ struct CoreExport voice_state_update_t : public event_dispatch_t {
 /**
  * @brief Create interaction
  */
-struct CoreExport interaction_create_t : public event_dispatch_t {
+struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 
 	/** Constructor
 	 * @param client The shard the event originated on
@@ -198,7 +198,7 @@ struct CoreExport interaction_create_t : public event_dispatch_t {
 /**
  * @brief Click on button
  */
-struct CoreExport button_click_t : public interaction_create_t {
+struct DPP_EXPORT button_click_t : public interaction_create_t {
 
 	/** Constructor
 	 * @param client The shard the event originated on
@@ -221,7 +221,7 @@ struct CoreExport button_click_t : public interaction_create_t {
 /**
  * @brief Click on select
  */
-struct CoreExport select_click_t : public interaction_create_t {
+struct DPP_EXPORT select_click_t : public interaction_create_t {
 
 	/** Constructor
 	 * @param client The shard the event originated on
@@ -244,7 +244,7 @@ struct CoreExport select_click_t : public interaction_create_t {
 
 
 /** @brief Delete guild */
-struct CoreExport guild_delete_t : public event_dispatch_t {
+struct DPP_EXPORT guild_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -255,7 +255,7 @@ struct CoreExport guild_delete_t : public event_dispatch_t {
 };
 
 /** @brief Update guild stickers */
-struct CoreExport guild_stickers_update_t : public event_dispatch_t {
+struct DPP_EXPORT guild_stickers_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -267,7 +267,7 @@ struct CoreExport guild_stickers_update_t : public event_dispatch_t {
 };
 
 /** @brief Guild join request delete (user declined membership screening) */
-struct CoreExport guild_join_request_delete_t : public event_dispatch_t {
+struct DPP_EXPORT guild_join_request_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -279,7 +279,7 @@ struct CoreExport guild_join_request_delete_t : public event_dispatch_t {
 };
 
 /** @brief Delete channel */
-struct CoreExport channel_delete_t : public event_dispatch_t {
+struct DPP_EXPORT channel_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -290,7 +290,7 @@ struct CoreExport channel_delete_t : public event_dispatch_t {
 };
 
 /** @brief Update channel */
-struct CoreExport channel_update_t : public event_dispatch_t {
+struct DPP_EXPORT channel_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -301,7 +301,7 @@ struct CoreExport channel_update_t : public event_dispatch_t {
 };
 
 /** @brief Session ready */
-struct CoreExport ready_t : public event_dispatch_t {
+struct DPP_EXPORT ready_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -312,7 +312,7 @@ struct CoreExport ready_t : public event_dispatch_t {
 };
 
 /** @brief Message Deleted */
-struct CoreExport message_delete_t : public event_dispatch_t {
+struct DPP_EXPORT message_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -321,7 +321,7 @@ struct CoreExport message_delete_t : public event_dispatch_t {
 	message* deleted;
 };
 
-struct CoreExport application_command_delete_t : public event_dispatch_t {
+struct DPP_EXPORT application_command_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -330,7 +330,7 @@ struct CoreExport application_command_delete_t : public event_dispatch_t {
 };
 
 /** @brief Guild member remove */
-struct CoreExport guild_member_remove_t : public event_dispatch_t {
+struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -344,7 +344,7 @@ struct CoreExport guild_member_remove_t : public event_dispatch_t {
  * @brief Create application slash command
  * 
  */
-struct CoreExport application_command_create_t : public event_dispatch_t {
+struct DPP_EXPORT application_command_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -353,7 +353,7 @@ struct CoreExport application_command_create_t : public event_dispatch_t {
 };
 
 /** @brief Session resumed */
-struct CoreExport resumed_t : public event_dispatch_t {
+struct DPP_EXPORT resumed_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -364,7 +364,7 @@ struct CoreExport resumed_t : public event_dispatch_t {
 };
 
 /** @brief Guild role create */
-struct CoreExport guild_role_create_t : public event_dispatch_t {
+struct DPP_EXPORT guild_role_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -375,7 +375,7 @@ struct CoreExport guild_role_create_t : public event_dispatch_t {
 };
 
 /** @brief Typing start */
-struct CoreExport typing_start_t : public event_dispatch_t {
+struct DPP_EXPORT typing_start_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -388,7 +388,7 @@ struct CoreExport typing_start_t : public event_dispatch_t {
 };
 
 /** @brief Voice state update */
-struct CoreExport voice_track_marker_t : public event_dispatch_t {
+struct DPP_EXPORT voice_track_marker_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on.
 	 * Will always be null.
@@ -404,7 +404,7 @@ struct CoreExport voice_track_marker_t : public event_dispatch_t {
 
 
 /** @brief Message reaction add */
-struct CoreExport message_reaction_add_t : public event_dispatch_t {
+struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -419,7 +419,7 @@ struct CoreExport message_reaction_add_t : public event_dispatch_t {
 };
 
 /** @brief Guild members chunk */
-struct CoreExport guild_members_chunk_t : public event_dispatch_t {
+struct DPP_EXPORT guild_members_chunk_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -430,7 +430,7 @@ struct CoreExport guild_members_chunk_t : public event_dispatch_t {
 };
 
 /** @brief Message reaction remove */
-struct CoreExport message_reaction_remove_t : public event_dispatch_t {
+struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -445,7 +445,7 @@ struct CoreExport message_reaction_remove_t : public event_dispatch_t {
 };
 
 /** @brief Create guild */
-struct CoreExport guild_create_t : public event_dispatch_t {
+struct DPP_EXPORT guild_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -455,7 +455,7 @@ struct CoreExport guild_create_t : public event_dispatch_t {
 };
 
 /** @brief Create channel */
-struct CoreExport channel_create_t : public event_dispatch_t {
+struct DPP_EXPORT channel_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -466,7 +466,7 @@ struct CoreExport channel_create_t : public event_dispatch_t {
 };
 
 /** @brief Message remove emoji */
-struct CoreExport message_reaction_remove_emoji_t : public event_dispatch_t {
+struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -479,7 +479,7 @@ struct CoreExport message_reaction_remove_emoji_t : public event_dispatch_t {
 };
 
 /** @brief Message delete bulk */
-struct CoreExport message_delete_bulk_t : public event_dispatch_t {
+struct DPP_EXPORT message_delete_bulk_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -492,7 +492,7 @@ struct CoreExport message_delete_bulk_t : public event_dispatch_t {
 };
 
 /** @brief Guild role update */
-struct CoreExport guild_role_update_t : public event_dispatch_t {
+struct DPP_EXPORT guild_role_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -503,7 +503,7 @@ struct CoreExport guild_role_update_t : public event_dispatch_t {
 };
 
 /** @brief Guild role delete */
-struct CoreExport guild_role_delete_t : public event_dispatch_t {
+struct DPP_EXPORT guild_role_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -514,7 +514,7 @@ struct CoreExport guild_role_delete_t : public event_dispatch_t {
 };
 
 /** @brief Channel pins update */
-struct CoreExport channel_pins_update_t : public event_dispatch_t {
+struct DPP_EXPORT channel_pins_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -526,7 +526,7 @@ struct CoreExport channel_pins_update_t : public event_dispatch_t {
 };
 
 /** @brief Message remove all reactions */
-struct CoreExport message_reaction_remove_all_t : public event_dispatch_t {
+struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -538,7 +538,7 @@ struct CoreExport message_reaction_remove_all_t : public event_dispatch_t {
 };
 
 /** @brief Voice server update */
-struct CoreExport voice_server_update_t : public event_dispatch_t {
+struct DPP_EXPORT voice_server_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -550,7 +550,7 @@ struct CoreExport voice_server_update_t : public event_dispatch_t {
 };
 
 /** @brief Guild emojis update */
-struct CoreExport guild_emojis_update_t : public event_dispatch_t {
+struct DPP_EXPORT guild_emojis_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -564,7 +564,7 @@ struct CoreExport guild_emojis_update_t : public event_dispatch_t {
  * @brief Presence update
  * 
  */
-struct CoreExport presence_update_t : public event_dispatch_t {
+struct DPP_EXPORT presence_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -574,7 +574,7 @@ struct CoreExport presence_update_t : public event_dispatch_t {
 };
 
 /** @brief Webhooks update */
-struct CoreExport webhooks_update_t : public event_dispatch_t {
+struct DPP_EXPORT webhooks_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -585,7 +585,7 @@ struct CoreExport webhooks_update_t : public event_dispatch_t {
 };
 
 /** @brief Guild member add */
-struct CoreExport guild_member_add_t : public event_dispatch_t {
+struct DPP_EXPORT guild_member_add_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -596,7 +596,7 @@ struct CoreExport guild_member_add_t : public event_dispatch_t {
 };
 
 /** @brief Invite delete */
-struct CoreExport invite_delete_t : public event_dispatch_t {
+struct DPP_EXPORT invite_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -606,7 +606,7 @@ struct CoreExport invite_delete_t : public event_dispatch_t {
 };
 
 /** @brief Guild update */
-struct CoreExport guild_update_t : public event_dispatch_t {
+struct DPP_EXPORT guild_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -616,7 +616,7 @@ struct CoreExport guild_update_t : public event_dispatch_t {
 };
 
 /** @brief Guild integrations update */
-struct CoreExport guild_integrations_update_t : public event_dispatch_t {
+struct DPP_EXPORT guild_integrations_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -626,7 +626,7 @@ struct CoreExport guild_integrations_update_t : public event_dispatch_t {
 };
 
 /** @brief Guild member update */
-struct CoreExport guild_member_update_t : public event_dispatch_t {
+struct DPP_EXPORT guild_member_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -640,7 +640,7 @@ struct CoreExport guild_member_update_t : public event_dispatch_t {
  * @brief Update application slash command
  * 
  */
-struct CoreExport application_command_update_t : public event_dispatch_t {
+struct DPP_EXPORT application_command_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -649,7 +649,7 @@ struct CoreExport application_command_update_t : public event_dispatch_t {
 };
 
 /** @brief Invite create */
-struct CoreExport invite_create_t : public event_dispatch_t {
+struct DPP_EXPORT invite_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -659,7 +659,7 @@ struct CoreExport invite_create_t : public event_dispatch_t {
 };
 
 /** @brief Message update */
-struct CoreExport message_update_t : public event_dispatch_t {
+struct DPP_EXPORT message_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -669,7 +669,7 @@ struct CoreExport message_update_t : public event_dispatch_t {
 };
 
 /* @brief User update */
-struct CoreExport user_update_t : public event_dispatch_t {
+struct DPP_EXPORT user_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -679,7 +679,7 @@ struct CoreExport user_update_t : public event_dispatch_t {
 };
 
 /** @brief Create message */
-struct CoreExport message_create_t : public event_dispatch_t {
+struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -689,7 +689,7 @@ struct CoreExport message_create_t : public event_dispatch_t {
 };
 
 /** @brief Guild ban add */
-struct CoreExport guild_ban_add_t : public event_dispatch_t {
+struct DPP_EXPORT guild_ban_add_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -700,7 +700,7 @@ struct CoreExport guild_ban_add_t : public event_dispatch_t {
 };
 
 /** @brief Guild ban remove */
-struct CoreExport guild_ban_remove_t : public event_dispatch_t {
+struct DPP_EXPORT guild_ban_remove_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -711,7 +711,7 @@ struct CoreExport guild_ban_remove_t : public event_dispatch_t {
 };
 
 /** @brief Integration create */
-struct CoreExport integration_create_t : public event_dispatch_t {
+struct DPP_EXPORT integration_create_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -721,7 +721,7 @@ struct CoreExport integration_create_t : public event_dispatch_t {
 };
 
 /** @brief Integration update */
-struct CoreExport integration_update_t : public event_dispatch_t {
+struct DPP_EXPORT integration_update_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -732,7 +732,7 @@ struct CoreExport integration_update_t : public event_dispatch_t {
 };
 
 /** @brief Integration delete */
-struct CoreExport integration_delete_t : public event_dispatch_t {
+struct DPP_EXPORT integration_delete_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -743,7 +743,7 @@ struct CoreExport integration_delete_t : public event_dispatch_t {
 };
 
 /** @brief Thread Create*/
-struct CoreExport thread_create_t : public event_dispatch_t {
+struct DPP_EXPORT thread_create_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -756,7 +756,7 @@ struct CoreExport thread_create_t : public event_dispatch_t {
 
 /** @brief Thread Update
 */
-struct CoreExport thread_update_t : public event_dispatch_t {
+struct DPP_EXPORT thread_update_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -769,7 +769,7 @@ struct CoreExport thread_update_t : public event_dispatch_t {
 
 /** @brief Thread Delete
  */
-struct CoreExport thread_delete_t : public event_dispatch_t {
+struct DPP_EXPORT thread_delete_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -782,7 +782,7 @@ struct CoreExport thread_delete_t : public event_dispatch_t {
 
 /** @brief Thread List Sync
  */
-struct CoreExport thread_list_sync_t : public event_dispatch_t {
+struct DPP_EXPORT thread_list_sync_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -796,7 +796,7 @@ struct CoreExport thread_list_sync_t : public event_dispatch_t {
 
 /** @brief Thread Member Update
  */
-struct CoreExport thread_member_update_t : public event_dispatch_t {
+struct DPP_EXPORT thread_member_update_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -808,7 +808,7 @@ struct CoreExport thread_member_update_t : public event_dispatch_t {
 
 /** @brief Thread Members Update
  */
-struct CoreExport thread_members_update_t : public event_dispatch_t {
+struct DPP_EXPORT thread_members_update_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -824,7 +824,7 @@ struct CoreExport thread_members_update_t : public event_dispatch_t {
 
 /** @brief voice buffer send
  */
-struct CoreExport voice_buffer_send_t : public event_dispatch_t {
+struct DPP_EXPORT voice_buffer_send_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -837,7 +837,7 @@ struct CoreExport voice_buffer_send_t : public event_dispatch_t {
 };
 
 /** @brief voice user talking */
-struct CoreExport voice_user_talking_t : public event_dispatch_t {
+struct DPP_EXPORT voice_user_talking_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -851,7 +851,7 @@ struct CoreExport voice_user_talking_t : public event_dispatch_t {
 };
 
 /** @brief voice user talking */
-struct CoreExport voice_ready_t : public event_dispatch_t {
+struct DPP_EXPORT voice_ready_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on
@@ -864,7 +864,7 @@ struct CoreExport voice_ready_t : public event_dispatch_t {
 };
 
 /** @brief voice receive packet */
-struct CoreExport voice_receive_t : public event_dispatch_t {
+struct DPP_EXPORT voice_receive_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on.
@@ -888,7 +888,7 @@ struct CoreExport voice_receive_t : public event_dispatch_t {
 };
 
 /** @brief voice client speaking event */
-struct CoreExport voice_client_speaking_t : public event_dispatch_t {
+struct DPP_EXPORT voice_client_speaking_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on.
@@ -902,7 +902,7 @@ struct CoreExport voice_client_speaking_t : public event_dispatch_t {
 };
 
 /** @brief voice client disconnect event */
-struct CoreExport voice_client_disconnect_t : public event_dispatch_t {
+struct DPP_EXPORT voice_client_disconnect_t : public event_dispatch_t {
 	/** 
 	 * @brief Constructor
 	 * @param client The shard the event originated on.
@@ -918,7 +918,7 @@ struct CoreExport voice_client_disconnect_t : public event_dispatch_t {
  * that the user code is interested in. These are modified via the on_eventname style
  * methods in the cluster class.
  */
-class CoreExport dispatcher {
+class DPP_EXPORT dispatcher {
 public:
 	/** @brief Event handler function pointer for log event
 	 * @param event Event parameters

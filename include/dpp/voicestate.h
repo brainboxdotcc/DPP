@@ -42,7 +42,7 @@ enum voicestate_flags {
  * These are stored in the dpp::guild object, and accessible there,
  * or via dpp::channel::get_voice_members
  */
-class CoreExport voicestate {
+class DPP_EXPORT voicestate {
 public:
 	class discord_client*	shard;		//!< Owning shard
 	snowflake		guild_id;       //!< Optional: the guild id this voice state is for
