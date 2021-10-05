@@ -38,7 +38,7 @@ namespace events {
 /**
  * @brief An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
  */
-class CoreExport event {
+class DPP_EXPORT event {
 public:
 	/** Pure virtual method for event handler code
 	 * @param client The creating shard

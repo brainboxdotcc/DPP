@@ -37,7 +37,7 @@ namespace dpp {
  * The Discord API provides both if a parameter is a user ping,
  * so we offer both in a combined structure.
  */
-struct CoreExport resolved_user {
+struct DPP_EXPORT resolved_user {
 	/**
 	 * @brief Holds user information
 	 */
@@ -75,7 +75,7 @@ enum parameter_type {
  * Note that for non-slash commands optional parameters can only be at the end of
  * the list of parameters.
  */
-struct CoreExport param_info {
+struct DPP_EXPORT param_info {
 
 	/**
 	 * @brief Type of parameter
@@ -133,7 +133,7 @@ typedef std::vector<std::pair<std::string, command_parameter>> parameter_list_t;
  * response facilities but we want this to be transparent if you use the command
  * handler class.
  */
-struct CoreExport command_source {
+struct DPP_EXPORT command_source {
 	/**
 	 * @brief Sending guild id
 	 */
@@ -165,7 +165,7 @@ typedef std::function<void(const std::string&, const parameter_list_t&, command_
 /**
  * @brief Represents the details of a command added to the command handler class.
  */
-struct CoreExport command_info_t {
+struct DPP_EXPORT command_info_t {
 	/**
 	 * @brief Function reference for the handler. This is std::function so it can represent
 	 * a class member, a lambda or a raw C function pointer.
@@ -186,7 +186,7 @@ struct CoreExport command_info_t {
  * @brief The commandhandler class represents a group of commands, prefixed or slash commands with handling functions.
  * 
  */
-class CoreExport commandhandler {
+class DPP_EXPORT commandhandler {
 private:
 	/**
 	 * @brief List of guild commands to bulk register

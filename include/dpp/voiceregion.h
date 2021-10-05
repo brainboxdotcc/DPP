@@ -38,7 +38,7 @@ enum voiceregion_flags {
 /**
  * @brief Represents a voice region on discord
  */
-class CoreExport voiceregion {
+class DPP_EXPORT voiceregion {
 public:
 	/**
 	 * @brief Voice server ID

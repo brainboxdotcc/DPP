@@ -67,17 +67,17 @@ Constants and macros should be all `UPPERCASE` with `SNAKE_CASE` to separate wor
 All comments should be in `doxygen` format (similar to javadoc). Please see existing class definitions for an example. You should use doxygen style comments in a class definition inside a header file, and can use any other comment types within the .cpp file. Be liberal with comments, especially if your code makes any assumptions!
 
 ## Symbol exporting
-If you export a class which is to be accessible to users, be sure to prefix it with the `CoreExport` macro, for example:
+If you export a class which is to be accessible to users, be sure to prefix it with the `DPP_EXPORT` macro, for example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-class CoreExport my_new_class {
+class DPP_EXPORT my_new_class {
 public:
 	int hats;
 	int clowns;
 };
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `CoreExport` macro ensures that on certain platforms (notably Windows) the symbol is exported to be available to the library user.
+The `DPP_EXPORT` macro ensures that on certain platforms (notably Windows) the symbol is exported to be available to the library user.
 
 ## Public vs private vs protected
 It is a design philosophy of D++ that everything possible in a class should be public, unless the user really does not need it (you should consider justifying in comments why) or user adjustment of the variable could badly break the functioning of the library. Avoid the use of accessors for setting/getting values in a class, except for bit fields, where you should provide accessors for setting and getting individual bits (for example, see `user.h`), or in the event you want to provide a "fluent" interface.
@@ -104,7 +104,7 @@ If a value will only hold values up to 255, use `uint8_t`. If a value cannot hol
 Where possible, if you are adding methods to a class you should consider fluent design. Fluent design is the use of class methods tha return a reference to self (via `return *this`), so that you can chain object method calls together (in the way `dpp::message` and `dpp::embed` do). For example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-class CoreExport my_new_class {
+class DPP_EXPORT my_new_class {
 public:
 	int hats;
 	int clowns;

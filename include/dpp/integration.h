@@ -55,7 +55,7 @@ enum integration_flags {
 /**
  * @brief An application that has been integrated
  */
-struct CoreExport integration_app {
+struct DPP_EXPORT integration_app {
 	/// Inegration id
 	snowflake id;
 	/// Name
@@ -71,7 +71,7 @@ struct CoreExport integration_app {
 };
 
 /** Represents an integration within a dpp::guild */
-class CoreExport integration : public managed {
+class DPP_EXPORT integration : public managed {
 public:
 	/** Integration name */
 	std::string name;

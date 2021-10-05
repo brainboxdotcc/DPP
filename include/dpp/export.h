@@ -26,17 +26,17 @@
 
 #ifdef DPP_BUILD
 	#ifdef _WIN32
-		#define CoreExport __declspec(dllexport)
+		#define DPP_EXPORT __declspec(dllexport)
 	#else
-		#define CoreExport
+		#define DPP_EXPORT
 	#endif
 #else
 	#ifdef _WIN32
-		#define CoreExport __declspec(dllimport)
+		#define DPP_EXPORT __declspec(dllimport)
 		/* This is required otherwise fmt::format requires additional file linkage to your project */
 		#define FMT_HEADER_ONLY
 	#else
-		#define CoreExport
+		#define DPP_EXPORT
 	#endif
 #endif
 

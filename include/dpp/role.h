@@ -80,7 +80,7 @@ enum role_permissions : uint64_t {
 /**
  * @brief Represents a role within a dpp::guild
  */
-class CoreExport role : public managed {
+class DPP_EXPORT role : public managed {
 public:
 	/** Role name */
 	std::string name;

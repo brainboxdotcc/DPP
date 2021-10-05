@@ -70,7 +70,7 @@ typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, doub
  * meaning it can hold different potential types (see dpp::command_value)
  * that you can retrieve with std::get().
  */
-struct CoreExport command_option_choice {
+struct DPP_EXPORT command_option_choice {
 	std::string name;	//!< Option name (1-32 chars)
 	command_value value;	//!< Option value
 
@@ -106,7 +106,7 @@ void to_json(nlohmann::json& j, const command_option_choice& choice);
  * Adding options acts like sub-commands and can contain more
  * options.
  */
-struct CoreExport command_option {
+struct DPP_EXPORT command_option {
 	command_option_type type;                    //!< Option type (what type of value is accepted)
 	std::string name;                            //!< Option name (1-32 chars)
 	std::string description;                     //!< Option description (1-100 chars)
@@ -179,7 +179,7 @@ enum interaction_response_type {
  *
  * `mymessage.flags |= dpp::m_ephemeral;`
  */
-struct CoreExport interaction_response {
+struct DPP_EXPORT interaction_response {
 
 	/**
 	 * @brief Response type from dpp::interaction_response_type.
@@ -232,7 +232,7 @@ struct CoreExport interaction_response {
 /**
  * @brief Resolved snowflake ids to users, guild members, roles and channels.
  */
-struct CoreExport command_resolved {
+struct DPP_EXPORT command_resolved {
 	/**
 	 * @brief Resolved users
 	 */
@@ -256,7 +256,7 @@ struct CoreExport command_resolved {
  * These are the values specified by the user when actually issuing
  * the command on a channel or in DM.
  */
-struct CoreExport command_data_option {
+struct DPP_EXPORT command_data_option {
 	std::string name;                          //!< the name of the parameter
 	command_option_type type;                  //!< value of ApplicationCommandOptionType
 	command_value value;                       //!< Optional: the value of the pair
@@ -287,7 +287,7 @@ enum interaction_type {
  * This subobject represents the application command associated
  * with the interaction.
  */
-struct CoreExport command_interaction {
+struct DPP_EXPORT command_interaction {
 	snowflake id;                              //!< the ID of the invoked command
 	std::string name;                          //!< the name of the invoked command
 	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
@@ -311,7 +311,7 @@ enum component_type_t {
 /**
  * @brief A button click for a button component
  */
-struct CoreExport component_interaction {
+struct DPP_EXPORT component_interaction {
 	uint8_t component_type;
 	std::string custom_id;
 	std::vector<std::string> values;
@@ -331,7 +331,7 @@ void from_json(const nlohmann::json& j, component_interaction& bi);
  * @brief An interaction represents a user running a command and arrives
  * via the dpp::cluster::on_interaction_create event.
  */
-class CoreExport interaction : public managed {
+class DPP_EXPORT interaction : public managed {
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
 	uint8_t	type;                                               //!< the type of interaction
@@ -384,7 +384,7 @@ enum command_permission_type {
  * @brief Application command permissions allow you to enable or
  * disable commands for specific users or roles within a guild
  */
-class CoreExport command_permission {
+class DPP_EXPORT command_permission {
 public:
 	snowflake id;                  //!< the ID of the role or uses
 	command_permission_type type;  //!< the type of permission
@@ -404,7 +404,7 @@ void to_json(nlohmann::json& j, const command_permission& cp);
 /**
  * @brief Returned when fetching the permissions for a command in a guild.
  */
-class CoreExport guild_command_permissions {
+class DPP_EXPORT guild_command_permissions {
 public:
 	snowflake id;                                 //!< the id of the command
 	snowflake application_id;                     //!< the id of the application the command belongs to
@@ -433,7 +433,7 @@ enum slashcommand_contextmenu_type {
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
  */
-class CoreExport slashcommand : public managed {
+class DPP_EXPORT slashcommand : public managed {
 public:
 	/**
 	 * @brief Application id (usually matches your bots id)

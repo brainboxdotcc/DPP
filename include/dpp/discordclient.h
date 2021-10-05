@@ -56,7 +56,7 @@ class zlibcontext;
  * A client can only connect to one voice channel per guild at a time, so these are stored in a map
  * in the dpp::discord_client keyed by guild_id.
  */
-class CoreExport voiceconn {
+class DPP_EXPORT voiceconn {
 	/**
 	 * @brief Owning dpp::discord_client instance
 	 */
@@ -135,7 +135,7 @@ public:
 };
 
 /** @brief Implements a discord client. Each discord_client connects to one shard and derives from a websocket client. */
-class CoreExport discord_client : public websocket_client
+class DPP_EXPORT discord_client : public websocket_client
 {
 protected:
 	friend class dpp::events::voice_state_update;

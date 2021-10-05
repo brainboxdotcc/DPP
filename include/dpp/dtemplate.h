@@ -28,7 +28,7 @@ namespace dpp {
 /**
  * @brief Represents a guild template
  */
-class CoreExport dtemplate {
+class DPP_EXPORT dtemplate {
 public:	
 	/**
 	 * @brief Template code
