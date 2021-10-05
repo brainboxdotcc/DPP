@@ -310,11 +310,6 @@ public:
 	 */
 	component& fill_from_json(nlohmann::json* j);
 
-	/** Build JSON from this object.
-	 * @return The JSON text of the invite
-	 */
-	std::string build_json() const;
-
 };
 
 /**
