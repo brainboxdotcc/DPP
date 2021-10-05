@@ -611,8 +611,8 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		json n;
 		n["type"] = cot_action_row;
 		n["components"] = {};
-		json sn;
 		for (auto & subcomponent  : component.components) {
+			json sn;
 			if (subcomponent.type == cot_button) {
 				sn["type"] = subcomponent.type;
 				sn["label"] = subcomponent.label;

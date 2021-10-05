@@ -13,9 +13,22 @@ int main()
 	dpp::cluster bot(configdocument["token"]);
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-		bot.request("https://brainbox.cc/robots.txt", dpp::m_get, [&bot](const dpp::http_request_completion_t& rv) {
-			std::cout << rv.status << rv.body << "\n";
-		});
+		bot.message_create(
+			dpp::message(847003255708188682, "A message.").add_component(
+				dpp::component().add_component(
+				dpp::component().set_label("A Button").
+				set_type(dpp::cot_button).
+				set_emoji("📦").
+				set_style(dpp::cos_danger).
+				set_id("myid")
+				).add_component(
+				dpp::component().set_label("Another Button").
+				set_type(dpp::cot_button).
+				set_style(dpp::cos_primary).
+				set_id("234")
+				)
+			)
+		);
 	});
 
 	bot.start(false);
