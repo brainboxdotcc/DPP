@@ -11,7 +11,7 @@ file_put_contents("header.html", $header);
 chdir("..");
 system("/usr/local/bin/doxygen");
 system("cp -r docs/* ~/dpp-web/");
-system("cd ~/dpp-web");
+chdir("~/dpp-web");
 system("git add -A");
 system("git commit -a -m \"automatic commit\"");
 system("git push");
