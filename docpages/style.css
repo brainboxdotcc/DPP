@@ -5,7 +5,8 @@ img {
 
 select[name=vsv] {
 	background: none;
-	border: 1px solid #8a8a8a;
+	border: 1px solid var(--primary-dark-color);
+	color: var(--primary-dark-color);
 	border-radius: 6px;
 	padding: 5px;
 	margin-left: 1rem;
