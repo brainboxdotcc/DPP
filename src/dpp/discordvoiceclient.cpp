@@ -176,12 +176,12 @@ int discord_voice_client::UDPSend(const char* data, size_t length)
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(this->port);
 	servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-	return sendto(fd, data, (int)length, 0, (const sockaddr*)&servaddr, (int)sizeof(sockaddr_in));
+	return sendto(this->fd, data, (int)length, 0, (const sockaddr*)&servaddr, (int)sizeof(sockaddr_in));
 }
 
 int discord_voice_client::UDPRecv(char* data, size_t max_length)
 {
-	return recv(fd, data, (int)max_length, 0);
+	return recv(this->fd, data, (int)max_length, 0);
 }
 
 bool discord_voice_client::HandleFrame(const std::string &data)
