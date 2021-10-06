@@ -30,17 +30,20 @@ $tags = explode("\n", shell_exec("git tag"));
 system("rm -rf " . sys_get_temp_dir() . "/dpp-old");
 mkdir(sys_get_temp_dir() . "/dpp-old");
 chdir(sys_get_temp_dir() . "/dpp-old");
-system("git clone https://github.com/brainboxdotcc/DPP.git");
-chdir("DPP");
 foreach ($tags as $tag) {
-	echo "TAG: $tag\n";
 	$orig_tag = $tag;
 	$tag = preg_replace("/^v/", "", $tag);
 	if (!empty($tag)) {
-	print "Generate $orig_tag docs (https://dpp.dev/$tag/)\n";
+		print "Generate $orig_tag docs (https://dpp.dev/$tag/)\n";
+		system("git clone https://github.com/brainboxdotcc/DPP.git");
+		chdir("DPP");
 		system("git checkout tags/$orig_tag");
+		system("cp -rv " . getenv("HOME") . "/D++/docpages/* docpages/");
+		system("cp -rv " . getenv("HOME") . "/D++/Doxyfile Doxyfile");
 		shell_exec("/usr/local/bin/doxygen");
 		system("cp -r docs/* " . getenv("HOME") . "/dpp-web/$tag");
+		chdir("..");
+		system("rm -rf " . sys_get_temp_dir() . "/dpp-old/DPP");
 	}
 }
 

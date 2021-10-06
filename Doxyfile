@@ -24,6 +24,9 @@
 # for the list of possible encodings.
 # The default value is: UTF-8.
 
+QUIET = YES
+WARNINGS = NO
+
 DOXYFILE_ENCODING      = UTF-8
 
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded by
