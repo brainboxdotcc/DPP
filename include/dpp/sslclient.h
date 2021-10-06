@@ -39,7 +39,7 @@ class opensslcontext;
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
  */
-class CoreExport ssl_client
+class DPP_EXPORT ssl_client
 {
 protected:
 	/** Input buffer received from openssl */

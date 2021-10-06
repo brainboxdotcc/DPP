@@ -38,7 +38,7 @@ namespace dpp {
 	/** @brief The managed class is the base class for various types that can
 	 * be stored in a cache that are identified by a dpp::snowflake id
 	 */
-	class CoreExport managed {
+	class DPP_EXPORT managed {
 	public:
 		/** Unique ID of object */
 		snowflake id;
@@ -93,21 +93,21 @@ namespace dpp {
 		 * @param parameters Command line parameters. Each will be escaped using std::quoted.
 		 * @param callback The callback to call on completion.
 		 */
-		void CoreExport exec(const std::string& cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
+		void DPP_EXPORT exec(const std::string& cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
 
 		/**
 		 * @brief Returns urrent date and time
 		 * 
 		 * @return std::string Current date and time
 		 */
-		std::string CoreExport current_date_time();
+		std::string DPP_EXPORT current_date_time();
 		/**
 		 * @brief Convert a dpp::loglevel enum value to a string
 		 * 
 		 * @param in log level to convert
 		 * @return std::string string form of log level
 		 */
-		std::string CoreExport loglevel(dpp::loglevel in);
+		std::string DPP_EXPORT loglevel(dpp::loglevel in);
 
 		/**
 		 * @brief Store a 128 bit icon hash (profile picture, server icon etc)
@@ -115,7 +115,7 @@ namespace dpp {
 		 * Has a constructor to build one from a string, and a method to fetch
 		 * the value back in string form.
 		 */
-		struct CoreExport iconhash {
+		struct DPP_EXPORT iconhash {
 
 			uint64_t first;		//!< High 64 bits
 			uint64_t second;	//!< Low 64 bits
@@ -173,14 +173,14 @@ namespace dpp {
 		 * 
 		 * @return double time with fractional seconds
 		 */
-		double CoreExport time_f();
+		double DPP_EXPORT time_f();
 
 		/**
 		 * @brief Returns true if D++ was built with voice support
 		 * 
 		 * @return bool True if voice support is compiled in (libsodium/libopus) 
 		 */
-		bool CoreExport has_voice();
+		bool DPP_EXPORT has_voice();
 
 		/**
 		 * @brief Convert a byte count to display value
@@ -188,14 +188,14 @@ namespace dpp {
 		 * @param c number of bytes
 		 * @return std::string display value suffixed with M, G, T where necessary
 		 */
-		std::string CoreExport bytes(uint64_t c);
+		std::string DPP_EXPORT bytes(uint64_t c);
 
 		/**
 		 * @brief A class used to represent an uptime in hours, minutes,
 		 * seconds and days, with helper functions to convert from time_t
 		 * and display as a string.
 		 */
-		struct CoreExport uptime {
+		struct DPP_EXPORT uptime {
 			uint16_t days;	//!< Number of days
 			uint8_t hours;	//!< Number of hours
 			uint8_t mins;	//!< Number of minutes
@@ -241,7 +241,7 @@ namespace dpp {
 		 * @param data The start of the data to display
 		 * @param length The length of data to display
 		 */
-		void CoreExport debug_dump(uint8_t* data, size_t length);
+		void DPP_EXPORT debug_dump(uint8_t* data, size_t length);
 
 		/**
 		 * @brief Returns the length of a UTF-8 string in codepoints
@@ -249,7 +249,7 @@ namespace dpp {
 		 * @param str string to count length of
 		 * @return size_t length of string (0 for invalid utf8)
 		 */
-		size_t CoreExport utf8len(const std::string &str);
+		size_t DPP_EXPORT utf8len(const std::string &str);
 
 		/**
 		 * @brief Return substring of a UTF-8 encoded string in codepoints
@@ -259,7 +259,7 @@ namespace dpp {
 		 * @param length length in codepoints
 		 * @return std::string Substring in UTF-8 or empty string if invalid UTF-8 passed in
 		 */
-		std::string CoreExport utf8substr(const std::string& str, std::string::size_type start, std::string::size_type length);
+		std::string DPP_EXPORT utf8substr(const std::string& str, std::string::size_type start, std::string::size_type length);
 	};
 
 };

@@ -30,7 +30,7 @@ namespace dpp {
  * @brief The ban class represents a ban on a guild.
  * 
  */
-class CoreExport ban {
+class DPP_EXPORT ban {
 public:
 	/** The ban reason */
 	std::string reason;

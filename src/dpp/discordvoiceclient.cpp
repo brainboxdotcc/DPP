@@ -230,17 +230,19 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 			{
 				if (j.find("d") != j.end() 
 					&& j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()
-					&& j["d"].find("ssrc") != j["d"].end() && !j["d"]["ssrc"].is_null()) 
+					&& j["d"].find("ssrc") != j["d"].end() && !j["d"]["ssrc"].is_null() && j["d"]["ssrc"].is_number_integer()) 
 				{
 					uint32_t u_ssrc = j["d"]["ssrc"].get<uint32_t>();
 					snowflake u_id = SnowflakeNotNull(&j["d"], "user_id");
 					ssrcMap[u_ssrc] = u_id;
-					
-					voice_client_speaking_t vcs(nullptr, data);
-					vcs.voice_client = this;
-					vcs.user_id = u_id;
-					vcs.ssrc = u_ssrc;
-					creator->dispatch.voice_client_speaking(vcs);
+
+					if (creator->dispatch.voice_client_speaking) {
+						voice_client_speaking_t vcs(nullptr, data);
+						vcs.voice_client = this;
+						vcs.user_id = u_id;
+						vcs.ssrc = u_ssrc;
+						creator->dispatch.voice_client_speaking(vcs);
+					}
 				}
 			}
 			break;

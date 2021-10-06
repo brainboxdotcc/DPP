@@ -127,7 +127,7 @@ enum activity_flags {
 /**
  * @brief An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
  */
-class CoreExport activity {
+class DPP_EXPORT activity {
 public:
 	/** Name of ativity
 	 * e.g. "Fortnite"
@@ -177,7 +177,7 @@ public:
 /**
  * @brief Represents user presence, e.g. what game they are playing and if they are online
  */
-class CoreExport presence {
+class DPP_EXPORT presence {
 public:
 	/** The user the presence applies to */
 	snowflake	user_id;

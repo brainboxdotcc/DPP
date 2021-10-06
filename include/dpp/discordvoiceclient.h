@@ -68,7 +68,7 @@ namespace dpp {
 // Forward declaration
 class cluster;
 
-struct CoreExport voice_out_packet {
+struct DPP_EXPORT voice_out_packet {
 	/** 
 	 * @brief Each string is a UDP packet.
 	 * Generally these will be RTP.
@@ -85,7 +85,7 @@ struct CoreExport voice_out_packet {
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
  */
-class CoreExport discord_voice_client : public websocket_client
+class DPP_EXPORT discord_voice_client : public websocket_client
 {
 	/** Mutex for outbound packet stream */
 	std::mutex stream_mutex;

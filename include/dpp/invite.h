@@ -28,7 +28,7 @@ namespace dpp {
 /**
  * @brief Represents an invite to a discord guild or channel
  */
-class CoreExport invite {
+class DPP_EXPORT invite {
 public:
 	/** Invite code
 	 */

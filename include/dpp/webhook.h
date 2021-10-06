@@ -36,7 +36,7 @@ enum webhook_type {
 /**
  * @brief Represents a discord webhook
  */
-class CoreExport webhook : public managed {
+class DPP_EXPORT webhook : public managed {
 public:
 	uint8_t type;   		//!< the type of the webhook
 	snowflake guild_id;     	//!< Optional: the guild id this webhook is for
