@@ -1,4 +1,3 @@
-#include <dpp/discord.h>
 /************************************************************************************
  *
  * D++, A Lightweight C++ library for Discord
@@ -19,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/discord.h>
 #include <dpp/event.h>
 #include <string>
 #include <iostream>
