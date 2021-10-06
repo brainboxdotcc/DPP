@@ -27,12 +27,6 @@ $extrastylesheet
 <script>
 	setTimeout(function() {
 		$("#main-menu").html($("#main-menu").html() + "<li><select name='vsv' onchange='window.location.href=this.options[this.selectedIndex].value'>##VERSION_OPTIONS##</select></li>");
-		var v = window.location.pathname.split("/")[1];
-		if (v.substring(0, 1) == 'v') {
-			$("select[name=vsv]").val(window.location.pathname.split("/")[1]);
-		} else {
-			$("select[name=vsv]").val("/");
-		}
 	}, 500);
 </script>
 <!--BEGIN TITLEAREA-->

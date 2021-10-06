@@ -3,6 +3,11 @@ img {
 	max-height: auto;
 }
 
+object[data="DPP_Architecture.svg"] {
+	max-width: 100% !important;
+	max-height: auto;
+}
+
 select[name=vsv] {
 	background: none;
 	border: 1px solid var(--primary-dark-color);

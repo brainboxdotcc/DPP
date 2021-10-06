@@ -35,11 +35,24 @@ foreach ($tags as $tag) {
 	$tag = preg_replace("/^v/", "", $tag);
 	if (!empty($tag)) {
 		print "Generate $orig_tag docs (https://dpp.dev/$tag/)\n";
-		system("git clone https://github.com/brainboxdotcc/DPP.git");
+		system("git clone --recursive https://github.com/brainboxdotcc/DPP.git");
 		chdir("DPP");
 		system("git checkout tags/$orig_tag");
-		system("cp -rv " . getenv("HOME") . "/D++/docpages/* docpages/");
-		system("cp -rv " . getenv("HOME") . "/D++/Doxyfile Doxyfile");
+		/* Older versions of the docs before 9.0.7 don't have these. Force them into the tree so old verisons get current styling */
+		system("cp -rv " . getenv("HOME") . "/D++/docpages/images docpages");
+		system("cp -rv " . getenv("HOME") . "/D++/docpages/style.css docpages/style.css");
+		system("cp -rv " . getenv("HOME") . "/D++/docpages/*.html docpages/");
+		system("cp -rv " . getenv("HOME") . "/D++/doxygen-awesome-css doxygen-awesome-css");
+		/* Always make sure that the version is using the latest doxygen,
+		 * but rewrite version number (project number)
+		 */
+		$doxy = file_get_contents(getenv("HOME") . "/D++/Doxyfile");
+		$doxy = str_replace("PROJECT_NUMBER         =", "PROJECT_NUMBER         = $tag", $doxy);
+		file_put_contents("Doxyfile", $doxy);
+		/* Rewrite selected version number so that each page has a new default selected in the drop down */
+		$hdr = file_get_contents(getenv("HOME") . "/D++/docpages/header.html");
+		$hdr = str_replace("option value='/$tag/'", "option selected value='/$tag/'", $hdr);
+		file_put_contents("docpages/header.html", $hdr);		
 		shell_exec("/usr/local/bin/doxygen");
 		system("cp -r docs/* " . getenv("HOME") . "/dpp-web/$tag");
 		chdir("..");
