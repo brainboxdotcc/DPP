@@ -1,6 +1,8 @@
 #undef DPP_BUILD
+
+_Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
+
 #include <dpp/dpp.h>
-#include <dpp/fmt/format.h>
 #include <dpp/nlohmann/json.hpp>
  
 using json = nlohmann::json;

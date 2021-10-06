@@ -780,7 +780,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			try {
 				snowflake rid = std::stoull(static_cast<const std::string&>(m));
 				mention_roles.push_back(rid);
-			} catch (const std::exception& c) {}
+			} catch (const std::exception&) {}
 		}
 	}
 	if (d->find("mention_channels") != d->end()) {

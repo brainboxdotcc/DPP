@@ -25,7 +25,7 @@
 namespace dpp {
 
 /** Various flags related to dpp::role */
-enum role_flags {
+enum role_flags : uint8_t {
 	r_hoist =		0b00000001, //!< Hoisted role
 	r_managed =		0b00000010, //!< Managed role (introduced by a bot or application)
 	r_mentionable =		0b00000100, //!< Mentionable with a ping

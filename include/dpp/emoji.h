@@ -30,7 +30,7 @@ namespace dpp {
 /**
  * @brief Flags for dpp::emoji
  */
-enum emoji_flags {
+enum emoji_flags : uint8_t {
 	/// Emoji requires colons
 	e_require_colons = 0b00000001,
 	/// Managed (introduced by application)

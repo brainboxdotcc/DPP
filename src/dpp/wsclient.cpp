@@ -26,8 +26,8 @@
 
 namespace dpp {
 
-const unsigned char WS_MASKBIT = (1 << 7);
-const unsigned char WS_FINBIT = (1 << 7);
+const unsigned char WS_MASKBIT = (1u << 7u);
+const unsigned char WS_FINBIT = (1u << 7u);
 const unsigned char WS_PAYLOAD_LENGTH_MAGIC_LARGE = 126;
 const unsigned char WS_PAYLOAD_LENGTH_MAGIC_HUGE = 127;
 const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
@@ -80,7 +80,7 @@ size_t websocket_client::FillHeader(unsigned char* outbuf, size_t sendlength, ws
 
 	if (sendlength <= WS_MAX_PAYLOAD_LENGTH_SMALL)
 	{
-		outbuf[pos++] = sendlength;
+		outbuf[pos++] = (unsigned int)sendlength;
 	}
 	else if (sendlength <= WS_MAX_PAYLOAD_LENGTH_LARGE)
 	{
