@@ -389,14 +389,14 @@ public:
 	/**
 	 * @brief on voice client disconnect event
 	 *
-	 * @param _voice_state_update User function to attach to event
+	 * @param _voice_client_disconnect User function to attach to event
 	 */
 	void on_voice_client_disconnect (std::function<void(const voice_client_disconnect_t& _event)> _voice_client_disconnect);
 
 	/**
 	 * @brief on voice client speaking event
 	 *
-	 * @param _voice_state_update User function to attach to event
+	 * @param _voice_client_speaking User function to attach to event
 	 */
 	void on_voice_client_speaking (std::function<void(const voice_client_speaking_t& _event)> _voice_client_speaking);
 
@@ -1452,6 +1452,7 @@ public:
 	 * @param guild_id Guild ID to search in
 	 * @param query Query string to match username(s) and nickname(s) against
 	 * @param limit max number of members to return (1-1000)
+	 * @param callback Function to call when the API call completes.
 	 */
 	void guild_search_members(snowflake guild_id, const std::string& query, uint16_t limit, command_completion_event_t callback);
 
