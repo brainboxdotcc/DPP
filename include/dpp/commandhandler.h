@@ -298,7 +298,7 @@ public:
 	 * 
 	 * @param msg message to parse
 	 */
-	void route(const class dpp::message& msg);
+	void route(const dpp::message& msg);
 
 	/**
 	 * @brief Route a command from the on_interaction_create function.
@@ -307,7 +307,7 @@ public:
 	 * 
 	 * @param event command interaction event to parse
 	 */
-	void route(const class interaction_create_t & event);
+	void route(const struct interaction_create_t & event);
 
 	/**
 	 * @brief Reply to a command.
