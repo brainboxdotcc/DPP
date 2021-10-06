@@ -98,11 +98,11 @@ role& role::load_image(const std::string &image_blob, const image_type type) {
 		{ i_jpg, "image/jpeg" },
 		{ i_png, "image/png" }
 	};
-	if (image_data) {
-		/* If there's already image data defined, free the old data, to prevent a memory leak */
-		delete image_data;
-	}
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length()));
+
+	/* If there's already image data defined, free the old data, to prevent a memory leak */
+	delete image_data;
+
+	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length()));
 
 	return *this;
 }

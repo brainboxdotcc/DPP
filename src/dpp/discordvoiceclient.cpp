@@ -67,7 +67,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	channel_id(_channel_id),
 	server_id(_server_id),
 	token(_token),
-	last_heartbeat(time(NULL)),
+	last_heartbeat(time(nullptr)),
 	heartbeat_interval(0),
 	sessionid(_session_id),
 	runner(nullptr),
@@ -176,12 +176,12 @@ int discord_voice_client::UDPSend(const char* data, size_t length)
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(this->port);
 	servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-	return sendto(this->fd, data, length, 0, (const struct sockaddr*)&servaddr, sizeof(sockaddr_in));
+	return sendto(this->fd, data, (int)length, 0, (const sockaddr*)&servaddr, (int)sizeof(sockaddr_in));
 }
 
 int discord_voice_client::UDPRecv(char* data, size_t max_length)
 {
-	return recv(this->fd, data, max_length, 0);
+	return recv(this->fd, data, (int)max_length, 0);
 }
 
 bool discord_voice_client::HandleFrame(const std::string &data)
@@ -256,7 +256,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					this->heartbeat_interval = j["d"]["heartbeat_interval"].get<uint32_t>();
 				}
 
-				if (modes.size()) {
+				if (!modes.empty()) {
 					log(dpp::ll_debug, "Resuming voice session...");
 						json obj = {
 						{ "op", 7 },
@@ -286,7 +286,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					};
 					this->write(obj.dump());
 				}
-				this->connect_time = time(NULL);
+				this->connect_time = time(nullptr);
 			}
 			break;
 			/* Session description */
@@ -329,8 +329,8 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 
 				external_ip = discover_ip();
 
-				int newfd = -1;
-				if ((newfd = socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
+				int newfd;
+				if ((newfd = (int)socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
 
 					sockaddr_in servaddr;
 					memset(&servaddr, 0, sizeof(sockaddr_in));
@@ -338,7 +338,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 					servaddr.sin_port = htons(0);
 
-					if (bind(newfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
+					if (bind(newfd, (sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
 						throw dpp::exception("Can't bind() client UDP socket");
 					}
 					
@@ -363,9 +363,9 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					this->custom_readable_ready = std::bind(&discord_voice_client::ReadReady, this);
 
 					int bound_port = 0;
-					struct sockaddr_in sin;
+					sockaddr_in sin;
 					socklen_t len = sizeof(sin);
-					if (getsockname(this->fd, (struct sockaddr *)&sin, &len) > -1) {
+					if (getsockname(this->fd, (sockaddr *)&sin, &len) > -1) {
 						bound_port = ntohs(sin.sin_port);
 					}
 
@@ -404,8 +404,8 @@ float discord_voice_client::get_secs_remaining() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	float ret = 0;
 
-	for (auto packet : outbuf)
-		ret += packet.duration * (timescale / 1000000000.0);
+	for (const auto& packet : outbuf)
+		ret += packet.duration * (timescale / 1000000000.0f);
 
 	return ret;
 }
@@ -475,14 +475,14 @@ void discord_voice_client::ReadReady()
 			offset++;
 			if (byte == 0) 
 				continue;
-			offset += 1 + (byte >> 4);
+			offset += 1 + (byte >> 4u);
 		}
 		uint8_t byte = packet[offset];
 		if (byte == 0x00 || byte == 0x02) offset++;
 
 		/* We're left with the decrypted opus packet */
 		packet = packet + offset;
-		packet_len -= offset;
+		packet_len -= (uint32_t)offset;
 
 		if (decode_voice_recv)
 		{
@@ -537,7 +537,7 @@ void discord_voice_client::WriteReady()
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (creator->dispatch.voice_buffer_send) {
 			voice_buffer_send_t snd(nullptr, "");
-			snd.buffer_size = bufsize;
+			snd.buffer_size = (int)bufsize;
 			snd.voice_client = this;
 			creator->dispatch.voice_buffer_send(snd);
 		}
@@ -548,7 +548,7 @@ void discord_voice_client::WriteReady()
 			vtm.voice_client = this;
 			{
 				std::lock_guard<std::mutex> lock(this->stream_mutex);
-				if (track_meta.size()) {
+				if (!track_meta.empty()) {
 					vtm.track_meta = track_meta[0];
 					track_meta.erase(track_meta.begin());
 				}
@@ -560,7 +560,7 @@ void discord_voice_client::WriteReady()
 
 dpp::utility::uptime discord_voice_client::get_uptime()
 {
-	return dpp::utility::uptime(time(NULL) - connect_time);
+	return dpp::utility::uptime(time(nullptr) - connect_time);
 }
 
 bool discord_voice_client::is_connected()
@@ -570,15 +570,15 @@ bool discord_voice_client::is_connected()
 
 int discord_voice_client::WantWrite() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	if (!this->paused && outbuf.size()) {
-		return fd;
+	if (!this->paused && !outbuf.empty()) {
+		return (int)fd;
 	} else {
 		return -1;
 	}
 }
 
 int discord_voice_client::WantRead() {
-	return fd;
+	return (int)fd;
 }
 
 void discord_voice_client::Error(uint32_t errorcode)
@@ -667,7 +667,7 @@ void discord_voice_client::one_second_timer()
 	}
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 	if (this->GetState() == CONNECTED) {
-		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
+		for (int x = 0; x < (time(nullptr) % 2) + 1; ++x) {
 			std::lock_guard<std::mutex> locker(queue_mutex);
 			if (message_queue.size()) {
 				std::string message = message_queue.front();
@@ -678,9 +678,9 @@ void discord_voice_client::one_second_timer()
 
 		if (this->heartbeat_interval) {
 			/* Check if we're due to emit a heartbeat */
-			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
+			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 				QueueMessage(json({{"op", 3}, {"d", rand()}}).dump(), true);
-				last_heartbeat = time(NULL);
+				last_heartbeat = time(nullptr);
 			}
 		}
 	}
@@ -795,7 +795,7 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 
 	}
 
-	opus_int32 encodedAudioMaxLength = length;
+	opus_int32 encodedAudioMaxLength = (opus_int32)length;
 	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
 	size_t encodedAudioLength = encodedAudioMaxLength;
 
@@ -808,7 +808,7 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 
 discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
 #if HAVE_VOICE
-	int samples = opus_packet_get_nb_samples(opus_packet, length, 48000);
+	int samples = opus_packet_get_nb_samples(opus_packet, (opus_int32)length, 48000);
 	uint64_t duration = (samples / 48) / (timescale / 1000000);
 	send_audio_opus(opus_packet, length, duration);
 #endif
@@ -817,8 +817,8 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
 #if HAVE_VOICE
-	int frameSize = 48 * duration * (timescale / 1000000);
-	opus_int32 encodedAudioMaxLength = length;
+	int frameSize = (int)(48 * duration * (timescale / 1000000));
+	opus_int32 encodedAudioMaxLength = (opus_int32)length;
 	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
 	size_t encodedAudioLength = encodedAudioMaxLength;
 
@@ -829,7 +829,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	++sequence;
 	const int headerSize = 12;
 	const int nonceSize = 24;
-	rtp_header header(sequence, timestamp, ssrc);
+	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
 
 	int8_t nonce[nonceSize];
 	std::memcpy(nonce, &header, sizeof(header));
@@ -877,7 +877,7 @@ std::string discord_voice_client::discover_ip() {
 	unsigned char packet[74] = { 0 };
 	(*(uint16_t*)(packet)) = htons(0x01);
 	(*(uint16_t*)(packet + 2)) = htons(70);
-	(*(uint32_t*)(packet + 4)) = htonl(this->ssrc);
+	(*(uint32_t*)(packet + 4)) = htonl((uint32_t)this->ssrc);
 	if ((newfd = socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
 		sockaddr_in servaddr;
 		socklen_t sl = sizeof(servaddr);
@@ -885,7 +885,7 @@ std::string discord_voice_client::discover_ip() {
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 		servaddr.sin_port = htons(0);
-		if (bind(newfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
+		if (bind(newfd, (sockaddr*)&servaddr, sizeof(servaddr)) < 0) {
 			log(ll_warning, "Could not bind socket for IP discovery");
 			return "";
 		}
@@ -893,7 +893,7 @@ std::string discord_voice_client::discover_ip() {
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_port = htons(this->port);
 		servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-		if (::connect(newfd, (const struct sockaddr*)&servaddr, sizeof(sockaddr_in)) < 0) {
+		if (::connect(newfd, (const sockaddr*)&servaddr, sizeof(sockaddr_in)) < 0) {
 			log(ll_warning, "Could not connect socket for IP discovery");
 			return "";
 		}

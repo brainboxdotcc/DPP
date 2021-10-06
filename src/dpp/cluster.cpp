@@ -28,6 +28,7 @@
 #include <chrono>
 #include <iostream>
 #include <dpp/nlohmann/json.hpp>
+#include <utility>
 #include <dpp/fmt/format.h>
 
 namespace dpp {
@@ -82,7 +83,7 @@ bool confirmation_callback_t::is_error() const {
 		}
 		return false;
 	}
-	catch (const std::exception &e) {
+	catch (const std::exception &) {
 		/* JSON parse error indicates the content is not JSON.
 		 * This means that its an empty body e.g. 204 response, and not an actual error.
 		 */
@@ -1414,7 +1415,7 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 		if (image_blob.size() > MAX_EMOJI_SIZE) {
 			throw dpp::exception("User icon file exceeds discord limit of 256 kilobytes");
 		}
-		j["avatar"] = "data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length());
+		j["avatar"] = "data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length());
 	}
 	this->post_rest(API_PATH "/users", "@me", "", m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

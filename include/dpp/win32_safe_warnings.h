@@ -28,3 +28,4 @@
  * and is to be silenced, thrown into the sarlacc pit to be eaten for 1000 years...
  */
 
+_Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables

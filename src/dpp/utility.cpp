@@ -191,13 +191,12 @@ namespace dpp {
 				if (!pipe) {
 					return;
 				}
-				while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+				while (fgets(buffer.data(), (int)buffer.size(), pipe.get()) != nullptr) {
 					result += buffer.data();
 				}
 				if (callback) {
 					callback(result);
 				}
-				return;
 			});
 			t.detach();
 		}
