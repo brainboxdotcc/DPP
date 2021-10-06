@@ -246,7 +246,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				} else {
 					/* Full connect */
 					while (time(nullptr) < creator->last_identify + 5) {
-						uint32_t wait = (uint32_t)((creator->last_identify + 5) - time(nullptr));
+						time_t wait = (creator->last_identify + 5) - time(nullptr);
 						log(dpp::ll_debug, fmt::format("Waiting {} seconds before identifying for session...", wait));
 						std::this_thread::sleep_for(std::chrono::seconds(wait));
 					}

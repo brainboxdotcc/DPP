@@ -23,6 +23,7 @@
 #include <string>
 #include <functional>
 #include <dpp/discord.h>
+#include <dpp/socket.h>
 
 namespace dpp {
 
@@ -54,7 +55,7 @@ protected:
 	bool nonblocking;
 
 	/** Raw file descriptor of connection */
-	SOCKET sfd;
+	dpp::socket sfd;
 
 	/** Openssl opaque contexts */
 	opensslcontext* ssl;
@@ -98,7 +99,7 @@ public:
 	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread!
 	 * Returning -1 means that you don't want to be notified.
 	 */
-	std::function<int()> custom_readable_fd;
+	std::function<dpp::socket()> custom_readable_fd;
 
 	/**
 	 * @brief Attaching an additional file descriptor to this function will send notifications when you are able to write
@@ -107,7 +108,7 @@ public:
 	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread! You should toggle this
 	 * to -1 when you do not have anything to write otherwise it'll keep triggering repeatedly (it is level triggered).
 	 */
-	std::function<int()> custom_writeable_fd;
+	std::function<dpp::socket()> custom_writeable_fd;
 
 	/**
 	 * @brief This event will be called when you can read from the custom fd

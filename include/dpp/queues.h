@@ -255,10 +255,10 @@ private:
 	 */
 	int in_queue_port;
 	int out_queue_port;
-	int in_queue_listen_sock;
-	int in_queue_connect_sock;
-	int out_queue_listen_sock;
-	int out_queue_connect_sock;
+	dpp::socket in_queue_listen_sock;
+	dpp::socket in_queue_connect_sock;
+	dpp::socket out_queue_listen_sock;
+	dpp::socket out_queue_connect_sock;
 
 	/** Thread loop functions */
 	void in_loop();
