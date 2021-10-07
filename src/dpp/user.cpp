@@ -164,7 +164,7 @@ void from_json(const nlohmann::json& j, user& u) {
 	}
 	u.avatar = av;
 
-	u.discriminator = SnowflakeNotNull(&j, "discriminator");
+	u.discriminator = (uint16_t)SnowflakeNotNull(&j, "discriminator");
 
 	u.flags |= BoolNotNull(&j, "bot") ? dpp::u_bot : 0;
 	u.flags |= BoolNotNull(&j, "system") ? dpp::u_system : 0;

@@ -155,7 +155,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 			/* Decompress buffer */
 			decompressed.clear();
 			zlib->d_stream.next_in = (Bytef *)buffer.c_str();
-			zlib->d_stream.avail_in = buffer.size();
+			zlib->d_stream.avail_in = (uInt)buffer.size();
 			do {
 				int have = 0;
 				zlib->d_stream.next_out = (Bytef*)decomp_buffer;
@@ -245,8 +245,8 @@ bool discord_client::HandleFrame(const std::string &buffer)
 					resumes++;
 				} else {
 					/* Full connect */
-					while (time(NULL) < creator->last_identify + 5) {
-						uint32_t wait = (creator->last_identify + 5) - time(NULL);
+					while (time(nullptr) < creator->last_identify + 5) {
+						time_t wait = (creator->last_identify + 5) - time(nullptr);
 						log(dpp::ll_debug, fmt::format("Waiting {} seconds before identifying for session...", wait));
 						std::this_thread::sleep_for(std::chrono::seconds(wait));
 					}

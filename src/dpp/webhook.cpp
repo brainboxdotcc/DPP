@@ -84,11 +84,10 @@ webhook& webhook::load_image(const std::string &image_blob, const image_type typ
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
 		throw dpp::exception("Webhook icon file exceeds discord limit of 256 kilobytes");
 	}
-	if (image_data) {
-		/* If there's already image data defined, free the old data, to prevent a memory leak */
-		delete image_data;
-	}
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + (is_base64_encoded ? image_blob : base64_encode((unsigned char const*)image_blob.data(), image_blob.length())));
+
+	/* If there's already image data defined, free the old data, to prevent a memory leak */
+	delete image_data;
+	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + (is_base64_encoded ? image_blob : base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length())));
 
 	return *this;
 }

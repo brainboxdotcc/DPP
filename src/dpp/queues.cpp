@@ -18,9 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstdlib>
 #include <sys/types.h>
 
 #ifdef _WIN32
@@ -34,10 +34,11 @@
 #include <netinet/tcp.h>
 #include <unistd.h>
 #endif
+#include <dpp/socket.h>
 
 #include <fcntl.h>
-#include <signal.h>
-#include <string.h>
+#include <csignal>
+#include <cstring>
 #include <random>
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
@@ -240,19 +241,19 @@ http_request_completion_t http_request::Run(cluster* owner) {
 
 request_queue::request_queue(class cluster* owner) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0)
 {
-	in_queue_listen_sock = socket(AF_INET, SOCK_STREAM, 0);
-	out_queue_listen_sock = socket(AF_INET, SOCK_STREAM, 0);
+	in_queue_listen_sock = ::socket(AF_INET, SOCK_STREAM, 0);
+	out_queue_listen_sock = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (in_queue_listen_sock == -1 || out_queue_listen_sock == -1) {
 		throw dpp::exception("Can't initialise request queue sockets");
 	}
 
-	std::mt19937 generator(dpp::utility::time_f() * 100000 + (size_t)this);
+	std::mt19937 generator((unsigned int)(dpp::utility::time_f() * 100000 + (size_t)this));
 	std::uniform_real_distribution<double> distribution(8192, 32760);
 
-	in_queue_port = distribution(generator);
-	out_queue_port = distribution(generator);
+	in_queue_port = (int)distribution(generator);
+	out_queue_port = (int)distribution(generator);
 
-	struct sockaddr_in in_server, out_server;
+	sockaddr_in in_server, out_server;
 	in_server.sin_family = out_server.sin_family = AF_INET;
 	in_server.sin_addr.s_addr = out_server.sin_addr.s_addr = htonl(0x7f000001); /* Localhost */
 	in_server.sin_port = htons(in_queue_port);
@@ -271,13 +272,13 @@ request_queue::request_queue(class cluster* owner) : creator(owner), terminating
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(250));	
 
-	in_queue_connect_sock = socket(AF_INET, SOCK_STREAM, 0);
-	out_queue_connect_sock = socket(AF_INET, SOCK_STREAM, 0);
+	in_queue_connect_sock = ::socket(AF_INET, SOCK_STREAM, 0);
+	out_queue_connect_sock = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (in_queue_connect_sock == -1 || out_queue_connect_sock == -1) {
 		throw dpp::exception("Can't initialise request queue notifier sockets");
 	}
 
-	struct sockaddr_in in_client, out_client;
+	sockaddr_in in_client, out_client;
 	in_client.sin_addr.s_addr = out_client.sin_addr.s_addr = inet_addr("127.0.0.1");
 	in_client.sin_family = out_client.sin_family = AF_INET;
 	in_client.sin_port = htons(in_queue_port);
@@ -304,8 +305,8 @@ void request_queue::in_loop()
 	fd_set readfds;
 	timeval ts;
 	char n;
-	struct sockaddr_in client;
-	int notifier = accept(in_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
+	sockaddr_in client;
+	int notifier = (int)accept(in_queue_listen_sock, (struct sockaddr *)&client, (socklen_t*)&c);
 	if (notifier < 0) {
 		throw dpp::exception("Failed to initialise REST in queue - can't accept notifier connection");
 	}
@@ -347,7 +348,7 @@ void request_queue::in_loop()
 								*/
 								if (currbucket->second.remaining < 1) {
 									uint64_t wait = (currbucket->second.retry_after ? currbucket->second.retry_after : currbucket->second.reset_after);
-									if (time(NULL) > currbucket->second.timestamp + wait) {
+									if ((uint64_t)time(nullptr) > currbucket->second.timestamp + wait) {
 										/* Time has passed, we can process this bucket again. send its request. */
 										rv = req->Run(creator);
 									} else {

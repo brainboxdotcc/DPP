@@ -22,7 +22,7 @@
 
 #include <dpp/export.h>
 
-#include <errno.h>
+#include <cerrno>
 
 #ifdef _WIN32
 #include <WinSock2.h>
@@ -37,12 +37,12 @@
 #include <unistd.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <signal.h>
-#include <string.h>
+#include <csignal>
+#include <cstring>
 #include <string>
 #include <map>
 #include <vector>
@@ -51,6 +51,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/discordevents.h>
+#include <dpp/socket.h>
 #include <queue>
 #include <thread>
 #include <deque>
@@ -174,11 +175,11 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 
 	/** File descriptor for UDP connection
 	 */
-	SOCKET fd;
+	dpp::socket fd;
 
 	/** Socket address of voice server
 	 */
-	struct sockaddr_in servaddr;
+	sockaddr_in servaddr;
 
 	/** Secret key for encrypting voice.
 	 * If it has been sent, this is non-null and points to a 
@@ -254,7 +255,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * 
 	 * @return int file descriptor or -1
 	 */
-	int WantWrite();
+	dpp::socket WantWrite();
 
 	/**
 	 * @brief This hooks the ssl_client, returning the file
@@ -263,7 +264,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * 
 	 * @return int file descriptor or -1
 	 */
-	int WantRead();
+	dpp::socket WantRead();
 
 	/**
 	 * @brief Called by ssl_client when the socket is ready

@@ -25,6 +25,11 @@
 //static_assert(__cplusplus >= 201703L, "D++ Requires a C++17 compatible compiler. Please ensure that you have enabled C++17 in your compiler flags.");
 
 #ifdef DPP_BUILD
+
+	#ifdef _WIN32
+		#include <dpp/win32_safe_warnings.h>
+	#endif
+
 	#ifdef _WIN32
 		#define DPP_EXPORT __declspec(dllexport)
 	#else

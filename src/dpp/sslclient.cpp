@@ -132,11 +132,11 @@ void ssl_client::Connect()
 	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 	int err;
 	for (struct addrinfo *addr = addrs; addr != nullptr; addr = addr->ai_next) {
-		sfd = socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
+		sfd = ::socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
 		if (sfd == ERROR_STATUS) {
 			err = errno;
 			continue;
-		} else if (connect(sfd, addr->ai_addr, addr->ai_addrlen) == 0) {
+		} else if (connect(sfd, addr->ai_addr, (int)addr->ai_addrlen) == 0) {
 			break;
 		}
 		err = errno;
@@ -157,7 +157,7 @@ void ssl_client::Connect()
 		throw dpp::exception(strerror(err));
 
 	/* We're good to go - hand the fd over to openssl */
-	SSL_set_fd(ssl->ssl, sfd);
+	SSL_set_fd(ssl->ssl, (int)sfd);
 
 	status = SSL_connect(ssl->ssl);
 	if (status != 1) {
@@ -178,7 +178,7 @@ void ssl_client::write(const std::string &data)
 	if (nonblocking) {
 		obuffer += data;
 	} else {
-		SSL_write(ssl->ssl, data.data(), data.length());
+		SSL_write(ssl->ssl, data.data(), (int)data.length());
 	}
 }
 
@@ -230,15 +230,15 @@ void ssl_client::read_loop()
 	}
 #endif
 	nonblocking = true;
-	width = sfd + 1;
+	width = (int)sfd + 1;
 
 	try {
 		/* Loop until there is a socket error */
 		while(true) {
 
-			if (last_tick != time(NULL)) {
+			if (last_tick != time(nullptr)) {
 				this->one_second_timer();
-				last_tick = time(NULL);
+				last_tick = time(nullptr);
 			}
 
 			FD_ZERO(&readfds);
@@ -248,12 +248,12 @@ void ssl_client::read_loop()
 			SAFE_FD_SET(sfd,&readfds);
 			SAFE_FD_SET(sfd,&efds);
 			if (custom_readable_fd && custom_readable_fd() >= 0) {
-				int cfd = custom_readable_fd();
+				int cfd = (int)custom_readable_fd();
 				SAFE_FD_SET(cfd, &readfds);
 				SAFE_FD_SET(cfd, &efds);
 			}
 			if (custom_writeable_fd && custom_writeable_fd() >= 0) {
-				int cfd = custom_writeable_fd();
+				int cfd = (int)custom_writeable_fd();
 				SAFE_FD_SET(cfd, &writefds);
 			}
 
@@ -338,7 +338,7 @@ void ssl_client::read_loop()
 			if ((SAFE_FD_ISSET(sfd,&writefds) && ClientToServerLength) || (write_blocked_on_read && SAFE_FD_ISSET(sfd,&readfds))) {
 				write_blocked_on_read = false;
 				/* Try to write */
-				r = SSL_write(ssl->ssl, ClientToServerBuffer + ClientToServerOffset, ClientToServerLength);
+				r = SSL_write(ssl->ssl, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength);
 				
 				switch(SSL_get_error(ssl->ssl,r)) {
 					/* We wrote something */
