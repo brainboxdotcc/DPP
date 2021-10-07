@@ -573,7 +573,7 @@ dpp::socket discord_voice_client::WantWrite() {
 	if (!this->paused && !outbuf.empty()) {
 		return fd;
 	} else {
-		return SOCKET_ERROR;
+		return INVALID_SOCKET;
 	}
 }
 
