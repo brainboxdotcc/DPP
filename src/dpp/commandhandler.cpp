@@ -153,7 +153,6 @@ commandhandler& commandhandler::register_commands()
 
 bool commandhandler::string_has_prefix(std::string &str)
 {
-	size_t str_length = utility::utf8len(str);
 	for (auto& p : prefixes) {
 		size_t prefix_length = utility::utf8len(p);
 		if (utility::utf8substr(str, 0, prefix_length) == p) {
@@ -291,7 +290,7 @@ void commandhandler::route(const dpp::message& msg)
 	}
 }
 
-void commandhandler::route(const interaction_create_t & event)
+void commandhandler::route(const struct interaction_create_t & event)
 {
 	/* We don't need to check for prefixes here, slash command interactions
 	 * dont have prefixes at all.

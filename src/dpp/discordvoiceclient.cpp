@@ -329,10 +329,10 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 
 				external_ip = discover_ip();
 
-				int newfd;
-				if ((newfd = (int)socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
+				dpp::socket newfd;
+				if ((newfd = ::socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
 
-					sockaddr_in servaddr;
+					sockaddr_in servaddr{};
 					memset(&servaddr, 0, sizeof(sockaddr_in));
 					servaddr.sin_family = AF_INET;
 					servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -568,17 +568,17 @@ bool discord_voice_client::is_connected()
 	return (this->GetState() == CONNECTED);
 }
 
-int discord_voice_client::WantWrite() {
+dpp::socket discord_voice_client::WantWrite() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	if (!this->paused && !outbuf.empty()) {
-		return (int)fd;
+		return fd;
 	} else {
-		return -1;
+		return INVALID_SOCKET;
 	}
 }
 
-int discord_voice_client::WantRead() {
-	return (int)fd;
+dpp::socket discord_voice_client::WantRead() {
+	return fd;
 }
 
 void discord_voice_client::Error(uint32_t errorcode)
@@ -669,7 +669,7 @@ void discord_voice_client::one_second_timer()
 	if (this->GetState() == CONNECTED) {
 		for (int x = 0; x < (time(nullptr) % 2) + 1; ++x) {
 			std::lock_guard<std::mutex> locker(queue_mutex);
-			if (message_queue.size()) {
+			if (!message_queue.empty()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();
 				this->write(message);
@@ -748,7 +748,7 @@ void discord_voice_client::insert_marker(const std::string& metadata) {
 
 uint32_t discord_voice_client::get_tracks_remaining() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	if (outbuf.size() == 0)
+	if (outbuf.empty())
 		return 0;
 	else
 		return tracks + 1;
@@ -757,7 +757,7 @@ uint32_t discord_voice_client::get_tracks_remaining() {
 void discord_voice_client::skip_to_next_marker() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	/* Keep popping the first entry off the outbuf until the first entry is a track marker */
-	while (outbuf.size() && outbuf[0].packet.size() != sizeof(uint16_t) && ((uint16_t)(*(outbuf[0].packet.data()))) != AUDIO_TRACK_MARKER) {
+	while (!outbuf.empty() && outbuf[0].packet.size() != sizeof(uint16_t) && ((uint16_t)(*(outbuf[0].packet.data()))) != AUDIO_TRACK_MARKER) {
 		outbuf.erase(outbuf.begin());
 	}
 	if (outbuf.size()) {
@@ -766,7 +766,7 @@ void discord_voice_client::skip_to_next_marker() {
 	}
 	if (tracks > 0)
 		tracks--;
-	if (track_meta.size()) {
+	if (!track_meta.empty()) {
 		track_meta.erase(track_meta.begin());
 	}
 }
@@ -873,13 +873,13 @@ uint64_t discord_voice_client::get_timescale() {
 }
 
 std::string discord_voice_client::discover_ip() {
-	SOCKET newfd = -1;
+	dpp::socket newfd = SOCKET_ERROR;
 	unsigned char packet[74] = { 0 };
 	(*(uint16_t*)(packet)) = htons(0x01);
 	(*(uint16_t*)(packet + 2)) = htons(70);
 	(*(uint32_t*)(packet + 4)) = htonl((uint32_t)this->ssrc);
-	if ((newfd = socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
-		sockaddr_in servaddr;
+	if ((newfd = ::socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
+		sockaddr_in servaddr{};
 		socklen_t sl = sizeof(servaddr);
 		memset(&servaddr, 0, sizeof(sockaddr_in));
 		servaddr.sin_family = AF_INET;

@@ -132,7 +132,7 @@ void ssl_client::Connect()
 	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 	int err;
 	for (struct addrinfo *addr = addrs; addr != nullptr; addr = addr->ai_next) {
-		sfd = socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
+		sfd = ::socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
 		if (sfd == ERROR_STATUS) {
 			err = errno;
 			continue;
@@ -248,12 +248,12 @@ void ssl_client::read_loop()
 			SAFE_FD_SET(sfd,&readfds);
 			SAFE_FD_SET(sfd,&efds);
 			if (custom_readable_fd && custom_readable_fd() >= 0) {
-				int cfd = custom_readable_fd();
+				int cfd = (int)custom_readable_fd();
 				SAFE_FD_SET(cfd, &readfds);
 				SAFE_FD_SET(cfd, &efds);
 			}
 			if (custom_writeable_fd && custom_writeable_fd() >= 0) {
-				int cfd = custom_writeable_fd();
+				int cfd = (int)custom_writeable_fd();
 				SAFE_FD_SET(cfd, &writefds);
 			}
 
