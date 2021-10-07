@@ -148,7 +148,7 @@ struct DPP_EXPORT command_option {
 	command_option& add_option(const command_option &o);
 
 	/**
-	 * @brief Set channel type for option
+	 * @brief Add channel type for option (only for co_channel type options)
 	 *
 	 * @param ch type to set
 	 * @return command_option& return a reference to self for chaining of calls
