@@ -27,6 +27,7 @@
 
 namespace dpp {
 
+enum channel_type;
 /**
  * @brief Represents command option types.
  * These are the possible parameter value types.
@@ -113,6 +114,7 @@ struct DPP_EXPORT command_option {
 	bool required;                               //!< True if this is a mandatory parameter
 	std::vector<command_option_choice> choices;  //!< List of choices for multiple choice command
 	std::vector<command_option> options;         //!< Sub-commands
+	std::vector<channel_type> channel_types;
 
 	/**
 	 * @brief Construct a new command option object
@@ -144,6 +146,14 @@ struct DPP_EXPORT command_option {
 	 * @return command_option& return a reference to self for chaining of calls
 	 */
 	command_option& add_option(const command_option &o);
+
+	/**
+	 * @brief Set channel type for option
+	 *
+	 * @param ch type to set
+	 * @return command_option& return a reference to self for chaining of calls
+	 */
+	command_option& add_channel_type(const channel_type ch);
 };
 
 /**

@@ -78,6 +78,14 @@ void to_json(json& j, const command_option& opt) {
 			j["choices"].push_back(jchoice);
 		}
 	}
+
+	if (!opt.channel_types.empty()) {
+		j["channel_types"] = json();
+
+		for (const auto ch_type : opt.channel_types) {
+			j["channel_types"].push_back(ch_type);
+		}
+	}
 }
 
 void to_json(nlohmann::json& j, const command_permission& cp) {
@@ -187,6 +195,12 @@ command_option& command_option::add_choice(const command_option_choice &o)
 command_option& command_option::add_option(const command_option &o)
 {
 	options.push_back(o);
+	return *this;
+}
+
+command_option& command_option::add_channel_type(const channel_type ch)
+{
+	this->channel_types.push_back(ch);
 	return *this;
 }
 
