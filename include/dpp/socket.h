@@ -1,5 +1,11 @@
 #pragma once
 
+#ifndef _WIN32
+#ifndef SOCKET
+#define SOCKET int
+#endif
+#endif
+
 namespace dpp
 {
     typedef SOCKET socket;

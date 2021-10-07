@@ -178,7 +178,6 @@ using socket_t = SOCKET;
 #include <unistd.h>
 
 using socket_t = int;
-#define INVALID_SOCKET (-1)
 #endif //_WIN32
 
 #include <algorithm>
