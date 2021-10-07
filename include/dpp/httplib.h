@@ -180,6 +180,8 @@ using socket_t = SOCKET;
 using socket_t = int;
 #endif //_WIN32
 
+#include <dpp/socket.h>
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -187,7 +189,7 @@ using socket_t = int;
 #include <cctype>
 #include <climits>
 #include <condition_variable>
-#include <errno.h>
+#include <cerrno>
 #include <fcntl.h>
 #include <fstream>
 #include <functional>
