@@ -34,6 +34,7 @@
 #include <netinet/tcp.h>
 #include <unistd.h>
 #endif
+#include <dpp/socket.h>
 
 #include <fcntl.h>
 #include <csignal>
@@ -240,8 +241,8 @@ http_request_completion_t http_request::Run(cluster* owner) {
 
 request_queue::request_queue(class cluster* owner) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0)
 {
-	in_queue_listen_sock = (int)socket(AF_INET, SOCK_STREAM, 0);
-	out_queue_listen_sock = (int)socket(AF_INET, SOCK_STREAM, 0);
+	in_queue_listen_sock = ::socket(AF_INET, SOCK_STREAM, 0);
+	out_queue_listen_sock = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (in_queue_listen_sock == -1 || out_queue_listen_sock == -1) {
 		throw dpp::exception("Can't initialise request queue sockets");
 	}
@@ -271,8 +272,8 @@ request_queue::request_queue(class cluster* owner) : creator(owner), terminating
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(250));	
 
-	in_queue_connect_sock = (int)socket(AF_INET, SOCK_STREAM, 0);
-	out_queue_connect_sock = (int)socket(AF_INET, SOCK_STREAM, 0);
+	in_queue_connect_sock = ::socket(AF_INET, SOCK_STREAM, 0);
+	out_queue_connect_sock = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (in_queue_connect_sock == -1 || out_queue_connect_sock == -1) {
 		throw dpp::exception("Can't initialise request queue notifier sockets");
 	}
