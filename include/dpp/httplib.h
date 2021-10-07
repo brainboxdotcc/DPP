@@ -178,8 +178,9 @@ using socket_t = SOCKET;
 #include <unistd.h>
 
 using socket_t = int;
-#define INVALID_SOCKET (-1)
 #endif //_WIN32
+
+#include <dpp/socket.h>
 
 #include <algorithm>
 #include <array>
@@ -188,7 +189,7 @@ using socket_t = int;
 #include <cctype>
 #include <climits>
 #include <condition_variable>
-#include <errno.h>
+#include <cerrno>
 #include <fcntl.h>
 #include <fstream>
 #include <functional>
