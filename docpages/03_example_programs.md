@@ -641,7 +641,7 @@ int main()
 					dpp::component().add_component(
 						dpp::component().set_label("Click me!").
 						set_type(dpp::cot_button).
-						set_emoji("😄").
+						set_emoji(u8"😄").
 						set_style(dpp::cos_danger).
 						set_id("myid")
 					)
@@ -755,8 +755,8 @@ int main()
 				dpp::component().add_component(
 					dpp::component().set_type(dpp::cot_selectmenu).
 					set_placeholder("Pick something").
-					add_select_option(dpp::select_option("label1","value1","description1").set_emoji("😄")).
-					add_select_option(dpp::select_option("label2","value2","description2").set_emoji("🙂")).
+					add_select_option(dpp::select_option("label1","value1","description1").set_emoji(u8"😄")).
+					add_select_option(dpp::select_option("label2","value2","description2").set_emoji(u8"🙂")).
 					set_id("myselid")
 				)
 			);
