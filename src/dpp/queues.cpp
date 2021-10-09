@@ -247,21 +247,19 @@ request_queue::request_queue(class cluster* owner) : creator(owner), terminating
 		throw dpp::exception("Can't initialise request queue sockets");
 	}
 
-	std::mt19937 generator((unsigned int)(dpp::utility::time_f() * 100000 + (size_t)this));
-	std::uniform_real_distribution<double> distribution(8192, 32760);
-
-	in_queue_port = (int)distribution(generator);
-	out_queue_port = (int)distribution(generator);
-
 	sockaddr_in in_server, out_server;
 	in_server.sin_family = out_server.sin_family = AF_INET;
 	in_server.sin_addr.s_addr = out_server.sin_addr.s_addr = htonl(0x7f000001); /* Localhost */
-	in_server.sin_port = htons(in_queue_port);
-	out_server.sin_port = htons(out_queue_port);
+	in_server.sin_port = out_server.sin_port = 0;
 
-	if ((bind(in_queue_listen_sock, (struct sockaddr *)&in_server , sizeof(in_server)) < 0) || (bind(out_queue_listen_sock, (struct sockaddr *)&out_server , sizeof(out_server)) < 0)) {
+	if ((bind(in_queue_listen_sock, (sockaddr *)&in_server , sizeof(in_server)) < 0) || (bind(out_queue_listen_sock, (sockaddr *)&out_server , sizeof(out_server)) < 0)) {
 		throw dpp::exception("Can't bind request queue sockets");
 	}
+
+    socklen_t addrLen = sizeof(sockaddr_in);
+    getsockname(in_queue_listen_sock, (sockaddr *)&in_server, &addrLen);
+    getsockname(out_queue_listen_sock, (sockaddr *)&out_server, &addrLen);
+
 	/* Backlog is only 1, because we only expect our own system to connect back to this once */
 	if (listen(in_queue_listen_sock, 1) == -1 || listen(out_queue_listen_sock, 1) == -1) {
 		throw dpp::exception("Can't listen() on request queue sockets");
@@ -278,13 +276,7 @@ request_queue::request_queue(class cluster* owner) : creator(owner), terminating
 		throw dpp::exception("Can't initialise request queue notifier sockets");
 	}
 
-	sockaddr_in in_client, out_client;
-	in_client.sin_addr.s_addr = out_client.sin_addr.s_addr = inet_addr("127.0.0.1");
-	in_client.sin_family = out_client.sin_family = AF_INET;
-	in_client.sin_port = htons(in_queue_port);
-	out_client.sin_port = htons(out_queue_port);
-
-	if ((connect(in_queue_connect_sock, (struct sockaddr *)&in_client, sizeof(in_client)) < 0) || (connect(out_queue_connect_sock, (struct sockaddr *)&out_client, sizeof(out_client)) < 0)) {
+	if ((connect(in_queue_connect_sock, (sockaddr *)&in_server, sizeof(in_server)) < 0) || (connect(out_queue_connect_sock, (sockaddr *)&out_server, sizeof(out_server)) < 0)) {
 		throw dpp::exception("Can't connect notifiers");
 	}
 }

@@ -248,13 +248,11 @@ private:
 	/** How many seconds we are globally rate limited for, if globally_ratelimited is true */
 	uint64_t globally_limited_for;
 
-	/** Ports for notifications of request completion.
+	/**
 	 * Why are we using sockets here instead of std::condition_variable? Because
 	 * in the future we will want to notify across clusters of completion and state,
 	 * and we can't do this across processes with condition variables.
 	 */
-	int in_queue_port;
-	int out_queue_port;
 	dpp::socket in_queue_listen_sock;
 	dpp::socket in_queue_connect_sock;
 	dpp::socket out_queue_listen_sock;
