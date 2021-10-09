@@ -12,11 +12,24 @@ if (!file_exists(getenv("HOME") . "/dpp-web")) {
 echo "Make version drop down select\n";
 $opts = shell_exec("git tag | perl -p -e s/^v//g | sort -n -r | (echo \"<option value='/'>master</option>\" && sed \"s/.*/<option value='\/&\/'>&<\/option>/\")");
 $opts = preg_replace("/\r|\n|/", "", $opts);
+$tags = explode("\n", shell_exec("git tag"));
+
+$taglist = '';
+foreach ($tags as $tag) {
+	if ($tag != '') {
+		$tag2 = str_replace("v", "", $tag);
+		$taglist .= "<a href='/".$tag2."/'>D++ Library version $tag</a>";
+	}
+}
 
 $template = file_get_contents("header.template.html");
 $header = str_replace("##VERSION_OPTIONS##", $opts, $template);
 
+$footer = file_get_contents("footer.template.html");
+$footer = str_replace("###PREV###", $taglist, $footer);
+
 file_put_contents("header.html", $header);
+file_put_contents("footer.html", $footer);
 
 echo "Generate `master` docs\n";
 
@@ -26,7 +39,6 @@ system("cp -r docs/* " . getenv("HOME") . "/dpp-web/");
 
 /* Create old version docs */
 chdir(getenv("HOME") . "/D++");
-$tags = explode("\n", shell_exec("git tag"));
 system("rm -rf " . sys_get_temp_dir() . "/dpp-old");
 mkdir(sys_get_temp_dir() . "/dpp-old");
 chdir(sys_get_temp_dir() . "/dpp-old");
@@ -52,6 +64,7 @@ foreach ($tags as $tag) {
 		/* Rewrite selected version number so that each page has a new default selected in the drop down */
 		$hdr = file_get_contents(getenv("HOME") . "/D++/docpages/header.html");
 		$hdr = str_replace("option value='/$tag/'", "option selected value='/$tag/'", $hdr);
+		/* Rewrite version info in header */
 		file_put_contents("docpages/header.html", $hdr);		
 		shell_exec("/usr/local/bin/doxygen");
 		system("cp -r docs/* " . getenv("HOME") . "/dpp-web/$tag");
