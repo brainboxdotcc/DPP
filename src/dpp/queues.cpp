@@ -256,7 +256,7 @@ request_queue::request_queue(class cluster* owner) : creator(owner), terminating
 		throw dpp::exception("Can't bind request queue sockets");
 	}
 
-    int addrLen = sizeof(sockaddr_in);
+    socklen_t addrLen = sizeof(sockaddr_in);
     getsockname(in_queue_listen_sock, (sockaddr *)&in_server, &addrLen);
     getsockname(out_queue_listen_sock, (sockaddr *)&out_server, &addrLen);
 
