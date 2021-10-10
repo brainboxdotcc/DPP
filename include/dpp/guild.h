@@ -54,47 +54,49 @@ enum region : uint8_t {
  */
 enum guild_flags {
 	/** Large guild */
-	g_large =				0b000000000000000000001,
+	g_large =				0b0000000000000000000001,
 	/** Unavailable guild (inaccessible due to an outage) */
-	g_unavailable = 			0b000000000000000000010,
+	g_unavailable = 			0b0000000000000000000010,
 	/** Guild has widget enabled */
-	g_widget_enabled =			0b000000000000000000100,
+	g_widget_enabled =			0b0000000000000000000100,
 	/** Guild can  have an invite splash image */
-	g_invite_splash =			0b000000000000000001000,
+	g_invite_splash =			0b0000000000000000001000,
 	/** Guild can have VIP regions */
-	g_vip_regions =				0b000000000000000010000,
+	g_vip_regions =				0b0000000000000000010000,
 	/** Guild can have a vanity url */
-	g_vanity_url =				0b000000000000000100000,
+	g_vanity_url =				0b0000000000000000100000,
 	/** Guild is verified */
-	g_verified =				0b000000000000001000000,
+	g_verified =				0b0000000000000001000000,
 	/** Guild is partnered */
-	g_partnered =				0b000000000000010000000,
+	g_partnered =				0b0000000000000010000000,
 	/** Community features enabled */
-	g_community =				0b000000000000100000000,
+	g_community =				0b0000000000000100000000,
 	/** Guild has commerce features enabled */
-	g_commerce =				0b000000000001000000000,
+	g_commerce =				0b0000000000001000000000,
 	/** Guild has news features enabled */
-	g_news =				0b000000000010000000000,
+	g_news =				0b0000000000010000000000,
 	/** Guild is discoverable in discovery */
-	g_discoverable =			0b000000000100000000000,
+	g_discoverable =			0b0000000000100000000000,
 	/** Guild is featureable */
-	g_featureable =				0b000000001000000000000,
+	g_featureable =				0b0000000001000000000000,
 	/** Guild can have an animated icon (doesn't mean it actually has one though) */
-	g_animated_icon =			0b000000010000000000000,
+	g_animated_icon =			0b0000000010000000000000,
 	/** Guild can have a banner image */
-	g_banner =				0b000000100000000000000,
+	g_banner =				0b0000000100000000000000,
 	/** Guild has a welcome screen */
-	g_welcome_screen_enabled =		0b000001000000000000000,
+	g_welcome_screen_enabled =		0b0000001000000000000000,
 	/** Guild has a member verification gate */
-	g_member_verification_gate =		0b000010000000000000000,
+	g_member_verification_gate =		0b0000010000000000000000,
 	/** Guild has a preview */
-	g_preview_enabled =			0b000100000000000000000,
+	g_preview_enabled =			0b0000100000000000000000,
 	/** Guild join notifications are off */
-	g_no_join_notifications =		0b001000000000000000000,
+	g_no_join_notifications =		0b0001000000000000000000,
 	/** Guild boost notifications are off */
-	g_no_boost_notifications =		0b010000000000000000000,
+	g_no_boost_notifications =		0b0010000000000000000000,
 	/** Guild has an actual animated icon (set by the icon hash starting with 'a_') */
-	g_has_animated_icon =			0b100000000000000000000
+	g_has_animated_icon =			0b0100000000000000000000,
+	/** Guild has an actual animated banner (set by the icon hash starting with 'a_') */
+	g_has_animated_banner =			0b1000000000000000000000
 };
 
 /**
@@ -377,6 +379,8 @@ public:
 	/** Server icon is actually an animated gif */
 	bool has_animated_icon_hash() const;
 
+	/** Server banner is actually an animated gif */
+	bool has_animated_banner_icon_hash() const;
 };
 
 /** A container of guilds */

@@ -15,22 +15,12 @@ int main()
 	dpp::cluster bot(configdocument["token"]);
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-		bot.message_create(
-			dpp::message(847003255708188682, "A message.").add_component(
-				dpp::component().add_component(
-				dpp::component().set_label("A Button").
-				set_type(dpp::cot_button).
-				set_emoji("📦").
-				set_style(dpp::cos_danger).
-				set_id("myid")
-				).add_component(
-				dpp::component().set_label("Another Button").
-				set_type(dpp::cot_button).
-				set_style(dpp::cos_primary).
-				set_id("234")
-				)
-			)
-		);
+	});
+
+	bot.on_log([&](const dpp::log_t& loginfo) {
+		if (loginfo.severity > dpp::ll_trace) {
+			std::cout << dpp::utility::loglevel(loginfo.severity) << " " << loginfo.message << "\n";
+		}
 	});
 
 	bot.start(false);

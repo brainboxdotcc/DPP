@@ -116,14 +116,21 @@ namespace dpp {
 		}
 
 		void iconhash::set(const std::string &hash) {
+			std::string clean_hash(hash);
 			if (hash.empty()) {	// Clear values if empty hash
 				first = second = 0;
 				return;
 			}
-			if (hash.length() != 32)
-				throw std::length_error("iconhash must be exactly 32 characters in length");
-			this->first = from_string<uint64_t>(hash.substr(0, 16), std::hex);
-			this->second = from_string<uint64_t>(hash.substr(16, 16), std::hex);
+			if (hash.length() == 34 && hash.substr(0, 2) == "a_") {
+				/* Someone passed in an animated icon. numpty.
+				 * Clean that mess up!
+				 */
+				clean_hash = hash.substr(2);
+			}
+			if (clean_hash.length() != 32)
+				throw std::length_error("iconhash must be exactly 32 characters in length, passed value is: '" + clean_hash + "'");
+			this->first = from_string<uint64_t>(clean_hash.substr(0, 16), std::hex);
+			this->second = from_string<uint64_t>(clean_hash.substr(16, 16), std::hex);
 		}
 
 		iconhash::iconhash(const std::string &hash) {

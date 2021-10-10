@@ -31,10 +31,16 @@
 
 namespace dpp {
 
-/** Encodes a url parameter similar to php urlencode() */
+/**
+ * @brief Encodes a url parameter similar to php urlencode()
+ * 
+ * @param value String to encode
+ * @return * std::string URL encoded string
+ */
 std::string url_encode(const std::string &value);
 
-/** Error values. Don't change the order or add extra values here,
+/**
+ * @brief Error values. Don't change the order or add extra values here,
  * as they map onto the error values of cpp-httplib
  */
 enum http_error {
@@ -191,7 +197,8 @@ public:
 	bool is_completed();
 };
 
-/** A rate limit bucket. The library builds one of these for
+/**
+ * @brief A rate limit bucket. The library builds one of these for
  * each endpoint.
  */
 struct DPP_EXPORT bucket_t {
@@ -219,47 +226,71 @@ struct DPP_EXPORT bucket_t {
  * in their callback it won't affect when other requests are sent, and if a HTTP request
  * takes a long time due to latency, it won't hold up user processing.
  *
- * There is usually only one request_queue object in each dpp::cluster, which is used
- * internally for the various REST methods such as sending messages.
+ * There are usually two request_queue objects in each dpp::cluster, one of which is used
+ * internally for the various REST methods to Discord such as sending messages, and the other
+ * used to support user REST calls via dpp::cluster::request().
  */
 class DPP_EXPORT request_queue {
 private:
 	/** The cluster that owns this request_queue */
 	class cluster* creator;
-	/** Mutexes for thread safety */
+
+	/** Inbound queue mutex thread safety */
 	std::mutex in_mutex;
+
+	/** Outbound queue mutex thread safety */
 	std::mutex out_mutex;
-	/** In and out threads */
+
+	/** Inbound queue thread */
 	std::thread* in_thread;
+
+	/** Outbound queue thread */
 	std::thread* out_thread;
+
 	/** Ratelimit bucket counters */
 	std::map<std::string, bucket_t> buckets;
+
 	/** Queue of requests to be made */
 	std::map<std::string, std::vector<http_request*>> requests_in;
+
 	/** Completed requests queue */
 	std::queue<std::pair<http_request_completion_t*, http_request*>> responses_out;
+
 	/** Completed requests to delete */
 	std::multimap<time_t, std::pair<http_request_completion_t*, http_request*>> responses_to_delete;
 
 	/** Set to true if the threads should terminate */
 	bool terminating;
+
 	/** True if globally rate limited - makes the entire request thread wait */
 	bool globally_ratelimited;
+
 	/** How many seconds we are globally rate limited for, if globally_ratelimited is true */
 	uint64_t globally_limited_for;
 
-	/**
+	/*
 	 * Why are we using sockets here instead of std::condition_variable? Because
 	 * in the future we will want to notify across clusters of completion and state,
 	 * and we can't do this across processes with condition variables.
 	 */
+
+	/** Inbound queue listening socket */
 	dpp::socket in_queue_listen_sock;
+	/** Inbound queue connecting socket */
 	dpp::socket in_queue_connect_sock;
+	/** Outbound queue listening socket */
 	dpp::socket out_queue_listen_sock;
+	/** Outbound queue connecting socket */
 	dpp::socket out_queue_connect_sock;
 
-	/** Thread loop functions */
+	/**
+	 * @brief Inbound queue thread loop
+	 */
 	void in_loop();
+
+	/**
+	 * @brief Outbound queue thread loop
+	 */
 	void out_loop();
 
 	/** Notify request thread of a new request */
@@ -267,16 +298,23 @@ private:
 
 	/** Notify completion thread of new completed request */
 	void emit_out_queue_signal();
+
 public:
+
 	/** Constructor
-	 * @param owner The creating cluster
+	 * @param owner The creating cluster.
+	 * Side effects: Creates two threads for the queue
 	 */
 	request_queue(class cluster* owner);
 
-	/** Destructor */
+	/**
+	 * @brief Destroy the request queue object.
+	 * Side effects: Joins and deletes queue threads
+	 */
 	~request_queue();
 
-	/** Put a http_request into the request queue. You should ALWAYS "new" an object
+	/**
+	 * @brief Put a http_request into the request queue. You should ALWAYS "new" an object
 	 * to pass to here -- don't submit an object that's on the stack!
 	 * @param req request to add
 	 */

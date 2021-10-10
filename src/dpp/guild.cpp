@@ -225,9 +225,13 @@ bool guild::is_preview_enabled() const {
 	return this->flags & g_preview_enabled;
 }
 
- bool guild::has_animated_icon_hash() const {
-	 return this->flags & g_has_animated_icon;
- }
+bool guild::has_animated_icon_hash() const {
+	return this->flags & g_has_animated_icon;
+}
+
+bool guild::has_animated_banner_icon_hash() const {
+	return this->flags & g_has_animated_banner;
+}
 
 std::string guild::build_json(bool with_id) const {
 	json j;
@@ -353,6 +357,9 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 
 		std::string _banner = StringNotNull(d, "banner");
 		if (!_banner.empty()) {
+			if (_banner.length() > 2 && _banner.substr(0, 2) == "a_") {
+				this->flags |= dpp::g_has_animated_banner;
+			}
 			this->banner = _banner;
 		}
 		SetInt8NotNull(d, "premium_tier", this->premium_tier);
