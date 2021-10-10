@@ -722,6 +722,12 @@ int main()
 			819556414099554344
 		);
 
+		/* NOTE: We must call this to ensure slash commands are registered.
+		 * This does a bulk register, which will replace other commands
+		 * that are registered already!
+		 */
+		command_handler.register_commands();
+
 	});
 
 
