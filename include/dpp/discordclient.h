@@ -138,7 +138,11 @@ public:
 class DPP_EXPORT discord_client : public websocket_client
 {
 protected:
+	/**
+	 * @brief Needed so that voice_state_update can call dpp::discord_client::disconnect_voice_internal
+	 */
 	friend class dpp::events::voice_state_update;
+
 	/**
 	 * @brief Disconnect from the connected voice channel on a guild
 	 * 
@@ -147,7 +151,9 @@ protected:
 	 * Should be set to false if we already receive this message in an event.
 	 */
 	void disconnect_voice_internal(snowflake guild_id, bool send_json = true);
+
 private:
+
 	/** Mutex for message queue */
 	std::mutex queue_mutex;
 
@@ -157,7 +163,10 @@ private:
 	/** Thread this shard is executing on */
 	std::thread* runner;
 
-	/** Run shard loop under a thread */
+	/**
+	 * @brief Run shard loop under a thread.
+	 * Calls discord_client::Run() from within a std::thread.
+	 */
 	void ThreadRun();
 
 	/** If true, stream compression is enabled */
@@ -169,7 +178,12 @@ private:
 	/** Decompressed string */
 	std::string decompressed;
 
-	/** Frame decompression stream */
+	/**
+	 * @brief This object contains the various zlib structs which
+	 * are not usable by the user of the library directly. They
+	 * are wrapped within this opaque object so that this header
+	 * file does not bring in a dependency on zlib.h.
+	 */
 	zlibcontext* zlib;
 
 	/** Total decompressed received bytes */
@@ -178,16 +192,16 @@ private:
 	/** Last connect time of cluster */
 	time_t connect_time;
 
-	/** Time last ping sent to websocket */
+	/** Time last ping sent to websocket, in fractional seconds */
 	double ping_start;
 
 	/**
-	 * @brief Initialise ZLib
+	 * @brief Initialise ZLib (websocket compression)
 	 */
 	void SetupZLib();
 
 	/**
-	 * @brief Shut down ZLib
+	 * @brief Shut down ZLib (websocket compression)
 	 */
 	void EndZLib();
 
@@ -294,7 +308,6 @@ public:
 
 	/**
 	 * @brief Clear the outbound message queue
-	 * 
 	 */
 	void ClearQueue();
 
@@ -319,7 +332,9 @@ public:
 	 */
 	dpp::utility::uptime get_uptime();
 
-	/** Constructor takes shard id, max shards and token.
+	/**
+	 * @brief Construct a new discord_client object
+	 * 
 	 * @param _cluster The owning cluster for this shard
 	 * @param _shard_id The ID of the shard to start
 	 * @param _max_shards The total number of shards across all clusters
@@ -346,7 +361,11 @@ public:
 	 */
 	virtual void Error(uint32_t errorcode);
 
-	/** Start and monitor I/O loop */
+	/**
+	 * @brief Start and monitor I/O loop.
+	 * Note that this is a blocking call and is usually executed within a
+	 * thread by whatever creates the object.
+	 */
 	void Run();
 
 	/**
@@ -366,6 +385,13 @@ public:
 	 */
 	void disconnect_voice(snowflake guild_id);
 
+	/**
+	 * @brief Get the dpp::voiceconn object for a specific guild on this shard.
+	 * 
+	 * @param guild_id The guild ID to retrieve the voice connection for
+	 * @return voiceconn* The voice connection for the guild, or nullptr if there is no
+	 * voice connection to this guild.
+	 */
 	voiceconn* get_voice(snowflake guild_id);
 };
 

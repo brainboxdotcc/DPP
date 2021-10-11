@@ -32,9 +32,16 @@ namespace dpp {
  * @brief Websocket connection status
  */
 enum ws_state {
-	/** Sending/receiving HTTP headers prior to protocol switch */
+	/**
+	 * @brief Sending/receiving HTTP headers, acting as a standard HTTP connection.
+	 * This is the state prior to receiving "HTTP/1.1 101 Switching Protocols" from the
+	 * server side.
+	 */
 	HTTP_HEADERS,
-	/** Connected, upgraded and sending/receiving frames */
+
+	/**
+	 * @brief Connected as a websocket, and "upgraded". Now talking using binary frames.
+	 */
 	CONNECTED
 };
 
