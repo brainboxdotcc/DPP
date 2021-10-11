@@ -48,5 +48,5 @@ table.doxtable td, table.doxtable th {
 
 dl.note {
 	background-color: #fcfcc0;
-	color: var(--note-color-darker);
+	color: #8d7400;
 }
