@@ -616,9 +616,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 	}
 
 
-	if (components.size()) {
-		j["components"] = json::array();
-	}
+	j["components"] = json::array();
 	for (auto & component : components) {
 		json n;
 		n["type"] = cot_action_row;
