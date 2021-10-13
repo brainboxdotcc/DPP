@@ -1114,7 +1114,7 @@ int main() {
     /* Setup the bot */
     dpp::cluster bot("token");
 
-    /* Message handler to look for a command called !select */
+    /* Message handler to look for a command called !embed */
     bot.on_message_create([&bot](const dpp::message_create_t & event) {
         if (event.msg->content == "!embed") {
 
