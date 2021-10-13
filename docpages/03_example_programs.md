@@ -15,6 +15,7 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage components2 "Using component interactions (advanced)"
 * \subpage commandhandler "Using a command handler object"
 * \subpage subcommands "Using sub-commands in slash commands"
+* \subpage embed-message "Sending Embeds"
 
 
 \page firstbot Creating Your First Bot
@@ -1098,3 +1099,61 @@ int main(int argc, char const *argv[])
 	return 0;
 }
 ~~~~~~~~~~
+
+\page embed-message Sending Embeds
+
+You might have seen these special messages, often sent by bots. In this section, we will show how to create an embed.
+
+To make an embed use this.
+
+~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+#include <dpp/fmt/format.h>
+
+int main() {
+    /* Setup the bot */
+    dpp::cluster bot("token");
+
+    /* Message handler to look for a command called !select */
+    bot.on_message_create([&bot](const dpp::message_create_t & event) {
+        if (event.msg->content == "!embed") {
+
+            /* create the embed and send it into the channel */
+            dpp::embed embed = dpp::embed().
+                set_color(0x0099ff).
+                set_title("Some name").
+                set_url("https://dpp.dev/").
+                set_author("Some name", "https://dpp.dev/", "https://dpp.dev/DPP-Logo.png").
+                set_description("Some description here").
+                set_thumbnail("https://dpp.dev/DPP-Logo.png").
+                add_field(
+                        "Regular field title",
+                        "Some value here"
+                ).
+                add_field(
+                        "Inline field title",
+                        "Some value here",
+                        true
+                ).
+                add_field(
+                        "Inline field title",
+                        "Some value here",
+                        true
+                ).
+                set_image("https://dpp.dev/DPP-Logo.png").
+                set_footer(dpp::embed_footer().set_text("Some footer text here").set_icon("https://dpp.dev/DPP-Logo.png"));
+
+            embed.timestamp = time(0);
+
+            bot.message_create(dpp::message(event.msg->channel_id, embed));
+        }
+    });
+
+    bot.start(false);
+    return 0;
+}
+~~~~~~~~~~
+
+The code will send the following message.
+
+\image html embed.png
