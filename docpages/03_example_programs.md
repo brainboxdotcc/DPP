@@ -559,13 +559,13 @@ int main()
 If you want to make your bot use spdlog, like aegis does, you can attach it to the on_log event. You can do this as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-#include <dpp/fmt/format.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <iomanip>
+#include <dpp/dpp.h>
+#include <dpp/fmt/format.h>
 
 int main(int argc, char const *argv[])
 {

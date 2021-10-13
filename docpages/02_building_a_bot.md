@@ -44,6 +44,8 @@ project(discord-bot VERSION 1.0 DESCRIPTION "A discord bot")
 
 # Add DPP as dependency
 add_subdirectory(libs/DPP)
+add_subdirectory(libs/spdlog) # if you need a logger. Don't forget to clone sources
+                              # in the `libs/` directory
 
 # Create an executable
 add_executable(${PROJECT_NAME}
@@ -54,8 +56,7 @@ add_executable(${PROJECT_NAME}
 # Linking libraries
 target_link_libraries(${PROJECT_NAME}
     dpp
-    spdlog # if you need a logger. Don't forget to clone sources
-           # in the `libs/` directory
+    spdlog # Like before, if you need spdlog
 )
 
 # Specify includes
