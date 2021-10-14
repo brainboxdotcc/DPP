@@ -436,6 +436,12 @@ embed& embed::set_author(const embed_author& a)
 	return *this;
 }
 
+embed& embed::set_timestamp(time_t tstamp)
+{
+	timestamp = tstamp;
+	return *this;
+}
+
 embed& embed::set_author(const std::string& name, const std::string& url, const std::string& icon_url) {
 	dpp::embed_author a;
 	a.name = utility::utf8substr(name, 0, 256);
