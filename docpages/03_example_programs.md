@@ -1141,9 +1141,8 @@ int main() {
                         true
                 ).
                 set_image("https://dpp.dev/DPP-Logo.png").
-                set_footer(dpp::embed_footer().set_text("Some footer text here").set_icon("https://dpp.dev/DPP-Logo.png"));
-
-            embed.timestamp = time(0);
+                set_footer(dpp::embed_footer().set_text("Some footer text here").set_icon("https://dpp.dev/DPP-Logo.png")).
+                set_timestamp(time(0));
 
             bot.message_create(dpp::message(event.msg->channel_id, embed));
         }
