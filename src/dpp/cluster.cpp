@@ -969,7 +969,7 @@ void cluster::guild_get_preview(snowflake guild_id, command_completion_event_t c
 }
 
 void cluster::guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "member/" + std::to_string(user_id), m_get, "", [callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_get, "", [callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, guild_id, user_id), http));
 		}
