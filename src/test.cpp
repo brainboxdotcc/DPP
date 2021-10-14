@@ -18,7 +18,7 @@ int main()
 	});
 
 	bot.on_log([&](const dpp::log_t& loginfo) {
-		if (loginfo.severity > dpp::ll_trace) {
+		if (loginfo.severity >= dpp::ll_trace) {
 			std::cout << dpp::utility::loglevel(loginfo.severity) << " " << loginfo.message << "\n";
 		}
 	});
