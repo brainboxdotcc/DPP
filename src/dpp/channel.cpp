@@ -144,13 +144,11 @@ channel& channel::fill_from_json(json* j) {
 	if (type == GUILD_NEWS_THREAD || type == GUILD_PUBLIC_THREAD || type == GUILD_PRIVATE_THREAD) {
 		SetInt8NotNull(j, "message_count", this->message_count);
 		SetInt8NotNull(j, "memeber_count", this->member_count);
-		dpp::thread_metadata metadata;
 		auto json_metadata = (*j)["thread_metadata"];
 		metadata.archived = BoolNotNull(&json_metadata, "archived");
 		metadata.archive_timestamp = TimestampNotNull(&json_metadata, "archive_timestamp");
 		metadata.auto_archive_duration = Int16NotNull(&json_metadata, "auto_archive_duration");
 		metadata.locked = BoolNotNull(&json_metadata, "locked");
-
 	}
 
 	return *this;

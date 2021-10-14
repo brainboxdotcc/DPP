@@ -48,7 +48,6 @@ void guild_role_update::handle(discord_client* client, json &j, const std::strin
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 	if (g) {
 		if (client->creator->cache_policy.role_policy == dpp::cp_none) {
-			json& role = d["role"];
 			dpp::role r;
 			r.fill_from_json(g->id, &d);
 			if (client->creator->dispatch.guild_role_update) {

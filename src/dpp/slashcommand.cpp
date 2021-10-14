@@ -28,7 +28,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-slashcommand::slashcommand() : managed(), default_permission(true), type(ctxm_chat_input) {
+slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1) {
 }
 
 slashcommand::~slashcommand() {
