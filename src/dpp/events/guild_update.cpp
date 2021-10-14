@@ -49,7 +49,7 @@ void guild_update::handle(discord_client* client, json &j, const std::string &ra
 		g->fill_from_json(client, &d);
 		if (!g->is_unavailable()) {
 			if (client->creator->cache_policy.role_policy != dpp::cp_none && d.find("roles") != d.end()) {
-				for (int rc = 0; rc < g->roles.size(); ++rc) {
+				for (size_t rc = 0; rc < g->roles.size(); ++rc) {
 					dpp::role* oldrole = dpp::find_role(g->roles[rc]);
 					dpp::get_role_cache()->remove(oldrole);
 				}

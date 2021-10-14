@@ -29,7 +29,7 @@
 
 namespace dpp {
 
-event_dispatch_t::event_dispatch_t(discord_client* client, const std::string &raw) : from(client), raw_event(raw)
+event_dispatch_t::event_dispatch_t(discord_client* client, const std::string &raw) : raw_event(raw), from(client)
 {
 }
 
