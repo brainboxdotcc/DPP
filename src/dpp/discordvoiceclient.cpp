@@ -630,7 +630,7 @@ void discord_voice_client::Error(uint32_t errorcode)
 	}
 }
 
-void discord_voice_client::log(dpp::loglevel severity, const std::string &msg)
+void discord_voice_client::log(dpp::loglevel severity, const std::string &msg) const
 {
 	creator->log(severity, msg);
 }
