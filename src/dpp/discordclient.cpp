@@ -225,6 +225,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				this->sessionid = "";
 				this->last_seq = 0;
 				/* No break here, falls through to state 10 to cause a reidentify */
+				[[fallthrough]];
 			case 10:
 				/* Need to check carefully for the existence of this before we try to access it! */
 				if (j.find("d") != j.end() && j["d"].find("heartbeat_interval") != j["d"].end() && !j["d"]["heartbeat_interval"].is_null()) {

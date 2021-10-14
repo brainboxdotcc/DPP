@@ -128,10 +128,12 @@ void ssl_client::Connect()
 	if ((host = gethostbyname(hostname.c_str())) == nullptr)
 		throw dpp::exception(fmt::format("Couldn't resolve hostname '{}'", hostname));
 
-	struct addrinfo hints = {0}, *addrs;
+	addrinfo hints, *addrs;
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
+
+	memset(&hints, 0, sizeof(addrinfo));
 
 	int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
 	if (status != 0)

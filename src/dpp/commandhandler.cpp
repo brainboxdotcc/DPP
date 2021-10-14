@@ -383,6 +383,7 @@ void commandhandler::route(const struct interaction_create_t & event)
 					bool b = std::get<bool>(slash_parameter);
 					param = b;
 				}
+				break;
 				case pt_double: {
 					double b = std::get<double>(slash_parameter);
 					param = b;
