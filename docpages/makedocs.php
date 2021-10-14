@@ -68,6 +68,7 @@ foreach ($tags as $tag) {
 		/* Rewrite version info in header */
 		file_put_contents("docpages/header.html", $hdr);		
 		shell_exec("/usr/local/bin/doxygen");
+		mkdir(getenv("HOME") . "/dpp-web/$tag");
 		system("cp -r docs/* " . getenv("HOME") . "/dpp-web/$tag");
 		chdir("..");
 		system("rm -rf " . sys_get_temp_dir() . "/dpp-old/DPP");
