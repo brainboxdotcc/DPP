@@ -82,7 +82,15 @@ public:
 #define BUFSIZZ 16 * 1240
 const int ERROR_STATUS = -1;
 
-ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) : last_tick(time(NULL)), hostname(_hostname), port(_port), bytes_in(0), bytes_out(0)
+ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) :
+	nonblocking(false),
+	sfd(INVALID_SOCKET),
+	ssl(nullptr),
+	last_tick(time(NULL)),
+	hostname(_hostname),
+	port(_port),
+	bytes_out(0),
+	bytes_in(0)
 {
 #ifndef WIN32
         signal(SIGALRM, SIG_IGN);
@@ -130,7 +138,7 @@ void ssl_client::Connect()
 		throw dpp::exception(fmt::format("getaddrinfo (host={}, port={}): ", hostname, port, gai_strerror(status)));
 
 	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
-	int err;
+	int err = 0;
 	for (struct addrinfo *addr = addrs; addr != nullptr; addr = addr->ai_next) {
 		sfd = ::socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
 		if (sfd == ERROR_STATUS) {
@@ -204,7 +212,6 @@ void ssl_client::read_loop()
 	 * we need another frame or receive while we are due to send a frame
 	 * would cause the protocol to break.
 	 */
-	int width;
 	int r = 0;
 	size_t ClientToServerLength = 0, ClientToServerOffset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
@@ -230,7 +237,6 @@ void ssl_client::read_loop()
 	}
 #endif
 	nonblocking = true;
-	width = (int)sfd + 1;
 
 	try {
 		/* Loop until there is a socket error */

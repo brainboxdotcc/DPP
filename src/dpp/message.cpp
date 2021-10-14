@@ -31,7 +31,9 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-component::component() : type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""), disabled(false), min_values(-1), max_values(-1)
+component::component() :
+	type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""),
+	min_values(-1), max_values(-1), disabled(false)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -197,7 +199,7 @@ void to_json(json& j, const component& cp) {
 select_option::select_option() : is_default(false) {
 }
 
-select_option::select_option(const std::string &_label, const std::string &_value, const std::string &_description) : is_default(false), label(_label), value(_value), description(_description) {
+select_option::select_option(const std::string &_label, const std::string &_value, const std::string &_description) : label(_label), value(_value), description(_description), is_default(false) {
 }
 
 select_option& select_option::set_label(const std::string &l) {
@@ -260,8 +262,8 @@ embed::~embed() = default;
 embed::embed() : timestamp(0), color(0) {
 }
 
-message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), flags(0),
-	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0)
+message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), tts(false),
+	mention_everyone(false), pinned(false), webhook_id(0), flags(0), type(mt_default)
 {
 	message_reference.channel_id = 0;
 	message_reference.guild_id = 0;
@@ -849,7 +851,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	return *this;
 }
 
-sticker::sticker() : id(0), pack_id(0), guild_id(0), type(st_standard), format_type(sf_png), available(true), sort_value(0) {
+sticker::sticker() : id(0), pack_id(0), type(st_standard), format_type(sf_png), available(true), guild_id(0), sort_value(0) {
 }
 
 sticker& sticker::fill_from_json(nlohmann::json* j) {

@@ -34,8 +34,8 @@
 namespace dpp {
 
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy)
-	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id),
-	maxclusters(_maxclusters), last_identify(time(NULL) - 5), compressed(comp), cache_policy(policy), rest_ping(0.0)
+	: rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(NULL) - 5), intents(_intents),
+	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy)
 {
 	rest = new request_queue(this);
 	raw_rest = new request_queue(this);
@@ -58,7 +58,7 @@ cluster::~cluster()
 }
 
 confirmation_callback_t::confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http)
-	: type(_type), value(_value), http_info(_http)
+	: type(_type), http_info(_http), value(_value)
 {
 	if (type == "confirmation") {
 		confirmation newvalue = std::get<confirmation>(_value);

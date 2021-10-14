@@ -32,10 +32,10 @@ namespace dpp {
 integration::integration() :
 	managed(),
 	type(i_twitch),
+	flags(0),
 	role_id(0),
 	user_id(0),
 	expire_grace_period(0),
-	flags(0),
 	synced_at(0),
 	subscriber_count(0)
 {

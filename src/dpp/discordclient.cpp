@@ -48,24 +48,26 @@ public:
 
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
        : websocket_client(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
+        runner(nullptr),
+	compressed(comp),
+	decomp_buffer(nullptr),
+	decompressed_total(0),
+	connect_time(0),
+	ping_start(0.0),
 	creator(_cluster),
+	heartbeat_interval(0),
+	last_heartbeat(time(nullptr)),
 	shard_id(_shard_id),
 	max_shards(_max_shards),
-	token(_token),
-	last_heartbeat(time(NULL)),
-	heartbeat_interval(0),
-	reconnects(0),
-	resumes(0),
 	last_seq(0),
-	sessionid(""),
+	token(_token),
 	intents(_intents),
-	runner(nullptr),
-	compressed(comp),
-	decompressed_total(0),
-	decomp_buffer(nullptr),
+	sessionid(""),
+	resumes(0),
+	reconnects(0),
+	websocket_ping(0.0),
 	ready(false),
-	ping_start(0.0),
-	websocket_ping(0.0)
+	last_heartbeat_ack(time(nullptr))
 {
 	zlib = new zlibcontext();
 	Connect();

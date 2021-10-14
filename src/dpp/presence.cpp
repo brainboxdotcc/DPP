@@ -26,11 +26,12 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) : type(typ), name(nam), state(stat), url(url_)
+activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) :
+	 name(nam), state(stat), url(url_), type(typ)
 {	
 }
 
-presence::presence() : guild_id(0), user_id(0), flags(0)
+presence::presence() : user_id(0), guild_id(0), flags(0)
 {
 }
 

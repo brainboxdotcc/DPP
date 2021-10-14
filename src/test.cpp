@@ -1,7 +1,7 @@
 #undef DPP_BUILD
-
+#ifdef _WIN32
 _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
-
+#endif
 #include <dpp/dpp.h>
 #include <dpp/nlohmann/json.hpp>
  
