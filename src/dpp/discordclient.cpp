@@ -210,12 +210,14 @@ bool discord_client::HandleFrame(const std::string &buffer)
 		return true;
 	}
 
-	if (j.find("s") != j.end() && !j["s"].is_null()) {
-		last_seq = j["s"].get<uint64_t>();
+	auto seq = j.find("s");
+	if (seq != j.end() && !seq->is_null()) {
+		last_seq = seq->get<uint64_t>();
 	}
 
-	if (j.find("op") != j.end()) {
-		uint32_t op = j["op"];
+	auto o = j.find("op");
+	if (o != j.end() && !o->is_null()) {
+		uint32_t op = o->get<uint32_t>();
 
 		switch (op) {
 			case 9:
@@ -284,7 +286,8 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				websocket_ping = 0;
 			break;
 			case 0: {
-				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
+				auto t = j.find("t");
+				std::string event = t != j.end() && t->is_null() ? t->get<std::string>() : "";
 
 				HandleEvent(event, j, data);
 			}
