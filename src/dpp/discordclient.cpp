@@ -286,9 +286,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				websocket_ping = 0;
 			break;
 			case 0: {
-				auto t = j.find("t");
-				std::string event = t != j.end() && t->is_null() ? t->get<std::string>() : "";
-
+				std::string event = j["t"];
 				HandleEvent(event, j, data);
 			}
 			break;
