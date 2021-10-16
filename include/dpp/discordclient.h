@@ -196,7 +196,18 @@ private:
 	/** Time last ping sent to websocket, in fractional seconds */
 	double ping_start;
 
+	/** ETF parser */
 	class etf_parser* etf;
+
+	/**
+	 * @brief Convert a JSON object to string.
+	 * In JSON protocol mode, call json.dump(), and in ETF mode,
+	 * call etf::build().
+	 * 
+	 * @param json nlohmann::json object to convert
+	 * @return * std::string string output in the correct format
+	 */
+	std::string jsonobj_to_string(nlohmann::json& json);
 
 	/**
 	 * @brief Initialise ZLib (websocket compression)

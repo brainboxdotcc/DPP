@@ -477,7 +477,9 @@ void discord_client::one_second_timer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				QueueMessage(json({{"op", 1}, {"d", last_seq}}).dump(), true);
+				QueueMessage(
+					json({{"op", 1}, {"d", last_seq}}).dump()
+					, true);
 				last_heartbeat = time(NULL);
 			}
 		}
@@ -558,6 +560,14 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id, boo
 		log(ll_debug, fmt::format("Requested the bot connect to voice channel {} on guild {}, but it seems we are already on this VC", channel_id, guild_id));
 	}
 #endif
+}
+
+std::string discord_client::jsonobj_to_string(nlohmann::json& json) {
+	if (protocol == ws_json) {
+		return json.dump();
+	} else {
+		return etf->build(json);
+	}
 }
 
 void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_json) {
