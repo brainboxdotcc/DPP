@@ -35,7 +35,7 @@ namespace dpp {
 
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy)
 	: rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(NULL) - 5), intents(_intents),
-	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy)
+	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
 	rest = new request_queue(this);
 	raw_rest = new request_queue(this);
@@ -56,6 +56,12 @@ cluster::~cluster()
 	WSACleanup();
 #endif
 }
+
+cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
+	ws_mode = mode;
+	return *this;
+}
+
 
 confirmation_callback_t::confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http)
 	: type(_type), http_info(_http), value(_value)
@@ -189,7 +195,7 @@ void cluster::start(bool return_after) {
 			if (s % maxclusters == cluster_id) {
 				/* Each discord_client spawns its own thread in its Run() */
 				try {
-					this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed);
+					this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
 					this->shards[s]->Run();
 				}
 				catch (const std::exception &e) {

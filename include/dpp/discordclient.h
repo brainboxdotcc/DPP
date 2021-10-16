@@ -30,6 +30,7 @@
 #include <dpp/cluster.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/event.h>
+#include <dpp/etf.h>
 #include <queue>
 #include <thread>
 #include <deque>
@@ -195,6 +196,8 @@ private:
 	/** Time last ping sent to websocket, in fractional seconds */
 	double ping_start;
 
+	class etf_parser* etf;
+
 	/**
 	 * @brief Initialise ZLib (websocket compression)
 	 */
@@ -253,6 +256,8 @@ public:
 
 	/** Last heartbeat ACK (opcode 11) */
 	time_t last_heartbeat_ack;
+
+	websocket_protocol_t protocol;
 
 	/** List of voice channels we are connecting to keyed by guild id */
 	std::unordered_map<snowflake, voiceconn*> connecting_voice_channels;
@@ -341,8 +346,9 @@ public:
 	 * @param _token The bot token to use for identifying to the websocket
 	 * @param intents Privileged intents to use, a bitmask of values from dpp::intents
 	 * @param compressed True if the received data will be gzip compressed
+	 * @param ws_potocol Websocket protocol to use for the connection, JSON or ETF
 	 */
-	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true);
+	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
 
 	/** Destructor */
 	virtual ~discord_client();

@@ -289,6 +289,8 @@ public:
 
 	cache_policy_t cache_policy;
 
+	websocket_protocol_t ws_mode;
+
 	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
 	 * @param token The bot token to use for all HTTP commands and websocket connections
@@ -314,6 +316,8 @@ public:
 
 	/** Destructor */
 	~cluster();
+
+	cluster& set_websocket_protocol(websocket_protocol_t mode);
 
 	/**
 	 * @brief Log a message to whatever log the user is using.

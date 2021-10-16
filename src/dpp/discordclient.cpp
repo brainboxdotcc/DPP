@@ -46,7 +46,7 @@ public:
 	z_stream d_stream;
 };
 
-discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
+discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
         runner(nullptr),
 	compressed(comp),
@@ -67,9 +67,11 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	reconnects(0),
 	websocket_ping(0.0),
 	ready(false),
-	last_heartbeat_ack(time(nullptr))
+	last_heartbeat_ack(time(nullptr)),
+	protocol(ws_proto)
 {
 	zlib = new zlibcontext();
+	etf = new etf_parser();
 	Connect();
 }
 
@@ -79,6 +81,7 @@ discord_client::~discord_client()
 		runner->join();
 		delete runner;
 	}
+	delete etf;
 	delete zlib;
 }
 
@@ -203,7 +206,14 @@ bool discord_client::HandleFrame(const std::string &buffer)
 	json j;
 	
 	try {
-		j = json::parse(data);
+		switch (protocol) {
+			case ws_json:
+				j = json::parse(data);
+			break;
+			case ws_etf:
+				etf->parse(data, j);
+			break;
+		}
 	}
 	catch (const std::exception &e) {
 		log(dpp::ll_error, fmt::format("discord_client::HandleFrame {} [{}]", e.what(), data));
