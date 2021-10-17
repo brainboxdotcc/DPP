@@ -279,7 +279,7 @@ void cluster::set_presence(const dpp::presence &p) {
 	std::string string_presence = p.build_json();
 	for (auto& s : shards) {
 		if (s.second->is_connected()) {
-			s.second->QueueMessage(string_presence);
+			s.second->QueueMessage(s.second->jsonobj_to_string(string_presence));
 		}
 	}
 }

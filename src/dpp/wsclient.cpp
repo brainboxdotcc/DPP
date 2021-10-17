@@ -116,7 +116,7 @@ void websocket_client::write(const std::string &data)
 		ssl_client::write(data);
 	} else {
 		unsigned char out[MAXHEADERSIZE];
-		size_t s = this->FillHeader(out, data.length(), OP_TEXT);
+		size_t s = this->FillHeader(out, data.length(), OP_BINARY);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
 		ssl_client::write(data);

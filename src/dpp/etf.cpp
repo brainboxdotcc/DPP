@@ -60,62 +60,50 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-int etf_parser::erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, size_t l) {
-	char *buf = pk->buf;
-	size_t allocated_size = pk->allocated_size;
-	size_t length = pk->length;
+void etf_parser::erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, size_t l) {
 
-	if (length + l > allocated_size) {
+	if (pk->length + l > pk->buf.size()) {
 		// Grow buffer 2x to avoid excessive re-allocations.
-		allocated_size = (length + l) * 2;
-		buf = (char *)realloc(buf, allocated_size);
-
-		if (!buf)
-			return -1;
+		pk->buf.resize((pk->length + l) * 2);
 	}
 
-	memcpy(buf + length, bytes, l);
-	length += l;
-
-	pk->buf = buf;
-	pk->allocated_size = allocated_size;
-	pk->length = length;
-	return 0;
+	memcpy(pk->buf.data() + pk->length, bytes, l);
+	pk->length += l;
 }
 
-int etf_parser::erlpack_append_version(erlpack_buffer *b) {
+ void etf_parser::erlpack_append_version(erlpack_buffer *b) {
 	static unsigned char buf[1] = {FORMAT_VERSION};
 	erlpack_append(b, buf, 1);
 }
 
-int etf_parser::erlpack_append_nil(erlpack_buffer *b) {
+ void etf_parser::erlpack_append_nil(erlpack_buffer *b) {
 	static unsigned char buf[5] = {SMALL_ATOM_EXT, 3, 'n', 'i', 'l'};
 	erlpack_append(b, buf, 5);
 }
 
-int etf_parser::erlpack_append_false(erlpack_buffer *b) {
+ void etf_parser::erlpack_append_false(erlpack_buffer *b) {
 	static unsigned char buf[7] = {SMALL_ATOM_EXT, 5, 'f', 'a', 'l', 's', 'e'};
 	erlpack_append(b, buf, 7);
 }
 
-int etf_parser::erlpack_append_true(erlpack_buffer *b) {
+ void etf_parser::erlpack_append_true(erlpack_buffer *b) {
 	static unsigned char buf[6] = {SMALL_ATOM_EXT, 4, 't', 'r', 'u', 'e'};
 	erlpack_append(b, buf, 6);
 }
 
-int etf_parser::erlpack_append_small_integer(erlpack_buffer *b, unsigned char d) {
+ void etf_parser::erlpack_append_small_integer(erlpack_buffer *b, unsigned char d) {
 	unsigned char buf[2] = {SMALL_INTEGER_EXT, d};
 	erlpack_append(b, buf, 2);
 }
 
-int etf_parser::erlpack_append_integer(erlpack_buffer *b, int32_t d) {
+ void etf_parser::erlpack_append_integer(erlpack_buffer *b, int32_t d) {
 	unsigned char buf[5];
 	buf[0] = INTEGER_EXT;
 	_erlpack_store32(buf + 1, d);
 	erlpack_append(b, buf, 5);
 }
 
-int etf_parser::erlpack_append_unsigned_long_long(erlpack_buffer *b, unsigned long long d) {
+ void etf_parser::erlpack_append_unsigned_long_long(erlpack_buffer *b, unsigned long long d) {
 	unsigned char buf[1 + 2 + sizeof(unsigned long long)];
 	buf[0] = SMALL_BIG_EXT;
 
@@ -131,7 +119,7 @@ int etf_parser::erlpack_append_unsigned_long_long(erlpack_buffer *b, unsigned lo
 	erlpack_append(b, buf, 1 + 2 + bytes_enc);
 }
 
-int etf_parser::erlpack_append_long_long(erlpack_buffer *b, long long d) {
+ void etf_parser::erlpack_append_long_long(erlpack_buffer *b, long long d) {
 	unsigned char buf[1 + 2 + sizeof(unsigned long long)];
 	buf[0] = SMALL_BIG_EXT;
 	buf[2] = d < 0 ? 1 : 0;
@@ -146,7 +134,7 @@ int etf_parser::erlpack_append_long_long(erlpack_buffer *b, long long d) {
 	erlpack_append(b, buf, 1 + 2 + bytes_enc);
 }
 
-int etf_parser::erlpack_append_double(erlpack_buffer *b, double f) {
+ void etf_parser::erlpack_append_double(erlpack_buffer *b, double f) {
 	unsigned char buf[1 + 8] = {0};
 	buf[0] = NEW_FLOAT_EXT;
 	type_punner p;
@@ -155,85 +143,63 @@ int etf_parser::erlpack_append_double(erlpack_buffer *b, double f) {
 	erlpack_append(b, buf, 1 + 8);
 }
 
-int etf_parser::erlpack_append_atom(erlpack_buffer *b, const char *bytes, size_t size) {
+ void etf_parser::erlpack_append_atom(erlpack_buffer *b, const char *bytes, size_t size) {
 	if (size < 255) {
 		unsigned char buf[2] = {SMALL_ATOM_EXT, (unsigned char)size};
-		int ret = erlpack_buffer_write(b, (const char *)buf, 2);
-		if (ret < 0)
-		return ret;
-
+		erlpack_buffer_write(b, (const char *)buf, 2);
 		erlpack_append(b, bytes, size);
 	} else {
 		unsigned char buf[3];
 		buf[0] = ATOM_EXT;
 
 		if (size > 0xFFFF) {
-			return 1;
+			throw dpp::exception("ETF: Atom too large");
 		}
 
 		_erlpack_store16(buf + 1, size);
-
-		int ret = erlpack_buffer_write(b, (const char *)buf, 3);
-		if (ret < 0)
-		return ret;
-
+		erlpack_buffer_write(b, (const char *)buf, 3);
 		erlpack_append(b, bytes, size);
 	}
 }
 
-int etf_parser::erlpack_append_atom_utf8(erlpack_buffer *b, const char *bytes, size_t size) {
+ void etf_parser::erlpack_append_atom_utf8(erlpack_buffer *b, const char *bytes, size_t size) {
 	if (size < 255) {
 		unsigned char buf[2] = {SMALL_ATOM_UTF8_EXT, (unsigned char)size};
-		int ret = erlpack_buffer_write(b, (const char *)buf, 2);
-		if (ret < 0)
-			return ret;
-
+		erlpack_buffer_write(b, (const char *)buf, 2);
 		erlpack_append(b, bytes, size);
 	} else {
 		unsigned char buf[3];
 		buf[0] = ATOM_UTF8_EXT;
 
 		if (size > 0xFFFF) {
-			return 1;
+			throw dpp::exception("ETF: Atom too large");
 		}
 
 		_erlpack_store16(buf + 1, size);
-
-		int ret = erlpack_buffer_write(b, (const char *)buf, 3);
-		if (ret < 0)
-			return ret;
-
+		erlpack_buffer_write(b, (const char *)buf, 3);
 		erlpack_append(b, bytes, size);
 	}
 }
 
-int etf_parser::erlpack_append_binary(erlpack_buffer *b, const char *bytes, size_t size) {
-  unsigned char buf[5];
-  buf[0] = BINARY_EXT;
+void etf_parser::erlpack_append_binary(erlpack_buffer *b, const char *bytes, size_t size) {
+	unsigned char buf[5];
+	buf[0] = BINARY_EXT;
 
-  _erlpack_store32(buf + 1, size);
-
-  int ret = erlpack_buffer_write(b, (const char *)buf, 5);
-  if (ret < 0)
-    return ret;
-
-  erlpack_append(b, bytes, size);
+	_erlpack_store32(buf + 1, size);
+	erlpack_buffer_write(b, (const char *)buf, 5);
+	erlpack_append(b, bytes, size);
 }
 
-int etf_parser::erlpack_append_string(erlpack_buffer *b, const char *bytes, size_t size) {
+ void etf_parser::erlpack_append_string(erlpack_buffer *b, const char *bytes, size_t size) {
 	unsigned char buf[3];
 	buf[0] = STRING_EXT;
 
 	_erlpack_store16(buf + 1, size);
-
-	int ret = erlpack_buffer_write(b, (const char *)buf, 3);
-	if (ret < 0)
-		return ret;
-
+	erlpack_buffer_write(b, (const char *)buf, 3);
 	erlpack_append(b, bytes, size);
 }
 
-int etf_parser::erlpack_append_tuple_header(erlpack_buffer *b, size_t size) {
+ void etf_parser::erlpack_append_tuple_header(erlpack_buffer *b, size_t size) {
 	if (size < 256) {
 		unsigned char buf[2];
 		buf[0] = SMALL_TUPLE_EXT;
@@ -247,19 +213,19 @@ int etf_parser::erlpack_append_tuple_header(erlpack_buffer *b, size_t size) {
 	}
 }
 
-int etf_parser::erlpack_append_nil_ext(erlpack_buffer *b) {
+ void etf_parser::erlpack_append_nil_ext(erlpack_buffer *b) {
 	static unsigned char buf[1] = {NIL_EXT};
 	erlpack_append(b, buf, 1);
 }
 
-int etf_parser::erlpack_append_list_header(erlpack_buffer *b, size_t size) {
+ void etf_parser::erlpack_append_list_header(erlpack_buffer *b, size_t size) {
 	unsigned char buf[5];
 	buf[0] = LIST_EXT;
 	_erlpack_store32(buf + 1, size);
 	erlpack_append(b, buf, 5);
 }
 
-int etf_parser::erlpack_append_map_header(erlpack_buffer *b, size_t size) {
+ void etf_parser::erlpack_append_map_header(erlpack_buffer *b, size_t size) {
 	unsigned char buf[5];
 	buf[0] = MAP_EXT;
 	_erlpack_store32(buf + 1, size);
@@ -401,12 +367,10 @@ json etf_parser::decodeNil() {
 
 json etf_parser::decodeMap() {
 	const uint32_t length = read32();
-	std::cout << "Map len=" << length << "\n";
 	auto map = json::object();
 	for(uint32_t i = 0; i < length; ++i) {
 		const auto key = inner_parse();
 		const auto value = inner_parse();
-		std::cout << "key=" << key.dump() << " value=" << value.dump() <<"\n";
 		if (key.is_number()) {
 			map[std::to_string(key.get<uint64_t>())] = value;
 		} else {
@@ -505,11 +469,9 @@ json etf_parser::decodeBinaryAsString() {
 	const auto length = read32();
 	const char* str = readString(length);
 	if (str == NULL) {
-		std::cout << "decodeBinaryAsString got NULL string\n";
 		return json();
 	}
 	std::string s = std::string(str, length);
-	std::cout << "str=" << s << " length " << length << "\n";
 	json j = std::string(str, length);
 	return j;
 }
@@ -630,91 +592,69 @@ json etf_parser::inner_parse() {
 	}
 
 	const uint8_t type = read8();
-	std::cout << "inner parse: " << type << "\n";
 
 	switch(type) {
 		case SMALL_INTEGER_EXT:
-			std::cout << "Decode small integer\n";
 			return decodeSmallInteger();
 		break;
 		case INTEGER_EXT:
-			std::cout << "Decode integer\n";
 			return decodeInteger();
 		break;
 		case FLOAT_EXT:
-			std::cout << "Decode float\n";
 			return decodeFloat();
 		break;
 		case NEW_FLOAT_EXT:
-			std::cout << "Decode new float\n";
 			return decodeNewFloat();
 		break;
 		case ATOM_EXT:
-			std::cout << "Decode atom\n";
 			return decodeAtom();
 		break;
 		case SMALL_ATOM_EXT:
-			std::cout << "Decode small atom\n";
 			return decodeSmallAtom();
 		break;
 		case SMALL_TUPLE_EXT:
-			std::cout << "Decode small tuple\n";
 			return decodeSmallTuple();
 		break;
 		case LARGE_TUPLE_EXT:
-			std::cout << "Decode large tuple\n";
 			return decodeLargeTuple();
 		break;
 		case NIL_EXT:
-			std::cout << "Decode nil\n";
 			return decodeNil();
 		break;
 		case STRING_EXT:
-			std::cout << "Decode string as list\n";
 			return decodeStringAsList();
 		break;
 		case LIST_EXT:
-			std::cout << "Decode list\n";
 			return decodeList();
 		break;
 		case MAP_EXT:
-			std::cout << "Decode map\n";
 			return decodeMap();
 		break;
 		case BINARY_EXT:
-			std::cout << "Decode binary as string\n";
 			return decodeBinaryAsString();
 		break;
 		case SMALL_BIG_EXT:
-			std::cout << "Decode small big\n";
 			return decodeSmallBig();
 		break;
 		case LARGE_BIG_EXT:
-			std::cout << "Decode large big\n";
 			return decodeLargeBig();
 		break;
 		case REFERENCE_EXT:
-			std::cout << "Decode reference\n";
 			return decodeReference();
 		break;
 		case NEW_REFERENCE_EXT:
-			std::cout << "Decode new reference\n";
 			return decodeNewReference();
 		break;
 		case PORT_EXT:
-			std::cout << "Decode port\n";
 			return decodePort();
 		break;
 		case PID_EXT:
-			std::cout << "Decode pid\n";
 			return decodePID();
 		break;
 		case EXPORT_EXT:
-			std::cout << "Decode export\n";
 			return decodeExport();
 		break;
 		case COMPRESSED:
-			std::cout << "Decode compressed\n";
 			return decodeCompressed();
 		break;
 		default:
@@ -735,9 +675,85 @@ json etf_parser::parse(const std::string& in) {
 	}
 }
 
-std::string etf_parser::build(const json& j) {
-	return "";
+void etf_parser::inner_build(const json* i, erlpack_buffer* b)
+{
+	if (i->is_number_integer()) {
+		int number = i->get<int>();
+		if (number >= 0 && number <= 127) {
+			unsigned char num = (unsigned char)number;
+			erlpack_append_small_integer(b, num);
+		}
+		/*else if (i->is_number_unsigned()) {
+			auto uNum = (uint64_t)i->get<uint64_t>();
+			erlpack_append_unsigned_long_long(b, uNum);
+		}*/
+		else if (i->is_number_integer()) {
+			erlpack_append_integer(b, number);
+		}
+	}
+	else if (i->is_number_float()) {
+		double decimal = i->get<double>();
+		erlpack_append_double(b, decimal);
+	}
+	else if (i->is_null()) {
+		erlpack_append_nil(b);
+	}
+	else if (i->is_boolean()) {
+		bool truthy = i->get<bool>();
+		if (truthy) {
+			erlpack_append_true(b);
+		} else {
+			erlpack_append_false(b);
+		}
+	}
+	else if (i->is_string()) {
+		const std::string s = i->get<std::string>();
+		erlpack_append_binary(b, s.c_str(), s.length());
+	}
+	else if (i->is_array()) {
+		const size_t length = i->size();
+		if (length == 0) {
+			erlpack_append_nil_ext(b);
+		} else {
+			if (length > std::numeric_limits<uint32_t>::max() - 1) {
+				throw dpp::exception("ETF encode: List too large for ETF");
+			}
+		}
+
+		erlpack_append_list_header(b, length);
+
+		for(size_t index = 0; index < length; ++index) {
+			inner_build(&((*i)[index]), b);
+		}
+		erlpack_append_nil_ext(b);
+	}
+	else if (i->is_object()) {
+		const size_t length = i->size();
+		if (length > std::numeric_limits<uint32_t>::max() - 1) {
+			throw dpp::exception("ETF encode: Map too large for ETF");
+		}
+		erlpack_append_map_header(b, length);
+		for (auto n = i->begin(); n != i->end(); ++n) {
+			json jstr = n.key();
+			inner_build(&jstr, b);
+			inner_build(&(n.value()), b);
+		}
+	}
 }
+
+std::string etf_parser::build(const json& j) {
+	erlpack_buffer pk(1024 * 1024);
+	erlpack_append_version(&pk);
+	inner_build(&j, &pk);
+	return std::string(pk.buf.data(), pk.length);
+}
+
+erlpack_buffer::erlpack_buffer(size_t initial) {
+	buf.resize(initial);
+	length = 0;
+}
+
+erlpack_buffer::~erlpack_buffer() = default;
 
 };
 

@@ -144,6 +144,11 @@ protected:
 	friend class dpp::events::voice_state_update;
 
 	/**
+	 * @brief Needed to allow cluster::set_presence to use the ETF functions
+	 */
+	friend class dpp::cluster;
+
+	/**
 	 * @brief Disconnect from the connected voice channel on a guild
 	 * 
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
@@ -206,7 +211,7 @@ private:
 	 * @param json nlohmann::json object to convert
 	 * @return * std::string string output in the correct format
 	 */
-	std::string jsonobj_to_string(nlohmann::json& json);
+	std::string jsonobj_to_string(const nlohmann::json& json);
 
 	/**
 	 * @brief Initialise ZLib (websocket compression)

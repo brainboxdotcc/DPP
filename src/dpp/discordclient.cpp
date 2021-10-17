@@ -210,22 +210,19 @@ bool discord_client::HandleFrame(const std::string &buffer)
 	switch (protocol) {
 		case ws_json:
 			try {
-				log(dpp::ll_trace, fmt::format("R: {}", data));
 				j = json::parse(data);
 			}
 			catch (const std::exception &e) {
-				log(dpp::ll_error, fmt::format("discord_client::HandleFrame {} [{}]", e.what(), data));
+				log(dpp::ll_error, fmt::format("discord_client::HandleFrame(JSON): {} [{}]", e.what(), data));
 				return true;
 			}
 		break;
 		case ws_etf:
 			try {
-				log(dpp::ll_trace, fmt::format("R: len={}\n{}", data.size(), dpp::utility::debug_dump((uint8_t*)data.data(), data.size())));
 				j = etf->parse(data);
-				log(dpp::ll_trace, fmt::format("ETF_TO_JSON: {}", j.dump()));
 			}
 			catch (const std::exception &e) {
-				log(dpp::ll_error, fmt::format("discord_client::HandleFrame {} [{}]", e.what(), j.dump()));
+				log(dpp::ll_error, fmt::format("discord_client::HandleFrame(ETF): {} len={}\n{}", e.what(), data.size(), dpp::utility::debug_dump((uint8_t*)data.data(), data.size())));
 				return true;
 			}
 		break;
@@ -267,7 +264,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 							}
 						}
 					};
-					this->write(obj.dump());
+					this->write(jsonobj_to_string(obj));
 					resumes++;
 				} else {
 					/* Full connect */
@@ -299,7 +296,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 					if (this->intents) {
 						obj["d"]["intents"] = this->intents;
 					}
-					this->write(obj.dump());
+					this->write(jsonobj_to_string(obj));
 					this->connect_time = creator->last_identify = time(NULL);
 					reconnects++;
 				}
@@ -489,7 +486,7 @@ void discord_client::one_second_timer()
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 				QueueMessage(
-					json({{"op", 1}, {"d", last_seq}}).dump()
+					jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}))
 					, true);
 				last_heartbeat = time(NULL);
 			}
@@ -557,7 +554,7 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id, boo
 		* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
 		*/
 		log(ll_debug, fmt::format("Sending op 4 to join VC, guild {} channel {} ", guild_id, channel_id));
-		QueueMessage(json({
+		QueueMessage(jsonobj_to_string(json({
 			{ "op", 4 },
 			{ "d", {
 					{ "guild_id", std::to_string(guild_id) },
@@ -566,14 +563,14 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id, boo
 					{ "self_deaf", self_deaf },
 				}
 			}
-		}).dump(), false);
+		})), false);
 	} else {
 		log(ll_debug, fmt::format("Requested the bot connect to voice channel {} on guild {}, but it seems we are already on this VC", channel_id, guild_id));
 	}
 #endif
 }
 
-std::string discord_client::jsonobj_to_string(nlohmann::json& json) {
+std::string discord_client::jsonobj_to_string(const nlohmann::json& json) {
 	if (protocol == ws_json) {
 		return json.dump();
 	} else {
@@ -588,7 +585,7 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 	if (v != connecting_voice_channels.end()) {
 		log(ll_debug, fmt::format("Disconnecting voice, guild: {}", guild_id));
 		if (emit_json) {
-			QueueMessage(json({
+			QueueMessage(jsonobj_to_string(json({
 				{ "op", 4 },
 				{ "d", {
 						{ "guild_id", std::to_string(guild_id) },
@@ -597,7 +594,7 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 						{ "self_deaf", false },
 					}
 				}
-			}).dump(), false);
+			})), false);
 		}
 		delete v->second;
 		v->second = nullptr;

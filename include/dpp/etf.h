@@ -31,13 +31,15 @@ union type_punner {
 	double df;
 };
 
-struct erlpack_buffer {
-	char *buf;
+struct DPP_EXPORT erlpack_buffer {
+	std::vector<char> buf;
 	size_t length;
-	size_t allocated_size;
+
+	erlpack_buffer(size_t initial);
+	~erlpack_buffer();
 };
 
-#define erlpack_append(pk, buf, len) return erlpack_buffer_write(pk, (const char *)buf, len)
+#define erlpack_append(pk, buf, len) erlpack_buffer_write(pk, (const char *)buf, len)
 
 /**
  * @brief The etf_parser class can serialise and deserialise ETF (Erlang Term Format)
@@ -91,41 +93,43 @@ class DPP_EXPORT etf_parser {
 	nlohmann::json decodePID();
 	nlohmann::json decodeExport();
 
-	int erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, size_t l);
+	void erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, size_t l);
 
-	int erlpack_append_version(erlpack_buffer *b);
+	void erlpack_append_version(erlpack_buffer *b);
 
-	int erlpack_append_nil(erlpack_buffer *b);
+	void erlpack_append_nil(erlpack_buffer *b);
 
-	int erlpack_append_false(erlpack_buffer *b);
+	void erlpack_append_false(erlpack_buffer *b);
 
-	int erlpack_append_true(erlpack_buffer *b);
+	void erlpack_append_true(erlpack_buffer *b);
 
-	int erlpack_append_small_integer(erlpack_buffer *b, unsigned char d);
+	void erlpack_append_small_integer(erlpack_buffer *b, unsigned char d);
 
-	int erlpack_append_integer(erlpack_buffer *b, int32_t d);
+	void erlpack_append_integer(erlpack_buffer *b, int32_t d);
 
-	int erlpack_append_unsigned_long_long(erlpack_buffer *b, unsigned long long d);
+	void erlpack_append_unsigned_long_long(erlpack_buffer *b, unsigned long long d);
 
-	int erlpack_append_long_long(erlpack_buffer *b, long long d);
+	void erlpack_append_long_long(erlpack_buffer *b, long long d);
 
-	int erlpack_append_double(erlpack_buffer *b, double f);
+	void erlpack_append_double(erlpack_buffer *b, double f);
 
-	int erlpack_append_atom(erlpack_buffer *b, const char *bytes, size_t size);
+	void erlpack_append_atom(erlpack_buffer *b, const char *bytes, size_t size);
 
-	int erlpack_append_atom_utf8(erlpack_buffer *b, const char *bytes, size_t size);
+	void erlpack_append_atom_utf8(erlpack_buffer *b, const char *bytes, size_t size);
 
-	int erlpack_append_binary(erlpack_buffer *b, const char *bytes, size_t size);
+	void erlpack_append_binary(erlpack_buffer *b, const char *bytes, size_t size);
 
-	int erlpack_append_string(erlpack_buffer *b, const char *bytes, size_t size);
+	void erlpack_append_string(erlpack_buffer *b, const char *bytes, size_t size);
 
-	int erlpack_append_tuple_header(erlpack_buffer *b, size_t size);
+	void erlpack_append_tuple_header(erlpack_buffer *b, size_t size);
 
-	int erlpack_append_nil_ext(erlpack_buffer *b);
+	void erlpack_append_nil_ext(erlpack_buffer *b);
 
-	int erlpack_append_list_header(erlpack_buffer *b, size_t size);
+	void erlpack_append_list_header(erlpack_buffer *b, size_t size);
 
-	int erlpack_append_map_header(erlpack_buffer *b, size_t size);
+	void erlpack_append_map_header(erlpack_buffer *b, size_t size);
+
+	void inner_build(const nlohmann::json* j, erlpack_buffer* b);
 
 public:
 	/** Constructor */

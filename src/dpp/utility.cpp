@@ -160,12 +160,16 @@ namespace dpp {
 			for (size_t n = 0; n < extra; ++n) {
 				out << "-- ";
 			}
+			std::string ascii;
 			for (uint8_t* ptr = data; ptr < data + length; ++ptr) {
 				if (((size_t)ptr % 16) == 0) {
-					out << fmt::format("\n[{:016X}] : ", (size_t)ptr);
+					out << fmt::format("    {}\n[{:016X}] : ", ascii, (size_t)ptr);
+					ascii.clear();
 				}
+				ascii.push_back(*ptr >= ' ' && *ptr <= '~' ? *ptr : '.');
 				out << fmt::format("{:02X} ", *ptr);
 			}
+			out << "    " << ascii;
 			out << "\n";
 			return out.str();
 		}
