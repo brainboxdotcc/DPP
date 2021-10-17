@@ -30,10 +30,13 @@
 #include <thread>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>
+#include <dpp/etf.h>
 #include <zlib.h>
 
-#define PATH_UNCOMPRESSED	"/?v=" DISCORD_API_VERSION "&encoding=json"
-#define PATH_COMPRESSED		"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
+#define PATH_UNCOMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json"
+#define PATH_COMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
+#define PATH_UNCOMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf"
+#define PATH_COMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf&compress=zlib-stream"
 #define DECOMP_BUFFER_SIZE	512 * 1024
 
 namespace dpp {
@@ -47,7 +50,7 @@ public:
 };
 
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
-       : websocket_client(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
+       : websocket_client(DEFAULT_GATEWAY, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
         runner(nullptr),
 	compressed(comp),
 	decomp_buffer(nullptr),
@@ -202,22 +205,30 @@ bool discord_client::HandleFrame(const std::string &buffer)
 	}
 
 
-	log(dpp::ll_trace, fmt::format("R: {}", data));
 	json j;
 	
-	try {
-		switch (protocol) {
-			case ws_json:
+	switch (protocol) {
+		case ws_json:
+			try {
+				log(dpp::ll_trace, fmt::format("R: {}", data));
 				j = json::parse(data);
-			break;
-			case ws_etf:
-				etf->parse(data, j);
-			break;
-		}
-	}
-	catch (const std::exception &e) {
-		log(dpp::ll_error, fmt::format("discord_client::HandleFrame {} [{}]", e.what(), data));
-		return true;
+			}
+			catch (const std::exception &e) {
+				log(dpp::ll_error, fmt::format("discord_client::HandleFrame {} [{}]", e.what(), data));
+				return true;
+			}
+		break;
+		case ws_etf:
+			try {
+				log(dpp::ll_trace, fmt::format("R: len={}\n{}", data.size(), dpp::utility::debug_dump((uint8_t*)data.data(), data.size())));
+				j = etf->parse(data);
+				log(dpp::ll_trace, fmt::format("ETF_TO_JSON: {}", j.dump()));
+			}
+			catch (const std::exception &e) {
+				log(dpp::ll_error, fmt::format("discord_client::HandleFrame {} [{}]", e.what(), j.dump()));
+				return true;
+			}
+		break;
 	}
 
 	auto seq = j.find("s");

@@ -30,7 +30,6 @@
 #include <dpp/cluster.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/event.h>
-#include <dpp/etf.h>
 #include <queue>
 #include <thread>
 #include <deque>

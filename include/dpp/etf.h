@@ -22,7 +22,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/discord.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
 
@@ -50,9 +50,9 @@ class DPP_EXPORT etf_parser {
 
 	size_t offset;
 
-	char* data;
+	uint8_t* data;
 
-	void inner_parse(const std::string& in, nlohmann::json& j);
+	nlohmann::json inner_parse();
 
 	uint8_t read8();
 
@@ -61,6 +61,35 @@ class DPP_EXPORT etf_parser {
 	uint32_t read32();
 
 	uint64_t read64();
+
+	const char* readString(uint32_t length);
+
+	nlohmann::json processAtom(const char* atom, uint16_t length);
+	nlohmann::json decodeAtom();
+	nlohmann::json decodeSmallAtom();
+	nlohmann::json decodeSmallInteger();
+	nlohmann::json decodeInteger();
+	nlohmann::json decodeArray(uint32_t length);
+	nlohmann::json decodeList();
+	nlohmann::json decodeTuple(uint32_t length);
+	nlohmann::json decodeNil();
+	nlohmann::json decodeMap();
+	nlohmann::json decodeFloat();
+	nlohmann::json decodeNewFloat();
+	nlohmann::json decodeBig(uint32_t digits);
+	nlohmann::json decodeSmallBig();
+	nlohmann::json decodeLargeBig();
+	nlohmann::json decodeBinaryAsString();
+	nlohmann::json decodeString();
+	nlohmann::json decodeStringAsList();
+	nlohmann::json decodeSmallTuple();
+	nlohmann::json decodeLargeTuple();
+	nlohmann::json decodeCompressed();
+	nlohmann::json decodeReference();
+	nlohmann::json decodeNewReference();
+	nlohmann::json decodePort();
+	nlohmann::json decodePID();
+	nlohmann::json decodeExport();
 
 	int erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, size_t l);
 
@@ -105,7 +134,7 @@ public:
 	/** Destructor */
 	~etf_parser();
 
-	void parse(const std::string& in, nlohmann::json& j);
+	nlohmann::json parse(const std::string& in);
 
 	std::string build(const nlohmann::json& j);
 };

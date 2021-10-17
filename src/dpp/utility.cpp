@@ -149,23 +149,25 @@ namespace dpp {
 				return fmt::format("{:016x}{:016x}", this->first, this->second);
 		}
 
-		void debug_dump(uint8_t* data, size_t length) {
+		std::string debug_dump(uint8_t* data, size_t length) {
+			std::ostringstream out;
 			size_t addr = (size_t)data;
 			size_t extra = addr % 16;
 			if (extra != 0) {
 				addr -= extra;
-				std::cout << fmt::format("[{:016X}] : ", addr);
+				out << fmt::format("[{:016X}] : ", addr);
 			}
 			for (size_t n = 0; n < extra; ++n) {
-				std::cout << "-- ";
+				out << "-- ";
 			}
 			for (uint8_t* ptr = data; ptr < data + length; ++ptr) {
 				if (((size_t)ptr % 16) == 0) {
-					std::cout << fmt::format("\n[{:016X}] : ", (size_t)ptr);
+					out << fmt::format("\n[{:016X}] : ", (size_t)ptr);
 				}
-				std::cout << fmt::format("{:02X} ", *ptr);
+				out << fmt::format("{:02X} ", *ptr);
 			}
-			std::cout << "\n";
+			out << "\n";
+			return out.str();
 		}
 
 		std::string bytes(uint64_t c) {

@@ -23,6 +23,8 @@ int main()
 		}
 	});
 
+	bot.set_websocket_protocol(dpp::ws_etf);
+
 	bot.start(false);
 
 	return 0;

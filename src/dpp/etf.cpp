@@ -18,11 +18,15 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#define __STDC_FORMAT_MACROS 1
 #include <dpp/etf.h>
 #include <dpp/sysdep.h>
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
+#include <dpp/dispatcher.h>
 #include <dpp/nlohmann/json.hpp>
+#include <zlib.h>
+#include <iostream>
 
 #define FORMAT_VERSION 131
 #define NEW_FLOAT_EXT 'F'      // 70  [Float64:IEEE float]
@@ -271,7 +275,7 @@ etf_parser::~etf_parser() = default;
 
 uint8_t etf_parser::read8() {
 	if (offset + sizeof(uint8_t) > size) {
-		return 0;
+		throw dpp::exception("ETF: read8() past end of buffer");
 	}
 	auto val = *reinterpret_cast<const uint8_t*>(data + offset);
 	offset += sizeof(uint8_t);
@@ -280,7 +284,7 @@ uint8_t etf_parser::read8() {
 
 uint16_t etf_parser::read16() {
 	if (offset + sizeof(uint16_t) > size) {
-		return 0;
+		throw dpp::exception("ETF: read16() past end of buffer");
 	}
 	uint16_t val = _erlpack_be16(*reinterpret_cast<const uint16_t*>(data + offset));
 	offset += sizeof(uint16_t);
@@ -289,7 +293,7 @@ uint16_t etf_parser::read16() {
 
 uint32_t etf_parser::read32() {
 	if (offset + sizeof(uint32_t) > size) {
-		return 0;
+		throw dpp::exception("ETF: read32() past end of buffer");
 	}
 	uint32_t val = _erlpack_be32(*reinterpret_cast<const uint32_t*>(data + offset));
 	offset += sizeof(uint32_t);
@@ -298,24 +302,440 @@ uint32_t etf_parser::read32() {
 
 uint64_t etf_parser::read64() {
 	if (offset + sizeof(uint64_t) > size) {
-		return 0;
+		throw dpp::exception("ETF: read64() past end of buffer");
 	}
 	uint64_t val = _erlpack_be64(*reinterpret_cast<const uint64_t*>(data + offset));
 	offset += sizeof(val);
 	return val;
 }
 
-void etf_parser::inner_parse(const std::string& data, nlohmann::json& j) {
+const char* etf_parser::readString(uint32_t length) {
+	if (offset + length > size) {
+		return nullptr;
+	}
+
+	const uint8_t* str = data + offset;
+	offset += length;
+	return (const char*)str;
 }
 
-void etf_parser::parse(const std::string& in, nlohmann::json& j) {
+json etf_parser::processAtom(const char* atom, uint16_t length) {
+	if (atom == NULL) {
+		return json();
+	}
+
+	json j;
+
+	if (length >= 3 && length <= 5) {
+		if (length == 3 && strncmp(atom, "nil", 3) == 0) {
+			return j;
+		}
+		else if (length == 4 && strncmp(atom, "null", 4) == 0) {
+			return j;
+		}
+		else if(length == 4 && strncmp(atom, "true", 4) == 0) {
+			j = true;
+			return j;
+		}
+		else if (length == 5 && strncmp(atom, "false", 5) == 0) {
+			j = false;
+			return j;
+		}
+	}
+
+	j = std::string(atom, length);
+	return j;
+}
+
+json etf_parser::decodeAtom() {
+	auto length = read16();
+	const char* atom = readString(length);
+	return processAtom(atom, length);
+}
+
+json etf_parser::decodeSmallAtom() {
+	auto length = read8();
+	const char* atom = readString(length);
+	return processAtom(atom, length);
+}
+
+json etf_parser::decodeSmallInteger() {
+	json j;
+	j = (int8_t)read8();
+	return j;
+}
+
+json etf_parser::decodeInteger() {
+	json j;
+	j = (int32_t)read32();
+	return j;
+}
+
+json etf_parser::decodeArray(uint32_t length) {
+	json array = json::array();
+	for(uint32_t i = 0; i < length; ++i) {
+		array.push_back(inner_parse());
+	}
+	return array;
+}
+
+json etf_parser::decodeList() {
+	const uint32_t length = read32();
+	auto array = decodeArray(length);
+
+	const auto tailMarker = read8();
+	if (tailMarker != NIL_EXT) {
+		return json();
+	}
+
+	return array;
+}
+
+json etf_parser::decodeTuple(uint32_t length) {
+	return decodeArray(length);
+}
+
+json etf_parser::decodeNil() {
+	return json::array();
+}
+
+json etf_parser::decodeMap() {
+	const uint32_t length = read32();
+	std::cout << "Map len=" << length << "\n";
+	auto map = json::object();
+	for(uint32_t i = 0; i < length; ++i) {
+		const auto key = inner_parse();
+		const auto value = inner_parse();
+		std::cout << "key=" << key.dump() << " value=" << value.dump() <<"\n";
+		if (key.is_number()) {
+			map[std::to_string(key.get<uint64_t>())] = value;
+		} else {
+			map[key.get<std::string>()] = value;
+		}
+	}
+	return map;
+}
+
+json etf_parser::decodeFloat() {
+
+	const uint8_t FLOAT_LENGTH = 31;
+	const char* floatStr = readString(FLOAT_LENGTH);
+
+	if (floatStr == NULL) {
+		return json();
+	}
+
+	double number;
+	char nullTerimated[FLOAT_LENGTH + 1] = {0};
+
+	memcpy(nullTerimated, floatStr, FLOAT_LENGTH);
+
+	auto count = sscanf(nullTerimated, "%lf", &number);
+
+	if (count != 1) {
+		return json();
+	}
+
+	json j = number;
+	return j;
+}
+
+json etf_parser::decodeNewFloat() {
+	union {
+		uint64_t ui64;
+		double df;
+	} val;
+	val.ui64 = read64();
+	json j = val.df;
+	return j;
+}
+
+json etf_parser::decodeBig(uint32_t digits) {
+	const uint8_t sign = read8();
+
+	if (digits > 8) {
+		throw dpp::exception("ETF: big integer larger than 8 bytes unsupported");
+	}
+
+	uint64_t value = 0;
+	uint64_t b = 1;
+	for(uint32_t i = 0; i < digits; ++i) {
+		uint64_t digit = read8();
+		value += digit * b;
+		b <<= 8;
+	}
+
+	if (digits <= 4) {
+		if (sign == 0) {
+			json j = std::to_string(static_cast<uint32_t>(value));
+			return j;
+		}
+
+		const bool isSignBitAvailable = (value & (1 << 31)) == 0;
+		if (isSignBitAvailable) {
+			int32_t negativeValue = -static_cast<int32_t>(value);
+			json j = std::to_string(negativeValue);
+			return j;
+		}
+	}
+
+	char outBuffer[32] = {0}; // 9223372036854775807
+	const char* const formatString = sign == 0 ? "%llu" : "-%ll";
+	const int res = sprintf(outBuffer, formatString, value);
+
+	if (res < 0) {
+		throw dpp::exception("Decode big integer failed");
+	}
+	const uint8_t length = (uint8_t)res;
+	json j = std::string(outBuffer, length);
+	return j;
+}
+
+json etf_parser::decodeSmallBig() {
+	const auto bytes = read8();
+	return decodeBig(bytes);
+}
+
+json etf_parser::decodeLargeBig() {
+	const auto bytes = read32();
+	return decodeBig(bytes);
+}
+
+json etf_parser::decodeBinaryAsString() {
+	const auto length = read32();
+	const char* str = readString(length);
+	if (str == NULL) {
+		std::cout << "decodeBinaryAsString got NULL string\n";
+		return json();
+	}
+	std::string s = std::string(str, length);
+	std::cout << "str=" << s << " length " << length << "\n";
+	json j = std::string(str, length);
+	return j;
+}
+
+json etf_parser::decodeString() {
+	const auto length = read16();
+	const char* str = readString(length);
+	if (str == NULL) {
+		return json();
+	}
+	json j = std::string(str, length);
+	return j;
+}
+
+json etf_parser::decodeStringAsList() {
+	const auto length = read16();
+	json array = json::array();
+	if (offset + length > size) {
+		throw dpp::exception("String list past end of buffer");
+	}
+	for(uint16_t i = 0; i < length; ++i) {
+		array.push_back(decodeSmallInteger());
+	}
+	return array;
+}
+
+json etf_parser::decodeSmallTuple() {
+	return decodeTuple(read8());
+}
+
+json etf_parser::decodeLargeTuple() {
+	return decodeTuple(read32());
+}
+
+json etf_parser::decodeCompressed() {
+	const uint32_t uncompressedSize = read32();
+	unsigned long sourceSize = uncompressedSize;
+	std::vector<uint8_t> outBuffer;
+	outBuffer.reserve(uncompressedSize);
+	const int ret = uncompress((Bytef*)outBuffer.data(), &sourceSize, (const unsigned char*)(data + offset), (uLong)(size - offset));
+
+	offset += sourceSize;
+	if (ret != Z_OK) {
+		throw dpp::exception("ETF compressed value: decompresson error");
+	}
+
+	uint8_t* old_data = data;
+	size_t old_size = size;
+	size_t old_offset = offset;
+	data = outBuffer.data();
+	size = uncompressedSize;
+	offset = 0;
+	json j = inner_parse();
+	data = old_data;
+	size = old_size;
+	offset = old_offset;
+	return j;
+}
+
+json etf_parser::decodeReference() {
+	json reference;
+
+	reference["node"] = inner_parse();
+
+	std::vector<int32_t> ids;
+	ids.push_back(read32());
+	reference["id"] = ids;
+
+	reference["creation"] = read8();
+
+	return reference;
+}
+
+json etf_parser::decodeNewReference() {
+	json reference;
+
+	uint16_t len = read16();
+	reference["node"] = inner_parse();
+	reference["creation"] = read8();
+
+	std::vector<int32_t> ids;
+	for(uint16_t i = 0; i < len; ++i) {
+		ids.push_back(read32());
+	}
+	reference["id"] = ids;
+
+	return reference;
+}
+
+json etf_parser::decodePort() {
+	json port;
+	port["node"] = inner_parse();
+	port["id"] = read32();
+	port["creation"] = read8();
+	return port;
+}
+
+json etf_parser::decodePID() {
+	json pid;
+	pid["node"] = inner_parse();
+	pid["id"] = read32();
+	pid["serial"] = read32();
+	pid["creation"] = read8();
+	return pid;
+}
+
+json etf_parser::decodeExport() {
+	json exp;
+	exp["mod"] = inner_parse();
+	exp["fun"] = inner_parse();
+	exp["arity"] = inner_parse();
+	return exp;
+}
+
+json etf_parser::inner_parse() {
+	if(offset >= size) {
+		throw dpp::exception("Read past end of ETF buffer");
+	}
+
+	const uint8_t type = read8();
+	std::cout << "inner parse: " << type << "\n";
+
+	switch(type) {
+		case SMALL_INTEGER_EXT:
+			std::cout << "Decode small integer\n";
+			return decodeSmallInteger();
+		break;
+		case INTEGER_EXT:
+			std::cout << "Decode integer\n";
+			return decodeInteger();
+		break;
+		case FLOAT_EXT:
+			std::cout << "Decode float\n";
+			return decodeFloat();
+		break;
+		case NEW_FLOAT_EXT:
+			std::cout << "Decode new float\n";
+			return decodeNewFloat();
+		break;
+		case ATOM_EXT:
+			std::cout << "Decode atom\n";
+			return decodeAtom();
+		break;
+		case SMALL_ATOM_EXT:
+			std::cout << "Decode small atom\n";
+			return decodeSmallAtom();
+		break;
+		case SMALL_TUPLE_EXT:
+			std::cout << "Decode small tuple\n";
+			return decodeSmallTuple();
+		break;
+		case LARGE_TUPLE_EXT:
+			std::cout << "Decode large tuple\n";
+			return decodeLargeTuple();
+		break;
+		case NIL_EXT:
+			std::cout << "Decode nil\n";
+			return decodeNil();
+		break;
+		case STRING_EXT:
+			std::cout << "Decode string as list\n";
+			return decodeStringAsList();
+		break;
+		case LIST_EXT:
+			std::cout << "Decode list\n";
+			return decodeList();
+		break;
+		case MAP_EXT:
+			std::cout << "Decode map\n";
+			return decodeMap();
+		break;
+		case BINARY_EXT:
+			std::cout << "Decode binary as string\n";
+			return decodeBinaryAsString();
+		break;
+		case SMALL_BIG_EXT:
+			std::cout << "Decode small big\n";
+			return decodeSmallBig();
+		break;
+		case LARGE_BIG_EXT:
+			std::cout << "Decode large big\n";
+			return decodeLargeBig();
+		break;
+		case REFERENCE_EXT:
+			std::cout << "Decode reference\n";
+			return decodeReference();
+		break;
+		case NEW_REFERENCE_EXT:
+			std::cout << "Decode new reference\n";
+			return decodeNewReference();
+		break;
+		case PORT_EXT:
+			std::cout << "Decode port\n";
+			return decodePort();
+		break;
+		case PID_EXT:
+			std::cout << "Decode pid\n";
+			return decodePID();
+		break;
+		case EXPORT_EXT:
+			std::cout << "Decode export\n";
+			return decodeExport();
+		break;
+		case COMPRESSED:
+			std::cout << "Decode compressed\n";
+			return decodeCompressed();
+		break;
+		default:
+			throw dpp::exception("Unknown data type in ETF");
+		break;
+	}
+}
+
+json etf_parser::parse(const std::string& in) {
 	offset = 0;
 	size = in.size();
-	data = (char*)in.data();
-	inner_parse(in, j);
+	data = (uint8_t*)in.data();
+	const auto version = read8();
+	if (version == FORMAT_VERSION) {
+		return inner_parse();
+	} else {
+		throw dpp::exception("Incorrect ETF version");
+	}
 }
 
-std::string etf_parser::build(const nlohmann::json& j) {
+std::string etf_parser::build(const json& j) {
 	return "";
 }
 
