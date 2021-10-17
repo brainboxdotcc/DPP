@@ -311,7 +311,7 @@ json etf_parser::decode_small_atom() {
 
 json etf_parser::decode_small_integer() {
 	json j;
-	j = (int8_t)read_8_bits();
+	j = (uint8_t)read_8_bits();
 	return j;
 }
 
