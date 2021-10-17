@@ -46,6 +46,8 @@ const uint8_t FORMAT_VERSION = 131;
  * in the ETF binary structure.
  */
 enum etf_token_type : uint8_t {
+	/// 68  [Distribution header]
+	ett_distribution =	'D',
 	/// 70  [Float64:IEEE float]
 	ett_new_float =		'F',
 	/// 77  [UInt32:Len, UInt8:Bits, Len:Data]

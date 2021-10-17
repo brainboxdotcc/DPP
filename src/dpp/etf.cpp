@@ -579,6 +579,8 @@ json etf_parser::inner_parse() {
 	const uint8_t type = read_8_bits();
 
 	switch(type) {
+		case ett_distribution:
+			throw dpp::exception("Distribution headers are not supported");
 		case ett_smallint:
 			return decode_small_integer();
 		case ett_integer:
