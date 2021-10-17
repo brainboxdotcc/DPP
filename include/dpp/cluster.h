@@ -287,8 +287,15 @@ public:
 	 */
 	dpp::user me;
 
+	/**
+	 * @brief Current cache policy for the cluster
+	 */
 	cache_policy_t cache_policy;
 
+	/**
+	 * @brief Websocket mode for all shards in the cluster, either ws_json or ws_etf.
+	 * Production bots should use ETF, while development bots should use JSON.
+	 */
 	websocket_protocol_t ws_mode;
 
 	/**

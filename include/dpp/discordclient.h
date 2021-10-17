@@ -200,7 +200,7 @@ private:
 	/** Time last ping sent to websocket, in fractional seconds */
 	double ping_start;
 
-	/** ETF parser */
+	/** ETF parser for when in ws_etf mode */
 	class etf_parser* etf;
 
 	/**
@@ -272,6 +272,7 @@ public:
 	/** Last heartbeat ACK (opcode 11) */
 	time_t last_heartbeat_ack;
 
+	/** Current websocket protocol, currently either ETF or JSON */
 	websocket_protocol_t protocol;
 
 	/** List of voice channels we are connecting to keyed by guild id */
