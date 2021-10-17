@@ -17,8 +17,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ * Parts of this file inspired by, or outright copied from erlpack:
+ * https://github.com/discord/erlpack/
+ * 
+ * Acknowledgements:
+ *
+ *   sysdep.h:
+ *       Based on work by FURUHASHI Sadayuki in msgpack-python
+ *       (https://github.com/msgpack/msgpack-python)
+ *
+ *       Copyright (C) 2008-2010 FURUHASHI Sadayuki
+ *       Licensed under the Apache License, Version 2.0 (the "License").
+ * 
  ************************************************************************************/
-#define __STDC_FORMAT_MACROS 1
 #include <dpp/etf.h>
 #include <dpp/sysdep.h>
 #include <dpp/discordevents.h>
@@ -28,39 +39,12 @@
 #include <zlib.h>
 #include <iostream>
 
-#define FORMAT_VERSION 131
-#define NEW_FLOAT_EXT 'F'      // 70  [Float64:IEEE float]
-#define BIT_BINARY_EXT 'M'     // 77  [UInt32:Len, UInt8:Bits, Len:Data]
-#define COMPRESSED 'P'         // 80  [UInt4:UncompressedSize, N:ZlibCompressedData]
-#define SMALL_INTEGER_EXT 'a'  // 97  [UInt8:Int]
-#define INTEGER_EXT 'b'        // 98  [Int32:Int]
-#define FLOAT_EXT 'c'          // 99  [31:Float String] Float in string format (formatted "%.20e", sscanf "%lf"). Superseded by NEW_FLOAT_EXT
-#define ATOM_EXT 'd'           // 100 [UInt16:Len, Len:AtomName] max Len is 255
-#define REFERENCE_EXT 'e'      // 101 [atom:Node, UInt32:ID, UInt8:Creation]
-#define PORT_EXT 'f'           // 102 [atom:Node, UInt32:ID, UInt8:Creation]
-#define PID_EXT 'g'            // 103 [atom:Node, UInt32:ID, UInt32:Serial, UInt8:Creation]
-#define SMALL_TUPLE_EXT 'h'    // 104 [UInt8:Arity, N:Elements]
-#define LARGE_TUPLE_EXT 'i'    // 105 [UInt32:Arity, N:Elements]
-#define NIL_EXT 'j'            // 106 empty list
-#define STRING_EXT 'k'         // 107 [UInt16:Len, Len:Characters]
-#define LIST_EXT 'l'           // 108 [UInt32:Len, Elements, Tail]
-#define BINARY_EXT 'm'         // 109 [UInt32:Len, Len:Data]
-#define SMALL_BIG_EXT 'n'      // 110 [UInt8:n, UInt8:Sign, n:nums]
-#define LARGE_BIG_EXT 'o'      // 111 [UInt32:n, UInt8:Sign, n:nums]
-#define NEW_FUN_EXT 'p'        // 112 [UInt32:Size, UInt8:Arity, 16*Uint6-MD5:Uniq, UInt32:Index, UInt32:NumFree, atom:Module, int:OldIndex, int:OldUniq, pid:Pid, NunFree*ext:FreeVars]
-#define EXPORT_EXT 'q'         // 113 [atom:Module, atom:Function, smallint:Arity]
-#define NEW_REFERENCE_EXT 'r'  // 114 [UInt16:Len, atom:Node, UInt8:Creation, Len*UInt32:ID]
-#define SMALL_ATOM_EXT 's'     // 115 [UInt8:Len, Len:AtomName]
-#define MAP_EXT 't'            // 116 [UInt32:Airty, N:Pairs]
-#define FUN_EXT 'u'            // 117 [UInt4:NumFree, pid:Pid, atom:Module, int:Index, int:Uniq, NumFree*ext:FreeVars]
-#define ATOM_UTF8_EXT 'v'      // 118 [UInt16:Len, Len:AtomName] max Len is 255 characters (up to 4 bytes per)
-#define SMALL_ATOM_UTF8_EXT 'w' // 119 [UInt8:Len, Len:AtomName]
-
 namespace dpp {
 
 using json = nlohmann::json;
 
-void etf_parser::erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, size_t l) {
+
+void etf_parser::buffer_write(etf_buffer *pk, const char *bytes, size_t l) {
 
 	if (pk->length + l > pk->buf.size()) {
 		// Grow buffer 2x to avoid excessive re-allocations.
@@ -71,41 +55,41 @@ void etf_parser::erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, siz
 	pk->length += l;
 }
 
- void etf_parser::erlpack_append_version(erlpack_buffer *b) {
+ void etf_parser::append_version(etf_buffer *b) {
 	static unsigned char buf[1] = {FORMAT_VERSION};
-	erlpack_append(b, buf, 1);
+	buffer_write(b, (const char *)buf, 1);
 }
 
- void etf_parser::erlpack_append_nil(erlpack_buffer *b) {
-	static unsigned char buf[5] = {SMALL_ATOM_EXT, 3, 'n', 'i', 'l'};
-	erlpack_append(b, buf, 5);
+ void etf_parser::append_nil(etf_buffer *b) {
+	static unsigned char buf[5] = {ett_atom_small, 3, 'n', 'i', 'l'};
+	buffer_write(b, (const char *)buf, 5);
 }
 
- void etf_parser::erlpack_append_false(erlpack_buffer *b) {
-	static unsigned char buf[7] = {SMALL_ATOM_EXT, 5, 'f', 'a', 'l', 's', 'e'};
-	erlpack_append(b, buf, 7);
+ void etf_parser::append_false(etf_buffer *b) {
+	static unsigned char buf[7] = {ett_atom_small, 5, 'f', 'a', 'l', 's', 'e'};
+	buffer_write(b, (const char *)buf, 7);
 }
 
- void etf_parser::erlpack_append_true(erlpack_buffer *b) {
-	static unsigned char buf[6] = {SMALL_ATOM_EXT, 4, 't', 'r', 'u', 'e'};
-	erlpack_append(b, buf, 6);
+ void etf_parser::append_true(etf_buffer *b) {
+	static unsigned char buf[6] = {ett_atom_small, 4, 't', 'r', 'u', 'e'};
+	buffer_write(b, (const char *)buf, 6);
 }
 
- void etf_parser::erlpack_append_small_integer(erlpack_buffer *b, unsigned char d) {
-	unsigned char buf[2] = {SMALL_INTEGER_EXT, d};
-	erlpack_append(b, buf, 2);
+ void etf_parser::append_small_integer(etf_buffer *b, unsigned char d) {
+	unsigned char buf[2] = {ett_smallint, d};
+	buffer_write(b, (const char *)buf, 2);
 }
 
- void etf_parser::erlpack_append_integer(erlpack_buffer *b, int32_t d) {
+ void etf_parser::append_integer(etf_buffer *b, int32_t d) {
 	unsigned char buf[5];
-	buf[0] = INTEGER_EXT;
-	_erlpack_store32(buf + 1, d);
-	erlpack_append(b, buf, 5);
+	buf[0] = ett_integer;
+	store_32_bits(buf + 1, d);
+	buffer_write(b, (const char *)buf, 5);
 }
 
- void etf_parser::erlpack_append_unsigned_long_long(erlpack_buffer *b, unsigned long long d) {
+ void etf_parser::append_unsigned_long_long(etf_buffer *b, unsigned long long d) {
 	unsigned char buf[1 + 2 + sizeof(unsigned long long)];
-	buf[0] = SMALL_BIG_EXT;
+	buf[0] = ett_bigint_small;
 
 	unsigned char bytes_enc = 0;
 	while (d > 0) {
@@ -116,12 +100,12 @@ void etf_parser::erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, siz
 	buf[1] = bytes_enc;
 	buf[2] = 0;
 
-	erlpack_append(b, buf, 1 + 2 + bytes_enc);
+	buffer_write(b, (const char *)buf, 1 + 2 + bytes_enc);
 }
 
- void etf_parser::erlpack_append_long_long(erlpack_buffer *b, long long d) {
+ void etf_parser::append_long_long(etf_buffer *b, long long d) {
 	unsigned char buf[1 + 2 + sizeof(unsigned long long)];
-	buf[0] = SMALL_BIG_EXT;
+	buf[0] = ett_bigint_small;
 	buf[2] = d < 0 ? 1 : 0;
 	unsigned long long ull = d < 0 ? -d : d;
 	unsigned char bytes_enc = 0;
@@ -131,105 +115,105 @@ void etf_parser::erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, siz
 		bytes_enc++;
 	}
 	buf[1] = bytes_enc;
-	erlpack_append(b, buf, 1 + 2 + bytes_enc);
+	buffer_write(b, (const char *)buf, 1 + 2 + bytes_enc);
 }
 
- void etf_parser::erlpack_append_double(erlpack_buffer *b, double f) {
+ void etf_parser::append_double(etf_buffer *b, double f) {
 	unsigned char buf[1 + 8] = {0};
-	buf[0] = NEW_FLOAT_EXT;
+	buf[0] = ett_new_float;
 	type_punner p;
 	p.df = f;
-	_erlpack_store64(buf + 1, p.ui64);
-	erlpack_append(b, buf, 1 + 8);
+	store_64_bits(buf + 1, p.ui64);
+	buffer_write(b, (const char *)buf, 1 + 8);
 }
 
- void etf_parser::erlpack_append_atom(erlpack_buffer *b, const char *bytes, size_t size) {
+ void etf_parser::append_atom(etf_buffer *b, const char *bytes, size_t size) {
 	if (size < 255) {
-		unsigned char buf[2] = {SMALL_ATOM_EXT, (unsigned char)size};
-		erlpack_buffer_write(b, (const char *)buf, 2);
-		erlpack_append(b, bytes, size);
+		unsigned char buf[2] = {ett_atom_small, (unsigned char)size};
+		buffer_write(b, (const char *)buf, 2);
+		buffer_write(b, (const char *)bytes, size);
 	} else {
 		unsigned char buf[3];
-		buf[0] = ATOM_EXT;
+		buf[0] = ett_atom;
 
 		if (size > 0xFFFF) {
 			throw dpp::exception("ETF: Atom too large");
 		}
 
-		_erlpack_store16(buf + 1, size);
-		erlpack_buffer_write(b, (const char *)buf, 3);
-		erlpack_append(b, bytes, size);
+		store_16_bits(buf + 1, size);
+		buffer_write(b, (const char *)buf, 3);
+		buffer_write(b, (const char *)bytes, size);
 	}
 }
 
- void etf_parser::erlpack_append_atom_utf8(erlpack_buffer *b, const char *bytes, size_t size) {
+ void etf_parser::append_atom_utf8(etf_buffer *b, const char *bytes, size_t size) {
 	if (size < 255) {
-		unsigned char buf[2] = {SMALL_ATOM_UTF8_EXT, (unsigned char)size};
-		erlpack_buffer_write(b, (const char *)buf, 2);
-		erlpack_append(b, bytes, size);
+		unsigned char buf[2] = {ett_atom_utf8_small, (unsigned char)size};
+		buffer_write(b, (const char *)buf, 2);
+		buffer_write(b, (const char *)bytes, size);
 	} else {
 		unsigned char buf[3];
-		buf[0] = ATOM_UTF8_EXT;
+		buf[0] = ett_atom_utf8;
 
 		if (size > 0xFFFF) {
 			throw dpp::exception("ETF: Atom too large");
 		}
 
-		_erlpack_store16(buf + 1, size);
-		erlpack_buffer_write(b, (const char *)buf, 3);
-		erlpack_append(b, bytes, size);
+		store_16_bits(buf + 1, size);
+		buffer_write(b, (const char *)buf, 3);
+		buffer_write(b, (const char *)bytes, size);
 	}
 }
 
-void etf_parser::erlpack_append_binary(erlpack_buffer *b, const char *bytes, size_t size) {
+void etf_parser::append_binary(etf_buffer *b, const char *bytes, size_t size) {
 	unsigned char buf[5];
-	buf[0] = BINARY_EXT;
+	buf[0] = ett_binary;
 
-	_erlpack_store32(buf + 1, size);
-	erlpack_buffer_write(b, (const char *)buf, 5);
-	erlpack_append(b, bytes, size);
+	store_32_bits(buf + 1, size);
+	buffer_write(b, (const char *)buf, 5);
+	buffer_write(b, (const char *)bytes, size);
 }
 
- void etf_parser::erlpack_append_string(erlpack_buffer *b, const char *bytes, size_t size) {
+ void etf_parser::append_string(etf_buffer *b, const char *bytes, size_t size) {
 	unsigned char buf[3];
-	buf[0] = STRING_EXT;
+	buf[0] = ett_string;
 
-	_erlpack_store16(buf + 1, size);
-	erlpack_buffer_write(b, (const char *)buf, 3);
-	erlpack_append(b, bytes, size);
+	store_16_bits(buf + 1, size);
+	buffer_write(b, (const char *)buf, 3);
+	buffer_write(b, (const char *)bytes, size);
 }
 
- void etf_parser::erlpack_append_tuple_header(erlpack_buffer *b, size_t size) {
+ void etf_parser::append_tuple_header(etf_buffer *b, size_t size) {
 	if (size < 256) {
 		unsigned char buf[2];
-		buf[0] = SMALL_TUPLE_EXT;
+		buf[0] = ett_small_tuple;
 		buf[1] = (unsigned char)size;
-		erlpack_append(b, buf, 2);
+		buffer_write(b, (const char *)buf, 2);
 	} else {
 		unsigned char buf[5];
-		buf[0] = LARGE_TUPLE_EXT;
-		_erlpack_store32(buf + 1, size);
-		erlpack_append(b, buf, 5);
+		buf[0] = ett_large_tuple;
+		store_32_bits(buf + 1, size);
+		buffer_write(b, (const char *)buf, 5);
 	}
 }
 
- void etf_parser::erlpack_append_nil_ext(erlpack_buffer *b) {
-	static unsigned char buf[1] = {NIL_EXT};
-	erlpack_append(b, buf, 1);
+ void etf_parser::append_nil_ext(etf_buffer *b) {
+	static unsigned char buf[1] = {ett_nil};
+	buffer_write(b, (const char *)buf, 1);
 }
 
- void etf_parser::erlpack_append_list_header(erlpack_buffer *b, size_t size) {
+ void etf_parser::append_list_header(etf_buffer *b, size_t size) {
 	unsigned char buf[5];
-	buf[0] = LIST_EXT;
-	_erlpack_store32(buf + 1, size);
-	erlpack_append(b, buf, 5);
+	buf[0] = ett_list;
+	store_32_bits(buf + 1, size);
+	buffer_write(b, (const char *)buf, 5);
 }
 
- void etf_parser::erlpack_append_map_header(erlpack_buffer *b, size_t size) {
+ void etf_parser::append_map_header(etf_buffer *b, size_t size) {
 	unsigned char buf[5];
-	buf[0] = MAP_EXT;
-	_erlpack_store32(buf + 1, size);
-	erlpack_append(b, buf, 5);
+	buf[0] = ett_map;
+	store_32_bits(buf + 1, size);
+	buffer_write(b, (const char *)buf, 5);
 }
 
 etf_parser::etf_parser()
@@ -239,43 +223,43 @@ etf_parser::etf_parser()
 etf_parser::~etf_parser() = default;
 
 
-uint8_t etf_parser::read8() {
+uint8_t etf_parser::read_8_bits() {
 	if (offset + sizeof(uint8_t) > size) {
-		throw dpp::exception("ETF: read8() past end of buffer");
+		throw dpp::exception("ETF: read_8_bits() past end of buffer");
 	}
 	auto val = *reinterpret_cast<const uint8_t*>(data + offset);
 	offset += sizeof(uint8_t);
 	return val;
 }
 
-uint16_t etf_parser::read16() {
+uint16_t etf_parser::read_16_bits() {
 	if (offset + sizeof(uint16_t) > size) {
-		throw dpp::exception("ETF: read16() past end of buffer");
+		throw dpp::exception("ETF: read_16_bits() past end of buffer");
 	}
-	uint16_t val = _erlpack_be16(*reinterpret_cast<const uint16_t*>(data + offset));
+	uint16_t val = etf_byte_order_16(*reinterpret_cast<const uint16_t*>(data + offset));
 	offset += sizeof(uint16_t);
 	return val;
 }
 
-uint32_t etf_parser::read32() {
+uint32_t etf_parser::read_32_bits() {
 	if (offset + sizeof(uint32_t) > size) {
-		throw dpp::exception("ETF: read32() past end of buffer");
+		throw dpp::exception("ETF: read_32_bits() past end of buffer");
 	}
-	uint32_t val = _erlpack_be32(*reinterpret_cast<const uint32_t*>(data + offset));
+	uint32_t val = etf_byte_order_32(*reinterpret_cast<const uint32_t*>(data + offset));
 	offset += sizeof(uint32_t);
 	return val;
 }
 
-uint64_t etf_parser::read64() {
+uint64_t etf_parser::read_64_bits() {
 	if (offset + sizeof(uint64_t) > size) {
-		throw dpp::exception("ETF: read64() past end of buffer");
+		throw dpp::exception("ETF: read_64_bits() past end of buffer");
 	}
-	uint64_t val = _erlpack_be64(*reinterpret_cast<const uint64_t*>(data + offset));
+	uint64_t val = etf_byte_order_64(*reinterpret_cast<const uint64_t*>(data + offset));
 	offset += sizeof(val);
 	return val;
 }
 
-const char* etf_parser::readString(uint32_t length) {
+const char* etf_parser::read_string(uint32_t length) {
 	if (offset + length > size) {
 		return nullptr;
 	}
@@ -285,7 +269,7 @@ const char* etf_parser::readString(uint32_t length) {
 	return (const char*)str;
 }
 
-json etf_parser::processAtom(const char* atom, uint16_t length) {
+json etf_parser::process_atom(const char* atom, uint16_t length) {
 	if (atom == NULL) {
 		return json();
 	}
@@ -313,31 +297,31 @@ json etf_parser::processAtom(const char* atom, uint16_t length) {
 	return j;
 }
 
-json etf_parser::decodeAtom() {
-	auto length = read16();
-	const char* atom = readString(length);
-	return processAtom(atom, length);
+json etf_parser::decode_atom() {
+	auto length = read_16_bits();
+	const char* atom = read_string(length);
+	return process_atom(atom, length);
 }
 
-json etf_parser::decodeSmallAtom() {
-	auto length = read8();
-	const char* atom = readString(length);
-	return processAtom(atom, length);
+json etf_parser::decode_small_atom() {
+	auto length = read_8_bits();
+	const char* atom = read_string(length);
+	return process_atom(atom, length);
 }
 
-json etf_parser::decodeSmallInteger() {
+json etf_parser::decode_small_integer() {
 	json j;
-	j = (int8_t)read8();
+	j = (int8_t)read_8_bits();
 	return j;
 }
 
-json etf_parser::decodeInteger() {
+json etf_parser::decode_integer() {
 	json j;
-	j = (int32_t)read32();
+	j = (int32_t)read_32_bits();
 	return j;
 }
 
-json etf_parser::decodeArray(uint32_t length) {
+json etf_parser::decode_array(uint32_t length) {
 	json array = json::array();
 	for(uint32_t i = 0; i < length; ++i) {
 		array.push_back(inner_parse());
@@ -345,28 +329,28 @@ json etf_parser::decodeArray(uint32_t length) {
 	return array;
 }
 
-json etf_parser::decodeList() {
-	const uint32_t length = read32();
-	auto array = decodeArray(length);
+json etf_parser::decode_list() {
+	const uint32_t length = read_32_bits();
+	auto array = decode_array(length);
 
-	const auto tailMarker = read8();
-	if (tailMarker != NIL_EXT) {
+	const auto tailMarker = read_8_bits();
+	if (tailMarker != ett_nil) {
 		return json();
 	}
 
 	return array;
 }
 
-json etf_parser::decodeTuple(uint32_t length) {
-	return decodeArray(length);
+json etf_parser::decode_tuple(uint32_t length) {
+	return decode_array(length);
 }
 
-json etf_parser::decodeNil() {
+json etf_parser::decode_nil() {
 	return json::array();
 }
 
-json etf_parser::decodeMap() {
-	const uint32_t length = read32();
+json etf_parser::decode_map() {
+	const uint32_t length = read_32_bits();
 	auto map = json::object();
 	for(uint32_t i = 0; i < length; ++i) {
 		const auto key = inner_parse();
@@ -380,10 +364,10 @@ json etf_parser::decodeMap() {
 	return map;
 }
 
-json etf_parser::decodeFloat() {
+json etf_parser::decode_float() {
 
 	const uint8_t FLOAT_LENGTH = 31;
-	const char* floatStr = readString(FLOAT_LENGTH);
+	const char* floatStr = read_string(FLOAT_LENGTH);
 
 	if (floatStr == NULL) {
 		return json();
@@ -404,18 +388,18 @@ json etf_parser::decodeFloat() {
 	return j;
 }
 
-json etf_parser::decodeNewFloat() {
+json etf_parser::decode_new_float() {
 	union {
 		uint64_t ui64;
 		double df;
 	} val;
-	val.ui64 = read64();
+	val.ui64 = read_64_bits();
 	json j = val.df;
 	return j;
 }
 
-json etf_parser::decodeBig(uint32_t digits) {
-	const uint8_t sign = read8();
+json etf_parser::decode_bigint(uint32_t digits) {
+	const uint8_t sign = read_8_bits();
 
 	if (digits > 8) {
 		throw dpp::exception("ETF: big integer larger than 8 bytes unsupported");
@@ -424,7 +408,7 @@ json etf_parser::decodeBig(uint32_t digits) {
 	uint64_t value = 0;
 	uint64_t b = 1;
 	for(uint32_t i = 0; i < digits; ++i) {
-		uint64_t digit = read8();
+		uint64_t digit = read_8_bits();
 		value += digit * b;
 		b <<= 8;
 	}
@@ -455,19 +439,19 @@ json etf_parser::decodeBig(uint32_t digits) {
 	return j;
 }
 
-json etf_parser::decodeSmallBig() {
-	const auto bytes = read8();
-	return decodeBig(bytes);
+json etf_parser::decode_bigint_small() {
+	const auto bytes = read_8_bits();
+	return decode_bigint(bytes);
 }
 
-json etf_parser::decodeLargeBig() {
-	const auto bytes = read32();
-	return decodeBig(bytes);
+json etf_parser::decode_bigint_large() {
+	const auto bytes = read_32_bits();
+	return decode_bigint(bytes);
 }
 
-json etf_parser::decodeBinaryAsString() {
-	const auto length = read32();
-	const char* str = readString(length);
+json etf_parser::decode_binary() {
+	const auto length = read_32_bits();
+	const char* str = read_string(length);
 	if (str == NULL) {
 		return json();
 	}
@@ -476,9 +460,9 @@ json etf_parser::decodeBinaryAsString() {
 	return j;
 }
 
-json etf_parser::decodeString() {
-	const auto length = read16();
-	const char* str = readString(length);
+json etf_parser::decode_string() {
+	const auto length = read_16_bits();
+	const char* str = read_string(length);
 	if (str == NULL) {
 		return json();
 	}
@@ -486,28 +470,28 @@ json etf_parser::decodeString() {
 	return j;
 }
 
-json etf_parser::decodeStringAsList() {
-	const auto length = read16();
+json etf_parser::decode_string_as_list() {
+	const auto length = read_16_bits();
 	json array = json::array();
 	if (offset + length > size) {
 		throw dpp::exception("String list past end of buffer");
 	}
 	for(uint16_t i = 0; i < length; ++i) {
-		array.push_back(decodeSmallInteger());
+		array.push_back(decode_small_integer());
 	}
 	return array;
 }
 
-json etf_parser::decodeSmallTuple() {
-	return decodeTuple(read8());
+json etf_parser::decode_tuple_small() {
+	return decode_tuple(read_8_bits());
 }
 
-json etf_parser::decodeLargeTuple() {
-	return decodeTuple(read32());
+json etf_parser::decode_tuple_large() {
+	return decode_tuple(read_32_bits());
 }
 
-json etf_parser::decodeCompressed() {
-	const uint32_t uncompressedSize = read32();
+json etf_parser::decode_compressed() {
+	const uint32_t uncompressedSize = read_32_bits();
 	unsigned long sourceSize = uncompressedSize;
 	std::vector<uint8_t> outBuffer;
 	outBuffer.reserve(uncompressedSize);
@@ -531,54 +515,54 @@ json etf_parser::decodeCompressed() {
 	return j;
 }
 
-json etf_parser::decodeReference() {
+json etf_parser::decode_reference() {
 	json reference;
 
 	reference["node"] = inner_parse();
 
 	std::vector<int32_t> ids;
-	ids.push_back(read32());
+	ids.push_back(read_32_bits());
 	reference["id"] = ids;
 
-	reference["creation"] = read8();
+	reference["creation"] = read_8_bits();
 
 	return reference;
 }
 
-json etf_parser::decodeNewReference() {
+json etf_parser::decode_new_reference() {
 	json reference;
 
-	uint16_t len = read16();
+	uint16_t len = read_16_bits();
 	reference["node"] = inner_parse();
-	reference["creation"] = read8();
+	reference["creation"] = read_8_bits();
 
 	std::vector<int32_t> ids;
 	for(uint16_t i = 0; i < len; ++i) {
-		ids.push_back(read32());
+		ids.push_back(read_32_bits());
 	}
 	reference["id"] = ids;
 
 	return reference;
 }
 
-json etf_parser::decodePort() {
+json etf_parser::decode_port() {
 	json port;
 	port["node"] = inner_parse();
-	port["id"] = read32();
-	port["creation"] = read8();
+	port["id"] = read_32_bits();
+	port["creation"] = read_8_bits();
 	return port;
 }
 
-json etf_parser::decodePID() {
+json etf_parser::decode_pid() {
 	json pid;
 	pid["node"] = inner_parse();
-	pid["id"] = read32();
-	pid["serial"] = read32();
-	pid["creation"] = read8();
+	pid["id"] = read_32_bits();
+	pid["serial"] = read_32_bits();
+	pid["creation"] = read_8_bits();
 	return pid;
 }
 
-json etf_parser::decodeExport() {
+json etf_parser::decode_export() {
 	json exp;
 	exp["mod"] = inner_parse();
 	exp["fun"] = inner_parse();
@@ -587,87 +571,67 @@ json etf_parser::decodeExport() {
 }
 
 json etf_parser::inner_parse() {
+	/* Decode one value into json from ETF */
 	if(offset >= size) {
 		throw dpp::exception("Read past end of ETF buffer");
 	}
 
-	const uint8_t type = read8();
+	const uint8_t type = read_8_bits();
 
 	switch(type) {
-		case SMALL_INTEGER_EXT:
-			return decodeSmallInteger();
-		break;
-		case INTEGER_EXT:
-			return decodeInteger();
-		break;
-		case FLOAT_EXT:
-			return decodeFloat();
-		break;
-		case NEW_FLOAT_EXT:
-			return decodeNewFloat();
-		break;
-		case ATOM_EXT:
-			return decodeAtom();
-		break;
-		case SMALL_ATOM_EXT:
-			return decodeSmallAtom();
-		break;
-		case SMALL_TUPLE_EXT:
-			return decodeSmallTuple();
-		break;
-		case LARGE_TUPLE_EXT:
-			return decodeLargeTuple();
-		break;
-		case NIL_EXT:
-			return decodeNil();
-		break;
-		case STRING_EXT:
-			return decodeStringAsList();
-		break;
-		case LIST_EXT:
-			return decodeList();
-		break;
-		case MAP_EXT:
-			return decodeMap();
-		break;
-		case BINARY_EXT:
-			return decodeBinaryAsString();
-		break;
-		case SMALL_BIG_EXT:
-			return decodeSmallBig();
-		break;
-		case LARGE_BIG_EXT:
-			return decodeLargeBig();
-		break;
-		case REFERENCE_EXT:
-			return decodeReference();
-		break;
-		case NEW_REFERENCE_EXT:
-			return decodeNewReference();
-		break;
-		case PORT_EXT:
-			return decodePort();
-		break;
-		case PID_EXT:
-			return decodePID();
-		break;
-		case EXPORT_EXT:
-			return decodeExport();
-		break;
-		case COMPRESSED:
-			return decodeCompressed();
-		break;
+		case ett_smallint:
+			return decode_small_integer();
+		case ett_integer:
+			return decode_integer();
+		case ett_float:
+			return decode_float();
+		case ett_new_float:
+			return decode_new_float();
+		case ett_atom:
+			return decode_atom();
+		case ett_atom_small:
+			return decode_small_atom();
+		case ett_small_tuple:
+			return decode_tuple_small();
+		case ett_large_tuple:
+			return decode_tuple_large();
+		case ett_nil:
+			return decode_nil();
+		case ett_string:
+			return decode_string_as_list();
+		case ett_list:
+			return decode_list();
+		case ett_map:
+			return decode_map();
+		case ett_binary:
+			return decode_binary();
+		case ett_bigint_small:
+			return decode_bigint_small();
+		case ett_bigint_large:
+			return decode_bigint_large();
+		case ett_reference:
+			return decode_reference();
+		case ett_new_reference:
+			return decode_new_reference();
+		case ett_port:
+			return decode_port();
+		case ett_pid:
+			return decode_pid();
+		case ett_export:
+			return decode_export();
+		case ett_compressed:
+			return decode_compressed();
 		default:
 			throw dpp::exception("Unknown data type in ETF");
-		break;
 	}
 }
 
 json etf_parser::parse(const std::string& in) {
+	/* Recursively decode multiple values from ETF to JSON */
 	offset = 0;
 	size = in.size();
 	data = (uint8_t*)in.data();
-	const auto version = read8();
+	const uint8_t version = read_8_bits();
 	if (version == FORMAT_VERSION) {
 		return inner_parse();
 	} else {
@@ -675,64 +639,70 @@ json etf_parser::parse(const std::string& in) {
 	}
 }
 
-void etf_parser::inner_build(const json* i, erlpack_buffer* b)
+void etf_parser::inner_build(const json* i, etf_buffer* b)
 {
 	if (i->is_number_integer()) {
-		int number = i->get<int>();
+		/* Numeric integer types by size */
+		int64_t number = i->get<int64_t>();
 		if (number >= 0 && number <= 127) {
 			unsigned char num = (unsigned char)number;
-			erlpack_append_small_integer(b, num);
+			append_small_integer(b, num);
 		}
-		/*else if (i->is_number_unsigned()) {
-			auto uNum = (uint64_t)i->get<uint64_t>();
-			erlpack_append_unsigned_long_long(b, uNum);
-		}*/
-		else if (i->is_number_integer()) {
-			erlpack_append_integer(b, number);
+		else if (number >= std::numeric_limits<uint32_t>::max() - 1) {
+			append_unsigned_long_long(b, number);
+		}
+		else {
+			int32_t num32 = (int32_t)number;
+			append_integer(b, num32);
 		}
 	}
 	else if (i->is_number_float()) {
+		/* Floating point (double) types */
 		double decimal = i->get<double>();
-		erlpack_append_double(b, decimal);
+		append_double(b, decimal);
 	}
 	else if (i->is_null()) {
-		erlpack_append_nil(b);
+		/* NULL type */
+		append_nil(b);
 	}
 	else if (i->is_boolean()) {
+		/* Boolean types */
 		bool truthy = i->get<bool>();
 		if (truthy) {
-			erlpack_append_true(b);
+			append_true(b);
 		} else {
-			erlpack_append_false(b);
+			append_false(b);
 		}
 	}
 	else if (i->is_string()) {
+		/* String types */
 		const std::string s = i->get<std::string>();
-		erlpack_append_binary(b, s.c_str(), s.length());
+		append_binary(b, s.c_str(), s.length());
 	}
 	else if (i->is_array()) {
+		/* Array types (can contain any other type, recursively) */
 		const size_t length = i->size();
 		if (length == 0) {
-			erlpack_append_nil_ext(b);
+			append_nil_ext(b);
 		} else {
 			if (length > std::numeric_limits<uint32_t>::max() - 1) {
 				throw dpp::exception("ETF encode: List too large for ETF");
 			}
 		}
 
-		erlpack_append_list_header(b, length);
-
+		append_list_header(b, length);
 		for(size_t index = 0; index < length; ++index) {
 			inner_build(&((*i)[index]), b);
 		}
-		erlpack_append_nil_ext(b);
+		append_nil_ext(b);
 	}
 	else if (i->is_object()) {
+		/* Object types (can contain any other type, recursively, but nlohmann::json only supports string keys) */
 		const size_t length = i->size();
 		if (length > std::numeric_limits<uint32_t>::max() - 1) {
 			throw dpp::exception("ETF encode: Map too large for ETF");
 		}
-		erlpack_append_map_header(b, length);
+		append_map_header(b, length);
 		for (auto n = i->begin(); n != i->end(); ++n) {
 			json jstr = n.key();
 			inner_build(&jstr, b);
@@ -742,18 +712,18 @@ void etf_parser::inner_build(const json* i, erlpack_buffer* b)
 }
 
 std::string etf_parser::build(const json& j) {
-	erlpack_buffer pk(1024 * 1024);
-	erlpack_append_version(&pk);
+	etf_buffer pk(1024 * 1024);
+	append_version(&pk);
 	inner_build(&j, &pk);
 	return std::string(pk.buf.data(), pk.length);
 }
 
-erlpack_buffer::erlpack_buffer(size_t initial) {
+etf_buffer::etf_buffer(size_t initial) {
 	buf.resize(initial);
 	length = 0;
 }
 
-erlpack_buffer::~erlpack_buffer() = default;
+etf_buffer::~etf_buffer() = default;
 
 };
 

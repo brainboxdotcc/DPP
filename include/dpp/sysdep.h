@@ -1,6 +1,8 @@
 /*
+ * Discord erlpack - tidied up for D++, Craig Edwards 2021.
+ * 
  * MessagePack system dependencies modified for erlpack.
- *
+ * 
  * Copyright (C) 2008-2010 FURUHASHI Sadayuki
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,27 +17,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-#ifndef ERLPACK_SYSDEP_H__
-#define ERLPACK_SYSDEP_H__
+#pragma once
 
 #include <stdlib.h>
 #include <stddef.h>
-#if defined(_MSC_VER) && _MSC_VER < 1600
-typedef __int8 int8_t;
-typedef unsigned __int8 uint8_t;
-typedef __int16 int16_t;
-typedef unsigned __int16 uint16_t;
-typedef __int32 int32_t;
-typedef unsigned __int32 uint32_t;
-typedef __int64 int64_t;
-typedef unsigned __int64 uint64_t;
-#elif defined(_MSC_VER)  // && _MSC_VER >= 1600
-#include <stdint.h>
-#else
 #include <stdint.h>
 #include <stdbool.h>
-#endif
-
 #if defined(__linux__)
 #include <endian.h>
 #endif
@@ -71,44 +58,44 @@ typedef unsigned __int64 uint64_t;
 
 #ifdef _WIN32
 #  if defined(ntohs)
-#    define _erlpack_be16(x) ntohs(x)
+#    define etf_byte_order_16(x) ntohs(x)
 #  elif defined(_byteswap_ushort) || (defined(_MSC_VER) && _MSC_VER >= 1400)
-#    define _erlpack_be16(x) ((uint16_t)_byteswap_ushort((unsigned short)x))
+#    define etf_byte_order_16(x) ((uint16_t)_byteswap_ushort((unsigned short)x))
 #  else
-#    define _erlpack_be16(x) ( \
+#    define etf_byte_order_16(x) ( \
         ((((uint16_t)x) <<  8) ) | \
         ((((uint16_t)x) >>  8) ) )
 #  endif
 #else
-#  define _erlpack_be16(x) ntohs(x)
+#  define etf_byte_order_16(x) ntohs(x)
 #endif
 
 #ifdef _WIN32
 #  if defined(ntohl)
-#    define _erlpack_be32(x) ntohl(x)
+#    define etf_byte_order_32(x) ntohl(x)
 #  elif defined(_byteswap_ulong) || (defined(_MSC_VER) && _MSC_VER >= 1400)
-#    define _erlpack_be32(x) ((uint32_t)_byteswap_ulong((unsigned long)x))
+#    define etf_byte_order_32(x) ((uint32_t)_byteswap_ulong((unsigned long)x))
 #  else
-#    define _erlpack_be32(x) \
+#    define etf_byte_order_32(x) \
         ( ((((uint32_t)x) << 24)               ) | \
           ((((uint32_t)x) <<  8) & 0x00ff0000U ) | \
           ((((uint32_t)x) >>  8) & 0x0000ff00U ) | \
           ((((uint32_t)x) >> 24)               ) )
 #  endif
 #else
-#  define _erlpack_be32(x) ntohl(x)
+#  define etf_byte_order_32(x) ntohl(x)
 #endif
 
 #if defined(_byteswap_uint64) || (defined(_MSC_VER) && _MSC_VER >= 1400)
-#  define _erlpack_be64(x) (_byteswap_uint64(x))
+#  define etf_byte_order_64(x) (_byteswap_uint64(x))
 #elif defined(bswap_64)
-#  define _erlpack_be64(x) bswap_64(x)
+#  define etf_byte_order_64(x) bswap_64(x)
 #elif defined(__DARWIN_OSSwapInt64)
-#  define _erlpack_be64(x) __DARWIN_OSSwapInt64(x)
+#  define etf_byte_order_64(x) __DARWIN_OSSwapInt64(x)
 #elif defined(__linux__)
-#  define _erlpack_be64(x) be64toh(x)
+#  define etf_byte_order_64(x) be64toh(x)
 #else
-#  define _erlpack_be64(x) \
+#  define etf_byte_order_64(x) \
     ( ((((uint64_t)x) << 56)                         ) | \
       ((((uint64_t)x) << 40) & 0x00ff000000000000ULL ) | \
       ((((uint64_t)x) << 24) & 0x0000ff0000000000ULL ) | \
@@ -120,17 +107,14 @@ typedef unsigned __int64 uint64_t;
 #endif
 
 #else
-#define _erlpack_be16(x) (x)
-#define _erlpack_be32(x) (x)
-#define _erlpack_be64(x) (x)
+#define etf_byte_order_16(x) (x)
+#define etf_byte_order_32(x) (x)
+#define etf_byte_order_64(x) (x)
 #endif
 
-#define _erlpack_store16(to, num) \
-    do { uint16_t val = _erlpack_be16(num); memcpy(to, &val, 2); } while(0)
-#define _erlpack_store32(to, num) \
-    do { uint32_t val = _erlpack_be32(num); memcpy(to, &val, 4); } while(0)
-#define _erlpack_store64(to, num) \
-    do { uint64_t val = _erlpack_be64(num); memcpy(to, &val, 8); } while(0)
-
-
-#endif /* sysdep.h */
+#define store_16_bits(to, num) \
+    do { uint16_t val = etf_byte_order_16(num); memcpy(to, &val, 2); } while(0)
+#define store_32_bits(to, num) \
+    do { uint32_t val = etf_byte_order_32(num); memcpy(to, &val, 4); } while(0)
+#define store_64_bits(to, num) \
+    do { uint64_t val = etf_byte_order_64(num); memcpy(to, &val, 8); } while(0)

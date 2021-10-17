@@ -16,6 +16,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Parts of this file inspired by, or outright copied from erlpack:
+ * https://github.com/discord/erlpack/
+ * 
+ * Acknowledgements:
+ *
+ *   sysdep.h:
+ *       Based on work by FURUHASHI Sadayuki in msgpack-python
+ *       (https://github.com/msgpack/msgpack-python)
+ *
+ *       Copyright (C) 2008-2010 FURUHASHI Sadayuki
+ *       Licensed under the Apache License, Version 2.0 (the "License").
  *
  ************************************************************************************/
 
@@ -26,20 +38,111 @@
 
 namespace dpp {
 
+/** Current ETF format version in use */
+const uint8_t FORMAT_VERSION = 131;
+
+/**
+ * @brief Represents a token which identifies the type of value which follows it
+ * in the ETF binary structure.
+ */
+enum etf_token_type : uint8_t {
+	/// 70  [Float64:IEEE float]
+	ett_new_float =		'F',
+	/// 77  [UInt32:Len, UInt8:Bits, Len:Data]
+	ett_bit_binary =	'M',
+	/// 80  [UInt4:UncompressedSize, N:ZlibCompressedData]
+	ett_compressed =	'P',
+	/// 97  [UInt8:Int]
+	ett_smallint =		'a',
+	/// 98  [Int32:Int]
+	ett_integer =		'b',
+	/// 99  [31:Float String] Float in string format (formatted "%.20e", sscanf "%lf"). Superseded by ett_new_float
+	ett_float =		'c',
+	/// 100 [UInt16:Len, Len:AtomName] max Len is 255
+	ett_atom =		'd',
+	/// 101 [atom:Node, UInt32:ID, UInt8:Creation]
+	ett_reference =		'e',
+	/// 102 [atom:Node, UInt32:ID, UInt8:Creation]
+	ett_port =		'f',
+	/// 103 [atom:Node, UInt32:ID, UInt32:Serial, UInt8:Creation]
+	ett_pid =		'g',
+	/// 104 [UInt8:Arity, N:Elements]
+	ett_small_tuple =	'h',
+	/// 105 [UInt32:Arity, N:Elements]
+	ett_large_tuple =	'i',
+	/// 106 empty list
+	ett_nil =		'j',
+	/// 107 [UInt16:Len, Len:Characters]
+	ett_string =		'k',
+	/// 108 [UInt32:Len, Elements, Tail]
+	ett_list =		'l',
+	/// 109 [UInt32:Len, Len:Data]
+	ett_binary =		'm',
+	/// 110 [UInt8:n, UInt8:Sign, n:nums]
+	ett_bigint_small =	'n',
+	/// 111 [UInt32:n, UInt8:Sign, n:nums]
+	ett_bigint_large =	'o',
+	/// 112 [UInt32:Size, UInt8:Arity, 16*Uint6-MD5:Uniq, UInt32:Index, UInt32:NumFree, atom:Module, int:OldIndex, int:OldUniq, pid:Pid, NunFree*ext:FreeVars]
+	ett_new_function =	'p',
+	/// 113 [atom:Module, atom:Function, smallint:Arity]
+	ett_export =		'q',
+	/// 114 [UInt16:Len, atom:Node, UInt8:Creation, Len*UInt32:ID]
+	ett_new_reference =	'r',
+	/// 115 [UInt8:Len, Len:AtomName]
+	ett_atom_small =	's',
+	/// 116 [UInt32:Airty, N:Pairs]
+	ett_map =	 	't',
+	/// 117 [UInt4:NumFree, pid:Pid, atom:Module, int:Index, int:Uniq, NumFree*ext:FreeVars]
+	ett_function =		'u',
+	/// 118 [UInt16:Len, Len:AtomName] max Len is 255 characters (up to 4 bytes per)
+	ett_atom_utf8 =		'v',
+	/// 119 [UInt8:Len, Len:AtomName]
+	ett_atom_utf8_small =	'w'
+};
+
+/**
+ * @brief A horrible structure used within the ETF parser to convert uint64_t to double and back.
+ * This is horrible, but it is the official way erlang term format does this, so we can't really
+ * mess with it much.
+ */
 union type_punner {
+	/**
+	 * @brief binary integer value
+	 */
 	uint64_t ui64;
+	/**
+	 * @brief double floating point value
+	 */
 	double df;
 };
 
-struct DPP_EXPORT erlpack_buffer {
+/**
+ * @brief Represents a buffer of bytes being encoded into ETF
+ */
+struct DPP_EXPORT etf_buffer {
+	/**
+	 * @brief Raw buffer
+	 */
 	std::vector<char> buf;
+	/**
+	 * @brief Current used length of buffer
+	 * (this is different from buf.size() as it is pre-allocated
+	 * using resize and may not all be in use)
+	 */
 	size_t length;
 
-	erlpack_buffer(size_t initial);
-	~erlpack_buffer();
-};
+	/**
+	 * @brief Construct a new etf buffer object
+	 * 
+	 * @param initial initial buffer size to allocate
+	 */
+	etf_buffer(size_t initial);
 
-#define erlpack_append(pk, buf, len) erlpack_buffer_write(pk, (const char *)buf, len)
+	/**
+	 * @brief Destroy the etf buffer object
+	 */
+	~etf_buffer();
+};
 
 /**
  * @brief The etf_parser class can serialise and deserialise ETF (Erlang Term Format)
@@ -48,98 +151,431 @@ struct DPP_EXPORT erlpack_buffer {
  */
 class DPP_EXPORT etf_parser {
 
+	/**
+	 * @brief Current size of binary data
+	 */
 	size_t size;
 
+	/**
+	 * @brief Current offset into binary data
+	 */
 	size_t offset;
 
+	/**
+	 * @brief Pointer to binary ETF data to be decoded
+	 */
 	uint8_t* data;
 
+	/**
+	 * @brief Parse a single value, and if that value contains other
+	 * values (e.g. an array or map) then call itself recursively.
+	 * 
+	 * @return nlohmann::json JSON value from the ETF
+	 */
 	nlohmann::json inner_parse();
 
-	uint8_t read8();
+	/**
+	 * @brief Read 8 bits of data from the buffer
+	 * 
+	 * @return uint8_t data retrieved
+	 */
+	uint8_t read_8_bits();
 
-	uint16_t read16();
+	/**
+	 * @brief Read 16 bits of data from the buffer
+	 * 
+	 * @return uint16_t data retrieved
+	 */
+	uint16_t read_16_bits();
 
-	uint32_t read32();
+	/**
+	 * @brief Read 32 bits of data from the buffer
+	 * 
+	 * @return uint32_t data retrieved
+	 */
+	uint32_t read_32_bits();
 
-	uint64_t read64();
+	/**
+	 * @brief Read 64 bits of data from the buffer
+	 * 
+	 * @return uint64_t data retrieved
+	 */
+	uint64_t read_64_bits();
 
-	const char* readString(uint32_t length);
+	/**
+	 * @brief Read string data from the buffer
+	 *
+	 * @param length Length of string to retrieve 
+	 * @return const char* data retrieved
+	 */
+	const char* read_string(uint32_t length);
 
-	nlohmann::json processAtom(const char* atom, uint16_t length);
-	nlohmann::json decodeAtom();
-	nlohmann::json decodeSmallAtom();
-	nlohmann::json decodeSmallInteger();
-	nlohmann::json decodeInteger();
-	nlohmann::json decodeArray(uint32_t length);
-	nlohmann::json decodeList();
-	nlohmann::json decodeTuple(uint32_t length);
-	nlohmann::json decodeNil();
-	nlohmann::json decodeMap();
-	nlohmann::json decodeFloat();
-	nlohmann::json decodeNewFloat();
-	nlohmann::json decodeBig(uint32_t digits);
-	nlohmann::json decodeSmallBig();
-	nlohmann::json decodeLargeBig();
-	nlohmann::json decodeBinaryAsString();
-	nlohmann::json decodeString();
-	nlohmann::json decodeStringAsList();
-	nlohmann::json decodeSmallTuple();
-	nlohmann::json decodeLargeTuple();
-	nlohmann::json decodeCompressed();
-	nlohmann::json decodeReference();
-	nlohmann::json decodeNewReference();
-	nlohmann::json decodePort();
-	nlohmann::json decodePID();
-	nlohmann::json decodeExport();
+	/**
+	 * @brief Process an 'atom' value.
+	 * An atom is a "label" or constant value within the data,
+	 * such as a key name, nullptr, or false.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json process_atom(const char* atom, uint16_t length);
 
-	void erlpack_buffer_write(erlpack_buffer *pk, const char *bytes, size_t l);
+	/**
+	 * @brief Decode an 'atom' value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_atom();
 
-	void erlpack_append_version(erlpack_buffer *b);
+	/**
+	 * @brief Decode a small 'atom' value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_small_atom();
 
-	void erlpack_append_nil(erlpack_buffer *b);
+	/**
+	 * @brief Decode a small integer value (0-255).
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_small_integer();
 
-	void erlpack_append_false(erlpack_buffer *b);
+	/**
+	 * @brief Decode an integer value (-MAXINT -> MAXINT-1).
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_integer();
 
-	void erlpack_append_true(erlpack_buffer *b);
+	/**
+	 * @brief Decode an array of values.
+	 * 
+	 * @return nlohmann::json values converted to JSON
+	 */
+	nlohmann::json decode_array(uint32_t length);
 
-	void erlpack_append_small_integer(erlpack_buffer *b, unsigned char d);
+	/**
+	 * @brief Decode a list of values.
+	 * 
+	 * @return nlohmann::json values converted to JSON
+	 */
+	nlohmann::json decode_list();
 
-	void erlpack_append_integer(erlpack_buffer *b, int32_t d);
+	/**
+	 * @brief Decode a 'tuple' value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_tuple(uint32_t length);
 
-	void erlpack_append_unsigned_long_long(erlpack_buffer *b, unsigned long long d);
+	/**
+	 * @brief Decode a nil 'atom' value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_nil();
 
-	void erlpack_append_long_long(erlpack_buffer *b, long long d);
+	/**
+	 * @brief Decode a map (object) value.
+	 * Will recurse to evaluate each member variable.
+	 * 
+	 * @return nlohmann::json values converted to JSON
+	 */
+	nlohmann::json decode_map();
 
-	void erlpack_append_double(erlpack_buffer *b, double f);
+	/**
+	 * @brief Decode a floating point numeric value.
+	 * (depreciated in erlang but still expected to be supported)
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_float();
 
-	void erlpack_append_atom(erlpack_buffer *b, const char *bytes, size_t size);
+	/**
+	 * @brief Decode a floating type numeric value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_new_float();
 
-	void erlpack_append_atom_utf8(erlpack_buffer *b, const char *bytes, size_t size);
+	/**
+	 * @brief Decode a 'bigint' value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_bigint(uint32_t digits);
 
-	void erlpack_append_binary(erlpack_buffer *b, const char *bytes, size_t size);
+	/**
+	 * @brief Decode a small 'bigint' value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_bigint_small();
 
-	void erlpack_append_string(erlpack_buffer *b, const char *bytes, size_t size);
+	/**
+	 * @brief Decode a large 'bigint' value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_bigint_large();
 
-	void erlpack_append_tuple_header(erlpack_buffer *b, size_t size);
+	/**
+	 * @brief Decode a binary value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_binary();
 
-	void erlpack_append_nil_ext(erlpack_buffer *b);
+	/**
+	 * @brief Decode a string value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_string();
 
-	void erlpack_append_list_header(erlpack_buffer *b, size_t size);
+	/**
+	 * @brief Decode a string list value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_string_as_list();
 
-	void erlpack_append_map_header(erlpack_buffer *b, size_t size);
+	/**
+	 * @brief Decode a 'small tuple' value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_tuple_small();
 
-	void inner_build(const nlohmann::json* j, erlpack_buffer* b);
+	/**
+	 * @brief Decode a 'large tuple' value.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_tuple_large();
+
+	/**
+	 * @brief Decode a compressed value.
+	 * This is a zlib-compressed binary blob which contains another
+	 * ETF object.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_compressed();
+
+	/**
+	 * @brief Decode a 'reference' value.
+	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_reference();
+
+	/**
+	 * @brief Decode a 'new reference' value.
+	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_new_reference();
+
+	/**
+	 * @brief Decode a 'port' value.
+	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_port();
+
+	/**
+	 * @brief Decode a 'PID' value.
+	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_pid();
+
+	/**
+	 * @brief Decode an 'export' value.
+	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
+	 * 
+	 * @return nlohmann::json value converted to JSON
+	 */
+	nlohmann::json decode_export();
+
+	/**
+	 * @brief Write to output buffer for creation of ETF from JSON
+	 * 
+	 * @param pk buffer struct
+	 * @param bytes byte buffer to write
+	 * @param l number of bytes to write
+	 */
+	void buffer_write(etf_buffer *pk, const char *bytes, size_t l);
+
+	/**
+	 * @brief Append version number to ETF buffer
+	 * 
+	 * @param b buffer to append to
+	 */
+	void append_version(etf_buffer *b);
+
+	/**
+	 * @brief Append nil value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 */
+	void append_nil(etf_buffer *b);
+
+	/**
+	 * @brief Append false value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 */
+	void append_false(etf_buffer *b);
+
+	/**
+	 * @brief Append true value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 */
+	void append_true(etf_buffer *b);
+
+	/**
+	 * @brief Append small integer value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param d double to append
+	 */
+	void append_small_integer(etf_buffer *b, unsigned char d);
+
+	/**
+	 * @brief Append integer value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param d integer to append
+	 */
+	void append_integer(etf_buffer *b, int32_t d);
+
+	/**
+	 * @brief Append 64 bit integer value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param d integer to append
+	 */
+	void append_unsigned_long_long(etf_buffer *b, unsigned long long d);
+
+	/**
+	 * @brief Append 64 bit integer value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param d integer to append
+	 */
+	void append_long_long(etf_buffer *b, long long d);
+
+	/**
+	 * @brief Append double value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param f doule to append
+	 */
+	void append_double(etf_buffer *b, double f);
+
+	/**
+	 * @brief Append atom value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param bytes pointer to string to append
+	 * @param size size of string to append
+	 */
+	void append_atom(etf_buffer *b, const char *bytes, size_t size);
+
+	/**
+	 * @brief Append utf8 atom value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param bytes pointer to string to append
+	 * @param size size of string to append
+	 */
+	void append_atom_utf8(etf_buffer *b, const char *bytes, size_t size);
+
+	/**
+	 * @brief Append binary value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param bytes pointer to string to append
+	 * @param size size of string to append
+	 */
+	void append_binary(etf_buffer *b, const char *bytes, size_t size);
+
+	/**
+	 * @brief Append string value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param bytes pointer to string to append
+	 * @param size size of string to append
+	 */
+	void append_string(etf_buffer *b, const char *bytes, size_t size);
+
+	/**
+	 * @brief Append tuple value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param size size of value to append
+	 */
+	void append_tuple_header(etf_buffer *b, size_t size);
+
+	/**
+	 * @brief Append list terminator to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 */
+	void append_nil_ext(etf_buffer *b);
+
+	/**
+	 * @brief Append a list header value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param size size of values to append
+	 */
+	void append_list_header(etf_buffer *b, size_t size);
+
+	/**
+	 * @brief Append a map header value to ETF buffer
+	 * 
+	 * @param b  buffer to append to
+	 * @param size size of values to append
+	 */
+	void append_map_header(etf_buffer *b, size_t size);
+
+	void inner_build(const nlohmann::json* j, etf_buffer* b);
 
 public:
-	/** Constructor */
+	/**
+	 * @brief Construct a new etf parser object
+	 */
 	etf_parser();
 
-	/** Destructor */
+	/**
+	 * @brief Destroy the etf parser object
+	 */
 	~etf_parser();
 
+	/**
+	 * @brief Convert ETF binary content to nlohmann::json
+	 * 
+	 * @param in Raw binary ETF data (generally from a websocket)
+	 * @return nlohmann::json JSON data for use in the library
+	 */
 	nlohmann::json parse(const std::string& in);
 
+	/**
+	 * @brief Create ETF binary data from nlohmann::json
+	 * 
+	 * @param j JSON value to encode to ETF
+	 * @return std::string raw ETF data. Note that this can
+	 * and probably will contain null values, use std::string::data()
+	 * and std::string::size() to manipulate or send it.
+	 */
 	std::string build(const nlohmann::json& j);
 };
 

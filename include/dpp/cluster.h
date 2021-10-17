@@ -317,6 +317,15 @@ public:
 	/** Destructor */
 	~cluster();
 
+	/**
+	 * @brief Set the websocket protocol for all shards on this cluster.
+	 * You should call this method before cluster::start.
+	 * Generally ws_etf is faster, but provides less facilities for debugging should something
+	 * go wrong. It is recommended to use ETF in production and JSON in development.
+	 * 
+	 * @param mode websocket protocol to use, either ws_json or ws_etf.
+	 * @return cluster& Reference to self for chaining.
+	 */
 	cluster& set_websocket_protocol(websocket_protocol_t mode);
 
 	/**

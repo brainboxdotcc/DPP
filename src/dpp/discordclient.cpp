@@ -207,6 +207,13 @@ bool discord_client::HandleFrame(const std::string &buffer)
 
 	json j;
 	
+	/**
+	 * This section parses the input frames from the websocket after they're decompressed.
+	 * Note that both ETF and JSON parsers return an nlohmann::json object, so that the rest
+	 * of the library or any user code does not need to be concerned with protocol differences.
+	 * Generally, ETF is faster and consumes much less memory, but provides less opportunities
+	 * to diagnose if it goes wrong.
+	 */
 	switch (protocol) {
 		case ws_json:
 			try {
