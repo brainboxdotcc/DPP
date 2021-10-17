@@ -18,12 +18,13 @@ You can download the latest releases and check out our source code from the [Git
 
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
-* Sharding (Many shards, one process: specify the number of shards, or let the library decide)
+* Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
+* Highly optimised ETF (Erlang Term Format) support for very fast websocket throughput (*no other C++ Discord library has this!*)
 * [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
 * [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio)
 * The entire Discord API is available for use in the library
 * Stable [Windows support](https://dpp.dev/buildwindows.html)
-* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7) and Debian x86/x64
+* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM6/ARM7) and Debian x86/x64
 
 ## Supported Operating Systems
 
