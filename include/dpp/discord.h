@@ -82,15 +82,15 @@ namespace dpp {
 		/**
 		 * @brief Run a commandline program asyncronously. The command line program
 		 * is spawned in a separate std::thread, and when complete, its output from
-		 * stdout is passed to the callback function in its string prameter. For eample
+		 * stdout is passed to the callback function in its string prameter. For example
 		 * ```
-		 * dpp::utility::exec("ls", [](const std::string& output) {
-		 *     std::cout << "Output of 'ls': " << output << "\n";
+		 * dpp::utility::exec("/bin/ls", {"-al"}, [](const std::string& output) {
+		 *     std::cout << "Output of 'ls -al': " << output << "\n";
 		 * });
 		 * ```
 		 * 
 		 * @param cmd The command to run.
-		 * @param parameters Command line parameters. Each will be escaped using std::quoted.
+		 * @param parameters Command line parameters. Each will be escaped using `std::quoted`.
 		 * @param callback The callback to call on completion.
 		 */
 		void DPP_EXPORT exec(const std::string& cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
