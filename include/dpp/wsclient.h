@@ -28,6 +28,12 @@
 
 namespace dpp {
 
+
+enum websocket_protocol_t {
+	ws_json = 0,
+	ws_etf = 1
+};
+
 /**
  * @brief Websocket connection status
  */

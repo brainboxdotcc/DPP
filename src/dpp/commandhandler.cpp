@@ -88,7 +88,7 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 		newcommand.set_name(lowercase(command)).set_description(description).set_application_id(this->app_id);
 
 		for (auto& parameter : parameters) {
-			command_option_type cot;
+			command_option_type cot = co_string;
 			switch (parameter.second.type) {
 				case pt_boolean:
 					cot = co_boolean;
@@ -383,6 +383,7 @@ void commandhandler::route(const struct interaction_create_t & event)
 					bool b = std::get<bool>(slash_parameter);
 					param = b;
 				}
+				break;
 				case pt_double: {
 					double b = std::get<double>(slash_parameter);
 					param = b;

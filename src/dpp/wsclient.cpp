@@ -36,8 +36,8 @@ const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
 websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath)
 	: ssl_client(hostname, port),
-	state(HTTP_HEADERS),
 	key(fmt::format("{:16x}", time(nullptr))),
+	state(HTTP_HEADERS),
 	path(urlpath)
 {
 }
@@ -116,7 +116,7 @@ void websocket_client::write(const std::string &data)
 		ssl_client::write(data);
 	} else {
 		unsigned char out[MAXHEADERSIZE];
-		size_t s = this->FillHeader(out, data.length(), OP_TEXT);
+		size_t s = this->FillHeader(out, data.length(), OP_BINARY);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
 		ssl_client::write(data);
@@ -200,8 +200,6 @@ bool websocket_client::parseheader(std::string &data)
 			case OP_PING:
 			case OP_PONG:
 			{
-				std::string payload;
-
 				unsigned char len1 = data[1];
 				unsigned int payloadstartoffset = 2;
 
@@ -246,22 +244,16 @@ bool websocket_client::parseheader(std::string &data)
 					return false;
 				}
 
-				/* Copy from buffer into string */
-				const std::string::iterator endit = data.begin() + payloadstartoffset + len;
-				for (std::string::const_iterator i = data.begin() + payloadstartoffset; i != endit; ++i) {
-					const unsigned char c = (unsigned char)*i;
-					payload.push_back(c);
-				}
-		
-				/* Remove this frame from the input buffer */
-				data.erase(data.begin(), endit);
-
 				if ((opcode & ~WS_FINBIT) == OP_PING || (opcode & ~WS_FINBIT) == OP_PONG) {
-					HandlePingPong((opcode & ~WS_FINBIT) == OP_PING, payload);
+					HandlePingPong((opcode & ~WS_FINBIT) == OP_PING, data.substr(payloadstartoffset, len));
 				} else {
 					/* Pass this frame to the deriving class */
-					this->HandleFrame(payload);
+					this->HandleFrame(data.substr(payloadstartoffset, len));
 				}
+
+				/* Remove this frame from the input buffer */
+				data.erase(data.begin(), data.begin() + payloadstartoffset + len);
+
 				return true;
 			}
 			break;

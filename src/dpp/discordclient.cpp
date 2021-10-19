@@ -30,10 +30,13 @@
 #include <thread>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>
+#include <dpp/etf.h>
 #include <zlib.h>
 
-#define PATH_UNCOMPRESSED	"/?v=" DISCORD_API_VERSION "&encoding=json"
-#define PATH_COMPRESSED		"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
+#define PATH_UNCOMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json"
+#define PATH_COMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
+#define PATH_UNCOMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf"
+#define PATH_COMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf&compress=zlib-stream"
 #define DECOMP_BUFFER_SIZE	512 * 1024
 
 namespace dpp {
@@ -46,28 +49,32 @@ public:
 	z_stream d_stream;
 };
 
-discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
-       : websocket_client(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
+discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
+       : websocket_client(DEFAULT_GATEWAY, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
+        runner(nullptr),
+	compressed(comp),
+	decomp_buffer(nullptr),
+	decompressed_total(0),
+	connect_time(0),
+	ping_start(0.0),
 	creator(_cluster),
+	heartbeat_interval(0),
+	last_heartbeat(time(nullptr)),
 	shard_id(_shard_id),
 	max_shards(_max_shards),
-	token(_token),
-	last_heartbeat(time(NULL)),
-	heartbeat_interval(0),
-	reconnects(0),
-	resumes(0),
 	last_seq(0),
-	sessionid(""),
+	token(_token),
 	intents(_intents),
-	runner(nullptr),
-	compressed(comp),
-	decompressed_total(0),
-	decomp_buffer(nullptr),
+	sessionid(""),
+	resumes(0),
+	reconnects(0),
+	websocket_ping(0.0),
 	ready(false),
-	ping_start(0.0),
-	websocket_ping(0.0)
+	last_heartbeat_ack(time(nullptr)),
+	protocol(ws_proto)
 {
 	zlib = new zlibcontext();
+	etf = new etf_parser();
 	Connect();
 }
 
@@ -77,6 +84,7 @@ discord_client::~discord_client()
 		runner->join();
 		delete runner;
 	}
+	delete etf;
 	delete zlib;
 }
 
@@ -197,23 +205,44 @@ bool discord_client::HandleFrame(const std::string &buffer)
 	}
 
 
-	log(dpp::ll_trace, fmt::format("R: {}", data));
 	json j;
 	
-	try {
-		j = json::parse(data);
-	}
-	catch (const std::exception &e) {
-		log(dpp::ll_error, fmt::format("discord_client::HandleFrame {} [{}]", e.what(), data));
-		return true;
+	/**
+	 * This section parses the input frames from the websocket after they're decompressed.
+	 * Note that both ETF and JSON parsers return an nlohmann::json object, so that the rest
+	 * of the library or any user code does not need to be concerned with protocol differences.
+	 * Generally, ETF is faster and consumes much less memory, but provides less opportunities
+	 * to diagnose if it goes wrong.
+	 */
+	switch (protocol) {
+		case ws_json:
+			try {
+				j = json::parse(data);
+			}
+			catch (const std::exception &e) {
+				log(dpp::ll_error, fmt::format("discord_client::HandleFrame(JSON): {} [{}]", e.what(), data));
+				return true;
+			}
+		break;
+		case ws_etf:
+			try {
+				j = etf->parse(data);
+			}
+			catch (const std::exception &e) {
+				log(dpp::ll_error, fmt::format("discord_client::HandleFrame(ETF): {} len={}\n{}", e.what(), data.size(), dpp::utility::debug_dump((uint8_t*)data.data(), data.size())));
+				return true;
+			}
+		break;
 	}
 
-	if (j.find("s") != j.end() && !j["s"].is_null()) {
-		last_seq = j["s"].get<uint64_t>();
+	auto seq = j.find("s");
+	if (seq != j.end() && !seq->is_null()) {
+		last_seq = seq->get<uint64_t>();
 	}
 
-	if (j.find("op") != j.end()) {
-		uint32_t op = j["op"];
+	auto o = j.find("op");
+	if (o != j.end() && !o->is_null()) {
+		uint32_t op = o->get<uint32_t>();
 
 		switch (op) {
 			case 9:
@@ -223,6 +252,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				this->sessionid = "";
 				this->last_seq = 0;
 				/* No break here, falls through to state 10 to cause a reidentify */
+				[[fallthrough]];
 			case 10:
 				/* Need to check carefully for the existence of this before we try to access it! */
 				if (j.find("d") != j.end() && j["d"].find("heartbeat_interval") != j["d"].end() && !j["d"]["heartbeat_interval"].is_null()) {
@@ -241,7 +271,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 							}
 						}
 					};
-					this->write(obj.dump());
+					this->write(jsonobj_to_string(obj));
 					resumes++;
 				} else {
 					/* Full connect */
@@ -273,7 +303,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 					if (this->intents) {
 						obj["d"]["intents"] = this->intents;
 					}
-					this->write(obj.dump());
+					this->write(jsonobj_to_string(obj));
 					this->connect_time = creator->last_identify = time(NULL);
 					reconnects++;
 				}
@@ -281,8 +311,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				websocket_ping = 0;
 			break;
 			case 0: {
-				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
-
+				std::string event = j["t"];
 				HandleEvent(event, j, data);
 			}
 			break;
@@ -463,7 +492,9 @@ void discord_client::one_second_timer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				QueueMessage(json({{"op", 1}, {"d", last_seq}}).dump(), true);
+				QueueMessage(
+					jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}))
+					, true);
 				last_heartbeat = time(NULL);
 			}
 		}
@@ -530,7 +561,7 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id, boo
 		* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
 		*/
 		log(ll_debug, fmt::format("Sending op 4 to join VC, guild {} channel {} ", guild_id, channel_id));
-		QueueMessage(json({
+		QueueMessage(jsonobj_to_string(json({
 			{ "op", 4 },
 			{ "d", {
 					{ "guild_id", std::to_string(guild_id) },
@@ -539,11 +570,19 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id, boo
 					{ "self_deaf", self_deaf },
 				}
 			}
-		}).dump(), false);
+		})), false);
 	} else {
 		log(ll_debug, fmt::format("Requested the bot connect to voice channel {} on guild {}, but it seems we are already on this VC", channel_id, guild_id));
 	}
 #endif
+}
+
+std::string discord_client::jsonobj_to_string(const nlohmann::json& json) {
+	if (protocol == ws_json) {
+		return json.dump();
+	} else {
+		return etf->build(json);
+	}
 }
 
 void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_json) {
@@ -553,7 +592,7 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 	if (v != connecting_voice_channels.end()) {
 		log(ll_debug, fmt::format("Disconnecting voice, guild: {}", guild_id));
 		if (emit_json) {
-			QueueMessage(json({
+			QueueMessage(jsonobj_to_string(json({
 				{ "op", 4 },
 				{ "d", {
 						{ "guild_id", std::to_string(guild_id) },
@@ -562,7 +601,7 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 						{ "self_deaf", false },
 					}
 				}
-			}).dump(), false);
+			})), false);
 		}
 		delete v->second;
 		v->second = nullptr;

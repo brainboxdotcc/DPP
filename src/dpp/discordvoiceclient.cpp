@@ -63,35 +63,37 @@ bool discord_voice_client::sodium_initialised = false;
 
 discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
 	   : websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4"),
-	creator(_cluster),
-	channel_id(_channel_id),
-	server_id(_server_id),
-	token(_token),
-	last_heartbeat(time(nullptr)),
-	heartbeat_interval(0),
-	sessionid(_session_id),
 	runner(nullptr),
-	terminating(false),
-	fd(-1),
+	connect_time(0),
+	port(0),
+	ssrc(0),
+	timescale(1000000),
+	paused(false),
+#if HAVE_VOICE
+	encoder(nullptr),
+	decoder(nullptr),
+	repacketizer(nullptr),
+#endif
+	fd(INVALID_SOCKET),
 	secret_key(nullptr),
 	sequence(0),
 	timestamp(0),
-	timescale(1000000),
 	last_timestamp(std::chrono::high_resolution_clock::now()),
+	sending(false),
+	tracks(0),
+	creator(_cluster),
+	terminating(false),
 #ifdef HAVE_VOICE
 	decode_voice_recv(true),
 #else
 	decode_voice_recv(false),
 #endif
-	sending(false),
-	paused(false),
-	tracks(0)
-#if HAVE_VOICE
-	,
-	encoder(nullptr),
-	decoder(nullptr),
-	repacketizer(nullptr)
-#endif
+	heartbeat_interval(0),
+	last_heartbeat(time(nullptr)),
+	token(_token),
+	sessionid(_session_id),
+	server_id(_server_id),
+	channel_id(_channel_id)
 {
 #if HAVE_VOICE
 	if (!discord_voice_client::sodium_initialised) {
@@ -302,7 +304,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					}
 				}
 
-				/* This is needed to start voice receiving and make sure that the start of sending isnt cut off */
+				/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */
 				send_silence(20);
 
 				/* Fire on_voice_ready */
@@ -520,7 +522,7 @@ void discord_voice_client::WriteReady()
 					tracks--;
 			}
 			if (outbuf.size()) {
-				if (this->UDPSend(outbuf[0].packet.data(), outbuf[0].packet.length()) == outbuf[0].packet.length()) {
+				if (this->UDPSend(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
 					duration = outbuf[0].duration * timescale;
 					outbuf.erase(outbuf.begin());
 					bufsize = outbuf.size();
@@ -628,7 +630,7 @@ void discord_voice_client::Error(uint32_t errorcode)
 	}
 }
 
-void discord_voice_client::log(dpp::loglevel severity, const std::string &msg)
+void discord_voice_client::log(dpp::loglevel severity, const std::string &msg) const
 {
 	creator->log(severity, msg);
 }
@@ -827,7 +829,6 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	memcpy(encodedAudioData.data(), opus_packet, length);
 
 	++sequence;
-	const int headerSize = 12;
 	const int nonceSize = 24;
 	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
 
@@ -880,7 +881,6 @@ std::string discord_voice_client::discover_ip() {
 	(*(uint32_t*)(packet + 4)) = htonl((uint32_t)this->ssrc);
 	if ((newfd = ::socket(AF_INET, SOCK_DGRAM, 0)) >= 0) {
 		sockaddr_in servaddr{};
-		socklen_t sl = sizeof(servaddr);
 		memset(&servaddr, 0, sizeof(sockaddr_in));
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_addr.s_addr = htonl(INADDR_ANY);

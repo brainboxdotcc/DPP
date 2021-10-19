@@ -34,8 +34,8 @@
 namespace dpp {
 
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy)
-	: token(_token), intents(_intents), numshards(_shards), cluster_id(_cluster_id),
-	maxclusters(_maxclusters), last_identify(time(NULL) - 5), compressed(comp), cache_policy(policy), rest_ping(0.0)
+	: rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(NULL) - 5), intents(_intents),
+	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
 	rest = new request_queue(this);
 	raw_rest = new request_queue(this);
@@ -57,8 +57,14 @@ cluster::~cluster()
 #endif
 }
 
+cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
+	ws_mode = mode;
+	return *this;
+}
+
+
 confirmation_callback_t::confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http)
-	: type(_type), value(_value), http_info(_http)
+	: type(_type), http_info(_http), value(_value)
 {
 	if (type == "confirmation") {
 		confirmation newvalue = std::get<confirmation>(_value);
@@ -189,7 +195,7 @@ void cluster::start(bool return_after) {
 			if (s % maxclusters == cluster_id) {
 				/* Each discord_client spawns its own thread in its Run() */
 				try {
-					this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed);
+					this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
 					this->shards[s]->Run();
 				}
 				catch (const std::exception &e) {
@@ -270,10 +276,10 @@ gateway::gateway(nlohmann::json* j) {
 }
 
 void cluster::set_presence(const dpp::presence &p) {
-	std::string string_presence = p.build_json();
+	json pres = json::parse(p.build_json());
 	for (auto& s : shards) {
 		if (s.second->is_connected()) {
-			s.second->QueueMessage(string_presence);
+			s.second->QueueMessage(s.second->jsonobj_to_string(pres));
 		}
 	}
 }
@@ -969,7 +975,7 @@ void cluster::guild_get_preview(snowflake guild_id, command_completion_event_t c
 }
 
 void cluster::guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "member/" + std::to_string(user_id), m_get, "", [callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_get, "", [callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild_member", guild_member().fill_from_json(&j, guild_id, user_id), http));
 		}
