@@ -251,19 +251,6 @@ class DPP_EXPORT cluster {
 	shard_list shards;
 
 	/**
-	 * @brief Thread safety mutex for the map of audit reasons stored in cluster::audit_reasons
-	 */
-	std::mutex audit_reason_mutex;
-
-	/**
-	 * @brief A map of audit reasons for each thread. These are per-thread to make the cluster
-	 * methods like cluster::get_audit_reason and cluster::set_audit_reason thread safe across
-	 * multiple threads. You must ensure you set the audit reason on the same thread that makes
-	 * the request associated with it.
-	 */
-	std::map<std::thread::id, std::string> audit_reasons;
-
-	/**
 	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
 	 *
 	 * @param shardinfo Received HTTP data from API call

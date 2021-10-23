@@ -33,6 +33,14 @@
 
 namespace dpp {
 
+/**
+ * @brief An audit reason for each thread. These are per-thread to make the cluster
+ * methods like cluster::get_audit_reason and cluster::set_audit_reason thread safe across
+ * multiple threads. You must ensure you set the audit reason on the same thread that makes
+ * the request associated with it.
+ */
+thread_local std::string audit_reason;
+
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy)
 	: rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(NULL) - 5), intents(_intents),
 	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
@@ -285,21 +293,18 @@ void cluster::set_presence(const dpp::presence &p) {
 }
 
 cluster& cluster::set_audit_reason(const std::string &reason) {
-	std::lock_guard<std::mutex> audit_reason_lock(audit_reason_mutex);
-	audit_reasons[std::this_thread::get_id()] = reason;
+	audit_reason = reason;
 	return *this;
 }
 
 cluster& cluster::clear_audit_reason() {
-	std::lock_guard<std::mutex> audit_reason_lock(audit_reason_mutex);
-	audit_reasons[std::this_thread::get_id()] = "";
+	audit_reason.clear();
 	return *this;
 }
 
 std::string cluster::get_audit_reason() {
-	std::lock_guard<std::mutex> audit_reason_lock(audit_reason_mutex);
-	std::string r = audit_reasons[std::this_thread::get_id()];
-	audit_reasons[std::this_thread::get_id()] = "";
+	std::string r = audit_reason;
+	audit_reason.clear();
 	return r;
 }
 
