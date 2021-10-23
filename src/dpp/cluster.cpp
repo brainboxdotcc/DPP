@@ -695,9 +695,9 @@ void cluster::message_delete(snowflake message_id, snowflake channel_id, command
 void cluster::message_delete_bulk(const std::vector<snowflake>& message_ids, snowflake channel_id, command_completion_event_t callback) {
 	json j;
 	for (auto & m : message_ids) {
-		j.push_back(std::to_string(m));
+		j["messages"].push_back(std::to_string(m));
 	}
-	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages/bulk-delete", m_delete, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages/bulk-delete", m_post, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
