@@ -15,6 +15,7 @@ int main()
 	dpp::cluster bot(configdocument["token"]);
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
+		bot.set_audit_reason("test reason").thread_create("test thread", 828681546533437471, 60, dpp::GUILD_PUBLIC_THREAD);
 	});
 
 	bot.on_log([&](const dpp::log_t& loginfo) {

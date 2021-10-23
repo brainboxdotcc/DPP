@@ -258,7 +258,7 @@ void cluster::post_rest(const std::string &endpoint, const std::string &major_pa
 		if (callback) {
 			callback(j, rv);
 		}
-	}, postdata, method, filename, filecontent));
+	}, postdata, method, get_audit_reason(), filename, filecontent));
 }
 
 void cluster::request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers) {
@@ -282,6 +282,25 @@ void cluster::set_presence(const dpp::presence &p) {
 			s.second->QueueMessage(s.second->jsonobj_to_string(pres));
 		}
 	}
+}
+
+cluster& cluster::set_audit_reason(const std::string &reason) {
+	std::lock_guard<std::mutex> audit_reason_lock(audit_reason_mutex);
+	audit_reasons[std::this_thread::get_id()] = reason;
+	return *this;
+}
+
+cluster& cluster::clear_audit_reason() {
+	std::lock_guard<std::mutex> audit_reason_lock(audit_reason_mutex);
+	audit_reasons[std::this_thread::get_id()] = "";
+	return *this;
+}
+
+std::string cluster::get_audit_reason() {
+	std::lock_guard<std::mutex> audit_reason_lock(audit_reason_mutex);
+	std::string r = audit_reasons[std::this_thread::get_id()];
+	audit_reasons[std::this_thread::get_id()] = "";
+	return r;
 }
 
 discord_client* cluster::get_shard(uint32_t id) {

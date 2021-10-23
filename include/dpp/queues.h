@@ -150,6 +150,8 @@ public:
 	std::string postdata;
 	/** HTTP method for request */
 	http_method method;
+	/** Audit log reason for Discord requests, if non-empty */
+	std::string reason;
 	/** Upload file name (server side) */
 	std::string file_name;
 	/** Upload file contents (binary) */
@@ -165,10 +167,11 @@ public:
 	 * @param completion completion event to call when done
 	 * @param _postdata Data to send in POST and PUT requests
 	 * @param method The HTTP method to use from dpp::http_method
+	 * @param audit_reason Audit log reason to send, empty to send none
 	 * @param filename The filename (server side) of any uploaded file
 	 * @param filecontent The binary content of any uploaded file for the request
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &filename = "", const std::string &filecontent = "");
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::string &filename = "", const std::string &filecontent = "");
 
 	/** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _url Raw HTTP url
