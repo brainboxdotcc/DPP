@@ -28,6 +28,7 @@
 #include <mutex>
 #include <vector>
 #include <functional>
+#include <condition_variable>
 
 namespace dpp {
 
@@ -250,6 +251,12 @@ private:
 	/** Outbound queue thread */
 	std::thread* out_thread;
 
+	/** Inbound queue condition, signalled when there are requests to fulfill */
+	std::condition_variable in_ready;
+
+	/** Outbound queue condition, signalled when there are requests completed to call callbacks for */ 
+	std::condition_variable out_ready;
+
 	/** Ratelimit bucket counters */
 	std::map<std::string, bucket_t> buckets;
 
@@ -271,21 +278,6 @@ private:
 	/** How many seconds we are globally rate limited for, if globally_ratelimited is true */
 	uint64_t globally_limited_for;
 
-	/*
-	 * Why are we using sockets here instead of std::condition_variable? Because
-	 * in the future we will want to notify across clusters of completion and state,
-	 * and we can't do this across processes with condition variables.
-	 */
-
-	/** Inbound queue listening socket */
-	dpp::socket in_queue_listen_sock;
-	/** Inbound queue connecting socket */
-	dpp::socket in_queue_connect_sock;
-	/** Outbound queue listening socket */
-	dpp::socket out_queue_listen_sock;
-	/** Outbound queue connecting socket */
-	dpp::socket out_queue_connect_sock;
-
 	/**
 	 * @brief Inbound queue thread loop
 	 */
@@ -295,13 +287,6 @@ private:
 	 * @brief Outbound queue thread loop
 	 */
 	void out_loop();
-
-	/** Notify request thread of a new request */
-	void emit_in_queue_signal();
-
-	/** Notify completion thread of new completed request */
-	void emit_out_queue_signal();
-
 public:
 
 	/** Constructor
