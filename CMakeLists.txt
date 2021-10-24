@@ -23,7 +23,25 @@ option(DPP_BUILD_TEST "Build the test program" ON)
 
 add_compile_definitions(DPP_BUILD)
 
-if(WIN32)
+#if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+#	set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+#endif()
+
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h" version_h)
+
+if(NOT version_h MATCHES "DPP_VERSION_SHORT ([0-9][0-9])([0-9][0-9])([0-9][0-9])")
+	message(FATAL_ERROR "Cannot get DPP_VERSION_SHORT from version.h")
+endif()
+
+math(EXPR DPP_VERSION_MAJOR ${CMAKE_MATCH_1})
+math(EXPR DPP_VERSION_MINOR ${CMAKE_MATCH_2})
+math(EXPR DPP_VERSION_PATCH ${CMAKE_MATCH_3})
+
+string(CONCAT DPP_VERSION ${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSION_PATCH})
+
+project(libdpp VERSION ${DPP_VERSION} LANGUAGES CXX)
+
+if(WIN32 AND NOT MINGW)
 	if (NOT WINDOWS_32_BIT)
 		message("-- Building for windows with precompiled packaged dependencies")
 		#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -47,7 +65,7 @@ if(WIN32)
 		set(HAVE_OPUS_OPUS_H "${CMAKE_CURRENT_SOURCE_DIR}/win32/include/opus/opus.h")
 		set(OPUS_FOUND 1)
 		SET(sodium_VERSION_STRING "win32 bundled")
-		
+
 		include_directories("${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
 
 		add_compile_definitions(OPENSSL_SYS_WIN32)
@@ -58,24 +76,6 @@ if(WIN32)
 
 	endif()
 endif()
-
-#if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-#	set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
-#endif()
-
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h" version_h)
-
-if(NOT version_h MATCHES "DPP_VERSION_SHORT ([0-9][0-9])([0-9][0-9])([0-9][0-9])")
-	message(FATAL_ERROR "Cannot get DPP_VERSION_SHORT from version.h")
-endif()
-
-math(EXPR DPP_VERSION_MAJOR ${CMAKE_MATCH_1})
-math(EXPR DPP_VERSION_MINOR ${CMAKE_MATCH_2})
-math(EXPR DPP_VERSION_PATCH ${CMAKE_MATCH_3})
-
-string(CONCAT DPP_VERSION ${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSION_PATCH})
-
-project(libdpp VERSION ${DPP_VERSION} LANGUAGES CXX)
 
 if(NOT BUILD_SHARED_LIBS)
 	if(UNIX)
@@ -94,7 +94,7 @@ if(NOT BUILD_SHARED_LIBS)
 endif()
 
 include("cmake/colour.cmake")
-if (NOT WIN32)
+if (MINGW OR NOT WIN32)
 	include("cmake/FindSodium.cmake")
 	include("cmake/FindOpus.cmake")
 endif()
@@ -122,16 +122,16 @@ string(ASCII 27 Esc)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
-if(NOT WIN32)
+if(MINGW OR NOT WIN32)
 	find_package(ZLIB REQUIRED)
-endif(NOT WIN32)
+endif(MINGW OR NOT WIN32)
 
 if(APPLE)
 	set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
 
 	find_package(OpenSSL REQUIRED)
 else()
-	if(NOT WIN32)
+	if(MINGW OR NOT WIN32)
 		find_package(OpenSSL REQUIRED)
 	endif()
 endif()
@@ -165,7 +165,9 @@ if(MSVC)
 	string(REGEX REPLACE "/W[1|2|3|4]" "/W3" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wempty-body -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread -g -O3 -fPIC")
-	add_link_options("-rdynamic")
+	if (NOT MINGW)
+		add_link_options("-rdynamic")
+	endif ()
 endif()
 
 set(modules_dir "src")
@@ -184,7 +186,7 @@ foreach (fullmodname ${subdirlist})
 		add_library(${modname} STATIC ${modsrc})
 	endif()
 
-	if (WIN32)
+	if (WIN32 AND NOT MINGW)
 		if (NOT WINDOWS_32_BIT)
 			target_link_libraries(${modname} PUBLIC "${PROJECT_SOURCE_DIR}/win32/lib/libssl.lib"
 				"${PROJECT_SOURCE_DIR}/win32/lib/libcrypto.lib"
@@ -201,6 +203,9 @@ foreach (fullmodname ${subdirlist})
 
 	else()
 		target_link_libraries(${modname} PUBLIC ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${ZLIB_LIBRARIES})
+		if (MINGW)
+			target_link_libraries(${modname} PUBLIC wsock32 ws2_32 crypt32)
+		endif ()
 	endif()
 
 	if (HAVE_VOICE)
@@ -218,7 +223,7 @@ if (DPP_BUILD_TEST)
 	target_link_libraries(test PUBLIC ${modname})
 endif()
 
-if(WIN32)
+if(WIN32 AND NOT MINGW)
 	if (NOT WINDOWS_32_BIT)
 		configure_file("${PROJECT_SOURCE_DIR}/win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
 		configure_file("${PROJECT_SOURCE_DIR}/win32/bin/libcrypto-1_1-x64.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
@@ -244,6 +249,9 @@ if(NOT WIN32)
 
 	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/dpp.pc.in" "${CMAKE_BINARY_DIR}/dpp.pc" @ONLY)
 	install(FILES "${CMAKE_BINARY_DIR}/dpp.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+elseif(MINGW)
+	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+	install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 endif()
 
 include("cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
