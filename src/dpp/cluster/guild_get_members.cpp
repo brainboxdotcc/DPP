@@ -27,6 +27,7 @@
 #include <dpp/cache.h>
 #include <dpp/nlohmann/json.hpp>
 #include <utility>
+#include <dpp/fmt/format.h>
 
 namespace dpp {
 
