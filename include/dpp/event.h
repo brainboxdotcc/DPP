@@ -64,6 +64,7 @@ event_decl(guild_stickers_update);
 
 /* Stage channels */
 event_decl(stage_instance_create);
+event_decl(stage_instance_update);
 event_decl(stage_instance_delete);
 
 /* Guild members */

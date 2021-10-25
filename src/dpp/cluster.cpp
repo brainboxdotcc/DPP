@@ -266,6 +266,10 @@ void cluster::on_stage_instance_create (std::function<void(const stage_instance_
 	this->dispatch.stage_instance_create = _stage_instance_create;
 }
 
+void cluster::on_stage_instance_update (std::function<void(const stage_instance_update_t& _event)> _stage_instance_update) {
+	this->dispatch.stage_instance_update = _stage_instance_update;
+}
+
 void cluster::on_stage_instance_delete (std::function<void(const stage_instance_delete_t& _event)> _stage_instance_delete) {
 	this->dispatch.stage_instance_delete = _stage_instance_delete;
 }
