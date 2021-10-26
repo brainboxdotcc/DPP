@@ -2167,12 +2167,21 @@ x	 */
 	void thread_member_remove(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Get a thread member
+	 *
+	 * @param thread_id Thread to get member for
+	 * @param user_id ID of the user to get
+	 * @param callback Function to call when the API call completes
+	 */
+	void get_thread_member(const snowflake thread_id, const snowflake user_id, command_completion_event_t callback);
+
+	/**
 	 * @brief Get members of a thread
 	 *
 	 * @param thread_id Thread to get members for
 	 * @param callback Function to call when the API call completes
 	 */
-	void get_thread_members(snowflake thread_id, command_completion_event_t callback = {});
+	void get_thread_members(snowflake thread_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get active threads in a channel (Sorted by ID in descending order)
@@ -2180,7 +2189,7 @@ x	 */
 	 * @param channel_id Channel to get active threads for
 	 * @param callback Function to call when the API call completes
 	 */
-	void get_active_threads(snowflake channel_id, command_completion_event_t callback = {});
+	void get_active_threads(snowflake channel_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
@@ -2190,7 +2199,7 @@ x	 */
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
 	 */
-	void get_public_archived_threads(snowflake channel_id, time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
+	void get_public_archived_threads(snowflake channel_id, time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback);
 
 	/**
 	 * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
@@ -2200,7 +2209,7 @@ x	 */
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
 	 */
-	void get_private_archived_threads(snowflake channel_id,  time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback = {});
+	void get_private_archived_threads(snowflake channel_id,  time_t before_timestamp = 0, uint16_t limit = 0, command_completion_event_t callback);
 
 	/**
 	 * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
@@ -2211,7 +2220,7 @@ x	 */
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
 	 */
-	void get_joined_private_archived_threads(snowflake channel_id, snowflake before_id = 0, uint16_t limit = 0, command_completion_event_t callback = {});
+	void get_joined_private_archived_threads(snowflake channel_id, snowflake before_id = 0, uint16_t limit = 0, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a sticker in a guild

@@ -114,6 +114,13 @@ void cluster::get_public_archived_threads(snowflake channel_id, time_t before_ti
 		});
 }
 
+void cluster::get_thread_member(const snowflake thread_id, const snowflake user_id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/channels", std::to_string(thread_id), "/threads-members/" + std::to_string(user_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("thread_member", thread_member().fill_from_json(&j), http));
+		}
+	});
+}
 
 void cluster::get_thread_members(snowflake thread_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(thread_id), "/threads-members", m_get, "", [callback](json &j, const http_request_completion_t& http) {
