@@ -2286,7 +2286,7 @@ x	 */
 	 * @param channel_id ID of the associated channel
 	 * @param callback User function to execute when the api call completes
 	 * @note Callback contains a stage_instance object upon success. On failure, the value contained is undefined and is_error() returns true.
-	 * @note This supports X-Audit-Log-Reason header.
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
 	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
 
@@ -2304,7 +2304,7 @@ x	 */
 	 *
 	 * @param channel_id ID of the associated channel
 	 * @param callback User function to execute when the api call completes
-	 * @note This supports X-Audit-Log-Reason header.
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
 	void stage_instance_edit(const stage_instance& instance, command_completion_event_t callback = {});
 
@@ -2313,7 +2313,7 @@ x	 */
 	 *
 	 * @param channel_id ID of the associated channel
 	 * @param callback User function to execute when the api call completes
-	 * @note This supports X-Audit-Log-Reason header.
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
 	void stage_instance_delete(const snowflake channel_id, command_completion_event_t callback = {});
 
