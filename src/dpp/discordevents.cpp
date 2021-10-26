@@ -302,9 +302,10 @@ std::map<std::string, dpp::events::event*> eventmap = {
 	{ "THREAD_LIST_SYNC", new dpp::events::thread_list_sync() },
 	{ "THREAD_MEMBER_UPDATE", new dpp::events::thread_member_update() },
 	{ "THREAD_MEMBERS_UPDATE", new dpp::events::thread_members_update() },
-	{ "GUILD_APPLICATION_COMMAND_COUNTS_UPDATE", nullptr },
 	{ "GUILD_STICKERS_UPDATE", new dpp::events::guild_stickers_update() },
+	{ "GUILD_APPLICATION_COMMAND_COUNTS_UPDATE", nullptr },
 	{ "APPLICATION_COMMAND_PERMISSIONS_UPDATE", nullptr },
+	{ "EMBEDDED_ACTIVITY_UPDATE", nullptr }
 };
 
 void discord_client::HandleEvent(const std::string &event, json &j, const std::string &raw)
