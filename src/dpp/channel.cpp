@@ -126,7 +126,7 @@ channel& channel::fill_from_json(json* j) {
 	SetInt16NotNull(j, "rate_limit_per_user", this->rate_limit_per_user);
 	SetSnowflakeNotNull(j, "owner_id", this->owner_id);
 	SetSnowflakeNotNull(j, "parent_id", this->parent_id);
-	//this->last_pin_timestamp
+	this->bitrate = Int16NotNull(j, "bitrate")/1024;
 	uint8_t type = Int8NotNull(j, "type");
 	this->flags |= BoolNotNull(j, "nsfw") ? dpp::c_nsfw : 0;
 	this->flags |= (type == GUILD_TEXT) ? dpp::c_text : 0;
@@ -182,9 +182,10 @@ std::string channel::build_json(bool with_id) const {
 	j["position"] = position;
 	j["name"] = name;
 	j["topic"] = topic;
+	j["rate_limit_per_user"] = rate_limit_per_user;
 	if (is_voice_channel()) {
 		j["user_limit"] = user_limit; 
-		j["rate_limit_per_user"] = rate_limit_per_user;
+		j["bitrate"] = bitrate*1024;
 	}
 	if (!is_dm()) {
 		if (parent_id) {
