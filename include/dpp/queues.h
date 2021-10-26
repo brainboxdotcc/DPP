@@ -28,6 +28,7 @@
 #include <mutex>
 #include <vector>
 #include <functional>
+#include <condition_variable>
 
 namespace dpp {
 
@@ -150,6 +151,8 @@ public:
 	std::string postdata;
 	/** HTTP method for request */
 	http_method method;
+	/** Audit log reason for Discord requests, if non-empty */
+	std::string reason;
 	/** Upload file name (server side) */
 	std::string file_name;
 	/** Upload file contents (binary) */
@@ -165,10 +168,11 @@ public:
 	 * @param completion completion event to call when done
 	 * @param _postdata Data to send in POST and PUT requests
 	 * @param method The HTTP method to use from dpp::http_method
+	 * @param audit_reason Audit log reason to send, empty to send none
 	 * @param filename The filename (server side) of any uploaded file
 	 * @param filecontent The binary content of any uploaded file for the request
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &filename = "", const std::string &filecontent = "");
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::string &filename = "", const std::string &filecontent = "");
 
 	/** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _url Raw HTTP url
@@ -247,6 +251,12 @@ private:
 	/** Outbound queue thread */
 	std::thread* out_thread;
 
+	/** Inbound queue condition, signalled when there are requests to fulfill */
+	std::condition_variable in_ready;
+
+	/** Outbound queue condition, signalled when there are requests completed to call callbacks for */ 
+	std::condition_variable out_ready;
+
 	/** Ratelimit bucket counters */
 	std::map<std::string, bucket_t> buckets;
 
@@ -268,21 +278,6 @@ private:
 	/** How many seconds we are globally rate limited for, if globally_ratelimited is true */
 	uint64_t globally_limited_for;
 
-	/*
-	 * Why are we using sockets here instead of std::condition_variable? Because
-	 * in the future we will want to notify across clusters of completion and state,
-	 * and we can't do this across processes with condition variables.
-	 */
-
-	/** Inbound queue listening socket */
-	dpp::socket in_queue_listen_sock;
-	/** Inbound queue connecting socket */
-	dpp::socket in_queue_connect_sock;
-	/** Outbound queue listening socket */
-	dpp::socket out_queue_listen_sock;
-	/** Outbound queue connecting socket */
-	dpp::socket out_queue_connect_sock;
-
 	/**
 	 * @brief Inbound queue thread loop
 	 */
@@ -292,13 +287,6 @@ private:
 	 * @brief Outbound queue thread loop
 	 */
 	void out_loop();
-
-	/** Notify request thread of a new request */
-	void emit_in_queue_signal();
-
-	/** Notify completion thread of new completed request */
-	void emit_out_queue_signal();
-
 public:
 
 	/** Constructor

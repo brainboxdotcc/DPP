@@ -38,6 +38,13 @@ thread_member& thread_member::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
+void to_json(nlohmann::json& j, const thread_metadata& tmdata) {
+	j["archived"] = tmdata.archived;
+	j["auto_archive_duration"] = tmdata.auto_archive_duration;
+	j["locked"] = tmdata.locked;
+	j["invitable"] = tmdata.invitable;
+}
+
 channel::channel() :
 	managed(),
 	flags(0),
@@ -96,6 +103,18 @@ bool channel::is_store_channel() const {
 	return !is_stage_channel() && (flags & dpp::c_store);
 }
 
+bool channel::is_news_thread() const {
+	return flags & dpp::c_news_thread;
+}
+
+bool channel::is_public_thread() const {
+	return flags & dpp::c_public_thread;
+}
+
+bool channel::is_private_thread() const {
+	return flags & dpp::c_private_thread;
+}
+
 channel& channel::fill_from_json(json* j) {
 	this->id = SnowflakeNotNull(j, "id");
 	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
@@ -107,7 +126,7 @@ channel& channel::fill_from_json(json* j) {
 	SetInt16NotNull(j, "rate_limit_per_user", this->rate_limit_per_user);
 	SetSnowflakeNotNull(j, "owner_id", this->owner_id);
 	SetSnowflakeNotNull(j, "parent_id", this->parent_id);
-	//this->last_pin_timestamp
+	this->bitrate = Int16NotNull(j, "bitrate")/1024;
 	uint8_t type = Int8NotNull(j, "type");
 	this->flags |= BoolNotNull(j, "nsfw") ? dpp::c_nsfw : 0;
 	this->flags |= (type == GUILD_TEXT) ? dpp::c_text : 0;
@@ -144,13 +163,11 @@ channel& channel::fill_from_json(json* j) {
 	if (type == GUILD_NEWS_THREAD || type == GUILD_PUBLIC_THREAD || type == GUILD_PRIVATE_THREAD) {
 		SetInt8NotNull(j, "message_count", this->message_count);
 		SetInt8NotNull(j, "memeber_count", this->member_count);
-		dpp::thread_metadata metadata;
 		auto json_metadata = (*j)["thread_metadata"];
 		metadata.archived = BoolNotNull(&json_metadata, "archived");
 		metadata.archive_timestamp = TimestampNotNull(&json_metadata, "archive_timestamp");
 		metadata.auto_archive_duration = Int16NotNull(&json_metadata, "auto_archive_duration");
 		metadata.locked = BoolNotNull(&json_metadata, "locked");
-
 	}
 
 	return *this;
@@ -165,9 +182,10 @@ std::string channel::build_json(bool with_id) const {
 	j["position"] = position;
 	j["name"] = name;
 	j["topic"] = topic;
+	j["rate_limit_per_user"] = rate_limit_per_user;
 	if (is_voice_channel()) {
 		j["user_limit"] = user_limit; 
-		j["rate_limit_per_user"] = rate_limit_per_user;
+		j["bitrate"] = bitrate*1024;
 	}
 	if (!is_dm()) {
 		if (parent_id) {
@@ -186,6 +204,15 @@ std::string channel::build_json(bool with_id) const {
 			j["type"] = GUILD_NEWS;
 		} else if (is_store_channel()) {
 			j["type"] = GUILD_STORE;
+		} else if (is_news_thread()) {
+			j["type"] = GUILD_NEWS_THREAD;
+			j["thread_metadata"] = this->metadata;
+		} else if (is_public_thread()) {
+			j["type"] = GUILD_PUBLIC_THREAD;
+			j["thread_metadata"] = this->metadata;
+		} else if (is_private_thread()) {
+			j["type"] = GUILD_PRIVATE_THREAD;
+			j["thread_metadata"] = this->metadata;
 		}
 		j["nsfw"] = is_nsfw();
 	} else {
@@ -195,7 +222,7 @@ std::string channel::build_json(bool with_id) const {
 			j["type"] = DM;
 		}
 	}
-
+	
 	return j.dump();
 }
 

@@ -37,11 +37,10 @@ namespace dpp { namespace events {
 
 using namespace dpp;
 void thread_member_update::handle(discord_client* client, json& j, const std::string& raw) {
-	json& d = j["d"];
 	if (client->creator->dispatch.thread_member_update) {
+		json& d = j["d"];
 		dpp::thread_member_update_t tm(client, raw);
-		tm.updated = thread_member().fill_from_json(&j);
-
+		tm.updated = thread_member().fill_from_json(&d);
 		client->creator->dispatch.thread_member_update(tm);
 	}
 }

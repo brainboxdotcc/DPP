@@ -10,6 +10,7 @@ if (!file_exists(getenv("HOME") . "/dpp-web")) {
 
 /* Make drop down list of versions from the tags */
 echo "Make version drop down select\n";
+system("git fetch -av --tags");
 $opts = shell_exec("git tag | perl -p -e s/^v//g | sort -n -r | (echo \"<option value='/'>master</option>\" && sed \"s/.*/<option value='\/&\/'>&<\/option>/\")");
 $opts = preg_replace("/\r|\n|/", "", $opts);
 $tags = explode("\n", shell_exec("git tag"));
@@ -50,7 +51,7 @@ foreach ($tags as $tag) {
 		system("git clone --recursive https://github.com/brainboxdotcc/DPP.git");
 		chdir("DPP");
 		system("git checkout tags/$orig_tag");
-		/* Older versions of the docs before 9.0.7 don't have these. Force them into the tree so old verisons get current styling */
+		/* Older versions of the docs before 9.0.7 don't have these. Force them into the tree so old versions get current styling */
 		system("cp -rv " . getenv("HOME") . "/D++/docpages/images docpages");
 		system("cp -rv " . getenv("HOME") . "/D++/docpages/style.css docpages/style.css");
 		system("cp -rv " . getenv("HOME") . "/D++/docpages/*.html docpages/");
@@ -67,6 +68,7 @@ foreach ($tags as $tag) {
 		/* Rewrite version info in header */
 		file_put_contents("docpages/header.html", $hdr);		
 		shell_exec("/usr/local/bin/doxygen");
+		mkdir(getenv("HOME") . "/dpp-web/$tag");
 		system("cp -r docs/* " . getenv("HOME") . "/dpp-web/$tag");
 		chdir("..");
 		system("rm -rf " . sys_get_temp_dir() . "/dpp-old/DPP");

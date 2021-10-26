@@ -10,7 +10,8 @@
 
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
-* Sharding (Many shards, one process: specify the number of shards, or let the library decide)
+* Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
+* Highly optimised ETF (Erlang Term Format) support for very fast websocket throughput (*no other C++ Discord library has this!*)
 * [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
 * [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio)
 * The entire Discord API is available for use in the library
@@ -55,9 +56,19 @@ also be sure to contribute, if you're interested!
 
 ## Dependencies
 
-### External Dependencies (You must install these)
+### Build requirements
 * [cmake](https://cmake.org/) (version 3.13+)
-* [g++](https://gcc.gnu.org) (version 8+)
+* A supported C++ compiler from the list below
+
+### Supported compilers
+* [g++](https://gcc.gnu.org) (version 8 or higher)
+* [clang](https://clang.llvm.org/)
+* AppleClang (12.0 or higher)
+* Microsoft Visual Studio 2019
+* MinGW (gcc version 8 or higher)
+Other compilers may work (either newer versions of those listed above, or different compilers entirely) but have not been tested by us.
+
+### External Dependencies (You must install these)
 * [OpenSSL](https://openssl.org/) (whichever `-dev` package comes with your OS)
 * [zlib](https://zlib.net) (whichever `-dev` package comes with your OS)
 

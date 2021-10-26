@@ -113,6 +113,7 @@ typedef std::variant<
 		auditlog,
 		slashcommand,
 		slashcommand_map,
+		stage_instance,
 		sticker,
 		sticker_map,
 		sticker_pack,
@@ -287,7 +288,16 @@ public:
 	 */
 	dpp::user me;
 
+	/**
+	 * @brief Current cache policy for the cluster
+	 */
 	cache_policy_t cache_policy;
+
+	/**
+	 * @brief Websocket mode for all shards in the cluster, either ws_json or ws_etf.
+	 * Production bots should use ETF, while development bots should use JSON.
+	 */
+	websocket_protocol_t ws_mode;
 
 	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
@@ -312,8 +322,68 @@ public:
 	 */
 	cluster(const cluster&&) = delete;
 
-	/** Destructor */
+	/**
+	 * @brief Destroy the cluster object
+	 */
 	~cluster();
+
+	/**
+	 * @brief Set the websocket protocol for all shards on this cluster.
+	 * You should call this method before cluster::start.
+	 * Generally ws_etf is faster, but provides less facilities for debugging should something
+	 * go wrong. It is recommended to use ETF in production and JSON in development.
+	 * 
+	 * @param mode websocket protocol to use, either ws_json or ws_etf.
+	 * @return cluster& Reference to self for chaining.
+	 */
+	cluster& set_websocket_protocol(websocket_protocol_t mode);
+
+	/**
+	 * @brief Set the audit log reason for the next REST call to be made.
+	 * This is set per-thread, so you must ensure that if you call this method, your request that
+	 * is associated with the reason happens on the same thread where you set the reason.
+	 * Once the next call is made, the audit log reason is cleared for this thread automatically.
+	 * 
+	 * Example:
+	 * ```
+	 * bot.set_audit_reason("Too much abusive content")
+	 *    .channel_delete(my_channel_id);
+	 * ```
+	 * 
+	 * @param reason The reason to set for the next REST call on this thread
+	 * @return cluster& Reference to self for chaining.
+	 */
+	cluster& set_audit_reason(const std::string &reason);
+
+	/**
+	 * @brief Clear the audit log reason for the next REST call to be made.
+	 * This is set per-thread, so you must ensure that if you call this method, your request that
+	 * is associated with the reason happens on the same thread where you set the reason.
+	 * Once the next call is made, the audit log reason is cleared for this thread automatically.
+	 * 
+	 * Example:
+	 * ```
+	 * bot.set_audit_reason("Won't be sent")
+	 *    .clear_audit_reason()
+	 *    .channel_delete(my_channel_id);
+	 * ```
+	 * 
+	 * @return cluster& Reference to self for chaining.
+	 */
+	cluster& clear_audit_reason();
+
+	/**
+	 * @brief Get the audit reason set for the next REST call to be made on this thread.
+	 * This is set per-thread, so you must ensure that if you call this method, your request that
+	 * is associated with the reason happens on the same thread where you set the reason.
+	 * Once the next call is made, the audit log reason is cleared for this thread automatically.
+	 * 
+	 * @note This method call clears the audit reason when it returns it.
+	 * 
+	 * @return std::string The audit reason to be used.
+	 *
+	 */
+	std::string get_audit_reason();
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
@@ -883,6 +953,13 @@ public:
 	void on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create);
 
 	/**
+	 * @brief Called when a stage instance is updated.
+	 *
+	 * @param _stage_instance_update User function to attach to event
+	 */
+	void on_stage_instance_update (std::function<void(const stage_instance_update_t& _event)> _stage_instance_update);
+
+	/**
 	 * @brief Called when an existing stage instance is deleted from a stage channel.
 	 *
 	 * @param _stage_instance_delete User function to attach to event
@@ -1240,6 +1317,7 @@ public:
 
 	/**
 	 * @brief Delete a message from a channel. The callback function is called when the message has been edited
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param message_id Message ID to delete
 	 * @param channel_id Channel to delete from
@@ -1249,6 +1327,7 @@ public:
 
 	/**
 	 * @brief Bulk delete messages from a channel. The callback function is called when the message has been edited
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param message_ids List of message IDs to delete (maximum of 100 message IDs)
 	 * @param channel_id Channel to delete from
@@ -1274,6 +1353,7 @@ public:
 
 	/**
 	 * @brief Create a channel
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param c Channel to create
 	 * @param callback Function to call when the API call completes.
@@ -1282,6 +1362,7 @@ public:
 
 	/**
 	 * @brief Edit a channel
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param c Channel to edit/update
 	 * @param callback Function to call when the API call completes.
@@ -1290,6 +1371,7 @@ public:
 
 	/**
 	 * @brief Edit a channel's position
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param c Channel to change the position for
 	 * @param callback Function to call when the API call completes.
@@ -1310,6 +1392,7 @@ public:
 
 	/**
 	 * @brief Delete a channel
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param channel_id Channel id to delete
 	 * @param callback Function to call when the API call completes.
@@ -1342,6 +1425,7 @@ public:
 
 	/**
 	 * @brief Create invite for a channel
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param c Channel to create an invite on
 	 * @param i Invite to create
@@ -1379,6 +1463,7 @@ public:
 
 	/**
 	 * @brief Remove a permission from a channel
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param c Channel to remove permission from
 	 * @param overwrite_id Overwrite to remove, user or channel ID
@@ -1405,6 +1490,7 @@ public:
 
 	/**
 	 * @brief Pin a message
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param channel_id Channel id to pin message on
 	 * @param message_id Message id to pin message on
@@ -1414,6 +1500,7 @@ public:
 
 	/**
 	 * @brief Unpin a message
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param channel_id Channel id to unpin message on
 	 * @param message_id Message id to unpin message on
@@ -1472,11 +1559,12 @@ public:
 	 * @param gm Guild member to add
 	 * @param access_token Access token from Oauth2 scope
 	 * @param callback Function to call when the API call completes.
-	 */
+x	 */
 	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Edit the properties of an existing guild member
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param gm Guild member to edit
 	 * @param callback Function to call when the API call completes.
@@ -1490,19 +1578,21 @@ public:
 	 * @param user_id User id, who should be moved
 	 * @param callback Function to call when the API call completes.
 	 */
-    void guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback = {});
+	void guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback = {});
 
-    /**
-     * @brief Change current user nickname
-     *
-     * @param guild_id Guild ID to change nickanem on
-     * @param nickname New nickname, or empty string to clear nickname
-     * @param callback Function to call when the API call completes.
-     */
+	/**
+	 * @brief Change current user nickname
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 *
+	 * @param guild_id Guild ID to change nickanem on
+	 * @param nickname New nickname, or empty string to clear nickname
+	 * @param callback Function to call when the API call completes.
+	 */
 	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Add role to guild member
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to add a role to
 	 * @param user_id User ID to add role to
@@ -1513,6 +1603,7 @@ public:
 
 	/**
 	 * @brief Remove role from guild member
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to remove role from user on
 	 * @param user_id User ID to remove role from
@@ -1523,6 +1614,7 @@ public:
 
 	/**
 	 * @brief Remove (kick) a guild member
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to kick member from
 	 * @param user_id User ID to kick
@@ -1532,6 +1624,7 @@ public:
 
 	/**
 	 * @brief Add guild ban
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to add ban to
 	 * @param user_id User ID to ban
@@ -1543,6 +1636,7 @@ public:
 
 	/**
 	 * @brief Delete guild ban
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild to delete ban from
 	 * @param user_id User ID to delete ban for
@@ -1641,6 +1735,7 @@ public:
 
 	/**
 	 * @brief Edit a guild
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param g Guild to edit
 	 * @param callback Function to call when the API call completes.
@@ -1675,6 +1770,7 @@ public:
 	/**
 	 * @brief Create single emoji.
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to create emoji om
 	 * @param newemoji Emoji to create
@@ -1685,6 +1781,7 @@ public:
 	/**
 	 * @brief Edit a single emoji.
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to edit emoji on
 	 * @param newemoji Emoji to edit
@@ -1694,6 +1791,7 @@ public:
 
 	/**
 	 * @brief Delete a guild emoji
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to delete emoji on
 	 * @param emoji_id Emoji ID to delete
@@ -1712,6 +1810,7 @@ public:
 
 	/**
 	 * @brief Begin guild prune
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to prune
 	 * @param pruneinfo Pruning info
@@ -1746,6 +1845,7 @@ public:
 
 	/**
 	 * @brief Modify guild integration
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to modify integration for
 	 * @param i Integration to modify
@@ -1755,6 +1855,7 @@ public:
 
 	/**
 	 * @brief Delete guild integration
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to delete integration for
 	 * @param integration_id Integration ID to delete
@@ -1917,6 +2018,7 @@ public:
 
 	/**
 	 * @brief Create a role on a guild
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param r Role to create (guild ID is encapsulated in the role object)
 	 * @param callback Function to call when the API call completes.
@@ -1925,6 +2027,7 @@ public:
 
 	/**
 	 * @brief Edit a role on a guild
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param r Role to edit
 	 * @param callback Function to call when the API call completes.
@@ -1933,6 +2036,7 @@ public:
 
 	/**
 	 * @brief Edit a role's position in a guild
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param r Role to change position of
 	 * @param callback Function to call when the API call completes.
@@ -1941,6 +2045,7 @@ public:
 
 	/**
 	 * @brief Delete a role
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to delete the role on
 	 * @param role_id Role ID to delete
@@ -2005,6 +2110,7 @@ public:
 
 	/**
 	 * @brief Create a thread
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
@@ -2016,6 +2122,7 @@ public:
 
 	/**
 	 * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
@@ -2108,6 +2215,7 @@ public:
 
 	/**
 	 * @brief Create a sticker in a guild
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param s Sticker to create. Must have its guild ID set.
 	 * @param callback Function to call when the API call completes.
@@ -2117,6 +2225,7 @@ public:
 
 	/**
 	 * @brief Modify a sticker in a guild
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param s Sticker to modify. Must have its guild ID and sticker ID set.
 	 * @param callback Function to call when the API call completes.
@@ -2126,6 +2235,7 @@ public:
 
 	/**
 	 * @brief Delete a sticker from a guild
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param sticker_id sticker ID to delete
 	 * @param guild_id guild ID to delete from
@@ -2169,6 +2279,43 @@ public:
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void sticker_packs_get(command_completion_event_t callback);
+
+	/**
+	 * @brief Create a stage instance on a stage channel.
+	 *
+	 * @param channel_id ID of the associated channel
+	 * @param callback User function to execute when the api call completes
+	 * @note Callback contains a stage_instance object upon success. On failure, the value contained is undefined and is_error() returns true.
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 */
+	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get the stage instance associated with the channel id, if it exists.
+	 *
+	 * @param channel_id ID of the associated channel
+	 * @param callback User function to execute when the api call completes
+	 * @note Callback contains a stage_instance object upon success. On failure, the value contained is undefined and is_error() returns true.
+	 */
+	void stage_instance_get(const snowflake channel_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Edit a stage instance.
+	 *
+	 * @param channel_id ID of the associated channel
+	 * @param callback User function to execute when the api call completes
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 */
+	void stage_instance_edit(const stage_instance& instance, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Delete a stage instance.
+	 *
+	 * @param channel_id ID of the associated channel
+	 * @param callback User function to execute when the api call completes
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 */
+	void stage_instance_delete(const snowflake channel_id, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get all voice regions

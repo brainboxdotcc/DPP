@@ -294,6 +294,7 @@ std::map<std::string, dpp::events::event*> eventmap = {
 	{ "USER_UPDATE", new dpp::events::user_update() },
 	{ "GUILD_JOIN_REQUEST_DELETE", new dpp::events::guild_join_request_delete() },
 	{ "STAGE_INSTANCE_CREATE", new dpp::events::stage_instance_create() },
+	{ "STAGE_INSTANCE_UPDATE", new dpp::events::stage_instance_update() },
 	{ "STAGE_INSTANCE_DELETE", new dpp::events::stage_instance_delete() },
 	{ "THREAD_CREATE", new dpp::events::thread_create() },
 	{ "THREAD_UPDATE", new dpp::events::thread_update() },
@@ -301,9 +302,10 @@ std::map<std::string, dpp::events::event*> eventmap = {
 	{ "THREAD_LIST_SYNC", new dpp::events::thread_list_sync() },
 	{ "THREAD_MEMBER_UPDATE", new dpp::events::thread_member_update() },
 	{ "THREAD_MEMBERS_UPDATE", new dpp::events::thread_members_update() },
-	{ "GUILD_APPLICATION_COMMAND_COUNTS_UPDATE", nullptr },
 	{ "GUILD_STICKERS_UPDATE", new dpp::events::guild_stickers_update() },
+	{ "GUILD_APPLICATION_COMMAND_COUNTS_UPDATE", nullptr },
 	{ "APPLICATION_COMMAND_PERMISSIONS_UPDATE", nullptr },
+	{ "EMBEDDED_ACTIVITY_UPDATE", nullptr }
 };
 
 void discord_client::HandleEvent(const std::string &event, json &j, const std::string &raw)
