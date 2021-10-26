@@ -113,6 +113,7 @@ typedef std::variant<
 		auditlog,
 		slashcommand,
 		slashcommand_map,
+		stage_instance,
 		sticker,
 		sticker_map,
 		sticker_pack,

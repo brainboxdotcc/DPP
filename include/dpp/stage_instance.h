@@ -67,7 +67,7 @@ struct DPP_EXPORT stage_instance {
 	 *
 	 * @return std::string Dumped json of this object
 	 */
-	std::string build_json();
+	std::string const build_json() const;
 };
 
 };
