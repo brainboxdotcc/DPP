@@ -18,14 +18,39 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#pragma once
+#include <dpp/discord.h>
+#include <dpp/event.h>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <dpp/discordclient.h>
+#include <dpp/discord.h>
+#include <dpp/cache.h>
+#include <dpp/stringops.h>
+#include <dpp/nlohmann/json.hpp>
+#include <dpp/discordevents.h>
 
-#if !defined(DPP_VERSION_LONG)
-#define DPP_VERSION_LONG 0x00090010
-#define DPP_VERSION_SHORT 090010
-#define DPP_VERSION_TEXT "D++ 9.0.10 (26-Oct-2021)"
 
-#define DPP_VERSION_MAJOR ((DPP_VERSION_LONG & 0x00ff0000) >> 16)
-#define DPP_VERSION_MINOR ((DPP_VERSION_LONG & 0x0000ff00) >> 8)
-#define DPP_VERSION_PATCH (DPP_VERSION_LONG & 0x000000ff)
-#endif
+using json = nlohmann::json;
+
+namespace dpp { namespace events {
+
+using namespace dpp;
+
+/**
+ * @brief Handle event
+ * 
+ * @param client Websocket client (current shard)
+ * @param j JSON data for the event
+ * @param raw Raw JSON string
+ */
+void stage_instance_update::handle(discord_client* client, json &j, const std::string &raw) {
+	if (client->creator->dispatch.stage_instance_update) {
+		json& d = j["d"];
+		dpp::stage_instance_update_t siu(client, raw);
+		siu.updated.fill_from_json(&d);
+		client->creator->dispatch.stage_instance_update(siu);
+	}
+}
+
+}};

@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,38 +18,43 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/stage_instance.h>
 #include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
+
+namespace dpp {
 
 using json = nlohmann::json;
 
-namespace dpp { namespace events {
-
-using namespace dpp;
-
-/**
- * @brief Handle event
- * 
- * @param client Websocket client (current shard)
- * @param j JSON data for the event
- * @param raw Raw JSON string
- */
-void stage_instance_delete::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.stage_instance_delete) {
-		json& d = j["d"];
-		dpp::stage_instance_delete_t sid(client, raw);
-		sid.deleted.fill_from_json(&d);
-		client->creator->dispatch.stage_instance_delete(sid);
-	}
+stage_instance::stage_instance() :
+	id(0),
+	guild_id(0),
+	channel_id(0),	
+	privacy_level(sp_public),
+	discoverable_disabled(false)
+{
 }
 
-}};
+stage_instance& stage_instance::fill_from_json(const json* j) {
+	SetSnowflakeNotNull(j, "id", this->id);
+	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
+	SetSnowflakeNotNull(j, "channel_id", this->channel_id);
+	SetStringNotNull(j, "topic", this->topic) ;
+	this->privacy_level = static_cast<dpp::stage_privacy_level>(Int8NotNull(j, "privacy_level"));
+	SetBoolNotNull(j, "discoverable_disabled", this->discoverable_disabled);
+
+	return *this;
+}
+
+std::string const stage_instance::build_json() const {
+	json j;
+	j["topic"] = this->topic;
+	j["privacy_level"] = this->privacy_level;
+	j["channel_id"] = this->channel_id;
+
+	return j.dump();
+}
+
+};

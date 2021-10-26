@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,18 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#pragma once
+#include <dpp/discord.h>
+#include <dpp/cluster.h>
+#include <dpp/nlohmann/json.hpp>
 
-#if !defined(DPP_VERSION_LONG)
-#define DPP_VERSION_LONG 0x00090010
-#define DPP_VERSION_SHORT 090010
-#define DPP_VERSION_TEXT "D++ 9.0.10 (26-Oct-2021)"
+namespace dpp {
 
-#define DPP_VERSION_MAJOR ((DPP_VERSION_LONG & 0x00ff0000) >> 16)
-#define DPP_VERSION_MINOR ((DPP_VERSION_LONG & 0x0000ff00) >> 8)
-#define DPP_VERSION_PATCH (DPP_VERSION_LONG & 0x000000ff)
-#endif
+void cluster::get_gateway_bot(command_completion_event_t callback) {
+	this->post_rest(API_PATH "/gateway", "bot", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("gateway", gateway(&j), http));
+		}
+	});
+}
+
+};

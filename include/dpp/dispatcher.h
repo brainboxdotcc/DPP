@@ -71,26 +71,20 @@ struct DPP_EXPORT stage_instance_create_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	stage_instance_create_t(class discord_client* client, const std::string& raw);
-	/**
-	 * @brief stage instance id
+
+	stage_instance created;
+};
+
+/** @brief Update stage instance */
+struct DPP_EXPORT stage_instance_update_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
 	 */
-	snowflake id;
-	/**
-	 * @brief Channel ID
-	 */
-	snowflake channel_id;
-	/**
-	 * @brief Guild ID
-	 */
-	snowflake guild_id;
-	/**
-	 * @brief Privacy level
-	 */
-	uint8_t privacy_level;
-	/**
-	 * @brief Stage Topic
-	 */
-	std::string topic;
+	stage_instance_update_t(class discord_client* client, const std::string& raw);
+
+	stage_instance updated;
 };
 
 /** @brief Delete stage instance */
@@ -101,26 +95,8 @@ struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	stage_instance_delete_t(class discord_client* client, const std::string& raw);
-	/**
-	 * @brief stage instance id
-	 */
-	snowflake id;
-	/**
-	 * @brief Channel ID
-	 */
-	snowflake channel_id;
-	/**
-	 * @brief Guild ID
-	 */
-	snowflake guild_id;
-	/**
-	 * @brief Privacy level
-	 */
-	uint8_t privacy_level;
-	/**
-	 * @brief Stage Topic
-	 */
-	std::string topic;
+
+	stage_instance deleted;
 };
 
 /** @brief Voice state update */
@@ -1164,6 +1140,10 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const stage_instance_create_t& event)> stage_instance_create;
+	/** @brief Event handler function pointer for stage instance update event
+	 * @param event Event parameters
+	 */
+	std::function<void(const stage_instance_update_t& event)> stage_instance_update;
 	/** @brief Event handler function pointer for stage instance delete event
 	 * @param event Event parameters
 	 */

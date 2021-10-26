@@ -304,7 +304,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					}
 				}
 
-				/* This is needed to start voice receiving and make sure that the start of sending isnt cut off */
+				/* This is needed to start voice receiving and make sure that the start of sending isn't cut off */
 				send_silence(20);
 
 				/* Fire on_voice_ready */

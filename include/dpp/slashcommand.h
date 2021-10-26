@@ -396,7 +396,7 @@ enum command_permission_type {
  */
 class DPP_EXPORT command_permission {
 public:
-	snowflake id;                  //!< the ID of the role or uses
+	snowflake id;                  //!< the ID of the role or user
 	command_permission_type type;  //!< the type of permission
 	bool permission;               //!< true to allow, false, to disallow
 };
