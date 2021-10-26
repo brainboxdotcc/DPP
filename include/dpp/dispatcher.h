@@ -76,7 +76,7 @@ struct DPP_EXPORT stage_instance_create_t : public event_dispatch_t {
 };
 
 /** @brief Update stage instance */
-struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
+struct DPP_EXPORT stage_instance_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on. CAN BE NULL
 	 * for log events originating from the cluster object

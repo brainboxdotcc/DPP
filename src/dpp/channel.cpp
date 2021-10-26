@@ -205,13 +205,13 @@ std::string channel::build_json(bool with_id) const {
 			j["type"] = GUILD_STORE;
 		} else if (is_news_thread()) {
 			j["type"] = GUILD_NEWS_THREAD;
-			j["thread_metadata"] = this->thread_metadata;
+			j["thread_metadata"] = this->metadata;
 		} else if (is_public_thread()) {
 			j["type"] = GUILD_PUBLIC_THREAD;
-			j["thread_metadata"] = this->thread_metadata;
+			j["thread_metadata"] = this->metadata;
 		} else if (is_private_thread()) {
 			j["type"] = GUILD_PRIVATE_THREAD;
-			j["thread_metadata"] = this->thread_metadata;
+			j["thread_metadata"] = this->metadata;
 		}
 		j["nsfw"] = is_nsfw();
 	} else {

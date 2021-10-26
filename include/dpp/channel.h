@@ -104,6 +104,8 @@ struct DPP_EXPORT thread_metadata {
 	uint16_t auto_archive_duration;
 	/// Whether a thread is locked
 	bool locked;
+	/// Whether non-moderators can add other non-moderators 
+	bool invitable;
 };
 
 /**
