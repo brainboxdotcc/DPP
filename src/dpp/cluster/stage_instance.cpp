@@ -24,16 +24,36 @@
 
 namespace dpp {
 
-cluster::stage_instance_create() {
+cluster::stage_instance_create(const stage_instance& si, command_completion_event_t callback = {}) {
+	this->post_rest(API_PATH "/stage-instances", "", "", m_post, si.build_json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
 }
 
-cluster::stage_instance_get() {
+cluster::stage_instance_get(const snowflake channel_id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/stage-instances", std::to_string(channel_id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", stage_instance().fill_from_json(&j), http));
+		}
+	});
 }
 
-cluster::stage_instance_edit() {
+cluster::stage_instance_edit(const stage_instance& si, command_completion_event_t callback = {}) {
+	this->post_rest(API_PATH "/stage-instances", std::to_string(si.channel_id), "", m_patch, si.build_json(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
 }
 
-cluster::stage_instance_delete() {
+cluster::stage_instance_delete(const stage_instance& si, command_completion_event_t callback = {}) {
+	this->post_rest(API_PATH "/stage-instances", std::to_string(si.channel_id), "", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
 }
 
 };

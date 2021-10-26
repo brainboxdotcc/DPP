@@ -22,11 +22,7 @@ void stage_instance_update::handle(discord_client* client, json &j, const std::s
 	if (client->creator->dispatch.stage_instance_update) {
 		json& d = j["d"];
 		dpp::stage_instance_update_t siu(client, raw);
-		siu.id = SnowflakeNotNull(&d, "id");
-		siu.channel_id = SnowflakeNotNull(&d, "channel_id");
-		siu.guild_id = SnowflakeNotNull(&d, "channel_id");
-		siu.privacy_level = dpp::Int8NotNull(&d, "privacy_level");
-		siu.topic = StringNotNull(&d, "topic");
+		siu.updated.fill_from_json(&j);
 		client->creator->dispatch.stage_instance_update(siu);
 	}
 }

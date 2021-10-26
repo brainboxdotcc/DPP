@@ -47,11 +47,7 @@ void stage_instance_delete::handle(discord_client* client, json &j, const std::s
 	if (client->creator->dispatch.stage_instance_delete) {
 		json& d = j["d"];
 		dpp::stage_instance_delete_t sid(client, raw);
-		sid.id = SnowflakeNotNull(&d, "id");
-		sid.channel_id = SnowflakeNotNull(&d, "channel_id");
-		sid.guild_id = SnowflakeNotNull(&d, "channel_id");
-		sid.privacy_level = dpp::Int8NotNull(&d, "privacy_level");
-		sid.topic = StringNotNull(&d, "topic");
+		sid.deleted.fill_from_json(&j);
 		client->creator->dispatch.stage_instance_delete(sid);
 	}
 }

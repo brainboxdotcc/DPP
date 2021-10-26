@@ -25,12 +25,12 @@
 
 namespace dpp {
 
-enum stage_privacy_level : int8_t {
+enum stage_privacy_level : uint8_t {
 	sp_public = 1, ///The Stage instance is visible publicly, such as on Stage Discovery.
 	sp_guild_only = 2 ///The Stage instance is visible to only guild members.
 };
 
-struct CoreExport stage_instance : managed {
+struct DPP_EXPORT stage_instance {
 
 	/// The id of this Stage instance
 	snowflake id;
@@ -53,10 +53,21 @@ struct CoreExport stage_instance : managed {
 	/*
 	 * @brief Destroy the stage_instance object
 	 */
-	~stage_instance();
+	~stage_instance() = default;
 
+	/*
+	 * @brief Serialise a stage_instance object rom json
+	 *
+	 * @return stage_instance& a reference to self
+	 */
+	stage_instance& fill_from_json(const nlohmann::json* j);
+
+	/*
+	 * @brief Build json for this object
+	 *
+	 * @return std::string Dumped json of this object
+	 */
+	std::string build_json();
 };
 
-nlohmann::json to_json() {
-}
 };

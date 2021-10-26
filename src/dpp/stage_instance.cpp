@@ -22,14 +22,35 @@
 
 namespace dpp {
 
+using json = nlohmann::json;
+
 stage_instance::stage_instance() :
 	id(0),
 	guild_id(0),
 	channel_id(0),	
 	privacy_level(sp_public),
-	discoverable_disabled(),
-
+	discoverable_disabled(false)
 {
+}
+
+stage_instance& stage_instance::fill_from_json(const json* j) {
+	SetSnowflakeNotNull(j, "id", this->id);
+	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
+	SetSnowflakeNotNull(j, "channel_id", this->channel_id);
+	SetStringNotNull(j, "topic", this->topic) ;
+	SetInt8NotNull(j, "privacy_level", this->privacy_level);
+	SetBoolNotNull(j, "discoverable_disabled", this->discoverable_disabled);
+
+	return *this;
+}
+
+std::string stage_instance::build_json() {
+	json j;
+	j["topic"] = this->topic;
+	j["privacy_level"] = this->privacy_level;
+	j["channel_id"] = this->channel_id;
+
+	return j.dump();
 }
 
 };

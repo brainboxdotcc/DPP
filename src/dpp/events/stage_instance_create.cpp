@@ -47,11 +47,7 @@ void stage_instance_create::handle(discord_client* client, json &j, const std::s
 	if (client->creator->dispatch.stage_instance_create) {
 		json& d = j["d"];
 		dpp::stage_instance_create_t sic(client, raw);
-		sic.id = SnowflakeNotNull(&d, "id");
-		sic.channel_id = SnowflakeNotNull(&d, "channel_id");
-		sic.guild_id = SnowflakeNotNull(&d, "channel_id");
-		sic.privacy_level = dpp::Int8NotNull(&d, "privacy_level");
-		sic.topic = StringNotNull(&d, "topic");
+		sic.created.fill_from_json(&j);
 		client->creator->dispatch.stage_instance_create(sic);
 	}
 }
