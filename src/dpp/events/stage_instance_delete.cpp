@@ -47,7 +47,7 @@ void stage_instance_delete::handle(discord_client* client, json &j, const std::s
 	if (client->creator->dispatch.stage_instance_delete) {
 		json& d = j["d"];
 		dpp::stage_instance_delete_t sid(client, raw);
-		sid.deleted.fill_from_json(&j);
+		sid.deleted.fill_from_json(&d);
 		client->creator->dispatch.stage_instance_delete(sid);
 	}
 }

@@ -47,7 +47,7 @@ void stage_instance_create::handle(discord_client* client, json &j, const std::s
 	if (client->creator->dispatch.stage_instance_create) {
 		json& d = j["d"];
 		dpp::stage_instance_create_t sic(client, raw);
-		sic.created.fill_from_json(&j);
+		sic.created.fill_from_json(&d);
 		client->creator->dispatch.stage_instance_create(sic);
 	}
 }
