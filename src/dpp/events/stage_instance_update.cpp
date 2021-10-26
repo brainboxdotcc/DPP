@@ -30,6 +30,7 @@
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/discordevents.h>
 
+
 using json = nlohmann::json;
 
 namespace dpp { namespace events {
@@ -43,12 +44,12 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void stage_instance_delete::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.stage_instance_delete) {
+void stage_instance_update::handle(discord_client* client, json &j, const std::string &raw) {
+	if (client->creator->dispatch.stage_instance_update) {
 		json& d = j["d"];
-		dpp::stage_instance_delete_t sid(client, raw);
-		sid.deleted.fill_from_json(&d);
-		client->creator->dispatch.stage_instance_delete(sid);
+		dpp::stage_instance_update_t siu(client, raw);
+		siu.updated.fill_from_json(&d);
+		client->creator->dispatch.stage_instance_update(siu);
 	}
 }
 

@@ -113,6 +113,7 @@ typedef std::variant<
 		auditlog,
 		slashcommand,
 		slashcommand_map,
+		stage_instance,
 		sticker,
 		sticker_map,
 		sticker_pack,
@@ -950,6 +951,13 @@ public:
 	 * @param _stage_instance_create User function to attach to event
 	 */
 	void on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create);
+
+	/**
+	 * @brief Called when a stage instance is updated.
+	 *
+	 * @param _stage_instance_update User function to attach to event
+	 */
+	void on_stage_instance_update (std::function<void(const stage_instance_update_t& _event)> _stage_instance_update);
 
 	/**
 	 * @brief Called when an existing stage instance is deleted from a stage channel.
@@ -2271,6 +2279,43 @@ x	 */
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void sticker_packs_get(command_completion_event_t callback);
+
+	/**
+	 * @brief Create a stage instance on a stage channel.
+	 *
+	 * @param channel_id ID of the associated channel
+	 * @param callback User function to execute when the api call completes
+	 * @note Callback contains a stage_instance object upon success. On failure, the value contained is undefined and is_error() returns true.
+	 * @note This supports X-Audit-Log-Reason header.
+	 */
+	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get the stage instance associated with the channel id, if it exists.
+	 *
+	 * @param channel_id ID of the associated channel
+	 * @param callback User function to execute when the api call completes
+	 * @note Callback contains a stage_instance object upon success. On failure, the value contained is undefined and is_error() returns true.
+	 */
+	void stage_instance_get(const snowflake channel_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Edit a stage instance.
+	 *
+	 * @param channel_id ID of the associated channel
+	 * @param callback User function to execute when the api call completes
+	 * @note This supports X-Audit-Log-Reason header.
+	 */
+	void stage_instance_edit(const stage_instance& instance, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Delete a stage instance.
+	 *
+	 * @param channel_id ID of the associated channel
+	 * @param callback User function to execute when the api call completes
+	 * @note This supports X-Audit-Log-Reason header.
+	 */
+	void stage_instance_delete(const snowflake channel_id, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get all voice regions

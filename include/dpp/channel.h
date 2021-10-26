@@ -104,6 +104,8 @@ struct DPP_EXPORT thread_metadata {
 	uint16_t auto_archive_duration;
 	/// Whether a thread is locked
 	bool locked;
+	/// Whether non-moderators can add other non-moderators 
+	bool invitable;
 };
 
 /**
@@ -285,6 +287,27 @@ public:
 	 */
 	bool is_store_channel() const;
 
+	/*
+	 * @brief Returns true if the channel is a news thread
+	 *
+	 * @return true if news thread
+	 */
+	bool is_news_thread() const;
+
+	/*
+	 * @brief Returns true if the channel is a public thread
+	 *
+	 * @return true if public thread
+	 */
+	bool is_public_thread() const;
+
+	/*
+	 * @brief Returns true if the channel is a private thread
+	 *
+	 * @return true if private thread
+	 */
+	bool is_private_thread() const;
+
 	/**
 	 * @brief Returns true if the channel is a stage channel
 	 * 
@@ -292,6 +315,14 @@ public:
 	 */
 	bool is_stage_channel() const;
 };
+
+/*
+ * @brief Serialize a thread_metadata object to json
+ *
+ * @param j JSON object to serialize to
+ * @param tmdata object to serialize
+ */
+void to_json(nlohmann::json& j, const thread_metadata& tmdata);
 
 /**
  * @brief A group of channels

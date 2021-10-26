@@ -38,6 +38,13 @@ thread_member& thread_member::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
+void to_json(nlohmann::json& j, const thread_metadata& tmdata) {
+	j["archived"] = tmdata.archived;
+	j["auto_archive_duration"] = tmdata.auto_archive_duration;
+	j["locked"] = tmdata.locked;
+	j["invitable"] = tmdata.invitable;
+}
+
 channel::channel() :
 	managed(),
 	flags(0),
@@ -94,6 +101,18 @@ bool channel::is_news_channel() const {
 bool channel::is_store_channel() const {
 	/* Important: Stage/Store overlap to pack more values in a byte */
 	return !is_stage_channel() && (flags & dpp::c_store);
+}
+
+bool channel::is_news_thread() const {
+	return flags & dpp::c_news_thread;
+}
+
+bool channel::is_public_thread() const {
+	return flags & dpp::c_public_thread;
+}
+
+bool channel::is_private_thread() const {
+	return flags & dpp::c_private_thread;
 }
 
 channel& channel::fill_from_json(json* j) {
@@ -184,6 +203,15 @@ std::string channel::build_json(bool with_id) const {
 			j["type"] = GUILD_NEWS;
 		} else if (is_store_channel()) {
 			j["type"] = GUILD_STORE;
+		} else if (is_news_thread()) {
+			j["type"] = GUILD_NEWS_THREAD;
+			j["thread_metadata"] = this->metadata;
+		} else if (is_public_thread()) {
+			j["type"] = GUILD_PUBLIC_THREAD;
+			j["thread_metadata"] = this->metadata;
+		} else if (is_private_thread()) {
+			j["type"] = GUILD_PRIVATE_THREAD;
+			j["thread_metadata"] = this->metadata;
 		}
 		j["nsfw"] = is_nsfw();
 	} else {
@@ -193,7 +221,7 @@ std::string channel::build_json(bool with_id) const {
 			j["type"] = DM;
 		}
 	}
-
+	
 	return j.dump();
 }
 

@@ -280,4 +280,5 @@ namespace dpp {
 #include <dpp/presence.h>
 #include <dpp/intents.h>
 #include <dpp/slashcommand.h>
+#include <dpp/stage_instance.h>
 #include <dpp/auditlog.h>

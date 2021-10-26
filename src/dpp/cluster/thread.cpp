@@ -154,7 +154,6 @@ void cluster::thread_create_with_message(const std::string& thread_name, snowfla
 	});
 }
 
-
 void cluster::thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(thread_id), "/thread-members/" + std::to_string(user_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
