@@ -42,7 +42,7 @@ stage_instance& stage_instance::fill_from_json(const json* j) {
 	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
 	SetSnowflakeNotNull(j, "channel_id", this->channel_id);
 	SetStringNotNull(j, "topic", this->topic) ;
-	this->privacy_level = Int8NotNull(j, "privacy_level");
+	this->privacy_level = static_cast<dpp::stage_privacy_level>Int8NotNull(j, "privacy_level");
 	SetBoolNotNull(j, "discoverable_disabled", this->discoverable_disabled);
 
 	return *this;
