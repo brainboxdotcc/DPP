@@ -86,6 +86,7 @@ typedef std::variant<
 		guild_member_map,
 		channel,
 		channel_map,
+		thread_member,
 		thread_member_map,
 		guild,
 		guild_map,
