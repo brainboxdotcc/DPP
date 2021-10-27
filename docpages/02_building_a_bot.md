@@ -127,3 +127,28 @@ To create a basic bot using **Visual Studio 2019**, follow the steps below to cr
 - Please note that if you change the artchitecture (step 13) you must reconfigure all of steps 7 through 12 again as these configurations are specific to each architecture. This is to allow for different sets of precompiled libs, e.g. for `x86`, `x64`, etc.
 - You should run your bot from a command prompt. If you do not, and it exits, you will not be able to see any output as the window will immediately close.
 - Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
+
+\page creating-a-bot-application Creating a bot application
+
+Before you start coding, you need to create and register your bot in the Discord developer portal.
+
+To create a new application, take the steps as follows:
+
+1. Sign in to the [Discord developer portal](https://discord.com/developers/applications) and click on "New Application" on the top right.
+2. Next, enter a name for the application in the pop-up and press the "Create" button.
+
+\image create_application_confirm_popup.png
+
+In this example we named it "D++ Test Bot".
+
+4. Move on by click the "Bot" tab in the left-hand side of the screen. Now click the "Add Bot" button on the right and confirm that you want to add the bot to your application.
+
+\image create_application_add_bot.png
+
+On the resulting screen, you’ll note a page with information regarding your new bot. You can edit your bot name, description, and avatar here if you want to.
+
+\image create_application_bot_overview.png
+
+In this panel, you can get your bot token. A bot token looks like this: `OTAyOTMxODU1NTU1MzE3ODUw.YXlm0g.9oYCt-XHXVH_z9qAytzmVRzKWTg`
+
+\note Don't share this token with anybody! If you ever somehow compromise your current bot token or see your bot in danger, you can regenerate the token in the panel.
