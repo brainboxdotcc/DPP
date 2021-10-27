@@ -141,7 +141,7 @@ To create a new application, take the steps as follows:
 
 In this example we named it "D++ Test Bot".
 
-4. Move on by click the "Bot" tab in the left-hand side of the screen. Now click the "Add Bot" button on the right and confirm that you want to add the bot to your application.
+3. Move on by click the "Bot" tab in the left-hand side of the screen. Now click the "Add Bot" button on the right and confirm that you want to add the bot to your application.
 
 \image create_application_add_bot.png
 
