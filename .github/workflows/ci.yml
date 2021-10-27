@@ -29,7 +29,7 @@ jobs:
 
       - name: Package distributable
         if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
-        run: cd build && cpack
+        run: cd build && cpack --verbose
 
       - name: Upload Binary
         if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
@@ -94,7 +94,7 @@ jobs:
         run: xcopy /s/q main\build\Debug main\build\Release\
 
       - name: Package distributable
-        run: cd main/build && cpack
+        run: cd main/build && cpack --verbose
 
       - name: Upload Binary
         uses: actions/upload-artifact@v2
@@ -128,7 +128,7 @@ jobs:
         run: cd build && sudo ninja -j4
 
       - name: Package Distributable
-        run: cd build && cpack
+        run: cd build && cpack --verbose
 
       - name: Upload Binaries
         uses: actions/upload-artifact@v2
