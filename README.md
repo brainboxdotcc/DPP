@@ -20,7 +20,7 @@
 
 Want to help? Drop me a line or send a PR.
 
-This library is in use on [TriviaBot](https://triviabot.co.uk/) and [Sporks bot](https://sporks.gg).
+This library is in use on [TriviaBot](https://triviabot.co.uk/) and [Sporks bot](https://sporks.gg) and many other bots!
 
 ## Documentation
 
