@@ -6,7 +6,7 @@ Click on a link below for a guide specifically for your system:
 
 * \subpage build-a-discord-bot-windows-visual-studio "Building a discord bot in Windows"
 * \subpage buildcmake "Building a Discord Bot using CMake/UNIX"
-
+* \subpage creating-a-bot-application "Creating a bot application"
 
 \page buildcmake Building a Discord Bot using CMake/UNIX
 # Building with CMake
@@ -137,17 +137,17 @@ To create a new application, take the steps as follows:
 1. Sign in to the [Discord developer portal](https://discord.com/developers/applications) and click on "New Application" on the top right.
 2. Next, enter a name for the application in the pop-up and press the "Create" button.
 
-\image create_application_confirm_popup.png
+\image html create_application_confirm_popup.png
 
 In this example we named it "D++ Test Bot".
 
 3. Move on by click the "Bot" tab in the left-hand side of the screen. Now click the "Add Bot" button on the right and confirm that you want to add the bot to your application.
 
-\image create_application_add_bot.png
+\image html create_application_add_bot.png
 
 On the resulting screen, you’ll note a page with information regarding your new bot. You can edit your bot name, description, and avatar here if you want to.
 
-\image create_application_bot_overview.png
+\image html create_application_bot_overview.png
 
 In this panel, you can get your bot token. A bot token looks like this: `OTAyOTMxODU1NTU1MzE3ODUw.YXlm0g.9oYCt-XHXVH_z9qAytzmVRzKWTg`
 
