@@ -382,7 +382,7 @@ void from_json(const nlohmann::json& j, component_interaction& bi);
  * @see https://github.com/nlohmann/json#arbitrary-types-conversions
  *
  * @param j output json object
- * @param bi autocomplete_interaction to be deserialized
+ * @param ai autocomplete_interaction to be deserialized
  */
 void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
 

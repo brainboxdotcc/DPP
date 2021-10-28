@@ -2302,7 +2302,7 @@ x	 */
 	/**
 	 * @brief Create a stage instance on a stage channel.
 	 *
-	 * @param channel_id ID of the associated channel
+	 * @param instance Stage instance to create
 	 * @param callback User function to execute when the api call completes
 	 * @note Callback contains a stage_instance object upon success. On failure, the value contained is undefined and is_error() returns true.
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
@@ -2321,7 +2321,7 @@ x	 */
 	/**
 	 * @brief Edit a stage instance.
 	 *
-	 * @param channel_id ID of the associated channel
+	 * @param instance Stage instance to edit
 	 * @param callback User function to execute when the api call completes
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
