@@ -380,9 +380,19 @@ interaction_response::~interaction_response() {
 	delete msg;
 }
 
+interaction_response& interaction_response::add_autocomplete_choice(const command_option_choice& achoice) {
+	this->autocomplete_choices.emplace_back(achoice);
+	return *this;
+}
+
+
 interaction_response::interaction_response(interaction_response_type t, const struct message& m) : interaction_response() {
 	type = t;
 	*msg = m;
+}
+
+interaction_response::interaction_response(interaction_response_type t) : interaction_response() {
+	type = t;
 }
 
 interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
@@ -395,13 +405,21 @@ interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 
 std::string interaction_response::build_json() const {
 	json j;
-	json msg_json = json::parse(msg->build_json(false, true));
 	j["type"] = this->type;
-	auto cid = msg_json.find("channel_id");
-	if (cid != msg_json.end()) {
-		msg_json.erase(cid);
+	if (this->autocomplete_choices.empty()) {
+		json msg_json = json::parse(msg->build_json(false, true));
+		auto cid = msg_json.find("channel_id");
+		if (cid != msg_json.end()) {
+			msg_json.erase(cid);
+		}
+		j["data"] = msg_json;
+	} else {
+		j["data"] = json::object();
+		for (auto & c : this->autocomplete_choices) {
+			json opt = c;
+			j["data"][c.name] = opt["value"];
+		}
 	}
-	j["data"] = msg_json;
 	return j.dump();
 }
 

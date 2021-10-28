@@ -187,7 +187,8 @@ enum interaction_response_type {
 	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
 	ir_deferred_channel_message_with_source = 5,	//!< ACK an interaction and edit a response later, the user sees a loading state
 	ir_deferred_update_message = 6,			//!< for components, ACK an interaction and edit the original message later; the user does not see a loading state
-	ir_update_message = 7				//!< for components, edit the message the component was attached to
+	ir_update_message = 7,				//!< for components, edit the message the component was attached to
+	ir_autocomplete_reply = 8			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
 };
 
 /**
@@ -216,6 +217,11 @@ struct DPP_EXPORT interaction_response {
 	struct message* msg;
 
 	/**
+	 * @brief Array of up to 25 autocomplete choices
+	 */
+	std::vector<command_option_choice> autocomplete_choices;
+
+	/**
 	 * @brief Construct a new interaction response object
 	 */
 	interaction_response();
@@ -227,6 +233,13 @@ struct DPP_EXPORT interaction_response {
 	 * @param m Message to reply with
 	 */
 	interaction_response(interaction_response_type t, const struct message& m);
+
+	/**
+	 * @brief Construct a new interaction response object
+	 *
+	 * @param t Type of reply
+	 */
+	interaction_response(interaction_response_type t);
 
 	/**
 	 * @brief Fill object properties from JSON
@@ -242,6 +255,14 @@ struct DPP_EXPORT interaction_response {
 	 * @return std::string JSON string
 	 */
 	std::string build_json() const;
+
+	/**
+	 * @brief Add a command option choice
+	 * 
+	 * @param achoice command option choice to add
+	 * @return interaction_response& Reference to self
+	 */
+	interaction_response& add_autocomplete_choice(const command_option_choice& achoice);
 
 	/**
 	 * @brief Destroy the interaction response object

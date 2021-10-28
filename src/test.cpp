@@ -4,7 +4,6 @@ _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or st
 #endif
 #include <dpp/dpp.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
  
 using json = nlohmann::json;
 
@@ -26,7 +25,7 @@ int main()
 				/* Reply to the command. There is an overloaded version of this
 				* call that accepts a dpp::message so you can send embeds.
 				*/
-				event.reply(dpp::ir_channel_message_with_source, fmt::format("Blep! You chose {}", animal));
+				event.reply(dpp::ir_channel_message_with_source, "Blep! You chose " + animal);
 			}
 		}
 	});
@@ -46,9 +45,9 @@ int main()
 		/* Register the command */
 		bot.guild_command_create(newcommand, 825407338755653642, [&bot](const dpp::confirmation_callback_t &callback) {
 			if (callback.is_error()) {
-				bot.log(dpp::ll_error, fmt::format("Failed to register slash command: {}", callback.http_info.body));
+				bot.log(dpp::ll_error, "Failed to register slash command: " + callback.http_info.body);
 			} else {
-				bot.log(dpp::ll_debug, fmt::format("Slash registered: {}", callback.http_info.body));
+				bot.log(dpp::ll_debug, "Slash registered: " + callback.http_info.body);
 			}
 		});
 	});
@@ -56,7 +55,21 @@ int main()
 	bot.on_autocomplete([&bot](const dpp::autocomplete_t & event) {
 		for (auto & opt : event.options) {
 			if (opt.focused) {
-				std::cout << "Autocomplete " << opt.name << " with value of '" << opt.value << "' in field  " << event.name << "\n";
+				bot.interaction_response_create(event.command.id, event.command.token, dpp::interaction_response(dpp::ir_autocomplete_reply)
+					.add_autocomplete_choice(dpp::command_option_choice("squids", "lots of squids"))
+					.add_autocomplete_choice(dpp::command_option_choice("cats", "a few cats"))
+					.add_autocomplete_choice(dpp::command_option_choice("dogs", "bucket of dogs"))
+					.add_autocomplete_choice(dpp::command_option_choice("elephants", "bottle of elephants"))
+				,
+				[&bot](const dpp::confirmation_callback_t &callback) {
+					if (callback.is_error()) {
+						bot.log(dpp::ll_error, "Failed to respond: " + callback.http_info.body);
+					} else {
+						bot.log(dpp::ll_debug, "Responded: " + callback.http_info.body);
+					}
+				});
+				std::cout << "Autocomplete " << opt.name << " with value of '" << opt.value << "' in field " << event.name << "\n";
+				break;
 			}
 		}
 	});
