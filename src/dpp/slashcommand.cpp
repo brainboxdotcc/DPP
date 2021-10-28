@@ -415,9 +415,10 @@ std::string interaction_response::build_json() const {
 		j["data"] = msg_json;
 	} else {
 		j["data"] = json::object();
+		j["data"]["choices"] = json::array();
 		for (auto & c : this->autocomplete_choices) {
 			json opt = c;
-			j["data"][c.name] = opt["value"];
+			j["data"]["choices"].push_back(opt);
 		}
 	}
 	return j.dump();

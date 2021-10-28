@@ -40,16 +40,8 @@ int main()
 			.add_option(dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
 		);
 
-		std::cout << newcommand.build_json() << "\n";
- 
 		/* Register the command */
-		bot.guild_command_create(newcommand, 825407338755653642, [&bot](const dpp::confirmation_callback_t &callback) {
-			if (callback.is_error()) {
-				bot.log(dpp::ll_error, "Failed to register slash command: " + callback.http_info.body);
-			} else {
-				bot.log(dpp::ll_debug, "Slash registered: " + callback.http_info.body);
-			}
-		});
+		bot.guild_command_create(newcommand, 825407338755653642, [&bot](const dpp::confirmation_callback_t &callback));
 	});
 
 	bot.on_autocomplete([&bot](const dpp::autocomplete_t & event) {
@@ -60,15 +52,8 @@ int main()
 					.add_autocomplete_choice(dpp::command_option_choice("cats", "a few cats"))
 					.add_autocomplete_choice(dpp::command_option_choice("dogs", "bucket of dogs"))
 					.add_autocomplete_choice(dpp::command_option_choice("elephants", "bottle of elephants"))
-				,
-				[&bot](const dpp::confirmation_callback_t &callback) {
-					if (callback.is_error()) {
-						bot.log(dpp::ll_error, "Failed to respond: " + callback.http_info.body);
-					} else {
-						bot.log(dpp::ll_debug, "Responded: " + callback.http_info.body);
-					}
-				});
-				std::cout << "Autocomplete " << opt.name << " with value of '" << opt.value << "' in field " << event.name << "\n";
+				);
+				bot.log(dpp::ll_debug, "Autocomplete " + opt.name + " with value of '" + opt.value + "' in field " + event.name);
 				break;
 			}
 		}
