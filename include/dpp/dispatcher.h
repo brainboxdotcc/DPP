@@ -195,7 +195,7 @@ struct DPP_EXPORT button_click_t : public interaction_create_t {
 };
 
 /**
- * @brief Click on button
+ * @brief Discord requests that we fill a list of auto completion choices for a command option
  */
 struct DPP_EXPORT autocomplete_t : public interaction_create_t {
 
@@ -209,12 +209,23 @@ struct DPP_EXPORT autocomplete_t : public interaction_create_t {
 	 * @brief Get a command line parameter
 	 * 
 	 * @param name The command line parameter to retrieve
-	 * @return Always returns an empty parameter as buttons dont have parameters!
+	 * @return Always returns an empty parameter as auto complete requests dont have parameters!
 	 */
 	const virtual command_value& get_parameter(const std::string& name) const;
 
+	/**
+	 * @brief Command ID
+	 */
 	dpp::snowflake id;
+
+	/**
+	 * @brief Command name
+	 */
 	std::string name;
+
+	/**
+	 * @brief auto completion options
+	 */
 	std::vector<dpp::command_option> options;
 };
 
