@@ -56,6 +56,23 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 			ic.command = i;
 			client->creator->dispatch.interaction_create(ic);
 		}
+	} else if (i.type == it_autocomplete) {
+		// "data":{"id":"903319628816728104","name":"blep","options":[{"focused":true,"name":"animal","type":3,"value":"a"}],"type":1}
+		if (client->creator->dispatch.autocomplete) {
+			dpp::autocomplete_t ac(client, raw);
+			ac.id = SnowflakeNotNull(&(d["data"]), "id");
+			ac.name = StringNotNull(&(d["data"]), "name");
+			for (auto & o : d["data"]["options"]) {
+				dpp::command_option opt;
+				opt.name = StringNotNull(&o, "name");
+				opt.type = (dpp::command_option_type)Int8NotNull(&o, "type");
+				opt.value = StringNotNull(&o, "value");
+				opt.focused = BoolNotNull(&o, "focused");
+				ac.options.push_back(opt);
+			}
+			ac.command = i;
+			client->creator->dispatch.autocomplete(ac);
+		}
 	} else if (i.type == it_component_button) {
 		dpp::component_interaction bi = std::get<component_interaction>(i.data);
 		if (bi.component_type == cotype_button) {

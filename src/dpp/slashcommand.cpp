@@ -59,6 +59,7 @@ void to_json(json& j, const command_option& opt) {
 	j["name"] = opt.name;
 	j["description"] = opt.description;
 	j["type"] = opt.type;
+	j["autocomplete"] = opt.autocomplete;
 	j["required"] = opt.required;
 
 	if (opt.options.size()) {
@@ -182,7 +183,7 @@ command_option_choice::command_option_choice(const std::string &n, command_value
 }
 
 command_option::command_option(command_option_type t, const std::string &n, const std::string &d, bool r) :
-	type(t), name(n), description(d), required(r)
+	type(t), name(n), description(d), required(r), autocomplete(false)
 {
 }
 
@@ -203,6 +204,13 @@ command_option& command_option::add_channel_type(const channel_type ch)
 	this->channel_types.push_back(ch);
 	return *this;
 }
+
+command_option& command_option::set_auto_complete(bool autocomp)
+{
+	this->autocomplete = autocomp;
+	return *this;
+}
+
 
 slashcommand& slashcommand::add_option(const command_option &o)
 {
@@ -280,6 +288,10 @@ void from_json(const nlohmann::json& j, component_interaction& bi) {
 	}
 }
 
+void from_json(const nlohmann::json& j, autocomplete_interaction& ai) {
+
+}
+
 void from_json(const nlohmann::json& j, interaction& i) {
 	i.id = SnowflakeNotNull(&j, "id");
 	i.application_id = SnowflakeNotNull(&j, "application_id");
@@ -352,6 +364,10 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			component_interaction bi;
 			j.at("data").get_to(bi);
 			i.data = bi;
+		} else if (i.type == it_autocomplete) {
+			autocomplete_interaction ai;
+			j.at("data").get_to(ai);
+			i.data = ai;
 		}
 	}
 }

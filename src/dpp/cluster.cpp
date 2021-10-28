@@ -282,6 +282,10 @@ void cluster::on_button_click (std::function<void(const button_click_t& _event)>
 	this->dispatch.button_click = _button_click;
 }
 
+void cluster::on_autocomplete (std::function<void(const autocomplete_t& _event)> _autocomplete) {
+	this->dispatch.autocomplete = _autocomplete;
+}
+
 void cluster::on_select_click (std::function<void(const select_click_t& _event)> _select_click) {
 	this->dispatch.select_click = _select_click;
 }

@@ -89,6 +89,13 @@ const command_value& select_click_t::get_parameter(const std::string& name) cons
 	return dummy_b_value;
 }
 
+const command_value& autocomplete_t::get_parameter(const std::string& name) const
+{
+	/* Autocomplete don't have parameters, so override this */
+	static command_value dummy_b_value = {};
+	return dummy_b_value;
+}
+
 /* Standard default constructors that call the parent constructor, for events */
 event_ctor(guild_join_request_delete_t, event_dispatch_t);
 event_ctor(stage_instance_create_t, event_dispatch_t);
@@ -98,6 +105,7 @@ event_ctor(log_t, event_dispatch_t);
 event_ctor(voice_state_update_t, event_dispatch_t);
 event_ctor(interaction_create_t, event_dispatch_t);
 event_ctor(button_click_t, interaction_create_t);
+event_ctor(autocomplete_t, interaction_create_t);
 event_ctor(select_click_t, interaction_create_t);
 event_ctor(guild_delete_t, event_dispatch_t);
 event_ctor(channel_delete_t, event_dispatch_t);

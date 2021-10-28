@@ -508,6 +508,15 @@ public:
 	void on_button_click (std::function<void(const button_click_t& _event)> _button_click);
 
 	/**
+	 * @brief Called when an auto completed field needs suggestions to present to the user
+	 * This is triggered by discord when option choices have auto completion enabled which you have
+	 * associated with a dpp::slashcommand.
+	 *
+	 * @param _autocomplete  User function to attach to event
+	 */
+	void on_autocomplete (std::function<void(const autocomplete_t& _event)> _autocomplete);
+
+	/**
 	 * @brief Called when a select menu is clicked attached to a message.
 	 * Select menu clicks are triggered by discord when select menus are clicked which you have
 	 * associated with a message using dpp::component.

@@ -112,7 +112,10 @@ struct DPP_EXPORT command_option {
 	std::string name;                            //!< Option name (1-32 chars)
 	std::string description;                     //!< Option description (1-100 chars)
 	bool required;                               //!< True if this is a mandatory parameter
+	bool focused;                                //!< True if the user is typing in this field, when sent via autocomplete
+	std::string value;                           //!< Set only by autocomplete went sent as part of an interaction
 	std::vector<command_option_choice> choices;  //!< List of choices for multiple choice command
+	bool autocomplete;                           //!< True if this option supports auto completion
 	std::vector<command_option> options;         //!< Sub-commands
 	std::vector<channel_type> channel_types;
 
@@ -154,6 +157,14 @@ struct DPP_EXPORT command_option {
 	 * @return command_option& return a reference to self for chaining of calls
 	 */
 	command_option& add_channel_type(const channel_type ch);
+
+	/**
+	 * @brief Set the auto complete state
+	 * 
+	 * @param autocomp True to enable auto completion for this option
+	 * @return command_option& return a reference to self for chaining of calls
+	 */
+	command_option& set_auto_complete(bool autocomp);
 };
 
 /**
@@ -289,7 +300,8 @@ void from_json(const nlohmann::json& j, command_data_option& cdo);
 enum interaction_type {
 	it_ping = 1,			//!< ping
 	it_application_command = 2,	//!< application command (slash command)
-	it_component_button = 3		//!< button click (component interaction)
+	it_component_button = 3,	//!< button click (component interaction)
+	it_autocomplete = 4		//!< Autocomplete interaction
 };
 
 /**
@@ -328,6 +340,12 @@ struct DPP_EXPORT component_interaction {
 };
 
 /**
+ * @brief An auto complete interaction
+ */
+struct DPP_EXPORT autocomplete_interaction {
+};
+
+/**
  * @brief helper function to deserialize a component_interaction from json
  *
  * @see https://github.com/nlohmann/json#arbitrary-types-conversions
@@ -338,6 +356,16 @@ struct DPP_EXPORT component_interaction {
 void from_json(const nlohmann::json& j, component_interaction& bi);
 
 /**
+ * @brief helper function to deserialize an autocomplete_interaction from json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param bi autocomplete_interaction to be deserialized
+ */
+void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
+
+/**
  * @brief An interaction represents a user running a command and arrives
  * via the dpp::cluster::on_interaction_create event.
  */
@@ -345,7 +373,7 @@ class DPP_EXPORT interaction : public managed {
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
 	uint8_t	type;                                               //!< the type of interaction
-	std::variant<command_interaction, component_interaction> data; //!< Optional: the command data payload
+	std::variant<command_interaction, component_interaction, autocomplete_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
 	snowflake message_id;					    //!< Originating message id

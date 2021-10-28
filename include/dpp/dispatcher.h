@@ -195,6 +195,31 @@ struct DPP_EXPORT button_click_t : public interaction_create_t {
 };
 
 /**
+ * @brief Click on button
+ */
+struct DPP_EXPORT autocomplete_t : public interaction_create_t {
+
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	autocomplete_t(class discord_client* client, const std::string& raw);
+
+	/**
+	 * @brief Get a command line parameter
+	 * 
+	 * @param name The command line parameter to retrieve
+	 * @return Always returns an empty parameter as buttons dont have parameters!
+	 */
+	const virtual command_value& get_parameter(const std::string& name) const;
+
+	dpp::snowflake id;
+	std::string name;
+	std::vector<dpp::command_option> options;
+};
+
+
+/**
  * @brief Click on select
  */
 struct DPP_EXPORT select_click_t : public interaction_create_t {
@@ -920,6 +945,10 @@ public:
 	 * @param event Event parameters
 	 */
 	std::function<void(const button_click_t& event)> button_click;
+	/** @brief Event handler function pointer for autocomplete event
+	 * @param event Event parameters
+	 */
+	std::function<void(const autocomplete_t& event)> autocomplete;
 	/** @brief Event handler function pointer for button click event
 	 * @param event Event parameters
 	 */
