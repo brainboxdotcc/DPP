@@ -41,7 +41,7 @@ int main()
 		);
 
 		/* Register the command */
-		bot.guild_command_create(newcommand, 825407338755653642, [&bot](const dpp::confirmation_callback_t &callback));
+		bot.guild_command_create(newcommand, 825407338755653642);
 	});
 
 	bot.on_autocomplete([&bot](const dpp::autocomplete_t & event) {
