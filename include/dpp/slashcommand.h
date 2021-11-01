@@ -27,6 +27,13 @@
 
 namespace dpp {
 
+/**
+ * @brief Discord limits the maximum number of replies to an autocomplete interaction to 25.
+ * This value represents that maximum. interaction_response::add_autocomplete_choice does not allow
+ * adding more than this number of elements to the vector.
+ */
+const size_t AUTOCOMPLETE_MAX_CHOICES = 25;
+
 enum channel_type;
 /**
  * @brief Represents command option types.
@@ -113,7 +120,7 @@ struct DPP_EXPORT command_option {
 	std::string description;                     //!< Option description (1-100 chars)
 	bool required;                               //!< True if this is a mandatory parameter
 	bool focused;                                //!< True if the user is typing in this field, when sent via autocomplete
-	std::string value;                           //!< Set only by autocomplete went sent as part of an interaction
+	command_value value;                         //!< Set only by autocomplete went sent as part of an interaction
 	std::vector<command_option_choice> choices;  //!< List of choices for multiple choice command
 	bool autocomplete;                           //!< True if this option supports auto completion
 	std::vector<command_option> options;         //!< Sub-commands

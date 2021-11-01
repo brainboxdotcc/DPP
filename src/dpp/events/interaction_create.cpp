@@ -66,7 +66,32 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				dpp::command_option opt;
 				opt.name = StringNotNull(&o, "name");
 				opt.type = (dpp::command_option_type)Int8NotNull(&o, "type");
-				opt.value = StringNotNull(&o, "value");
+				if (o.contains("value") && !o.at("value").is_null()) {
+					switch (opt.type) {
+						case co_boolean:
+							opt.value = o.at("value").get<bool>();
+							break;
+						case co_channel:
+						case co_role:
+						case co_user:
+						case co_mentionable:
+							opt.value = SnowflakeNotNull(&o, "value");
+							break;
+						case co_integer:
+							opt.value = o.at("value").get<int64_t>();
+							break;
+						case co_string:
+							opt.value = o.at("value").get<std::string>();
+							break;
+						case co_number:
+							opt.value = o.at("value").get<double>();
+							break;
+						case co_sub_command:
+						case co_sub_command_group:
+							/* Silences warning on clang, handled elsewhere */
+						break;
+					}
+				}
 				opt.focused = BoolNotNull(&o, "focused");
 				ac.options.push_back(opt);
 			}

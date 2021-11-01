@@ -21,6 +21,7 @@
 #include <dpp/slashcommand.h>
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
+#include <dpp/dispatcher.h>
 #include <dpp/nlohmann/json.hpp>
 #include <iostream>
 
@@ -189,6 +190,9 @@ command_option::command_option(command_option_type t, const std::string &n, cons
 
 command_option& command_option::add_choice(const command_option_choice &o)
 {
+	if (this->autocomplete) {
+		throw dpp::exception("Can't set autocomplete=true if choices exist in the command_option");
+	}
 	choices.push_back(o);
 	return *this;
 }
@@ -207,6 +211,9 @@ command_option& command_option::add_channel_type(const channel_type ch)
 
 command_option& command_option::set_auto_complete(bool autocomp)
 {
+	if (autocomp && !choices.empty()) {
+		throw dpp::exception("Can't set autocomplete=true if choices exist in the command_option");
+	}
 	this->autocomplete = autocomp;
 	return *this;
 }
@@ -381,7 +388,9 @@ interaction_response::~interaction_response() {
 }
 
 interaction_response& interaction_response::add_autocomplete_choice(const command_option_choice& achoice) {
-	this->autocomplete_choices.emplace_back(achoice);
+	if (autocomplete_choices.size() < AUTOCOMPLETE_MAX_CHOICES) {
+		this->autocomplete_choices.emplace_back(achoice);
+	}
 	return *this;
 }
 

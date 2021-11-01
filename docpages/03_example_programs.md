@@ -1206,15 +1206,18 @@ int main()
 			/* The option which has focused set to true is the one the user is typing in */
 			if (opt.focused) {
 				/* In a real world usage of this function you should return values that loosely match
-				 * opt.value, which contains what the user has typed so far.
+				 * opt.value, which contains what the user has typed so far. The opt.value is a variant
+				 * and will contain the type identical to that of the slash command parameter.
+				 * Here we can safely know it is string.
 				 */
+				std::string uservalue = std::get<std::string>(opt.value);
 				bot.interaction_response_create(event.command.id, event.command.token, dpp::interaction_response(dpp::ir_autocomplete_reply)
 					.add_autocomplete_choice(dpp::command_option_choice("squids", "lots of squids"))
 					.add_autocomplete_choice(dpp::command_option_choice("cats", "a few cats"))
 					.add_autocomplete_choice(dpp::command_option_choice("dogs", "bucket of dogs"))
 					.add_autocomplete_choice(dpp::command_option_choice("elephants", "bottle of elephants"))
 				);
-				bot.log(dpp::ll_debug, "Autocomplete " + opt.name + " with value of '" + opt.value + "' in field " + event.name);
+				bot.log(dpp::ll_debug, "Autocomplete " + opt.name + " with value '" + uservalue + "' in field " + event.name);
 				break;
 			}
 		}
