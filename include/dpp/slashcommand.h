@@ -107,6 +107,11 @@ struct DPP_EXPORT command_option_choice {
 void to_json(nlohmann::json& j, const command_option_choice& choice);
 
 /**
+ * @brief A minimum or maximum value for co_number and co_integer dpp::command_option types
+ */
+typedef std::variant<std::monostate, int64_t, double> command_option_range;
+
+/**
  * @brief Each command option is a command line parameter.
  * It can have a type (see dpp::command_option_type), a name,
  * a description, can be required or optional, and can have
@@ -124,7 +129,9 @@ struct DPP_EXPORT command_option {
 	std::vector<command_option_choice> choices;  //!< List of choices for multiple choice command
 	bool autocomplete;                           //!< True if this option supports auto completion
 	std::vector<command_option> options;         //!< Sub-commands
-	std::vector<channel_type> channel_types;
+	std::vector<channel_type> channel_types;     //!< Allowed channel types for channel snowflake id options
+	command_option_range min_value;              //!< Minimum value allowed, for co_number and co_integer types only
+	command_option_range max_value;              //!< Maximum value allowed, for co_number and co_integer types only
 
 	/**
 	 * @brief Construct a new command option object
@@ -148,6 +155,22 @@ struct DPP_EXPORT command_option {
 	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& add_choice(const command_option_choice &o);
+
+	/**
+	 * @brief Set the minimum numeric value of the option. 
+	 * Only valid if the type is co_number or co_integer.
+	 * @param min_v Minimum value
+	 * @return command_option& return a reference to sef for chaining of calls
+	 */
+	command_option& set_min_value(command_option_range min_v);
+
+	/**
+	 * @brief Set the maximum numeric value of the option. 
+	 * Only valid if the type is co_number or co_integer.
+	 * @param max_v Maximum value
+	 * @return command_option& return a reference to sef for chaining of calls
+	 */
+	command_option& set_max_value(command_option_range max_v);
 
 	/**
 	 * @brief Add a sub-command option

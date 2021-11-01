@@ -51,9 +51,21 @@ void to_json(json& j, const command_option_choice& choice) {
 		j["value"] = std::get<bool>(choice.value);
 	} else if (std::holds_alternative<snowflake>(choice.value)) {
 		j["value"] = std::to_string(std::get<uint64_t>(choice.value));
+	} else if (std::holds_alternative<double>(choice.value)) {
+		j["value"] = std::to_string(std::get<double>(choice.value));
 	} else {
 		j["value"] = std::get<std::string>(choice.value);
 	}
+}
+
+command_option& command_option::set_min_value(command_option_range min_v) {
+	min_value = min_v;
+	return *this;
+}
+
+command_option& command_option::set_max_value(command_option_range max_v) {
+	max_value = max_v;
+	return *this;
 }
 
 void to_json(json& j, const command_option& opt) {
@@ -62,6 +74,22 @@ void to_json(json& j, const command_option& opt) {
 	j["type"] = opt.type;
 	j["autocomplete"] = opt.autocomplete;
 	j["required"] = opt.required;
+
+	/* Check for minimum and maximum values */
+	if (opt.type == dpp::co_number || opt.type == dpp::co_integer) {
+		/* Min */
+		if (std::holds_alternative<double>(opt.min_value)) {
+			j["min_value"] = std::get<double>(opt.min_value);
+		} else if (std::holds_alternative<int64_t>(opt.min_value)) {
+			j["min_value"] = std::get<int64_t>(opt.min_value);
+		}
+		/* Max */
+		if (std::holds_alternative<double>(opt.max_value)) {
+			j["max_value"] = std::to_string(std::get<double>(opt.max_value));
+		} else if (std::holds_alternative<int64_t>(opt.max_value)) {
+			j["max_value"] = std::get<int64_t>(opt.max_value);
+		}
+	}
 
 	if (opt.options.size()) {
 		j["options"] = json();
