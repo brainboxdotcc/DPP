@@ -1,3 +1,7 @@
+html {
+	--content-maxwidth: auto !important;
+}
+
 img {
 	max-width: 100% !important;
 	max-height: auto;
