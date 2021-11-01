@@ -1,5 +1,5 @@
 html {
-	--content-maxwidth: auto !important;
+	--content-maxwidth: 90% !important;
 }
 
 img {
