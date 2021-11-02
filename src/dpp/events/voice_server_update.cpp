@@ -66,8 +66,8 @@ void voice_server_update::handle(discord_client* client, json &j, const std::str
 		}
 	}
 
-	if (client->creator->dispatch.voice_server_update) {
-		client->creator->dispatch.voice_server_update(vsu);
+	if (!client->creator->dispatch.voice_server_update.empty()) {
+		call_event(client->creator->dispatch.voice_server_update, vsu);
 	}
 }
 

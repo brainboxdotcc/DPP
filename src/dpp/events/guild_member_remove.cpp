@@ -54,14 +54,16 @@ void guild_member_remove::handle(discord_client* client, json &j, const std::str
 		dpp::user u;
 		u.fill_from_json(&(d["user"]));
 		gmr.removed = &u;
-		if (client->creator->dispatch.guild_member_remove)
-			client->creator->dispatch.guild_member_remove(gmr);
+		if (client->creator->dispatch.guild_member_remove.empty()) {
+			call_event(client->creator->dispatch.guild_member_remove, gmr);
+		}
 	} else {
 
 		gmr.removed = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));
 
-		if (client->creator->dispatch.guild_member_remove)
-			client->creator->dispatch.guild_member_remove(gmr);
+		if (!client->creator->dispatch.guild_member_remove.empty()) {
+			call_event(client->creator->dispatch.guild_member_remove, gmr);
+		}
 
 		if (gmr.removing_guild && gmr.removed) {
 			auto i = gmr.removing_guild->members.find(gmr.removed->id);

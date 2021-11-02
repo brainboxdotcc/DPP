@@ -53,21 +53,20 @@ void user_update::handle(discord_client* client, json &j, const std::string &raw
 			if (u) {
 				u->fill_from_json(&d);
 			}
-			if (client->creator->dispatch.user_update) {
+			if (!client->creator->dispatch.user_update.empty()) {
 				dpp::user_update_t uu(client, raw);
 				uu.updated = *u;
-				client->creator->dispatch.user_update(uu);
+				call_event(client->creator->dispatch.user_update, uu);
 			}
 		} else {
-			if (client->creator->dispatch.user_update) {
+			if (!client->creator->dispatch.user_update.empty()) {
 				dpp::user u;
 				u.fill_from_json(&d);
 				dpp::user_update_t uu(client, raw);
 				uu.updated = u;
-				client->creator->dispatch.user_update(uu);
+				call_event(client->creator->dispatch.user_update, uu);
 			}
 		}
-
 	}
 }
 

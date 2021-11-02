@@ -29,8 +29,28 @@
 
 namespace dpp {
 
+thread_local bool stop_event = false;
+
 event_dispatch_t::event_dispatch_t(discord_client* client, const std::string &raw) : raw_event(raw), from(client)
 {
+	/* NOTE: This is thread_local because the event_dispatch_t sent to the event is const and cannot itself be modified,
+	 * so there's no const-safe way to set an object variable to true later!
+	 */
+	stop_event = false;
+}
+
+const event_dispatch_t& event_dispatch_t::cancel_event() const
+{
+	/* NOTE: This is thread_local because the event_dispatch_t sent to the event is const and cannot itself be modified,
+	 * so there's no const-safe way to have this as an object property!
+	 */
+	stop_event = true;
+	return *this;
+}
+
+bool event_dispatch_t::is_cancelled() const
+{
+	return stop_event;
 }
 
 void interaction_create_t::reply(interaction_response_type t, const message & m) const

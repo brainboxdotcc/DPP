@@ -45,11 +45,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void stage_instance_update::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.stage_instance_update) {
+	if (!client->creator->dispatch.stage_instance_update.empty()) {
 		json& d = j["d"];
 		dpp::stage_instance_update_t siu(client, raw);
 		siu.updated.fill_from_json(&d);
-		client->creator->dispatch.stage_instance_update(siu);
+		call_event(client->creator->dispatch.stage_instance_update, siu);
 	}
 }
 

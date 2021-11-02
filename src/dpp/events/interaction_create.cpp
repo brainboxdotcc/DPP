@@ -51,14 +51,14 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 	 * so ensure they are dispatched properly.
 	 */
 	if (i.type == it_application_command) {
-		if (client->creator->dispatch.interaction_create) {
+		if (!client->creator->dispatch.interaction_create.empty()) {
 			dpp::interaction_create_t ic(client, raw);
 			ic.command = i;
-			client->creator->dispatch.interaction_create(ic);
+			call_event(client->creator->dispatch.interaction_create, ic);
 		}
 	} else if (i.type == it_autocomplete) {
 		// "data":{"id":"903319628816728104","name":"blep","options":[{"focused":true,"name":"animal","type":3,"value":"a"}],"type":1}
-		if (client->creator->dispatch.autocomplete) {
+		if (!client->creator->dispatch.autocomplete.empty()) {
 			dpp::autocomplete_t ac(client, raw);
 			ac.id = SnowflakeNotNull(&(d["data"]), "id");
 			ac.name = StringNotNull(&(d["data"]), "name");
@@ -96,27 +96,27 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				ac.options.push_back(opt);
 			}
 			ac.command = i;
-			client->creator->dispatch.autocomplete(ac);
+			call_event(client->creator->dispatch.autocomplete, ac);
 		}
 	} else if (i.type == it_component_button) {
 		dpp::component_interaction bi = std::get<component_interaction>(i.data);
 		if (bi.component_type == cotype_button) {
-			if (client->creator->dispatch.button_click) {
+			if (!client->creator->dispatch.button_click.empty()) {
 				dpp::button_click_t ic(client, raw);
 				ic.command = i;
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;
-				client->creator->dispatch.button_click(ic);
+				call_event(client->creator->dispatch.button_click, ic);
 			}
 		}
 		if (bi.component_type == cotype_select) {
-			if (client->creator->dispatch.select_click) {
+			if (!client->creator->dispatch.select_click.empty()) {
 				dpp::select_click_t ic(client, raw);
 				ic.command = i;
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;
 				ic.values = bi.values;
-				client->creator->dispatch.select_click(ic);
+				call_event(client->creator->dispatch.select_click, ic);
 			}
 		}
 	}

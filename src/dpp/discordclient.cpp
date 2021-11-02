@@ -397,12 +397,12 @@ void discord_client::Error(uint32_t errorcode)
 
 void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 {
-	if (creator->dispatch.log) {
+	if (!creator->dispatch.log.empty()) {
 		/* Pass to user if theyve hooked the event */
 		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
-		creator->dispatch.log(logmsg);
+		call_event(creator->dispatch.log, logmsg);
 	}
 }
 
