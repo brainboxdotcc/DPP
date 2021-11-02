@@ -75,6 +75,10 @@ int main()
 		std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 	});
 
+	bot.on_message_update([&bot](const dpp::message_update_t & event) {
+		std::cout << "MU RAW: " << event.raw_event << "\n";
+	});
+
 	bot.start(false);
 
 	return 0;

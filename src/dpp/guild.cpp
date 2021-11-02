@@ -25,6 +25,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 
@@ -117,9 +118,38 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 		}
 	}
 
+	if (j.contains("avatar") && !j.at("avatar").is_null()) {
+		std::string av = StringNotNull(&j, "avatar");
+		if (av.substr(0, 2) == "a_") {
+			gm.flags |= gm_animated_avatar;
+		}
+		gm.avatar = av;
+	}
+
 	gm.flags |= BoolNotNull(&j, "deaf") ? gm_deaf : 0;
 	gm.flags |= BoolNotNull(&j, "mute") ? gm_mute : 0;
 	gm.flags |= BoolNotNull(&j, "pending") ? gm_pending : 0;
+}
+
+std::string guild_member::get_avatar_url()  const {
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	 * At some point in the future this URL *will* change!
+	 */
+	if (!this->avatar.to_string().empty()) {
+		return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}",
+			this->user_id,
+			(has_animated_guild_avatar() ? "a_" : ""),
+			this->avatar.to_string(),
+			(has_animated_guild_avatar() ? "gif" : "png")
+		);
+	} else {
+		return std::string();
+	}
+}
+
+
+bool guild_member::has_animated_guild_avatar() const {
+	return this->flags & gm_animated_avatar;
 }
 
 std::string guild_member::build_json() const {
