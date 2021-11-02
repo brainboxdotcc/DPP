@@ -44,7 +44,7 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void message_reaction_remove::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.message_reaction_remove) {
+	if (!client->creator->dispatch.message_reaction_remove.empty()) {
 		json &d = j["d"];
 		dpp::message_reaction_remove_t mrr(client, raw);
 		mrr.reacting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
@@ -54,7 +54,7 @@ void message_reaction_remove::handle(discord_client* client, json &j, const std:
 		mrr.message_id = SnowflakeNotNull(&d, "message_id");
 		mrr.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
 		if (mrr.reacting_channel && mrr.message_id) {
-			client->creator->dispatch.message_reaction_remove(mrr);
+			call_event(client->creator->dispatch.message_reaction_remove, mrr);
 		}
 	}
 }

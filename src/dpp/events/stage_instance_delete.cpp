@@ -44,11 +44,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void stage_instance_delete::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.stage_instance_delete) {
+	if (!client->creator->dispatch.stage_instance_delete.empty()) {
 		json& d = j["d"];
 		dpp::stage_instance_delete_t sid(client, raw);
 		sid.deleted.fill_from_json(&d);
-		client->creator->dispatch.stage_instance_delete(sid);
+		call_event(client->creator->dispatch.stage_instance_delete, sid);
 	}
 }
 

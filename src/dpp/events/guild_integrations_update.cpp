@@ -44,11 +44,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void guild_integrations_update::handle(class discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.guild_integrations_update) {
+	if (!client->creator->dispatch.guild_integrations_update.empty()) {
 		json& d = j["d"];
 		dpp::guild_integrations_update_t giu(client, raw);
 		giu.updating_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
-		client->creator->dispatch.guild_integrations_update(giu);
+		call_event(client->creator->dispatch.guild_integrations_update, giu);
 	}
 }
 

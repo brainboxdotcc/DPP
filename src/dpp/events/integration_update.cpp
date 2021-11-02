@@ -44,11 +44,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void integration_update::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.integration_update) {
+	if (!client->creator->dispatch.integration_update.empty()) {
 		json& d = j["d"];
 		dpp::integration_update_t iu(client, raw);
 		iu.updated_integration = dpp::integration().fill_from_json(&d);
-		client->creator->dispatch.integration_update(iu);
+		call_event(client->creator->dispatch.integration_update, iu);
 	}
 }
 

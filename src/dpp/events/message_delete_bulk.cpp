@@ -44,7 +44,7 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void message_delete_bulk::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.message_delete_bulk) {
+	if (!client->creator->dispatch.message_delete_bulk.empty()) {
 		json& d = j["d"];
 		dpp::message_delete_bulk_t msg(client, raw);
 		msg.deleting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
@@ -53,7 +53,7 @@ void message_delete_bulk::handle(discord_client* client, json &j, const std::str
 		for (auto& m : d["ids"]) {
 			msg.deleted.push_back(from_string<uint64_t>(m.get<std::string>(), std::dec));
 		}
-		client->creator->dispatch.message_delete_bulk(msg);
+		call_event(client->creator->dispatch.message_delete_bulk, msg);
 	}
 
 }

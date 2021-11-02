@@ -44,11 +44,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void integration_delete::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.integration_delete) {
+	if (!client->creator->dispatch.integration_delete.empty()) {
 		json& d = j["d"];
 		dpp::integration_delete_t id(client, raw);
 		id.deleted_integration = dpp::integration().fill_from_json(&d);
-		client->creator->dispatch.integration_delete(id);
+		call_event(client->creator->dispatch.integration_delete, id);
 	}
 }
 

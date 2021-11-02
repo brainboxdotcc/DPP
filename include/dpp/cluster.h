@@ -30,6 +30,7 @@
 #include <dpp/json_fwd.hpp>
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
+#include <algorithm>
 
 using  json = nlohmann::json;
 

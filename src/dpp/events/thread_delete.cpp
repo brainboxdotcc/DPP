@@ -47,11 +47,11 @@ void thread_delete::handle(discord_client* client, json& j, const std::string& r
 		if (gt != g->threads.end()) {
 			g->threads.erase(gt);
 		}
-		if (client->creator->dispatch.thread_delete) {
-			dpp::thread_delete_t tc(client, raw);
-			tc.deleted = t;
-			tc.deleting_guild = g;
-			client->creator->dispatch.thread_delete(tc);
+		if (!client->creator->dispatch.thread_delete.empty()) {
+			dpp::thread_delete_t td(client, raw);
+			td.deleted = t;
+			td.deleting_guild = g;
+			call_event(client->creator->dispatch.thread_delete, td);
 		}
 	}
 }
