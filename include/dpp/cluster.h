@@ -217,6 +217,11 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
+/**
+ * @brief A returned event handle for an event which was attached
+ */
+typedef size_t event_handle;
+
 /** @brief The cluster class represents a group of shards and a command queue for sending and
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
@@ -456,21 +461,21 @@ public:
 	 *
 	 * @param _voice_state_update User function to attach to event
 	 */
-	void on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
+	event_handle on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
 
 	/**
 	 * @brief on voice client disconnect event
 	 *
 	 * @param _voice_client_disconnect User function to attach to event
 	 */
-	void on_voice_client_disconnect (std::function<void(const voice_client_disconnect_t& _event)> _voice_client_disconnect);
+	event_handle on_voice_client_disconnect (std::function<void(const voice_client_disconnect_t& _event)> _voice_client_disconnect);
 
 	/**
 	 * @brief on voice client speaking event
 	 *
 	 * @param _voice_client_speaking User function to attach to event
 	 */
-	void on_voice_client_speaking (std::function<void(const voice_client_speaking_t& _event)> _voice_client_speaking);
+	event_handle on_voice_client_speaking (std::function<void(const voice_client_speaking_t& _event)> _voice_client_speaking);
 
 	/**
 	 * @brief Called when a log message is to be written to the log.
@@ -480,7 +485,7 @@ public:
 	 *
 	 * @param _log  User function to attach to event
 	 */
-	void on_log (std::function<void(const log_t& _event)> _log);
+	event_handle on_log (std::function<void(const log_t& _event)> _log);
 
 	/**
 	 * @brief on guild join request delete.
@@ -488,7 +493,7 @@ public:
 	 *
 	 * @param _guild_join_request_delete User function to attach to event
 	 */
-	void on_guild_join_request_delete(std::function<void(const guild_join_request_delete_t& _event)> _guild_join_request_delete);
+	event_handle on_guild_join_request_delete(std::function<void(const guild_join_request_delete_t& _event)> _guild_join_request_delete);
 
 	/**
 	 * @brief Called when a new interaction is created.
@@ -497,7 +502,7 @@ public:
 	 *
 	 * @param _interaction_create  User function to attach to event
 	 */
-	void on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);
+	event_handle on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);
 
 	/**
 	 * @brief Called when a button is clicked attached to a message.
@@ -506,7 +511,7 @@ public:
 	 *
 	 * @param _button_click  User function to attach to event
 	 */
-	void on_button_click (std::function<void(const button_click_t& _event)> _button_click);
+	event_handle on_button_click (std::function<void(const button_click_t& _event)> _button_click);
 
 	/**
 	 * @brief Called when an auto completed field needs suggestions to present to the user
@@ -515,7 +520,7 @@ public:
 	 *
 	 * @param _autocomplete  User function to attach to event
 	 */
-	void on_autocomplete (std::function<void(const autocomplete_t& _event)> _autocomplete);
+	event_handle on_autocomplete (std::function<void(const autocomplete_t& _event)> _autocomplete);
 
 	/**
 	 * @brief Called when a select menu is clicked attached to a message.
@@ -524,7 +529,7 @@ public:
 	 *
 	 * @param _select_click  User function to attach to event
 	 */
-	void on_select_click (std::function<void(const select_click_t& _event)> _select_click);
+	event_handle on_select_click (std::function<void(const select_click_t& _event)> _select_click);
 
 	/**
 	 * @brief Called when a guild is deleted.
@@ -534,7 +539,7 @@ public:
 	 *
 	 * @param _guild_delete  User function to attach to event
 	 */
-	void on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete);
+	event_handle on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete);
 
 	/**
 	 * @brief Called when a channel is deleted from a guild.
@@ -544,7 +549,7 @@ public:
 	 *
 	 * @param _channel_delete  User function to attach to event
 	 */
-	void on_channel_delete (std::function<void(const channel_delete_t& _event)> _channel_delete);
+	event_handle on_channel_delete (std::function<void(const channel_delete_t& _event)> _channel_delete);
 
 	/**
 	 * @brief Called when a channel is edited on a guild.
@@ -553,7 +558,7 @@ public:
 	 *
 	 * @param _channel_update  User function to attach to event
 	 */
-	void on_channel_update (std::function<void(const channel_update_t& _event)> _channel_update);
+	event_handle on_channel_update (std::function<void(const channel_update_t& _event)> _channel_update);
 
 	/**
 	 * @brief Called when a shard is connected and ready.
@@ -561,7 +566,7 @@ public:
 	 *
 	 * @param _ready  User function to attach to event
 	 */
-	void on_ready (std::function<void(const ready_t& _event)> _ready);
+	event_handle on_ready (std::function<void(const ready_t& _event)> _ready);
 
 	/**
 	 * @brief Called when a message is deleted.
@@ -570,28 +575,28 @@ public:
 	 *
 	 * @param _message_delete  User function to attach to event
 	 */
-	void on_message_delete (std::function<void(const message_delete_t& _event)> _message_delete);
+	event_handle on_message_delete (std::function<void(const message_delete_t& _event)> _message_delete);
 
 	/**
 	 * @brief Called when an application command (slash command) is deleted.
 	 *
 	 * @param _application_command_delete  User function to attach to event
 	 */
-	void on_application_command_delete (std::function<void(const application_command_delete_t& _event)> _application_command_delete);
+	event_handle on_application_command_delete (std::function<void(const application_command_delete_t& _event)> _application_command_delete);
 
 	/**
 	 * @brief Called when a user leaves a guild (either through being kicked, or choosing to leave)
 	 *
 	 * @param _guild_member_remove  User function to attach to event
 	 */
-	void on_guild_member_remove (std::function<void(const guild_member_remove_t& _event)> _guild_member_remove);
+	event_handle on_guild_member_remove (std::function<void(const guild_member_remove_t& _event)> _guild_member_remove);
 
 	/**
 	 * @brief Called when a new application command (slash command) is registered.
 	 *
 	 * @param _application_command_create  User function to attach to event
 	 */
-	void on_application_command_create (std::function<void(const application_command_create_t& _event)> _application_command_create);
+	event_handle on_application_command_create (std::function<void(const application_command_create_t& _event)> _application_command_create);
 
 	/**
 	 * @brief Called when a connection to a shard successfully resumes.
@@ -600,28 +605,28 @@ public:
 	 *
 	 * @param _resumed  User function to attach to event
 	 */
-	void on_resumed (std::function<void(const resumed_t& _event)> _resumed);
+	event_handle on_resumed (std::function<void(const resumed_t& _event)> _resumed);
 
 	/**
 	 * @brief Called when a new role is created on a guild.
 	 *
 	 * @param _guild_role_create  User function to attach to event
 	 */
-	void on_guild_role_create (std::function<void(const guild_role_create_t& _event)> _guild_role_create);
+	event_handle on_guild_role_create (std::function<void(const guild_role_create_t& _event)> _guild_role_create);
 
 	/**
 	 * @brief Called when a user is typing on a channel.
 	 *
 	 * @param _typing_start  User function to attach to event
 	 */
-	void on_typing_start (std::function<void(const typing_start_t& _event)> _typing_start);
+	event_handle on_typing_start (std::function<void(const typing_start_t& _event)> _typing_start);
 
 	/**
 	 * @brief Called when a new reaction is added to a message.
 	 *
 	 * @param _message_reaction_add  User function to attach to event
 	 */
-	void on_message_reaction_add (std::function<void(const message_reaction_add_t& _event)> _message_reaction_add);
+	event_handle on_message_reaction_add (std::function<void(const message_reaction_add_t& _event)> _message_reaction_add);
 
 	/**
 	 * @brief Called when a set of members is received for a guild.
@@ -630,14 +635,14 @@ public:
 	 *
 	 * @param _guild_members_chunk  User function to attach to event
 	 */
-	void on_guild_members_chunk (std::function<void(const guild_members_chunk_t& _event)> _guild_members_chunk);
+	event_handle on_guild_members_chunk (std::function<void(const guild_members_chunk_t& _event)> _guild_members_chunk);
 
 	/**
 	 * @brief Called when a single reaction is removed from a message.
 	 *
 	 * @param _message_reaction_remove  User function to attach to event
 	 */
-	void on_message_reaction_remove (std::function<void(const message_reaction_remove_t& _event)> _message_reaction_remove);
+	event_handle on_message_reaction_remove (std::function<void(const message_reaction_remove_t& _event)> _message_reaction_remove);
 
 	/**
 	 * @brief Called when a new guild is created.
@@ -645,42 +650,42 @@ public:
 	 *
 	 * @param _guild_create  User function to attach to event
 	 */
-	void on_guild_create (std::function<void(const guild_create_t& _event)> _guild_create);
+	event_handle on_guild_create (std::function<void(const guild_create_t& _event)> _guild_create);
 
 	/**
 	 * @brief Called when a new channel is created on a guild.
 	 *
 	 * @param _channel_create  User function to attach to event
 	 */
-	void on_channel_create (std::function<void(const channel_create_t& _event)> _channel_create);
+	event_handle on_channel_create (std::function<void(const channel_create_t& _event)> _channel_create);
 
 	/**
 	 * @brief Called when all reactions for a particular emoji are removed from a message.
 	 *
 	 * @param _message_reaction_remove_emoji  User function to attach to event
 	 */
-	void on_message_reaction_remove_emoji (std::function<void(const message_reaction_remove_emoji_t& _event)> _message_reaction_remove_emoji);
+	event_handle on_message_reaction_remove_emoji (std::function<void(const message_reaction_remove_emoji_t& _event)> _message_reaction_remove_emoji);
 
 	/**
 	 * @brief Called when multiple messages are deleted from a channel or DM.
 	 *
 	 * @param _message_delete_bulk  User function to attach to event
 	 */
-	void on_message_delete_bulk (std::function<void(const message_delete_bulk_t& _event)> _message_delete_bulk);
+	event_handle on_message_delete_bulk (std::function<void(const message_delete_bulk_t& _event)> _message_delete_bulk);
 
 	/**
 	 * @brief Called when an existing role is updated on a guild.
 	 *
 	 * @param _guild_role_update  User function to attach to event
 	 */
-	void on_guild_role_update (std::function<void(const guild_role_update_t& _event)> _guild_role_update);
+	event_handle on_guild_role_update (std::function<void(const guild_role_update_t& _event)> _guild_role_update);
 
 	/**
 	 * @brief Called when a role is deleted in a guild.
 	 *
 	 * @param _guild_role_delete  User function to attach to event
 	 */
-	void on_guild_role_delete (std::function<void(const guild_role_delete_t& _event)> _guild_role_delete);
+	event_handle on_guild_role_delete (std::function<void(const guild_role_delete_t& _event)> _guild_role_delete);
 
 	/**
 	 * @brief Called when a message is pinned.
@@ -689,14 +694,14 @@ public:
 	 *
 	 * @param _channel_pins_update  User function to attach to event
 	 */
-	void on_channel_pins_update (std::function<void(const channel_pins_update_t& _event)> _channel_pins_update);
+	event_handle on_channel_pins_update (std::function<void(const channel_pins_update_t& _event)> _channel_pins_update);
 
 	/**
 	 * @brief Called when all reactions are removed from a message.
 	 *
 	 * @param _message_reaction_remove_all  User function to attach to event
 	 */
-	void on_message_reaction_remove_all (std::function<void(const message_reaction_remove_all_t& _event)> _message_reaction_remove_all);
+	event_handle on_message_reaction_remove_all (std::function<void(const message_reaction_remove_all_t& _event)> _message_reaction_remove_all);
 
 	/**
 	 * @brief Called when we are told which voice server we can use.
@@ -705,7 +710,7 @@ public:
 	 *
 	 * @param _voice_server_update  User function to attach to event
 	 */
-	void on_voice_server_update (std::function<void(const voice_server_update_t& _event)> _voice_server_update);
+	event_handle on_voice_server_update (std::function<void(const voice_server_update_t& _event)> _voice_server_update);
 
 	/**
 	 * @brief Called when new emojis are added to a guild.
@@ -713,7 +718,7 @@ public:
 	 *
 	 * @param _guild_emojis_update  User function to attach to event
 	 */
-	void on_guild_emojis_update (std::function<void(const guild_emojis_update_t& _event)> _guild_emojis_update);
+	event_handle on_guild_emojis_update (std::function<void(const guild_emojis_update_t& _event)> _guild_emojis_update);
 
 	/**
 	 * @brief Called when new stickers are added to a guild.
@@ -721,7 +726,7 @@ public:
 	 *
 	 * @param _guild_stickers_update  User function to attach to event
 	 */
-	void on_guild_stickers_update (std::function<void(const guild_stickers_update_t& _event)> _guild_stickers_update);
+	event_handle on_guild_stickers_update (std::function<void(const guild_stickers_update_t& _event)> _guild_stickers_update);
 
 	/**
 	 * @brief Called when a user's presence is updated.
@@ -732,35 +737,35 @@ public:
 	 *
 	 * @param _presence_update  User function to attach to event
 	 */
-	void on_presence_update (std::function<void(const presence_update_t& _event)> _presence_update);
+	event_handle on_presence_update (std::function<void(const presence_update_t& _event)> _presence_update);
 
 	/**
 	 * @brief Called when the webhooks for a guild are updated.
 	 *
 	 * @param _webhooks_update  User function to attach to event
 	 */
-	void on_webhooks_update (std::function<void(const webhooks_update_t& _event)> _webhooks_update);
+	event_handle on_webhooks_update (std::function<void(const webhooks_update_t& _event)> _webhooks_update);
 
 	/**
 	 * @brief Called when a new member joins a guild.
 	 *
 	 * @param _guild_member_add  User function to attach to event
 	 */
-	void on_guild_member_add (std::function<void(const guild_member_add_t& _event)> _guild_member_add);
+	event_handle on_guild_member_add (std::function<void(const guild_member_add_t& _event)> _guild_member_add);
 
 	/**
 	 * @brief Called when an invite is deleted from a guild.
 	 *
 	 * @param _invite_delete  User function to attach to event
 	 */
-	void on_invite_delete (std::function<void(const invite_delete_t& _event)> _invite_delete);
+	event_handle on_invite_delete (std::function<void(const invite_delete_t& _event)> _invite_delete);
 
 	/**
 	 * @brief Called when details of a guild are updated.
 	 *
 	 * @param _guild_update  User function to attach to event
 	 */
-	void on_guild_update (std::function<void(const guild_update_t& _event)> _guild_update);
+	event_handle on_guild_update (std::function<void(const guild_update_t& _event)> _guild_update);
 
 	/**
 	 * @brief Called when an integration is updated for a guild.
@@ -770,14 +775,14 @@ public:
 	 *
 	 * @param _guild_integrations_update  User function to attach to event
 	 */
-	void on_guild_integrations_update (std::function<void(const guild_integrations_update_t& _event)> _guild_integrations_update);
+	event_handle on_guild_integrations_update (std::function<void(const guild_integrations_update_t& _event)> _guild_integrations_update);
 
 	/**
 	 * @brief Called when details of a guild member (e.g. their roles or nickname) are updated.
 	 *
 	 * @param _guild_member_update  User function to attach to event
 	 */
-	void on_guild_member_update (std::function<void(const guild_member_update_t& _event)> _guild_member_update);
+	event_handle on_guild_member_update (std::function<void(const guild_member_update_t& _event)> _guild_member_update);
 
 	/**
 	 * @brief Called when an application command (slash command) is updated.
@@ -785,21 +790,21 @@ public:
 	 *
 	 * @param _application_command_update  User function to attach to event
 	 */
-	void on_application_command_update (std::function<void(const application_command_update_t& _event)> _application_command_update);
+	event_handle on_application_command_update (std::function<void(const application_command_update_t& _event)> _application_command_update);
 
 	/**
 	 * @brief Called when a new invite is created for a guild.
 	 *
 	 * @param _invite_create  User function to attach to event
 	 */
-	void on_invite_create (std::function<void(const invite_create_t& _event)> _invite_create);
+	event_handle on_invite_create (std::function<void(const invite_create_t& _event)> _invite_create);
 
 	/**
 	 * @brief Called when a message is updated (edited).
 	 *
 	 * @param _message_update  User function to attach to event
 	 */
-	void on_message_update (std::function<void(const message_update_t& _event)> _message_update);
+	event_handle on_message_update (std::function<void(const message_update_t& _event)> _message_update);
 
 	/**
 	 * @brief Called when a user is updated.
@@ -808,7 +813,7 @@ public:
 	 *
 	 * @param _user_update  User function to attach to event
 	 */
-	void on_user_update (std::function<void(const user_update_t& _event)> _user_update);
+	event_handle on_user_update (std::function<void(const user_update_t& _event)> _user_update);
 
 	/**
 	 * @brief Called when a new message arrives from discord.
@@ -818,21 +823,21 @@ public:
 	 *
 	 * @param _message_create  User function to attach to event
 	 */
-	void on_message_create (std::function<void(const message_create_t& _event)> _message_create);
+	event_handle on_message_create (std::function<void(const message_create_t& _event)> _message_create);
 
 	/**
 	 * @brief Called when a ban is added to a guild.
 	 *
 	 * @param _guild_ban_add  User function to attach to event
 	 */
-	void on_guild_ban_add (std::function<void(const guild_ban_add_t& _event)> _guild_ban_add);
+	event_handle on_guild_ban_add (std::function<void(const guild_ban_add_t& _event)> _guild_ban_add);
 
 	/**
 	 * @brief Called when a ban is removed from a guild.
 	 *
 	 * @param _guild_ban_remove  User function to attach to event
 	 */
-	void on_guild_ban_remove (std::function<void(const guild_ban_remove_t& _event)> _guild_ban_remove);
+	event_handle on_guild_ban_remove (std::function<void(const guild_ban_remove_t& _event)> _guild_ban_remove);
 
 	/**
 	 * @brief Called when a new intgration is attached to a guild by a user.
@@ -841,7 +846,7 @@ public:
 	 *
 	 * @param _integration_create User function to attach to event
 	 */
-	void on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create);
+	event_handle on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create);
 
 	/**
 	 * @brief Called when an integration is updated by a user.
@@ -851,7 +856,7 @@ public:
 	 *
 	 * @param _integration_update User function to attach to event
 	 */
-	void on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update);
+	event_handle on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update);
 
 	/**
 	 * @brief Called when an integration is removed by a user.
@@ -860,7 +865,7 @@ public:
 	 *
 	 * @param _integration_delete User function to attach to event
 	 */
-	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
+	event_handle on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
 
 	/**
 	 * @brief Called when a thread is created
@@ -868,21 +873,21 @@ public:
 	 *
 	 * @param _thread_create User function to attach to event
 	 */
-	void on_thread_create (std::function<void(const thread_create_t& _event)> _thread_create);
+	event_handle on_thread_create (std::function<void(const thread_create_t& _event)> _thread_create);
 
 	/**
 	 * @brief Called when a thread is updated
 	 *
 	 * @param _thread_update User function to attach to event
 	 */
-	void on_thread_update (std::function<void(const thread_update_t& _event)> _thread_update);
+	event_handle on_thread_update (std::function<void(const thread_update_t& _event)> _thread_update);
 
 	/**
 	 * @brief Called when a thread is deleted
 	 *
 	 * @param _thread_delete User function to attach to event
 	 */
-	void on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete);
+	event_handle on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete);
 
 	/**
 	 * @brief Called when thread list is synced (upon gaining access to a channel)
@@ -890,21 +895,21 @@ public:
 	 *
 	 * @param _thread_list_sync User function to attach to event
 	 */
-	void on_thread_list_sync (std::function<void(const thread_list_sync_t& _event)> _thread_list_sync);
+	event_handle on_thread_list_sync (std::function<void(const thread_list_sync_t& _event)> _thread_list_sync);
 
 	/**
 	 * @brief Called when current user's thread member object is updated
 	 *
 	 * @param _thread_member_update User function to attach to event
 	 */
-	void on_thread_member_update (std::function<void(const thread_member_update_t& _event)> _thread_member_update);
+	event_handle on_thread_member_update (std::function<void(const thread_member_update_t& _event)> _thread_member_update);
 
 	/**
 	 * @brief Called when a thread's member list is updated (without GUILD_MEMBERS intent, is only called for current user)
 	 *
 	 * @param _thread_members_update User function to attach to event
 	 */
-	void on_thread_members_update (std::function<void(const thread_members_update_t& _event)> _thread_members_update);
+	event_handle on_thread_members_update (std::function<void(const thread_members_update_t& _event)> _thread_members_update);
 
 	/**
 	 * @brief Called when packets are sent from the voice buffer.
@@ -916,14 +921,14 @@ public:
 	 *
 	 * @param _voice_buffer_send User function to attach to event
 	 */
-	void on_voice_buffer_send (std::function<void(const voice_buffer_send_t& _event)> _voice_buffer_send);
+	event_handle on_voice_buffer_send (std::function<void(const voice_buffer_send_t& _event)> _voice_buffer_send);
 
 	/**
 	 * @brief Called when a user is talking on a voice channel.
 	 *
 	 * @param _voice_user_talking User function to attach to event
 	 */
-	void on_voice_user_talking (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking);
+	event_handle on_voice_user_talking (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking);
 
 	/**
 	 * @brief Called when a voice channel is connected and ready to send audio.
@@ -932,7 +937,7 @@ public:
 	 *
 	 * @param _voice_ready User function to attach to event
 	 */
-	void on_voice_ready (std::function<void(const voice_ready_t& _event)> _voice_ready);
+	event_handle on_voice_ready (std::function<void(const voice_ready_t& _event)> _voice_ready);
 
 	/**
 	 * @brief Called when new audio data is received.
@@ -943,7 +948,7 @@ public:
 	 * 
 	 * @param _voice_receive User function to attach to event
 	 */
-	void on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive);
+	event_handle on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive);
 
 	/**
 	 * @brief Called when sending of audio passes over a track marker.
@@ -954,28 +959,28 @@ public:
 	 *
 	 * @param _voice_track_marker User function to attach to event
 	 */
-	void on_voice_track_marker (std::function<void(const voice_track_marker_t& _event)> _voice_track_marker);
+	event_handle on_voice_track_marker (std::function<void(const voice_track_marker_t& _event)> _voice_track_marker);
 
 	/**
 	 * @brief Called when a new stage instance is created on a stage channel.
 	 *
 	 * @param _stage_instance_create User function to attach to event
 	 */
-	void on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create);
+	event_handle on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create);
 
 	/**
 	 * @brief Called when a stage instance is updated.
 	 *
 	 * @param _stage_instance_update User function to attach to event
 	 */
-	void on_stage_instance_update (std::function<void(const stage_instance_update_t& _event)> _stage_instance_update);
+	event_handle on_stage_instance_update (std::function<void(const stage_instance_update_t& _event)> _stage_instance_update);
 
 	/**
 	 * @brief Called when an existing stage instance is deleted from a stage channel.
 	 *
 	 * @param _stage_instance_delete User function to attach to event
 	 */
-	void on_stage_instance_delete (std::function<void(const stage_instance_delete_t& _event)> _stage_instance_delete);
+	event_handle on_stage_instance_delete (std::function<void(const stage_instance_delete_t& _event)> _stage_instance_delete);
 
 	/**
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create
