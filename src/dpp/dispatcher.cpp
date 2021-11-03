@@ -58,6 +58,14 @@ void interaction_create_t::reply(interaction_response_type t, const message & m)
 	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m));
 }
 
+void interaction_create_t::thinking() const {
+	message msg;
+	msg.content = "*";
+	msg.guild_id = this->command.guild_id;
+	msg.channel_id = this->command.channel_id;
+	this->reply(ir_deferred_channel_message_with_source, msg);
+}
+
 void interaction_create_t::reply(interaction_response_type t, const std::string & mt) const
 {
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command));

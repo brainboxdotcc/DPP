@@ -217,6 +217,11 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void edit_response(const std::string & mt) const;
 
 	/**
+	 * @brief Set the bot to 'thinking' state
+	 */
+	void thinking() const;
+
+	/**
 	 * @brief Get a command line parameter
 	 * 
 	 * @param name The command line parameter to retrieve
