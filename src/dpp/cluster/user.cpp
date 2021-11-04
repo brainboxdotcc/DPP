@@ -48,6 +48,14 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 }
 
 
+void cluster::current_application_get(command_completion_event_t callback) {
+	this->post_rest(API_PATH "/oauth2/applications", "@me", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("application", application().fill_from_json(&j), http));
+		}
+	});
+}
+
 void cluster::current_user_get(command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", "@me", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
@@ -55,7 +63,6 @@ void cluster::current_user_get(command_completion_event_t callback) {
 		}
 	});
 }
-
 
 void cluster::current_user_get_guilds(command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", "@me", "guilds", m_get, "", [callback](json &j, const http_request_completion_t& http) {

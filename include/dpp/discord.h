@@ -282,3 +282,4 @@ namespace dpp {
 #include <dpp/slashcommand.h>
 #include <dpp/stage_instance.h>
 #include <dpp/auditlog.h>
+#include <dpp/application.h>

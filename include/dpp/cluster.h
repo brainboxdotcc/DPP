@@ -119,7 +119,9 @@ typedef std::variant<
 		sticker,
 		sticker_map,
 		sticker_pack,
-		sticker_pack_map
+		sticker_pack_map,
+		application,
+		application_map
 	> confirmable_t;
 
 /**
@@ -2603,6 +2605,13 @@ x	 */
 	 * @param callback Function to call when the API call completes.
 	 */
 	void current_user_get(command_completion_event_t callback);
+
+	/**
+	 * @brief Get current (bot) application
+	 *
+	 * @param callback Function to call when the API call completes.
+	 */
+	void current_application_get(command_completion_event_t callback);
 
 	/**
 	 * @brief Get current (bot) user guilds
