@@ -138,7 +138,7 @@ public:
 	bool				verified;	//!< whether the connection is verified
 	bool				friend_sync;	//!< whether friend sync is enabled for this connection
 	bool				show_activity;	//!< whether activities related to this connection will be shown in presence updates
-	bool				visibile;	//!< visibility of this connection
+	bool				visible;	//!< visibility of this connection
 
 	/**
 	 * @brief Construct a new connection object

@@ -124,7 +124,7 @@ connection& connection::fill_from_json(nlohmann::json* j) {
 	this->id = SnowflakeNotNull(j, "id");
 	this->name = StringNotNull(j, "name");
 	this->type = StringNotNull(j, "type");
-	this->bool = BoolNotNull(j, "revoked");
+	this->revoked = BoolNotNull(j, "revoked");
 	this->verified = BoolNotNull(j, "verified");
 	this->friend_sync = BoolNotNull(j, "friend_sync");
 	this->show_activity = BoolNotNull(j, "show_activity");
