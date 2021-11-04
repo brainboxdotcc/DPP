@@ -100,7 +100,7 @@ enum audit_type {
 	/// Guild integration update
 	ae_integration_update		=	81,
 	/// Guild integration delete
-	ae_integration_delete		=	82
+	ae_integration_delete		=	82,
 	/// Stage instance create
 	ae_stage_instance_create	=	83,
 	/// Stage instance update
