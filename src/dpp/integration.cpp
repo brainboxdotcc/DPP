@@ -131,7 +131,7 @@ connection& connection::fill_from_json(nlohmann::json* j) {
 	this->visible = (Int32NotNull(j, "visibility") == 1);
 	if (j->find("integrations") != j->end()) {
 		for (auto & i : (*j)["integrations"]) {
-			integrations.push_back(integration().fill_from_json(i));
+			integrations.push_back(integration().fill_from_json(&i));
 		}
 	}
 }
