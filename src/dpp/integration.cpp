@@ -134,6 +134,7 @@ connection& connection::fill_from_json(nlohmann::json* j) {
 			integrations.push_back(integration().fill_from_json(&i));
 		}
 	}
+	return *this;
 }
 
 
