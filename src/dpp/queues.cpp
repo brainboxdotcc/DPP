@@ -64,14 +64,14 @@ void populate_result(const std::string &url, cluster* owner, http_request_comple
 
 	/* This will be ignored for non-discord requests without rate limit headers */
 
-	rv.ratelimit_limit = from_string<uint64_t>(res->get_header_value("X-RateLimit-Limit"), std::dec);
-	rv.ratelimit_remaining = from_string<uint64_t>(res->get_header_value("X-RateLimit-Remaining"), std::dec);
-	rv.ratelimit_reset_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Reset-After"), std::dec);
+	rv.ratelimit_limit = from_string<uint64_t>(res->get_header_value("X-RateLimit-Limit"));
+	rv.ratelimit_remaining = from_string<uint64_t>(res->get_header_value("X-RateLimit-Remaining"));
+	rv.ratelimit_reset_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Reset-After"));
 	rv.ratelimit_bucket = res->get_header_value("X-RateLimit-Bucket");
 	rv.ratelimit_global = (res->get_header_value("X-RateLimit-Global") == "true");
 	owner->rest_ping = rv.latency;
 	if (res->get_header_value("X-RateLimit-Retry-After") != "") {
-		rv.ratelimit_retry_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Retry-After"), std::dec);
+		rv.ratelimit_retry_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Retry-After"));
 	}
 	if (rv.status == 429) {
 		owner->log(ll_warning, fmt::format("Rate limited on endpoint {}, reset after {}s!", url, rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));

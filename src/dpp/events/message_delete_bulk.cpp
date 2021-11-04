@@ -51,7 +51,7 @@ void message_delete_bulk::handle(discord_client* client, json &j, const std::str
 		msg.deleting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
 		msg.deleting_user = dpp::find_user(SnowflakeNotNull(&d, "user_id"));
 		for (auto& m : d["ids"]) {
-			msg.deleted.push_back(from_string<uint64_t>(m.get<std::string>(), std::dec));
+			msg.deleted.push_back(from_string<uint64_t>(m.get<std::string>()));
 		}
 		call_event(client->creator->dispatch.message_delete_bulk, msg);
 	}

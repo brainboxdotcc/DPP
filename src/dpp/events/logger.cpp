@@ -45,7 +45,7 @@ using namespace dpp;
 void logger::handle(discord_client* client, json &j, const std::string &raw) {
 	if (!client->creator->dispatch.log.empty()) {
 		dpp::log_t logmsg(client, raw);
-		logmsg.severity = (dpp::loglevel)from_string<uint32_t>(raw.substr(0, raw.find(';')), std::dec);
+		logmsg.severity = (dpp::loglevel)from_string<uint32_t>(raw.substr(0, raw.find(';')));
 		logmsg.message = raw.substr(raw.find(';') + 1, raw.length());
 		call_event(client->creator->dispatch.log, logmsg);
 	}

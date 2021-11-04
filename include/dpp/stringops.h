@@ -126,17 +126,34 @@ template <typename T> T from_string(const std::string &s, std::ios_base & (*f)(s
 	return t;
 }
 
-template <uint64_t> uint64_t from_string(const std::string &s, std::ios_base & (*f)(std::ios_base&))
+/**
+ * @brief  Convert any value from a string to another type using stringstream.
+ * 
+ * @tparam T Type to convert to 
+ * @param s String to convert from
+ * @return T Returned numeric value
+ *
+ * @note Base 10 for numeric conversions.
+ */
+template <typename T> T from_string(const std::string &s)
+{
+	T t;
+	std::istringstream iss(s);
+	iss >> t;
+	return t;
+}
+
+template <uint64_t> uint64_t from_string(const std::string &s)
 {
 	return std::stoull(s, 0, 10);
 }
 
-template <uint32_t> uint32_t from_string(const std::string &s, std::ios_base & (*f)(std::ios_base&))
+template <uint32_t> uint32_t from_string(const std::string &s)
 {
 	return std::stoul(s, 0, 10);
 }
 
-template <int> int from_string(const std::string &s, std::ios_base & (*f)(std::ios_base&))
+template <int> int from_string(const std::string &s)
 {
 	return std::stoi(s, 0, 10);
 }

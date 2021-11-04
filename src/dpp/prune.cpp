@@ -32,7 +32,7 @@ prune& prune::fill_from_json(nlohmann::json* j) {
 	compute_prune_count = BoolNotNull(j, "compute_prune_count");
 	if (j->find("include_roles") != j->end()) {
 		for (auto & r : (*j)["include_roles"]) {
-			include_roles.push_back(from_string<uint64_t>(r.get<std::string>(), std::dec));
+			include_roles.push_back(from_string<uint64_t>(r.get<std::string>()));
 		}
 	}
 	return *this;

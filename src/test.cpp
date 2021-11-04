@@ -30,7 +30,7 @@ int main()
 	});
 
 	/* The interaction create event is fired when someone issues your commands */
-	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
+	bot.on_interaction_create([&](const dpp::interaction_create_t & event) {
 		if (event.command.type == dpp::it_application_command) {
 			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
 			/* Check which command they ran */
@@ -48,7 +48,7 @@ int main()
 	/* The on_autocomplete event is fired whenever discord needs information to fill in a command options's choices.
 	 * You must reply with a REST event within 500ms, so make it snappy!
 	 */
-	bot.on_autocomplete([&bot](const dpp::autocomplete_t & event) {
+	bot.on_autocomplete([&](const dpp::autocomplete_t & event) {
 		for (auto & opt : event.options) {
 			/* The option which has focused set to true is the one the user is typing in */
 			if (opt.focused) {
@@ -71,11 +71,11 @@ int main()
 	});
 
 	/* Simple log event */
-	bot.on_log([&bot](const dpp::log_t & event) {
+	bot.on_log([&](const dpp::log_t & event) {
 		std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 	});
 
-	bot.on_message_update([&bot](const dpp::message_update_t & event) {
+	bot.on_message_update([&](const dpp::message_update_t & event) {
 		std::cout << "MU RAW: " << event.raw_event << "\n";
 	});
 

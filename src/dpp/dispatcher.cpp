@@ -53,22 +53,22 @@ bool event_dispatch_t::is_cancelled() const
 	return stop_event;
 }
 
-void interaction_create_t::reply(interaction_response_type t, const message & m) const
+void interaction_create_t::reply(interaction_response_type t, const message & m, command_completion_event_t callback) const
 {
-	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m));
+	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), callback);
 }
 
-void interaction_create_t::thinking() const {
+void interaction_create_t::thinking(command_completion_event_t callback) const {
 	message msg;
 	msg.content = "*";
 	msg.guild_id = this->command.guild_id;
 	msg.channel_id = this->command.channel_id;
-	this->reply(ir_deferred_channel_message_with_source, msg);
+	this->reply(ir_deferred_channel_message_with_source, msg, callback);
 }
 
-void interaction_create_t::reply(interaction_response_type t, const std::string & mt) const
+void interaction_create_t::reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback) const
 {
-	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command));
+	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
 void interaction_create_t::get_original_response(command_completion_event_t callback) const
@@ -80,14 +80,14 @@ void interaction_create_t::get_original_response(command_completion_event_t call
 	});
 }
 
-void interaction_create_t::edit_response(const message & m) const
+void interaction_create_t::edit_response(const message & m, command_completion_event_t callback) const
 {
-	from->creator->interaction_response_edit(this->command.token, m);
+	from->creator->interaction_response_edit(this->command.token, m, callback);
 }
 
-void interaction_create_t::edit_response(const std::string & mt) const
+void interaction_create_t::edit_response(const std::string & mt, command_completion_event_t callback) const
 {
-	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command));
+	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
 const command_value& interaction_create_t::get_parameter(const std::string& name) const

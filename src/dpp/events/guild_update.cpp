@@ -44,7 +44,7 @@ using namespace dpp;
  */
 void guild_update::handle(discord_client* client, json &j, const std::string &raw) {
        json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(from_string<uint64_t>(d["id"].get<std::string>(), std::dec));
+	dpp::guild* g = dpp::find_guild(from_string<uint64_t>(d["id"].get<std::string>()));
 	if (g) {
 		g->fill_from_json(client, &d);
 		if (!g->is_unavailable()) {

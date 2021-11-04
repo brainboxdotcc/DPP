@@ -144,7 +144,7 @@ channel& channel::fill_from_json(json* j) {
 	if (j->find("recipients") != j->end()) {
 		recipients = {};
 		for (auto & r : (*j)["recipients"]) {
-			recipients.push_back(from_string<uint64_t>(r["id"].get<std::string>(), std::dec));
+			recipients.push_back(from_string<uint64_t>(r["id"].get<std::string>()));
 		}
 	}
 

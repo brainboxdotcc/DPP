@@ -84,7 +84,6 @@ void cluster::guild_delete_integration(snowflake guild_id, snowflake integration
 	});
 }
 
-
 void cluster::guild_edit(const class guild &g, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(g.id), "", m_patch, g.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
@@ -184,7 +183,7 @@ void cluster::guild_modify_integration(snowflake guild_id, const class integrati
 
 
 void cluster::guild_get_prune_counts(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "prune", m_get, pruneinfo.build_json(false), [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "prune", m_get, pruneinfo.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("prune", prune().fill_from_json(&j), http));
 		}
@@ -192,7 +191,7 @@ void cluster::guild_get_prune_counts(snowflake guild_id, const struct prune& pru
 }
 
 void cluster::guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "prune", m_get, pruneinfo.build_json(true), [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "prune", m_get, pruneinfo.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("prune", prune().fill_from_json(&j), http));
 		}
