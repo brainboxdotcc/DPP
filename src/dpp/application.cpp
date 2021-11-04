@@ -34,7 +34,6 @@ application::application() : id(0), bot_public(false), bot_require_code_grant(fa
 application::~application() = default;
 
 application& application::fill_from_json(nlohmann::json* j) {
-
 	SetSnowflakeNotNull(j, "id", id);
 	SetStringNotNull(j, "name", name);
 	std::string ic = StringNotNull(j, "icon");

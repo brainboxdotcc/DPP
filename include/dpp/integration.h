@@ -125,8 +125,39 @@ public:
 	bool expiry_kicks_user() const;
 };
 
+/**
+ * @brief The connection object that the user has attached.
+ */
+class DPP_EXPORT connection {
+public:
+	std::string			id;		//!< id of the connection account
+	std::string			name;		//!< the username of the connection account
+	std::string			type;		//!< the service of the connection (twitch, youtube)
+	bool				revoked;	//!< Optional: whether the connection is revoked
+	std::vector<integration>	integrations;	//!< Optional: an array of partial server integrations
+	bool				verified;	//!< whether the connection is verified
+	bool				friend_sync;	//!< whether friend sync is enabled for this connection
+	bool				show_activity;	//!< whether activities related to this connection will be shown in presence updates
+	bool				visibile;	//!< visibility of this connection
+
+	/**
+	 * @brief Construct a new connection object
+	 */
+	connection();
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	connection& fill_from_json(nlohmann::json* j);
+
+};
+
 /** A group of integrations */
 typedef std::unordered_map<snowflake, integration> integration_map;
+
+/** A group of connections */
+typedef std::unordered_map<snowflake, connection> connection_map;
 
 };
 

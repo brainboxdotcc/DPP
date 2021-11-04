@@ -117,4 +117,24 @@ bool integration::expiry_kicks_user() const {
 	return flags & if_expire_kick;
 }
 
+connection::connection() : id(0), revoked(false), verified(false), friend_sync(false), show_activity(false), visible(false) {
+}
+
+connection& connection::fill_from_json(nlohmann::json* j) {
+	this->id = SnowflakeNotNull(j, "id");
+	this->name = StringNotNull(j, "name");
+	this->type = StringNotNull(j, "type");
+	this->bool = BoolNotNull(j, "revoked");
+	this->verified = BoolNotNull(j, "verified");
+	this->friend_sync = BoolNotNull(j, "friend_sync");
+	this->show_activity = BoolNotNull(j, "show_activity");
+	this->visible = (Int32NotNull(j, "visibility") == 1);
+	if (j->find("integrations") != j->end()) {
+		for (auto & i : (*j)["integrations"]) {
+			integrations.push_back(integration().fill_from_json(i));
+		}
+	}
+}
+
+
 };

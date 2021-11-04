@@ -64,6 +64,18 @@ void cluster::current_user_get(command_completion_event_t callback) {
 	});
 }
 
+void cluster::current_user_connections_get(command_completion_event_t callback) {
+	this->post_rest(API_PATH "/users", "@me", "connections", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			connection_map connections;
+			for (auto & curr_conn : j) {
+				connections[SnowflakeNotNull(&curr_conn, "id")] = connection().fill_from_json(&curr_conn);
+			}
+			callback(confirmation_callback_t("connection_map", connections, http));
+		}
+	});
+}
+
 void cluster::current_user_get_guilds(command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", "@me", "guilds", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

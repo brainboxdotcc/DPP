@@ -121,7 +121,9 @@ typedef std::variant<
 		sticker_pack,
 		sticker_pack_map,
 		application,
-		application_map
+		application_map,
+		connection,
+		connection_map
 	> confirmable_t;
 
 /**
@@ -2612,6 +2614,15 @@ x	 */
 	 * @param callback Function to call when the API call completes.
 	 */
 	void current_application_get(command_completion_event_t callback);
+
+	/**
+	 * @brief Get current user's connections (linked accounts, e.g. steam, xbox).
+	 * This call requires the oauth2 `connections` scope and cannot be executed
+	 * against a bot token.
+	 *
+	 * @param callback Function to call when the API call completes.
+	 */
+	void current_user_connections_get(command_completion_event_t callback);
 
 	/**
 	 * @brief Get current (bot) user guilds
