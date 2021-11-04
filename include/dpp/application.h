@@ -26,22 +26,41 @@
 
 namespace dpp {
 
+/**
+ * @brief status of a member of a team who maintain a bot/applicaiton
+ */
 enum team_member_status : uint8_t {
+	/// User was invited to the team
 	tms_invited = 1,
+	/// User has accepted membership onto the team
 	tms_accepted = 2
 };
 
+/**
+ * @brief Flags for a bot or application
+ */
 enum application_flags : uint32_t {
+	/// Has gateway presence intent
 	apf_gateway_presence = (1 << 12),
-	apf_gateway_presence_limited = (1 << 13), 
+	/// Has gateway presence intent for <100 guilds
+	apf_gateway_presence_limited = (1 << 13),
+	/// Has guild members intent 
 	apf_gateway_guild_members = (1 << 14),
+	/// Has guild members intent for <100 guilds
 	apf_gateway_guild_members_limited = (1 << 15),
+	/// Verification is pending
 	apf_verification_pending_guild_limit = (1 << 16),
+	/// Embedded
 	apf_embedded = (1 << 17),
+	/// Has approval for message content
 	apf_gateway_message_content = (1 << 18),
+	/// Has message content, but <100 guilds
 	apf_gateway_message_content_limited = (1 << 19)
 };
 
+/**
+ * @brief Represents a team member on a team who maintain a bot/application
+ */
 class DPP_EXPORT team_member {
 public:
 	team_member_status	membership_state;	//!< the user's membership state on the team
@@ -50,6 +69,9 @@ public:
 	user			member_user;		//!< the avatar, discriminator, id, and username of the user
 };
 
+/**
+ * @brief Represents a team of users who maintain a bot/application
+ */
 class DPP_EXPORT app_team {
 public:
 	utility::iconhash		icon;		//!< a hash of the image of the team's icon (may be empty)
@@ -61,7 +83,6 @@ public:
 
 /**
  * @brief The application class represents details of a bot application
- * 
  */
 class DPP_EXPORT application {
 public:
