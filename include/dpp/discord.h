@@ -236,6 +236,26 @@ namespace dpp {
 		};
 
 		/**
+		 * @brief Convert floats to RGB for sending in embeds
+		 * 
+		 * @param red red value, between 0 and 1 inclusive
+		 * @param green green value, between 0 and 1 inclusive
+		 * @param blue blue value, between 0 and 1 inclusive
+		 * @return uint32_t returned integer colour value
+		 */
+		uint32_t rgb(float red, float green, float blue);
+
+		/**
+		 * @brief Convert ints to RGB for sending in embeds
+		 * 
+		 * @param red red value, between 0 and 255 inclusive
+		 * @param green green value, between 0 and 255 inclusive
+		 * @param blue blue value, between 0 and 255 inclusive
+		 * @return uint32_t returned integer colour value
+		 */
+		uint32_t rgb(int red, int green, int blue);
+
+		/**
 		 * @brief Output hex values of a section of memory for debugging
 		 * 
 		 * @param data The start of the data to display

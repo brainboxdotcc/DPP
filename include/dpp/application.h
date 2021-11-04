@@ -118,7 +118,10 @@ public:
 	application& fill_from_json(nlohmann::json* j);
 };
 
-/** A group of bans
+/** A group of applications.
+ * This is not currently ever sent by Discord API but the DPP standard setup for
+ * objects that can be received by REST has the possibility for this, so this exists.
+ * Don't ever expect to see one at present.
  */
 typedef std::unordered_map<snowflake, application> application_map;
 

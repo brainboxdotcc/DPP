@@ -188,6 +188,15 @@ namespace dpp {
 			}
 		}
 
+		uint32_t rgb(float red, float green, float blue) {
+			return (((uint32_t)(red * 255)) << 16) | (((uint32_t)(green * 255)) << 8) | ((uint32_t)(blue * 255));
+		}
+
+		/* NOTE: Parameters here are `int` instead of `uint32_t` or `uint8_t` to prevent ambiguity error with rgb(float, float, float) */
+		uint32_t rgb(int red, int green, int blue) {
+			return ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
+		}
+
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 			auto t = std::thread([cmd, parameters, callback]() {
 				std::array<char, 128> buffer;
