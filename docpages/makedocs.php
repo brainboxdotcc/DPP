@@ -11,9 +11,19 @@ if (!file_exists(getenv("HOME") . "/dpp-web")) {
 /* Make drop down list of versions from the tags */
 echo "Make version drop down select\n";
 system("git fetch -av --tags");
-$opts = shell_exec("git tag | perl -p -e s/^v//g | sort -n -r | (echo \"<option value='/'>master</option>\" && sed \"s/.*/<option value='\/&\/'>&<\/option>/\")");
-$opts = preg_replace("/\r|\n|/", "", $opts);
 $tags = explode("\n", shell_exec("git tag"));
+for ($n = 0; $n < count($tags); ++$n) {
+	$tags[$n] = preg_replace('/^v/', '', $tags[$n]);
+}
+natsort($tags);
+$tags = array_reverse($tags);
+
+$opts = "<option value='/'>master</option>";
+foreach ($tags as $tag) {
+	if ($tag != '') {
+		$opts .= "<option value='/$tag/'>$tag</option>";
+	}
+}
 
 $taglist = '';
 foreach ($tags as $tag) {
