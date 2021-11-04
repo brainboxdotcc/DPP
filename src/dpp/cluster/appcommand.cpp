@@ -32,7 +32,7 @@ void cluster::global_bulk_command_create(const std::vector<slashcommand> &comman
 	for (auto & s : commands) {
 		j.push_back(json::parse(s.build_json(false)));
 	}
-	this->post_rest(API_PATH "/applications", std::to_string(commands[0].application_id ? commands[0].application_id : me.id), "commands", m_put, j.dump(), [this, callback] (json &j, const http_request_completion_t& http) mutable {
+	this->post_rest(API_PATH "/applications", std::to_string(commands[0].application_id ? commands[0].application_id : me.id), "commands", m_put, j.dump(), [callback] (json &j, const http_request_completion_t& http) mutable {
 		slashcommand_map slashcommands;
 		for (auto & curr_slashcommand : j) {
 			slashcommands[SnowflakeNotNull(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
@@ -92,7 +92,7 @@ void cluster::guild_bulk_command_create(const std::vector<slashcommand> &command
 	for (auto & s : commands) {
 		j.push_back(json::parse(s.build_json(false)));
 	}
-	this->post_rest(API_PATH "/applications", std::to_string(commands[0].application_id ? commands[0].application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_put, j.dump(), [this, callback] (json &j, const http_request_completion_t& http) mutable {
+	this->post_rest(API_PATH "/applications", std::to_string(commands[0].application_id ? commands[0].application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_put, j.dump(), [callback] (json &j, const http_request_completion_t& http) mutable {
 		slashcommand_map slashcommands;
 		for (auto & curr_slashcommand : j) {
 			slashcommands[SnowflakeNotNull(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
