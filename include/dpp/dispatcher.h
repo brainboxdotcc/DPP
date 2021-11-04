@@ -184,7 +184,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param t Type of reply to send
 	 * @param m Message object to send. Not all fields are supported by Discord.
 	 */
-	void reply(interaction_response_type t, const message & m) const;
+	void reply(interaction_response_type t, const message & m, command_completion_event_t callback = {}) const;
 
 	/**
 	 * @brief Send a reply for this interaction
@@ -192,7 +192,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param t Type of reply to send
 	 * @param mt The string value to send, for simple text only messages
 	 */
-	void reply(interaction_response_type t, const std::string & mt) const;
+	void reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback = {}) const;
 
 	/**
 	 * @brief Get original response message for this interaction
@@ -200,26 +200,37 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_original_response(command_completion_event_t callback = {}) const;
+	void get_original_response(command_completion_event_t callback) const;
 
 	/**
 	 * @brief Edit the response for this interaction
 	 *
 	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * @param callback User function to execute when the api call completes.
 	 */
-	void edit_response(const message & m) const;
+	void edit_response(const message & m, command_completion_event_t callback = {}) const;
 
 	/**
 	 * @brief Edit the response for this interaction
 	 *
 	 * @param mt The string value to send, for simple text only messages
+	 * @param callback User function to execute when the api call completes.
 	 */
-	void edit_response(const std::string & mt) const;
+	void edit_response(const std::string & mt, command_completion_event_t callback = {}) const;
+
+	/**
+	 * @brief Delete the original response for this interaction
+	 *
+	 * @param callback User function to execute when the api call completes.
+	 */
+	void delete_original_response(command_completion_event_t callback = {});
 
 	/**
 	 * @brief Set the bot to 'thinking' state
+	 *
+	 * @param callback User function to execute when the api call completes.
 	 */
-	void thinking() const;
+	void thinking(command_completion_event_t callback = {}) const;
 
 	/**
 	 * @brief Get a command line parameter
