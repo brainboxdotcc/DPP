@@ -396,6 +396,20 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		SetInt16NotNull(d, "premium_subscription_count", this->premium_subscription_count);
 		SetSnowflakeNotNull(d, "public_updates_channel_id", this->public_updates_channel_id);
 		SetInt16NotNull(d, "max_video_channel_users", this->max_video_channel_users);
+
+		if (d->find("welcome_screen") != d->end()) {
+			json& w = (*d)["welcome_screen"];
+			SetStringNotNull(&w, "description", welcome_screen.description);
+			for (auto& wc : w["welcome_channels"]) {
+				welcome_channel_t wchan;
+				SetStringNotNull(&wc, "description", wchan.description);
+				SetSnowflakeNotNull(&wc, "channel_id", wchan.channel_id);
+				SetSnowflakeNotNull(&wc, "emoji_id", wchan.emoji_id);
+				SetStringNotNull(&wc, "emoji_name", wchan.emoji_name);
+				welcome_screen.welcome_channels.push_back(wchan);
+			}
+		}
+		
 	} else {
 		this->flags |= dpp::g_unavailable;
 	}
