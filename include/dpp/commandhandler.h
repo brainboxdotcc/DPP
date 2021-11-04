@@ -22,6 +22,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/discord.h>
+#include <dpp/dispatcher.h>
 #include <dpp/json_fwd.hpp>
 #include <unordered_map>
 #include <vector>
@@ -318,8 +319,9 @@ public:
 	 * 
 	 * @param m message to reply with.
 	 * @param source source of the command
+	 * @param callback User function to execute when the api call completes.
 	 */
-	void reply(const dpp::message &m, command_source source);
+	void reply(const dpp::message &m, command_source source, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Reply to a command without a message, causing the discord client
@@ -330,11 +332,12 @@ public:
 	 * seconds.
 	 * 
 	 * @param source source of the command
+	 * @param callback User function to execute when the api call completes.
 	 */
-	void thinking(command_source source);
+	void thinking(command_source source, command_completion_event_t callback = {});
 
 	/* Easter egg */
-	void thonk(command_source source);
+	void thonk(command_source source, command_completion_event_t callback = {});
 
 };
 
