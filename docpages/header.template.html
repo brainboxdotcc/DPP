@@ -26,7 +26,8 @@ $extrastylesheet
 <div id="top"><!-- do not remove this div, it is closed by doxygen! -->
 <script>
     $(document).ready(function() {
-        $("#main-menu").html($("#main-menu").html() + "<li><select name='vsv' onchange='window.location.href=this.options[this.selectedIndex].value'>##VERSION_OPTIONS##</select></li>");
+        let menu = $("#main-menu");
+        menu.html(menu.html() + "<li><select name='vsv' onchange='window.location.href=this.options[this.selectedIndex].value'>##VERSION_OPTIONS##</select></li>");
     });
 </script>
 <!--BEGIN TITLEAREA-->
