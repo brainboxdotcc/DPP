@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install apt packages
-        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }}:${{ matrix.cfg.arch }} ninja-build libsodium-dev:${{ matrix.cfg.arch }} libopus-dev:${{ matrix.cfg.arch }} zlib1g-dev:${{ matrix.cfg.arch }}
+        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }}:${{ matrix.cfg.arch }} ninja-build libsodium-dev:${{ matrix.cfg.arch }} libopus-dev:${{ matrix.cfg.arch }} zlib1g-dev:${{ matrix.cfg.arch }} rpm:${{ matrix.cfg.arch }}
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -G Ninja ..
@@ -31,12 +31,20 @@ jobs:
         if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
         run: cd build && cpack --verbose
 
-      - name: Upload Binary
+      - name: Upload Binary (DEB)
         if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
         uses: actions/upload-artifact@v2
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.deb'
+
+      - name: Upload Binary (RPM)
+        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
+          path: '${{github.workspace}}/build/*.rpm'
+
 
   macos:
     name: macOS x64
@@ -119,7 +127,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Packages
-        run: sudo apt update && sudo apt install cmake ninja-build
+        run: sudo apt update && sudo apt install cmake ninja-build rpm
 
       - name: Generate CMakeFiles
         run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DCMAKE_BUILD_TYPE=Release -G Ninja ..
@@ -130,9 +138,16 @@ jobs:
       - name: Package Distributable
         run: cd build && cpack --verbose
 
-      - name: Upload Binaries
+      - name: Upload Binaries (DEB)
         uses: actions/upload-artifact@v2
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.deb"
+
+      - name: Upload Binaries (RPM)
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - RPM Package ${{matrix.cfg.name}}"
+          path: "${{github.workspace}}/build/*.rpm"
+
 
