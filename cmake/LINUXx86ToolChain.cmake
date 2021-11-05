@@ -8,6 +8,7 @@ SET(CMAKE_CXX_COMPILER g++-8)
 # Below call is necessary to avoid non-RT problem.
 SET(CMAKE_LIBRARY_ARCHITECTURE i386-linux-gnu)
 SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE i386)
+SET(CPACK_RPM_PACKAGE_ARCHITECTURE i686)
 
 #If you have installed cross compiler to somewhere else, please specify that path.
 SET(COMPILER_ROOT /usr/bin) 
