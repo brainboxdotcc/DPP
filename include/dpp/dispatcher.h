@@ -183,6 +183,8 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * 
 	 * @param t Type of reply to send
 	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void reply(interaction_response_type t, const message & m, command_completion_event_t callback = {}) const;
 
@@ -191,6 +193,8 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * 
 	 * @param t Type of reply to send
 	 * @param mt The string value to send, for simple text only messages
+	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback = {}) const;
 
@@ -207,6 +211,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 *
 	 * @param m Message object to send. Not all fields are supported by Discord.
 	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void edit_response(const message & m, command_completion_event_t callback = {}) const;
 
@@ -215,6 +220,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 *
 	 * @param mt The string value to send, for simple text only messages
 	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void edit_response(const std::string & mt, command_completion_event_t callback = {}) const;
 
@@ -222,6 +228,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @brief Delete the original response for this interaction
 	 *
 	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void delete_original_response(command_completion_event_t callback = {});
 
@@ -229,6 +236,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @brief Set the bot to 'thinking' state
 	 *
 	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void thinking(command_completion_event_t callback = {}) const;
 
