@@ -992,7 +992,7 @@ struct DPP_EXPORT message_update_t : public event_dispatch_t {
 	message* updated;
 };
 
-/* @brief User update */
+/** @brief User update */
 struct DPP_EXPORT user_update_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on

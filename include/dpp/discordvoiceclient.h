@@ -69,6 +69,9 @@ namespace dpp {
 // Forward declaration
 class cluster;
 
+/**
+ * @brief An opus-encoded RTP packet to be sent out to a voice channel
+ */
 struct DPP_EXPORT voice_out_packet {
 	/** 
 	 * @brief Each string is a UDP packet.
@@ -198,6 +201,9 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 */
 	uint32_t timestamp;
 
+	/**
+	 * Last sent packet high-resolution timestamp
+	 */
 	std::chrono::high_resolution_clock::time_point last_timestamp;
 
 	/**
