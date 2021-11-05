@@ -1117,7 +1117,7 @@ int main() {
     bot.on_message_create([&bot](const dpp::message_create_t & event) {
         if (event.msg->content == "!embed") {
 
-            /* create the embed and send it into the channel */
+            /* create the embed */
             dpp::embed embed = dpp::embed().
                 set_color(0x0099ff).
                 set_title("Some name").
@@ -1143,7 +1143,8 @@ int main() {
                 set_footer(dpp::embed_footer().set_text("Some footer text here").set_icon("https://dpp.dev/DPP-Logo.png")).
                 set_timestamp(time(0));
 
-            bot.message_create(dpp::message(event.msg->channel_id, embed));
+            /* reply with the created embed */
+            bot.message_create(dpp::message(event.msg->channel_id, embed).set_reference(event.msg->id));
         }
     });
 
