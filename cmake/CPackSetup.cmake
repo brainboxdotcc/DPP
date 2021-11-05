@@ -42,7 +42,7 @@ elseif(UNIX)
 	set(CPACK_RPM_PACKAGE_LICENSE "Apache 2.0")
 	set(CPACK_PACKAGE_CONTACT "https://discord.gg/dpp") # D++ Development Discord
 	set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsodium23 (>= 1.0.17-1), libopus0 (>= 1.3-1)")
-	set(CPACK_RPM_PACKAGE_REQUIRES "libsodium >= 2.5.0, libopusenc >= 0.2.1")
+	set(CPACK_RPM_PACKAGE_REQUIRES "libsodium >= 1.0.17, opus >= 1.3.1")
 	set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "An incredibly lightweight C++ Discord library")
 	set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 	set(CPACK_DEBIAN_PACKAGE_SECTION "libs")
