@@ -8,11 +8,22 @@ gh run list -w "D++ CI" | grep $'\t'master$'\t' | grep ^completed | head -n1
 gh run download `gh run list -w "D++ CI" | grep $'\t'master$'\t' | grep ^completed | head -n1 | awk '{ printf $(NF-2) }'`
 echo "Move assets..."
 mkdir assets
+
+# rpm
+mv "./libdpp - RPM Package amd64/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-x64.rpm"
+mv "./libdpp - RPM Package Linux x86/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-i386.rpm"
+mv "./libdpp - RPM Package ARM64/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-rpi-arm64.rpm"
+mv "./libdpp - RPM Package ARMv7 HF/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-rpi-arm7hf.rpm"
+mv "./libdpp - RPM Package ARMv6/libdpp-$NEWVER-Linux.rpm" "./assets/libdpp-$NEWVER-linux-rpi-arm6.rpm"
+
+# deb
 mv "./libdpp - Debian Package amd64/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-x64.deb"
 mv "./libdpp - Debian Package Linux x86/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-i386.deb"
 mv "./libdpp - Debian Package ARM64/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm64.deb"
 mv "./libdpp - Debian Package ARMv7 HF/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm7hf.deb"
 mv "./libdpp - Debian Package ARMv6/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm6.deb"
+
+# win
 mv "./libdpp - Windows x64-Release/libdpp-$NEWVER-win64.zip" "./assets/libdpp-$NEWVER-win64-release-vs2019.zip"
 mv "./libdpp - Windows x64-Debug/libdpp-$NEWVER-win64.zip" "./assets/libdpp-$NEWVER-win64-debug-vs2019.zip"
 mv "./libdpp - Windows x86-Release/libdpp-$NEWVER-win32.zip" "./assets/libdpp-$NEWVER-win32-release-vs2019.zip"
@@ -44,7 +55,7 @@ rm -rf libdpp-$NEWVER-win32
 
 cd ..
 echo "Create release..."
-gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(git log --format="- %s" $(git show-ref | grep refs/tags | tail -n 1 | cut -d ' ' -f 1)..HEAD)" ./assets/*.zip ./assets/*.deb
+gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(git log --format="- %s" $(git show-ref | grep refs/tags | tail -n 1 | cut -d ' ' -f 1)..HEAD)" ./assets/*.zip ./assets/*.deb ./assets/*.rpm
 echo "Cleaning up..."
 cd ..
 rm -rf temp
