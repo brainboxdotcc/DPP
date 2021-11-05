@@ -70,7 +70,9 @@ struct DPP_EXPORT integration_app {
 	user* bot;
 };
 
-/** Represents an integration within a dpp::guild */
+/**
+ * @brief Represents an integration on a guild, e.g. a connection to twitch.
+ */
 class DPP_EXPORT integration : public managed {
 public:
 	/** Integration name */

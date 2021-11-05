@@ -25,11 +25,20 @@
 
 namespace dpp {
 
+/**
+ * @brief Represents the privacy of a stage instance
+ */
 enum stage_privacy_level : uint8_t {
-	sp_public = 1, ///The Stage instance is visible publicly, such as on Stage Discovery.
-	sp_guild_only = 2 ///The Stage instance is visible to only guild members.
+	/// The Stage instance is visible publicly, such as on Stage Discovery.
+	sp_public = 1,
+	/// The Stage instance is visible to only guild members.
+	sp_guild_only = 2
 };
 
+/**
+ * @brief A stage instance.
+ * Stage instances are like a conference facility, with moderators/speakers and listeners.
+ */
 struct DPP_EXPORT stage_instance {
 
 	/// The id of this Stage instance
@@ -45,24 +54,24 @@ struct DPP_EXPORT stage_instance {
 	/// Whether or not Stage Discovery is disabled
 	bool discoverable_disabled;
 
-	/*
+	/**
 	 * @brief Create a stage_instance object
 	 */
 	stage_instance();
 
-	/*
+	/**
 	 * @brief Destroy the stage_instance object
 	 */
 	~stage_instance() = default;
 
-	/*
+	/**
 	 * @brief Serialise a stage_instance object rom json
 	 *
 	 * @return stage_instance& a reference to self
 	 */
 	stage_instance& fill_from_json(const nlohmann::json* j);
 
-	/*
+	/**
 	 * @brief Build json for this object
 	 *
 	 * @return std::string Dumped json of this object

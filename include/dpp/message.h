@@ -54,24 +54,42 @@ enum component_style : uint8_t {
 	cos_link
 };
 
+/**
+ * @brief An option for a select component
+ */
 struct DPP_EXPORT select_option {
+	/**
+	 * @brief Label for option
+	 */
 	std::string label;
+	/**
+	 * @brief Value for option
+	 */
 	std::string value;
+	/**
+	 * @brief Description of option
+	 */
 	std::string description;
+	/**
+	 * @brief True if option is the default option
+	 */
 	bool is_default;
-	/** Emoji definition. To set an emoji on your button
+	/**
+	 * @brief Emoji definition. To set an emoji on your button
 	 * you must set one of either the name or id fields.
 	 * The easiest way is to use the component::set_emoji
 	 * method.
 	 */
 	struct inner_select_emoji {
-		/** Set the name field to the name of the emoji.
+		/**
+		 * @brief Set the name field to the name of the emoji.
 		 * For built in unicode emojis, set this to the
 		 * actual unicode value of the emoji e.g. "😄"
 		 * and not for example ":smile:"
 		 */
 		std::string name;
-		/** The emoji ID value for emojis that are custom
+		/**
+		 * @brief The emoji ID value for emojis that are custom
 		 * ones belonging to a guild. The same rules apply
 		 * as with other emojis, that the bot must be on
 		 * the guild where the emoji resides and it must
@@ -79,26 +97,75 @@ struct DPP_EXPORT select_option {
 		 * lack of boosts etc)
 		 */
 		dpp::snowflake id = 0;
-		/** True if the emoji is animated. Only applies to
+		/**
+		 * @brief True if the emoji is animated. Only applies to
 		 * custom emojis.
 		 */
 		bool animated = false;
 	} emoji;
 
+	/**
+	 * @brief Construct a new select option object
+	 */
 	select_option();
 
+	/**
+	 * @brief Construct a new select option object
+	 * 
+	 * @param label Label of option
+	 * @param value Value of option
+	 * @param description Description of option
+	 */
 	select_option(const std::string &label, const std::string &value, const std::string &description = "");
 
+	/**
+	 * @brief Set the label
+	 * 
+	 * @param l label to set
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_label(const std::string &l);
 
+	/**
+	 * @brief Set the value
+	 * 
+	 * @param v value to set
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_value(const std::string &v);
 
+	/**
+	 * @brief Set the description
+	 * 
+	 * @param d description to set
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_description(const std::string &d);
-	
+
+	/**
+	 * @brief Set the emoji
+	 * 
+	 * @param n emoji name
+	 * @param id emoji id for custom emojis
+	 * @param animated true if animated emoji
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_emoji(const std::string &n, dpp::snowflake id = 0, bool animated = false);
 
+	/**
+	 * @brief Set the option as default
+	 * 
+	 * @param def true to set the option as default
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_default(bool def);
 
+	/**
+	 * @brief Set the emoji as animated
+	 * 
+	 * @param anim true if animated
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_animated(bool anim);
 };
 
@@ -262,17 +329,40 @@ public:
 	 * Defaults to false on all created components.
 	 *
 	 * @param disable True to disable, false to disable.
-	 * @return component&
+	 * @return component& Reference to self
 	 */
 	component& set_disabled(bool disable);
 
-
+	/**
+	 * @brief Set the placeholder
+	 * 
+	 * @param placeholder placeholder string
+	 * @return component& Reference to self
+	 */
 	component& set_placeholder(const std::string &placeholder);
 
+	/**
+	 * @brief Set the min value
+	 * 
+	 * @param min_values min value to set
+	 * @return component& Reference to self
+	 */
 	component& set_min_values(uint32_t min_values);
 
+	/**
+	 * @brief Set the max value
+	 * 
+	 * @param max_values max value to set
+	 * @return component& Reference to self
+	 */
 	component& set_max_values(uint32_t max_values);
 
+	/**
+	 * @brief Add a select option
+	 * 
+	 * @param option option to add
+	 * @return component& Reference to self
+	 */
 	component& add_select_option(const select_option &option);
 
 	/**
@@ -590,6 +680,9 @@ struct DPP_EXPORT attachment {
 	~attachment() = default;
 };
 
+/**
+ * @brief Represents the type of a sticker
+ */
 enum sticker_type : uint8_t {
 	/// Nitro pack sticker
 	st_standard = 1,
@@ -683,6 +776,9 @@ struct DPP_EXPORT sticker {
 
 };
 
+/**
+ * @brief Represents a sticker pack (the built in groups of stickers that all nitro users get to use)
+ */
 struct DPP_EXPORT sticker_pack {
 	/// id of the sticker pack
 	snowflake       id;
@@ -792,19 +888,25 @@ enum message_type {
 	mt_context_menu_command 	= 23
 };
 
+/**
+ * @brief Represents the caching policy of a cache in the library.
+ */
 enum cache_policy_setting_t {
 	/**
 	 * @brief request aggressively on seeing new guilds, and also store missing data from messages.
-	 * This is the default behaviour.
+	 * This is the default behaviour and the least memory-efficient option. Memory usage will increase
+	 * over time, initiailly quite rapidly, and then linearly over time. It is the least cpu-intensive
+	 * setting.
 	 */
 	cp_aggressive = 0,
 	/**
 	 * @brief only cache when there is relavent activity, e.g. a message to the bot.
+	 * This is a good middle-ground, memory usage will increase linearly over time.
 	 */
 	cp_lazy = 1,
 	/**
 	 * @brief Don't cache anything. Fill details when we see them.
-	 * (NOT IMPLEMENTED YET)
+	 * This is the most memory-efficient option but consumes more CPU time
 	 */
 	cp_none = 2
 };
@@ -898,6 +1000,9 @@ struct DPP_EXPORT message {
 	/** Self allocated user for caching being off */
 	user		self_author;
 
+	/**
+	 * @brief Reference to another message, e.g. a reply
+	 */
 	struct message_ref {
 		/// id of the originating message
 		snowflake message_id;
@@ -909,6 +1014,9 @@ struct DPP_EXPORT message {
 		bool fail_if_not_exists;
 	} message_reference;
 
+	/**
+	 * @brief Reference to an interaction
+	 */
 	struct message_interaction_struct{
 		// id of the interaction
 		snowflake id;
@@ -920,12 +1028,33 @@ struct DPP_EXPORT message {
 		user usr;
 	} interaction;
 
+	/**
+	 * @brief Allowed mentions detils
+	 */
 	struct allowed_ref {
+		/**
+		 * @brief Set to true to parse user mentions in the text
+		 */
 		bool parse_users;
+		/**
+		 * @brief Set to true to at-everyone and at-here mentions in the text
+		 */
 		bool parse_everyone;
+		/**
+		 * @brief Set to true to parse role mentions in the text
+		 */
 		bool parse_roles;
+		/**
+		 * @brief Set to true to mention the user who sent the message this one is replying to
+		 */
 		bool replied_user;
+		/**
+		 * @brief List of users to allow pings for 
+		 */
 		std::vector<snowflake> users;
+		/**
+		 * @brief List of roles to allow pings for 
+		 */
 		std::vector<snowflake> roles;
 	} allowed_mentions;
 

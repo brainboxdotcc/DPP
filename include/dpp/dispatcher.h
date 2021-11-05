@@ -450,6 +450,7 @@ struct DPP_EXPORT message_delete_t : public event_dispatch_t {
 	message* deleted;
 };
 
+/** @brief Application slash command deleted */
 struct DPP_EXPORT application_command_delete_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
