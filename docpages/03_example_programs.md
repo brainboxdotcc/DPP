@@ -1143,7 +1143,7 @@ int main() {
                 set_footer(dpp::embed_footer().set_text("Some footer text here").set_icon("https://dpp.dev/DPP-Logo.png")).
                 set_timestamp(time(0));
 
-            /* reply with the embed */
+            /* reply with the created embed */
             bot.message_create(dpp::message(event.msg->channel_id, embed).set_reference(event.msg->id));
         }
     });
