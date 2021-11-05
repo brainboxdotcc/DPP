@@ -43,11 +43,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void invite_create::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.invite_create) {
+	if (!client->creator->dispatch.invite_create.empty()) {
 		json& d = j["d"];
 		dpp::invite_create_t ci(client, raw);
 		ci.created_invite = dpp::invite().fill_from_json(&d);
-		client->creator->dispatch.invite_create(ci);
+		call_event(client->creator->dispatch.invite_create, ci);
 	}
 }
 

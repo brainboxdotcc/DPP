@@ -36,7 +36,7 @@ void cluster::get_voice_regions(command_completion_event_t callback) {
 
 
 void cluster::guild_get_voice_regions(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "regions", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "regions", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		voiceregion_map voiceregions;
 		for (auto & curr_region : j) {
 			voiceregions[StringNotNull(&curr_region, "id")] = voiceregion().fill_from_json(&j);

@@ -45,11 +45,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void integration_create::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.integration_create) {
+	if (!client->creator->dispatch.integration_create.empty()) {
 		json& d = j["d"];
 		dpp::integration_create_t ic(client, raw);
 		ic.created_integration = dpp::integration().fill_from_json(&d);
-		client->creator->dispatch.integration_create(ic);
+		call_event(client->creator->dispatch.integration_create, ic);
 	}
 }
 

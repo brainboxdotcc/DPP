@@ -41,11 +41,16 @@
 
 namespace dpp {
 
-/* This is an internal class, defined externally as just a forward declaration for an opaque pointer.
- * This is because we don't want an external dependency on zlib's headers
+/**
+ * @brief This is an opaque class containing zlib library specific structures.
+ * We define it this way so that the public facing D++ library doesnt require
+ * the zlib headers be available to build against it.
  */
 class zlibcontext {
 public:
+	/**
+	 * @brief Zlib stream struct
+	 */
 	z_stream d_stream;
 };
 
@@ -397,12 +402,12 @@ void discord_client::Error(uint32_t errorcode)
 
 void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 {
-	if (creator->dispatch.log) {
+	if (!creator->dispatch.log.empty()) {
 		/* Pass to user if theyve hooked the event */
 		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
-		creator->dispatch.log(logmsg);
+		call_event(creator->dispatch.log, logmsg);
 	}
 }
 

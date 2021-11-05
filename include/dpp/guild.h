@@ -108,7 +108,9 @@ enum guild_member_flags {
 	/** Member muted */
 	gm_mute =		0b00010,
 	/** Member pending verification by membership screening */
-	gm_pending =		0b00100
+	gm_pending =		0b00100,
+	/** Member has animated guild-specific avatar */
+	gm_animated_avatar = 	0b01000,
 };
 
 /**
@@ -130,6 +132,8 @@ public:
 	time_t premium_since;
 	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
 	uint8_t flags;
+	/** User avatar (per-server avatar is a nitro only feature) */
+	utility::iconhash avatar;
 
 	/** Default constructor */
 	guild_member();
@@ -152,7 +156,41 @@ public:
 
 	/** Returns true if pending verification by membership screening */
 	bool is_pending() const;
+
+	/** Returns true if the user's per-guild custom avatar is animated */
+	bool has_animated_guild_avatar() const;
+
+	/** Returns the members's per guild avatar if they have one, otherwise returns an empty string */
+	std::string get_avatar_url() const;
 	
+};
+
+/**
+ * @brief Defines a channel on a server's welcome screen
+ */
+struct welcome_channel_t {
+	/// the channel's id
+	snowflake channel_id;
+
+	/// the description shown for the channel
+	std::string description;
+
+	/// the emoji id, if the emoji is custom
+	snowflake emoji_id;
+
+	/// the emoji name if custom, the unicode character if standard, or null if no emoji is set
+	std::string emoji_name;
+};
+
+
+/**
+ * @brief Defines a server's welcome screen
+ */
+struct welcome_screen_t {
+	/// the server description shown in the welcome screen
+	std::string description;
+	/// the channels shown in the welcome screen, up to 5
+	std::vector<welcome_channel_t> welcome_channels;
 };
 
 /** @brief Guild members container
@@ -265,6 +303,10 @@ public:
         /** List of emojis
 	 */
 	std::vector<snowflake> emojis;
+
+	/** Welcome screen
+	 */
+	welcome_screen_t welcome_screen;
 
 	/** Default constructor, zeroes all values */
 	guild();

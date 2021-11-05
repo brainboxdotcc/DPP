@@ -15,16 +15,69 @@ int main()
 	dpp::cluster bot(configdocument["token"]);
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-		bot.set_audit_reason("test reason").thread_create("test thread", 828681546533437471, 60, dpp::GUILD_PUBLIC_THREAD);
+		/* Create a new global command on ready event */
+		bot.guild_command_create(dpp::slashcommand().set_name("blep")
+			.set_description("Send a random adorable animal photo")
+			.set_application_id(bot.me.id)
+			.add_option(
+				/* If you set the auto complete setting on a command option, it will trigger the on_auticomplete
+				 * event whenever discord needs to fill information for the choices. You cannot set any choices
+				 * here if you set the auto complete value to true.
+				 */
+				dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
+			),
+			825407338755653642);
 	});
 
-	bot.on_log([&](const dpp::log_t& loginfo) {
-		if (loginfo.severity >= dpp::ll_trace) {
-			std::cout << dpp::utility::loglevel(loginfo.severity) << " " << loginfo.message << "\n";
+	/* The interaction create event is fired when someone issues your commands */
+	bot.on_interaction_create([&](const dpp::interaction_create_t & event) {
+		if (event.command.type == dpp::it_application_command) {
+			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
+			/* Check which command they ran */
+			if (cmd_data.name == "blep") {
+				/* Fetch a parameter value from the command parameters */
+				std::string animal = std::get<std::string>(event.get_parameter("animal"));
+				/* Reply to the command. There is an overloaded version of this
+				* call that accepts a dpp::message so you can send embeds.
+				*/
+				event.reply(dpp::ir_channel_message_with_source, "Blep! You chose " + animal);
+			}
+		}
+	});
+ 
+	/* The on_autocomplete event is fired whenever discord needs information to fill in a command options's choices.
+	 * You must reply with a REST event within 500ms, so make it snappy!
+	 */
+	bot.on_autocomplete([&](const dpp::autocomplete_t & event) {
+		for (auto & opt : event.options) {
+			/* The option which has focused set to true is the one the user is typing in */
+			if (opt.focused) {
+				/* In a real world usage of this function you should return values that loosely match
+				 * opt.value, which contains what the user has typed so far. The opt.value is a variant
+				 * and will contain the type identical to that of the slash command parameter.
+				 * Here we can safely know it is string.
+				 */
+				std::string uservalue = std::get<std::string>(opt.value);
+				bot.interaction_response_create(event.command.id, event.command.token, dpp::interaction_response(dpp::ir_autocomplete_reply)
+					.add_autocomplete_choice(dpp::command_option_choice("squids", "lots of squids"))
+					.add_autocomplete_choice(dpp::command_option_choice("cats", "a few cats"))
+					.add_autocomplete_choice(dpp::command_option_choice("dogs", "bucket of dogs"))
+					.add_autocomplete_choice(dpp::command_option_choice("elephants", "bottle of elephants"))
+				);
+				bot.log(dpp::ll_debug, "Autocomplete " + opt.name + " with value of '" + uservalue + "' in field " + event.name);
+				break;
+			}
 		}
 	});
 
-	bot.set_websocket_protocol(dpp::ws_etf);
+	/* Simple log event */
+	bot.on_log([&](const dpp::log_t & event) {
+		std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+	});
+
+	bot.on_message_update([&](const dpp::message_update_t & event) {
+		std::cout << "MU RAW: " << event.raw_event << "\n";
+	});
 
 	bot.start(false);
 

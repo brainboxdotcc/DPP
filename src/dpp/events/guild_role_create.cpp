@@ -51,11 +51,11 @@ void guild_role_create::handle(discord_client* client, json &j, const std::strin
 			json &role = d["role"];
 			dpp::role r;
 			r.fill_from_json(g->id, &role);
-			if (client->creator->dispatch.guild_role_create) {
+			if (!client->creator->dispatch.guild_role_create.empty()) {
 				dpp::guild_role_create_t grc(client, raw);
 				grc.creating_guild = g;
 				grc.created = &r;
-				client->creator->dispatch.guild_role_create(grc);
+				call_event(client->creator->dispatch.guild_role_create, grc);
 			}
 		} else {
 			json &role = d["role"];
@@ -66,11 +66,11 @@ void guild_role_create::handle(discord_client* client, json &j, const std::strin
 			r->fill_from_json(g->id, &role);
 			dpp::get_role_cache()->store(r);
 			g->roles.push_back(r->id);
-			if (client->creator->dispatch.guild_role_create) {
+			if (!client->creator->dispatch.guild_role_create.empty()) {
 				dpp::guild_role_create_t grc(client, raw);
 				grc.creating_guild = g;
 				grc.created = r;
-				client->creator->dispatch.guild_role_create(grc);
+				call_event(client->creator->dispatch.guild_role_create, grc);
 			}
 		}
 	}

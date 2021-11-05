@@ -27,6 +27,13 @@
 
 namespace dpp {
 
+/**
+ * @brief Discord limits the maximum number of replies to an autocomplete interaction to 25.
+ * This value represents that maximum. interaction_response::add_autocomplete_choice does not allow
+ * adding more than this number of elements to the vector.
+ */
+const size_t AUTOCOMPLETE_MAX_CHOICES = 25;
+
 enum channel_type;
 /**
  * @brief Represents command option types.
@@ -100,6 +107,11 @@ struct DPP_EXPORT command_option_choice {
 void to_json(nlohmann::json& j, const command_option_choice& choice);
 
 /**
+ * @brief A minimum or maximum value for co_number and co_integer dpp::command_option types
+ */
+typedef std::variant<std::monostate, int64_t, double> command_option_range;
+
+/**
  * @brief Each command option is a command line parameter.
  * It can have a type (see dpp::command_option_type), a name,
  * a description, can be required or optional, and can have
@@ -112,9 +124,14 @@ struct DPP_EXPORT command_option {
 	std::string name;                            //!< Option name (1-32 chars)
 	std::string description;                     //!< Option description (1-100 chars)
 	bool required;                               //!< True if this is a mandatory parameter
+	bool focused;                                //!< True if the user is typing in this field, when sent via autocomplete
+	command_value value;                         //!< Set only by autocomplete went sent as part of an interaction
 	std::vector<command_option_choice> choices;  //!< List of choices for multiple choice command
+	bool autocomplete;                           //!< True if this option supports auto completion
 	std::vector<command_option> options;         //!< Sub-commands
-	std::vector<channel_type> channel_types;
+	std::vector<channel_type> channel_types;     //!< Allowed channel types for channel snowflake id options
+	command_option_range min_value;              //!< Minimum value allowed, for co_number and co_integer types only
+	command_option_range max_value;              //!< Maximum value allowed, for co_number and co_integer types only
 
 	/**
 	 * @brief Construct a new command option object
@@ -140,6 +157,22 @@ struct DPP_EXPORT command_option {
 	command_option& add_choice(const command_option_choice &o);
 
 	/**
+	 * @brief Set the minimum numeric value of the option. 
+	 * Only valid if the type is co_number or co_integer.
+	 * @param min_v Minimum value
+	 * @return command_option& return a reference to sef for chaining of calls
+	 */
+	command_option& set_min_value(command_option_range min_v);
+
+	/**
+	 * @brief Set the maximum numeric value of the option. 
+	 * Only valid if the type is co_number or co_integer.
+	 * @param max_v Maximum value
+	 * @return command_option& return a reference to sef for chaining of calls
+	 */
+	command_option& set_max_value(command_option_range max_v);
+
+	/**
 	 * @brief Add a sub-command option
 	 *
 	 * @param o Sub-command option to add
@@ -154,6 +187,14 @@ struct DPP_EXPORT command_option {
 	 * @return command_option& return a reference to self for chaining of calls
 	 */
 	command_option& add_channel_type(const channel_type ch);
+
+	/**
+	 * @brief Set the auto complete state
+	 * 
+	 * @param autocomp True to enable auto completion for this option
+	 * @return command_option& return a reference to self for chaining of calls
+	 */
+	command_option& set_auto_complete(bool autocomp);
 };
 
 /**
@@ -176,7 +217,8 @@ enum interaction_response_type {
 	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
 	ir_deferred_channel_message_with_source = 5,	//!< ACK an interaction and edit a response later, the user sees a loading state
 	ir_deferred_update_message = 6,			//!< for components, ACK an interaction and edit the original message later; the user does not see a loading state
-	ir_update_message = 7				//!< for components, edit the message the component was attached to
+	ir_update_message = 7,				//!< for components, edit the message the component was attached to
+	ir_autocomplete_reply = 8			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
 };
 
 /**
@@ -205,6 +247,11 @@ struct DPP_EXPORT interaction_response {
 	struct message* msg;
 
 	/**
+	 * @brief Array of up to 25 autocomplete choices
+	 */
+	std::vector<command_option_choice> autocomplete_choices;
+
+	/**
 	 * @brief Construct a new interaction response object
 	 */
 	interaction_response();
@@ -216,6 +263,13 @@ struct DPP_EXPORT interaction_response {
 	 * @param m Message to reply with
 	 */
 	interaction_response(interaction_response_type t, const struct message& m);
+
+	/**
+	 * @brief Construct a new interaction response object
+	 *
+	 * @param t Type of reply
+	 */
+	interaction_response(interaction_response_type t);
 
 	/**
 	 * @brief Fill object properties from JSON
@@ -231,6 +285,14 @@ struct DPP_EXPORT interaction_response {
 	 * @return std::string JSON string
 	 */
 	std::string build_json() const;
+
+	/**
+	 * @brief Add a command option choice
+	 * 
+	 * @param achoice command option choice to add
+	 * @return interaction_response& Reference to self
+	 */
+	interaction_response& add_autocomplete_choice(const command_option_choice& achoice);
 
 	/**
 	 * @brief Destroy the interaction response object
@@ -289,7 +351,8 @@ void from_json(const nlohmann::json& j, command_data_option& cdo);
 enum interaction_type {
 	it_ping = 1,			//!< ping
 	it_application_command = 2,	//!< application command (slash command)
-	it_component_button = 3		//!< button click (component interaction)
+	it_component_button = 3,	//!< button click (component interaction)
+	it_autocomplete = 4		//!< Autocomplete interaction
 };
 
 /**
@@ -328,6 +391,12 @@ struct DPP_EXPORT component_interaction {
 };
 
 /**
+ * @brief An auto complete interaction
+ */
+struct DPP_EXPORT autocomplete_interaction {
+};
+
+/**
  * @brief helper function to deserialize a component_interaction from json
  *
  * @see https://github.com/nlohmann/json#arbitrary-types-conversions
@@ -338,6 +407,16 @@ struct DPP_EXPORT component_interaction {
 void from_json(const nlohmann::json& j, component_interaction& bi);
 
 /**
+ * @brief helper function to deserialize an autocomplete_interaction from json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param ai autocomplete_interaction to be deserialized
+ */
+void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
+
+/**
  * @brief An interaction represents a user running a command and arrives
  * via the dpp::cluster::on_interaction_create event.
  */
@@ -345,7 +424,7 @@ class DPP_EXPORT interaction : public managed {
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
 	uint8_t	type;                                               //!< the type of interaction
-	std::variant<command_interaction, component_interaction> data; //!< Optional: the command data payload
+	std::variant<command_interaction, component_interaction, autocomplete_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
 	snowflake message_id;					    //!< Originating message id

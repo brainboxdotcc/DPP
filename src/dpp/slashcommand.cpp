@@ -21,6 +21,7 @@
 #include <dpp/slashcommand.h>
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
+#include <dpp/dispatcher.h>
 #include <dpp/nlohmann/json.hpp>
 #include <iostream>
 
@@ -50,16 +51,45 @@ void to_json(json& j, const command_option_choice& choice) {
 		j["value"] = std::get<bool>(choice.value);
 	} else if (std::holds_alternative<snowflake>(choice.value)) {
 		j["value"] = std::to_string(std::get<uint64_t>(choice.value));
+	} else if (std::holds_alternative<double>(choice.value)) {
+		j["value"] = std::to_string(std::get<double>(choice.value));
 	} else {
 		j["value"] = std::get<std::string>(choice.value);
 	}
+}
+
+command_option& command_option::set_min_value(command_option_range min_v) {
+	min_value = min_v;
+	return *this;
+}
+
+command_option& command_option::set_max_value(command_option_range max_v) {
+	max_value = max_v;
+	return *this;
 }
 
 void to_json(json& j, const command_option& opt) {
 	j["name"] = opt.name;
 	j["description"] = opt.description;
 	j["type"] = opt.type;
+	j["autocomplete"] = opt.autocomplete;
 	j["required"] = opt.required;
+
+	/* Check for minimum and maximum values */
+	if (opt.type == dpp::co_number || opt.type == dpp::co_integer) {
+		/* Min */
+		if (std::holds_alternative<double>(opt.min_value)) {
+			j["min_value"] = std::get<double>(opt.min_value);
+		} else if (std::holds_alternative<int64_t>(opt.min_value)) {
+			j["min_value"] = std::get<int64_t>(opt.min_value);
+		}
+		/* Max */
+		if (std::holds_alternative<double>(opt.max_value)) {
+			j["max_value"] = std::to_string(std::get<double>(opt.max_value));
+		} else if (std::holds_alternative<int64_t>(opt.max_value)) {
+			j["max_value"] = std::get<int64_t>(opt.max_value);
+		}
+	}
 
 	if (opt.options.size()) {
 		j["options"] = json();
@@ -182,12 +212,15 @@ command_option_choice::command_option_choice(const std::string &n, command_value
 }
 
 command_option::command_option(command_option_type t, const std::string &n, const std::string &d, bool r) :
-	type(t), name(n), description(d), required(r)
+	type(t), name(n), description(d), required(r), autocomplete(false)
 {
 }
 
 command_option& command_option::add_choice(const command_option_choice &o)
 {
+	if (this->autocomplete) {
+		throw dpp::exception("Can't set autocomplete=true if choices exist in the command_option");
+	}
 	choices.push_back(o);
 	return *this;
 }
@@ -203,6 +236,16 @@ command_option& command_option::add_channel_type(const channel_type ch)
 	this->channel_types.push_back(ch);
 	return *this;
 }
+
+command_option& command_option::set_auto_complete(bool autocomp)
+{
+	if (autocomp && !choices.empty()) {
+		throw dpp::exception("Can't set autocomplete=true if choices exist in the command_option");
+	}
+	this->autocomplete = autocomp;
+	return *this;
+}
+
 
 slashcommand& slashcommand::add_option(const command_option &o)
 {
@@ -280,6 +323,10 @@ void from_json(const nlohmann::json& j, component_interaction& bi) {
 	}
 }
 
+void from_json(const nlohmann::json& j, autocomplete_interaction& ai) {
+
+}
+
 void from_json(const nlohmann::json& j, interaction& i) {
 	i.id = SnowflakeNotNull(&j, "id");
 	i.application_id = SnowflakeNotNull(&j, "application_id");
@@ -352,6 +399,10 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			component_interaction bi;
 			j.at("data").get_to(bi);
 			i.data = bi;
+		} else if (i.type == it_autocomplete) {
+			autocomplete_interaction ai;
+			j.at("data").get_to(ai);
+			i.data = ai;
 		}
 	}
 }
@@ -364,9 +415,21 @@ interaction_response::~interaction_response() {
 	delete msg;
 }
 
+interaction_response& interaction_response::add_autocomplete_choice(const command_option_choice& achoice) {
+	if (autocomplete_choices.size() < AUTOCOMPLETE_MAX_CHOICES) {
+		this->autocomplete_choices.emplace_back(achoice);
+	}
+	return *this;
+}
+
+
 interaction_response::interaction_response(interaction_response_type t, const struct message& m) : interaction_response() {
 	type = t;
 	*msg = m;
+}
+
+interaction_response::interaction_response(interaction_response_type t) : interaction_response() {
+	type = t;
 }
 
 interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
@@ -379,13 +442,22 @@ interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 
 std::string interaction_response::build_json() const {
 	json j;
-	json msg_json = json::parse(msg->build_json(false, true));
 	j["type"] = this->type;
-	auto cid = msg_json.find("channel_id");
-	if (cid != msg_json.end()) {
-		msg_json.erase(cid);
+	if (this->autocomplete_choices.empty()) {
+		json msg_json = json::parse(msg->build_json(false, true));
+		auto cid = msg_json.find("channel_id");
+		if (cid != msg_json.end()) {
+			msg_json.erase(cid);
+		}
+		j["data"] = msg_json;
+	} else {
+		j["data"] = json::object();
+		j["data"]["choices"] = json::array();
+		for (auto & c : this->autocomplete_choices) {
+			json opt = c;
+			j["data"]["choices"].push_back(opt);
+		}
 	}
-	j["data"] = msg_json;
 	return j.dump();
 }
 

@@ -126,6 +126,15 @@ void cluster::channel_typing(const class channel &c, command_completion_event_t 
 	});
 }
 
+void cluster::channel_typing(snowflake cid, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/channels", std::to_string(cid), "typing", m_post, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+
 void cluster::channels_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

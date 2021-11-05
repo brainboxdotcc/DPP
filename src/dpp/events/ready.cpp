@@ -57,11 +57,11 @@ void ready::handle(discord_client* client, json &j, const std::string &raw) {
 		client->creator->me.fill_from_json(&(j["d"]["user"]));
 	}
 
-	if (client->creator->dispatch.ready) {
+	if (!client->creator->dispatch.ready.empty()) {
 		dpp::ready_t r(client, raw);
 		r.session_id = client->sessionid;
 		r.shard_id = client->shard_id;
-		client->creator->dispatch.ready(r);
+		call_event(client->creator->dispatch.ready, r);
 	}
 }
 

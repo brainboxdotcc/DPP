@@ -100,7 +100,25 @@ enum audit_type {
 	/// Guild integration update
 	ae_integration_update		=	81,
 	/// Guild integration delete
-	ae_integration_delete		=	82
+	ae_integration_delete		=	82,
+	/// Stage instance create
+	ae_stage_instance_create	=	83,
+	/// Stage instance update
+	ae_stage_instance_update	=	84,
+	/// stage instance delete
+	ae_stage_instance_delete	=	85,
+	/// Sticker create
+	ae_sticker_create		=	90,
+	/// Sticker update
+	ae_sticker_update		=	91,
+	/// Sticker delete
+	ae_sticker_delete		=	92,
+	/// Thread create
+	ae_thread_create		=	110,
+	/// Thread update
+	ae_thread_update		=	111,
+	/// Thread delete
+	ae_thread_delete		=	112
 };
 
 /**

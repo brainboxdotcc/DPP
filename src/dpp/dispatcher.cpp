@@ -29,18 +29,46 @@
 
 namespace dpp {
 
+thread_local bool stop_event = false;
+
 event_dispatch_t::event_dispatch_t(discord_client* client, const std::string &raw) : raw_event(raw), from(client)
 {
+	/* NOTE: This is thread_local because the event_dispatch_t sent to the event is const and cannot itself be modified,
+	 * so there's no const-safe way to set an object variable to true later!
+	 */
+	stop_event = false;
 }
 
-void interaction_create_t::reply(interaction_response_type t, const message & m) const
+const event_dispatch_t& event_dispatch_t::cancel_event() const
 {
-	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m));
+	/* NOTE: This is thread_local because the event_dispatch_t sent to the event is const and cannot itself be modified,
+	 * so there's no const-safe way to have this as an object property!
+	 */
+	stop_event = true;
+	return *this;
 }
 
-void interaction_create_t::reply(interaction_response_type t, const std::string & mt) const
+bool event_dispatch_t::is_cancelled() const
 {
-	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command));
+	return stop_event;
+}
+
+void interaction_create_t::reply(interaction_response_type t, const message & m, command_completion_event_t callback) const
+{
+	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), callback);
+}
+
+void interaction_create_t::thinking(command_completion_event_t callback) const {
+	message msg;
+	msg.content = "*";
+	msg.guild_id = this->command.guild_id;
+	msg.channel_id = this->command.channel_id;
+	this->reply(ir_deferred_channel_message_with_source, msg, callback);
+}
+
+void interaction_create_t::reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback) const
+{
+	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
 void interaction_create_t::get_original_response(command_completion_event_t callback) const
@@ -52,14 +80,14 @@ void interaction_create_t::get_original_response(command_completion_event_t call
 	});
 }
 
-void interaction_create_t::edit_response(const message & m) const
+void interaction_create_t::edit_response(const message & m, command_completion_event_t callback) const
 {
-	from->creator->interaction_response_edit(this->command.token, m);
+	from->creator->interaction_response_edit(this->command.token, m, callback);
 }
 
-void interaction_create_t::edit_response(const std::string & mt) const
+void interaction_create_t::edit_response(const std::string & mt, command_completion_event_t callback) const
 {
-	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command));
+	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
 const command_value& interaction_create_t::get_parameter(const std::string& name) const
@@ -89,6 +117,13 @@ const command_value& select_click_t::get_parameter(const std::string& name) cons
 	return dummy_b_value;
 }
 
+const command_value& autocomplete_t::get_parameter(const std::string& name) const
+{
+	/* Autocomplete don't have parameters, so override this */
+	static command_value dummy_b_value = {};
+	return dummy_b_value;
+}
+
 /* Standard default constructors that call the parent constructor, for events */
 event_ctor(guild_join_request_delete_t, event_dispatch_t);
 event_ctor(stage_instance_create_t, event_dispatch_t);
@@ -98,6 +133,7 @@ event_ctor(log_t, event_dispatch_t);
 event_ctor(voice_state_update_t, event_dispatch_t);
 event_ctor(interaction_create_t, event_dispatch_t);
 event_ctor(button_click_t, interaction_create_t);
+event_ctor(autocomplete_t, interaction_create_t);
 event_ctor(select_click_t, interaction_create_t);
 event_ctor(guild_delete_t, event_dispatch_t);
 event_ctor(channel_delete_t, event_dispatch_t);

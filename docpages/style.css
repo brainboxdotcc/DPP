@@ -1,3 +1,12 @@
+html {
+	--content-maxwidth: 90% !important;
+}
+
+.memItemLeft, .memTemplItemLeft {
+	/* This was set to no wrap. Large types force scrolling right. ew. */
+	white-space: break-spaces !important;
+}
+
 img {
 	max-width: 100% !important;
 	max-height: auto;

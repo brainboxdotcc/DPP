@@ -45,15 +45,14 @@ using namespace dpp;
  */
 void channel_pins_update::handle(discord_client* client, json &j, const std::string &raw) {
 
-	if (client->creator->dispatch.channel_pins_update) {
+	if (!client->creator->dispatch.channel_pins_update.empty()) {
 		json& d = j["d"];
 		dpp::channel_pins_update_t cpu(client, raw);
 		cpu.pin_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
 		cpu.pin_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		cpu.timestamp = TimestampNotNull(&d, "last_pin_timestamp");
 
-		client->creator->dispatch.channel_pins_update(cpu);
-
+		call_event(client->creator->dispatch.channel_pins_update, cpu);
 	}
 
 }

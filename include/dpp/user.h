@@ -27,47 +27,49 @@ namespace dpp {
 /**
  * @brief Various bitmask flags used to represent information about a dpp::user
  */
-enum user_flags {
+enum user_flags : uint32_t {
 	/// User is a bot
-	u_bot =			0b00000000000000000000001,
+	u_bot =				0b00000000000000000000001,
 	/// User is a system user (Clyde!)
-	u_system =		0b00000000000000000000010,
+	u_system =			0b00000000000000000000010,
 	/// User has multi-factor authentication enabled
-	u_mfa_enabled =		0b00000000000000000000100,
+	u_mfa_enabled =			0b00000000000000000000100,
 	/// User is verified (verified email address)
-	u_verified =		0b00000000000000000001000,
+	u_verified =			0b00000000000000000001000,
 	/// User has full nitro
-	u_nitro_full =		0b00000000000000000010000,
+	u_nitro_full =			0b00000000000000000010000,
 	/// User has nitro classic
-	u_nitro_classic =	0b00000000000000000100000,
+	u_nitro_classic =		0b00000000000000000100000,
 	/// User is discord staff
-	u_discord_employee =	0b00000000000000001000000,
+	u_discord_employee =		0b00000000000000001000000,
 	/// User owns a partnered server
-	u_partnered_owner =	0b00000000000000010000000,
+	u_partnered_owner =		0b00000000000000010000000,
 	/// User is a member of hypesquad events
-	u_hypesquad_events =	0b00000000000000100000000,
+	u_hypesquad_events =		0b00000000000000100000000,
 	/// User has BugHunter level 1
-	u_bughunter_1 =		0b00000000000001000000000,
+	u_bughunter_1 =			0b00000000000001000000000,
 	/// User is a member of House Bravery
-	u_house_bravery =	0b00000000000010000000000,
+	u_house_bravery =		0b00000000000010000000000,
 	/// User is a member of House Brilliance
-	u_house_brilliance =	0b00000000000100000000000,
+	u_house_brilliance =		0b00000000000100000000000,
 	/// User is a member of House Balance
-	u_house_balanace =	0b00000000001000000000000,
+	u_house_balanace =		0b00000000001000000000000,
 	/// User is an early supporter
-	u_early_supporter =	0b00000000010000000000000,
+	u_early_supporter =		0b00000000010000000000000,
 	/// User is a team user
-	u_team_user =		0b00000000100000000000000,
+	u_team_user =			0b00000000100000000000000,
 	/// User is has Bug Hunter level 2
-	u_bughunter_2 =		0b00000001000000000000000,
+	u_bughunter_2 =			0b00000001000000000000000,
 	/// User is a verified bot
-	u_verified_bot =	0b00000010000000000000000,
+	u_verified_bot =		0b00000010000000000000000,
 	/// User has the Early Verified Bot Developer badge
-	u_verified_bot_dev =	0b00000100000000000000000,
+	u_verified_bot_dev =	 	0b00000100000000000000000,
 	/// User's icon is animated
-	u_animated_icon =	0b00001000000000000000000,
+	u_animated_icon =		0b00001000000000000000000,
 	/// User is a certified moderator
-	u_certified_moderator =	0b00010000000000000000000
+	u_certified_moderator =		0b00010000000000000000000,
+	/// User is a bot using HTTP interactions (shows online even when not connected to a websocket)
+	u_bot_http_interactions =	0b00100000000000000000000,
 };
 
 /**
@@ -225,6 +227,13 @@ public:
 	 * @return true if certified moderator
 	 */
 	bool is_certified_moderator() const;
+	/**
+	 * @brief Return true if user is a bot which exclusively uses HTTP interactions.
+	 * Bots using HTTP interactions are always considered online even when not connected to a websocket.
+	 *
+	 * @return true if is a http interactions only bot
+	 */
+	bool is_bot_http_interactions() const;
 	/**
 	 * @brief Return true if user has an animated icon
 	 *

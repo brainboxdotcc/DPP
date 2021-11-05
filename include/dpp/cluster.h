@@ -30,6 +30,7 @@
 #include <dpp/json_fwd.hpp>
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
+#include <algorithm>
 
 using  json = nlohmann::json;
 
@@ -118,7 +119,11 @@ typedef std::variant<
 		sticker,
 		sticker_map,
 		sticker_pack,
-		sticker_pack_map
+		sticker_pack_map,
+		application,
+		application_map,
+		connection,
+		connection_map
 	> confirmable_t;
 
 /**
@@ -215,6 +220,11 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  * @brief Automatically JSON encoded HTTP result
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
+
+/**
+ * @brief A returned event handle for an event which was attached
+ */
+typedef size_t event_handle;
 
 /** @brief The cluster class represents a group of shards and a command queue for sending and
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
@@ -454,22 +464,49 @@ public:
 	 * @brief on voice state update event
 	 *
 	 * @param _voice_state_update User function to attach to event
+	 * Event is called with the parameter type `const` dpp::voice_state_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
+	event_handle on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update);
+	/**
+	 * @brief Detach listener from on_voice_state_update event
+	 * 
+	 * @param _voice_state_update Handle to remove from event, previously returned by dpp::cluster::on_voice_state_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_voice_state_update(const event_handle _voice_state_update);
 
 	/**
 	 * @brief on voice client disconnect event
 	 *
 	 * @param _voice_client_disconnect User function to attach to event
+	 * Event is called with the parameter type `const` dpp::voice_client_disconnect_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_voice_client_disconnect (std::function<void(const voice_client_disconnect_t& _event)> _voice_client_disconnect);
+	event_handle on_voice_client_disconnect (std::function<void(const voice_client_disconnect_t& _event)> _voice_client_disconnect);
+	/**
+	 * @brief Detach listener from on_voice_client_disconnect event
+	 * 
+	 * @param _voice_client_disconnect Handle to remove from event, previously returned by dpp::cluster::on_voice_client_disconnect()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_voice_client_disconnect(const event_handle _voice_client_disconnect);
 
 	/**
 	 * @brief on voice client speaking event
 	 *
 	 * @param _voice_client_speaking User function to attach to event
+	 * Event is called with the parameter type `const` dpp::voice_client_speaking_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_voice_client_speaking (std::function<void(const voice_client_speaking_t& _event)> _voice_client_speaking);
+	event_handle on_voice_client_speaking (std::function<void(const voice_client_speaking_t& _event)> _voice_client_speaking);
+	/**
+	 * @brief Detach listener from on_voice_client_speaking event
+	 * 
+	 * @param _voice_client_speaking Handle to remove from event, previously returned by dpp::cluster::on_voice_client_speaking()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_voice_client_speaking(const event_handle _voice_client_speaking);
 
 	/**
 	 * @brief Called when a log message is to be written to the log.
@@ -478,16 +515,34 @@ public:
 	 * library will be silent.
 	 *
 	 * @param _log  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::log_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_log (std::function<void(const log_t& _event)> _log);
+	event_handle on_log (std::function<void(const log_t& _event)> _log);
+	/**
+	 * @brief Detach listener from on_log event
+	 * 
+	 * @param _log Handle to remove from event, previously returned by dpp::cluster::on_log()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_log(const event_handle _log);
 
 	/**
 	 * @brief on guild join request delete.
 	 * Triggered when a user declines the membership screening questionnaire for a guild.
 	 *
 	 * @param _guild_join_request_delete User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_join_request_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_join_request_delete(std::function<void(const guild_join_request_delete_t& _event)> _guild_join_request_delete);
+	event_handle on_guild_join_request_delete(std::function<void(const guild_join_request_delete_t& _event)> _guild_join_request_delete);
+	/**
+	 * @brief Detach listener from on_guild_join_request_delete event
+	 * 
+	 * @param _guild_join_request_delete Handle to remove from event, previously returned by dpp::cluster::on_guild_join_request_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_join_request_delete(const event_handle _guild_join_request_delete);
 
 	/**
 	 * @brief Called when a new interaction is created.
@@ -495,8 +550,17 @@ public:
 	 * by a user. For an example of this in action please see \ref slashcommands
 	 *
 	 * @param _interaction_create  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::interaction_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);
+	event_handle on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create);
+	/**
+	 * @brief Detach listener from on_interaction_create event
+	 * 
+	 * @param _interaction_create Handle to remove from event, previously returned by dpp::cluster::on_interaction_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_interaction_create(const event_handle _interaction_create);
 
 	/**
 	 * @brief Called when a button is clicked attached to a message.
@@ -504,8 +568,35 @@ public:
 	 * associated with a message using dpp::component.
 	 *
 	 * @param _button_click  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::button_click_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_button_click (std::function<void(const button_click_t& _event)> _button_click);
+	event_handle on_button_click (std::function<void(const button_click_t& _event)> _button_click);
+	/**
+	 * @brief Detach listener from on_button_click event
+	 * 
+	 * @param _button_click Handle to remove from event, previously returned by dpp::cluster::on_button_click()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_button_click(const event_handle _button_click);
+
+	/**
+	 * @brief Called when an auto completed field needs suggestions to present to the user
+	 * This is triggered by discord when option choices have auto completion enabled which you have
+	 * associated with a dpp::slashcommand.
+	 *
+	 * @param _autocomplete  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::autocomplete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_autocomplete (std::function<void(const autocomplete_t& _event)> _autocomplete);
+	/**
+	 * @brief Detach listener from on_autocomplete event
+	 * 
+	 * @param _autocomplete Handle to remove from event, previously returned by dpp::cluster::on_autocomplete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_autocomplete(const event_handle _autocomplete);
 
 	/**
 	 * @brief Called when a select menu is clicked attached to a message.
@@ -513,8 +604,17 @@ public:
 	 * associated with a message using dpp::component.
 	 *
 	 * @param _select_click  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::select_click_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_select_click (std::function<void(const select_click_t& _event)> _select_click);
+	event_handle on_select_click (std::function<void(const select_click_t& _event)> _select_click);
+	/**
+	 * @brief Detach listener from on_select_click event
+	 * 
+	 * @param _select_click Handle to remove from event, previously returned by dpp::cluster::on_select_click()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_select_click(const event_handle _select_click);
 
 	/**
 	 * @brief Called when a guild is deleted.
@@ -523,8 +623,17 @@ public:
 	 * an outage.
 	 *
 	 * @param _guild_delete  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete);
+	event_handle on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete);
+	/**
+	 * @brief Detach listener from on_guild_delete event
+	 * 
+	 * @param _guild_delete Handle to remove from event, previously returned by dpp::cluster::on_guild_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_delete(const event_handle _guild_delete);
 
 	/**
 	 * @brief Called when a channel is deleted from a guild.
@@ -533,8 +642,17 @@ public:
 	 * collector.
 	 *
 	 * @param _channel_delete  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::channel_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_channel_delete (std::function<void(const channel_delete_t& _event)> _channel_delete);
+	event_handle on_channel_delete (std::function<void(const channel_delete_t& _event)> _channel_delete);
+	/**
+	 * @brief Detach listener from on_channel_delete event
+	 * 
+	 * @param _channel_delete Handle to remove from event, previously returned by dpp::cluster::on_channel_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_channel_delete(const event_handle _channel_delete);
 
 	/**
 	 * @brief Called when a channel is edited on a guild.
@@ -542,16 +660,34 @@ public:
 	 * receive this event.
 	 *
 	 * @param _channel_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::channel_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_channel_update (std::function<void(const channel_update_t& _event)> _channel_update);
+	event_handle on_channel_update (std::function<void(const channel_update_t& _event)> _channel_update);
+	/**
+	 * @brief Detach listener from on_channel_update event
+	 * 
+	 * @param _channel_update Handle to remove from event, previously returned by dpp::cluster::on_channel_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_channel_update(const event_handle _channel_update);
 
 	/**
 	 * @brief Called when a shard is connected and ready.
 	 * A set of on_guild_create events will follow this event.
 	 *
 	 * @param _ready  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::ready_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_ready (std::function<void(const ready_t& _event)> _ready);
+	event_handle on_ready (std::function<void(const ready_t& _event)> _ready);
+	/**
+	 * @brief Detach listener from on_ready event
+	 * 
+	 * @param _ready Handle to remove from event, previously returned by dpp::cluster::on_ready()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_ready(const event_handle _ready);
 
 	/**
 	 * @brief Called when a message is deleted.
@@ -559,29 +695,65 @@ public:
 	 * receive this event.
 	 *
 	 * @param _message_delete  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::message_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_message_delete (std::function<void(const message_delete_t& _event)> _message_delete);
+	event_handle on_message_delete (std::function<void(const message_delete_t& _event)> _message_delete);
+	/**
+	 * @brief Detach listener from on_message_delete event
+	 * 
+	 * @param _message_delete Handle to remove from event, previously returned by dpp::cluster::on_message_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_message_delete(const event_handle _message_delete);
 
 	/**
 	 * @brief Called when an application command (slash command) is deleted.
 	 *
 	 * @param _application_command_delete  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::application_command_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_application_command_delete (std::function<void(const application_command_delete_t& _event)> _application_command_delete);
+	event_handle on_application_command_delete (std::function<void(const application_command_delete_t& _event)> _application_command_delete);
+	/**
+	 * @brief Detach listener from on_application_command_delete event
+	 * 
+	 * @param _application_command_delete Handle to remove from event, previously returned by dpp::cluster::on_application_command_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_application_command_delete(const event_handle _application_command_delete);
 
 	/**
 	 * @brief Called when a user leaves a guild (either through being kicked, or choosing to leave)
 	 *
 	 * @param _guild_member_remove  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_member_remove_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_member_remove (std::function<void(const guild_member_remove_t& _event)> _guild_member_remove);
+	event_handle on_guild_member_remove (std::function<void(const guild_member_remove_t& _event)> _guild_member_remove);
+	/**
+	 * @brief Detach listener from on_guild_member_remove event
+	 * 
+	 * @param _guild_member_remove Handle to remove from event, previously returned by dpp::cluster::on_guild_member_remove()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_member_remove(const event_handle _guild_member_remove);
 
 	/**
 	 * @brief Called when a new application command (slash command) is registered.
 	 *
 	 * @param _application_command_create  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::application_command_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_application_command_create (std::function<void(const application_command_create_t& _event)> _application_command_create);
+	event_handle on_application_command_create (std::function<void(const application_command_create_t& _event)> _application_command_create);
+	/**
+	 * @brief Detach listener from on_application_command_create event
+	 * 
+	 * @param _application_command_create Handle to remove from event, previously returned by dpp::cluster::on_application_command_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_application_command_create(const event_handle _application_command_create);
 
 	/**
 	 * @brief Called when a connection to a shard successfully resumes.
@@ -589,29 +761,65 @@ public:
 	 * This is generally non-fatal and informational only.
 	 *
 	 * @param _resumed  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::resumed_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_resumed (std::function<void(const resumed_t& _event)> _resumed);
+	event_handle on_resumed (std::function<void(const resumed_t& _event)> _resumed);
+	/**
+	 * @brief Detach listener from on_resumed event
+	 * 
+	 * @param _resumed Handle to remove from event, previously returned by dpp::cluster::on_resumed()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_resumed(const event_handle _resumed);
 
 	/**
 	 * @brief Called when a new role is created on a guild.
 	 *
 	 * @param _guild_role_create  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_role_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_role_create (std::function<void(const guild_role_create_t& _event)> _guild_role_create);
+	event_handle on_guild_role_create (std::function<void(const guild_role_create_t& _event)> _guild_role_create);
+	/**
+	 * @brief Detach listener from on_guild_role_create event
+	 * 
+	 * @param _guild_role_create Handle to remove from event, previously returned by dpp::cluster::on_guild_role_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_role_create(const event_handle _guild_role_create);
 
 	/**
 	 * @brief Called when a user is typing on a channel.
 	 *
 	 * @param _typing_start  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::typing_start_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_typing_start (std::function<void(const typing_start_t& _event)> _typing_start);
+	event_handle on_typing_start (std::function<void(const typing_start_t& _event)> _typing_start);
+	/**
+	 * @brief Detach listener from on_typing_start event
+	 * 
+	 * @param _typing_start Handle to remove from event, previously returned by dpp::cluster::on_typing_start()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_typing_start(const event_handle _typing_start);
 
 	/**
 	 * @brief Called when a new reaction is added to a message.
 	 *
 	 * @param _message_reaction_add  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::message_reaction_add_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_message_reaction_add (std::function<void(const message_reaction_add_t& _event)> _message_reaction_add);
+	event_handle on_message_reaction_add (std::function<void(const message_reaction_add_t& _event)> _message_reaction_add);
+	/**
+	 * @brief Detach listener from on_message_reaction_add event
+	 * 
+	 * @param _message_reaction_add Handle to remove from event, previously returned by dpp::cluster::on_message_reaction_add()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_message_reaction_add(const event_handle _message_reaction_add);
 
 	/**
 	 * @brief Called when a set of members is received for a guild.
@@ -619,58 +827,130 @@ public:
 	 * events.
 	 *
 	 * @param _guild_members_chunk  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_members_chunk_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_members_chunk (std::function<void(const guild_members_chunk_t& _event)> _guild_members_chunk);
+	event_handle on_guild_members_chunk (std::function<void(const guild_members_chunk_t& _event)> _guild_members_chunk);
+	/**
+	 * @brief Detach listener from on_guild_members_chunk event
+	 * 
+	 * @param _guild_members_chunk Handle to remove from event, previously returned by dpp::cluster::on_guild_members_chunk()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_members_chunk(const event_handle _guild_members_chunk);
 
 	/**
 	 * @brief Called when a single reaction is removed from a message.
 	 *
 	 * @param _message_reaction_remove  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::message_reaction_remove_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_message_reaction_remove (std::function<void(const message_reaction_remove_t& _event)> _message_reaction_remove);
+	event_handle on_message_reaction_remove (std::function<void(const message_reaction_remove_t& _event)> _message_reaction_remove);
+	/**
+	 * @brief Detach listener from on_message_reaction_remove event
+	 * 
+	 * @param _message_reaction_remove Handle to remove from event, previously returned by dpp::cluster::on_message_reaction_remove()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_message_reaction_remove(const event_handle _message_reaction_remove);
 
 	/**
 	 * @brief Called when a new guild is created.
 	 * D++ will request members for the guild for its cache using guild_members_chunk.
 	 *
 	 * @param _guild_create  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_create (std::function<void(const guild_create_t& _event)> _guild_create);
+	event_handle on_guild_create (std::function<void(const guild_create_t& _event)> _guild_create);
+	/**
+	 * @brief Detach listener from on_guild_create event
+	 * 
+	 * @param _guild_create Handle to remove from event, previously returned by dpp::cluster::on_guild_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_create(const event_handle _guild_create);
 
 	/**
 	 * @brief Called when a new channel is created on a guild.
 	 *
 	 * @param _channel_create  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::channel_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_channel_create (std::function<void(const channel_create_t& _event)> _channel_create);
+	event_handle on_channel_create (std::function<void(const channel_create_t& _event)> _channel_create);
+	/**
+	 * @brief Detach listener from on_channel_create event
+	 * 
+	 * @param _channel_create Handle to remove from event, previously returned by dpp::cluster::on_channel_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_channel_create(const event_handle _channel_create);
 
 	/**
 	 * @brief Called when all reactions for a particular emoji are removed from a message.
 	 *
 	 * @param _message_reaction_remove_emoji  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::message_reaction_remove_emoji_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_message_reaction_remove_emoji (std::function<void(const message_reaction_remove_emoji_t& _event)> _message_reaction_remove_emoji);
+	event_handle on_message_reaction_remove_emoji (std::function<void(const message_reaction_remove_emoji_t& _event)> _message_reaction_remove_emoji);
+	/**
+	 * @brief Detach listener from on_message_reaction_remove_emoji event
+	 * 
+	 * @param _message_reaction_remove_emoji Handle to remove from event, previously returned by dpp::cluster::on_message_reaction_remove_emoji()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_message_reaction_remove_emoji(const event_handle _message_reaction_remove_emoji);
 
 	/**
 	 * @brief Called when multiple messages are deleted from a channel or DM.
 	 *
 	 * @param _message_delete_bulk  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::message_delete_bulk_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_message_delete_bulk (std::function<void(const message_delete_bulk_t& _event)> _message_delete_bulk);
+	event_handle on_message_delete_bulk (std::function<void(const message_delete_bulk_t& _event)> _message_delete_bulk);
+	/**
+	 * @brief Detach listener from on_message_delete_bulk event
+	 * 
+	 * @param _message_delete_bulk Handle to remove from event, previously returned by dpp::cluster::on_message_delete_bulk()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_message_delete_bulk(const event_handle _message_delete_bulk);
 
 	/**
 	 * @brief Called when an existing role is updated on a guild.
 	 *
 	 * @param _guild_role_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_role_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_role_update (std::function<void(const guild_role_update_t& _event)> _guild_role_update);
+	event_handle on_guild_role_update (std::function<void(const guild_role_update_t& _event)> _guild_role_update);
+	/**
+	 * @brief Detach listener from on_guild_role_update event
+	 * 
+	 * @param _guild_role_update Handle to remove from event, previously returned by dpp::cluster::on_guild_role_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_role_update(const event_handle _guild_role_update);
 
 	/**
 	 * @brief Called when a role is deleted in a guild.
 	 *
 	 * @param _guild_role_delete  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_role_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_role_delete (std::function<void(const guild_role_delete_t& _event)> _guild_role_delete);
+	event_handle on_guild_role_delete (std::function<void(const guild_role_delete_t& _event)> _guild_role_delete);
+	/**
+	 * @brief Detach listener from on_guild_role_delete event
+	 * 
+	 * @param _guild_role_delete Handle to remove from event, previously returned by dpp::cluster::on_guild_role_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_role_delete(const event_handle _guild_role_delete);
 
 	/**
 	 * @brief Called when a message is pinned.
@@ -678,15 +958,33 @@ public:
 	 * of the last pinned message.
 	 *
 	 * @param _channel_pins_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::channel_pins_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_channel_pins_update (std::function<void(const channel_pins_update_t& _event)> _channel_pins_update);
+	event_handle on_channel_pins_update (std::function<void(const channel_pins_update_t& _event)> _channel_pins_update);
+	/**
+	 * @brief Detach listener from on_channel_pins_update event
+	 * 
+	 * @param _channel_pins_update Handle to remove from event, previously returned by dpp::cluster::on_channel_pins_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_channel_pins_update(const event_handle _channel_pins_update);
 
 	/**
 	 * @brief Called when all reactions are removed from a message.
 	 *
 	 * @param _message_reaction_remove_all  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::message_reaction_remove_all_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_message_reaction_remove_all (std::function<void(const message_reaction_remove_all_t& _event)> _message_reaction_remove_all);
+	event_handle on_message_reaction_remove_all (std::function<void(const message_reaction_remove_all_t& _event)> _message_reaction_remove_all);
+	/**
+	 * @brief Detach listener from on_message_reaction_remove_all event
+	 * 
+	 * @param _message_reaction_remove_all Handle to remove from event, previously returned by dpp::cluster::on_message_reaction_remove_all()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_message_reaction_remove_all(const event_handle _message_reaction_remove_all);
 
 	/**
 	 * @brief Called when we are told which voice server we can use.
@@ -694,63 +992,135 @@ public:
 	 * or as discord rearrange their infrastructure.
 	 *
 	 * @param _voice_server_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::voice_server_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_voice_server_update (std::function<void(const voice_server_update_t& _event)> _voice_server_update);
+	event_handle on_voice_server_update (std::function<void(const voice_server_update_t& _event)> _voice_server_update);
+	/**
+	 * @brief Detach listener from on_voice_server_update event
+	 * 
+	 * @param _voice_server_update Handle to remove from event, previously returned by dpp::cluster::on_voice_server_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_voice_server_update(const event_handle _voice_server_update);
 
 	/**
 	 * @brief Called when new emojis are added to a guild.
 	 * The complete set of emojis is sent every time.
 	 *
 	 * @param _guild_emojis_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_emojis_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_emojis_update (std::function<void(const guild_emojis_update_t& _event)> _guild_emojis_update);
+	event_handle on_guild_emojis_update (std::function<void(const guild_emojis_update_t& _event)> _guild_emojis_update);
+	/**
+	 * @brief Detach listener from on_guild_emojis_update event
+	 * 
+	 * @param _guild_emojis_update Handle to remove from event, previously returned by dpp::cluster::on_guild_emojis_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_emojis_update(const event_handle _guild_emojis_update);
 
 	/**
 	 * @brief Called when new stickers are added to a guild.
 	 * The complete set of stickers is sent every time.
 	 *
 	 * @param _guild_stickers_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_stickers_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_stickers_update (std::function<void(const guild_stickers_update_t& _event)> _guild_stickers_update);
+	event_handle on_guild_stickers_update (std::function<void(const guild_stickers_update_t& _event)> _guild_stickers_update);
+	/**
+	 * @brief Detach listener from on_guild_stickers_update event
+	 * 
+	 * @param _guild_stickers_update Handle to remove from event, previously returned by dpp::cluster::on_guild_stickers_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_stickers_update(const event_handle _guild_stickers_update);
 
 	/**
 	 * @brief Called when a user's presence is updated.
 	 * To receive these you will need the GUILD_PRESENCES privileged intent.
-	 * You will receive many of these, very often, and receiving them will significaintly
+	 * You will receive many of these, very often, and receiving them will significantly
 	 * increase your bot's CPU usage. If you don't need them it is recommended to not ask
 	 * for them.
 	 *
 	 * @param _presence_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::presence_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_presence_update (std::function<void(const presence_update_t& _event)> _presence_update);
+	event_handle on_presence_update (std::function<void(const presence_update_t& _event)> _presence_update);
+	/**
+	 * @brief Detach listener from on_presence_update event
+	 * 
+	 * @param _presence_update Handle to remove from event, previously returned by dpp::cluster::on_presence_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_presence_update(const event_handle _presence_update);
 
 	/**
 	 * @brief Called when the webhooks for a guild are updated.
 	 *
 	 * @param _webhooks_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::webhooks_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_webhooks_update (std::function<void(const webhooks_update_t& _event)> _webhooks_update);
+	event_handle on_webhooks_update (std::function<void(const webhooks_update_t& _event)> _webhooks_update);
+	/**
+	 * @brief Detach listener from on_webhooks_update event
+	 * 
+	 * @param _webhooks_update Handle to remove from event, previously returned by dpp::cluster::on_webhooks_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_webhooks_update(const event_handle _webhooks_update);
 
 	/**
 	 * @brief Called when a new member joins a guild.
 	 *
 	 * @param _guild_member_add  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_member_add_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_member_add (std::function<void(const guild_member_add_t& _event)> _guild_member_add);
+	event_handle on_guild_member_add (std::function<void(const guild_member_add_t& _event)> _guild_member_add);
+	/**
+	 * @brief Detach listener from on_guild_member_add event
+	 * 
+	 * @param _guild_member_add Handle to remove from event, previously returned by dpp::cluster::on_guild_member_add()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_member_add(const event_handle _guild_member_add);
 
 	/**
 	 * @brief Called when an invite is deleted from a guild.
 	 *
 	 * @param _invite_delete  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::invite_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_invite_delete (std::function<void(const invite_delete_t& _event)> _invite_delete);
+	event_handle on_invite_delete (std::function<void(const invite_delete_t& _event)> _invite_delete);
+	/**
+	 * @brief Detach listener from on_invite_delete event
+	 * 
+	 * @param _invite_delete Handle to remove from event, previously returned by dpp::cluster::on_invite_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_invite_delete(const event_handle _invite_delete);
 
 	/**
 	 * @brief Called when details of a guild are updated.
 	 *
 	 * @param _guild_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_update (std::function<void(const guild_update_t& _event)> _guild_update);
+	event_handle on_guild_update (std::function<void(const guild_update_t& _event)> _guild_update);
+	/**
+	 * @brief Detach listener from on_guild_update event
+	 * 
+	 * @param _guild_update Handle to remove from event, previously returned by dpp::cluster::on_guild_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_update(const event_handle _guild_update);
 
 	/**
 	 * @brief Called when an integration is updated for a guild.
@@ -759,37 +1129,82 @@ public:
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
 	 * @param _guild_integrations_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_integrations_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_integrations_update (std::function<void(const guild_integrations_update_t& _event)> _guild_integrations_update);
+	event_handle on_guild_integrations_update (std::function<void(const guild_integrations_update_t& _event)> _guild_integrations_update);
+	/**
+	 * @brief Detach listener from on_guild_integrations_update event
+	 * 
+	 * @param _guild_integrations_update Handle to remove from event, previously returned by dpp::cluster::on_guild_integrations_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_integrations_update(const event_handle _guild_integrations_update);
 
 	/**
 	 * @brief Called when details of a guild member (e.g. their roles or nickname) are updated.
 	 *
 	 * @param _guild_member_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_member_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_member_update (std::function<void(const guild_member_update_t& _event)> _guild_member_update);
+	event_handle on_guild_member_update (std::function<void(const guild_member_update_t& _event)> _guild_member_update);
+	/**
+	 * @brief Detach listener from on_guild_member_update event
+	 * 
+	 * @param _guild_member_update Handle to remove from event, previously returned by dpp::cluster::on_guild_member_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_member_update(const event_handle _guild_member_update);
 
 	/**
 	 * @brief Called when an application command (slash command) is updated.
 	 * You will only receive this event for application commands that belong to your bot/application.
 	 *
 	 * @param _application_command_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::application_command_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_application_command_update (std::function<void(const application_command_update_t& _event)> _application_command_update);
+	event_handle on_application_command_update (std::function<void(const application_command_update_t& _event)> _application_command_update);
+	/**
+	 * @brief Detach listener from on_application_command_update event
+	 * 
+	 * @param _application_command_update Handle to remove from event, previously returned by dpp::cluster::on_application_command_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_application_command_update(const event_handle _application_command_update);
 
 	/**
 	 * @brief Called when a new invite is created for a guild.
 	 *
 	 * @param _invite_create  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::invite_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_invite_create (std::function<void(const invite_create_t& _event)> _invite_create);
+	event_handle on_invite_create (std::function<void(const invite_create_t& _event)> _invite_create);
+	/**
+	 * @brief Detach listener from on_invite_create event
+	 * 
+	 * @param _invite_create Handle to remove from event, previously returned by dpp::cluster::on_invite_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_invite_create(const event_handle _invite_create);
 
 	/**
 	 * @brief Called when a message is updated (edited).
 	 *
 	 * @param _message_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::message_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_message_update (std::function<void(const message_update_t& _event)> _message_update);
+	event_handle on_message_update (std::function<void(const message_update_t& _event)> _message_update);
+	/**
+	 * @brief Detach listener from on_message_update event
+	 * 
+	 * @param _message_update Handle to remove from event, previously returned by dpp::cluster::on_message_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_message_update(const event_handle _message_update);
 
 	/**
 	 * @brief Called when a user is updated.
@@ -797,8 +1212,17 @@ public:
 	 * username change, discriminator change or change in subscription status for nitro.
 	 *
 	 * @param _user_update  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::user_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_user_update (std::function<void(const user_update_t& _event)> _user_update);
+	event_handle on_user_update (std::function<void(const user_update_t& _event)> _user_update);
+	/**
+	 * @brief Detach listener from on_user_update event
+	 * 
+	 * @param _user_update Handle to remove from event, previously returned by dpp::cluster::on_user_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_user_update(const event_handle _user_update);
 
 	/**
 	 * @brief Called when a new message arrives from discord.
@@ -807,22 +1231,49 @@ public:
 	 * the roadmap to be supported as it consumes excessive amounts of RAM.
 	 *
 	 * @param _message_create  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::message_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_message_create (std::function<void(const message_create_t& _event)> _message_create);
+	event_handle on_message_create (std::function<void(const message_create_t& _event)> _message_create);
+	/**
+	 * @brief Detach listener from on_message_create event
+	 * 
+	 * @param _message_create Handle to remove from event, previously returned by dpp::cluster::on_message_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_message_create(const event_handle _message_create);
 
 	/**
 	 * @brief Called when a ban is added to a guild.
 	 *
 	 * @param _guild_ban_add  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_ban_add_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_ban_add (std::function<void(const guild_ban_add_t& _event)> _guild_ban_add);
+	event_handle on_guild_ban_add (std::function<void(const guild_ban_add_t& _event)> _guild_ban_add);
+	/**
+	 * @brief Detach listener from on_guild_ban_add event
+	 * 
+	 * @param _guild_ban_add Handle to remove from event, previously returned by dpp::cluster::on_guild_ban_add()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_ban_add(const event_handle _guild_ban_add);
 
 	/**
 	 * @brief Called when a ban is removed from a guild.
 	 *
 	 * @param _guild_ban_remove  User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_ban_remove_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_guild_ban_remove (std::function<void(const guild_ban_remove_t& _event)> _guild_ban_remove);
+	event_handle on_guild_ban_remove (std::function<void(const guild_ban_remove_t& _event)> _guild_ban_remove);
+	/**
+	 * @brief Detach listener from on_guild_ban_remove event
+	 * 
+	 * @param _guild_ban_remove Handle to remove from event, previously returned by dpp::cluster::on_guild_ban_remove()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_ban_remove(const event_handle _guild_ban_remove);
 
 	/**
 	 * @brief Called when a new intgration is attached to a guild by a user.
@@ -830,8 +1281,17 @@ public:
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
 	 * @param _integration_create User function to attach to event
+	 * Event is called with the parameter type `const` dpp::integration_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create);
+	event_handle on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create);
+	/**
+	 * @brief Detach listener from on_integration_create event
+	 * 
+	 * @param _integration_create Handle to remove from event, previously returned by dpp::cluster::on_integration_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_integration_create(const event_handle _integration_create);
 
 	/**
 	 * @brief Called when an integration is updated by a user.
@@ -840,8 +1300,17 @@ public:
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
 	 * @param _integration_update User function to attach to event
+	 * Event is called with the parameter type `const` dpp::integration_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update);
+	event_handle on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update);
+	/**
+	 * @brief Detach listener from on_integration_update event
+	 * 
+	 * @param _integration_update Handle to remove from event, previously returned by dpp::cluster::on_integration_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_integration_update(const event_handle _integration_update);
 
 	/**
 	 * @brief Called when an integration is removed by a user.
@@ -849,52 +1318,115 @@ public:
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
 	 * @param _integration_delete User function to attach to event
+	 * Event is called with the parameter type `const` dpp::integration_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
+	event_handle on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete);
+	/**
+	 * @brief Detach listener from on_integration_delete event
+	 * 
+	 * @param _integration_delete Handle to remove from event, previously returned by dpp::cluster::on_integration_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_integration_delete(const event_handle _integration_delete);
 
 	/**
 	 * @brief Called when a thread is created
 	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
 	 * @param _thread_create User function to attach to event
+	 * Event is called with the parameter type `const` dpp::thread_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_thread_create (std::function<void(const thread_create_t& _event)> _thread_create);
+	event_handle on_thread_create (std::function<void(const thread_create_t& _event)> _thread_create);
+	/**
+	 * @brief Detach listener from on_thread_create event
+	 * 
+	 * @param _thread_create Handle to remove from event, previously returned by dpp::cluster::on_thread_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_thread_create(const event_handle _thread_create);
 
 	/**
 	 * @brief Called when a thread is updated
 	 *
 	 * @param _thread_update User function to attach to event
+	 * Event is called with the parameter type `const` dpp::thread_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_thread_update (std::function<void(const thread_update_t& _event)> _thread_update);
+	event_handle on_thread_update (std::function<void(const thread_update_t& _event)> _thread_update);
+	/**
+	 * @brief Detach listener from on_thread_update event
+	 * 
+	 * @param _thread_update Handle to remove from event, previously returned by dpp::cluster::on_thread_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_thread_update(const event_handle _thread_update);
 
 	/**
 	 * @brief Called when a thread is deleted
 	 *
 	 * @param _thread_delete User function to attach to event
+	 * Event is called with the parameter type `const` dpp::thread_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete);
+	event_handle on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete);
+	/**
+	 * @brief Detach listener from on_thread_delete event
+	 * 
+	 * @param _thread_delete Handle to remove from event, previously returned by dpp::cluster::on_thread_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_thread_delete(const event_handle _thread_delete);
 
 	/**
 	 * @brief Called when thread list is synced (upon gaining access to a channel)
 	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
 	 * @param _thread_list_sync User function to attach to event
+	 * Event is called with the parameter type `const` dpp::thread_list_sync_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_thread_list_sync (std::function<void(const thread_list_sync_t& _event)> _thread_list_sync);
+	event_handle on_thread_list_sync (std::function<void(const thread_list_sync_t& _event)> _thread_list_sync);
+	/**
+	 * @brief Detach listener from on_thread_list_sync event
+	 * 
+	 * @param _thread_list_sync Handle to remove from event, previously returned by dpp::cluster::on_thread_list_sync()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_thread_list_sync(const event_handle _thread_list_sync);
 
 	/**
 	 * @brief Called when current user's thread member object is updated
 	 *
 	 * @param _thread_member_update User function to attach to event
+	 * Event is called with the parameter type `const` dpp::thread_member_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_thread_member_update (std::function<void(const thread_member_update_t& _event)> _thread_member_update);
+	event_handle on_thread_member_update (std::function<void(const thread_member_update_t& _event)> _thread_member_update);
+	/**
+	 * @brief Detach listener from on_thread_member_update event
+	 * 
+	 * @param _thread_member_update Handle to remove from event, previously returned by dpp::cluster::on_thread_member_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_thread_member_update(const event_handle _thread_member_update);
 
 	/**
 	 * @brief Called when a thread's member list is updated (without GUILD_MEMBERS intent, is only called for current user)
 	 *
 	 * @param _thread_members_update User function to attach to event
+	 * Event is called with the parameter type `const` dpp::thread_members_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_thread_members_update (std::function<void(const thread_members_update_t& _event)> _thread_members_update);
+	event_handle on_thread_members_update (std::function<void(const thread_members_update_t& _event)> _thread_members_update);
+	/**
+	 * @brief Detach listener from on_thread_members_update event
+	 * 
+	 * @param _thread_members_update Handle to remove from event, previously returned by dpp::cluster::on_thread_members_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_thread_members_update(const event_handle _thread_members_update);
 
 	/**
 	 * @brief Called when packets are sent from the voice buffer.
@@ -905,15 +1437,33 @@ public:
 	 * content.
 	 *
 	 * @param _voice_buffer_send User function to attach to event
+	 * Event is called with the parameter type `const` dpp::voice_buffer_send_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_voice_buffer_send (std::function<void(const voice_buffer_send_t& _event)> _voice_buffer_send);
+	event_handle on_voice_buffer_send (std::function<void(const voice_buffer_send_t& _event)> _voice_buffer_send);
+	/**
+	 * @brief Detach listener from on_voice_buffer_send event
+	 * 
+	 * @param _voice_buffer_send Handle to remove from event, previously returned by dpp::cluster::on_voice_buffer_send()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_voice_buffer_send(const event_handle _voice_buffer_send);
 
 	/**
 	 * @brief Called when a user is talking on a voice channel.
 	 *
 	 * @param _voice_user_talking User function to attach to event
+	 * Event is called with the parameter type `const` dpp::voice_user_talking_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_voice_user_talking (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking);
+	event_handle on_voice_user_talking (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking);
+	/**
+	 * @brief Detach listener from on_voice_user_talking event
+	 * 
+	 * @param _voice_user_talking Handle to remove from event, previously returned by dpp::cluster::on_voice_user_talking()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_voice_user_talking(const event_handle _voice_user_talking);
 
 	/**
 	 * @brief Called when a voice channel is connected and ready to send audio.
@@ -921,8 +1471,17 @@ public:
 	 * as there is further connection that needs to be done before audio is ready to send.
 	 *
 	 * @param _voice_ready User function to attach to event
+	 * Event is called with the parameter type `const` dpp::voice_ready_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_voice_ready (std::function<void(const voice_ready_t& _event)> _voice_ready);
+	event_handle on_voice_ready (std::function<void(const voice_ready_t& _event)> _voice_ready);
+	/**
+	 * @brief Detach listener from on_voice_ready event
+	 * 
+	 * @param _voice_ready Handle to remove from event, previously returned by dpp::cluster::on_voice_ready()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_voice_ready(const event_handle _voice_ready);
 
 	/**
 	 * @brief Called when new audio data is received.
@@ -932,8 +1491,17 @@ public:
 	 * @note Receiveing audio for bots is not officially supported by discord.
 	 * 
 	 * @param _voice_receive User function to attach to event
+	 * Event is called with the parameter type `const` dpp::voice_receive_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive);
+	event_handle on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive);
+	/**
+	 * @brief Detach listener from on_voice_receive event
+	 * 
+	 * @param _voice_receive Handle to remove from event, previously returned by dpp::cluster::on_voice_receive()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_voice_receive(const event_handle _voice_receive);
 
 	/**
 	 * @brief Called when sending of audio passes over a track marker.
@@ -943,29 +1511,65 @@ public:
 	 * event.
 	 *
 	 * @param _voice_track_marker User function to attach to event
+	 * Event is called with the parameter type `const` dpp::voice_track_marker_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_voice_track_marker (std::function<void(const voice_track_marker_t& _event)> _voice_track_marker);
+	event_handle on_voice_track_marker (std::function<void(const voice_track_marker_t& _event)> _voice_track_marker);
+	/**
+	 * @brief Detach listener from on_voice_track_marker event
+	 * 
+	 * @param _voice_track_marker Handle to remove from event, previously returned by dpp::cluster::on_voice_track_marker()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_voice_track_marker(const event_handle _voice_track_marker);
 
 	/**
 	 * @brief Called when a new stage instance is created on a stage channel.
 	 *
 	 * @param _stage_instance_create User function to attach to event
+	 * 
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create);
+	event_handle on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create);
+	/**
+	 * @brief Detach listener from on_stage_instance_create event
+	 * 
+	 * @param _stage_instance_create Handle to remove from event, previously returned by dpp::cluster::on_stage_instance_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_stage_instance_create(const event_handle _stage_instance_create);
 
 	/**
 	 * @brief Called when a stage instance is updated.
 	 *
 	 * @param _stage_instance_update User function to attach to event
+	 * Event is called with the parameter type `const` dpp::stage_instance_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_stage_instance_update (std::function<void(const stage_instance_update_t& _event)> _stage_instance_update);
+	event_handle on_stage_instance_update (std::function<void(const stage_instance_update_t& _event)> _stage_instance_update);
+	/**
+	 * @brief Detach listener from on_stage_instance_update event
+	 * 
+	 * @param _stage_instance_update Handle to remove from event, previously returned by dpp::cluster::on_stage_instance_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_stage_instance_update(const event_handle _stage_instance_update);
 
 	/**
 	 * @brief Called when an existing stage instance is deleted from a stage channel.
 	 *
 	 * @param _stage_instance_delete User function to attach to event
+	 * Event is called with the parameter type `const` dpp::stage_instance_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
 	 */
-	void on_stage_instance_delete (std::function<void(const stage_instance_delete_t& _event)> _stage_instance_delete);
+	event_handle on_stage_instance_delete (std::function<void(const stage_instance_delete_t& _event)> _stage_instance_delete);
+	/**
+	 * @brief Detach listener from on_stage_instance_delete event
+	 * 
+	 * @param _stage_instance_delete Handle to remove from event, previously returned by dpp::cluster::on_stage_instance_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_stage_instance_delete(const event_handle _stage_instance_delete);
 
 	/**
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create
@@ -1210,6 +1814,7 @@ public:
 	 * @param m Message to delete own reaction from
 	 * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
 
@@ -1220,6 +1825,7 @@ public:
 	 * @param user_id User ID who's reaction you want to remove
 	 * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback = {});
 
@@ -1232,6 +1838,7 @@ public:
 	 * @param after Reactions before this ID should be retrieved if this is set to non-zero
 	 * @param limit This number of reactions maximum should be returned
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
 
@@ -1240,6 +1847,7 @@ public:
 	 *
 	 * @param m Message to delete reactions from
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_all_reactions(const struct message &m, command_completion_event_t callback = {});
 
@@ -1249,6 +1857,7 @@ public:
 	 * @param m Message to delete reactions from
 	 * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
 
@@ -1270,6 +1879,7 @@ public:
 	 * @param channel_id Channel to delete reactions from
 	 * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
 
@@ -1281,6 +1891,7 @@ public:
 	 * @param user_id User ID who's reaction you want to remove
 	 * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback = {});
 
@@ -1294,6 +1905,7 @@ public:
 	 * @param after Reactions before this ID should be retrieved if this is set to non-zero
 	 * @param limit This number of reactions maximum should be returned
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_get_reactions(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
 
@@ -1303,6 +1915,7 @@ public:
 	 * @param message_id Message to delete reactions from
 	 * @param channel_id Channel to delete reactions from
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_all_reactions(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
 
@@ -1313,6 +1926,7 @@ public:
 	 * @param channel_id Channel to delete reactions from
 	 * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
 
@@ -1323,6 +1937,7 @@ public:
 	 * @param message_id Message ID to delete
 	 * @param channel_id Channel to delete from
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
 
@@ -1333,6 +1948,7 @@ public:
 	 * @param message_ids List of message IDs to delete (maximum of 100 message IDs)
 	 * @param channel_id Channel to delete from
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = {});
 
@@ -1341,6 +1957,7 @@ public:
 	 *
 	 * @param c Channel ID to retrieve
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_get(snowflake c, command_completion_event_t callback);
 
@@ -1349,6 +1966,7 @@ public:
 	 *
 	 * @param guild_id Guild ID to retrieve channels for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channels_get(snowflake guild_id, command_completion_event_t callback);
 
@@ -1358,6 +1976,7 @@ public:
 	 *
 	 * @param c Channel to create
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_create(const class channel &c, command_completion_event_t callback = {});
 
@@ -1367,6 +1986,7 @@ public:
 	 *
 	 * @param c Channel to edit/update
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_edit(const class channel &c, command_completion_event_t callback = {});
 
@@ -1376,6 +1996,7 @@ public:
 	 *
 	 * @param c Channel to change the position for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_edit_position(const class channel &c, command_completion_event_t callback = {});
 
@@ -1388,6 +2009,7 @@ public:
 	 * @param deny deny permissions
 	 * @param member true if the overwrite_id is a user id, false if it is a channel id
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback = {});
 
@@ -1397,6 +2019,7 @@ public:
 	 *
 	 * @param channel_id Channel id to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_delete(snowflake channel_id, command_completion_event_t callback = {});
 
@@ -1405,6 +2028,7 @@ public:
 	 *
 	 * @param invite Invite code to get information on
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void invite_get(const std::string &invite, command_completion_event_t callback);
 
@@ -1413,6 +2037,7 @@ public:
 	 *
 	 * @param invite Invite code to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void invite_delete(const std::string &invite, command_completion_event_t callback = {});
 
@@ -1421,6 +2046,7 @@ public:
 	 *
 	 * @param c Channel to get invites for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::invite_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_invites_get(const class channel &c, command_completion_event_t callback);
 
@@ -1431,6 +2057,7 @@ public:
 	 * @param c Channel to create an invite on
 	 * @param i Invite to create
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback = {});
 
@@ -1439,6 +2066,7 @@ public:
 	 *
 	 * @param channel_id Channel ID to get pins for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void pins_get(snowflake channel_id, command_completion_event_t callback);
 
@@ -1450,6 +2078,7 @@ public:
 	 * @param access_token Access token from OAuth2
 	 * @param nick Nickname of user to apply to the chat
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback = {});
 
@@ -1459,6 +2088,7 @@ public:
 	 * @param channel_id Channel ID of group DM
 	 * @param user_id User ID to remove from group DM
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback = {});
 
@@ -1469,6 +2099,7 @@ public:
 	 * @param c Channel to remove permission from
 	 * @param overwrite_id Overwrite to remove, user or channel ID
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback = {});
 
@@ -1478,6 +2109,7 @@ public:
 	 * @param c Channel id to follow
 	 * @param target_channel_id Channel to subscribe the channel to
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback = {});
 
@@ -1486,8 +2118,18 @@ public:
 	 *
 	 * @param c Channel to set as typing on
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void channel_typing(const class channel &c, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Trigger channel typing indicator
+	 *
+	 * @param cid Channel ID to set as typing on
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void channel_typing(snowflake cid, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Pin a message
@@ -1496,6 +2138,7 @@ public:
 	 * @param channel_id Channel id to pin message on
 	 * @param message_id Message id to pin message on
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
 
@@ -1506,6 +2149,7 @@ public:
 	 * @param channel_id Channel id to unpin message on
 	 * @param message_id Message id to unpin message on
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
 
@@ -1514,6 +2158,7 @@ public:
 	 *
 	 * @param g Guild ID to retrieve
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get(snowflake g, command_completion_event_t callback);
 
@@ -1522,6 +2167,7 @@ public:
 	 *
 	 * @param g Guild ID to retrieve
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_preview(snowflake g, command_completion_event_t callback);
 
@@ -1531,6 +2177,7 @@ public:
 	 * @param guild_id Guild ID to get member for
 	 * @param user_id User ID of member to get
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
 
@@ -1541,6 +2188,7 @@ public:
 	 * @param query Query string to match username(s) and nickname(s) against
 	 * @param limit max number of members to return (1-1000)
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_search_members(snowflake guild_id, const std::string& query, uint16_t limit, command_completion_event_t callback);
 
@@ -1551,6 +2199,7 @@ public:
 	 * @param limit max number of members to return (1-1000)
 	 * @param after the highest user id in the previous page
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_members(snowflake guild_id, uint16_t limit, snowflake after, command_completion_event_t callback);
 
@@ -1560,7 +2209,8 @@ public:
 	 * @param gm Guild member to add
 	 * @param access_token Access token from Oauth2 scope
 	 * @param callback Function to call when the API call completes.
-x	 */
+	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
 	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback = {});
 
 	/**
@@ -1569,6 +2219,7 @@ x	 */
 	 *
 	 * @param gm Guild member to edit
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = {});
 
@@ -1578,6 +2229,7 @@ x	 */
 	 * @param guild_id Guild id to which the user is connected
 	 * @param user_id User id, who should be moved
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback = {});
 
@@ -1588,6 +2240,7 @@ x	 */
 	 * @param guild_id Guild ID to change nickanem on
 	 * @param nickname New nickname, or empty string to clear nickname
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
 
@@ -1599,6 +2252,7 @@ x	 */
 	 * @param user_id User ID to add role to
 	 * @param role_id Role ID to add to the user
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
 
@@ -1610,6 +2264,7 @@ x	 */
 	 * @param user_id User ID to remove role from
 	 * @param role_id Role to remove
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
 
@@ -1620,6 +2275,7 @@ x	 */
 	 * @param guild_id Guild ID to kick member from
 	 * @param user_id User ID to kick
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
 
@@ -1632,6 +2288,7 @@ x	 */
 	 * @param delete_message_days How many days of ther user's messages to also delete
 	 * @param reason Reason for ban
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::ban object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback = {});
 
@@ -1642,6 +2299,7 @@ x	 */
 	 * @param guild_id Guild to delete ban from
 	 * @param user_id User ID to delete ban for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
 
@@ -1650,6 +2308,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to get bans for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::ban_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_bans(snowflake guild_id, command_completion_event_t callback);
 
@@ -1659,6 +2318,7 @@ x	 */
 	 * @param guild_id Guild ID to get ban for
 	 * @param user_id User ID of ban to retrieve
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::ban object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_ban(snowflake guild_id, snowflake user_id, command_completion_event_t callback);
 
@@ -1667,6 +2327,7 @@ x	 */
 	 *
 	 * @param code Template code
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void template_get(const std::string &code, command_completion_event_t callback);
 
@@ -1676,6 +2337,7 @@ x	 */
 	 * @param code Template code to create guild from
 	 * @param name Guild name to create
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback = {});
 
@@ -1684,6 +2346,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to get templates for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_templates_get(snowflake guild_id, command_completion_event_t callback);
 
@@ -1694,6 +2357,7 @@ x	 */
 	 * @param name Template name to create
 	 * @param description Description of template to create
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback);
 
@@ -1703,6 +2367,7 @@ x	 */
 	 * @param guild_id Guild to synchronise template for
 	 * @param code Code of template to synchronise
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
 
@@ -1714,6 +2379,7 @@ x	 */
 	 * @param name New name of template
 	 * @param description New description of template
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback = {});
 
@@ -1723,6 +2389,7 @@ x	 */
 	 * @param guild_id Guild ID of template to delete
 	 * @param code Template code to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
 
@@ -1731,6 +2398,7 @@ x	 */
 	 *
 	 * @param g Guild to create
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_create(const class guild &g, command_completion_event_t callback = {});
 
@@ -1740,6 +2408,7 @@ x	 */
 	 *
 	 * @param g Guild to edit
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_edit(const class guild &g, command_completion_event_t callback = {});
 
@@ -1748,6 +2417,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_delete(snowflake guild_id, command_completion_event_t callback = {});
 
@@ -1756,6 +2426,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to get emojis for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_emojis_get(snowflake guild_id, command_completion_event_t callback);
 
@@ -1765,6 +2436,7 @@ x	 */
 	 * @param guild_id Guild ID to get emoji for
 	 * @param emoji_id Emoji ID to get
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_emoji_get(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback);
 
@@ -1776,6 +2448,7 @@ x	 */
 	 * @param guild_id Guild ID to create emoji om
 	 * @param newemoji Emoji to create
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
 
@@ -1787,6 +2460,7 @@ x	 */
 	 * @param guild_id Guild ID to edit emoji on
 	 * @param newemoji Emoji to edit
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
 
@@ -1797,6 +2471,7 @@ x	 */
 	 * @param guild_id Guild ID to delete emoji on
 	 * @param emoji_id Emoji ID to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = {});
 
@@ -1806,6 +2481,7 @@ x	 */
 	 * @param guild_id Guild ID to count for pruning
 	 * @param pruneinfo Pruning info
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::prune object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_prune_counts(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback);
 
@@ -1816,6 +2492,7 @@ x	 */
 	 * @param guild_id Guild ID to prune
 	 * @param pruneinfo Pruning info
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::prune object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback = {});
 
@@ -1825,6 +2502,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to get voice regions for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::voiceregion_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_voice_regions(snowflake guild_id, command_completion_event_t callback);
 
@@ -1833,6 +2511,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to get invites for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::invite_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_guild_invites(snowflake guild_id, command_completion_event_t callback);
 
@@ -1841,6 +2520,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to get integrations for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::integration_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_integrations(snowflake guild_id, command_completion_event_t callback);
 
@@ -1851,6 +2531,7 @@ x	 */
 	 * @param guild_id Guild ID to modify integration for
 	 * @param i Integration to modify
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::integration object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback = {});
 
@@ -1861,6 +2542,7 @@ x	 */
 	 * @param guild_id Guild ID to delete integration for
 	 * @param integration_id Integration ID to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
 
@@ -1870,6 +2552,7 @@ x	 */
 	 * @param guild_id Guild ID to sync integration on
 	 * @param integration_id Integration ID to synchronise
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
 
@@ -1878,6 +2561,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to get widget for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_widget object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_widget(snowflake guild_id, command_completion_event_t callback);
 
@@ -1887,6 +2571,7 @@ x	 */
 	 * @param guild_id Guild ID to edit widget for
 	 * @param gw New guild widget information
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_widget object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback = {});
 
@@ -1895,6 +2580,7 @@ x	 */
 	 *
 	 * @param guild_id Guild to get vanity URL for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_vanity(snowflake guild_id, command_completion_event_t callback);
 
@@ -1903,6 +2589,7 @@ x	 */
 	 *
 	 * @param w Webhook to create
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void create_webhook(const class webhook &w, command_completion_event_t callback = {});
 
@@ -1911,6 +2598,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to get webhooks for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::webhook_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_guild_webhooks(snowflake guild_id, command_completion_event_t callback);
 
@@ -1919,6 +2607,7 @@ x	 */
 	 *
 	 * @param channel_id Channel ID to get webhooks for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::webhook_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_channel_webhooks(snowflake channel_id, command_completion_event_t callback);
 
@@ -1927,6 +2616,7 @@ x	 */
 	 *
 	 * @param webhook_id Webhook ID to get
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_webhook(snowflake webhook_id, command_completion_event_t callback);
 
@@ -1936,6 +2626,7 @@ x	 */
 	 * @param webhook_id Webhook ID to retrieve
 	 * @param token Token of webhook
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback);
 
@@ -1944,6 +2635,7 @@ x	 */
 	 *
 	 * @param wh Webhook to edit
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void edit_webhook(const class webhook& wh, command_completion_event_t callback = {});
 
@@ -1952,6 +2644,7 @@ x	 */
 	 *
 	 * @param wh Wehook to edit (should include token)
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback = {});
 
@@ -1960,6 +2653,7 @@ x	 */
 	 *
 	 * @param webhook_id Webhook ID to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void delete_webhook(snowflake webhook_id, command_completion_event_t callback = {});
 
@@ -1969,6 +2663,7 @@ x	 */
 	 * @param webhook_id Webhook ID to delete
 	 * @param token Token of webhook to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback = {});
 
@@ -1980,6 +2675,7 @@ x	 */
 	 * @param wait waits for server confirmation of message send before response, and returns the created message body
 	 * @param thread_id Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, command_completion_event_t callback = {});
 
@@ -1988,6 +2684,7 @@ x	 */
 	 *
 	 * @param wh Webhook to get the original message for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_webhook_message(const class webhook &wh, command_completion_event_t callback = {});
 
@@ -1997,6 +2694,7 @@ x	 */
 	 * @param wh Webhook to edit message for
 	 * @param m New message
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void edit_webhook_message(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
 
@@ -2006,6 +2704,7 @@ x	 */
 	 * @param wh Webhook to delete message for
 	 * @param message_id Message ID to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = {});
 
@@ -2014,6 +2713,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to get role for
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::role_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void roles_get(snowflake guild_id, command_completion_event_t callback);
 
@@ -2023,6 +2723,7 @@ x	 */
 	 *
 	 * @param r Role to create (guild ID is encapsulated in the role object)
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void role_create(const class role &r, command_completion_event_t callback = {});
 
@@ -2032,6 +2733,7 @@ x	 */
 	 *
 	 * @param r Role to edit
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void role_edit(const class role &r, command_completion_event_t callback = {});
 
@@ -2041,6 +2743,7 @@ x	 */
 	 *
 	 * @param r Role to change position of
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void role_edit_position(const class role &r, command_completion_event_t callback = {});
 
@@ -2051,6 +2754,7 @@ x	 */
 	 * @param guild_id Guild ID to delete the role on
 	 * @param role_id Role ID to delete
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback = {});
 
@@ -2059,6 +2763,7 @@ x	 */
 	 *
 	 * @param user_id User ID to retrieve
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void user_get(snowflake user_id, command_completion_event_t callback);
 
@@ -2066,13 +2771,33 @@ x	 */
 	 * @brief Get current (bot) user
 	 *
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void current_user_get(command_completion_event_t callback);
+
+	/**
+	 * @brief Get current (bot) application
+	 *
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::application object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void current_application_get(command_completion_event_t callback);
+
+	/**
+	 * @brief Get current user's connections (linked accounts, e.g. steam, xbox).
+	 * This call requires the oauth2 `connections` scope and cannot be executed
+	 * against a bot token.
+	 *
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::connection_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void current_user_connections_get(command_completion_event_t callback);
 
 	/**
 	 * @brief Get current (bot) user guilds
 	 *
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void current_user_get_guilds(command_completion_event_t callback);
 
@@ -2083,6 +2808,7 @@ x	 */
 	 * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
 	 * @param type Type of image for avatar
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = {});
 
@@ -2090,6 +2816,7 @@ x	 */
 	 * @brief Get current user DM channels
 	 *
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void current_user_get_dms(command_completion_event_t callback);
 
@@ -2098,6 +2825,7 @@ x	 */
 	 *
 	 * @param user_id User ID to create DM channel with
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void create_dm_channel(snowflake user_id, command_completion_event_t callback = {});
 
@@ -2106,6 +2834,7 @@ x	 */
 	 *
 	 * @param guild_id Guild ID to leave
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = {});
 
@@ -2118,6 +2847,7 @@ x	 */
 	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
 	 * @param thread_type Type of thread - GUILD_PUBLIC_THREAD, GUILD_NEWS_THREAD, GUILD_PRIVATE_THREAD
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, command_completion_event_t callback = {});
 
@@ -2130,6 +2860,7 @@ x	 */
 	 * @param message_id message to start thread with
 	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, command_completion_event_t callback = {});
 
@@ -2138,6 +2869,7 @@ x	 */
 	 *
 	 * @param thread_id Thread ID to join
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void current_user_join_thread(snowflake thread_id, command_completion_event_t callback = {});
 
@@ -2146,6 +2878,7 @@ x	 */
 	 *
 	 * @param thread_id Thread ID to leave
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void current_user_leave_thread(snowflake thread_id, command_completion_event_t callback = {});
 
@@ -2155,6 +2888,7 @@ x	 */
 	 * @param thread_id Thread ID to add to
 	 * @param user_id Member ID to add
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
 
@@ -2164,6 +2898,7 @@ x	 */
 	 * @param thread_id Thread ID to remove from
 	 * @param user_id Member ID to remove
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void thread_member_remove(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
 
@@ -2173,6 +2908,7 @@ x	 */
 	 * @param thread_id Thread to get member for
 	 * @param user_id ID of the user to get
 	 * @param callback Function to call when the API call completes
+	 * On success the callback will contain a dpp::thread_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_thread_member(const snowflake thread_id, const snowflake user_id, command_completion_event_t callback);
 
@@ -2181,6 +2917,7 @@ x	 */
 	 *
 	 * @param thread_id Thread to get members for
 	 * @param callback Function to call when the API call completes
+	 * On success the callback will contain a dpp::thread_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_thread_members(snowflake thread_id, command_completion_event_t callback);
 
@@ -2189,6 +2926,7 @@ x	 */
 	 *
 	 * @param channel_id Channel to get active threads for
 	 * @param callback Function to call when the API call completes
+	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_active_threads(snowflake channel_id, command_completion_event_t callback);
 
@@ -2199,6 +2937,7 @@ x	 */
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
+	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_public_archived_threads(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
 
@@ -2209,6 +2948,7 @@ x	 */
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
+	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_private_archived_threads(snowflake channel_id,  time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
 
@@ -2220,6 +2960,7 @@ x	 */
 	 * @param before_id Get threads before this id
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
+	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_joined_private_archived_threads(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback);
 
@@ -2293,9 +3034,9 @@ x	 */
 	/**
 	 * @brief Create a stage instance on a stage channel.
 	 *
-	 * @param channel_id ID of the associated channel
+	 * @param instance Stage instance to create
 	 * @param callback User function to execute when the api call completes
-	 * @note Callback contains a stage_instance object upon success. On failure, the value contained is undefined and is_error() returns true.
+	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
 	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
@@ -2305,15 +3046,16 @@ x	 */
 	 *
 	 * @param channel_id ID of the associated channel
 	 * @param callback User function to execute when the api call completes
-	 * @note Callback contains a stage_instance object upon success. On failure, the value contained is undefined and is_error() returns true.
+	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void stage_instance_get(const snowflake channel_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Edit a stage instance.
 	 *
-	 * @param channel_id ID of the associated channel
+	 * @param instance Stage instance to edit
 	 * @param callback User function to execute when the api call completes
+	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
 	void stage_instance_edit(const stage_instance& instance, command_completion_event_t callback = {});
@@ -2323,6 +3065,7 @@ x	 */
 	 *
 	 * @param channel_id ID of the associated channel
 	 * @param callback User function to execute when the api call completes
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
 	void stage_instance_delete(const snowflake channel_id, command_completion_event_t callback = {});
@@ -2331,6 +3074,7 @@ x	 */
 	 * @brief Get all voice regions
 	 *
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::voiceregion_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_voice_regions(command_completion_event_t callback);
 
@@ -2338,6 +3082,7 @@ x	 */
 	 * @brief Get the gateway information for the bot using the token
 	 *
 	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::gateway object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_gateway_bot(command_completion_event_t callback);
 

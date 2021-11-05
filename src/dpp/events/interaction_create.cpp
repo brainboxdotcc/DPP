@@ -51,30 +51,72 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 	 * so ensure they are dispatched properly.
 	 */
 	if (i.type == it_application_command) {
-		if (client->creator->dispatch.interaction_create) {
+		if (!client->creator->dispatch.interaction_create.empty()) {
 			dpp::interaction_create_t ic(client, raw);
 			ic.command = i;
-			client->creator->dispatch.interaction_create(ic);
+			call_event(client->creator->dispatch.interaction_create, ic);
+		}
+	} else if (i.type == it_autocomplete) {
+		// "data":{"id":"903319628816728104","name":"blep","options":[{"focused":true,"name":"animal","type":3,"value":"a"}],"type":1}
+		if (!client->creator->dispatch.autocomplete.empty()) {
+			dpp::autocomplete_t ac(client, raw);
+			ac.id = SnowflakeNotNull(&(d["data"]), "id");
+			ac.name = StringNotNull(&(d["data"]), "name");
+			for (auto & o : d["data"]["options"]) {
+				dpp::command_option opt;
+				opt.name = StringNotNull(&o, "name");
+				opt.type = (dpp::command_option_type)Int8NotNull(&o, "type");
+				if (o.contains("value") && !o.at("value").is_null()) {
+					switch (opt.type) {
+						case co_boolean:
+							opt.value = o.at("value").get<bool>();
+							break;
+						case co_channel:
+						case co_role:
+						case co_user:
+						case co_mentionable:
+							opt.value = SnowflakeNotNull(&o, "value");
+							break;
+						case co_integer:
+							opt.value = o.at("value").get<int64_t>();
+							break;
+						case co_string:
+							opt.value = o.at("value").get<std::string>();
+							break;
+						case co_number:
+							opt.value = o.at("value").get<double>();
+							break;
+						case co_sub_command:
+						case co_sub_command_group:
+							/* Silences warning on clang, handled elsewhere */
+						break;
+					}
+				}
+				opt.focused = BoolNotNull(&o, "focused");
+				ac.options.push_back(opt);
+			}
+			ac.command = i;
+			call_event(client->creator->dispatch.autocomplete, ac);
 		}
 	} else if (i.type == it_component_button) {
 		dpp::component_interaction bi = std::get<component_interaction>(i.data);
 		if (bi.component_type == cotype_button) {
-			if (client->creator->dispatch.button_click) {
+			if (!client->creator->dispatch.button_click.empty()) {
 				dpp::button_click_t ic(client, raw);
 				ic.command = i;
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;
-				client->creator->dispatch.button_click(ic);
+				call_event(client->creator->dispatch.button_click, ic);
 			}
 		}
 		if (bi.component_type == cotype_select) {
-			if (client->creator->dispatch.select_click) {
+			if (!client->creator->dispatch.select_click.empty()) {
 				dpp::select_click_t ic(client, raw);
 				ic.command = i;
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;
 				ic.values = bi.values;
-				client->creator->dispatch.select_click(ic);
+				call_event(client->creator->dispatch.select_click, ic);
 			}
 		}
 	}
