@@ -48,7 +48,7 @@ void thread_members_update::handle(discord_client* client, json& j, const std::s
 			SetInt8NotNull(&d, "member_count", tms.member_count);
 			if (d.find("added_members") != d.end()) {
 				for (auto& tm : d["added_members"]) {
-					tms.added.push_back(thread_member().fill_from_json(&tm));
+					tms.added.emplace_back(thread_member().fill_from_json(&tm));
 				}
 			}
 			if (d.find("removed_member_ids") != d.end()) {

@@ -79,20 +79,21 @@ error_info confirmation_callback_t::get_error() const {
 							detail.reason = (*errordetails)["message"].get<std::string>();
 							detail.field = fields.key();
 							detail.object = obj.key();
-							e.errors.push_back(detail);
+							e.errors.emplace_back(detail);
 						}
 					}
 				}
 
 			} else if (obj->find("_errors") != obj->end()) {
 				/* An object of error messages */
+				e.errors.reserve((*obj)["_errors"].size());
 				for (auto errordetails = (*obj)["_errors"].begin(); errordetails != (*obj)["_errors"].end(); ++errordetails) {
 					error_detail detail;
 					detail.code = (*errordetails)["code"].get<std::string>();
 					detail.reason = (*errordetails)["message"].get<std::string>();
 					detail.object.clear();
 					detail.field = obj.key();
-					e.errors.push_back(detail);
+					e.errors.emplace_back(detail);
 				}
 			}
 		}

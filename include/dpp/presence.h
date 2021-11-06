@@ -209,7 +209,7 @@ public:
 	 * @param status Status of the activity
 	 * @param a Activity itself 
 	 */
-	presence(presence_status status, activity a);
+	presence(presence_status status, const activity& a);
 
 	/** Destructor */
 	~presence();

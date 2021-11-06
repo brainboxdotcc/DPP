@@ -72,7 +72,7 @@ application& application::fill_from_json(nlohmann::json* j) {
 			SetStringNotNull(&m, "permissions", tm.permissions);
 			SetSnowflakeNotNull(&m, "team_id", tm.team_id);
 			tm.member_user = user().fill_from_json(&m["user"]);
-			this->team.members.push_back(tm);
+			this->team.members.emplace_back(tm);
 		}
 	}
 	return *this;

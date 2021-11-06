@@ -40,7 +40,7 @@ presence::presence(presence_status status, activity_type type, const std::string
 	a.name = activity_description;
 	a.type = type;
 	activities.clear();
-	activities.push_back(a);
+	activities.emplace_back(a);
 	flags &= PF_CLEAR_STATUS;
 	if (status == ps_online)
 		flags |= p_status_online;
@@ -50,9 +50,9 @@ presence::presence(presence_status status, activity_type type, const std::string
 		flags |= p_status_dnd;
 }
 
-presence::presence(presence_status status, activity a) {
+presence::presence(presence_status status, const activity &a) {
 	activities.clear();
-	activities.push_back(std::move(a));
+	activities.emplace_back(a);
 	flags &= PF_CLEAR_STATUS;
 	if (status == ps_online)
 		flags |= p_status_online;

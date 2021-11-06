@@ -427,7 +427,7 @@ void discord_voice_client::Send(const char* packet, size_t len, uint64_t duratio
 	voice_out_packet frame;
 	frame.packet = std::string(packet, len);
 	frame.duration = duration;
-	outbuf.push_back(frame);
+	outbuf.emplace_back(frame);
 }
 
 void discord_voice_client::ReadReady()
@@ -639,9 +639,9 @@ void discord_voice_client::QueueMessage(const std::string &j, bool to_front)
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	if (to_front) {
-		message_queue.push_front(j);
+		message_queue.emplace_front(j);
 	} else {
-		message_queue.push_back(j);
+		message_queue.emplace_back(j);
 	}
 }
 

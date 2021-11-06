@@ -113,6 +113,7 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 
 	gm.roles.clear();
 	if (j.contains("roles") && !j.at("roles").is_null()) {
+		gm.roles.reserve(j.at("roles").size());
 		for (auto& role : j.at("roles")) {
 			gm.roles.push_back(std::stoull(role.get<std::string>()));
 		}
@@ -400,13 +401,14 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		if (d->find("welcome_screen") != d->end()) {
 			json& w = (*d)["welcome_screen"];
 			SetStringNotNull(&w, "description", welcome_screen.description);
+			welcome_screen.welcome_channels.reserve(w["welcome_channels"].size());
 			for (auto& wc : w["welcome_channels"]) {
 				welcome_channel_t wchan;
 				SetStringNotNull(&wc, "description", wchan.description);
 				SetSnowflakeNotNull(&wc, "channel_id", wchan.channel_id);
 				SetSnowflakeNotNull(&wc, "emoji_id", wchan.emoji_id);
 				SetStringNotNull(&wc, "emoji_name", wchan.emoji_name);
-				welcome_screen.welcome_channels.push_back(wchan);
+				welcome_screen.welcome_channels.emplace_back(wchan);
 			}
 		}
 		

@@ -198,7 +198,7 @@ slashcommand& slashcommand::set_application_id(snowflake i) {
 }
 
 slashcommand& slashcommand::add_permission(const command_permission& p) {
-	this->permissions.push_back(p);
+	this->permissions.emplace_back(p);
 	return *this;
 }
 
@@ -221,19 +221,19 @@ command_option& command_option::add_choice(const command_option_choice &o)
 	if (this->autocomplete) {
 		throw dpp::exception("Can't set autocomplete=true if choices exist in the command_option");
 	}
-	choices.push_back(o);
+	choices.emplace_back(o);
 	return *this;
 }
 
 command_option& command_option::add_option(const command_option &o)
 {
-	options.push_back(o);
+	options.emplace_back(o);
 	return *this;
 }
 
 command_option& command_option::add_channel_type(const channel_type ch)
 {
-	this->channel_types.push_back(ch);
+	this->channel_types.emplace_back(ch);
 	return *this;
 }
 
@@ -249,7 +249,7 @@ command_option& command_option::set_auto_complete(bool autocomp)
 
 slashcommand& slashcommand::add_option(const command_option &o)
 {
-	options.push_back(o);
+	options.emplace_back(o);
 	return *this;
 }
 

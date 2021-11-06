@@ -93,7 +93,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 					}
 				}
 				opt.focused = BoolNotNull(&o, "focused");
-				ac.options.push_back(opt);
+				ac.options.emplace_back(opt);
 			}
 			ac.command = i;
 			call_event(client->creator->dispatch.autocomplete, ac);

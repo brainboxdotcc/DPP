@@ -156,7 +156,7 @@ channel& channel::fill_from_json(json* j) {
 			po.allow = SnowflakeNotNull(&overwrite, "allow");
 			po.deny = SnowflakeNotNull(&overwrite, "deny");
 			po.type = Int8NotNull(&overwrite, "type");
-			permission_overwrites.push_back(po);
+			permission_overwrites.emplace_back(po);
 		}
 	}
 	

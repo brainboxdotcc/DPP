@@ -324,7 +324,7 @@ json etf_parser::decode_integer() {
 json etf_parser::decode_array(uint32_t length) {
 	json array = json::array();
 	for(uint32_t i = 0; i < length; ++i) {
-		array.push_back(inner_parse());
+		array.emplace_back(inner_parse());
 	}
 	return array;
 }

@@ -65,7 +65,7 @@ auditlog& auditlog::fill_from_json(nlohmann::json* j) {
 			opts.type = StringNotNull(&o, "type");
 			ae.options = opts;
 		}
-		this->entries.push_back(ae);
+		this->entries.emplaces_back(ae);
 	}
 	return *this;
 }

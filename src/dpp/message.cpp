@@ -47,7 +47,7 @@ component& component::fill_from_json(nlohmann::json* j) {
 		for (json sub_component : (*j)["components"]) {
 			dpp::component new_component;
 			new_component.fill_from_json(&sub_component);
-			components.push_back(new_component);
+			components.emplace_back(new_component);
 		}
 	} else if (type == cot_button) {
 		label = StringNotNull(j, "label");
@@ -65,7 +65,7 @@ component& component::fill_from_json(nlohmann::json* j) {
 component& component::add_component(const component& c)
 {
 	set_type(cot_action_row);
-	components.push_back(c);
+	components.emplace_back(c);
 	return *this;
 }
 
@@ -252,7 +252,7 @@ component& component::set_max_values(uint32_t _max_values) {
 
 component& component::add_select_option(const select_option &option) {
 	if (options.size() <= 25) {
-		options.push_back(option);
+		options.emplace_back(option);
 	}
 	return *this;
 }
@@ -308,13 +308,13 @@ message::message(snowflake _channel_id, const std::string &_content, message_typ
 
 message& message::add_component(const component& c)
 {
-	components.push_back(c);
+	components.emplace_back(c);
 	return *this;
 }
 
 message& message::add_embed(const embed& e)
 {
-	embeds.push_back(e);
+	embeds.emplace_back(e);
 	return *this;
 }
 
@@ -355,7 +355,7 @@ message::message(const std::string &_content, message_type t) : message() {
 
 message::message(snowflake _channel_id, const embed& _embed) : message() {
 	channel_id = _channel_id;
-	embeds.push_back(_embed);
+	embeds.emplace_back(_embed);
 }
 
 embed::embed(json* j) : embed() {
@@ -770,7 +770,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	if (d->find("sticker_items") != d->end()) {
 		json &sub = (*d)["sticker_items"];
 		for (auto & sticker_raw : sub) {
-			stickers.push_back(dpp::sticker().fill_from_json(&sticker_raw));
+			stickers.emplace_back(dpp::sticker().fill_from_json(&sticker_raw));
 		}
 	}
 	if (d->find("mentions") != d->end()) {
@@ -778,7 +778,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		for (auto & m : sub) {
 			dpp::user u = dpp::user().fill_from_json(&m);
 			dpp::guild_member gm = dpp::guild_member().fill_from_json(static_cast<json*>(&m["member"]), this->guild_id, u.id);
-			mentions.push_back({u, gm});
+			mentions.emplace_back({u, gm});
 		}
 	}
 	if (d->find("mention_roles") != d->end()) {
@@ -792,7 +792,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	if (d->find("mention_channels") != d->end()) {
 		json &sub = (*d)["mention_channels"];
 		for (auto & m : sub) {
-			mention_channels.push_back(dpp::channel().fill_from_json(&m));
+			mention_channels.emplace_back(dpp::channel().fill_from_json(&m));
 		}
 	}
 	/* Fill in member record, cache uncached ones */
@@ -830,7 +830,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	if (d->find("embeds") != d->end()) {
 		json & el = (*d)["embeds"];
 		for (auto& e : el) {
-			this->embeds.push_back(embed(&e));
+			this->embeds.emplace_back(embed(&e));
 		}
 	}
 	this->content = StringNotNull(d, "content");
@@ -841,7 +841,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	if (d->find("reactions") != d->end()) {
 		json & el = (*d)["reactions"];
 		for (auto& e : el) {
-			this->reactions.push_back(reaction(&e));
+			this->reactions.emplace_back(reaction(&e));
 		}
 	}
 	if (((*d)["nonce"]).is_string()) {
@@ -852,7 +852,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->pinned = BoolNotNull(d, "pinned");
 	this->webhook_id = SnowflakeNotNull(d, "webhook_id");
 	for (auto& e : (*d)["attachments"]) {
-		this->attachments.push_back(attachment(&e));
+		this->attachments.emplace_back(attachment(&e));
 	}
 	return *this;
 }

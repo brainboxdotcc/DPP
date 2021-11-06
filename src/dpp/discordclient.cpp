@@ -415,9 +415,9 @@ void discord_client::QueueMessage(const std::string &j, bool to_front)
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	if (to_front) {
-		message_queue.push_front(j);
+		message_queue.emplace_front(j);
 	} else {
-		message_queue.push_back(j);
+		message_queue.emplace_back(j);
 	}
 }
 

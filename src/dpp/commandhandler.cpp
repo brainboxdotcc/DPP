@@ -60,7 +60,7 @@ commandhandler::~commandhandler() = default;
 
 commandhandler& commandhandler::add_prefix(const std::string &prefix)
 {
-	prefixes.push_back(prefix);
+	prefixes.emplace_back(prefix);
 	if (prefix == "/") {
 		/* Register existing slash commands */
 		slash_commands_enabled = true;
@@ -126,9 +126,9 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 			if (bulk_registration_list_guild.find(guild_id) == bulk_registration_list_guild.end()) {
 				bulk_registration_list_guild[guild_id] = {};
 			}
-			bulk_registration_list_guild[guild_id].push_back(newcommand);
+			bulk_registration_list_guild[guild_id].emplace_back(newcommand);
 		} else {
-			bulk_registration_list_global.push_back(newcommand);
+			bulk_registration_list_global.emplace_back(newcommand);
 		}
 	}
 	return *this;

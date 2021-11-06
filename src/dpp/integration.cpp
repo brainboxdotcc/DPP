@@ -130,8 +130,9 @@ connection& connection::fill_from_json(nlohmann::json* j) {
 	this->show_activity = BoolNotNull(j, "show_activity");
 	this->visible = (Int32NotNull(j, "visibility") == 1);
 	if (j->find("integrations") != j->end()) {
+		integrations.reserve((*j)["integrations"].size());
 		for (auto & i : (*j)["integrations"]) {
-			integrations.push_back(integration().fill_from_json(&i));
+			integrations.emplace_back(integration().fill_from_json(&i));
 		}
 	}
 	return *this;

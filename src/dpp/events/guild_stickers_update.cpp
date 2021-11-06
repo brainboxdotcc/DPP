@@ -53,7 +53,7 @@ void guild_stickers_update::handle(discord_client* client, json &j, const std::s
 			for (auto & sticker : d["stickers"]) {
 				dpp::sticker s;
 				s.fill_from_json(&sticker);
-				gsu.stickers.push_back(s);
+				gsu.stickers.emplace_back(s);
 			}
 			gsu.updating_guild = g;
 			call_event(client->creator->dispatch.stickers_update, gsu);
