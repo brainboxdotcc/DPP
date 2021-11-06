@@ -778,7 +778,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		for (auto & m : sub) {
 			dpp::user u = dpp::user().fill_from_json(&m);
 			dpp::guild_member gm = dpp::guild_member().fill_from_json(static_cast<json*>(&m["member"]), this->guild_id, u.id);
-			mentions.emplace_back({u, gm});
+			mentions.push_back({u, gm});
 		}
 	}
 	if (d->find("mention_roles") != d->end()) {
