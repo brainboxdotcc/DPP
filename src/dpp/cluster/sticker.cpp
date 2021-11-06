@@ -63,8 +63,11 @@ void cluster::guild_sticker_modify(sticker &s, command_completion_event_t callba
 void cluster::guild_stickers_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "stickers", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		sticker_map stickers;
-		for (auto & curr_sticker : j) {
-			stickers[SnowflakeNotNull(&curr_sticker, "id")] = sticker().fill_from_json(&curr_sticker);
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_sticker : j) {
+				stickers[SnowflakeNotNull(&curr_sticker, "id")] = sticker().fill_from_json(&curr_sticker);
+			}
 		}
 		if (callback) {
 			callback(confirmation_callback_t("sticker_map", stickers, http));
@@ -85,8 +88,11 @@ void cluster::nitro_sticker_get(snowflake id, command_completion_event_t callbac
 void cluster::sticker_packs_get(command_completion_event_t callback) {
 	this->post_rest(API_PATH "/sticker-packs", "", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		sticker_pack_map stickerpacks;
-		for (auto & curr_stickerpack : j) {
-			stickerpacks[SnowflakeNotNull(&curr_stickerpack, "id")] = sticker_pack().fill_from_json(&curr_stickerpack);
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_stickerpack : j) {
+				stickerpacks[SnowflakeNotNull(&curr_stickerpack, "id")] = sticker_pack().fill_from_json(&curr_stickerpack);
+			}
 		}
 		if (callback) {
 			callback(confirmation_callback_t("sticker_pack_map", stickerpacks, http));

@@ -119,8 +119,11 @@ void cluster::get_channel_webhooks(snowflake channel_id, command_completion_even
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			webhook_map webhooks;
-			for (auto & curr_webhook: j) {
-				webhooks[SnowflakeNotNull(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
+			confirmation_callback_t e("confirmation", confirmation(), http);
+			if (!e.is_error()) {
+				for (auto & curr_webhook: j) {
+					webhooks[SnowflakeNotNull(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
+				}
 			}
 			callback(confirmation_callback_t("webhook_map", webhooks, http));
 		}
@@ -132,8 +135,11 @@ void cluster::get_guild_webhooks(snowflake guild_id, command_completion_event_t 
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			webhook_map webhooks;
-			for (auto & curr_webhook: j) {
-				webhooks[SnowflakeNotNull(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
+			confirmation_callback_t e("confirmation", confirmation(), http);
+			if (!e.is_error()) {
+				for (auto & curr_webhook: j) {
+					webhooks[SnowflakeNotNull(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
+				}
 			}
 			callback(confirmation_callback_t("webhook_map", webhooks, http));
 		}

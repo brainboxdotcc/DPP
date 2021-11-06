@@ -113,9 +113,12 @@ void cluster::guild_get_ban(snowflake guild_id, snowflake user_id, command_compl
 
 void cluster::guild_get_bans(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "bans", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		confirmation_callback_t e("confirmation", confirmation(), http);
 		ban_map bans;
-		for (auto & curr_ban : j) {
-			bans[SnowflakeNotNull(&curr_ban, "user_id")] = ban().fill_from_json(&curr_ban);
+		if (!e.is_error()) {
+			for (auto & curr_ban : j) {
+				bans[SnowflakeNotNull(&curr_ban, "user_id")] = ban().fill_from_json(&curr_ban);
+			}
 		}
 		if (callback) {
 			callback(confirmation_callback_t("ban_map", bans, http));
@@ -136,8 +139,11 @@ void cluster::guild_get(snowflake guild_id, command_completion_event_t callback)
 void cluster::guild_get_integrations(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "integrations", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		integration_map integrations;
-		for (auto & curr_integration : j) {
-			integrations[SnowflakeNotNull(&curr_integration, "id")] = integration().fill_from_json(&curr_integration);
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_integration : j) {
+				integrations[SnowflakeNotNull(&curr_integration, "id")] = integration().fill_from_json(&curr_integration);
+			}
 		}
 		if (callback) {
 			callback(confirmation_callback_t("integration_map", integrations, http));

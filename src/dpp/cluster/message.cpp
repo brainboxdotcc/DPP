@@ -175,8 +175,11 @@ void cluster::message_get_reactions(const struct message &m, const std::string &
 	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			user_map users;
-			for (auto & curr_user : j) {
-				users[SnowflakeNotNull(&curr_user, "id")] = user().fill_from_json(&curr_user);
+			confirmation_callback_t e("confirmation", confirmation(), http);
+			if (!e.is_error()) {
+				for (auto & curr_user : j) {
+					users[SnowflakeNotNull(&curr_user, "id")] = user().fill_from_json(&curr_user);
+				}
 			}
 			callback(confirmation_callback_t("user_map", users, http));
 		}
@@ -218,9 +221,12 @@ void cluster::messages_get(snowflake channel_id, snowflake around, snowflake bef
 	}
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages" + parameters, m_get, json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
+			confirmation_callback_t e("confirmation", confirmation(), http);
 			message_map messages;
-			for (auto & curr_message : j) {
-				messages[SnowflakeNotNull(&curr_message, "id")] = message().fill_from_json(&curr_message);
+			if (!e.is_error()) {
+				for (auto & curr_message : j) {
+					messages[SnowflakeNotNull(&curr_message, "id")] = message().fill_from_json(&curr_message);
+				}
 			}
 			callback(confirmation_callback_t("message_map", messages, http));
 		}
@@ -240,11 +246,14 @@ void cluster::message_unpin(snowflake channel_id, snowflake message_id, command_
 void cluster::pins_get(snowflake channel_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "pins", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		message_map pins_messages;
-		for (auto & curr_message : j) {
-			pins_messages[SnowflakeNotNull(&curr_message, "id")] = message().fill_from_json(&curr_message);
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_message : j) {
+				pins_messages[SnowflakeNotNull(&curr_message, "id")] = message().fill_from_json(&curr_message);
+			}
 		}
 		if (callback) {
-		callback(confirmation_callback_t("message_map", pins_messages, http));
+			callback(confirmation_callback_t("message_map", pins_messages, http));
 		}
 	});
 }

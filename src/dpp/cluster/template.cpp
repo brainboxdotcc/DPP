@@ -71,8 +71,11 @@ void cluster::guild_template_modify(snowflake guild_id, const std::string &code,
 void cluster::guild_templates_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "templates", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		dtemplate_map dtemplates;
-		for (auto & curr_dtemplate : j) {
-			dtemplates[SnowflakeNotNull(&curr_dtemplate, "id")] = dtemplate().fill_from_json(&curr_dtemplate);
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_dtemplate : j) {
+				dtemplates[SnowflakeNotNull(&curr_dtemplate, "id")] = dtemplate().fill_from_json(&curr_dtemplate);
+			}
 		}
 		if (callback) {
 				callback(confirmation_callback_t("dtemplate_map", dtemplates, http));

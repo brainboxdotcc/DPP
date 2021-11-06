@@ -36,8 +36,11 @@ void cluster::current_user_get_dms(command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", "@me", "channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map channels;
-			for (auto & curr_channel: j) {
-				channels[SnowflakeNotNull(&curr_channel, "id")] = channel().fill_from_json(&curr_channel);
+			confirmation_callback_t e("confirmation", confirmation(), http);
+			if (!e.is_error()) {
+				for (auto & curr_channel: j) {
+					channels[SnowflakeNotNull(&curr_channel, "id")] = channel().fill_from_json(&curr_channel);
+				}
 			}
 			callback(confirmation_callback_t("channel_map", channels, http));
 		}

@@ -27,8 +27,11 @@ namespace dpp {
 void cluster::get_guild_invites(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		invite_map invites;
-		for (auto & curr_invite : j) {
-			invites[StringNotNull(&curr_invite, "code")] = invite().fill_from_json(&curr_invite);
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_invite : j) {
+				invites[StringNotNull(&curr_invite, "code")] = invite().fill_from_json(&curr_invite);
+			}
 		}
 		if (callback) {
 			callback(confirmation_callback_t("invite_map", invites, http));
