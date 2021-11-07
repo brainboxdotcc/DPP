@@ -33,6 +33,9 @@ install(EXPORT ${DPP_EXPORT_NAME} DESTINATION ${DPP_INSTALL_LIBRARY_DIR} NAMESPA
 ## Project installation metadata
 set(CPACK_PACKAGE_NAME   libdpp)	# Name of generated file
 set(CPACK_PACKAGE_VENDOR Brainbox.cc)	# Maker of the application
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "An incredibly lightweight C++ Discord library")
+set(CPACK_PACKAGE_DESCRIPTION "An incredibly lightweight C++ Discord library")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://dpp.dev/")
 
 ## Select generated based on what operating system
 if(WIN32)
