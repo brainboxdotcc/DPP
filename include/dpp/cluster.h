@@ -1619,7 +1619,10 @@ public:
 	void interaction_response_edit(const std::string &token, const message &r, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Create a global slash command (a bot can have a maximum of 100 of these)
+	 * @brief Create a global slash command (a bot can have a maximum of 100 of these).
+	 * 
+	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
+	 * you should use cluster::guild_command_create instead.
 	 *
 	 * @param s Slash command to create, s.id will be filled if the creation succeeds
 	 * @param callback Function to call when the API call completes.
@@ -1648,7 +1651,8 @@ public:
 
 
 	/**
-	 * @brief Create/overwrite guild slash commands
+	 * @brief Create/overwrite guild slash commands.
+	 * Any existing guild slash commands on this guild will be deleted and replaced with these.
 	 *
 	 * @param commands Vector of slash commands to create/update.
 	 * New guild commands will be available in the guild immediately. If the command did not already exist, it will count toward daily application command create limits.
@@ -1659,8 +1663,12 @@ public:
 	void guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Create/overwrite global slash commands
+	 * @brief Create/overwrite global slash commands.
+	 * Any existing global slash commands will be deletd and replaced with these.
 	 *
+	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
+	 * you should use cluster::guild_bulk_command_create instead.
+	 * 
 	 * @param commands Vector of slash commands to create/update.
 	 * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
 	 * Commands that do not already exist will count toward daily application command create limits.
