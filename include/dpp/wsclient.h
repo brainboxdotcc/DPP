@@ -29,7 +29,7 @@
 namespace dpp {
 
 
-enum websocket_protocol_t {
+enum websocket_protocol_t : uint8_t {
 	ws_json = 0,
 	ws_etf = 1
 };
@@ -37,7 +37,7 @@ enum websocket_protocol_t {
 /**
  * @brief Websocket connection status
  */
-enum ws_state {
+enum ws_state : uint8_t {
 	/**
 	 * @brief Sending/receiving HTTP headers, acting as a standard HTTP connection.
 	 * This is the state prior to receiving "HTTP/1.1 101 Switching Protocols" from the
@@ -54,7 +54,7 @@ enum ws_state {
 /**
  * @brief Low-level websocket opcodes for frames
  */
-enum ws_opcode
+enum ws_opcode : uint8_t
 {
         OP_CONTINUATION = 0x00,	//!< Continuation
         OP_TEXT = 0x01,		//!< Text frame
@@ -77,6 +77,9 @@ class DPP_EXPORT websocket_client : public ssl_client
 
 	/** Path part of URL for websocket */
 	std::string path;
+
+	/** Data opcode, represents the type of frames we send */
+	ws_opcode data_opcode;
 
 	/** HTTP headers received on connecting/upgrading */
 	std::map<std::string, std::string> HTTPHeaders;
@@ -122,8 +125,11 @@ public:
 	 * @param hostname Hostname to connect to
 	 * @param port Port to connect to
 	 * @param urlpath The URL path components of the HTTP request to send
+	 * @param opcode The encoding type to use, either OP_BINARY or OP_TEXT
+	 * @note Voice websockets only support OP_TEXT, and other websockets must be
+	 * OP_BINARY if you are going to send ETF.
 	 */
-        websocket_client(const std::string &hostname, const std::string &port = "443", const std::string &urlpath = "");
+        websocket_client(const std::string &hostname, const std::string &port = "443", const std::string &urlpath = "", ws_opcode opcode = OP_BINARY);
 
 	/** Destructor */
         virtual ~websocket_client();

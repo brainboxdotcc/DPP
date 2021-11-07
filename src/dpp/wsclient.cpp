@@ -34,11 +34,12 @@ const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 const size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath)
+websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath, ws_opcode opcode)
 	: ssl_client(hostname, port),
 	key(fmt::format("{:16x}", time(nullptr))),
 	state(HTTP_HEADERS),
-	path(urlpath)
+	path(urlpath),
+	data_opcode(opcode)
 {
 }
 
@@ -116,7 +117,7 @@ void websocket_client::write(const std::string &data)
 		ssl_client::write(data);
 	} else {
 		unsigned char out[MAXHEADERSIZE];
-		size_t s = this->FillHeader(out, data.length(), OP_BINARY);
+		size_t s = this->FillHeader(out, data.length(), this->data_opcode);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
 		ssl_client::write(data);
