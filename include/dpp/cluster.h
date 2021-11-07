@@ -1624,11 +1624,11 @@ public:
 	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
 	 * you should use cluster::guild_command_create instead.
 	 *
-	 * @param s Slash command to create, s.id will be filled if the creation succeeds
+	 * @param s Slash command to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_command_create(slashcommand &s, command_completion_event_t callback = {});
+	void global_command_create(const slashcommand &s, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get the audit log for a guild
@@ -1642,12 +1642,12 @@ public:
 	/**
 	 * @brief Create a slash command local to a guild
 	 *
-	 * @param s Slash command to create, s.id will be filled if the creation succeeds
+	 * @param s Slash command to create
 	 * @param guild_id Guild ID to create the slash command in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_create(slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
 
 	/**
