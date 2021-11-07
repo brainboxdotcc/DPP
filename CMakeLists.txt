@@ -20,7 +20,6 @@ cmake_minimum_required (VERSION 3.12)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
-option(BUILD_DEBUG "Build with debug symbols, optimisations off" OFF)
 
 add_compile_definitions(DPP_BUILD)
 
