@@ -68,12 +68,7 @@ void cluster::channel_edit_position(const class channel &c, command_completion_e
 }
 
 void cluster::channel_edit(const class channel &c, command_completion_event_t callback) {
-	json j = c.build_json(true);
-	auto p = j.find("position");
-	if (p != j.end()) {
-		j.erase(p);
-	}
-	this->post_rest(API_PATH "/channels", std::to_string(c.id), "", m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(c.id), "", m_patch, c.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
 		}
