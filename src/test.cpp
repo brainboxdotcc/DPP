@@ -28,17 +28,26 @@ _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or st
  
 using json = nlohmann::json;
 
+/* Represents a test case */
 struct test_t {
+	/* Description of test */
 	std::string description;
+	/* Has been executed */
 	bool executed = false;
+	/* Was successfully tested */
 	bool success = false;
 };
 
+/* How long the unit tests can run for */
 const int64_t TEST_TIMEOUT = 60;
+
+/* IDs of various channels and guilds used to test */
 const dpp::snowflake TEST_GUILD_ID = 825407338755653642;
 const dpp::snowflake TEST_TEXT_CHANNEL_ID = 828681546533437471;
 const dpp::snowflake TEST_VC_ID = 825411635631095858;
+const dpp::snowflake TEST_USER_ID = 826535422381391913;
 
+/* Current list of unit tests */
 std::map<std::string, test_t> tests = {
 	{"CLUSTER", {"Instantiate DPP cluster", false, false}},
 	{"BOTSTART", {"cluster::start method", false, false}},
@@ -50,39 +59,69 @@ std::map<std::string, test_t> tests = {
 	{"MESSAGEDELETE", {"Deletion of a channel message", false, false}},
 	{"MESSAGERECEIVE", {"Receipt of a created message", false, false}},
 	{"CACHE", {"Test guild cache", false, false}},
+	{"USERCACHE", {"Test user cache", false, false}},
 	{"VOICECONN", {"Connect to voice channel", false, false}},
+	{"VOICESEND", {"Send audio to voice channel", false, false}},
 	{"REACT", {"React to a message", false, false}},
 	{"REACTEVENT", {"Reaction event", false, false}},
+	{"GUILDCREATE", {"Receive guild create event", false, false}},
 };
 
+/**
+ * @brief Sets a test's status
+ * 
+ * @param testname test name (key) to set the status of
+ * @param success If set to true, sets success to true, if set to false and called
+ * once, sets executed to true, if called twice, also sets success to false.
+ * This means that before you run the test you should call this function once
+ * with success set to false, then if/wen the test completes call it again with true.
+ * If the test fails, call it a second time with false, or not at all.
+ */
 void set_test(const std::string testname, bool success = false) {
 	auto i = tests.find(testname);
 	if (i != tests.end()) {
 		if (!i->second.executed) {
-			std::cout << "[TESTING] " << i->second.description << "\n";
+			std::cout << "[\u001b[33mTESTING\u001b[0m] " << i->second.description << "\n";
 		} else if (!success) {
-			std::cout << "[FAILED] " << i->second.description << "\n";
+			std::cout << "[\u001b[31mFAILED\u001b[0m] " << i->second.description << "\n";
 		}
 		i->second.executed = true;
 		if (success) {
 			i->second.success = true;
-			std::cout << "[SUCCESS] " << i->second.description << "\n";
+			std::cout << "[\u001b[32mSUCCESS\u001b[0m] " << i->second.description << "\n";
 		}
 	}
 }
 
+/* Unit tests go here */
 int main()
 {
 	std::string token(getenv("DPP_UNIT_TEST_TOKEN"));
 	if (token.empty()) {
-		std::cerr << "DPP_UNIT_TEST_TOKEN not defined -- this is likely a fork.\n\nNot running unit tests.\n";
+		std::cerr << "\u001b[31mDPP_UNIT_TEST_TOKEN not defined -- this is likely a fork.\n\nNot running unit tests.\u001b[0m\n";
 		return 0;
 	}
+
+	uint8_t* testaudio = nullptr;
+	size_t testaudio_size = 0;
+	std::ifstream input ("../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	if (input.is_open()) {
+		testaudio_size = input.tellg();
+		testaudio = new uint8_t[testaudio_size];
+		input.seekg (0, std::ios::beg);
+		input.read ((char*)testaudio, testaudio_size);
+		input.close();
+	}
+
 	set_test("CLUSTER", false);
 	try {
 		set_test("CLUSTER", true);
 		dpp::cluster bot(token);
 		set_test("CONNECTION", false);
+		set_test("GUILDCREATE", false);
+
+		/* This ensures we test both protocols, as voice is json and shard is etf */
+		bot.set_websocket_protocol(dpp::ws_etf);
 
 		bot.on_ready([&bot](const dpp::ready_t & event) {
 
@@ -150,7 +189,6 @@ int main()
 				});
 		});
 
-		/* Simple log event */
 		bot.on_log([&](const dpp::log_t & event) {
 			std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 			if (event.message == "Test log message") {
@@ -166,6 +204,25 @@ int main()
 
 		bot.on_voice_ready([&](const dpp::voice_ready_t & event) {
 			set_test("VOICECONN", true);
+			dpp::discord_voice_client* v = event.voice_client;
+			set_test("VOICESEND", false);
+			if (v && v->is_ready()) {
+				v->send_audio_raw((uint16_t*)testaudio, testaudio_size);
+			} else {
+				set_test("VOICESEND", false);
+			}
+		});
+
+		bot.on_voice_buffer_send([&](const dpp::voice_buffer_send_t & event) {
+			if (event.buffer_size == 0) {
+				set_test("VOICESEND", true);
+			}
+		});
+
+		bot.on_guild_create([&](const dpp::guild_create_t & event) {
+			if (event.created->id == TEST_GUILD_ID) {
+				set_test("GUILDCREATE", true);
+			}
 		});
 
 		bot.on_message_create([&](const dpp::message_create_t & event) {
@@ -183,7 +240,14 @@ int main()
 			set_test("BOTSTART", false);
 		}
 
-		std::this_thread::sleep_for(std::chrono::seconds(TEST_TIMEOUT));
+		std::this_thread::sleep_for(std::chrono::seconds(TEST_TIMEOUT / 2));
+
+		set_test("USERCACHE", false);
+		dpp::user* u = dpp::find_user(TEST_USER_ID);
+		set_test("USERCACHE", u);
+
+		std::this_thread::sleep_for(std::chrono::seconds(TEST_TIMEOUT / 2));
+
 	}
 	catch (const std::exception & e) {
 		set_test("CLUSTER", false);
@@ -191,16 +255,16 @@ int main()
 
 	/* Report on all test cases */
 	uint16_t failed = 0, passed = 0;
-	fmt::print("\n\nUNIT TEST SUMMARY\n==================\n");
+	fmt::print("\u001b[37;1m\n\nUNIT TEST SUMMARY\n==================\n\u001b[0m");
 	for (auto & t : tests) {
 		if (t.second.success == false || t.second.executed == false) {
 			failed++;
 		} else {
 			passed++;
 		}
-		fmt::print("{:50s} {:6s}\n", t.second.description, t.second.executed && t.second.success ? "PASS" : "FAIL");
+		fmt::print("{:50s} {:6s}\u001b[0m\n", t.second.description, t.second.executed && t.second.success ? "\u001b[32mPASS" : "\u001b[31mFAIL");
 	}
-	fmt::print("\nFailed: {} Passed: {} Coverage: {:.02f}%\n", failed, passed, (float)(passed) / (float)(tests.size()) * 100.0f);
+	fmt::print("\u001b[37;1m\nFailed: {} Passed: {} Percentage: {:.02f}%\u001b[0m\n", failed, passed, (float)(passed) / (float)(tests.size()) * 100.0f);
 
 	/* Return value = number of failed tests, exit code 0 = success */
 	return failed;
