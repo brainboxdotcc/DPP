@@ -73,10 +73,15 @@ void set_test(const std::string testname, bool success = false) {
 
 int main()
 {
+	std::string token(getenv("DPP_UNIT_TEST_TOKEN"));
+	if (token.empty()) {
+		std::cerr << "DPP_UNIT_TEST_TOKEN not defined -- this is likely a fork.\n\nNot running unit tests.\n";
+		return 0;
+	}
 	set_test("CLUSTER", false);
 	try {
 		set_test("CLUSTER", true);
-		dpp::cluster bot(getenv("DPP_UNIT_TEST_TOKEN"));
+		dpp::cluster bot(token);
 		set_test("CONNECTION", false);
 
 		bot.on_ready([&bot](const dpp::ready_t & event) {
