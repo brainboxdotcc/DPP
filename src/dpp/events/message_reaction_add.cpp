@@ -47,9 +47,10 @@ void message_reaction_add::handle(discord_client* client, json &j, const std::st
 	if (!client->creator->dispatch.message_reaction_add.empty()) {
 		json &d = j["d"];
 		dpp::message_reaction_add_t mra(client, raw);
-		mra.reacting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+		dpp::snowflake guild_id = SnowflakeNotNull(&d, "guild_id");
+		mra.reacting_guild = dpp::find_guild(guild_id);
 		mra.reacting_user = dpp::user().fill_from_json(&(d["member"]["user"]));
-		mra.reacting_member = dpp::guild_member().fill_from_json(&(d["member"]), mra.reacting_guild->id, mra.reacting_user.id);
+		mra.reacting_member = dpp::guild_member().fill_from_json(&(d["member"]), guild_id, mra.reacting_user.id);
 		mra.reacting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
 		mra.message_id = SnowflakeNotNull(&d, "message_id");
 		mra.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
