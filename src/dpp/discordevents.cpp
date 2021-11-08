@@ -31,13 +31,11 @@
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>
-
-#ifdef _WIN32
 #include <time.h>
 #include <iomanip>
 #include <sstream>
 
-char* strptime(const char* s, const char* f, struct tm* tm) {
+char* crossplatform_strptime(const char* s, const char* f, struct tm* tm) {
 	std::istringstream input(s);
 	input.imbue(std::locale(setlocale(LC_ALL, nullptr)));
 	input >> std::get_time(tm, f);
@@ -46,7 +44,6 @@ char* strptime(const char* s, const char* f, struct tm* tm) {
 	}
 	return (char*)(s + input.tellg());
 }
-#endif
 
 namespace dpp {
 
@@ -211,17 +208,24 @@ time_t TimestampNotNull(const json* j, const char* keyname)
 		std::string timedate = (*j)[keyname].get<std::string>();
 		if (timedate.find('+') != std::string::npos && timedate.find('.') != std::string::npos) {
 			std::string tzpart = timedate.substr(timedate.find('+'), timedate.length());
-			timedate = timedate.substr(0, timedate.find('.')) + tzpart ;
-			strptime(timedate.substr(0, 19).c_str(), "%FT%TZ%z", &timestamp);
+			timedate = timedate.substr(0, timedate.find('.')); // + "Z" + tzpart;
+			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%dT%T", &timestamp);
 			timestamp.tm_isdst = 0;
 			retval = mktime(&timestamp);
 		} else {
-			strptime(timedate.substr(0, 19).c_str(), "%F %T", &timestamp);
+			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%d %T", &timestamp);
 			retval = mktime(&timestamp);
 		}
 	}
 	return retval;
 }
+
+/*
+STR: 2021-11-08T12:38:12.846000+00:00
+TZPART: +00:00 STR: 2021-11-08T12:38:12+00:00
+TS.YEAR: 0
+MKTIME: -2209075200
+*/
 
 void SetTimestampNotNull(const json* j, const char* keyname, time_t &v)
 {
