@@ -219,7 +219,7 @@ void cluster::messages_get(snowflake channel_id, snowflake around, snowflake bef
 	if (!parameters.empty()) {
 		parameters[0] = '?';
 	}
-	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages" + parameters, m_get, json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages" + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			message_map messages;

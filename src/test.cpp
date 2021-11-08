@@ -65,6 +65,7 @@ std::map<std::string, test_t> tests = {
 	{"REACT", {"React to a message", false, false}},
 	{"REACTEVENT", {"Reaction event", false, false}},
 	{"GUILDCREATE", {"Receive guild create event", false, false}},
+	{"MESSAGESGET", {"Get messages", false, false}},
 };
 
 /**
@@ -96,11 +97,12 @@ void set_test(const std::string testname, bool success = false) {
 /* Unit tests go here */
 int main()
 {
-	std::string token(getenv("DPP_UNIT_TEST_TOKEN"));
-	if (token.empty()) {
+	char* t = getenv("DPP_UNIT_TEST_TOKEN");
+	if (!t) {
 		std::cerr << "\u001b[31mDPP_UNIT_TEST_TOKEN not defined -- this is likely a fork.\n\nNot running unit tests.\u001b[0m\n";
 		return 0;
 	}
+	std::string token(t);
 
 	uint8_t* testaudio = nullptr;
 	size_t testaudio_size = 0;
@@ -228,6 +230,14 @@ int main()
 		bot.on_message_create([&](const dpp::message_create_t & event) {
 			if (event.msg->author->id == bot.me.id) {
 				set_test("MESSAGERECEIVE", true);
+				set_test("MESSAGESGET", false);
+				bot.messages_get(event.msg->channel_id, 0, event.msg->id, 0, 5, [](const dpp::confirmation_callback_t &cc){
+					if (!cc.is_error()) {
+						set_test("MESSAGESGET", true);
+					}  else {
+						set_test("MESSAGESGET", false);
+					}
+				});
 			}
 		});
 
