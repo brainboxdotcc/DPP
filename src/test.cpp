@@ -1,85 +1,178 @@
+/************************************************************************************
+ *
+ * D++, A Lightweight C++ library for Discord
+ *
+ * Copyright 2021 Craig Edwards and D++ contributors 
+ * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ************************************************************************************/
 #undef DPP_BUILD
 #ifdef _WIN32
 _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
 #endif
 #include <dpp/dpp.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt/format.h>
  
 using json = nlohmann::json;
 
+struct test_t {
+	std::string description;
+	bool executed = false;
+	bool success = false;
+};
+
+const int64_t TEST_TIMEOUT = 60;
+const dpp::snowflake TEST_GUILD_ID = 825407338755653642;
+const dpp::snowflake TEST_TEXT_CHANNEL_ID = 828681546533437471;
+const dpp::snowflake TEST_VC_ID = 825411635631095858;
+
+std::map<std::string, test_t> tests = {
+	{"CLUSTER", {"Instantiate DPP cluster", false, false}},
+	{"BOTSTART", {"cluster::start method", false, false}},
+	{"CONNECTION", {"Connection to client websocket", false, false}},
+	{"APPCOMMAND", {"Creation of application command", false, false}},
+	{"DELCOMMAND", {"Deletion of application command", false, false}},
+	{"LOGGER", {"Log events", false, false}},
+	{"MESSAGECREATE", {"Creation of a channel message", false, false}},
+	{"MESSAGEDELETE", {"Deletion of a channel message", false, false}},
+	{"MESSAGERECEIVE", {"Receipt of a created message", false, false}},
+	{"CACHE", {"Test guild cache", false, false}},
+	{"VOICECONN", {"Connect to voice channel", false, false}},
+};
+
+void set_test(const std::string testname, bool success = false) {
+	auto i = tests.find(testname);
+	if (i != tests.end()) {
+		if (!i->second.executed) {
+			std::cout << "[TESTING] " << i->second.description << "\n";
+		} else if (!success) {
+			std::cout << "[FAILED] " << i->second.description << "\n";
+		}
+		i->second.executed = true;
+		if (success) {
+			i->second.success = true;
+			std::cout << "[SUCCESS] " << i->second.description << "\n";
+		}
+	}
+}
+
 int main()
 {
-	json configdocument;
-	std::ifstream configfile("../config.json");
-	configfile >> configdocument;
-	dpp::cluster bot(configdocument["token"]);
+	set_test("CLUSTER", false);
+	try {
+		set_test("CLUSTER", true);
+		dpp::cluster bot(getenv("DPP_UNIT_TEST_TOKEN"));
+		set_test("CONNECTION", false);
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
-		/* Create a new global command on ready event */
-		bot.guild_command_create(dpp::slashcommand().set_name("blep")
-			.set_description("Send a random adorable animal photo")
-			.set_application_id(bot.me.id)
-			.add_option(
-				/* If you set the auto complete setting on a command option, it will trigger the on_auticomplete
-				 * event whenever discord needs to fill information for the choices. You cannot set any choices
-				 * here if you set the auto complete value to true.
-				 */
-				dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
-			),
-			825407338755653642);
-	});
+		bot.on_ready([&bot](const dpp::ready_t & event) {
 
-	/* The interaction create event is fired when someone issues your commands */
-	bot.on_interaction_create([&](const dpp::interaction_create_t & event) {
-		if (event.command.type == dpp::it_application_command) {
-			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-			/* Check which command they ran */
-			if (cmd_data.name == "blep") {
-				/* Fetch a parameter value from the command parameters */
-				std::string animal = std::get<std::string>(event.get_parameter("animal"));
-				/* Reply to the command. There is an overloaded version of this
-				* call that accepts a dpp::message so you can send embeds.
-				*/
-				event.reply(dpp::ir_channel_message_with_source, "Blep! You chose " + animal);
+			set_test("CONNECTION", true);
+			set_test("APPCOMMAND", false);
+			set_test("LOGGER", false);
+
+			bot.log(dpp::ll_info, "Test log message");
+
+			bot.guild_command_create(dpp::slashcommand().set_name("testcommand")
+				.set_description("Test command for DPP unit test")
+				.set_application_id(bot.me.id),
+				TEST_GUILD_ID, [&bot](const dpp::confirmation_callback_t &callback) {
+					if (!callback.is_error()) {
+						set_test("APPCOMMAND", true);
+						set_test("DELCOMMAND", false);
+						dpp::slashcommand s = std::get<dpp::slashcommand>(callback.value);
+						bot.guild_command_delete(s.id, TEST_GUILD_ID, [&bot](const dpp::confirmation_callback_t &callback) {
+							if (!callback.is_error()) {
+								set_test("DELCOMMAND", true);
+								set_test("MESSAGECREATE", false);
+								set_test("MESSAGERECEIVE", false);
+								bot.message_create(dpp::message(TEST_TEXT_CHANNEL_ID, "test message"), [&bot](const dpp::confirmation_callback_t &callback) {
+									if (!callback.is_error()) {
+										set_test("MESSAGECREATE", true);
+										set_test("MESSAGEDELETE", false);
+										dpp::message m = std::get<dpp::message>(callback.value);
+										bot.message_delete(m.id, TEST_TEXT_CHANNEL_ID, [&bot](const dpp::confirmation_callback_t &callback) {
+											set_test("MESSAGEDELETE", true);
+											set_test("CACHE", false);
+
+											dpp::guild* g = dpp::find_guild(TEST_GUILD_ID);
+
+											if (g) {
+												set_test("CACHE", true);
+												set_test("VOICECONN", false);
+												dpp::discord_client* s = bot.get_shard(0);
+												s->connect_voice(g->id, TEST_VC_ID, false, false);
+											}
+
+
+										});
+									}
+								});
+							}
+						});
+
+					}
+				});
+		});
+
+		/* Simple log event */
+		bot.on_log([&](const dpp::log_t & event) {
+			std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+			if (event.message == "Test log message") {
+				set_test("LOGGER", true);
 			}
-		}
-	});
- 
-	/* The on_autocomplete event is fired whenever discord needs information to fill in a command options's choices.
-	 * You must reply with a REST event within 500ms, so make it snappy!
-	 */
-	bot.on_autocomplete([&](const dpp::autocomplete_t & event) {
-		for (auto & opt : event.options) {
-			/* The option which has focused set to true is the one the user is typing in */
-			if (opt.focused) {
-				/* In a real world usage of this function you should return values that loosely match
-				 * opt.value, which contains what the user has typed so far. The opt.value is a variant
-				 * and will contain the type identical to that of the slash command parameter.
-				 * Here we can safely know it is string.
-				 */
-				std::string uservalue = std::get<std::string>(opt.value);
-				bot.interaction_response_create(event.command.id, event.command.token, dpp::interaction_response(dpp::ir_autocomplete_reply)
-					.add_autocomplete_choice(dpp::command_option_choice("squids", "lots of squids"))
-					.add_autocomplete_choice(dpp::command_option_choice("cats", "a few cats"))
-					.add_autocomplete_choice(dpp::command_option_choice("dogs", "bucket of dogs"))
-					.add_autocomplete_choice(dpp::command_option_choice("elephants", "bottle of elephants"))
-				);
-				bot.log(dpp::ll_debug, "Autocomplete " + opt.name + " with value of '" + uservalue + "' in field " + event.name);
-				break;
+		});
+
+		bot.on_voice_ready([&](const dpp::voice_ready_t & event) {
+			set_test("VOICECONN", true);
+		});
+
+		bot.on_message_create([&](const dpp::message_create_t & event) {
+			if (event.msg->author->id == bot.me.id) {
+				set_test("MESSAGERECEIVE", true);
 			}
+		});
+
+		set_test("BOTSTART", false);
+		try {
+			bot.start(true);
+			set_test("BOTSTART", true);
 		}
-	});
+		catch (const std::exception & e) {
+			set_test("BOTSTART", false);
+		}
 
-	/* Simple log event */
-	bot.on_log([&](const dpp::log_t & event) {
-		std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
-	});
+		std::this_thread::sleep_for(std::chrono::seconds(TEST_TIMEOUT));
+	}
+	catch (const std::exception & e) {
+		set_test("CLUSTER", false);
+	}
 
-	bot.on_message_update([&](const dpp::message_update_t & event) {
-		std::cout << "MU RAW: " << event.raw_event << "\n";
-	});
+	/* Report on all test cases */
+	uint16_t failed = 0, passed = 0;
+	fmt::print("\n\nUNIT TEST SUMMARY\n==================\n");
+	for (auto & t : tests) {
+		if (t.second.success == false || t.second.executed == false) {
+			failed++;
+		} else {
+			passed++;
+		}
+		fmt::print("{:50s} {:6s}\n", t.second.description, t.second.executed && t.second.success ? "PASS" : "FAIL");
+	}
+	fmt::print("\nFailed: {} Passed: {} Coverage: {:.02f}%\n", failed, passed, (float)(passed) / (float)(tests.size()) * 100.0f);
 
-	bot.start(false);
-
-	return 0;
+	/* Return value = number of failed tests, exit code 0 = success */
+	return failed;
 }
