@@ -1776,7 +1776,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
+	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint8_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Send a message to a channel. The callback function is called when the message has been sent

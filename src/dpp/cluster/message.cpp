@@ -202,7 +202,7 @@ void cluster::message_pin(snowflake channel_id, snowflake message_id, command_co
 }
 
 
-void cluster::messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
+void cluster::messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint8_t limit, command_completion_event_t callback) {
 	std::string parameters;
 	if (around) {
 		parameters.append("&around=" + std::to_string(around));
@@ -214,6 +214,9 @@ void cluster::messages_get(snowflake channel_id, snowflake around, snowflake bef
 		parameters.append("&after=" + std::to_string(after));
 	}
 	if (limit) {
+		if (limit > 100) {
+			limit = 100;
+		}
 		parameters.append("&limit=" + std::to_string(limit));
 	}
 	if (!parameters.empty()) {
