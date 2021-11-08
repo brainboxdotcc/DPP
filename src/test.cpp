@@ -66,6 +66,8 @@ std::map<std::string, test_t> tests = {
 	{"REACTEVENT", {"Reaction event", false, false}},
 	{"GUILDCREATE", {"Receive guild create event", false, false}},
 	{"MESSAGESGET", {"Get messages", false, false}},
+	{"TIMESTAMP", {"crossplatform_strptime()", false, false}},
+	{"ICONHASH", {"utility::iconhash", false, false}},
 };
 
 /**
@@ -117,10 +119,16 @@ int main()
 
 	set_test("CLUSTER", false);
 	try {
-		set_test("CLUSTER", true);
 		dpp::cluster bot(token);
+		set_test("CLUSTER", true);
 		set_test("CONNECTION", false);
 		set_test("GUILDCREATE", false);
+		set_test("ICONHASH", false);
+
+		dpp::utility::iconhash i;
+		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
+		i = dummyval;
+		set_test("ICONHASH", (i.to_string() == dummyval));
 
 		/* This ensures we test both protocols, as voice is json and shard is etf */
 		bot.set_websocket_protocol(dpp::ws_etf);
@@ -233,7 +241,19 @@ int main()
 				set_test("MESSAGESGET", false);
 				bot.messages_get(event.msg->channel_id, 0, event.msg->id, 0, 5, [](const dpp::confirmation_callback_t &cc){
 					if (!cc.is_error()) {
-						set_test("MESSAGESGET", true);
+						dpp::message_map mm = std::get<dpp::message_map>(cc.value);
+						if (mm.size()) {
+							set_test("MESSAGESGET", true);
+							set_test("TIMESTAMP", false);
+							dpp::message m = mm.begin()->second;
+							if (m.sent > 0) {
+								set_test("TIMESTAMP", true);
+							} else {
+								set_test("TIMESTAMP", false);
+							}
+						} else {
+							set_test("MESSAGESGET", false);	
+						}
 					}  else {
 						set_test("MESSAGESGET", false);
 					}
