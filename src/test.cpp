@@ -51,6 +51,8 @@ std::map<std::string, test_t> tests = {
 	{"MESSAGERECEIVE", {"Receipt of a created message", false, false}},
 	{"CACHE", {"Test guild cache", false, false}},
 	{"VOICECONN", {"Connect to voice channel", false, false}},
+	{"REACT", {"React to a message", false, false}},
+	{"REACTEVENT", {"Reaction event", false, false}},
 };
 
 void set_test(const std::string testname, bool success = false) {
@@ -101,23 +103,39 @@ int main()
 								bot.message_create(dpp::message(TEST_TEXT_CHANNEL_ID, "test message"), [&bot](const dpp::confirmation_callback_t &callback) {
 									if (!callback.is_error()) {
 										set_test("MESSAGECREATE", true);
+										set_test("REACT", false);
 										set_test("MESSAGEDELETE", false);
 										dpp::message m = std::get<dpp::message>(callback.value);
-										bot.message_delete(m.id, TEST_TEXT_CHANNEL_ID, [&bot](const dpp::confirmation_callback_t &callback) {
-											set_test("MESSAGEDELETE", true);
-											set_test("CACHE", false);
-
-											dpp::guild* g = dpp::find_guild(TEST_GUILD_ID);
-
-											if (g) {
-												set_test("CACHE", true);
-												set_test("VOICECONN", false);
-												dpp::discord_client* s = bot.get_shard(0);
-												s->connect_voice(g->id, TEST_VC_ID, false, false);
+										set_test("REACTEVENT", false);
+										bot.message_add_reaction(m.id, TEST_TEXT_CHANNEL_ID, "😄", [&bot](const dpp::confirmation_callback_t &callback) {
+											if (!callback.is_error()) {
+												set_test("REACT", true);
+											} else {
+												set_test("REACT", false);
 											}
-
-
 										});
+										bot.message_delete(m.id, TEST_TEXT_CHANNEL_ID, [&bot](const dpp::confirmation_callback_t &callback) {
+
+											if (!callback.is_error()) {
+												set_test("MESSAGEDELETE", true);
+												set_test("CACHE", false);
+
+												dpp::guild* g = dpp::find_guild(TEST_GUILD_ID);
+
+												if (g) {
+													set_test("CACHE", true);
+													set_test("VOICECONN", false);
+													dpp::discord_client* s = bot.get_shard(0);
+													s->connect_voice(g->id, TEST_VC_ID, false, false);
+												} else {
+													set_test("CACHE", false);
+												}
+											} else {
+												set_test("MESSAGEDELETE", false);
+											}
+										});
+									} else {
+										set_test("MESSAGECREATE", false);
 									}
 								});
 							}
@@ -132,6 +150,12 @@ int main()
 			std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 			if (event.message == "Test log message") {
 				set_test("LOGGER", true);
+			}
+		});
+
+		bot.on_message_reaction_add([&](const dpp::message_reaction_add_t & event) {
+			if (event.reacting_user.id == bot.me.id && event.reacting_emoji.name == "😄") {
+				set_test("REACTEVENT", true);
 			}
 		});
 
