@@ -82,6 +82,7 @@ typedef std::variant<
 		message,
 		message_map,
 		user,
+		user_identified,
 		user_map,
 		guild_member,
 		guild_member_map,
@@ -2773,7 +2774,9 @@ public:
 	 *
 	 * @param user_id User ID to retrieve
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+	 * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
 	 */
 	void user_get(snowflake user_id, command_completion_event_t callback);
 
@@ -2781,7 +2784,9 @@ public:
 	 * @brief Get current (bot) user
 	 *
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+	 * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
 	 */
 	void current_user_get(command_completion_event_t callback);
 

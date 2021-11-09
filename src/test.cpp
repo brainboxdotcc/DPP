@@ -68,6 +68,7 @@ std::map<std::string, test_t> tests = {
 	{"MESSAGESGET", {"Get messages", false, false}},
 	{"TIMESTAMP", {"crossplatform_strptime()", false, false}},
 	{"ICONHASH", {"utility::iconhash", false, false}},
+	{"CURRENTUSER", {"cluster::current_user_get()", false, false}},
 };
 
 /**
@@ -124,6 +125,7 @@ int main()
 		set_test("CONNECTION", false);
 		set_test("GUILDCREATE", false);
 		set_test("ICONHASH", false);
+		set_test("CURRENTUSER", false);
 
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
@@ -269,6 +271,19 @@ int main()
 		catch (const std::exception & e) {
 			set_test("BOTSTART", false);
 		}
+
+		bot.current_user_get([&](const dpp::confirmation_callback_t &cc){
+			if (!cc.is_error()) {
+				dpp::user_identified ui = std::get<dpp::user_identified>(cc.value);
+				if (ui.id == bot.me.id) {
+					set_test("CURRENTUSER", true);
+				} else {
+					set_test("CURRENTUSER", false);
+				}
+			} else {
+				set_test("CURRENTUSER", false);
+			}
+		});
 
 		std::this_thread::sleep_for(std::chrono::seconds(TEST_TIMEOUT / 2));
 
