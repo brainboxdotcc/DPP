@@ -52,10 +52,12 @@ channel::channel() :
 	position(0),
 	last_message_id(0),
 	user_limit(0),
+	bitrate(0),
 	rate_limit_per_user(0),
 	owner_id(0),
 	parent_id(0),
-	last_pin_timestamp(0)
+	last_pin_timestamp(0),
+	permissions(0)
 {
 }
 
@@ -101,6 +103,20 @@ bool channel::is_store_channel() const {
 	return !is_stage_channel() && (flags & dpp::c_store);
 }
 
+bool channel::is_video_auto() const {
+	/* Note: c_video_auto has no real flag (its value is 0)
+	 * as absence of the 720p FULL quality flag indicates it must be
+	 * c_video_auto instead -- discord decided to put what is basically
+	 * a bool into two potential values, 1 and 2. hmmm...
+	 */
+	return !is_video_720p();
+}
+
+bool channel::is_video_720p() const {
+	return (flags & dpp::c_video_quality_720p);
+}
+
+
 bool thread::is_news_thread() const {
 	return flags & dpp::c_news_thread;
 }
@@ -129,6 +145,13 @@ thread& thread::fill_from_json(json* j) {
 	metadata.auto_archive_duration = Int16NotNull(&json_metadata, "auto_archive_duration");
 	metadata.locked = BoolNotNull(&json_metadata, "locked");
 
+	/* Only certain events set this */
+	if (j->find("member") != j->end())  {
+		member.fill_from_json(&((*j)["member"]));
+	}
+
+	SetStringNotNull(j, "rtc_region", rtc_region);
+	
 	return *this;
 }
 
@@ -161,6 +184,15 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
 	this->flags |= (type == GUILD_STAGE) ? dpp::c_stage : 0;
 
+	uint8_t vqm = Int8NotNull(j, "video_quality_mode");
+	if (vqm == 2) {
+		/* If this is set to 2, this means full quality 720p video for voice channel.
+		 * Undefined, or a value of 1 (the other two possibilities right now) means
+		 * video quality AUTO.
+		 */
+		this->flags |= dpp::c_video_quality_720p;
+	}
+
 	if (j->find("recipients") != j->end()) {
 		recipients = {};
 		for (auto & r : (*j)["recipients"]) {
@@ -178,6 +210,13 @@ channel& channel::fill_from_json(json* j) {
 			po.type = Int8NotNull(&overwrite, "type");
 			permission_overwrites.emplace_back(po);
 		}
+	}
+
+	/* Note: This is only set when the channel is in the resolved set from an interaction.
+	 * When set it contains the invokers permissions on channel. Any other time, contains 0.
+	 */
+	if (j->find("permissions") != j->end()) {
+		SetSnowflakeNotNull(j, "permissions", permissions);
 	}
 	
 	return *this;

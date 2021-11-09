@@ -40,31 +40,39 @@ enum channel_type {
 	GUILD_STAGE	= 13	//!< a "stage" channel, like a voice channel with one authorised speaker
 };
 /** @brief Our flags as stored in the object */
-enum channel_flags {
+enum channel_flags : uint16_t {
+	/**
+	 * @brief video quality mode 720p
+	 * This is a dummy value as it does nothing, in comparison to
+	 * c_video_quality_720p which actually sets the bit!
+	 */
+	c_video_quality_auto =	0b0000000000000000,
 	/// NSFW Gated Channel
-	c_nsfw =			0b00000001,
+	c_nsfw =		0b0000000000000001,
 	/// Text channel
-	c_text =			0b00000010,
+	c_text =		0b0000000000000010,
 	/// Direct Message
-	c_dm =				0b00000100,
+	c_dm =			0b0000000000000100,
 	/// Voice channel
-	c_voice =			0b00001000,
+	c_voice =		0b0000000000001000,
 	/// Group
-	c_group =			0b00010000,
+	c_group =		0b0000000000010000,
 	/// Category
-	c_category =		0b00100000,
+	c_category =		0b0000000000100000,
 	/// News channel
-	c_news =			0b01000000,
+	c_news =		0b0000000001000000,
 	/// Store page
-	c_store =			0b10000000,
+	c_store =		0b0000000010000000,
 	/// Stage channel
-	c_stage =			0b11000000,
+	c_stage =		0b0000000011000000,
 	/// News thread
-	c_news_thread =		0b11100000,
+	c_news_thread =		0b0000000011100000,
 	/// Public thread
-	c_public_thread = 	0b11110000,
+	c_public_thread = 	0b0000000011110000,
 	/// Private thread
-	c_private_thread =	0b11111000
+	c_private_thread =	0b0000000011111000,
+	/// Video quality forced to 720p
+	c_video_quality_720p =	0b0000000100000000
 };
 
 /**
@@ -141,7 +149,7 @@ typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 class DPP_EXPORT channel : public managed {
 public:
 	/** Flags bitmap */
-	uint8_t flags;
+	uint16_t flags;
 	
 	/** Guild id of the guild that owns the channel */
 	snowflake guild_id;
@@ -181,6 +189,19 @@ public:
 
 	/** Permission overwrites to apply to base permissions */
 	std::vector<permission_overwrite> permission_overwrites;
+
+	/**
+	 * @brief This is only filled when the channel is part of the `resolved` set
+	 * sent within an interaction. Any other time it contains zero. When filled,
+	 * it contains the calculated permission bitmask of the user issuing the command
+	 * within this channel.
+	 */
+	uint64_t permissions;
+
+	/**
+	 * @brief Voice region if set for voice channel, otherwise empty string
+	 */
+	std::string rtc_region;
 
 	/** Constructor */
 	channel();
@@ -291,6 +312,21 @@ public:
 	 * @return true if stage channel
 	 */
 	bool is_stage_channel() const;
+
+	/**
+	 * @brief Returns true if video quality is auto
+	 * 
+	 * @return true if video quality is auto
+	 */
+	bool is_video_auto() const;
+
+	/**
+	 * @brief Returns true if video quality is 720p
+	 * 
+	 * @return true if video quality is 720p
+	 */
+	bool is_video_720p() const;
+
 };
 
 /** @brief A definition of a discord thread.
@@ -307,6 +343,12 @@ public:
 
 	/** Thread metadata (threads) */
 	thread_metadata metadata;
+
+	/**
+	 * @brief Thread member of current user if joined to the thread.
+	 * Note this is only set by certain api calls otherwise contains default data
+	 */
+	thread_member member;
 
 	/**
 	 * @brief Construct a new thread object
