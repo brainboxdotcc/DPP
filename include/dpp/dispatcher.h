@@ -1111,9 +1111,9 @@ struct DPP_EXPORT thread_create_t : public event_dispatch_t {
 	 */
 	guild* creating_guild;
 	/**
-	 * @brief channel (thread) created
+	 * @brief thread created
 	 */
-	channel created;
+	thread created;
 };
 
 /** @brief Thread Update
@@ -1130,9 +1130,9 @@ struct DPP_EXPORT thread_update_t : public event_dispatch_t {
 	 */
 	guild* updating_guild;
 	/**
-	 * @brief channel (thread) updated
+	 * @brief thread updated
 	 */
-	channel updated;
+	thread updated;
 };
 
 /** @brief Thread Delete
@@ -1149,9 +1149,9 @@ struct DPP_EXPORT thread_delete_t : public event_dispatch_t {
 	 */
 	guild* deleting_guild;
 	/**
-	 * @brief channel (thread) deleted
+	 * @brief thread deleted
 	 */
-	channel deleted;
+	thread deleted;
 };
 
 /** @brief Thread List Sync
@@ -1170,7 +1170,7 @@ struct DPP_EXPORT thread_list_sync_t : public event_dispatch_t {
 	/**
 	 * @brief list of threads (channels) synchronised
 	 */
-	std::vector<channel> threads;
+	std::vector<thread> threads;
 	/**
 	 * @brief list of thread members for the channels (threads)
 	 */

@@ -55,9 +55,7 @@ channel::channel() :
 	rate_limit_per_user(0),
 	owner_id(0),
 	parent_id(0),
-	last_pin_timestamp(0),
-	message_count(0),
-	member_count(0)
+	last_pin_timestamp(0)
 {
 }
 
@@ -103,16 +101,41 @@ bool channel::is_store_channel() const {
 	return !is_stage_channel() && (flags & dpp::c_store);
 }
 
-bool channel::is_news_thread() const {
+bool thread::is_news_thread() const {
 	return flags & dpp::c_news_thread;
 }
 
-bool channel::is_public_thread() const {
+bool thread::is_public_thread() const {
 	return flags & dpp::c_public_thread;
 }
 
-bool channel::is_private_thread() const {
+bool thread::is_private_thread() const {
 	return flags & dpp::c_private_thread;
+}
+
+thread& thread::fill_from_json(json* j) {
+	channel::fill_from_json(j);
+
+	uint8_t type = Int8NotNull(j, "type");
+	this->flags |= (type == GUILD_NEWS_THREAD) ? dpp::c_news_thread : 0;
+	this->flags |= (type == GUILD_PUBLIC_THREAD) ? dpp::c_public_thread : 0;
+	this->flags |= (type == GUILD_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
+
+	SetInt8NotNull(j, "message_count", this->message_count);
+	SetInt8NotNull(j, "memeber_count", this->member_count);
+	auto json_metadata = (*j)["thread_metadata"];
+	metadata.archived = BoolNotNull(&json_metadata, "archived");
+	metadata.archive_timestamp = TimestampNotNull(&json_metadata, "archive_timestamp");
+	metadata.auto_archive_duration = Int16NotNull(&json_metadata, "auto_archive_duration");
+	metadata.locked = BoolNotNull(&json_metadata, "locked");
+
+	return *this;
+}
+
+thread::thread() : channel(), message_count(0), member_count(0) {
+}
+
+thread::~thread() {
 }
 
 channel& channel::fill_from_json(json* j) {
@@ -137,9 +160,6 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_NEWS) ? dpp::c_news : 0;
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
 	this->flags |= (type == GUILD_STAGE) ? dpp::c_stage : 0;
-	this->flags |= (type == GUILD_NEWS_THREAD) ? dpp::c_news_thread : 0;
-	this->flags |= (type == GUILD_PUBLIC_THREAD) ? dpp::c_public_thread : 0;
-	this->flags |= (type == GUILD_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
 
 	if (j->find("recipients") != j->end()) {
 		recipients = {};
@@ -160,17 +180,25 @@ channel& channel::fill_from_json(json* j) {
 		}
 	}
 	
-	if (type == GUILD_NEWS_THREAD || type == GUILD_PUBLIC_THREAD || type == GUILD_PRIVATE_THREAD) {
-		SetInt8NotNull(j, "message_count", this->message_count);
-		SetInt8NotNull(j, "memeber_count", this->member_count);
-		auto json_metadata = (*j)["thread_metadata"];
-		metadata.archived = BoolNotNull(&json_metadata, "archived");
-		metadata.archive_timestamp = TimestampNotNull(&json_metadata, "archive_timestamp");
-		metadata.auto_archive_duration = Int16NotNull(&json_metadata, "auto_archive_duration");
-		metadata.locked = BoolNotNull(&json_metadata, "locked");
-	}
-
 	return *this;
+}
+
+std::string thread::build_json(bool with_id) const {
+	json j = json::parse(channel::build_json(with_id));
+	if (is_news_thread()) {
+		/* News thread */
+		j["type"] = GUILD_NEWS_THREAD;
+		j["thread_metadata"] = this->metadata;
+	} else if (is_public_thread()) {
+		/* Public thread */
+		j["type"] = GUILD_PUBLIC_THREAD;
+		j["thread_metadata"] = this->metadata;
+	} else {
+		/* Private thread */
+		j["type"] = GUILD_PRIVATE_THREAD;
+		j["thread_metadata"] = this->metadata;
+	}
+	return j.dump();
 }
 
 std::string channel::build_json(bool with_id) const {
@@ -204,15 +232,6 @@ std::string channel::build_json(bool with_id) const {
 			j["type"] = GUILD_NEWS;
 		} else if (is_store_channel()) {
 			j["type"] = GUILD_STORE;
-		} else if (is_news_thread()) {
-			j["type"] = GUILD_NEWS_THREAD;
-			j["thread_metadata"] = this->metadata;
-		} else if (is_public_thread()) {
-			j["type"] = GUILD_PUBLIC_THREAD;
-			j["thread_metadata"] = this->metadata;
-		} else if (is_private_thread()) {
-			j["type"] = GUILD_PRIVATE_THREAD;
-			j["thread_metadata"] = this->metadata;
 		}
 		j["nsfw"] = is_nsfw();
 	} else {

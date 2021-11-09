@@ -133,7 +133,11 @@ struct DPP_EXPORT thread_member
 /** @brief A group of thread member objects*/
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
-/** @brief A definition of a discord channel */
+/**
+ * @brief A definition of a discord channel
+ * There are one of these for every channel type except threads. Threads are
+ * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
+ */ 
 class DPP_EXPORT channel : public managed {
 public:
 	/** Flags bitmap */
@@ -178,15 +182,6 @@ public:
 	/** Permission overwrites to apply to base permissions */
 	std::vector<permission_overwrite> permission_overwrites;
 
-	/** Approximate count of messages in a thread (threads) */
-	uint8_t message_count;
-
-	/** Approximate count of members in a thread (threads) */
-	uint8_t member_count;
-
-	/** Thread metadata (threads) */
-	thread_metadata metadata;
-
 	/** Constructor */
 	channel();
 
@@ -205,7 +200,7 @@ public:
 	 * @param with_id include the ID in the json
 	 * @return std::string JSON string
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Get the user permissions for a user on this channel
@@ -290,27 +285,6 @@ public:
 	 */
 	bool is_store_channel() const;
 
-	/*
-	 * @brief Returns true if the channel is a news thread
-	 *
-	 * @return true if news thread
-	 */
-	bool is_news_thread() const;
-
-	/*
-	 * @brief Returns true if the channel is a public thread
-	 *
-	 * @return true if public thread
-	 */
-	bool is_public_thread() const;
-
-	/*
-	 * @brief Returns true if the channel is a private thread
-	 *
-	 * @return true if private thread
-	 */
-	bool is_private_thread() const;
-
 	/**
 	 * @brief Returns true if the channel is a stage channel
 	 * 
@@ -318,6 +292,69 @@ public:
 	 */
 	bool is_stage_channel() const;
 };
+
+/** @brief A definition of a discord thread.
+ * A thread is a superset of a channel. Not to be confused with `std::thread`!
+ */
+class DPP_EXPORT thread : public channel {
+public:
+
+	/** Approximate count of messages in a thread (threads) */
+	uint8_t message_count;
+
+	/** Approximate count of members in a thread (threads) */
+	uint8_t member_count;
+
+	/** Thread metadata (threads) */
+	thread_metadata metadata;
+
+	/**
+	 * @brief Construct a new thread object
+	 */
+	thread();
+
+	/**
+	 * @brief Returns true if the channel is a news thread
+	 *
+	 * @return true if news thread
+	 */
+	bool is_news_thread() const;
+
+	/**
+	 * @brief Returns true if the channel is a public thread
+	 *
+	 * @return true if public thread
+	 */
+	bool is_public_thread() const;
+
+	/**
+	 * @brief Returns true if the channel is a private thread
+	 *
+	 * @return true if private thread
+	 */
+	bool is_private_thread() const;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	thread& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Destroy the thread object
+	 */
+	virtual ~thread();
+
+	/**
+	 * @brief Build json for this thread object
+	 * 
+	 * @param with_id include the ID in the json
+	 * @return std::string JSON string
+	 */
+	virtual std::string build_json(bool with_id = false) const;
+
+};
+
 
 /*
  * @brief Serialize a thread_metadata object to json
@@ -331,6 +368,11 @@ void to_json(nlohmann::json& j, const thread_metadata& tmdata);
  * @brief A group of channels
  */
 typedef std::unordered_map<snowflake, channel> channel_map;
+
+/**
+ * @brief A group of threads
+ */
+typedef std::unordered_map<snowflake, thread> thread_map;
 
 };
 

@@ -123,7 +123,9 @@ typedef std::variant<
 		application,
 		application_map,
 		connection,
-		connection_map
+		connection_map,
+		thread,
+		thread_map
 	> confirmable_t;
 
 /**
@@ -2855,7 +2857,7 @@ public:
 	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
 	 * @param thread_type Type of thread - GUILD_PUBLIC_THREAD, GUILD_NEWS_THREAD, GUILD_PRIVATE_THREAD
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, command_completion_event_t callback = {});
 
@@ -2868,7 +2870,7 @@ public:
 	 * @param message_id message to start thread with
 	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, command_completion_event_t callback = {});
 
@@ -2918,7 +2920,7 @@ public:
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_thread_member(const snowflake thread_id, const snowflake user_id, command_completion_event_t callback);
+	void thread_member_get(const snowflake thread_id, const snowflake user_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get members of a thread
@@ -2927,16 +2929,16 @@ public:
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_thread_members(snowflake thread_id, command_completion_event_t callback);
+	void thread_members_get(snowflake thread_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get active threads in a channel (Sorted by ID in descending order)
 	 *
 	 * @param channel_id Channel to get active threads for
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_active_threads(snowflake channel_id, command_completion_event_t callback);
+	void threads_get_active(snowflake channel_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
@@ -2945,9 +2947,9 @@ public:
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_public_archived_threads(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
+	void threads_get_public_archived(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
@@ -2956,9 +2958,9 @@ public:
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_private_archived_threads(snowflake channel_id,  time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
+	void threads_get_private_archived(snowflake channel_id,  time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
@@ -2968,9 +2970,9 @@ public:
 	 * @param before_id Get threads before this id
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_joined_private_archived_threads(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback);
+	void threads_get_joined_private_archived(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a sticker in a guild

@@ -39,7 +39,7 @@ using namespace dpp;
 void thread_delete::handle(discord_client* client, json& j, const std::string& raw) {
 	json& d = j["d"];
 
-	dpp::channel t;
+	dpp::thread t;
 	t.fill_from_json(&d);
 	dpp::guild* g = dpp::find_guild(t.guild_id);
 	if (g) {
