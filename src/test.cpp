@@ -69,6 +69,8 @@ std::map<std::string, test_t> tests = {
 	{"TIMESTAMP", {"crossplatform_strptime()", false, false}},
 	{"ICONHASH", {"utility::iconhash", false, false}},
 	{"CURRENTUSER", {"cluster::current_user_get()", false, false}},
+	{"GETGUILD", {"cluster::guild_get()", false, false}},
+	{"GETCHAN", {"cluster::channel_get()", false, false}},
 };
 
 /**
@@ -126,6 +128,8 @@ int main()
 		set_test("GUILDCREATE", false);
 		set_test("ICONHASH", false);
 		set_test("CURRENTUSER", false);
+		set_test("GETGUILD", false);
+		set_test("GETCHAN", false);
 
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
@@ -272,7 +276,7 @@ int main()
 			set_test("BOTSTART", false);
 		}
 
-		bot.current_user_get([&](const dpp::confirmation_callback_t &cc){
+		bot.current_user_get([&](const dpp::confirmation_callback_t &cc) {
 			if (!cc.is_error()) {
 				dpp::user_identified ui = std::get<dpp::user_identified>(cc.value);
 				if (ui.id == bot.me.id) {
@@ -282,6 +286,32 @@ int main()
 				}
 			} else {
 				set_test("CURRENTUSER", false);
+			}
+		});
+
+		bot.channel_get(TEST_TEXT_CHANNEL_ID, [&](const dpp::confirmation_callback_t &cc) {
+			if (!cc.is_error()) {
+				dpp::channel c = std::get<dpp::channel>(cc.value);
+				if (c.id == TEST_TEXT_CHANNEL_ID) {
+					set_test("GETCHAN", true);
+				} else {
+					set_test("GETCHAN", false);
+				}
+			} else {
+				set_test("GETCHAN", false);
+			}
+		});
+
+		bot.guild_get(TEST_GUILD_ID, [&](const dpp::confirmation_callback_t &cc) {
+			if (!cc.is_error()) {
+				dpp::guild g = std::get<dpp::guild>(cc.value);
+				if (g.id == TEST_GUILD_ID) {
+					set_test("GETGUILD", true);
+				} else {
+					set_test("GETGUILD", false);
+				}
+			} else {
+				set_test("GETGUILD", false);
 			}
 		});
 
