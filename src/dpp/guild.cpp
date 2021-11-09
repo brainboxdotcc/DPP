@@ -72,14 +72,13 @@ guild::guild() :
 	shard_id(0),
 	flags(0),
 	owner_id(0),
-	voice_region(r_us_central),
 	afk_channel_id(0),
 	afk_timeout(0),
 	widget_channel_id(0),
-	verification_level(0),
+	verification_level(ver_none),
 	default_message_notifications(0),
-	explicit_content_filter(0),
-	mfa_level(0),
+	explicit_content_filter(expl_disabled),
+	mfa_level(mfa_none),
 	application_id(0),
 	system_channel_id(0),
 	rules_channel_id(0),
@@ -87,7 +86,10 @@ guild::guild() :
 	premium_tier(0),
 	premium_subscription_count(0),
 	public_updates_channel_id(0),
-	max_video_channel_users(0)
+	max_video_channel_users(0),
+	max_presences(0),
+	max_members(0),
+	nsfw_level(nsfw_default)
 {
 }
 
@@ -339,12 +341,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			this->discovery_splash = _dsplash;
 		}
 		SetSnowflakeNotNull(d, "owner_id", this->owner_id);
-		if (!(*d)["region"].is_null()) {
-			auto r = regionmap.find((*d)["region"].get<std::string>());
-			if (r != regionmap.end()) {
-				this->voice_region = r->second;
-			}
-		}
+
 		this->flags |= BoolNotNull(d, "large") ? dpp::g_large : 0;
 		this->flags |= BoolNotNull(d, "widget_enabled") ? dpp::g_widget_enabled : 0;
 
@@ -365,10 +362,10 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		SetSnowflakeNotNull(d, "afk_channel_id", this->afk_channel_id);
 		SetInt8NotNull(d, "afk_timeout", this->afk_timeout);
 		SetSnowflakeNotNull(d, "widget_channel_id", this->widget_channel_id);
-		SetInt8NotNull(d, "verification_level", this->verification_level);
+		this->verification_level = (verification_level_t)Int8NotNull(d, "verification_level");
 		SetInt8NotNull(d, "default_message_notifications", this->default_message_notifications);
-		SetInt8NotNull(d, "explicit_content_filter", this->explicit_content_filter);
-		SetInt8NotNull(d, "mfa_level", this->mfa_level);
+		this->explicit_content_filter = (guild_explicit_content_t)Int8NotNull(d, "explicit_content_filter");
+		this->mfa_level = (mfa_level_t)Int8NotNull(d, "mfa_level");
 		SetSnowflakeNotNull(d, "application_id", this->application_id);
 		SetSnowflakeNotNull(d, "system_channel_id", this->system_channel_id);
 		SetSnowflakeNotNull(d, "rules_channel_id", this->rules_channel_id);
@@ -397,6 +394,11 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		SetInt16NotNull(d, "premium_subscription_count", this->premium_subscription_count);
 		SetSnowflakeNotNull(d, "public_updates_channel_id", this->public_updates_channel_id);
 		SetInt16NotNull(d, "max_video_channel_users", this->max_video_channel_users);
+
+		SetInt32NotNull(d, "max_presences", this->max_presences);
+		SetInt32NotNull(d, "max_members", this->max_members);
+
+		this->nsfw_level = (guild_nsfw_level_t)Int8NotNull(d, "nsfw_level");
 
 		if (d->find("welcome_screen") != d->end()) {
 			json& w = (*d)["welcome_screen"];

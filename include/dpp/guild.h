@@ -193,6 +193,62 @@ struct welcome_screen_t {
 	std::vector<welcome_channel_t> welcome_channels;
 };
 
+/**
+ * @brief Guild NSFW level.
+ * Used to represent just how naughty this guild is. Naughty  guild, go sit in the corner.
+ */
+enum guild_nsfw_level_t : uint8_t {
+	/// Default, not set by owner
+	nsfw_default		=	0,
+	/// Explicit
+	nsfw_explicit		=	1,
+	/// Safe for work
+	nsfw_safe		=	2,
+	/// Age restricted, 18+
+	nsfw_age_restricted	=	3
+};
+
+/**
+ * @brief explicit content filter level.
+ * This is set by a guild admin, but can be forced to a setting if the server is verified,
+ * partnered, official etc.
+ */
+enum guild_explicit_content_t : uint8_t {
+	/// media content will not be scanned
+	expl_disabled =			0,
+	/// media content sent by members without roles will be scanned
+	expl_members_without_roles =	1,
+	/// media content sent by all members will be scanned
+	expl_all_members =		2
+};
+
+/**
+ * @brief MFA level for server. If set to elevated all moderators need MFA to perform specific
+ * actions such as kick or ban.
+ */
+enum mfa_level_t : uint8_t {
+	/// MFA not elevated
+	mfa_none = 0,
+	/// MFA elevated
+	mfa_elevated = 1
+};
+
+/**
+ * @brief Guild verification level
+ */
+enum verification_level_t : uint8_t {
+	/// unrestricted
+	ver_none =	0,
+	/// must have verified email on account
+	ver_low	= 	1,
+	/// must be registered on Discord for longer than 5 minutes
+	ver_medium =	2,
+	/// must be a member of the server for longer than 10 minutes
+	ver_high =	3,
+	/// must have a verified phone number
+	ver_very_high =	4,
+};
+
 /** @brief Guild members container
  */
 typedef std::unordered_map<snowflake, guild_member> members_container;
@@ -229,9 +285,6 @@ public:
 	/** Snowflake id of guild owner */
 	snowflake owner_id;
 
-	/** Guild voice region */
-	region voice_region;
-
 	/** Snowflake ID of AFK voice channel or 0 */
 	snowflake afk_channel_id;
 
@@ -242,16 +295,16 @@ public:
 	snowflake widget_channel_id;
 
 	/** Verification level of server */
-	uint8_t verification_level;
+	verification_level_t verification_level;
 
 	/** Setting for how notifications are to be delivered to users */
 	uint8_t default_message_notifications;
 
 	/** Whether or not explicit content filtering is enable and what setting it is */
-	uint8_t explicit_content_filter;
+	guild_explicit_content_t explicit_content_filter;
 
 	/** If multi factor authentication is required for moderators or not */
-	uint8_t mfa_level;
+	mfa_level_t mfa_level;
 
 	/** ID of creating application, if any, or 0 */
 	snowflake application_id;
@@ -307,6 +360,22 @@ public:
 	/** Welcome screen
 	 */
 	welcome_screen_t welcome_screen;
+
+	/**
+	 * @brief the maximum number of presences for the guild.
+	 * @note Generally Discord always fills this with 0, apart from for the largest of guilds
+	 */
+	uint32_t max_presences;
+
+	/**
+	 * @brief the maximum number of members for the guild
+	 */
+	uint32_t max_members;
+
+	/**
+	 * @brief Guild NSFW level
+	 */
+	guild_nsfw_level_t nsfw_level;
 
 	/** Default constructor, zeroes all values */
 	guild();
