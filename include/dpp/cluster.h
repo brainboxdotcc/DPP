@@ -2079,7 +2079,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void pins_get(snowflake channel_id, command_completion_event_t callback);
+	void channel_pins_get(snowflake channel_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Adds a recipient to a Group DM using their access token
@@ -2524,7 +2524,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_guild_invites(snowflake guild_id, command_completion_event_t callback);
+	void guild_get_invites(snowflake guild_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get guild itegrations

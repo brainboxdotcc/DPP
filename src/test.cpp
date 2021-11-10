@@ -18,107 +18,13 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#undef DPP_BUILD
-#ifdef _WIN32
-_Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
-#endif
-#include <dpp/dpp.h>
-#include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include "test.h"
  
-using json = nlohmann::json;
-
-/* Represents a test case */
-struct test_t {
-	/* Description of test */
-	std::string description;
-	/* Has been executed */
-	bool executed = false;
-	/* Was successfully tested */
-	bool success = false;
-};
-
-/* How long the unit tests can run for */
-const int64_t TEST_TIMEOUT = 60;
-
-/* IDs of various channels and guilds used to test */
-const dpp::snowflake TEST_GUILD_ID = 825407338755653642;
-const dpp::snowflake TEST_TEXT_CHANNEL_ID = 828681546533437471;
-const dpp::snowflake TEST_VC_ID = 825411635631095858;
-const dpp::snowflake TEST_USER_ID = 826535422381391913;
-
-/* Current list of unit tests */
-std::map<std::string, test_t> tests = {
-	{"CLUSTER", {"Instantiate DPP cluster", false, false}},
-	{"BOTSTART", {"cluster::start method", false, false}},
-	{"CONNECTION", {"Connection to client websocket", false, false}},
-	{"APPCOMMAND", {"Creation of application command", false, false}},
-	{"DELCOMMAND", {"Deletion of application command", false, false}},
-	{"LOGGER", {"Log events", false, false}},
-	{"MESSAGECREATE", {"Creation of a channel message", false, false}},
-	{"MESSAGEDELETE", {"Deletion of a channel message", false, false}},
-	{"MESSAGERECEIVE", {"Receipt of a created message", false, false}},
-	{"CACHE", {"Test guild cache", false, false}},
-	{"USERCACHE", {"Test user cache", false, false}},
-	{"VOICECONN", {"Connect to voice channel", false, false}},
-	{"VOICESEND", {"Send audio to voice channel", false, false}},
-	{"REACT", {"React to a message", false, false}},
-	{"REACTEVENT", {"Reaction event", false, false}},
-	{"GUILDCREATE", {"Receive guild create event", false, false}},
-	{"MESSAGESGET", {"Get messages", false, false}},
-	{"TIMESTAMP", {"crossplatform_strptime()", false, false}},
-	{"ICONHASH", {"utility::iconhash", false, false}},
-	{"CURRENTUSER", {"cluster::current_user_get()", false, false}},
-	{"GETGUILD", {"cluster::guild_get()", false, false}},
-	{"GETCHAN", {"cluster::channel_get()", false, false}},
-};
-
-/**
- * @brief Sets a test's status
- * 
- * @param testname test name (key) to set the status of
- * @param success If set to true, sets success to true, if set to false and called
- * once, sets executed to true, if called twice, also sets success to false.
- * This means that before you run the test you should call this function once
- * with success set to false, then if/wen the test completes call it again with true.
- * If the test fails, call it a second time with false, or not at all.
- */
-void set_test(const std::string testname, bool success = false) {
-	auto i = tests.find(testname);
-	if (i != tests.end()) {
-		if (!i->second.executed) {
-			std::cout << "[\u001b[33mTESTING\u001b[0m] " << i->second.description << "\n";
-		} else if (!success) {
-			std::cout << "[\u001b[31mFAILED\u001b[0m] " << i->second.description << "\n";
-		}
-		i->second.executed = true;
-		if (success) {
-			i->second.success = true;
-			std::cout << "[\u001b[32mSUCCESS\u001b[0m] " << i->second.description << "\n";
-		}
-	}
-}
-
 /* Unit tests go here */
 int main()
 {
-	char* t = getenv("DPP_UNIT_TEST_TOKEN");
-	if (!t) {
-		std::cerr << "\u001b[31mDPP_UNIT_TEST_TOKEN not defined -- this is likely a fork.\n\nNot running unit tests.\u001b[0m\n";
-		return 0;
-	}
-	std::string token(t);
-
-	uint8_t* testaudio = nullptr;
-	size_t testaudio_size = 0;
-	std::ifstream input ("../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
-	if (input.is_open()) {
-		testaudio_size = input.tellg();
-		testaudio = new uint8_t[testaudio_size];
-		input.seekg (0, std::ios::beg);
-		input.read ((char*)testaudio, testaudio_size);
-		input.close();
-	}
+	std::string token(get_token());
+	std::vector<uint8_t> testaudio = load_test_audio();
 
 	set_test("CLUSTER", false);
 	try {
@@ -127,9 +33,6 @@ int main()
 		set_test("CONNECTION", false);
 		set_test("GUILDCREATE", false);
 		set_test("ICONHASH", false);
-		set_test("CURRENTUSER", false);
-		set_test("GETGUILD", false);
-		set_test("GETCHAN", false);
 
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
@@ -205,8 +108,12 @@ int main()
 				});
 		});
 
+		std::mutex loglock;
 		bot.on_log([&](const dpp::log_t & event) {
-			std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+			std::lock_guard<std::mutex> locker(loglock);
+			if (event.severity > dpp::ll_trace) {
+				std::cout << "[" << fmt::format("{:3.03f}", dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+			}
 			if (event.message == "Test log message") {
 				set_test("LOGGER", true);
 			}
@@ -223,7 +130,7 @@ int main()
 			dpp::discord_voice_client* v = event.voice_client;
 			set_test("VOICESEND", false);
 			if (v && v->is_ready()) {
-				v->send_audio_raw((uint16_t*)testaudio, testaudio_size);
+				v->send_audio_raw((uint16_t*)testaudio.data(), testaudio.size());
 			} else {
 				set_test("VOICESEND", false);
 			}
@@ -276,71 +183,28 @@ int main()
 			set_test("BOTSTART", false);
 		}
 
-		bot.current_user_get([&](const dpp::confirmation_callback_t &cc) {
-			if (!cc.is_error()) {
-				dpp::user_identified ui = std::get<dpp::user_identified>(cc.value);
-				if (ui.id == bot.me.id) {
-					set_test("CURRENTUSER", true);
-				} else {
-					set_test("CURRENTUSER", false);
-				}
-			} else {
-				set_test("CURRENTUSER", false);
-			}
-		});
+		noparam_api_test(current_user_get, dpp::user_identified, "CURRENTUSER");
+		singleparam_api_test(channel_get, TEST_TEXT_CHANNEL_ID, dpp::channel, "GETCHAN");
+		singleparam_api_test(guild_get, TEST_GUILD_ID, dpp::guild, "GETGUILD");
+		singleparam_api_test_list(roles_get, TEST_GUILD_ID, dpp::role_map, "GETROLES");
+		singleparam_api_test_list(channels_get, TEST_GUILD_ID, dpp::channel_map, "GETCHANS");
+		singleparam_api_test_list(guild_get_invites, TEST_GUILD_ID, dpp::invite_map, "GETINVS");
+		singleparam_api_test_list(guild_get_bans, TEST_GUILD_ID, dpp::ban_map, "GETBANS");
+		singleparam_api_test_list(channel_pins_get, TEST_TEXT_CHANNEL_ID, dpp::message_map, "GETPINS");
 
-		bot.channel_get(TEST_TEXT_CHANNEL_ID, [&](const dpp::confirmation_callback_t &cc) {
-			if (!cc.is_error()) {
-				dpp::channel c = std::get<dpp::channel>(cc.value);
-				if (c.id == TEST_TEXT_CHANNEL_ID) {
-					set_test("GETCHAN", true);
-				} else {
-					set_test("GETCHAN", false);
-				}
-			} else {
-				set_test("GETCHAN", false);
-			}
-		});
-
-		bot.guild_get(TEST_GUILD_ID, [&](const dpp::confirmation_callback_t &cc) {
-			if (!cc.is_error()) {
-				dpp::guild g = std::get<dpp::guild>(cc.value);
-				if (g.id == TEST_GUILD_ID) {
-					set_test("GETGUILD", true);
-				} else {
-					set_test("GETGUILD", false);
-				}
-			} else {
-				set_test("GETGUILD", false);
-			}
-		});
-
-		std::this_thread::sleep_for(std::chrono::seconds(TEST_TIMEOUT / 2));
+		std::this_thread::sleep_for(std::chrono::seconds(5));
 
 		set_test("USERCACHE", false);
 		dpp::user* u = dpp::find_user(TEST_USER_ID);
 		set_test("USERCACHE", u);
 
-		std::this_thread::sleep_for(std::chrono::seconds(TEST_TIMEOUT / 2));
+		wait_for_tests();
 
 	}
 	catch (const std::exception & e) {
 		set_test("CLUSTER", false);
 	}
 
-	/* Report on all test cases */
-	uint16_t failed = 0, passed = 0;
-	fmt::print("\u001b[37;1m\n\nUNIT TEST SUMMARY\n==================\n\u001b[0m");
-	for (auto & t : tests) {
-		if (t.second.success == false || t.second.executed == false) {
-			failed++;
-		} else {
-			passed++;
-		}
-		fmt::print("{:50s} {:6s}\u001b[0m\n", t.second.description, t.second.executed && t.second.success ? "\u001b[32mPASS" : "\u001b[31mFAIL");
-	}
-	fmt::print("\u001b[37;1m\nFailed: {} Passed: {} Percentage: {:.02f}%\u001b[0m\n", failed, passed, (float)(passed) / (float)(tests.size()) * 100.0f);
-
 	/* Return value = number of failed tests, exit code 0 = success */
-	return failed;
+	return test_summary();
 }

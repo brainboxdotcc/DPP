@@ -246,7 +246,7 @@ void cluster::message_unpin(snowflake channel_id, snowflake message_id, command_
 }
 
 
-void cluster::pins_get(snowflake channel_id, command_completion_event_t callback) {
+void cluster::channel_pins_get(snowflake channel_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "pins", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		message_map pins_messages;
 		confirmation_callback_t e("confirmation", confirmation(), http);
