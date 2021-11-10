@@ -183,12 +183,12 @@ slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
 }
 
 slashcommand& slashcommand::set_name(const std::string &n) {
-	name = n;
+	name = utility::utf8substr(n, 0, 32);
 	return *this;
 }
 
 slashcommand& slashcommand::set_description(const std::string &d) {
-	description = d;
+	description = utility::utf8substr(d, 0, 100);
 	return *this;
 }
 
