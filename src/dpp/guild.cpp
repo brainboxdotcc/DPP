@@ -362,7 +362,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			this->flags |= dpp::g_no_setup_tips;
 		}
 		if (scf & 8) {
-a			this->flags |= dpp::g_no_sticker_greeting;
+			this->flags |= dpp::g_no_sticker_greeting;
 		}
 
 		SetSnowflakeNotNull(d, "afk_channel_id", this->afk_channel_id);
