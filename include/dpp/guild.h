@@ -30,7 +30,8 @@ namespace dpp {
 
 /**
  * @brief Represents voice regions for guilds and channels.
- * @note Largely deprecated in favour of per-channel regions.
+ * @deprecated Deprecated in favour of per-channel regions.
+ * Please use channel::rtc_region instead.
  */
 enum region : uint8_t {
 	r_brazil,		//!< Brazil
@@ -54,53 +55,67 @@ enum region : uint8_t {
  */
 enum guild_flags : uint32_t {
 	/** Large guild */
-	g_large =				0b000000000000000000000001,
+	g_large =				0b00000000000000000000000000000001,
 	/** Unavailable guild (inaccessible due to an outage) */
-	g_unavailable = 			0b000000000000000000000010,
+	g_unavailable = 			0b00000000000000000000000000000010,
 	/** Guild has widget enabled */
-	g_widget_enabled =			0b000000000000000000000100,
+	g_widget_enabled =			0b00000000000000000000000000000100,
 	/** Guild can  have an invite splash image */
-	g_invite_splash =			0b000000000000000000001000,
+	g_invite_splash =			0b00000000000000000000000000001000,
 	/** Guild can have VIP regions */
-	g_vip_regions =				0b000000000000000000010000,
+	g_vip_regions =				0b00000000000000000000000000010000,
 	/** Guild can have a vanity url */
-	g_vanity_url =				0b000000000000000000100000,
+	g_vanity_url =				0b00000000000000000000000000100000,
 	/** Guild is verified */
-	g_verified =				0b000000000000000001000000,
+	g_verified =				0b00000000000000000000000001000000,
 	/** Guild is partnered */
-	g_partnered =				0b000000000000000010000000,
+	g_partnered =				0b00000000000000000000000010000000,
 	/** Community features enabled */
-	g_community =				0b000000000000000100000000,
+	g_community =				0b00000000000000000000000100000000,
 	/** Guild has commerce features enabled */
-	g_commerce =				0b000000000000001000000000,
+	g_commerce =				0b00000000000000000000001000000000,
 	/** Guild has news features enabled */
-	g_news =				0b000000000000010000000000,
+	g_news =				0b00000000000000000000010000000000,
 	/** Guild is discoverable in discovery */
-	g_discoverable =			0b000000000000100000000000,
+	g_discoverable =			0b00000000000000000000100000000000,
 	/** Guild is featureable */
-	g_featureable =				0b000000000001000000000000,
+	g_featureable =				0b00000000000000000001000000000000,
 	/** Guild can have an animated icon (doesn't mean it actually has one though) */
-	g_animated_icon =			0b000000000010000000000000,
+	g_animated_icon =			0b00000000000000000010000000000000,
 	/** Guild can have a banner image */
-	g_banner =				0b000000000100000000000000,
+	g_banner =				0b00000000000000000100000000000000,
 	/** Guild has a welcome screen */
-	g_welcome_screen_enabled =		0b000000001000000000000000,
+	g_welcome_screen_enabled =		0b00000000000000001000000000000000,
 	/** Guild has a member verification gate */
-	g_member_verification_gate =		0b000000010000000000000000,
+	g_member_verification_gate =		0b00000000000000010000000000000000,
 	/** Guild has a preview */
-	g_preview_enabled =			0b000000100000000000000000,
+	g_preview_enabled =			0b00000000000000100000000000000000,
 	/** Guild join notifications are off */
-	g_no_join_notifications =		0b000001000000000000000000,
+	g_no_join_notifications =		0b00000000000001000000000000000000,
 	/** Guild boost notifications are off */
-	g_no_boost_notifications =		0b000010000000000000000000,
+	g_no_boost_notifications =		0b00000000000010000000000000000000,
 	/** Guild has an actual animated icon (set by the icon hash starting with 'a_') */
-	g_has_animated_icon =			0b000100000000000000000000,
+	g_has_animated_icon =			0b00000000000100000000000000000000,
 	/** Guild has an actual animated banner (set by the icon hash starting with 'a_') */
-	g_has_animated_banner =			0b001000000000000000000000,
+	g_has_animated_banner =			0b00000000001000000000000000000000,
 	/** Guild setup tips are off */
-	g_no_setup_tips =			0b010000000000000000000000,
+	g_no_setup_tips =			0b00000000010000000000000000000000,
 	/** "Wave to say hi" sticker prompt buttons are off */
-	g_no_sticker_greeting =			0b100000000000000000000000
+	g_no_sticker_greeting =			0b00000000100000000000000000000000,
+	/** guild has enabled monetization */
+	g_monetization_enabled =		0b00000001000000000000000000000000,
+	/** guild has increased custom sticker slots */
+	g_more_stickers =			0b00000010000000000000000000000000,
+	/** guild has access to create private threads */
+	g_private_threads =			0b00000100000000000000000000000000,
+	/** guild is able to set role icons */
+	g_role_icons =				0b00001000000000000000000000000000,
+	/** guild has access to the seven day archive time for threads */
+	g_seven_day_thread_archive =		0b00010000000000000000000000000000,
+	/** guild has access to the three day archive time for threads */
+	g_three_day_thread_archive =		0b00100000000000000000000000000000,
+	/** guild has enabled ticketed events */
+	g_ticketed_events =			0b01000000000000000000000000000000,
 };
 
 /**
@@ -588,6 +603,49 @@ public:
 	 * @return bool is animated gif
 	 */
 	bool has_animated_banner_icon_hash() const;
+
+
+	/**
+	 * @brief guild has access to monetization features
+	 * @return bool 
+	 */
+	bool has_monetization_enabled() const;
+
+	/**
+	 * @brief guild has increased custom sticker slots
+	 * @return bool has more stickers
+	 */
+	bool has_more_stickers() const;
+
+	/**
+	 * @brief guild has access to create private threads
+	 * @return bool has private threads
+	 */
+	bool has_private_threads() const;
+
+	/**
+	 * @brief guild is able to set role icons
+	 * @return bool has role icons
+	 */
+	bool has_role_icons() const;
+
+	/**
+	 * @brief guild has access to the seven day archive time for threads 
+	 * @return bool has seven day thread archive
+	 */
+	bool has_seven_day_thread_archive() const;
+
+	/**
+	 * @brief guild has access to the three day archive time for threads
+	 * @return bool has three day thread archive
+	 */
+	bool has_three_day_thread_archive() const;
+
+	/**
+	 * @brief guild has enabled ticketed events
+	 * @return bool has ticketed events
+	 */
+	bool has_ticketed_events() const;
 };
 
 /** A container of guilds */

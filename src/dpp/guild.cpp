@@ -44,26 +44,15 @@ std::map<std::string, dpp::guild_flags> featuremap = {
 	{"BANNER", dpp::g_banner },
 	{"WELCOME_SCREEN_ENABLED", dpp::g_welcome_screen_enabled },
 	{"MEMBER_VERIFICATION_GATE_ENABLED", dpp::g_member_verification_gate },
-	{"PREVIEW_ENABLED", dpp::g_preview_enabled }
+	{"PREVIEW_ENABLED", dpp::g_preview_enabled },
+	{"MONETIZATION_ENABLED", dpp::g_monetization_enabled },
+	{"MORE_STICKERS", dpp::g_more_stickers },
+	{"PRIVATE_THREADS", dpp::g_private_threads },
+	{"ROLE_ICONS", dpp::g_role_icons },
+	{"SEVEN_DAY_THREAD_ARCHIVE", dpp::g_seven_day_thread_archive },
+	{"THREE_DAY_THREAD_ARCHIVE", dpp::g_three_day_thread_archive },
+	{"TICKETED_EVENTS_ENABLED", dpp::g_ticketed_events },
 };
-
-std::map<std::string, dpp::region> regionmap = {
-	{ "brazil", dpp::r_brazil },
-	{ "central-europe", dpp::r_central_europe },
-	{ "hong-kong", dpp::r_hong_kong },
-	{ "india", dpp::r_india },
-	{ "japan",  dpp::r_japan },
-	{ "russia", dpp::r_russia },
-	{ "singapore", dpp::r_singapore },
-	{ "south-africa", dpp::r_south_africa },
-	{ "sydney", dpp::r_sydney },
-	{ "us-central", dpp::r_us_central },
-	{ "us-east", dpp::r_us_east },
-	{ "us-south", dpp::r_us_south },
-	{ "us-west", dpp::r_us_west },
-	{ "western-europe", dpp::r_western_europe }
-};
-
 
 namespace dpp {
 
@@ -264,6 +253,34 @@ bool guild::has_animated_icon_hash() const {
 
 bool guild::has_animated_banner_icon_hash() const {
 	return this->flags & g_has_animated_banner;
+}
+
+bool guild::has_monetization_enabled() const {
+	return this->flags & g_monetization_enabled;
+}
+
+bool guild::has_more_stickers() const {
+	return this->flags & g_more_stickers;
+}
+
+bool guild::has_private_threads() const {
+	return this->flags & g_private_threads;
+}
+
+bool guild::has_role_icons() const {
+	return this->flags & g_role_icons;
+}
+
+bool guild::has_seven_day_thread_archive() const {
+	return this->flags & g_seven_day_thread_archive;
+}
+
+bool guild::has_three_day_thread_archive() const {
+	return this->flags & g_three_day_thread_archive;
+}
+
+bool guild::has_ticketed_events() const {
+	return this->flags & g_ticketed_events;
 }
 
 std::string guild::build_json(bool with_id) const {
