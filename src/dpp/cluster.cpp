@@ -324,8 +324,53 @@ bool cluster::detach_interaction_create(const event_handle _interaction_create) 
 	detach(dispatch.interaction_create, _interaction_create);
 }
 
+event_handle cluster::on_guild_scheduled_event_create (std::function<void(const guild_scheduled_event_create_t& _event)> _guild_scheduled_event_create) {
+	dispatch.guild_scheduled_event_create.emplace_back(_guild_scheduled_event_create);
+	return (event_handle)*(size_t *)(char *)&_guild_scheduled_event_create;
+}
+
+bool cluster::detach_guild_scheduled_event_create(const event_handle _guild_scheduled_event_create) {
+	detach(dispatch.guild_scheduled_event_create, _guild_scheduled_event_create);
+}
+
+event_handle cluster::on_guild_scheduled_event_update (std::function<void(const guild_scheduled_event_update_t& _event)> _guild_scheduled_event_update) {
+	dispatch.guild_scheduled_event_update.emplace_back(_guild_scheduled_event_update);
+	return (event_handle)*(size_t *)(char *)&_guild_scheduled_event_update;
+}
+
+bool cluster::detach_guild_scheduled_event_update(const event_handle _guild_scheduled_event_update) {
+	detach(dispatch.guild_scheduled_event_update, _guild_scheduled_event_update);
+}
+
+event_handle cluster::on_guild_scheduled_event_delete (std::function<void(const guild_scheduled_event_delete_t& _event)> _guild_scheduled_event_delete) {
+	dispatch.guild_scheduled_event_delete.emplace_back(_guild_scheduled_event_delete);
+	return (event_handle)*(size_t *)(char *)&_guild_scheduled_event_delete;
+}
+
+bool cluster::detach_guild_scheduled_event_delete(const event_handle _guild_scheduled_event_delete) {
+	detach(dispatch.guild_scheduled_event_delete, _guild_scheduled_event_delete);
+}
+
+event_handle cluster::on_guild_scheduled_event_user_add (std::function<void(const guild_scheduled_event_user_add_t& _event)> _guild_scheduled_event_user_add) {
+	dispatch.guild_scheduled_event_user_add.emplace_back(_guild_scheduled_event_user_add);
+	return (event_handle)*(size_t *)(char *)&_guild_scheduled_event_user_add;
+}
+
+bool cluster::detach_guild_scheduled_event_user_add(const event_handle _guild_scheduled_event_user_add) {
+	detach(dispatch.guild_scheduled_event_user_add, _guild_scheduled_event_user_add);
+}
+
+event_handle cluster::on_guild_scheduled_event_user_remove (std::function<void(const guild_scheduled_event_user_remove_t& _event)> _guild_scheduled_event_user_remove) {
+	dispatch.guild_scheduled_event_user_remove.emplace_back(_guild_scheduled_event_user_remove);
+	return (event_handle)*(size_t *)(char *)&_guild_scheduled_event_user_remove;
+}
+
+bool cluster::detach_guild_scheduled_event_user_remove(const event_handle _guild_scheduled_event_user_remove) {
+	detach(dispatch.guild_scheduled_event_user_remove, _guild_scheduled_event_user_remove);
+}
+
 event_handle cluster::on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create) {
-	dispatch.interaction_create.emplace_back(_interaction_create);;
+	dispatch.interaction_create.emplace_back(_interaction_create);
 	return (event_handle)*(size_t *)(char *)&_interaction_create;
 }
 

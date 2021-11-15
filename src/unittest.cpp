@@ -112,7 +112,12 @@ std::string get_token() {
 		std::cerr << "\u001b[31mDPP_UNIT_TEST_TOKEN not defined -- this is likely a fork.\n\nNot running unit tests.\u001b[0m\n";
 		exit(0);
 	}
-	return std::string(t);
+	std::string tok = std::string(t);
+	if (tok.empty()) {
+		std::cerr << "\u001b[31mDPP_UNIT_TEST_TOKEN empty -- this is likely a PR.\n\nNot running unit tests.\u001b[0m\n";
+		exit(0);
+	}
+	return tok;
 }
 
 void wait_for_tests() {

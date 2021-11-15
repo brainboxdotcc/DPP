@@ -1434,6 +1434,86 @@ public:
 	bool detach_thread_members_update(const event_handle _thread_members_update);
 
 	/**
+	 * @brief Called when a new scheduled event is created
+	 *
+	 * @param _guild_scheduled_event_create User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_create (std::function<void(const guild_scheduled_event_create_t& _event)> _guild_scheduled_event_create);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_create
+	 * 
+	 * @param _guild_scheduled_event_create Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_create(const event_handle _guild_scheduled_event_create);
+
+	/**
+	 * @brief Called when a new scheduled event is updated
+	 *
+	 * @param _guild_scheduled_event_update User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_update (std::function<void(const guild_scheduled_event_update_t& _event)> _guild_scheduled_event_update);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_update
+	 * 
+	 * @param _guild_scheduled_event_update Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_update(const event_handle _guild_scheduled_event_update);
+
+	/**
+	 * @brief Called when a new scheduled event is deleted
+	 *
+	 * @param _guild_scheduled_event_delete User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_delete (std::function<void(const guild_scheduled_event_delete_t& _event)> _guild_scheduled_event_delete);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_delete
+	 * 
+	 * @param _guild_scheduled_event_delete Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_delete(const event_handle _guild_scheduled_event_delete);
+
+	/**
+	 * @brief Called when a user is added to a scheduled event
+	 *
+	 * @param _guild_scheduled_event_user_add User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_user_add_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_user_add (std::function<void(const guild_scheduled_event_user_add_t& _event)> _guild_scheduled_event_user_add);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_user_add
+	 * 
+	 * @param _guild_scheduled_event_user_add Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_user_add()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_user_add(const event_handle _guild_scheduled_event_user_add);
+
+	/**
+	 * @brief Called when a user is removed to a scheduled event
+	 *
+	 * @param _guild_scheduled_event_user_remove User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_user_remove_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_user_remove (std::function<void(const guild_scheduled_event_user_remove_t& _event)> _guild_scheduled_event_user_remove);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_user_remove
+	 * 
+	 * @param _guild_scheduled_event_user_remove Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_user_remove()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_user_remove(const event_handle _guild_scheduled_event_user_remove);
+
+	/**
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
 	 * with Sodium, and merged into packets by the repacketizer, which is done in the
