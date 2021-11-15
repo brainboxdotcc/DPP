@@ -279,6 +279,7 @@ public:
 	 * @param description The description of the command, shown for slash commands
 	 * @param guild_id The guild ID to restrict the command to. For slash commands causes registration of a guild command as opposed to a global command.
 	 * @return commandhandler& reference to self
+	 * @throw dpp::exception if application ID cannot be determined
 	 */
 	commandhandler& add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, const std::string &description = "", snowflake guild_id = 0);
 

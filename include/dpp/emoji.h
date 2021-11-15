@@ -136,6 +136,7 @@ public:
 	 * @param image_blob Image binary data
 	 * @param type Type of image
 	 * @return emoji& Reference to self
+	 * @throw dpp::exception Image content exceeds discord maximum of 256 kilobytes
 	 */
 	emoji& load_image(const std::string &image_blob, const image_type type);
 

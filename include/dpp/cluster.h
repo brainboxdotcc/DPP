@@ -269,6 +269,7 @@ class DPP_EXPORT cluster {
 	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
 	 *
 	 * @param shardinfo Received HTTP data from API call
+	 * @throw dpp::exception Thrown if REST request to obtain shard count fails
 	 */
 	void auto_shard(const confirmation_callback_t &shardinfo);
 public:
@@ -323,6 +324,7 @@ public:
 	 * @param maxclusters The total number of clusters that are active, which may be on separate processes or even separate machines.
 	 * @param compressed Whether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
 	 * @param policy Set the user caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
+	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
 	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = {cp_aggressive, cp_aggressive, cp_aggressive});
 
@@ -2824,6 +2826,7 @@ public:
 	 * @param type Type of image for avatar
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+ 	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
 	 */
 	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = {});
 

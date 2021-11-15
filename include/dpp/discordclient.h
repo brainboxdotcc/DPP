@@ -216,6 +216,7 @@ private:
 
 	/**
 	 * @brief Initialise ZLib (websocket compression)
+	 * @throw dpp::exception if ZLib cannot be initialised
 	 */
 	void SetupZLib();
 
