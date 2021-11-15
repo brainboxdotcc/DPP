@@ -302,7 +302,12 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "GUILD_STICKERS_UPDATE", new dpp::events::guild_stickers_update() },
 	{ "GUILD_APPLICATION_COMMAND_COUNTS_UPDATE", nullptr },
 	{ "APPLICATION_COMMAND_PERMISSIONS_UPDATE", nullptr },
-	{ "EMBEDDED_ACTIVITY_UPDATE", nullptr }
+	{ "EMBEDDED_ACTIVITY_UPDATE", nullptr },
+	{ "GUILD_SCHEDULED_EVENT_CREATE", new dpp::events::guild_scheduled_event_create() },
+	{ "GUILD_SCHEDULED_EVENT_UPDATE", new dpp::events::guild_scheduled_event_update() },
+	{ "GUILD_SCHEDULED_EVENT_DELETE", new dpp::events::guild_scheduled_event_delete() },
+	{ "GUILD_SCHEDULED_EVENT_USER_ADD", new dpp::events::guild_scheduled_event_user_add() },
+	{ "GUILD_SCHEDULED_EVENT_USER_REMOVE", new dpp::events::guild_scheduled_event_user_remove() },
 };
 
 void discord_client::HandleEvent(const std::string &event, json &j, const std::string &raw)

@@ -303,3 +303,4 @@ namespace dpp {
 #include <dpp/stage_instance.h>
 #include <dpp/auditlog.h>
 #include <dpp/application.h>
+#include <dpp/scheduled_event.h>

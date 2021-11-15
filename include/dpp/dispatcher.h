@@ -114,6 +114,78 @@ struct DPP_EXPORT log_t : public event_dispatch_t {
 	std::string message;
 };
 
+/** @brief Add user to scheduled event */
+struct DPP_EXPORT guild_scheduled_event_user_add_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	guild_scheduled_event_user_add_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief event user added to
+	 */
+	scheduled_event event;
+};
+
+/** @brief Delete user from scheduled event */
+struct DPP_EXPORT guild_scheduled_event_user_remove_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	guild_scheduled_event_user_remove_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief event user removed from
+	 */
+	scheduled_event event;
+};
+
+/** @brief Create scheduled event */
+struct DPP_EXPORT guild_scheduled_event_create_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	guild_scheduled_event_create_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief created event
+	 */
+	scheduled_event created;
+};
+
+/** @brief Create scheduled event */
+struct DPP_EXPORT guild_scheduled_event_update_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	guild_scheduled_event_update_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief updated event
+	 */
+	scheduled_event updated;
+};
+
+/** @brief Delete scheduled event */
+struct DPP_EXPORT guild_scheduled_event_delete_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	guild_scheduled_event_delete_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief deleted event
+	 */
+	scheduled_event deleted;
+};
+
+
+
 /** @brief Create stage instance */
 struct DPP_EXPORT stage_instance_create_t : public event_dispatch_t {
 	/** Constructor
@@ -1618,6 +1690,26 @@ public:
 	 * @param event Event parameters
 	 */
 	std::vector<std::function<void(const guild_stickers_update_t& event)>> stickers_update;
+	/** @brief Event handler function pointer for guild scheduled event create event
+	 * @param event Event parameters
+	 */
+	std::vector<std::function<void(const guild_scheduled_event_create_t& event)>> guild_scheduled_event_create;
+	/** @brief Event handler function pointer for guild scheduled event update event
+	 * @param event Event parameters
+	 */
+	std::vector<std::function<void(const guild_scheduled_event_update_t& event)>> guild_scheduled_event_update;
+	/** @brief Event handler function pointer for guild scheduled event delete event
+	 * @param event Event parameters
+	 */
+	std::vector<std::function<void(const guild_scheduled_event_delete_t& event)>> guild_scheduled_event_delete;
+	/** @brief Event handler function pointer for guild scheduled event user add event
+	 * @param event Event parameters
+	 */
+	std::vector<std::function<void(const guild_scheduled_event_user_add_t& event)>> guild_scheduled_event_user_add;
+	/** @brief Event handler function pointer for guild scheduled event user remove event
+	 * @param event Event parameters
+	 */
+	std::vector<std::function<void(const guild_scheduled_event_user_remove_t& event)>> guild_scheduled_event_remove;
 };
 
 /**

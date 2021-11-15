@@ -113,6 +113,12 @@ enum audit_type {
 	ae_sticker_update		=	91,
 	/// Sticker delete
 	ae_sticker_delete		=	92,
+	/// Scheduled event creation
+	ae_guild_scheduled_event_create	=	100,
+	/// Scheduled event update
+	ae_guild_scheduled_event_update	=	101,
+	/// Scheduled event deletion
+	ae_guild_scheduled_event_delete	=	102,
 	/// Thread create
 	ae_thread_create		=	110,
 	/// Thread update

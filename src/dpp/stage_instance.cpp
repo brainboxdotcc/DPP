@@ -52,7 +52,7 @@ std::string const stage_instance::build_json() const {
 	json j;
 	j["topic"] = this->topic;
 	j["privacy_level"] = this->privacy_level;
-	j["channel_id"] = this->channel_id;
+	j["channel_id"] = std::to_string(this->channel_id);
 
 	return j.dump();
 }
