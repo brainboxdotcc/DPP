@@ -66,7 +66,7 @@ enum event_status : uint8_t {
 /**
  * @brief Entities for the event
  */
-struct event_entities {
+struct DPP_EXPORT event_entities {
 	/// the speakers of the stage channel
 	std::vector<snowflake> speaker_ids;
 	/// location of the event
@@ -113,10 +113,17 @@ struct DPP_EXPORT scheduled_event {
 
 	/**
 	 * @brief Build json for this object
+	 * @param with_id Include id field in json
 	 *
 	 * @return std::string Dumped json of this object
 	 */
-	std::string const build_json() const;
+	std::string const build_json(bool with_id = false) const;
 };
+
+/**
+ * @brief A group of scheduled events
+ */
+typedef std::unordered_map<snowflake, scheduled_event> scheduled_event_map;
+
 
 };
