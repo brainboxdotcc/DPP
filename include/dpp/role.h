@@ -21,6 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/json_fwd.hpp>
+#include <dpp/guild.h>
 
 namespace dpp {
 
@@ -217,6 +218,14 @@ public:
 	bool has_send_messages_in_threads() const;
 	/** True if has the start embedded activities permission*/
 	bool has_start_embedded_activities() const;
+
+	/**
+	 * @brief Get guild members who have this role
+	 * @note This method requires user/members cache to be active
+	 * 
+	 * @return members_container List of members who have this role
+	 */
+	members_container get_members() const;
 };
 
 /** A group of roles */

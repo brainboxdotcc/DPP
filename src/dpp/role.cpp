@@ -19,6 +19,8 @@
  *
  ************************************************************************************/
 #include <dpp/discord.h>
+#include <dpp/role.h>
+#include <dpp/cache.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
@@ -275,4 +277,25 @@ bool role::has_send_messages_in_threads() const {
 bool role::has_start_embedded_activities() const {
 	return ((this->permissions & p_administrator) | (this->permissions & p_start_embedded_activities));
 }
+
+members_container role::get_members() const {
+	members_container gm;
+	guild* g = dpp::find_guild(this->guild_id);
+	if (g) {
+		if (this->guild_id == this->id) {
+			/* Special shortcircuit for everyone-role. Always includes all users. */
+			return g->members;
+		}
+		for (auto & m : g->members) {
+			/* Iterate all members and use std::find on their role list to see who has this role */
+			auto i = std::find(m.second.roles.begin(), m.second.roles.end(), this->id);
+			if (i != m.second.roles.end()) {
+				gm[m.second.user_id] = m.second;
+			}
+		}
+	}
+	return gm;
+}
+
+
 };

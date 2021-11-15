@@ -28,6 +28,8 @@
 
 namespace dpp {
 
+class channel;
+
 /**
  * @brief Represents voice regions for guilds and channels.
  * @deprecated Deprecated in favour of per-channel regions.
