@@ -135,12 +135,14 @@ void cluster::thread_members_get(snowflake thread_id, command_completion_event_t
 }
 
 
-void cluster::thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, command_completion_event_t callback)
+void cluster::thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback)
 {
 	json j;
 	j["name"] = thread_name;
 	j["auto_archive_duration"] = auto_archive_duration;
 	j["type"] = thread_type;
+	j["invitable"] = invitable;
+	j["rate_limit_per_user"] = rate_limit_per_user;
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("thread", thread().fill_from_json(&j), http));
@@ -149,11 +151,12 @@ void cluster::thread_create(const std::string& thread_name, snowflake channel_id
 }
 
 
-void cluster::thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, command_completion_event_t callback)
+void cluster::thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback)
 {
 	json j;
 	j["name"] = thread_name;
 	j["auto_archive_duration"] = auto_archive_duration;
+	j["rate_limit_per_user"] = rate_limit_per_user;
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id) + "/threads", m_post, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("thread", thread().fill_from_json(&j), http));
