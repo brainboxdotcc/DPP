@@ -256,7 +256,7 @@ std::string channel::build_json(bool with_id) const {
 	}
 	if (!is_dm()) {
 		if (parent_id) {
-			j["parent_id"] = parent_id;
+			j["parent_id"] = std::to_string(parent_id);
 		}
 		if (is_text_channel()) {
 			j["type"] = GUILD_TEXT;
