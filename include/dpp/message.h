@@ -21,6 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/discord.h>
+#include <dpp/queues.h>
 #include <optional>
 #include <dpp/json_fwd.hpp>
 
@@ -662,22 +663,36 @@ struct DPP_EXPORT attachment {
 	std::string content_type;
 	/** Whether this attachment is ephemeral, if applicable */
 	bool ephemeral;
+	/** Owning message */
+	class message* owner;
 
 	/**
 	 * @brief Constructs a new attachment object.
+	 * @param o Owning dpp::message object
 	 */
-	attachment();
+	attachment(class message* o);
 
 	/**
 	 * @brief Constructs a new attachment object from a JSON object.
+	 * @param o Owning dpp::message object
 	 * @param j JSON to read information from
 	 */
-	attachment(nlohmann::json* j);
+	attachment(class message* o, nlohmann::json* j);
 
 	/**
 	 * @brief Destructs the attachment object.
 	 */
 	~attachment() = default;
+
+	/**
+	 * @brief Download this attachment
+	 * @param callback A callback which is called when the download completes.
+	 * @note The content of the file will be in the http_info.body parameter of the
+	 * callback parameter.
+	 * @throw dpp::exception If there is no owner associated with this attachment that
+	 * itself has an owning cluster, this method will throw a dpp::exception when called.
+	 */
+	void download(http_completion_event callback) const;
 };
 
 /**
@@ -1059,9 +1074,22 @@ struct DPP_EXPORT message {
 	} allowed_mentions;
 
 	/**
+	 * @brief The cluster which created this message object
+	 */
+	class cluster* owner;
+
+	/**
 	 * @brief Construct a new message object
 	 */
 	message();
+
+	/**
+	 * @brief Construct a new message object
+	 * @param o Owning cluster, passed down to various things such as dpp::attachment.
+	 * Owning cluster is optional (can be nullptr) and if nulled, will prevent some functions
+	 * such as attachment::download from functioning (they will throw, if used)
+	 */
+	message(class cluster* o);
 
 	/**
 	 * @brief Destroy the message object

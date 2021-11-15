@@ -26,6 +26,8 @@
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
+#include <dpp/dispatcher.h>
+#include <dpp/cluster.h>
 
 using json = nlohmann::json;
 
@@ -263,7 +265,7 @@ embed::embed() : timestamp(0), color(0) {
 }
 
 message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), tts(false),
-	mention_everyone(false), pinned(false), webhook_id(0), flags(0), type(mt_default)
+	mention_everyone(false), pinned(false), webhook_id(0), flags(0), type(mt_default), owner(nullptr)
 {
 	message_reference.channel_id = 0;
 	message_reference.guild_id = 0;
@@ -280,6 +282,10 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0)
 	 */
 	allowed_mentions.replied_user = true;
 
+}
+
+message::message(class cluster* o) : message() {
+	owner = o;
 }
 
 message& message::set_reference(snowflake _message_id, snowflake _guild_id, snowflake _channel_id, bool fail_if_not_exists) {
@@ -535,16 +541,17 @@ reaction::reaction(json* j) {
 	emoji_name = StringNotNull(&emoji, "name");
 }
 
-attachment::attachment() 
+attachment::attachment(class message* o) 
 	: id(0)
 	, size(0)
 	, width(0)
 	, height(0)
 	, ephemeral(false)
+	, owner(o)
 {
 }
 
-attachment::attachment(json *j) : attachment() {
+attachment::attachment(class message* o, json *j) : attachment(o) {
 	this->id = SnowflakeNotNull(j, "id");
 	this->size = (*j)["size"];
 	this->filename = (*j)["filename"];
@@ -554,6 +561,16 @@ attachment::attachment(json *j) : attachment() {
 	this->height = Int32NotNull(j, "height");
 	this->content_type = StringNotNull(j, "content_type");
 	this->ephemeral = BoolNotNull(j, "ephemeral");
+}
+
+void attachment::download(http_completion_event callback) const {
+	/* Download attachment if there is one attached to this object */
+	if (!owner->owner) {
+		throw dpp::exception("attachment has no owning message/cluster");
+	}
+	if (callback && this->id && !this->url.empty()) {
+		owner->owner->request(this->url, dpp::m_get, callback);
+	}
 }
 
 std::string message::build_json(bool with_id, bool is_interaction_response) const {
@@ -852,7 +869,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->pinned = BoolNotNull(d, "pinned");
 	this->webhook_id = SnowflakeNotNull(d, "webhook_id");
 	for (auto& e : (*d)["attachments"]) {
-		this->attachments.emplace_back(attachment(&e));
+		this->attachments.emplace_back(attachment(this, &e));
 	}
 	return *this;
 }

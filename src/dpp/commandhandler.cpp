@@ -409,6 +409,7 @@ void commandhandler::route(const struct interaction_create_t & event)
 void commandhandler::reply(const dpp::message &m, command_source source, command_completion_event_t callback)
 {
 	dpp::message msg = m;
+	msg.owner = this->owner;
 	msg.guild_id = source.guild_id;
 	msg.channel_id = source.channel_id;
 	if (!source.command_token.empty() && source.command_id) {
@@ -420,7 +421,7 @@ void commandhandler::reply(const dpp::message &m, command_source source, command
 
 void commandhandler::thinking(command_source source, command_completion_event_t callback)
 {
-	dpp::message msg;
+	dpp::message msg(this->owner);
 	msg.content = "*";
 	msg.guild_id = source.guild_id;
 	msg.channel_id = source.channel_id;
