@@ -69,9 +69,9 @@ scheduled_event& scheduled_event::fill_from_json(const json* j) {
 	return *this;
 }
 
-std::string const scheduled_event::build_json() const {
+std::string const scheduled_event::build_json(bool with_id) const {
 	json j;
-	if (this->id) {
+	if (this->id && with_id) {
 		j["id"] = std::to_string(id);
 	}
 	j["name"] = this->name;

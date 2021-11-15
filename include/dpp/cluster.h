@@ -126,7 +126,9 @@ typedef std::variant<
 		connection,
 		connection_map,
 		thread,
-		thread_map
+		thread_map,
+		scheduled_event,
+		scheduled_event_map
 	> confirmable_t;
 
 /**
@@ -3183,6 +3185,64 @@ public:
 	 * On success the callback will contain a dpp::gateway object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void get_gateway_bot(command_completion_event_t callback);
+
+	/**
+	 * @brief Get all scheduled events for a guild
+	 *
+	 * @param guild_id Guild to get events for
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_events_get(snowflake guild_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get users RSVP'd to an event
+	 *
+	 * @param guild_id Guild to get user list for
+	 * @param event_id Guild to get user list for
+	 * @param limit Maximum number of results to return
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_users_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback, uint8_t limit = 100);
+
+	/**
+	 * @brief Create a scheduled event on a guild
+	 *
+	 * @param event Event to create (guild ID must be populated)
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_create(const scheduled_event& event, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Delete a scheduled event from a guild
+	 *
+	 * @param event_id Event ID to delete
+	 * @param guild_id Guild ID of event to delete
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_delete(snowflake event_id, snowflake guild_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Edit/modify a scheduled event on a guild
+	 *
+	 * @param event Event to create (event ID and guild ID must be populated)
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_edit(const scheduled_event& event, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get a scheduled event for a guild
+	 *
+	 * @param guild_id Guild to get event for
+	 * @param event_id Event ID to get
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback);
 
 
 };
