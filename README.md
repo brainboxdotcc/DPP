@@ -33,6 +33,8 @@ The documentation is a work in progress, generated from the code comments and ma
 The library runs great on **Linux**. **Windows** is also supported and we offer ready made compiled DLL and LIB files for easy integration into any windows visual studio 2019 project.
 **Mac OS X** and **FreeBSD** is also functional and stable, as is running your bot on a **Raspberry Pi** - we offer a prebuilt .deb for ARM64, ARM6 and ARM7 to save on having to wait for it to compile.
 
+If you are on windows, and just want to get started as quickly as possible, you should look at our [Windows Bot Template repository](https://github.com/brainboxdotcc/windows-bot-template). This repository can be cloned and will get you up and running in a matter of minutes, with a pre-built D++ in a ready to go project for Visual Studio 2019.
+
 The library may work fine in other operating systems too, if you run a D++ bot on something not listed here please let us know!
 
 ## 🤝 Contributing
