@@ -27,7 +27,7 @@
 namespace dpp {
 
 /**
- * @brief status of a member of a team who maintain a bot/applicaiton
+ * @brief status of a member of a team who maintain a bot/application
  */
 enum team_member_status : uint8_t {
 	/// User was invited to the team

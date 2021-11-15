@@ -585,7 +585,7 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	 */
 	message_reaction_add_t(class discord_client* client, const std::string& raw);
 	/**
-	 * @brief Guild reaction occured on
+	 * @brief Guild reaction occurred on
 	 */
 	guild* reacting_guild;
 	/**
@@ -635,7 +635,7 @@ struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
 	 */
 	message_reaction_remove_t(class discord_client* client, const std::string& raw);
 	/**
-	 * @brief Guild reaction occured on
+	 * @brief Guild reaction occurred on
 	 */
 	guild* reacting_guild;
 	/**
@@ -694,7 +694,7 @@ struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 	 */
 	message_reaction_remove_emoji_t(class discord_client* client, const std::string& raw);
 	/**
-	 * @brief Guild reaction occured on
+	 * @brief Guild reaction occurred on
 	 */
 	guild* reacting_guild;
 	/**
@@ -799,7 +799,7 @@ struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
 	 */
 	message_reaction_remove_all_t(class discord_client* client, const std::string& raw);
 	/**
-	 * @brief Guild reaction occured on
+	 * @brief Guild reaction occurred on
 	 */
 	guild* reacting_guild;
 	/**
@@ -863,7 +863,7 @@ struct DPP_EXPORT presence_update_t : public event_dispatch_t {
 	 */
 	presence_update_t(class discord_client* client, const std::string& raw);
 	/**
-	 * @brief rich presence being upated
+	 * @brief rich presence being updated
 	 */
 	presence rich_presence;
 };
@@ -1658,7 +1658,7 @@ public:
 	/**
 	 * @brief Construct a new exception object
 	 * 
-	 * @param what reason mesage
+	 * @param what reason message
 	 */
 	explicit exception(const std::string& what) : msg(what) { }
 	
