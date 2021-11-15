@@ -125,7 +125,19 @@ struct DPP_EXPORT guild_scheduled_event_user_add_t : public event_dispatch_t {
 	/**
 	 * @brief event user added to
 	 */
-	scheduled_event event;
+	snowflake event_id;
+
+	/**
+	 * @brief User being added
+	 * 
+	 */
+	snowflake user_id;
+
+	/**
+	 * @brief Guild being added to
+	 * 
+	 */
+	snowflake guild_id;
 };
 
 /** @brief Delete user from scheduled event */
@@ -139,7 +151,19 @@ struct DPP_EXPORT guild_scheduled_event_user_remove_t : public event_dispatch_t 
 	/**
 	 * @brief event user removed from
 	 */
-	scheduled_event event;
+	snowflake event_id;
+
+	/**
+	 * @brief User being removed
+	 * 
+	 */
+	snowflake user_id;
+
+	/**
+	 * @brief Guild being removed from
+	 * 
+	 */
+	snowflake guild_id;
 };
 
 /** @brief Create scheduled event */
@@ -1709,7 +1733,7 @@ public:
 	/** @brief Event handler function pointer for guild scheduled event user remove event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_scheduled_event_user_remove_t& event)>> guild_scheduled_event_remove;
+	std::vector<std::function<void(const guild_scheduled_event_user_remove_t& event)>> guild_scheduled_event_user_remove;
 };
 
 /**

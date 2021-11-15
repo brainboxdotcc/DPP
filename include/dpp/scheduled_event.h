@@ -1,0 +1,122 @@
+/************************************************************************************
+ *
+ * D++, A Lightweight C++ library for Discord
+ *
+ * Copyright 2021 Craig Edwards and D++ contributors 
+ * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ************************************************************************************/
+#pragma once
+#include <dpp/export.h>
+#include <dpp/discord.h>
+#include <dpp/json_fwd.hpp>
+
+namespace dpp {
+
+/**
+ * @brief Represents the privacy of an event
+ */
+enum event_privacy_level : uint8_t {
+	/// The event is visible publicly, such as on Stage Discovery.
+	ep_public = 1,
+	/// The event is visible to only guild members.
+	ep_guild_only = 2
+};
+
+/**
+ * @brief Event entity types
+ */
+enum event_entity_type : uint8_t {
+	/// Not set
+	eet_none = 0,
+	/// A stage instance
+	eet_stage_instance = 1,
+	/// A voice channel
+	eet_voice = 2,
+	/// External to discord, or a text channel etc
+	eet_external = 3
+};
+
+/**
+ * @brief Event status types
+ */
+enum event_status : uint8_t {
+	/// Scheduled
+	es_scheduled	=	1,
+	/// Active now
+	es_active	=	2,
+	/// Completed
+	es_completed	=	3,
+	/// Cancelled
+	es_cancelled	=	4
+};
+
+/**
+ * @brief Entities for the event
+ */
+struct event_entities {
+	/// the speakers of the stage channel
+	std::vector<snowflake> speaker_ids;
+	/// location of the event
+	std::string location;
+};
+
+/**
+ * @brief A scheduled event
+ */
+struct DPP_EXPORT scheduled_event {
+	snowflake       	id;			//!< the id of the scheduled event
+	snowflake		guild_id;		//!< the guild id which the scheduled event belongs to
+	snowflake		channel_id;		//!< the channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL (may be empty)
+	snowflake		creator_id;		//!< Optional: the id of the user that created the scheduled event
+	std::string		name;			//!< the name of the scheduled event
+	std::string		description;		//!< Optional: the description of the scheduled event
+	std::string		image;			//!< the image of the scheduled event (may be empty)
+	time_t			scheduled_start_time;	//!< the time the scheduled event will start
+	time_t			scheduled_end_time;	//!< the time the scheduled event will end, or null if the event does not have a scheduled time to end (may be empty)
+	event_privacy_level	privacy_level;		//!< the privacy level of the scheduled event
+	event_status		status;			//!< the status of the scheduled event
+	event_entity_type	entity_type;		//!< the type of hosting entity associated with a scheduled event, e.g. voice channel or stage channel
+	snowflake		entity_id;		//!< any additional id of the hosting entity associated with event, e.g. stage instance id) (may be empty)
+	event_entities		entity_metadata;	//!< the entity metadata for the scheduled event (may be empty)
+	user			creator;		//!< Optional: the creator of the scheduled event
+	uint32_t		user_count;		//!< Optional: the number of users subscribed to the scheduled event
+
+	/**
+	 * @brief Create a scheduled_event object
+	 */
+	scheduled_event();
+
+	/**
+	 * @brief Destroy the scheduled_event object
+	 */
+	~scheduled_event() = default;
+
+	/**
+	 * @brief Serialise a scheduled_event object from json
+	 *
+	 * @return scheduled_event& a reference to self
+	 */
+	scheduled_event& fill_from_json(const nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this object
+	 *
+	 * @return std::string Dumped json of this object
+	 */
+	std::string const build_json() const;
+};
+
+};
