@@ -664,20 +664,20 @@ struct DPP_EXPORT attachment {
 	/** Whether this attachment is ephemeral, if applicable */
 	bool ephemeral;
 	/** Owning message */
-	class message* owner;
+	struct message* owner;
 
 	/**
 	 * @brief Constructs a new attachment object.
 	 * @param o Owning dpp::message object
 	 */
-	attachment(class message* o);
+	attachment(struct message* o);
 
 	/**
 	 * @brief Constructs a new attachment object from a JSON object.
 	 * @param o Owning dpp::message object
 	 * @param j JSON to read information from
 	 */
-	attachment(class message* o, nlohmann::json* j);
+	attachment(struct message* o, nlohmann::json* j);
 
 	/**
 	 * @brief Destructs the attachment object.

@@ -541,7 +541,7 @@ reaction::reaction(json* j) {
 	emoji_name = StringNotNull(&emoji, "name");
 }
 
-attachment::attachment(class message* o) 
+attachment::attachment(struct message* o) 
 	: id(0)
 	, size(0)
 	, width(0)
@@ -551,7 +551,7 @@ attachment::attachment(class message* o)
 {
 }
 
-attachment::attachment(class message* o, json *j) : attachment(o) {
+attachment::attachment(struct message* o, json *j) : attachment(o) {
 	this->id = SnowflakeNotNull(j, "id");
 	this->size = (*j)["size"];
 	this->filename = (*j)["filename"];
