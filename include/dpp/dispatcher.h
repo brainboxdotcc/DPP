@@ -1117,6 +1117,20 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * If you use any parts of this in another thread, take a copy! It doesn't stick around!
 	 */
 	message* msg;
+	/**
+	 * @brief Send a message to the same channel as the channel_id in recieved event.
+	 * @param msg Message to send
+	 * @param callback User function to execute once the API call completes.
+	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
+	 */
+	void send(message& msg, command_completion_event_t callback = {});
+	/**
+	 * @brief Reply to the message recieved in the event.
+	 * @param msg Message to send as a reply.
+	 * @param callback User function to execute once the API call completes.
+	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
+	 */
+	void reply(message& msg, command_completion_event_t callback = {});
 };
 
 /** @brief Guild ban add */
