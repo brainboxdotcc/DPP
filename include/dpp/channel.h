@@ -72,7 +72,7 @@ enum channel_flags : uint16_t {
 	/// Private thread
 	c_private_thread =	0b0000000011111000,
 	/// Video quality forced to 720p
-	c_video_quality_720p =	0b0000000100000000
+	c_video_quality_720p =	0b0000000100000000,
 };
 
 /**

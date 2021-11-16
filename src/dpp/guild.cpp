@@ -52,6 +52,7 @@ std::map<std::string, dpp::guild_flags> featuremap = {
 	{"SEVEN_DAY_THREAD_ARCHIVE", dpp::g_seven_day_thread_archive },
 	{"THREE_DAY_THREAD_ARCHIVE", dpp::g_three_day_thread_archive },
 	{"TICKETED_EVENTS_ENABLED", dpp::g_ticketed_events },
+	{"CHANNEL_BANNER", dpp::g_channel_banners },
 };
 
 namespace dpp {
@@ -197,6 +198,10 @@ bool guild::has_vip_regions() const {
 
 bool guild::has_vanity_url() const {
 	return this->flags & g_vanity_url;
+}
+
+bool guild::has_channel_banners() const {
+	return this->flags & g_channel_banners;
 }
 
 bool guild::is_verified() const {
