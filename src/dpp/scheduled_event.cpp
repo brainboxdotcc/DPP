@@ -57,9 +57,14 @@ scheduled_event& scheduled_event::fill_from_json(const json* j) {
 	this->privacy_level = static_cast<dpp::event_privacy_level>(Int8NotNull(j, "privacy_level"));
 	this->status = static_cast<dpp::event_status>(Int8NotNull(j, "status"));
 	this->entity_type = static_cast<dpp::event_entity_type>(Int8NotNull(j, "entity_type"));
-	SetStringNotNull(&((*j)["entity_metadata"]), "location", this->entity_metadata.location);
-	for (auto & speaker : (*j)["entity_metadata"]["speaker_ids"]) {
-		this->entity_metadata.speaker_ids.push_back(std::stoull(speaker.get<std::string>()));
+	auto i = j->find("entity_metadata");
+	if (i != j->end()) {
+		SetStringNotNull(&((*j)["entity_metadata"]), "location", this->entity_metadata.location);
+		if (i->find("speaker_ids") != i->end()) {
+			for (auto & speaker : (*j)["entity_metadata"]["speaker_ids"]) {
+				this->entity_metadata.speaker_ids.push_back(std::stoull(speaker.get<std::string>()));
+			}
+		}
 	}
 	if (j->find("creator") != j->end()) {
 		json u = (*j)["creator"];

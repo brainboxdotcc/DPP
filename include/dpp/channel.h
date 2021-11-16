@@ -204,7 +204,7 @@ public:
 	std::string rtc_region;
 
 	/**
-	 * @brief Channel icon
+	 * @brief Channel icon (for group DMs)
 	 */
 	utility::iconhash icon;
 
