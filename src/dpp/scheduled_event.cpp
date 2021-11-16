@@ -62,7 +62,12 @@ scheduled_event& scheduled_event::fill_from_json(const json* j) {
 		SetStringNotNull(&((*j)["entity_metadata"]), "location", this->entity_metadata.location);
 		if (i->find("speaker_ids") != i->end()) {
 			for (auto & speaker : (*j)["entity_metadata"]["speaker_ids"]) {
-				this->entity_metadata.speaker_ids.push_back(std::stoull(speaker.get<std::string>()));
+				try {
+					this->entity_metadata.speaker_ids.push_back(std::stoull(speaker.get<std::string>()));
+				}
+				catch (const std::exception&) {
+					/* Invalid speaker ID, non-numeric. This should never happen, but we guard against it */
+				}
 			}
 		}
 	}

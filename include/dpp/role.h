@@ -37,21 +37,21 @@ enum role_flags : uint8_t {
  * @brief Represents the various discord permissions
  */
 enum role_permissions : uint64_t {
-	p_create_instant_invite		=	0x00000001,	//!< allows creationboosters of instant invites
-	p_kick_members			=	0x00000002,	//!< allows kicking members
-	p_ban_members			=	0x00000004,	//!< allows banning members
-	p_administrator			=	0x00000008,	//!< allows all permissions and bypasses channel permission overwrites
-	p_manage_channels		=	0x00000010,	//!< allows management and editing of channels
-	p_manage_guild			=	0x00000020,	//!< allows management and editing of the guild
-	p_add_reactions			=	0x00000040,	//!< allows for the addition of reactions to messages
-	p_view_audit_log		=	0x00000080,	//!< allows for viewing of audit logs
-	p_priority_speaker		=	0x00000100,	//!< allows for using priority speaker in a voice channel
-	p_stream			=	0x00000200,	//!< allows the user to go live
-	p_view_channel			=	0x00000400,	//!< allows guild members to view a channel, which includes reading messages in text channels
-	p_send_messages			=	0x00000800,	//!< allows for sending messages in a channel
-	p_send_tts_messages		=	0x00001000,	//!< allows for sending of /tts messages
-	p_manage_messages		=	0x00002000,	//!< allows for deletion of other users messages
-	p_embed_links			=	0x00004000,	//!< links sent by users with this permission will be auto-embedded
+	p_create_instant_invite		=	0x0000000001,	//!< allows creation of instant invites
+	p_kick_members			=	0x0000000002,	//!< allows kicking members
+	p_ban_members			=	0x0000000004,	//!< allows banning members
+	p_administrator			=	0x0000000008,	//!< allows all permissions and bypasses channel permission overwrites
+	p_manage_channels		=	0x0000000010,	//!< allows management and editing of channels
+	p_manage_guild			=	0x0000000020,	//!< allows management and editing of the guild
+	p_add_reactions			=	0x0000000040,	//!< allows for the addition of reactions to messages
+	p_view_audit_log		=	0x0000000080,	//!< allows for viewing of audit logs
+	p_priority_speaker		=	0x0000000100,	//!< allows for using priority speaker in a voice channel
+	p_stream			=	0x0000000200,	//!< allows the user to go live
+	p_view_channel			=	0x0000000400,	//!< allows guild members to view a channel, which includes reading messages in text channels
+	p_send_messages			=	0x0000000800,	//!< allows for sending messages in a channel
+	p_send_tts_messages		=	0x0000001000,	//!< allows for sending of /tts messages
+	p_manage_messages		=	0x0000002000,	//!< allows for deletion of other users messages
+	p_embed_links			=	0x0000004000,	//!< links sent by users with this permission will be auto-embedded
 	p_attach_files			=	0x0000008000,	//!< allows for uploading images and files
 	p_read_message_history		=	0x0000010000,	//!< allows for reading of message history
 	p_mention_everyone		=	0x0000020000,	//!< allows for using the everyone and the here tag to notify users in a channel
@@ -70,6 +70,7 @@ enum role_permissions : uint64_t {
 	p_manage_emojis_and_stickers	=	0x0040000000,	//!< allows management and editing of emojis and stickers
 	p_use_application_commands	=	0x0080000000,	//!< allows members to use application commands, including slash commands and context menus 
 	p_request_to_speak		=	0x0100000000,	//!< allows for requesting to speak in stage channels. (Discord: This permission is under active development and may be changed or removed.)
+	p_manage_events			=	0x0200000000,	//!< allows for management (creation, updating, deleting, starting) of scheduled events
 	p_manage_threads		=	0x0400000000,	//!< allows for deleting and archiving threads, and viewing all private threads
 	p_create_public_threads		=	0x0800000000,	//!< allows for creating threads
 	p_create_private_threads	=	0x1000000000,	//!< allows for creating private threads
@@ -79,15 +80,29 @@ enum role_permissions : uint64_t {
 };
 
 /**
- * @brief Represents a role within a dpp::guild
+ * @brief Represents a role within a dpp::guild.
+ * Roles are combined via logical OR of the permission bitmasks, then channel-specific overrides
+ * can be applied on top, deny types apply a logic NOT to the bit mask, and allows apply a logical OR.
+ * @note Every guild has at least one role, called the 'everyone' role, which always has the same role
+ * ID as the guild's ID. This is the base permission set applied to all users where no other role or override
+ * applies, and is the starting value of the bit mask looped through to calculate channel permissions.
  */
 class DPP_EXPORT role : public managed {
 public:
-	/** Role name */
+	/**
+	 * @brief Role name
+	 * Between 1 and 100 characters.
+	 */
 	std::string name;
-	/** Guild id */
+	/**
+	 * @brief Guild ID
+	 */
 	snowflake guild_id;
-	/** Role colour */
+	/**
+	 * @brief Role colour.
+	 * A colour of 0 means no colour. If you want a black role,
+	 * you must use the value 0x000001.
+	 */
 	uint32_t colour;
 	/** Role position */
 	uint8_t position;
@@ -106,20 +121,88 @@ public:
 	/** Image data for the role icon (if any) */
 	std::string* image_data;
 
-	/** Default constructor */
+	/**
+	 * @brief Construct a new role object
+	 */
 	role();
 
-	/** Default destructor */
+	/**
+	 * @brief Destroy the role object
+	 */
 	virtual ~role();
 
-	/** Fill this role from json.
+	/**
+	 * @brief Set the name of the role
+	 * Maximum length: 100
+	 * Minimum length: 1
+	 * @param n Name to set
+	 * @return role& reference to self
+	 * @throw dpp::exception thrown if role length is less than 1 character
+	 */
+	role& set_name(const std::string& n);
+
+	/**
+	 * @brief Set the colour object
+	 * 
+	 * @param c Colour to set
+	 * @note There is an americanised version of this method, role::set_color().
+	 * @return role& reference to self
+	 */
+	role& set_colour(uint32_t c);
+
+	/**
+	 * @brief Set the color object
+	 * 
+	 * @param c Colour to set
+	 * @note This is an alias of role::set_colour for American spelling.
+	 * @return role& reference to self
+	 */
+	role& set_color(uint32_t c);
+
+	/**
+	 * @brief Set the flags object
+	 * 
+	 * @param f Flags to set
+	 * @return role& reference to self
+	 */
+	role& set_flags(uint8_t f);
+
+	/**
+	 * @brief Set the integration id object
+	 * 
+	 * @param i Integration ID to set
+	 * @return role& reference to self
+	 */
+	role& set_integration_id(snowflake i);
+
+	/**
+	 * @brief Set the bot id object
+	 * 
+	 * @param b Bot ID to set
+	 * @return role& reference to self
+	 */
+	role& set_bot_id(snowflake b);
+
+	/**
+	 * @brief Set the guild id object
+	 * 
+	 * @param gid Guild ID to set
+	 * @return role& reference to self
+	 */
+	role& set_guild_id(snowflake gid);
+
+	/**
+	 * @brief Fill this role from json.
+	 * 
 	 * @param guild_id the guild id to place in the json
 	 * @param j The json data
 	 * @return A reference to self
 	 */
 	role& fill_from_json(snowflake guild_id, nlohmann::json* j);
 
-	/** Build a json string from this object.
+	/**
+	 * @brief Build a json string from this object.
+	 * 
 	 * @param with_id true if the ID is to be included in the json text
 	 * @return The json of the role
 	 */
@@ -134,95 +217,300 @@ public:
 	 */
 	role& load_image(const std::string &image_blob, const image_type type);
 
-	/** True if the role is hoisted */
+	/**
+	 * @brief True if the role is hoisted
+	 * @return bool Role appears separated from others in the member list
+	 */
 	bool is_hoisted() const;
-	/** True if the role is mentionable */
+	/**
+	 * @brief True if the role is mentionable
+	 * @return bool Role is mentionable
+	 */
 	bool is_mentionable() const;
-	/** True if the role is managed (belongs to a bot or application) */
+	/**
+	 * @brief True if the role is managed (belongs to a bot or application)
+	 * @return bool True if the role is managed (introduced for a bot or other application by Discord)
+	 */
 	bool is_managed() const;
-	/** True if has create instant invite permission */
+	/**
+	 * @brief True if has create instant invite permission
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the instant invite permission or is administrator.
+	 */
 	bool has_create_instant_invite() const;
-	/** True if has the kick members permission */
+	/**
+	 * @brief True if has create instant invite permission
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the kick members permission or is administrator.
+	 */
 	bool has_kick_members() const;
-	/** True if has the ban members permission */
+	/**
+	 * @brief True if has the ban members permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the ban members permission or is administrator.
+	 */
 	bool has_ban_members() const;
-	/** True if has the administrator permission */
+	/**
+	 * @brief True if has the administrator permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the administrator permission or is administrator.
+	 */
 	bool has_administrator() const;
-	/** True if has the manage channels permission */
+	/**
+	 * @brief True if has the manage channels permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the manage channels permission or is administrator.
+	 */
 	bool has_manage_channels() const;
-	/** True if has the manage guild permission */
+	/**
+	 * @brief True if has the manage guild permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the manage guild permission or is administrator.
+	 */
 	bool has_manage_guild() const;
-	/** True if has the add reactions permission */
+	/**
+	 * @brief True if has the add reactions permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the add reactions permission or is administrator.
+	 */
 	bool has_add_reactions() const;
-	/** True if has the view audit log permission */
+	/**
+	 * @brief True if has the view audit log permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the view audit log permission or is administrator.
+	 */
 	bool has_view_audit_log() const;
-	/** True if has the priority speaker permission */
+	/**
+	 * @brief True if has the priority speaker permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the priority speaker permission or is administrator.
+	 */
 	bool has_priority_speaker() const;
-	/** True if has the stream permission */
+	/**
+	 * @brief True if has the stream permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the stream permission or is administrator.
+	 */
 	bool has_stream() const;
-	/** True if has the view channel permission */
+	/**
+	 * @brief True if has the view channel permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the view channel permission or is administrator.
+	 */
 	bool has_view_channel() const;
-	/** True if has the send messages permission */
+	/**
+	 * @brief True if has the send messages permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the send messages permission or is administrator.
+	 */
 	bool has_send_messages() const;
-	/** True if has the send TTS messages permission */
+	/**
+	 * @brief True if has the send TTS messages permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the send TTS messages permission or is administrator.
+	 */
 	bool has_send_tts_messages() const;
-	/** True if has the manage messages permission */
+	/**
+	 * @brief True if has the manage messages permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the manage messages permission or is administrator.
+	 */
 	bool has_manage_messages() const;
-	/** True if has the embed links permission */
+	/**
+	 * @brief True if has the embed links permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the embed links permission or is administrator.
+	 */
 	bool has_embed_links() const;
-	/** True if has the attach files permission */
+	/**
+	 * @brief True if has the attach files permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the attach files permission or is administrator.
+	 */
 	bool has_attach_files() const;
-	/** True if has the read message history permission */
+	/**
+	 * @brief True if has the read message history permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the read message history permission or is administrator.
+	 */
 	bool has_read_message_history() const;
-	/** True if has the mention \@everyone and \@here permission */
+	/**
+	 * @brief True if has the mention \@everyone and \@here permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the mention \@everyone and \@here permission or is administrator.
+	 */
 	bool has_mention_everyone() const;
-	/** True if has the use external emojis permission */
+	/**
+	 * @brief True if has the use external emojis permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the use external emojis permission or is administrator.
+	 */
 	bool has_use_external_emojis() const;
-	/** True if has the view guild insights permission */
+	/**
+	 * @brief True if has the view guild insights permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the view guild insights permission or is administrator.
+	 */
 	bool has_view_guild_insights() const;
-	/** True if has the connect voice permission */
+	/**
+	 * @brief True if has the connect voice permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the connect voice permission or is administrator.
+	 */
 	bool has_connect() const;
-	/** True if has the speak permission */
+	/**
+	 * @brief True if has the speak permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the speak permission or is administrator.
+	 */
 	bool has_speak() const;
-	/** True if has the mute members permission */
+	/**
+	 * @brief True if has the mute members permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the mute members permission or is administrator.
+	 */
 	bool has_mute_members() const;
-	/** True if has the deafen members permission */
+	/**
+	 * @brief True if has the deafen members permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the deafen members permission or is administrator.
+	 */
 	bool has_deafen_members() const;
-	/** True if has the move members permission */
+	/**
+	 * @brief True if has the move members permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the move members permission or is administrator.
+	 */
 	bool has_move_members() const;
 	/** True if has use voice activity detection permission */
 	bool has_use_vad() const;
-	/** True if has the change nickname permission */
+	/**
+	 * @brief True if has the change nickname permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the change nickname permission or is administrator.
+	 */
 	bool has_change_nickname() const;
-	/** True if has the manage nicknames permission */
+	/**
+	 * @brief True if has the manage nicknames permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the manage nicknames permission or is administrator.
+	 */
 	bool has_manage_nicknames() const;
-	/** True if has the manage roles permission */
+	/**
+	 * @brief True if has the manage roles permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the manage roles permission or is administrator.
+	 */
 	bool has_manage_roles() const;
-	/** True if has the manage webhooks permission */
+	/**
+	 * @brief True if has the manage webhooks permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the manage webhooks permission or is administrator.
+	 */
 	bool has_manage_webhooks() const;
-	/** True if has the manage emojis and stickers permission */
+	/**
+	 * @brief True if has the manage emojis and stickers permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the manage emojis and stickers permission or is administrator.
+	 */
 	bool has_manage_emojis_and_stickers() const;
-	/** True if has the use application commands permission*/
+	/**
+	 * @brief True if has the use application commands permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the use application commands permission or is administrator.
+	 */
 	bool has_use_application_commands() const;
-	/** True if has the request to speak permission*/
+	/**
+	 * @brief True if has the request to speak permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the request to speak permission or is administrator.
+	 */
 	bool has_request_to_speak() const;
-	/** True if has the manage threads permission*/
+	/**
+	 * @brief True if has the manage threads permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the manage threads permission or is administrator.
+	 */
 	bool has_manage_threads() const;
-	/** True if has the create public threads permission*/
+	/**
+	 * @brief True if has the create public threads permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the create public threads permission or is administrator.
+	 */
 	bool has_create_public_threads() const;
-	/** True if has the create private threads permission*/
+	/**
+	 * @brief True if has the create private threads permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the create private threads permission or is administrator.
+	 */
 	bool has_create_private_threads() const;
-	/** True if has the use external stickers permission*/
+	/**
+	 * @brief True if has the use external stickers permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the use external stickers permission or is administrator.
+	 */
 	bool has_use_external_stickers() const;
-	/** True if has the send messages in threads permission*/
+	/**
+	 * @brief True if has the send messages in threads permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the send messages in threads permission or is administrator.
+	 */
 	bool has_send_messages_in_threads() const;
-	/** True if has the start embedded activities permission*/
+	/**
+	 * @brief True if has the start embedded activities permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the start embedded activities permission or is administrator.
+	 */
 	bool has_start_embedded_activities() const;
+	/**
+	 * @brief True if has the manage events permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the manage events permission or is administrator.
+	 */
+	bool has_manage_events() const;
 
 	/**
 	 * @brief Get guild members who have this role
 	 * @note This method requires user/members cache to be active
-	 * 
 	 * @return members_container List of members who have this role
 	 */
 	members_container get_members() const;

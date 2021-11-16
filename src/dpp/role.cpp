@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/discord.h>
+#include <dpp/dispatcher.h>
 #include <dpp/role.h>
 #include <dpp/cache.h>
 #include <dpp/discordevents.h>
@@ -276,6 +277,48 @@ bool role::has_send_messages_in_threads() const {
 
 bool role::has_start_embedded_activities() const {
 	return ((this->permissions & p_administrator) | (this->permissions & p_start_embedded_activities));
+}
+
+bool role::has_manage_events() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_events));
+}
+
+role& role::set_name(const std::string& n) {
+	size_t l = utility::utf8len(n);
+	if (l < 1) {
+		throw dpp::exception("Role name too short");
+	}
+	name = utility::utf8substr(n, 0, 100);
+	return *this;
+}
+
+role& role::set_colour(uint32_t c) {
+	colour = c;
+	return *this;
+}
+
+role& role::set_color(uint32_t c) {
+	return set_colour(c);
+}
+
+role& role::set_flags(uint8_t f) {
+	flags = f;
+	return *this;
+}
+
+role& role::set_integration_id(snowflake i) {
+	integration_id = i;
+	return *this;
+}
+
+role& role::set_bot_id(snowflake b) {
+	bot_id = b;
+	return *this;
+}
+
+role& role::set_guild_id(snowflake gid) {
+	guild_id = gid;
+	return *this;
 }
 
 members_container role::get_members() const {
