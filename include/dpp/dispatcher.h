@@ -1123,14 +1123,14 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * @param callback User function to execute once the API call completes.
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
-	void send(message& msg, command_completion_event_t callback = {});
+	void send(message& msg, command_completion_event_t callback = {}) const;
 	/**
 	 * @brief Reply to the message recieved in the event.
 	 * @param msg Message to send as a reply.
 	 * @param callback User function to execute once the API call completes.
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
-	void reply(message& msg, command_completion_event_t callback = {});
+	void reply(message& msg, command_completion_event_t callback = {}) const;
 };
 
 /** @brief Guild ban add */

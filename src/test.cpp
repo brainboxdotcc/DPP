@@ -171,6 +171,24 @@ int main()
 						set_test("MESSAGESGET", false);
 					}
 				});
+				bot.send("MSGCREATESEND", [&bot, ch_id = event.msg->channel_id] (auto cc) {
+							if (!cc.is_error()) {
+							dpp::message m = std::get<dpp::message>(cc.value);
+								if (m.id == ch_id) {
+									set_test("MSGCREATESEND", true);
+								}
+								bot.message_delete(m);
+							}
+						});
+				bot.reply("MSGCREATEREPLY", [&bot, ref_id = event.msg->id] (auto cc) {
+							if (!cc.is_error()) {
+							dpp::message m = std::get<dpp::message>(cc.value);
+								if (m.id == ref_id) {
+									set_test("MSGCREATEREPLY", true);
+								}
+								bot.message_delete(m);
+							}
+						});
 			}
 		});
 
