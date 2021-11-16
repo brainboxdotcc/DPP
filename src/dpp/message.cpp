@@ -871,6 +871,13 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	for (auto& e : (*d)["attachments"]) {
 		this->attachments.emplace_back(attachment(this, &e));
 	}
+	if (d->find("message_reference") != d->end()) {
+		json& mr = (*d)["message_reference"];
+		message_reference.channel_id = SnowflakeNotNull(&mr, "channel_id");
+		message_reference.guild_id = SnowflakeNotNull(&mr, "guild_id");
+		message_reference.message_id = SnowflakeNotNull(&mr, "message_id");
+		message_reference.fail_if_not_exists = BoolNotNull(&mr, "fail_if_not_exists");
+	}
 	return *this;
 }
 

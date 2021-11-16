@@ -148,8 +148,10 @@ int main()
 			}
 		});
 
+		bool message_tested = false;
 		bot.on_message_create([&](const dpp::message_create_t & event) {
-			if (event.msg->author->id == bot.me.id) {
+			if (event.msg->author->id == bot.me.id && !message_tested) {
+				message_tested = true;
 				set_test("MESSAGERECEIVE", true);
 				set_test("MESSAGESGET", false);
 				bot.messages_get(event.msg->channel_id, 0, event.msg->id, 0, 5, [](const dpp::confirmation_callback_t &cc){
@@ -171,32 +173,35 @@ int main()
 						set_test("MESSAGESGET", false);
 					}
 				});
+				set_test("MSGCREATESEND", false);
 				event.send("MSGCREATESEND", [&bot, ch_id = event.msg->channel_id] (auto cc) {
-							if (!cc.is_error()) {
-							dpp::message m = std::get<dpp::message>(cc.value);
-								if (m.channel_id == ch_id) {
-									set_test("MSGCREATESEND", true);
-								} else {
-									set_test("MSGCREATESEND", false);
-								}
-								bot.message_delete(m.id, m.channel_id);
-							} else { 
-									set_test("MSGCREATESEND", false);
-							}
-						});
+					if (!cc.is_error()) {
+						dpp::message m = std::get<dpp::message>(cc.value);
+						if (m.channel_id == ch_id) {
+							set_test("MSGCREATESEND", true);
+						} else {
+							set_test("MSGCREATESEND", false);
+						}
+						bot.message_delete(m.id, m.channel_id);
+					} else { 
+						set_test("MSGCREATESEND", false);
+					}
+				});
+				set_test("MSGCREATEREPLY", false);
 				event.reply("MSGCREATEREPLY", [&bot, ref_id = event.msg->id] (auto cc) {
-							if (!cc.is_error()) {
-							dpp::message m = std::get<dpp::message>(cc.value);
-								if (m.message_reference.message_id == ref_id) {
-									set_test("MSGCREATEREPLY", true);
-								} else {
-									set_test("MSGCREATEREPLY", false);
-								}
-								bot.message_delete(m.id, m.channel_id);
-							} else { 
-									set_test("MSGCREATEREPLY", false);
-							}
-						});
+					if (!cc.is_error()) {
+						dpp::message m = std::get<dpp::message>(cc.value);
+						if (m.message_reference.message_id == ref_id) {
+							set_test("MSGCREATEREPLY", true);
+						} else {
+							set_test("MSGCREATEREPLY", false);
+							std::cout << " *** " << ref_id << " -> " << m.message_reference.message_id << "\n";
+						}
+						bot.message_delete(m.id, m.channel_id);
+					} else { 
+						set_test("MSGCREATEREPLY", false);
+					}
+				});
 			}
 		});
 
