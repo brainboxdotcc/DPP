@@ -39,8 +39,15 @@ void cluster::guild_events_get(snowflake guild_id, command_completion_event_t ca
 	});
 }
 
-void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback, uint8_t limit) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "/users?limit=" + std::to_string(limit), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback, uint8_t limit, snowflake before, snowflake after) {
+	std::string append;
+	if (before) {
+		append += "&before=" + std::to_string(before);
+	}
+	if (after) {
+		append += "&after=" + std::to_string(after);
+	}
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "/users?limit=" + std::to_string(limit) + append, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			user_map users;
 			confirmation_callback_t e("confirmation", confirmation(), http);

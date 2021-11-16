@@ -3204,10 +3204,12 @@ public:
 	 * @param guild_id Guild to get user list for
 	 * @param event_id Guild to get user list for
 	 * @param limit Maximum number of results to return
+	 * @param before Return user IDs that fall before this ID, if provided
+	 * @param after Return user IDs that fall after this ID, if provided
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_event_users_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback, uint8_t limit = 100);
+	void guild_event_users_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback, uint8_t limit = 100, snowflake before = 0, snowflake after = 0);
 
 	/**
 	 * @brief Create a scheduled event on a guild
