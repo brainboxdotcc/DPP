@@ -203,6 +203,16 @@ public:
 	 */
 	std::string rtc_region;
 
+	/**
+	 * @brief Channel icon
+	 */
+	utility::iconhash icon;
+
+	/**
+	 * @brief Channel banner (boost level locked)
+	 */
+	utility::iconhash banner;
+
 	/** Constructor */
 	channel();
 
