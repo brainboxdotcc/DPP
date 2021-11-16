@@ -171,22 +171,30 @@ int main()
 						set_test("MESSAGESGET", false);
 					}
 				});
-				bot.send("MSGCREATESEND", [&bot, ch_id = event.msg->channel_id] (auto cc) {
+				event.send("MSGCREATESEND", [&bot, ch_id = event.msg->channel_id] (auto cc) {
 							if (!cc.is_error()) {
 							dpp::message m = std::get<dpp::message>(cc.value);
-								if (m.id == ch_id) {
+								if (m.channel_id == ch_id) {
 									set_test("MSGCREATESEND", true);
+								} else {
+									set_test("MSGCREATESEND", false);
 								}
-								bot.message_delete(m);
+								bot.message_delete(m.id, m.channel_id);
+							} else { 
+									set_test("MSGCREATESEND", false);
 							}
 						});
-				bot.reply("MSGCREATEREPLY", [&bot, ref_id = event.msg->id] (auto cc) {
+				event.reply("MSGCREATEREPLY", [&bot, ref_id = event.msg->id] (auto cc) {
 							if (!cc.is_error()) {
 							dpp::message m = std::get<dpp::message>(cc.value);
-								if (m.id == ref_id) {
+								if (m.message_reference.message_id == ref_id) {
 									set_test("MSGCREATEREPLY", true);
+								} else {
+									set_test("MSGCREATEREPLY", false);
 								}
-								bot.message_delete(m);
+								bot.message_delete(m.id, m.channel_id);
+							} else { 
+									set_test("MSGCREATEREPLY", false);
 							}
 						});
 			}
