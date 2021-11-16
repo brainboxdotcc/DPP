@@ -149,8 +149,6 @@ thread& thread::fill_from_json(json* j) {
 	if (j->find("member") != j->end())  {
 		member.fill_from_json(&((*j)["member"]));
 	}
-
-	SetStringNotNull(j, "rtc_region", rtc_region);
 	
 	return *this;
 }
@@ -218,6 +216,19 @@ channel& channel::fill_from_json(json* j) {
 	if (j->find("permissions") != j->end()) {
 		SetSnowflakeNotNull(j, "permissions", permissions);
 	}
+
+	std::string _icon = StringNotNull(j, "icon");
+	std::string _banner = StringNotNull(j, "banner");
+
+	if (!_icon.empty()) {
+		this->icon = _icon;
+	}
+
+	if (!_banner.empty()) {
+		this->banner = _banner;
+	}
+
+	SetStringNotNull(j, "rtc_region", rtc_region);
 	
 	return *this;
 }
@@ -242,14 +253,20 @@ std::string thread::build_json(bool with_id) const {
 
 std::string channel::build_json(bool with_id) const {
 	json j;
-	if (with_id) {
+	if (with_id && id) {
 		j["id"] = std::to_string(id);
 	}
 	j["guild_id"] = std::to_string(guild_id);
-	j["position"] = position;
+	if (position) {
+		j["position"] = position;
+	}
 	j["name"] = name;
-	j["topic"] = topic;
-	j["rate_limit_per_user"] = rate_limit_per_user;
+	if (!topic.empty()) {
+		j["topic"] = topic;
+	}
+	if (rate_limit_per_user) {
+		j["rate_limit_per_user"] = rate_limit_per_user;
+	}
 	if (is_voice_channel()) {
 		j["user_limit"] = user_limit; 
 		j["bitrate"] = bitrate*1024;

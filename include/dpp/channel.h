@@ -72,7 +72,7 @@ enum channel_flags : uint16_t {
 	/// Private thread
 	c_private_thread =	0b0000000011111000,
 	/// Video quality forced to 720p
-	c_video_quality_720p =	0b0000000100000000
+	c_video_quality_720p =	0b0000000100000000,
 };
 
 /**
@@ -202,6 +202,16 @@ public:
 	 * @brief Voice region if set for voice channel, otherwise empty string
 	 */
 	std::string rtc_region;
+
+	/**
+	 * @brief Channel icon
+	 */
+	utility::iconhash icon;
+
+	/**
+	 * @brief Channel banner (boost level locked)
+	 */
+	utility::iconhash banner;
 
 	/** Constructor */
 	channel();

@@ -118,6 +118,8 @@ enum guild_flags : uint32_t {
 	g_three_day_thread_archive =		0b00100000000000000000000000000000,
 	/** guild has enabled ticketed events */
 	g_ticketed_events =			0b01000000000000000000000000000000,
+	/** guild can have channel banners */
+	g_channel_banners =			0b10000000000000000000000000000000,
 };
 
 /**
@@ -648,6 +650,12 @@ public:
 	 * @return bool has ticketed events
 	 */
 	bool has_ticketed_events() const;
+
+	/**
+	 * @brief guild has access to channel banners feature
+	 * @return bool has channel banners
+	 */
+	bool has_channel_banners() const;
 };
 
 /** A container of guilds */
