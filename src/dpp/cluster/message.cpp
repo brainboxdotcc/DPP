@@ -243,7 +243,7 @@ void cluster::messages_get(snowflake channel_id, snowflake around, snowflake bef
 
 
 void cluster::message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "pins/" + std::to_string(message_id), m_delete, "", [this, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "pins/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}

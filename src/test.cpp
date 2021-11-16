@@ -70,7 +70,7 @@ int main()
 										set_test("MESSAGEDELETE", false);
 										dpp::message m = std::get<dpp::message>(callback.value);
 										set_test("REACTEVENT", false);
-										bot.message_add_reaction(m.id, TEST_TEXT_CHANNEL_ID, "😄", [&bot](const dpp::confirmation_callback_t &callback) {
+										bot.message_add_reaction(m.id, TEST_TEXT_CHANNEL_ID, "😄", [](const dpp::confirmation_callback_t &callback) {
 											if (!callback.is_error()) {
 												set_test("REACT", true);
 											} else {
@@ -171,6 +171,32 @@ int main()
 						set_test("MESSAGESGET", false);
 					}
 				});
+				event.send("MSGCREATESEND", [&bot, ch_id = event.msg->channel_id] (auto cc) {
+							if (!cc.is_error()) {
+							dpp::message m = std::get<dpp::message>(cc.value);
+								if (m.channel_id == ch_id) {
+									set_test("MSGCREATESEND", true);
+								} else {
+									set_test("MSGCREATESEND", false);
+								}
+								bot.message_delete(m.id, m.channel_id);
+							} else { 
+									set_test("MSGCREATESEND", false);
+							}
+						});
+				event.reply("MSGCREATEREPLY", [&bot, ref_id = event.msg->id] (auto cc) {
+							if (!cc.is_error()) {
+							dpp::message m = std::get<dpp::message>(cc.value);
+								if (m.message_reference.message_id == ref_id) {
+									set_test("MSGCREATEREPLY", true);
+								} else {
+									set_test("MSGCREATEREPLY", false);
+								}
+								bot.message_delete(m.id, m.channel_id);
+							} else { 
+									set_test("MSGCREATEREPLY", false);
+							}
+						});
 			}
 		});
 

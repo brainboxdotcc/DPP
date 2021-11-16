@@ -53,6 +53,42 @@ bool event_dispatch_t::is_cancelled() const
 	return stop_event;
 }
 
+void message_create_t::send(const std::string& m, command_completion_event_t callback) const
+{
+	this->send(dpp::message(m), callback);
+}
+
+void message_create_t::send(message& msg, command_completion_event_t callback) const 
+{
+	msg.channel_id = this->msg->channel_id;
+	this->from->creator->message_create(msg, callback);
+}
+
+void message_create_t::send(message&& msg, command_completion_event_t callback) const 
+{
+	msg.channel_id = this->msg->channel_id;
+	this->from->creator->message_create(msg, callback);
+}
+
+void message_create_t::reply(const std::string& m, command_completion_event_t callback) const
+{
+	this->reply(dpp::message(m), callback);
+}
+
+void message_create_t::reply(message& msg, command_completion_event_t callback) const 
+{
+	msg.set_reference(this->msg->id);
+	msg.channel_id = this->msg->channel_id;
+	this->from->creator->message_create(msg, callback);
+}
+
+void message_create_t::reply(message&& msg, command_completion_event_t callback) const 
+{
+	msg.set_reference(this->msg->id);
+	msg.channel_id = this->msg->channel_id;
+	this->from->creator->message_create(msg, callback);
+}
+
 void interaction_create_t::reply(interaction_response_type t, const message & m, command_completion_event_t callback) const
 {
 	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), callback);
