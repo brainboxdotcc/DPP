@@ -188,10 +188,18 @@ int main()
 					}
 				});
 				set_test("MSGCREATEREPLY", false);
-				event.reply("MSGCREATEREPLY", [&bot, ref_id = event.msg->id] (auto cc) {
+				event.reply("MSGCREATEREPLY", true, [&bot, ref_id = event.msg->id, author_id = event.msg->author->id] (auto cc) {
 					if (!cc.is_error()) {
 						dpp::message m = std::get<dpp::message>(cc.value);
 						if (m.message_reference.message_id == ref_id) {
+							for (auto&[usr, mem] : m.mentions) {
+								if (usr.id = author_id) {
+									set_test("MSGMENTIONUSER", true);
+									break;
+								} else {
+									set_test("MSGMENTIONUSER", false);
+								}
+							}
 							set_test("MSGCREATEREPLY", true);
 						} else {
 							set_test("MSGCREATEREPLY", false);
