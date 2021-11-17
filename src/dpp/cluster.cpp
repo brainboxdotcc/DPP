@@ -20,6 +20,7 @@
  ************************************************************************************/
 #include <map>
 #include <dpp/discord.h>
+#include <dpp/exception.h>
 #include <dpp/cluster.h>
 #include <dpp/discordclient.h>
 #include <dpp/discordevents.h>
@@ -52,7 +53,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	// Set up winsock.
 	WSADATA wsadata;
 	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
-		throw dpp::exception("WSAStartup failure");
+		throw dpp::connection_exception("WSAStartup failure");
 	}
 #endif
 }
@@ -87,9 +88,9 @@ void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 		}
 	} else {
 		if (shardinfo.is_error()) {
-			throw dpp::exception(fmt::format("Auto Shard: Could not get shard count ({} [code: {}]). Cluster startup aborted.", shardinfo.get_error().message, shardinfo.get_error().code));
+			throw dpp::rest_exception(fmt::format("Auto Shard: Could not get shard count ({} [code: {}]). Cluster startup aborted.", shardinfo.get_error().message, shardinfo.get_error().code));
 		} else {
-			throw dpp::exception("Auto Shard: Could not get shard count (unknown error, check your connection). Cluster startup aborted.");
+			throw dpp::rest_exception("Auto Shard: Could not get shard count (unknown error, check your connection). Cluster startup aborted.");
 		}
 	}
 }

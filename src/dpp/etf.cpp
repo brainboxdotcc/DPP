@@ -34,7 +34,7 @@
 #include <dpp/sysdep.h>
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
-#include <dpp/dispatcher.h>
+#include <dpp/exception.h>
 #include <dpp/nlohmann/json.hpp>
 #include <zlib.h>
 #include <iostream>
@@ -137,7 +137,7 @@ void etf_parser::buffer_write(etf_buffer *pk, const char *bytes, size_t l) {
 		buf[0] = ett_atom;
 
 		if (size > 0xFFFF) {
-			throw dpp::exception("ETF: Atom too large");
+			throw dpp::parse_exception("ETF: Atom too large");
 		}
 
 		store_16_bits(buf + 1, size);
@@ -156,7 +156,7 @@ void etf_parser::buffer_write(etf_buffer *pk, const char *bytes, size_t l) {
 		buf[0] = ett_atom_utf8;
 
 		if (size > 0xFFFF) {
-			throw dpp::exception("ETF: Atom too large");
+			throw dpp::parse_exception("ETF: Atom too large");
 		}
 
 		store_16_bits(buf + 1, size);
@@ -225,7 +225,7 @@ etf_parser::~etf_parser() = default;
 
 uint8_t etf_parser::read_8_bits() {
 	if (offset + sizeof(uint8_t) > size) {
-		throw dpp::exception("ETF: read_8_bits() past end of buffer");
+		throw dpp::parse_exception("ETF: read_8_bits() past end of buffer");
 	}
 	auto val = *reinterpret_cast<const uint8_t*>(data + offset);
 	offset += sizeof(uint8_t);
@@ -234,7 +234,7 @@ uint8_t etf_parser::read_8_bits() {
 
 uint16_t etf_parser::read_16_bits() {
 	if (offset + sizeof(uint16_t) > size) {
-		throw dpp::exception("ETF: read_16_bits() past end of buffer");
+		throw dpp::parse_exception("ETF: read_16_bits() past end of buffer");
 	}
 	uint16_t val = etf_byte_order_16(*reinterpret_cast<const uint16_t*>(data + offset));
 	offset += sizeof(uint16_t);
@@ -243,7 +243,7 @@ uint16_t etf_parser::read_16_bits() {
 
 uint32_t etf_parser::read_32_bits() {
 	if (offset + sizeof(uint32_t) > size) {
-		throw dpp::exception("ETF: read_32_bits() past end of buffer");
+		throw dpp::parse_exception("ETF: read_32_bits() past end of buffer");
 	}
 	uint32_t val = etf_byte_order_32(*reinterpret_cast<const uint32_t*>(data + offset));
 	offset += sizeof(uint32_t);
@@ -252,7 +252,7 @@ uint32_t etf_parser::read_32_bits() {
 
 uint64_t etf_parser::read_64_bits() {
 	if (offset + sizeof(uint64_t) > size) {
-		throw dpp::exception("ETF: read_64_bits() past end of buffer");
+		throw dpp::parse_exception("ETF: read_64_bits() past end of buffer");
 	}
 	uint64_t val = etf_byte_order_64(*reinterpret_cast<const uint64_t*>(data + offset));
 	offset += sizeof(val);
@@ -402,7 +402,7 @@ json etf_parser::decode_bigint(uint32_t digits) {
 	const uint8_t sign = read_8_bits();
 
 	if (digits > 8) {
-		throw dpp::exception("ETF: big integer larger than 8 bytes unsupported");
+		throw dpp::parse_exception("ETF: big integer larger than 8 bytes unsupported");
 	}
 
 	uint64_t value = 0;
@@ -432,7 +432,7 @@ json etf_parser::decode_bigint(uint32_t digits) {
 	const int res = sprintf(outBuffer, formatString, value);
 
 	if (res < 0) {
-		throw dpp::exception("Decode big integer failed");
+		throw dpp::parse_exception("Decode big integer failed");
 	}
 	const uint8_t length = (uint8_t)res;
 	json j = std::string(outBuffer, length);
@@ -474,7 +474,7 @@ json etf_parser::decode_string_as_list() {
 	const auto length = read_16_bits();
 	json array = json::array();
 	if (offset + length > size) {
-		throw dpp::exception("String list past end of buffer");
+		throw dpp::parse_exception("String list past end of buffer");
 	}
 	for(uint16_t i = 0; i < length; ++i) {
 		array.push_back(decode_small_integer());
@@ -499,7 +499,7 @@ json etf_parser::decode_compressed() {
 
 	offset += sourceSize;
 	if (ret != Z_OK) {
-		throw dpp::exception("ETF compressed value: decompresson error");
+		throw dpp::parse_exception("ETF compressed value: decompresson error");
 	}
 
 	uint8_t* old_data = data;
@@ -573,14 +573,14 @@ json etf_parser::decode_export() {
 json etf_parser::inner_parse() {
 	/* Decode one value into json from ETF */
 	if(offset >= size) {
-		throw dpp::exception("Read past end of ETF buffer");
+		throw dpp::parse_exception("Read past end of ETF buffer");
 	}
 
 	const uint8_t type = read_8_bits();
 
 	switch(type) {
 		case ett_distribution:
-			throw dpp::exception("Distribution headers are not supported");
+			throw dpp::parse_exception("Distribution headers are not supported");
 		case ett_smallint:
 			return decode_small_integer();
 		case ett_integer:
@@ -624,7 +624,7 @@ json etf_parser::inner_parse() {
 		case ett_compressed:
 			return decode_compressed();
 		default:
-			throw dpp::exception("Unknown data type in ETF");
+			throw dpp::parse_exception("Unknown data type in ETF");
 	}
 }
 
@@ -637,7 +637,7 @@ json etf_parser::parse(const std::string& in) {
 	if (version == FORMAT_VERSION) {
 		return inner_parse();
 	} else {
-		throw dpp::exception("Incorrect ETF version");
+		throw dpp::parse_exception("Incorrect ETF version");
 	}
 }
 
@@ -688,7 +688,7 @@ void etf_parser::inner_build(const json* i, etf_buffer* b)
 			append_nil_ext(b);
 		} else {
 			if (length > std::numeric_limits<uint32_t>::max() - 1) {
-				throw dpp::exception("ETF encode: List too large for ETF");
+				throw dpp::parse_exception("ETF encode: List too large for ETF");
 			}
 		}
 
@@ -702,7 +702,7 @@ void etf_parser::inner_build(const json* i, etf_buffer* b)
 		/* Object types (can contain any other type, recursively, but nlohmann::json only supports string keys) */
 		const size_t length = i->size();
 		if (length > std::numeric_limits<uint32_t>::max() - 1) {
-			throw dpp::exception("ETF encode: Map too large for ETF");
+			throw dpp::parse_exception("ETF encode: Map too large for ETF");
 		}
 		append_map_header(b, length);
 		for (auto n = i->begin(); n != i->end(); ++n) {

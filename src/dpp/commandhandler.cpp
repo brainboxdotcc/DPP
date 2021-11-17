@@ -22,7 +22,7 @@
 #include <dpp/commandhandler.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
-#include <dpp/dispatcher.h>
+#include <dpp/exception.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>
@@ -78,7 +78,7 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 	if (slash_commands_enabled) {
 		if (this->app_id == 0) {
 			if (owner->me.id == 0) {
-				throw dpp::exception("Command handler not ready (i don't know my application ID)");
+				throw dpp::logic_exception("Command handler not ready (i don't know my application ID)");
 			} else {
 				this->app_id = owner->me.id;
 			}

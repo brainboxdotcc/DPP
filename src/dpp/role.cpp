@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/discord.h>
-#include <dpp/dispatcher.h>
+#include <dpp/exception.h>
 #include <dpp/role.h>
 #include <dpp/cache.h>
 #include <dpp/discordevents.h>
@@ -286,7 +286,7 @@ bool role::has_manage_events() const {
 role& role::set_name(const std::string& n) {
 	size_t l = utility::utf8len(n);
 	if (l < 1) {
-		throw dpp::exception("Role name too short");
+		throw dpp::length_exception("Role name too short");
 	}
 	name = utility::utf8substr(n, 0, 100);
 	return *this;

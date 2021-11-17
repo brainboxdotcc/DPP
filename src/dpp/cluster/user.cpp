@@ -20,6 +20,7 @@
  ************************************************************************************/
 #include <dpp/discord.h>
 #include <dpp/cluster.h>
+#include <dpp/exception.h>
 #include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
@@ -36,7 +37,7 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 			{ i_png, "image/png" }
 		};
 		if (image_blob.size() > MAX_EMOJI_SIZE) {
-			throw dpp::exception("User icon file exceeds discord limit of 256 kilobytes");
+			throw dpp::length_exception("User icon file exceeds discord limit of 256 kilobytes");
 		}
 		j["avatar"] = "data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length());
 	}

@@ -280,6 +280,16 @@ namespace dpp {
 		 * @return std::string Substring in UTF-8 or empty string if invalid UTF-8 passed in
 		 */
 		std::string DPP_EXPORT utf8substr(const std::string& str, std::string::size_type start, std::string::size_type length);
+
+		/**
+		 * @brief Read a whole file into a std::string.
+		 * Be sure you have enough memory to read the file, if you are reading a large file.
+		 * @note Be aware this function can block! If you are regularly reading large files, consider caching them.
+		 * @param filename The path to the file to read
+		 * @return std::string The file contents
+		 * @throw dpp::exception on failure to read the entire file
+		 */
+		std::string DPP_EXPORT read_file(const std::string& filename);
 	};
 
 };
