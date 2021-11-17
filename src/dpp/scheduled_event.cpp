@@ -89,6 +89,10 @@ std::string const scheduled_event::build_json(bool with_id) const {
 	}
 	if (this->channel_id) {
 		j["channel_id"] = std::to_string(this->channel_id);
+	} else {
+		if (with_id) {
+			j["channel_id"] = json::value_t::null;
+		}
 	}
 	if (this->guild_id) {
 		j["guild_id"] = std::to_string(this->guild_id);
