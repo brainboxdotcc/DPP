@@ -46,6 +46,7 @@ const dpp::snowflake TEST_GUILD_ID = 907951970017480704;
 const dpp::snowflake TEST_TEXT_CHANNEL_ID = 907951970017480707;
 const dpp::snowflake TEST_VC_ID = 907951970017480708;
 const dpp::snowflake TEST_USER_ID = 826535422381391913;
+const dpp::snowflake TEST_EVENT_ID = 909928577951203360;
 
 /**
  * @brief Perform a test of a REST base API call with one parameter
@@ -86,6 +87,27 @@ const dpp::snowflake TEST_USER_ID = 826535422381391913;
 			set_test(testname, false); \
 		} \
 	});
+
+/**
+ * @brief Perform a test of a REST base API call with two parameters
+ */
+#define twoparam_api_test_list(func_name, param1, param2, return_type, testname) \
+	set_test(testname, false); \
+	bot.func_name (param1, param2, [&](const dpp::confirmation_callback_t &cc) { \
+		if (!cc.is_error()) { \
+			return_type g = std::get<return_type>(cc.value); \
+			if (g.size() > 0) { \
+				set_test(testname, true); \
+			} else { \
+				bot.log(dpp::ll_debug, cc.http_info.body); \
+				set_test(testname, false); \
+			} \
+		} else { \
+			bot.log(dpp::ll_debug, cc.http_info.body); \
+			set_test(testname, false); \
+		} \
+	});
+
 
 /**
  * @brief Perform a test of a REST base API call with no parameters

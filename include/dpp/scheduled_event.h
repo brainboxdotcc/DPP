@@ -67,8 +67,6 @@ enum event_status : uint8_t {
  * @brief Entities for the event
  */
 struct DPP_EXPORT event_entities {
-	/// the speakers of the stage channel
-	std::vector<snowflake> speaker_ids;
 	/// location of the event
 	std::string location;
 };

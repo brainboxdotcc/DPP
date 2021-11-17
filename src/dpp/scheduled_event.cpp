@@ -60,16 +60,6 @@ scheduled_event& scheduled_event::fill_from_json(const json* j) {
 	auto i = j->find("entity_metadata");
 	if (i != j->end()) {
 		SetStringNotNull(&((*j)["entity_metadata"]), "location", this->entity_metadata.location);
-		if (i->find("speaker_ids") != i->end()) {
-			for (auto & speaker : (*j)["entity_metadata"]["speaker_ids"]) {
-				try {
-					this->entity_metadata.speaker_ids.push_back(std::stoull(speaker.get<std::string>()));
-				}
-				catch (const std::exception&) {
-					/* Invalid speaker ID, non-numeric. This should never happen, but we guard against it */
-				}
-			}
-		}
 	}
 	if (j->find("creator") != j->end()) {
 		json u = (*j)["creator"];
@@ -128,17 +118,9 @@ std::string const scheduled_event::build_json(bool with_id) const {
 		ss << std::put_time(&t, "%FT%TZ");
 		j["scheduled_end_time"] = ss.str();
 	}
-	if (!entity_metadata.location.empty() || entity_metadata.speaker_ids.size()) {
+	if (!entity_metadata.location.empty()) {
 		j["entity_metadata"] = json::object();
-		if (!entity_metadata.location.empty()) {
-			j["entity_metadata"]["location"] = entity_metadata.location;
-		}
-		if (entity_metadata.speaker_ids.size()) {
-			j["entity_metadata"]["speaker_ids"] = json::array();
-			for (auto & s : entity_metadata.speaker_ids) {
-				j["entity_metadata"]["speaker_ids"].push_back(std::to_string(s));
-			}
-		}
+		j["entity_metadata"]["location"] = entity_metadata.location;
 	}
 
 	return j.dump();
