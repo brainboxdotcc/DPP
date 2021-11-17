@@ -238,7 +238,7 @@ int main()
 		twoparam_api_test(guild_event_get, TEST_GUILD_ID, TEST_EVENT_ID, dpp::scheduled_event, "GETEVENT");
 		twoparam_api_test_list(guild_event_users_get, TEST_GUILD_ID, TEST_EVENT_ID, dpp::user_map, "GETEVENTUSERS");
 
-		std::this_thread::sleep_for(std::chrono::seconds(5));
+		std::this_thread::sleep_for(std::chrono::seconds(20));
 
 		set_test("USERCACHE", false);
 		dpp::user* u = dpp::find_user(TEST_USER_ID);

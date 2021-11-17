@@ -128,7 +128,7 @@ std::string get_token() {
 
 void wait_for_tests() {
 	uint16_t ticks = 0;
-	while (ticks < TEST_TIMEOUT - 5) {
+	while (ticks < TEST_TIMEOUT) {
 		size_t executed = 0;
 		for (auto & t : tests) {
 			if (t.second.executed == true) {
@@ -136,7 +136,7 @@ void wait_for_tests() {
 			}
 		}
 		if (executed == tests.size()) {
-			std::this_thread::sleep_for(std::chrono::seconds(3));
+			std::this_thread::sleep_for(std::chrono::seconds(10));
 			return;
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
