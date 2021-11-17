@@ -51,9 +51,17 @@ void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, comm
 		if (callback) {
 			user_map users;
 			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error() && j.find("users") != j.end()) {
-				for (auto & curr_user : j["users"]) {
-					users[SnowflakeNotNull(&curr_user, "id")] = user().fill_from_json(&curr_user);
+			if (!e.is_error()) {
+				if (j.find("users") != j.end()) {
+					for (auto & curr_user : j["users"]) {
+						users[SnowflakeNotNull(&curr_user, "id")] = user().fill_from_json(&curr_user);
+					}
+				} else {
+					if (j.is_array()) {
+						for (auto & curr_user : j) {
+							users[SnowflakeNotNull(&curr_user, "id")] = user().fill_from_json(&curr_user);
+						}
+					}
 				}
 			}
 			callback(confirmation_callback_t("user_map", users, http));
