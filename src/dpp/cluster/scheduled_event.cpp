@@ -94,7 +94,7 @@ void cluster::guild_event_edit(const scheduled_event& event, command_completion_
 }
 
 void cluster::guild_event_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "?with_user_count=true", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("scheduled_event", scheduled_event().fill_from_json(&j), http));
 		}
