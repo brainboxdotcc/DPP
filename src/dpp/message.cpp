@@ -277,10 +277,7 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0)
 	allowed_mentions.parse_users = false;
 	allowed_mentions.parse_everyone = false;
 	allowed_mentions.parse_roles = false;
-	/* The documentation for discord is INCORRECT. This defaults to true, and must be set to false.
-	 * The default ctor reflects this.
-	 */
-	allowed_mentions.replied_user = true;
+	allowed_mentions.replied_user = false;
 
 }
 
