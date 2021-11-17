@@ -70,22 +70,28 @@ void message_create_t::send(message&& msg, command_completion_event_t callback) 
 	this->from->creator->message_create(msg, callback);
 }
 
-void message_create_t::reply(const std::string& m, command_completion_event_t callback) const
+void message_create_t::reply(const std::string& m, bool mention_replied_user, command_completion_event_t callback) const
 {
-	this->reply(dpp::message(m), callback);
+	this->reply(dpp::message(m), mention_replied_user, callback);
 }
 
-void message_create_t::reply(message& msg, command_completion_event_t callback) const 
+void message_create_t::reply(message& msg, bool mention_replied_user, command_completion_event_t callback) const 
 {
 	msg.set_reference(this->msg->id);
 	msg.channel_id = this->msg->channel_id;
+	if (mention_replied_user) {
+		msg.allowed_mentions.replied_user = mention_replied_user;
+	}
 	this->from->creator->message_create(msg, callback);
 }
 
-void message_create_t::reply(message&& msg, command_completion_event_t callback) const 
+void message_create_t::reply(message&& msg, bool mention_replied_user, command_completion_event_t callback) const 
 {
 	msg.set_reference(this->msg->id);
 	msg.channel_id = this->msg->channel_id;
+	if (mention_replied_user) {
+		msg.allowed_mentions.replied_user = mention_replied_user;
+	}
 	this->from->creator->message_create(msg, callback);
 }
 
