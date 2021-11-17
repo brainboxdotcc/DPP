@@ -81,6 +81,7 @@ void message_create_t::reply(message& msg, bool mention_replied_user, command_co
 	msg.channel_id = this->msg->channel_id;
 	if (mention_replied_user) {
 		msg.allowed_mentions.replied_user = mention_replied_user;
+		msg.allowed_mentions.users.push_back(this->msg->author->id);
 	}
 	this->from->creator->message_create(msg, callback);
 }
@@ -91,6 +92,7 @@ void message_create_t::reply(message&& msg, bool mention_replied_user, command_c
 	msg.channel_id = this->msg->channel_id;
 	if (mention_replied_user) {
 		msg.allowed_mentions.replied_user = mention_replied_user;
+		msg.allowed_mentions.users.push_back(this->msg->author->id);
 	}
 	this->from->creator->message_create(msg, callback);
 }

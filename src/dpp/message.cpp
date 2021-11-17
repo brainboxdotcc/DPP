@@ -625,6 +625,8 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		}
 		if (!allowed_mentions.replied_user) {
 			j["allowed_mentions"]["replied_user"] = false;
+		} else {
+			j["allowed_mentions"]["replied_user"] = true;
 		}
 		if (allowed_mentions.users.size()) {
 			j["allowed_mentions"]["users"] = json::array();

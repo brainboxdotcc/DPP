@@ -50,7 +50,7 @@ std::map<std::string, test_t> tests = {
 	{"GETBANS", {"cluster::guild_get_bans()", false, false}},
 	{"GETPINS", {"cluster::channel_pins_get()", false, false}},
 	{"GETEVENTS", {"cluster::guild_events_get()", false, false}},
-	{"MSGMENTIONUSER", {"message_create_t::reply()", false, false}},
+	{"MSGMENTIONUSER", {"message_create_t::reply() (mention)", false, false}},
 	{"MSGCREATESEND", {"message_create_t::send()", false, false}},
 	{"MSGCREATEREPLY", {"message_create_t::reply()", false, false}},
 	{"GETEVENTUSERS", {"cluster::guild_event_users_get()", false, false}},

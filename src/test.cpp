@@ -174,7 +174,7 @@ int main()
 					}
 				});
 				set_test("MSGCREATESEND", false);
-				event.send("MSGCREATESEND", [&bot, ch_id = event.msg->channel_id] (auto cc) {
+				event.send("MSGCREATESEND", [&bot, ch_id = event.msg->channel_id] (const auto& cc) {
 					if (!cc.is_error()) {
 						dpp::message m = std::get<dpp::message>(cc.value);
 						if (m.channel_id == ch_id) {
@@ -188,17 +188,21 @@ int main()
 					}
 				});
 				set_test("MSGCREATEREPLY", false);
-				event.reply("MSGCREATEREPLY", true, [&bot, ref_id = event.msg->id, author_id = event.msg->author->id] (auto cc) {
+				set_test("MSGMENTIONUSER", false);
+				event.reply("MSGCREATEREPLY", true, [&bot, ref_id = event.msg->id, author_id = event.msg->author->id] (const auto& cc) {
 					if (!cc.is_error()) {
 						dpp::message m = std::get<dpp::message>(cc.value);
 						if (m.message_reference.message_id == ref_id) {
+							bool f = false;
 							for (auto&[usr, mem] : m.mentions) {
-								if (usr.id = author_id) {
+								if (usr.id == author_id) {
 									set_test("MSGMENTIONUSER", true);
+									f = true;
 									break;
-								} else {
-									set_test("MSGMENTIONUSER", false);
 								}
+							}
+							if (!f) {
+								set_test("MSGMENTIONUSER", false);
 							}
 							set_test("MSGCREATEREPLY", true);
 						} else {
