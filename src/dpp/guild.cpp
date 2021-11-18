@@ -164,6 +164,11 @@ std::string guild_member::build_json() const {
 	return j.dump();
 }
 
+guild& guild::set_name(const std::string& n) {
+	this->name = utility::validate(trim(n), 2, 100, "Guild names cannot be less than 2 characters");
+	return *this;
+}
+
 bool guild_member::is_deaf() const {
 	return flags & dpp::gm_deaf;
 }

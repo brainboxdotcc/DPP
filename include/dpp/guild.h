@@ -489,6 +489,15 @@ public:
 	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false);
 
 	/**
+	 * @brief Set the name of the guild in the object
+	 * Min length: 2, Max length: 100 (not including leading/trailing spaces)
+	 * @param n Guild name
+	 * @return guild& reference to self
+	 * @throw dpp::length_exception if guild name is too short
+	 */
+	guild& set_name(const std::string& n);
+
+	/**
 	 * @brief Is a large server (>250 users)
 	 * @return bool is a large guild
 	 */
