@@ -290,6 +290,20 @@ namespace dpp {
 		 * @throw dpp::exception on failure to read the entire file
 		 */
 		std::string DPP_EXPORT read_file(const std::string& filename);
+
+		/**
+		 * @brief Validate a string value
+		 * In the event the length of the string is less than _min, then an exception of type dpp:length_exception
+		 * will be thrown. If the string is longer than _max UTF8 codepoints it will be truncated to fit.
+		 * 
+		 * @param value The value to validate
+		 * @param _min Minimum length
+		 * @param _max Maximum length
+		 * @param exception_message Exception message to throw if value length < _min
+		 * @return std::string Validated string, truncated if neccessary.
+		 * @throw dpp::length_exception if value UTF8 length < _min
+		 */
+		std::string validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);
 	};
 
 };

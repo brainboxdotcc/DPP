@@ -20,6 +20,7 @@
  ************************************************************************************/
 #include <dpp/scheduled_event.h>
 #include <dpp/discord.h>
+#include <dpp/exception.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
@@ -35,12 +36,78 @@ scheduled_event::scheduled_event() :
 	creator_id(0),	
 	scheduled_start_time(0),
 	scheduled_end_time(0),
-	privacy_level(ep_public),
+	privacy_level(ep_guild_only),
 	status(es_scheduled),
-	entity_type(eet_none),
+	entity_type(eet_external),
 	entity_id(0),
 	user_count(0)
 {
+}
+
+scheduled_event& scheduled_event::set_name(const std::string& n) {
+	this->name = utility::validate(n, 1, 100, "Name too short");
+	return *this;
+}
+
+scheduled_event& scheduled_event::set_description(const std::string& d) {
+	this->description = utility::validate(d, 1, 1000, "Description too short");
+	return *this;
+}
+
+scheduled_event& scheduled_event::clear_description() {
+	this->description.clear();
+	return *this;
+}
+
+scheduled_event& scheduled_event::set_location(const std::string& l) {
+	this->entity_metadata.location = utility::validate(l, 1, 100, "Location too short");
+	this->channel_id = 0;
+	return *this;
+}
+
+scheduled_event& scheduled_event::set_channel_id(snowflake c) {
+	this->channel_id = c;
+	this->entity_metadata.location.clear();
+	return *this;
+}
+
+scheduled_event& scheduled_event::set_creator_id(snowflake c) {
+	this->creator_id = c;
+	return *this;
+}
+
+scheduled_event& scheduled_event::set_status(event_status s) {
+	if (this->status == es_completed || this->status == es_cancelled) {
+		throw dpp::logic_exception("Can't update status of a completed or cancelled event");
+	} else {
+		if (this->status == es_scheduled) {
+			if (s != es_active && s != es_cancelled) {
+				throw dpp::logic_exception("Invalid status transition, scheduled can only transition to active or cancelled");
+			}
+		} else if (this->status == es_active) {
+			if (s != es_completed) {
+				throw dpp::logic_exception("Invalid status transition, active can only transition to completed");
+			}
+		}
+	}
+	this->status = s;
+	return *this;
+}
+
+scheduled_event& scheduled_event::set_start_time(time_t t) {
+	if (t < time(nullptr)) {
+		throw dpp::length_exception("Start time cannot be before current date and time");
+	}
+	this->scheduled_start_time = t;
+	return *this;
+}
+
+scheduled_event& scheduled_event::set_end_time(time_t t) {
+	if (t < time(nullptr)) {
+		throw dpp::length_exception("End time cannot be before current date and time");
+	}
+	this->scheduled_end_time = t;
+	return *this;
 }
 
 scheduled_event& scheduled_event::fill_from_json(const json* j) {
@@ -122,9 +189,11 @@ std::string const scheduled_event::build_json(bool with_id) const {
 		ss << std::put_time(&t, "%FT%TZ");
 		j["scheduled_end_time"] = ss.str();
 	}
+	j["entity_metadata"] = json::object();
 	if (!entity_metadata.location.empty()) {
-		j["entity_metadata"] = json::object();
 		j["entity_metadata"]["location"] = entity_metadata.location;
+	} else {
+		j["entity_metadata"]["location"] = json::value_t::null;
 	}
 
 	return j.dump();

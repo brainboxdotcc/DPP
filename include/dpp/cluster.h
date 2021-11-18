@@ -128,7 +128,9 @@ typedef std::variant<
 		thread,
 		thread_map,
 		scheduled_event,
-		scheduled_event_map
+		scheduled_event_map,
+		event_member,
+		event_member_map
 	> confirmable_t;
 
 /**

@@ -29,8 +29,6 @@ namespace dpp {
  * @brief Represents the privacy of an event
  */
 enum event_privacy_level : uint8_t {
-	/// The event is visible publicly, such as on Stage Discovery.
-	ep_public = 1,
 	/// The event is visible to only guild members.
 	ep_guild_only = 2
 };
@@ -39,8 +37,6 @@ enum event_privacy_level : uint8_t {
  * @brief Event entity types
  */
 enum event_entity_type : uint8_t {
-	/// Not set
-	eet_none = 0,
 	/// A stage instance
 	eet_stage_instance = 1,
 	/// A voice channel
@@ -69,6 +65,26 @@ enum event_status : uint8_t {
 struct DPP_EXPORT event_entities {
 	/// location of the event
 	std::string location;
+};
+
+/**
+ * @brief Represents a guild member/user who has registered interest in an event
+ * 
+ */
+struct DPP_EXPORT event_member {
+	/**
+	 * @brief Event ID associated with
+	 */
+        snowflake guild_scheduled_event_id;
+	/**
+	 * @brief User details of associated user
+	 * 
+	 */
+        dpp::user user;
+	/**
+	 * @brief Member details of user on the associated guild
+	 */
+        dpp::guild_member member;
 };
 
 /**
@@ -103,6 +119,79 @@ struct DPP_EXPORT scheduled_event {
 	~scheduled_event() = default;
 
 	/**
+	 * @brief Set the name of the event
+	 * Minimum length: 1, Maximum length: 100
+	 * @param n event name
+	 * @return scheduled_event& reference to self
+	 * @throw dpp::length_error if length < 1
+	 */
+	scheduled_event& set_name(const std::string& n);
+
+	/**
+	 * @brief Set the description of the event
+	 * Minimum length: 1 (if set), Maximum length: 100
+	 * @param d event description
+	 * @return scheduled_event& reference to self
+	 * @throw dpp::length_error if length < 1
+	 */
+	scheduled_event& set_description(const std::string& d);
+
+	/**
+	 * @brief Clear the description of the event
+	 * @return scheduled_event& reference to self
+	 */
+	scheduled_event& clear_description();
+
+	/**
+	 * @brief Set the location of the event.
+	 * Minimum length: 1, Maximum length: 1000
+	 * @note Clears channel_id
+	 * @param l event location
+	 * @return scheduled_event& reference to self
+	 * @throw dpp::length_error if length < 1
+	 */
+	scheduled_event& set_location(const std::string& l);
+
+	/**
+	 * @brief Set the voice channel id of the event
+	 * @note clears location
+	 * @param c channel ID
+	 * @return scheduled_event& reference to self
+	 */
+	scheduled_event& set_channel_id(snowflake c);
+
+	/**
+	 * @brief Set the creator id of the event
+	 * @param c creator user ID
+	 * @return scheduled_event& reference to self
+	 */
+	scheduled_event& set_creator_id(snowflake c);
+
+	/**
+	 * @brief Set the status of the event
+	 * @param s status to set
+	 * @return scheduled_event& reference to self
+	 * @throw dpp::logic_error if status change is not valid
+	 */
+	scheduled_event& set_status(event_status s);
+
+	/**
+	 * @brief Set the start time of the event
+	 * @param t starting time
+	 * @return scheduled_event& reference to self
+	 * @throw dpp::length_error if time is before now
+	 */
+	scheduled_event& set_start_time(time_t t);
+
+	/**
+	 * @brief Set the end time of the event
+	 * @param t ending time
+	 * @return scheduled_event& reference to self
+	 * @throw dpp::length_error if time is before now
+	 */
+	scheduled_event& set_end_time(time_t t);
+
+	/**
 	 * @brief Serialise a scheduled_event object from json
 	 *
 	 * @return scheduled_event& a reference to self
@@ -122,6 +211,11 @@ struct DPP_EXPORT scheduled_event {
  * @brief A group of scheduled events
  */
 typedef std::unordered_map<snowflake, scheduled_event> scheduled_event_map;
+
+/**
+ * @brief A group of scheduled event members
+ */
+typedef std::unordered_map<snowflake, event_member> event_member_map;
 
 
 };

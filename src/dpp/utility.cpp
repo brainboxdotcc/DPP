@@ -316,6 +316,16 @@ namespace dpp {
 			}
 		}
 
+		std::string validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message) {
+			if (utf8len(value) < _min) {
+				throw dpp::length_exception(exception_message);
+			} else if (utf8len(value) > _max) {
+				return utf8substr(value, 0, _max);
+			}
+			return value;
+		}
+
+
 	};
 
 };

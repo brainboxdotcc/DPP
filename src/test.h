@@ -116,6 +116,7 @@ const dpp::snowflake TEST_EVENT_ID = 909928577951203360;
 	bot.func_name (param1, param2, [&](const dpp::confirmation_callback_t &cc) { \
 		if (!cc.is_error()) { \
 			return_type g = std::get<return_type>(cc.value); \
+			bot.log(dpp::ll_debug, fmt::format("Returned content: {}", cc.http_info.body)); \
 			if (g.size() > 0) { \
 				set_test(testname, true); \
 			} else { \
