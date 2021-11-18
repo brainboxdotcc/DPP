@@ -284,11 +284,7 @@ bool role::has_manage_events() const {
 }
 
 role& role::set_name(const std::string& n) {
-	size_t l = utility::utf8len(n);
-	if (l < 1) {
-		throw dpp::length_exception("Role name too short");
-	}
-	name = utility::utf8substr(n, 0, 100);
+	name = utility::validate(n, 1, 100, "Role name too short");
 	return *this;
 }
 
