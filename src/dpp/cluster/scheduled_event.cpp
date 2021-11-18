@@ -47,24 +47,22 @@ void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, comm
 	if (after) {
 		append += "&after=" + std::to_string(after);
 	}
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "/users?limit=" + std::to_string(limit) + append, m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "/users?with_member=true&limit=" + std::to_string(limit) + append, m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			user_map users;
+			event_member_map users;
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
-				if (j.find("users") != j.end()) {
-					for (auto & curr_user : j["users"]) {
-						users[SnowflakeNotNull(&curr_user, "id")] = user().fill_from_json(&curr_user);
-					}
-				} else {
-					if (j.is_array()) {
-						for (auto & curr_user : j) {
-							users[SnowflakeNotNull(&curr_user, "id")] = user().fill_from_json(&curr_user);
-						}
+				if (j.is_array()) {
+					for (auto & curr_user : j) {
+						event_member e;
+						e.user = user().fill_from_json(&(curr_user["user"]));
+						e.member = guild_member().fill_from_json(&(curr_user["user"]), guild_id, e.user.id);
+						e.guild_scheduled_event_id = SnowflakeNotNull(&curr_user, "guild_scheduled_event_id");
+						users[e.user.id] = e;
 					}
 				}
 			}
-			callback(confirmation_callback_t("user_map", users, http));
+			callback(confirmation_callback_t("event_member_map", users, http));
 		}
 	});
 }
