@@ -43,10 +43,25 @@ typedef std::function<void()> timer_callback_t;
  * @brief Used internally to store state of active timers
  */
 struct DPP_EXPORT timer_t {
+	/**
+	 * @brief Timer handle
+	 */
 	timer handle;
+	/**
+	 * @brief Next timer tick as unix epoch
+	 */
 	time_t next_tick;
+	/**
+	 * @brief Frequency between ticks
+	 */
 	uint64_t frequency;
+	/**
+	 * @brief Lambda to call on tick
+	 */
 	timer_callback_t on_tick;
+	/**
+	 * @brief Lambda to call on stop (optional)
+	 */
 	timer_callback_t on_stop;
 };
 
