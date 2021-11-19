@@ -57,6 +57,7 @@ std::map<std::string, test_t> tests = {
 	{"GETEVENTUSERS", {"cluster::guild_event_users_get()", false, false}},
 	{"TIMERSTART", {"start timer", false, false}},
 	{"TIMERSTOP", {"stop timer", false, false}},
+	{"ONESHOT", {"one-shot timer", false, false}},
 };
 
 double start = dpp::utility::time_f();

@@ -238,6 +238,22 @@ int main()
 			ticks++;
 		}, 1);
 
+		set_test("TIMEDLISTENER", false);
+		dpp::timed_listener tl(&bot, 10, bot.dispatch.log, [&](const dpp::log_t & event) {
+			set_test("TIMEDLISTENER", true);
+		});
+
+		set_test("ONESHOT", false);
+		bool once = false;
+		dpp::oneshot_timer ost(&bot, 5, [&]() {
+			if (!once) {
+				set_test("ONESHOT", true);
+			} else {
+				set_test("ONESHOT", false);
+			}
+			once = true;
+		});
+
 		noparam_api_test(current_user_get, dpp::user_identified, "CURRENTUSER");
 		singleparam_api_test(channel_get, TEST_TEXT_CHANNEL_ID, dpp::channel, "GETCHAN");
 		singleparam_api_test(guild_get, TEST_GUILD_ID, dpp::guild, "GETGUILD");

@@ -32,6 +32,7 @@
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
 #include <algorithm>
+#include <iostream>
 
 using  json = nlohmann::json;
 
@@ -135,6 +136,23 @@ typedef std::variant<
 	> confirmable_t;
 
 /**
+ * @brief Detatch a listener from an event container
+ * 
+ * @tparam T event container type
+ * @param container container to detach from
+ * @param ptr handle to listener to remove
+ * @return bool True if successfully removed listener
+ */
+template<typename T> bool detach(T container, const event_handle ptr) {
+	auto i = container.find(ptr);
+	if (i != container.end()) {
+		container.erase(i);
+		return true;
+	}
+	return false;
+}
+
+/**
  * @brief The details of a field in an error response
  */
 struct DPP_EXPORT error_detail {
@@ -229,11 +247,6 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
-/**
- * @brief A returned event handle for an event which was attached
- */
-typedef size_t event_handle;
-
 /** @brief The cluster class represents a group of shards and a command queue for sending and
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
@@ -281,6 +294,12 @@ class DPP_EXPORT cluster {
 	 * @brief List of timers by time
 	 */
 	timer_next_t next_timer;
+
+	/**
+	 * @brief Next event handle to be handed out.
+	 * Always incremental from 1, unique during execution.
+	 */
+	event_handle next_eh;
 
 	/**
 	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
@@ -371,6 +390,13 @@ public:
 	 * @brief Destroy the cluster object
 	 */
 	virtual ~cluster();
+
+	/**
+	 * @brief Get the next handle ID to be used
+	 * 
+	 * @return event_handle next ID to use
+	 */
+	event_handle get_next_handle();
 
 	/**
 	 * @brief Set the websocket protocol for all shards on this cluster.
@@ -3296,6 +3322,69 @@ public:
 	void guild_event_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback);
 
 
+};
+
+/**
+ * @brief A timed_listener is a way to temporarily attach to an event for a specific timeframe, then detach when complete.
+ * A lambda may also be optionally called when the timeout is reached. Destructing the timed_listener detaches any attached
+ * event listeners, and cancels any created timers, but does not call any timeout lambda.
+ * 
+ * @tparam attached_event Event within cluster to attach to within the cluster::dispatch member (dpp::dispatcher object)
+ * @tparam listening_function Definition of lambda function that matches up with the attached_event.
+ */
+template <typename attached_event, class listening_function> class timed_listener 
+{
+private:
+	/// Owning cluster
+	cluster* owner;
+
+	/// Duration of listen
+	time_t duration;
+
+	/// Reference to attached event in cluster
+	std::map<event_handle, attached_event>& ev;
+
+	/// Timer handle
+	timer th;
+
+	/// Event handle
+	event_handle listener_handler;
+    
+public:
+	/**
+	 * @brief Construct a new timed listener object
+	 * 
+	 * @param cl Owning cluster
+	 * @param dur Duration of timed event in seconds
+	 * @param event Event to hook, e.g. cluster->dispatch.message_create
+	 * @param on_end An optional void() lambda to trigger when the timed_listener times out.
+	 * Calling the destructor before the timeout is reached does not call this lambda.
+	 * @param listener Lambda to receive events. Type must match up properly with that passed into the 'event' parameter.
+	 */
+	timed_listener(cluster* cl, uint64_t _duration, std::map<event_handle, attached_event>& event, listening_function listener, timer_callback_t on_end = {})
+	: owner(cl), duration(_duration), ev(event)
+	{
+		/* Attach event */
+		listener_handler = owner->get_next_handle();
+		event.emplace(listener_handler, listener);
+		/* Create timer */
+		th = cl->start_timer([this]() {
+			/* Timer has finished, detach it from event.
+			 * Only allowed to tick once.
+			 */
+			owner->stop_timer(th);
+			dpp::detach(ev, listener_handler);
+		}, duration, on_end);
+	}
+
+	/**
+	 * @brief Destroy the timed listener object
+	 */
+	~timed_listener() {
+		/* Stop timer and detach event, but do not call on_end */
+		owner->stop_timer(th);
+		dpp::detach(ev, listener_handler);
+	}
 };
 
 };

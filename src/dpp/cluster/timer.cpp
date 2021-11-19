@@ -37,7 +37,7 @@ timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_c
 	newtimer->on_stop = on_stop;
 	newtimer->frequency = frequency;
 	timer_list[newtimer->handle] = newtimer;
-	next_timer[newtimer->next_tick] = newtimer;
+	next_timer.emplace(newtimer->next_tick, newtimer);
 
 	return newtimer->handle;
 }
@@ -73,7 +73,7 @@ void cluster::timer_reschedule(timer_t* t) {
 		if (i->second->handle == t->handle) {
 			next_timer.erase(i);
 			t->next_tick = time(nullptr) + t->frequency;
-			next_timer[t->next_tick] = t;
+			next_timer.emplace(t->next_tick, t);
 			break;
 		}
 	}
@@ -102,6 +102,26 @@ void cluster::tick_timers() {
 		/* Reschedule for next tick */
 		timer_reschedule(t);
 	}
+}
+
+oneshot_timer::oneshot_timer(class cluster* cl, uint64_t duration, timer_callback_t callback) : owner(cl) {
+	/* Create timer */
+	th = cl->start_timer([callback, this]() {
+		callback();
+		this->owner->stop_timer(this->th);
+	}, duration);
+}
+
+timer oneshot_timer::get_handle() {
+	return this->th;
+}
+
+void oneshot_timer::cancel() {
+	owner->stop_timer(this->th);
+}
+
+oneshot_timer::~oneshot_timer() {
+	cancel();
 }
 
 };

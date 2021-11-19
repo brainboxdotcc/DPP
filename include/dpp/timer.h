@@ -69,11 +69,53 @@ struct DPP_EXPORT timer_t {
  * @brief A map of timers, ordered by earliest first so that map::begin() is always the 
  * soonest to be due.
  */
-typedef std::map<time_t, timer_t*> timer_next_t;
+typedef std::multimap<time_t, timer_t*> timer_next_t;
 
 /**
  * @brief A map of timers stored by handle
  */
 typedef std::unordered_map<timer, timer_t*> timer_reg_t;
+
+/**
+ * @brief Trigger a timed event once.
+ * The provided callback is called only once.
+ */
+class oneshot_timer
+{
+private:
+	/// Owning cluster
+	class cluster* owner;
+	/// Timer handle
+	timer th;
+public:
+	/**
+	 * @brief Construct a new oneshot timer object
+	 * 
+	 * @param cl cluster owner
+	 * @param duration duration before firing
+	 * @param callback callback to call on firing
+	 */
+	oneshot_timer(class cluster* cl, uint64_t duration, timer_callback_t callback);
+
+	/**
+	 * @brief Get the handle for the created one-shot timer
+	 * 
+	 * @return timer handle for use with stop_timer
+	 */
+	timer get_handle();
+
+	/**
+	 * @brief Cancel the one shot timer immediately.
+	 * Callback function is not called.
+	 */
+	void cancel();
+
+	/**
+	 * @brief Destroy the oneshot timer object
+	 */
+	~oneshot_timer();
+};
+
+
 
 };

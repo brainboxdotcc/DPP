@@ -30,6 +30,11 @@
 
 namespace dpp {
 
+/**
+ * @brief A returned event handle for an event which was attached
+ */
+typedef size_t event_handle;
+
 /* Forward declaration */
 struct confirmation_callback_t;
 
@@ -86,7 +91,7 @@ struct DPP_EXPORT event_dispatch_t {
 /**
  * @brief Call all listeners for an event handler.
  * 
- * @tparam V a `std::vector` of `std::function`, where each `std::function` takes a single parameter derived from dpp::event_dispatch_t
+ * @tparam V a `std::map` of `std::function`, where each `std::function` takes a single parameter derived from dpp::event_dispatch_t
  * @tparam E an object derived from dpp::event_dispatch_t to pass as the single parameter to the event listener functions
  * @param vec vector of listeners attached to an event handler
  * @param event event object to pass as a parameter to the event handler
@@ -94,7 +99,7 @@ struct DPP_EXPORT event_dispatch_t {
 template< class V, class E > void call_event(const V& vec, const E& event) {
 	std::for_each(vec.begin(), vec.end(), [&](auto &ev) {
 		if (!event.is_cancelled()) {
-			ev(event);
+			ev.second(event);
 		}
 	});
 };
@@ -1502,283 +1507,283 @@ public:
 	/** @brief Event handler function pointer for log event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const log_t& event)>> log;
+	std::map<event_handle, std::function<void(const log_t& event)>> log;
 	/** @brief Event handler function pointer for voice state update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const voice_state_update_t& event)>> voice_state_update;
+	std::map<event_handle, std::function<void(const voice_state_update_t& event)>> voice_state_update;
 	/** @brief Event handler function pointer for voice client speaking event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const voice_client_speaking_t& event)>> voice_client_speaking;
+	std::map<event_handle, std::function<void(const voice_client_speaking_t& event)>> voice_client_speaking;
 	/** @brief Event handler function pointer for voice client disconnect event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const voice_client_disconnect_t& event)>> voice_client_disconnect;
+	std::map<event_handle, std::function<void(const voice_client_disconnect_t& event)>> voice_client_disconnect;
 	/** @brief Event handler function pointer for interaction create event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const interaction_create_t& event)>> interaction_create;
+	std::map<event_handle, std::function<void(const interaction_create_t& event)>> interaction_create;
 	/** @brief Event handler function pointer for button click event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const button_click_t& event)>> button_click;
+	std::map<event_handle, std::function<void(const button_click_t& event)>> button_click;
 	/** @brief Event handler function pointer for autocomplete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const autocomplete_t& event)>> autocomplete;
+	std::map<event_handle, std::function<void(const autocomplete_t& event)>> autocomplete;
 	/** @brief Event handler function pointer for button click event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const select_click_t& event)>> select_click;
+	std::map<event_handle, std::function<void(const select_click_t& event)>> select_click;
 	/** @brief Event handler function pointer for guild delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_delete_t& event)>> guild_delete;
+	std::map<event_handle, std::function<void(const guild_delete_t& event)>> guild_delete;
 	/** @brief Event handler function pointer for channel delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const channel_delete_t& event)>> channel_delete;
+	std::map<event_handle, std::function<void(const channel_delete_t& event)>> channel_delete;
 	/** @brief Event handler function pointer for channel update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const channel_update_t& event)>> channel_update;
+	std::map<event_handle, std::function<void(const channel_update_t& event)>> channel_update;
 	/** @brief Event handler function pointer for ready event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const ready_t& event)>> ready;
+	std::map<event_handle, std::function<void(const ready_t& event)>> ready;
 	/** @brief Event handler function pointer for message delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const message_delete_t& event)>> message_delete;
+	std::map<event_handle, std::function<void(const message_delete_t& event)>> message_delete;
 	/** @brief Event handler function pointer for application command delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const application_command_delete_t& event)>> application_command_delete;
+	std::map<event_handle, std::function<void(const application_command_delete_t& event)>> application_command_delete;
 	/** @brief Event handler function pointer for guild member remove event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_member_remove_t& event)>> guild_member_remove;
+	std::map<event_handle, std::function<void(const guild_member_remove_t& event)>> guild_member_remove;
 	/** @brief Event handler function pointer for guild member remove event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const application_command_create_t& event)>> application_command_create;
+	std::map<event_handle, std::function<void(const application_command_create_t& event)>> application_command_create;
 	/** @brief Event handler function pointer for resumed event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const resumed_t& event)>> resumed;
+	std::map<event_handle, std::function<void(const resumed_t& event)>> resumed;
 	/** @brief Event handler function pointer for guild role create event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_role_create_t& event)>> guild_role_create;
+	std::map<event_handle, std::function<void(const guild_role_create_t& event)>> guild_role_create;
 	/** @brief Event handler function pointer for typing start event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const typing_start_t& event)>> typing_start;
+	std::map<event_handle, std::function<void(const typing_start_t& event)>> typing_start;
 	/** @brief Event handler function pointer for message reaction add event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const message_reaction_add_t& event)>> message_reaction_add;
+	std::map<event_handle, std::function<void(const message_reaction_add_t& event)>> message_reaction_add;
 	/** @brief Event handler function pointer for guild members chunk event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_members_chunk_t& event)>> guild_members_chunk;
+	std::map<event_handle, std::function<void(const guild_members_chunk_t& event)>> guild_members_chunk;
 	/** @brief Event handler function pointer for message reaction remove event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const message_reaction_remove_t& event)>> message_reaction_remove;
+	std::map<event_handle, std::function<void(const message_reaction_remove_t& event)>> message_reaction_remove;
 	/** @brief Event handler function pointer for guild create event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_create_t& event)>> guild_create;
+	std::map<event_handle, std::function<void(const guild_create_t& event)>> guild_create;
 	/** @brief Event handler function pointer for guild channel create event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const channel_create_t& event)>> channel_create;
+	std::map<event_handle, std::function<void(const channel_create_t& event)>> channel_create;
 	/** @brief Event handler function pointer for message reaction remove emoji event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const message_reaction_remove_emoji_t& event)>> message_reaction_remove_emoji;
+	std::map<event_handle, std::function<void(const message_reaction_remove_emoji_t& event)>> message_reaction_remove_emoji;
 	/** @brief Event handler function pointer for message delete bulk event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const message_delete_bulk_t& event)>> message_delete_bulk;
+	std::map<event_handle, std::function<void(const message_delete_bulk_t& event)>> message_delete_bulk;
 	/** @brief Event handler function pointer for guild role update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_role_update_t& event)>> guild_role_update;
+	std::map<event_handle, std::function<void(const guild_role_update_t& event)>> guild_role_update;
 	/** @brief Event handler function pointer for guild role delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_role_delete_t& event)>> guild_role_delete;
+	std::map<event_handle, std::function<void(const guild_role_delete_t& event)>> guild_role_delete;
 	/** @brief Event handler function pointer for channel pins update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const channel_pins_update_t& event)>> channel_pins_update;
+	std::map<event_handle, std::function<void(const channel_pins_update_t& event)>> channel_pins_update;
 	/** @brief Event handler function pointer for message reaction remove all event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const message_reaction_remove_all_t& event)>> message_reaction_remove_all;
+	std::map<event_handle, std::function<void(const message_reaction_remove_all_t& event)>> message_reaction_remove_all;
 	/** @brief Event handler function pointer for voice server update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const voice_server_update_t& event)>> voice_server_update;
+	std::map<event_handle, std::function<void(const voice_server_update_t& event)>> voice_server_update;
 	/** @brief Event handler function pointer for guild emojis update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_emojis_update_t& event)>> guild_emojis_update;
+	std::map<event_handle, std::function<void(const guild_emojis_update_t& event)>> guild_emojis_update;
 	/** @brief Event handler function pointer for presence update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const presence_update_t& event)>> presence_update;
+	std::map<event_handle, std::function<void(const presence_update_t& event)>> presence_update;
 	/** @brief Event handler function pointer for webhooks update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const webhooks_update_t& event)>> webhooks_update;
+	std::map<event_handle, std::function<void(const webhooks_update_t& event)>> webhooks_update;
 	/** @brief Event handler function pointer for guild member add event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_member_add_t& event)>> guild_member_add;
+	std::map<event_handle, std::function<void(const guild_member_add_t& event)>> guild_member_add;
 	/** @brief Event handler function pointer for invite delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const invite_delete_t& event)>> invite_delete;
+	std::map<event_handle, std::function<void(const invite_delete_t& event)>> invite_delete;
 	/** @brief Event handler function pointer for guild update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_update_t& event)>> guild_update;
+	std::map<event_handle, std::function<void(const guild_update_t& event)>> guild_update;
 	/** @brief Event handler function pointer for guild integrations update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_integrations_update_t& event)>> guild_integrations_update;
+	std::map<event_handle, std::function<void(const guild_integrations_update_t& event)>> guild_integrations_update;
 	/** @brief Event handler function pointer for guild member update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_member_update_t& event)>> guild_member_update;
+	std::map<event_handle, std::function<void(const guild_member_update_t& event)>> guild_member_update;
 	/** @brief Event handler function pointer for application command update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const application_command_update_t& event)>> application_command_update;
+	std::map<event_handle, std::function<void(const application_command_update_t& event)>> application_command_update;
 	/** @brief Event handler function pointer for invite create event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const invite_create_t& event)>> invite_create;
+	std::map<event_handle, std::function<void(const invite_create_t& event)>> invite_create;
 	/** @brief Event handler function pointer for message update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const message_update_t& event)>> message_update;
+	std::map<event_handle, std::function<void(const message_update_t& event)>> message_update;
 	/** @brief Event handler function pointer for user update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const user_update_t& event)>> user_update;
+	std::map<event_handle, std::function<void(const user_update_t& event)>> user_update;
 	/** @brief Event handler function pointer for message create event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const message_create_t& event)>> message_create;
+	std::map<event_handle, std::function<void(const message_create_t& event)>> message_create;
 	/** @brief Event handler function pointer for guild ban add event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_ban_add_t& event)>> guild_ban_add;
+	std::map<event_handle, std::function<void(const guild_ban_add_t& event)>> guild_ban_add;
 	/** @brief Event handler function pointer for guild ban remove event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_ban_remove_t& event)>> guild_ban_remove;
+	std::map<event_handle, std::function<void(const guild_ban_remove_t& event)>> guild_ban_remove;
 	/** @brief Event handler function pointer for integration create event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const integration_create_t& event)>> integration_create;
+	std::map<event_handle, std::function<void(const integration_create_t& event)>> integration_create;
 	/** @brief Event handler function pointer for integration update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const integration_update_t& event)>> integration_update;
+	std::map<event_handle, std::function<void(const integration_update_t& event)>> integration_update;
 	/** @brief Event handler function pointer for integration delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const integration_delete_t& event)>> integration_delete;	
+	std::map<event_handle, std::function<void(const integration_delete_t& event)>> integration_delete;	
 	/** @brief Event handler function pointer for thread create event 
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const thread_create_t& event)>> thread_create;
+	std::map<event_handle, std::function<void(const thread_create_t& event)>> thread_create;
 	/** @brief Event handler function pointer for thread update event 
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const thread_update_t& event)>> thread_update;
+	std::map<event_handle, std::function<void(const thread_update_t& event)>> thread_update;
 	/** @brief Event handler function pointer for thread delete event 
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const thread_delete_t& event)>> thread_delete;
+	std::map<event_handle, std::function<void(const thread_delete_t& event)>> thread_delete;
 	/** @brief Event handler function pointer for thread list sync event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const thread_list_sync_t& event)>> thread_list_sync;
+	std::map<event_handle, std::function<void(const thread_list_sync_t& event)>> thread_list_sync;
 	/** @brief Event handler function pointer for thread member update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const thread_member_update_t& event)>> thread_member_update;
+	std::map<event_handle, std::function<void(const thread_member_update_t& event)>> thread_member_update;
 	/** @brief Event handler function pointer for thread members update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const thread_members_update_t& event)>> thread_members_update;
+	std::map<event_handle, std::function<void(const thread_members_update_t& event)>> thread_members_update;
 	/** @brief Event handler function pointer for voice buffer send event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const voice_buffer_send_t& event)>> voice_buffer_send;
+	std::map<event_handle, std::function<void(const voice_buffer_send_t& event)>> voice_buffer_send;
 	/** @brief Event handler function pointer for voice user talking event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const voice_user_talking_t& event)>> voice_user_talking;
+	std::map<event_handle, std::function<void(const voice_user_talking_t& event)>> voice_user_talking;
 	/** @brief Event handler function pointer for voice ready event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const voice_ready_t& event)>> voice_ready;
+	std::map<event_handle, std::function<void(const voice_ready_t& event)>> voice_ready;
 	/** @brief Event handler function pointer for voice receive event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const voice_receive_t& event)>> voice_receive;
+	std::map<event_handle, std::function<void(const voice_receive_t& event)>> voice_receive;
 	/** @brief Event handler function pointer for voice track marker event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const voice_track_marker_t& event)>> voice_track_marker;
+	std::map<event_handle, std::function<void(const voice_track_marker_t& event)>> voice_track_marker;
 	/** @brief Event handler function pointer for guild join request delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_join_request_delete_t& event)>> guild_join_request_delete;
+	std::map<event_handle, std::function<void(const guild_join_request_delete_t& event)>> guild_join_request_delete;
 	/** @brief Event handler function pointer for stage instance create event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const stage_instance_create_t& event)>> stage_instance_create;
+	std::map<event_handle, std::function<void(const stage_instance_create_t& event)>> stage_instance_create;
 	/** @brief Event handler function pointer for stage instance update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const stage_instance_update_t& event)>> stage_instance_update;
+	std::map<event_handle, std::function<void(const stage_instance_update_t& event)>> stage_instance_update;
 	/** @brief Event handler function pointer for stage instance delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const stage_instance_delete_t& event)>> stage_instance_delete;
+	std::map<event_handle, std::function<void(const stage_instance_delete_t& event)>> stage_instance_delete;
 	/** @brief Event handler function pointer for guild sticker update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_stickers_update_t& event)>> stickers_update;
+	std::map<event_handle, std::function<void(const guild_stickers_update_t& event)>> stickers_update;
 	/** @brief Event handler function pointer for guild scheduled event create event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_scheduled_event_create_t& event)>> guild_scheduled_event_create;
+	std::map<event_handle, std::function<void(const guild_scheduled_event_create_t& event)>> guild_scheduled_event_create;
 	/** @brief Event handler function pointer for guild scheduled event update event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_scheduled_event_update_t& event)>> guild_scheduled_event_update;
+	std::map<event_handle, std::function<void(const guild_scheduled_event_update_t& event)>> guild_scheduled_event_update;
 	/** @brief Event handler function pointer for guild scheduled event delete event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_scheduled_event_delete_t& event)>> guild_scheduled_event_delete;
+	std::map<event_handle, std::function<void(const guild_scheduled_event_delete_t& event)>> guild_scheduled_event_delete;
 	/** @brief Event handler function pointer for guild scheduled event user add event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_scheduled_event_user_add_t& event)>> guild_scheduled_event_user_add;
+	std::map<event_handle, std::function<void(const guild_scheduled_event_user_add_t& event)>> guild_scheduled_event_user_add;
 	/** @brief Event handler function pointer for guild scheduled event user remove event
 	 * @param event Event parameters
 	 */
-	std::vector<std::function<void(const guild_scheduled_event_user_remove_t& event)>> guild_scheduled_event_user_remove;
+	std::map<event_handle, std::function<void(const guild_scheduled_event_user_remove_t& event)>> guild_scheduled_event_user_remove;
 };
 
 };
