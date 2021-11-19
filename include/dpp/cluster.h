@@ -27,6 +27,7 @@
 #include <variant>
 #include <dpp/discord.h>
 #include <dpp/dispatcher.h>
+#include <dpp/timer.h>
 #include <dpp/json_fwd.hpp>
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
@@ -239,6 +240,8 @@ typedef size_t event_handle;
  */
 class DPP_EXPORT cluster {
 
+	friend class discord_client;
+
 	/** queue system for commands sent to Discord, and any replies */
 	request_queue* rest;
 
@@ -270,12 +273,34 @@ class DPP_EXPORT cluster {
 	shard_list shards;
 
 	/**
+	 * @brief List of all active registered timers
+	 */
+	timer_reg_t timer_list;
+
+	/**
+	 * @brief List of timers by time
+	 */
+	timer_next_t next_timer;
+
+	/**
 	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
 	 *
 	 * @param shardinfo Received HTTP data from API call
 	 * @throw dpp::exception Thrown if REST request to obtain shard count fails
 	 */
 	void auto_shard(const confirmation_callback_t &shardinfo);
+
+	/**
+	 * @brief Tick active timers
+	 */
+	void tick_timers();
+
+	/**
+	 * @brief Reschedule a timer for its next tick
+	 * 
+	 * @param t Timer to reschedule
+	 */
+	void timer_reschedule(timer_t* t);
 public:
 	/** Current bot token for all shards on this cluster and all commands sent via HTTP */
 	std::string token;
@@ -345,7 +370,7 @@ public:
 	/**
 	 * @brief Destroy the cluster object
 	 */
-	~cluster();
+	virtual ~cluster();
 
 	/**
 	 * @brief Set the websocket protocol for all shards on this cluster.
@@ -413,6 +438,25 @@ public:
 	 * @param msg The log message to output
 	 */
 	void log(dpp::loglevel severity, const std::string &msg) const;
+
+	/**
+	 * @brief Start a timer. Every `frequency` seconds, the callback is called.
+	 * 
+	 * @param on_tick The callback lambda to call for this timer when ticked
+	 * @param on_stop The callback lambda to call for this timer when it is stopped
+	 * @param frequency How often to tick the timer
+	 * @return timer A handle to the timer, used to remove that timer later
+	 */
+	timer start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop = {});
+
+	/**
+	 * @brief Stop a ticking timer
+	 * 
+	 * @param t Timer handle received from cluster::start_timer
+	 * @return bool True if the timer was stopped, false if it did not exist
+	 * @note If the timer has an on_stop lambda, the on_stop lambda will be called.
+	 */
+	bool stop_timer(timer t);
 
 	/**
 	 * @brief Get the dm channel for a user id

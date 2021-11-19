@@ -62,6 +62,10 @@ cluster::~cluster()
 {
 	delete rest;
 	delete raw_rest;
+	/* Free memory for active timers */
+	for (auto & t : timer_list) {
+		delete t.second;
+	}
 #ifdef _WIN32
 	WSACleanup();
 #endif

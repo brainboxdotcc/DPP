@@ -55,6 +55,8 @@ std::map<std::string, test_t> tests = {
 	{"MSGCREATESEND", {"message_create_t::send()", false, false}},
 	{"MSGCREATEREPLY", {"message_create_t::reply()", false, false}},
 	{"GETEVENTUSERS", {"cluster::guild_event_users_get()", false, false}},
+	{"TIMERSTART", {"start timer", false, false}},
+	{"TIMERSTOP", {"stop timer", false, false}},
 };
 
 double start = dpp::utility::time_f();

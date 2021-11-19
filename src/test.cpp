@@ -226,6 +226,18 @@ int main()
 			set_test("BOTSTART", false);
 		}
 
+		set_test("TIMERSTART", false);
+		uint32_t ticks = 0;
+		dpp::timer th = bot.start_timer([&]() {
+			if (ticks == 5) {
+				/* The simple test timer ticks every second.
+				 * If we get to 5 seconds, we know the timer is working.
+				 */
+				set_test("TIMERSTART", true);
+			}
+			ticks++;
+		}, 1);
+
 		noparam_api_test(current_user_get, dpp::user_identified, "CURRENTUSER");
 		singleparam_api_test(channel_get, TEST_TEXT_CHANNEL_ID, dpp::channel, "GETCHAN");
 		singleparam_api_test(guild_get, TEST_GUILD_ID, dpp::guild, "GETGUILD");
@@ -239,6 +251,10 @@ int main()
 		twoparam_api_test_list(guild_event_users_get, TEST_GUILD_ID, TEST_EVENT_ID, dpp::event_member_map, "GETEVENTUSERS");
 
 		std::this_thread::sleep_for(std::chrono::seconds(20));
+
+		/* Test stopping timer */
+		set_test("TIMERSTOP", false);
+		set_test("TIMERSTOP", bot.stop_timer(th));
 
 		set_test("USERCACHE", false);
 		dpp::user* u = dpp::find_user(TEST_USER_ID);
