@@ -80,7 +80,7 @@ typedef std::unordered_map<timer, timer_t*> timer_reg_t;
  * @brief Trigger a timed event once.
  * The provided callback is called only once.
  */
-class oneshot_timer
+class DPP_EXPORT oneshot_timer
 {
 private:
 	/// Owning cluster
