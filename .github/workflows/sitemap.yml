@@ -24,7 +24,7 @@ jobs:
         run: cd /home/runner/dpp-web && npx sitemap-generator --no-respect-robots-txt --verbose https://dpp.dev/
 
       - name: commit and push
-        run: cd /home/runner/dpp-web && git add sitemap.xml && git commit -am "Update sitemap" && git pull && git push
+      run: cd /home/runner/dpp-web && git add sitemap.xml && git commit -am "Update sitemap" && git pull --rebase && git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
