@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - 'dev'
+    files:
+      - '**Doxyfile'
+      - '**docpages/**'
+      - '**/*.h'
+      - '**/documentation.yml'
 
 jobs:
   docs:
