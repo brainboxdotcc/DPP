@@ -1263,6 +1263,11 @@ int main() {
 
             // attach the file
             msg.set_file_content(dpp::utility::read_file(filePath.relative_path()));
+            /*
+             * alternatively, you can put any other name in here.
+             * This name doesn't have to be same as the uploaded filename.
+             * But it should have the same file extension
+             */
             msg.set_filename(filePath.filename());
 
             // send the message
