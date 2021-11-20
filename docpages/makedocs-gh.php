@@ -1,7 +1,6 @@
 <?php
 
 /* Sanity checks */
-#mkdir("/dpp-web");
 system("git clone git@github.com:brainboxdotcc/dpp-web.git /dpp-web");
 
 
