@@ -3,7 +3,7 @@
 /* Sanity checks */
 system("sudo apt-get install graphviz");
 #system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git/\" /dpp-web");
-system("gh auth login --with-token process.env.GITHUB_TOKEN");
+system("echo \$GITHUB_TOKEN | gh auth login --with-token ");
 system("gh auth status");
 exit(0);
 chdir("/home/runner/work/DPP/DPP");
