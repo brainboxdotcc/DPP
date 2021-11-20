@@ -5,7 +5,7 @@ system("sudo apt-get install graphviz");
 #system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git/\" /dpp-web");
 system("echo \$GITHUB_TOKEN | gh auth login --with-token ");
 system("gh auth status");
-system("git clone https://\$LIB_UPDATE_SECRET@github.com/brainboxdotcc/dpp-web.git /home/runner/dpp-web");
+system("git clone https://braindigitalis:\$LIB_UPDATE_SECRET@github.com/brainboxdotcc/dpp-web.git /home/runner/dpp-web");
 
 chdir("/home/runner/work/DPP/DPP");
 system("sudo cp /home/runner/dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
@@ -101,5 +101,5 @@ echo "Commit and push\n";
 chdir("/home/runner/dpp-web");
 system("git add -A >/dev/null");
 system("git commit -a -m \"automatic commit\" >/dev/null");
-system("git push -f \"https://\$LIB_UPDATE_SECRET@github.com/brainboxdotcc/dpp-web.git\"");
+system("git push -f \"https://braindigitalis:\$LIB_UPDATE_SECRET@github.com/brainboxdotcc/dpp-web.git\"");
 
