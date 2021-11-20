@@ -2,7 +2,10 @@
 
 /* Sanity checks */
 system("sudo apt-get install graphviz");
-system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git/\" /dpp-web");
+#system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git/\" /dpp-web");
+system("gh auth login --with-token process.env.GITHUB_TOKEN");
+system("gh auth status");
+exit(0);
 chdir("/home/runner/work/DPP/DPP");
 system("sudo cp /dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
 chdir("docpages");
