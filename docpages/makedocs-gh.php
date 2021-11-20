@@ -4,7 +4,7 @@
 system("sudo apt-get install graphviz");
 system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git\" /dpp-web");
 system("sudo git clone --recursive https://github.com/brainboxdotcc/DPP.git " . getenv("HOME") . "/D++");
-system("cp -rv " . getenv("HOME"). "/D++/doxygen-awesome-css/* ./doxygen-awesome-css/");
+chdir(getenv("HOME") . "/D++");
 
 system("sudo cp /dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
 
@@ -60,6 +60,7 @@ foreach ($tags as $tag) {
 		print "Generate $orig_tag docs (https://dpp.dev/$tag/)\n";
 		system("git clone --recursive https://github.com/brainboxdotcc/DPP.git");
 		chdir("DPP");
+		system("git fetch -av");
 		system("git checkout tags/$orig_tag");
 		/* Older versions of the docs before 9.0.7 don't have these. Force them into the tree so old versions get current styling */
 		system("cp -rv " . getenv("HOME") . "/D++/docpages/images docpages");
