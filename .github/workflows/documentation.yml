@@ -29,3 +29,4 @@ jobs:
         run: cd docpages && php makedocs-gh.php
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LIB_UPDATE_SECRET: ${{ secrets.LIB_UPDATE_SECRET }}
