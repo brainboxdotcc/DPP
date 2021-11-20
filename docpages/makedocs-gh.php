@@ -1,8 +1,9 @@
 <?php
 
 /* Sanity checks */
-system("git clone git@github.com:brainboxdotcc/dpp-web.git /dpp-web");
+system("sudo git clone git@github.com:brainboxdotcc/dpp-web.git /dpp-web");
 
+system("sudo cp /dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
 
 /* Make drop down list of versions from the tags */
 echo "Make version drop down select\n";
@@ -42,7 +43,7 @@ echo "Generate `master` docs\n";
 
 chdir("..");
 shell_exec("/usr/local/bin/doxygen");
-system("cp -r docs/* /dpp-web/");
+system("sudo cp -r docs/* /dpp-web/");
 
 /* Create old version docs */
 chdir(getenv("HOME") . "/D++");
@@ -74,8 +75,8 @@ foreach ($tags as $tag) {
 		/* Rewrite version info in header */
 		file_put_contents("docpages/header.html", $hdr);		
 		shell_exec("/usr/local/bin/doxygen");
-		mkdir("/dpp-web/$tag");
-		system("cp -r docs/* /dpp-web/$tag");
+		system("sudo mkdir /dpp-web/$tag");
+		system("sudo cp -r docs/* /dpp-web/$tag");
 		chdir("..");
 		system("rm -rf " . sys_get_temp_dir() . "/dpp-old/DPP");
 	}
