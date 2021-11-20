@@ -62,6 +62,7 @@ foreach ($tags as $tag) {
 		chdir("DPP");
 		system("git fetch --tags -av");
 		system("git checkout tags/$orig_tag");
+		system("git checkout tags/v$orig_tag");
 		/* Older versions of the docs before 9.0.7 don't have these. Force them into the tree so old versions get current styling */
 		system("cp -rv /home/runner/work/DPP/DPP/docpages/images docpages");
 		system("cp -rv /home/runner/work/DPP/DPP/docpages/style.css docpages/style.css");
