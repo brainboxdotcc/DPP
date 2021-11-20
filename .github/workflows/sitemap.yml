@@ -1,0 +1,32 @@
+name: Generate dpp.dev sitemap
+on:
+  workflow_dispatch:
+
+jobs:
+  updater:
+    name: Generate Sitemap
+    runs-on: ubuntu-20.04
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Install apt packages
+        run: git config --global user.email "updatebot@dpp.dev" && git config --global user.name "D++ Update Bot" && git clone https://braindigitalis:$PERSONAL_ACCESS_TOKEN@github.com/brainboxdotcc/dpp-web.git /home/runner/dpp-web 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Install sitemap-generator
+        run: npm install -g sitemap-generator-cli && cd /home/runner/dpp-web && npx sitemap-generator --no-respect-robots-txt --verbose https://dpp.dev/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: commit and push
+        run: cd /home/runner/dpp-web && git add sitemap.xml && git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+
