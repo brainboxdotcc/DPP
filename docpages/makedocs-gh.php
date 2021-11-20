@@ -5,9 +5,10 @@ system("sudo apt-get install graphviz");
 #system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git/\" /dpp-web");
 system("echo \$GITHUB_TOKEN | gh auth login --with-token ");
 system("gh auth status");
+system("gh clone brainboxdotcc/dpp-web /home/runner/dpp-web");
 exit(0);
 chdir("/home/runner/work/DPP/DPP");
-system("sudo cp /dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
+system("sudo cp /home/runner/dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
 chdir("docpages");
 
 system("git config --global advice.detachedHead false");
@@ -50,7 +51,7 @@ echo "Generate `master` docs\n";
 
 chdir("..");
 shell_exec("/usr/local/bin/doxygen");
-system("sudo cp -r docs/* /dpp-web/");
+system("sudo cp -r docs/* /home/runner/dpp-web/");
 
 /* Create old version docs */
 chdir("/home/runner/work/DPP/DPP");
@@ -85,8 +86,8 @@ foreach ($tags as $tag) {
 		/* Rewrite version info in header */
 		file_put_contents("docpages/header.html", $hdr);		
 		shell_exec("/usr/local/bin/doxygen");
-		system("sudo mkdir /dpp-web/$tag");
-		system("sudo cp -r docs/* /dpp-web/$tag");
+		system("sudo mkdir /home/runner/dpp-web/$tag");
+		system("sudo cp -r docs/* /home/runner/dpp-web/$tag");
 		chdir("..");
 		system("rm -rf " . sys_get_temp_dir() . "/dpp-old/DPP");
 	}
@@ -94,8 +95,8 @@ foreach ($tags as $tag) {
 
 /* Commit and push everything to the github pages repo */
 echo "Commit and push\n";
-chdir("/dpp-web");
-system("sudo git add -A >/dev/null");
-system("sudo git commit -a -m \"automatic commit\" >/dev/null");
-system("sudo git push");
+chdir("/home/runner/dpp-web");
+system("git add -A >/dev/null");
+system("git commit -a -m \"automatic commit\" >/dev/null");
+system("git push");
 
