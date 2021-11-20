@@ -3355,7 +3355,7 @@ public:
 	 * @brief Construct a new timed listener object
 	 * 
 	 * @param cl Owning cluster
-	 * @param dur Duration of timed event in seconds
+	 * @param _duration Duration of timed event in seconds
 	 * @param event Event to hook, e.g. cluster->dispatch.message_create
 	 * @param on_end An optional void() lambda to trigger when the timed_listener times out.
 	 * Calling the destructor before the timeout is reached does not call this lambda.
