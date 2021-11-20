@@ -23,6 +23,8 @@ jobs:
 
       - name: Checkout D++
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
       - name: Generate Docs
         run: cd docpages && php makedocs-gh.php

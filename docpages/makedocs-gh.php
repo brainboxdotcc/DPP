@@ -4,8 +4,6 @@
 system("sudo apt-get install graphviz");
 system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git\" /dpp-web");
 chdir("/home/runner/work/DPP/DPP");
-system("git clone --recursive https://github.com/brainboxdotcc/DPP.git dppsub");
-system("cp -rv dppsub/doxygen-awesome-css /home/runner/work/DPP/DPP/doxygen-awesome-css");
 system("sudo cp /dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
 chdir("docpages");
 
