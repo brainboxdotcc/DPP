@@ -14,10 +14,8 @@ jobs:
   docs:
     name: Build Documentation
     runs-on: ubuntu-20.04
-    strategy:
 
     steps:
- 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
