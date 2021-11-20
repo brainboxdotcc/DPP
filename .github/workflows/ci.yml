@@ -8,8 +8,8 @@ on:
       - '**.h'
       - '**.hpp'
       - '**CMakeLists.txt'
-  push:
-    pull_request:
+  pull_request:
+    paths:
       - '**Dockerfile'
       - '**.cxx'
       - '**.cpp'
