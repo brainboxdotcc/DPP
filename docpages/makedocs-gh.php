@@ -3,9 +3,8 @@
 /* Sanity checks */
 system("sudo apt-get install graphviz");
 system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git\" /dpp-web");
-system("sudo git clone --recursive https://github.com/brainboxdotcc/DPP.git " . getenv("HOME") . "/D++");
-chdir(getenv("HOME") . "/D++");
-
+chdir("/home/runner/work/DPP/DPP");
+system("git submodule update --recursive");
 system("sudo cp /dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
 
 /* Make drop down list of versions from the tags */
@@ -49,7 +48,7 @@ shell_exec("/usr/local/bin/doxygen");
 system("sudo cp -r docs/* /dpp-web/");
 
 /* Create old version docs */
-chdir(getenv("HOME") . "/D++");
+chdir("/home/runner/work/DPP/DPP");
 system("rm -rf " . sys_get_temp_dir() . "/dpp-old");
 mkdir(sys_get_temp_dir() . "/dpp-old");
 chdir(sys_get_temp_dir() . "/dpp-old");
@@ -63,18 +62,18 @@ foreach ($tags as $tag) {
 		system("git fetch -av");
 		system("git checkout tags/$orig_tag");
 		/* Older versions of the docs before 9.0.7 don't have these. Force them into the tree so old versions get current styling */
-		system("cp -rv " . getenv("HOME") . "/D++/docpages/images docpages");
-		system("cp -rv " . getenv("HOME") . "/D++/docpages/style.css docpages/style.css");
-		system("cp -rv " . getenv("HOME") . "/D++/docpages/*.html docpages/");
-		system("cp -rv " . getenv("HOME") . "/D++/doxygen-awesome-css doxygen-awesome-css");
+		system("cp -rv /home/runner/work/DPP/DPP/docpages/images docpages");
+		system("cp -rv /home/runner/work/DPP/DPP/docpages/style.css docpages/style.css");
+		system("cp -rv /home/runner/work/DPP/DPP/docpages/*.html docpages/");
+		system("cp -rv /home/runner/work/DPP/DPP/doxygen-awesome-css doxygen-awesome-css");
 		/* Always make sure that the version is using the latest doxygen,
 		 * but rewrite version number (project number)
 		 */
-		$doxy = file_get_contents(getenv("HOME") . "/D++/Doxyfile");
+		$doxy = file_get_contents("/home/runner/work/DPP/DPP/Doxyfile");
 		$doxy = str_replace("PROJECT_NUMBER         =", "PROJECT_NUMBER         = $tag", $doxy);
 		file_put_contents("Doxyfile", $doxy);
 		/* Rewrite selected version number so that each page has a new default selected in the drop down */
-		$hdr = file_get_contents(getenv("HOME") . "/D++/docpages/header.html");
+		$hdr = file_get_contents("/home/runner/work/DPP/DPP/docpages/header.html");
 		$hdr = str_replace("option value='/$tag/'", "option selected value='/$tag/'", $hdr);
 		/* Rewrite version info in header */
 		file_put_contents("docpages/header.html", $hdr);		
@@ -89,6 +88,7 @@ foreach ($tags as $tag) {
 /* Commit and push everything to the github pages repo */
 echo "Commit and push\n";
 chdir("/dpp-web");
+system("ls -alh");
 #system("git add -A");
 #system("git commit -a -m \"automatic commit\"");
 #system("git push");
