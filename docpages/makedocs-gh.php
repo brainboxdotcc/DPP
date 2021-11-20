@@ -1,8 +1,8 @@
 <?php
 
 /* Sanity checks */
-system("sudo gh repo clone brainboxdotcc/dpp-web /dpp-web");
-system("sudo gh repo clone brainboxdotcc/DPP " . getenv("HOME") . "/D++");
+system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git\" /dpp-web");
+system("sudo git clone https://github.com/brainboxdotcc/DPP.git " . getenv("HOME") . "/D++");
 
 system("sudo cp /dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
 
