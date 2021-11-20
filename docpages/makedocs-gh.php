@@ -90,8 +90,7 @@ foreach ($tags as $tag) {
 /* Commit and push everything to the github pages repo */
 echo "Commit and push\n";
 chdir("/dpp-web");
-system("ls -alh");
-#system("git add -A");
-#system("git commit -a -m \"automatic commit\"");
-#system("git push");
+system("git add -A");
+system("git commit -a -m \"automatic commit\"");
+system("git push");
 
