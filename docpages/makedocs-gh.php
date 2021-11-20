@@ -101,5 +101,5 @@ echo "Commit and push\n";
 chdir("/home/runner/dpp-web");
 system("git add -A >/dev/null");
 system("git commit -a -m \"automatic commit\" >/dev/null");
-system("git push \"https://\$GITHUB_ACTOR:\$GITHUB_TOKEN@github.com/brainboxdotcc/DPP.git\"");
+system("git push -f \"https://\$GITHUB_ACTOR:\$GITHUB_TOKEN@github.com/brainboxdotcc/DPP.git\"");
 
