@@ -6,6 +6,7 @@ system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxd
 chdir("/home/runner/work/DPP/DPP");
 system("git submodule update --recursive");
 system("sudo cp /dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
+chdir("docpages");
 
 /* Make drop down list of versions from the tags */
 echo "Make version drop down select\n";
@@ -32,14 +33,14 @@ foreach ($tags as $tag) {
 	}
 }
 
-$template = file_get_contents("header.template.html");
+$template = file_get_contents("/home/runner/work/DPP/DPP/docpages/header.template.html");
 $header = str_replace("##VERSION_OPTIONS##", $opts, $template);
 
-$footer = file_get_contents("footer.template.html");
+$footer = file_get_contents("/home/runner/work/DPP/DPP/docpages/footer.template.html");
 $footer = str_replace("###PREV###", $taglist, $footer);
 
-file_put_contents("header.html", $header);
-file_put_contents("footer.html", $footer);
+file_put_contents("/home/runner/work/DPP/DPP/docpages/header.html", $header);
+file_put_contents("/home/runner/work/DPP/DPP/docpages/footer.html", $footer);
 
 echo "Generate `master` docs\n";
 
