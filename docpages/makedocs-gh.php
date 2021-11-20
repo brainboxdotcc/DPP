@@ -6,10 +6,14 @@ system("sudo apt-get install graphviz");
 system("echo \$GITHUB_TOKEN | gh auth login --with-token ");
 system("gh auth status");
 system("gh repo clone brainboxdotcc/dpp-web /home/runner/dpp-web");
+
 chdir("/home/runner/work/DPP/DPP");
 system("sudo cp /home/runner/dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
 chdir("docpages");
 
+
+system("git config --global user.email \"robot@dpp.dev\"");
+system("git config --global user.name \"Docs Deployment Bot\"");
 system("git config --global advice.detachedHead false");
 
 /* Make drop down list of versions from the tags */
@@ -97,5 +101,5 @@ echo "Commit and push\n";
 chdir("/home/runner/dpp-web");
 system("git add -A >/dev/null");
 system("git commit -a -m \"automatic commit\" >/dev/null");
-system("git push");
+system("git push \"https://\$GITHUB_ACTOR:\$GITHUB_TOKEN@github.com/brainboxdotcc/DPP.git\"");
 
