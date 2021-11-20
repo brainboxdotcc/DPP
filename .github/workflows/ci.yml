@@ -1,6 +1,22 @@
 name: D++ CI
-on: [push, pull_request]
-paths: ['**Dockerfile', '**.cxx', '**.cpp', '**.h', '**.hpp' '**CMakeLists.txt']
+on:
+  push:
+    paths:
+      - '**Dockerfile'
+      - '**.cxx'
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+      - '**CMakeLists.txt'
+  push:
+    pull_request:
+      - '**Dockerfile'
+      - '**.cxx'
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+      - '**CMakeLists.txt'
+
 
 jobs:
   linux:
