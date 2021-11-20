@@ -180,6 +180,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Read 8 bits of data from the buffer
 	 * 
 	 * @return uint8_t data retrieved
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	uint8_t read_8_bits();
 
@@ -187,6 +188,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Read 16 bits of data from the buffer
 	 * 
 	 * @return uint16_t data retrieved
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	uint16_t read_16_bits();
 
@@ -194,6 +196,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Read 32 bits of data from the buffer
 	 * 
 	 * @return uint32_t data retrieved
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	uint32_t read_32_bits();
 
@@ -201,6 +204,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Read 64 bits of data from the buffer
 	 * 
 	 * @return uint64_t data retrieved
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	uint64_t read_64_bits();
 
@@ -209,6 +213,7 @@ class DPP_EXPORT etf_parser {
 	 *
 	 * @param length Length of string to retrieve 
 	 * @return const char* data retrieved
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	const char* read_string(uint32_t length);
 
@@ -218,6 +223,7 @@ class DPP_EXPORT etf_parser {
 	 * such as a key name, nullptr, or false.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json process_atom(const char* atom, uint16_t length);
 
@@ -225,6 +231,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode an 'atom' value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_atom();
 
@@ -232,6 +239,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a small 'atom' value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_small_atom();
 
@@ -239,6 +247,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a small integer value (0-255).
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_small_integer();
 
@@ -246,6 +255,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode an integer value (-MAXINT -> MAXINT-1).
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_integer();
 
@@ -253,6 +263,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode an array of values.
 	 * 
 	 * @return nlohmann::json values converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_array(uint32_t length);
 
@@ -260,6 +271,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a list of values.
 	 * 
 	 * @return nlohmann::json values converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_list();
 
@@ -267,6 +279,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a 'tuple' value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_tuple(uint32_t length);
 
@@ -274,6 +287,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a nil 'atom' value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_nil();
 
@@ -282,6 +296,7 @@ class DPP_EXPORT etf_parser {
 	 * Will recurse to evaluate each member variable.
 	 * 
 	 * @return nlohmann::json values converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_map();
 
@@ -290,6 +305,7 @@ class DPP_EXPORT etf_parser {
 	 * (depreciated in erlang but still expected to be supported)
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_float();
 
@@ -297,6 +313,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a floating type numeric value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_new_float();
 
@@ -304,6 +321,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a 'bigint' value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_bigint(uint32_t digits);
 
@@ -311,6 +329,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a small 'bigint' value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_bigint_small();
 
@@ -318,6 +337,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a large 'bigint' value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_bigint_large();
 
@@ -325,6 +345,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a binary value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_binary();
 
@@ -332,6 +353,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a string value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_string();
 
@@ -339,6 +361,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a string list value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_string_as_list();
 
@@ -346,6 +369,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a 'small tuple' value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_tuple_small();
 
@@ -353,6 +377,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Decode a 'large tuple' value.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_tuple_large();
 
@@ -362,6 +387,7 @@ class DPP_EXPORT etf_parser {
 	 * ETF object.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_compressed();
 
@@ -370,6 +396,7 @@ class DPP_EXPORT etf_parser {
 	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_reference();
 
@@ -378,6 +405,7 @@ class DPP_EXPORT etf_parser {
 	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_new_reference();
 
@@ -386,6 +414,7 @@ class DPP_EXPORT etf_parser {
 	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_port();
 
@@ -394,6 +423,7 @@ class DPP_EXPORT etf_parser {
 	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_pid();
 
@@ -402,6 +432,7 @@ class DPP_EXPORT etf_parser {
 	 * Erlang expects this to be supported, in practice Discord doesn't send these right now.
 	 * 
 	 * @return nlohmann::json value converted to JSON
+	 * @throw dpp::exception Data stream isn't long enough to fetch requested bits
 	 */
 	nlohmann::json decode_export();
 
@@ -411,6 +442,7 @@ class DPP_EXPORT etf_parser {
 	 * @param pk buffer struct
 	 * @param bytes byte buffer to write
 	 * @param l number of bytes to write
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void buffer_write(etf_buffer *pk, const char *bytes, size_t l);
 
@@ -418,6 +450,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Append version number to ETF buffer
 	 * 
 	 * @param b buffer to append to
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_version(etf_buffer *b);
 
@@ -425,6 +458,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Append nil value to ETF buffer
 	 * 
 	 * @param b  buffer to append to
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_nil(etf_buffer *b);
 
@@ -432,6 +466,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Append false value to ETF buffer
 	 * 
 	 * @param b  buffer to append to
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_false(etf_buffer *b);
 
@@ -439,6 +474,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Append true value to ETF buffer
 	 * 
 	 * @param b  buffer to append to
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_true(etf_buffer *b);
 
@@ -447,6 +483,7 @@ class DPP_EXPORT etf_parser {
 	 * 
 	 * @param b  buffer to append to
 	 * @param d double to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_small_integer(etf_buffer *b, unsigned char d);
 
@@ -455,6 +492,7 @@ class DPP_EXPORT etf_parser {
 	 * 
 	 * @param b  buffer to append to
 	 * @param d integer to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_integer(etf_buffer *b, int32_t d);
 
@@ -463,6 +501,7 @@ class DPP_EXPORT etf_parser {
 	 * 
 	 * @param b  buffer to append to
 	 * @param d integer to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_unsigned_long_long(etf_buffer *b, unsigned long long d);
 
@@ -471,6 +510,7 @@ class DPP_EXPORT etf_parser {
 	 * 
 	 * @param b  buffer to append to
 	 * @param d integer to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_long_long(etf_buffer *b, long long d);
 
@@ -479,6 +519,7 @@ class DPP_EXPORT etf_parser {
 	 * 
 	 * @param b  buffer to append to
 	 * @param f doule to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_double(etf_buffer *b, double f);
 
@@ -488,6 +529,7 @@ class DPP_EXPORT etf_parser {
 	 * @param b  buffer to append to
 	 * @param bytes pointer to string to append
 	 * @param size size of string to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_atom(etf_buffer *b, const char *bytes, size_t size);
 
@@ -497,6 +539,7 @@ class DPP_EXPORT etf_parser {
 	 * @param b  buffer to append to
 	 * @param bytes pointer to string to append
 	 * @param size size of string to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_atom_utf8(etf_buffer *b, const char *bytes, size_t size);
 
@@ -506,6 +549,7 @@ class DPP_EXPORT etf_parser {
 	 * @param b  buffer to append to
 	 * @param bytes pointer to string to append
 	 * @param size size of string to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_binary(etf_buffer *b, const char *bytes, size_t size);
 
@@ -515,6 +559,7 @@ class DPP_EXPORT etf_parser {
 	 * @param b  buffer to append to
 	 * @param bytes pointer to string to append
 	 * @param size size of string to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_string(etf_buffer *b, const char *bytes, size_t size);
 
@@ -523,6 +568,7 @@ class DPP_EXPORT etf_parser {
 	 * 
 	 * @param b  buffer to append to
 	 * @param size size of value to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_tuple_header(etf_buffer *b, size_t size);
 
@@ -530,6 +576,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Append list terminator to ETF buffer
 	 * 
 	 * @param b  buffer to append to
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_nil_ext(etf_buffer *b);
 
@@ -538,6 +585,7 @@ class DPP_EXPORT etf_parser {
 	 * 
 	 * @param b  buffer to append to
 	 * @param size size of values to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_list_header(etf_buffer *b, size_t size);
 
@@ -546,9 +594,17 @@ class DPP_EXPORT etf_parser {
 	 * 
 	 * @param b  buffer to append to
 	 * @param size size of values to append
+	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_map_header(etf_buffer *b, size_t size);
 
+	/**
+	 * @brief Build ETF buffer
+	 * 
+	 * @param j JSON object to build from
+	 * @param b Buffer to append to
+	 * @throw std::exception Buffer cannot be extended
+	 */
 	void inner_build(const nlohmann::json* j, etf_buffer* b);
 
 public:
@@ -567,6 +623,7 @@ public:
 	 * 
 	 * @param in Raw binary ETF data (generally from a websocket)
 	 * @return nlohmann::json JSON data for use in the library
+	 * @throw dpp::exception Malformed or otherwise invalid ETF content
 	 */
 	nlohmann::json parse(const std::string& in);
 
@@ -577,6 +634,7 @@ public:
 	 * @return std::string raw ETF data. Note that this can
 	 * and probably will contain null values, use std::string::data()
 	 * and std::string::size() to manipulate or send it.
+	 * @throw std::exception Not enough memory, or invalid data types/values
 	 */
 	std::string build(const nlohmann::json& j);
 };

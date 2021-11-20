@@ -53,6 +53,50 @@ bool event_dispatch_t::is_cancelled() const
 	return stop_event;
 }
 
+void message_create_t::send(const std::string& m, command_completion_event_t callback) const
+{
+	this->send(dpp::message(m), callback);
+}
+
+void message_create_t::send(message& msg, command_completion_event_t callback) const 
+{
+	msg.channel_id = this->msg->channel_id;
+	this->from->creator->message_create(msg, callback);
+}
+
+void message_create_t::send(message&& msg, command_completion_event_t callback) const 
+{
+	msg.channel_id = this->msg->channel_id;
+	this->from->creator->message_create(msg, callback);
+}
+
+void message_create_t::reply(const std::string& m, bool mention_replied_user, command_completion_event_t callback) const
+{
+	this->reply(dpp::message(m), mention_replied_user, callback);
+}
+
+void message_create_t::reply(message& msg, bool mention_replied_user, command_completion_event_t callback) const 
+{
+	msg.set_reference(this->msg->id);
+	msg.channel_id = this->msg->channel_id;
+	if (mention_replied_user) {
+		msg.allowed_mentions.replied_user = mention_replied_user;
+		msg.allowed_mentions.users.push_back(this->msg->author->id);
+	}
+	this->from->creator->message_create(msg, callback);
+}
+
+void message_create_t::reply(message&& msg, bool mention_replied_user, command_completion_event_t callback) const 
+{
+	msg.set_reference(this->msg->id);
+	msg.channel_id = this->msg->channel_id;
+	if (mention_replied_user) {
+		msg.allowed_mentions.replied_user = mention_replied_user;
+		msg.allowed_mentions.users.push_back(this->msg->author->id);
+	}
+	this->from->creator->message_create(msg, callback);
+}
+
 void interaction_create_t::reply(interaction_response_type t, const message & m, command_completion_event_t callback) const
 {
 	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), callback);
@@ -190,5 +234,10 @@ event_ctor(voice_client_speaking_t, event_dispatch_t);
 event_ctor(voice_client_disconnect_t, event_dispatch_t);
 event_ctor(voice_track_marker_t, event_dispatch_t);
 event_ctor(guild_stickers_update_t, event_dispatch_t);
+event_ctor(guild_scheduled_event_create_t, event_dispatch_t);
+event_ctor(guild_scheduled_event_update_t, event_dispatch_t);
+event_ctor(guild_scheduled_event_delete_t, event_dispatch_t);
+event_ctor(guild_scheduled_event_user_add_t, event_dispatch_t);
+event_ctor(guild_scheduled_event_user_remove_t, event_dispatch_t);
 
 };

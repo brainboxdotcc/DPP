@@ -24,6 +24,7 @@
 #ifndef _WIN32
 #include <unistd.h>
 #endif
+#include <dpp/exception.h>
 #include <dpp/discordclient.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
@@ -105,7 +106,7 @@ void discord_client::SetupZLib()
 		zlib->d_stream.zfree = (free_func)0;
 		zlib->d_stream.opaque = (voidpf)0;
 		if (inflateInit(&(zlib->d_stream)) != Z_OK) {
-			throw dpp::exception("Can't initialise stream compression!");
+			throw dpp::connection_exception("Can't initialise stream compression!");
 		}
 		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
 	}
@@ -446,8 +447,12 @@ void discord_client::one_second_timer()
 	auto first_iter = shards.begin();
 	if (first_iter != shards.end()) {
 		dpp::discord_client* first_shard = first_iter->second;
-		if ((time(NULL) % 60) == 0 && first_shard == this) {
-			dpp::garbage_collection();
+		if (first_shard == this) {
+			creator->tick_timers();
+
+			if ((time(NULL) % 60) == 0) {
+				dpp::garbage_collection();
+			}
 		}
 	}
 

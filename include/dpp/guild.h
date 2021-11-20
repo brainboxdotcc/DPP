@@ -28,9 +28,12 @@
 
 namespace dpp {
 
+class channel;
+
 /**
  * @brief Represents voice regions for guilds and channels.
- * @note Largely deprecated in favour of per-channel regions.
+ * @deprecated Deprecated in favour of per-channel regions.
+ * Please use channel::rtc_region instead.
  */
 enum region : uint8_t {
 	r_brazil,		//!< Brazil
@@ -52,60 +55,80 @@ enum region : uint8_t {
 /**
  * @brief The various flags that represent the status of a dpp::guild object
  */
-enum guild_flags {
+enum guild_flags : uint32_t {
 	/** Large guild */
-	g_large =				0b0000000000000000000001,
+	g_large =				0b00000000000000000000000000000001,
 	/** Unavailable guild (inaccessible due to an outage) */
-	g_unavailable = 			0b0000000000000000000010,
+	g_unavailable = 			0b00000000000000000000000000000010,
 	/** Guild has widget enabled */
-	g_widget_enabled =			0b0000000000000000000100,
+	g_widget_enabled =			0b00000000000000000000000000000100,
 	/** Guild can  have an invite splash image */
-	g_invite_splash =			0b0000000000000000001000,
+	g_invite_splash =			0b00000000000000000000000000001000,
 	/** Guild can have VIP regions */
-	g_vip_regions =				0b0000000000000000010000,
+	g_vip_regions =				0b00000000000000000000000000010000,
 	/** Guild can have a vanity url */
-	g_vanity_url =				0b0000000000000000100000,
+	g_vanity_url =				0b00000000000000000000000000100000,
 	/** Guild is verified */
-	g_verified =				0b0000000000000001000000,
+	g_verified =				0b00000000000000000000000001000000,
 	/** Guild is partnered */
-	g_partnered =				0b0000000000000010000000,
+	g_partnered =				0b00000000000000000000000010000000,
 	/** Community features enabled */
-	g_community =				0b0000000000000100000000,
+	g_community =				0b00000000000000000000000100000000,
 	/** Guild has commerce features enabled */
-	g_commerce =				0b0000000000001000000000,
+	g_commerce =				0b00000000000000000000001000000000,
 	/** Guild has news features enabled */
-	g_news =				0b0000000000010000000000,
+	g_news =				0b00000000000000000000010000000000,
 	/** Guild is discoverable in discovery */
-	g_discoverable =			0b0000000000100000000000,
+	g_discoverable =			0b00000000000000000000100000000000,
 	/** Guild is featureable */
-	g_featureable =				0b0000000001000000000000,
+	g_featureable =				0b00000000000000000001000000000000,
 	/** Guild can have an animated icon (doesn't mean it actually has one though) */
-	g_animated_icon =			0b0000000010000000000000,
+	g_animated_icon =			0b00000000000000000010000000000000,
 	/** Guild can have a banner image */
-	g_banner =				0b0000000100000000000000,
+	g_banner =				0b00000000000000000100000000000000,
 	/** Guild has a welcome screen */
-	g_welcome_screen_enabled =		0b0000001000000000000000,
+	g_welcome_screen_enabled =		0b00000000000000001000000000000000,
 	/** Guild has a member verification gate */
-	g_member_verification_gate =		0b0000010000000000000000,
+	g_member_verification_gate =		0b00000000000000010000000000000000,
 	/** Guild has a preview */
-	g_preview_enabled =			0b0000100000000000000000,
+	g_preview_enabled =			0b00000000000000100000000000000000,
 	/** Guild join notifications are off */
-	g_no_join_notifications =		0b0001000000000000000000,
+	g_no_join_notifications =		0b00000000000001000000000000000000,
 	/** Guild boost notifications are off */
-	g_no_boost_notifications =		0b0010000000000000000000,
+	g_no_boost_notifications =		0b00000000000010000000000000000000,
 	/** Guild has an actual animated icon (set by the icon hash starting with 'a_') */
-	g_has_animated_icon =			0b0100000000000000000000,
+	g_has_animated_icon =			0b00000000000100000000000000000000,
 	/** Guild has an actual animated banner (set by the icon hash starting with 'a_') */
-	g_has_animated_banner =			0b1000000000000000000000
+	g_has_animated_banner =			0b00000000001000000000000000000000,
+	/** Guild setup tips are off */
+	g_no_setup_tips =			0b00000000010000000000000000000000,
+	/** "Wave to say hi" sticker prompt buttons are off */
+	g_no_sticker_greeting =			0b00000000100000000000000000000000,
+	/** guild has enabled monetization */
+	g_monetization_enabled =		0b00000001000000000000000000000000,
+	/** guild has increased custom sticker slots */
+	g_more_stickers =			0b00000010000000000000000000000000,
+	/** guild has access to create private threads */
+	g_private_threads =			0b00000100000000000000000000000000,
+	/** guild is able to set role icons */
+	g_role_icons =				0b00001000000000000000000000000000,
+	/** guild has access to the seven day archive time for threads */
+	g_seven_day_thread_archive =		0b00010000000000000000000000000000,
+	/** guild has access to the three day archive time for threads */
+	g_three_day_thread_archive =		0b00100000000000000000000000000000,
+	/** guild has enabled ticketed events */
+	g_ticketed_events =			0b01000000000000000000000000000000,
+	/** guild can have channel banners */
+	g_channel_banners =			0b10000000000000000000000000000000,
 };
 
 /**
  * @brief Various flags that can be used to indicate the status of a guild member
  */
-enum guild_member_flags {
-	/** Member deafened */
+enum guild_member_flags : uint8_t {
+	/** Member deafened in voice channels */
 	gm_deaf =		0b00001,
-	/** Member muted */
+	/** Member muted in voice channels */
 	gm_mute =		0b00010,
 	/** Member pending verification by membership screening */
 	gm_pending =		0b00100,
@@ -114,11 +137,12 @@ enum guild_member_flags {
 };
 
 /**
- * @brief Represents dpp::user membership upon a dpp::guild
+ * @brief Represents dpp::user membership upon a dpp::guild.
+ * This contains the user's nickname, guild roles, and any other guild-specific flags.
  */
 class DPP_EXPORT guild_member {
 public:
-	/** Nickname, or nullptr if they don't have a nickname on this guild */
+	/** Nickname, or empty string if they don't have a nickname on this guild */
 	std::string nickname;
 	/** Guild id */
 	snowflake guild_id;
@@ -142,25 +166,54 @@ public:
 	 * @param j The json object to get data from
 	 * @param g_id The guild id to associate the member with
 	 * @param u_id The user id to associate the member with
+	 * @return Reference to self for call chaining
 	 */
 	guild_member& fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id);
 
-	/** Build json string for the member object */
+	/**
+	 * @brief Build json string for the member object
+	 * 
+	 * @return std::string json string
+	 */
 	std::string build_json() const;
 
-	/** Returns true if the user is deafened */
+	/**
+	 * @brief Returns true if the user is deafened
+	 * 
+	 * @return true user is deafened
+	 * @return false user is not deafened
+	 */
 	bool is_deaf() const;
 
-	/** Returns true if the user is muted */
+	/**
+	 * @brief Returns true if the user is muted
+	 * 
+	 * @return true user muted
+	 * @return false user not muted
+	 */
 	bool is_muted() const;
 
-	/** Returns true if pending verification by membership screening */
+	/**
+	 * @brief Returns true if pending verification by membership screening
+	 * 
+	 * @return true user has completed membership screening
+	 * @return false user has not completed membership screening
+	 */
 	bool is_pending() const;
 
-	/** Returns true if the user's per-guild custom avatar is animated */
+	/**
+	 * @brief Returns true if the user's per-guild custom avatar is animated
+	 * 
+	 * @return true user's custom avatar is animated
+	 * @return false user's custom avatar is not animated
+	 */
 	bool has_animated_guild_avatar() const;
 
-	/** Returns the members's per guild avatar if they have one, otherwise returns an empty string */
+	/**
+	 * @brief Returns the members's per guild avatar if they have one, otherwise returns an empty string
+	 * 
+	 * @return std::string avatar or empty string
+	 */
 	std::string get_avatar_url() const;
 	
 };
@@ -170,13 +223,13 @@ public:
  */
 struct welcome_channel_t {
 	/// the channel's id
-	snowflake channel_id;
+	snowflake channel_id = 0;
 
 	/// the description shown for the channel
 	std::string description;
 
 	/// the emoji id, if the emoji is custom
-	snowflake emoji_id;
+	snowflake emoji_id = 0;
 
 	/// the emoji name if custom, the unicode character if standard, or null if no emoji is set
 	std::string emoji_name;
@@ -191,6 +244,63 @@ struct welcome_screen_t {
 	std::string description;
 	/// the channels shown in the welcome screen, up to 5
 	std::vector<welcome_channel_t> welcome_channels;
+};
+
+/**
+ * @brief Guild NSFW level.
+ * Used to represent just how naughty this guild is. Naughty  guild, go sit in the corner.
+ * @note This is set by Discord, and cannot be set by any bot or user on the guild.
+ */
+enum guild_nsfw_level_t : uint8_t {
+	/// Default setting, not configured
+	nsfw_default		=	0,
+	/// Explicit content may be in this guild
+	nsfw_explicit		=	1,
+	/// Safe for work content only
+	nsfw_safe		=	2,
+	/// Age restricted, 18+
+	nsfw_age_restricted	=	3
+};
+
+/**
+ * @brief explicit content filter level.
+ * This is set by a guild admin, but can be forced to a setting if the server is verified,
+ * partnered, official etc.
+ */
+enum guild_explicit_content_t : uint8_t {
+	/// media content will not be scanned
+	expl_disabled =			0,
+	/// media content sent by members without roles will be scanned
+	expl_members_without_roles =	1,
+	/// media content sent by all members will be scanned
+	expl_all_members =		2
+};
+
+/**
+ * @brief MFA level for server. If set to elevated all moderators need MFA to perform specific
+ * actions such as kick or ban.
+ */
+enum mfa_level_t : uint8_t {
+	/// MFA not elevated
+	mfa_none = 0,
+	/// MFA elevated
+	mfa_elevated = 1
+};
+
+/**
+ * @brief Guild verification level
+ */
+enum verification_level_t : uint8_t {
+	/// unrestricted
+	ver_none =	0,
+	/// must have verified email on account
+	ver_low	= 	1,
+	/// must be registered on Discord for longer than 5 minutes
+	ver_medium =	2,
+	/// must be a member of the server for longer than 10 minutes
+	ver_high =	3,
+	/// must have a verified phone number
+	ver_very_high =	4,
 };
 
 /** @brief Guild members container
@@ -229,9 +339,6 @@ public:
 	/** Snowflake id of guild owner */
 	snowflake owner_id;
 
-	/** Guild voice region */
-	region voice_region;
-
 	/** Snowflake ID of AFK voice channel or 0 */
 	snowflake afk_channel_id;
 
@@ -242,16 +349,16 @@ public:
 	snowflake widget_channel_id;
 
 	/** Verification level of server */
-	uint8_t verification_level;
+	verification_level_t verification_level;
 
 	/** Setting for how notifications are to be delivered to users */
 	uint8_t default_message_notifications;
 
 	/** Whether or not explicit content filtering is enable and what setting it is */
-	uint8_t explicit_content_filter;
+	guild_explicit_content_t explicit_content_filter;
 
 	/** If multi factor authentication is required for moderators or not */
-	uint8_t mfa_level;
+	mfa_level_t mfa_level;
 
 	/** ID of creating application, if any, or 0 */
 	snowflake application_id;
@@ -308,6 +415,22 @@ public:
 	 */
 	welcome_screen_t welcome_screen;
 
+	/**
+	 * @brief the maximum number of presences for the guild.
+	 * @note Generally Discord always fills this with 0, apart from for the largest of guilds
+	 */
+	uint32_t max_presences;
+
+	/**
+	 * @brief the maximum number of members for the guild
+	 */
+	uint32_t max_members;
+
+	/**
+	 * @brief Guild NSFW level
+	 */
+	guild_nsfw_level_t nsfw_level;
+
 	/** Default constructor, zeroes all values */
 	guild();
 
@@ -325,6 +448,7 @@ public:
 
 	/** Build a JSON string from this object.
 	 * @param with_id True if an ID is to be included in the JSON
+	 * @return JSON string
 	 */
 	std::string build_json(bool with_id = false) const;
 
@@ -364,65 +488,183 @@ public:
 	 */
 	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false);
 
-	/** Is a large server (>250 users) */
+	/**
+	 * @brief Set the name of the guild in the object
+	 * Min length: 2, Max length: 100 (not including leading/trailing spaces)
+	 * @param n Guild name
+	 * @return guild& reference to self
+	 * @throw dpp::length_exception if guild name is too short
+	 */
+	guild& set_name(const std::string& n);
+
+	/**
+	 * @brief Is a large server (>250 users)
+	 * @return bool is a large guild
+	 */
 	bool is_large() const;
 
-	/** Is unavailable due to outage (most other fields will be blank or outdated */
+	/**
+	 * @brief Is unavailable due to outage (most other fields will be blank or outdated
+	 * @return bool is unavailable
+	 */
 	bool is_unavailable() const;
 
-	/** Widget is enabled for this server */
+	/**
+	 * @brief Widget is enabled for this server
+	 * @return bool widget enabled
+	 */
 	bool widget_enabled() const;
 
-	/** Guild has an invite splash */
+	/**
+	 * @brief Guild has an invite splash
+	 * @return bool has an invite splash
+	 */
 	bool has_invite_splash() const;
 
-	/** Guild has VIP regions */
+	/**
+	 * @brief Guild has VIP voice regions
+	 * @return bool has vip regions
+	 */
 	bool has_vip_regions() const;
 
-	/** Guild can have a vanity url */
+	/**
+	 * @brief Guild can have a vanity url
+	 * @return bool can have vanity url
+	 */
 	bool has_vanity_url() const;
 
-	/** Guild is a verified server */
+	/**
+	 * @brief Guild is a verified server
+	 * @return bool is verified
+	 */
 	bool is_verified() const;
 
-	/** Guild is a discord partner server */
+	/**
+	 * @brief Guild is a discord partnered server
+	 * @return bool is discord partnered
+	 */
 	bool is_partnered() const;
 
-	/** Guild has enabled community */
+	/**
+	 * @brief Has enabled community
+	 * @return bool has enabled community
+	 */
 	bool is_community() const;
 
-	/** Guild has enabled commerce channels */
+	/**
+	 * @brief Guild has commerce channels
+	 * @return bool has commerce guilds
+	 */
 	bool has_commerce() const;
 
-	/** Guild has news channels */
+	/**
+	 * @brief Guild has news channels
+	 * @return bool has news channels
+	 */
 	bool has_news() const;
 
-	/** Guild is discoverable */
+	/**
+	 * @brief Guild is discoverable
+	 * @return bool is discoverable
+	 */
 	bool is_discoverable() const;
 
-	/** Guild is featureable */
+	/**
+	 * @brief Guild is featurable
+	 * @return bool is featurable
+	 */
 	bool is_featureable() const;
 
-	/** Guild is allowed an animated icon */
+	/**
+	 * @brief Guild can have an animated icon
+	 * @return bool can have animated icon
+	 */
 	bool has_animated_icon() const;
 
-	/** Guild has a banner image */
+	/**
+	 * @brief Guild has a banner image
+	 * @return bool has banner image
+	 */
 	bool has_banner() const;
 
-	/** Guild has enabled welcome screen */
+	/**
+	 * @brief Guild has enabled the welcome screen
+	 * @return bool enabled welcome screen
+	 */
 	bool is_welcome_screen_enabled() const;
 
-	/** Guild has enabled membership screening */
+	/**
+	 * @brief Guild has membership screening
+	 * @return bool has membership screening
+	 */
 	bool has_member_verification_gate() const;
 
-	/** Guild has preview enabled */
+	/**
+	 * @brief Guild has preview enabled
+	 * @return bool has preview
+	 */
 	bool is_preview_enabled() const;
 
-	/** Server icon is actually an animated gif */
+	/**
+	 * @brief Guild icon is actually an animated gif
+	 * @return bool is animated gif
+	 */
 	bool has_animated_icon_hash() const;
 
-	/** Server banner is actually an animated gif */
+	/**
+	 * @brief Guild banner is animated gif
+	 * @return bool is animated gif
+	 */
 	bool has_animated_banner_icon_hash() const;
+
+
+	/**
+	 * @brief guild has access to monetization features
+	 * @return bool 
+	 */
+	bool has_monetization_enabled() const;
+
+	/**
+	 * @brief guild has increased custom sticker slots
+	 * @return bool has more stickers
+	 */
+	bool has_more_stickers() const;
+
+	/**
+	 * @brief guild has access to create private threads
+	 * @return bool has private threads
+	 */
+	bool has_private_threads() const;
+
+	/**
+	 * @brief guild is able to set role icons
+	 * @return bool has role icons
+	 */
+	bool has_role_icons() const;
+
+	/**
+	 * @brief guild has access to the seven day archive time for threads 
+	 * @return bool has seven day thread archive
+	 */
+	bool has_seven_day_thread_archive() const;
+
+	/**
+	 * @brief guild has access to the three day archive time for threads
+	 * @return bool has three day thread archive
+	 */
+	bool has_three_day_thread_archive() const;
+
+	/**
+	 * @brief guild has enabled ticketed events
+	 * @return bool has ticketed events
+	 */
+	bool has_ticketed_events() const;
+
+	/**
+	 * @brief guild has access to channel banners feature
+	 * @return bool has channel banners
+	 */
+	bool has_channel_banners() const;
 };
 
 /** A container of guilds */

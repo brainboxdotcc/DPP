@@ -243,6 +243,37 @@ public:
 };
 
 /**
+ * @brief A user with additional fields only available via the oauth2 identify scope.
+ * These are not included in dpp::user as additional scopes are needed to fetch them
+ * which bots do not normally have.
+ */
+class DPP_EXPORT user_identified : public user {
+public:
+	utility::iconhash	banner;		//!< Optional: the user's banner hash    identify (may be empty)
+	uint32_t		accent_color;	//!< Optional: the user's banner color encoded as an integer representation of hexadecimal color code    identify (may be empty)
+	std::string		locale;		//!< Optional: the user's chosen language option identify
+	bool			verified;	//!< Optional: whether the email on this account has been verified       email
+	std::string		email;		//!< Optional: the user's email  email (may be empty)
+	
+	/** Fill this record from json.
+	 * @param j The json to fill this record from
+	 * @return Reference to self
+	 */
+	user_identified& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Construct a new user identified object
+	 */
+	user_identified();
+
+	/**
+	 * @brief Destroy the user identified object
+	 */
+	virtual ~user_identified();
+
+};
+
+/**
  * @brief helper function to deserialize a user from json
  *
  * @see https://github.com/nlohmann/json#arbitrary-types-conversions
@@ -251,6 +282,16 @@ public:
  * @param u user to be deserialized
  */
 void from_json(const nlohmann::json& j, user& u);
+
+/**
+ * @brief helper function to deserialize a user_identified from json
+ *
+ * @see https://github.com/nlohmann/json#arbitrary-types-conversions
+ *
+ * @param j output json object
+ * @param u user to be deserialized
+ */
+void from_json(const nlohmann::json& j, user_identified& u);
 
 /** A group of users */
 typedef std::unordered_map<snowflake, user> user_map;

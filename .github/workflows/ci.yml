@@ -1,5 +1,22 @@
 name: D++ CI
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - '**Dockerfile'
+      - '**.cxx'
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+      - '**CMakeLists.txt'
+  pull_request:
+    paths:
+      - '**Dockerfile'
+      - '**.cxx'
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+      - '**CMakeLists.txt'
+
 
 jobs:
   linux:
@@ -25,7 +42,13 @@ jobs:
           CXX: ${{matrix.cfg.cpp-version}}
 
       - name: Build Project
-        run: cd build && ninja -j4
+        run: cd build && ninja 
+
+      - name: Run unit tests
+        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
+        run: cd build && ./test
+        env:
+          DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
 
       - name: Package distributable
         if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
@@ -60,7 +83,7 @@ jobs:
         run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 
       - name: Build Project
-        run: cd build && ninja -j4
+        run: cd build && ninja 
 
   windows: # Windows x64 and x86 build matrix
     strategy:
@@ -133,7 +156,7 @@ jobs:
         run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 
       - name: Compile Source
-        run: cd build && sudo ninja -j4
+        run: cd build && sudo ninja 
 
       - name: Package Distributable
         run: cd build && cpack --verbose

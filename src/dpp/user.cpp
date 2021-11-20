@@ -57,6 +57,13 @@ user::~user()
 {
 }
 
+user_identified::user_identified() : user(), accent_color(0), verified(false) {
+
+}
+
+user_identified::~user_identified() {
+}
+
 std::string user::get_avatar_url()  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
@@ -156,6 +163,24 @@ bool user::has_animated_icon() const {
 user& user::fill_from_json(json* j) {
 	j->get_to(*this);
 	return *this;
+}
+
+user_identified& user_identified::fill_from_json(json* j) {
+	j->get_to(*this);
+	return *this;
+}
+
+void from_json(const nlohmann::json& j, user_identified& u) {
+	dpp::user* user_type = dynamic_cast<user*>(&u);
+	from_json(j, *user_type);
+	u.email = StringNotNull(&j, "email");
+	u.locale = StringNotNull(&j, "locale");
+	u.accent_color = Int32NotNull(&j, "accent_color");
+	u.verified = BoolNotNull(&j, "verified");
+	if (j.find("banner") != j.end()) {
+		std::string b = StringNotNull(&j, "banner");
+		u.banner = b;
+	}
 }
 
 void from_json(const nlohmann::json& j, user& u) {

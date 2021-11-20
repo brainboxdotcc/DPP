@@ -20,6 +20,7 @@
  ************************************************************************************/
 #include <dpp/discord.h>
 #include <dpp/stringops.h>
+#include <dpp/exception.h>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
@@ -28,7 +29,7 @@
 #include <chrono>
 #include <ctime>
 #include <algorithm>
-#include <iomanip>
+#include <fstream>
 #include <dpp/fmt/format.h>
 
 #ifdef _WIN32
@@ -296,6 +297,35 @@ namespace dpp {
 
 			return str.substr(min, max);
 		}
+
+		std::string read_file(const std::string& filename)
+		{
+			try {
+				std::ifstream file(filename, std::ifstream::binary);
+				file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+				file.seekg(0, std::istream::end);
+				const std::streampos ssize = file.tellg();
+				file.seekg(0, std::istream::beg);
+				std::string result(size_t(ssize), 0);
+				file.read(&result[0], std::streamsize(ssize));
+				return result;
+			}
+			catch (const std::exception& e) {
+				/* Rethrow as dpp::file_exception */
+				throw dpp::file_exception(e.what());
+			}
+		}
+
+		std::string validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message) {
+			if (utf8len(value) < _min) {
+				throw dpp::length_exception(exception_message);
+			} else if (utf8len(value) > _max) {
+				return utf8substr(value, 0, _max);
+			}
+			return value;
+		}
+
+
 	};
 
 };

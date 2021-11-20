@@ -280,6 +280,30 @@ namespace dpp {
 		 * @return std::string Substring in UTF-8 or empty string if invalid UTF-8 passed in
 		 */
 		std::string DPP_EXPORT utf8substr(const std::string& str, std::string::size_type start, std::string::size_type length);
+
+		/**
+		 * @brief Read a whole file into a std::string.
+		 * Be sure you have enough memory to read the file, if you are reading a large file.
+		 * @note Be aware this function can block! If you are regularly reading large files, consider caching them.
+		 * @param filename The path to the file to read
+		 * @return std::string The file contents
+		 * @throw dpp::exception on failure to read the entire file
+		 */
+		std::string DPP_EXPORT read_file(const std::string& filename);
+
+		/**
+		 * @brief Validate a string value
+		 * In the event the length of the string is less than _min, then an exception of type dpp:length_exception
+		 * will be thrown. If the string is longer than _max UTF8 codepoints it will be truncated to fit.
+		 * 
+		 * @param value The value to validate
+		 * @param _min Minimum length
+		 * @param _max Maximum length
+		 * @param exception_message Exception message to throw if value length < _min
+		 * @return std::string Validated string, truncated if neccessary.
+		 * @throw dpp::length_exception if value UTF8 length < _min
+		 */
+		std::string validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);
 	};
 
 };
@@ -303,3 +327,4 @@ namespace dpp {
 #include <dpp/stage_instance.h>
 #include <dpp/auditlog.h>
 #include <dpp/application.h>
+#include <dpp/scheduled_event.h>

@@ -20,6 +20,7 @@
  ************************************************************************************/
 #include <map>
 #include <dpp/discord.h>
+#include <dpp/exception.h>
 #include <dpp/cluster.h>
 #include <dpp/discordclient.h>
 #include <dpp/discordevents.h>
@@ -48,11 +49,12 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 {
 	rest = new request_queue(this);
 	raw_rest = new request_queue(this);
+	next_eh = 0;
 #ifdef _WIN32
 	// Set up winsock.
 	WSADATA wsadata;
 	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
-		throw dpp::exception("WSAStartup failure");
+		throw dpp::connection_exception("WSAStartup failure");
 	}
 #endif
 }
@@ -61,6 +63,10 @@ cluster::~cluster()
 {
 	delete rest;
 	delete raw_rest;
+	/* Free memory for active timers */
+	for (auto & t : timer_list) {
+		delete t.second;
+	}
 #ifdef _WIN32
 	WSACleanup();
 #endif
@@ -87,9 +93,9 @@ void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 		}
 	} else {
 		if (shardinfo.is_error()) {
-			throw dpp::exception(fmt::format("Auto Shard: Could not get shard count ({} [code: {}]). Cluster startup aborted.", shardinfo.get_error().message, shardinfo.get_error().code));
+			throw dpp::rest_exception(fmt::format("Auto Shard: Could not get shard count ({} [code: {}]). Cluster startup aborted.", shardinfo.get_error().message, shardinfo.get_error().code));
 		} else {
-			throw dpp::exception("Auto Shard: Could not get shard count (unknown error, check your connection). Cluster startup aborted.");
+			throw dpp::rest_exception("Auto Shard: Could not get shard count (unknown error, check your connection). Cluster startup aborted.");
 		}
 	}
 }
@@ -246,600 +252,708 @@ const shard_list& cluster::get_shards() {
 	return shards;
 }
 
-
-#define detach(container, ptr) { \
-	for (auto i = container.begin(); i != container.end(); ++i) { \
-		if ((event_handle)*(size_t *)(char *)&(*i) == (event_handle)*(size_t *)(char *)&ptr) { \
-			container.erase(i);	 \
-			return true; \
-		} \
-	} \
-	return false; \
+event_handle cluster::get_next_handle() {
+	return ++next_eh;
 }
 
 bool cluster::detach_log(const event_handle _log) {
-	detach(dispatch.log, _log);
+	return detach(dispatch.log, _log);
 }
 
 event_handle cluster::on_log (std::function<void(const log_t& _event)> _log) {
-	dispatch.log.emplace_back(_log);
-	return (event_handle)*(size_t *)(char *)&_log;
+	event_handle h = get_next_handle();
+	dispatch.log.emplace(h, _log);
+	return h;
 }
 
 bool cluster::detach_voice_state_update(const event_handle _voice_state_update) {
-	detach(dispatch.voice_state_update, _voice_state_update);
+	return detach(dispatch.voice_state_update, _voice_state_update);
 }
 
 event_handle cluster::on_voice_state_update (std::function<void(const voice_state_update_t& _event)> _voice_state_update) {
-	dispatch.voice_state_update.emplace_back(_voice_state_update);
-	return (event_handle)*(size_t *)(char *)&_voice_state_update;
+	event_handle h = get_next_handle();
+	dispatch.voice_state_update.emplace(h, _voice_state_update);
+	return h;
 }
 
 bool cluster::detach_voice_client_disconnect(const event_handle _voice_client_disconnect) {
-	detach(dispatch.voice_client_disconnect, _voice_client_disconnect);
+	return detach(dispatch.voice_client_disconnect, _voice_client_disconnect);
 }
 
 event_handle cluster::on_voice_client_disconnect (std::function<void(const voice_client_disconnect_t& _event)> _voice_client_disconnect) {
-	dispatch.voice_client_disconnect.emplace_back(_voice_client_disconnect);
-	return (event_handle)*(size_t *)(char *)&_voice_client_disconnect;
+	event_handle h = get_next_handle();
+	dispatch.voice_client_disconnect.emplace(h, _voice_client_disconnect);
+	return h;
 }
 
 bool cluster::detach_voice_client_speaking(const event_handle _voice_client_speaking) {
-	detach(dispatch.voice_client_speaking, _voice_client_speaking);
+	return detach(dispatch.voice_client_speaking, _voice_client_speaking);
 }
 
 event_handle cluster::on_voice_client_speaking (std::function<void(const voice_client_speaking_t& _event)> _voice_client_speaking) {
-	dispatch.voice_client_speaking.emplace_back(_voice_client_speaking);;
-	return (event_handle)*(size_t *)(char *)&_voice_client_speaking;
+	event_handle h = get_next_handle();
+	dispatch.voice_client_speaking.emplace(h, _voice_client_speaking);
+	return h;;
 }
 
 bool cluster::detach_stage_instance_create(const event_handle _stage_instance_create) {
-	detach(dispatch.stage_instance_create, _stage_instance_create);
+	return detach(dispatch.stage_instance_create, _stage_instance_create);
 }
 
 event_handle cluster::on_stage_instance_create (std::function<void(const stage_instance_create_t& _event)> _stage_instance_create) {
-	dispatch.stage_instance_create.emplace_back(_stage_instance_create);;
-	return (event_handle)*(size_t *)(char *)&_stage_instance_create;
+	event_handle h = get_next_handle();
+	dispatch.stage_instance_create.emplace(h, _stage_instance_create);
+	return h;;
 }
 
 bool cluster::detach_stage_instance_update(const event_handle _stage_instance_update) {
-	detach(dispatch.stage_instance_update, _stage_instance_update);
+	return detach(dispatch.stage_instance_update, _stage_instance_update);
 }
 
 event_handle cluster::on_stage_instance_update (std::function<void(const stage_instance_update_t& _event)> _stage_instance_update) {
-	dispatch.stage_instance_update.emplace_back(_stage_instance_update);;
-	return (event_handle)*(size_t *)(char *)&_stage_instance_update;
+	event_handle h = get_next_handle();
+	dispatch.stage_instance_update.emplace(h, _stage_instance_update);
+	return h;;
 }
 
 bool cluster::detach_stage_instance_delete(const event_handle _stage_instance_delete) {
-	detach(dispatch.stage_instance_delete, _stage_instance_delete);
+	return detach(dispatch.stage_instance_delete, _stage_instance_delete);
 }
 
 event_handle cluster::on_stage_instance_delete (std::function<void(const stage_instance_delete_t& _event)> _stage_instance_delete) {
-	dispatch.stage_instance_delete.emplace_back(_stage_instance_delete);;
-	return (event_handle)*(size_t *)(char *)&_stage_instance_delete;
+	event_handle h = get_next_handle();
+	dispatch.stage_instance_delete.emplace(h, _stage_instance_delete);
+	return h;;
 }
 
 bool cluster::detach_interaction_create(const event_handle _interaction_create) {
-	detach(dispatch.interaction_create, _interaction_create);
+	return detach(dispatch.interaction_create, _interaction_create);
+}
+
+event_handle cluster::on_guild_scheduled_event_create (std::function<void(const guild_scheduled_event_create_t& _event)> _guild_scheduled_event_create) {
+	event_handle h = get_next_handle();
+	dispatch.guild_scheduled_event_create.emplace(h, _guild_scheduled_event_create);
+	return h;
+}
+
+bool cluster::detach_guild_scheduled_event_create(const event_handle _guild_scheduled_event_create) {
+	return detach(dispatch.guild_scheduled_event_create, _guild_scheduled_event_create);
+}
+
+event_handle cluster::on_guild_scheduled_event_update (std::function<void(const guild_scheduled_event_update_t& _event)> _guild_scheduled_event_update) {
+	event_handle h = get_next_handle();
+	dispatch.guild_scheduled_event_update.emplace(h, _guild_scheduled_event_update);
+	return h;
+}
+
+bool cluster::detach_guild_scheduled_event_update(const event_handle _guild_scheduled_event_update) {
+	return detach(dispatch.guild_scheduled_event_update, _guild_scheduled_event_update);
+}
+
+event_handle cluster::on_guild_scheduled_event_delete (std::function<void(const guild_scheduled_event_delete_t& _event)> _guild_scheduled_event_delete) {
+	event_handle h = get_next_handle();
+	dispatch.guild_scheduled_event_delete.emplace(h, _guild_scheduled_event_delete);
+	return h;
+}
+
+bool cluster::detach_guild_scheduled_event_delete(const event_handle _guild_scheduled_event_delete) {
+	return detach(dispatch.guild_scheduled_event_delete, _guild_scheduled_event_delete);
+}
+
+event_handle cluster::on_guild_scheduled_event_user_add (std::function<void(const guild_scheduled_event_user_add_t& _event)> _guild_scheduled_event_user_add) {
+	event_handle h = get_next_handle();
+	dispatch.guild_scheduled_event_user_add.emplace(h, _guild_scheduled_event_user_add);
+	return h;
+}
+
+bool cluster::detach_guild_scheduled_event_user_add(const event_handle _guild_scheduled_event_user_add) {
+	return detach(dispatch.guild_scheduled_event_user_add, _guild_scheduled_event_user_add);
+}
+
+event_handle cluster::on_guild_scheduled_event_user_remove (std::function<void(const guild_scheduled_event_user_remove_t& _event)> _guild_scheduled_event_user_remove) {
+	event_handle h = get_next_handle();
+	dispatch.guild_scheduled_event_user_remove.emplace(h, _guild_scheduled_event_user_remove);
+	return h;
+}
+
+bool cluster::detach_guild_scheduled_event_user_remove(const event_handle _guild_scheduled_event_user_remove) {
+	return detach(dispatch.guild_scheduled_event_user_remove, _guild_scheduled_event_user_remove);
 }
 
 event_handle cluster::on_interaction_create (std::function<void(const interaction_create_t& _event)> _interaction_create) {
-	dispatch.interaction_create.emplace_back(_interaction_create);;
-	return (event_handle)*(size_t *)(char *)&_interaction_create;
+	event_handle h = get_next_handle();
+	dispatch.interaction_create.emplace(h, _interaction_create);
+	return h;
 }
 
 bool cluster::detach_button_click(const event_handle _button_click) {
-	detach(dispatch.button_click, _button_click);
+	return detach(dispatch.button_click, _button_click);
 }
 
 event_handle cluster::on_button_click (std::function<void(const button_click_t& _event)> _button_click) {
-	dispatch.button_click.emplace_back(_button_click);;
-	return (event_handle)*(size_t *)(char *)&_button_click;
+	event_handle h = get_next_handle();
+	dispatch.button_click.emplace(h, _button_click);
+	return h;;
 }
 
 bool cluster::detach_autocomplete(const event_handle _autocomplete) {
-	detach(dispatch.autocomplete, _autocomplete);
+	return detach(dispatch.autocomplete, _autocomplete);
 }
 
 event_handle cluster::on_autocomplete (std::function<void(const autocomplete_t& _event)> _autocomplete) {
-	dispatch.autocomplete.emplace_back(_autocomplete);;
-	return (event_handle)*(size_t *)(char *)&_autocomplete;
+	event_handle h = get_next_handle();
+	dispatch.autocomplete.emplace(h, _autocomplete);
+	return h;;
 }
 
 bool cluster::detach_select_click(const event_handle _select_click) {
-	detach(dispatch.select_click, _select_click);
+	return detach(dispatch.select_click, _select_click);
 }
 
 event_handle cluster::on_select_click (std::function<void(const select_click_t& _event)> _select_click) {
-	dispatch.select_click.emplace_back(_select_click);;
-	return (event_handle)*(size_t *)(char *)&_select_click;
+	event_handle h = get_next_handle();
+	dispatch.select_click.emplace(h, _select_click);
+	return h;;
 }
 
 bool cluster::detach_guild_delete(const event_handle _guild_delete) {
-	detach(dispatch.guild_delete, _guild_delete);
+	return detach(dispatch.guild_delete, _guild_delete);
 }
 
 event_handle cluster::on_guild_delete (std::function<void(const guild_delete_t& _event)> _guild_delete) {
-	dispatch.guild_delete.emplace_back(_guild_delete);;
-	return (event_handle)*(size_t *)(char *)&_guild_delete;
+	event_handle h = get_next_handle();
+	dispatch.guild_delete.emplace(h, _guild_delete);
+	return h;;
 }
 
 bool cluster::detach_channel_delete(const event_handle _channel_delete) {
-	detach(dispatch.channel_delete, _channel_delete);
+	return detach(dispatch.channel_delete, _channel_delete);
 }
 
 event_handle cluster::on_channel_delete (std::function<void(const channel_delete_t& _event)> _channel_delete) {
-	dispatch.channel_delete.emplace_back(_channel_delete);;
-	return (event_handle)*(size_t *)(char *)&_channel_delete;
+	event_handle h = get_next_handle();
+	dispatch.channel_delete.emplace(h, _channel_delete);
+	return h;;
 }
 
 bool cluster::detach_channel_update(const event_handle _channel_update) {
-	detach(dispatch.channel_update, _channel_update);
+	return detach(dispatch.channel_update, _channel_update);
 }
 
 event_handle cluster::on_channel_update (std::function<void(const channel_update_t& _event)> _channel_update) {
-	dispatch.channel_update.emplace_back(_channel_update);;
-	return (event_handle)*(size_t *)(char *)&_channel_update;
+	event_handle h = get_next_handle();
+	dispatch.channel_update.emplace(h, _channel_update);
+	return h;;
 }
 
 bool cluster::detach_ready(const event_handle _ready) {
-	detach(dispatch.ready, _ready);
+	return detach(dispatch.ready, _ready);
 }
 
 event_handle cluster::on_ready (std::function<void(const ready_t& _event)> _ready) {
-	dispatch.ready.emplace_back(_ready);;
-	return (event_handle)*(size_t *)(char *)&_ready;
+	event_handle h = get_next_handle();
+	dispatch.ready.emplace(h, _ready);
+	return h;;
 }
 
 bool cluster::detach_message_delete(const event_handle _message_delete) {
-	detach(dispatch.message_delete, _message_delete);
+	return detach(dispatch.message_delete, _message_delete);
 }
 
 event_handle cluster::on_message_delete (std::function<void(const message_delete_t& _event)> _message_delete) {
-	dispatch.message_delete.emplace_back(_message_delete);;
-	return (event_handle)*(size_t *)(char *)&_message_delete;
+	event_handle h = get_next_handle();
+	dispatch.message_delete.emplace(h, _message_delete);
+	return h;;
 }
 
 bool cluster::detach_application_command_delete(const event_handle _application_command_delete) {
-	detach(dispatch.application_command_delete, _application_command_delete);
+	return detach(dispatch.application_command_delete, _application_command_delete);
 }
 
 event_handle cluster::on_application_command_delete (std::function<void(const application_command_delete_t& _event)> _application_command_delete) {
-	dispatch.application_command_delete.emplace_back(_application_command_delete);;
-	return (event_handle)*(size_t *)(char *)&_application_command_delete;
+	event_handle h = get_next_handle();
+	dispatch.application_command_delete.emplace(h, _application_command_delete);
+	return h;;
 }
 
 bool cluster::detach_guild_member_remove(const event_handle _guild_member_remove) {
-	detach(dispatch.guild_member_remove, _guild_member_remove);
+	return detach(dispatch.guild_member_remove, _guild_member_remove);
 }
 
 event_handle cluster::on_guild_member_remove (std::function<void(const guild_member_remove_t& _event)> _guild_member_remove) {
-	dispatch.guild_member_remove.emplace_back(_guild_member_remove);;
-	return (event_handle)*(size_t *)(char *)&_guild_member_remove;
+	event_handle h = get_next_handle();
+	dispatch.guild_member_remove.emplace(h, _guild_member_remove);
+	return h;;
 }
 
 bool cluster::detach_application_command_create(const event_handle _application_command_create) {
-	detach(dispatch.application_command_create, _application_command_create);
+	return detach(dispatch.application_command_create, _application_command_create);
 }
 
 event_handle cluster::on_application_command_create (std::function<void(const application_command_create_t& _event)> _application_command_create) {
-	dispatch.application_command_create.emplace_back(_application_command_create);;
-	return (event_handle)*(size_t *)(char *)&_application_command_create;
+	event_handle h = get_next_handle();
+	dispatch.application_command_create.emplace(h, _application_command_create);
+	return h;;
 }
 
 bool cluster::detach_resumed(const event_handle _resumed) {
-	detach(dispatch.resumed, _resumed);
+	return detach(dispatch.resumed, _resumed);
 }
 
 event_handle cluster::on_resumed (std::function<void(const resumed_t& _event)> _resumed) {
-	dispatch.resumed.emplace_back(_resumed);;
-	return (event_handle)*(size_t *)(char *)&_resumed;
+	event_handle h = get_next_handle();
+	dispatch.resumed.emplace(h, _resumed);
+	return h;;
 }
 
 bool cluster::detach_guild_role_create(const event_handle _guild_role_create) {
-	detach(dispatch.guild_role_create, _guild_role_create);
+	return detach(dispatch.guild_role_create, _guild_role_create);
 }
 
 event_handle cluster::on_guild_role_create (std::function<void(const guild_role_create_t& _event)> _guild_role_create) {
-	dispatch.guild_role_create.emplace_back(_guild_role_create);;
-	return (event_handle)*(size_t *)(char *)&_guild_role_create;
+	event_handle h = get_next_handle();
+	dispatch.guild_role_create.emplace(h, _guild_role_create);
+	return h;;
 }
 
 bool cluster::detach_typing_start(const event_handle _typing_start) {
-	detach(dispatch.typing_start, _typing_start);
+	return detach(dispatch.typing_start, _typing_start);
 }
 
 event_handle cluster::on_typing_start (std::function<void(const typing_start_t& _event)> _typing_start) {
-	dispatch.typing_start.emplace_back(_typing_start);;
-	return (event_handle)*(size_t *)(char *)&_typing_start;
+	event_handle h = get_next_handle();
+	dispatch.typing_start.emplace(h, _typing_start);
+	return h;;
 }
 
 bool cluster::detach_message_reaction_add(const event_handle _message_reaction_add) {
-	detach(dispatch.message_reaction_add, _message_reaction_add);
+	return detach(dispatch.message_reaction_add, _message_reaction_add);
 }
 
 event_handle cluster::on_message_reaction_add (std::function<void(const message_reaction_add_t& _event)> _message_reaction_add) {
-	dispatch.message_reaction_add.emplace_back(_message_reaction_add);;
-	return (event_handle)*(size_t *)(char *)&_message_reaction_add;
+	event_handle h = get_next_handle();
+	dispatch.message_reaction_add.emplace(h, _message_reaction_add);
+	return h;;
 }
 
 bool cluster::detach_guild_members_chunk(const event_handle _guild_members_chunk) {
-	detach(dispatch.guild_members_chunk, _guild_members_chunk);
+	return detach(dispatch.guild_members_chunk, _guild_members_chunk);
 }
 
 event_handle cluster::on_guild_members_chunk (std::function<void(const guild_members_chunk_t& _event)> _guild_members_chunk) {
-	dispatch.guild_members_chunk.emplace_back(_guild_members_chunk);;
-	return (event_handle)*(size_t *)(char *)&_guild_members_chunk;
+	event_handle h = get_next_handle();
+	dispatch.guild_members_chunk.emplace(h, _guild_members_chunk);
+	return h;;
 }
 
 bool cluster::detach_message_reaction_remove(const event_handle _message_reaction_remove) {
-	detach(dispatch.message_reaction_remove, _message_reaction_remove);
+	return detach(dispatch.message_reaction_remove, _message_reaction_remove);
 }
 
 event_handle cluster::on_message_reaction_remove (std::function<void(const message_reaction_remove_t& _event)> _message_reaction_remove) {
-	dispatch.message_reaction_remove.emplace_back(_message_reaction_remove);;
-	return (event_handle)*(size_t *)(char *)&_message_reaction_remove;
+	event_handle h = get_next_handle();
+	dispatch.message_reaction_remove.emplace(h, _message_reaction_remove);
+	return h;;
 }
 
 bool cluster::detach_guild_create(const event_handle _guild_create) {
-	detach(dispatch.guild_create, _guild_create);
+	return detach(dispatch.guild_create, _guild_create);
 }
 
 event_handle cluster::on_guild_create (std::function<void(const guild_create_t& _event)> _guild_create) {
-	dispatch.guild_create.emplace_back(_guild_create);;
-	return (event_handle)*(size_t *)(char *)&_guild_create;
+	event_handle h = get_next_handle();
+	dispatch.guild_create.emplace(h, _guild_create);
+	return h;;
 }
 
 bool cluster::detach_channel_create(const event_handle _channel_create) {
-	detach(dispatch.channel_create, _channel_create);
+	return detach(dispatch.channel_create, _channel_create);
 }
 
 event_handle cluster::on_channel_create (std::function<void(const channel_create_t& _event)> _channel_create) {
-	dispatch.channel_create.emplace_back(_channel_create);;
-	return (event_handle)*(size_t *)(char *)&_channel_create;
+	event_handle h = get_next_handle();
+	dispatch.channel_create.emplace(h, _channel_create);
+	return h;;
 }
 
 bool cluster::detach_message_reaction_remove_emoji(const event_handle _message_reaction_remove_emoji) {
-	detach(dispatch.message_reaction_remove_emoji, _message_reaction_remove_emoji);
+	return detach(dispatch.message_reaction_remove_emoji, _message_reaction_remove_emoji);
 }
 
 event_handle cluster::on_message_reaction_remove_emoji (std::function<void(const message_reaction_remove_emoji_t& _event)> _message_reaction_remove_emoji) {
-	dispatch.message_reaction_remove_emoji.emplace_back(_message_reaction_remove_emoji);;
-	return (event_handle)*(size_t *)(char *)&_message_reaction_remove_emoji;
+	event_handle h = get_next_handle();
+	dispatch.message_reaction_remove_emoji.emplace(h, _message_reaction_remove_emoji);
+	return h;;
 }
 
 bool cluster::detach_message_delete_bulk(const event_handle _message_delete_bulk) {
-	detach(dispatch.message_delete_bulk, _message_delete_bulk);
+	return detach(dispatch.message_delete_bulk, _message_delete_bulk);
 }
 
 event_handle cluster::on_message_delete_bulk (std::function<void(const message_delete_bulk_t& _event)> _message_delete_bulk) {
-	dispatch.message_delete_bulk.emplace_back(_message_delete_bulk);;
-	return (event_handle)*(size_t *)(char *)&_message_delete_bulk;
+	event_handle h = get_next_handle();
+	dispatch.message_delete_bulk.emplace(h, _message_delete_bulk);
+	return h;;
 }
 
 bool cluster::detach_guild_role_update(const event_handle _guild_role_update) {
-	detach(dispatch.guild_role_update, _guild_role_update);
+	return detach(dispatch.guild_role_update, _guild_role_update);
 }
 
 event_handle cluster::on_guild_role_update (std::function<void(const guild_role_update_t& _event)> _guild_role_update) {
-	dispatch.guild_role_update.emplace_back(_guild_role_update);;
-	return (event_handle)*(size_t *)(char *)&_guild_role_update;
+	event_handle h = get_next_handle();
+	dispatch.guild_role_update.emplace(h, _guild_role_update);
+	return h;;
 }
 
 bool cluster::detach_guild_role_delete(const event_handle _guild_role_delete) {
-	detach(dispatch.guild_role_delete, _guild_role_delete);
+	return detach(dispatch.guild_role_delete, _guild_role_delete);
 }
 
 event_handle cluster::on_guild_role_delete (std::function<void(const guild_role_delete_t& _event)> _guild_role_delete) {
-	dispatch.guild_role_delete.emplace_back(_guild_role_delete);;
-	return (event_handle)*(size_t *)(char *)&_guild_role_delete;
+	event_handle h = get_next_handle();
+	dispatch.guild_role_delete.emplace(h, _guild_role_delete);
+	return h;;
 }
 
 bool cluster::detach_channel_pins_update(const event_handle _channel_pins_update) {
-	detach(dispatch.channel_pins_update, _channel_pins_update);
+	return detach(dispatch.channel_pins_update, _channel_pins_update);
 }
 
 event_handle cluster::on_channel_pins_update (std::function<void(const channel_pins_update_t& _event)> _channel_pins_update) {
-	dispatch.channel_pins_update.emplace_back(_channel_pins_update);;
-	return (event_handle)*(size_t *)(char *)&_channel_pins_update;
+	event_handle h = get_next_handle();
+	dispatch.channel_pins_update.emplace(h, _channel_pins_update);
+	return h;;
 }
 
 bool cluster::detach_message_reaction_remove_all(const event_handle _message_reaction_remove_all) {
-	detach(dispatch.message_reaction_remove_all, _message_reaction_remove_all);
+	return detach(dispatch.message_reaction_remove_all, _message_reaction_remove_all);
 }
 
 event_handle cluster::on_message_reaction_remove_all (std::function<void(const message_reaction_remove_all_t& _event)> _message_reaction_remove_all) {
-	dispatch.message_reaction_remove_all.emplace_back(_message_reaction_remove_all);;
-	return (event_handle)*(size_t *)(char *)&_message_reaction_remove_all;
+	event_handle h = get_next_handle();
+	dispatch.message_reaction_remove_all.emplace(h, _message_reaction_remove_all);
+	return h;;
 }
 
 bool cluster::detach_thread_create(const event_handle _thread_create) {
-	detach(dispatch.thread_create, _thread_create);
+	return detach(dispatch.thread_create, _thread_create);
 }
 
 event_handle cluster::on_thread_create (std::function<void(const thread_create_t& _event)> _thread_create) {
-	dispatch.thread_create.emplace_back(_thread_create);;
-	return (event_handle)*(size_t *)(char *)&_thread_create;
+	event_handle h = get_next_handle();
+	dispatch.thread_create.emplace(h, _thread_create);
+	return h;;
 }
 
 bool cluster::detach_thread_update(const event_handle _thread_update) {
-	detach(dispatch.thread_update, _thread_update);
+	return detach(dispatch.thread_update, _thread_update);
 }
 
 event_handle cluster::on_thread_update (std::function<void(const thread_update_t& _event)> _thread_update) {
-	dispatch.thread_update.emplace_back(_thread_update);;
-	return (event_handle)*(size_t *)(char *)&_thread_update;
+	event_handle h = get_next_handle();
+	dispatch.thread_update.emplace(h, _thread_update);
+	return h;;
 }
 
 bool cluster::detach_thread_delete(const event_handle _thread_delete) {
-	detach(dispatch.thread_delete, _thread_delete);
+	return detach(dispatch.thread_delete, _thread_delete);
 }
 
 event_handle cluster::on_thread_delete (std::function<void(const thread_delete_t& _event)> _thread_delete) {
-	dispatch.thread_delete.emplace_back(_thread_delete);;
-	return (event_handle)*(size_t *)(char *)&_thread_delete;
+	event_handle h = get_next_handle();
+	dispatch.thread_delete.emplace(h, _thread_delete);
+	return h;;
 }
 
 bool cluster::detach_thread_list_sync(const event_handle _thread_list_sync) {
-	detach(dispatch.thread_list_sync, _thread_list_sync);
+	return detach(dispatch.thread_list_sync, _thread_list_sync);
 }
 
 event_handle cluster::on_thread_list_sync (std::function<void(const thread_list_sync_t& _event)> _thread_list_sync) {
-	dispatch.thread_list_sync.emplace_back(_thread_list_sync);;
-	return (event_handle)*(size_t *)(char *)&_thread_list_sync;
+	event_handle h = get_next_handle();
+	dispatch.thread_list_sync.emplace(h, _thread_list_sync);
+	return h;;
 }
 
 bool cluster::detach_thread_member_update(const event_handle _thread_member_update) {
-	detach(dispatch.thread_member_update, _thread_member_update);
+	return detach(dispatch.thread_member_update, _thread_member_update);
 }
 
 event_handle cluster::on_thread_member_update (std::function<void(const thread_member_update_t& _event)> _thread_member_update) {
-	dispatch.thread_member_update.emplace_back(_thread_member_update);;
-	return (event_handle)*(size_t *)(char *)&_thread_member_update;
+	event_handle h = get_next_handle();
+	dispatch.thread_member_update.emplace(h, _thread_member_update);
+	return h;;
 }
 
 bool cluster::detach_thread_members_update(const event_handle _thread_members_update) {
-	detach(dispatch.thread_members_update, _thread_members_update);
+	return detach(dispatch.thread_members_update, _thread_members_update);
 }
 
 event_handle cluster::on_thread_members_update (std::function<void(const thread_members_update_t& _event)> _thread_members_update) {
-	dispatch.thread_members_update.emplace_back(_thread_members_update);;
-	return (event_handle)*(size_t *)(char *)&_thread_members_update;
+	event_handle h = get_next_handle();
+	dispatch.thread_members_update.emplace(h, _thread_members_update);
+	return h;;
 }
 
 bool cluster::detach_voice_server_update(const event_handle _voice_server_update) {
-	detach(dispatch.voice_server_update, _voice_server_update);
+	return detach(dispatch.voice_server_update, _voice_server_update);
 }
 
 event_handle cluster::on_voice_server_update (std::function<void(const voice_server_update_t& _event)> _voice_server_update) {
-	dispatch.voice_server_update.emplace_back(_voice_server_update);;
-	return (event_handle)*(size_t *)(char *)&_voice_server_update;
+	event_handle h = get_next_handle();
+	dispatch.voice_server_update.emplace(h, _voice_server_update);
+	return h;;
 }
 
 bool cluster::detach_guild_emojis_update(const event_handle _guild_emojis_update) {
-	detach(dispatch.guild_emojis_update, _guild_emojis_update);
+	return detach(dispatch.guild_emojis_update, _guild_emojis_update);
 }
 
 event_handle cluster::on_guild_emojis_update (std::function<void(const guild_emojis_update_t& _event)> _guild_emojis_update) {
-	dispatch.guild_emojis_update.emplace_back(_guild_emojis_update);;
-	return (event_handle)*(size_t *)(char *)&_guild_emojis_update;
+	event_handle h = get_next_handle();
+	dispatch.guild_emojis_update.emplace(h, _guild_emojis_update);
+	return h;;
 }
 
 bool cluster::detach_guild_stickers_update(const event_handle _guild_stickers_update) {
-	detach(dispatch.stickers_update, _guild_stickers_update);
+	return detach(dispatch.stickers_update, _guild_stickers_update);
 }
 
 event_handle cluster::on_guild_stickers_update (std::function<void(const guild_stickers_update_t& _event)> _guild_stickers_update) {
-	dispatch.stickers_update.emplace_back(_guild_stickers_update);;
-	return (event_handle)*(size_t *)(char *)&_guild_stickers_update;
+	event_handle h = get_next_handle();
+	dispatch.stickers_update.emplace(h, _guild_stickers_update);
+	return h;;
 }
 
 bool cluster::detach_presence_update(const event_handle _presence_update) {
-	detach(dispatch.presence_update, _presence_update);
+	return detach(dispatch.presence_update, _presence_update);
 }
 
 event_handle cluster::on_presence_update (std::function<void(const presence_update_t& _event)> _presence_update) {
-	dispatch.presence_update.emplace_back(_presence_update);;
-	return (event_handle)*(size_t *)(char *)&_presence_update;
+	event_handle h = get_next_handle();
+	dispatch.presence_update.emplace(h, _presence_update);
+	return h;;
 }
 
 bool cluster::detach_webhooks_update(const event_handle _webhooks_update) {
-	detach(dispatch.webhooks_update, _webhooks_update);
+	return detach(dispatch.webhooks_update, _webhooks_update);
 }
 
 event_handle cluster::on_webhooks_update (std::function<void(const webhooks_update_t& _event)> _webhooks_update) {
-	dispatch.webhooks_update.emplace_back(_webhooks_update);;
-	return (event_handle)*(size_t *)(char *)&_webhooks_update;
+	event_handle h = get_next_handle();
+	dispatch.webhooks_update.emplace(h, _webhooks_update);
+	return h;;
 }
 
 bool cluster::detach_guild_member_add(const event_handle _guild_member_add) {
-	detach(dispatch.guild_member_add, _guild_member_add);
+	return detach(dispatch.guild_member_add, _guild_member_add);
 }
 
 event_handle cluster::on_guild_member_add (std::function<void(const guild_member_add_t& _event)> _guild_member_add) {
-	dispatch.guild_member_add.emplace_back(_guild_member_add);;
-	return (event_handle)*(size_t *)(char *)&_guild_member_add;
+	event_handle h = get_next_handle();
+	dispatch.guild_member_add.emplace(h, _guild_member_add);
+	return h;;
 }
 
 bool cluster::detach_invite_delete(const event_handle _invite_delete) {
-	detach(dispatch.invite_delete, _invite_delete);
+	return detach(dispatch.invite_delete, _invite_delete);
 }
 
 event_handle cluster::on_invite_delete (std::function<void(const invite_delete_t& _event)> _invite_delete) {
-	dispatch.invite_delete.emplace_back(_invite_delete);;
-	return (event_handle)*(size_t *)(char *)&_invite_delete;
+	event_handle h = get_next_handle();
+	dispatch.invite_delete.emplace(h, _invite_delete);
+	return h;;
 }
 
 bool cluster::detach_guild_update(const event_handle _guild_update) {
-	detach(dispatch.guild_update, _guild_update);
+	return detach(dispatch.guild_update, _guild_update);
 }
 
 event_handle cluster::on_guild_update (std::function<void(const guild_update_t& _event)> _guild_update) {
-	dispatch.guild_update.emplace_back(_guild_update);;
-	return (event_handle)*(size_t *)(char *)&_guild_update;
+	event_handle h = get_next_handle();
+	dispatch.guild_update.emplace(h, _guild_update);
+	return h;;
 }
 
 bool cluster::detach_guild_integrations_update(const event_handle _guild_integrations_update) {
-	detach(dispatch.guild_integrations_update, _guild_integrations_update);
+	return detach(dispatch.guild_integrations_update, _guild_integrations_update);
 }
 
 event_handle cluster::on_guild_integrations_update (std::function<void(const guild_integrations_update_t& _event)> _guild_integrations_update) {
-	dispatch.guild_integrations_update.emplace_back(_guild_integrations_update);;
-	return (event_handle)*(size_t *)(char *)&_guild_integrations_update;
+	event_handle h = get_next_handle();
+	dispatch.guild_integrations_update.emplace(h, _guild_integrations_update);
+	return h;;
 }
 
 bool cluster::detach_guild_member_update(const event_handle _guild_member_update) {
-	detach(dispatch.guild_member_update, _guild_member_update);
+	return detach(dispatch.guild_member_update, _guild_member_update);
 }
 
 event_handle cluster::on_guild_member_update (std::function<void(const guild_member_update_t& _event)> _guild_member_update) {
-	dispatch.guild_member_update.emplace_back(_guild_member_update);;
-	return (event_handle)*(size_t *)(char *)&_guild_member_update;
+	event_handle h = get_next_handle();
+	dispatch.guild_member_update.emplace(h, _guild_member_update);
+	return h;;
 }
 
 bool cluster::detach_application_command_update(const event_handle _application_command_update) {
-	detach(dispatch.application_command_update, _application_command_update);
+	return detach(dispatch.application_command_update, _application_command_update);
 }
 
 event_handle cluster::on_application_command_update (std::function<void(const application_command_update_t& _event)> _application_command_update) {
-	dispatch.application_command_update.emplace_back(_application_command_update);;
-	return (event_handle)*(size_t *)(char *)&_application_command_update;
+	event_handle h = get_next_handle();
+	dispatch.application_command_update.emplace(h, _application_command_update);
+	return h;;
 }
 
 bool cluster::detach_invite_create(const event_handle _invite_create) {
-	detach(dispatch.invite_create, _invite_create);
+	return detach(dispatch.invite_create, _invite_create);
 }
 
 event_handle cluster::on_invite_create (std::function<void(const invite_create_t& _event)> _invite_create) {
-	dispatch.invite_create.emplace_back(_invite_create);;
-	return (event_handle)*(size_t *)(char *)&_invite_create;
+	event_handle h = get_next_handle();
+	dispatch.invite_create.emplace(h, _invite_create);
+	return h;;
 }
 
 bool cluster::detach_message_update(const event_handle _message_update) {
-	detach(dispatch.message_update, _message_update);
+	return detach(dispatch.message_update, _message_update);
 }
 
 event_handle cluster::on_message_update (std::function<void(const message_update_t& _event)> _message_update) {
-	dispatch.message_update.emplace_back(_message_update);;
-	return (event_handle)*(size_t *)(char *)&_message_update;
+	event_handle h = get_next_handle();
+	dispatch.message_update.emplace(h, _message_update);
+	return h;;
 }
 
 bool cluster::detach_user_update(const event_handle _user_update) {
-	detach(dispatch.user_update, _user_update);
+	return detach(dispatch.user_update, _user_update);
 }
 
 event_handle cluster::on_user_update (std::function<void(const user_update_t& _event)> _user_update) {
-	dispatch.user_update.emplace_back(_user_update);;
-	return (event_handle)*(size_t *)(char *)&_user_update;
+	event_handle h = get_next_handle();
+	dispatch.user_update.emplace(h, _user_update);
+	return h;;
 }
 
 bool cluster::detach_message_create(const event_handle _message_create) {
-	detach(dispatch.message_create, _message_create);
+	return detach(dispatch.message_create, _message_create);
 }
 
 event_handle cluster::on_message_create (std::function<void(const message_create_t& _event)> _message_create) {
-	dispatch.message_create.emplace_back(_message_create);;
-	return (event_handle)*(size_t *)(char *)&_message_create;
+	event_handle h = get_next_handle();
+	dispatch.message_create.emplace(h, _message_create);
+	return h;;
 }
 
 bool cluster::detach_guild_ban_add(const event_handle _guild_ban_add) {
-	detach(dispatch.guild_ban_add, _guild_ban_add);
+	return detach(dispatch.guild_ban_add, _guild_ban_add);
 }
 
 event_handle cluster::on_guild_ban_add (std::function<void(const guild_ban_add_t& _event)> _guild_ban_add) {
-	dispatch.guild_ban_add.emplace_back(_guild_ban_add);;
-	return (event_handle)*(size_t *)(char *)&_guild_ban_add;
+	event_handle h = get_next_handle();
+	dispatch.guild_ban_add.emplace(h, _guild_ban_add);
+	return h;;
 }
 
 bool cluster::detach_guild_ban_remove(const event_handle _guild_ban_remove) {
-	detach(dispatch.guild_ban_remove, _guild_ban_remove);
+	return detach(dispatch.guild_ban_remove, _guild_ban_remove);
 }
 
 event_handle cluster::on_guild_ban_remove (std::function<void(const guild_ban_remove_t& _event)> _guild_ban_remove) {
-	dispatch.guild_ban_remove.emplace_back(_guild_ban_remove);;
-	return (event_handle)*(size_t *)(char *)&_guild_ban_remove;
+	event_handle h = get_next_handle();
+	dispatch.guild_ban_remove.emplace(h, _guild_ban_remove);
+	return h;;
 }
 
 bool cluster::detach_integration_create(const event_handle _integration_create) {
-	detach(dispatch.integration_create, _integration_create);
+	return detach(dispatch.integration_create, _integration_create);
 }
 
 event_handle cluster::on_integration_create (std::function<void(const integration_create_t& _event)> _integration_create) {
-	dispatch.integration_create.emplace_back(_integration_create);;
-	return (event_handle)*(size_t *)(char *)&_integration_create;
+	event_handle h = get_next_handle();
+	dispatch.integration_create.emplace(h, _integration_create);
+	return h;;
 }
 
 bool cluster::detach_integration_update(const event_handle _integration_update) {
-	detach(dispatch.integration_update, _integration_update);
+	return detach(dispatch.integration_update, _integration_update);
 }
 
 event_handle cluster::on_integration_update (std::function<void(const integration_update_t& _event)> _integration_update) {
-	dispatch.integration_update.emplace_back(_integration_update);;
-	return (event_handle)*(size_t *)(char *)&_integration_update;
+	event_handle h = get_next_handle();
+	dispatch.integration_update.emplace(h, _integration_update);
+	return h;;
 }
 
 bool cluster::detach_integration_delete(const event_handle _integration_delete) {
-	detach(dispatch.integration_delete, _integration_delete);
+	return detach(dispatch.integration_delete, _integration_delete);
 }
 
 event_handle cluster::on_integration_delete (std::function<void(const integration_delete_t& _event)> _integration_delete) {
-	dispatch.integration_delete.emplace_back(_integration_delete);;
-	return (event_handle)*(size_t *)(char *)&_integration_delete;
+	event_handle h = get_next_handle();
+	dispatch.integration_delete.emplace(h, _integration_delete);
+	return h;;
 }
 
 bool cluster::detach_voice_buffer_send(const event_handle _voice_buffer_send) {
-	detach(dispatch.voice_buffer_send, _voice_buffer_send);
+	return detach(dispatch.voice_buffer_send, _voice_buffer_send);
 }
 
 event_handle cluster::on_voice_buffer_send (std::function<void(const voice_buffer_send_t& _event)> _voice_buffer_send) {
-	dispatch.voice_buffer_send.emplace_back(_voice_buffer_send);;
-	return (event_handle)*(size_t *)(char *)&_voice_buffer_send;
+	event_handle h = get_next_handle();
+	dispatch.voice_buffer_send.emplace(h, _voice_buffer_send);
+	return h;;
 }
 
 bool cluster::detach_voice_user_talking(const event_handle _voice_user_talking) {
-	detach(dispatch.voice_user_talking, _voice_user_talking);
+	return detach(dispatch.voice_user_talking, _voice_user_talking);
 }
 
 event_handle cluster::on_voice_user_talking (std::function<void(const voice_user_talking_t& _event)> _voice_user_talking) {
-	dispatch.voice_user_talking.emplace_back(_voice_user_talking);;
-	return (event_handle)*(size_t *)(char *)&_voice_user_talking;
+	event_handle h = get_next_handle();
+	dispatch.voice_user_talking.emplace(h, _voice_user_talking);
+	return h;;
 }
 
 bool cluster::detach_voice_ready(const event_handle _voice_ready) {
-	detach(dispatch.voice_ready, _voice_ready);
+	return detach(dispatch.voice_ready, _voice_ready);
 }
 
 event_handle cluster::on_voice_ready (std::function<void(const voice_ready_t& _event)> _voice_ready) {
-	dispatch.voice_ready.emplace_back(_voice_ready);;
-	return (event_handle)*(size_t *)(char *)&_voice_ready;
+	event_handle h = get_next_handle();
+	dispatch.voice_ready.emplace(h, _voice_ready);
+	return h;;
 }
 
 bool cluster::detach_voice_receive(const event_handle _voice_receive) {
-	detach(dispatch.voice_receive, _voice_receive);
+	return detach(dispatch.voice_receive, _voice_receive);
 }
 
 event_handle cluster::on_voice_receive (std::function<void(const voice_receive_t& _event)> _voice_receive) {
-	dispatch.voice_receive.emplace_back(_voice_receive);;
-	return (event_handle)*(size_t *)(char *)&_voice_receive;
+	event_handle h = get_next_handle();
+	dispatch.voice_receive.emplace(h, _voice_receive);
+	return h;;
 }
 
 bool cluster::detach_voice_track_marker(const event_handle _voice_track_marker) {
-	detach(dispatch.voice_track_marker, _voice_track_marker);
+	return detach(dispatch.voice_track_marker, _voice_track_marker);
 }
 
 event_handle cluster::on_voice_track_marker (std::function<void(const voice_track_marker_t& _event)> _voice_track_marker) {
-	dispatch.voice_track_marker.emplace_back(_voice_track_marker);;
-	return (event_handle)*(size_t *)(char *)&_voice_track_marker;
+	event_handle h = get_next_handle();
+	dispatch.voice_track_marker.emplace(h, _voice_track_marker);
+	return h;;
 }
 
 bool cluster::detach_guild_join_request_delete(const event_handle _guild_join_request_delete) {
-	detach(dispatch.guild_join_request_delete, _guild_join_request_delete);
+	return detach(dispatch.guild_join_request_delete, _guild_join_request_delete);
 }
 
 event_handle cluster::on_guild_join_request_delete (std::function<void(const guild_join_request_delete_t& _event)> _guild_join_request_delete) {
-	dispatch.guild_join_request_delete.emplace_back(_guild_join_request_delete);;
-	return (event_handle)*(size_t *)(char *)&_guild_join_request_delete;
+	event_handle h = get_next_handle();
+	dispatch.guild_join_request_delete.emplace(h, _guild_join_request_delete);
+	return h;;
 }
 
 };

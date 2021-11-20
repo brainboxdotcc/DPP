@@ -22,7 +22,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/dispatcher.h>
+#include <dpp/exception.h>
 
 namespace dpp {
 
@@ -94,7 +94,7 @@ emoji& emoji::load_image(const std::string &image_blob, const image_type type) {
 		{ i_png, "image/png" }
 	};
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
-		throw dpp::exception("Emoji file exceeds discord limit of 256 kilobytes");
+		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
 	}
 
 	/* If there's already image data defined, free the old data, to prevent a memory leak */

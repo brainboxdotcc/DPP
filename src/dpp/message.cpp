@@ -26,6 +26,8 @@
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
+#include <dpp/exception.h>
+#include <dpp/cluster.h>
 
 using json = nlohmann::json;
 
@@ -263,7 +265,7 @@ embed::embed() : timestamp(0), color(0) {
 }
 
 message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), tts(false),
-	mention_everyone(false), pinned(false), webhook_id(0), flags(0), type(mt_default)
+	mention_everyone(false), pinned(false), webhook_id(0), flags(0), type(mt_default), owner(nullptr)
 {
 	message_reference.channel_id = 0;
 	message_reference.guild_id = 0;
@@ -275,11 +277,12 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0)
 	allowed_mentions.parse_users = false;
 	allowed_mentions.parse_everyone = false;
 	allowed_mentions.parse_roles = false;
-	/* The documentation for discord is INCORRECT. This defaults to true, and must be set to false.
-	 * The default ctor reflects this.
-	 */
-	allowed_mentions.replied_user = true;
+	allowed_mentions.replied_user = false;
 
+}
+
+message::message(class cluster* o) : message() {
+	owner = o;
 }
 
 message& message::set_reference(snowflake _message_id, snowflake _guild_id, snowflake _channel_id, bool fail_if_not_exists) {
@@ -535,16 +538,17 @@ reaction::reaction(json* j) {
 	emoji_name = StringNotNull(&emoji, "name");
 }
 
-attachment::attachment() 
+attachment::attachment(struct message* o) 
 	: id(0)
 	, size(0)
 	, width(0)
 	, height(0)
 	, ephemeral(false)
+	, owner(o)
 {
 }
 
-attachment::attachment(json *j) : attachment() {
+attachment::attachment(struct message* o, json *j) : attachment(o) {
 	this->id = SnowflakeNotNull(j, "id");
 	this->size = (*j)["size"];
 	this->filename = (*j)["filename"];
@@ -554,6 +558,16 @@ attachment::attachment(json *j) : attachment() {
 	this->height = Int32NotNull(j, "height");
 	this->content_type = StringNotNull(j, "content_type");
 	this->ephemeral = BoolNotNull(j, "ephemeral");
+}
+
+void attachment::download(http_completion_event callback) const {
+	/* Download attachment if there is one attached to this object */
+	if (!owner->owner) {
+		throw dpp::logic_exception("attachment has no owning message/cluster");
+	}
+	if (callback && this->id && !this->url.empty()) {
+		owner->owner->request(this->url, dpp::m_get, callback);
+	}
 }
 
 std::string message::build_json(bool with_id, bool is_interaction_response) const {
@@ -608,6 +622,8 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		}
 		if (!allowed_mentions.replied_user) {
 			j["allowed_mentions"]["replied_user"] = false;
+		} else {
+			j["allowed_mentions"]["replied_user"] = true;
 		}
 		if (allowed_mentions.users.size()) {
 			j["allowed_mentions"]["users"] = json::array();
@@ -852,7 +868,14 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->pinned = BoolNotNull(d, "pinned");
 	this->webhook_id = SnowflakeNotNull(d, "webhook_id");
 	for (auto& e : (*d)["attachments"]) {
-		this->attachments.emplace_back(attachment(&e));
+		this->attachments.emplace_back(attachment(this, &e));
+	}
+	if (d->find("message_reference") != d->end()) {
+		json& mr = (*d)["message_reference"];
+		message_reference.channel_id = SnowflakeNotNull(&mr, "channel_id");
+		message_reference.guild_id = SnowflakeNotNull(&mr, "guild_id");
+		message_reference.message_id = SnowflakeNotNull(&mr, "message_id");
+		message_reference.fail_if_not_exists = BoolNotNull(&mr, "fail_if_not_exists");
 	}
 	return *this;
 }

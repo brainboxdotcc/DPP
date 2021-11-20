@@ -20,6 +20,7 @@
  ************************************************************************************/
 #include <dpp/discord.h>
 #include <dpp/cluster.h>
+#include <dpp/exception.h>
 #include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
@@ -36,7 +37,7 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 			{ i_png, "image/png" }
 		};
 		if (image_blob.size() > MAX_EMOJI_SIZE) {
-			throw dpp::exception("User icon file exceeds discord limit of 256 kilobytes");
+			throw dpp::length_exception("User icon file exceeds discord limit of 256 kilobytes");
 		}
 		j["avatar"] = "data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length());
 	}
@@ -59,7 +60,7 @@ void cluster::current_application_get(command_completion_event_t callback) {
 void cluster::current_user_get(command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", "@me", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
+			callback(confirmation_callback_t("user_identified", user_identified().fill_from_json(&j), http));
 		}
 	});
 }
@@ -107,7 +108,7 @@ void cluster::current_user_leave_guild(snowflake guild_id, command_completion_ev
 void cluster::user_get(snowflake user_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", std::to_string(user_id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
+			callback(confirmation_callback_t("user_identified", user_identified().fill_from_json(&j), http));
 		}
 	});
 }

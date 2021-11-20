@@ -27,10 +27,12 @@
 #include <variant>
 #include <dpp/discord.h>
 #include <dpp/dispatcher.h>
+#include <dpp/timer.h>
 #include <dpp/json_fwd.hpp>
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
 #include <algorithm>
+#include <iostream>
 
 using  json = nlohmann::json;
 
@@ -82,6 +84,7 @@ typedef std::variant<
 		message,
 		message_map,
 		user,
+		user_identified,
 		user_map,
 		guild_member,
 		guild_member_map,
@@ -123,8 +126,31 @@ typedef std::variant<
 		application,
 		application_map,
 		connection,
-		connection_map
+		connection_map,
+		thread,
+		thread_map,
+		scheduled_event,
+		scheduled_event_map,
+		event_member,
+		event_member_map
 	> confirmable_t;
+
+/**
+ * @brief Detatch a listener from an event container
+ * 
+ * @tparam T event container type
+ * @param container container to detach from
+ * @param ptr handle to listener to remove
+ * @return bool True if successfully removed listener
+ */
+template<typename T> bool detach(T container, const event_handle ptr) {
+	auto i = container.find(ptr);
+	if (i != container.end()) {
+		container.erase(i);
+		return true;
+	}
+	return false;
+}
 
 /**
  * @brief The details of a field in an error response
@@ -221,16 +247,13 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
-/**
- * @brief A returned event handle for an event which was attached
- */
-typedef size_t event_handle;
-
 /** @brief The cluster class represents a group of shards and a command queue for sending and
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
  */
 class DPP_EXPORT cluster {
+
+	friend class discord_client;
 
 	/** queue system for commands sent to Discord, and any replies */
 	request_queue* rest;
@@ -263,11 +286,40 @@ class DPP_EXPORT cluster {
 	shard_list shards;
 
 	/**
+	 * @brief List of all active registered timers
+	 */
+	timer_reg_t timer_list;
+
+	/**
+	 * @brief List of timers by time
+	 */
+	timer_next_t next_timer;
+
+	/**
+	 * @brief Next event handle to be handed out.
+	 * Always incremental from 1, unique during execution.
+	 */
+	event_handle next_eh;
+
+	/**
 	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
 	 *
 	 * @param shardinfo Received HTTP data from API call
+	 * @throw dpp::exception Thrown if REST request to obtain shard count fails
 	 */
 	void auto_shard(const confirmation_callback_t &shardinfo);
+
+	/**
+	 * @brief Tick active timers
+	 */
+	void tick_timers();
+
+	/**
+	 * @brief Reschedule a timer for its next tick
+	 * 
+	 * @param t Timer to reschedule
+	 */
+	void timer_reschedule(timer_t* t);
 public:
 	/** Current bot token for all shards on this cluster and all commands sent via HTTP */
 	std::string token;
@@ -320,6 +372,7 @@ public:
 	 * @param maxclusters The total number of clusters that are active, which may be on separate processes or even separate machines.
 	 * @param compressed Whether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
 	 * @param policy Set the user caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
+	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
 	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = {cp_aggressive, cp_aggressive, cp_aggressive});
 
@@ -336,7 +389,14 @@ public:
 	/**
 	 * @brief Destroy the cluster object
 	 */
-	~cluster();
+	virtual ~cluster();
+
+	/**
+	 * @brief Get the next handle ID to be used
+	 * 
+	 * @return event_handle next ID to use
+	 */
+	event_handle get_next_handle();
 
 	/**
 	 * @brief Set the websocket protocol for all shards on this cluster.
@@ -404,6 +464,25 @@ public:
 	 * @param msg The log message to output
 	 */
 	void log(dpp::loglevel severity, const std::string &msg) const;
+
+	/**
+	 * @brief Start a timer. Every `frequency` seconds, the callback is called.
+	 * 
+	 * @param on_tick The callback lambda to call for this timer when ticked
+	 * @param on_stop The callback lambda to call for this timer when it is stopped
+	 * @param frequency How often to tick the timer
+	 * @return timer A handle to the timer, used to remove that timer later
+	 */
+	timer start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop = {});
+
+	/**
+	 * @brief Stop a ticking timer
+	 * 
+	 * @param t Timer handle received from cluster::start_timer
+	 * @return bool True if the timer was stopped, false if it did not exist
+	 * @note If the timer has an on_stop lambda, the on_stop lambda will be called.
+	 */
+	bool stop_timer(timer t);
 
 	/**
 	 * @brief Get the dm channel for a user id
@@ -1429,6 +1508,86 @@ public:
 	bool detach_thread_members_update(const event_handle _thread_members_update);
 
 	/**
+	 * @brief Called when a new scheduled event is created
+	 *
+	 * @param _guild_scheduled_event_create User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_create_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_create (std::function<void(const guild_scheduled_event_create_t& _event)> _guild_scheduled_event_create);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_create
+	 * 
+	 * @param _guild_scheduled_event_create Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_create()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_create(const event_handle _guild_scheduled_event_create);
+
+	/**
+	 * @brief Called when a new scheduled event is updated
+	 *
+	 * @param _guild_scheduled_event_update User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_update_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_update (std::function<void(const guild_scheduled_event_update_t& _event)> _guild_scheduled_event_update);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_update
+	 * 
+	 * @param _guild_scheduled_event_update Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_update()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_update(const event_handle _guild_scheduled_event_update);
+
+	/**
+	 * @brief Called when a new scheduled event is deleted
+	 *
+	 * @param _guild_scheduled_event_delete User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_delete_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_delete (std::function<void(const guild_scheduled_event_delete_t& _event)> _guild_scheduled_event_delete);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_delete
+	 * 
+	 * @param _guild_scheduled_event_delete Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_delete()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_delete(const event_handle _guild_scheduled_event_delete);
+
+	/**
+	 * @brief Called when a user is added to a scheduled event
+	 *
+	 * @param _guild_scheduled_event_user_add User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_user_add_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_user_add (std::function<void(const guild_scheduled_event_user_add_t& _event)> _guild_scheduled_event_user_add);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_user_add
+	 * 
+	 * @param _guild_scheduled_event_user_add Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_user_add()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_user_add(const event_handle _guild_scheduled_event_user_add);
+
+	/**
+	 * @brief Called when a user is removed to a scheduled event
+	 *
+	 * @param _guild_scheduled_event_user_remove User function to attach to event
+	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_user_remove_t&
+	 * @return event_handle An opaque handle to the attached event, which can be used to refer to it later if needed
+	 */
+	event_handle on_guild_scheduled_event_user_remove (std::function<void(const guild_scheduled_event_user_remove_t& _event)> _guild_scheduled_event_user_remove);
+	/**
+	 * @brief Detach listener from on_guild_scheduled_event_user_remove
+	 * 
+	 * @param _guild_scheduled_event_user_remove Handle to remove from event, previously returned by dpp::cluster::on_guild_scheduled_event_user_remove()
+	 * @return true on successful detach of listener
+	 */
+	bool detach_guild_scheduled_event_user_remove(const event_handle _guild_scheduled_event_user_remove);
+
+	/**
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
 	 * with Sodium, and merged into packets by the repacketizer, which is done in the
@@ -1776,7 +1935,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
+	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint8_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Send a message to a channel. The callback function is called when the message has been sent
@@ -2076,7 +2235,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void pins_get(snowflake channel_id, command_completion_event_t callback);
+	void channel_pins_get(snowflake channel_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Adds a recipient to a Group DM using their access token
@@ -2521,7 +2680,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_guild_invites(snowflake guild_id, command_completion_event_t callback);
+	void guild_get_invites(snowflake guild_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get guild itegrations
@@ -2771,7 +2930,9 @@ public:
 	 *
 	 * @param user_id User ID to retrieve
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+	 * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
 	 */
 	void user_get(snowflake user_id, command_completion_event_t callback);
 
@@ -2779,7 +2940,9 @@ public:
 	 * @brief Get current (bot) user
 	 *
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+	 * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
 	 */
 	void current_user_get(command_completion_event_t callback);
 
@@ -2817,6 +2980,7 @@ public:
 	 * @param type Type of image for avatar
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+ 	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
 	 */
 	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = {});
 
@@ -2854,10 +3018,12 @@ public:
 	 * @param channel_id Channel in which thread to create
 	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
 	 * @param thread_type Type of thread - GUILD_PUBLIC_THREAD, GUILD_NEWS_THREAD, GUILD_PRIVATE_THREAD
+	 * @param invitable whether non-moderators can add other non-moderators to a thread; only available when creating a private thread
+	 * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, command_completion_event_t callback = {});
+	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
@@ -2867,10 +3033,11 @@ public:
 	 * @param channel_id Channel in which thread to create
 	 * @param message_id message to start thread with
 	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
+	 * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, command_completion_event_t callback = {});
+	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Join a thread
@@ -2918,7 +3085,7 @@ public:
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_thread_member(const snowflake thread_id, const snowflake user_id, command_completion_event_t callback);
+	void thread_member_get(const snowflake thread_id, const snowflake user_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get members of a thread
@@ -2927,16 +3094,16 @@ public:
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_thread_members(snowflake thread_id, command_completion_event_t callback);
+	void thread_members_get(snowflake thread_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get active threads in a channel (Sorted by ID in descending order)
 	 *
 	 * @param channel_id Channel to get active threads for
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_active_threads(snowflake channel_id, command_completion_event_t callback);
+	void threads_get_active(snowflake channel_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
@@ -2945,9 +3112,9 @@ public:
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_public_archived_threads(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
+	void threads_get_public_archived(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
@@ -2956,9 +3123,9 @@ public:
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_private_archived_threads(snowflake channel_id,  time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
+	void threads_get_private_archived(snowflake channel_id,  time_t before_timestamp, uint16_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
@@ -2968,9 +3135,9 @@ public:
 	 * @param before_id Get threads before this id
 	 * @param limit Number of threads to get
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_joined_private_archived_threads(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback);
+	void threads_get_joined_private_archived(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a sticker in a guild
@@ -3094,7 +3261,130 @@ public:
 	 */
 	void get_gateway_bot(command_completion_event_t callback);
 
+	/**
+	 * @brief Get all scheduled events for a guild
+	 *
+	 * @param guild_id Guild to get events for
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_events_get(snowflake guild_id, command_completion_event_t callback);
 
+	/**
+	 * @brief Get users RSVP'd to an event
+	 *
+	 * @param guild_id Guild to get user list for
+	 * @param event_id Guild to get user list for
+	 * @param limit Maximum number of results to return
+	 * @param before Return user IDs that fall before this ID, if provided
+	 * @param after Return user IDs that fall after this ID, if provided
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_users_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback, uint8_t limit = 100, snowflake before = 0, snowflake after = 0);
+
+	/**
+	 * @brief Create a scheduled event on a guild
+	 *
+	 * @param event Event to create (guild ID must be populated)
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_create(const scheduled_event& event, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Delete a scheduled event from a guild
+	 *
+	 * @param event_id Event ID to delete
+	 * @param guild_id Guild ID of event to delete
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_delete(snowflake event_id, snowflake guild_id, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Edit/modify a scheduled event on a guild
+	 *
+	 * @param event Event to create (event ID and guild ID must be populated)
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_edit(const scheduled_event& event, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get a scheduled event for a guild
+	 *
+	 * @param guild_id Guild to get event for
+	 * @param event_id Event ID to get
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_event_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback);
+
+
+};
+
+/**
+ * @brief A timed_listener is a way to temporarily attach to an event for a specific timeframe, then detach when complete.
+ * A lambda may also be optionally called when the timeout is reached. Destructing the timed_listener detaches any attached
+ * event listeners, and cancels any created timers, but does not call any timeout lambda.
+ * 
+ * @tparam attached_event Event within cluster to attach to within the cluster::dispatch member (dpp::dispatcher object)
+ * @tparam listening_function Definition of lambda function that matches up with the attached_event.
+ */
+template <typename attached_event, class listening_function> class timed_listener 
+{
+private:
+	/// Owning cluster
+	cluster* owner;
+
+	/// Duration of listen
+	time_t duration;
+
+	/// Reference to attached event in cluster
+	std::map<event_handle, attached_event>& ev;
+
+	/// Timer handle
+	timer th;
+
+	/// Event handle
+	event_handle listener_handler;
+    
+public:
+	/**
+	 * @brief Construct a new timed listener object
+	 * 
+	 * @param cl Owning cluster
+	 * @param _duration Duration of timed event in seconds
+	 * @param event Event to hook, e.g. cluster->dispatch.message_create
+	 * @param on_end An optional void() lambda to trigger when the timed_listener times out.
+	 * Calling the destructor before the timeout is reached does not call this lambda.
+	 * @param listener Lambda to receive events. Type must match up properly with that passed into the 'event' parameter.
+	 */
+	timed_listener(cluster* cl, uint64_t _duration, std::map<event_handle, attached_event>& event, listening_function listener, timer_callback_t on_end = {})
+	: owner(cl), duration(_duration), ev(event)
+	{
+		/* Attach event */
+		listener_handler = owner->get_next_handle();
+		event.emplace(listener_handler, listener);
+		/* Create timer */
+		th = cl->start_timer([this]() {
+			/* Timer has finished, detach it from event.
+			 * Only allowed to tick once.
+			 */
+			owner->stop_timer(th);
+			dpp::detach(ev, listener_handler);
+		}, duration, on_end);
+	}
+
+	/**
+	 * @brief Destroy the timed listener object
+	 */
+	~timed_listener() {
+		/* Stop timer and detach event, but do not call on_end */
+		owner->stop_timer(th);
+		dpp::detach(ev, listener_handler);
+	}
 };
 
 };

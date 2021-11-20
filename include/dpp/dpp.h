@@ -21,6 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/version.h>
+#include <dpp/exception.h>
 #include <string>
 #include <map>
 #include <vector>

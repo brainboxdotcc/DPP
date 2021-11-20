@@ -137,4 +137,11 @@ event_decl(integration_create);
 event_decl(integration_update);
 event_decl(integration_delete);
 
+/* Scheduled events */
+event_decl(guild_scheduled_event_create);
+event_decl(guild_scheduled_event_update);
+event_decl(guild_scheduled_event_delete);
+event_decl(guild_scheduled_event_user_add);
+event_decl(guild_scheduled_event_user_remove);
+
 }};

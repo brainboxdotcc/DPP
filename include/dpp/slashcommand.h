@@ -153,6 +153,7 @@ struct DPP_EXPORT command_option {
 	 *
 	 * @param o choice to add
 	 * @return command_option& returns a reference to self for chaining of calls
+	 * @throw dpp::exception command_option is an autocomplete, so choices cannot be added
 	 */
 	command_option& add_choice(const command_option_choice &o);
 
@@ -193,6 +194,7 @@ struct DPP_EXPORT command_option {
 	 * 
 	 * @param autocomp True to enable auto completion for this option
 	 * @return command_option& return a reference to self for chaining of calls
+	 * @throw dpp::exception You attempted to enable auto complete on a command_option that has choices added to it
 	 */
 	command_option& set_auto_complete(bool autocomp);
 };
@@ -376,8 +378,17 @@ struct DPP_EXPORT command_interaction {
  */
 void from_json(const nlohmann::json& j, command_interaction& ci);
 
+/**
+ * @brief Component type, either button or select
+ */
 enum component_type_t {
+	/**
+	 * @brief Button
+	 */
 	cotype_button = 2,
+	/**
+	 * @brief Option select list (drop-down)
+	 */
 	cotype_select = 3
 };
 
@@ -385,8 +396,17 @@ enum component_type_t {
  * @brief A button click for a button component
  */
 struct DPP_EXPORT component_interaction {
+	/**
+	 * @brief Component type
+	 */
 	uint8_t component_type;
+	/**
+	 * @brief Custom ID set when created
+	 */
 	std::string custom_id;
+	/**
+	 * @brief Possible values for a drop down list
+	 */
 	std::vector<std::string> values;
 };
 
@@ -465,7 +485,15 @@ void from_json(const nlohmann::json& j, interaction& i);
  * @brief type of permission in the dpp::command_permission class
  */
 enum command_permission_type {
+	/**
+	 * @brief Role permission
+	 * 
+	 */
 	cpt_role = 1,
+	/**
+	 * @brief User permission
+	 * 
+	 */
 	cpt_user = 2,
 };
 
@@ -511,8 +539,11 @@ public:
  */
 void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
 
+/**
+ * @brief Right-click context menu types
+ */
 enum slashcommand_contextmenu_type {
-	ctxm_none = 0,
+	ctxm_none = 0,		//!< Undefined context menu type
 	ctxm_chat_input = 1,	//!< DEFAULT, these are the slash commands you're used to
 	ctxm_user = 2,		//!< Add command to user context menu
 	ctxm_message = 3	//!< Add command to message context menu
@@ -595,6 +626,8 @@ public:
 	 * @brief Set the name of the command
 	 *
 	 * @param n name of command
+	 * @note The maximum length of a command name is 32 UTF-8 codepoints.
+	 * If your command name is longer than this, it will be truncated.
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_name(const std::string &n);
@@ -603,6 +636,8 @@ public:
 	 * @brief Set the description of the command
 	 *
 	 * @param d description
+	 * @note The maximum length of a command description is 100 UTF-8 codepoints.
+	 * If your command description is longer than this, it will be truncated.
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_description(const std::string &d);

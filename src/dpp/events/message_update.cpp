@@ -46,7 +46,7 @@ void message_update::handle(discord_client* client, json &j, const std::string &
 	if (!client->creator->dispatch.message_update.empty()) {
 		json d = j["d"];
 		dpp::message_update_t msg(client, raw);
-		dpp::message m;
+		dpp::message m(client->creator);
 		m.fill_from_json(&d);
 	      	msg.updated = &m;
 		call_event(client->creator->dispatch.message_update, msg);

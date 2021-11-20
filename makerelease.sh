@@ -55,7 +55,7 @@ rm -rf libdpp-$NEWVER-win32
 
 cd ..
 echo "Create release..."
-gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(git log --format="- %s" $(git show-ref | grep refs/tags | tail -n 1 | cut -d ' ' -f 1)..HEAD)" ./assets/*.zip ./assets/*.deb ./assets/*.rpm
+gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(git log --format="- %s" $(git log --no-walk --tags | head -n1 | cut -d ' ' -f 2)..HEAD)" ./assets/*.zip ./assets/*.deb ./assets/*.rpm
 echo "Cleaning up..."
 cd ..
 rm -rf temp

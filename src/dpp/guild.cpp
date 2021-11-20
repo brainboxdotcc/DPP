@@ -44,26 +44,16 @@ std::map<std::string, dpp::guild_flags> featuremap = {
 	{"BANNER", dpp::g_banner },
 	{"WELCOME_SCREEN_ENABLED", dpp::g_welcome_screen_enabled },
 	{"MEMBER_VERIFICATION_GATE_ENABLED", dpp::g_member_verification_gate },
-	{"PREVIEW_ENABLED", dpp::g_preview_enabled }
+	{"PREVIEW_ENABLED", dpp::g_preview_enabled },
+	{"MONETIZATION_ENABLED", dpp::g_monetization_enabled },
+	{"MORE_STICKERS", dpp::g_more_stickers },
+	{"PRIVATE_THREADS", dpp::g_private_threads },
+	{"ROLE_ICONS", dpp::g_role_icons },
+	{"SEVEN_DAY_THREAD_ARCHIVE", dpp::g_seven_day_thread_archive },
+	{"THREE_DAY_THREAD_ARCHIVE", dpp::g_three_day_thread_archive },
+	{"TICKETED_EVENTS_ENABLED", dpp::g_ticketed_events },
+	{"CHANNEL_BANNER", dpp::g_channel_banners },
 };
-
-std::map<std::string, dpp::region> regionmap = {
-	{ "brazil", dpp::r_brazil },
-	{ "central-europe", dpp::r_central_europe },
-	{ "hong-kong", dpp::r_hong_kong },
-	{ "india", dpp::r_india },
-	{ "japan",  dpp::r_japan },
-	{ "russia", dpp::r_russia },
-	{ "singapore", dpp::r_singapore },
-	{ "south-africa", dpp::r_south_africa },
-	{ "sydney", dpp::r_sydney },
-	{ "us-central", dpp::r_us_central },
-	{ "us-east", dpp::r_us_east },
-	{ "us-south", dpp::r_us_south },
-	{ "us-west", dpp::r_us_west },
-	{ "western-europe", dpp::r_western_europe }
-};
-
 
 namespace dpp {
 
@@ -72,14 +62,13 @@ guild::guild() :
 	shard_id(0),
 	flags(0),
 	owner_id(0),
-	voice_region(r_us_central),
 	afk_channel_id(0),
 	afk_timeout(0),
 	widget_channel_id(0),
-	verification_level(0),
+	verification_level(ver_none),
 	default_message_notifications(0),
-	explicit_content_filter(0),
-	mfa_level(0),
+	explicit_content_filter(expl_disabled),
+	mfa_level(mfa_none),
 	application_id(0),
 	system_channel_id(0),
 	rules_channel_id(0),
@@ -87,7 +76,10 @@ guild::guild() :
 	premium_tier(0),
 	premium_subscription_count(0),
 	public_updates_channel_id(0),
-	max_video_channel_users(0)
+	max_video_channel_users(0),
+	max_presences(0),
+	max_members(0),
+	nsfw_level(nsfw_default)
 {
 }
 
@@ -172,6 +164,11 @@ std::string guild_member::build_json() const {
 	return j.dump();
 }
 
+guild& guild::set_name(const std::string& n) {
+	this->name = utility::validate(trim(n), 2, 100, "Guild names cannot be less than 2 characters");
+	return *this;
+}
+
 bool guild_member::is_deaf() const {
 	return flags & dpp::gm_deaf;
 }
@@ -206,6 +203,10 @@ bool guild::has_vip_regions() const {
 
 bool guild::has_vanity_url() const {
 	return this->flags & g_vanity_url;
+}
+
+bool guild::has_channel_banners() const {
+	return this->flags & g_channel_banners;
 }
 
 bool guild::is_verified() const {
@@ -262,6 +263,34 @@ bool guild::has_animated_icon_hash() const {
 
 bool guild::has_animated_banner_icon_hash() const {
 	return this->flags & g_has_animated_banner;
+}
+
+bool guild::has_monetization_enabled() const {
+	return this->flags & g_monetization_enabled;
+}
+
+bool guild::has_more_stickers() const {
+	return this->flags & g_more_stickers;
+}
+
+bool guild::has_private_threads() const {
+	return this->flags & g_private_threads;
+}
+
+bool guild::has_role_icons() const {
+	return this->flags & g_role_icons;
+}
+
+bool guild::has_seven_day_thread_archive() const {
+	return this->flags & g_seven_day_thread_archive;
+}
+
+bool guild::has_three_day_thread_archive() const {
+	return this->flags & g_three_day_thread_archive;
+}
+
+bool guild::has_ticketed_events() const {
+	return this->flags & g_ticketed_events;
 }
 
 std::string guild::build_json(bool with_id) const {
@@ -339,12 +368,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			this->discovery_splash = _dsplash;
 		}
 		SetSnowflakeNotNull(d, "owner_id", this->owner_id);
-		if (!(*d)["region"].is_null()) {
-			auto r = regionmap.find((*d)["region"].get<std::string>());
-			if (r != regionmap.end()) {
-				this->voice_region = r->second;
-			}
-		}
+
 		this->flags |= BoolNotNull(d, "large") ? dpp::g_large : 0;
 		this->flags |= BoolNotNull(d, "widget_enabled") ? dpp::g_widget_enabled : 0;
 
@@ -361,14 +385,20 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		if (scf & 2) {
 			this->flags |= dpp::g_no_boost_notifications;
 		}
+		if (scf & 4) {
+			this->flags |= dpp::g_no_setup_tips;
+		}
+		if (scf & 8) {
+			this->flags |= dpp::g_no_sticker_greeting;
+		}
 
 		SetSnowflakeNotNull(d, "afk_channel_id", this->afk_channel_id);
 		SetInt8NotNull(d, "afk_timeout", this->afk_timeout);
 		SetSnowflakeNotNull(d, "widget_channel_id", this->widget_channel_id);
-		SetInt8NotNull(d, "verification_level", this->verification_level);
+		this->verification_level = (verification_level_t)Int8NotNull(d, "verification_level");
 		SetInt8NotNull(d, "default_message_notifications", this->default_message_notifications);
-		SetInt8NotNull(d, "explicit_content_filter", this->explicit_content_filter);
-		SetInt8NotNull(d, "mfa_level", this->mfa_level);
+		this->explicit_content_filter = (guild_explicit_content_t)Int8NotNull(d, "explicit_content_filter");
+		this->mfa_level = (mfa_level_t)Int8NotNull(d, "mfa_level");
 		SetSnowflakeNotNull(d, "application_id", this->application_id);
 		SetSnowflakeNotNull(d, "system_channel_id", this->system_channel_id);
 		SetSnowflakeNotNull(d, "rules_channel_id", this->rules_channel_id);
@@ -397,6 +427,11 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		SetInt16NotNull(d, "premium_subscription_count", this->premium_subscription_count);
 		SetSnowflakeNotNull(d, "public_updates_channel_id", this->public_updates_channel_id);
 		SetInt16NotNull(d, "max_video_channel_users", this->max_video_channel_users);
+
+		SetInt32NotNull(d, "max_presences", this->max_presences);
+		SetInt32NotNull(d, "max_members", this->max_members);
+
+		this->nsfw_level = (guild_nsfw_level_t)Int8NotNull(d, "nsfw_level");
 
 		if (d->find("welcome_screen") != d->end()) {
 			json& w = (*d)["welcome_screen"];

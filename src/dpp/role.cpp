@@ -19,6 +19,9 @@
  *
  ************************************************************************************/
 #include <dpp/discord.h>
+#include <dpp/exception.h>
+#include <dpp/role.h>
+#include <dpp/cache.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
@@ -275,4 +278,63 @@ bool role::has_send_messages_in_threads() const {
 bool role::has_start_embedded_activities() const {
 	return ((this->permissions & p_administrator) | (this->permissions & p_start_embedded_activities));
 }
+
+bool role::has_manage_events() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_events));
+}
+
+role& role::set_name(const std::string& n) {
+	name = utility::validate(n, 1, 100, "Role name too short");
+	return *this;
+}
+
+role& role::set_colour(uint32_t c) {
+	colour = c;
+	return *this;
+}
+
+role& role::set_color(uint32_t c) {
+	return set_colour(c);
+}
+
+role& role::set_flags(uint8_t f) {
+	flags = f;
+	return *this;
+}
+
+role& role::set_integration_id(snowflake i) {
+	integration_id = i;
+	return *this;
+}
+
+role& role::set_bot_id(snowflake b) {
+	bot_id = b;
+	return *this;
+}
+
+role& role::set_guild_id(snowflake gid) {
+	guild_id = gid;
+	return *this;
+}
+
+members_container role::get_members() const {
+	members_container gm;
+	guild* g = dpp::find_guild(this->guild_id);
+	if (g) {
+		if (this->guild_id == this->id) {
+			/* Special shortcircuit for everyone-role. Always includes all users. */
+			return g->members;
+		}
+		for (auto & m : g->members) {
+			/* Iterate all members and use std::find on their role list to see who has this role */
+			auto i = std::find(m.second.roles.begin(), m.second.roles.end(), this->id);
+			if (i != m.second.roles.end()) {
+				gm[m.second.user_id] = m.second;
+			}
+		}
+	}
+	return gm;
+}
+
+
 };

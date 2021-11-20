@@ -329,6 +329,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @param outDataSize Output data length, should be at least equal to the input size.
 	 * Will be adjusted on return to the actual compressed data size.
 	 * @return size_t The compressed data size that was encoded.
+	 * @throw dpp::exception If data length to encode is invalid
 	 */
 	size_t encode(uint8_t *input, size_t inDataSize, uint8_t *output, size_t &outDataSize);
 
@@ -377,7 +378,10 @@ public:
 	 */
 	virtual void log(dpp::loglevel severity, const std::string &msg) const;
 
-	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
+	/**
+	 * @brief Fires every second from the underlying socket I/O loop, used for sending heartbeats
+	 * @throw dpp::exception if the socket needs to disconnect
+	 */
 	virtual void one_second_timer();
 
 	/**
@@ -409,6 +413,7 @@ public:
 	 * @param _token The voice session token to use for identifying to the websocket
 	 * @param _session_id The voice session id to identify with
 	 * @param _host The voice server hostname to connect to (hostname:port format)
+	 * @throw dpp::exception Sodium or Opus failed to initialise
 	 */
 	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host);
 
@@ -417,7 +422,8 @@ public:
 
 	/** Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
-	 * @returns True if a frame has been handled
+	 * @return bool True if a frame has been handled
+	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
 	virtual bool HandleFrame(const std::string &buffer);
 
@@ -455,6 +461,8 @@ public:
 	 * quality.
 	 * 
 	 * @return discord_voice_client& Reference to self
+	 * 
+	 * @throw dpp::exception If data length is invalid
 	 */
 	discord_voice_client& send_audio_raw(uint16_t* audio_data, const size_t length);
 
@@ -481,6 +489,8 @@ public:
 	 * e.g. that audio frames are not too large or contain
 	 * an incorrect format. Discord will still expect the same frequency
 	 * and bit width of audio and the same signedness.
+	 * 
+	 * @throw dpp::exception If data length is invalid
 	 */
 	discord_voice_client& send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration);
 
@@ -506,6 +516,8 @@ public:
 	 * e.g. that audio frames are not too large or contain
 	 * an incorrect format. Discord will still expect the same frequency
 	 * and bit width of audio and the same signedness.
+	 * 
+	 * @throw dpp::exception If data length is invalid
 	 */
 	discord_voice_client& send_audio_opus(uint8_t* opus_packet, const size_t length);
 
@@ -525,6 +537,7 @@ public:
 	 * @param new_timescale Timescale to set. This defaults to 1000000,
 	 * which means 1 millisecond.
 	 * @return discord_voice_client& Reference to self
+	 * @throw dpp::exception If data length is invalid
 	 */
 	discord_voice_client& set_timescale(uint64_t new_timescale);
 

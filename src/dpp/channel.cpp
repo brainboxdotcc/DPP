@@ -52,12 +52,12 @@ channel::channel() :
 	position(0),
 	last_message_id(0),
 	user_limit(0),
+	bitrate(0),
 	rate_limit_per_user(0),
 	owner_id(0),
 	parent_id(0),
 	last_pin_timestamp(0),
-	message_count(0),
-	member_count(0)
+	permissions(0)
 {
 }
 
@@ -103,16 +103,60 @@ bool channel::is_store_channel() const {
 	return !is_stage_channel() && (flags & dpp::c_store);
 }
 
-bool channel::is_news_thread() const {
+bool channel::is_video_auto() const {
+	/* Note: c_video_auto has no real flag (its value is 0)
+	 * as absence of the 720p FULL quality flag indicates it must be
+	 * c_video_auto instead -- discord decided to put what is basically
+	 * a bool into two potential values, 1 and 2. hmmm...
+	 */
+	return !is_video_720p();
+}
+
+bool channel::is_video_720p() const {
+	return (flags & dpp::c_video_quality_720p);
+}
+
+
+bool thread::is_news_thread() const {
 	return flags & dpp::c_news_thread;
 }
 
-bool channel::is_public_thread() const {
+bool thread::is_public_thread() const {
 	return flags & dpp::c_public_thread;
 }
 
-bool channel::is_private_thread() const {
+bool thread::is_private_thread() const {
 	return flags & dpp::c_private_thread;
+}
+
+thread& thread::fill_from_json(json* j) {
+	channel::fill_from_json(j);
+
+	uint8_t type = Int8NotNull(j, "type");
+	this->flags |= (type == GUILD_NEWS_THREAD) ? dpp::c_news_thread : 0;
+	this->flags |= (type == GUILD_PUBLIC_THREAD) ? dpp::c_public_thread : 0;
+	this->flags |= (type == GUILD_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
+
+	SetInt8NotNull(j, "message_count", this->message_count);
+	SetInt8NotNull(j, "memeber_count", this->member_count);
+	auto json_metadata = (*j)["thread_metadata"];
+	metadata.archived = BoolNotNull(&json_metadata, "archived");
+	metadata.archive_timestamp = TimestampNotNull(&json_metadata, "archive_timestamp");
+	metadata.auto_archive_duration = Int16NotNull(&json_metadata, "auto_archive_duration");
+	metadata.locked = BoolNotNull(&json_metadata, "locked");
+
+	/* Only certain events set this */
+	if (j->find("member") != j->end())  {
+		member.fill_from_json(&((*j)["member"]));
+	}
+	
+	return *this;
+}
+
+thread::thread() : channel(), message_count(0), member_count(0) {
+}
+
+thread::~thread() {
 }
 
 channel& channel::fill_from_json(json* j) {
@@ -137,9 +181,15 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_NEWS) ? dpp::c_news : 0;
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
 	this->flags |= (type == GUILD_STAGE) ? dpp::c_stage : 0;
-	this->flags |= (type == GUILD_NEWS_THREAD) ? dpp::c_news_thread : 0;
-	this->flags |= (type == GUILD_PUBLIC_THREAD) ? dpp::c_public_thread : 0;
-	this->flags |= (type == GUILD_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
+
+	uint8_t vqm = Int8NotNull(j, "video_quality_mode");
+	if (vqm == 2) {
+		/* If this is set to 2, this means full quality 720p video for voice channel.
+		 * Undefined, or a value of 1 (the other two possibilities right now) means
+		 * video quality AUTO.
+		 */
+		this->flags |= dpp::c_video_quality_720p;
+	}
 
 	if (j->find("recipients") != j->end()) {
 		recipients = {};
@@ -159,37 +209,71 @@ channel& channel::fill_from_json(json* j) {
 			permission_overwrites.emplace_back(po);
 		}
 	}
-	
-	if (type == GUILD_NEWS_THREAD || type == GUILD_PUBLIC_THREAD || type == GUILD_PRIVATE_THREAD) {
-		SetInt8NotNull(j, "message_count", this->message_count);
-		SetInt8NotNull(j, "memeber_count", this->member_count);
-		auto json_metadata = (*j)["thread_metadata"];
-		metadata.archived = BoolNotNull(&json_metadata, "archived");
-		metadata.archive_timestamp = TimestampNotNull(&json_metadata, "archive_timestamp");
-		metadata.auto_archive_duration = Int16NotNull(&json_metadata, "auto_archive_duration");
-		metadata.locked = BoolNotNull(&json_metadata, "locked");
+
+	/* Note: This is only set when the channel is in the resolved set from an interaction.
+	 * When set it contains the invokers permissions on channel. Any other time, contains 0.
+	 */
+	if (j->find("permissions") != j->end()) {
+		SetSnowflakeNotNull(j, "permissions", permissions);
 	}
 
+	std::string _icon = StringNotNull(j, "icon");
+	std::string _banner = StringNotNull(j, "banner");
+
+	if (!_icon.empty()) {
+		this->icon = _icon;
+	}
+
+	if (!_banner.empty()) {
+		this->banner = _banner;
+	}
+
+	SetStringNotNull(j, "rtc_region", rtc_region);
+	
 	return *this;
+}
+
+std::string thread::build_json(bool with_id) const {
+	json j = json::parse(channel::build_json(with_id));
+	if (is_news_thread()) {
+		/* News thread */
+		j["type"] = GUILD_NEWS_THREAD;
+		j["thread_metadata"] = this->metadata;
+	} else if (is_public_thread()) {
+		/* Public thread */
+		j["type"] = GUILD_PUBLIC_THREAD;
+		j["thread_metadata"] = this->metadata;
+	} else {
+		/* Private thread */
+		j["type"] = GUILD_PRIVATE_THREAD;
+		j["thread_metadata"] = this->metadata;
+	}
+	return j.dump();
 }
 
 std::string channel::build_json(bool with_id) const {
 	json j;
-	if (with_id) {
+	if (with_id && id) {
 		j["id"] = std::to_string(id);
 	}
 	j["guild_id"] = std::to_string(guild_id);
-	j["position"] = position;
+	if (position) {
+		j["position"] = position;
+	}
 	j["name"] = name;
-	j["topic"] = topic;
-	j["rate_limit_per_user"] = rate_limit_per_user;
+	if (!topic.empty()) {
+		j["topic"] = topic;
+	}
+	if (rate_limit_per_user) {
+		j["rate_limit_per_user"] = rate_limit_per_user;
+	}
 	if (is_voice_channel()) {
 		j["user_limit"] = user_limit; 
 		j["bitrate"] = bitrate*1024;
 	}
 	if (!is_dm()) {
 		if (parent_id) {
-			j["parent_id"] = parent_id;
+			j["parent_id"] = std::to_string(parent_id);
 		}
 		if (is_text_channel()) {
 			j["type"] = GUILD_TEXT;
@@ -204,15 +288,6 @@ std::string channel::build_json(bool with_id) const {
 			j["type"] = GUILD_NEWS;
 		} else if (is_store_channel()) {
 			j["type"] = GUILD_STORE;
-		} else if (is_news_thread()) {
-			j["type"] = GUILD_NEWS_THREAD;
-			j["thread_metadata"] = this->metadata;
-		} else if (is_public_thread()) {
-			j["type"] = GUILD_PUBLIC_THREAD;
-			j["thread_metadata"] = this->metadata;
-		} else if (is_private_thread()) {
-			j["type"] = GUILD_PRIVATE_THREAD;
-			j["thread_metadata"] = this->metadata;
 		}
 		j["nsfw"] = is_nsfw();
 	} else {

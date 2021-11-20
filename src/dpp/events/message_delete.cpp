@@ -46,7 +46,7 @@ void message_delete::handle(discord_client* client, json &j, const std::string &
 	if (!client->creator->dispatch.message_delete.empty()) {
 		json d = j["d"];
 		dpp::message_delete_t msg(client, raw);
-		dpp::message m;
+		dpp::message m(client->creator);
 		m.fill_from_json(&d);
 		msg.deleted = &m;
 		call_event(client->creator->dispatch.message_delete, msg);

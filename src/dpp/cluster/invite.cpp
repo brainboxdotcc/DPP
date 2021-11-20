@@ -24,7 +24,7 @@
 
 namespace dpp {
 
-void cluster::get_guild_invites(snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_get_invites(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "invites", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		invite_map invites;
 		confirmation_callback_t e("confirmation", confirmation(), http);

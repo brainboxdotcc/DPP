@@ -121,7 +121,7 @@ connection::connection() : id(0), revoked(false), verified(false), friend_sync(f
 }
 
 connection& connection::fill_from_json(nlohmann::json* j) {
-	this->id = SnowflakeNotNull(j, "id");
+	this->id = StringNotNull(j, "id");
 	this->name = StringNotNull(j, "name");
 	this->type = StringNotNull(j, "type");
 	this->revoked = BoolNotNull(j, "revoked");

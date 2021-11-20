@@ -51,7 +51,7 @@ void thread_list_sync::handle(discord_client* client, json& j, const std::string
 			dpp::thread_list_sync_t tls(client, raw);
 			if (d.find("threads") != d.end()) {
 				for (auto& t : d["threads"]) {
-					tls.threads.push_back(channel().fill_from_json(&t));
+					tls.threads.push_back(thread().fill_from_json(&t));
 				}
 			}
 			if (d.find("members") != d.end()) {

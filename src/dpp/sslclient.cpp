@@ -58,7 +58,7 @@
 #include <dpp/fmt/format.h>
 #include <dpp/sslclient.h>
 #include <dpp/discord.h>
-#include <dpp/dispatcher.h>
+#include <dpp/exception.h>
 
 namespace dpp {
 
@@ -109,7 +109,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) :
         signal(SIGXFSZ, SIG_IGN);
 #endif
 	if (FD_SETSIZE < 1024) {
-		throw dpp::exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
+		throw dpp::connection_exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
 	}
 	ssl = new opensslcontext();
 	Connect();

@@ -21,7 +21,7 @@
 #include <dpp/slashcommand.h>
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
-#include <dpp/dispatcher.h>
+#include <dpp/exception.h>
 #include <dpp/nlohmann/json.hpp>
 #include <iostream>
 
@@ -183,12 +183,12 @@ slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
 }
 
 slashcommand& slashcommand::set_name(const std::string &n) {
-	name = n;
+	name = utility::utf8substr(n, 0, 32);
 	return *this;
 }
 
 slashcommand& slashcommand::set_description(const std::string &d) {
-	description = d;
+	description = utility::utf8substr(d, 0, 100);
 	return *this;
 }
 
@@ -219,7 +219,7 @@ command_option::command_option(command_option_type t, const std::string &n, cons
 command_option& command_option::add_choice(const command_option_choice &o)
 {
 	if (this->autocomplete) {
-		throw dpp::exception("Can't set autocomplete=true if choices exist in the command_option");
+		throw dpp::logic_exception("Can't set autocomplete=true if choices exist in the command_option");
 	}
 	choices.emplace_back(o);
 	return *this;
@@ -240,7 +240,7 @@ command_option& command_option::add_channel_type(const channel_type ch)
 command_option& command_option::set_auto_complete(bool autocomp)
 {
 	if (autocomp && !choices.empty()) {
-		throw dpp::exception("Can't set autocomplete=true if choices exist in the command_option");
+		throw dpp::logic_exception("Can't set autocomplete=true if choices exist in the command_option");
 	}
 	this->autocomplete = autocomp;
 	return *this;

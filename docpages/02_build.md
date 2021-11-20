@@ -63,7 +63,8 @@ If you are having trouble setting up CMake, you can try [our template bot](https
 
 To build on windows follow these steps *exactly*. The build process depends on specific libraries being installed on your system in specific locations.
 
-\note You should not need to build a copy of the library for windows — DLL and LIB files for Windows and Visual Studio 2019 are be provided in the GitHub version releases. Unless you wish to submit fixes and enhancements to the library itself, you may find it easier to use these releases instead.
+\note **You do not need to build a copy from source** -- we have done this for you. Unless you consider yourself an **advanced user** you should [obtain a pre-made visual studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/) and completely skip this guide!
+
 
 1. Make sure you have Visual Studio 2019. The Community, Professional or Enterprise versions all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
 2. Check out the DPP project source using git

@@ -82,7 +82,10 @@ protected:
 	/** Called every second */
 	virtual void one_second_timer();
 
-	/** Start connection */
+	/**
+	 * @brief Start SSL connection and connect to TCP endpoint
+	 * @throw dpp::exception Failed to initialise connection
+	 */
 	virtual void Connect();
 public:
 	/** Get total bytes sent */
@@ -125,11 +128,13 @@ public:
 	 * @brief Connect to a specified host and port. Throws std::runtime_error on fatal error.
 	 * @param _hostname The hostname to connect to
 	 * @param _port the Port number to connect to
+	 * @throw dpp::exception Failed to initialise connection
 	 */
 	ssl_client(const std::string &_hostname, const std::string &_port = "443");
 
 	/**
 	 * @brief Nonblocking I/O loop
+	 * @throw std::exception Any std::exception (or derivative) thrown from read_loop() causes reconnection of the shard
 	 */
 	void read_loop();
 
