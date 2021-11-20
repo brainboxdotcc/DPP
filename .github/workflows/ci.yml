@@ -1,12 +1,6 @@
 name: D++ CI
-  on: [push, pull_request]
-    paths: # Don't run CI unless actual compileable source code has changed. We aren't interested in docs changes.
-      - '**Dockerfile'
-      - '**.cxx'
-      - '**.cpp'
-      - '**.h'
-      - '**.hpp'
-      - '**CMakeLists.txt'
+on: [push, pull_request]
+paths: ['**Dockerfile', '**.cxx', '**.cpp', '**.h', '**.hpp' '**CMakeLists.txt']
 
 jobs:
   linux:
