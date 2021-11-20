@@ -1,0 +1,31 @@
+name: Docs Build (dpp.dev)
+on:
+  push:
+    paths:
+      - '**Doxyfile'
+      - '**docpages/**'
+  pull_request:
+    paths:
+      - '**Doxyfile'
+      - '**docpages/**'
+
+
+jobs:
+  docs:
+    name: Build Documentation
+    runs-on: ubuntu-20.04
+    strategy:
+
+    steps:
+ 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+
+      - name: Checkout D++
+        uses: actions/checkout@v2
+
+      - name: Generate Docs
+        run: cd docpages && php makedocs-gh.php
+ 
