@@ -2,10 +2,12 @@
 
 /* Sanity checks */
 system("sudo apt-get install graphviz");
-system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git\" /dpp-web");
+system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git/\" /dpp-web");
 chdir("/home/runner/work/DPP/DPP");
 system("sudo cp /dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
 chdir("docpages");
+
+system("git config --global advice.detachedHead false");
 
 /* Make drop down list of versions from the tags */
 echo "Make version drop down select\n";
@@ -90,7 +92,7 @@ foreach ($tags as $tag) {
 /* Commit and push everything to the github pages repo */
 echo "Commit and push\n";
 chdir("/dpp-web");
-system("git add -A");
-system("git commit -a -m \"automatic commit\"");
-system("git push");
+system("sudo git add -A");
+system("sudo git commit -a -m \"automatic commit\"");
+system("sudo git push");
 

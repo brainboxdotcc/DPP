@@ -1,14 +1,8 @@
 name: Docs Build (dpp.dev)
 on:
   push:
-    paths:
-      - '**Doxyfile'
-      - '**docpages/**'
-  pull_request:
-    paths:
-      - '**Doxyfile'
-      - '**docpages/**'
-
+    branches:
+      - 'dev'
 
 jobs:
   docs:
