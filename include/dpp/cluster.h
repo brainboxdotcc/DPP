@@ -3325,6 +3325,22 @@ public:
 };
 
 /**
+ * @brief Attach an event to a dispatcher map.
+ * Used internally by the library.
+ * @tparam T map container in dpp::dispatcher to attach event to
+ * @tparam F listener function to attach to the event
+ * @param c owning cluster for the event
+ * @param container container within the dpp::dispatcher
+ * @param func function to attach to listen to the event
+ * @return event_handle event handle of the attached event, for use with dpp::detach
+ */
+template<typename T, class F> event_handle attach(class cluster* c, T& container, F func) {
+	event_handle h = c->get_next_handle();
+	container.emplace(h, func);
+	return h;
+}
+
+/**
  * @brief A timed_listener is a way to temporarily attach to an event for a specific timeframe, then detach when complete.
  * A lambda may also be optionally called when the timeout is reached. Destructing the timed_listener detaches any attached
  * event listeners, and cancels any created timers, but does not call any timeout lambda.
@@ -3365,8 +3381,7 @@ public:
 	: owner(cl), duration(_duration), ev(event)
 	{
 		/* Attach event */
-		listener_handler = owner->get_next_handle();
-		event.emplace(listener_handler, listener);
+		listener_handler = attach(cl, listener_handler, listener);
 		/* Create timer */
 		th = cl->start_timer([this]() {
 			/* Timer has finished, detach it from event.
