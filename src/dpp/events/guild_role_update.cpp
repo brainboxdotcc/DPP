@@ -50,22 +50,22 @@ void guild_role_update::handle(discord_client* client, json &j, const std::strin
 		if (client->creator->cache_policy.role_policy == dpp::cp_none) {
 			dpp::role r;
 			r.fill_from_json(g->id, &d);
-			if (!client->creator->dispatch.guild_role_update.empty()) {
+			if (!client->creator->on_guild_role_update.empty()) {
 				dpp::guild_role_update_t gru(client, raw);
 				gru.updating_guild = g;
 				gru.updated = &r;
-				call_event(client->creator->dispatch.guild_role_update, gru);
+				client->creator->on_guild_role_update.call(gru);
 			}
 		} else {
 			json& role = d["role"];
 			dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
 			if (r) {
 				r->fill_from_json(g->id, &role);
-				if (!client->creator->dispatch.guild_role_update.empty()) {
+				if (!client->creator->on_guild_role_update.empty()) {
 					dpp::guild_role_update_t gru(client, raw);
 					gru.updating_guild = g;
 					gru.updated = r;
-					call_event(client->creator->dispatch.guild_role_update, gru);
+					client->creator->on_guild_role_update.call(gru);
 				}
 			}
 		}

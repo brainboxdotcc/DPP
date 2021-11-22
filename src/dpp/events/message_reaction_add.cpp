@@ -44,7 +44,7 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void message_reaction_add::handle(discord_client* client, json &j, const std::string &raw) {
-	if (!client->creator->dispatch.message_reaction_add.empty()) {
+	if (!client->creator->on_message_reaction_add.empty()) {
 		json &d = j["d"];
 		dpp::message_reaction_add_t mra(client, raw);
 		dpp::snowflake guild_id = SnowflakeNotNull(&d, "guild_id");
@@ -55,7 +55,7 @@ void message_reaction_add::handle(discord_client* client, json &j, const std::st
 		mra.message_id = SnowflakeNotNull(&d, "message_id");
 		mra.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
 		if (mra.reacting_channel && mra.message_id) {
-			call_event(client->creator->dispatch.message_reaction_add, mra);
+			client->creator->on_message_reaction_add.call(mra);
 		}
 	}
 }

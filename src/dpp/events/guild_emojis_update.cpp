@@ -66,11 +66,11 @@ void guild_emojis_update::handle(discord_client* client, json &j, const std::str
 				g->emojis.push_back(e->id);
 			}
 		}
-		if (!client->creator->dispatch.guild_emojis_update.empty()) {
+		if (!client->creator->on_guild_emojis_update.empty()) {
 			dpp::guild_emojis_update_t geu(client, raw);
 			geu.emojis = g->emojis;
 			geu.updating_guild = g;
-			call_event(client->creator->dispatch.guild_emojis_update, geu);
+			client->creator->on_guild_emojis_update.call(geu);
 		}
 	}
 }

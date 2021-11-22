@@ -216,12 +216,12 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					if (it != ssrcMap.end()) 
 						ssrcMap.erase(it);
 
-					if (!creator->dispatch.voice_client_disconnect.empty())
+					if (!creator->on_voice_client_disconnect.empty())
 					{
 						voice_client_disconnect_t vcd(nullptr, data);
 						vcd.voice_client = this;
 						vcd.user_id = u_id;
-						call_event(creator->dispatch.voice_client_disconnect, vcd);
+						creator->on_voice_client_disconnect.call(vcd);
 					}
 				}
 			}
@@ -239,12 +239,12 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 					snowflake u_id = SnowflakeNotNull(&j["d"], "user_id");
 					ssrcMap[u_ssrc] = u_id;
 
-					if (!creator->dispatch.voice_client_speaking.empty()) {
+					if (!creator->on_voice_client_speaking.empty()) {
 						voice_client_speaking_t vcs(nullptr, data);
 						vcs.voice_client = this;
 						vcs.user_id = u_id;
 						vcs.ssrc = u_ssrc;
-						call_event(creator->dispatch.voice_client_speaking, vcs);
+						creator->on_voice_client_speaking.call(vcs);
 					}
 				}
 			}
@@ -309,11 +309,11 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 				send_silence(20);
 
 				/* Fire on_voice_ready */
-				if (!creator->dispatch.voice_ready.empty()) {
+				if (!creator->on_voice_ready.empty()) {
 					voice_ready_t rdy(nullptr, data);
 					rdy.voice_client = this;
 					rdy.voice_channel_id = this->channel_id;
-					call_event(creator->dispatch.voice_ready, rdy);
+					creator->on_voice_ready.call(rdy);
 				}
 			}
 			break;
@@ -437,7 +437,7 @@ void discord_voice_client::ReadReady()
 	uint8_t buffer[65535];
 	int r = this->UDPRecv((char*)buffer, sizeof(buffer));
 
-	if (r > 0 && !creator->dispatch.voice_receive.empty()) {
+	if (r > 0 && !creator->on_voice_receive.empty()) {
 		voice_receive_t vr(nullptr, std::string((const char*)buffer, r));
 		vr.voice_client = this;
 		vr.audio = nullptr;
@@ -495,13 +495,13 @@ void discord_voice_client::ReadReady()
 				return;
 			vr.audio = (uint8_t *)pcm;
 			vr.audio_size = samples * 4; // 2 channels, 2 byte samples (2 * 2)
-			call_event(creator->dispatch.voice_receive, vr);
+			creator->on_voice_receive.call(vr);
 		}
 		else
 		{
 			vr.audio = packet;
 			vr.audio_size = packet_len;
-			call_event(creator->dispatch.voice_receive, vr);
+			creator->on_voice_receive.call(vr);
 		}
 	}
 #endif
@@ -538,15 +538,15 @@ void discord_voice_client::WriteReady()
 			std::this_thread::sleep_for(sleep_time);
 		}
 		last_timestamp = std::chrono::high_resolution_clock::now();
-		if (!creator->dispatch.voice_buffer_send.empty()) {
+		if (!creator->on_voice_buffer_send.empty()) {
 			voice_buffer_send_t snd(nullptr, "");
 			snd.buffer_size = (int)bufsize;
 			snd.voice_client = this;
-			call_event(creator->dispatch.voice_buffer_send, snd);
+			creator->on_voice_buffer_send.call(snd);
 		}
 	}
 	if (track_marker_found) {
-		if (!creator->dispatch.voice_track_marker.empty()) {
+		if (!creator->on_voice_track_marker.empty()) {
 			voice_track_marker_t vtm(nullptr, "");
 			vtm.voice_client = this;
 			{
@@ -556,7 +556,7 @@ void discord_voice_client::WriteReady()
 					track_meta.erase(track_meta.begin());
 				}
 			}
-			call_event(creator->dispatch.voice_track_marker, vtm);
+			creator->on_voice_track_marker.call(vtm);
 		}
 	}
 }

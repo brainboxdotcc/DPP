@@ -62,17 +62,17 @@ void guild_members_chunk::handle(discord_client* client, json &j, const std::str
 					dpp::guild_member gm;
 					gm.fill_from_json(&userrec, g->id, u->id);
 					g->members[u->id] = gm;
-					if (!client->creator->dispatch.guild_members_chunk.empty()) {
+					if (!client->creator->on_guild_members_chunk.empty()) {
 						um[u->id] = gm;
 					}
 				}
 			}
 		}
-		if (!client->creator->dispatch.guild_members_chunk.empty()) {
+		if (!client->creator->on_guild_members_chunk.empty()) {
 			dpp::guild_members_chunk_t gmc(client, raw);
 			gmc.adding = g;
 			gmc.members = &um;
-			call_event(client->creator->dispatch.guild_members_chunk, gmc);
+			client->creator->on_guild_members_chunk.call(gmc);
 		}
 	}
 }

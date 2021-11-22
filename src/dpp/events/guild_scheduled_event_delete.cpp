@@ -46,10 +46,10 @@ using namespace dpp;
  */
 void guild_scheduled_event_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	if (!client->creator->dispatch.guild_scheduled_event_delete.empty()) {
+	if (!client->creator->on_guild_scheduled_event_delete.empty()) {
 		dpp::guild_scheduled_event_delete_t ed(client, raw);
 		ed.deleted.fill_from_json(&d);
-		call_event(client->creator->dispatch.guild_scheduled_event_delete, ed);
+		client->creator->on_guild_scheduled_event_delete.call(ed);
 	}
 }
 

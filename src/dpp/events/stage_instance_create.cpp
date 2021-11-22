@@ -44,11 +44,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void stage_instance_create::handle(discord_client* client, json &j, const std::string &raw) {
-	if (!client->creator->dispatch.stage_instance_create.empty()) {
+	if (!client->creator->on_stage_instance_create.empty()) {
 		json& d = j["d"];
 		dpp::stage_instance_create_t sic(client, raw);
 		sic.created.fill_from_json(&d);
-		call_event(client->creator->dispatch.stage_instance_create, sic);
+		client->creator->on_stage_instance_create.call(sic);
 	}
 }
 

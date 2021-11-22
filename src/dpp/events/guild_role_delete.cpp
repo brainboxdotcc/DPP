@@ -50,21 +50,21 @@ void guild_role_delete::handle(discord_client* client, json &j, const std::strin
 		if (client->creator->cache_policy.role_policy == dpp::cp_none) {
 			dpp::role r;
 			r.fill_from_json(g->id, &d);
-			if (!client->creator->dispatch.guild_role_delete.empty()) {
+			if (!client->creator->on_guild_role_delete.empty()) {
 				dpp::guild_role_delete_t grd(client, raw);
 				grd.deleting_guild = g;
 				grd.deleted = &r;
-				call_event(client->creator->dispatch.guild_role_delete, grd);
+				client->creator->on_guild_role_delete.call(grd);
 			}
 		} else {
 			json& role = d["role"];
 			dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
 			if (r) {
-				if (!client->creator->dispatch.guild_role_delete.empty()) {
+				if (!client->creator->on_guild_role_delete.empty()) {
 					dpp::guild_role_delete_t grd(client, raw);
 					grd.deleting_guild = g;
 					grd.deleted = r;
-					call_event(client->creator->dispatch.guild_role_delete, grd);
+					client->creator->on_guild_role_delete.call(grd);
 				}
 				auto i = std::find(g->roles.begin(), g->roles.end(), r->id);
 				if (i != g->roles.end()) {

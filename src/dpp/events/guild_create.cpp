@@ -139,10 +139,10 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 		}
 	}
 
-	if (!client->creator->dispatch.guild_create.empty()) {
+	if (!client->creator->on_guild_create.empty()) {
 		dpp::guild_create_t gc(client, raw);
 		gc.created = g;
-		call_event(client->creator->dispatch.guild_create, gc);
+		client->creator->on_guild_create.call(gc);
 	}
 }
 

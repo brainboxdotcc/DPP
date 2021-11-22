@@ -55,11 +55,11 @@ void channel_delete::handle(discord_client* client, json &j, const std::string &
 				g->channels.erase(gc);
 			}
 
-			if (!client->creator->dispatch.channel_delete.empty()) {
+			if (!client->creator->on_channel_delete.empty()) {
 				dpp::channel_delete_t cd(client, raw);
 				cd.deleted = c;
 				cd.deleting_guild = g;
-				call_event(client->creator->dispatch.channel_delete, cd);
+				client->creator->on_channel_delete.call(cd);
 			}
 		}
 		dpp::get_channel_cache()->remove(c);

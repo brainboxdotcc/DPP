@@ -45,12 +45,12 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void guild_ban_add::handle(discord_client* client, json &j, const std::string &raw) {
-	if (!client->creator->dispatch.guild_ban_add.empty()) {
+	if (!client->creator->on_guild_ban_add.empty()) {
 		json &d = j["d"];
 		dpp::guild_ban_add_t gba(client, raw);
 		gba.banning_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 		gba.banned = dpp::user().fill_from_json(&(d["user"]));
-		call_event(client->creator->dispatch.guild_ban_add, gba);
+		client->creator->on_guild_ban_add.call(gba);
 	}
 }
 

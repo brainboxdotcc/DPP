@@ -239,7 +239,7 @@ int main()
 		}, 1);
 
 		set_test("TIMEDLISTENER", false);
-		dpp::timed_listener tl(&bot, 10, bot.dispatch.log, [&](const dpp::log_t & event) {
+		dpp::timed_listener tl(&bot, 10, bot.on_log, [&](const dpp::log_t & event) {
 			set_test("TIMEDLISTENER", true);
 		});
 

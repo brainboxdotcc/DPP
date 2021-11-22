@@ -46,12 +46,12 @@ using namespace dpp;
  */
 void guild_scheduled_event_user_add::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	if (!client->creator->dispatch.guild_scheduled_event_user_add.empty()) {
+	if (!client->creator->on_guild_scheduled_event_user_add.empty()) {
 		dpp::guild_scheduled_event_user_add_t eua(client, raw);
 		eua.guild_id = SnowflakeNotNull(&d, "guild_id");
 		eua.user_id = SnowflakeNotNull(&d, "user_id");
 		eua.event_id = SnowflakeNotNull(&d, "guild_scheduled_event_id");
-		call_event(client->creator->dispatch.guild_scheduled_event_user_add, eua);
+		client->creator->on_guild_scheduled_event_user_add.call(eua);
 	}
 }
 

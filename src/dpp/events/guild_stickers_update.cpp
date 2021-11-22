@@ -48,7 +48,7 @@ void guild_stickers_update::handle(discord_client* client, json &j, const std::s
 	json& d = j["d"];
 	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
 	if (g) {
-		if (!client->creator->dispatch.stickers_update.empty()) {
+		if (!client->creator->on_guild_stickers_update.empty()) {
 			dpp::guild_stickers_update_t gsu(client, raw);
 			for (auto & sticker : d["stickers"]) {
 				dpp::sticker s;
@@ -56,7 +56,7 @@ void guild_stickers_update::handle(discord_client* client, json &j, const std::s
 				gsu.stickers.emplace_back(s);
 			}
 			gsu.updating_guild = g;
-			call_event(client->creator->dispatch.stickers_update, gsu);
+			client->creator->on_guild_stickers_update.call(gsu);
 		}
 	}
 }
