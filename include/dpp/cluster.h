@@ -240,24 +240,28 @@ typedef std::function<void(json&, const http_request_completion_t&)> json_encode
  * The event_router_t::empty() method will return true if there are no listeners attached
  * to the event_router_t (this can be used to save time by not constructing objects that
  * nobody will ever see).
- * The event_router_t::dispatch() method removes an existing listener from the event,
+ * The event_router_t::detach() method removes an existing listener from the event,
  * using the event_handle ID returned by operator().
  * 
  * This class is used by the library to route all websocket events to listening code.
  * 
  * Example:
  * 
+ * ```cpp
+ * // Declare an event that takes log_t as its parameter
  * event_router_t< std::function<void(const log_t& event)> > my_event;
  * 
- * ```cpp
+ * // Attach a listener to the event
  * event_handle id = my_event([&](const log_t& cc) {
  *     std::cout << cc.message << "\n";
  * });
  * 
+ * // Construct a log_t and call the event (listeners will receive the log_t object)
  * log_t lt;
  * lt.message = "foo";
  * my_event.call(lt);
  * 
+ * // Detach from an event using the handle returned by operator()
  * my_event.detach(id);
  * ```
  * 
