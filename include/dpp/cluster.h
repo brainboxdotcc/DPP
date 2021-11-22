@@ -249,7 +249,7 @@ typedef std::function<void(json&, const http_request_completion_t&)> json_encode
  * 
  * ```cpp
  * // Declare an event that takes log_t as its parameter
- * event_router_t< std::function<void(const log_t& event)> > my_event;
+ * event_router_t<log_t> my_event;
  * 
  * // Attach a listener to the event
  * event_handle id = my_event([&](const log_t& cc) {
@@ -265,9 +265,9 @@ typedef std::function<void(json&, const http_request_completion_t&)> json_encode
  * my_event.detach(id);
  * ```
  * 
- * @tparam F std::function template for the listener lambda
+ * @tparam T type of single parameter passed to event lambda derived from event_dispatch_t
  */
-template<class F> class event_router_t {
+template<class T> class event_router_t {
 private:
 	/**
 	 * @brief Next handle to be given out for this router
@@ -279,7 +279,7 @@ private:
 	 * be called in they order they are bound to the event
 	 * as std::map is an ordered container.
 	 */
-	std::map<event_handle, F> dispatch_container;
+	std::map<event_handle, std::function<void(const T&)>> dispatch_container;
 public:
 	/**
 	 * @brief Construct a new event_router_t object.
@@ -292,11 +292,9 @@ public:
 	 * @brief Call all attached listeners.
 	 * Listenrs may cancel, by calling the event.cancel method.
 	 * 
-	 * @tparam E class type to pass as parameter to all listeners.
-	 * This class must be derived from event_dispatch_t.
 	 * @param event Class to pass as parameter to all listeners.
 	 */
-	template<class E> void call(const E& event) const {
+	void call(const T& event) const {
 		std::for_each(dispatch_container.begin(), dispatch_container.end(), [&](auto &ev) {
 			if (!event.is_cancelled()) {
 				ev.second(event);
@@ -325,7 +323,7 @@ public:
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if neccessary.
 	 */
-	event_handle operator()(F func) {
+	event_handle operator()(std::function<void(const T&)> func) {
 		event_handle h = next_handle++;
 		dispatch_container.emplace(h, func);
 		return h;		
@@ -634,30 +632,27 @@ public:
 	 * @brief on voice state update event
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::voice_state_update_t&
+	 * The function signature for this event takes a single `const` reference of type voice_state_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const voice_state_update_t&)> > on_voice_state_update;
+	event_router_t<voice_state_update_t> on_voice_state_update;
 
 	
 	/**
 	 * @brief on voice client disconnect event
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::voice_client_disconnect_t&
+	 * The function signature for this event takes a single `const` reference of type voice_client_disconnect_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const voice_client_disconnect_t&)> > on_voice_client_disconnect;
+	event_router_t<voice_client_disconnect_t> on_voice_client_disconnect;
 
 	
 	/**
 	 * @brief on voice client speaking event
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::voice_client_speaking_t&
+	 * The function signature for this event takes a single `const` reference of type voice_client_speaking_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const voice_client_speaking_t&)> > on_voice_client_speaking;
+	event_router_t<voice_client_speaking_t> on_voice_client_speaking;
 
 	
 	/**
@@ -667,20 +662,18 @@ public:
 	 * library will be silent.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::log_t&
+	 * The function signature for this event takes a single `const` reference of type log_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const log_t& event)> > on_log;
+	event_router_t<log_t> on_log;
 
 	/**
 	 * @brief on guild join request delete.
 	 * Triggered when a user declines the membership screening questionnaire for a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_join_request_delete_t&
+	 * The function signature for this event takes a single `const` reference of type guild_join_request_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_join_request_delete_t&)> > on_guild_join_request_delete;
+	event_router_t<guild_join_request_delete_t> on_guild_join_request_delete;
 
 	
 	/**
@@ -689,10 +682,9 @@ public:
 	 * by a user. For an example of this in action please see \ref slashcommands
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::interaction_create_t&
+	 * The function signature for this event takes a single `const` reference of type interaction_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const interaction_create_t&)> > on_interaction_create;
+	event_router_t<interaction_create_t> on_interaction_create;
 
 	
 	/**
@@ -701,10 +693,9 @@ public:
 	 * associated with a message using dpp::component.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::button_click_t&
+	 * The function signature for this event takes a single `const` reference of type button_click_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const button_click_t&)> > on_button_click;
+	event_router_t<button_click_t> on_button_click;
 
 	
 	/**
@@ -713,10 +704,9 @@ public:
 	 * associated with a dpp::slashcommand.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::autocomplete_t&
+	 * The function signature for this event takes a single `const` reference of type autocomplete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const autocomplete_t&)> > on_autocomplete;
+	event_router_t<autocomplete_t> on_autocomplete;
 
 	
 	/**
@@ -725,10 +715,9 @@ public:
 	 * associated with a message using dpp::component.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::select_click_t&
+	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const select_click_t&)> > on_select_click;
+	event_router_t<select_click_t> on_select_click;
 
 	
 	/**
@@ -738,10 +727,9 @@ public:
 	 * an outage.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_delete_t&
+	 * The function signature for this event takes a single `const` reference of type guild_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_delete_t&)> > on_guild_delete;
+	event_router_t<guild_delete_t> on_guild_delete;
 
 	
 	/**
@@ -751,10 +739,9 @@ public:
 	 * collector.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::channel_delete_t&
+	 * The function signature for this event takes a single `const` reference of type channel_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const channel_delete_t&)> > on_channel_delete;
+	event_router_t<channel_delete_t> on_channel_delete;
 
 	
 	/**
@@ -763,10 +750,9 @@ public:
 	 * receive this event.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::channel_update_t&
+	 * The function signature for this event takes a single `const` reference of type channel_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const channel_update_t&)> > on_channel_update;
+	event_router_t<channel_update_t> on_channel_update;
 
 	
 	/**
@@ -774,10 +760,9 @@ public:
 	 * A set of on_guild_create events will follow this event.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::ready_t&
+	 * The function signature for this event takes a single `const` reference of type ready_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const ready_t&)> > on_ready;
+	event_router_t<ready_t> on_ready;
 
 	
 	/**
@@ -786,40 +771,36 @@ public:
 	 * receive this event.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::message_delete_t&
+	 * The function signature for this event takes a single `const` reference of type message_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const message_delete_t&)> > on_message_delete;
+	event_router_t<message_delete_t> on_message_delete;
 
 	
 	/**
 	 * @brief Called when an application command (slash command) is deleted.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::application_command_delete_t&
+	 * The function signature for this event takes a single `const` reference of type application_command_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const application_command_delete_t&)> > on_application_command_delete;
+	event_router_t<application_command_delete_t> on_application_command_delete;
 
 	
 	/**
 	 * @brief Called when a user leaves a guild (either through being kicked, or choosing to leave)
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_member_remove_t&
+	 * The function signature for this event takes a single `const` reference of type guild_member_remove_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_member_remove_t&)> > on_guild_member_remove;
+	event_router_t<guild_member_remove_t> on_guild_member_remove;
 
 	
 	/**
 	 * @brief Called when a new application command (slash command) is registered.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::application_command_create_t&
+	 * The function signature for this event takes a single `const` reference of type application_command_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const application_command_create_t&)> > on_application_command_create;
+	event_router_t<application_command_create_t> on_application_command_create;
 
 	
 	/**
@@ -828,40 +809,36 @@ public:
 	 * This is generally non-fatal and informational only.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::resumed_t&
+	 * The function signature for this event takes a single `const` reference of type resumed_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const resumed_t&)> > on_resumed;
+	event_router_t<resumed_t> on_resumed;
 
 	
 	/**
 	 * @brief Called when a new role is created on a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_role_create_t&
+	 * The function signature for this event takes a single `const` reference of type guild_role_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_role_create_t&)> > on_guild_role_create;
+	event_router_t<guild_role_create_t> on_guild_role_create;
 
 	
 	/**
 	 * @brief Called when a user is typing on a channel.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::typing_start_t&
+	 * The function signature for this event takes a single `const` reference of type typing_start_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const typing_start_t&)> > on_typing_start;
+	event_router_t<typing_start_t> on_typing_start;
 
 	
 	/**
 	 * @brief Called when a new reaction is added to a message.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::message_reaction_add_t&
+	 * The function signature for this event takes a single `const` reference of type message_reaction_add_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const message_reaction_add_t&)> > on_message_reaction_add;
+	event_router_t<message_reaction_add_t> on_message_reaction_add;
 
 	
 	/**
@@ -870,20 +847,18 @@ public:
 	 * events.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_members_chunk_t&
+	 * The function signature for this event takes a single `const` reference of type guild_members_chunk_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_members_chunk_t&)> > on_guild_members_chunk;
+	event_router_t<guild_members_chunk_t> on_guild_members_chunk;
 
 	
 	/**
 	 * @brief Called when a single reaction is removed from a message.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::message_reaction_remove_t&
+	 * The function signature for this event takes a single `const` reference of type message_reaction_remove_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const message_reaction_remove_t&)> > on_message_reaction_remove;
+	event_router_t<message_reaction_remove_t> on_message_reaction_remove;
 
 	
 	/**
@@ -891,60 +866,54 @@ public:
 	 * D++ will request members for the guild for its cache using guild_members_chunk.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_create_t&
+	 * The function signature for this event takes a single `const` reference of type guild_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_create_t&)> > on_guild_create;
+	event_router_t<guild_create_t> on_guild_create;
 
 	
 	/**
 	 * @brief Called when a new channel is created on a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::channel_create_t&
+	 * The function signature for this event takes a single `const` reference of type channel_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const channel_create_t&)> > on_channel_create;
+	event_router_t<channel_create_t> on_channel_create;
 
 	
 	/**
 	 * @brief Called when all reactions for a particular emoji are removed from a message.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::message_reaction_remove_emoji_t&
+	 * The function signature for this event takes a single `const` reference of type message_reaction_remove_emoji_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const message_reaction_remove_emoji_t&)> > on_message_reaction_remove_emoji;
+	event_router_t<message_reaction_remove_emoji_t> on_message_reaction_remove_emoji;
 
 	
 	/**
 	 * @brief Called when multiple messages are deleted from a channel or DM.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::message_delete_bulk_t&
+	 * The function signature for this event takes a single `const` reference of type message_delete_bulk_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const message_delete_bulk_t&)> > on_message_delete_bulk;
+	event_router_t<message_delete_bulk_t> on_message_delete_bulk;
 
 	
 	/**
 	 * @brief Called when an existing role is updated on a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_role_update_t&
+	 * The function signature for this event takes a single `const` reference of type guild_role_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_role_update_t&)> > on_guild_role_update;
+	event_router_t<guild_role_update_t> on_guild_role_update;
 
 	
 	/**
 	 * @brief Called when a role is deleted in a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_role_delete_t&
+	 * The function signature for this event takes a single `const` reference of type guild_role_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_role_delete_t&)> > on_guild_role_delete;
+	event_router_t<guild_role_delete_t> on_guild_role_delete;
 
 	
 	/**
@@ -953,20 +922,18 @@ public:
 	 * of the last pinned message.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::channel_pins_update_t&
+	 * The function signature for this event takes a single `const` reference of type channel_pins_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const channel_pins_update_t&)> > on_channel_pins_update;
+	event_router_t<channel_pins_update_t> on_channel_pins_update;
 
 	
 	/**
 	 * @brief Called when all reactions are removed from a message.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::message_reaction_remove_all_t&
+	 * The function signature for this event takes a single `const` reference of type message_reaction_remove_all_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const message_reaction_remove_all_t&)> > on_message_reaction_remove_all;
+	event_router_t<message_reaction_remove_all_t> on_message_reaction_remove_all;
 
 	
 	/**
@@ -975,10 +942,9 @@ public:
 	 * or as discord rearrange their infrastructure.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::voice_server_update_t&
+	 * The function signature for this event takes a single `const` reference of type voice_server_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const voice_server_update_t&)> > on_voice_server_update;
+	event_router_t<voice_server_update_t> on_voice_server_update;
 
 	
 	/**
@@ -986,10 +952,9 @@ public:
 	 * The complete set of emojis is sent every time.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_emojis_update_t&
+	 * The function signature for this event takes a single `const` reference of type guild_emojis_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_emojis_update_t&)> > on_guild_emojis_update;
+	event_router_t<guild_emojis_update_t> on_guild_emojis_update;
 
 	
 	/**
@@ -997,10 +962,9 @@ public:
 	 * The complete set of stickers is sent every time.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_stickers_update_t&
+	 * The function signature for this event takes a single `const` reference of type guild_stickers_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_stickers_update_t&)> > on_guild_stickers_update;
+	event_router_t<guild_stickers_update_t> on_guild_stickers_update;
 
 	
 	/**
@@ -1011,50 +975,45 @@ public:
 	 * for them.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::presence_update_t&
+	 * The function signature for this event takes a single `const` reference of type presence_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const presence_update_t&)> > on_presence_update;
+	event_router_t<presence_update_t> on_presence_update;
 
 	
 	/**
 	 * @brief Called when the webhooks for a guild are updated.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::webhooks_update_t&
+	 * The function signature for this event takes a single `const` reference of type webhooks_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const webhooks_update_t&)> > on_webhooks_update;
+	event_router_t<webhooks_update_t> on_webhooks_update;
 
 	
 	/**
 	 * @brief Called when a new member joins a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_member_add_t&
+	 * The function signature for this event takes a single `const` reference of type guild_member_add_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_member_add_t&)> > on_guild_member_add;
+	event_router_t<guild_member_add_t> on_guild_member_add;
 
 	
 	/**
 	 * @brief Called when an invite is deleted from a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::invite_delete_t&
+	 * The function signature for this event takes a single `const` reference of type invite_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const invite_delete_t&)> > on_invite_delete;
+	event_router_t<invite_delete_t> on_invite_delete;
 
 	
 	/**
 	 * @brief Called when details of a guild are updated.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_update_t&
+	 * The function signature for this event takes a single `const` reference of type guild_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_update_t&)> > on_guild_update;
+	event_router_t<guild_update_t> on_guild_update;
 
 	
 	/**
@@ -1064,20 +1023,18 @@ public:
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_integrations_update_t&
+	 * The function signature for this event takes a single `const` reference of type guild_integrations_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_integrations_update_t&)> > on_guild_integrations_update;
+	event_router_t<guild_integrations_update_t> on_guild_integrations_update;
 
 	
 	/**
 	 * @brief Called when details of a guild member (e.g. their roles or nickname) are updated.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_member_update_t&
+	 * The function signature for this event takes a single `const` reference of type guild_member_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_member_update_t&)> > on_guild_member_update;
+	event_router_t<guild_member_update_t> on_guild_member_update;
 
 	
 	/**
@@ -1085,30 +1042,27 @@ public:
 	 * You will only receive this event for application commands that belong to your bot/application.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::application_command_update_t&
+	 * The function signature for this event takes a single `const` reference of type application_command_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const application_command_update_t&)> > on_application_command_update;
+	event_router_t<application_command_update_t> on_application_command_update;
 
 	
 	/**
 	 * @brief Called when a new invite is created for a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::invite_create_t&
+	 * The function signature for this event takes a single `const` reference of type invite_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const invite_create_t&)> > on_invite_create;
+	event_router_t<invite_create_t> on_invite_create;
 
 	
 	/**
 	 * @brief Called when a message is updated (edited).
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::message_update_t&
+	 * The function signature for this event takes a single `const` reference of type message_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const message_update_t&)> > on_message_update;
+	event_router_t<message_update_t> on_message_update;
 
 	
 	/**
@@ -1117,10 +1071,9 @@ public:
 	 * username change, discriminator change or change in subscription status for nitro.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::user_update_t&
+	 * The function signature for this event takes a single `const` reference of type user_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const user_update_t&)> > on_user_update;
+	event_router_t<user_update_t> on_user_update;
 
 	
 	/**
@@ -1130,30 +1083,27 @@ public:
 	 * the roadmap to be supported as it consumes excessive amounts of RAM.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::message_create_t&
+	 * The function signature for this event takes a single `const` reference of type message_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const message_create_t&)> > on_message_create;
+	event_router_t<message_create_t> on_message_create;
 
 	
 	/**
 	 * @brief Called when a ban is added to a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_ban_add_t&
+	 * The function signature for this event takes a single `const` reference of type guild_ban_add_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_ban_add_t&)> > on_guild_ban_add;
+	event_router_t<guild_ban_add_t> on_guild_ban_add;
 
 	
 	/**
 	 * @brief Called when a ban is removed from a guild.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_ban_remove_t&
+	 * The function signature for this event takes a single `const` reference of type guild_ban_remove_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_ban_remove_t&)> > on_guild_ban_remove;
+	event_router_t<guild_ban_remove_t> on_guild_ban_remove;
 
 	
 	/**
@@ -1162,10 +1112,9 @@ public:
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::integration_create_t&
+	 * The function signature for this event takes a single `const` reference of type integration_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const integration_create_t&)> > on_integration_create;
+	event_router_t<integration_create_t> on_integration_create;
 
 	
 	/**
@@ -1175,10 +1124,9 @@ public:
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::integration_update_t&
+	 * The function signature for this event takes a single `const` reference of type integration_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const integration_update_t&)> > on_integration_update;
+	event_router_t<integration_update_t> on_integration_update;
 
 	
 	/**
@@ -1187,10 +1135,9 @@ public:
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::integration_delete_t&
+	 * The function signature for this event takes a single `const` reference of type integration_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const integration_delete_t&)> > on_integration_delete;
+	event_router_t<integration_delete_t> on_integration_delete;
 
 	
 	/**
@@ -1198,30 +1145,27 @@ public:
 	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::thread_create_t&
+	 * The function signature for this event takes a single `const` reference of type thread_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const thread_create_t&)> > on_thread_create;
+	event_router_t<thread_create_t> on_thread_create;
 
 	
 	/**
 	 * @brief Called when a thread is updated
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::thread_update_t&
+	 * The function signature for this event takes a single `const` reference of type thread_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const thread_update_t&)> > on_thread_update;
+	event_router_t<thread_update_t> on_thread_update;
 
 	
 	/**
 	 * @brief Called when a thread is deleted
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::thread_delete_t&
+	 * The function signature for this event takes a single `const` reference of type thread_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const thread_delete_t&)> > on_thread_delete;
+	event_router_t<thread_delete_t> on_thread_delete;
 
 	
 	/**
@@ -1229,80 +1173,72 @@ public:
 	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::thread_list_sync_t&
+	 * The function signature for this event takes a single `const` reference of type thread_list_sync_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const thread_list_sync_t&)> > on_thread_list_sync;
+	event_router_t<thread_list_sync_t> on_thread_list_sync;
 
 	
 	/**
 	 * @brief Called when current user's thread member object is updated
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::thread_member_update_t&
+	 * The function signature for this event takes a single `const` reference of type thread_member_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const thread_member_update_t&)> > on_thread_member_update;
+	event_router_t<thread_member_update_t> on_thread_member_update;
 
 	
 	/**
 	 * @brief Called when a thread's member list is updated (without GUILD_MEMBERS intent, is only called for current user)
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::thread_members_update_t&
+	 * The function signature for this event takes a single `const` reference of type thread_members_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const thread_members_update_t&)> > on_thread_members_update;
+	event_router_t<thread_members_update_t> on_thread_members_update;
 
 	
 	/**
 	 * @brief Called when a new scheduled event is created
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_create_t&
+	 * The function signature for this event takes a single `const` reference of type guild_scheduled_event_create_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_create_t&)> > on_guild_scheduled_event_create;
+	event_router_t<guild_scheduled_event_create_t> on_guild_scheduled_event_create;
 
 	
 	/**
 	 * @brief Called when a new scheduled event is updated
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_update_t&
+	 * The function signature for this event takes a single `const` reference of type guild_scheduled_event_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_update_t&)> > on_guild_scheduled_event_update;
+	event_router_t<guild_scheduled_event_update_t> on_guild_scheduled_event_update;
 
 	
 	/**
 	 * @brief Called when a new scheduled event is deleted
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_delete_t&
+	 * The function signature for this event takes a single `const` reference of type guild_scheduled_event_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_delete_t&)> > on_guild_scheduled_event_delete;
+	event_router_t<guild_scheduled_event_delete_t> on_guild_scheduled_event_delete;
 
 	
 	/**
 	 * @brief Called when a user is added to a scheduled event
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_user_add_t&
+	 * The function signature for this event takes a single `const` reference of type guild_scheduled_event_user_add_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_user_add_t&)> > on_guild_scheduled_event_user_add;
+	event_router_t<guild_scheduled_event_user_add_t> on_guild_scheduled_event_user_add;
 
 	
 	/**
 	 * @brief Called when a user is removed to a scheduled event
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_user_remove_t&
+	 * The function signature for this event takes a single `const` reference of type guild_scheduled_event_user_remove_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_user_remove_t&)> > on_guild_scheduled_event_user_remove;
+	event_router_t<guild_scheduled_event_user_remove_t> on_guild_scheduled_event_user_remove;
 
 	
 	/**
@@ -1314,20 +1250,18 @@ public:
 	 * content.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::voice_buffer_send_t&
+	 * The function signature for this event takes a single `const` reference of type voice_buffer_send_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const voice_buffer_send_t&)> > on_voice_buffer_send;
+	event_router_t<voice_buffer_send_t> on_voice_buffer_send;
 
 	
 	/**
 	 * @brief Called when a user is talking on a voice channel.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::voice_user_talking_t&
+	 * The function signature for this event takes a single `const` reference of type voice_user_talking_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const voice_user_talking_t&)> > on_voice_user_talking;
+	event_router_t<voice_user_talking_t> on_voice_user_talking;
 
 	
 	/**
@@ -1336,10 +1270,9 @@ public:
 	 * as there is further connection that needs to be done before audio is ready to send.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::voice_ready_t&
+	 * The function signature for this event takes a single `const` reference of type voice_ready_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const voice_ready_t&)> > on_voice_ready;
+	event_router_t<voice_ready_t> on_voice_ready;
 
 	
 	/**
@@ -1350,10 +1283,9 @@ public:
 	 * @note Receiveing audio for bots is not officially supported by discord.
 	 * 
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::voice_receive_t&
+	 * The function signature for this event takes a single `const` reference of type voice_receive_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const voice_receive_t&)> > on_voice_receive;
+	event_router_t<voice_receive_t> on_voice_receive;
 
 	
 	/**
@@ -1364,40 +1296,36 @@ public:
 	 * event.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::voice_track_marker_t&
+	 * The function signature for this event takes a single `const` reference of type voice_track_marker_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const voice_track_marker_t&)> > on_voice_track_marker;
+	event_router_t<voice_track_marker_t> on_voice_track_marker;
 
 	
 	/**
 	 * @brief Called when a new stage instance is created on a stage channel.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
 	 * 
 	 */
-	event_router_t< std::function<void(const stage_instance_create_t&)> > on_stage_instance_create;
+	event_router_t<stage_instance_create_t> on_stage_instance_create;
 
 	
 	/**
 	 * @brief Called when a stage instance is updated.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::stage_instance_update_t&
+	 * The function signature for this event takes a single `const` reference of type stage_instance_update_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const stage_instance_update_t&)> > on_stage_instance_update;
+	event_router_t<stage_instance_update_t> on_stage_instance_update;
 
 	
 	/**
 	 * @brief Called when an existing stage instance is deleted from a stage channel.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The lambda must match the signature of this template declaration.
-	 * Event is called with the parameter type `const` dpp::stage_instance_delete_t&
+	 * The function signature for this event takes a single `const` reference of type stage_instance_delete_t&, and returns void.
 	 */
-	event_router_t< std::function<void(const stage_instance_delete_t&)> > on_stage_instance_delete;
+	event_router_t<stage_instance_delete_t> on_stage_instance_delete;
 
 	
 	/**
@@ -3012,7 +2940,7 @@ private:
 	time_t duration;
 
 	/// Reference to attached event in cluster
-	//event_router_t< std::function<void(const thread_member_update_t&)> > on_thread_member_update;
+	//event_router_t<thread_member_update_t> on_thread_member_update;
 	attached_event& ev;
 
 	/// Timer handle
