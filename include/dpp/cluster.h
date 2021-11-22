@@ -3381,7 +3381,7 @@ public:
 	: owner(cl), duration(_duration), ev(event)
 	{
 		/* Attach event */
-		listener_handler = attach(cl, listener_handler, listener);
+		listener_handler = attach(cl, event, listener);
 		/* Create timer */
 		th = cl->start_timer([this]() {
 			/* Timer has finished, detach it from event.
