@@ -231,6 +231,7 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
+extern event_handle __next_handle;
 
 /**
  * @brief Handles routing of an event to multiple listeners.
@@ -279,10 +280,6 @@ private:
 	 */
 	mutable std::shared_mutex lock;
 	/**
-	 * @brief Next handle to be given out for this router
-	 */
-	event_handle next_handle;
-	/**
 	 * @brief Container of event listeners keyed by handle,
 	 * as handles are handed out sequentially they will always
 	 * be called in they order they are bound to the event
@@ -292,9 +289,8 @@ private:
 public:
 	/**
 	 * @brief Construct a new event_router_t object.
-	 * Note: Starts handle at 1.
 	 */
-	event_router_t() : next_handle(1) {
+	event_router_t() {
 	}
 
 	/**
@@ -336,7 +332,7 @@ public:
 	 */
 	event_handle operator()(std::function<void(const T&)> func) {
 		std::unique_lock l(lock);
-		event_handle h = next_handle++;
+		event_handle h = __next_handle++;
 		dispatch_container.emplace(h, func);
 		return h;		
 	}
