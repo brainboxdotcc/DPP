@@ -637,7 +637,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::voice_state_update_t&
 	 */
-	event_router_t< std::function<void(const voice_state_update_t& _event)> > on_voice_state_update;
+	event_router_t< std::function<void(const voice_state_update_t&)> > on_voice_state_update;
 
 	
 	/**
@@ -647,7 +647,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::voice_client_disconnect_t&
 	 */
-	event_router_t< std::function<void(const voice_client_disconnect_t& _event)> > on_voice_client_disconnect;
+	event_router_t< std::function<void(const voice_client_disconnect_t&)> > on_voice_client_disconnect;
 
 	
 	/**
@@ -657,7 +657,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::voice_client_speaking_t&
 	 */
-	event_router_t< std::function<void(const voice_client_speaking_t& _event)> > on_voice_client_speaking;
+	event_router_t< std::function<void(const voice_client_speaking_t&)> > on_voice_client_speaking;
 
 	
 	/**
@@ -680,7 +680,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_join_request_delete_t&
 	 */
-	event_router_t< std::function<void(const guild_join_request_delete_t& _event)> > on_guild_join_request_delete;
+	event_router_t< std::function<void(const guild_join_request_delete_t&)> > on_guild_join_request_delete;
 
 	
 	/**
@@ -692,7 +692,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::interaction_create_t&
 	 */
-	event_router_t< std::function<void(const interaction_create_t& _event)> > on_interaction_create;
+	event_router_t< std::function<void(const interaction_create_t&)> > on_interaction_create;
 
 	
 	/**
@@ -704,7 +704,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::button_click_t&
 	 */
-	event_router_t< std::function<void(const button_click_t& _event)> > on_button_click;
+	event_router_t< std::function<void(const button_click_t&)> > on_button_click;
 
 	
 	/**
@@ -716,7 +716,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::autocomplete_t&
 	 */
-	event_router_t< std::function<void(const autocomplete_t& _event)> > on_autocomplete;
+	event_router_t< std::function<void(const autocomplete_t&)> > on_autocomplete;
 
 	
 	/**
@@ -728,7 +728,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::select_click_t&
 	 */
-	event_router_t< std::function<void(const select_click_t& _event)> > on_select_click;
+	event_router_t< std::function<void(const select_click_t&)> > on_select_click;
 
 	
 	/**
@@ -741,7 +741,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_delete_t&
 	 */
-	event_router_t< std::function<void(const guild_delete_t& _event)> > on_guild_delete;
+	event_router_t< std::function<void(const guild_delete_t&)> > on_guild_delete;
 
 	
 	/**
@@ -754,7 +754,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::channel_delete_t&
 	 */
-	event_router_t< std::function<void(const channel_delete_t& _event)> > on_channel_delete;
+	event_router_t< std::function<void(const channel_delete_t&)> > on_channel_delete;
 
 	
 	/**
@@ -766,7 +766,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::channel_update_t&
 	 */
-	event_router_t< std::function<void(const channel_update_t& _event)> > on_channel_update;
+	event_router_t< std::function<void(const channel_update_t&)> > on_channel_update;
 
 	
 	/**
@@ -777,7 +777,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::ready_t&
 	 */
-	event_router_t< std::function<void(const ready_t& _event)> > on_ready;
+	event_router_t< std::function<void(const ready_t&)> > on_ready;
 
 	
 	/**
@@ -789,7 +789,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::message_delete_t&
 	 */
-	event_router_t< std::function<void(const message_delete_t& _event)> > on_message_delete;
+	event_router_t< std::function<void(const message_delete_t&)> > on_message_delete;
 
 	
 	/**
@@ -799,7 +799,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::application_command_delete_t&
 	 */
-	event_router_t< std::function<void(const application_command_delete_t& _event)> > on_application_command_delete;
+	event_router_t< std::function<void(const application_command_delete_t&)> > on_application_command_delete;
 
 	
 	/**
@@ -809,7 +809,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_member_remove_t&
 	 */
-	event_router_t< std::function<void(const guild_member_remove_t& _event)> > on_guild_member_remove;
+	event_router_t< std::function<void(const guild_member_remove_t&)> > on_guild_member_remove;
 
 	
 	/**
@@ -819,7 +819,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::application_command_create_t&
 	 */
-	event_router_t< std::function<void(const application_command_create_t& _event)> > on_application_command_create;
+	event_router_t< std::function<void(const application_command_create_t&)> > on_application_command_create;
 
 	
 	/**
@@ -831,7 +831,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::resumed_t&
 	 */
-	event_router_t< std::function<void(const resumed_t& _event)> > on_resumed;
+	event_router_t< std::function<void(const resumed_t&)> > on_resumed;
 
 	
 	/**
@@ -841,7 +841,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_role_create_t&
 	 */
-	event_router_t< std::function<void(const guild_role_create_t& _event)> > on_guild_role_create;
+	event_router_t< std::function<void(const guild_role_create_t&)> > on_guild_role_create;
 
 	
 	/**
@@ -851,7 +851,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::typing_start_t&
 	 */
-	event_router_t< std::function<void(const typing_start_t& _event)> > on_typing_start;
+	event_router_t< std::function<void(const typing_start_t&)> > on_typing_start;
 
 	
 	/**
@@ -861,7 +861,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::message_reaction_add_t&
 	 */
-	event_router_t< std::function<void(const message_reaction_add_t& _event)> > on_message_reaction_add;
+	event_router_t< std::function<void(const message_reaction_add_t&)> > on_message_reaction_add;
 
 	
 	/**
@@ -873,7 +873,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_members_chunk_t&
 	 */
-	event_router_t< std::function<void(const guild_members_chunk_t& _event)> > on_guild_members_chunk;
+	event_router_t< std::function<void(const guild_members_chunk_t&)> > on_guild_members_chunk;
 
 	
 	/**
@@ -883,7 +883,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::message_reaction_remove_t&
 	 */
-	event_router_t< std::function<void(const message_reaction_remove_t& _event)> > on_message_reaction_remove;
+	event_router_t< std::function<void(const message_reaction_remove_t&)> > on_message_reaction_remove;
 
 	
 	/**
@@ -894,7 +894,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_create_t&
 	 */
-	event_router_t< std::function<void(const guild_create_t& _event)> > on_guild_create;
+	event_router_t< std::function<void(const guild_create_t&)> > on_guild_create;
 
 	
 	/**
@@ -904,7 +904,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::channel_create_t&
 	 */
-	event_router_t< std::function<void(const channel_create_t& _event)> > on_channel_create;
+	event_router_t< std::function<void(const channel_create_t&)> > on_channel_create;
 
 	
 	/**
@@ -914,7 +914,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::message_reaction_remove_emoji_t&
 	 */
-	event_router_t< std::function<void(const message_reaction_remove_emoji_t& _event)> > on_message_reaction_remove_emoji;
+	event_router_t< std::function<void(const message_reaction_remove_emoji_t&)> > on_message_reaction_remove_emoji;
 
 	
 	/**
@@ -924,7 +924,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::message_delete_bulk_t&
 	 */
-	event_router_t< std::function<void(const message_delete_bulk_t& _event)> > on_message_delete_bulk;
+	event_router_t< std::function<void(const message_delete_bulk_t&)> > on_message_delete_bulk;
 
 	
 	/**
@@ -934,7 +934,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_role_update_t&
 	 */
-	event_router_t< std::function<void(const guild_role_update_t& _event)> > on_guild_role_update;
+	event_router_t< std::function<void(const guild_role_update_t&)> > on_guild_role_update;
 
 	
 	/**
@@ -944,7 +944,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_role_delete_t&
 	 */
-	event_router_t< std::function<void(const guild_role_delete_t& _event)> > on_guild_role_delete;
+	event_router_t< std::function<void(const guild_role_delete_t&)> > on_guild_role_delete;
 
 	
 	/**
@@ -956,7 +956,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::channel_pins_update_t&
 	 */
-	event_router_t< std::function<void(const channel_pins_update_t& _event)> > on_channel_pins_update;
+	event_router_t< std::function<void(const channel_pins_update_t&)> > on_channel_pins_update;
 
 	
 	/**
@@ -966,7 +966,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::message_reaction_remove_all_t&
 	 */
-	event_router_t< std::function<void(const message_reaction_remove_all_t& _event)> > on_message_reaction_remove_all;
+	event_router_t< std::function<void(const message_reaction_remove_all_t&)> > on_message_reaction_remove_all;
 
 	
 	/**
@@ -978,7 +978,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::voice_server_update_t&
 	 */
-	event_router_t< std::function<void(const voice_server_update_t& _event)> > on_voice_server_update;
+	event_router_t< std::function<void(const voice_server_update_t&)> > on_voice_server_update;
 
 	
 	/**
@@ -989,7 +989,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_emojis_update_t&
 	 */
-	event_router_t< std::function<void(const guild_emojis_update_t& _event)> > on_guild_emojis_update;
+	event_router_t< std::function<void(const guild_emojis_update_t&)> > on_guild_emojis_update;
 
 	
 	/**
@@ -1000,7 +1000,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_stickers_update_t&
 	 */
-	event_router_t< std::function<void(const guild_stickers_update_t& _event)> > on_guild_stickers_update;
+	event_router_t< std::function<void(const guild_stickers_update_t&)> > on_guild_stickers_update;
 
 	
 	/**
@@ -1014,7 +1014,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::presence_update_t&
 	 */
-	event_router_t< std::function<void(const presence_update_t& _event)> > on_presence_update;
+	event_router_t< std::function<void(const presence_update_t&)> > on_presence_update;
 
 	
 	/**
@@ -1024,7 +1024,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::webhooks_update_t&
 	 */
-	event_router_t< std::function<void(const webhooks_update_t& _event)> > on_webhooks_update;
+	event_router_t< std::function<void(const webhooks_update_t&)> > on_webhooks_update;
 
 	
 	/**
@@ -1034,7 +1034,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_member_add_t&
 	 */
-	event_router_t< std::function<void(const guild_member_add_t& _event)> > on_guild_member_add;
+	event_router_t< std::function<void(const guild_member_add_t&)> > on_guild_member_add;
 
 	
 	/**
@@ -1044,7 +1044,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::invite_delete_t&
 	 */
-	event_router_t< std::function<void(const invite_delete_t& _event)> > on_invite_delete;
+	event_router_t< std::function<void(const invite_delete_t&)> > on_invite_delete;
 
 	
 	/**
@@ -1054,7 +1054,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_update_t&
 	 */
-	event_router_t< std::function<void(const guild_update_t& _event)> > on_guild_update;
+	event_router_t< std::function<void(const guild_update_t&)> > on_guild_update;
 
 	
 	/**
@@ -1067,7 +1067,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_integrations_update_t&
 	 */
-	event_router_t< std::function<void(const guild_integrations_update_t& _event)> > on_guild_integrations_update;
+	event_router_t< std::function<void(const guild_integrations_update_t&)> > on_guild_integrations_update;
 
 	
 	/**
@@ -1077,7 +1077,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_member_update_t&
 	 */
-	event_router_t< std::function<void(const guild_member_update_t& _event)> > on_guild_member_update;
+	event_router_t< std::function<void(const guild_member_update_t&)> > on_guild_member_update;
 
 	
 	/**
@@ -1088,7 +1088,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::application_command_update_t&
 	 */
-	event_router_t< std::function<void(const application_command_update_t& _event)> > on_application_command_update;
+	event_router_t< std::function<void(const application_command_update_t&)> > on_application_command_update;
 
 	
 	/**
@@ -1098,7 +1098,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::invite_create_t&
 	 */
-	event_router_t< std::function<void(const invite_create_t& _event)> > on_invite_create;
+	event_router_t< std::function<void(const invite_create_t&)> > on_invite_create;
 
 	
 	/**
@@ -1108,7 +1108,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::message_update_t&
 	 */
-	event_router_t< std::function<void(const message_update_t& _event)> > on_message_update;
+	event_router_t< std::function<void(const message_update_t&)> > on_message_update;
 
 	
 	/**
@@ -1120,7 +1120,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::user_update_t&
 	 */
-	event_router_t< std::function<void(const user_update_t& _event)> > on_user_update;
+	event_router_t< std::function<void(const user_update_t&)> > on_user_update;
 
 	
 	/**
@@ -1133,7 +1133,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::message_create_t&
 	 */
-	event_router_t< std::function<void(const message_create_t& _event)> > on_message_create;
+	event_router_t< std::function<void(const message_create_t&)> > on_message_create;
 
 	
 	/**
@@ -1143,7 +1143,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_ban_add_t&
 	 */
-	event_router_t< std::function<void(const guild_ban_add_t& _event)> > on_guild_ban_add;
+	event_router_t< std::function<void(const guild_ban_add_t&)> > on_guild_ban_add;
 
 	
 	/**
@@ -1153,7 +1153,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_ban_remove_t&
 	 */
-	event_router_t< std::function<void(const guild_ban_remove_t& _event)> > on_guild_ban_remove;
+	event_router_t< std::function<void(const guild_ban_remove_t&)> > on_guild_ban_remove;
 
 	
 	/**
@@ -1165,7 +1165,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::integration_create_t&
 	 */
-	event_router_t< std::function<void(const integration_create_t& _event)> > on_integration_create;
+	event_router_t< std::function<void(const integration_create_t&)> > on_integration_create;
 
 	
 	/**
@@ -1178,7 +1178,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::integration_update_t&
 	 */
-	event_router_t< std::function<void(const integration_update_t& _event)> > on_integration_update;
+	event_router_t< std::function<void(const integration_update_t&)> > on_integration_update;
 
 	
 	/**
@@ -1190,7 +1190,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::integration_delete_t&
 	 */
-	event_router_t< std::function<void(const integration_delete_t& _event)> > on_integration_delete;
+	event_router_t< std::function<void(const integration_delete_t&)> > on_integration_delete;
 
 	
 	/**
@@ -1201,7 +1201,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::thread_create_t&
 	 */
-	event_router_t< std::function<void(const thread_create_t& _event)> > on_thread_create;
+	event_router_t< std::function<void(const thread_create_t&)> > on_thread_create;
 
 	
 	/**
@@ -1211,7 +1211,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::thread_update_t&
 	 */
-	event_router_t< std::function<void(const thread_update_t& _event)> > on_thread_update;
+	event_router_t< std::function<void(const thread_update_t&)> > on_thread_update;
 
 	
 	/**
@@ -1221,7 +1221,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::thread_delete_t&
 	 */
-	event_router_t< std::function<void(const thread_delete_t& _event)> > on_thread_delete;
+	event_router_t< std::function<void(const thread_delete_t&)> > on_thread_delete;
 
 	
 	/**
@@ -1232,7 +1232,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::thread_list_sync_t&
 	 */
-	event_router_t< std::function<void(const thread_list_sync_t& _event)> > on_thread_list_sync;
+	event_router_t< std::function<void(const thread_list_sync_t&)> > on_thread_list_sync;
 
 	
 	/**
@@ -1242,7 +1242,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::thread_member_update_t&
 	 */
-	event_router_t< std::function<void(const thread_member_update_t& _event)> > on_thread_member_update;
+	event_router_t< std::function<void(const thread_member_update_t&)> > on_thread_member_update;
 
 	
 	/**
@@ -1252,7 +1252,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::thread_members_update_t&
 	 */
-	event_router_t< std::function<void(const thread_members_update_t& _event)> > on_thread_members_update;
+	event_router_t< std::function<void(const thread_members_update_t&)> > on_thread_members_update;
 
 	
 	/**
@@ -1262,7 +1262,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_create_t&
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_create_t& _event)> > on_guild_scheduled_event_create;
+	event_router_t< std::function<void(const guild_scheduled_event_create_t&)> > on_guild_scheduled_event_create;
 
 	
 	/**
@@ -1272,7 +1272,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_update_t&
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_update_t& _event)> > on_guild_scheduled_event_update;
+	event_router_t< std::function<void(const guild_scheduled_event_update_t&)> > on_guild_scheduled_event_update;
 
 	
 	/**
@@ -1282,7 +1282,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_delete_t&
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_delete_t& _event)> > on_guild_scheduled_event_delete;
+	event_router_t< std::function<void(const guild_scheduled_event_delete_t&)> > on_guild_scheduled_event_delete;
 
 	
 	/**
@@ -1292,7 +1292,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_user_add_t&
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_user_add_t& _event)> > on_guild_scheduled_event_user_add;
+	event_router_t< std::function<void(const guild_scheduled_event_user_add_t&)> > on_guild_scheduled_event_user_add;
 
 	
 	/**
@@ -1302,7 +1302,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::guild_scheduled_event_user_remove_t&
 	 */
-	event_router_t< std::function<void(const guild_scheduled_event_user_remove_t& _event)> > on_guild_scheduled_event_user_remove;
+	event_router_t< std::function<void(const guild_scheduled_event_user_remove_t&)> > on_guild_scheduled_event_user_remove;
 
 	
 	/**
@@ -1317,7 +1317,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::voice_buffer_send_t&
 	 */
-	event_router_t< std::function<void(const voice_buffer_send_t& _event)> > on_voice_buffer_send;
+	event_router_t< std::function<void(const voice_buffer_send_t&)> > on_voice_buffer_send;
 
 	
 	/**
@@ -1327,7 +1327,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::voice_user_talking_t&
 	 */
-	event_router_t< std::function<void(const voice_user_talking_t& _event)> > on_voice_user_talking;
+	event_router_t< std::function<void(const voice_user_talking_t&)> > on_voice_user_talking;
 
 	
 	/**
@@ -1339,7 +1339,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::voice_ready_t&
 	 */
-	event_router_t< std::function<void(const voice_ready_t& _event)> > on_voice_ready;
+	event_router_t< std::function<void(const voice_ready_t&)> > on_voice_ready;
 
 	
 	/**
@@ -1353,7 +1353,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::voice_receive_t&
 	 */
-	event_router_t< std::function<void(const voice_receive_t& _event)> > on_voice_receive;
+	event_router_t< std::function<void(const voice_receive_t&)> > on_voice_receive;
 
 	
 	/**
@@ -1367,7 +1367,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::voice_track_marker_t&
 	 */
-	event_router_t< std::function<void(const voice_track_marker_t& _event)> > on_voice_track_marker;
+	event_router_t< std::function<void(const voice_track_marker_t&)> > on_voice_track_marker;
 
 	
 	/**
@@ -1377,7 +1377,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * 
 	 */
-	event_router_t< std::function<void(const stage_instance_create_t& _event)> > on_stage_instance_create;
+	event_router_t< std::function<void(const stage_instance_create_t&)> > on_stage_instance_create;
 
 	
 	/**
@@ -1387,7 +1387,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::stage_instance_update_t&
 	 */
-	event_router_t< std::function<void(const stage_instance_update_t& _event)> > on_stage_instance_update;
+	event_router_t< std::function<void(const stage_instance_update_t&)> > on_stage_instance_update;
 
 	
 	/**
@@ -1397,7 +1397,7 @@ public:
 	 * The lambda must match the signature of this template declaration.
 	 * Event is called with the parameter type `const` dpp::stage_instance_delete_t&
 	 */
-	event_router_t< std::function<void(const stage_instance_delete_t& _event)> > on_stage_instance_delete;
+	event_router_t< std::function<void(const stage_instance_delete_t&)> > on_stage_instance_delete;
 
 	
 	/**
@@ -3012,7 +3012,7 @@ private:
 	time_t duration;
 
 	/// Reference to attached event in cluster
-	//event_router_t< std::function<void(const thread_member_update_t& _event)> > on_thread_member_update;
+	//event_router_t< std::function<void(const thread_member_update_t&)> > on_thread_member_update;
 	attached_event& ev;
 
 	/// Timer handle
