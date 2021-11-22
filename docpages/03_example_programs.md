@@ -17,6 +17,7 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage subcommands "Using sub-commands in slash commands"
 * \subpage embed-message "Sending Embeds"
 * \subpage application-command-autocomplete "Slash command auto completion"
+* \subpage attach-file "Attaching a file"
 
 \page firstbot Creating Your First Bot
 
@@ -1232,5 +1233,87 @@ int main()
 	bot.start(false);
 
 	return 0;
+}
+~~~~~~~~~~
+
+\page attach-file Attaching a file to a message
+
+Attached files must be locally stored.
+
+To attach a file to a message, you can upload a local image.
+
+D++ has this helper function to read a file: `dpp::utility::read_file`.
+
+An example program:
+
+~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+#include <filesystem>
+
+int main() {
+    dpp::cluster bot("token");
+
+    /* Message handler to look for a command called !file */
+    bot.on_message_create([&bot](const dpp::message_create_t &event) {
+        if (event.msg->content == "!file") {
+            // create a message
+            dpp::message msg(event.msg->channel_id, "Hey there, i've got a new image!");
+
+            std::filesystem::path filePath("path_to_your_file.json");
+
+            // attach the file
+            msg.set_file_content(dpp::utility::read_file(filePath.relative_path()));
+            /*
+             * alternatively, you can put any other name in here.
+             * This name doesn't have to be the same as the uploaded filename.
+             * But it should have the same file extension.
+             */
+            msg.set_filename(filePath.filename());
+
+            // send the message
+            bot.message_create(msg);
+        }
+    });
+
+    bot.start(false);
+    return 0;
+}
+~~~~~~~~~~
+
+Attachments via an url aren't possible. But there's a workaround for. You can download the file and then attach it to the message.
+
+To make requests, D++ also has a helper function: `dpp::cluster::request`.
+
+The following example program shows how to request a file and attach it to a message.
+
+~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
+int main() {
+    dpp::cluster bot("token");
+
+    /* Message handler to look for a command called !file */
+    bot.on_message_create([&bot](const dpp::message_create_t &event) {
+        if (event.msg->content == "!file") {
+            // request an image
+            bot.request("https://dpp.dev/DPP-Logo.png", dpp::m_get, [&bot, channel_id = event.msg->channel_id](const dpp::http_request_completion_t & httpRequestCompletion) {
+
+                // create a message
+                dpp::message msg(channel_id, "This is my new attachment:");
+
+                // attach the image on success
+                if (httpRequestCompletion.status == 200) {
+                    msg.set_file_content(httpRequestCompletion.body);
+                    msg.set_filename("example-image.png"); // give the file a name
+                }
+
+                // send the message
+                bot.message_create(msg);
+            });
+        }
+    });
+
+    bot.start(false);
+    return 0;
 }
 ~~~~~~~~~~
