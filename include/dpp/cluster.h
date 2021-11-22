@@ -33,6 +33,7 @@
 #include <dpp/queues.h>
 #include <algorithm>
 #include <iostream>
+#include <shared_mutex>
 
 using  json = nlohmann::json;
 
@@ -233,13 +234,17 @@ typedef std::function<void(json&, const http_request_completion_t&)> json_encode
 
 /**
  * @brief Handles routing of an event to multiple listeners.
+ * 
  * Multiple listeners may attach to the event_router_t by means of operator(). Passing a
  * lambda into operator() attaches to the event.
+ * 
  * Dispatchers of the event may call the event_router_t::call() method to cause all listeners
  * to receive the event.
+ * 
  * The event_router_t::empty() method will return true if there are no listeners attached
  * to the event_router_t (this can be used to save time by not constructing objects that
  * nobody will ever see).
+ * 
  * The event_router_t::detach() method removes an existing listener from the event,
  * using the event_handle ID returned by operator().
  * 
@@ -270,6 +275,10 @@ typedef std::function<void(json&, const http_request_completion_t&)> json_encode
 template<class T> class event_router_t {
 private:
 	/**
+	 * @brief Thread safety mutex
+	 */
+	mutable std::shared_mutex lock;
+	/**
 	 * @brief Next handle to be given out for this router
 	 */
 	event_handle next_handle;
@@ -295,6 +304,7 @@ public:
 	 * @param event Class to pass as parameter to all listeners.
 	 */
 	void call(const T& event) const {
+		std::shared_lock l(lock);
 		std::for_each(dispatch_container.begin(), dispatch_container.end(), [&](auto &ev) {
 			if (!event.is_cancelled()) {
 				ev.second(event);
@@ -310,6 +320,7 @@ public:
 	 * @return false if there are some listeners
 	 */
 	bool empty() const {
+		std::shared_lock l(lock);
 		return dispatch_container.empty();
 	}
 
@@ -324,9 +335,24 @@ public:
 	 * detach the listener from the event later if neccessary.
 	 */
 	event_handle operator()(std::function<void(const T&)> func) {
+		std::unique_lock l(lock);
 		event_handle h = next_handle++;
 		dispatch_container.emplace(h, func);
 		return h;		
+	}
+
+	/**
+	 * @brief Attach a lambda to the event, adding a listener.
+	 * The lambda should follow the signature specified when declaring
+	 * the event object and should take exactly one parameter derived
+	 * from event_dispatch_t.
+	 * 
+	 * @param func Function lambda to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if neccessary.
+	 */
+	event_handle attach(std::function<void(const T&)> func) {
+		return (*this)(func);
 	}
 
 	/**
@@ -337,6 +363,7 @@ public:
 	 * @return false The ID is invalid (possibly already detached, or does not exist)
 	 */
 	bool detach(const event_handle handle) {
+		std::unique_lock l(lock);
 		auto i = dispatch_container.find(handle);
 		if (i != dispatch_container.end()) {
 			dispatch_container.erase(i);
