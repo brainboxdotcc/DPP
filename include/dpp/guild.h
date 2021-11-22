@@ -328,6 +328,7 @@ public:
 	 * @brief Vanity url code for verified or partnered servers and boost level 3
 	 * @note This field cannot be set from the API. Attempts to change this value will be
 	 * silently ignored even if the correct number of boosts or verified/partnered status exist.
+	 * See: https://github.com/discord/discord-api-docs/issues/519
 	 */
 	std::string vanity_url_code;
 
