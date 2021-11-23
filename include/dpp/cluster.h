@@ -331,10 +331,7 @@ public:
 	 * detach the listener from the event later if neccessary.
 	 */
 	event_handle operator()(std::function<void(const T&)> func) {
-		std::unique_lock l(lock);
-		event_handle h = __next_handle++;
-		dispatch_container.emplace(h, func);
-		return h;		
+		return this->attach(func);
 	}
 
 	/**
@@ -348,7 +345,10 @@ public:
 	 * detach the listener from the event later if neccessary.
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
-		return (*this)(func);
+		std::unique_lock l(lock);
+		event_handle h = next_handle++;
+		dispatch_container.emplace(h, func);
+		return h;		
 	}
 
 	/**
