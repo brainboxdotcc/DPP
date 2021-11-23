@@ -217,7 +217,42 @@ public:
 	 * @return std::string avatar or empty string
 	 */
 	std::string get_avatar_url() const;
-	
+
+	/**
+	 * @brief Set the nickname 
+	 * 
+	 * @param nick Nickname to set
+	 * 
+	 * @return guild_member& reference to self
+	 */
+	guild_member& set_nickname(const std::string& nick);
+
+	/**
+	 * @brief Set whether the user is muted in voice channels
+	 *
+	 * @param is_muted value to set, true if mute in voice channels
+	 * 
+	 * @return guild_member& reference to self 
+	 */
+	guild_member& set_mute(const bool is_muted);
+
+	/**
+	 * @brief Set whether the user is deafened in voice channels
+	 *
+	 * @param is_deafened value to set, true if deaf in voice channels
+	 * 
+	 * @return guild_member& reference to self 
+	 */
+	guild_member& set_deaf(const bool is_deafened);
+
+	/* 
+	 * @brief Set communication_disabled_until
+	 *
+	 * @param timestamp timestamp until communication is disabled
+	 *
+	 * @return guild_member& reference to self
+	 */
+	guild_member& set_communication_disabled_until(const time_t timestamp);
 };
 
 /**

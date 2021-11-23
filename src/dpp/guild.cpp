@@ -92,6 +92,26 @@ guild_member::guild_member() :
 {
 }
 
+guild_member& guild_member::set_nickname(const std::string& nick) {
+	this->nickname = nick;
+	return *this;
+}
+
+guild_member& guild_member::set_mute(const bool is_muted) {
+	this->flags = (is_muted) ? flags | gm_mute : flags & ~gm_mute;
+	return *this;
+}
+
+guild_member& guild_member::set_deaf(const bool is_deafened) {
+	this->flags = (is_deafened) ? flags | gm_deaf : flags & ~gm_deaf;
+	return *this;
+}
+
+guild_member& guild_member::set_communication_disabled_until(const time_t disabled_timestamp) {
+	this->communication_disabled_until = disabled_timestamp;
+	return *this;
+}
+
 guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id) {
 	this->guild_id = g_id;
 	this->user_id = u_id;
