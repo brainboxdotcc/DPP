@@ -52,7 +52,6 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 {
 	rest = new request_queue(this);
 	raw_rest = new request_queue(this);
-	next_eh = 0;
 #ifdef _WIN32
 	// Set up winsock.
 	WSADATA wsadata;

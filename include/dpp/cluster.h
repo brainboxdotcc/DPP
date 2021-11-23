@@ -372,13 +372,19 @@ class DPP_EXPORT cluster {
 
 	friend class discord_client;
 
-	/** queue system for commands sent to Discord, and any replies */
+	/**
+	 * @brief queue system for commands sent to Discord, and any replies
+	 */
 	request_queue* rest;
 
-	/** queue system for arbitrary HTTP requests sent by the user to sites other than Discord */
+	/**
+	 * @brief queue system for arbitrary HTTP requests sent by the user to sites other than Discord
+	 */
 	request_queue* raw_rest;
 
-	/** True if to use compression on shards */
+	/**
+	 * @brief True if to use compression on shards
+	 */
 	bool compressed;
 
 	/**
@@ -413,12 +419,6 @@ class DPP_EXPORT cluster {
 	timer_next_t next_timer;
 
 	/**
-	 * @brief Next event handle to be handed out.
-	 * Always incremental from 1, unique during execution.
-	 */
-	event_handle next_eh;
-
-	/**
 	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
 	 *
 	 * @param shardinfo Received HTTP data from API call
@@ -438,25 +438,39 @@ class DPP_EXPORT cluster {
 	 */
 	void timer_reschedule(timer_t* t);
 public:
-	/** Current bot token for all shards on this cluster and all commands sent via HTTP */
+	/**
+	 * @brief Current bot token for all shards on this cluster and all commands sent via HTTP
+	 */
 	std::string token;
 
-	/* Last time the bot sent an IDENTIFY */
+	/**
+	 * @brief Last time the bot sent an IDENTIFY
+	 */
 	time_t last_identify;
 
-	/** Current bitmask of gateway intents */
+	/**
+	 * @brief Current bitmask of gateway intents
+	 */
 	uint32_t intents;
 
-	/** Total number of shards across all clusters */
+	/**
+	 * @brief Total number of shards across all clusters
+	 */
 	uint32_t numshards;
 
-	/** ID of this cluster, between 0 and MAXCLUSTERS-1 inclusive */
+	/**
+	 * @brief ID of this cluster, between 0 and MAXCLUSTERS-1 inclusive
+	 */
 	uint32_t cluster_id;
 
-	/** Total number of clusters that are active */
+	/**
+	 * @brief Total number of clusters that are active
+	 */
 	uint32_t maxclusters;
 
-	/** REST latency (HTTPS ping) */
+	/**
+	 * @brief REST latency (HTTPS ping) in seconds
+	 */
 	double rest_ping;
 
 	/**
