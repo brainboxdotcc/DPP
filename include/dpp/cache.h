@@ -27,6 +27,9 @@
 
 namespace dpp {
 
+	/** forward declaratiin */
+	class guild_member;
+
 	/**
 	 * @brief A set of cached managed objects
 	 */
@@ -123,5 +126,16 @@ namespace dpp {
 	cache_decl(role, find_role, get_role_cache, get_role_count);
 	cache_decl(channel, find_channel, get_channel_cache, get_channel_count);
 	cache_decl(emoji, find_emoji, get_emoji_cache, get_emoji_count);
+
+	/**
+	 * @brief Get the guild_member from cache of given IDs
+	 *
+	 * @param guild_id ID of the guild to find guild_member for
+	 * @param user_id ID of the user to find guild_member for
+	 *
+	 * @throw dpp::cache_exception if the guild or guild_member is not found in the cache
+	 * @return guild_member the cached object, if found
+	 */
+	guild_member find_guild_member(const snowflake guild_id, const snowflake user_id);
 };
 

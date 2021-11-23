@@ -175,6 +175,11 @@ public:
 	 * @note This is a stub for documentation purposes. For full information on supported methods please see dpp::exception.
 	 */
 	class parse_exception : public dpp::exception { };
+	/**
+	 * @brief Represents invalid access to dpp's cache or its members, which may or may not exist. 
+	 * @note This is a stub for documentation purposes. For full information on supported methods please see dpp::exception.
+	 */
+	class cache_exception : public dpp::exception { };
 #else
 	derived_exception(logic_exception, dpp::exception);
 	derived_exception(file_exception, dpp::exception);
@@ -183,6 +188,7 @@ public:
 	derived_exception(rest_exception, dpp::exception);
 	derived_exception(length_exception, dpp::exception);
 	derived_exception(parse_exception, dpp::exception);
+	derived_exception(cache_exception, dpp::exception);
 #endif
 
 };
