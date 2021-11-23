@@ -245,7 +245,7 @@ public:
 	 */
 	guild_member& set_deaf(const bool is_deafened);
 
-	/* 
+	/**
 	 * @brief Set communication_disabled_until
 	 *
 	 * @param timestamp timestamp until communication is disabled
