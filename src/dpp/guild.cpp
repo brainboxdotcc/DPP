@@ -100,10 +100,10 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, sn
 }
 
 void from_json(const nlohmann::json& j, guild_member& gm) {
-	gm.nickname = StringNotNull(&j, "nick");
-	gm.joined_at = TimestampNotNull(&j, "joined_at");
-	gm.premium_since = TimestampNotNull(&j, "premium_since");
-	gm.communication_disabled_until = TimestampNotNull(&j, "communication_disabled_until");
+	set_string_not_null(&j, "nick", gm.nickname);
+	set_ts_not_null(&j, "joined_at", gm.joined_at);
+	set_ts_not_null(&j, "premium_since", gm.premium_since);
+	set_ts_not_null(&j, "communication_disabled_until", gm.communication_disabled_until);
 
 	gm.roles.clear();
 	if (j.contains("roles") && !j.at("roles").is_null()) {
