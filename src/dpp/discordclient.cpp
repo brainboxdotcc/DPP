@@ -81,7 +81,7 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 {
 	zlib = new zlibcontext();
 	etf = new etf_parser();
-	Connect();
+	this->connect();
 }
 
 discord_client::~discord_client()
@@ -99,7 +99,7 @@ uint64_t discord_client::get_decompressed_bytes_in()
 	return decompressed_total;
 }
 
-void discord_client::SetupZLib()
+void discord_client::setup_zlib()
 {
 	if (compressed) {
 		zlib->d_stream.zalloc = (alloc_func)0;
@@ -113,7 +113,7 @@ void discord_client::SetupZLib()
 
 }
 
-void discord_client::EndZLib()
+void discord_client::end_zlib()
 {
 	if (compressed) {
 		inflateEnd(&(zlib->d_stream));
@@ -124,22 +124,22 @@ void discord_client::EndZLib()
 	}
 }
 
-void discord_client::ThreadRun()
+void discord_client::thread_run()
 {
-	SetupZLib();
+	setup_zlib();
 	do {
 		bool error = false;
 		ready = false;
 		message_queue.clear();
 		ssl_client::read_loop();
 		ssl_client::close();
-		EndZLib();
-		SetupZLib();
+		end_zlib();
+		setup_zlib();
 		do {
 			error = false;
 			try {
-				ssl_client::Connect();
-				websocket_client::Connect();
+				ssl_client::connect();
+				websocket_client::connect();
 			}
 			catch (const std::exception &e) {
 				log(dpp::ll_error, std::string("Error establishing connection, retry in 5 seconds: ") + e.what());
@@ -151,13 +151,13 @@ void discord_client::ThreadRun()
 	} while(true);
 }
 
-void discord_client::Run()
+void discord_client::run()
 {
-	this->runner = new std::thread(&discord_client::ThreadRun, this);
+	this->runner = new std::thread(&discord_client::thread_run, this);
 	this->thread_id = runner->native_handle();
 }
 
-bool discord_client::HandleFrame(const std::string &buffer)
+bool discord_client::handle_frame(const std::string &buffer)
 {
 	std::string& data = (std::string&)buffer;
 
@@ -180,17 +180,17 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				{
 					case Z_NEED_DICT:
 					case Z_STREAM_ERROR:
-						this->Error(6000);
+						this->error(6000);
 						this->close();
 						return true;
 					break;
 					case Z_DATA_ERROR:
-						this->Error(6001);
+						this->error(6001);
 						this->close();
 						return true;
 					break;
 					case Z_MEM_ERROR:
-						this->Error(6002);
+						this->error(6002);
 						this->close();
 						return true;
 					break;
@@ -226,7 +226,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				j = json::parse(data);
 			}
 			catch (const std::exception &e) {
-				log(dpp::ll_error, fmt::format("discord_client::HandleFrame(JSON): {} [{}]", e.what(), data));
+				log(dpp::ll_error, fmt::format("discord_client::handle_frame(JSON): {} [{}]", e.what(), data));
 				return true;
 			}
 		break;
@@ -235,7 +235,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				j = etf->parse(data);
 			}
 			catch (const std::exception &e) {
-				log(dpp::ll_error, fmt::format("discord_client::HandleFrame(ETF): {} len={}\n{}", e.what(), data.size(), dpp::utility::debug_dump((uint8_t*)data.data(), data.size())));
+				log(dpp::ll_error, fmt::format("discord_client::handle_frame(ETF): {} len={}\n{}", e.what(), data.size(), dpp::utility::debug_dump((uint8_t*)data.data(), data.size())));
 				return true;
 			}
 		break;
@@ -318,7 +318,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 			break;
 			case 0: {
 				std::string event = j["t"];
-				HandleEvent(event, j, data);
+				handle_event(event, j, data);
 			}
 			break;
 			case 7:
@@ -352,10 +352,10 @@ dpp::utility::uptime discord_client::get_uptime()
 
 bool discord_client::is_connected()
 {
-	return (this->GetState() == CONNECTED) && (this->ready);
+	return (this->get_state() == CONNECTED) && (this->ready);
 }
 
-void discord_client::Error(uint32_t errorcode)
+void discord_client::error(uint32_t errorcode)
 {
 	const static std::map<uint32_t, std::string> errortext = {
 		{ 1000, "Socket shutdown" },
@@ -412,7 +412,7 @@ void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 	}
 }
 
-void discord_client::QueueMessage(const std::string &j, bool to_front)
+void discord_client::queue_message(const std::string &j, bool to_front)
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	if (to_front) {
@@ -422,13 +422,13 @@ void discord_client::QueueMessage(const std::string &j, bool to_front)
 	}
 }
 
-void discord_client::ClearQueue()
+void discord_client::clear_queue()
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	message_queue.clear();
 }
 
-size_t discord_client::GetQueueSize()
+size_t discord_client::get_queue_size()
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	return message_queue.size();
@@ -502,7 +502,7 @@ void discord_client::one_second_timer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				QueueMessage(
+				queue_message(
 					jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}))
 					, true);
 				last_heartbeat = time(NULL);
@@ -571,7 +571,7 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id, boo
 		* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
 		*/
 		log(ll_debug, fmt::format("Sending op 4 to join VC, guild {} channel {} ", guild_id, channel_id));
-		QueueMessage(jsonobj_to_string(json({
+		queue_message(jsonobj_to_string(json({
 			{ "op", 4 },
 			{ "d", {
 					{ "guild_id", std::to_string(guild_id) },
@@ -602,7 +602,7 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 	if (v != connecting_voice_channels.end()) {
 		log(ll_debug, fmt::format("Disconnecting voice, guild: {}", guild_id));
 		if (emit_json) {
-			QueueMessage(jsonobj_to_string(json({
+			queue_message(jsonobj_to_string(json({
 				{ "op", 4 },
 				{ "d", {
 						{ "guild_id", std::to_string(guild_id) },
@@ -668,7 +668,7 @@ void voiceconn::connect(snowflake guild_id) {
 				this->creator->log(ll_debug, fmt::format("Connecting voice for guild {} channel {}", guild_id, this->channel_id));
 				this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname);
 				/* Note: Spawns thread! */
-				this->voiceclient->Run();
+				this->voiceclient->run();
 			}
 			catch (std::exception &e) {
 				this->creator->log(ll_error, fmt::format("Can't connect to voice websocket (guild_id: {}, channel_id: {}): {}", guild_id, this->channel_id, e.what()));

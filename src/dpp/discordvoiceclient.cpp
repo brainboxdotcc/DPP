@@ -114,7 +114,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 		throw dpp::voice_exception(fmt::format("discord_voice_client::discord_voice_client; opus_decoder_create() failed: {}", opusError));
 	}
 	repacketizer = opus_repacketizer_create();
-	Connect();
+	this->connect();
 #endif
 }
 
@@ -155,25 +155,25 @@ bool discord_voice_client::is_playing() {
 	return (!this->outbuf.empty());
 }
 
-void discord_voice_client::ThreadRun()
+void discord_voice_client::thread_run()
 {
 	do {
 		ssl_client::read_loop();
 		ssl_client::close();
 		if (!terminating) {
-			ssl_client::Connect();
-			websocket_client::Connect();
+			ssl_client::connect();
+			websocket_client::connect();
 		}
 	} while(!terminating);
 }
 
-void discord_voice_client::Run()
+void discord_voice_client::run()
 {
-	this->runner = new std::thread(&discord_voice_client::ThreadRun, this);
+	this->runner = new std::thread(&discord_voice_client::thread_run, this);
 	this->thread_id = runner->native_handle();
 }
 
-int discord_voice_client::UDPSend(const char* data, size_t length)
+int discord_voice_client::udp_send(const char* data, size_t length)
 {
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
@@ -182,12 +182,12 @@ int discord_voice_client::UDPSend(const char* data, size_t length)
 	return sendto(this->fd, data, (int)length, 0, (const sockaddr*)&servaddr, (int)sizeof(sockaddr_in));
 }
 
-int discord_voice_client::UDPRecv(char* data, size_t max_length)
+int discord_voice_client::udp_recv(char* data, size_t max_length)
 {
 	return recv(this->fd, data, (int)max_length, 0);
 }
 
-bool discord_voice_client::HandleFrame(const std::string &data)
+bool discord_voice_client::handle_frame(const std::string &data)
 {
 	log(dpp::ll_trace, fmt::format("R: {}", data));
 	json j;
@@ -196,7 +196,7 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 		j = json::parse(data);
 	}
 	catch (const std::exception &e) {
-		log(dpp::ll_error, fmt::format("discord_voice_client::HandleFrame {} [{}]", e.what(), data));
+		log(dpp::ll_error, fmt::format("discord_voice_client::handle_frame {} [{}]", e.what(), data));
 		return true;
 	}
 
@@ -360,10 +360,10 @@ bool discord_voice_client::HandleFrame(const std::string &data)
 #endif
 					/* Hook select() in the ssl_client to add a new file descriptor */
 					this->fd = newfd;
-					this->custom_writeable_fd = std::bind(&discord_voice_client::WantWrite, this);
-					this->custom_readable_fd = std::bind(&discord_voice_client::WantRead, this);
-					this->custom_writeable_ready = std::bind(&discord_voice_client::WriteReady, this);
-					this->custom_readable_ready = std::bind(&discord_voice_client::ReadReady, this);
+					this->custom_writeable_fd = std::bind(&discord_voice_client::want_write, this);
+					this->custom_readable_fd = std::bind(&discord_voice_client::want_read, this);
+					this->custom_writeable_ready = std::bind(&discord_voice_client::write_ready, this);
+					this->custom_readable_ready = std::bind(&discord_voice_client::read_ready, this);
 
 					int bound_port = 0;
 					sockaddr_in sin;
@@ -423,7 +423,7 @@ void discord_voice_client::stop_audio() {
 	outbuf.clear();
 }
 
-void discord_voice_client::Send(const char* packet, size_t len, uint64_t duration) {
+void discord_voice_client::send(const char* packet, size_t len, uint64_t duration) {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	voice_out_packet frame;
 	frame.packet = std::string(packet, len);
@@ -431,11 +431,11 @@ void discord_voice_client::Send(const char* packet, size_t len, uint64_t duratio
 	outbuf.emplace_back(frame);
 }
 
-void discord_voice_client::ReadReady()
+void discord_voice_client::read_ready()
 {
 #ifdef HAVE_VOICE
 	uint8_t buffer[65535];
-	int r = this->UDPRecv((char*)buffer, sizeof(buffer));
+	int r = this->udp_recv((char*)buffer, sizeof(buffer));
 
 	if (r > 0 && !creator->on_voice_receive.empty()) {
 		voice_receive_t vr(nullptr, std::string((const char*)buffer, r));
@@ -507,7 +507,7 @@ void discord_voice_client::ReadReady()
 #endif
 }
 
-void discord_voice_client::WriteReady()
+void discord_voice_client::write_ready()
 {
 	uint64_t duration = 0;
 	bool track_marker_found = false;
@@ -523,7 +523,7 @@ void discord_voice_client::WriteReady()
 					tracks--;
 			}
 			if (outbuf.size()) {
-				if (this->UDPSend(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
+				if (this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
 					duration = outbuf[0].duration * timescale;
 					outbuf.erase(outbuf.begin());
 					bufsize = outbuf.size();
@@ -568,10 +568,10 @@ dpp::utility::uptime discord_voice_client::get_uptime()
 
 bool discord_voice_client::is_connected()
 {
-	return (this->GetState() == CONNECTED);
+	return (this->get_state() == CONNECTED);
 }
 
-dpp::socket discord_voice_client::WantWrite() {
+dpp::socket discord_voice_client::want_write() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	if (!this->paused && !outbuf.empty()) {
 		return fd;
@@ -580,11 +580,11 @@ dpp::socket discord_voice_client::WantWrite() {
 	}
 }
 
-dpp::socket discord_voice_client::WantRead() {
+dpp::socket discord_voice_client::want_read() {
 	return fd;
 }
 
-void discord_voice_client::Error(uint32_t errorcode)
+void discord_voice_client::error(uint32_t errorcode)
 {
 	const static std::map<uint32_t, std::string> errortext = {
 		{ 1000, "Socket shutdown" },
@@ -636,7 +636,7 @@ void discord_voice_client::log(dpp::loglevel severity, const std::string &msg) c
 	creator->log(severity, msg);
 }
 
-void discord_voice_client::QueueMessage(const std::string &j, bool to_front)
+void discord_voice_client::queue_message(const std::string &j, bool to_front)
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	if (to_front) {
@@ -646,13 +646,13 @@ void discord_voice_client::QueueMessage(const std::string &j, bool to_front)
 	}
 }
 
-void discord_voice_client::ClearQueue()
+void discord_voice_client::clear_queue()
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	message_queue.clear();
 }
 
-size_t discord_voice_client::GetQueueSize()
+size_t discord_voice_client::get_queue_size()
 {
 	std::lock_guard<std::mutex> locker(queue_mutex);
 	return message_queue.size();
@@ -669,7 +669,7 @@ void discord_voice_client::one_second_timer()
 		throw dpp::connection_exception("Terminating voice connection");
 	}
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
-	if (this->GetState() == CONNECTED) {
+	if (this->get_state() == CONNECTED) {
 		for (int x = 0; x < (time(nullptr) % 2) + 1; ++x) {
 			std::lock_guard<std::mutex> locker(queue_mutex);
 			if (!message_queue.empty()) {
@@ -682,7 +682,7 @@ void discord_voice_client::one_second_timer()
 		if (this->heartbeat_interval) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				QueueMessage(json({{"op", 3}, {"d", rand()}}).dump(), true);
+				queue_message(json({{"op", 3}, {"d", rand()}}).dump(), true);
 				last_heartbeat = time(nullptr);
 			}
 		}
@@ -741,7 +741,7 @@ void discord_voice_client::insert_marker(const std::string& metadata) {
 	 * to actually send it, and instead to skip it
 	 */
 	uint16_t tm = AUDIO_TRACK_MARKER;
-	Send((const char*)&tm, sizeof(uint16_t), 0);
+	this->send((const char*)&tm, sizeof(uint16_t), 0);
 	{
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		track_meta.push_back(metadata);
@@ -842,7 +842,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
 
-	Send((const char*)audioDataPacket.data(), audioDataPacket.size(), duration);
+	this->send((const char*)audioDataPacket.data(), audioDataPacket.size(), duration);
 	timestamp += frameSize;
 
 	speak();
@@ -852,7 +852,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 discord_voice_client& discord_voice_client::speak() {
 	if (!this->sending) {
-		this->QueueMessage(json({
+		this->queue_message(json({
 		{"op", 5},
 		{"d", {
 			{"speaking", 1},
@@ -898,7 +898,7 @@ std::string discord_voice_client::discover_ip() {
 			log(ll_warning, "Could not connect socket for IP discovery");
 			return "";
 		}
-		if (send(newfd, (const char*)packet, 74, 0) == -1) {
+		if (::send(newfd, (const char*)packet, 74, 0) == -1) {
 			log(ll_warning, "Could not send packet for IP discovery");
 			return "";
 		}

@@ -101,23 +101,23 @@ class DPP_EXPORT websocket_client : public ssl_client
 	 * @param sendlength The size of the data to encapsulate
 	 * @param opcode the ws_opcode to send in the header
 	 */
-	size_t FillHeader(unsigned char* outbuf, size_t sendlength, ws_opcode opcode);
+	size_t fill_header(unsigned char* outbuf, size_t sendlength, ws_opcode opcode);
 
 	/** Handle ping and pong requests.
 	 * @param ping True if this is a ping, false if it is a pong 
 	 * @param payload The ping payload, to be returned as-is for a ping
 	 */
-	void HandlePingPong(bool ping, const std::string &payload);
+	void handle_ping_pong(bool ping, const std::string &payload);
 
 protected:
 
 	/** (Re)connect */
-	virtual void Connect();
+	virtual void connect();
 
 	/** Get websocket state
 	 * @return websocket state
 	 */
-	ws_state GetState();
+	ws_state get_state();
 
 public:
 
@@ -159,14 +159,14 @@ public:
 	 * @param buffer The buffer contents
 	 * @return True if the frame was successfully handled. False if no valid frame is in the buffer.
 	 */
-	virtual bool HandleFrame(const std::string &buffer);
+	virtual bool handle_frame(const std::string &buffer);
 
 	/**
 	 * @brief Called upon error frame.
 	 * 
 	 * @param errorcode The error code from the websocket server
 	 */
-	virtual void Error(uint32_t errorcode);
+	virtual void error(uint32_t errorcode);
 
 	/** Fires every second from the underlying socket I/O loop, used for sending webscocket pings */
 	virtual void one_second_timer();

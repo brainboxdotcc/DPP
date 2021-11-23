@@ -171,9 +171,9 @@ private:
 
 	/**
 	 * @brief Run shard loop under a thread.
-	 * Calls discord_client::Run() from within a std::thread.
+	 * Calls discord_client::run() from within a std::thread.
 	 */
-	void ThreadRun();
+	void thread_run();
 
 	/** If true, stream compression is enabled */
 	bool compressed;
@@ -218,12 +218,12 @@ private:
 	 * @brief Initialise ZLib (websocket compression)
 	 * @throw dpp::exception if ZLib cannot be initialised
 	 */
-	void SetupZLib();
+	void setup_zlib();
 
 	/**
 	 * @brief Shut down ZLib (websocket compression)
 	 */
-	void EndZLib();
+	void end_zlib();
 
 public:
 	/** Owning cluster */
@@ -293,7 +293,7 @@ public:
 	 * @param j JSON object for the event content
 	 * @param raw Raw JSON event string
 	 */
-	virtual void HandleEvent(const std::string &event, json &j, const std::string &raw);
+	virtual void handle_event(const std::string &event, json &j, const std::string &raw);
 
 	/**
 	 * @brief Get the Guild Count for this shard
@@ -327,19 +327,19 @@ public:
 	 * (this is for urgent messages such as heartbeat, presence, so they can take precedence over
 	 * chunk requests etc)
 	 */
-	void QueueMessage(const std::string &j, bool to_front = false);
+	void queue_message(const std::string &j, bool to_front = false);
 
 	/**
 	 * @brief Clear the outbound message queue
 	 */
-	void ClearQueue();
+	void clear_queue();
 
 	/**
 	 * @brief Get the size of the outbound message queue
 	 * 
 	 * @return The size of the queue
 	 */
-	size_t GetQueueSize();
+	size_t get_queue_size();
 
 	/**
 	 * @brief Returns true if the shard is connected
@@ -378,19 +378,19 @@ public:
 	 * @param buffer The entire buffer content from the websocket client
 	 * @returns True if a frame has been handled
 	 */
-	virtual bool HandleFrame(const std::string &buffer);
+	virtual bool handle_frame(const std::string &buffer);
 
 	/** Handle a websocket error.
 	 * @param errorcode The error returned from the websocket
 	 */
-	virtual void Error(uint32_t errorcode);
+	virtual void error(uint32_t errorcode);
 
 	/**
 	 * @brief Start and monitor I/O loop.
 	 * Note that this is a blocking call and is usually executed within a
 	 * thread by whatever creates the object.
 	 */
-	void Run();
+	void run();
 
 	/**
 	 * @brief Connect to a voice channel

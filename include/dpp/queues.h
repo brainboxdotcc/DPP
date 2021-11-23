@@ -130,7 +130,7 @@ enum http_method {
  * 
  * You should instantiate one of these objects via its constructor,
  * and pass a pointer to it into an instance of request_queue. Although you can
- * directly call the Run() method of the object and it will make a HTTP call, be
+ * directly call the run() method of the object and it will make a HTTP call, be
  * aware that if you do this, it will be a **BLOCKING call** (not asynchronous) and
  * will not respect rate limits, as both of these functions are managed by the
  * request_queue class.
@@ -195,7 +195,7 @@ public:
 	/** Execute the HTTP request and mark the request complete.
 	 * @param owner creating cluster
 	 */
-	http_request_completion_t Run(class cluster* owner);
+	http_request_completion_t run(class cluster* owner);
 
 	/** Returns true if the request is complete */
 	bool is_completed();
