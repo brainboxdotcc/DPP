@@ -1,0 +1,16 @@
+name: Check Build
+
+on:
+  workflow_run:
+    workflows: ['D++ CI', 'Docs Build (dpp.dev)']
+    types:
+      - completed
+
+jobs:
+  completion:
+    name: Mark build as completed
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Dummy step
+        run: echo "All good!"
