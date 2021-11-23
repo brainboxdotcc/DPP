@@ -74,7 +74,7 @@ void cluster::guild_templates_get(snowflake guild_id, command_completion_event_t
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_dtemplate : j) {
-				dtemplates[SnowflakeNotNull(&curr_dtemplate, "id")] = dtemplate().fill_from_json(&curr_dtemplate);
+				dtemplates[snowflake_not_null(&curr_dtemplate, "id")] = dtemplate().fill_from_json(&curr_dtemplate);
 			}
 		}
 		if (callback) {

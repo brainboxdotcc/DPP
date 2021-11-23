@@ -44,7 +44,7 @@ component::component() :
 
 
 component& component::fill_from_json(nlohmann::json* j) {
-	type = static_cast<component_type>(Int8NotNull(j, "type"));
+	type = static_cast<component_type>(int8_not_null(j, "type"));
 	if (type == cot_action_row) {
 		for (json sub_component : (*j)["components"]) {
 			dpp::component new_component;
@@ -52,14 +52,14 @@ component& component::fill_from_json(nlohmann::json* j) {
 			components.emplace_back(new_component);
 		}
 	} else if (type == cot_button) {
-		label = StringNotNull(j, "label");
-		style = static_cast<component_style>(Int8NotNull(j, "style"));
-		custom_id = StringNotNull(j, "custom_id");
-		disabled = BoolNotNull(j, "disabled");
+		label = string_not_null(j, "label");
+		style = static_cast<component_style>(int8_not_null(j, "style"));
+		custom_id = string_not_null(j, "custom_id");
+		disabled = bool_not_null(j, "disabled");
 	} else if (type == cot_selectmenu) {
 		label = "";
-		custom_id = StringNotNull(j, "custom_id");
-		disabled = BoolNotNull(j, "disabled");
+		custom_id = string_not_null(j, "custom_id");
+		disabled = bool_not_null(j, "disabled");
 	}
 	return *this;
 }
@@ -362,18 +362,18 @@ message::message(snowflake _channel_id, const embed& _embed) : message() {
 }
 
 embed::embed(json* j) : embed() {
-	title = StringNotNull(j, "title");
-	type = StringNotNull(j, "type");
-	description = StringNotNull(j, "description");
-	url = StringNotNull(j, "url");
-	timestamp = TimestampNotNull(j, "timestamp");
-	color = Int32NotNull(j, "color");
+	title = string_not_null(j, "title");
+	type = string_not_null(j, "type");
+	description = string_not_null(j, "description");
+	url = string_not_null(j, "url");
+	timestamp = ts_not_null(j, "timestamp");
+	color = int32_not_null(j, "color");
 	if (j->find("footer") != j->end()) {
 		dpp::embed_footer f;
 		json& fj = (*j)["footer"];
-		f.text = StringNotNull(&fj, "text");
-		f.icon_url = StringNotNull(&fj, "icon_url");
-		f.proxy_url = StringNotNull(&fj, "proxy_url");
+		f.text = string_not_null(&fj, "text");
+		f.icon_url = string_not_null(&fj, "icon_url");
+		f.proxy_url = string_not_null(&fj, "proxy_url");
 		footer = f;
 	}
 	std::vector<std::string> type_list = { "image", "video", "thumbnail" };
@@ -381,10 +381,10 @@ embed::embed(json* j) : embed() {
 		if (j->find(s) != j->end()) {
 			embed_image curr;
 			json& fi = (*j)[s];
-			curr.url = StringNotNull(&fi, "url");
-			curr.height = StringNotNull(&fi, "height");
-			curr.width = StringNotNull(&fi, "width");
-			curr.proxy_url = StringNotNull(&fi, "proxy_url");
+			curr.url = string_not_null(&fi, "url");
+			curr.height = string_not_null(&fi, "height");
+			curr.width = string_not_null(&fi, "width");
+			curr.proxy_url = string_not_null(&fi, "proxy_url");
 			if (s == "image") {
 				image = curr;
 			} else if (s == "video") {
@@ -397,26 +397,26 @@ embed::embed(json* j) : embed() {
 	if (j->find("provider") != j->end()) {
 		json &p = (*j)["provider"];
 		dpp::embed_provider pr;
-		pr.name = StringNotNull(&p, "name");
-		pr.url = StringNotNull(&p, "url");
+		pr.name = string_not_null(&p, "name");
+		pr.url = string_not_null(&p, "url");
 		provider = pr;
 	}
 	if (j->find("author") != j->end()) {
 		json &a = (*j)["author"];
 		dpp::embed_author au;
-		au.name = StringNotNull(&a, "name");
-		au.url = StringNotNull(&a, "url");
-		au.icon_url = StringNotNull(&a, "icon_url");
-		au.proxy_icon_url = StringNotNull(&a, "proxy_icon_url");
+		au.name = string_not_null(&a, "name");
+		au.url = string_not_null(&a, "url");
+		au.icon_url = string_not_null(&a, "icon_url");
+		au.proxy_icon_url = string_not_null(&a, "proxy_icon_url");
 		author = au;
 	}
 	if (j->find("fields") != j->end()) {
 		json &fl = (*j)["fields"];
 		for (auto & field : fl) {
 			embed_field f;
-			f.name = StringNotNull(&field, "name");
-			f.value = StringNotNull(&field, "value");
-			f.is_inline = BoolNotNull(&field, "inline");
+			f.name = string_not_null(&field, "name");
+			f.value = string_not_null(&field, "value");
+			f.is_inline = bool_not_null(&field, "inline");
 			fields.push_back(f);
 		}
 	}
@@ -534,8 +534,8 @@ reaction::reaction(json* j) {
 	count = (*j)["count"];
 	me = (*j)["me"];
 	json emoji = (*j)["emoji"];
-	emoji_id = SnowflakeNotNull(&emoji, "id");
-	emoji_name = StringNotNull(&emoji, "name");
+	emoji_id = snowflake_not_null(&emoji, "id");
+	emoji_name = string_not_null(&emoji, "name");
 }
 
 attachment::attachment(struct message* o) 
@@ -549,15 +549,15 @@ attachment::attachment(struct message* o)
 }
 
 attachment::attachment(struct message* o, json *j) : attachment(o) {
-	this->id = SnowflakeNotNull(j, "id");
+	this->id = snowflake_not_null(j, "id");
 	this->size = (*j)["size"];
 	this->filename = (*j)["filename"];
 	this->url = (*j)["url"];
 	this->proxy_url = (*j)["proxy_url"];
-	this->width = Int32NotNull(j, "width");
-	this->height = Int32NotNull(j, "height");
-	this->content_type = StringNotNull(j, "content_type");
-	this->ephemeral = BoolNotNull(j, "ephemeral");
+	this->width = int32_not_null(j, "width");
+	this->height = int32_not_null(j, "height");
+	this->content_type = string_not_null(j, "content_type");
+	this->ephemeral = bool_not_null(j, "ephemeral");
 }
 
 void attachment::download(http_completion_event callback) const {
@@ -732,9 +732,9 @@ message::~message() = default;
 
 
 message& message::fill_from_json(json* d, cache_policy_t cp) {
-	this->id = SnowflakeNotNull(d, "id");
-	this->channel_id = SnowflakeNotNull(d, "channel_id");
-	this->guild_id = SnowflakeNotNull(d, "guild_id");
+	this->id = snowflake_not_null(d, "id");
+	this->channel_id = snowflake_not_null(d, "channel_id");
+	this->guild_id = snowflake_not_null(d, "guild_id");
 	/* We didn't get a guild id. See if we can find one in the channel */
 	if (guild_id == 0 && channel_id != 0) {
 		dpp::channel* c = dpp::find_channel(this->channel_id);
@@ -742,8 +742,8 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			this->guild_id = c->guild_id;
 		}
 	}
-	this->flags = Int8NotNull(d, "flags");
-	this->type = Int8NotNull(d, "type");
+	this->flags = int8_not_null(d, "flags");
+	this->type = int8_not_null(d, "type");
 	this->author = nullptr;
 	user* authoruser = nullptr;
 	/* May be null, if its null cache it from the partial */
@@ -756,7 +756,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			self_author.fill_from_json(&j_author);
 		} else {
 			/* User caching on - aggressive or lazy - create a cached user entry */
-			authoruser = find_user(SnowflakeNotNull(&j_author, "id"));
+			authoruser = find_user(snowflake_not_null(&j_author, "id"));
 			if (!authoruser) {
 				/* User does not exist yet, cache the partial as a user record */
 				authoruser = new user();
@@ -768,9 +768,9 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	}
 	if (d->find("interaction") != d->end()) {
 		json& inter = (*d)["interaction"];
-		interaction.id = SnowflakeNotNull(&inter, "id");
-		interaction.name = StringNotNull(&inter, "name");
-		interaction.type = Int8NotNull(&inter, "type");
+		interaction.id = snowflake_not_null(&inter, "id");
+		interaction.name = string_not_null(&inter, "name");
+		interaction.type = int8_not_null(&inter, "type");
 		if (inter.contains("user") && !inter["user"].is_null()) from_json(inter["user"], interaction.usr);
 	}
 	if (d->find("sticker_items") != d->end()) {
@@ -806,7 +806,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->member = {};
 	if (g && d->find("member") != d->end()) {
 		json& mi = (*d)["member"];
-		snowflake uid = SnowflakeNotNull(&(mi["user"]), "id");
+		snowflake uid = snowflake_not_null(&(mi["user"]), "id");
 		if (!uid && authoruser) {
 			uid = authoruser->id;
 		}
@@ -839,11 +839,11 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			this->embeds.emplace_back(embed(&e));
 		}
 	}
-	this->content = StringNotNull(d, "content");
-	this->sent = TimestampNotNull(d, "timestamp");
-	this->edited = TimestampNotNull(d, "edited_timestamp");
-	this->tts = BoolNotNull(d, "tts");
-	this->mention_everyone = BoolNotNull(d, "mention_everyone");
+	this->content = string_not_null(d, "content");
+	this->sent = ts_not_null(d, "timestamp");
+	this->edited = ts_not_null(d, "edited_timestamp");
+	this->tts = bool_not_null(d, "tts");
+	this->mention_everyone = bool_not_null(d, "mention_everyone");
 	if (d->find("reactions") != d->end()) {
 		json & el = (*d)["reactions"];
 		for (auto& e : el) {
@@ -851,21 +851,21 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		}
 	}
 	if (((*d)["nonce"]).is_string()) {
-		this->nonce = StringNotNull(d, "nonce");
+		this->nonce = string_not_null(d, "nonce");
 	} else {
-		this->nonce = std::to_string(SnowflakeNotNull(d, "nonce"));
+		this->nonce = std::to_string(snowflake_not_null(d, "nonce"));
 	}
-	this->pinned = BoolNotNull(d, "pinned");
-	this->webhook_id = SnowflakeNotNull(d, "webhook_id");
+	this->pinned = bool_not_null(d, "pinned");
+	this->webhook_id = snowflake_not_null(d, "webhook_id");
 	for (auto& e : (*d)["attachments"]) {
 		this->attachments.emplace_back(attachment(this, &e));
 	}
 	if (d->find("message_reference") != d->end()) {
 		json& mr = (*d)["message_reference"];
-		message_reference.channel_id = SnowflakeNotNull(&mr, "channel_id");
-		message_reference.guild_id = SnowflakeNotNull(&mr, "guild_id");
-		message_reference.message_id = SnowflakeNotNull(&mr, "message_id");
-		message_reference.fail_if_not_exists = BoolNotNull(&mr, "fail_if_not_exists");
+		message_reference.channel_id = snowflake_not_null(&mr, "channel_id");
+		message_reference.guild_id = snowflake_not_null(&mr, "guild_id");
+		message_reference.message_id = snowflake_not_null(&mr, "message_id");
+		message_reference.fail_if_not_exists = bool_not_null(&mr, "fail_if_not_exists");
 	}
 	return *this;
 }
@@ -874,17 +874,17 @@ sticker::sticker() : id(0), pack_id(0), type(st_standard), format_type(sf_png), 
 }
 
 sticker& sticker::fill_from_json(nlohmann::json* j) {
-	this->id = SnowflakeNotNull(j, "id");
-	this->pack_id = SnowflakeNotNull(j, "pack_id");
-	this->name = StringNotNull(j, "name");
-	this->description = StringNotNull(j, "description");
-	this->tags = StringNotNull(j, "tags");
-	this->asset = StringNotNull(j, "asset");
-	this->guild_id = SnowflakeNotNull(j, "guild_id");
-	this->type = static_cast<sticker_type>(Int8NotNull(j, "type"));
-	this->format_type = static_cast<sticker_format>(Int8NotNull(j, "format_type"));
-	this->available = BoolNotNull(j, "available");
-	this->sort_value = Int8NotNull(j, "sort_value");
+	this->id = snowflake_not_null(j, "id");
+	this->pack_id = snowflake_not_null(j, "pack_id");
+	this->name = string_not_null(j, "name");
+	this->description = string_not_null(j, "description");
+	this->tags = string_not_null(j, "tags");
+	this->asset = string_not_null(j, "asset");
+	this->guild_id = snowflake_not_null(j, "guild_id");
+	this->type = static_cast<sticker_type>(int8_not_null(j, "type"));
+	this->format_type = static_cast<sticker_format>(int8_not_null(j, "format_type"));
+	this->available = bool_not_null(j, "available");
+	this->sort_value = int8_not_null(j, "sort_value");
 	if (j->find("user") != j->end()) {
 		sticker_user.fill_from_json(&((*j)["user"]));
 	}
@@ -922,16 +922,16 @@ sticker_pack::sticker_pack() : id(0), sku_id(0), cover_sticker_id(0), banner_ass
 }
 
 sticker_pack& sticker_pack::fill_from_json(nlohmann::json* j) {
-	this->id = SnowflakeNotNull(j, "id");
-	this->sku_id = SnowflakeNotNull(j, "sku_id");
-	this->cover_sticker_id = SnowflakeNotNull(j, "cover_sticker_id");
-	this->banner_asset_id = SnowflakeNotNull(j, "banner_asset_id");
-	this->name = StringNotNull(j, "name");
-	this->description = StringNotNull(j, "description");
+	this->id = snowflake_not_null(j, "id");
+	this->sku_id = snowflake_not_null(j, "sku_id");
+	this->cover_sticker_id = snowflake_not_null(j, "cover_sticker_id");
+	this->banner_asset_id = snowflake_not_null(j, "banner_asset_id");
+	this->name = string_not_null(j, "name");
+	this->description = string_not_null(j, "description");
 	if (j->find("stickers") != j->end()) {
 		json & sl = (*j)["stickers"];
 		for (auto& s : sl) {
-			this->stickers[SnowflakeNotNull(&s, "id")] = sticker().fill_from_json(&s);
+			this->stickers[snowflake_not_null(&s, "id")] = sticker().fill_from_json(&s);
 		}
 	}
 	return *this;

@@ -60,12 +60,12 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 		// "data":{"id":"903319628816728104","name":"blep","options":[{"focused":true,"name":"animal","type":3,"value":"a"}],"type":1}
 		if (!client->creator->on_autocomplete.empty()) {
 			dpp::autocomplete_t ac(client, raw);
-			ac.id = SnowflakeNotNull(&(d["data"]), "id");
-			ac.name = StringNotNull(&(d["data"]), "name");
+			ac.id = snowflake_not_null(&(d["data"]), "id");
+			ac.name = string_not_null(&(d["data"]), "name");
 			for (auto & o : d["data"]["options"]) {
 				dpp::command_option opt;
-				opt.name = StringNotNull(&o, "name");
-				opt.type = (dpp::command_option_type)Int8NotNull(&o, "type");
+				opt.name = string_not_null(&o, "name");
+				opt.type = (dpp::command_option_type)int8_not_null(&o, "type");
 				if (o.contains("value") && !o.at("value").is_null()) {
 					switch (opt.type) {
 						case co_boolean:
@@ -75,7 +75,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 						case co_role:
 						case co_user:
 						case co_mentionable:
-							opt.value = SnowflakeNotNull(&o, "value");
+							opt.value = snowflake_not_null(&o, "value");
 							break;
 						case co_integer:
 							opt.value = o.at("value").get<int64_t>();
@@ -92,7 +92,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 						break;
 					}
 				}
-				opt.focused = BoolNotNull(&o, "focused");
+				opt.focused = bool_not_null(&o, "focused");
 				ac.options.emplace_back(opt);
 			}
 			ac.command = i;

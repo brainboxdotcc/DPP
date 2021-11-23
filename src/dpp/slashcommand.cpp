@@ -36,10 +36,10 @@ slashcommand::~slashcommand() {
 }
 
 slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
-	id = SnowflakeNotNull(j, "id");
-	name = StringNotNull(j, "name");
-	description = StringNotNull(j, "description");
-	version = SnowflakeNotNull(j, "version");
+	id = snowflake_not_null(j, "id");
+	name = string_not_null(j, "name");
+	description = string_not_null(j, "description");
+	version = snowflake_not_null(j, "version");
 	return *this;
 }
 
@@ -263,8 +263,8 @@ std::string interaction::build_json(bool with_id) const {
 }
 
 void from_json(const nlohmann::json& j, command_data_option& cdo) {
-	cdo.name = StringNotNull(&j, "name");
-	cdo.type = (command_option_type)Int8NotNull(&j, "type");
+	cdo.name = string_not_null(&j, "name");
+	cdo.type = (command_option_type)int8_not_null(&j, "type");
 
 	if (j.contains("options") && !j.at("options").is_null()) {
 		j.at("options").get_to(cdo.options);
@@ -272,7 +272,7 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 
 	/* If there's a target ID, define it */
 	if (j.contains("target_id") && !j.at("target_id").is_null()) {
-		cdo.target_id = (dpp::snowflake)SnowflakeNotNull(&j, "target_id");
+		cdo.target_id = (dpp::snowflake)snowflake_not_null(&j, "target_id");
 	}
 
 	if (j.contains("value") && !j.at("value").is_null()) {
@@ -284,7 +284,7 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 			case co_role:
 			case co_user:
 			case co_mentionable:
-				cdo.value = SnowflakeNotNull(&j, "value");
+				cdo.value = snowflake_not_null(&j, "value");
 				break;
 			case co_integer:
 				cdo.value = j.at("value").get<int64_t>();
@@ -304,8 +304,8 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 }
 
 void from_json(const nlohmann::json& j, command_interaction& ci) {
-	ci.id = SnowflakeNotNull(&j, "id");
-	ci.name = StringNotNull(&j, "name");
+	ci.id = snowflake_not_null(&j, "id");
+	ci.name = string_not_null(&j, "name");
 
 	if (j.contains("options") && !j.at("options").is_null()) {
 		j.at("options").get_to(ci.options);
@@ -313,8 +313,8 @@ void from_json(const nlohmann::json& j, command_interaction& ci) {
 }
 
 void from_json(const nlohmann::json& j, component_interaction& bi) {
-	bi.component_type = Int8NotNull(&j, "component_type");
-	bi.custom_id = StringNotNull(&j, "custom_id");
+	bi.component_type = int8_not_null(&j, "component_type");
+	bi.custom_id = string_not_null(&j, "custom_id");
 	if (bi.component_type == cotype_select && j.find("values") != j.end()) {
 		/* Get values */
 		for (auto& entry : j["values"]) {
@@ -328,19 +328,19 @@ void from_json(const nlohmann::json& j, autocomplete_interaction& ai) {
 }
 
 void from_json(const nlohmann::json& j, interaction& i) {
-	i.id = SnowflakeNotNull(&j, "id");
-	i.application_id = SnowflakeNotNull(&j, "application_id");
-	i.channel_id = SnowflakeNotNull(&j, "channel_id");
-	i.guild_id = SnowflakeNotNull(&j, "guild_id");
+	i.id = snowflake_not_null(&j, "id");
+	i.application_id = snowflake_not_null(&j, "application_id");
+	i.channel_id = snowflake_not_null(&j, "channel_id");
+	i.guild_id = snowflake_not_null(&j, "guild_id");
 
 	if (j.find("message") != j.end()) {
 		const json& m = j["message"];
-		SetSnowflakeNotNull(&m, "id", i.message_id);
+		set_snowflake_not_null(&m, "id", i.message_id);
 	}
 
-	i.type = Int8NotNull(&j, "type");
-	i.token = StringNotNull(&j, "token");
-	i.version = Int8NotNull(&j, "version");
+	i.type = int8_not_null(&j, "type");
+	i.token = string_not_null(&j, "token");
+	i.version = int8_not_null(&j, "version");
 
 	if (j.contains("member") && !j.at("member").is_null()) {
 		j.at("member").get_to(i.member);
@@ -433,7 +433,7 @@ interaction_response::interaction_response(interaction_response_type t) : intera
 }
 
 interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
-	type = (interaction_response_type)Int8NotNull(j, "type");
+	type = (interaction_response_type)int8_not_null(j, "type");
 	if (j->find("data") != j->end()) {
 		msg->fill_from_json(&((*j)["data"]));
 	}

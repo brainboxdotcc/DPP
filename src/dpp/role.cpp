@@ -53,21 +53,21 @@ role::~role()
 role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 {
 	this->guild_id = _guild_id;
-	this->name = StringNotNull(j, "name");
-	this->icon = StringNotNull(j, "icon");
-	this->unicode_emoji = StringNotNull(j, "unicode_emoji");
-	this->id = SnowflakeNotNull(j, "id");
-	this->colour = Int32NotNull(j, "color");
-	this->position = Int8NotNull(j, "position");
-	this->permissions = SnowflakeNotNull(j, "permissions");
-	this->flags |= BoolNotNull(j, "hoist") ? dpp::r_hoist : 0;
-	this->flags |= BoolNotNull(j, "managed") ? dpp::r_managed : 0;
-	this->flags |= BoolNotNull(j, "mentionable") ? dpp::r_mentionable : 0;
+	this->name = string_not_null(j, "name");
+	this->icon = string_not_null(j, "icon");
+	this->unicode_emoji = string_not_null(j, "unicode_emoji");
+	this->id = snowflake_not_null(j, "id");
+	this->colour = int32_not_null(j, "color");
+	this->position = int8_not_null(j, "position");
+	this->permissions = snowflake_not_null(j, "permissions");
+	this->flags |= bool_not_null(j, "hoist") ? dpp::r_hoist : 0;
+	this->flags |= bool_not_null(j, "managed") ? dpp::r_managed : 0;
+	this->flags |= bool_not_null(j, "mentionable") ? dpp::r_mentionable : 0;
 	if (j->find("tags") != j->end()) {
 		auto t = (*j)["tags"];
-		this->flags |= BoolNotNull(&t, "premium_subscriber") ? dpp::r_premium_subscriber : 0;
-		this->bot_id = SnowflakeNotNull(&t, "bot_id");
-		this->integration_id = SnowflakeNotNull(&t, "integration_id");
+		this->flags |= bool_not_null(&t, "premium_subscriber") ? dpp::r_premium_subscriber : 0;
+		this->bot_id = snowflake_not_null(&t, "bot_id");
+		this->integration_id = snowflake_not_null(&t, "integration_id");
 	}
 	return *this;
 }

@@ -47,8 +47,8 @@ void guild_join_request_delete::handle(class discord_client* client, json &j, co
 	if (!client->creator->on_guild_join_request_delete.empty()) {
 		json& d = j["d"];
 		dpp::guild_join_request_delete_t grd(client, raw);
-		grd.user_id = SnowflakeNotNull(&d, "user_id");
-		grd.guild_id = SnowflakeNotNull(&d, "guild_id");
+		grd.user_id = snowflake_not_null(&d, "user_id");
+		grd.guild_id = snowflake_not_null(&d, "guild_id");
 		client->creator->on_guild_join_request_delete.call(grd);
 	}
 }

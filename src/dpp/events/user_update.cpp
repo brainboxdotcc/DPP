@@ -46,7 +46,7 @@ using namespace dpp;
 void user_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 
-	dpp::snowflake user_id = SnowflakeNotNull(&d, "id");
+	dpp::snowflake user_id = snowflake_not_null(&d, "id");
 	if (user_id) {
 		if (client->creator->cache_policy.user_policy != dpp::cp_none) {
 			dpp::user* u = dpp::find_user(user_id);

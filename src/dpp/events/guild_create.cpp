@@ -46,9 +46,9 @@ using namespace dpp;
 void guild_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	bool newguild = false;
-	if (SnowflakeNotNull(&d, "id") == 0)
+	if (snowflake_not_null(&d, "id") == 0)
 		return;
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "id"));
 	if (!g) {
 		g = new dpp::guild();
 		newguild = true;
@@ -61,7 +61,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			g->roles.clear();
 			g->roles.reserve(d["roles"].size());
 			for (auto & role : d["roles"]) {
-				dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
+				dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
 				if (!r) {
 					r = new dpp::role();
 				}
@@ -75,7 +75,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 		g->channels.clear();
 		g->channels.reserve(d["channels"].size());
 		for (auto & channel : d["channels"]) {
-			dpp::channel* c = dpp::find_channel(SnowflakeNotNull(&channel, "id"));
+			dpp::channel* c = dpp::find_channel(snowflake_not_null(&channel, "id"));
 			if (!c) {
 				c = new dpp::channel();
 			}
@@ -89,14 +89,14 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 		g->threads.clear();
 		g->threads.reserve(d["threads"].size());
 		for (auto & channel : d["threads"]) {
-			g->threads.push_back(SnowflakeNotNull(&channel, "id"));
+			g->threads.push_back(snowflake_not_null(&channel, "id"));
 		}
 
 		/* Store guild members */
 		if (client->creator->cache_policy.user_policy == cp_aggressive) {
 			g->members.reserve(d["members"].size());
 			for (auto & user : d["members"]) {
-				snowflake userid = SnowflakeNotNull(&(user["user"]), "id");
+				snowflake userid = snowflake_not_null(&(user["user"]), "id");
 				/* Only store ones we don't have already otherwise gm will leak */
 				if (g->members.find(userid) == g->members.end()) {
 					dpp::user* u = dpp::find_user(userid);
@@ -118,7 +118,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			g->emojis.reserve(d["emojis"].size());
 			g->emojis = {};
 			for (auto & emoji : d["emojis"]) {
-				dpp::emoji* e = dpp::find_emoji(SnowflakeNotNull(&emoji, "id"));
+				dpp::emoji* e = dpp::find_emoji(snowflake_not_null(&emoji, "id"));
 				if (!e) {
 					e = new dpp::emoji();
 					e->fill_from_json(&emoji);

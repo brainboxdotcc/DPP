@@ -117,7 +117,7 @@ void cluster::guild_get_bans(snowflake guild_id, command_completion_event_t call
 		ban_map bans;
 		if (!e.is_error()) {
 			for (auto & curr_ban : j) {
-				bans[SnowflakeNotNull(&curr_ban, "user_id")] = ban().fill_from_json(&curr_ban);
+				bans[snowflake_not_null(&curr_ban, "user_id")] = ban().fill_from_json(&curr_ban);
 			}
 		}
 		if (callback) {
@@ -142,7 +142,7 @@ void cluster::guild_get_integrations(snowflake guild_id, command_completion_even
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_integration : j) {
-				integrations[SnowflakeNotNull(&curr_integration, "id")] = integration().fill_from_json(&curr_integration);
+				integrations[snowflake_not_null(&curr_integration, "id")] = integration().fill_from_json(&curr_integration);
 			}
 		}
 		if (callback) {

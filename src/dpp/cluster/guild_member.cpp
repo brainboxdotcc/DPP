@@ -70,9 +70,9 @@ void cluster::guild_get_members(snowflake guild_id, uint16_t limit, snowflake af
 				guild_member gm;
 				snowflake user_id = 0;
 				if (curr_member.find("user") != curr_member.end()) {
-					user_id = SnowflakeNotNull(&(curr_member["user"]), "id");
+					user_id = snowflake_not_null(&(curr_member["user"]), "id");
 				}
-				guild_members[SnowflakeNotNull(&curr_member, "id")] = guild_member().fill_from_json(&curr_member, guild_id, user_id);
+				guild_members[snowflake_not_null(&curr_member, "id")] = guild_member().fill_from_json(&curr_member, guild_id, user_id);
 			}
 		}
 		if (callback) {
@@ -130,9 +130,9 @@ void cluster::guild_search_members(snowflake guild_id, const std::string& query,
 				guild_member gm;
 				snowflake user_id = 0;
 				if (curr_member.find("user") != curr_member.end()) {
-					user_id = SnowflakeNotNull(&(curr_member["user"]), "id");
+					user_id = snowflake_not_null(&(curr_member["user"]), "id");
 				}
-				guild_members[SnowflakeNotNull(&curr_member, "id")] = guild_member().fill_from_json(&curr_member, guild_id, user_id);
+				guild_members[snowflake_not_null(&curr_member, "id")] = guild_member().fill_from_json(&curr_member, guild_id, user_id);
 			}
 		}
 		if (callback) {

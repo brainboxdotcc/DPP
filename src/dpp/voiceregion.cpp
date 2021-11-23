@@ -34,15 +34,15 @@ voiceregion::voiceregion() : flags(0)
 voiceregion::~voiceregion() = default;
 
 voiceregion& voiceregion::fill_from_json(nlohmann::json* j) {
-	id = StringNotNull(j, "id");
-	name = StringNotNull(j, "id");
-	if (BoolNotNull(j, "optimal"))
+	id = string_not_null(j, "id");
+	name = string_not_null(j, "id");
+	if (bool_not_null(j, "optimal"))
 		flags |= v_optimal;
-	if (BoolNotNull(j, "deprecated"))
+	if (bool_not_null(j, "deprecated"))
 		flags |= v_deprecated;
-	if (BoolNotNull(j, "custom"))
+	if (bool_not_null(j, "custom"))
 		flags |= v_custom;
-	if (BoolNotNull(j, "vip"))
+	if (bool_not_null(j, "vip"))
 		flags |= v_vip;
 	return *this;
 }

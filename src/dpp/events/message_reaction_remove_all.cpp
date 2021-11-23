@@ -47,9 +47,9 @@ void message_reaction_remove_all::handle(discord_client* client, json &j, const 
 	if (!client->creator->on_message_reaction_remove_all.empty()) {
 		json &d = j["d"];
 		dpp::message_reaction_remove_all_t mrra(client, raw);
-		mrra.reacting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
-		mrra.reacting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
-		mrra.message_id = SnowflakeNotNull(&d, "message_id");
+		mrra.reacting_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
+		mrra.reacting_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
+		mrra.message_id = snowflake_not_null(&d, "message_id");
 		if (mrra.reacting_channel && mrra.message_id) {
 			client->creator->on_message_reaction_remove_all.call(mrra);
 		}

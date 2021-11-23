@@ -46,19 +46,19 @@ using namespace dpp;
 void guild_member_add::handle(discord_client* client, json &j, const std::string &raw) {
 	json d = j["d"];
 
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	dpp::guild_member_add_t gmr(client, raw);
 	if (g) {
 		if (client->creator->cache_policy.user_policy == dpp::cp_none) {
 			dpp::guild_member gm;
-			gm.fill_from_json(&d, g->id, SnowflakeNotNull(&(d["user"]), "id"));
+			gm.fill_from_json(&d, g->id, snowflake_not_null(&(d["user"]), "id"));
 			gmr.added = gm;
 			if (!client->creator->on_guild_member_add.empty()) {
 				gmr.adding_guild = g;
 				client->creator->on_guild_member_add.call(gmr);
 			}
 		} else {
-			dpp::user* u = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));
+			dpp::user* u = dpp::find_user(snowflake_not_null(&(d["user"]), "id"));
 			if (!u) {
 				u = new dpp::user();
 				u->fill_from_json(&(d["user"]));

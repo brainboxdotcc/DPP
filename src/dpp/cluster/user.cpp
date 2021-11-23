@@ -72,7 +72,7 @@ void cluster::current_user_connections_get(command_completion_event_t callback) 
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_conn : j) {
-					connections[SnowflakeNotNull(&curr_conn, "id")] = connection().fill_from_json(&curr_conn);
+					connections[snowflake_not_null(&curr_conn, "id")] = connection().fill_from_json(&curr_conn);
 				}
 			}
 			callback(confirmation_callback_t("connection_map", connections, http));
@@ -87,7 +87,7 @@ void cluster::current_user_get_guilds(command_completion_event_t callback) {
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_guild : j) {
-					guilds[SnowflakeNotNull(&curr_guild, "id")] = guild().fill_from_json(nullptr, &curr_guild);
+					guilds[snowflake_not_null(&curr_guild, "id")] = guild().fill_from_json(nullptr, &curr_guild);
 				}
 			}
 			callback(confirmation_callback_t("guild_map", guilds, http));

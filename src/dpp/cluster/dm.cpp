@@ -39,7 +39,7 @@ void cluster::current_user_get_dms(command_completion_event_t callback) {
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_channel: j) {
-					channels[SnowflakeNotNull(&curr_channel, "id")] = channel().fill_from_json(&curr_channel);
+					channels[snowflake_not_null(&curr_channel, "id")] = channel().fill_from_json(&curr_channel);
 				}
 			}
 			callback(confirmation_callback_t("channel_map", channels, http));

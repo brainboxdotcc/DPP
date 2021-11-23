@@ -99,9 +99,9 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, sn
 }
 
 void from_json(const nlohmann::json& j, guild_member& gm) {
-	gm.nickname = StringNotNull(&j, "nick");
-	gm.joined_at = TimestampNotNull(&j, "joined_at");
-	gm.premium_since = TimestampNotNull(&j, "premium_since");
+	gm.nickname = string_not_null(&j, "nick");
+	gm.joined_at = ts_not_null(&j, "joined_at");
+	gm.premium_since = ts_not_null(&j, "premium_since");
 
 	gm.roles.clear();
 	if (j.contains("roles") && !j.at("roles").is_null()) {
@@ -112,16 +112,16 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	}
 
 	if (j.contains("avatar") && !j.at("avatar").is_null()) {
-		std::string av = StringNotNull(&j, "avatar");
+		std::string av = string_not_null(&j, "avatar");
 		if (av.substr(0, 2) == "a_") {
 			gm.flags |= gm_animated_avatar;
 		}
 		gm.avatar = av;
 	}
 
-	gm.flags |= BoolNotNull(&j, "deaf") ? gm_deaf : 0;
-	gm.flags |= BoolNotNull(&j, "mute") ? gm_mute : 0;
-	gm.flags |= BoolNotNull(&j, "pending") ? gm_pending : 0;
+	gm.flags |= bool_not_null(&j, "deaf") ? gm_deaf : 0;
+	gm.flags |= bool_not_null(&j, "mute") ? gm_mute : 0;
+	gm.flags |= bool_not_null(&j, "pending") ? gm_pending : 0;
 }
 
 std::string guild_member::get_avatar_url()  const {
@@ -344,18 +344,18 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	 * GUILD_UPDATE sends a partial guild object, so we use Set*NotNull functions
 	 * for a lot of the values under the assumption they may sometimes be missing.
 	 */
-	this->id = SnowflakeNotNull(d, "id");
+	this->id = snowflake_not_null(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
 		/* Clear unavailable flag if set */
 		if (this->flags & dpp::g_unavailable) {
 			this->flags -= dpp::g_unavailable;
 		}
-		SetStringNotNull(d, "name", this->name);
+		set_string_not_null(d, "name", this->name);
 		/* Special case for guild icon to allow for animated icons.
 		 * Animated icons start with a_ on the name, so we use this to set a flag
 		 * in the flags field and then just store the iconhash separately.
 		 */
-		std::string _icon = StringNotNull(d, "icon");
+		std::string _icon = string_not_null(d, "icon");
 		if (!_icon.empty()) {
 			if (_icon.length() > 2 && _icon.substr(0, 2) == "a_") {
 				_icon = _icon.substr(2, _icon.length());
@@ -363,14 +363,14 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			}
 			this->icon = _icon;
 		}
-		std::string _dsplash = StringNotNull(d, "discovery_splash");
+		std::string _dsplash = string_not_null(d, "discovery_splash");
 		if (!_dsplash.empty()) {
 			this->discovery_splash = _dsplash;
 		}
-		SetSnowflakeNotNull(d, "owner_id", this->owner_id);
+		set_snowflake_not_null(d, "owner_id", this->owner_id);
 
-		this->flags |= BoolNotNull(d, "large") ? dpp::g_large : 0;
-		this->flags |= BoolNotNull(d, "widget_enabled") ? dpp::g_widget_enabled : 0;
+		this->flags |= bool_not_null(d, "large") ? dpp::g_large : 0;
+		this->flags |= bool_not_null(d, "widget_enabled") ? dpp::g_widget_enabled : 0;
 
 		for (auto & feature : (*d)["features"]) {
 			auto f = featuremap.find(feature.get<std::string>());
@@ -378,7 +378,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 				this->flags |= f->second;
 			}
 		}
-		uint8_t scf = Int8NotNull(d, "system_channel_flags");
+		uint8_t scf = int8_not_null(d, "system_channel_flags");
 		if (scf & 1) {
 			this->flags |= dpp::g_no_join_notifications;
 		}
@@ -392,19 +392,19 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			this->flags |= dpp::g_no_sticker_greeting;
 		}
 
-		SetSnowflakeNotNull(d, "afk_channel_id", this->afk_channel_id);
-		SetInt8NotNull(d, "afk_timeout", this->afk_timeout);
-		SetSnowflakeNotNull(d, "widget_channel_id", this->widget_channel_id);
-		this->verification_level = (verification_level_t)Int8NotNull(d, "verification_level");
-		SetInt8NotNull(d, "default_message_notifications", this->default_message_notifications);
-		this->explicit_content_filter = (guild_explicit_content_t)Int8NotNull(d, "explicit_content_filter");
-		this->mfa_level = (mfa_level_t)Int8NotNull(d, "mfa_level");
-		SetSnowflakeNotNull(d, "application_id", this->application_id);
-		SetSnowflakeNotNull(d, "system_channel_id", this->system_channel_id);
-		SetSnowflakeNotNull(d, "rules_channel_id", this->rules_channel_id);
-		SetInt32NotNull(d, "member_count", this->member_count);
-		SetStringNotNull(d, "vanity_url_code", this->vanity_url_code);
-		SetStringNotNull(d, "description", this->description);
+		set_snowflake_not_null(d, "afk_channel_id", this->afk_channel_id);
+		set_int8_not_null(d, "afk_timeout", this->afk_timeout);
+		set_snowflake_not_null(d, "widget_channel_id", this->widget_channel_id);
+		this->verification_level = (verification_level_t)int8_not_null(d, "verification_level");
+		set_int8_not_null(d, "default_message_notifications", this->default_message_notifications);
+		this->explicit_content_filter = (guild_explicit_content_t)int8_not_null(d, "explicit_content_filter");
+		this->mfa_level = (mfa_level_t)int8_not_null(d, "mfa_level");
+		set_snowflake_not_null(d, "application_id", this->application_id);
+		set_snowflake_not_null(d, "system_channel_id", this->system_channel_id);
+		set_snowflake_not_null(d, "rules_channel_id", this->rules_channel_id);
+		set_int32_not_null(d, "member_count", this->member_count);
+		set_string_not_null(d, "vanity_url_code", this->vanity_url_code);
+		set_string_not_null(d, "description", this->description);
 		if (d->find("voice_states") != d->end()) {
 			this->voice_members.clear();
 			for (auto & vm : (*d)["voice_states"]) {
@@ -416,33 +416,33 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			}
 		}
 
-		std::string _banner = StringNotNull(d, "banner");
+		std::string _banner = string_not_null(d, "banner");
 		if (!_banner.empty()) {
 			if (_banner.length() > 2 && _banner.substr(0, 2) == "a_") {
 				this->flags |= dpp::g_has_animated_banner;
 			}
 			this->banner = _banner;
 		}
-		SetInt8NotNull(d, "premium_tier", this->premium_tier);
-		SetInt16NotNull(d, "premium_subscription_count", this->premium_subscription_count);
-		SetSnowflakeNotNull(d, "public_updates_channel_id", this->public_updates_channel_id);
-		SetInt16NotNull(d, "max_video_channel_users", this->max_video_channel_users);
+		set_int8_not_null(d, "premium_tier", this->premium_tier);
+		set_int16_not_null(d, "premium_subscription_count", this->premium_subscription_count);
+		set_snowflake_not_null(d, "public_updates_channel_id", this->public_updates_channel_id);
+		set_int16_not_null(d, "max_video_channel_users", this->max_video_channel_users);
 
-		SetInt32NotNull(d, "max_presences", this->max_presences);
-		SetInt32NotNull(d, "max_members", this->max_members);
+		set_int32_not_null(d, "max_presences", this->max_presences);
+		set_int32_not_null(d, "max_members", this->max_members);
 
-		this->nsfw_level = (guild_nsfw_level_t)Int8NotNull(d, "nsfw_level");
+		this->nsfw_level = (guild_nsfw_level_t)int8_not_null(d, "nsfw_level");
 
 		if (d->find("welcome_screen") != d->end()) {
 			json& w = (*d)["welcome_screen"];
-			SetStringNotNull(&w, "description", welcome_screen.description);
+			set_string_not_null(&w, "description", welcome_screen.description);
 			welcome_screen.welcome_channels.reserve(w["welcome_channels"].size());
 			for (auto& wc : w["welcome_channels"]) {
 				welcome_channel_t wchan;
-				SetStringNotNull(&wc, "description", wchan.description);
-				SetSnowflakeNotNull(&wc, "channel_id", wchan.channel_id);
-				SetSnowflakeNotNull(&wc, "emoji_id", wchan.emoji_id);
-				SetStringNotNull(&wc, "emoji_name", wchan.emoji_name);
+				set_string_not_null(&wc, "description", wchan.description);
+				set_snowflake_not_null(&wc, "channel_id", wchan.channel_id);
+				set_snowflake_not_null(&wc, "emoji_id", wchan.emoji_id);
+				set_string_not_null(&wc, "emoji_name", wchan.emoji_name);
 				welcome_screen.welcome_channels.emplace_back(wchan);
 			}
 		}
@@ -458,8 +458,8 @@ guild_widget::guild_widget() : enabled(false), channel_id(0)
 }
 
 guild_widget& guild_widget::fill_from_json(nlohmann::json* j) {
-	enabled = BoolNotNull(j, "enabled");
-	channel_id = SnowflakeNotNull(j, "channel_id");
+	enabled = bool_not_null(j, "enabled");
+	channel_id = snowflake_not_null(j, "channel_id");
 	return *this;
 }
 

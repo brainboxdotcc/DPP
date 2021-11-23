@@ -39,18 +39,18 @@ webhook::~webhook() {
 }
 
 webhook& webhook::fill_from_json(nlohmann::json* j) {
-	id = SnowflakeNotNull(j, "id");
-	type = Int8NotNull(j, "type");
-	channel_id = SnowflakeNotNull(j, "channel_id");
-	guild_id = SnowflakeNotNull(j, "guild_id");
+	id = snowflake_not_null(j, "id");
+	type = int8_not_null(j, "type");
+	channel_id = snowflake_not_null(j, "channel_id");
+	guild_id = snowflake_not_null(j, "guild_id");
 	if (j->find("user") != j->end()) {
 		json & user = (*j)["user"];
-		user_id = SnowflakeNotNull(&user, "id");
+		user_id = snowflake_not_null(&user, "id");
 	}
-	name = StringNotNull(j, "name");
-	avatar = StringNotNull(j, "name");
-	token = StringNotNull(j, "token");
-	application_id = SnowflakeNotNull(j, "application_id");
+	name = string_not_null(j, "name");
+	avatar = string_not_null(j, "name");
+	token = string_not_null(j, "token");
+	application_id = snowflake_not_null(j, "application_id");
 
 	return *this;
 }

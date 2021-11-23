@@ -45,7 +45,7 @@ using namespace dpp;
  */
 void guild_role_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json &d = j["d"];
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	if (g) {
 		if (client->creator->cache_policy.role_policy == dpp::cp_none) {
 			json &role = d["role"];
@@ -59,7 +59,7 @@ void guild_role_create::handle(discord_client* client, json &j, const std::strin
 			}
 		} else {
 			json &role = d["role"];
-			dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
+			dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
 			if (!r) {
 				r = new dpp::role();
 			}

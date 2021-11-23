@@ -173,37 +173,37 @@ user_identified& user_identified::fill_from_json(json* j) {
 void from_json(const nlohmann::json& j, user_identified& u) {
 	dpp::user* user_type = dynamic_cast<user*>(&u);
 	from_json(j, *user_type);
-	u.email = StringNotNull(&j, "email");
-	u.locale = StringNotNull(&j, "locale");
-	u.accent_color = Int32NotNull(&j, "accent_color");
-	u.verified = BoolNotNull(&j, "verified");
+	u.email = string_not_null(&j, "email");
+	u.locale = string_not_null(&j, "locale");
+	u.accent_color = int32_not_null(&j, "accent_color");
+	u.verified = bool_not_null(&j, "verified");
 	if (j.find("banner") != j.end()) {
-		std::string b = StringNotNull(&j, "banner");
+		std::string b = string_not_null(&j, "banner");
 		u.banner = b;
 	}
 }
 
 void from_json(const nlohmann::json& j, user& u) {
-	u.id = SnowflakeNotNull(&j, "id");
-	u.username = StringNotNull(&j, "username");
+	u.id = snowflake_not_null(&j, "id");
+	u.username = string_not_null(&j, "username");
 
-	std::string av = StringNotNull(&j, "avatar");
+	std::string av = string_not_null(&j, "avatar");
 	if (av.length() > 2 && av.substr(0, 2) == "a_") {
 		av = av.substr(2, av.length());
 		u.flags |= u_animated_icon;
 	}
 	u.avatar = av;
 
-	u.discriminator = (uint16_t)SnowflakeNotNull(&j, "discriminator");
+	u.discriminator = (uint16_t)snowflake_not_null(&j, "discriminator");
 
-	u.flags |= BoolNotNull(&j, "bot") ? dpp::u_bot : 0;
-	u.flags |= BoolNotNull(&j, "system") ? dpp::u_system : 0;
-	u.flags |= BoolNotNull(&j, "mfa_enabled") ? dpp::u_mfa_enabled : 0;
-	u.flags |= BoolNotNull(&j, "verified") ? dpp::u_verified : 0;
-	u.flags |= Int8NotNull(&j, "premium_type") == 1 ? dpp::u_nitro_classic : 0;
-	u.flags |= Int8NotNull(&j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
-	uint32_t flags = Int32NotNull(&j, "flags");
-	flags |= Int32NotNull(&j, "public_flags");
+	u.flags |= bool_not_null(&j, "bot") ? dpp::u_bot : 0;
+	u.flags |= bool_not_null(&j, "system") ? dpp::u_system : 0;
+	u.flags |= bool_not_null(&j, "mfa_enabled") ? dpp::u_mfa_enabled : 0;
+	u.flags |= bool_not_null(&j, "verified") ? dpp::u_verified : 0;
+	u.flags |= int8_not_null(&j, "premium_type") == 1 ? dpp::u_nitro_classic : 0;
+	u.flags |= int8_not_null(&j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
+	uint32_t flags = int32_not_null(&j, "flags");
+	flags |= int32_not_null(&j, "public_flags");
 	for (auto & flag : usermap) {
 		if (flags & flag.first) {
 			u.flags |= flag.second;

@@ -111,28 +111,28 @@ scheduled_event& scheduled_event::set_end_time(time_t t) {
 }
 
 scheduled_event& scheduled_event::fill_from_json(const json* j) {
-	SetSnowflakeNotNull(j, "id", this->id);
-	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
-	SetSnowflakeNotNull(j, "channel_id", this->channel_id);
-	SetSnowflakeNotNull(j, "creator_id", this->creator_id);
-	SetSnowflakeNotNull(j, "creator_id", this->creator_id);
-	SetStringNotNull(j, "name", this->name);
-	SetStringNotNull(j, "description", this->description);
-	SetStringNotNull(j, "image", this->image);
-	SetTimestampNotNull(j, "scheduled_start_time", this->scheduled_start_time);
-	SetTimestampNotNull(j, "scheduled_end_time", this->scheduled_end_time);
-	this->privacy_level = static_cast<dpp::event_privacy_level>(Int8NotNull(j, "privacy_level"));
-	this->status = static_cast<dpp::event_status>(Int8NotNull(j, "status"));
-	this->entity_type = static_cast<dpp::event_entity_type>(Int8NotNull(j, "entity_type"));
+	set_snowflake_not_null(j, "id", this->id);
+	set_snowflake_not_null(j, "guild_id", this->guild_id);
+	set_snowflake_not_null(j, "channel_id", this->channel_id);
+	set_snowflake_not_null(j, "creator_id", this->creator_id);
+	set_snowflake_not_null(j, "creator_id", this->creator_id);
+	set_string_not_null(j, "name", this->name);
+	set_string_not_null(j, "description", this->description);
+	set_string_not_null(j, "image", this->image);
+	set_ts_not_null(j, "scheduled_start_time", this->scheduled_start_time);
+	set_ts_not_null(j, "scheduled_end_time", this->scheduled_end_time);
+	this->privacy_level = static_cast<dpp::event_privacy_level>(int8_not_null(j, "privacy_level"));
+	this->status = static_cast<dpp::event_status>(int8_not_null(j, "status"));
+	this->entity_type = static_cast<dpp::event_entity_type>(int8_not_null(j, "entity_type"));
 	auto i = j->find("entity_metadata");
 	if (i != j->end()) {
-		SetStringNotNull(&((*j)["entity_metadata"]), "location", this->entity_metadata.location);
+		set_string_not_null(&((*j)["entity_metadata"]), "location", this->entity_metadata.location);
 	}
 	if (j->find("creator") != j->end()) {
 		json u = (*j)["creator"];
 		creator.fill_from_json(&u);
 	}
-	SetInt32NotNull(j, "user_count", this->user_count);
+	set_int32_not_null(j, "user_count", this->user_count);
 	return *this;
 }
 

@@ -46,7 +46,7 @@ using namespace dpp;
  */
 void guild_stickers_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	if (g) {
 		if (!client->creator->on_guild_stickers_update.empty()) {
 			dpp::guild_stickers_update_t gsu(client, raw);

@@ -46,7 +46,7 @@ using namespace dpp;
  */
 void channel_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::channel* c = dpp::find_channel(SnowflakeNotNull(&d, "id"));
+	dpp::channel* c = dpp::find_channel(snowflake_not_null(&d, "id"));
 	if (c) {
 		dpp::guild* g = dpp::find_guild(c->guild_id);
 		if (g) {

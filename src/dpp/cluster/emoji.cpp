@@ -63,7 +63,7 @@ void cluster::guild_emojis_get(snowflake guild_id, command_completion_event_t ca
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_emoji : j) {
-					emojis[SnowflakeNotNull(&curr_emoji, "id")] = emoji().fill_from_json(&curr_emoji);
+					emojis[snowflake_not_null(&curr_emoji, "id")] = emoji().fill_from_json(&curr_emoji);
 				}
 			}
 			callback(confirmation_callback_t("emoji_map", emojis, http));

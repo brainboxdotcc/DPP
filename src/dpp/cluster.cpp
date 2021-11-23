@@ -209,12 +209,12 @@ void cluster::request(const std::string &url, http_method method, http_completio
 }
 
 gateway::gateway(nlohmann::json* j) {
-	url = StringNotNull(j, "url");
-	shards = Int32NotNull(j, "shards");
-	session_start_total = Int32NotNull(&((*j)["session_start_limit"]), "total");
-	session_start_remaining  = Int32NotNull(&((*j)["session_start_limit"]), "remaining");
-	session_start_reset_after = Int32NotNull(&((*j)["session_start_limit"]), "reset_after");
-	session_start_max_concurrency = Int32NotNull(&((*j)["session_start_limit"]), "max_concurrency");
+	url = string_not_null(j, "url");
+	shards = int32_not_null(j, "shards");
+	session_start_total = int32_not_null(&((*j)["session_start_limit"]), "total");
+	session_start_remaining  = int32_not_null(&((*j)["session_start_limit"]), "remaining");
+	session_start_reset_after = int32_not_null(&((*j)["session_start_limit"]), "reset_after");
+	session_start_max_concurrency = int32_not_null(&((*j)["session_start_limit"]), "max_concurrency");
 }
 
 void cluster::set_presence(const dpp::presence &p) {

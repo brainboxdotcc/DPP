@@ -48,9 +48,9 @@ void guild_scheduled_event_user_add::handle(discord_client* client, json &j, con
 	json& d = j["d"];
 	if (!client->creator->on_guild_scheduled_event_user_add.empty()) {
 		dpp::guild_scheduled_event_user_add_t eua(client, raw);
-		eua.guild_id = SnowflakeNotNull(&d, "guild_id");
-		eua.user_id = SnowflakeNotNull(&d, "user_id");
-		eua.event_id = SnowflakeNotNull(&d, "guild_scheduled_event_id");
+		eua.guild_id = snowflake_not_null(&d, "guild_id");
+		eua.user_id = snowflake_not_null(&d, "user_id");
+		eua.event_id = snowflake_not_null(&d, "guild_scheduled_event_id");
 		client->creator->on_guild_scheduled_event_user_add.call(eua);
 	}
 }
