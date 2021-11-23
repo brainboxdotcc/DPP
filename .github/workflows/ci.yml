@@ -179,6 +179,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger build check
-        run: gh auth login --with-token; gh workflow run -r $GITHUB_REF "Check Build"
+        run: gh workflow run -r $GITHUB_REF "Check Build"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
