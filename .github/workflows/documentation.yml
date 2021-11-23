@@ -35,6 +35,7 @@ jobs:
     #needs: docs
     runs-on: ubuntu-latest
     steps:
-      - run: |
-        gh auth login
-        gh workflow run "Check Build"
+      - name: Trigger build check
+        run: gh auth login && gh workflow run "Check Build"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
