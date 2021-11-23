@@ -30,3 +30,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+  completion:
+    #needs: docs
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+        gh auth login
+        gh workflow run "Check Build"
