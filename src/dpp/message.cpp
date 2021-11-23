@@ -685,18 +685,8 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 					e["fields"].push_back(f);
 				}
 			}
-			if (embed.timestamp != 0) {
-				std::ostringstream ss;
-				struct tm t;
-			
-			#ifdef _WIN32
-				gmtime_s(&t, &embed.timestamp);
-			#else
-				gmtime_r(&embed.timestamp, &t);
-			#endif
-				
-				ss << std::put_time(&t, "%FT%TZ");
-				e["timestamp"] = ss.str();
+			if (embed.timestamp) {
+				e["timestamp"] = ts_to_string(embed.timestamp);
 			}
 
 				j["embeds"].push_back(e);

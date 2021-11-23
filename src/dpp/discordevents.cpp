@@ -47,6 +47,18 @@ char* crossplatform_strptime(const char* s, const char* f, struct tm* tm) {
 
 namespace dpp {
 
+std::string ts_to_string(time_t ts) {
+	std::ostringstream ss;
+	struct tm t;
+	#ifdef _WIN32
+		gmtime_s(&t, &ts);
+	#else
+		gmtime_r(&ts, &t);
+	#endif
+	ss << std::put_time(&t, "%FT%TZ");
+	return ss.str();
+}
+
 uint64_t SnowflakeNotNull(const json* j, const char *keyname) {
 	/* Snowflakes are a special case. Pun intended.
 	 * Because discord drinks the javascript kool-aid, they have to send 64 bit integers as strings as js can't deal with them

@@ -168,26 +168,10 @@ std::string const scheduled_event::build_json(bool with_id) const {
 		j["creator_id"] = std::to_string(this->creator_id);
 	}
 	if (scheduled_start_time) {
-		std::ostringstream ss;
-		struct tm t;
-		#ifdef _WIN32
-			gmtime_s(&t, &scheduled_start_time);
-		#else
-			gmtime_r(&scheduled_start_time, &t);
-		#endif
-		ss << std::put_time(&t, "%FT%TZ");
-		j["scheduled_start_time"] = ss.str();
+		j["scheduled_start_time"] = ts_to_string(scheduled_start_time);
 	}
 	if (scheduled_end_time) {
-		std::ostringstream ss;
-		struct tm t;
-		#ifdef _WIN32
-			gmtime_s(&t, &scheduled_end_time);
-		#else
-			gmtime_r(&scheduled_end_time, &t);
-		#endif
-		ss << std::put_time(&t, "%FT%TZ");
-		j["scheduled_end_time"] = ss.str();
+		j["scheduled_end_time"] = ts_to_string(scheduled_end_time);
 	}
 	j["entity_metadata"] = json::object();
 	if (!entity_metadata.location.empty()) {

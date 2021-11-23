@@ -145,4 +145,12 @@ void SetTimestampNotNull(const nlohmann::json* j, const char *keyname, time_t &v
  */
 std::string base64_encode(unsigned char const* buf, unsigned int buffer_length);
 
+/**
+ * @brief Convert time_t unix epoch to std::string ISO date/time
+ * 
+ * @param ts Timestamp to convert
+ * @return std::string Converted time/date string
+ */
+std::string ts_to_string(time_t ts);
+
 };
