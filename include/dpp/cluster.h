@@ -331,10 +331,7 @@ public:
 	 * detach the listener from the event later if neccessary.
 	 */
 	event_handle operator()(std::function<void(const T&)> func) {
-		std::unique_lock l(lock);
-		event_handle h = __next_handle++;
-		dispatch_container.emplace(h, func);
-		return h;		
+		return this->attach(func);
 	}
 
 	/**
@@ -348,7 +345,10 @@ public:
 	 * detach the listener from the event later if neccessary.
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
-		return (*this)(func);
+		std::unique_lock l(lock);
+		event_handle h = __next_handle++;
+		dispatch_container.emplace(h, func);
+		return h;		
 	}
 
 	/**
@@ -358,14 +358,9 @@ public:
 	 * @return true The event was successfully detached
 	 * @return false The ID is invalid (possibly already detached, or does not exist)
 	 */
-	bool detach(const event_handle handle) {
+	bool detach(const event_handle& handle) {
 		std::unique_lock l(lock);
-		auto i = dispatch_container.find(handle);
-		if (i != dispatch_container.end()) {
-			dispatch_container.erase(i);
-			return true;
-		}
-		return false;
+		return this->dispatch_container.erase(handle);
 	}
 };
 
