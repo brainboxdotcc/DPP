@@ -135,10 +135,10 @@ void cluster::start(bool return_after) {
 		for (uint32_t s = 0; s < numshards; ++s) {
 			/* Filter out shards that arent part of the current cluster, if the bot is clustered */
 			if (s % maxclusters == cluster_id) {
-				/* Each discord_client spawns its own thread in its Run() */
+				/* Each discord_client spawns its own thread in its run() */
 				try {
 					this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
-					this->shards[s]->Run();
+					this->shards[s]->run();
 				}
 				catch (const std::exception &e) {
 					log(dpp::ll_critical, fmt::format("Could not start shard {}: {}", s, e.what()));
@@ -221,7 +221,7 @@ void cluster::set_presence(const dpp::presence &p) {
 	json pres = json::parse(p.build_json());
 	for (auto& s : shards) {
 		if (s.second->is_connected()) {
-			s.second->QueueMessage(s.second->jsonobj_to_string(pres));
+			s.second->queue_message(s.second->jsonobj_to_string(pres));
 		}
 	}
 }

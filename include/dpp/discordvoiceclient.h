@@ -104,7 +104,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::thread* runner;
 
 	/** Run shard loop under a thread */
-	void ThreadRun();
+	void thread_run();
 
 	/** Last connect time of voice session */
 	time_t connect_time;
@@ -242,7 +242,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @param length length of data to send
 	 * @return int bytes sent. Will return -1 if we cannot send
 	 */
-	int UDPSend(const char* data, size_t length);
+	int udp_send(const char* data, size_t length);
 
 	/**
 	 * @brief Receive data from UDP socket immediately.
@@ -252,7 +252,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @return int bytes received. -1 if there is an error
 	 * (e.g. EAGAIN)
 	 */
-	int UDPRecv(char* data, size_t max_length);
+	int udp_recv(char* data, size_t max_length);
 
 	/**
 	 * @brief This hooks the ssl_client, returning the file
@@ -261,7 +261,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * 
 	 * @return int file descriptor or -1
 	 */
-	dpp::socket WantWrite();
+	dpp::socket want_write();
 
 	/**
 	 * @brief This hooks the ssl_client, returning the file
@@ -270,7 +270,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * 
 	 * @return int file descriptor or -1
 	 */
-	dpp::socket WantRead();
+	dpp::socket want_read();
 
 	/**
 	 * @brief Called by ssl_client when the socket is ready
@@ -278,14 +278,14 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * the buffer and send it. So long as it doesnt error
 	 * completely, we pop it off the head of the queue.
 	 */
-	void WriteReady();
+	void write_ready();
 
 	/**
 	 * @brief Called by ssl_client when there is data to be
 	 * read. At this point we insert that data into the
 	 * input queue.
 	 */
-	void ReadReady();
+	void read_ready();
 
 	/**
 	 * @brief Send data to the UDP socket, using the buffer.
@@ -294,7 +294,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @param len length of packet
 	 * @param duration duration of opus packet
 	 */
-	void Send(const char* packet, size_t len, uint64_t duration);
+	void send(const char* packet, size_t len, uint64_t duration);
 
 	/**
 	 * @brief Queue a message to be sent via the websocket
@@ -304,20 +304,20 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * (this is for urgent messages such as heartbeat, presence, so they can take precedence over
 	 * chunk requests etc)
 	 */
-	void QueueMessage(const std::string &j, bool to_front = false);
+	void queue_message(const std::string &j, bool to_front = false);
 
 	/**
 	 * @brief Clear the outbound message queue
 	 * 
 	 */
-	void ClearQueue();
+	void clear_queue();
 
 	/**
 	 * @brief Get the size of the outbound message queue
 	 * 
 	 * @return The size of the queue
 	 */
-	size_t GetQueueSize();
+	size_t get_queue_size();
 
 	/**
 	 * @brief Encode a byte buffer using opus codec.
@@ -425,15 +425,15 @@ public:
 	 * @return bool True if a frame has been handled
 	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
-	virtual bool HandleFrame(const std::string &buffer);
+	virtual bool handle_frame(const std::string &buffer);
 
 	/** Handle a websocket error.
 	 * @param errorcode The error returned from the websocket
 	 */
-	virtual void Error(uint32_t errorcode);
+	virtual void error(uint32_t errorcode);
 
 	/** Start and monitor I/O loop */
-	void Run();
+	void run();
 
 	/**
 	 * @brief Send raw audio to the voice channel.

@@ -32,8 +32,7 @@ emoji::emoji() : managed(), user_id(0), flags(0), image_data(nullptr)
 {
 }
 
-emoji::emoji(const std::string n, const snowflake i, const uint8_t f)
-	: managed(i), name(n), user_id(0), flags(f), image_data(nullptr)
+emoji::emoji(const std::string n, const snowflake i, const uint8_t f) : managed(i), name(n), user_id(0), flags(f), image_data(nullptr)
 {	
 }
 

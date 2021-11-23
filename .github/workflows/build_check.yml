@@ -1,0 +1,12 @@
+name: Check Build
+on:
+  workflow_dispatch:
+
+jobs:
+  completion:
+    name: Check Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dummy step
+        run: ls

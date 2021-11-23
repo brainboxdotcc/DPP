@@ -35,9 +35,19 @@ namespace dpp {
 class opensslcontext;
 
 /**
+ * @brief A callback for socket status
+ */
+typedef std::function<dpp::socket()> socket_callback_t;
+
+/**
+ * @brief A socket notification callback
+ */
+typedef std::function<void()> socket_notification_t;
+
+/**
  * @brief Implements a simple non-blocking SSL stream client.
  * 
- * Note that although the design is non-blocking the Run() method will
+ * Note that although the design is non-blocking the run() method will
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
  */
@@ -86,7 +96,7 @@ protected:
 	 * @brief Start SSL connection and connect to TCP endpoint
 	 * @throw dpp::exception Failed to initialise connection
 	 */
-	virtual void Connect();
+	virtual void connect();
 public:
 	/** Get total bytes sent */
 	uint64_t get_bytes_out();
@@ -103,7 +113,7 @@ public:
 	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread!
 	 * Returning -1 means that you don't want to be notified.
 	 */
-	std::function<dpp::socket()> custom_readable_fd;
+	socket_callback_t custom_readable_fd;
 
 	/**
 	 * @brief Attaching an additional file descriptor to this function will send notifications when you are able to write
@@ -112,17 +122,17 @@ public:
 	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread! You should toggle this
 	 * to -1 when you do not have anything to write otherwise it'll keep triggering repeatedly (it is level triggered).
 	 */
-	std::function<dpp::socket()> custom_writeable_fd;
+	socket_callback_t custom_writeable_fd;
 
 	/**
 	 * @brief This event will be called when you can read from the custom fd
 	 */
-	std::function<void()> custom_readable_ready;
+	socket_notification_t custom_readable_ready;
 
 	/**
 	 * @brief This event will be called when you can write to a custom fd
 	 */
-	std::function<void()> custom_writeable_ready;
+	socket_notification_t custom_writeable_ready;
 
 	/**
 	 * @brief Connect to a specified host and port. Throws std::runtime_error on fatal error.

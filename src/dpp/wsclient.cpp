@@ -43,7 +43,7 @@ websocket_client::websocket_client(const std::string &hostname, const std::strin
 {
 }
 
-void websocket_client::Connect()
+void websocket_client::connect()
 {
 	state = HTTP_HEADERS;
 	/* Send headers synchronously */
@@ -68,13 +68,13 @@ websocket_client::~websocket_client()
 {
 }
 
-bool websocket_client::HandleFrame(const std::string &buffer)
+bool websocket_client::handle_frame(const std::string &buffer)
 {
 	/* This is a stub for classes that derive the websocket client */
 	return true;
 }
 
-size_t websocket_client::FillHeader(unsigned char* outbuf, size_t sendlength, ws_opcode opcode)
+size_t websocket_client::fill_header(unsigned char* outbuf, size_t sendlength, ws_opcode opcode)
 {
 	size_t pos = 0;
 	outbuf[pos++] = WS_FINBIT | opcode;
@@ -117,7 +117,7 @@ void websocket_client::write(const std::string &data)
 		ssl_client::write(data);
 	} else {
 		unsigned char out[MAXHEADERSIZE];
-		size_t s = this->FillHeader(out, data.length(), this->data_opcode);
+		size_t s = this->fill_header(out, data.length(), this->data_opcode);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
 		ssl_client::write(data);
@@ -181,7 +181,7 @@ bool websocket_client::handle_buffer(std::string &buffer)
 	return true;
 }
 
-ws_state websocket_client::GetState()
+ws_state websocket_client::get_state()
 {
 	return this->state;
 }
@@ -246,10 +246,10 @@ bool websocket_client::parseheader(std::string &data)
 				}
 
 				if ((opcode & ~WS_FINBIT) == OP_PING || (opcode & ~WS_FINBIT) == OP_PONG) {
-					HandlePingPong((opcode & ~WS_FINBIT) == OP_PING, data.substr(payloadstartoffset, len));
+					handle_ping_pong((opcode & ~WS_FINBIT) == OP_PING, data.substr(payloadstartoffset, len));
 				} else {
 					/* Pass this frame to the deriving class */
-					this->HandleFrame(data.substr(payloadstartoffset, len));
+					this->handle_frame(data.substr(payloadstartoffset, len));
 				}
 
 				/* Remove this frame from the input buffer */
@@ -264,14 +264,14 @@ bool websocket_client::parseheader(std::string &data)
 				uint16_t error = data[2] & 0xff;
 			       	error <<= 8;
 				error |= (data[3] & 0xff);
-				this->Error(error);
+				this->error(error);
 				return false;
 			}
 			break;
 
 			default:
 			{
-				this->Error(0);
+				this->error(0);
 				return false;
 			}
 			break;
@@ -286,26 +286,26 @@ void websocket_client::one_second_timer()
 		/* For sending pings, we send with payload */
 		unsigned char out[MAXHEADERSIZE];
 		std::string payload = "keepalive";
-		size_t s = this->FillHeader(out, payload.length(), OP_PING);
+		size_t s = this->fill_header(out, payload.length(), OP_PING);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
 		ssl_client::write(payload);
 	}
 }
 
-void websocket_client::HandlePingPong(bool ping, const std::string &payload)
+void websocket_client::handle_ping_pong(bool ping, const std::string &payload)
 {
 	unsigned char out[MAXHEADERSIZE];
 	if (ping) {
 		/* For receiving pings we echo back their payload with the type OP_PONG */
-		size_t s = this->FillHeader(out, payload.length(), OP_PONG);
+		size_t s = this->fill_header(out, payload.length(), OP_PONG);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
 		ssl_client::write(payload);
 	}
 }
 
-void websocket_client::Error(uint32_t errorcode)
+void websocket_client::error(uint32_t errorcode)
 {
 }
 

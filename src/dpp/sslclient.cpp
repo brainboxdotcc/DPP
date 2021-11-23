@@ -112,11 +112,11 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) :
 		throw dpp::connection_exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
 	}
 	ssl = new opensslcontext();
-	Connect();
+	this->connect();
 }
 
 /* SSL Client constructor throws std::runtime_error if it can't connect to the host */
-void ssl_client::Connect()
+void ssl_client::connect()
 {
 	/* Initial connection is done in blocking mode. There is a timeout on it. */
 	nonblocking = false;
@@ -155,7 +155,7 @@ void ssl_client::Connect()
 		if (sfd == ERROR_STATUS) {
 			err = errno;
 			continue;
-		} else if (connect(sfd, addr->ai_addr, (int)addr->ai_addrlen) == 0) {
+		} else if (::connect(sfd, addr->ai_addr, (int)addr->ai_addrlen) == 0) {
 			break;
 		}
 		err = errno;

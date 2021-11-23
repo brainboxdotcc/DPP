@@ -92,7 +92,7 @@ bool http_request::is_completed()
 }
 
 /* Execute a HTTP request */
-http_request_completion_t http_request::Run(cluster* owner) {
+http_request_completion_t http_request::run(cluster* owner) {
 
 	http_request_completion_t rv;
 	double start = dpp::utility::time_f();
@@ -275,7 +275,7 @@ void request_queue::in_loop()
 							uint64_t wait = (currbucket->second.retry_after ? currbucket->second.retry_after : currbucket->second.reset_after);
 							if ((uint64_t)time(nullptr) > currbucket->second.timestamp + wait) {
 								/* Time has passed, we can process this bucket again. send its request. */
-								rv = req->Run(creator);
+								rv = req->run(creator);
 							} else {
 								/* Time not up yet, emit signal and wait */
 								std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -284,11 +284,11 @@ void request_queue::in_loop()
 							}
 						} else {
 							/* There's limit remaining, we can just run the request */
-							rv = req->Run(creator);
+							rv = req->run(creator);
 						}
 					} else {
 						/* No bucket for this endpoint yet. Just send it, and make one from its reply */
-						rv = req->Run(creator);
+						rv = req->run(creator);
 					}
 
 					bucket_t newbucket;

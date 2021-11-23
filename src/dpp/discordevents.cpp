@@ -322,7 +322,7 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "GUILD_SCHEDULED_EVENT_USER_REMOVE", new dpp::events::guild_scheduled_event_user_remove() },
 };
 
-void discord_client::HandleEvent(const std::string &event, json &j, const std::string &raw)
+void discord_client::handle_event(const std::string &event, json &j, const std::string &raw)
 {
 	auto ev_iter = eventmap.find(event);
 	if (ev_iter != eventmap.end()) {

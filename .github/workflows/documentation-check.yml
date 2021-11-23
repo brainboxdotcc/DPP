@@ -1,8 +1,8 @@
-name: Docs Build (dpp.dev)
+name: Docs Check
 on:
   push:
     branches:
-      - 'dev'
+      - '!dev'
     files:
       - '**Doxyfile'
       - '**docpages/**'
@@ -11,7 +11,7 @@ on:
 
 jobs:
   docs:
-    name: Build Documentation
+    name: Check Documentation
     runs-on: ubuntu-20.04
 
     steps:
@@ -26,7 +26,7 @@ jobs:
           submodules: recursive
 
       - name: Generate Docs
-        run: cd docpages && php makedocs-gh.php
+        run: cd docpages && php makedocs-gh.php nodeploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
