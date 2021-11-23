@@ -1,5 +1,4 @@
 name: Check Build
-
 on:
   workflow_run:
     workflows: ['D++ CI', 'Docs Build (dpp.dev)']
@@ -8,9 +7,9 @@ on:
 
 jobs:
   completion:
-    name: Mark build as completed
+    name: Check Build
     runs-on: ubuntu-20.04
 
     steps:
       - name: Dummy step
-        run: echo "All good!"
+        run: ls
