@@ -174,11 +174,3 @@ jobs:
           path: "${{github.workspace}}/build/*.rpm"
 
 
-  completion:
-    needs: [ 'linux', 'cross-compiles', 'macos', 'windows' ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger build check
-        run: gh workflow run -r $GITHUB_REF "Check Build"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
