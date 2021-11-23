@@ -32,10 +32,10 @@ jobs:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
   completion:
-    #needs: docs
+    needs: docs
     runs-on: ubuntu-latest
     steps:
       - name: Trigger build check
-        run: gh auth login --with-token && gh workflow run "Check Build"
+        run: gh auth login --with-token && gh workflow run -r dev "Check Build"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
