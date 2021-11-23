@@ -1,5 +1,10 @@
 <?php
 
+$nodeploy = false;
+if (count($argv) > 1 && $argv[1] == 'nodeploy') {
+	$nodeploy = true;
+}
+
 /* Sanity checks */
 system("sudo apt-get install graphviz");
 #system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git/\" /dpp-web");
@@ -55,6 +60,10 @@ echo "Generate `master` docs\n";
 chdir("..");
 shell_exec("/usr/local/bin/doxygen");
 system("sudo cp -r docs/* /home/runner/dpp-web/");
+
+if ($nodeploy) {
+	exit(0);
+}
 
 /* Create old version docs */
 chdir("/home/runner/work/DPP/DPP");
