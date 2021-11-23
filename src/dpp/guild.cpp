@@ -87,7 +87,8 @@ guild::guild() :
 guild_member::guild_member() :
 	joined_at(0),
 	premium_since(0),
-	flags(0)
+	flags(0),
+	communication_disabled_until(0)
 {
 }
 
@@ -99,9 +100,10 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, sn
 }
 
 void from_json(const nlohmann::json& j, guild_member& gm) {
-	gm.nickname = string_not_null(&j, "nick");
-	gm.joined_at = ts_not_null(&j, "joined_at");
-	gm.premium_since = ts_not_null(&j, "premium_since");
+	gm.nickname = StringNotNull(&j, "nick");
+	gm.joined_at = TimestampNotNull(&j, "joined_at");
+	gm.premium_since = TimestampNotNull(&j, "premium_since");
+	gm.communication_disabled_until = TimestampNotNull(&j, "communication_disabled_until");
 
 	gm.roles.clear();
 	if (j.contains("roles") && !j.at("roles").is_null()) {
@@ -147,6 +149,7 @@ bool guild_member::has_animated_guild_avatar() const {
 
 std::string guild_member::build_json() const {
 	json j;
+	j["communication_disabled_until"] = ts_to_string(this->communication_disabled_until);
 	if (!this->nickname.empty())
 		j["nick"] = this->nickname;
 	if (this->roles.size()) {
