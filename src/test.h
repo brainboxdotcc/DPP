@@ -38,6 +38,13 @@ struct test_t {
 	bool success = false;
 };
 
+class test_cached_object_t : public dpp::managed {
+public:
+	test_cached_object_t(dpp::snowflake _id) : dpp::managed(_id) { };
+	virtual ~test_cached_object_t() = default;
+	std::string foo;
+};
+
 /* How long the unit tests can run for */
 const int64_t TEST_TIMEOUT = 60;
 

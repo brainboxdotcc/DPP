@@ -257,6 +257,19 @@ int main()
 			once = true;
 		});
 
+		set_test("CUSTOMCACHE", false);
+		dpp::cache<test_cached_object_t> testcache;
+		test_cached_object_t* tco = new test_cached_object_t(666);
+		tco->foo = "bar";
+		testcache.store(tco);
+		test_cached_object_t* found_tco = testcache.find(666);
+		if (found_tco && found_tco->id == 666 && found_tco->foo == "bar") {
+			set_test("CUSTOMCACHE", true);
+		} else {
+			set_test("CUSTOMCACHE", false);
+		}
+		testcache.remove(found_tco);
+
 		noparam_api_test(current_user_get, dpp::user_identified, "CURRENTUSER");
 		singleparam_api_test(channel_get, TEST_TEXT_CHANNEL_ID, dpp::channel, "GETCHAN");
 		singleparam_api_test(guild_get, TEST_GUILD_ID, dpp::guild, "GETGUILD");
