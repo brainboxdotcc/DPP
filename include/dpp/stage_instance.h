@@ -79,4 +79,7 @@ struct DPP_EXPORT stage_instance {
 	std::string const build_json() const;
 };
 
+/** A group of stage instances */
+typedef std::unordered_map<snowflake, stage_instance> stage_instance_map;
+
 };

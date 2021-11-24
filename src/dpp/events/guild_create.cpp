@@ -161,6 +161,42 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			}
 		}
 
+		/* Fill in scheduled events, if there are any */
+		if (d.find("guild_scheduled_events") != d.end()) {
+			for (auto & p : d["guild_scheduled_events"]) {
+				scheduled_event s;
+				s.fill_from_json(&p);
+				gc.scheduled_events.emplace(s.id, s);
+			}
+		}
+
+		/* Fill in stage instances, if there are any */
+		if (d.find("stage_instances") != d.end()) {
+			for (auto & p : d["stage_instances"]) {
+				stage_instance s;
+				s.fill_from_json(&p);
+				gc.stage_instances.emplace(s.id, s);
+			}
+		}
+
+		/* Fill in threads, if there are any */
+		if (d.find("threads") != d.end()) {
+			for (auto & p : d["threads"]) {
+				dpp::thread t;
+				t.fill_from_json(&p);
+				gc.threads.emplace(t.id, t);
+			}
+		}
+
+		/* Fill in stickers, if there are any */
+		if (d.find("stickers") != d.end()) {
+			for (auto & p : d["stickers"]) {
+				sticker st;
+				st.fill_from_json(&p);
+				gc.stickers.emplace(st.id, st);
+			}
+		}
+
 		client->creator->on_guild_create.call(gc);
 	}
 }
