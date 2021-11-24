@@ -84,9 +84,8 @@ public:
 /**
  * @brief The application class represents details of a bot application
  */
-class DPP_EXPORT application {
+class DPP_EXPORT application : public managed {
 public:
-	snowflake		id;			//!< the id of the app
 	std::string		name;			//!< the name of the app
 	utility::iconhash	icon;			//!< the icon hash of the app (may be empty)
 	std::string		description;		//!< the description of the app

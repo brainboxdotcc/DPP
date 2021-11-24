@@ -90,8 +90,7 @@ struct DPP_EXPORT event_member {
 /**
  * @brief A scheduled event
  */
-struct DPP_EXPORT scheduled_event {
-	snowflake       	id;			//!< the id of the scheduled event
+struct DPP_EXPORT scheduled_event : public managed {
 	snowflake		guild_id;		//!< the guild id which the scheduled event belongs to
 	snowflake		channel_id;		//!< the channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL (may be empty)
 	snowflake		creator_id;		//!< Optional: the id of the user that created the scheduled event

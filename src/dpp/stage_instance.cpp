@@ -29,7 +29,7 @@ namespace dpp {
 using json = nlohmann::json;
 
 stage_instance::stage_instance() :
-	id(0),
+	managed(0),
 	guild_id(0),
 	channel_id(0),	
 	privacy_level(sp_public),

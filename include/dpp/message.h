@@ -717,10 +717,7 @@ enum sticker_format : uint8_t {
 /**
  * @brief Represents stickers received in messages
  */
-struct DPP_EXPORT sticker {
-	/** @brief The ID of the sticker
-	 */
-	snowflake	id;
+struct DPP_EXPORT sticker : public managed {
 	/** Optional: for standard stickers, id of the pack the sticker is from
 	 */
 	snowflake	pack_id;
@@ -794,9 +791,7 @@ struct DPP_EXPORT sticker {
 /**
  * @brief Represents a sticker pack (the built in groups of stickers that all nitro users get to use)
  */
-struct DPP_EXPORT sticker_pack {
-	/// id of the sticker pack
-	snowflake       id;
+struct DPP_EXPORT sticker_pack : public managed {
 	/// the stickers in the pack
 	std::map<snowflake, sticker> stickers;
 	/// name of the sticker pack
@@ -956,9 +951,7 @@ struct DPP_EXPORT cache_policy_t {
 /**
  * @brief Represents messages sent and received on Discord
  */
-struct DPP_EXPORT message {
-	/** id of the message */
-	snowflake       id;
+struct DPP_EXPORT message : public managed {
 	/** id of the channel the message was sent in */
 	snowflake       channel_id;
 	/** Optional: id of the guild the message was sent in */

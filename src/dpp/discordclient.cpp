@@ -513,10 +513,10 @@ void discord_client::one_second_timer()
 
 uint64_t discord_client::get_guild_count() {
 	uint64_t total = 0;
-	dpp::cache* c = dpp::get_guild_cache();
-	dpp::cache_container& gc = c->get_container();
+	dpp::cache<guild>* c = dpp::get_guild_cache();
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	/* IMPORTANT: We must lock the container to iterate it */
-	std::lock_guard<std::mutex> lock(c->get_mutex());
+	std::shared_lock l(c->get_mutex());
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -528,10 +528,10 @@ uint64_t discord_client::get_guild_count() {
 
 uint64_t discord_client::get_member_count() {
 	uint64_t total = 0;
-	dpp::cache* c = dpp::get_guild_cache();
-	dpp::cache_container& gc = c->get_container();
+	dpp::cache<guild>* c = dpp::get_guild_cache();
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	/* IMPORTANT: We must lock the container to iterate it */
-	std::lock_guard<std::mutex> lock(c->get_mutex());
+	std::shared_lock l(c->get_mutex());
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -549,10 +549,10 @@ uint64_t discord_client::get_member_count() {
 
 uint64_t discord_client::get_channel_count() {
 	uint64_t total = 0;
-	dpp::cache* c = dpp::get_guild_cache();
-	dpp::cache_container& gc = c->get_container();
+	dpp::cache<guild>* c = dpp::get_guild_cache();
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	/* IMPORTANT: We must lock the container to iterate it */
-	std::lock_guard<std::mutex> lock(c->get_mutex());
+	std::shared_lock l(c->get_mutex());
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {

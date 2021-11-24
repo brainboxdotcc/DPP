@@ -27,7 +27,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-application::application() : id(0), bot_public(false), bot_require_code_grant(false), guild_id(0), primary_sku_id(0), flags(0)
+application::application() : managed(0), bot_public(false), bot_require_code_grant(false), guild_id(0), primary_sku_id(0), flags(0)
 {
 }
 

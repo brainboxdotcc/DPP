@@ -30,7 +30,7 @@ namespace dpp {
 using json = nlohmann::json;
 
 scheduled_event::scheduled_event() :
-	id(0),
+	managed(0),
 	guild_id(0),
 	channel_id(0),	
 	creator_id(0),	
