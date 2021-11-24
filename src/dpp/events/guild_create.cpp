@@ -142,6 +142,25 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 	if (!client->creator->on_guild_create.empty()) {
 		dpp::guild_create_t gc(client, raw);
 		gc.created = g;
+
+		/* Fill presences if there are any */
+		if (d.find("presences") != d.end()) {
+			for (auto & p : d["presences"]) {
+				try {
+					snowflake user_id = std::stoull(p["user"]["id"].get<std::string>());
+					gc.presences.emplace(user_id, presence().fill_from_json(&p));
+				}
+				catch (std::exception&) {
+					/*
+				     	 * std::invalid_argument if no conversion could be performed
+					 * std::out_of_range if the converted value would fall out of the range of
+					 * the result type or if the underlying function (std::strtoul or std::strtoull)
+					 * sets errno to ERANGE. 
+					 */
+				}
+			}
+		}
+
 		client->creator->on_guild_create.call(gc);
 	}
 }

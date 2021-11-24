@@ -58,6 +58,7 @@ std::map<std::string, test_t> tests = {
 	{"TIMERSTART", {"start timer", false, false}},
 	{"TIMERSTOP", {"stop timer", false, false}},
 	{"ONESHOT", {"one-shot timer", false, false}},
+	{"PRESENCE", {"Presence intent", false, false}},
 };
 
 double start = dpp::utility::time_f();

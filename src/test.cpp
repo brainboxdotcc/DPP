@@ -26,9 +26,10 @@ int main()
 	std::string token(get_token());
 	std::vector<uint8_t> testaudio = load_test_audio();
 
+	set_test("PRESENCE", false);
 	set_test("CLUSTER", false);
 	try {
-		dpp::cluster bot(token);
+		dpp::cluster bot(token, dpp::i_all_intents);
 		set_test("CLUSTER", true);
 		set_test("CONNECTION", false);
 		set_test("GUILDCREATE", false);
@@ -40,7 +41,7 @@ int main()
 		set_test("ICONHASH", (i.to_string() == dummyval));
 
 		/* This ensures we test both protocols, as voice is json and shard is etf */
-		bot.set_websocket_protocol(dpp::ws_etf);
+		//bot.set_websocket_protocol(dpp::ws_etf);
 
 		bot.on_ready([&bot](const dpp::ready_t & event) {
 
@@ -145,6 +146,9 @@ int main()
 		bot.on_guild_create([&](const dpp::guild_create_t & event) {
 			if (event.created->id == TEST_GUILD_ID) {
 				set_test("GUILDCREATE", true);
+				if (event.presences.size() && event.presences.begin()->second.user_id > 0) {
+					set_test("PRESENCE", true);
+				}
 			}
 		});
 
@@ -207,7 +211,6 @@ int main()
 							set_test("MSGCREATEREPLY", true);
 						} else {
 							set_test("MSGCREATEREPLY", false);
-							std::cout << " *** " << ref_id << " -> " << m.message_reference.message_id << "\n";
 						}
 						bot.message_delete(m.id, m.channel_id);
 					} else { 

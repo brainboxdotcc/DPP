@@ -204,7 +204,7 @@ public:
 	presence(presence_status status, activity_type type, const std::string& activity_description);
 
 	/**
-	 * @brief Construct a new presence object with some parameters for sending to a websocket
+	 * @brief Construct a new presence object with some parameters for sending to a websocket.
 	 * 
 	 * @param status Status of the activity
 	 * @param a Activity itself 
@@ -221,6 +221,11 @@ public:
 	presence& fill_from_json(nlohmann::json* j);
 
 	/** Build JSON from this object.
+	 * 
+	 * Note: This excludes any part of the presence object that are not valid for websockets and bots,
+	 * and includes websocket opcode 3. You will not get what you expect if you call this on a user's
+	 * presence received from on_presence_update or on_guild_create!
+	 * 
 	 * @return The JSON text of the presence
 	 */
 	std::string build_json() const;
@@ -247,6 +252,6 @@ public:
 };
 
 /** A container of presences */
-typedef std::unordered_map<std::string, presence> presence_map;
+typedef std::unordered_map<snowflake, presence> presence_map;
 
 };
