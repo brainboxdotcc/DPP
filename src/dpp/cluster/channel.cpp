@@ -58,11 +58,18 @@ void cluster::channel_edit_permissions(const class channel &c, snowflake overwri
 	});
 }
 
-void cluster::channel_edit_position(const class channel &c, command_completion_event_t callback) {
-	json j({ {"id", c.id}, {"position", c.position}  });
-	this->post_rest(API_PATH "/guilds", std::to_string(c.guild_id), "channels/" + std::to_string(c.id), m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+void cluster::channel_edit_position(const std::vector<channel> &c, command_completion_event_t callback) {
+	json j = json::array();
+	if (c.empty()) {
+		return;
+	}
+	for (auto & ch : c) {
+		json cj({ {"id", ch.id}, {"position", ch.position}  });	
+		j.push_back(cj);
+	}
+	this->post_rest(API_PATH "/guilds", std::to_string(c[0].guild_id), "channels/" + std::to_string(c[0].id), m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
+			callback(confirmation_callback_t("channel", confirmation(), http));
 		}
 	});
 }

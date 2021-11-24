@@ -630,7 +630,9 @@ public:
 
 	/**
 	 * @brief Start the cluster, connecting all its shards.
-	 * Returns once all shards are connected.
+	 * 
+	 * Returns once all shards are connected if return_after is true,
+	 * otherwise enters an infinite loop while the shards run.
 	 *
 	 * @param return_after If true the bot will return to your program after starting shards, if false this function will never return.
 	 */
@@ -1769,6 +1771,13 @@ public:
 
 	/**
 	 * @brief Create a channel
+	 * 
+	 * Create a new channel object for the guild. Requires the `MANAGE_CHANNELS` permission. If setting permission overwrites,
+	 * only permissions your bot has in the guild can be allowed/denied. Setting `MANAGE_ROLES` permission in channels is only possible
+	 * for guild administrators. Returns the new channel object on success. Fires a `Channel Create Gateway` event.
+	 * 
+	 * All parameters to this endpoint are optional excluding `name`
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param c Channel to create
@@ -1788,14 +1797,19 @@ public:
 	void channel_edit(const class channel &c, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Edit a channel's position
+	 * @brief Edit multiple channels positions
+	 * 
+	 * Modify the positions of a set of channel objects for the guild.
+	 * Requires `MANAGE_CHANNELS` permission. Fires multiple `Channel Update Gateway` events.
+	 * Only channels to be modified are required.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param c Channel to change the position for
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_position(const class channel &c, command_completion_event_t callback = {});
+	void channel_edit_position(const std::vector<channel> &c, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Edit a channel's permissions
@@ -1941,8 +1955,8 @@ public:
 
 	/**
 	 * @brief Unpin a message
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param channel_id Channel id to unpin message on
 	 * @param message_id Message id to unpin message on
 	 * @param callback Function to call when the API call completes.
@@ -1952,6 +1966,9 @@ public:
 
 	/**
 	 * @brief Get a guild
+	 * 
+	 * Returns the guild object for the given id. This endpoint will also return approximate_member_count and approximate_presence_count
+	 * for the guild.
 	 *
 	 * @param g Guild ID to retrieve
 	 * @param callback Function to call when the API call completes.
@@ -1961,6 +1978,9 @@ public:
 
 	/**
 	 * @brief Get a guild preview. Returns a guild object but only a subset of the fields will be populated.
+	 * 
+	 * Returns the guild preview object for the given id `g`. If the user is not in the guild, then the guild
+	 * must be lurkable (it must be Discoverable or have a live public stage).
 	 *
 	 * @param g Guild ID to retrieve
 	 * @param callback Function to call when the API call completes.
@@ -1981,6 +2001,8 @@ public:
 	/**
 	 * @brief Search for guild members based on whether their username or nickname starts with the given string.
 	 *
+	 * @note This endpoint is restricted according to whether the `GUILD_MEMBERS` Privileged Intent is enabled for your application.
+	 *
 	 * @param guild_id Guild ID to search in
 	 * @param query Query string to match username(s) and nickname(s) against
 	 * @param limit max number of members to return (1-1000)
@@ -1991,6 +2013,8 @@ public:
 
 	/**
 	 * @brief Get all guild members
+	 * 
+	 * @note This endpoint is restricted according to whether the `GUILD_MEMBERS` Privileged Intent is enabled for your application.
 	 *
 	 * @param guild_id Guild ID to get all members for
 	 * @param limit max number of members to return (1-1000)
@@ -2002,6 +2026,15 @@ public:
 
 	/**
 	 * @brief Add guild member. Needs a specific oauth2 scope, from which you get the access_token.
+	 * 
+	 * Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope.
+	 * Returns the guild_member, which is defaulted if the user is already a member of the guild. Fires a `Guild Member Add` Gateway event.
+	 * 
+	 * For guilds with Membership Screening enabled, this endpoint will default to adding new members as pending in the guild member object.
+	 * Members that are pending will have to complete membership screening before they become full members that can talk.
+	 * 
+	 * @note All parameters to this endpoint except for access_token are optional.
+	 * The bot must be a member of the guild with `CREATE_INSTANT_INVITE` permission.
 	 *
 	 * @param gm Guild member to add
 	 * @param access_token Access token from Oauth2 scope
@@ -2012,8 +2045,12 @@ public:
 
 	/**
 	 * @brief Edit the properties of an existing guild member
+	 * 
+	 * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update Gateway` event.
+	 * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
+	 * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param gm Guild member to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2022,6 +2059,7 @@ public:
 
 	/**
 	 * @brief Moves the guild member to a other voice channel, if member is connected to one
+	 * 
 	 * @param channel_id Id of the channel to which the user is used
 	 * @param guild_id Guild id to which the user is connected
 	 * @param user_id User id, who should be moved
@@ -2032,6 +2070,11 @@ public:
 
 	/**
 	 * @brief Change current user nickname
+	 * 
+	 * Modifies the nickname of the current user in a guild.
+	 * Fires a `Guild Member Update` Gateway event.
+	 * 
+	 * @deprecated Deprecated in favor of Modify Current Member.
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to change nickanem on
@@ -2043,8 +2086,11 @@ public:
 
 	/**
 	 * @brief Add role to guild member
+	 * 
+	 * Adds a role to a guild member. Requires the `MANAGE_ROLES` permission.
+	 * Fires a Guild Member Update Gateway event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param guild_id Guild ID to add a role to
 	 * @param user_id User ID to add role to
 	 * @param role_id Role ID to add to the user
@@ -2055,8 +2101,11 @@ public:
 
 	/**
 	 * @brief Remove role from guild member
+	 * 
+	 * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
+	 * Fires a `Guild Member Update` Gateway event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param guild_id Guild ID to remove role from user on
 	 * @param user_id User ID to remove role from
 	 * @param role_id Role to remove
@@ -2067,8 +2116,11 @@ public:
 
 	/**
 	 * @brief Remove (kick) a guild member
+	 * 
+	 * Remove a member from a guild. Requires `KICK_MEMBERS` permission.
+	 * Fires a `Guild Member Remove` Gateway event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param guild_id Guild ID to kick member from
 	 * @param user_id User ID to kick
 	 * @param callback Function to call when the API call completes.
@@ -2078,8 +2130,11 @@ public:
 
 	/**
 	 * @brief Add guild ban
+	 * 
+	 * Create a guild ban, and optionally delete previous messages sent by the banned user.
+	 * Requires the `BAN_MEMBERS` permission. Fires a `Guild Ban Add` Gateway event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param guild_id Guild ID to add ban to
 	 * @param user_id User ID to ban
 	 * @param delete_message_days How many days of ther user's messages to also delete
@@ -2091,8 +2146,11 @@ public:
 
 	/**
 	 * @brief Delete guild ban
+	 * 
+	 * Remove the ban for a user. Requires the `BAN_MEMBERS` permissions.
+	 * Fires a Guild Ban Remove Gateway event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param guild_id Guild to delete ban from
 	 * @param user_id User ID to delete ban for
 	 * @param callback Function to call when the API call completes.
@@ -2102,6 +2160,8 @@ public:
 
 	/**
 	 * @brief Get guild ban list
+	 * 
+	 * Requires the `BAN_MEMBERS` permission.
 	 *
 	 * @param guild_id Guild ID to get bans for
 	 * @param callback Function to call when the API call completes.
@@ -2111,6 +2171,8 @@ public:
 
 	/**
 	 * @brief Get single guild ban
+	 * 
+	 * Requires the `BAN_MEMBERS` permission.
 	 *
 	 * @param guild_id Guild ID to get ban for
 	 * @param user_id User ID of ban to retrieve
@@ -2192,7 +2254,20 @@ public:
 
 	/**
 	 * @brief Create a guild
-	 *
+	 * 
+	 * Create a new guild. Returns a guild object on success. `Fires a Guild Create Gateway` event.
+	 * 
+	 * When using the roles parameter, the first member of the array is used to change properties of the guild's everyone role.
+	 * If you are trying to bootstrap a guild with additional roles, keep this in mind. The required id field within each role object is an
+	 * integer placeholder, and will be replaced by the API upon consumption. Its purpose is to allow you to overwrite a role's permissions
+	 * in a channel when also passing in channels with the channels array.
+	 * 
+    	 * When using the channels parameter, the position field is ignored, and none of the default channels are created. The id field within
+	 * each channel object may be set to an integer placeholder, and will be replaced by the API upon consumption. Its purpose is to
+	 * allow you to create `GUILD_CATEGORY` channels by setting the `parent_id` field on any children to the category's id field.
+	 * Category channels must be listed before any children.
+	 * 
+    	 * @note The region field is deprecated and is replaced by channel.rtc_region.
 	 * @param g Guild to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2201,8 +2276,11 @@ public:
 
 	/**
 	 * @brief Edit a guild
+	 * 
+	 * Modify a guild's settings. Requires the `MANAGE_GUILD` permission. Returns the updated guild object on success.
+	 * Fires a `Guild Update Gateway` event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param g Guild to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2211,6 +2289,8 @@ public:
 
 	/**
 	 * @brief Delete a guild
+	 * 
+	 * Delete a guild permanently. User must be owner. Fires a `Guild Delete Gateway` event.
 	 *
 	 * @param guild_id Guild ID to delete
 	 * @param callback Function to call when the API call completes.
@@ -2251,9 +2331,10 @@ public:
 
 	/**
 	 * @brief Edit a single emoji.
+	 * 
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param guild_id Guild ID to edit emoji on
 	 * @param newemoji Emoji to edit
 	 * @param callback Function to call when the API call completes.
@@ -2274,6 +2355,11 @@ public:
 
 	/**
 	 * @brief Get prune counts
+	 * 
+	 * Returns a prune object indicating the number of members that would be removed in a prune operation. Requires the `KICK_MEMBERS`
+	 * permission. By default, prune will not remove users with roles. You can optionally include specific roles in your prune by providing the
+	 * include_roles parameter. Any inactive user that has a subset of the provided role(s) will be counted in the prune and users with additional
+	 * roles will not.
 	 *
 	 * @param guild_id Guild ID to count for pruning
 	 * @param pruneinfo Pruning info
@@ -2284,8 +2370,14 @@ public:
 
 	/**
 	 * @brief Begin guild prune
+	 * 
+	 * Begin a prune operation. Requires the `KICK_MEMBERS` permission. Returns a prune object indicating the number of members
+	 * that were removed in the prune operation. For large guilds it's recommended to set the `compute_prune_count` option to false, forcing
+	 * 'pruned' to 0. Fires multiple `Guild Member Remove` Gateway events.
+	 * By default, prune will not remove users with roles. You can optionally include specific roles in your prune by providing the `include_roles`
+	 * parameter. Any inactive user that has a subset of the provided role(s) will be included in the prune and users with additional roles will not.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param guild_id Guild ID to prune
 	 * @param pruneinfo Pruning info
 	 * @param callback Function to call when the API call completes.
@@ -2295,7 +2387,10 @@ public:
 
 	/**
 	 * @brief Get guild voice regions.
+	 * 
 	 * Voice regions per guild are somewhat deprecated in preference of per-channel voice regions.
+	 * Returns a list of voice region objects for the guild. Unlike the similar /voice route, this returns VIP servers when
+	 * the guild is VIP-enabled.
 	 *
 	 * @param guild_id Guild ID to get voice regions for
 	 * @param callback Function to call when the API call completes.
@@ -2305,6 +2400,8 @@ public:
 
 	/**
 	 * @brief Get guild invites
+	 * 
+	 * Returns a list of invite objects (with invite metadata) for the guild. Requires the `MANAGE_GUILD` permission.
 	 *
 	 * @param guild_id Guild ID to get invites for
 	 * @param callback Function to call when the API call completes.
@@ -2314,6 +2411,8 @@ public:
 
 	/**
 	 * @brief Get guild itegrations
+	 * 
+	 * Requires the `MANAGE_GUILD` permission.
 	 *
 	 * @param guild_id Guild ID to get integrations for
 	 * @param callback Function to call when the API call completes.
@@ -2334,8 +2433,11 @@ public:
 
 	/**
 	 * @brief Delete guild integration
+	 * 
+	 * Delete the attached integration object for the guild. Deletes any associated webhooks and kicks the associated bot if there is one.
+	 * Requires the `MANAGE_GUILD` permission. Fires a Guild Integrations Update Gateway event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param guild_id Guild ID to delete integration for
 	 * @param integration_id Integration ID to delete
 	 * @param callback Function to call when the API call completes.
@@ -2355,6 +2457,8 @@ public:
 
 	/**
 	 * @brief Get guild widget
+	 * 
+	 * Requires the `MANAGE_GUILD` permission.
 	 *
 	 * @param guild_id Guild ID to get widget for
 	 * @param callback Function to call when the API call completes.
@@ -2364,6 +2468,8 @@ public:
 
 	/**
 	 * @brief Edit guild widget
+	 * 
+	 * Requires the `MANAGE_GUILD` permission. 
 	 *
 	 * @param guild_id Guild ID to edit widget for
 	 * @param gw New guild widget information
@@ -2374,6 +2480,8 @@ public:
 
 	/**
 	 * @brief Get guild vanity url, if enabled
+	 * 
+	 * Returns a partial dpp::invite object for guilds with that feature enabled. Requires the `MANAGE_GUILD` permission. code will be null if a vanity url for the guild is not set.
 	 *
 	 * @param guild_id Guild to get vanity URL for
 	 * @param callback Function to call when the API call completes.
@@ -2516,8 +2624,11 @@ public:
 
 	/**
 	 * @brief Create a role on a guild
+	 * 
+	 * Create a new role for the guild. Requires the `MANAGE_ROLES` permission. Returns the new role object on success.
+	 * Fires a `Guild Role Create` Gateway event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param r Role to create (guild ID is encapsulated in the role object)
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2526,8 +2637,10 @@ public:
 
 	/**
 	 * @brief Edit a role on a guild
+	 * 
+	 * Requires the `MANAGE_ROLES` permission. Returns the updated role on success. Fires a `Guild Role Update` Gateway event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param r Role to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2536,8 +2649,11 @@ public:
 
 	/**
 	 * @brief Edit a role's position in a guild
+	 * 
+	 * Modify the positions of a set of role objects for the guild. Requires the `MANAGE_ROLES` permission.
+	 * Fires multiple `Guild Role Update` Gateway events.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param r Role to change position of
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2546,8 +2662,10 @@ public:
 
 	/**
 	 * @brief Delete a role
+	 * 
+	 * Requires the `MANAGE_ROLES` permission. Fires a `Guild Role Delete` Gateway event.
+	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
 	 * @param guild_id Guild ID to delete the role on
 	 * @param role_id Role ID to delete
 	 * @param callback Function to call when the API call completes.
@@ -2605,6 +2723,9 @@ public:
 	/**
 	 * @brief Edit current (bot) user
 	 *
+	 * Modifies the current member in a guild. Returns the updated guild_member object on success.
+	 * Fires a `Guild Member Update` Gateway event.
+	 * 
 	 * @param nickname Nickname to set
 	 * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
 	 * @param type Type of image for avatar
@@ -2951,6 +3072,50 @@ public:
 	 */
 	void guild_event_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback);
 
+	/**
+	 * @brief Set the bot's voice state on a stage channel
+	 * 
+	 * **Caveats**
+	 * 
+	 * There are currently several caveats for this endpoint:
+	 * 
+	 * - `channel_id` must currently point to a stage channel.
+    	 * - current user must already have joined `channel_id`.
+    	 * - You must have the `MUTE_MEMBERS` permission to unsuppress yourself. You can always suppress yourself.
+    	 * - You must have the `REQUEST_TO_SPEAK` permission to request to speak. You can always clear your own request to speak.
+    	 * - You are able to set `request_to_speak_timestamp` to any present or future time.
+	 * 
+	 * @param guild_id Guild to set voice state on
+	 * @param channel_id Stage channel to set voice state on
+	 * @param callback Function to call when the API call completes.
+	 * @param suppress True if the user's audio should be suppressed, false if it should not
+	 * @param request_to_speak_timestamp The time at which we requested to speak, or 0 to clear the request. The time set here must be the current time or in the future.
+	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @throw std::logic_exception You attempted to set a request_to_speak_timestamp in the past which is not the value of 0.
+	 */
+	void current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Set a user's voice state on a stage channel
+	 *
+	 * **Caveats**
+	 * 
+	 * There are currently several caveats for this endpoint:
+	 * 
+	 * - `channel_id` must currently point to a stage channel.
+	 * - User must already have joined `channel_id`.
+	 * - You must have the `MUTE_MEMBERS` permission. (Since suppression is the only thing that is available currently)
+	 * - When unsuppressed, non-bot users will have their `request_to_speak_timestamp` set to the current time. Bot users will not.
+	 * - When suppressed, the user will have their `request_to_speak_timestamp` removed.
+	 * 
+	 * @param user_id The user to set the voice state of
+	 * @param guild_id Guild to set voice state on
+	 * @param channel_id Stage channel to set voice state on
+	 * @param callback Function to call when the API call completes.
+	 * @param suppress True if the user's audio should be suppressed, false if it should not
+	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = {});
 
 };
 
