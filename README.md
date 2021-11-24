@@ -67,7 +67,7 @@ also be sure to contribute, if you're interested!
 * [clang](https://clang.llvm.org/)
 * AppleClang (12.0 or higher)
 * Microsoft Visual Studio 2019
-* MinGW (gcc version 8 or higher)
+* [mingw-w64](https://www.mingw-w64.org/) (gcc version 8 or higher)
 Other compilers may work (either newer versions of those listed above, or different compilers entirely) but have not been tested by us.
 
 ### External Dependencies (You must install these)
