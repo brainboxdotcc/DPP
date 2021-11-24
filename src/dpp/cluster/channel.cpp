@@ -58,7 +58,7 @@ void cluster::channel_edit_permissions(const class channel &c, snowflake overwri
 	});
 }
 
-void cluster::channel_edit_position(const std::vector<channel> &c, command_completion_event_t callback) {
+void cluster::channel_edit_positions(const std::vector<channel> &c, command_completion_event_t callback) {
 	json j = json::array();
 	if (c.empty()) {
 		return;

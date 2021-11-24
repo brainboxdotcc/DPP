@@ -1809,7 +1809,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_position(const std::vector<channel> &c, command_completion_event_t callback = {});
+	void channel_edit_positions(const std::vector<channel> &c, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Edit a channel's permissions
