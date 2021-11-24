@@ -145,7 +145,7 @@ public:
 	 * 
 	 * @return A reference to the cache's container map
 	 */
-	std::unordered_map<snowflake, T*>& get_container() {
+	auto & get_container() {
 		return *(this->cache_map);		
 	}
 
