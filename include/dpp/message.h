@@ -957,7 +957,7 @@ struct DPP_EXPORT message : public managed {
 	/** Optional: id of the guild the message was sent in */
 	snowflake       guild_id;
 	/** the author of this message (not guaranteed to be a valid user) */
-	user*		author;
+	user		author;
 	/** Optional: member properties for this message's author */
 	guild_member	member;
 	/** contents of the message */
@@ -1004,9 +1004,6 @@ struct DPP_EXPORT message : public managed {
 
 	/** Message type */
 	uint8_t		type;
-
-	/** Self allocated user for caching being off */
-	user		self_author;
 
 	/**
 	 * @brief Reference to another message, e.g. a reply

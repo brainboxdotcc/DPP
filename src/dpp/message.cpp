@@ -264,7 +264,7 @@ embed::~embed() = default;
 embed::embed() : timestamp(0), color(0) {
 }
 
-message::message() : managed(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), tts(false),
+message::message() : managed(0), channel_id(0), guild_id(0), sent(0), edited(0), tts(false),
 	mention_everyone(false), pinned(false), webhook_id(0), flags(0), type(mt_default), owner(nullptr)
 {
 	message_reference.channel_id = 0;
@@ -588,9 +588,9 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		j["content"] = content;
 	}
 
-    if(author != nullptr) {
+    if(!author.username.empty()) {
         /* Used for webhooks */
-        j["username"] = author->username;
+        j["username"] = author.username;
     }
 
 	/* Populate message reference */
@@ -744,26 +744,23 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	}
 	this->flags = int8_not_null(d, "flags");
 	this->type = int8_not_null(d, "type");
-	this->author = nullptr;
-	user* authoruser = nullptr;
+	this->author = user();
 	/* May be null, if its null cache it from the partial */
 	if (d->find("author") != d->end()) {
 		json &j_author = (*d)["author"];
 		if (cp.user_policy == dpp::cp_none) {
 			/* User caching off! Allocate a temp user to be deleted in destructor */
-			authoruser = &self_author;
-			this->author = &self_author;
-			self_author.fill_from_json(&j_author);
+			this->author.fill_from_json(&j_author);
 		} else {
 			/* User caching on - aggressive or lazy - create a cached user entry */
-			authoruser = find_user(snowflake_not_null(&j_author, "id"));
+			user* authoruser = find_user(snowflake_not_null(&j_author, "id"));
 			if (!authoruser) {
 				/* User does not exist yet, cache the partial as a user record */
 				authoruser = new user();
 				authoruser->fill_from_json(&j_author);
 				get_user_cache()->store(authoruser);
 			}
-			this->author = authoruser;
+			this->author = *authoruser;
 		}
 	}
 	if (d->find("interaction") != d->end()) {
@@ -807,8 +804,8 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	if (g && d->find("member") != d->end()) {
 		json& mi = (*d)["member"];
 		snowflake uid = snowflake_not_null(&(mi["user"]), "id");
-		if (!uid && authoruser) {
-			uid = authoruser->id;
+		if (!uid && author.id) {
+			uid = author.id;
 		}
 		if (cp.user_policy == dpp::cp_none) {
 			/* User caching off! Just fill in directly but dont store member to guild */
@@ -817,18 +814,18 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			/* User caching on, lazy or aggressive - cache the member information */
 			auto thismember = g->members.find(uid);
 			if (thismember == g->members.end()) {
-				if (uid != 0 && authoruser) {
+				if (uid != 0 && author.id) {
 					guild_member gm;
 					gm.fill_from_json(&mi, g->id, uid);
-					g->members[authoruser->id] = gm;
+					g->members[author.id] = gm;
 					this->member = gm;
 				}
 			} else {
 				/* Update roles etc */
 				this->member = thismember->second;
-				if (authoruser) {
-					this->member.fill_from_json(&mi, g->id, authoruser->id);
-					g->members[authoruser->id] = this->member;
+				if (author.id) {
+					this->member.fill_from_json(&mi, g->id, author.id);
+					g->members[author.id] = this->member;
 				}
 			}
 		}

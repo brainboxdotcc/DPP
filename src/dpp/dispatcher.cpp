@@ -60,13 +60,13 @@ void message_create_t::send(const std::string& m, command_completion_event_t cal
 
 void message_create_t::send(message& msg, command_completion_event_t callback) const 
 {
-	msg.channel_id = this->msg->channel_id;
+	msg.channel_id = this->msg.channel_id;
 	this->from->creator->message_create(msg, callback);
 }
 
 void message_create_t::send(message&& msg, command_completion_event_t callback) const 
 {
-	msg.channel_id = this->msg->channel_id;
+	msg.channel_id = this->msg.channel_id;
 	this->from->creator->message_create(msg, callback);
 }
 
@@ -77,22 +77,22 @@ void message_create_t::reply(const std::string& m, bool mention_replied_user, co
 
 void message_create_t::reply(message& msg, bool mention_replied_user, command_completion_event_t callback) const 
 {
-	msg.set_reference(this->msg->id);
-	msg.channel_id = this->msg->channel_id;
+	msg.set_reference(this->msg.id);
+	msg.channel_id = this->msg.channel_id;
 	if (mention_replied_user) {
 		msg.allowed_mentions.replied_user = mention_replied_user;
-		msg.allowed_mentions.users.push_back(this->msg->author->id);
+		msg.allowed_mentions.users.push_back(this->msg.author.id);
 	}
 	this->from->creator->message_create(msg, callback);
 }
 
 void message_create_t::reply(message&& msg, bool mention_replied_user, command_completion_event_t callback) const 
 {
-	msg.set_reference(this->msg->id);
-	msg.channel_id = this->msg->channel_id;
+	msg.set_reference(this->msg.id);
+	msg.channel_id = this->msg.channel_id;
 	if (mention_replied_user) {
 		msg.allowed_mentions.replied_user = mention_replied_user;
-		msg.allowed_mentions.users.push_back(this->msg->author->id);
+		msg.allowed_mentions.users.push_back(this->msg.author.id);
 	}
 	this->from->creator->message_create(msg, callback);
 }

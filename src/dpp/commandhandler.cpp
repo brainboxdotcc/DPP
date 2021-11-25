@@ -44,7 +44,7 @@ commandhandler::commandhandler(cluster* o, bool auto_hook_events, snowflake appl
 			this->route(event);
 		});
 		messages = o->on_message_create([this](const dpp::message_create_t & event) {
-			this->route(*event.msg);
+			this->route(event.msg);
 		});
 	} else {
 		interactions = messages = 0;
@@ -409,7 +409,7 @@ void commandhandler::route(const struct interaction_create_t & event)
 		source.command_token = event.command.token;
 		source.guild_id = event.command.guild_id;
 		source.channel_id = event.command.channel_id;
-		source.issuer = (user*)&event.command.usr;
+		source.issuer = event.command.usr;
 		found_cmd->second.func(cmd.name, call_params, source);
 	}
 }

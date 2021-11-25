@@ -62,7 +62,7 @@ struct DPP_EXPORT event_dispatch_t {
 	 * Note that for some events, notably voice events, this may be nullptr.
 	 */
 	class discord_client* from; 
-	
+
 	/**
 	 * @brief Construct a new event_dispatch_t object
 	 * 
@@ -100,6 +100,8 @@ struct DPP_EXPORT log_t : public event_dispatch_t {
 	loglevel severity;
 	/** Log Message */
 	std::string message;
+
+	log_t(const log_t&) = default; 	
 };
 
 /** @brief Add user to scheduled event */
@@ -1125,9 +1127,8 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	message_create_t(class discord_client* client, const std::string& raw);
 	/**
 	 * @brief message that was created (sent).
-	 * If you use any parts of this in another thread, take a copy! It doesn't stick around!
 	 */
-	message* msg;
+	message msg;
 	/**
 	 * @brief Send a text to the same channel as the channel_id in recieved event.
 	 * @param m Text to send

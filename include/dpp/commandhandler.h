@@ -154,7 +154,7 @@ struct DPP_EXPORT command_source {
 	/**
 	 * @brief The user who issued the command
 	 */
-	user* issuer;
+	user issuer;
 };
 
 /**
