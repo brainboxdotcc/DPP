@@ -31,9 +31,11 @@
 #include <dpp/json_fwd.hpp>
 #include <dpp/discordclient.h>
 #include <dpp/queues.h>
+#include <dpp/cache.h>
 #include <algorithm>
 #include <iostream>
 #include <shared_mutex>
+#include <cstring>
 
 using  json = nlohmann::json;
 
@@ -3181,5 +3183,111 @@ public:
 		ev.detach(listener_handle);
 	}
 };
+
+/**
+ * @brief Collects objects from events during a specified time period.
+ * 
+ * This template must be specialised. There are premade specialisations which you can use
+ * such as dpp::reaction_collector and dpp::message_collector. For these specalised instances
+ * all you need to do is derive a simple class from them which implements collector::complete().
+ * 
+ * A collector will run for the specified number of seconds, attaching itself to the
+ * given event. During this time any events pass through the collector and collector::filter().
+ * This function can return a pointer to an object to allow a copy of that object to be stored
+ * to a vector, or it can return nullptr to do nothing with that object. For example a collector
+ * attached to on_message_create would receive an event with the type message_create_t, and from
+ * this may decide to extract the message_create_t::msg structure, returning a pointer to it, or
+ * instead may choose to return a nullptr.
+ * 
+ * When either the predetermined timeout is reached, or the collector::cancel() method is called,
+ * or the collector is destroyed, the collector::completed() method is called, which will be
+ * passed a list of collected objects in the order they were collected.
+ * 
+ * @tparam T parameter type of the event this collector will monitor
+ * @tparam C object type this collector will store
+ */
+template<class T, class C> class collector
+{
+protected:
+	/// Owning cluster
+	class cluster* owner;
+private:
+	/// Timed listener
+	timed_listener<event_router_t<T>, std::function<void(const T&)>>* tl;
+	/// stored list
+	std::vector<C> stored;
+	/// Trigger flag
+	bool triggered;
+public:
+	/**
+	 * @brief Construct a new collector object.
+	 * 
+	 * The timer for the collector begins immediately on construction of the object.
+	 * 
+	 * @param cl Pointer to cluster which manages this collector
+	 * @param duration Duration in seconds to run the collector for
+	 * @param event Event to attach to, e.g. cluster::on_message_create
+	 */
+	collector(class cluster* cl, uint64_t duration, event_router_t<T> & event) : triggered(false) {
+		using namespace std::placeholders;
+		std::function<void(const T&)> f = [this](const T& event) {
+			const C* v = filter(event);
+			if (v) {
+				stored.push_back(*v);
+			}
+		};
+		tl = new dpp::timed_listener(cl, duration, event, f, [this]() {
+			if (!triggered) {
+				triggered = true;
+				completed(stored);
+			}
+		});
+	}
+
+	/**
+	 * @brief You must implement this function to receive the completed list of
+	 * captured objects.
+	 * @param list The list of captured objects in captured order
+	 */
+	virtual void completed(const std::vector<C>& list) = 0;
+
+	/**
+	 * @brief Filter the list of elements.
+	 * 
+	 * Every time an event is fired on the collector, this method wil be called
+	 * to determine if we should add an object to the list or not. This function
+	 * can then process the `element` value, extract the parts which are to be
+	 * saved to a list (e.g. a dpp::message out of a dpp::message_create_t) and
+	 * return it as the return value. Returning a value of nullptr causes no
+	 * object to be stored.
+	 * 
+	 * @param element The event data to filter
+	 * @return const C* Returned object or nullptr
+	 */
+	virtual const C* filter(const T& element) = 0;
+
+	/**
+	 * @brief Immediately cancels the collector.
+	 * 
+	 * Use this if you have met the conditions for which you are collecting objects
+	 * early, e.g. you were watching for a message containing 'yes' or 'no' and have
+	 * received it before the time is up.
+	 * 
+	 * @note Causes calling of the completed() method if it has not yet been called.
+	 */
+	virtual void cancel() {
+		delete tl;
+		tl = nullptr;
+	}
+
+	/**
+	 * @brief Destroy the collector object.
+	 * @note Causes calling of the completed() method if it has not yet been called.
+	 */
+	virtual ~collector() {
+		delete tl;
+	}
+};
+
 
 };

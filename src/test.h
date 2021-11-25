@@ -205,3 +205,15 @@ double get_start_time();
  * @return double fractional seconds
  */
 double get_time();
+
+/**
+ * @brief A test version of the message collector for use in unit tests
+ */
+class message_collector : public dpp::message_collector {
+public:
+	message_collector(dpp::cluster* cl, uint64_t duration) : dpp::message_collector(cl, duration) { }
+
+	virtual void completed(const std::vector<dpp::message>& list) {
+		set_test("MSGCOLLECT", list.size() > 0);
+	}
+};

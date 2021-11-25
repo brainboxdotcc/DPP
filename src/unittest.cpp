@@ -60,6 +60,7 @@ std::map<std::string, test_t> tests = {
 	{"ONESHOT", {"one-shot timer", false, false}},
 	{"PRESENCE", {"Presence intent", false, false}},
 	{"CUSTOMCACHE", {"Instantiate a cache", false, false}},
+	{"MSGCOLLECT", {"message_collector", false, false}},
 };
 
 double start = dpp::utility::time_f();

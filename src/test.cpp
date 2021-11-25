@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #include "test.h"
- 
+
 /* Unit tests go here */
 int main()
 {
@@ -34,6 +34,9 @@ int main()
 		set_test("CONNECTION", false);
 		set_test("GUILDCREATE", false);
 		set_test("ICONHASH", false);
+
+		set_test("MSGCOLLECT", false);
+		message_collector collect_messages(&bot, 25);
 
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
@@ -154,11 +157,11 @@ int main()
 
 		bool message_tested = false;
 		bot.on_message_create([&](const dpp::message_create_t & event) {
-			if (event.msg->author->id == bot.me.id && !message_tested) {
+			if (event.msg.author.id == bot.me.id && !message_tested) {
 				message_tested = true;
 				set_test("MESSAGERECEIVE", true);
 				set_test("MESSAGESGET", false);
-				bot.messages_get(event.msg->channel_id, 0, event.msg->id, 0, 5, [](const dpp::confirmation_callback_t &cc){
+				bot.messages_get(event.msg.channel_id, 0, event.msg.id, 0, 5, [](const dpp::confirmation_callback_t &cc){
 					if (!cc.is_error()) {
 						dpp::message_map mm = std::get<dpp::message_map>(cc.value);
 						if (mm.size()) {
@@ -178,7 +181,7 @@ int main()
 					}
 				});
 				set_test("MSGCREATESEND", false);
-				event.send("MSGCREATESEND", [&bot, ch_id = event.msg->channel_id] (const auto& cc) {
+				event.send("MSGCREATESEND", [&bot, ch_id = event.msg.channel_id] (const auto& cc) {
 					if (!cc.is_error()) {
 						dpp::message m = std::get<dpp::message>(cc.value);
 						if (m.channel_id == ch_id) {
@@ -193,7 +196,7 @@ int main()
 				});
 				set_test("MSGCREATEREPLY", false);
 				set_test("MSGMENTIONUSER", false);
-				event.reply("MSGCREATEREPLY", true, [&bot, ref_id = event.msg->id, author_id = event.msg->author->id] (const auto& cc) {
+				event.reply("MSGCREATEREPLY", true, [&bot, ref_id = event.msg.id, author_id = event.msg.author.id] (const auto& cc) {
 					if (!cc.is_error()) {
 						dpp::message m = std::get<dpp::message>(cc.value);
 						if (m.message_reference.message_id == ref_id) {
