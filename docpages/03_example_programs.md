@@ -19,6 +19,7 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage application-command-autocomplete "Slash command auto completion"
 * \subpage attach-file "Attaching a file"
 * \subpage caching-messages "Caching messages"
+* \subpage collecting-reactions "Collecting Reactions"
 
 \page firstbot Creating Your First Bot
 
@@ -122,8 +123,8 @@ int main()
     });
 
     bot.on_message_create([&bot](const dpp::message_create_t & event) {
-        if (event.msg->content == "!ping") {
-            bot.message_create(dpp::message(event.msg->channel_id, "Pong!"));
+        if (event.msg.content == "!ping") {
+            bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
         }
     });
 
@@ -135,16 +136,16 @@ int main()
 Let's break down the code in the `on_message_create` event so that we can discuss what it is doing:
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-if (event.msg->content == "!ping") {
-	bot.message_create(dpp::message(event.msg->channel_id, "Pong!"));
+if (event.msg.content == "!ping") {
+	bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
 }
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-This code is simply comparing the message content `event.msg->content` (dpp::message_create_t::content) against the value in a constant string value `"!ping"`. If they match, then the `message_create` function is called.
+This code is simply comparing the message content `event.msg.content` (dpp::message_create_t::content) against the value in a constant string value `"!ping"`. If they match, then the `message_create` function is called.
 
 The `message_create` function (dpp::cluster::message_create) sends a message. There are many ways to call this function to send embed messages, upload files, and more, but for this simple demonstration we will just send some message text. The `message_create` function accepts a `dpp::message` object, which we create using two parameters:
 
-* The channel ID to send to, which we get from `event.msg->channel_id` (dpp::message_create_t::channel_id)
+* The channel ID to send to, which we get from `event.msg.channel_id` (dpp::message_create_t::channel_id)
 * The message content, which for this demonstration we just make the static text `"Pong!"`.
 
 ### 6. Add code to start the bot!
@@ -166,8 +167,8 @@ int main()
     });
 
     bot.on_message_create([&bot](const dpp::message_create_t & event) {
-        if (event.msg->content == "!ping") {
-            bot.message_create(dpp::message(event.msg->channel_id, "Pong!"));
+        if (event.msg.content == "!ping") {
+            bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
         }
     });
 
@@ -219,22 +220,22 @@ int main(int argc, char const *argv[])
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, robot, robot_size](const dpp::message_create_t & event) {
 
-		std::stringstream ss(event.msg->content);
+		std::stringstream ss(event.msg.content);
 		std::string command;
 
 		ss >> command;
 
 		/* Tell the bot to join the discord voice channel the user is on. Syntax: .join */
 		if (command == ".join") {
-			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			if (!g->connect_member_voice(event.msg->author->id)) {
+			dpp::guild * g = dpp::find_guild(event.msg.guild_id);
+			if (!g->connect_member_voice(event.msg.author.id)) {
 				bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
 			}
 		}
 
 		/* Tell the bot to play the sound file 'Robot.pcm'. Syntax: .robot */
 		if (command == ".robot") {
-			dpp::voiceconn* v = event.from->get_voice(event.msg->guild_id);
+			dpp::voiceconn* v = event.from->get_voice(event.msg.guild_id);
 			if (v && v->voiceclient && v->voiceclient->is_ready()) {
 				v->voiceclient->send_audio_raw((uint16_t*)robot, robot_size);
 			}
@@ -274,21 +275,21 @@ int main(int argc, char const *argv[])
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
-		std::stringstream ss(event.msg->content);
+		std::stringstream ss(event.msg.content);
 		std::string command;
 		ss >> command;
 
 		/* Tell the bot to join the discord voice channel the user is on. Syntax: .join */
 		if (command == ".join") {
-			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			if (!g->connect_member_voice(event.msg->author->id)) {
-				bot.message_create(dpp::message(event.msg->channel_id, "You don't seem to be on a voice channel! :("));
+			dpp::guild * g = dpp::find_guild(event.msg.guild_id);
+			if (!g->connect_member_voice(event.msg.author.id)) {
+				bot.message_create(dpp::message(event.msg.channel_id, "You don't seem to be on a voice channel! :("));
 			}
 		}
 
 		/* Tell the bot to play the sound file */
 		if (command == ".play") {
-			dpp::voiceconn* v = event.from->get_voice(event.msg->guild_id);
+			dpp::voiceconn* v = event.from->get_voice(event.msg.guild_id);
 			if (v && v->voiceclient && v->voiceclient->is_ready()) {
 				ogg_sync_state oy; 
 				ogg_stream_state os;
@@ -433,20 +434,20 @@ int main(int argc, char const *argv[])
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, robot, robot_size](const dpp::message_create_t & event) {
 
-		std::stringstream ss(event.msg->content);
+		std::stringstream ss(event.msg.content);
 		std::string command;
 
 		ss >> command;
 
 		/* Switch to or join the vc the user is on. Syntax: .join  */
 		if (command == ".join") {
-			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			auto current_vc = event.from->get_voice(event.msg->guild_id);
+			dpp::guild * g = dpp::find_guild(event.msg.guild_id);
+			auto current_vc = event.from->get_voice(event.msg.guild_id);
 			bool join_vc = true;
 			/* Check if we are currently on any vc */
 			if (current_vc) {
 				/* Find the channel id  that the user is currently on */
-				auto users_vc = g->voice_members.find(event.msg->author->id);
+				auto users_vc = g->voice_members.find(event.msg.author.id);
 				/* See if we currently share a channel with the user */
 				if (users_vc != g->voice_members.end() && current_vc->channel_id == users_vc->second.channel_id) {
 					join_vc = false;
@@ -458,13 +459,13 @@ int main(int argc, char const *argv[])
 					/* We are on a different voice channel. Leave it, then join the new one 
 					 * by falling through to the join_vc branch below.
 					 */
-					event.from->disconnect_voice(event.msg->guild_id);
+					event.from->disconnect_voice(event.msg.guild_id);
 					join_vc = true;
 				}
 			}
 			/* If we need to join a vc at all, join it here if join_vc == true */
 			if (join_vc) {
-				if (!g->connect_member_voice(event.msg->author->id)) {
+				if (!g->connect_member_voice(event.msg.author.id)) {
 					/* The user issuing the command is not on any voice channel, we can't do anything */
 					bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
 				} else {
@@ -637,10 +638,10 @@ int main()
 
 	/* Message handler to look for a command called !button */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
-		if (event.msg->content == "!button") {
+		if (event.msg.content == "!button") {
 			/* Create a message containing an action row, and a button within the action row. */
 			bot.message_create(
-				dpp::message(event.msg->channel_id, "this text has buttons").add_component(
+				dpp::message(event.msg.channel_id, "this text has buttons").add_component(
 					dpp::component().add_component(
 						dpp::component().set_label("Click me!").
 						set_type(dpp::cot_button).
@@ -755,9 +756,9 @@ int main()
 
 	/* Message handler to look for a command called !select */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
-		if (event.msg->content == "!select") {
+		if (event.msg.content == "!select") {
 			/* Create a message containing an action row, and a select menu within the action row. */
-			dpp::message m(event.msg->channel_id, "this text has a select menu");
+			dpp::message m(event.msg.channel_id, "this text has a select menu");
 			m.add_component(
 				dpp::component().add_component(
 					dpp::component().set_type(dpp::cot_selectmenu).
@@ -815,9 +816,9 @@ int main()
 	});
 
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
-		if (event.msg->content == "!ping2") {
+		if (event.msg.content == "!ping2") {
 			bot.message_create(
-				dpp::message(event.msg->channel_id, "What is 5+5?").add_component(
+				dpp::message(event.msg.channel_id, "What is 5+5?").add_component(
 					dpp::component().add_component(
 						dpp::component().set_label("9").
 						set_style(dpp::cos_primary).
@@ -994,21 +995,21 @@ int main(int argc, char const *argv[])
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, &pcmdata](const dpp::message_create_t & event) {
-		std::stringstream ss(event.msg->content);
+		std::stringstream ss(event.msg.content);
 		std::string command;
 		ss >> command;
 
 		/* Tell the bot to join the discord voice channel the user is on. Syntax: .join */
 		if (command == ".join") {
-			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			if (!g->connect_member_voice(event.msg->author->id)) {
-				bot.message_create(dpp::message(event.msg->channel_id, "You don't seem to be on a voice channel! :("));
+			dpp::guild * g = dpp::find_guild(event.msg.guild_id);
+			if (!g->connect_member_voice(event.msg.author.id)) {
+				bot.message_create(dpp::message(event.msg.channel_id, "You don't seem to be on a voice channel! :("));
 			}
 		}
 
 		/* Tell the bot to play the mp3 file. Syntax: .mp3 */
 		if (command == ".mp3") {
-			dpp::voiceconn* v = event.from->get_voice(event.msg->guild_id);
+			dpp::voiceconn* v = event.from->get_voice(event.msg.guild_id);
 			if (v && v->voiceclient && v->voiceclient->is_ready()) {
 				/* Stream the already decoded MP3 file. This passes the PCM data to the library to be encoded to OPUS */
 				v->voiceclient->send_audio_raw((uint16_t*)pcmdata.data(), pcmdata.size());
@@ -1067,17 +1068,17 @@ int main(int argc, char const *argv[])
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, &fd](const dpp::message_create_t & event) {
 
-		std::stringstream ss(event.msg->content);
+		std::stringstream ss(event.msg.content);
 		std::string command;
 
 		ss >> command;
 
 		/* Tell the bot to record */
 		if (command == ".record") {
-			dpp::guild * g = dpp::find_guild(event.msg->guild_id);
-			if (!g->connect_member_voice(event.msg->author->id)) {
+			dpp::guild * g = dpp::find_guild(event.msg.guild_id);
+			if (!g->connect_member_voice(event.msg.author.id)) {
 				bot.message_create(dpp::message(
-					event.msg->channel_id, 
+					event.msg.channel_id, 
 					"You don't seem to be on a voice channel! :("
 				));
 			}
@@ -1085,7 +1086,7 @@ int main(int argc, char const *argv[])
 
 		/* Tell the bot to stop recording */
 		if (command == ".stop") {
-			event.from->disconnect_voice(event.msg->guild_id);
+			event.from->disconnect_voice(event.msg.guild_id);
 			fclose(fd);
 		}
 	});
@@ -1117,7 +1118,7 @@ int main() {
 
     /* Message handler to look for a command called !embed */
     bot.on_message_create([&bot](const dpp::message_create_t & event) {
-        if (event.msg->content == "!embed") {
+        if (event.msg.content == "!embed") {
 
             /* create the embed */
             dpp::embed embed = dpp::embed().
@@ -1146,7 +1147,7 @@ int main() {
                 set_timestamp(time(0));
 
             /* reply with the created embed */
-            bot.message_create(dpp::message(event.msg->channel_id, embed).set_reference(event.msg->id));
+            bot.message_create(dpp::message(event.msg.channel_id, embed).set_reference(event.msg.id));
         }
     });
 
@@ -1256,9 +1257,9 @@ int main() {
 
     /* Message handler to look for a command called !file */
     bot.on_message_create([&bot](const dpp::message_create_t &event) {
-        if (event.msg->content == "!file") {
+        if (event.msg.content == "!file") {
             // create a message
-            dpp::message msg(event.msg->channel_id, "Hey there, i've got a new image!");
+            dpp::message msg(event.msg.channel_id, "Hey there, i've got a new image!");
 
             std::filesystem::path filePath("path_to_your_file.json");
 
@@ -1295,9 +1296,9 @@ int main() {
 
     /* Message handler to look for a command called !file */
     bot.on_message_create([&bot](const dpp::message_create_t &event) {
-        if (event.msg->content == "!file") {
+        if (event.msg.content == "!file") {
             // request an image
-            bot.request("https://dpp.dev/DPP-Logo.png", dpp::m_get, [&bot, channel_id = event.msg->channel_id](const dpp::http_request_completion_t & httpRequestCompletion) {
+            bot.request("https://dpp.dev/DPP-Logo.png", dpp::m_get, [&bot, channel_id = event.msg.channel_id](const dpp::http_request_completion_t & httpRequestCompletion) {
 
                 // create a message
                 dpp::message msg(channel_id, "This is my new attachment:");
@@ -1346,12 +1347,12 @@ int main() {
 		/* Make a permanent pointer using new, for each message to be cached */
 		dpp::message* m = new dpp::message();
 		/* Store the message into the pointer by copying it */
-		*m = *(event.msg);
+		*m = event.msg;
 		/* Store the new pointer to the cache using the store() method */
 		message_cache.store(m);
 
 		/* Simple ghetto command handler. In the real world, use slashcommand or commandhandler here. */
-		std::stringstream ss(event.msg->content);
+		std::stringstream ss(event.msg.content);
 		std::string cmd;
 		snowflake msg_id;
 		ss >> cmd;
@@ -1363,12 +1364,64 @@ int main() {
 			dpp::message* find_msg = message_cache.find(msg_id);
 			if (find_msg != nullptr) {
 				/* Found a cached message, echo it out */
-				bot.message_create(dpp::message(event.msg->channel_id, "This message had the following content: " + find_msg->content));
+				bot.message_create(dpp::message(event.msg.channel_id, "This message had the following content: " + find_msg.content));
 			} else {
 				/* Nothing like that here. Have you checked under the carpet? */
-				bot.message_create(dpp::message(event.msg->channel_id, "There is no message cached with this ID"));
+				bot.message_create(dpp::message(event.msg.channel_id, "There is no message cached with this ID"));
 			}
 		}
+	});
+
+	/* Start bot */
+	bot.start(false);
+
+	return 0;
+}
+~~~~~~~~~~
+
+\page collecting-reactions Collecting Reactions
+
+D++ comes with many useful helper classes, but amongst these is something called dpp::collector. Collector is a template which can be specialised to automatically collect objects of a pre-determined type from events for a specific interval of time. Once this time period is up, or the class is otherwise signalled, a method is called with the complete set of collected objects.
+
+In the example below we will use it to collect all reactions on a message.
+
+~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
+/* To create a collector we must derive from dpp::collector. As dpp::collector is a complicated template,
+ * various pre-made forms exist such as this one, reaction_collector.
+ */
+class react_collector : public dpp::reaction_collector {
+public:
+	/* Collector will run for 20 seconds */
+	react_collector(dpp::cluster* cl, snowflake id) : dpp::message_collector(cl, 20, id) { }
+
+	/* On completion just output number of collected reactions to as a message. */
+	virtual void completed(const std::vector<dpp::collected_reaction>& list) {
+		if (list.size()) {
+			owner->message_create(dpp::message(list[0].channel_id, "I collected " + std::to_string(list.size()) + " reactions!"));
+		} else {
+			owner->message_create(dpp::message("... I got nothin'."));
+		}
+	}
+};
+
+int main() {
+	/* Create bot */
+	dpp::cluster bot("token");
+
+	/* Pointer to reaction collector */
+	react_collector* r = nullptr;
+
+	/* Message handler */
+	bot.on_message_create([&](const dpp::message_create_t &event) {
+
+		/* If someone sends a message that has the text 'collect reactions!' start a reaction collector */
+		if (event.msg.content == "collect reactions!" && r == nullptr) {
+			/* Create a new reaction collector to collect reactions */
+			r = new react_collector(&bot, event.msg.id);
+		}
+
 	});
 
 	/* Start bot */
