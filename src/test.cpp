@@ -225,7 +225,7 @@ int main()
 			bot.start(true);
 			set_test("BOTSTART", true);
 		}
-		catch (const std::exception & e) {
+		catch (const std::exception &) {
 			set_test("BOTSTART", false);
 		}
 
@@ -295,7 +295,7 @@ int main()
 		wait_for_tests();
 
 	}
-	catch (const std::exception & e) {
+	catch (const std::exception &) {
 		set_test("CLUSTER", false);
 	}
 
