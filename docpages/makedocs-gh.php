@@ -59,7 +59,9 @@ echo "Generate `master` docs\n";
 
 chdir("..");
 shell_exec("/usr/local/bin/doxygen");
-system("rsync -rv --include='*' 'docs' '/home/runner/dpp-web'");
+chdir("docs");
+system("rsync -rv --include='*' '.' '/home/runner/dpp-web'");
+chdir("..");
 
 if ($nodeploy) {
 	exit(0);
@@ -99,7 +101,9 @@ foreach ($tags as $tag) {
 		file_put_contents("docpages/header.html", $hdr);		
 		shell_exec("/usr/local/bin/doxygen");
 		system("mkdir /home/runner/dpp-web/$tag 2>/dev/null");
-		system("rsync -r --include='*' 'docs' '/home/runner/dpp-web/".$tag."'");
+		chdir("docs");
+		system("rsync -r --include='*' '.' '/home/runner/dpp-web/".$tag."'");
+		chdir("..");
 		chdir("..");
 		system("rm -rf " . sys_get_temp_dir() . "/dpp-old/DPP");
 	}
