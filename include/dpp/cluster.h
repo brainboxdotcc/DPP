@@ -231,7 +231,7 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
-extern event_handle __next_handle;
+extern DPP_EXPORT event_handle __next_handle;
 
 /**
  * @brief Handles routing of an event to multiple listeners.

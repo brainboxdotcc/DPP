@@ -28,8 +28,8 @@
 
 namespace dpp {
 
-extern std::unordered_map<managed*, time_t> deletion_queue;
-extern std::mutex deletion_mutex;
+extern DPP_EXPORT std::unordered_map<managed*, time_t> deletion_queue;
+extern DPP_EXPORT std::mutex deletion_mutex;
 
 /** forward declaration */
 class guild_member;
