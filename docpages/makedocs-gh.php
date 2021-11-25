@@ -59,7 +59,7 @@ echo "Generate `master` docs\n";
 
 chdir("..");
 shell_exec("/usr/local/bin/doxygen");
-system("sudo cp -r docs/* /home/runner/dpp-web/");
+system("rsync -rv --include='*' 'docs' '/home/runner/dpp-web'");
 
 if ($nodeploy) {
 	exit(0);
@@ -98,8 +98,8 @@ foreach ($tags as $tag) {
 		/* Rewrite version info in header */
 		file_put_contents("docpages/header.html", $hdr);		
 		shell_exec("/usr/local/bin/doxygen");
-		system("sudo mkdir /home/runner/dpp-web/$tag 2>/dev/null");
-		system("sudo cp -r docs/* /home/runner/dpp-web/$tag");
+		system("mkdir /home/runner/dpp-web/$tag 2>/dev/null");
+		system("rsync -r --include='*' 'docs' '/home/runner/dpp-web/".$tag."'");
 		chdir("..");
 		system("rm -rf " . sys_get_temp_dir() . "/dpp-old/DPP");
 	}
