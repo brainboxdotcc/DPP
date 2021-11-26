@@ -65,6 +65,7 @@ std::map<std::string, test_t> tests = {
 
 double start = dpp::utility::time_f();
 
+
 void set_test(const std::string &testname, bool success) {
 	auto i = tests.find(testname);
 	if (i != tests.end()) {
