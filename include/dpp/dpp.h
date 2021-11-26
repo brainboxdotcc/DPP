@@ -145,7 +145,7 @@ public:
 	 * 
 	 * @param list items collected during the timeframe specified
 	 */
-	virtual void completed(const std::vector<dpp::reaction>& list) = 0;
+	virtual void completed(const std::vector<dpp::collected_reaction>& list) = 0;
 
 	/**
 	 * @brief Select and filter the items which are to appear in the list
