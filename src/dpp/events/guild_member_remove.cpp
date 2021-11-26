@@ -54,7 +54,7 @@ void guild_member_remove::handle(discord_client* client, json &j, const std::str
 		dpp::user u;
 		u.fill_from_json(&(d["user"]));
 		gmr.removed = &u;
-		if (client->creator->on_guild_member_remove.empty()) {
+		if (!client->creator->on_guild_member_remove.empty()) {
 			client->creator->on_guild_member_remove.call(gmr);
 		}
 	} else {
