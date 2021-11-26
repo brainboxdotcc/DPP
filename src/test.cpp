@@ -48,7 +48,7 @@ int main()
 		set_test("ICONHASH", (i.to_string() == dummyval));
 
 		/* This ensures we test both protocols, as voice is json and shard is etf */
-		//bot.set_websocket_protocol(dpp::ws_etf);
+		bot.set_websocket_protocol(dpp::ws_etf);
 
 		bot.on_ready([&bot](const dpp::ready_t & event) {
 

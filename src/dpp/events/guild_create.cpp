@@ -135,7 +135,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			if (client->intents & dpp::i_guild_presences) {
 				chunk_req["d"]["presences"] = true;
 			}
-			client->queue_message(chunk_req.dump());
+			client->queue_message(client->jsonobj_to_string(chunk_req));
 		}
 	}
 

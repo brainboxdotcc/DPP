@@ -145,6 +145,11 @@ protected:
 	friend class dpp::events::voice_state_update;
 
 	/**
+	 * @brief Needed so that guild_create can request member chunks if you have the correct intents
+	 */
+	friend class dpp::events::guild_create;
+
+	/**
 	 * @brief Needed to allow cluster::set_presence to use the ETF functions
 	 */
 	friend class dpp::cluster;

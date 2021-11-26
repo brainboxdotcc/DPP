@@ -428,7 +428,7 @@ json etf_parser::decode_bigint(uint32_t digits) {
 	}
 
 	char outBuffer[32] = {0}; // 9223372036854775807
-	const char* const formatString = sign == 0 ? "%llu" : "-%ll";
+	const char* const formatString = sign == 0 ? "%llu" : "-%lld";
 	const int res = sprintf(outBuffer, formatString, value);
 
 	if (res < 0) {
