@@ -3189,7 +3189,7 @@ public:
  * 
  * This template must be specialised. There are premade specialisations which you can use
  * such as dpp::reaction_collector and dpp::message_collector. For these specalised instances
- * all you need to do is derive a simple class from them which implements collector::complete().
+ * all you need to do is derive a simple class from them which implements collector::completed().
  * 
  * A collector will run for the specified number of seconds, attaching itself to the
  * given event. During this time any events pass through the collector and collector::filter().
