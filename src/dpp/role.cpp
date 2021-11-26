@@ -65,7 +65,14 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 	this->flags |= bool_not_null(j, "mentionable") ? dpp::r_mentionable : 0;
 	if (j->find("tags") != j->end()) {
 		auto t = (*j)["tags"];
-		this->flags |= bool_not_null(&t, "premium_subscriber") ? dpp::r_premium_subscriber : 0;
+		/* This is broken on the Discord API.
+		 * Confirmed 25/11/2021, by quin#3017. If the value exists
+		 * as a null, this is the nitro role. If it doesnt exist at all, it is
+		 * NOT the nitro role. How obtuse.
+		 */
+		if (t.find("premium_subscriber") != t.end()) {
+			this->flags |= dpp::r_premium_subscriber;
+		}
 		this->bot_id = snowflake_not_null(&t, "bot_id");
 		this->integration_id = snowflake_not_null(&t, "integration_id");
 	}
