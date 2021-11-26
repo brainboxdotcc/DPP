@@ -16,7 +16,7 @@
 * [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio)
 * The entire Discord API is available for use in the library
 * Stable [Windows support](https://dpp.dev/buildwindows.html)
-* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6) and Debian x86/x64
+* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6), Debian x86/x64 and RPM based distributions
 
 Want to help? Drop me a line or send a PR.
 
@@ -30,10 +30,10 @@ The documentation is a work in progress, generated from the code comments and ma
 
 ## Supported Systems
 
-The library runs great on **Linux**. **Windows** is also supported and we offer ready made compiled DLL and LIB files for easy integration into any windows visual studio 2019 project.
+The library runs great on **Linux**. **Windows** is also supported and we offer ready made compiled DLL and LIB files for easy integration into any windows visual studio 2019 or 2022 project.
 **Mac OS X** and **FreeBSD** is also functional and stable, as is running your bot on a **Raspberry Pi** - we offer a prebuilt .deb for ARM64, ARM6 and ARM7 to save on having to wait for it to compile.
 
-If you are on windows, and just want to get started as quickly as possible, you should look at our [Windows Bot Template repository](https://github.com/brainboxdotcc/windows-bot-template). This repository can be cloned and will get you up and running in a matter of minutes, with a pre-built D++ in a ready to go project for Visual Studio 2019.
+If you are on windows, and just want to get started as quickly as possible, you should look at our [Windows Bot Template repository](https://github.com/brainboxdotcc/windows-bot-template). This repository can be cloned and will get you up and running in a matter of minutes, with a pre-built D++ in a ready to go project for Visual Studio 2019 and 2022.
 
 The library may work fine in other operating systems too, if you run a D++ bot on something not listed here please let us know!
 
@@ -53,8 +53,7 @@ Make a humorous reference to brains in your nickname to get access to a secret b
 
 ## Show your support
 
-We love people's support in growing and improving. Be sure to leave a ⭐️ if you like the project and 
-also be sure to contribute, if you're interested!
+We love people's support in growing and improving. Be sure to leave a ⭐️ if you like the project and also be sure to contribute, if you're interested!
 
 ## Dependencies
 
@@ -66,7 +65,7 @@ also be sure to contribute, if you're interested!
 * [g++](https://gcc.gnu.org) (version 8 or higher)
 * [clang](https://clang.llvm.org/)
 * AppleClang (12.0 or higher)
-* Microsoft Visual Studio 2019
+* Microsoft Visual Studio 2019 or 2022 (16.x/17.x)
 * [mingw-w64](https://www.mingw-w64.org/) (gcc version 8 or higher)
 Other compilers may work (either newer versions of those listed above, or different compilers entirely) but have not been tested by us.
 
