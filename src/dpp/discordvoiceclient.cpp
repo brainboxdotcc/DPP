@@ -115,6 +115,8 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	}
 	repacketizer = opus_repacketizer_create();
 	this->connect();
+#else
+	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 }
 
@@ -504,6 +506,8 @@ void discord_voice_client::read_ready()
 			creator->on_voice_receive.call(vr);
 		}
 	}
+#else
+	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 }
 
@@ -731,6 +735,8 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 	} else {
 		throw dpp::voice_exception(fmt::format("Invalid input data length: {}, must be n times of {}", inDataSize, mEncFrameBytes));
 	}
+#else
+	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 	return outDataSize;
 }
@@ -805,6 +811,8 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 	encodedAudioLength = this->encode((uint8_t*)audio_data, length, encodedAudioData.data(), encodedAudioLength);
 
 	send_audio_opus(encodedAudioData.data(), encodedAudioLength);
+#else
+	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 	return *this;
 }
@@ -814,6 +822,8 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	int samples = opus_packet_get_nb_samples(opus_packet, (opus_int32)length, 48000);
 	uint64_t duration = (samples / 48) / (timescale / 1000000);
 	send_audio_opus(opus_packet, length, duration);
+#else
+	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 	return *this;
 }
@@ -846,6 +856,8 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	timestamp += frameSize;
 
 	speak();
+#else
+	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 	return *this;
 }
