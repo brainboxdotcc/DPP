@@ -1355,7 +1355,7 @@ int main() {
 		/* Simple ghetto command handler. In the real world, use slashcommand or commandhandler here. */
 		std::stringstream ss(event.msg.content);
 		std::string cmd;
-		snowflake msg_id;
+		dpp::snowflake msg_id;
 		ss >> cmd;
 
 		/* Look for our command */
@@ -1365,7 +1365,7 @@ int main() {
 			dpp::message* find_msg = message_cache.find(msg_id);
 			if (find_msg != nullptr) {
 				/* Found a cached message, echo it out */
-				bot.message_create(dpp::message(event.msg.channel_id, "This message had the following content: " + find_msg.content));
+				bot.message_create(dpp::message(event.msg.channel_id, "This message had the following content: " + find_msg->content));
 			} else {
 				/* Nothing like that here. Have you checked under the carpet? */
 				bot.message_create(dpp::message(event.msg.channel_id, "There is no message cached with this ID"));
