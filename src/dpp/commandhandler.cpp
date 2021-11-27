@@ -40,12 +40,14 @@ commandhandler::commandhandler(cluster* o, bool auto_hook_events, snowflake appl
 		app_id = o->me.id;
 	}
 	if (auto_hook_events) {
-		o->on_interaction_create([this](const dpp::interaction_create_t &event) {
+		interactions = o->on_interaction_create([this](const dpp::interaction_create_t &event) {
 			this->route(event);
 		});
-		o->on_message_create([this](const dpp::message_create_t & event) {
-			this->route(*event.msg);
+		messages = o->on_message_create([this](const dpp::message_create_t & event) {
+			this->route(event.msg);
 		});
+	} else {
+		interactions = messages = 0;
 	}
 
 }
@@ -56,7 +58,13 @@ commandhandler& commandhandler::set_owner(cluster* o)
 	return *this;
 }
 
-commandhandler::~commandhandler() = default;
+commandhandler::~commandhandler()
+{
+	if (messages && interactions) {
+		owner->on_message_create.detach(messages);
+		owner->on_interaction_create.detach(interactions);
+	}
+}
 
 commandhandler& commandhandler::add_prefix(const std::string &prefix)
 {
@@ -401,7 +409,7 @@ void commandhandler::route(const struct interaction_create_t & event)
 		source.command_token = event.command.token;
 		source.guild_id = event.command.guild_id;
 		source.channel_id = event.command.channel_id;
-		source.issuer = (user*)&event.command.usr;
+		source.issuer = event.command.usr;
 		found_cmd->second.func(cmd.name, call_params, source);
 	}
 }

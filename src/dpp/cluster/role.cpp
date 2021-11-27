@@ -74,7 +74,7 @@ void cluster::roles_get(snowflake guild_id, command_completion_event_t callback)
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_role : j) {
-					roles[SnowflakeNotNull(&curr_role, "id")] = role().fill_from_json(guild_id, &curr_role);
+					roles[snowflake_not_null(&curr_role, "id")] = role().fill_from_json(guild_id, &curr_role);
 				}
 			}
 			callback(confirmation_callback_t("role_map", roles, http));

@@ -29,7 +29,7 @@ namespace dpp {
 using json = nlohmann::json;
 
 stage_instance::stage_instance() :
-	id(0),
+	managed(0),
 	guild_id(0),
 	channel_id(0),	
 	privacy_level(sp_public),
@@ -38,12 +38,12 @@ stage_instance::stage_instance() :
 }
 
 stage_instance& stage_instance::fill_from_json(const json* j) {
-	SetSnowflakeNotNull(j, "id", this->id);
-	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
-	SetSnowflakeNotNull(j, "channel_id", this->channel_id);
-	SetStringNotNull(j, "topic", this->topic) ;
-	this->privacy_level = static_cast<dpp::stage_privacy_level>(Int8NotNull(j, "privacy_level"));
-	SetBoolNotNull(j, "discoverable_disabled", this->discoverable_disabled);
+	set_snowflake_not_null(j, "id", this->id);
+	set_snowflake_not_null(j, "guild_id", this->guild_id);
+	set_snowflake_not_null(j, "channel_id", this->channel_id);
+	set_string_not_null(j, "topic", this->topic) ;
+	this->privacy_level = static_cast<dpp::stage_privacy_level>(int8_not_null(j, "privacy_level"));
+	set_bool_not_null(j, "discoverable_disabled", this->discoverable_disabled);
 
 	return *this;
 }

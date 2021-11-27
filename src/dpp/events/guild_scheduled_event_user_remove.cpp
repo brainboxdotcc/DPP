@@ -46,12 +46,12 @@ using namespace dpp;
  */
 void guild_scheduled_event_user_remove::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	if (!client->creator->dispatch.guild_scheduled_event_user_remove.empty()) {
+	if (!client->creator->on_guild_scheduled_event_user_remove.empty()) {
 		dpp::guild_scheduled_event_user_remove_t eur(client, raw);
-		eur.guild_id = SnowflakeNotNull(&d, "guild_id");
-		eur.user_id = SnowflakeNotNull(&d, "user_id");
-		eur.event_id = SnowflakeNotNull(&d, "guild_scheduled_event_id");
-		call_event(client->creator->dispatch.guild_scheduled_event_user_remove, eur);
+		eur.guild_id = snowflake_not_null(&d, "guild_id");
+		eur.user_id = snowflake_not_null(&d, "user_id");
+		eur.event_id = snowflake_not_null(&d, "guild_scheduled_event_id");
+		client->creator->on_guild_scheduled_event_user_remove.call(eur);
 	}
 }
 

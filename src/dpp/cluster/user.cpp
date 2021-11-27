@@ -65,6 +65,38 @@ void cluster::current_user_get(command_completion_event_t callback) {
 	});
 }
 
+void cluster::current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress, time_t request_to_speak_timestamp, command_completion_event_t callback) {
+	json j({
+		{"channel_id", channel_id},
+		{"suppress", suppress}
+	});
+	if (request_to_speak_timestamp) {
+		if (request_to_speak_timestamp < time(nullptr)) {
+			throw dpp::logic_exception("Cannot set voice state request to speak timestamp to before current time");
+		}
+		j["request_to_speak_timestamp"] = ts_to_string(request_to_speak_timestamp);
+	} else {
+		j["request_to_speak_timestamp"] = json::value_t::null;
+	}
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/voice-states/@me", m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress, command_completion_event_t callback) {
+	json j({
+		{"channel_id", channel_id},
+		{"suppress", suppress}
+	});
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/voice-states/" + std::to_string(user_id), m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
 void cluster::current_user_connections_get(command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", "@me", "connections", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
@@ -72,7 +104,7 @@ void cluster::current_user_connections_get(command_completion_event_t callback) 
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_conn : j) {
-					connections[SnowflakeNotNull(&curr_conn, "id")] = connection().fill_from_json(&curr_conn);
+					connections[snowflake_not_null(&curr_conn, "id")] = connection().fill_from_json(&curr_conn);
 				}
 			}
 			callback(confirmation_callback_t("connection_map", connections, http));
@@ -87,7 +119,7 @@ void cluster::current_user_get_guilds(command_completion_event_t callback) {
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_guild : j) {
-					guilds[SnowflakeNotNull(&curr_guild, "id")] = guild().fill_from_json(nullptr, &curr_guild);
+					guilds[snowflake_not_null(&curr_guild, "id")] = guild().fill_from_json(nullptr, &curr_guild);
 				}
 			}
 			callback(confirmation_callback_t("guild_map", guilds, http));

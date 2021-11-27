@@ -43,11 +43,11 @@ void thread_update::handle(discord_client* client, json& j, const std::string& r
 	t.fill_from_json(&d);
 	dpp::guild* g = dpp::find_guild(t.guild_id);
 	if (g) {
-		if (!client->creator->dispatch.thread_update.empty()) {
+		if (!client->creator->on_thread_update.empty()) {
 			dpp::thread_update_t tu(client, raw);
 			tu.updated = t;
 			tu.updating_guild = g;
-			call_event(client->creator->dispatch.thread_update, tu);
+			client->creator->on_thread_update.call(tu);
 		}
 	}
 }

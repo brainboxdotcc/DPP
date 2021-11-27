@@ -43,13 +43,13 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void message_delete::handle(discord_client* client, json &j, const std::string &raw) {
-	if (!client->creator->dispatch.message_delete.empty()) {
+	if (!client->creator->on_message_delete.empty()) {
 		json d = j["d"];
 		dpp::message_delete_t msg(client, raw);
 		dpp::message m(client->creator);
 		m.fill_from_json(&d);
 		msg.deleted = &m;
-		call_event(client->creator->dispatch.message_delete, msg);
+		client->creator->on_message_delete.call(msg);
 	}
 
 }

@@ -90,13 +90,17 @@ jobs:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
         cfg:
-        - { name: x64,  arch: x64, config: Release }
-        - { name: x64,  arch: x64, config: Debug }
-        - { name: x86,  arch: x86, config: Release }
-        - { name: x86,  arch: x86, config: Debug }
+        - { name: x64,  arch: x64, config: Release, vs: '2019', os: 'windows-2019', vsv: '16' }
+        - { name: x64,  arch: x64, config: Debug, vs: '2019', os: 'windows-2019', vsv: '16' }
+        - { name: x86,  arch: x86, config: Release, vs: '2019', os: 'windows-2019', vsv: '16' }
+        - { name: x86,  arch: x86, config: Debug, vs: '2019', os: 'windows-2019', vsv: '16' }
+        - { name: x64,  arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17' }
+        - { name: x64,  arch: x64, config: Debug, vs: '2022', os: 'windows-2022', vsv: '17' }
+        - { name: x86,  arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17' }
+        - { name: x86,  arch: x86, config: Debug, vs: '2022', os: 'windows-2022', vsv: '17' }
 
-    name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}"
-    runs-on: windows-2019
+    name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
+    runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2
@@ -111,11 +115,11 @@ jobs:
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" ..
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
-        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -G "Visual Studio 16 2019" -A Win32 -T host=x86 ..
+        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
 
       - name: Build Project
         run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}}
@@ -130,7 +134,7 @@ jobs:
       - name: Upload Binary
         uses: actions/upload-artifact@v2
         with:
-          name: "libdpp - Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}"
+          name: "libdpp - Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
           path: '${{github.workspace}}/main/build/*.zip'
 
   cross-compiles:

@@ -154,7 +154,7 @@ struct DPP_EXPORT command_source {
 	/**
 	 * @brief The user who issued the command
 	 */
-	user* issuer;
+	user issuer;
 };
 
 /**
@@ -186,6 +186,8 @@ struct DPP_EXPORT command_info_t {
 /**
  * @brief The commandhandler class represents a group of commands, prefixed or slash commands with handling functions.
  * 
+ * It can automatically register slash commands, and handle routing of messages and interactions to separated command handler
+ * functions.
  */
 class DPP_EXPORT commandhandler {
 private:
@@ -224,6 +226,16 @@ public:
 	snowflake app_id;
 
 	/**
+	 * @brief Interaction event handle
+	 */
+	event_handle interactions;
+
+	/**
+	 * @brief Message event handle
+	 */
+	event_handle messages;
+
+	/**
 	 * @brief Returns true if the string has a known prefix on the start.
 	 * Modifies string to remove prefix if it returns true.
 	 * 
@@ -240,8 +252,9 @@ public:
 	 * 
 	 * @param o Owning cluster to attach to
 	 * @param auto_hook_events Set to true to automatically hook the on_interaction_create
-	 * and on_message events. Only do this if you have no other use for these events than
-	 * commands that are handled by the command handler (this is usually the case).
+	 * and on_message events. You should not need to set this to false unless you have a specific
+	 * use case, as D++ supports multiple listeners to an event, so will allow the commandhandler
+	 * to hook to your command events without disrupting other uses for the events you may have.
 	 * @param application_id The application id of the bot. If not specified, the class will
 	 * look within the cluster object and use cluster::me::id instead.
 	 */
@@ -279,15 +292,22 @@ public:
 	 * @param description The description of the command, shown for slash commands
 	 * @param guild_id The guild ID to restrict the command to. For slash commands causes registration of a guild command as opposed to a global command.
 	 * @return commandhandler& reference to self
-	 * @throw dpp::exception if application ID cannot be determined
+	 * @throw dpp::logic_exception if application ID cannot be determined
 	 */
 	commandhandler& add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, const std::string &description = "", snowflake guild_id = 0);
 
 	/**
 	 * @brief Register all slash commands with Discord
-	 * This method must be called if you are using the "/" prefix to mark the end of commands
-	 * being added to the handler. Note that this uses bulk registration and will replace any
+	 * This method must be called at least once  if you are using the "/" prefix to mark the
+	 * end of commands being added to the handler. Note that this uses bulk registration and will replace any
 	 * existing slash commands.
+	 * 
+	 * Note that if you have previously registered your commands and they have not changed, you do
+	 * not need to call this again. Discord retains a cache of previously added commands.
+	 * 
+	 * @note Registration of global slash commands can take up to an hour to appear on Discord.
+	 * This is a Discord API limitation. For rapid testing use guild specific commands by specifying
+	 * a guild ID when declaring the command.
 	 * 
 	 * @return commandhandler& Reference to self for chaining method calls
 	 */
@@ -296,7 +316,7 @@ public:
 	/**
 	 * @brief Route a command from the on_message_create function.
 	 * Call this method from within your on_message_create with the received
-	 * dpp::message object.
+	 * dpp::message object if you have disabled automatic registration of events.
 	 * 
 	 * @param msg message to parse
 	 */
@@ -305,7 +325,7 @@ public:
 	/**
 	 * @brief Route a command from the on_interaction_create function.
 	 * Call this method from your on_interaction_create with the received
-	 * dpp::interaction_create_t object.
+	 * dpp::interaction_create_t object if you have disabled automatic registration of events.
 	 * 
 	 * @param event command interaction event to parse
 	 */

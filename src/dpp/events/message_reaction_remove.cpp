@@ -44,17 +44,17 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void message_reaction_remove::handle(discord_client* client, json &j, const std::string &raw) {
-	if (!client->creator->dispatch.message_reaction_remove.empty()) {
+	if (!client->creator->on_message_reaction_remove.empty()) {
 		json &d = j["d"];
 		dpp::message_reaction_remove_t mrr(client, raw);
-		dpp::snowflake guild_id = SnowflakeNotNull(&d, "guild_id");
+		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
 		mrr.reacting_guild = dpp::find_guild(guild_id);
-		mrr.reacting_user_id = SnowflakeNotNull(&d, "user_id");
-		mrr.reacting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
-		mrr.message_id = SnowflakeNotNull(&d, "message_id");
+		mrr.reacting_user_id = snowflake_not_null(&d, "user_id");
+		mrr.reacting_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
+		mrr.message_id = snowflake_not_null(&d, "message_id");
 		mrr.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
 		if (mrr.reacting_channel && mrr.message_id) {
-			call_event(client->creator->dispatch.message_reaction_remove, mrr);
+			client->creator->on_message_reaction_remove.call(mrr);
 		}
 	}
 }

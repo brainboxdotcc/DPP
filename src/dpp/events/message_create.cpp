@@ -46,13 +46,12 @@ using namespace dpp;
  */
 void message_create::handle(discord_client* client, json &j, const std::string &raw) {
 
-	if (!client->creator->dispatch.message_create.empty()) {
+	if (!client->creator->on_message_create.empty()) {
 		json d = j["d"];
 		dpp::message_create_t msg(client, raw);
-		dpp::message m(client->creator);
-		m.fill_from_json(&d, client->creator->cache_policy);	
-		msg.msg = &m;
-		call_event(client->creator->dispatch.message_create, msg);
+		msg.msg.fill_from_json(&d, client->creator->cache_policy);
+		msg.msg.owner = client->creator;
+		client->creator->on_message_create.call(msg);
 	}
 }
 

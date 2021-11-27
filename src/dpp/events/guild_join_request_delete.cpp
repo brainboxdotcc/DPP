@@ -44,12 +44,12 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void guild_join_request_delete::handle(class discord_client* client, json &j, const std::string &raw) {
-	if (!client->creator->dispatch.guild_join_request_delete.empty()) {
+	if (!client->creator->on_guild_join_request_delete.empty()) {
 		json& d = j["d"];
 		dpp::guild_join_request_delete_t grd(client, raw);
-		grd.user_id = SnowflakeNotNull(&d, "user_id");
-		grd.guild_id = SnowflakeNotNull(&d, "guild_id");
-		call_event(client->creator->dispatch.guild_join_request_delete, grd);
+		grd.user_id = snowflake_not_null(&d, "user_id");
+		grd.guild_id = snowflake_not_null(&d, "guild_id");
+		client->creator->on_guild_join_request_delete.call(grd);
 	}
 }
 

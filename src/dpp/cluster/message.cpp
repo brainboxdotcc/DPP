@@ -182,7 +182,7 @@ void cluster::message_get_reactions(const struct message &m, const std::string &
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_user : j) {
-					users[SnowflakeNotNull(&curr_user, "id")] = user().fill_from_json(&curr_user);
+					users[snowflake_not_null(&curr_user, "id")] = user().fill_from_json(&curr_user);
 				}
 			}
 			callback(confirmation_callback_t("user_map", users, http));
@@ -233,7 +233,7 @@ void cluster::messages_get(snowflake channel_id, snowflake around, snowflake bef
 			message_map messages;
 			if (!e.is_error()) {
 				for (auto & curr_message : j) {
-					messages[SnowflakeNotNull(&curr_message, "id")] = message(this).fill_from_json(&curr_message);
+					messages[snowflake_not_null(&curr_message, "id")] = message(this).fill_from_json(&curr_message);
 				}
 			}
 			callback(confirmation_callback_t("message_map", messages, http));
@@ -257,7 +257,7 @@ void cluster::channel_pins_get(snowflake channel_id, command_completion_event_t 
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_message : j) {
-				pins_messages[SnowflakeNotNull(&curr_message, "id")] = message(this).fill_from_json(&curr_message);
+				pins_messages[snowflake_not_null(&curr_message, "id")] = message(this).fill_from_json(&curr_message);
 			}
 		}
 		if (callback) {

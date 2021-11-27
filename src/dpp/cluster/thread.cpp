@@ -47,7 +47,7 @@ void cluster::threads_get_active(snowflake channel_id, command_completion_event_
 		if (callback) {
 			thread_map threads;
 			for (auto &curr_thread : j) {
-				threads[SnowflakeNotNull(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
+				threads[snowflake_not_null(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("thread_map", threads, http));
 		}
@@ -67,7 +67,7 @@ void cluster::threads_get_joined_private_archived(snowflake channel_id, snowflak
 		if (callback) {
 			thread_map threads;
 			for (auto &curr_thread : j) {
-				threads[SnowflakeNotNull(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
+				threads[snowflake_not_null(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("thread_map", threads, http));
 		}
@@ -87,7 +87,7 @@ void cluster::threads_get_private_archived(snowflake channel_id, time_t before_t
 		if (callback) {
 			thread_map threads;
 			for (auto &curr_thread : j) {
-				threads[SnowflakeNotNull(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
+				threads[snowflake_not_null(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("thread_map", threads, http));
 		}
@@ -107,7 +107,7 @@ void cluster::threads_get_public_archived(snowflake channel_id, time_t before_ti
 		if (callback) {
 			thread_map threads;
 			for (auto &curr_thread : j) {
-				threads[SnowflakeNotNull(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
+				threads[snowflake_not_null(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("thread_map", threads, http));
 		}
@@ -127,7 +127,7 @@ void cluster::thread_members_get(snowflake thread_id, command_completion_event_t
 		if (callback) {
 			thread_member_map thread_members;
 			for (auto& curr_member : j) {
-				thread_members[SnowflakeNotNull(&curr_member, "user_id")] = thread_member().fill_from_json(&curr_member);
+				thread_members[snowflake_not_null(&curr_member, "user_id")] = thread_member().fill_from_json(&curr_member);
 			}
 			callback(confirmation_callback_t("thread_member_map", thread_members, http));
 		}

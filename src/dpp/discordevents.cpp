@@ -47,7 +47,23 @@ char* crossplatform_strptime(const char* s, const char* f, struct tm* tm) {
 
 namespace dpp {
 
-uint64_t SnowflakeNotNull(const json* j, const char *keyname) {
+double managed::get_creation_time() const {
+	return (double)((this->id >> 22) + 1420070400000) / 1000.0;
+}
+
+std::string ts_to_string(time_t ts) {
+	std::ostringstream ss;
+	struct tm t;
+	#ifdef _WIN32
+		gmtime_s(&t, &ts);
+	#else
+		gmtime_r(&ts, &t);
+	#endif
+	ss << std::put_time(&t, "%FT%TZ");
+	return ss.str();
+}
+
+uint64_t snowflake_not_null(const json* j, const char *keyname) {
 	/* Snowflakes are a special case. Pun intended.
 	 * Because discord drinks the javascript kool-aid, they have to send 64 bit integers as strings as js can't deal with them
 	 * even though we can. So, all snowflakes are sent and received wrapped as string values and must be read by nlohmann::json
@@ -62,7 +78,7 @@ uint64_t SnowflakeNotNull(const json* j, const char *keyname) {
 	}
 }
 
-void SetSnowflakeNotNull(const json* j, const char *keyname, uint64_t &v) {
+void set_snowflake_not_null(const json* j, const char *keyname, uint64_t &v) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		v = !k->is_null() && k->is_string() ? strtoull(k->get<std::string>().c_str(), nullptr, 10) : 0;
@@ -70,7 +86,7 @@ void SetSnowflakeNotNull(const json* j, const char *keyname, uint64_t &v) {
 }
 
 
-std::string StringNotNull(const json* j, const char *keyname) {
+std::string string_not_null(const json* j, const char *keyname) {
 	/* Returns empty string if the value is not a string, or is null or not defined */
 	auto k = j->find(keyname);
 	if (k != j->end()) {
@@ -80,7 +96,7 @@ std::string StringNotNull(const json* j, const char *keyname) {
 	}
 }
 
-void SetStringNotNull(const json* j, const char *keyname, std::string &v) {
+void set_string_not_null(const json* j, const char *keyname, std::string &v) {
 	/* Returns empty string if the value is not a string, or is null or not defined */
 	auto k = j->find(keyname);
 	if (k != j->end()) {
@@ -88,7 +104,7 @@ void SetStringNotNull(const json* j, const char *keyname, std::string &v) {
 	}
 }
 
-uint64_t Int64NotNull(const json* j, const char *keyname) {
+uint64_t int64_not_null(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && !k->is_string() ? k->get<uint64_t>() : 0;
@@ -97,7 +113,7 @@ uint64_t Int64NotNull(const json* j, const char *keyname) {
 	}
 }
 
-void SetInt64NotNull(const json* j, const char *keyname, uint64_t &v) {
+void set_int64_not_null(const json* j, const char *keyname, uint64_t &v) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		v = !k->is_null() && !k->is_string() ? k->get<uint64_t>() : 0;
@@ -105,7 +121,7 @@ void SetInt64NotNull(const json* j, const char *keyname, uint64_t &v) {
 }
 
 
-uint32_t Int32NotNull(const json* j, const char *keyname) {
+uint32_t int32_not_null(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && !k->is_string() ? k->get<uint32_t>() : 0;
@@ -114,14 +130,14 @@ uint32_t Int32NotNull(const json* j, const char *keyname) {
 	}
 }
 
-void SetInt32NotNull(const json* j, const char *keyname, uint32_t &v) {
+void set_int32_not_null(const json* j, const char *keyname, uint32_t &v) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		v = !k->is_null() && !k->is_string() ? k->get<uint32_t>() : 0;
 	}
 }
 
-uint16_t Int16NotNull(const json* j, const char *keyname) {
+uint16_t int16_not_null(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && !k->is_string() ? k->get<uint16_t>() : 0;
@@ -130,14 +146,14 @@ uint16_t Int16NotNull(const json* j, const char *keyname) {
 	}
 }
 
-void SetInt16NotNull(const json* j, const char *keyname, uint16_t &v) {
+void set_int16_not_null(const json* j, const char *keyname, uint16_t &v) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		v = !k->is_null() && !k->is_string() ? k->get<uint16_t>() : 0;
 	}
 }
 
-uint8_t Int8NotNull(const json* j, const char *keyname) {
+uint8_t int8_not_null(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() && !k->is_string() ? k->get<uint8_t>() : 0;
@@ -146,14 +162,14 @@ uint8_t Int8NotNull(const json* j, const char *keyname) {
 	}
 }
 
-void SetInt8NotNull(const json* j, const char *keyname, uint8_t &v) {
+void set_int8_not_null(const json* j, const char *keyname, uint8_t &v) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		v = !k->is_null() && !k->is_string() ? k->get<uint8_t>() : 0;
 	}
 }
 
-bool BoolNotNull(const json* j, const char *keyname) {
+bool bool_not_null(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		return !k->is_null() ? (k->get<bool>() == true) : false;
@@ -162,7 +178,7 @@ bool BoolNotNull(const json* j, const char *keyname) {
 	}
 }
 
-void SetBoolNotNull(const json* j, const char *keyname, bool &v) {
+void set_bool_not_null(const json* j, const char *keyname, bool &v) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		v = !k->is_null() ? (k->get<bool>() == true) : false;
@@ -196,7 +212,7 @@ std::string base64_encode(unsigned char const* buf, unsigned int buffer_length) 
 	return ret;
 }
 
-time_t TimestampNotNull(const json* j, const char* keyname)
+time_t ts_not_null(const json* j, const char* keyname)
 {
 	/* Parses discord ISO 8061 timestamps to time_t, accounting for local time adjustment.
 	 * Note that discord timestamps contain a decimal seconds part, which time_t and struct tm
@@ -220,7 +236,7 @@ time_t TimestampNotNull(const json* j, const char* keyname)
 	return retval;
 }
 
-void SetTimestampNotNull(const json* j, const char* keyname, time_t &v)
+void set_ts_not_null(const json* j, const char* keyname, time_t &v)
 {
 	/* Parses discord ISO 8061 timestamps to time_t, accounting for local time adjustment.
 	 * Note that discord timestamps contain a decimal seconds part, which time_t and struct tm
@@ -310,7 +326,7 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "GUILD_SCHEDULED_EVENT_USER_REMOVE", new dpp::events::guild_scheduled_event_user_remove() },
 };
 
-void discord_client::HandleEvent(const std::string &event, json &j, const std::string &raw)
+void discord_client::handle_event(const std::string &event, json &j, const std::string &raw)
 {
 	auto ev_iter = eventmap.find(event);
 	if (ev_iter != eventmap.end()) {

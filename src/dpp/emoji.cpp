@@ -32,8 +32,7 @@ emoji::emoji() : managed(), user_id(0), flags(0), image_data(nullptr)
 {
 }
 
-emoji::emoji(const std::string n, const snowflake i, const uint8_t f)
-	: managed(i), name(n), user_id(0), flags(f), image_data(nullptr)
+emoji::emoji(const std::string n, const snowflake i, const uint8_t f) : managed(i), name(n), user_id(0), flags(f), image_data(nullptr)
 {	
 }
 
@@ -42,19 +41,19 @@ emoji::~emoji() {
 }
 
 emoji& emoji::fill_from_json(nlohmann::json* j) {
-	id = SnowflakeNotNull(j, "id");
-	name = StringNotNull(j, "name");
+	id = snowflake_not_null(j, "id");
+	name = string_not_null(j, "name");
 	if (j->find("user") != j->end()) {
 		json & user = (*j)["user"];
-		user_id = SnowflakeNotNull(&user, "id");
+		user_id = snowflake_not_null(&user, "id");
 	}
-	if (BoolNotNull(j, "require_colons"))
+	if (bool_not_null(j, "require_colons"))
 		flags |= e_require_colons;
-	if (BoolNotNull(j, "managed"))
+	if (bool_not_null(j, "managed"))
 		flags |= e_managed;
-	if (BoolNotNull(j, "animated"))
+	if (bool_not_null(j, "animated"))
 		flags |= e_animated;
-	if (BoolNotNull(j, "available"))
+	if (bool_not_null(j, "available"))
 		flags |= e_available;
 	return *this;
 }

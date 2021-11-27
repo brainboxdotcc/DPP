@@ -66,7 +66,7 @@ void cluster::guild_stickers_get(snowflake guild_id, command_completion_event_t 
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_sticker : j) {
-				stickers[SnowflakeNotNull(&curr_sticker, "id")] = sticker().fill_from_json(&curr_sticker);
+				stickers[snowflake_not_null(&curr_sticker, "id")] = sticker().fill_from_json(&curr_sticker);
 			}
 		}
 		if (callback) {
@@ -91,7 +91,7 @@ void cluster::sticker_packs_get(command_completion_event_t callback) {
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_stickerpack : j) {
-				stickerpacks[SnowflakeNotNull(&curr_stickerpack, "id")] = sticker_pack().fill_from_json(&curr_stickerpack);
+				stickerpacks[snowflake_not_null(&curr_stickerpack, "id")] = sticker_pack().fill_from_json(&curr_stickerpack);
 			}
 		}
 		if (callback) {

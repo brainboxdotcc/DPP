@@ -55,36 +55,36 @@ integration& integration::fill_from_json(nlohmann::json* j)
 		{ "twitch", i_twitch },
 		{ "discord", i_discord }
 	};
-	this->id = SnowflakeNotNull(j, "id");
-	this->name = StringNotNull(j, "name");
-	this->type = type_map[StringNotNull(j, "type")];
-	if (BoolNotNull(j, "enabled"))
+	this->id = snowflake_not_null(j, "id");
+	this->name = string_not_null(j, "name");
+	this->type = type_map[string_not_null(j, "type")];
+	if (bool_not_null(j, "enabled"))
 		this->flags |= if_enabled;
-	if (BoolNotNull(j, "syncing"))
+	if (bool_not_null(j, "syncing"))
 		this->flags |= if_syncing;
-	if (BoolNotNull(j, "enable_emoticons"))
+	if (bool_not_null(j, "enable_emoticons"))
 		this->flags |= if_emoticons;
-	if (BoolNotNull(j, "revoked"))
+	if (bool_not_null(j, "revoked"))
 		this->flags |= if_revoked;
-	if (Int8NotNull(j, "expire_behavior"))
+	if (int8_not_null(j, "expire_behavior"))
 		this->flags |= if_expire_kick;
-	this->expire_grace_period = Int32NotNull(j, "expire_grace_period");
+	this->expire_grace_period = int32_not_null(j, "expire_grace_period");
 	if (j->find("user") != j->end()) {
 		auto t = (*j)["user"];
-		this->user_id = SnowflakeNotNull(&t, "user_id");
+		this->user_id = snowflake_not_null(&t, "user_id");
 	}
 	if (j->find("application") != j->end()) {
 		auto & t = (*j)["application"];
-		this->app.id = SnowflakeNotNull(&t, "id");
+		this->app.id = snowflake_not_null(&t, "id");
 		if (t.find("bot") != t.end()) {
 			auto & b = t["bot"];
-			this->app.bot = dpp::find_user(SnowflakeNotNull(&b, "id"));
+			this->app.bot = dpp::find_user(snowflake_not_null(&b, "id"));
 		}
 	}
-	this->subscriber_count = Int32NotNull(j, "subscriber_count");
+	this->subscriber_count = int32_not_null(j, "subscriber_count");
 
-	this->account_id = StringNotNull(&((*j)["account"]), "id");
-	this->account_name = StringNotNull(&((*j)["account"]), "name");
+	this->account_id = string_not_null(&((*j)["account"]), "id");
+	this->account_name = string_not_null(&((*j)["account"]), "name");
 
 	return *this;
 }
@@ -121,14 +121,14 @@ connection::connection() : id(0), revoked(false), verified(false), friend_sync(f
 }
 
 connection& connection::fill_from_json(nlohmann::json* j) {
-	this->id = StringNotNull(j, "id");
-	this->name = StringNotNull(j, "name");
-	this->type = StringNotNull(j, "type");
-	this->revoked = BoolNotNull(j, "revoked");
-	this->verified = BoolNotNull(j, "verified");
-	this->friend_sync = BoolNotNull(j, "friend_sync");
-	this->show_activity = BoolNotNull(j, "show_activity");
-	this->visible = (Int32NotNull(j, "visibility") == 1);
+	this->id = string_not_null(j, "id");
+	this->name = string_not_null(j, "name");
+	this->type = string_not_null(j, "type");
+	this->revoked = bool_not_null(j, "revoked");
+	this->verified = bool_not_null(j, "verified");
+	this->friend_sync = bool_not_null(j, "friend_sync");
+	this->show_activity = bool_not_null(j, "show_activity");
+	this->visible = (int32_not_null(j, "visibility") == 1);
 	if (j->find("integrations") != j->end()) {
 		integrations.reserve((*j)["integrations"].size());
 		for (auto & i : (*j)["integrations"]) {

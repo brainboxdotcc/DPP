@@ -67,6 +67,9 @@ For a very small bot, you can get the memory usage as low as **6 megabytes** on 
 ## How do I use this library in Windows?
 The easiest way is to download the precompiled latest release from our GitHub releases, and take the dlls, .lib file, and header files (`bin`, `lib` and `include` directories), placing them in a easily accessible place on your computer. Go into Visual Studio project settings in a new project, and point the project directories (notably the library directories and and include directories) at the correct locations. Add the `include` folder you extracted to your include directories, and add `dpp.lib` to your library directories. Ensure the project is set to C++17 standard in the settings. You should then be able to compile example programs within that project. When you run the program you have compiled you must ensure that all the dll files from the `bin` directory exist in the same directory as your executable.
 
+## Does this library support Visual Studio 2022?
+Yes! The master branch comes with pre-built binaries for Visual Studio 2022 and our windows bot template has a [vs2022 branch](https://github.com/brainboxdotcc/windows-bot-template/tree/vs2022) which you can clone to get Visual Studio 2022 specific code. For the time being we support both Visual Studio 2019 and 2022. At some point in the future only 2022 may be supported as 2019 becomes outdated.
+
 ## How much of the library is completed?
 All REST calls (outbound commands) are completed including all currently available interactions, and all Discord events are available. The library also has voice support.
 
@@ -89,7 +92,7 @@ If you don't understand something then feel free to ask in the [Discord server](
 NO! Definitely not! We have tried to keep things as simple as possible. We only use language features where they make sense, not just because they exist. Take a look at the example program (`test.cpp` and you'll see just how simple it is to get up and running quickly). We use a small subset of C++17 and C++14 features.
 
 ## Why is D++ also called DPP
-DPP is short for *Discord Plus Plus* (D++), a play on the Discord and C++ names.
+DPP is short for *D Plus Plus* (D++), a play on the Discord and C++ names. You'll see the library referred to as `dpp` within source code as `d++` is not a valid symbol so we couldn't exactly use that as our namespace name.
 
 ## Is D++ a single header library?
 No, D++ is a classically designed library which installs itself to your library directory/system directory as a shared object or dll. You must link to its .lib file and include its header files to make use of it. We have no plans for a single-header build.

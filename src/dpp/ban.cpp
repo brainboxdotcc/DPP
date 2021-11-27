@@ -34,10 +34,10 @@ ban::ban() : user_id(0)
 ban::~ban() = default;
 
 ban& ban::fill_from_json(nlohmann::json* j) {
-	reason = StringNotNull(j, "reason");
+	reason = string_not_null(j, "reason");
 	if (j->find("user") != j->end()) {
 		json & user = (*j)["user"];
-		user_id = SnowflakeNotNull(&user, "id");
+		user_id = snowflake_not_null(&user, "id");
 	}
 	return *this;
 }

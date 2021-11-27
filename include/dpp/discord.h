@@ -36,16 +36,33 @@ namespace dpp {
 	typedef uint64_t snowflake;
 
 	/** @brief The managed class is the base class for various types that can
-	 * be stored in a cache that are identified by a dpp::snowflake id
+	 * be stored in a cache that are identified by a dpp::snowflake id.
 	 */
 	class DPP_EXPORT managed {
 	public:
-		/** Unique ID of object */
+		/**
+		 * @brief Unique ID of object set by Discord.
+		 * This value contains a timestamp, worker ID, internal server ID, and an incrementing value.
+		 * Only the timestamp is relavent to us as useful metadata.
+		 */
 		snowflake id;
-		/** Constructor, initialises id to 0 */
+		/**
+		 * @brief Constructor, initialises ID
+		 * @param snowflake ID to set
+		 */
 		managed(const snowflake = 0);
-		/** Default destructor */
+		/**
+		 * @brief Destroy the managed object
+		 */
 		virtual ~managed() = default;
+
+		/**
+		 * @brief Get the creation time of this object according to Discord.
+		 * 
+		 * @return double creation time inferred from the snowflake ID.
+		 * The minimum possible value is the first second of 2015.
+		 */
+		double get_creation_time() const;
 	};
 
 	/** @brief Supported image types for profile pictures */

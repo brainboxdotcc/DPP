@@ -30,7 +30,7 @@ void cluster::get_voice_regions(command_completion_event_t callback) {
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_region : j) {
-				voiceregions[StringNotNull(&curr_region, "id")] = voiceregion().fill_from_json(&j);
+				voiceregions[string_not_null(&curr_region, "id")] = voiceregion().fill_from_json(&j);
 			}
 		}
 		callback(confirmation_callback_t("voiceregion_map", voiceregions, http));
@@ -44,7 +44,7 @@ void cluster::guild_get_voice_regions(snowflake guild_id, command_completion_eve
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_region : j) {
-				voiceregions[StringNotNull(&curr_region, "id")] = voiceregion().fill_from_json(&j);
+				voiceregions[string_not_null(&curr_region, "id")] = voiceregion().fill_from_json(&j);
 			}
 		}
 		callback(confirmation_callback_t("voiceregion_map", voiceregions, http));

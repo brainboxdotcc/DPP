@@ -64,8 +64,8 @@ error_info confirmation_callback_t::get_error() const {
 		json j = json::parse(this->http_info.body);
 		error_info e;
 
-		SetInt32NotNull(&j, "code", e.code);
-		SetStringNotNull(&j, "message", e.message);
+		set_int32_not_null(&j, "code", e.code);
+		set_string_not_null(&j, "message", e.message);
 		json& errors = j["errors"];
 		for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
 

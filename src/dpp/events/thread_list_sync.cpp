@@ -39,15 +39,15 @@ using namespace dpp;
 void thread_list_sync::handle(discord_client* client, json& j, const std::string& raw) {
 	json& d = j["d"];
 
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	if (g) {
 		/** Store thread IDs*/
 		if (d.find("threads") != d.end()) {
 			for (auto& t : d["threads"]) {
-				g->threads.push_back(SnowflakeNotNull(&t, "id"));
+				g->threads.push_back(snowflake_not_null(&t, "id"));
 			}
 		}
-		if (!client->creator->dispatch.thread_list_sync.empty()) {
+		if (!client->creator->on_thread_list_sync.empty()) {
 			dpp::thread_list_sync_t tls(client, raw);
 			if (d.find("threads") != d.end()) {
 				for (auto& t : d["threads"]) {
@@ -59,7 +59,7 @@ void thread_list_sync::handle(discord_client* client, json& j, const std::string
 					tls.members.push_back(thread_member().fill_from_json(&tm));
 				}
 			}
-			call_event(client->creator->dispatch.thread_list_sync, tls);
+			client->creator->on_thread_list_sync.call(tls);
 		}
 	}
 }

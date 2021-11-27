@@ -31,10 +31,10 @@ using json = nlohmann::json;
 namespace dpp {
 
 thread_member& thread_member::fill_from_json(nlohmann::json* j) {
-	SetSnowflakeNotNull(j, "id", this->thread_id);
-	SetSnowflakeNotNull(j, "user_id", this->user_id);
-	SetTimestampNotNull(j, "join_timestamp", this->joined);
-	SetInt32NotNull(j, "flags", this->flags);
+	set_snowflake_not_null(j, "id", this->thread_id);
+	set_snowflake_not_null(j, "user_id", this->user_id);
+	set_ts_not_null(j, "join_timestamp", this->joined);
+	set_int32_not_null(j, "flags", this->flags);
 	return *this;
 }
 
@@ -132,18 +132,18 @@ bool thread::is_private_thread() const {
 thread& thread::fill_from_json(json* j) {
 	channel::fill_from_json(j);
 
-	uint8_t type = Int8NotNull(j, "type");
+	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type == GUILD_NEWS_THREAD) ? dpp::c_news_thread : 0;
 	this->flags |= (type == GUILD_PUBLIC_THREAD) ? dpp::c_public_thread : 0;
 	this->flags |= (type == GUILD_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
 
-	SetInt8NotNull(j, "message_count", this->message_count);
-	SetInt8NotNull(j, "memeber_count", this->member_count);
+	set_int8_not_null(j, "message_count", this->message_count);
+	set_int8_not_null(j, "memeber_count", this->member_count);
 	auto json_metadata = (*j)["thread_metadata"];
-	metadata.archived = BoolNotNull(&json_metadata, "archived");
-	metadata.archive_timestamp = TimestampNotNull(&json_metadata, "archive_timestamp");
-	metadata.auto_archive_duration = Int16NotNull(&json_metadata, "auto_archive_duration");
-	metadata.locked = BoolNotNull(&json_metadata, "locked");
+	metadata.archived = bool_not_null(&json_metadata, "archived");
+	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");
+	metadata.auto_archive_duration = int16_not_null(&json_metadata, "auto_archive_duration");
+	metadata.locked = bool_not_null(&json_metadata, "locked");
 
 	/* Only certain events set this */
 	if (j->find("member") != j->end())  {
@@ -160,19 +160,19 @@ thread::~thread() {
 }
 
 channel& channel::fill_from_json(json* j) {
-	this->id = SnowflakeNotNull(j, "id");
-	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
-	SetInt16NotNull(j, "position", this->position);
-	SetStringNotNull(j, "name", this->name);
-	SetStringNotNull(j, "topic", this->topic);
-	SetSnowflakeNotNull(j, "last_message_id", this->last_message_id);
-	SetInt8NotNull(j, "user_limit", this->user_limit);
-	SetInt16NotNull(j, "rate_limit_per_user", this->rate_limit_per_user);
-	SetSnowflakeNotNull(j, "owner_id", this->owner_id);
-	SetSnowflakeNotNull(j, "parent_id", this->parent_id);
-	this->bitrate = Int16NotNull(j, "bitrate")/1024;
-	uint8_t type = Int8NotNull(j, "type");
-	this->flags |= BoolNotNull(j, "nsfw") ? dpp::c_nsfw : 0;
+	this->id = snowflake_not_null(j, "id");
+	set_snowflake_not_null(j, "guild_id", this->guild_id);
+	set_int16_not_null(j, "position", this->position);
+	set_string_not_null(j, "name", this->name);
+	set_string_not_null(j, "topic", this->topic);
+	set_snowflake_not_null(j, "last_message_id", this->last_message_id);
+	set_int8_not_null(j, "user_limit", this->user_limit);
+	set_int16_not_null(j, "rate_limit_per_user", this->rate_limit_per_user);
+	set_snowflake_not_null(j, "owner_id", this->owner_id);
+	set_snowflake_not_null(j, "parent_id", this->parent_id);
+	this->bitrate = int16_not_null(j, "bitrate")/1024;
+	uint8_t type = int8_not_null(j, "type");
+	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
 	this->flags |= (type == GUILD_TEXT) ? dpp::c_text : 0;
 	this->flags |= (type == GUILD_VOICE) ? dpp::c_voice : 0;
 	this->flags |= (type == DM) ? dpp::c_dm : 0;
@@ -182,7 +182,7 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
 	this->flags |= (type == GUILD_STAGE) ? dpp::c_stage : 0;
 
-	uint8_t vqm = Int8NotNull(j, "video_quality_mode");
+	uint8_t vqm = int8_not_null(j, "video_quality_mode");
 	if (vqm == 2) {
 		/* If this is set to 2, this means full quality 720p video for voice channel.
 		 * Undefined, or a value of 1 (the other two possibilities right now) means
@@ -202,10 +202,10 @@ channel& channel::fill_from_json(json* j) {
 		permission_overwrites = {};
 		for (auto & overwrite : (*j)["permission_overwrites"]) {
 			permission_overwrite po;
-			po.id = SnowflakeNotNull(&overwrite, "id");
-			po.allow = SnowflakeNotNull(&overwrite, "allow");
-			po.deny = SnowflakeNotNull(&overwrite, "deny");
-			po.type = Int8NotNull(&overwrite, "type");
+			po.id = snowflake_not_null(&overwrite, "id");
+			po.allow = snowflake_not_null(&overwrite, "allow");
+			po.deny = snowflake_not_null(&overwrite, "deny");
+			po.type = int8_not_null(&overwrite, "type");
 			permission_overwrites.emplace_back(po);
 		}
 	}
@@ -214,11 +214,11 @@ channel& channel::fill_from_json(json* j) {
 	 * When set it contains the invokers permissions on channel. Any other time, contains 0.
 	 */
 	if (j->find("permissions") != j->end()) {
-		SetSnowflakeNotNull(j, "permissions", permissions);
+		set_snowflake_not_null(j, "permissions", permissions);
 	}
 
-	std::string _icon = StringNotNull(j, "icon");
-	std::string _banner = StringNotNull(j, "banner");
+	std::string _icon = string_not_null(j, "icon");
+	std::string _banner = string_not_null(j, "banner");
 
 	if (!_icon.empty()) {
 		this->icon = _icon;
@@ -228,7 +228,7 @@ channel& channel::fill_from_json(json* j) {
 		this->banner = _banner;
 	}
 
-	SetStringNotNull(j, "rtc_region", rtc_region);
+	set_string_not_null(j, "rtc_region", rtc_region);
 	
 	return *this;
 }

@@ -46,10 +46,10 @@ using namespace dpp;
  */
 void guild_scheduled_event_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	if (!client->creator->dispatch.guild_scheduled_event_create.empty()) {
+	if (!client->creator->on_guild_scheduled_event_create.empty()) {
 		dpp::guild_scheduled_event_create_t ec(client, raw);
 		ec.created.fill_from_json(&d);
-		call_event(client->creator->dispatch.guild_scheduled_event_create, ec);
+		client->creator->on_guild_scheduled_event_create.call(ec);
 	}
 }
 

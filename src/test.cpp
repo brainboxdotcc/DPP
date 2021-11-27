@@ -19,20 +19,28 @@
  *
  ************************************************************************************/
 #include "test.h"
- 
+
 /* Unit tests go here */
 int main()
 {
 	std::string token(get_token());
 	std::vector<uint8_t> testaudio = load_test_audio();
 
+	set_test("TS", false);
+	dpp::managed m(TEST_USER_ID);
+	set_test("TS", ((uint64_t)m.get_creation_time()) == 1617131800);
+
+	set_test("PRESENCE", false);
 	set_test("CLUSTER", false);
 	try {
-		dpp::cluster bot(token);
+		dpp::cluster bot(token, dpp::i_all_intents);
 		set_test("CLUSTER", true);
 		set_test("CONNECTION", false);
 		set_test("GUILDCREATE", false);
 		set_test("ICONHASH", false);
+
+		set_test("MSGCOLLECT", false);
+		message_collector collect_messages(&bot, 25);
 
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
@@ -145,16 +153,19 @@ int main()
 		bot.on_guild_create([&](const dpp::guild_create_t & event) {
 			if (event.created->id == TEST_GUILD_ID) {
 				set_test("GUILDCREATE", true);
+				if (event.presences.size() && event.presences.begin()->second.user_id > 0) {
+					set_test("PRESENCE", true);
+				}
 			}
 		});
 
 		bool message_tested = false;
 		bot.on_message_create([&](const dpp::message_create_t & event) {
-			if (event.msg->author->id == bot.me.id && !message_tested) {
+			if (event.msg.author.id == bot.me.id && !message_tested) {
 				message_tested = true;
 				set_test("MESSAGERECEIVE", true);
 				set_test("MESSAGESGET", false);
-				bot.messages_get(event.msg->channel_id, 0, event.msg->id, 0, 5, [](const dpp::confirmation_callback_t &cc){
+				bot.messages_get(event.msg.channel_id, 0, event.msg.id, 0, 5, [](const dpp::confirmation_callback_t &cc){
 					if (!cc.is_error()) {
 						dpp::message_map mm = std::get<dpp::message_map>(cc.value);
 						if (mm.size()) {
@@ -174,7 +185,7 @@ int main()
 					}
 				});
 				set_test("MSGCREATESEND", false);
-				event.send("MSGCREATESEND", [&bot, ch_id = event.msg->channel_id] (const auto& cc) {
+				event.send("MSGCREATESEND", [&bot, ch_id = event.msg.channel_id] (const auto& cc) {
 					if (!cc.is_error()) {
 						dpp::message m = std::get<dpp::message>(cc.value);
 						if (m.channel_id == ch_id) {
@@ -189,7 +200,7 @@ int main()
 				});
 				set_test("MSGCREATEREPLY", false);
 				set_test("MSGMENTIONUSER", false);
-				event.reply("MSGCREATEREPLY", true, [&bot, ref_id = event.msg->id, author_id = event.msg->author->id] (const auto& cc) {
+				event.reply("MSGCREATEREPLY", true, [&bot, ref_id = event.msg.id, author_id = event.msg.author.id] (const auto& cc) {
 					if (!cc.is_error()) {
 						dpp::message m = std::get<dpp::message>(cc.value);
 						if (m.message_reference.message_id == ref_id) {
@@ -207,7 +218,6 @@ int main()
 							set_test("MSGCREATEREPLY", true);
 						} else {
 							set_test("MSGCREATEREPLY", false);
-							std::cout << " *** " << ref_id << " -> " << m.message_reference.message_id << "\n";
 						}
 						bot.message_delete(m.id, m.channel_id);
 					} else { 
@@ -222,7 +232,7 @@ int main()
 			bot.start(true);
 			set_test("BOTSTART", true);
 		}
-		catch (const std::exception & e) {
+		catch (const std::exception &) {
 			set_test("BOTSTART", false);
 		}
 
@@ -239,7 +249,7 @@ int main()
 		}, 1);
 
 		set_test("TIMEDLISTENER", false);
-		dpp::timed_listener tl(&bot, 10, bot.dispatch.log, [&](const dpp::log_t & event) {
+		dpp::timed_listener tl(&bot, 10, bot.on_log, [&](const dpp::log_t & event) {
 			set_test("TIMEDLISTENER", true);
 		});
 
@@ -253,6 +263,19 @@ int main()
 			}
 			once = true;
 		});
+
+		set_test("CUSTOMCACHE", false);
+		dpp::cache<test_cached_object_t> testcache;
+		test_cached_object_t* tco = new test_cached_object_t(666);
+		tco->foo = "bar";
+		testcache.store(tco);
+		test_cached_object_t* found_tco = testcache.find(666);
+		if (found_tco && found_tco->id == 666 && found_tco->foo == "bar") {
+			set_test("CUSTOMCACHE", true);
+		} else {
+			set_test("CUSTOMCACHE", false);
+		}
+		testcache.remove(found_tco);
 
 		noparam_api_test(current_user_get, dpp::user_identified, "CURRENTUSER");
 		singleparam_api_test(channel_get, TEST_TEXT_CHANNEL_ID, dpp::channel, "GETCHAN");
@@ -279,7 +302,7 @@ int main()
 		wait_for_tests();
 
 	}
-	catch (const std::exception & e) {
+	catch (const std::exception &) {
 		set_test("CLUSTER", false);
 	}
 

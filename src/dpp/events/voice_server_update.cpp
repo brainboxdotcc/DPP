@@ -47,9 +47,9 @@ void voice_server_update::handle(discord_client* client, json &j, const std::str
 
 	json &d = j["d"];
 	dpp::voice_server_update_t vsu(client, raw);
-	vsu.guild_id = SnowflakeNotNull(&d, "guild_id");
-	vsu.token = StringNotNull(&d, "token");
-	vsu.endpoint = StringNotNull(&d, "endpoint");
+	vsu.guild_id = snowflake_not_null(&d, "guild_id");
+	vsu.token = string_not_null(&d, "token");
+	vsu.endpoint = string_not_null(&d, "endpoint");
 
 	{
 		std::lock_guard<std::mutex> lock(client->voice_mutex);
@@ -66,8 +66,8 @@ void voice_server_update::handle(discord_client* client, json &j, const std::str
 		}
 	}
 
-	if (!client->creator->dispatch.voice_server_update.empty()) {
-		call_event(client->creator->dispatch.voice_server_update, vsu);
+	if (!client->creator->on_voice_server_update.empty()) {
+		client->creator->on_voice_server_update.call(vsu);
 	}
 }
 

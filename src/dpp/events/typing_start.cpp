@@ -44,15 +44,15 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void typing_start::handle(discord_client* client, json &j, const std::string &raw) {
-	if (!client->creator->dispatch.typing_start.empty()) {
+	if (!client->creator->on_typing_start.empty()) {
 		json& d = j["d"];
 		dpp::typing_start_t ts(client, raw);
-		ts.typing_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
-		ts.typing_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
-		ts.user_id = SnowflakeNotNull(&d, "user_id");
+		ts.typing_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
+		ts.typing_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
+		ts.user_id = snowflake_not_null(&d, "user_id");
 		ts.typing_user = dpp::find_user(ts.user_id);
-		ts.timestamp = TimestampNotNull(&d, "timestamp");
-		call_event(client->creator->dispatch.typing_start, ts);
+		ts.timestamp = ts_not_null(&d, "timestamp");
+		client->creator->on_typing_start.call(ts);
 	}
 }
 

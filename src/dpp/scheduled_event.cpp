@@ -30,7 +30,7 @@ namespace dpp {
 using json = nlohmann::json;
 
 scheduled_event::scheduled_event() :
-	id(0),
+	managed(0),
 	guild_id(0),
 	channel_id(0),	
 	creator_id(0),	
@@ -111,28 +111,28 @@ scheduled_event& scheduled_event::set_end_time(time_t t) {
 }
 
 scheduled_event& scheduled_event::fill_from_json(const json* j) {
-	SetSnowflakeNotNull(j, "id", this->id);
-	SetSnowflakeNotNull(j, "guild_id", this->guild_id);
-	SetSnowflakeNotNull(j, "channel_id", this->channel_id);
-	SetSnowflakeNotNull(j, "creator_id", this->creator_id);
-	SetSnowflakeNotNull(j, "creator_id", this->creator_id);
-	SetStringNotNull(j, "name", this->name);
-	SetStringNotNull(j, "description", this->description);
-	SetStringNotNull(j, "image", this->image);
-	SetTimestampNotNull(j, "scheduled_start_time", this->scheduled_start_time);
-	SetTimestampNotNull(j, "scheduled_end_time", this->scheduled_end_time);
-	this->privacy_level = static_cast<dpp::event_privacy_level>(Int8NotNull(j, "privacy_level"));
-	this->status = static_cast<dpp::event_status>(Int8NotNull(j, "status"));
-	this->entity_type = static_cast<dpp::event_entity_type>(Int8NotNull(j, "entity_type"));
+	set_snowflake_not_null(j, "id", this->id);
+	set_snowflake_not_null(j, "guild_id", this->guild_id);
+	set_snowflake_not_null(j, "channel_id", this->channel_id);
+	set_snowflake_not_null(j, "creator_id", this->creator_id);
+	set_snowflake_not_null(j, "creator_id", this->creator_id);
+	set_string_not_null(j, "name", this->name);
+	set_string_not_null(j, "description", this->description);
+	set_string_not_null(j, "image", this->image);
+	set_ts_not_null(j, "scheduled_start_time", this->scheduled_start_time);
+	set_ts_not_null(j, "scheduled_end_time", this->scheduled_end_time);
+	this->privacy_level = static_cast<dpp::event_privacy_level>(int8_not_null(j, "privacy_level"));
+	this->status = static_cast<dpp::event_status>(int8_not_null(j, "status"));
+	this->entity_type = static_cast<dpp::event_entity_type>(int8_not_null(j, "entity_type"));
 	auto i = j->find("entity_metadata");
 	if (i != j->end()) {
-		SetStringNotNull(&((*j)["entity_metadata"]), "location", this->entity_metadata.location);
+		set_string_not_null(&((*j)["entity_metadata"]), "location", this->entity_metadata.location);
 	}
 	if (j->find("creator") != j->end()) {
 		json u = (*j)["creator"];
 		creator.fill_from_json(&u);
 	}
-	SetInt32NotNull(j, "user_count", this->user_count);
+	set_int32_not_null(j, "user_count", this->user_count);
 	return *this;
 }
 
@@ -168,26 +168,10 @@ std::string const scheduled_event::build_json(bool with_id) const {
 		j["creator_id"] = std::to_string(this->creator_id);
 	}
 	if (scheduled_start_time) {
-		std::ostringstream ss;
-		struct tm t;
-		#ifdef _WIN32
-			gmtime_s(&t, &scheduled_start_time);
-		#else
-			gmtime_r(&scheduled_start_time, &t);
-		#endif
-		ss << std::put_time(&t, "%FT%TZ");
-		j["scheduled_start_time"] = ss.str();
+		j["scheduled_start_time"] = ts_to_string(scheduled_start_time);
 	}
 	if (scheduled_end_time) {
-		std::ostringstream ss;
-		struct tm t;
-		#ifdef _WIN32
-			gmtime_s(&t, &scheduled_end_time);
-		#else
-			gmtime_r(&scheduled_end_time, &t);
-		#endif
-		ss << std::put_time(&t, "%FT%TZ");
-		j["scheduled_end_time"] = ss.str();
+		j["scheduled_end_time"] = ts_to_string(scheduled_end_time);
 	}
 	j["entity_metadata"] = json::object();
 	if (!entity_metadata.location.empty()) {

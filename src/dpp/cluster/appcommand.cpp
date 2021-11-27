@@ -37,7 +37,7 @@ void cluster::global_bulk_command_create(const std::vector<slashcommand> &comman
 		slashcommand_map slashcommands;
 		if (!e.is_error()) {
 			for (auto & curr_slashcommand : j) {
-				slashcommands[SnowflakeNotNull(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
+				slashcommands[snowflake_not_null(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
 			}
 		}
 		if (callback) {
@@ -76,7 +76,7 @@ void cluster::global_commands_get(command_completion_event_t callback) {
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_slashcommand : j) {
-				slashcommands[SnowflakeNotNull(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
+				slashcommands[snowflake_not_null(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
 			}
 		}
 		if (callback) {
@@ -99,7 +99,7 @@ void cluster::guild_bulk_command_create(const std::vector<slashcommand> &command
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_slashcommand : j) {
-				slashcommands[SnowflakeNotNull(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
+				slashcommands[snowflake_not_null(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
 			}
 		}
 		if (callback) {
@@ -161,7 +161,7 @@ void cluster::guild_commands_get(snowflake guild_id, command_completion_event_t 
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_slashcommand : j) {
-				slashcommands[SnowflakeNotNull(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
+				slashcommands[snowflake_not_null(&curr_slashcommand, "id")] = slashcommand().fill_from_json(&curr_slashcommand);
 			}
 		}
 		if (callback) {

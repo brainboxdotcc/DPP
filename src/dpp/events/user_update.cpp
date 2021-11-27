@@ -46,25 +46,25 @@ using namespace dpp;
 void user_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 
-	dpp::snowflake user_id = SnowflakeNotNull(&d, "id");
+	dpp::snowflake user_id = snowflake_not_null(&d, "id");
 	if (user_id) {
 		if (client->creator->cache_policy.user_policy != dpp::cp_none) {
 			dpp::user* u = dpp::find_user(user_id);
 			if (u) {
 				u->fill_from_json(&d);
 			}
-			if (!client->creator->dispatch.user_update.empty()) {
+			if (!client->creator->on_user_update.empty()) {
 				dpp::user_update_t uu(client, raw);
 				uu.updated = *u;
-				call_event(client->creator->dispatch.user_update, uu);
+				client->creator->on_user_update.call(uu);
 			}
 		} else {
-			if (!client->creator->dispatch.user_update.empty()) {
+			if (!client->creator->on_user_update.empty()) {
 				dpp::user u;
 				u.fill_from_json(&d);
 				dpp::user_update_t uu(client, raw);
 				uu.updated = u;
-				call_event(client->creator->dispatch.user_update, uu);
+				client->creator->on_user_update.call(uu);
 			}
 		}
 	}

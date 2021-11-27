@@ -33,24 +33,24 @@ voicestate::voicestate() : shard(nullptr), guild_id(0), channel_id(0), user_id(0
 voicestate::~voicestate() = default;
 
 voicestate& voicestate::fill_from_json(nlohmann::json* j) {
-	guild_id = SnowflakeNotNull(j, "guild_id");
-	channel_id = SnowflakeNotNull(j, "channel_id");
-	user_id = SnowflakeNotNull(j, "user_id");
-	session_id = StringNotNull(j, "session_id");
+	guild_id = snowflake_not_null(j, "guild_id");
+	channel_id = snowflake_not_null(j, "channel_id");
+	user_id = snowflake_not_null(j, "user_id");
+	session_id = string_not_null(j, "session_id");
 	flags = 0;
-	if (BoolNotNull(j, "deaf"))
+	if (bool_not_null(j, "deaf"))
 		flags |= vs_deaf;
-	if (BoolNotNull(j, "mute"))
+	if (bool_not_null(j, "mute"))
 		flags |= vs_mute;
-	if (BoolNotNull(j, "self_mute"))
+	if (bool_not_null(j, "self_mute"))
 		flags |= vs_self_mute;
-	if (BoolNotNull(j, "self_deaf"))
+	if (bool_not_null(j, "self_deaf"))
 		flags |= vs_self_deaf;
-	if (BoolNotNull(j, "self_stream"))
+	if (bool_not_null(j, "self_stream"))
 		flags |= vs_self_stream;
-	if (BoolNotNull(j, "self_video"))
+	if (bool_not_null(j, "self_video"))
 		flags |= vs_self_video;
-	if (BoolNotNull(j, "suppress"))
+	if (bool_not_null(j, "suppress"))
 		flags |= vs_suppress;
 	return *this;
 }

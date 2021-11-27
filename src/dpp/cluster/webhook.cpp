@@ -122,7 +122,7 @@ void cluster::get_channel_webhooks(snowflake channel_id, command_completion_even
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_webhook: j) {
-					webhooks[SnowflakeNotNull(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
+					webhooks[snowflake_not_null(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
 				}
 			}
 			callback(confirmation_callback_t("webhook_map", webhooks, http));
@@ -138,7 +138,7 @@ void cluster::get_guild_webhooks(snowflake guild_id, command_completion_event_t 
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_webhook: j) {
-					webhooks[SnowflakeNotNull(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
+					webhooks[snowflake_not_null(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
 				}
 			}
 			callback(confirmation_callback_t("webhook_map", webhooks, http));

@@ -30,7 +30,7 @@ void cluster::guild_get_invites(snowflake guild_id, command_completion_event_t c
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_invite : j) {
-				invites[StringNotNull(&curr_invite, "code")] = invite().fill_from_json(&curr_invite);
+				invites[string_not_null(&curr_invite, "code")] = invite().fill_from_json(&curr_invite);
 			}
 		}
 		if (callback) {

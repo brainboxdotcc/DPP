@@ -31,7 +31,7 @@ void cluster::guild_events_get(snowflake guild_id, command_completion_event_t ca
 			confirmation_callback_t e("confirmation", confirmation(), http);
 			if (!e.is_error()) {
 				for (auto & curr_event : j) {
-					events[SnowflakeNotNull(&curr_event, "id")] = scheduled_event().fill_from_json(&curr_event);
+					events[snowflake_not_null(&curr_event, "id")] = scheduled_event().fill_from_json(&curr_event);
 				}
 			}
 			callback(confirmation_callback_t("scheduled_event_map", events, http));
@@ -57,7 +57,7 @@ void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, comm
 						event_member e;
 						e.user = user().fill_from_json(&(curr_user["user"]));
 						e.member = guild_member().fill_from_json(&(curr_user["user"]), guild_id, e.user.id);
-						e.guild_scheduled_event_id = SnowflakeNotNull(&curr_user, "guild_scheduled_event_id");
+						e.guild_scheduled_event_id = snowflake_not_null(&curr_user, "guild_scheduled_event_id");
 						users[e.user.id] = e;
 					}
 				}

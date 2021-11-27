@@ -38,6 +38,13 @@ struct test_t {
 	bool success = false;
 };
 
+class test_cached_object_t : public dpp::managed {
+public:
+	test_cached_object_t(dpp::snowflake _id) : dpp::managed(_id) { };
+	virtual ~test_cached_object_t() = default;
+	std::string foo;
+};
+
 /* How long the unit tests can run for */
 const int64_t TEST_TIMEOUT = 60;
 
@@ -198,3 +205,15 @@ double get_start_time();
  * @return double fractional seconds
  */
 double get_time();
+
+/**
+ * @brief A test version of the message collector for use in unit tests
+ */
+class message_collector : public dpp::message_collector {
+public:
+	message_collector(dpp::cluster* cl, uint64_t duration) : dpp::message_collector(cl, duration) { }
+
+	virtual void completed(const std::vector<dpp::message>& list) {
+		set_test("MSGCOLLECT", list.size() > 0);
+	}
+};
