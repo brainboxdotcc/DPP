@@ -48,9 +48,9 @@ namespace dpp {
 		snowflake id;
 		/**
 		 * @brief Constructor, initialises ID
-		 * @param snowflake ID to set
+		 * @param nid ID to set
 		 */
-		managed(const snowflake = 0);
+		managed(const snowflake nid = 0);
 		/**
 		 * @brief Destroy the managed object
 		 */
