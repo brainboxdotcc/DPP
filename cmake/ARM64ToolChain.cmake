@@ -45,6 +45,7 @@ EXECUTE_PROCESS(COMMAND printf "deb [arch=amd64] http://archive.ubuntu.com/ubunt
 	OUTPUT_FILE TMPFILE)
 EXECUTE_PROCESS(COMMAND sudo mv TMPFILE /etc/apt/sources.list)
 EXECUTE_PROCESS(COMMAND sudo dpkg --add-architecture arm64)
+EXECUTE_PROCESS(COMMAND sudo apt-add-repository -y ppa:canonical-kernel-team/ppa)
 EXECUTE_PROCESS(COMMAND sudo apt update)
 EXECUTE_PROCESS(COMMAND sudo apt install -y cmake ninja-build gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu zlib1g-dev:arm64 libssl-dev:arm64 libopus-dev:arm64 libsodium-dev:arm64)
 EXECUTE_PROCESS(COMMAND sudo mv /usr/lib/aarch64-linux-gnu/pkgconfig/libsodium.pc /usr/lib/pkgconfig/)
