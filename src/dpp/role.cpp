@@ -102,6 +102,10 @@ std::string role::build_json(bool with_id) const {
 	return j.dump();
 }
 
+std::string role::get_mention() const {
+	return "<&" + std::to_string(id) + ">";
+}
+
 role& role::load_image(const std::string &image_blob, const image_type type) {
 	static const std::map<image_type, std::string> mimetypes = {
 		{ i_gif, "image/gif" },

@@ -112,6 +112,13 @@ public:
 	std::string get_avatar_url() const;
 
 	/**
+	 * @brief Return a ping/mention for the user
+	 * 
+	 * @return std::string mention
+	 */
+	std::string get_mention() const;
+
+	/**
 	 * @brief User is a bot
 	 *
 	 * @return True if the user is a bot

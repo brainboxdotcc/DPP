@@ -209,6 +209,13 @@ public:
 	std::string build_json(bool with_id = false) const;
 
 	/**
+	 * @brief Get the mention/ping for the role
+	 * 
+	 * @return std::string mention
+	 */
+	std::string get_mention() const;
+
+	/**
 	 * @brief Load an image into the object as base64
 	 * 
 	 * @param image_blob Image binary data

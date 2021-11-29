@@ -76,6 +76,11 @@ std::string user::get_avatar_url()  const {
 	);
 }
 
+std::string user::get_mention() const {
+	return "<@" + std::to_string(id) + ">";
+}
+
+
 bool user::is_bot() const {
 	 return this->flags & u_bot;
 }

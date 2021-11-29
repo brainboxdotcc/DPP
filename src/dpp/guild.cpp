@@ -92,6 +92,10 @@ guild_member::guild_member() :
 {
 }
 
+std::string guild_member::get_mention() const {
+	return "<@!" + std::to_string(user_id) + ">";
+}
+
 guild_member& guild_member::set_nickname(const std::string& nick) {
 	this->nickname = nick;
 	return *this;
