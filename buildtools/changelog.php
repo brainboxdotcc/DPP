@@ -41,7 +41,7 @@ $changelog = [];
 exec("git log --format=\"%s\" $(git log --no-walk --tags | head -n1 | cut -d ' ' -f 2)..HEAD", $changelog);
 
 // Leadin
-echo "The changelog is listed below:\n\n= Release Changelog\n";
+echo "The changelog is listed below:\n\nRelease Changelog\n===========\n";
 
 foreach ($changelog as $change) {
 	

@@ -88,7 +88,7 @@ rm -rf libdpp-$NEWVER-win32
 
 cd ..
 echo "Create release..."
-gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(/usr/bin/php buildtools/changelog.php)" ./assets/*.zip ./assets/*.deb ./assets/*.rpm
+gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(/usr/bin/php ../buildtools/changelog.php)" ./assets/*.zip ./assets/*.deb ./assets/*.rpm
 echo "Cleaning up..."
 cd ..
 rm -rf temp
