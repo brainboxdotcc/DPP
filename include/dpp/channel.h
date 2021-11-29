@@ -234,6 +234,13 @@ public:
 	virtual std::string build_json(bool with_id = false) const;
 
 	/**
+	 * @brief Get the mention ping for the channel
+	 * 
+	 * @return std::string mention
+	 */
+	std::string get_mention() const;
+
+	/**
 	 * @brief Get the user permissions for a user on this channel
 	 * 
 	 * @param member The user to return permissions for

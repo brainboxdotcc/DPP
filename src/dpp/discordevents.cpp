@@ -51,6 +51,7 @@ double managed::get_creation_time() const {
 	return (double)((this->id >> 22) + 1420070400000) / 1000.0;
 }
 
+
 std::string ts_to_string(time_t ts) {
 	std::ostringstream ss;
 	struct tm t;

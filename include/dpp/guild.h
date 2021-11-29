@@ -253,6 +253,13 @@ public:
 	 * @return guild_member& reference to self
 	 */
 	guild_member& set_communication_disabled_until(const time_t timestamp);
+
+	/**
+	 * @brief Return a ping/mention for the user by nickname
+	 * 
+	 * @return std::string mention
+	 */
+	std::string get_mention() const;
 };
 
 /**

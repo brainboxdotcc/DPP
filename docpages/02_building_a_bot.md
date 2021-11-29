@@ -87,11 +87,11 @@ Your project directory should look like this:
 
 \page build-a-discord-bot-windows-visual-studio Building a discord bot in Windows
 
-To create a basic bot using **Visual Studio 2019**, follow the steps below to create a *working skeleton project you can build upon*. These instructions should work (but are currently untested) on versions of Visual Studio newer than 2019.
+To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, follow the steps below to create a *working skeleton project you can build upon*.
 
 \note This tutorial assumes you are using a pre-built copy of the library from a release, or from one of the artifacts on our github page. This is much easier than building it yourself and in most cases you do not need to build your own copy of the library. You can also skip this entire tutorial, and obtain a [pre-made visual studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/).
 
-1. Make sure you have Visual Studio 2019. Community, Professional or Enterprise work fine. These instructions are not for Visual Studio Code. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
+1. Make sure you have Visual Studio 2019 or 2022. Community, Professional or Enterprise work fine. These instructions are not for Visual Studio Code. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/). Note that older versions of Visual Studio will not work as they do not support enough of the C++17 standard.
 2. Start visual studio and choose to create a new project
    \image html vsproj_1.png
 3. Choose the project type "Console Project" and click next

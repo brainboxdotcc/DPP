@@ -146,6 +146,13 @@ public:
 	 * @return Formatted name for reactions
 	 */
 	std::string format() const;
+
+	/**
+	 * @brief Get the mention/ping for the emoji
+	 * 
+	 * @return std::string mention
+	 */
+	std::string get_mention() const;
 };
 
 /**

@@ -326,6 +326,11 @@ namespace dpp {
 		}
 
 
+		std::string DPP_EXPORT timestamp(time_t ts, time_format tf) {
+			char format[2] = { (char)tf, 0 };
+			return "<t:" + std::to_string(ts) + ":" + format + ">";
+		}
+
 	};
 
 };

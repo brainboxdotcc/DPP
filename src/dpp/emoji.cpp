@@ -109,5 +109,18 @@ std::string emoji::format() const
 	return id ? (name + ":" + std::to_string(id)) : name;
 }
 
+std::string emoji::get_mention() const {
+	if (id) {
+		if (is_animated()) {
+			return "<a:" + format() + ">";
+		} else {
+			return "<:" + format() + ">";
+		}
+	} else {
+		return "<:" + format() + ">";
+	}
+}
+
+
 };
 

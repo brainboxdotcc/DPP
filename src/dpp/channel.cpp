@@ -65,6 +65,10 @@ channel::~channel()
 {
 }
 
+std::string channel::get_mention() const {
+	return "<#" + std::to_string(id) + ">";
+}
+
 bool channel::is_nsfw() const {
 	return flags & dpp::c_nsfw;
 }
