@@ -23,7 +23,6 @@
 #include <variant>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
-#include <dpp/message.h>
 
 namespace dpp {
 
@@ -220,7 +219,8 @@ enum interaction_response_type {
 	ir_deferred_channel_message_with_source = 5,	//!< ACK an interaction and edit a response later, the user sees a loading state
 	ir_deferred_update_message = 6,			//!< for components, ACK an interaction and edit the original message later; the user does not see a loading state
 	ir_update_message = 7,				//!< for components, edit the message the component was attached to
-	ir_autocomplete_reply = 8			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
+	ir_autocomplete_reply = 8,			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
+	ir_modal_dialog = 9,				//!< A modal dialog box - Experimental
 };
 
 /**
@@ -286,7 +286,7 @@ struct DPP_EXPORT interaction_response {
 	 *
 	 * @return std::string JSON string
 	 */
-	std::string build_json() const;
+	virtual std::string build_json() const;
 
 	/**
 	 * @brief Add a command option choice
@@ -299,8 +299,46 @@ struct DPP_EXPORT interaction_response {
 	/**
 	 * @brief Destroy the interaction response object
 	 */
-	~interaction_response();
+	virtual ~interaction_response();
 
+};
+
+struct interaction_modal_response : public interaction_response {
+
+	std::string custom_id;
+
+	std::string title;
+
+	std::vector<component> components;
+
+	interaction_modal_response() : interaction_response(ir_modal_dialog) { };
+
+	interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components = {}) : interaction_response(ir_modal_dialog), custom_id(_custom_id), title(_title), components(_components) { };
+
+	/**
+	 * @brief Add a component to an interaction modal response
+	 * 
+	 * @param c component to add
+	 * @return interaction_modal_response& Reference to self
+	 */
+	interaction_modal_response& add_component(const component& c);
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return interaction_response& Reference to self
+	 */
+	interaction_modal_response& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json string for this object
+	 *
+	 * @return std::string JSON string
+	 */
+	virtual std::string build_json() const;
+
+	virtual ~interaction_modal_response() { };
 };
 
 /**

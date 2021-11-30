@@ -440,6 +440,19 @@ interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
+interaction_modal_response& interaction_modal_response::fill_from_json(nlohmann::json* j) {
+	json& d = (*j)["data"];
+	type = (interaction_response_type)int8_not_null(j, "type");
+	custom_id = string_not_null(&d, "custom_id");
+	title = string_not_null(&d, "custom_id");
+	if (d.find("components") != d.end()) {
+		for (auto& c : d["components"]) {
+			components.push_back(dpp::component().fill_from_json(&c));
+		}
+	}
+	return *this;
+}
+
 std::string interaction_response::build_json() const {
 	json j;
 	j["type"] = this->type;
@@ -459,6 +472,33 @@ std::string interaction_response::build_json() const {
 		}
 	}
 	return j.dump();
+}
+
+/* NOTE: Forward declaration for internal function actually defined in message.cpp */
+void to_json(json& j, const component& cp);
+
+std::string interaction_modal_response::build_json() const {
+	json j;
+	j["data"] = json::object();
+	j["data"]["custom_id"] = this->custom_id;
+	j["data"]["title"] = this->title;
+	j["data"]["components"] = json::array();
+	for (auto & component : components) {
+		json n;
+		n["type"] = cot_action_row;
+		n["components"] = {};
+		for (auto & subcomponent  : component.components) {
+			json sn = subcomponent;
+			n["components"].push_back(sn);
+		}
+		j["data"]["components"].push_back(n);
+	}
+	return j.dump();
+}
+
+interaction_modal_response& interaction_modal_response::add_component(const component& c) {
+	components.push_back(c);
+	return *this;
 }
 
 };

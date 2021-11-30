@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/discord.h>
 #include <dpp/message.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>
@@ -35,7 +36,7 @@ namespace dpp {
 
 component::component() :
 	type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""),
-	min_values(-1), max_values(-1), disabled(false)
+	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -93,6 +94,13 @@ component& component::set_style(component_style cs)
 	return *this;
 }
 
+component& component::set_text_style(text_style_type ts)
+{
+	set_type(cot_text);
+	text_style = ts;
+	return *this;
+}
+
 component& component::set_url(const std::string& u)
 {
 	set_type(cot_button);
@@ -130,7 +138,37 @@ component& component::set_emoji(const std::string& name, dpp::snowflake id, bool
 	return *this;
 }
 
+component& component::set_min_length(uint32_t min_l)
+{
+	min_length = min_l;
+	return *this;
+}
+
+component& component::set_max_length(uint32_t max_l)
+{
+	max_length = max_l;
+	return *this;
+}
+
+
 void to_json(json& j, const component& cp) {
+	if (cp.type == cot_text) {
+ 		j["type"] = cp.type;
+		j["label"] = cp.label;
+		j["style"] = int(cp.text_style);
+		if (!cp.custom_id.empty()) {
+			j["custom_id"] = cp.custom_id;
+		}
+		if (!cp.placeholder.empty()) {
+			j["placeholder"] = cp.placeholder;
+		}
+		if (cp.min_length > 0) {
+			j["min_length"] = cp.min_length;
+		}
+		if (cp.max_length > 0) {
+			j["max_length"] = cp.max_length;
+		}
+	}
 	if (cp.type == cot_button) {
 		j["type"] = cp.type;
 		j["label"] = cp.label;
@@ -588,10 +626,10 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		j["content"] = content;
 	}
 
-    if(!author.username.empty()) {
-        /* Used for webhooks */
-        j["username"] = author.username;
-    }
+	if(!author.username.empty()) {
+		/* Used for webhooks */
+		j["username"] = author.username;
+	}
 
 	/* Populate message reference */
 	if (message_reference.channel_id || message_reference.guild_id || message_reference.message_id) {

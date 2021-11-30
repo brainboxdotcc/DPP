@@ -285,6 +285,16 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback = {}) const;
 
 	/**
+	 * @brief Reply to interaction with a dialog box
+	 * @note Experimental
+	 * 
+	 * @param mr Dialog box response to send
+	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void dialog(const interaction_modal_response& mr, command_completion_event_t callback = {}) const;
+
+	/**
 	 * @brief Get original response message for this interaction
 	 *
 	 * @param callback Function to call when the API call completes.

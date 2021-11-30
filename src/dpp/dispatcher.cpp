@@ -110,6 +110,11 @@ void interaction_create_t::thinking(command_completion_event_t callback) const {
 	this->reply(ir_deferred_channel_message_with_source, msg, callback);
 }
 
+void interaction_create_t::dialog(const interaction_modal_response& mr, command_completion_event_t callback) const
+{
+	from->creator->interaction_response_create(this->command.id, this->command.token, mr, callback);
+}
+
 void interaction_create_t::reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback) const
 {
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
