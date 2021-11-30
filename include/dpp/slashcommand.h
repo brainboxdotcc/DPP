@@ -303,17 +303,63 @@ struct DPP_EXPORT interaction_response {
 
 };
 
+/**
+ * @brief Represents a modal dialog box response to an interaction.
+ * 
+ * @note This is currently experimental
+ * 
+ * A dialog box is a modal popup which appears to the user instead of a message. One or more
+ * components are displayed on a form (the same component structure as within a dpp::message).
+ * When the user submits the form an on_form_submit event is dispatched to any listeners.
+ */
 struct interaction_modal_response : public interaction_response {
 
+	/**
+	 * @brief Custom ID for the modal form
+	 */
 	std::string custom_id;
 
+	/**
+	 * @brief Title of the modal form box
+	 */
 	std::string title;
 
+	/**
+	 * @brief List of components. All components must be placed within
+	 * an action row, this class does that for you, so all you need to
+	 * add is a list of components.
+	 */
 	std::vector<component> components;
 
+	/**
+	 * @brief Construct a new interaction modal response object
+	 */
 	interaction_modal_response() : interaction_response(ir_modal_dialog) { };
 
+	/**
+	 * @brief Construct a new interaction modal response object
+	 * 
+	 * @param _custom_id Custom ID of the modal form
+	 * @param _title Title of the modal form
+	 * @param _components Components to add to the modal form
+	 */
 	interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components = {}) : interaction_response(ir_modal_dialog), custom_id(_custom_id), title(_title), components(_components) { };
+
+	/**
+	 * @brief Set the custom id
+	 * 
+	 * @param _custom_id custom id to set
+	 * @return interaction_modal_response& Reference to self
+	 */
+	interaction_modal_response& set_custom_id(const std::string& _custom_id);
+
+	/**
+	 * @brief Set the title 
+	 * 
+	 * @param _title title to set
+	 * @return interaction_modal_response& Reference to self
+	 */
+	interaction_modal_response& set_title(const std::string& _title);
 
 	/**
 	 * @brief Add a component to an interaction modal response
@@ -338,6 +384,9 @@ struct interaction_modal_response : public interaction_response {
 	 */
 	virtual std::string build_json() const;
 
+	/**
+	 * @brief Destroy the interaction modal response object
+	 */
 	virtual ~interaction_modal_response() { };
 };
 

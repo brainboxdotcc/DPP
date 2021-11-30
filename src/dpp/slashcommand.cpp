@@ -501,4 +501,14 @@ interaction_modal_response& interaction_modal_response::add_component(const comp
 	return *this;
 }
 
+interaction_modal_response& interaction_modal_response::set_custom_id(const std::string& _custom_id) {
+	custom_id = _custom_id;
+	return *this;
+}
+
+interaction_modal_response& interaction_modal_response::set_title(const std::string& _title) {
+	title = _title;
+	return *this;
+}
+
 };
