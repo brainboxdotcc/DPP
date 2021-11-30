@@ -61,6 +61,17 @@ component& component::fill_from_json(nlohmann::json* j) {
 		label = "";
 		custom_id = string_not_null(j, "custom_id");
 		disabled = bool_not_null(j, "disabled");
+	} else if (type == cot_text) {
+		custom_id = string_not_null(j, "custom_id");
+		type = (component_type)int8_not_null(j, "type");
+		json v = (*j)["value"];
+		if (!v.is_null() && v.is_number_integer()) {
+			value = v.get<int64_t>();
+		} else if (!v.is_null() && v.is_number_float()) {
+			value = v.get<double>();
+		} else if (!v.is_null() && v.is_string()) {
+			value = v.get<std::string>();
+		}
 	}
 	return *this;
 }

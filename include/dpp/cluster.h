@@ -732,7 +732,6 @@ public:
 	 * The function signature for this event takes a single `const` reference of type button_click_t&, and returns void.
 	 */
 	event_router_t<button_click_t> on_button_click;
-
 	
 	/**
 	 * @brief Called when an auto completed field needs suggestions to present to the user
@@ -754,6 +753,16 @@ public:
 	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
 	 */
 	event_router_t<select_click_t> on_select_click;
+
+	/**
+	 * @brief Called when a modal dialog is submitted.
+	 * Form submits are triggered by discord when modal dialogs are submitted which you have
+	 * associated with a slash command using dpp::interaction_modal_response.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type form_submit_t&, and returns void.
+	 */
+	event_router_t<form_submit_t> on_form_submit;
 
 	
 	/**

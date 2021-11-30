@@ -379,6 +379,30 @@ struct DPP_EXPORT button_click_t : public interaction_create_t {
 	uint8_t component_type;
 };
 
+struct DPP_EXPORT form_submit_t : public interaction_create_t {
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	form_submit_t(class discord_client* client, const std::string& raw);
+
+	/**
+	 * @brief Get a command line parameter
+	 * 
+	 * @param name The command line parameter to retrieve
+	 * @return Always returns an empty parameter as buttons dont have parameters!
+	 */
+	const virtual command_value& get_parameter(const std::string& name) const;
+	/**
+	 * @brief button custom id
+	 */
+	std::string custom_id;
+	/**
+	 * @brief Message components for form reply
+	 */
+	std::vector<component> components;
+};
+
 /**
  * @brief Discord requests that we fill a list of auto completion choices for a command option
  */

@@ -313,7 +313,9 @@ struct DPP_EXPORT interaction_response {
  * When the user submits the form an on_form_submit event is dispatched to any listeners.
  */
 struct interaction_modal_response : public interaction_response {
-
+private:
+	size_t current_row;
+public:
 	/**
 	 * @brief Custom ID for the modal form
 	 */
@@ -326,15 +328,14 @@ struct interaction_modal_response : public interaction_response {
 
 	/**
 	 * @brief List of components. All components must be placed within
-	 * an action row, this class does that for you, so all you need to
-	 * add is a list of components.
+	 * an action row, each outer vector is the action row.
 	 */
-	std::vector<component> components;
+	std::vector<std::vector<component>> components;
 
 	/**
 	 * @brief Construct a new interaction modal response object
 	 */
-	interaction_modal_response() : interaction_response(ir_modal_dialog) { };
+	interaction_modal_response();
 
 	/**
 	 * @brief Construct a new interaction modal response object
@@ -343,7 +344,7 @@ struct interaction_modal_response : public interaction_response {
 	 * @param _title Title of the modal form
 	 * @param _components Components to add to the modal form
 	 */
-	interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components = {}) : interaction_response(ir_modal_dialog), custom_id(_custom_id), title(_title), components(_components) { };
+	interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components = {});
 
 	/**
 	 * @brief Set the custom id
@@ -370,6 +371,14 @@ struct interaction_modal_response : public interaction_response {
 	interaction_modal_response& add_component(const component& c);
 
 	/**
+	 * @brief Add a new row to the interaction modal response.
+	 * @note A modal response can have a maximum of five rows.
+	 * @throw dpp::logic_exception if more than five rows are attempted to be added
+	 * @return interaction_modal_response& Reference to self
+	 */
+	interaction_modal_response& add_row();
+
+	/**
 	 * @brief Fill object properties from JSON
 	 *
 	 * @param j JSON to fill from
@@ -387,7 +396,7 @@ struct interaction_modal_response : public interaction_response {
 	/**
 	 * @brief Destroy the interaction modal response object
 	 */
-	virtual ~interaction_modal_response() { };
+	virtual ~interaction_modal_response() = default;
 };
 
 /**
@@ -441,7 +450,8 @@ enum interaction_type {
 	it_ping = 1,			//!< ping
 	it_application_command = 2,	//!< application command (slash command)
 	it_component_button = 3,	//!< button click (component interaction)
-	it_autocomplete = 4		//!< Autocomplete interaction
+	it_autocomplete = 4,		//!< Autocomplete interaction
+	it_modal_submit = 5,		//!< Modal form submission (experimental)
 };
 
 /**

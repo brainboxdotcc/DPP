@@ -22,6 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/queues.h>
 #include <optional>
+#include <variant>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {
@@ -260,6 +261,10 @@ public:
 	/** Disabled flag (for buttons)
 	 */
 	bool disabled;
+
+	/** Current value (only filled or valid when populated from an on_form_submit event)
+	 */
+	std::variant<std::monostate, std::string, int64_t, double> value;
 
 	/** Emoji definition. To set an emoji on your button
 	 * you must set one of either the name or id fields.
