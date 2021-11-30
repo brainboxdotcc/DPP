@@ -399,7 +399,7 @@ public:
 	/**
 	 * @brief Set the min length of text input
 	 * 
-	 * @param min_values min value to set
+	 * @param min_l min value to set
 	 * @return component& Reference to self
 	 */
 	component& set_min_length(uint32_t min_l);
@@ -407,7 +407,7 @@ public:
 	/**
 	 * @brief Set the max length of text input
 	 * 
-	 * @param max_values max value to set
+	 * @param max_l max value to set
 	 * @return component& Reference to self
 	 */
 	component& set_max_length(uint32_t max_l);
