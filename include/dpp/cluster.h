@@ -323,6 +323,17 @@ public:
 	}
 
 	/**
+	 * @brief Returns true if any listeners are attached.
+	 * 
+	 * This is the boolean opposite of event_router_t::empty().
+	 * @return true if listeners are attached
+	 * @return false if no listeners are attached
+	 */
+	operator bool() const {
+		return !empty();
+	}
+
+	/**
 	 * @brief Attach a lambda to the event, adding a listener.
 	 * The lambda should follow the signature specified when declaring
 	 * the event object and should take exactly one parameter derived
