@@ -35,8 +35,12 @@ The library may work fine in other operating systems too, if you run a D++ bot o
 
 ## Getting started
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)
-* Having questions?: [Discord Server](https://discord.gg/dpp) | \subpage frequently-asked-questions "FAQ"
-* Building on \ref buildlinux "Linux" | \ref buildwindows "Windows" | \ref buildosx "OSX" | \ref buildfreebsd "FreeBSD"
+* [Discord Server](https://discord.gg/dpp)
+* \subpage frequently-asked-questions "Frequently Asked Questions"
+* \ref buildlinux
+* \ref buildwindows
+* \ref buildosx
+* \ref buildfreebsd
 * \ref creating-a-bot-account "Creating a Bot Account"
 * [Example Programs](/md_docpages_03_example_programs.html)
 
