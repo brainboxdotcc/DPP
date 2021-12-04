@@ -130,7 +130,9 @@ To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, fo
 
 \page creating-a-bot-account Creating a Bot Account
 
-Before you start coding, you need to create and register your bot in the Discord developer portal.
+Before you start coding, you need to create and register your bot in the Discord developer portal. You can then add this bot to your Discord-server.
+
+## Creating a new bot
 
 To create a new application, take the steps as follows:
 
@@ -151,4 +153,28 @@ On the resulting screen, you’ll note a page with information regarding your ne
 
 In this panel, you can get your bot token. A bot token looks like this: `OTAyOTMxODU1NTU1MzE3ODUw.YXlm0g.9oYCt-XHXVH_z9qAytzmVRzKWTg`
 
-\note Don't share this token with anybody! If you ever somehow compromise your current bot token or see your bot in danger, you can regenerate the token in the panel.
+\warning **Do not share this token** with anybody! If you ever somehow compromise your current bot token or see your bot in danger, you can regenerate the token in the panel.
+
+## Adding the bot to your server
+
+Once you've created your bot in the discord developer portal, you may wonder:
+> Where is my bot now, I can't see him on my server?!
+
+That's because you've created a bot application, but it's not on any server right now.
+
+So to invite the bot to your server, you must create an invitation URL.
+
+1. go again into the [Applications page](https://discord.com/developers/applications) and click on your bot.
+2. Go to the "OAuth2" tab and click on the subpage "URL Generator".
+
+\image html create_application_navigate_to_url_generator.png
+
+3. Select the "bot" scope. If your bot uses slash commands, also select "applications.commands".
+
+You can read more about scopes and which you need for your application [here](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes).
+
+4. Choose the permissions required for your bot to function in the "Bot Permissions" section.
+
+\note For bots with elevated permissions, Discord enforces two-factor authentication on the bot owner's account when added to servers that have server-wide 2FA enabled.
+
+5. Copy and paste the resulting URL in your browser. Choose a server to invite the bot to, and click "Authorize".
