@@ -56,6 +56,16 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 			ic.command = i;
 			client->creator->on_interaction_create.call(ic);
 		}
+	} else if (i.type == it_modal_submit) {
+		if (!client->creator->on_form_submit.empty()) {
+			dpp::form_submit_t fs(client, raw);
+			fs.custom_id = string_not_null(&(d["data"]), "custom_id");
+			fs.command = i;
+			for (auto & c : d["data"]["components"]) {
+				fs.components.push_back(dpp::component().fill_from_json(&c));
+			}
+			client->creator->on_form_submit.call(fs);
+		}
 	} else if (i.type == it_autocomplete) {
 		// "data":{"id":"903319628816728104","name":"blep","options":[{"focused":true,"name":"animal","type":3,"value":"a"}],"type":1}
 		if (!client->creator->on_autocomplete.empty()) {

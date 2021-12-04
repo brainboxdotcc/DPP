@@ -23,7 +23,6 @@
 #include <variant>
 #include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
-#include <dpp/message.h>
 
 namespace dpp {
 
@@ -220,7 +219,8 @@ enum interaction_response_type {
 	ir_deferred_channel_message_with_source = 5,	//!< ACK an interaction and edit a response later, the user sees a loading state
 	ir_deferred_update_message = 6,			//!< for components, ACK an interaction and edit the original message later; the user does not see a loading state
 	ir_update_message = 7,				//!< for components, edit the message the component was attached to
-	ir_autocomplete_reply = 8			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
+	ir_autocomplete_reply = 8,			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
+	ir_modal_dialog = 9,				//!< A modal dialog box - Experimental
 };
 
 /**
@@ -286,7 +286,7 @@ struct DPP_EXPORT interaction_response {
 	 *
 	 * @return std::string JSON string
 	 */
-	std::string build_json() const;
+	virtual std::string build_json() const;
 
 	/**
 	 * @brief Add a command option choice
@@ -299,8 +299,104 @@ struct DPP_EXPORT interaction_response {
 	/**
 	 * @brief Destroy the interaction response object
 	 */
-	~interaction_response();
+	virtual ~interaction_response();
 
+};
+
+/**
+ * @brief Represents a modal dialog box response to an interaction.
+ * 
+ * @note This is currently experimental
+ * 
+ * A dialog box is a modal popup which appears to the user instead of a message. One or more
+ * components are displayed on a form (the same component structure as within a dpp::message).
+ * When the user submits the form an on_form_submit event is dispatched to any listeners.
+ */
+struct interaction_modal_response : public interaction_response {
+private:
+	size_t current_row;
+public:
+	/**
+	 * @brief Custom ID for the modal form
+	 */
+	std::string custom_id;
+
+	/**
+	 * @brief Title of the modal form box
+	 */
+	std::string title;
+
+	/**
+	 * @brief List of components. All components must be placed within
+	 * an action row, each outer vector is the action row.
+	 */
+	std::vector<std::vector<component>> components;
+
+	/**
+	 * @brief Construct a new interaction modal response object
+	 */
+	interaction_modal_response();
+
+	/**
+	 * @brief Construct a new interaction modal response object
+	 * 
+	 * @param _custom_id Custom ID of the modal form
+	 * @param _title Title of the modal form
+	 * @param _components Components to add to the modal form
+	 */
+	interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components = {});
+
+	/**
+	 * @brief Set the custom id
+	 * 
+	 * @param _custom_id custom id to set
+	 * @return interaction_modal_response& Reference to self
+	 */
+	interaction_modal_response& set_custom_id(const std::string& _custom_id);
+
+	/**
+	 * @brief Set the title 
+	 * 
+	 * @param _title title to set
+	 * @return interaction_modal_response& Reference to self
+	 */
+	interaction_modal_response& set_title(const std::string& _title);
+
+	/**
+	 * @brief Add a component to an interaction modal response
+	 * 
+	 * @param c component to add
+	 * @return interaction_modal_response& Reference to self
+	 */
+	interaction_modal_response& add_component(const component& c);
+
+	/**
+	 * @brief Add a new row to the interaction modal response.
+	 * @note A modal response can have a maximum of five rows.
+	 * @throw dpp::logic_exception if more than five rows are attempted to be added
+	 * @return interaction_modal_response& Reference to self
+	 */
+	interaction_modal_response& add_row();
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return interaction_response& Reference to self
+	 */
+	interaction_modal_response& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json string for this object
+	 *
+	 * @return std::string JSON string
+	 */
+	virtual std::string build_json() const;
+
+	/**
+	 * @brief Destroy the interaction modal response object
+	 */
+	virtual ~interaction_modal_response() = default;
 };
 
 /**
@@ -354,7 +450,8 @@ enum interaction_type {
 	it_ping = 1,			//!< ping
 	it_application_command = 2,	//!< application command (slash command)
 	it_component_button = 3,	//!< button click (component interaction)
-	it_autocomplete = 4		//!< Autocomplete interaction
+	it_autocomplete = 4,		//!< Autocomplete interaction
+	it_modal_submit = 5,		//!< Modal form submission (experimental)
 };
 
 /**

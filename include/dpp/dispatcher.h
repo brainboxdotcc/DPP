@@ -285,6 +285,16 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback = {}) const;
 
 	/**
+	 * @brief Reply to interaction with a dialog box
+	 * @note Experimental
+	 * 
+	 * @param mr Dialog box response to send
+	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void dialog(const interaction_modal_response& mr, command_completion_event_t callback = {}) const;
+
+	/**
 	 * @brief Get original response message for this interaction
 	 *
 	 * @param callback Function to call when the API call completes.
@@ -367,6 +377,30 @@ struct DPP_EXPORT button_click_t : public interaction_create_t {
 	 * @brief component type
 	 */
 	uint8_t component_type;
+};
+
+struct DPP_EXPORT form_submit_t : public interaction_create_t {
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	form_submit_t(class discord_client* client, const std::string& raw);
+
+	/**
+	 * @brief Get a command line parameter
+	 * 
+	 * @param name The command line parameter to retrieve
+	 * @return Always returns an empty parameter as buttons dont have parameters!
+	 */
+	const virtual command_value& get_parameter(const std::string& name) const;
+	/**
+	 * @brief button custom id
+	 */
+	std::string custom_id;
+	/**
+	 * @brief Message components for form reply
+	 */
+	std::vector<component> components;
 };
 
 /**

@@ -313,9 +313,11 @@ void ssl_client::read_loop()
 					switch (e) {
 						case SSL_ERROR_NONE:
 							/* Data received, add it to the buffer */
-							buffer.append(ServerToClientBuffer, r);
-							this->handle_buffer(buffer);
-							bytes_in += r;
+							if (r > 0) {
+								buffer.append(ServerToClientBuffer, r);
+								this->handle_buffer(buffer);
+								bytes_in += r;
+							}
 						break;
 						case SSL_ERROR_ZERO_RETURN:
 							/* End of data */

@@ -440,6 +440,19 @@ interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
+interaction_modal_response& interaction_modal_response::fill_from_json(nlohmann::json* j) {
+	json& d = (*j)["data"];
+	type = (interaction_response_type)int8_not_null(j, "type");
+	custom_id = string_not_null(&d, "custom_id");
+	title = string_not_null(&d, "custom_id");
+	if (d.find("components") != d.end()) {
+		for (auto& c : d["components"]) {
+			components[current_row].push_back(dpp::component().fill_from_json(&c));
+		}
+	}
+	return *this;
+}
+
 std::string interaction_response::build_json() const {
 	json j;
 	j["type"] = this->type;
@@ -459,6 +472,64 @@ std::string interaction_response::build_json() const {
 		}
 	}
 	return j.dump();
+}
+
+/* NOTE: Forward declaration for internal function actually defined in message.cpp */
+void to_json(json& j, const component& cp);
+
+interaction_modal_response::interaction_modal_response() : interaction_response(ir_modal_dialog), current_row(0) {
+	// Default to one empty row
+	components.push_back({});
+}
+
+interaction_modal_response::interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components) : interaction_response(ir_modal_dialog), current_row(0), custom_id(_custom_id), title(_title) {
+	// Default to one empty row
+	components.push_back(_components);
+}
+
+std::string interaction_modal_response::build_json() const {
+	json j;
+	j["type"] = this->type;
+	j["data"] = json::object();
+	j["data"]["custom_id"] = this->custom_id;
+	j["data"]["title"] = this->title;
+	j["data"]["components"] = json::array();
+	for (auto & row : components) {
+		json n;
+		n["type"] = cot_action_row;
+		n["components"] = json::array();
+		for (auto & component : row) {
+			json sn = component;
+			n["components"].push_back(sn);
+		}
+		j["data"]["components"].push_back(n);
+	}
+	return j.dump();
+}
+
+interaction_modal_response& interaction_modal_response::add_component(const component& c) {
+	components[current_row].push_back(c);
+	return *this;
+}
+
+interaction_modal_response& interaction_modal_response::add_row() {
+	if (components.size() < 5) {
+		current_row++;
+		components.push_back({});
+	} else {
+		throw dpp::logic_exception("A modal dialog can only have a maximum of five component rows");
+	}
+	return *this;
+}
+
+interaction_modal_response& interaction_modal_response::set_custom_id(const std::string& _custom_id) {
+	custom_id = _custom_id;
+	return *this;
+}
+
+interaction_modal_response& interaction_modal_response::set_title(const std::string& _title) {
+	title = _title;
+	return *this;
 }
 
 };

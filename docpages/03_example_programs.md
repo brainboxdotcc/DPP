@@ -13,6 +13,7 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage components "Using component interactions (buttons)"
 * \subpage components3 "Using component interactions (select menus)"
 * \subpage components2 "Using component interactions (advanced)"
+* \subpage modal-dialog-interactions "Modal Dialog Interactions"
 * \subpage commandhandler "Using a command handler object"
 * \subpage subcommands "Using sub-commands in slash commands"
 * \subpage embed-message "Sending Embeds"
@@ -1432,3 +1433,77 @@ int main() {
 	return 0;
 }
 ~~~~~~~~~~
+
+* \page modal-dialog-interactions Modal Dialog Interactions
+
+Modal dialog interactions are a new Discord API feature that allow you to have pop-up windows which prompt the user to input information. Once the user has filled in this information, your program will receive an `on_form_submit` event which will contain the data which was input. You must use a slash command interaction response to submit your modal form data to Discord, via the `on_interaction_create` event. From here calling the `dialog` method of the `interaction_create_t` event object will trigger the dialog to appear.
+
+@warning This feature is currently in a closed beta, and requires whitelisting of your application by Discord. These documents and any library methods associated with this feature are subject to change until the feature is officially announced for general use!
+
+Each dialog box may have up to five rows of input fields. The example below demonstrates a simple setup with just one text input:
+
+~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+#include <iostream>
+
+int main(int argc, char const *argv[])
+{
+	dpp::cluster bot("token");
+
+	bot.on_ready([&](const dpp::ready_t & event) {
+		/* Create a slash command and register it as a global command */
+		dpp::slashcommand newcommand;
+		newcommand.set_name("dialog").set_description("Make a modal dialog box").set_application_id(bot.me.id);
+		bot.global_command_create(newcommand);
+	});
+
+	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
+		if (event.command.type == dpp::it_application_command) {
+			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
+			/* Check for our /dialog command */
+			if (cmd_data.name == "dialog") {
+				/* Instantiate an interaction_modal_response object */
+				dpp::interaction_modal_response modal("my_modal", "Please enter stuff");
+				/* Add a text component */
+				modal.add_component(
+					dpp::component().
+					set_label("Type rammel").
+					set_id("field_id").
+					set_type(dpp::cot_text).
+					set_placeholder("gumf").
+					set_min_length(1).
+					set_max_length(2000).
+					set_text_style(dpp::text_paragraph)
+				);
+				/* Trigger the dialog box. All dialog boxes are ephemeral */
+				event.dialog(modal);
+			}
+		}
+	});
+
+	/* This event handles form submission for the modal dialog we create above */
+	bot.on_form_submit([&](const dpp::form_submit_t & event) {
+		/* For this simple example we know the first element of the first row ([0][0]) is value type string.
+		 * In the real world it may not be safe to make such assumptions!
+		 */
+		std::string v = std::get<std::string>(event.components[0].components[0].value);
+		dpp::message m;
+		m.set_content("You entered: " + v).set_flags(dpp::m_ephemeral);
+		/* Emit a reply. Form submission is still an interaction and must generate some form of reply! */
+		event.reply(dpp::ir_channel_message_with_source, m);
+	});
+
+	/* Budget brand logger */
+	bot.on_log([&](const dpp::log_t & log) {
+		std::cout << log.message << "\n";
+	});
+
+	/* Start bot */
+	bot.start(false);
+	return 0;
+}
+~~~~~~~~~~
+
+If you compile and run this program and wait for the global command to register, typing `/dialog` will present you with a dialog box like the one below:
+
+\image html modal_dialog.png

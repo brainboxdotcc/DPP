@@ -20,9 +20,9 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
 #include <dpp/queues.h>
 #include <optional>
+#include <variant>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {
@@ -36,7 +36,19 @@ enum component_type : uint8_t {
 	/// Clickable button
 	cot_button = 2,
 	/// Select menu
-	cot_selectmenu = 3
+	cot_selectmenu = 3,
+	/// Text input - Experimental
+	cot_text = 4,
+};
+
+/**
+ * @brief Types of text input
+ */
+enum text_style_type : uint8_t {
+	/// Intended for short single-line text.
+	text_short = 1,
+	/// Intended for much longer inputs.
+	text_paragraph = 2,
 };
 
 /**
@@ -196,7 +208,7 @@ public:
 	 */
 	std::vector<component> components;
 
-	/** Component label (for buttons).
+	/** Component label (for buttons, text inputs).
 	 * Maximum of 80 characters.
 	 */
 	std::string label;
@@ -205,7 +217,12 @@ public:
 	 */
 	component_style style;
 
-	/** Component id (for buttons).
+	/**
+	 * @brief Text style (for text inputs)
+	 */
+	text_style_type text_style;
+
+	/** Component id (for buttons, menus, text inputs).
 	 * Maximum of 100 characters.
 	 */
 	std::string custom_id;
@@ -215,7 +232,7 @@ public:
 	 */
 	std::string url;
 
-	/** Placeholder text for select menus
+	/** Placeholder text for select menus and text inputs
 	 */
 	std::string placeholder;
 
@@ -229,6 +246,14 @@ public:
 	 */
 	int32_t max_values;
 
+	/** Minimum length for text input.
+	 */
+	int32_t min_length;
+
+	/** Maximum length for text input
+	 */
+	int32_t max_length;
+
 	/** Select options for select menus
 	 */
 	std::vector<select_option> options;
@@ -236,6 +261,10 @@ public:
 	/** Disabled flag (for buttons)
 	 */
 	bool disabled;
+
+	/** Current value (only filled or valid when populated from an on_form_submit event)
+	 */
+	std::variant<std::monostate, std::string, int64_t, double> value;
 
 	/** Emoji definition. To set an emoji on your button
 	 * you must set one of either the name or id fields.
@@ -283,6 +312,15 @@ public:
 	 * @return component& reference to self
 	 */
 	component& set_type(component_type ct);
+
+	/**
+	 * @brief Set the text style of a text component
+	 * @note Sets type to `cot_text`
+	 * 
+	 * @param ts Text style type to set
+	 * @return component& reference to self
+	 */
+	component& set_text_style(text_style_type ts);
 
 	/**
 	 * @brief Set the label of the component, e.g. button text.
@@ -357,6 +395,22 @@ public:
 	 * @return component& Reference to self
 	 */
 	component& set_max_values(uint32_t max_values);
+
+	/**
+	 * @brief Set the min length of text input
+	 * 
+	 * @param min_l min value to set
+	 * @return component& Reference to self
+	 */
+	component& set_min_length(uint32_t min_l);
+
+	/**
+	 * @brief Set the max length of text input
+	 * 
+	 * @param max_l max value to set
+	 * @return component& Reference to self
+	 */
+	component& set_max_length(uint32_t max_l);
 
 	/**
 	 * @brief Add a select option

@@ -110,6 +110,11 @@ void interaction_create_t::thinking(command_completion_event_t callback) const {
 	this->reply(ir_deferred_channel_message_with_source, msg, callback);
 }
 
+void interaction_create_t::dialog(const interaction_modal_response& mr, command_completion_event_t callback) const
+{
+	from->creator->interaction_response_create(this->command.id, this->command.token, mr, callback);
+}
+
 void interaction_create_t::reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback) const
 {
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
@@ -161,6 +166,13 @@ const command_value& select_click_t::get_parameter(const std::string& name) cons
 	return dummy_b_value;
 }
 
+const command_value& form_submit_t::get_parameter(const std::string& name) const
+{
+	/* Buttons don't have parameters, so override this */
+	static command_value dummy_b_value = {};
+	return dummy_b_value;
+}
+
 const command_value& autocomplete_t::get_parameter(const std::string& name) const
 {
 	/* Autocomplete don't have parameters, so override this */
@@ -179,6 +191,7 @@ event_ctor(interaction_create_t, event_dispatch_t);
 event_ctor(button_click_t, interaction_create_t);
 event_ctor(autocomplete_t, interaction_create_t);
 event_ctor(select_click_t, interaction_create_t);
+event_ctor(form_submit_t, interaction_create_t);
 event_ctor(guild_delete_t, event_dispatch_t);
 event_ctor(channel_delete_t, event_dispatch_t);
 event_ctor(channel_update_t, event_dispatch_t);

@@ -366,6 +366,7 @@ namespace dpp {
 #include <dpp/webhook.h>
 #include <dpp/presence.h>
 #include <dpp/intents.h>
+#include <dpp/message.h>
 #include <dpp/slashcommand.h>
 #include <dpp/stage_instance.h>
 #include <dpp/auditlog.h>
