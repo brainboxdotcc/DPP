@@ -38,7 +38,7 @@ The library may work fine in other operating systems too, if you run a D++ bot o
 * Having questions?: [Discord Server](https://discord.gg/dpp) | \subpage frequently-asked-questions "FAQ"
 * Building on \ref buildlinux "Linux" | \ref buildwindows "Windows" | \ref buildosx "OSX" | \ref buildfreebsd "FreeBSD"
 * \ref creating-a-bot-account "Creating a Bot Account"
-* [Examples](/md_docpages_03_example_programs.html)
+* [Example Programs](/md_docpages_03_example_programs.html)
 
 ## Architecture
 * \ref clusters-shards-guilds
