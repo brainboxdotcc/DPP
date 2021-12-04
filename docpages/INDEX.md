@@ -24,7 +24,7 @@ You can download the latest releases and check out our source code from the [Git
 * [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio)
 * The entire Discord API is available for use in the library
 * Stable [Windows support](https://dpp.dev/buildwindows.html)
-* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM6/ARM7) and Debian x86/x64
+* Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6), Debian x86/x64 and RPM based distributions
 
 ## Supported Operating Systems
 
@@ -35,12 +35,10 @@ The library may work fine in other operating systems too, if you run a D++ bot o
 
 ## Getting started
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)
-* [Discord Server](https://discord.gg/dpp)
-* \subpage frequently-asked-questions "Frequently Asked Questions"
-* \ref buildlinux
-* \ref buildwindows
-* \ref buildosx
-* \ref buildfreebsd
+* Having questions?: [Discord Server](https://discord.gg/dpp) | \subpage frequently-asked-questions "FAQ"
+* Building on \ref buildlinux "Linux" | \ref buildwindows "Windows" | \ref buildosx "OSX" | \ref buildfreebsd "FreeBSD"
+* \ref creating-a-bot-account "Creating a Bot Account"
+* [Examples](/md_docpages_03_example_programs.html)
 
 ## Architecture
 * \ref clusters-shards-guilds

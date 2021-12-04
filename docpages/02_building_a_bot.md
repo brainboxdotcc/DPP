@@ -6,7 +6,7 @@ Click on a link below for a guide specifically for your system:
 
 * \subpage build-a-discord-bot-windows-visual-studio "Building a discord bot in Windows"
 * \subpage buildcmake "Building a Discord Bot using CMake/UNIX"
-* \subpage creating-a-bot-application "Creating a bot application"
+* \subpage creating-a-bot-account "Creating a Bot Account"
 
 \page buildcmake Building a Discord Bot using CMake/UNIX
 # Building with CMake
@@ -128,7 +128,7 @@ To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, fo
 - You should run your bot from a command prompt. If you do not, and it exits, you will not be able to see any output as the window will immediately close.
 - Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
 
-\page creating-a-bot-application Creating a bot application
+\page creating-a-bot-account Creating a Bot Account
 
 Before you start coding, you need to create and register your bot in the Discord developer portal.
 
