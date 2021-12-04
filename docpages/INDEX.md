@@ -41,7 +41,7 @@ The library may work fine in other operating systems too, if you run a D++ bot o
 * \ref buildwindows
 * \ref buildosx
 * \ref buildfreebsd
-* \ref creating-a-bot-account "Creating a Bot Account"
+* \ref creating-a-bot-application "Creating a Bot Account"
 * [Example Programs](/md_docpages_03_example_programs.html)
 
 ## Architecture
