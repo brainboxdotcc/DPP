@@ -1434,7 +1434,7 @@ int main() {
 }
 ~~~~~~~~~~
 
-* \page modal-dialog-interactions Modal Dialog Interactions
+\page modal-dialog-interactions Modal Dialog Interactions
 
 Modal dialog interactions are a new Discord API feature that allow you to have pop-up windows which prompt the user to input information. Once the user has filled in this information, your program will receive an `on_form_submit` event which will contain the data which was input. You must use a slash command interaction response to submit your modal form data to Discord, via the `on_interaction_create` event. From here calling the `dialog` method of the `interaction_create_t` event object will trigger the dialog to appear.
 
