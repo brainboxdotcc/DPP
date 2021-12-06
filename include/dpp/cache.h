@@ -276,7 +276,7 @@ cache_decl(emoji, find_emoji, get_emoji_cache, get_emoji_count);
  * @throw dpp::cache_exception if the guild or guild_member is not found in the cache
  * @return guild_member the cached object, if found
  */
-guild_member find_guild_member(const snowflake guild_id, const snowflake user_id);
+guild_member DPP_EXPORT find_guild_member(const snowflake guild_id, const snowflake user_id);
 
 };
 
