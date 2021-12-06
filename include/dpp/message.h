@@ -134,7 +134,7 @@ struct DPP_EXPORT select_option {
 	/**
 	 * @brief Set the label
 	 * 
-	 * @param l the user-facing name of the option. It will be truncated to the maximum length of 100 UTF-8 codepoints.
+	 * @param l the user-facing name of the option. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return select_option& reference to self for chaining
 	 */
 	select_option& set_label(const std::string &l);
@@ -142,7 +142,7 @@ struct DPP_EXPORT select_option {
 	/**
 	 * @brief Set the value
 	 * 
-	 * @param v value to set. It will be truncated to the maximum length of 100 UTF-8 codepoints.
+	 * @param v value to set. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return select_option& reference to self for chaining
 	 */
 	select_option& set_value(const std::string &v);
@@ -150,7 +150,7 @@ struct DPP_EXPORT select_option {
 	/**
 	 * @brief Set the description
 	 * 
-	 * @param d description to set. It will be truncated to the maximum length of 100 UTF-8 codepoints.
+	 * @param d description to set. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return select_option& reference to self for chaining
 	 */
 	select_option& set_description(const std::string &d);
@@ -327,7 +327,7 @@ public:
 	 * For action rows, this field is ignored. Setting the
 	 * label will auto-set the type to dpp::cot_button.
 	 *
-	 * @param label Label text to set. It will be truncated to the maximum length of 80 UTF-8 codepoints.
+	 * @param label Label text to set. It will be truncated to the maximum length of 80 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
 	component& set_label(const std::string &label);
@@ -337,7 +337,7 @@ public:
 	 * Calling this function sets the style to dpp::cos_link
 	 * and the type to dpp::cot_button.
 	 *
-	 * @param url URL to set. It will be truncated to the maximum length of 512 UTF-8 codepoints.
+	 * @param url URL to set. It will be truncated to the maximum length of 512 UTF-8 characters.
 	 * @return component& reference to self.
 	 */
 	component& set_url(const std::string &url);
@@ -377,7 +377,7 @@ public:
 	/**
 	 * @brief Set the placeholder
 	 * 
-	 * @param placeholder placeholder string. It will be truncated to the maximum length of 100 UTF-8 codepoints.
+	 * @param placeholder placeholder string. It will be truncated to the maximum length of 100 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
 	component& set_placeholder(const std::string &placeholder);
@@ -582,13 +582,13 @@ struct DPP_EXPORT embed {
 	~embed();
 
 	/** Set embed title. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title. It will be truncated to the maximum length of 256 UTF-8 codepoints.
+	 * @param text The text of the title. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @return A reference to self
 	 */
 	embed& set_title(const std::string &text);
 
 	/** Set embed description. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title. It will be truncated to the maximum length of 4096 UTF-8 codepoints.
+	 * @param text The text of the title. It will be truncated to the maximum length of 4096 UTF-8 characters.
 	 * @return A reference to self
 	 */
 	embed& set_description(const std::string &text);
@@ -620,8 +620,8 @@ struct DPP_EXPORT embed {
 	embed& set_url(const std::string &url);
 
 	/** Add an embed field. Returns the embed itself so these method calls may be "chained"
-	 * @param name The name of the field. It will be truncated to the maximum length of 256 UTF-8 codepoints.
-	 * @param value The value of the field. It will be truncated to the maximum length of 1024 UTF-8 codepoints.
+	 * @param name The name of the field. It will be truncated to the maximum length of 256 UTF-8 characters.
+	 * @param value The value of the field. It will be truncated to the maximum length of 1024 UTF-8 characters.
 	 * @param is_inline Whether or not to display the field 'inline' or on its own line
 	 * @return A reference to self
 	 */
@@ -634,7 +634,7 @@ struct DPP_EXPORT embed {
 	embed& set_author(const dpp::embed_author& a);
 
 	/** Set embed author. Returns the embed itself so these method calls may be "chained"
-	 * @param name The name of the author. It will be truncated to the maximum length of 256 UTF-8 codepoints.
+	 * @param name The name of the author. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @param url The url of the author
 	 * @param icon_url The icon URL of the author
 	 * @return A reference to self
@@ -642,7 +642,7 @@ struct DPP_EXPORT embed {
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 
 	/** Set embed provider. Returns the embed itself so these method calls may be "chained"
-	 * @param name The provider name. It will be truncated to the maximum length of 256 UTF-8 codepoints.
+	 * @param name The provider name. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @param url The provider url
 	 * @return A reference to self
 	 */
@@ -1146,7 +1146,7 @@ struct DPP_EXPORT message : public managed {
 	 * @brief Construct a new message object with a channel and content
 	 *
 	 * @param channel_id The channel to send the message to
-	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 codepoints.
+	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
@@ -1162,7 +1162,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Construct a new message object with content
 	 *
-	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 codepoints.
+	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(const std::string &content, message_type type = mt_default);
@@ -1313,7 +1313,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Set the message content
 	 * 
-	 * @param c message content. It will be truncated to the maximum length of 2000 UTF-8 codepoints.
+	 * @param c message content. It will be truncated to the maximum length of 2000 UTF-8 characters.
 	 * @return message& reference to self
 	 */
 	message& set_content(const std::string &c);
