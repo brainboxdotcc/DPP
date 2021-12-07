@@ -12,7 +12,7 @@ It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contr
 
 ## Downloads
 
-You can download the latest releases and check out our source code from the [GitHub page](https://github.com/brainboxdotcc/DPP/releases).
+You can download the latest releases and check out our source code from the [GitHub Repository](https://github.com/brainboxdotcc/DPP/releases).
 
 ## Library features
 
