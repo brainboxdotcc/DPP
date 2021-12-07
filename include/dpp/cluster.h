@@ -3281,6 +3281,19 @@ public:
 	 * return it as the return value. Returning a value of nullptr causes no
 	 * object to be stored.
 	 * 
+	 * Here is an example of how to filter messages which have specific text in them.
+	 * This should be used with the specialised type dpp::message_collector
+	 * 
+	 * ```cpp
+	 * virtual const dpp::message* filter(const dpp::message_create_t& m) {
+    	 *     if (m.msg.content.find("something i want") != std::string::npos) {
+	 *         return &m.msg;
+	 *     } else {
+	 *         return nullptr;
+	 *     }
+	 *}
+	 * ```
+	 * 
 	 * @param element The event data to filter
 	 * @return const C* Returned object or nullptr
 	 */
