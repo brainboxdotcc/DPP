@@ -3248,7 +3248,7 @@ public:
 	 * @param duration Duration in seconds to run the collector for
 	 * @param event Event to attach to, e.g. cluster::on_message_create
 	 */
-	collector(class cluster* cl, uint64_t duration, event_router_t<T> & event) : triggered(false) {
+	collector(class cluster* cl, uint64_t duration, event_router_t<T> & event) : owner(cl), triggered(false) {
 		using namespace std::placeholders;
 		std::function<void(const T&)> f = [this](const T& event) {
 			const C* v = filter(event);
@@ -3291,7 +3291,7 @@ public:
 	 *     } else {
 	 *         return nullptr;
 	 *     }
-	 *}
+	 * }
 	 * ```
 	 * 
 	 * @param element The event data to filter
