@@ -29,9 +29,7 @@ In this example we will create a C++ version of the [discord.js](https://discord
 
 The two programs can be seen side by side below:
 
-| C++/DPP               | JavaScript/Discord.js      |
-|-----------------------|----------------------------|
-| <img src="cprog.png" align="right" style="max-width: 100% !important"/> | <img src="jsprog.png" align="right" style="max-width: 100% !important"/> |
+\image html progs.png
 
 Let's break this program down step by step:
 
