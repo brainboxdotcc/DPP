@@ -419,6 +419,10 @@ struct DPP_EXPORT command_resolved {
 	 * @brief Resolved channels
 	 */
 	std::map<dpp::snowflake, dpp::channel> channels;
+    /**
+     * @brief Resolved messages
+     */
+    std::map<dpp::snowflake, dpp::message> messages;
 };
 
 /**
