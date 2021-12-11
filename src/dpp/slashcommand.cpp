@@ -388,6 +388,14 @@ void from_json(const nlohmann::json& j, interaction& i) {
 					i.resolved.members[id] = dpp::guild_member().fill_from_json(&f, i.guild_id, id);
 				}
 			}
+            /* Messages */
+            if (d_resolved.find("messages") != d_resolved.end()) {
+                for (auto v = d_resolved["messages"].begin(); v != d_resolved["messages"].end(); ++v) {
+                    json f = *v;
+                    dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+                    i.resolved.messages[id] = dpp::message().fill_from_json(&f);
+                }
+            }
 		}
 
 
