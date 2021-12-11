@@ -1509,7 +1509,7 @@ If you compile and run this program and wait for the global command to register,
 
 \image html modal_dialog.png
 
-\page context-menu "Context Menus"
+\page context-menu Context Menus
 
 Context menus are application commands that appear on the context menu (right click or tap) of users or messages to perform context-specific actions. They can be created using `dpp::slashcommand`. Once you create a context menu, try right-clicking either a user or message to see it in your server!
 
@@ -1517,7 +1517,7 @@ Context menus are application commands that appear on the context menu (right cl
 
 The following example shows how to create and handle **user context menus**.
 
-```c++
+~~~~~~~~~~{c++}
 #include <dpp/dpp.h>
 #include <iostream>
 
@@ -1551,7 +1551,7 @@ int main()
 
     return 0;
 }
-```
+~~~~~~~~~~
 
 It registers a guild command that can be called by right-click a user and click on the created menu.
 
