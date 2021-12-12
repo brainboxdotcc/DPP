@@ -1517,7 +1517,7 @@ Context menus are application commands that appear on the context menu (right cl
 
 The following example shows how to create and handle **user context menus**.
 
-~~~~~~~~~~{c++}
+~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 #include <iostream>
 
