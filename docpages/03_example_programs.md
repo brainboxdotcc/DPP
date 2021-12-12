@@ -21,6 +21,7 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage attach-file "Attaching a file"
 * \subpage caching-messages "Caching messages"
 * \subpage collecting-reactions "Collecting Reactions"
+* \subpage context-menu "Context Menus"
 
 
 \page firstbot Creating Your First Bot
@@ -29,9 +30,7 @@ In this example we will create a C++ version of the [discord.js](https://discord
 
 The two programs can be seen side by side below:
 
-| C++/DPP               | JavaScript/Discord.js      |
-|-----------------------|----------------------------|
-| <img src="cprog.png" align="right" style="max-width: 100% !important"/> | <img src="jsprog.png" align="right" style="max-width: 100% !important"/> |
+\image html progs.png
 
 Let's break this program down step by step:
 
@@ -79,7 +78,7 @@ int main()
 {
     dpp::cluster bot("token");
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
+    bot.on_ready([&bot](const auto & event) {
     });
 
     return 0;
@@ -98,10 +97,10 @@ int main()
 {
     dpp::cluster bot("token");
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
+    bot.on_ready([&bot](const auto & event) {
     });
 
-    bot.on_message_create([&bot](const dpp::message_create_t & event) {
+    bot.on_message_create([&bot](const auto & event) {
     });
 
     return 0;
@@ -120,11 +119,11 @@ int main()
 {
     dpp::cluster bot("token");
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
+    bot.on_ready([&bot](const auto & event) {
         std::cout << "Logged in as " << bot.me.username << "!\n";
     });
 
-    bot.on_message_create([&bot](const dpp::message_create_t & event) {
+    bot.on_message_create([&bot](const auto & event) {
         if (event.msg.content == "!ping") {
             bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
         }
@@ -164,11 +163,11 @@ int main()
 {
     dpp::cluster bot("token");
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
+    bot.on_ready([&bot](const auto & event) {
         std::cout << "Logged in as " << bot.me.username << "!\n";
     });
 
-    bot.on_message_create([&bot](const dpp::message_create_t & event) {
+    bot.on_message_create([&bot](const auto & event) {
         if (event.msg.content == "!ping") {
             bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
         }
@@ -181,7 +180,9 @@ int main()
 
 ### 7. Run your bot
 
-Compile your bot using `cmake ..` and `make` from the build directory, and run it with `./test` - Congratulations, you now have a working bot written using the D++ library!
+Compile your bot using `g++ -std=c++17 -o test test.cpp -ldpp` (if your .cpp file is called `test.cpp`) and run it with `./test`.
+
+**Congratulations** - you now have a working bot written using the D++ library!
 
 \page soundboard Creating a Sound Board
 
@@ -1507,3 +1508,51 @@ int main(int argc, char const *argv[])
 If you compile and run this program and wait for the global command to register, typing `/dialog` will present you with a dialog box like the one below:
 
 \image html modal_dialog.png
+
+\page context-menu Context Menus
+
+Context menus are application commands that appear on the context menu (right click or tap) of users or messages to perform context-specific actions. They can be created using `dpp::slashcommand`. Once you create a context menu, try right-clicking either a user or message to see it in your server!
+
+\image html context_menu_user_command.png
+
+The following example shows how to create and handle **user context menus**.
+
+~~~~~~~~~~{c++}
+#include <dpp/dpp.h>
+#include <iostream>
+
+int main()
+{
+    dpp::cluster bot("token");
+
+    bot.on_ready([&bot](const dpp::ready_t &event) {
+        dpp::slashcommand command;
+        /* Define a slash command */
+        command.set_name("High Five")
+                .set_type(dpp::ctxm_user)
+                .set_application_id(bot.me.id);
+        /* Register the command */
+        bot.guild_command_create(command, 857692897221033129); // you need to put your guild-id in here
+    });
+
+    bot.on_interaction_create([&](const dpp::interaction_create_t &event) {
+        if (event.command.type == dpp::ctxm_user) {
+            dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
+            if (cmd_data.name == "High Five") {
+                dpp::user user = event.command.resolved.users.begin()->second; // the user who the command has been issued on
+                dpp::user author = event.command.usr; // the user who clicked on the context menu
+                event.reply(dpp::ir_channel_message_with_source, author.get_mention() + " slapped " + user.get_mention());
+            }
+        }
+    });
+
+    /* Start bot */
+    bot.start(false);
+
+    return 0;
+}
+~~~~~~~~~~
+
+It registers a guild command that can be called by right-click a user and click on the created menu.
+
+\image html context_menu_user_command_showcase.png
