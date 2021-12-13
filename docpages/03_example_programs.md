@@ -30,9 +30,7 @@ In this example we will create a C++ version of the [discord.js](https://discord
 
 The two programs can be seen side by side below:
 
-| C++/DPP               | JavaScript/Discord.js      |
-|-----------------------|----------------------------|
-| <img src="cprog.png" align="right" style="max-width: 100% !important"/> | <img src="jsprog.png" align="right" style="max-width: 100% !important"/> |
+\image html progs.png
 
 Let's break this program down step by step:
 
@@ -80,7 +78,7 @@ int main()
 {
     dpp::cluster bot("token");
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
+    bot.on_ready([&bot](const auto & event) {
     });
 
     return 0;
@@ -99,10 +97,10 @@ int main()
 {
     dpp::cluster bot("token");
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
+    bot.on_ready([&bot](const auto & event) {
     });
 
-    bot.on_message_create([&bot](const dpp::message_create_t & event) {
+    bot.on_message_create([&bot](const auto & event) {
     });
 
     return 0;
@@ -121,11 +119,11 @@ int main()
 {
     dpp::cluster bot("token");
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
+    bot.on_ready([&bot](const auto & event) {
         std::cout << "Logged in as " << bot.me.username << "!\n";
     });
 
-    bot.on_message_create([&bot](const dpp::message_create_t & event) {
+    bot.on_message_create([&bot](const auto & event) {
         if (event.msg.content == "!ping") {
             bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
         }
@@ -165,11 +163,11 @@ int main()
 {
     dpp::cluster bot("token");
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
+    bot.on_ready([&bot](const auto & event) {
         std::cout << "Logged in as " << bot.me.username << "!\n";
     });
 
-    bot.on_message_create([&bot](const dpp::message_create_t & event) {
+    bot.on_message_create([&bot](const auto & event) {
         if (event.msg.content == "!ping") {
             bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
         }
@@ -182,7 +180,9 @@ int main()
 
 ### 7. Run your bot
 
-Compile your bot using `cmake ..` and `make` from the build directory, and run it with `./test` - Congratulations, you now have a working bot written using the D++ library!
+Compile your bot using `g++ -std=c++17 -o test test.cpp -ldpp` (if your .cpp file is called `test.cpp`) and run it with `./test`.
+
+**Congratulations** - you now have a working bot written using the D++ library!
 
 \page soundboard Creating a Sound Board
 
