@@ -435,7 +435,7 @@ struct DPP_EXPORT command_data_option {
 	command_option_type type;                  //!< value of ApplicationCommandOptionType
 	command_value value;                       //!< Optional: the value of the pair
 	std::vector<command_data_option> options;  //!< Optional: present if this option is a group or subcommand
-	dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions
+	bool focused;                              //!< Optional: true if this option is the currently focused option for autocomplete
 };
 
 /**
@@ -459,6 +459,16 @@ enum interaction_type {
 };
 
 /**
+ * @brief Right-click context menu types
+ */
+enum slashcommand_contextmenu_type {
+    ctxm_none = 0,        //!< Undefined context menu type
+    ctxm_chat_input = 1,    //!< DEFAULT, these are the slash commands you're used to
+    ctxm_user = 2,        //!< Add command to user context menu
+    ctxm_message = 3    //!< Add command to message context menu
+};
+
+/**
  * @brief Details of a command within an interaction.
  * This subobject represents the application command associated
  * with the interaction.
@@ -467,6 +477,8 @@ struct DPP_EXPORT command_interaction {
 	snowflake id;                              //!< the ID of the invoked command
 	std::string name;                          //!< the name of the invoked command
 	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
+    slashcommand_contextmenu_type type;        //!< type of the command interaction
+    dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions. e.g. user id or message id whom clicked or tapped with the context menu https://discord.com/developers/docs/interactions/application-commands#user-commands
 };
 
 /**
@@ -639,16 +651,6 @@ public:
  * @param gcp guild_command_permissions to be serialized
  */
 void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
-
-/**
- * @brief Right-click context menu types
- */
-enum slashcommand_contextmenu_type {
-	ctxm_none = 0,		//!< Undefined context menu type
-	ctxm_chat_input = 1,	//!< DEFAULT, these are the slash commands you're used to
-	ctxm_user = 2,		//!< Add command to user context menu
-	ctxm_message = 3	//!< Add command to message context menu
-};
 
 /**
  * @brief Represents an application command, created by your bot
