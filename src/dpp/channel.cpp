@@ -45,6 +45,13 @@ void to_json(nlohmann::json& j, const thread_metadata& tmdata) {
 	j["invitable"] = tmdata.invitable;
 }
 
+void to_json(nlohmann::json& j, const permission_overwrite& po) {
+	j["id"] = std::to_string(po.id);
+	j["allow"] = std::to_string(po.allow);
+	j["deny"] = std::to_string(po.deny);
+	j["type"] = po.type;
+}
+
 channel::channel() :
 	managed(),
 	flags(0),
@@ -267,6 +274,13 @@ std::string channel::build_json(bool with_id) const {
 	j["name"] = name;
 	if (!topic.empty()) {
 		j["topic"] = topic;
+	}
+	if (!permission_overwrites.empty()) {
+		j["permission_overwrites"] = json::array();
+		for (const auto& po : permission_overwrites) {
+			json jpo = po;
+			j["permission_overwrites"].push_back(jpo);
+		}
 	}
 	if (rate_limit_per_user) {
 		j["rate_limit_per_user"] = rate_limit_per_user;
