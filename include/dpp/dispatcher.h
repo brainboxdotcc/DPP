@@ -22,7 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/discord.h>
 #include <dpp/message.h>
-#include <dpp/slashcommand.h>
+#include <dpp/appcommand.h>
 #include <functional>
 #include <variant>
 #include <exception>

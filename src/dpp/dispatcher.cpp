@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/discord.h>
-#include <dpp/slashcommand.h>
+#include <dpp/appcommand.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/fmt/format.h>
