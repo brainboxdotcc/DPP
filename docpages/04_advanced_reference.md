@@ -199,6 +199,6 @@ Note however that when you set myvar within the inner lambda, this does **not ef
 
 Similarly, and important to note, your program **will not wait for bot.message_create to send its message and call its lambda** before continuing on to print `here`. It will instantly insert the request into its queue and bail straight back out (see the steps above) and immediately print the text.
 
-If you do want to get variables out of your lambda, create a class, or call a separate function, and pass what you need into that funtion from the lambda **by value** or alternatively, you can use `std::bind` to bind a lambda directly to an object's method instead (this is great for modular bots).
+If you do want to get variables out of your lambda, create a class, or call a separate function, and pass what you need into that function from the lambda **by value** or alternatively, you can use `std::bind` to bind a lambda directly to an object's method instead (this is great for modular bots).
 
 If you are stuck, as this is a complex subject please do feel free to ask on the [official support server](https://discord.gg/dpp)!
