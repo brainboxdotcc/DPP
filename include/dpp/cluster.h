@@ -341,7 +341,7 @@ public:
 	 * 
 	 * @param func Function lambda to attach to event
 	 * @return event_handle An event handle unique to this event, used to
-	 * detach the listener from the event later if neccessary.
+	 * detach the listener from the event later if necessary.
 	 */
 	event_handle operator()(std::function<void(const T&)> func) {
 		return this->attach(func);
@@ -355,7 +355,7 @@ public:
 	 * 
 	 * @param func Function lambda to attach to event
 	 * @return event_handle An event handle unique to this event, used to
-	 * detach the listener from the event later if neccessary.
+	 * detach the listener from the event later if necessary.
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
 		std::unique_lock l(lock);
