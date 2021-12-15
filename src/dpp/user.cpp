@@ -64,15 +64,20 @@ user_identified::user_identified() : user(), accent_color(0), verified(false) {
 user_identified::~user_identified() {
 }
 
-std::string user::get_avatar_url()  const {
+std::string user::get_avatar_url(uint32_t size)  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
-	return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}",
+	std::string size_str;
+	if (size) {
+		size_str = "?size=" + std::to_string(size);
+	}
+	return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}{}",
 		this->id,
 		(has_animated_icon() ? "a_" : ""),
 		this->avatar.to_string(),
-		(has_animated_icon() ? "gif" : "png")
+		(has_animated_icon() ? "gif" : "png"),
+		size_str
 	);
 }
 
