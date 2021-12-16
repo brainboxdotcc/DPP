@@ -1324,7 +1324,7 @@ int main() {
 }
 ~~~~~~~~~~
 
-Here's another example of how to add an image to an embed.
+Here's another example of how to add a local image to an embed.
 
 Upload the image in the same message as the embed and then reference it in the embed.
 
@@ -1340,7 +1340,7 @@ int main() {
             // create a message
             dpp::message msg(event.msg.channel_id, "");
 
-            std::filesystem::path filePath("path_to_your_file.jpg");
+            std::filesystem::path filePath("path_to_your_image.jpg");
 
             // attach the file to the message
             msg.set_file_content(dpp::utility::read_file(filePath));
