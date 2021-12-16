@@ -306,8 +306,8 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 void from_json(const nlohmann::json& j, command_interaction& ci) {
 	ci.id = snowflake_not_null(&j, "id");
 	ci.name = string_not_null(&j, "name");
-    ci.type = (dpp::slashcommand_contextmenu_type)int8_not_null(&j, "type");
-    ci.target_id = (dpp::snowflake)snowflake_not_null(&j, "target_id");
+	ci.type = (dpp::slashcommand_contextmenu_type)int8_not_null(&j, "type");
+	ci.target_id = snowflake_not_null(&j, "target_id");
 
 	if (j.contains("options") && !j.at("options").is_null()) {
 		j.at("options").get_to(ci.options);
