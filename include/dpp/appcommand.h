@@ -31,7 +31,7 @@ namespace dpp {
  * This value represents that maximum. interaction_response::add_autocomplete_choice does not allow
  * adding more than this number of elements to the vector.
  */
-const size_t AUTOCOMPLETE_MAX_CHOICES = 25;
+constexpr size_t AUTOCOMPLETE_MAX_CHOICES = 25;
 
 enum channel_type;
 /**
@@ -461,7 +461,7 @@ enum interaction_type {
 /**
  * @brief Right-click context menu types
  */
-enum slashcommand_contextmenu_type {
+enum appcommand_type {
     ctxm_none = 0,        //!< Undefined context menu type
     ctxm_chat_input = 1,    //!< DEFAULT, these are the slash commands you're used to
     ctxm_user = 2,        //!< Add command to user context menu
@@ -477,7 +477,7 @@ struct DPP_EXPORT command_interaction {
 	snowflake id;                              //!< the ID of the invoked command
 	std::string name;                          //!< the name of the invoked command
 	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
-    slashcommand_contextmenu_type type;        //!< type of the command interaction
+    appcommand_type type;        //!< type of the command interaction
     dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions. e.g. user id or message id whom clicked or tapped with the context menu https://discord.com/developers/docs/interactions/application-commands#user-commands
 };
 
@@ -656,24 +656,62 @@ void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
  */
-class DPP_EXPORT slashcommand : public managed {
+class DPP_EXPORT appcommand {
 public:
+	/**
+	 * @brief ID of this command 
+	 */
+	snowflake id;
+
 	/**
 	 * @brief Application id (usually matches your bots id)
 	 */
 	snowflake application_id;
 
 	/**
-	 * @brief Context menu type, defaults to none
-	 * 
+	 * @brief Type of the application command, defaults to ctxm_none
 	 */
-	slashcommand_contextmenu_type type;
+	appcommand_type type;
 
 	/**
 	 * @brief Command name (1-32 chars)
 	 */
 	std::string name;
 
+	/**
+	 * @brief autoincrementing version identifier updated during substantial record changes
+	 */
+	snowflake version;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return appcommand& Reference to self
+	 */
+	virtual appcommand&  fill_from_json(nlohmann::json* j);
+	
+	/**
+	 * @brief Build a json string for this object
+	 *
+	 * @param with_id True if to include the ID in the JSON
+	 * @return std::string JSON string
+	 */
+	virtual std::string build_json(const bool with_id = false) const;
+
+	/**
+	 * @brief Destroy this object
+	 */
+	virtual ~appcommand() = default;
+
+};
+
+/**
+ * @brief Represents an  slash command, created by your bot
+ * either globally, or on a guild.
+ */
+class DPP_EXPORT slashcommand : public appcommand {
+public:
 	/**
 	 * @brief Command description (1-100 chars)
 	 */
@@ -693,11 +731,6 @@ public:
 	 * @brief command permissions
 	 */
 	std::vector<command_permission> permissions;
-
-	/**
-	 * @brief autoincrementing version identifier updated during substantial record changes
-	 */
-	snowflake version;
 
 	/**
 	 * @brief Construct a new slashcommand object
@@ -723,7 +756,7 @@ public:
 	 * @param _type Type of context menu entry this command represents
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
-	slashcommand& set_type(slashcommand_contextmenu_type _type);
+	slashcommand& set_type(const appcommand_type _type);
 
 	/**
 	 * @brief Set the name of the command
@@ -751,7 +784,7 @@ public:
 	 * @param i application id
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
-	slashcommand& set_application_id(snowflake i);
+	slashcommand& set_application_id(const snowflake i);
 
 	/**
 	 * @brief Adds a permission to the command
@@ -784,7 +817,7 @@ public:
 	 * @param with_id True if to include the ID in the JSON
 	 * @return std::string JSON string
 	 */
-	std::string build_json(bool with_id = false) const;
+	std::string build_json(const bool with_id = false) const;
 };
 
 /**

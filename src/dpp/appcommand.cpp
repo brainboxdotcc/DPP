@@ -177,7 +177,7 @@ std::string slashcommand::build_json(bool with_id) const {
 	return j.dump();
 }
 
-slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
+slashcommand& slashcommand::set_type(appcommand_type t) {
 	type = t;
 	return *this;
 }
@@ -306,7 +306,7 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 void from_json(const nlohmann::json& j, command_interaction& ci) {
 	ci.id = snowflake_not_null(&j, "id");
 	ci.name = string_not_null(&j, "name");
-	ci.type = (dpp::slashcommand_contextmenu_type)int8_not_null(&j, "type");
+	ci.type = (dpp::appcommand_type)int8_not_null(&j, "type");
 	ci.target_id = snowflake_not_null(&j, "target_id");
 
 	if (j.contains("options") && !j.at("options").is_null()) {
