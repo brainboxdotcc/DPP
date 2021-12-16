@@ -343,7 +343,7 @@ namespace dpp {
 		 * @param _min Minimum length
 		 * @param _max Maximum length
 		 * @param exception_message Exception message to throw if value length < _min
-		 * @return std::string Validated string, truncated if neccessary.
+		 * @return std::string Validated string, truncated if necessary.
 		 * @throw dpp::length_exception if value UTF8 length < _min
 		 */
 		std::string validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);

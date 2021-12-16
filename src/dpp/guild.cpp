@@ -150,16 +150,21 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	gm.flags |= bool_not_null(&j, "pending") ? gm_pending : 0;
 }
 
-std::string guild_member::get_avatar_url()  const {
+std::string guild_member::get_avatar_url(uint32_t size)  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
+	std::string size_str;
+	if (size) {
+		size_str = "?size=" + std::to_string(size);
+	}
 	if (!this->avatar.to_string().empty()) {
-		return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}",
+		return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}{}",
 			this->user_id,
 			(has_animated_guild_avatar() ? "a_" : ""),
 			this->avatar.to_string(),
-			(has_animated_guild_avatar() ? "gif" : "png")
+			(has_animated_guild_avatar() ? "gif" : "png"),
+			size_str
 		);
 	} else {
 		return std::string();
