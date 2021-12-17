@@ -1264,17 +1264,15 @@ int main() {
             // create a message
             dpp::message msg(event.msg.channel_id, "Hey there, i've got a new file!");
 
-            std::filesystem::path filePath("path_to_your_file.json");
-
             // attach the file
-            msg.set_file_content(dpp::utility::read_file(filePath));
+            msg.set_file_content(dpp::utility::read_file("path_to_your_file.txt"));
             
             /*
              * alternatively, you can put any other name in here.
              * This name doesn't have to be the same as the uploaded filename.
              * But it should have the same file extension.
              */
-            msg.set_filename(filePath.filename());
+            msg.set_filename("file.txt");
 
             // send the message
             bot.message_create(msg);
@@ -1340,14 +1338,12 @@ int main() {
             // create a message
             dpp::message msg(event.msg.channel_id, "");
 
-            std::filesystem::path filePath("path_to_your_image.jpg");
-
             // attach the file to the message
-            msg.set_file_content(dpp::utility::read_file(filePath));
-            msg.set_filename(filePath.filename());
+            msg.set_file_content(dpp::utility::read_file("path_to_your_image.jpg"));
+            msg.set_filename("image.jpg");
 
             dpp::embed embed;
-            embed.set_image("attachment://" + filePath.filename().string()); // reference to the attached file
+            embed.set_image("attachment://image.jpg"); // reference to the attached file
             msg.add_embed(embed);
 
             // send the message
