@@ -1164,28 +1164,28 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 */
 	message msg;
 	/**
-	 * @brief Send a text to the same channel as the channel_id in recieved event.
+	 * @brief Send a text to the same channel as the channel_id in received event.
 	 * @param m Text to send
 	 * @param callback User function to execute once the API call completes.
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
 	void send(const std::string& m, command_completion_event_t callback = {}) const;
 	/**
-	 * @brief Send a message to the same channel as the channel_id in recieved event.
+	 * @brief Send a message to the same channel as the channel_id in received event.
 	 * @param msg Message to send
 	 * @param callback User function to execute once the API call completes.
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
 	void send(message& msg, command_completion_event_t callback = {}) const;
 	/**
-	 * @brief Send a message to the same channel as the channel_id in recieved event.
+	 * @brief Send a message to the same channel as the channel_id in received event.
 	 * @param msg Message to send
 	 * @param callback User function to execute once the API call completes.
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
 	void send(message&& msg, command_completion_event_t callback = {}) const;
 	/**
-	 * @brief Reply to the message recieved in the event.
+	 * @brief Reply to the message received in the event.
 	 * @param m Text to send
 	 * @param mention_replied_user mentions (pings) the author of message replied to, if true
 	 * @param callback User function to execute once the API call completes.
@@ -1193,7 +1193,7 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 */
 	void reply(const std::string& m, bool mention_replied_user = false, command_completion_event_t callback = {}) const;
 	/**
-	 * @brief Reply to the message recieved in the event.
+	 * @brief Reply to the message received in the event.
 	 * @param msg Message to send as a reply.
 	 * @param mention_replied_user mentions (pings) the author of message replied to, if true
 	 * @param callback User function to execute once the API call completes.
@@ -1201,7 +1201,7 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 */
 	void reply(message& msg, bool mention_replied_user = false, command_completion_event_t callback = {}) const;
 	/**
-	 * @brief Reply to the message recieved in the event.
+	 * @brief Reply to the message received in the event.
 	 * @param msg Message to send as a reply.
 	 * @param mention_replied_user mentions (pings) the author of message replied to, if true
 	 * @param callback User function to execute once the API call completes.

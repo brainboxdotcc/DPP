@@ -270,9 +270,9 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 		j.at("options").get_to(cdo.options);
 	}
 
-	/* If there's a target ID, define it */
-	if (j.contains("target_id") && !j.at("target_id").is_null()) {
-		cdo.target_id = (dpp::snowflake)snowflake_not_null(&j, "target_id");
+	/* If there's a focused, define it */
+	if (j.contains("focused") && !j.at("focused").is_null()) {
+		cdo.focused = bool_not_null(&j, "focused");
 	}
 
 	if (j.contains("value") && !j.at("value").is_null()) {
@@ -306,6 +306,8 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 void from_json(const nlohmann::json& j, command_interaction& ci) {
 	ci.id = snowflake_not_null(&j, "id");
 	ci.name = string_not_null(&j, "name");
+	ci.type = (dpp::slashcommand_contextmenu_type)int8_not_null(&j, "type");
+	ci.target_id = snowflake_not_null(&j, "target_id");
 
 	if (j.contains("options") && !j.at("options").is_null()) {
 		j.at("options").get_to(ci.options);

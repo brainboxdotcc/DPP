@@ -107,9 +107,10 @@ public:
 	/**
 	 * @brief Get the avatar url of the user object
 	 *
+	 * @param size The size of the avatar in pixels, if not specified, the default size is returned.
 	 * @return std::string avatar url
 	 */
-	std::string get_avatar_url() const;
+	std::string get_avatar_url(uint32_t size = 0) const;
 
 	/**
 	 * @brief Return a ping/mention for the user
