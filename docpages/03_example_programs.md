@@ -1253,7 +1253,6 @@ An example program:
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <filesystem>
 
 int main() {
     dpp::cluster bot("token");
