@@ -1262,18 +1262,17 @@ int main() {
     bot.on_message_create([&bot](const dpp::message_create_t &event) {
         if (event.msg.content == "!file") {
             // create a message
-            dpp::message msg(event.msg.channel_id, "Hey there, i've got a new image!");
-
-            std::filesystem::path filePath("path_to_your_file.json");
+            dpp::message msg(event.msg.channel_id, "Hey there, i've got a new file!");
 
             // attach the file
-            msg.set_file_content(dpp::utility::read_file(filePath.relative_path()));
+            msg.set_file_content(dpp::utility::read_file("path_to_your_file.txt"));
+            
             /*
              * alternatively, you can put any other name in here.
              * This name doesn't have to be the same as the uploaded filename.
              * But it should have the same file extension.
              */
-            msg.set_filename(filePath.filename());
+            msg.set_filename("file.txt");
 
             // send the message
             bot.message_create(msg);
@@ -1315,6 +1314,40 @@ int main() {
                 // send the message
                 bot.message_create(msg);
             });
+        }
+    });
+
+    bot.start(false);
+    return 0;
+}
+~~~~~~~~~~
+
+Here's another example of how to add a local image to an embed.
+
+Upload the image in the same message as the embed and then reference it in the embed.
+
+~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
+int main() {
+    dpp::cluster bot("token");
+
+    /* Message handler to look for a command called !file */
+    bot.on_message_create([&bot](const dpp::message_create_t &event) {
+        if (event.msg.content == "!file") {
+            // create a message
+            dpp::message msg(event.msg.channel_id, "");
+
+            // attach the file to the message
+            msg.set_file_content(dpp::utility::read_file("path_to_your_image.jpg"));
+            msg.set_filename("image.jpg");
+
+            dpp::embed embed;
+            embed.set_image("attachment://image.jpg"); // reference to the attached file
+            msg.add_embed(embed);
+
+            // send the message
+            bot.message_create(msg);
         }
     });
 
