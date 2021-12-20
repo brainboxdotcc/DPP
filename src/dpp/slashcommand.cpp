@@ -259,6 +259,7 @@ interaction& interaction::fill_from_json(nlohmann::json* j) {
 }
 
 std::string interaction::build_json(bool with_id) const {
+	/* There is no facility to build the json of an interaction as bots don't send them, only the API sends them as an event payload */
 	return "";
 }
 
@@ -331,6 +332,8 @@ void from_json(const nlohmann::json& j, autocomplete_interaction& ai) {
 
 void from_json(const nlohmann::json& j, interaction& i) {
 	i.id = snowflake_not_null(&j, "id");
+	i.locale = string_not_null(&j, "locale");
+	i.guild_locale = string_not_null(&j, "guild_locale");
 	i.application_id = snowflake_not_null(&j, "application_id");
 	i.channel_id = snowflake_not_null(&j, "channel_id");
 	i.guild_id = snowflake_not_null(&j, "guild_id");
