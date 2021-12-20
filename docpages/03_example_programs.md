@@ -495,7 +495,7 @@ int main(int argc, char const *argv[])
 \page slashcommands Using Slash Commands and Interactions
 
 Slash commands and interactions are a newer feature of Discord which allow bot's commands to be registered centrally within the
-system and for users to easily explore and get help with avaialble commands through the client itself.
+system and for users to easily explore and get help with available commands through the client itself.
 
 To add a slash command you should use the dpp::cluster::global_command_create method for global commands (available to all guilds)
 or dpp::cluster::guild_command_create to create a local command (available only to one guild).
@@ -1253,7 +1253,6 @@ An example program:
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <filesystem>
 
 int main() {
     dpp::cluster bot("token");
