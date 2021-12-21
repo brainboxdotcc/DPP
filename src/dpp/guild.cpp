@@ -123,6 +123,10 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, sn
 	return *this;
 }
 
+bool guild_member::is_communication_disabled() const {
+	return communication_disabled_until > time(nullptr);
+}
+
 void from_json(const nlohmann::json& j, guild_member& gm) {
 	set_string_not_null(&j, "nick", gm.nickname);
 	set_ts_not_null(&j, "joined_at", gm.joined_at);

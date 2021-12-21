@@ -180,6 +180,14 @@ public:
 	std::string build_json() const;
 
 	/**
+	 * @brief Returns true if the user is in time-out (communication disabled)
+	 * 
+	 * @return true user is in time-out
+	 * @return false user is not in time-out
+	 */
+	bool is_communication_disabled() const;
+
+	/**
 	 * @brief Returns true if the user is deafened
 	 * 
 	 * @return true user is deafened
