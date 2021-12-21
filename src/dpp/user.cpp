@@ -64,7 +64,7 @@ user_identified::user_identified() : user(), accent_color(0), verified(false) {
 user_identified::~user_identified() {
 }
 
-std::string user::get_avatar_url(uint32_t size)  const {
+std::string user::get_avatar_url(uint16_t size)  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */

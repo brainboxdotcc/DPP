@@ -154,7 +154,7 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	gm.flags |= bool_not_null(&j, "pending") ? gm_pending : 0;
 }
 
-std::string guild_member::get_avatar_url(uint32_t size)  const {
+std::string guild_member::get_avatar_url(uint16_t size)  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
