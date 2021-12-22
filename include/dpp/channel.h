@@ -268,6 +268,22 @@ public:
 	std::map<snowflake, voicestate> get_voice_members();
 
 	/**
+	 * @brief Get the channel's banner url if they have one, otherwise returns an empty string
+	 *
+	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized banner is returned.
+	 * @return std::string banner url or empty string
+	 */
+	std::string get_banner_url(uint16_t size = 0) const;
+
+	/**
+	 * @brief Get the channel's icon url (if its a group DM), otherwise returns an empty string
+	 *
+	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized icon is returned.
+	 * @return std::string icon url or empty string
+	 */
+	std::string get_icon_url(uint16_t size = 0) const;
+
+	/**
 	 * @brief Returns true if the channel is NSFW gated
 	 * 
 	 * @return true if NSFW

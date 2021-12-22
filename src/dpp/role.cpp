@@ -25,6 +25,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 
@@ -349,6 +350,25 @@ members_container role::get_members() const {
 		}
 	}
 	return gm;
+}
+
+std::string role::get_icon_url(uint16_t size) const {
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	 * At some point in the future this URL *will* change!
+	 */
+	if (!this->icon.to_string().empty()) {
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/role-icons/{}/{}.png{}",
+						   this->id,
+						   this->icon.to_string(),
+						   size_str
+		);
+	} else {
+		return std::string();
+	}
 }
 
 
