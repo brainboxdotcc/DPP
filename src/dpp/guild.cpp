@@ -584,6 +584,66 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 	return false;
 }
 
+	std::string guild::get_banner_url(uint32_t size) const {
+		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+		 * At some point in the future this URL *will* change!
+		 */
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/banners/{}/{}.png{}",
+						   this->id,
+						   this->banner.to_string(),
+						   size_str
+		);
+	}
 
+	std::string guild::get_discovery_splash_url(uint32_t size) const {
+		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+		 * At some point in the future this URL *will* change!
+		 */
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/discovery-splashes/{}/{}.png{}",
+						   this->id,
+						   this->discovery_splash.to_string(),
+						   size_str
+		);
+	}
+
+	std::string guild::get_icon_url(uint32_t size) const {
+		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+		 * At some point in the future this URL *will* change!
+		 */
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/icons/{}/{}{}.{}{}",
+						   this->id,
+						   (has_animated_icon() ? "a_" : ""),
+						   this->icon.to_string(),
+						   (has_animated_icon_hash() ? "gif" : "png"),
+						   size_str
+		);
+	}
+
+	std::string guild::get_splash_url(uint32_t size) const {
+		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+		 * At some point in the future this URL *will* change!
+		 */
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/splashes/{}/{}.png{}",
+						   this->id,
+						   this->splash.to_string(),
+						   size_str
+		);
+	}
 
 };

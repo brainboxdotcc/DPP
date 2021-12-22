@@ -539,6 +539,38 @@ public:
 	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false);
 
 	/**
+	 * @brief Get the banner url of the guild object
+	 *
+	 * @param size The size of the banner in pixels, if not specified, the default size is returned.
+	 * @return std::string banner url
+	 */
+	std::string get_banner_url(uint32_t size = 0) const;
+
+	/**
+	 * @brief Get the discovery splash url of the guild object
+	 *
+	 * @param size The size of the discovery splash in pixels, if not specified, the default size is returned.
+	 * @return std::string discovery splash url
+	 */
+	std::string get_discovery_splash_url(uint32_t size = 0) const;
+
+	/**
+	 * @brief Get the icon url of the guild object
+	 *
+	 * @param size The size of the icon in pixels, if not specified, the default size is returned.
+	 * @return std::string icon url
+	 */
+	std::string get_icon_url(uint32_t size = 0) const;
+
+	/**
+	 * @brief Get the splash url of the guild object
+	 *
+	 * @param size The size of the splash in pixels, if not specified, the default size is returned.
+	 * @return std::string splash url
+	 */
+	std::string get_splash_url(uint32_t size = 0) const;
+
+	/**
 	 * @brief Set the name of the guild in the object
 	 * Min length: 2, Max length: 100 (not including leading/trailing spaces)
 	 * @param n Guild name
