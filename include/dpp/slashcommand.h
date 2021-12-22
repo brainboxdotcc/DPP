@@ -566,6 +566,8 @@ public:
 	std::string token;                                          //!< a continuation token for responding to the interaction
 	uint8_t version;                                            //!< read-only property, always 1
 	command_resolved resolved;				    //!< Resolved user/role etc
+	std::string locale;                                         //!< User's locale (language)
+	std::string guild_locale;                                   //!< Guild's locale (language) - for guild interactions only
 
 	/**
 	 * @brief Fill object properties from JSON

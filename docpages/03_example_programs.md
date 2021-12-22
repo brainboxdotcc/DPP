@@ -495,7 +495,7 @@ int main(int argc, char const *argv[])
 \page slashcommands Using Slash Commands and Interactions
 
 Slash commands and interactions are a newer feature of Discord which allow bot's commands to be registered centrally within the
-system and for users to easily explore and get help with avaialble commands through the client itself.
+system and for users to easily explore and get help with available commands through the client itself.
 
 To add a slash command you should use the dpp::cluster::global_command_create method for global commands (available to all guilds)
 or dpp::cluster::guild_command_create to create a local command (available only to one guild).
@@ -1253,7 +1253,6 @@ An example program:
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <filesystem>
 
 int main() {
     dpp::cluster bot("token");
@@ -1568,13 +1567,20 @@ int main()
         bot.guild_command_create(command, 857692897221033129); // you need to put your guild-id in here
     });
 
+    /* Use the on_interaction_create event to look for application commands */
     bot.on_interaction_create([&](const dpp::interaction_create_t &event) {
-        if (event.command.type == dpp::ctxm_user) {
+        if (event.command.type == dpp::it_application_command) {
             dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-            if (cmd_data.name == "High Five") {
-                dpp::user user = event.command.resolved.users.begin()->second; // the user who the command has been issued on
-                dpp::user author = event.command.usr; // the user who clicked on the context menu
-                event.reply(dpp::ir_channel_message_with_source, author.get_mention() + " slapped " + user.get_mention());
+            
+            /* check if the command is a user context menu action */
+            if (cmd_data.type == dpp::ctxm_user) {
+
+                /* check if the context menu name is High Five */
+                if (cmd_data.name == "High Five") {
+                    dpp::user user = event.command.resolved.users.begin()->second; // the user who the command has been issued on
+                    dpp::user author = event.command.usr; // the user who clicked on the context menu
+                    event.reply(dpp::ir_channel_message_with_source, author.get_mention() + " slapped " + user.get_mention());
+                }
             }
         }
     });

@@ -294,6 +294,10 @@ bool role::has_manage_events() const {
 	return ((this->permissions & p_administrator) | (this->permissions & p_manage_events));
 }
 
+bool role::has_moderate_members() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_moderate_members));
+}
+
 role& role::set_name(const std::string& n) {
 	name = utility::validate(n, 1, 100, "Role name too short");
 	return *this;

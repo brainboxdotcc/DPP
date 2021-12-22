@@ -123,6 +123,10 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, sn
 	return *this;
 }
 
+bool guild_member::is_communication_disabled() const {
+	return communication_disabled_until > time(nullptr);
+}
+
 void from_json(const nlohmann::json& j, guild_member& gm) {
 	set_string_not_null(&j, "nick", gm.nickname);
 	set_ts_not_null(&j, "joined_at", gm.joined_at);
@@ -150,7 +154,7 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	gm.flags |= bool_not_null(&j, "pending") ? gm_pending : 0;
 }
 
-std::string guild_member::get_avatar_url(uint32_t size)  const {
+std::string guild_member::get_avatar_url(uint16_t size)  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
@@ -584,6 +588,66 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 	return false;
 }
 
+	std::string guild::get_banner_url(uint32_t size) const {
+		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+		 * At some point in the future this URL *will* change!
+		 */
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/banners/{}/{}.png{}",
+						   this->id,
+						   this->banner.to_string(),
+						   size_str
+		);
+	}
 
+	std::string guild::get_discovery_splash_url(uint32_t size) const {
+		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+		 * At some point in the future this URL *will* change!
+		 */
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/discovery-splashes/{}/{}.png{}",
+						   this->id,
+						   this->discovery_splash.to_string(),
+						   size_str
+		);
+	}
+
+	std::string guild::get_icon_url(uint32_t size) const {
+		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+		 * At some point in the future this URL *will* change!
+		 */
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/icons/{}/{}{}.{}{}",
+						   this->id,
+						   (has_animated_icon() ? "a_" : ""),
+						   this->icon.to_string(),
+						   (has_animated_icon_hash() ? "gif" : "png"),
+						   size_str
+		);
+	}
+
+	std::string guild::get_splash_url(uint32_t size) const {
+		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+		 * At some point in the future this URL *will* change!
+		 */
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/splashes/{}/{}.png{}",
+						   this->id,
+						   this->splash.to_string(),
+						   size_str
+		);
+	}
 
 };
