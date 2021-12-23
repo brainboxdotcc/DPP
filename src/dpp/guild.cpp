@@ -158,12 +158,13 @@ std::string guild_member::get_avatar_url(uint16_t size)  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
-	std::string size_str;
-	if (size) {
-		size_str = "?size=" + std::to_string(size);
-	}
 	if (!this->avatar.to_string().empty()) {
-		return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}{}",
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/guilds/{}/users/{}/avatars/{}{}.{}{}",
+			this->guild_id,
 			this->user_id,
 			(has_animated_guild_avatar() ? "a_" : ""),
 			this->avatar.to_string(),
@@ -588,10 +589,11 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 	return false;
 }
 
-	std::string guild::get_banner_url(uint32_t size) const {
-		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-		 * At some point in the future this URL *will* change!
-		 */
+std::string guild::get_banner_url(uint16_t size) const {
+    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	 * At some point in the future this URL *will* change!
+	 */
+	if (!this->banner.to_string().empty()) {
 		std::string size_str;
 		if (size) {
 			size_str = "?size=" + std::to_string(size);
@@ -601,12 +603,16 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 						   this->banner.to_string(),
 						   size_str
 		);
+	} else {
+		return std::string();
 	}
+}
 
-	std::string guild::get_discovery_splash_url(uint32_t size) const {
-		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-		 * At some point in the future this URL *will* change!
-		 */
+std::string guild::get_discovery_splash_url(uint16_t size) const {
+    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	 * At some point in the future this URL *will* change!
+	 */
+	if (!this->discovery_splash.to_string().empty()) {
 		std::string size_str;
 		if (size) {
 			size_str = "?size=" + std::to_string(size);
@@ -616,12 +622,16 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 						   this->discovery_splash.to_string(),
 						   size_str
 		);
+	} else {
+		return std::string();
 	}
+}
 
-	std::string guild::get_icon_url(uint32_t size) const {
-		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-		 * At some point in the future this URL *will* change!
-		 */
+std::string guild::get_icon_url(uint16_t size) const {
+    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	 * At some point in the future this URL *will* change!
+	 */
+	if (!this->icon.to_string().empty()) {
 		std::string size_str;
 		if (size) {
 			size_str = "?size=" + std::to_string(size);
@@ -633,12 +643,16 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 						   (has_animated_icon_hash() ? "gif" : "png"),
 						   size_str
 		);
+	} else {
+		return std::string();
 	}
+}
 
-	std::string guild::get_splash_url(uint32_t size) const {
-		/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-		 * At some point in the future this URL *will* change!
-		 */
+std::string guild::get_splash_url(uint16_t size) const {
+    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	 * At some point in the future this URL *will* change!
+	 */
+	if (!this->splash.to_string().empty()) {
 		std::string size_str;
 		if (size) {
 			size_str = "?size=" + std::to_string(size);
@@ -648,6 +662,10 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 						   this->splash.to_string(),
 						   size_str
 		);
+	} else {
+		return std::string();
 	}
+}
+
 
 };

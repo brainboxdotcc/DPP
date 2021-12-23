@@ -180,6 +180,27 @@ user_identified& user_identified::fill_from_json(json* j) {
 	return *this;
 }
 
+std::string user_identified::get_banner_url(uint16_t size) const {
+    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	 * At some point in the future this URL *will* change!
+	 */
+	if (!this->avatar.to_string().empty()) {
+		std::string size_str;
+		if (size) {
+			size_str = "?size=" + std::to_string(size);
+		}
+		return fmt::format("https://cdn.discordapp.com/banners/{}/{}{}.{}{}",
+						   this->id,
+						   (has_animated_icon() ? "a_" : ""),
+						   this->avatar.to_string(),
+						   (has_animated_icon() ? "gif" : "png"),
+						   size_str
+		);
+	} else {
+		return std::string();
+	}
+}
+
 void from_json(const nlohmann::json& j, user_identified& u) {
 	dpp::user* user_type = dynamic_cast<user*>(&u);
 	from_json(j, *user_type);
