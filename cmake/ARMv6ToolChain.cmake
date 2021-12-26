@@ -54,11 +54,11 @@ SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} --sysroot=${RASPBERRY_ROOT_PAT
 
 SET(LD_LIBRARY_PATH ${RASPBERRY_KINETIC_PATH}/lib)
 
-EXECUTE_PROCESS(COMMAND wget -P ${CMAKE_SOURCE_DIR}/rootfs http://archive.raspbian.org/raspbian/pool/main/z/zlib/zlib1g_1.2.11.dfsg-1_armhf.deb http://archive.raspbian.org/raspbian/pool/main/z/zlib/zlib1g-dev_1.2.11.dfsg-1_armhf.deb http://archive.raspbian.org/raspbian/pool/main/o/openssl/libssl1.1_1.1.1m-1_armhf.deb http://archive.raspbian.org/raspbian/pool/main/o/openssl/libssl-dev_1.1.1m-1_armhf.deb https://github.com/Pro/raspi-toolchain/releases/download/v1.0.2/raspi-toolchain.tar.gz)
+EXECUTE_PROCESS(COMMAND wget -P ${CMAKE_SOURCE_DIR}/rootfs -q http://archive.raspbian.org/raspbian/pool/main/z/zlib/zlib1g_1.2.11.dfsg-1_armhf.deb http://archive.raspbian.org/raspbian/pool/main/z/zlib/zlib1g-dev_1.2.11.dfsg-1_armhf.deb http://archive.raspbian.org/raspbian/pool/main/o/openssl/libssl1.1_1.1.1m-1_armhf.deb http://archive.raspbian.org/raspbian/pool/main/o/openssl/libssl-dev_1.1.1m-1_armhf.deb https://github.com/Pro/raspi-toolchain/releases/download/v1.0.2/raspi-toolchain.tar.gz)
 
 EXECUTE_PROCESS(
 	COMMAND tar -xzf ${CMAKE_SOURCE_DIR}/rootfs/raspi-toolchain.tar.gz -C /opt
 	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/zlib1g-dev_1.2.11.dfsg-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs
 	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/zlib1g_1.2.11.dfsg-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs
-	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/libssl-dev_1.1.1l-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs
-	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/libssl1.1_1.1.1l-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs)
+	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/libssl-dev_1.1.1m-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs
+	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/libssl1.1_1.1.1m-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs)
