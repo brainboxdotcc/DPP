@@ -26,7 +26,7 @@ int main()
 	std::string token(get_token());
 	std::vector<uint8_t> testaudio = load_test_audio();
 
-	set_test("TS", false); 
+	set_test("TS", false);
 	dpp::managed m(TEST_USER_ID);
 	set_test("TS", ((uint64_t)m.get_creation_time()) == 1617131800);
 
