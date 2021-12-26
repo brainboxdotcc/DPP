@@ -139,7 +139,7 @@ namespace dpp {
 		std::string DPP_EXPORT timestamp(time_t ts, time_format tf);
 
 		/**
-		 * @brief Returns urrent date and time
+		 * @brief Returns current date and time
 		 * 
 		 * @return std::string Current date and time
 		 */
