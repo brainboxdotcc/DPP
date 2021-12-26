@@ -57,6 +57,7 @@ public:
 
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(DEFAULT_GATEWAY, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
+        terminating(false),
         runner(nullptr),
 	compressed(comp),
 	decomp_buffer(nullptr),
@@ -86,6 +87,7 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 
 discord_client::~discord_client()
 {
+	terminating = true;
 	if (runner) {
 		runner->join();
 		delete runner;
@@ -148,7 +150,7 @@ void discord_client::thread_run()
 				error = true;
 			}
 		} while (error);
-	} while(true);
+	} while(!terminating);
 }
 
 void discord_client::run()
@@ -436,6 +438,9 @@ size_t discord_client::get_queue_size()
 
 void discord_client::one_second_timer()
 {
+	if (terminating) {
+		throw dpp::exception("Shard terminating due to cluster shutdown");
+	}
 
 	websocket_client::one_second_timer();
 

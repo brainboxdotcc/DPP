@@ -69,6 +69,10 @@ cluster::~cluster()
 	for (auto & t : timer_list) {
 		delete t.second;
 	}
+	for (const auto& sh : shards) {
+		log(ll_info, fmt::format("Terminating shard id {}", sh.second->shard_id));
+		delete sh.second;
+	}
 #ifdef _WIN32
 	WSACleanup();
 #endif

@@ -384,6 +384,7 @@ public:
 class DPP_EXPORT cluster {
 
 	friend class discord_client;
+	friend class discord_voice_client;
 
 	/**
 	 * @brief queue system for commands sent to Discord, and any replies

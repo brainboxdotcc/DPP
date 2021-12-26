@@ -155,6 +155,11 @@ protected:
 	friend class dpp::cluster;
 
 	/**
+	 * @brief True if the shard is terminating
+	 */
+	bool terminating;
+
+	/**
 	 * @brief Disconnect from the connected voice channel on a guild
 	 * 
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
