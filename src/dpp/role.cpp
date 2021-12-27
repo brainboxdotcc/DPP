@@ -86,6 +86,9 @@ std::string role::build_json(bool with_id) const {
 	if (with_id) {
 		j["id"] = std::to_string(id);
 	}
+	if (!name.empty()) {
+		j["name"] = name;
+	}
 	if (colour) {
 		j["color"] = colour;
 	}
