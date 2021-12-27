@@ -62,6 +62,7 @@ std::map<std::string, test_t> tests = {
 	{"CUSTOMCACHE", {"Instantiate a cache", false, false}},
 	{"MSGCOLLECT", {"message_collector", false, false}},
 	{"TS", {"managed::get_creation_date()", false, false}},
+	{"READFILE", {"utility::read_file()", false, false}},
 };
 
 double start = dpp::utility::time_f();

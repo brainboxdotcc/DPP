@@ -23,6 +23,14 @@
 /* Unit tests go here */
 int main()
 {
+	set_test("READFILE", false);
+	std::string rf_test = dpp::utility::read_file("libdpp.so");
+	FILE* fp = fopen("libdpp.so", "rb");
+	fseek(fp, 0, SEEK_END);
+	size_t off = (size_t)ftell(fp);
+	fclose(fp);
+	set_test("READFILE", off == rf_test.length());
+
 	std::string token(get_token());
 	std::vector<uint8_t> testaudio = load_test_audio();
 
