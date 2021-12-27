@@ -68,16 +68,13 @@ std::string user::get_avatar_url(uint16_t size)  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
-	std::string size_str;
-	if (size) {
-		size_str = "?size=" + std::to_string(size);
-	}
-	return fmt::format("https://cdn.discordapp.com/avatars/{}/{}{}.{}{}",
+	return fmt::format("{}/avatars/{}/{}{}.{}{}",
+		utility::cdn_host,
 		this->id,
 		(has_animated_icon() ? "a_" : ""),
 		this->avatar.to_string(),
 		(has_animated_icon() ? "gif" : "png"),
-		size_str
+		utility::avatar_size(size)
 	);
 }
 
@@ -185,16 +182,13 @@ std::string user_identified::get_banner_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->avatar.to_string().empty()) {
-		std::string size_str;
-		if (size) {
-			size_str = "?size=" + std::to_string(size);
-		}
-		return fmt::format("https://cdn.discordapp.com/banners/{}/{}{}.{}{}",
+		return fmt::format("{}/banners/{}/{}{}.{}{}",
+						   utility::cdn_host,
 						   this->id,
 						   (has_animated_icon() ? "a_" : ""),
 						   this->avatar.to_string(),
 						   (has_animated_icon() ? "gif" : "png"),
-						   size_str
+						   utility::avatar_size(size)
 		);
 	} else {
 		return std::string();

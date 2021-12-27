@@ -331,6 +331,13 @@ namespace dpp {
 			return "<t:" + std::to_string(ts) + ":" + format + ">";
 		}
 
+		std::string avatar_size(uint32_t size) {
+			if (size) {
+				return "?size=" + std::to_string(size);
+			}
+			return std::string();
+		}
+
 	};
 
 };

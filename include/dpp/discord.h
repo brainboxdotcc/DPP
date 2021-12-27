@@ -99,18 +99,35 @@ namespace dpp {
 	 * They have been sorted into numerical order of their ASCII value to keep C++ happy.
 	 */
 	enum time_format : uint8_t {
-		tf_long_date		=	'D',		/// "20 April 2021" - Long Date
-		tf_long_datetime	=	'F',		/// "Tuesday, 20 April 2021 16:20" - Long Date/Time
-		tf_relative_time	=	'R',		/// "2 months ago" - Relative Time		
-		tf_long_time		=	'T',		/// "16:20:30" - Long Time
-		tf_short_date		=	'd',		/// "20/04/2021" - Short Date
-		tf_short_datetime	=	'f',		/// "20 April 2021 16:20" - Short Date/Time
-		tf_short_time		=	't',		/// "16:20" - Short Time
+		/// "20 April 2021" - Long Date
+		tf_long_date		=	'D',
+		/// "Tuesday, 20 April 2021 16:20" - Long Date/Time
+		tf_long_datetime	=	'F',
+		/// "2 months ago" - Relative Time		
+		tf_relative_time	=	'R',
+		/// "16:20:30" - Long Time
+		tf_long_time		=	'T',
+		/// "20/04/2021" - Short Date
+		tf_short_date		=	'd',
+		/// "20 April 2021 16:20" - Short Date/Time
+		tf_short_datetime	=	'f',
+		/// "16:20" - Short Time
+		tf_short_time		=	't',
 	};
 
-	/** @brief Utility helper functions, generally for logging */
+	/**
+	 * @brief Utility helper functions, generally for logging
+	 */
 	namespace utility {
 
+		/**
+		 * @brief The base URL for CDN content such as profile pictures and guild icons.
+		 */
+		const std::string DPP_EXPORT cdn_host = "https://cdn.discordapp.com"; 
+
+		/**
+		 * @brief Callback for the results of a command executed via dpp::utility::exec
+		 */
 		typedef std::function<void(const std::string& output)> cmd_result_t;
 
 		/**
@@ -347,6 +364,14 @@ namespace dpp {
 		 * @throw dpp::length_exception if value UTF8 length < _min
 		 */
 		std::string validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);
+
+		/**
+		 * @brief Return the url parameter for an avatar size, or empty if the size is 0
+		 * 
+		 * @param size size to generate url parameter for
+		 * @return std::string url parameter
+		 */
+		std::string avatar_size(uint32_t size);
 	};
 
 };

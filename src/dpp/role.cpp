@@ -357,14 +357,11 @@ std::string role::get_icon_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->icon.to_string().empty()) {
-		std::string size_str;
-		if (size) {
-			size_str = "?size=" + std::to_string(size);
-		}
-		return fmt::format("https://cdn.discordapp.com/role-icons/{}/{}.png{}",
+		return fmt::format("{}/role-icons/{}/{}.png{}",
+						   utility::cdn_host,
 						   this->id,
 						   this->icon.to_string(),
-						   size_str
+						   utility::avatar_size(size)
 		);
 	} else {
 		return std::string();

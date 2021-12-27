@@ -159,17 +159,14 @@ std::string guild_member::get_avatar_url(uint16_t size)  const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->avatar.to_string().empty()) {
-		std::string size_str;
-		if (size) {
-			size_str = "?size=" + std::to_string(size);
-		}
-		return fmt::format("https://cdn.discordapp.com/guilds/{}/users/{}/avatars/{}{}.{}{}",
+		return fmt::format("{}/guilds/{}/users/{}/avatars/{}{}.{}{}",
+			utility::cdn_host,
 			this->guild_id,
 			this->user_id,
 			(has_animated_guild_avatar() ? "a_" : ""),
 			this->avatar.to_string(),
 			(has_animated_guild_avatar() ? "gif" : "png"),
-			size_str
+			utility::avatar_size(size)
 		);
 	} else {
 		return std::string();
@@ -594,14 +591,11 @@ std::string guild::get_banner_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->banner.to_string().empty()) {
-		std::string size_str;
-		if (size) {
-			size_str = "?size=" + std::to_string(size);
-		}
-		return fmt::format("https://cdn.discordapp.com/banners/{}/{}.png{}",
+		return fmt::format("{}/banners/{}/{}.png{}",
+						   utility::cdn_host,
 						   this->id,
 						   this->banner.to_string(),
-						   size_str
+						   utility::avatar_size(size)
 		);
 	} else {
 		return std::string();
@@ -613,14 +607,11 @@ std::string guild::get_discovery_splash_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->discovery_splash.to_string().empty()) {
-		std::string size_str;
-		if (size) {
-			size_str = "?size=" + std::to_string(size);
-		}
-		return fmt::format("https://cdn.discordapp.com/discovery-splashes/{}/{}.png{}",
+		return fmt::format("{}/discovery-splashes/{}/{}.png{}",
+						   utility::cdn_host,
 						   this->id,
 						   this->discovery_splash.to_string(),
-						   size_str
+						   utility::avatar_size(size)
 		);
 	} else {
 		return std::string();
@@ -632,16 +623,13 @@ std::string guild::get_icon_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->icon.to_string().empty()) {
-		std::string size_str;
-		if (size) {
-			size_str = "?size=" + std::to_string(size);
-		}
-		return fmt::format("https://cdn.discordapp.com/icons/{}/{}{}.{}{}",
+		return fmt::format("{}/icons/{}/{}{}.{}{}",
+						   utility::cdn_host,
 						   this->id,
 						   (has_animated_icon() ? "a_" : ""),
 						   this->icon.to_string(),
 						   (has_animated_icon_hash() ? "gif" : "png"),
-						   size_str
+						   utility::avatar_size(size)
 		);
 	} else {
 		return std::string();
@@ -653,14 +641,11 @@ std::string guild::get_splash_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->splash.to_string().empty()) {
-		std::string size_str;
-		if (size) {
-			size_str = "?size=" + std::to_string(size);
-		}
-		return fmt::format("https://cdn.discordapp.com/splashes/{}/{}.png{}",
+		return fmt::format("{}/splashes/{}/{}.png{}",
+						   utility::cdn_host,
 						   this->id,
 						   this->splash.to_string(),
-						   size_str
+						   utility::avatar_size(size)
 		);
 	} else {
 		return std::string();
