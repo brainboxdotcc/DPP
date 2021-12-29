@@ -206,39 +206,68 @@ void cluster::message_pin(snowflake channel_id, snowflake message_id, command_co
 	});
 }
 
+thread_local message_map big_mm;
 
-void cluster::messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint8_t limit, command_completion_event_t callback) {
-	std::string parameters;
-	if (around) {
-		parameters.append("&around=" + std::to_string(around));
-	}
-	if (before) {
-		parameters.append("&before=" + std::to_string(before));
-	}
-	if (after) {
-		parameters.append("&after=" + std::to_string(after));
-	}
-	if (limit) {
-		if (limit > 100) {
-			limit = 100;
+void cluster::messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint32_t limit, command_completion_event_t callback) {
+	std::function impl = [&](snowflake channel_id, snowflake around, snowflake before, snowflake after, uint32_t limit, command_completion_event_t callback) {
+		std::string parameters;
+		if (around) {
+			parameters.append("&around=" + std::to_string(around));
 		}
-		parameters.append("&limit=" + std::to_string(limit));
-	}
-	if (!parameters.empty()) {
-		parameters[0] = '?';
-	}
-	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages" + parameters, m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			message_map messages;
-			if (!e.is_error()) {
-				for (auto & curr_message : j) {
-					messages[snowflake_not_null(&curr_message, "id")] = message(this).fill_from_json(&curr_message);
-				}
+		if (before) {
+			parameters.append("&before=" + std::to_string(before));
+		}
+		if (after) {
+			parameters.append("&after=" + std::to_string(after));
+		}
+		if (limit) {
+			if (limit > 100) {
+				limit = 100;
 			}
-			callback(confirmation_callback_t("message_map", messages, http));
+			parameters.append("&limit=" + std::to_string(limit));
 		}
-	});
+		if (!parameters.empty()) {
+			parameters[0] = '?';
+		}
+		this->post_rest(API_PATH "/channels", std::to_string(channel_id), "messages" + parameters, m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
+			if (callback) {
+				confirmation_callback_t e("confirmation", confirmation(), http);
+				message_map messages;
+				if (!e.is_error()) {
+					for (auto & curr_message : j) {
+						messages[snowflake_not_null(&curr_message, "id")] = message(this).fill_from_json(&curr_message);
+					}
+				}
+				callback(confirmation_callback_t("message_map", messages, http));
+			}
+		});
+	};
+	if (limit <= 100) {
+		impl(channel_id, around, before, after, limit, callback);
+	} else {
+		std::function<void(snowflake)> f = [f, callback, impl, channel_id, around, before, limit](snowflake after) {
+			impl(channel_id, around, before, after, limit, [&](confirmation_callback_t cc) {
+				if (!cc.is_error()) {
+					snowflake last_snowflake = after;
+					message_map mm = std::get<message_map>(cc.value);
+					for (const auto& m : mm) {
+						big_mm.emplace(m.first, m.second);
+						last_snowflake = m.second.id;
+					}
+					if (mm.size() < 100) {
+						cc.value = big_mm;
+						callback(cc);
+					} else {
+						f(last_snowflake);
+					}
+				} else {
+					cc.value = big_mm;
+					callback(cc);
+				}
+			});
+		};
+		f(after);
+	}
 }
 
 
