@@ -1580,17 +1580,24 @@ public:
 	void message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Get multiple messages
+	 * @brief Get multiple messages.
+	 * 
+	 * This function will attempt to fetch as many messages as possible using multiple API calls if needed.
 	 *
 	 * @param channel_id Channel ID to retrieve messages for
 	 * @param around Messages should be retrieved around this ID if this is set to non-zero
 	 * @param before Messages before this ID should be retrieved if this is set to non-zero
 	 * @param after Messages before this ID should be retrieved if this is set to non-zero
-	 * @param limit This number of messages maximum should be returned
+	 * @param limit This number of messages maximum should be returned.
+	 * If the number passed for `limit` is less than 100, then this will be executed in one REST call. If you
+	 * specify a limit greater than 100, then there will be one REST call per 100 messages, which means
+	 * @warning if you request a large number of messages this can and will take a long time. You should not
+	 * constantly do this, or you may get banned from the API by Discord as repeated calls to an endpoint
+	 * are strongly discouraged!
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint8_t limit, command_completion_event_t callback);
+	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint32_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Send a message to a channel. The callback function is called when the message has been sent
