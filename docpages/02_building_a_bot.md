@@ -200,6 +200,8 @@ LD_PRELOAD=./usr/lib/libdpp.so ./bot
 
 @note There is a premade repl, ready for use which was built using the steps above. If you wish to use this repl simply [clone it by clicking here](https://replit.com/@braindigitalis/dpp-demo-bot). **Be sure to set a token** in the secrets, using an environment variable named `TOKEN` before attempting to run the repl container!
 
+\image html repl.png
+
 ## Troubleshooting
 
 If the bot fails to start and instead you receive an error message about being banned from the Discord API, there is nothing you can do about this. These bans are temporary but because repl.it is a shared platform, you share an IP address with many thousands of bots, some abusive and some badly written. This will happen often and is outside of the control of yourself and us. If this is a problem for you, we recommend instead you obtain some affordable non-free hosting instead.
