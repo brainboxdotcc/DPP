@@ -6,6 +6,7 @@ Click on a link below for a guide specifically for your system:
 
 * \subpage build-a-discord-bot-windows-visual-studio "Building a discord bot in Windows"
 * \subpage buildcmake "Building a Discord Bot using CMake/UNIX"
+* \subpage building-a-cpp-discord-bot-in-repl "Creating a Discord bot in Repl.it"
 * \subpage creating-a-bot-application "Creating a Bot Account"
 
 \page buildcmake Building a Discord Bot using CMake/UNIX
@@ -178,3 +179,27 @@ You can read more about scopes and which you need for your application [here](ht
 \note For bots with elevated permissions, Discord enforces two-factor authentication on the bot owner's account when added to servers that have server-wide 2FA enabled.
 
 5. Copy and paste the resulting URL in your browser. Choose a server to invite the bot to, and click "Authorize".
+
+\page building-a-cpp-discord-bot-in-repl Creating a Discord bot in Repl.it
+
+To build a D++ bot in a repl.it instance, follow the following steps. These steps are slightly more convoluted than installing D++ into a standard container as we don't have access to root in the conventional way or write access to any files outside of our home directory in a repl. This guide sidesteps the issue by locally extracting a libdpp deb file installer, and referencing the local dependencies from the command-line.
+
+1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v9.0.16/libdpp-9.0.16-linux-x64.deb`
+2. Extract this deb file using `dpkg`:
+```
+dpkg -x *.deb .
+```
+3. Compile your bot, note that you should be sure to include the `pthread` library explicitly and reference the extracted dpp installation you just put into the repl:
+```
+g++ -o bot main.cpp -ldpp -lpthread -L./usr/lib -I./usr/include -std=c++17
+```
+4. Run your bot! Note that you will need to set `LD_PRELOAD` to reference `libdpp.so` as it will be located in `$HOME` and not `/usr/lib`:
+```
+LD_PRELOAD=./usr/lib/libdpp.so ./bot
+```
+
+@note There is a premade repl, ready for use which was built using the steps above. If you wish to use this repl simply [clone it by clicking here](https://replit.com/@braindigitalis/dpp-demo-bot). **Be sure to set a token** in the secrets, using an environment variable named `TOKEN` before attempting to run the repl container!
+
+## Troubleshooting
+
+If the bot fails to start and instead you receive an error message about being banned from the Discord API, there is nothing you can do about this. These bans are temporary but because repl.it is a shared platform, you share an IP address with many thousands of bots, some abusive and some badly written. This will happen often and is outside of the control of yourself and us. If this is a problem for you, we recommend instead you obtain some affordable non-free hosting instead.
