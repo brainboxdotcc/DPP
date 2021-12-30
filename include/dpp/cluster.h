@@ -1590,7 +1590,7 @@ public:
 	 * @param after Messages before this ID should be retrieved if this is set to non-zero
 	 * @param limit This number of messages maximum should be returned.
 	 * If the number passed for `limit` is less than 100, then this will be executed in one REST call. If you
-	 * specify a limit greater than 100, then there will be one REST call per 100 messages, which means
+	 * specify a limit greater than 100, then there will be one REST call per 100 messages.
 	 * @warning if you request a large number of messages this can and will take a long time. You should not
 	 * constantly do this, or you may get banned from the API by Discord as repeated calls to an endpoint
 	 * are strongly discouraged!
