@@ -212,7 +212,8 @@ python3 -m http.server
 + For your url, copy the url of the new website that repl is serving for you
 + Select any alert contacts you want, then click "Create Monitor"
 Here is an example of a possible uptimerobot configuration:
-/image html uptimerobot.png
+
+\image html uptimerobot.png
 
 
 @note There is a premade repl, ready for use which was built using the steps above. If you wish to use this repl simply [visit this github repository](https://github.com/alanlichen/dpp-on-repl) and click the "Run on Replit" button. Then, follow the steps in the README file.
