@@ -182,6 +182,8 @@ You can read more about scopes and which you need for your application [here](ht
 
 \page building-a-cpp-discord-bot-in-repl Creating a Discord bot in Repl.it
 
+@note There is a premade repl, ready for use which was built using the steps above. If you wish to use this repl simply [visit this github repository](https://github.com/alanlichen/dpp-on-repl) and click the "Run on Replit" button. Then, follow the steps in the README file.
+
 To build a D++ bot in a repl.it instance, follow these steps. These steps are slightly more convoluted than installing D++ into a standard container as we don't have access to root in the conventional way or write access to any files outside of our home directory in a repl. This guide sidesteps the issue by locally extracting a libdpp deb file installer, and referencing the local dependencies from the command-line.
 
 1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v9.0.16/libdpp-9.0.16-linux-x64.deb`
@@ -214,11 +216,6 @@ python3 -m http.server
 Here is an example of a possible uptimerobot configuration:
 
 \image html uptimerobot.png
-
-
-@note There is a premade repl, ready for use which was built using the steps above. If you wish to use this repl simply [visit this github repository](https://github.com/alanlichen/dpp-on-repl) and click the "Run on Replit" button. Then, follow the steps in the README file.
-
-\image html repl.png
 
 ## Troubleshooting
 
