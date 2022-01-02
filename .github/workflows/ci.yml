@@ -7,6 +7,8 @@ on:
       - '**.cpp'
       - '**.h'
       - '**.hpp'
+      - '**.cmake'
+      - '**ci.yml'
       - '**CMakeLists.txt'
   pull_request:
     paths:
@@ -15,6 +17,8 @@ on:
       - '**.cpp'
       - '**.h'
       - '**.hpp'
+      - '**.cmake'
+      - '**ci.yml'
       - '**CMakeLists.txt'
 
 
