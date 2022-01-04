@@ -123,7 +123,7 @@ namespace dpp {
 		/**
 		 * @brief The base URL for CDN content such as profile pictures and guild icons.
 		 */
-		const std::string DPP_EXPORT cdn_host = "https://cdn.discordapp.com"; 
+		const std::string cdn_host = "https://cdn.discordapp.com"; 
 
 		/**
 		 * @brief Callback for the results of a command executed via dpp::utility::exec
@@ -392,7 +392,7 @@ namespace dpp {
 #include <dpp/presence.h>
 #include <dpp/intents.h>
 #include <dpp/message.h>
-#include <dpp/slashcommand.h>
+#include <dpp/appcommand.h>
 #include <dpp/stage_instance.h>
 #include <dpp/auditlog.h>
 #include <dpp/application.h>

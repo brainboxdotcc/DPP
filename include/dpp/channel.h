@@ -439,6 +439,14 @@ public:
  */
 void to_json(nlohmann::json& j, const thread_metadata& tmdata);
 
+/*
+ * @brief Serialize a permission_overwrite object to json
+ *
+ * @param j JSON object to serialize to
+ * @param po object to serialize
+ */
+void to_json(nlohmann::json& j, const permission_overwrite& po);
+
 /**
  * @brief A group of channels
  */

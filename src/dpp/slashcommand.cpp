@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/slashcommand.h>
+#include <dpp/appcommand.h>
 #include <dpp/discordevents.h>
 #include <dpp/discord.h>
 #include <dpp/exception.h>
