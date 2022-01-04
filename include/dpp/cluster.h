@@ -3182,7 +3182,7 @@ public:
 	 * 
 	 * @param cl Owning cluster
 	 * @param _duration Duration of timed event in seconds
-	 * @param event Event to hook, e.g. cluster.message_create
+	 * @param event Event to hook, e.g. cluster.on_message_create
 	 * @param on_end An optional void() lambda to trigger when the timed_listener times out.
 	 * Calling the destructor before the timeout is reached does not call this lambda.
 	 * @param listener Lambda to receive events. Type must match up properly with that passed into the 'event' parameter.
