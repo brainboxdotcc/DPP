@@ -545,4 +545,8 @@ interaction_modal_response& interaction_modal_response::set_title(const std::str
 	return *this;
 }
 
+command_permission::command_permission(snowflake id, command_permission_type &t, bool permission) :
+	id(id), type(t), permission(permission) {
+}
+
 };
