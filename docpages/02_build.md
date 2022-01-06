@@ -6,6 +6,7 @@ The way you build D++ varies from system to system. Please follow the guide belo
 * \subpage buildwindows "Building on Windows"
 * \subpage buildosx "Building on OSX"
 * \subpage buildfreebsd "Building on FreeBSD"
+* \subpage buildlinux "Building using Interstallar (on Linux)"
 
 \page buildlinux Building on Linux
 
@@ -207,4 +208,37 @@ If you are having trouble setting up CMake, you can try [our template bot](https
 
 **Have fun!**
 
+\page buildlinux Building using Interstallar (on Linux)
 
+# Building using Interstellar (on Linux)
+
+\note You might not want to build a copy of DPP using Interstellar, since you can follow the usual Building on Linux page. You do first need to download [interstellar](https://github.com/SirObby/interstellar) or build it yourself.
+
+## 1. Build Source Code
+
+    inter
+    
+As of 06/01/2022, you cannot yet run multiple jobs at once.
+
+## 3. Install to /usr/local/include and /usr/local/lib
+
+    sudo cp libdpp.so /usr/local/lib/libdpp.so
+    sudo cp -r include/* /usr/local/include/dpp/
+
+## 5. Using the library
+
+Once installed to the /usr/local directory, you can make use of the library in standalone programs simply by including it and linking to it:
+
+    g++ -std=c++17 mydppbot.cpp -o dppbot -ldpp
+
+The important flags in this command-line are:
+
+ * `-std=c++17` - Required to compile the headers
+  * `mydppbot.cpp` - Your source code
+ * `dppbot` - The name of the executable to make
+
+Of course, this is just a proof of concept — you should really use a more robust build system like GNU `make` or [`cmake`](@ref buildcmake).
+
+If you are having trouble setting up CMake, you can try [our template bot](https://github.com/brainboxdotcc/templatebot).
+
+**Have fun!**

@@ -1,0 +1,14 @@
+VARIABLE, VALUE;
+$_CC, /usr/bin/g++;
+add_source_folder, ./src;
+add_source_folder, ./src/dpp;
+add_source_folder, ./src/dpp/cluster;
+add_source_folder, ./src/dpp/events;
+add_include, ./include;
+link_libraries, -lm;
+add_flags, -pthread;
+add_flags, -lzlib;
+add_flags, -lopenssl;
+add_flags, -fPIC;
+add_library, dpp;
+add_shared_library, libdpp.so;
