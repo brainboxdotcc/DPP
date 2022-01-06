@@ -621,6 +621,20 @@ public:
 	snowflake id;                  //!< the ID of the role or user
 	command_permission_type type;  //!< the type of permission
 	bool permission;               //!< true to allow, false, to disallow
+
+	/**
+	 * @brief Construct a new command permission object
+	 */
+	command_permission() = default;
+
+	/**
+	 * @brief Construct a new command permission object
+	 *
+	 * @param id The ID of the role or user
+	 * @param t The permission type
+	 * @param permission True to allow, false, to disallow
+	 */
+	command_permission(snowflake id, command_permission_type &t, bool permission);
 };
 
 /**
