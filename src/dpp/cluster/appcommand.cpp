@@ -115,7 +115,9 @@ void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, co
 		}
 
 		if (http.status < 300 && s.permissions.size()) {
-			guild_command_edit_permissions(s, guild_id);
+			slashcommand n;
+			n.fill_from_json(&j);
+			guild_command_edit_permissions(n, guild_id);
 		}
 	});
 }
