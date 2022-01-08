@@ -220,7 +220,9 @@ public:
 	bool has_animated_guild_avatar() const;
 
 	/**
-	 * @brief Returns the members's per guild avatar if they have one, otherwise returns an empty string
+	 * @brief Returns the members per guild avatar if they have one, otherwise returns an empty string
+	 *
+	 * @note per-server avatar is a nitro only feature so it might be not set. If you need the real user avatar, use user::get_avatar_url.
 	 * 
 	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096. If not specified, the default sized avatar is returned.
 	 * @return std::string avatar url or empty string

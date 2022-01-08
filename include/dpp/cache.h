@@ -189,8 +189,8 @@ public:
 	 * std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	 * std::shared_lock l(c->get_mutex()); // MUST LOCK HERE
 	 * for (auto g = gc.begin(); g != gc.end(); ++g) {
-	 *	dpp::guild* gp = (dpp::guild*)g->second;
-	 *      // Do something here with the guild* in 'gp'
+	 *     dpp::guild* gp = (dpp::guild*)g->second;
+	 *     // Do something here with the guild* in 'gp'
 	 * }
 	 * ``` 
 	 * 
