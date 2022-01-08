@@ -223,9 +223,11 @@ time_t ts_not_null(const json* j, const char* keyname)
 	if (j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string()) {
 		tm timestamp = {};
 		std::string timedate = (*j)[keyname].get<std::string>();
-		if (timedate.find('+') != std::string::npos && timedate.find('.') != std::string::npos) {
+		if (timedate.find('+') != std::string::npos) {
 			std::string tzpart = timedate.substr(timedate.find('+'), timedate.length());
-			timedate = timedate.substr(0, timedate.find('.')); // + "Z" + tzpart;
+			if (timedate.find('.') != std::string::npos) {
+				timedate = timedate.substr(0, timedate.find('.')); // + "Z" + tzpart;
+			}
 			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%dT%T", &timestamp);
 			timestamp.tm_isdst = 0;
 			retval = mktime(&timestamp);
@@ -247,9 +249,11 @@ void set_ts_not_null(const json* j, const char* keyname, time_t &v)
 	if (j->find(keyname) != j->end() && !(*j)[keyname].is_null() && (*j)[keyname].is_string()) {
 		tm timestamp = {};
 		std::string timedate = (*j)[keyname].get<std::string>();
-		if (timedate.find('+') != std::string::npos && timedate.find('.') != std::string::npos) {
+		if (timedate.find('+') != std::string::npos) {
 			std::string tzpart = timedate.substr(timedate.find('+'), timedate.length());
-			timedate = timedate.substr(0, timedate.find('.')); // + "Z" + tzpart;
+			if (timedate.find('.') != std::string::npos) {
+				timedate = timedate.substr(0, timedate.find('.')); // + "Z" + tzpart;
+			}
 			crossplatform_strptime(timedate.substr(0, 19).c_str(), "%Y-%m-%dT%T", &timestamp);
 			timestamp.tm_isdst = 0;
 			retval = mktime(&timestamp);
