@@ -51,11 +51,11 @@ enum command_option_type : uint8_t {
 	co_boolean = 5,
 	/** A user snowflake id */
 	co_user = 6,
-	/** A channel snowflake id */
+	/** A channel snowflake id. Includes all channel types and categories */
 	co_channel = 7,
 	/** A role snowflake id */
 	co_role = 8,
-	/** A mentionable */
+	/** A mentionable. Includes users and roles */
 	co_mentionable = 9,
 	/** Any double between -2^53 and 2^53 */
 	co_number = 10
@@ -621,6 +621,20 @@ public:
 	snowflake id;                  //!< the ID of the role or user
 	command_permission_type type;  //!< the type of permission
 	bool permission;               //!< true to allow, false, to disallow
+
+	/**
+	 * @brief Construct a new command permission object
+	 */
+	command_permission() = default;
+
+	/**
+	 * @brief Construct a new command permission object
+	 *
+	 * @param id The ID of the role or user
+	 * @param t The permission type
+	 * @param permission True to allow, false, to disallow
+	 */
+	command_permission(snowflake id, command_permission_type &t, bool permission);
 };
 
 /**

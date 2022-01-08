@@ -72,8 +72,11 @@ void to_json(json& j, const command_option& opt) {
 	j["name"] = opt.name;
 	j["description"] = opt.description;
 	j["type"] = opt.type;
-	j["autocomplete"] = opt.autocomplete;
 	j["required"] = opt.required;
+
+	if (opt.autocomplete) {
+		j["autocomplete"] = opt.autocomplete;
+	}
 
 	/* Check for minimum and maximum values */
 	if (opt.type == dpp::co_number || opt.type == dpp::co_integer) {
@@ -543,6 +546,10 @@ interaction_modal_response& interaction_modal_response::set_custom_id(const std:
 interaction_modal_response& interaction_modal_response::set_title(const std::string& _title) {
 	title = _title;
 	return *this;
+}
+
+command_permission::command_permission(snowflake id, command_permission_type &t, bool permission) :
+	id(id), type(t), permission(permission) {
 }
 
 };

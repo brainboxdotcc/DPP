@@ -1059,7 +1059,7 @@ struct DPP_EXPORT message : public managed {
 	std::string	filecontent;
 
 	/** Message type */
-	uint8_t		type;
+	message_type type;
 
 	/**
 	 * @brief Reference to another message, e.g. a reply

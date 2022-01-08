@@ -2711,6 +2711,8 @@ public:
 	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
 	 * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
+	 * @note unless you want something special from `dpp::user_identified` or you've turned off caching, you have no need to call this.
+	 * Call `dpp::find_user` instead that looks up the user in the cache rather than a REST call.
 	 */
 	void user_get(snowflake user_id, command_completion_event_t callback);
 
@@ -3182,7 +3184,7 @@ public:
 	 * 
 	 * @param cl Owning cluster
 	 * @param _duration Duration of timed event in seconds
-	 * @param event Event to hook, e.g. cluster->dispatch.message_create
+	 * @param event Event to hook, e.g. cluster.on_message_create
 	 * @param on_end An optional void() lambda to trigger when the timed_listener times out.
 	 * Calling the destructor before the timeout is reached does not call this lambda.
 	 * @param listener Lambda to receive events. Type must match up properly with that passed into the 'event' parameter.
