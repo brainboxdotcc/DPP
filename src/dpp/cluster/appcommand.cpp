@@ -108,8 +108,13 @@ void cluster::guild_bulk_command_create(const std::vector<slashcommand> &command
 	});
 }
 
-void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_command_create(slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [s, this, guild_id, callback] (json &j, const http_request_completion_t& http) mutable {
+		/* Setting the id is required to edit the permissions of the command */
+		if (j.contains("id")) {
+			s.id = snowflake_not_null(&j, "id");
+		}
+
 		if (callback) {
 			callback(confirmation_callback_t("slashcommand", slashcommand().fill_from_json(&j), http));
 		}
