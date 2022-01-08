@@ -792,7 +792,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		}
 	}
 	this->flags = int8_not_null(d, "flags");
-	this->type = int8_not_null(d, "type");
+	this->type = static_cast<message_type>(int8_not_null(d, "type"));
 	this->author = user();
 	/* May be null, if its null cache it from the partial */
 	if (d->find("author") != d->end()) {
