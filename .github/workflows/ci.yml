@@ -115,7 +115,7 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Install chocolatey packages ${{ matrix.cfg.arch}}
-        run: choco install ninja -y
+        uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
