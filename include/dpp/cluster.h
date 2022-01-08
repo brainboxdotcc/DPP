@@ -1461,7 +1461,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_create(slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
 
 	/**
