@@ -412,6 +412,10 @@ struct DPP_EXPORT command_resolved {
 	 */
 	std::map<dpp::snowflake, dpp::guild_member> members;
 	/**
+	 * @brief Resolved guild member permissions
+	 */
+	std::map<dpp::snowflake, uint64_t> member_permissions;
+	/**
 	 * @brief Resolved roles
 	 */
 	std::map<dpp::snowflake, dpp::role> roles;
@@ -419,10 +423,10 @@ struct DPP_EXPORT command_resolved {
 	 * @brief Resolved channels
 	 */
 	std::map<dpp::snowflake, dpp::channel> channels;
-    /**
-     * @brief Resolved messages
-     */
-    std::map<dpp::snowflake, dpp::message> messages;
+	/**
+	 * @brief Resolved messages
+	 */
+	std::map<dpp::snowflake, dpp::message> messages;
 };
 
 /**

@@ -163,7 +163,7 @@ public:
 	 * 
 	 * This is used by the library e.g. to count guilds, users, and roles
 	 * stored within caches.
-	 * 
+	 * get
 	 * @return uint64_t count of items in the cache
 	 */
 	uint64_t count() {
