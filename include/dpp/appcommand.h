@@ -412,7 +412,7 @@ struct DPP_EXPORT command_resolved {
 	 */
 	std::map<dpp::snowflake, dpp::guild_member> members;
 	/**
-	 * @brief Resolved guild member permissions
+	 * @brief Resolved total guild member permissions in the channel, including overwrites
 	 */
 	std::map<dpp::snowflake, uint64_t> member_permissions;
 	/**
