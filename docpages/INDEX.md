@@ -132,9 +132,8 @@ To fix this issue, run `ldconfig`: `sudo ldconfig` as root. Log out if your SSH 
 ## When compiling with voice support, i get an error: "No rule to make target 'sodium_LIBRARY_DEBUG-NOTFOUND', needed by 'libdpp.so'. Stop."
 The libsodium package requires pkg-config, but does not check for it when installed. Install it as root, e.g. `sudo apt install pkg-config`. Rerun cmake, and rebuild the library.
 
-## When using precompiled libraries in Windows, the program runs but is just a black console window and the bot doesnt come online?
-If this happens, ensure you are using the correct precompiled build of the library. Our precompiled binaries are built in two forms, release mode and debug mode for Visual Studio 2019.
-If you require a build for a newer Visual Studio version, you will have to compile it yourself from the GitHub sources. Please see the section about \ref buildwindows for more information on how to do this.
+## When I try to instantiate a dpp::cluster in windows, a std::bad_alloc exception is thrown
+If this happens, ensure you are using the correct precompiled build of the library. Our precompiled binaries are built in two forms, **release mode** and **debug mode** for Visual Studio 2019/2022. These two versions of the library are not cross-compatible due to differences in the debug and release libstdc++. You should not need to build your own copy, but please see the section about \ref buildwindows for more information on how to build your own copy, if needed.
 
 ## Does this library build/run on Raspberry Pi?
 Yes! This project will build and run on Raspberry Pi and is very much suited to this kind of system. It may take some time (read: hours) to compile the project on your Raspberry Pi unless you build it using a cross compiler. We offer pre-built `.deb` files for arm6, arm7 and arm64, you should use these where possible to avoid having to compile it by hand, or you can use a cross-compiler to build it on your PC then transfer the compiled binaries across.
@@ -162,3 +161,5 @@ Yes! You can indeed run your bot in a repl.it container. [You can find a ready t
 ## Why do the "get" functions like "messages_get" return void rather than what I'm after?
 All the functions that obtain data directly from Discord (as opposed to the cache) perform HTTPS requests and may have to wait, either for the request itself or for their turn in a queue to respect rate limits. As such, it does not make sense that they should return a value, as this would mean they block execution of your event. Instead, each has a lambda, a function handler which receives the result of the request, which you can then read from within that function to get the data you are interested in. Note that this result will arrive on a different thread to the one which made the request.
 
+## Can i use a user token with this library (as opposed to a bot token)?
+No. This feature is not supported as it is against the Discord Terms Of Service, and therefore we have no plans to ever support it. You should not automate any user token. Some libraries used to support this but it is a legacy feature of those libraries (where still available) dating back to before Discord offered an official public API. Please be aware that if Discord ever catch you automating a bot token (or making a user client that uses a bot token) they can and do ban people for this.
