@@ -69,7 +69,7 @@ public:
 	/** True if this invite should not replace or "attach to" similar invites
 	 */
 	bool unique;
-	/** Readonly amount of times this invite has been used
+	/** How many times this invite has been used
 	 *
 	 * @note Only set when using cluster::channel_invites_get
 	 */
