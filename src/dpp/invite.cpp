@@ -26,7 +26,7 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-invite::invite() : guild_id(0), channel_id(0), inviter_id(0), target_user_id(0), target_user_type(1), approximate_presence_count(0), approximate_member_count(0)
+invite::invite() : expires_at(0), guild_id(0), channel_id(0), inviter_id(0), target_user_id(0), target_user_type(1), approximate_presence_count(0), approximate_member_count(0), uses(0)
 {
 }
 
