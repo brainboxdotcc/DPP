@@ -35,7 +35,8 @@ invite::~invite() = default;
 
 invite& invite::fill_from_json(nlohmann::json* j) {
 	code = string_not_null(j, "code");
-	guild_id = (j->find("guild") != j->end()) ? snowflake_not_null(&((*j)["guild_id"]), "id") : 0;
+	expires_at = (j->find("expires_at") != j->end()) ? ts_not_null(j, "expires_at") : 0;
+	guild_id = (j->find("guild") != j->end()) ? snowflake_not_null(&((*j)["guild"]), "id") : 0;
 	channel_id = (j->find("channel") != j->end()) ? snowflake_not_null(&((*j)["channel"]), "id") : 0;
 	inviter_id = (j->find("inviter") != j->end()) ? snowflake_not_null(&((*j)["inviter"]), "id") : 0;
 	target_user_id = (j->find("target_user") != j->end()) ? snowflake_not_null(&((*j)["target_user"]), "id") : 0;
@@ -46,6 +47,7 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 	max_uses = int32_not_null(j, "max_uses");
 	temporary = bool_not_null(j, "temporary");
 	unique = bool_not_null(j, "unique");
+	uses = (j->find("uses") != j->end()) ? int32_not_null(j, "uses") : 0;
 	return *this;
 }
 

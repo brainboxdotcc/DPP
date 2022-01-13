@@ -50,7 +50,7 @@ void cluster::invite_delete(const std::string &invitecode, command_completion_ev
 
 
 void cluster::invite_get(const std::string &invitecode, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/invites", dpp::url_encode(invitecode) + "?with_counts=true", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/invites", dpp::url_encode(invitecode) + "?with_counts=true&with_expiration=true", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("invite", invite().fill_from_json(&j), http));
 		}
