@@ -79,7 +79,10 @@ class DPP_EXPORT user : public managed {
 public:
 	/** Discord username */
 	std::string username;
-	/** Discriminator (aka tag), 4 digits usually displayed with leading zeroes */
+	/** Discriminator (aka tag), 4 digits usually displayed with leading zeroes.
+	 *
+	 * @note To print the discriminator with leading zeroes, use something like `fmt::format("{:04d}", discriminator)`
+	 */
 	uint16_t discriminator;
 	/** Avatar hash */
 	utility::iconhash avatar;
