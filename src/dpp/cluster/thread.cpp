@@ -81,7 +81,7 @@ void cluster::threads_get_joined_private_archived(snowflake channel_id, snowflak
 void cluster::threads_get_private_archived(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback) {
 	std::string parameters;
 	if (before_timestamp) {
-		parameters.append("&before=" + std::to_string(before_timestamp));
+		parameters.append("&before=" + ts_to_string(before_timestamp));
 	}
 	if (limit) {
 		parameters.append("&limit=" + std::to_string(limit));
@@ -104,7 +104,7 @@ void cluster::threads_get_private_archived(snowflake channel_id, time_t before_t
 void cluster::threads_get_public_archived(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback) {
 	std::string parameters;
 	if (before_timestamp) {
-		parameters.append("&before=" + std::to_string(before_timestamp));
+		parameters.append("&before=" + ts_to_string(before_timestamp));
 	}
 	if (limit) {
 		parameters.append("&limit=" + std::to_string(limit));
