@@ -46,7 +46,7 @@ void cluster::threads_get_active(snowflake channel_id, command_completion_event_
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "/threads/active", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			thread_map threads;
-			for (auto &curr_thread : j) {
+			for (auto &curr_thread : j["threads"]) {
 				threads[snowflake_not_null(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("thread_map", threads, http));
@@ -63,10 +63,13 @@ void cluster::threads_get_joined_private_archived(snowflake channel_id, snowflak
 	if (limit) {
 		parameters.append("&limit=" + std::to_string(limit));
 	}
+	if (!parameters.empty()) {
+		parameters[0] = '?';
+	}
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "/users/@me/threads/archived/private" + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			thread_map threads;
-			for (auto &curr_thread : j) {
+			for (auto &curr_thread : j["threads"]) {
 				threads[snowflake_not_null(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("thread_map", threads, http));
@@ -78,15 +81,18 @@ void cluster::threads_get_joined_private_archived(snowflake channel_id, snowflak
 void cluster::threads_get_private_archived(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback) {
 	std::string parameters;
 	if (before_timestamp) {
-		parameters.append("&before=" + std::to_string(before_timestamp));
+		parameters.append("&before=" + ts_to_string(before_timestamp));
 	}
 	if (limit) {
 		parameters.append("&limit=" + std::to_string(limit));
 	}
+	if (!parameters.empty()) {
+		parameters[0] = '?';
+	}
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "/threads/archived/private" + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			thread_map threads;
-			for (auto &curr_thread : j) {
+			for (auto &curr_thread : j["threads"]) {
 				threads[snowflake_not_null(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("thread_map", threads, http));
@@ -98,15 +104,18 @@ void cluster::threads_get_private_archived(snowflake channel_id, time_t before_t
 void cluster::threads_get_public_archived(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback) {
 	std::string parameters;
 	if (before_timestamp) {
-		parameters.append("&before=" + std::to_string(before_timestamp));
+		parameters.append("&before=" + ts_to_string(before_timestamp));
 	}
 	if (limit) {
 		parameters.append("&limit=" + std::to_string(limit));
 	}
+	if (!parameters.empty()) {
+		parameters[0] = '?';
+	}
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "/threads/archived/public" + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			thread_map threads;
-			for (auto &curr_thread : j) {
+			for (auto &curr_thread : j["threads"]) {
 				threads[snowflake_not_null(&curr_thread, "id")] = thread().fill_from_json(&curr_thread);
 			}
 			callback(confirmation_callback_t("thread_map", threads, http));
