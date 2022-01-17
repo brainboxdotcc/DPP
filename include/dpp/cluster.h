@@ -1774,7 +1774,9 @@ public:
 	 * @brief Bulk delete messages from a channel. The callback function is called when the message has been edited
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
-	 * @param message_ids List of message IDs to delete (maximum of 100 message IDs)
+	 * @note If any message provided older than 2 weeks or any duplicate message ID, it will fail.
+	 *
+	 * @param message_ids List of message IDs to delete (at least 2 and at most 100 message IDs)
 	 * @param channel_id Channel to delete from
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
