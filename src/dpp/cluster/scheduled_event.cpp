@@ -47,9 +47,6 @@ void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, comm
 	if (after) {
 		append += "&after=" + std::to_string(after);
 	}
-	if (!append.empty()) {
-		append[0] = '?';
-	}
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "/users?with_member=true&limit=" + std::to_string(limit) + append, m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			event_member_map users;
