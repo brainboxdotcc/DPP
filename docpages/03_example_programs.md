@@ -22,6 +22,7 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage caching-messages "Caching messages"
 * \subpage collecting-reactions "Collecting Reactions"
 * \subpage context-menu "Context Menus"
+* \subpage webhooks "Webhooks"
 
 
 \page firstbot Creating Your First Bot
@@ -1595,3 +1596,37 @@ int main()
 It registers a guild command that can be called by right-click a user and click on the created menu.
 
 \image html context_menu_user_command_showcase.png
+
+\page webhooks Webhooks
+
+Webhooks are a simple way to post messages from other apps and websites into Discord. They allow getting automated messages and data updates sent to a text channel in your server. [Read more](https://support.discord.com/hc/en-us/articles/228383668) in this article about Webhooks.
+
+The following code shows how to send messages in a channel using a webhook.
+
+~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
+int main()
+{
+    dpp::cluster bot(""); // normally, you put your token in here. But to just run a webhook its not required
+
+    /* create a webhook object */
+    dpp::webhook wh;
+    /* set the webhook ID */
+    wh.id = 833047646548133537;
+    /* set your webhook token */
+    wh.token = "ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE";
+    /* send a message with this webhook */
+    bot.execute_webhook(wh, dpp::message("Have a great time here :smile:"));
+
+    return 0;
+}
+~~~~~~~~~~
+
+When creating a webhook, Discord gives you a webhook-URL that looks like this:
+
+`https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE`
+
+It contains the webhook ID and the token which you need.
+
+The above is just a very simple example. You can also send embed messages. All you have to do is to add an embed to the message you want to send. If you want to, you can also send it into a thread.
