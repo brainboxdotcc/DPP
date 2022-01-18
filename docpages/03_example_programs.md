@@ -1608,7 +1608,7 @@ The following code shows how to send messages in a channel using a webhook.
 
 int main()
 {
-    dpp::cluster bot(""); // normally, you put your token in here. But to just run a webhook its not required
+    dpp::cluster bot(""); // normally, you put your bot token in here. But to just run a webhook its not required
 
     /* create a webhook object */
     dpp::webhook wh;
