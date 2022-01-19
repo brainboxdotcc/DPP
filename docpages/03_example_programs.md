@@ -562,6 +562,8 @@ int main()
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+\note For demonstration purposes this code is OK, but in the real world, it's not recommended to create slash commands in the `on_ready` event because it gets called often (discord forces reconnections and sometimes these do not resume). You could for example add a commandline parameter to your bot (`argc`, `argv`) so that if you want the bot to register commands it must be launched with a specific command line argument.
+
 \page spdlog Integrating with spdlog
 
 If you want to make your bot use spdlog, like aegis does, you can attach it to the on_log event. You can do this as follows:
