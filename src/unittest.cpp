@@ -63,6 +63,8 @@ std::map<std::string, test_t> tests = {
 	{"MSGCOLLECT", {"message_collector", false, false}},
 	{"TS", {"managed::get_creation_date()", false, false}},
 	{"READFILE", {"utility::read_file()", false, false}},
+	{"TIMESTAMPTOSTRING", {"dpp::ts_to_string()", false, false}},
+	{"TIMESTRINGTOTIMESTAMP", {"dpp::ts_not_null()", false, false}},
 };
 
 double start = dpp::utility::time_f();

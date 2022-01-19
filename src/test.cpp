@@ -34,6 +34,16 @@ int main()
 	std::string token(get_token());
 	std::vector<uint8_t> testaudio = load_test_audio();
 
+	set_test("TIMESTAMPTOSTRING", false);
+	set_test("TIMESTAMPTOSTRING", dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
+
+	set_test("TIMESTRINGTOTIMESTAMP", false);
+	json tj;
+	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
+	tj["t2"] = "2022-01-19T17:18:14+00:00";
+	uint32_t inTimestamp = 1642612694;
+	set_test("TIMESTRINGTOTIMESTAMP", (uint64_t)dpp::ts_not_null(&tj, "t1") == inTimestamp and (uint64_t)dpp::ts_not_null(&tj, "t2") == inTimestamp);
+
 	set_test("TS", false); 
 	dpp::managed m(TEST_USER_ID);
 	set_test("TS", ((uint64_t)m.get_creation_time()) == 1617131800);
