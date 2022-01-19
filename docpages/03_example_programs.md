@@ -561,6 +561,8 @@ int main()
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+\note For now it's fine but when your Bot goes in production, it's not recommended creating the slash commands in `on_ready` because it gets called often. You can create an update or any command that registers all of them when you run it, so you can just do it once and leave it if there's not any changes to be done to that. You don't need to re-register all slash commands over and over again unless you're changing the command itself.
+
 \page spdlog Integrating with spdlog
 
 If you want to make your bot use spdlog, like aegis does, you can attach it to the on_log event. You can do this as follows:
