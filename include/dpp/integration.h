@@ -42,7 +42,7 @@ enum integration_type {
 enum integration_flags {
 	/// Integration enabled
 	if_enabled =     0b00000001,
-	/// Integration synching
+	/// Integration syncing
 	if_syncing =     0b00000010,
 	/// Emoji integration
 	if_emoticons =   0b00000100,
@@ -56,7 +56,7 @@ enum integration_flags {
  * @brief An application that has been integrated
  */
 struct DPP_EXPORT integration_app {
-	/// Inegration id
+	/// Integration id
 	snowflake id;
 	/// Name
 	std::string name;

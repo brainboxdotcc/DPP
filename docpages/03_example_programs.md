@@ -85,7 +85,7 @@ int main()
 }
 ~~~~~~~~~~~~~~~~
 
-### 4. Attach to another event to reveice messages
+### 4. Attach to another event to receive messages
 
 If you want to receive messages, you should also attach your program to the `on_message_create` event (dpp::cluster::on_message_create) which is the same as the Discord.js `message` event. You add this to your program after the `on_ready` event:
 

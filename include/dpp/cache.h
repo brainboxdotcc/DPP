@@ -242,7 +242,7 @@ public:
 	/**
 	 * @brief Get "real" size in RAM of the cached objects
 	 * 
-	 * This does not include metadata used to maintain the undordered map itself.
+	 * This does not include metadata used to maintain the unordered map itself.
 	 * 
 	 * @return size_t size of cache in bytes
 	 */
