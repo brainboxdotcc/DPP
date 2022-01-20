@@ -561,7 +561,7 @@ int main()
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-\note For now it's fine but when your Bot goes in production, it's not recommended creating the slash commands in `on_ready` because it gets called often. You can create an update or any command that registers all of them when you run it, so you can just do it once and leave it if there's not any changes to be done to that. You don't need to re-register all slash commands over and over again unless you're changing the command itself.
+\note For demonstration purposes this code is OK, but in the real world, it's not recommended to create slash commands in the `on_ready` event because it gets called often (discord forces reconnections and sometimes these do not resume). You could for example add a commandline parameter to your bot (`argc`, `argv`) so that if you want the bot to register commands it must be launched with a specific command line argument.
 
 \page spdlog Integrating with spdlog
 
