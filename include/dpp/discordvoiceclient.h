@@ -456,7 +456,7 @@ public:
 	 * The audio data should be 48000Hz signed 16 bit audio.
 	 * 
 	 * @param length The length of the audio data. The length should
-	 * be a multiple of 4 (2x 16 bit stero channels) with a maximum
+	 * be a multiple of 4 (2x 16 bit stereo channels) with a maximum
 	 * length of 11520, which is a complete opus frame at highest
 	 * quality.
 	 * 
@@ -610,7 +610,7 @@ public:
 	 * @brief Insert a track marker into the audio
 	 * output buffer.
 	 * A track marker is an arbitrary flag in the
-	 * buffer contents that indictes the end of some
+	 * buffer contents that indicates the end of some
 	 * block of audio of significance to the sender.
 	 * This may be a song from a streaming site, or
 	 * some voice audio/speech, a sound effect, or
@@ -638,7 +638,7 @@ public:
 	void skip_to_next_marker();
 
 	/**
-	 * @brief Get the metdata string associated with each inserted marker.
+	 * @brief Get the metadata string associated with each inserted marker.
 	 * 
 	 * @return const std::vector<std::string>& list of metadata strings
 	 */

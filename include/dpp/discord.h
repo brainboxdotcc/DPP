@@ -43,7 +43,7 @@ namespace dpp {
 		/**
 		 * @brief Unique ID of object set by Discord.
 		 * This value contains a timestamp, worker ID, internal server ID, and an incrementing value.
-		 * Only the timestamp is relavent to us as useful metadata.
+		 * Only the timestamp is relevant to us as useful metadata.
 		 */
 		snowflake id;
 		/**
@@ -131,9 +131,9 @@ namespace dpp {
 		typedef std::function<void(const std::string& output)> cmd_result_t;
 
 		/**
-		 * @brief Run a commandline program asyncronously. The command line program
+		 * @brief Run a commandline program asynchronously. The command line program
 		 * is spawned in a separate std::thread, and when complete, its output from
-		 * stdout is passed to the callback function in its string prameter. For example
+		 * stdout is passed to the callback function in its string parameter. For example
 		 * ```
 		 * dpp::utility::exec("/bin/ls", {"-al"}, [](const std::string& output) {
 		 *     std::cout << "Output of 'ls -al': " << output << "\n";
@@ -181,7 +181,7 @@ namespace dpp {
 			uint64_t second;	//!< Low 64 bits
 
 			/**
-			 * @brief Construct a new iconcash object
+			 * @brief Construct a new iconhash object
 			 */
 			iconhash();
 

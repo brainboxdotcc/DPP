@@ -297,7 +297,7 @@ public:
 
 	/**
 	 * @brief Call all attached listeners.
-	 * Listenrs may cancel, by calling the event.cancel method.
+	 * Listeners may cancel, by calling the event.cancel method.
 	 * 
 	 * @param event Class to pass as parameter to all listeners.
 	 */
@@ -780,7 +780,7 @@ public:
 	/**
 	 * @brief Called when a guild is deleted.
 	 * A guild can be deleted via the bot being kicked, the bot leaving the guild
-	 * explicitly with dpp::guild_delete, or via the guild being unavaialble due to
+	 * explicitly with dpp::guild_delete, or via the guild being unavailable due to
 	 * an outage.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -791,7 +791,7 @@ public:
 	
 	/**
 	 * @brief Called when a channel is deleted from a guild.
-	 * The channel will still be temporarily avaialble in the cache. Pointers to the
+	 * The channel will still be temporarily available in the cache. Pointers to the
 	 * channel should not be retained long-term as they will be deleted by the garbage
 	 * collector.
 	 *
@@ -1337,7 +1337,7 @@ public:
 	 * Each separate user's audio from the voice channel will arrive tagged with
 	 * their user id in the event, if a user can be attributed to the received audio.
 	 * 
-	 * @note Receiveing audio for bots is not officially supported by discord.
+	 * @note Receiving audio for bots is not officially supported by discord.
 	 * 
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type voice_receive_t&, and returns void.
@@ -1478,7 +1478,7 @@ public:
 
 	/**
 	 * @brief Create/overwrite global slash commands.
-	 * Any existing global slash commands will be deletd and replaced with these.
+	 * Any existing global slash commands will be deleted and replaced with these.
 	 *
 	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
 	 * you should use cluster::guild_bulk_command_create instead.
@@ -2109,7 +2109,7 @@ public:
 	 * @deprecated Deprecated in favor of Modify Current Member.
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
-	 * @param guild_id Guild ID to change nickanem on
+	 * @param guild_id Guild ID to change nickname on
 	 * @param nickname New nickname, or empty string to clear nickname
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2169,7 +2169,7 @@ public:
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to add ban to
 	 * @param user_id User ID to ban
-	 * @param delete_message_days How many days of ther user's messages to also delete
+	 * @param delete_message_days How many days of their user's messages to also delete
 	 * @param reason Reason for ban
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::ban object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2442,7 +2442,7 @@ public:
 	void guild_get_invites(snowflake guild_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Get guild itegrations
+	 * @brief Get guild integrations
 	 * 
 	 * Requires the `MANAGE_GUILD` permission.
 	 *
@@ -2579,7 +2579,7 @@ public:
 	/**
 	 * @brief Edit webhook with token (token is encapsulated in the webhook object)
 	 *
-	 * @param wh Wehook to edit (should include token)
+	 * @param wh Webhook to edit (should include token)
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -3220,7 +3220,7 @@ public:
  * @brief Collects objects from events during a specified time period.
  * 
  * This template must be specialised. There are premade specialisations which you can use
- * such as dpp::reaction_collector and dpp::message_collector. For these specalised instances
+ * such as dpp::reaction_collector and dpp::message_collector. For these specialised instances
  * all you need to do is derive a simple class from them which implements collector::completed().
  * 
  * A collector will run for the specified number of seconds, attaching itself to the
