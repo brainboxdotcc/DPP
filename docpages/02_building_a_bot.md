@@ -125,7 +125,7 @@ To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, fo
 ## Troubleshooting
 
 - If you get an error that a dll is missing (e.g. `dpp.dll` or `opus.dll`) when starting your bot, then simply copy all dlls from the **bin** directory of where you extracted the DPP zip file to, into the same directory where your bot's executable is. You only need to do this once. There should be several of these dll files: `dpp.dll`, `zlib.dll`, `openssl.dll` and `libcrypto.dll` (or similarly named SSL related files), `libsodium.dll` and `opus.dll`.
-- Please note that if you change the artchitecture (step 13) you must reconfigure all of steps 7 through 12 again as these configurations are specific to each architecture. This is to allow for different sets of precompiled libs, e.g. for `x86`, `x64`, etc.
+- Please note that if you change the architecture (step 13) you must reconfigure all of steps 7 through 12 again as these configurations are specific to each architecture. This is to allow for different sets of precompiled libs, e.g. for `x86`, `x64`, etc.
 - You should run your bot from a command prompt. If you do not, and it exits, you will not be able to see any output as the window will immediately close.
 - Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
 
@@ -221,4 +221,4 @@ Here is an example of a possible uptimerobot configuration:
 
 If the bot fails to start and instead you receive an error message about being banned from the Discord API, there is little to be done about this. These bans are temporary but because repl.it is a shared platform, you share an IP address with many thousands of bots, some abusive and some badly written. This will happen often and is outside of the control of yourself and us. However, you can try to migitate this by typing `kill 1` in the shell. This is not guaranteed to work, and you might need to try it a few times. If it still does not work, then we recommend instead you obtain some affordable non-free hosting instead.
 
-If your bot continues to fall asleep even though you haev a server, we advise you to double check that no errors are happening, and if the server is being pinged. If that still does not work, we again recommend you to obtain some affordable non-free hosting.
+If your bot continues to fall asleep even though you have a server, we advise you to double check that no errors are happening, and if the server is being pinged. If that still does not work, we again recommend you to obtain some affordable non-free hosting.

@@ -204,7 +204,7 @@ public:
 	 */
 	component_type type;
 
-	/** Sub commponents, buttons on an action row
+	/** Sub components, buttons on an action row
 	 */
 	std::vector<component> components;
 
@@ -668,7 +668,7 @@ struct DPP_EXPORT embed {
 };
 
 /**
- * @brief Represets a reaction to a dpp::message
+ * @brief Represents a reaction to a dpp::message
  */
 struct DPP_EXPORT reaction {
 	/** Number of times this reaction has been added */
@@ -966,7 +966,7 @@ enum cache_policy_setting_t {
 	 */
 	cp_aggressive = 0,
 	/**
-	 * @brief only cache when there is relavent activity, e.g. a message to the bot.
+	 * @brief only cache when there is relevant activity, e.g. a message to the bot.
 	 * This is a good middle-ground, memory usage will increase linearly over time.
 	 */
 	cp_lazy = 1,
@@ -981,7 +981,7 @@ enum cache_policy_setting_t {
  * @brief Represents the caching policy of the cluster.
  * 
  * Channels and guilds are always cached as these caches are used
- * interally by the library. The memory usage of these is minimal.
+ * internally by the library. The memory usage of these is minimal.
  * 
  * All default to 'aggressive' which means to actively attempt to cache,
  * going out of the way to fill the caches completely. On large bots this
@@ -1090,7 +1090,7 @@ struct DPP_EXPORT message : public managed {
 	} interaction;
 
 	/**
-	 * @brief Allowed mentions detils
+	 * @brief Allowed mentions details
 	 */
 	struct allowed_ref {
 		/**

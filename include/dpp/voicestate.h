@@ -88,7 +88,7 @@ public:
 	/// Return true if user deafened themselves
 	bool is_self_deaf() const;
 
-	/// Return true if the user is streamig
+	/// Return true if the user is streaming
 	bool self_stream() const;
 
 	/// Return true if the user is in video
