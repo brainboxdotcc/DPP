@@ -37,9 +37,15 @@ static std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/
 static const char* DISCORD_HOST = "https://discord.com";
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent)
- : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), file_name(filename), file_content(filecontent), mimetype("application/json")
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), file_name({filename}), file_content({filecontent}), mimetype("application/json")
 {
 }
+
+http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent)
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), mimetype("application/json")
+{
+}
+
 
 http_request::http_request(const std::string &_url, http_completion_event completion, http_method _method, const std::string &_postdata, const std::string &_mimetype, const std::multimap<std::string, std::string> &_headers)
  : complete_handler(completion), completed(false), non_discord(true), endpoint(_url), postdata(_postdata), method(_method), mimetype(_mimetype), req_headers(_headers)
@@ -168,10 +174,20 @@ http_request_completion_t http_request::run(cluster* owner) {
 					}
 				} else {
 					/* Special multipart mime body for Discord */
-					httplib::MultipartFormDataItems items = {
-						{ "payload_json", postdata, "", mimetype.c_str() },
-						{ "file", file_content, file_name, "application/octet-stream" }
+					httplib::MultipartFormDataItems items  = {
+						{ "payload_json", postdata, "", mimetype }
 					};
+
+					if (file_content.size() == 1) {
+						struct httplib::MultipartFormData file = { "file", file_content[0], file_name[0], "application/octet-stream" };
+						items.push_back(file);
+					} else {
+						for (size_t i = 0; i < file_content.size(); i++) {
+							struct httplib::MultipartFormData file = { fmt::format("files[{}]", i), file_content[i], file_name[i], "application/octet-stream" };
+							items.push_back(file);
+						}
+					}
+
 					if (auto res = cli.Post(_url.c_str(), items)) {
 						rv.latency = dpp::utility::time_f() - start;
 						populate_result(_url, owner, rv, res);
@@ -413,4 +429,3 @@ std::string url_encode(const std::string &value) {
 
 
 };
-
