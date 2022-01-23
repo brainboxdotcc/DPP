@@ -780,18 +780,18 @@ struct DPP_EXPORT sticker : public managed {
 	/** The name of the sticker */
 	std::string	name;
 	/// description of the sticker (may be empty)
-	std::string     description;    
+	std::string	 description;	
 	/** for guild stickers, the Discord name of a unicode emoji representing the sticker's expression.
 	 * for standard stickers, a comma-separated list of related expressions.
 	 */
-	std::string     tags;
+	std::string	 tags;
 	/**
 	 * @brief Asset ID
 	 * @deprecated now an empty string but still sent by discord.
 	 * While discord still send this empty string value we will still have a field
 	 * here in the library.
 	 */
-	std::string     asset;
+	std::string	 asset;
 	/** The type of sticker */
 	sticker_type	type;
 	/// type of sticker format
@@ -851,15 +851,15 @@ struct DPP_EXPORT sticker_pack : public managed {
 	/// the stickers in the pack
 	std::map<snowflake, sticker> stickers;
 	/// name of the sticker pack
-	std::string     name;
+	std::string	 name;
 	/// id of the pack's SKU
-	snowflake       sku_id;
+	snowflake	   sku_id;
 	/// Optional: id of a sticker in the pack which is shown as the pack's icon
-	snowflake       cover_sticker_id;
+	snowflake	   cover_sticker_id;
 	/// description of the sticker pack
-	std::string     description;
+	std::string	 description;
 	/// id of the sticker pack's banner image
-	snowflake       banner_asset_id;
+	snowflake	   banner_asset_id;
 
 	/**
 	 * @brief Construct a new sticker pack object
@@ -1009,9 +1009,9 @@ struct DPP_EXPORT cache_policy_t {
  */
 struct DPP_EXPORT message : public managed {
 	/** id of the channel the message was sent in */
-	snowflake       channel_id;
+	snowflake	   channel_id;
 	/** Optional: id of the guild the message was sent in */
-	snowflake       guild_id;
+	snowflake	   guild_id;
 	/** the author of this message (not guaranteed to be a valid user) */
 	user		author;
 	/** Optional: member properties for this message's author */
@@ -1056,7 +1056,7 @@ struct DPP_EXPORT message : public managed {
 	std::vector<std::string>	filename;
 
 	/** File content to upload (raw binary) */
-    std::vector<std::string>	filecontent;
+	std::vector<std::string>	filecontent;
 
 	/** Message type */
 	message_type type;
@@ -1310,14 +1310,14 @@ struct DPP_EXPORT message : public managed {
 	 */
 	message& set_file_content(const std::string &fc);
 
-    /**
-     * @brief Add a file to the message
-     *
-     * @param filename filename
-     * @param filecontent raw file content contained in std::string
-     * @return message& reference to self
-     */
-    message& add_file(const std::string &filename, const std::string &filecontent);
+	/**
+	 * @brief Add a file to the message
+	 *
+	 * @param filename filename
+	 * @param filecontent raw file content contained in std::string
+	 * @return message& reference to self
+	 */
+	message& add_file(const std::string &filename, const std::string &filecontent);
 
 	/**
 	 * @brief Set the message content
