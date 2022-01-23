@@ -37,8 +37,12 @@ static std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/
 static const char* DISCORD_HOST = "https://discord.com";
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent)
- : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), file_name({filename}), file_content({filecontent}), mimetype("application/json")
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json")
 {
+		if (!filename.empty())
+			file_name.push_back(filename);
+		if (!filecontent.empty())
+			file_content.push_back(filecontent);
 }
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent)
