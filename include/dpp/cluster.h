@@ -261,7 +261,7 @@ extern DPP_EXPORT event_handle __next_handle;
  * 
  * // Attach a listener to the event
  * event_handle id = my_event([&](const log_t& cc) {
- *     std::cout << cc.message << "\n";
+ *	 std::cout << cc.message << "\n";
  * });
  * 
  * // Construct a log_t and call the event (listeners will receive the log_t object)
@@ -553,7 +553,7 @@ public:
 	 * Example:
 	 * ```
 	 * bot.set_audit_reason("Too much abusive content")
-	 *    .channel_delete(my_channel_id);
+	 *	.channel_delete(my_channel_id);
 	 * ```
 	 * 
 	 * @param reason The reason to set for the next REST call on this thread
@@ -570,8 +570,8 @@ public:
 	 * Example:
 	 * ```
 	 * bot.set_audit_reason("Won't be sent")
-	 *    .clear_audit_reason()
-	 *    .channel_delete(my_channel_id);
+	 *	.clear_audit_reason()
+	 *	.channel_delete(my_channel_id);
 	 * ```
 	 * 
 	 * @return cluster& Reference to self for chaining.
@@ -1399,9 +1399,9 @@ public:
 	 */
 	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
 
-    /**
-     * @brief Post a multipart REST request. Where possible use a helper method instead like message_create
-     *
+	/**
+	 * @brief Post a multipart REST request. Where possible use a helper method instead like message_create
+	 *
 	 * @param endpoint Endpoint to post to, e.g. /api/guilds
 	 * @param major_parameters Major parameters for the endpoint e.g. a guild id
 	 * @param parameters Minor parameters for the API request
@@ -1410,8 +1410,8 @@ public:
 	 * @param callback Function to call when the HTTP call completes. The callback parameter will contain amongst other things, the decoded json.
 	 * @param filename List of filenames to post for POST requests (for uploading files)
 	 * @param filecontent List of file content to post for POST requests (for uploading files)
-     */
-    void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {});
+	 */
+	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {});
 
 	/**
 	 * @brief Make a HTTP(S) request. For use when wanting asnyncronous access to HTTP APIs outside of Discord.
@@ -1526,7 +1526,7 @@ public:
 
 	/**
 	 * @brief Edit slash command permissions local to a guild,
-	 *        permissions are read from s.permissions
+	 *		permissions are read from s.permissions
 	 *
 	 * @param s Slash command to edit
 	 * @param guild_id Guild ID to edit the slash command in
@@ -2308,12 +2308,12 @@ public:
 	 * integer placeholder, and will be replaced by the API upon consumption. Its purpose is to allow you to overwrite a role's permissions
 	 * in a channel when also passing in channels with the channels array.
 	 * 
-    	 * When using the channels parameter, the position field is ignored, and none of the default channels are created. The id field within
+		 * When using the channels parameter, the position field is ignored, and none of the default channels are created. The id field within
 	 * each channel object may be set to an integer placeholder, and will be replaced by the API upon consumption. Its purpose is to
 	 * allow you to create `GUILD_CATEGORY` channels by setting the `parent_id` field on any children to the category's id field.
 	 * Category channels must be listed before any children.
 	 * 
-    	 * @note The region field is deprecated and is replaced by channel.rtc_region.
+		 * @note The region field is deprecated and is replaced by channel.rtc_region.
 	 * @param g Guild to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3128,10 +3128,10 @@ public:
 	 * There are currently several caveats for this endpoint:
 	 * 
 	 * - `channel_id` must currently point to a stage channel.
-    	 * - current user must already have joined `channel_id`.
-    	 * - You must have the `MUTE_MEMBERS` permission to unsuppress yourself. You can always suppress yourself.
-    	 * - You must have the `REQUEST_TO_SPEAK` permission to request to speak. You can always clear your own request to speak.
-    	 * - You are able to set `request_to_speak_timestamp` to any present or future time.
+		 * - current user must already have joined `channel_id`.
+		 * - You must have the `MUTE_MEMBERS` permission to unsuppress yourself. You can always suppress yourself.
+		 * - You must have the `REQUEST_TO_SPEAK` permission to request to speak. You can always clear your own request to speak.
+		 * - You are able to set `request_to_speak_timestamp` to any present or future time.
 	 * 
 	 * @param guild_id Guild to set voice state on
 	 * @param channel_id Stage channel to set voice state on
@@ -3193,7 +3193,7 @@ private:
 
 	/// Event handle
 	event_handle listener_handle;
-    
+	
 public:
 	/**
 	 * @brief Construct a new timed listener object
@@ -3312,11 +3312,11 @@ public:
 	 * 
 	 * ```cpp
 	 * virtual const dpp::message* filter(const dpp::message_create_t& m) {
-    	 *     if (m.msg.content.find("something i want") != std::string::npos) {
-	 *         return &m.msg;
-	 *     } else {
-	 *         return nullptr;
-	 *     }
+		 *	 if (m.msg.content.find("something i want") != std::string::npos) {
+	 *		 return &m.msg;
+	 *	 } else {
+	 *		 return nullptr;
+	 *	 }
 	 * }
 	 * ```
 	 * 
