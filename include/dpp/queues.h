@@ -154,9 +154,9 @@ public:
 	/** Audit log reason for Discord requests, if non-empty */
 	std::string reason;
 	/** Upload file name (server side) */
-	std::string file_name;
+    std::vector<std::string> file_name;
 	/** Upload file contents (binary) */
-	std::string file_content;
+	std::vector<std::string> file_content;
 	/** Request mime type */
 	std::string mimetype;
 	/** Request headers (non-discord requests only) */
@@ -174,7 +174,19 @@ public:
 	 */
 	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::string &filename = "", const std::string &filecontent = "");
 
-	/** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
+    /** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
+	 * @param _endpoint The API endpoint, e.g. /api/guilds
+	 * @param _parameters Major and minor parameters for the endpoint e.g. a user id or guild id
+	 * @param completion completion event to call when done
+	 * @param _postdata Data to send in POST and PUT requests
+	 * @param method The HTTP method to use from dpp::http_method
+	 * @param audit_reason Audit log reason to send, empty to send none
+	 * @param filename The filename (server side) of any uploaded file
+	 * @param filecontent The binary content of any uploaded file for the request
+	 */
+    http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {});
+
+    /** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _url Raw HTTP url
 	 * @param completion completion event to call when done
 	 * @param method The HTTP method to use from dpp::http_method

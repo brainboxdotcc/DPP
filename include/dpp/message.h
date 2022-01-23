@@ -1053,10 +1053,10 @@ struct DPP_EXPORT message : public managed {
 	std::vector<sticker> stickers;
 
 	/** Name of file to upload (for use server-side in discord's url) */
-	std::string	filename;
+	std::vector<std::string>	filename;
 
 	/** File content to upload (raw binary) */
-	std::string	filecontent;
+    std::vector<std::string>	filecontent;
 
 	/** Message type */
 	message_type type;
@@ -1295,7 +1295,7 @@ struct DPP_EXPORT message : public managed {
 	message& set_type(message_type t);
 
 	/**
-	 * @brief Set the filename
+	 * @brief Set the filename of the last file in list
 	 * 
 	 * @param fn filename
 	 * @return message& reference to self
@@ -1303,12 +1303,21 @@ struct DPP_EXPORT message : public managed {
 	message& set_filename(const std::string &fn);
 
 	/**
-	 * @brief Set the file content
+	 * @brief Set the file content of the last file in list
 	 * 
 	 * @param fc raw file content contained in std::string
 	 * @return message& reference to self
 	 */
 	message& set_file_content(const std::string &fc);
+
+    /**
+     * @brief Add a file to the message
+     *
+     * @param filename filename
+     * @param filecontent raw file content contained in std::string
+     * @return message& reference to self
+     */
+    message& add_file(const std::string &filename, const std::string &filecontent);
 
 	/**
 	 * @brief Set the message content

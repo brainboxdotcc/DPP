@@ -384,13 +384,27 @@ message& message::set_type(message_type t)
 
 message& message::set_filename(const std::string &fn)
 {
-	filename = fn;
+	if (filename.empty()) {
+		filename.push_back(fn);
+	} else {
+		filename[filename.size() - 1] = fn;
+	}
 	return *this;
 }
 
 message& message::set_file_content(const std::string &fc)
 {
-	filecontent = fc;
+	if (filecontent.empty()) {
+		filecontent.push_back(fc);
+	} else {
+		filecontent[filecontent.size() - 1] = fc;
+	}
+	return *this;
+}
+
+message& message::add_file(const std::string &fn, const std::string &fc) {
+	filecontent.push_back(fc);
+	filename.push_back(fn);
 	return *this;
 }
 

@@ -1399,6 +1399,20 @@ public:
 	 */
 	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
 
+    /**
+     * @brief Post a multipart REST request. Where possible use a helper method instead like message_create
+     *
+	 * @param endpoint Endpoint to post to, e.g. /api/guilds
+	 * @param major_parameters Major parameters for the endpoint e.g. a guild id
+	 * @param parameters Minor parameters for the API request
+	 * @param method Method, e.g. GET, POST
+	 * @param postdata Post data (usually JSON encoded)
+	 * @param callback Function to call when the HTTP call completes. The callback parameter will contain amongst other things, the decoded json.
+	 * @param filename List of filenames to post for POST requests (for uploading files)
+	 * @param filecontent List of file content to post for POST requests (for uploading files)
+     */
+    void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {});
+
 	/**
 	 * @brief Make a HTTP(S) request. For use when wanting asnyncronous access to HTTP APIs outside of Discord.
 	 *

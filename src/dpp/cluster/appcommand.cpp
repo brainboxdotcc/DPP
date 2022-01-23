@@ -174,7 +174,7 @@ void cluster::guild_commands_get(snowflake guild_id, command_completion_event_t 
 }
 
 void cluster::interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/interactions", std::to_string(interaction_id), url_encode(token) + "/callback", m_post, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest_multipart(API_PATH "/interactions", std::to_string(interaction_id), url_encode(token) + "/callback", m_post, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -182,7 +182,7 @@ void cluster::interaction_response_create(snowflake interaction_id, const std::s
 }
 
 void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/webhooks", std::to_string(me.id), url_encode(token) + "/messages/@original", m_patch, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), url_encode(token) + "/messages/@original", m_patch, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
