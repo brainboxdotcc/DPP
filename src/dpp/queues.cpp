@@ -175,18 +175,18 @@ http_request_completion_t http_request::run(cluster* owner) {
 				} else {
 					/* Special multipart mime body for Discord */
 					httplib::MultipartFormDataItems items  = {
-                        { "payload_json", postdata, "", mimetype }
-                    };
+						{ "payload_json", postdata, "", mimetype }
+					};
 
-                    if (file_content.size() == 1) {
-                        struct httplib::MultipartFormData file = { "file", file_content[0], file_name[0], "application/octet-stream" };
-                        items.push_back(file);
-                    } else {
-                        for (size_t i = 0; i < file_content.size(); i++) {
-                            struct httplib::MultipartFormData file = { fmt::format("files[{}]", i), file_content[i], file_name[i], "application/octet-stream" };
-                            items.push_back(file);
-                        }
-                    }
+					if (file_content.size() == 1) {
+						struct httplib::MultipartFormData file = { "file", file_content[0], file_name[0], "application/octet-stream" };
+						items.push_back(file);
+					} else {
+						for (size_t i = 0; i < file_content.size(); i++) {
+							struct httplib::MultipartFormData file = { fmt::format("files[{}]", i), file_content[i], file_name[i], "application/octet-stream" };
+							items.push_back(file);
+						}
+					}
 
 					if (auto res = cli.Post(_url.c_str(), items)) {
 						rv.latency = dpp::utility::time_f() - start;
@@ -429,4 +429,3 @@ std::string url_encode(const std::string &value) {
 
 
 };
-
