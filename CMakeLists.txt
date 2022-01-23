@@ -138,8 +138,6 @@ endif()
 
 include_directories(${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS})
 
-include_directories("include")
-
 find_package(Git QUIET)
 
 if(NOT GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
@@ -194,6 +192,9 @@ foreach (fullmodname ${subdirlist})
 	else()
 		add_library(${modname} STATIC ${modsrc})
 	endif()
+    target_include_directories(${modname} PUBLIC 
+       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+    )
 
 	if (WIN32 AND NOT MINGW)
 		if (NOT WINDOWS_32_BIT)
