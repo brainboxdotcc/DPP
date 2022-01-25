@@ -777,6 +777,10 @@ bool message::is_loading() const {
 	return flags & m_loading;
 }
 
+bool message::is_failed_to_mention_some_roles_in_thread() const {
+	return flags & m_failed_to_mention_some_roles_in_thread;
+}
+
 message::~message() = default;
 
 
