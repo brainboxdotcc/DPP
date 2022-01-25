@@ -2537,6 +2537,7 @@ public:
 
 	/**
 	 * @brief Create a webhook
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param w Webhook to create
 	 * @param callback Function to call when the API call completes.
@@ -2583,6 +2584,7 @@ public:
 
 	/**
 	 * @brief Edit webhook
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param wh Webhook to edit
 	 * @param callback Function to call when the API call completes.
@@ -2601,6 +2603,7 @@ public:
 
 	/**
 	 * @brief Delete a webhook
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param webhook_id Webhook ID to delete
 	 * @param callback Function to call when the API call completes.
