@@ -384,13 +384,27 @@ message& message::set_type(message_type t)
 
 message& message::set_filename(const std::string &fn)
 {
-	filename = fn;
+	if (filename.empty()) {
+		filename.push_back(fn);
+	} else {
+		filename[filename.size() - 1] = fn;
+	}
 	return *this;
 }
 
 message& message::set_file_content(const std::string &fc)
 {
-	filecontent = fc;
+	if (filecontent.empty()) {
+		filecontent.push_back(fc);
+	} else {
+		filecontent[filecontent.size() - 1] = fc;
+	}
+	return *this;
+}
+
+message& message::add_file(const std::string &fn, const std::string &fc) {
+	filecontent.push_back(fc);
+	filename.push_back(fn);
 	return *this;
 }
 
@@ -563,13 +577,13 @@ embed_footer& embed_footer::set_text(const std::string& t){
 	return *this;     
 }
 
-embed_footer& embed_footer::set_icon(const std::string& i){     
+embed_footer& embed_footer::set_icon(const std::string& i){
 	icon_url = i;
-	return *this;           
-}                                                                                  
+	return *this;
+}
 
-embed_footer& embed_footer::set_proxy(const std::string& p){     
-	proxy_url = p;          
+embed_footer& embed_footer::set_proxy(const std::string& p){
+	proxy_url = p;
 	return *this;
 }
 
@@ -775,10 +789,6 @@ bool message::is_ephemeral() const {
 
 bool message::is_loading() const {
 	return flags & m_loading;
-}
-
-bool message::is_failed_to_mention_some_roles_in_thread() const {
-	return flags & m_failed_to_mention_some_roles_in_thread;
 }
 
 message::~message() = default;

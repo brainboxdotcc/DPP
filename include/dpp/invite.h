@@ -33,6 +33,9 @@ public:
 	/** Invite code
 	 */
 	std::string code;
+	/** Readonly expiration timestamp of this invite or 0 if the invite doesn't expire
+	 */
+	time_t expires_at;
 	/** Guild for the invite
 	 */
 	snowflake guild_id;
@@ -54,7 +57,7 @@ public:
 	/** Approximate total users online and offline
 	 */
 	uint32_t approximate_member_count;
-	/** Maximum age of invite
+	/** Maximum age (in seconds) of invite
 	 */
 	uint32_t max_age;
 	/** Maximum number of uses
@@ -66,6 +69,11 @@ public:
 	/** True if this invite should not replace or "attach to" similar invites
 	 */
 	bool unique;
+	/** How many times this invite has been used
+	 *
+	 * @note Only set when using cluster::channel_invites_get
+	 */
+	uint32_t uses;
 
 	/** Constructor
 	 */

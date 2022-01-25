@@ -131,7 +131,7 @@ enum activity_flags {
  */
 class DPP_EXPORT activity {
 public:
-	/** Name of ativity
+	/** Name of activity
 	 * e.g. "Fortnite"
 	 */
 	std::string name;

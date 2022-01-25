@@ -86,7 +86,7 @@ int main()
 }
 ~~~~~~~~~~~~~~~~
 
-### 4. Attach to another event to reveice messages
+### 4. Attach to another event to receive messages
 
 If you want to receive messages, you should also attach your program to the `on_message_create` event (dpp::cluster::on_message_create) which is the same as the Discord.js `message` event. You add this to your program after the `on_ready` event:
 
@@ -561,6 +561,8 @@ int main()
 	return 0;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\note For demonstration purposes this code is OK, but in the real world, it's not recommended to create slash commands in the `on_ready` event because it gets called often (discord forces reconnections and sometimes these do not resume). You could for example add a commandline parameter to your bot (`argc`, `argv`) so that if you want the bot to register commands it must be launched with a specific command line argument.
 
 \page spdlog Integrating with spdlog
 
