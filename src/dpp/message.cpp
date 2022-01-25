@@ -559,7 +559,7 @@ embed& embed::set_url(const std::string &u) {
 }
 
 embed_footer& embed_footer::set_text(const std::string& t){
-	text = t; 
+	text = utility::utf8substr(t, 0, 2048);
 	return *this;     
 }
 
