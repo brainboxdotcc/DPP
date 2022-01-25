@@ -114,6 +114,8 @@ struct DPP_EXPORT thread_metadata {
 	bool locked;
 	/// Whether non-moderators can add other non-moderators 
 	bool invitable;
+	/// timestamp when the thread was created
+	time_t create_timestamp;
 };
 
 /**
