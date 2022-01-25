@@ -899,9 +899,7 @@ enum message_flags {
 	/// this message is only visible to the user who invoked the Interaction
 	m_ephemeral = 1 << 6,
 	/// this message is an Interaction Response and the bot is "thinking"
-	m_loading = 1 << 7,
-	/// this message failed to mention some roles and add their members to the thread
-	m_failed_to_mention_some_roles_in_thread = 1 << 8
+	m_loading = 1 << 7
 };
 
 /**
@@ -1263,13 +1261,6 @@ struct DPP_EXPORT message : public managed {
 	 * @return true if loading
 	 */
 	bool is_loading() const;
-
-	/**
-	 * @brief True if this message failed to mention some roles and add their members to the thread
-	 *
-	 * @return True if it failed to mention some roles and add their members to the thread
-	 */
-	bool is_failed_to_mention_some_roles_in_thread() const;
 
 	/**
 	 * @brief Add a component (button) to message
