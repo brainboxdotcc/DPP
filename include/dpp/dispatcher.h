@@ -921,7 +921,7 @@ struct DPP_EXPORT channel_pins_update_t : public event_dispatch_t {
 	 */
 	channel_pins_update_t(class discord_client* client, const std::string& raw);
 	/**
-	 * @brief guild where message is bieng pinned
+	 * @brief guild where message is being pinned
 	 */
 	guild* pin_guild;
 	/**

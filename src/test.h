@@ -48,12 +48,14 @@ public:
 /* How long the unit tests can run for */
 const int64_t TEST_TIMEOUT = 60;
 
+#define SAFE_GETENV(var) (getenv(var) ? getenv(var) : "0")
+
 /* IDs of various channels and guilds used to test */
-const dpp::snowflake TEST_GUILD_ID = 907951970017480704;
-const dpp::snowflake TEST_TEXT_CHANNEL_ID = 907951970017480707;
-const dpp::snowflake TEST_VC_ID = 907951970017480708;
-const dpp::snowflake TEST_USER_ID = 826535422381391913;
-const dpp::snowflake TEST_EVENT_ID = 909928577951203360;
+extern dpp::snowflake TEST_GUILD_ID;
+extern dpp::snowflake TEST_TEXT_CHANNEL_ID;
+extern dpp::snowflake TEST_VC_ID;
+extern dpp::snowflake TEST_USER_ID;
+extern dpp::snowflake TEST_EVENT_ID;
 
 /**
  * @brief Perform a test of a REST base API call with one parameter

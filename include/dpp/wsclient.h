@@ -168,7 +168,7 @@ public:
 	 */
 	virtual void error(uint32_t errorcode);
 
-	/** Fires every second from the underlying socket I/O loop, used for sending webscocket pings */
+	/** Fires every second from the underlying socket I/O loop, used for sending websocket pings */
 	virtual void one_second_timer();
 };
 

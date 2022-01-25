@@ -57,32 +57,32 @@ public:
 };
 
 /**
- * @brief Temlate type for base class of channel collector
+ * @brief Template type for base class of channel collector
  */
 typedef dpp::collector<dpp::channel_create_t, dpp::channel> channel_collector_t;
 
 /**
- * @brief Temlate type for base class of thread collector
+ * @brief Template type for base class of thread collector
  */
 typedef dpp::collector<dpp::thread_create_t, dpp::thread> thread_collector_t;
 
 /**
- * @brief Temlate type for base class of role collector
+ * @brief Template type for base class of role collector
  */
 typedef dpp::collector<dpp::guild_role_create_t, dpp::role> role_collector_t;
 
 /**
- * @brief Temlate type for base class of scheduled event collector
+ * @brief Template type for base class of scheduled event collector
  */
 typedef dpp::collector<dpp::guild_scheduled_event_create_t, dpp::scheduled_event> scheduled_event_collector_t;
 
 /**
- * @brief Temlate type for base class of message collector
+ * @brief Template type for base class of message collector
  */
 typedef dpp::collector<dpp::message_create_t, dpp::message> message_collector_t;
 
 /**
- * @brief Temlate type for base class of message reaction collector
+ * @brief Template type for base class of message reaction collector
  */
 typedef dpp::collector<dpp::message_reaction_add_t, dpp::collected_reaction> reaction_collector_t;
 

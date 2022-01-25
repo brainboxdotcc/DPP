@@ -163,7 +163,7 @@ public:
 	 * 
 	 * This is used by the library e.g. to count guilds, users, and roles
 	 * stored within caches.
-	 * 
+	 * get
 	 * @return uint64_t count of items in the cache
 	 */
 	uint64_t count() {
@@ -189,8 +189,8 @@ public:
 	 * std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	 * std::shared_lock l(c->get_mutex()); // MUST LOCK HERE
 	 * for (auto g = gc.begin(); g != gc.end(); ++g) {
-	 *	dpp::guild* gp = (dpp::guild*)g->second;
-	 *      // Do something here with the guild* in 'gp'
+	 *     dpp::guild* gp = (dpp::guild*)g->second;
+	 *     // Do something here with the guild* in 'gp'
 	 * }
 	 * ``` 
 	 * 
@@ -242,7 +242,7 @@ public:
 	/**
 	 * @brief Get "real" size in RAM of the cached objects
 	 * 
-	 * This does not include metadata used to maintain the undordered map itself.
+	 * This does not include metadata used to maintain the unordered map itself.
 	 * 
 	 * @return size_t size of cache in bytes
 	 */

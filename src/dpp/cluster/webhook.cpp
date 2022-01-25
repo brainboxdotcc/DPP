@@ -107,7 +107,10 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 	if (thread_id) {
 		parameters.append("&thread_id=" + std::to_string(thread_id));
 	}
-	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(!wh.token.empty() ? wh.token: token), m_post, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+	if (!parameters.empty()) {
+		parameters[0] = '?';
+	}
+	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(!wh.token.empty() ? wh.token: token) + parameters, m_post, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
 		}
