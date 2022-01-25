@@ -53,6 +53,11 @@ jobs:
         run: cd build && ./test
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
+          TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
+          TEST_TEXT_CHANNEL_ID: ${{secrets.TEST_TEXT_CHANNEL_ID}}
+          TEST_VC_ID: ${{secrets.TEST_VC_ID}}
+          TEST_USER_ID: ${{secrets.TEST_USER_ID}}
+          TEST_EVENT_ID: ${{secrets.TEST_EVENT_ID}}
 
       - name: Package distributable
         if: ${{ matrix.cfg.cpp-version == 'g++-8' }}

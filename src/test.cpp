@@ -239,6 +239,7 @@ int main()
 						}
 						bot.message_delete(m.id, m.channel_id);
 					} else { 
+						bot.log(dpp::ll_error, cc.http_info.body);
 						set_test("MSGCREATEREPLY", false);
 					}
 				});

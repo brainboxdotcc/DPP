@@ -69,6 +69,11 @@ std::map<std::string, test_t> tests = {
 
 double start = dpp::utility::time_f();
 
+dpp::snowflake TEST_GUILD_ID = std::stoull(SAFE_GETENV("TEST_GUILD_ID"));
+dpp::snowflake TEST_TEXT_CHANNEL_ID = std::stoull(SAFE_GETENV("TEST_TEXT_CHANNEL_ID"));
+dpp::snowflake TEST_VC_ID = std::stoull(SAFE_GETENV("TEST_VC_ID"));
+dpp::snowflake TEST_USER_ID = std::stoull(SAFE_GETENV("TEST_USER_ID"));
+dpp::snowflake TEST_EVENT_ID = std::stoull(SAFE_GETENV("TEST_EVENT_ID"));
 
 void set_test(const std::string &testname, bool success) {
 	auto i = tests.find(testname);
