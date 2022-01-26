@@ -834,30 +834,12 @@ public:
 
 	
 	/**
-	 * @brief Called when an application command (slash command) is deleted.
-	 *
-	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type application_command_delete_t&, and returns void.
-	 */
-	event_router_t<application_command_delete_t> on_application_command_delete;
-
-	
-	/**
 	 * @brief Called when a user leaves a guild (either through being kicked, or choosing to leave)
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_member_remove_t&, and returns void.
 	 */
 	event_router_t<guild_member_remove_t> on_guild_member_remove;
-
-	
-	/**
-	 * @brief Called when a new application command (slash command) is registered.
-	 *
-	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type application_command_create_t&, and returns void.
-	 */
-	event_router_t<application_command_create_t> on_application_command_create;
 
 	
 	/**
@@ -1092,16 +1074,6 @@ public:
 	 * The function signature for this event takes a single `const` reference of type guild_member_update_t&, and returns void.
 	 */
 	event_router_t<guild_member_update_t> on_guild_member_update;
-
-	
-	/**
-	 * @brief Called when an application command (slash command) is updated.
-	 * You will only receive this event for application commands that belong to your bot/application.
-	 *
-	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type application_command_update_t&, and returns void.
-	 */
-	event_router_t<application_command_update_t> on_application_command_update;
 
 	
 	/**
