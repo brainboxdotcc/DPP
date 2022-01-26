@@ -581,17 +581,17 @@ embed& embed::set_url(const std::string &u) {
 }
 
 embed_footer& embed_footer::set_text(const std::string& t){
-	text = t; 
+	text = utility::utf8substr(t, 0, 2048);
 	return *this;
 }
 
-embed_footer& embed_footer::set_icon(const std::string& i){	 
+embed_footer& embed_footer::set_icon(const std::string& i){
 	icon_url = i;
 	return *this;
-}																				  
+}
 
-embed_footer& embed_footer::set_proxy(const std::string& p){	 
-	proxy_url = p;		  
+embed_footer& embed_footer::set_proxy(const std::string& p){
+	proxy_url = p;
 	return *this;
 }
 

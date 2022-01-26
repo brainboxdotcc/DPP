@@ -471,7 +471,7 @@ struct DPP_EXPORT embed_footer {
 	std::string proxy_url;
 
 	/** Set footer's text. Returns footer itself so these methods may be "chained"
-	 * @param t string to set as footer text
+	 * @param t string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
 	 * @return A reference to self
 	 */
 	embed_footer& set_text(const std::string& t);
