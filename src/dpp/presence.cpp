@@ -21,10 +21,37 @@
 #include <dpp/presence.h>
 #include <dpp/discordevents.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 
 namespace dpp {
+
+std::string activity::get_large_asset_url(uint16_t size) const {
+	if (!this->assets.large_image.empty()) {
+		return fmt::format("app-assets/{}/{}.png{}",
+						   utility::cdn_host,
+						   this->application_id,
+						   this->assets.large_image,
+						   utility::avatar_size(size)
+		);
+	} else {
+		return std::string();
+	}
+}
+
+std::string activity::get_small_asset_url(uint16_t size) const {
+	if (!this->assets.large_image.empty()) {
+		return fmt::format("app-assets/{}/{}.png{}",
+						   utility::cdn_host,
+						   this->application_id,
+						   this->assets.large_image,
+						   utility::avatar_size(size)
+		);
+	} else {
+		return std::string();
+	}
+}
 
 activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) :
 	 name(nam), state(stat), url(url_), type(typ)
@@ -136,6 +163,12 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			activity a;
 			a.name = string_not_null(&act, "name");
 			a.details = string_not_null(&act, "details");
+			if (act.find("assets") != act.end()) {
+				a.assets.large_image = string_not_null(&(act["assets"]), "large_image");
+				a.assets.large_text = string_not_null(&(act["assets"]), "large_text");
+				a.assets.small_image = string_not_null(&(act["assets"]), "small_image");
+				a.assets.small_text = string_not_null(&(act["assets"]), "small_text");
+			}
 			a.state = string_not_null(&act, "state"); // if user
 			if (a.state.empty()) a.state = string_not_null(&act, "details"); // if activity from bot, maybe?
 			a.type = (activity_type)int8_not_null(&act, "type");

@@ -129,6 +129,27 @@ enum activity_flags {
 /**
  * @brief An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
  */
+struct DPP_EXPORT activity_asset {
+public:
+	/** The large asset image which usually contain snowflake ID or prefixed image ID
+	 */
+	std::string large_image;
+	/** Text displayed when hovering over the large image of the activity
+	 */
+	std::string large_text;
+	/** The small asset image which usually contain snowflake ID or prefixed image ID
+	 */
+	std::string small_image;
+	/** Text displayed when hovering over the small image of the activity
+	 */
+	std::string small_text;
+
+	activity_asset() = default;
+};
+
+/**
+ * @brief An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
+ */
 class DPP_EXPORT activity {
 public:
 	/** Name of activity
@@ -142,6 +163,9 @@ public:
 	/** What the player is currently doing
 	 */
 	std::string details;
+	/** Images for the presence and their hover texts
+	 */
+	activity_asset assets;
 	/** URL.
 	 * Only applicable for certain sites such a YouTube
 	 * Alias: details
@@ -165,6 +189,22 @@ public:
 	/** Flags bitmask from activity_flags
 	 */
 	uint8_t flags;
+
+	/**
+	 * @brief Get the assets large image url if they have one, otherwise returns an empty string
+	 *
+	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized image is returned.
+	 * @return image url or empty string
+	 */
+	std::string get_large_asset_url(uint16_t size = 0) const;
+
+	/**
+	 * @brief Get the assets small image url if they have one, otherwise returns an empty string
+	 *
+	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized image is returned.
+	 * @return image url or empty string
+	 */
+	std::string get_small_asset_url(uint16_t size = 0) const;
 
 	activity() = default;
 
