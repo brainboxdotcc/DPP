@@ -14,6 +14,10 @@ jobs:
     name: Build Documentation
     runs-on: ubuntu-20.04
 
+    concurrency: 
+      group: docs-deployment
+      cancel-in-progress: false
+
     steps:
       - name: Concurrency check
         uses: softprops/turnstyle@v1
