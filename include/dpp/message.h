@@ -471,7 +471,7 @@ struct DPP_EXPORT embed_footer {
 	std::string proxy_url;
 
 	/** Set footer's text. Returns footer itself so these methods may be "chained"
-	 * @param t string to set as footer text
+	 * @param t string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
 	 * @return A reference to self
 	 */
 	embed_footer& set_text(const std::string& t);
@@ -593,13 +593,18 @@ struct DPP_EXPORT embed {
 	 */
 	embed& set_description(const std::string &text);
 
-	/**
-	 * @brief Set the footer of the embed
-	 * 
+	/** Set the footer of the embed. Returns the embed itself so these method calls may be "chained"
 	 * @param f the footer to set
-	 * @return embed& a reference to self
+	 * @return A reference to self
 	 */
 	embed& set_footer(const embed_footer& f);
+
+	 /** Set the footer of the embed. Returns the embed itself so these method calls may be "chained"
+	  * @param text string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
+	  * @param icon_url url to set as footer icon url
+	  * @return A reference to self
+	  */
+	embed& set_footer(const std::string& text, const std::string& icon_url);
 
 	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
 	 * @param col The colour of the embed

@@ -701,7 +701,6 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 	int mEncFrameSize = 2880;
 	if (0 == (inDataSize % mEncFrameBytes)) {
 		bool isOk = true;
-		size_t cur = 0;
 		uint8_t *out = encode_buffer;
 
 		memset(out, 0, sizeof(encode_buffer));
@@ -717,7 +716,6 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 					break;
 				}
 				out += ret;
-				cur += ret;
 			} else {
 				isOk = false;
 				log(ll_warning, fmt::format("opus_encode(): {}", opus_strerror(ret)));

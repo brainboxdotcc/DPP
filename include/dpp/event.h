@@ -126,10 +126,7 @@ event_decl(voice_server_update);
 /* Webhooks */
 event_decl(webhooks_update);
 
-/* Slash commands */
-event_decl(application_command_create);
-event_decl(application_command_update);
-event_decl(application_command_delete);
+/* Application commands */
 event_decl(interaction_create);
 
 /* Integrations */
