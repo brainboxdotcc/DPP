@@ -53,6 +53,14 @@ std::string activity::get_small_asset_url(uint16_t size) const {
 	}
 }
 
+activity_emoji::activity_emoji() : id(0), animated(false)
+{
+}
+
+std::string activity_emoji::get_mention() const {
+	return "<:" + (id ? ((animated ? "a:" : "") + name + ":" + std::to_string(id)) : name) + ">";
+}
+
 activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) :
 	 name(nam), state(stat), url(url_), type(typ)
 {	
@@ -170,24 +178,24 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 				a.assets.small_text = string_not_null(&(act["assets"]), "small_text");
 			}
 			a.state = string_not_null(&act, "state"); // if user
-			if (a.state.empty()) a.state = string_not_null(&act, "details"); // if activity from bot, maybe?
 			a.type = (activity_type)int8_not_null(&act, "type");
 			a.url = string_not_null(&act, "url");
 			if (act.find("buttons") != act.end()) {
 				for (auto &l : act["buttons"]) {
 					activity_button ab;
-					if (l.is_string()) {
+					if (l.is_string()) { // its may be just a string (label) because normal bots cannot access the button URLs
 						ab.label = l;
 					} else {
-						if (l.find("label") != l.end()) {
-							ab.label = string_not_null(&l, "label");
-						}
-						if (l.find("url") != l.end()) {
-							ab.url = string_not_null(&l, "url");
-						}
+						ab.label = string_not_null(&l, "label");
+						ab.url = string_not_null(&l, "url");
 					}
 					a.buttons.push_back(ab);
 				}
+			}
+			if (act.find("emoji") != act.end()) {
+				a.emoji.name = string_not_null(&act["emoji"], "name");
+				a.emoji.id = snowflake_not_null(&act["emoji"], "id");
+				a.emoji.animated = bool_not_null(&act["emoji"], "animated");
 			}
 			a.created_at = int64_not_null(&act, "created_at");
 			if (act.find("timestamps") != act.end()) {

@@ -150,6 +150,31 @@ public:
 };
 
 /**
+ * @brief The emoji used for a custom status
+ */
+struct DPP_EXPORT activity_emoji {
+public:
+	/** The name of the emoji
+	 */
+	std::string name;
+	/** The ID of the emoji
+	 */
+	snowflake id;
+	/** Whether the emoji is animated
+	 */
+	bool animated;
+
+	/**
+	 * @brief Get the mention/ping for the emoji
+	 *
+	 * @return std::string mention
+	 */
+	std::string get_mention() const;
+
+	activity_emoji();
+};
+
+/**
  * @brief An activity asset are the images and the hover text displayed in the rich presence
  */
 struct DPP_EXPORT activity_asset {
@@ -197,6 +222,9 @@ public:
 	/** The custom buttons shown in the Rich Presence (max 2)
 	 */
 	std::vector<activity_button> buttons;
+	/** The emoji used for the custom status
+	 */
+	activity_emoji emoji;
 	/** Activity type
 	 */
 	activity_type type;
@@ -256,7 +284,7 @@ public:
 	/** Guild ID. Apparently, Discord supports this internally but the client doesnt... */
 	snowflake       guild_id;
 
-	/** Flags bitmask containing presence_flags */
+	/** Flags bitmask containing dpp::presence_flags */
 	uint8_t		flags;
 
 	/** List of activities */
