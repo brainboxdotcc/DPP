@@ -48,7 +48,7 @@ public:
 /* How long the unit tests can run for */
 const int64_t TEST_TIMEOUT = 60;
 
-#define SAFE_GETENV(var) (getenv(var) ? getenv(var) : "0")
+#define SAFE_GETENV(var) (getenv(var) && *(getenv(var)) ? getenv(var) : "0")
 
 /* IDs of various channels and guilds used to test */
 extern dpp::snowflake TEST_GUILD_ID;
