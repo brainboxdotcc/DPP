@@ -135,6 +135,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 		for (auto & act : (*j)["activities"]) {
 			activity a;
 			a.name = string_not_null(&act, "name");
+			a.details = string_not_null(&act, "details");
 			a.state = string_not_null(&act, "state"); // if user
 			if (a.state.empty()) a.state = string_not_null(&act, "details"); // if activity from bot, maybe?
 			a.type = (activity_type)int8_not_null(&act, "type");
