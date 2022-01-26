@@ -28,7 +28,7 @@ using json = nlohmann::json;
 namespace dpp {
 
 std::string activity::get_large_asset_url(uint16_t size) const {
-	if (!this->assets.large_image.empty()) {
+	if (!this->assets.large_image.empty() and this->application_id) {
 		return fmt::format("app-assets/{}/{}.png{}",
 						   utility::cdn_host,
 						   this->application_id,
@@ -41,7 +41,7 @@ std::string activity::get_large_asset_url(uint16_t size) const {
 }
 
 std::string activity::get_small_asset_url(uint16_t size) const {
-	if (!this->assets.large_image.empty()) {
+	if (!this->assets.large_image.empty() and this->application_id) {
 		return fmt::format("app-assets/{}/{}.png{}",
 						   utility::cdn_host,
 						   this->application_id,
@@ -173,6 +173,22 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			if (a.state.empty()) a.state = string_not_null(&act, "details"); // if activity from bot, maybe?
 			a.type = (activity_type)int8_not_null(&act, "type");
 			a.url = string_not_null(&act, "url");
+			if (act.find("buttons") != act.end()) {
+				for (auto &l : act["buttons"]) {
+					activity_button ab;
+					if (l.is_string()) {
+						ab.label = l;
+					} else {
+						if (l.find("label") != l.end()) {
+							ab.label = string_not_null(&l, "label");
+						}
+						if (l.find("url") != l.end()) {
+							ab.url = string_not_null(&l, "url");
+						}
+					}
+					a.buttons.push_back(ab);
+				}
+			}
 			a.created_at = int64_not_null(&act, "created_at");
 			if (act.find("timestamps") != act.end()) {
 				a.start = int64_not_null(&(act["timestamps"]), "start");

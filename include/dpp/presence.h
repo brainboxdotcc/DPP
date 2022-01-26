@@ -127,7 +127,24 @@ enum activity_flags {
 };
 
 /**
- * @brief An activity is a representation of what a user is doing. It might be a game, or a website, or a movie. Whatever.
+ * @brief An activity button is a custom button shown in the rich presence. Can be to join a game or whatever
+ */
+struct DPP_EXPORT activity_button {
+public:
+	/** The text shown on the button (1-32 characters)
+	 */
+	std::string label;
+	/** The url opened when clicking the button (1-512 characters). It's may be empty
+	 *
+	 * @note Bots cannot access the activity button URLs.
+	 */
+	std::string url;
+
+	activity_button() = default;
+};
+
+/**
+ * @brief An activity asset are the images and the hover text displayed in the rich presence
  */
 struct DPP_EXPORT activity_asset {
 public:
@@ -171,6 +188,9 @@ public:
 	 * Alias: details
 	 */
 	std::string url;
+	/** The custom buttons shown in the Rich Presence (max 2)
+	 */
+	std::vector<activity_button> buttons;
 	/** Activity type
 	 */
 	activity_type type;
