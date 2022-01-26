@@ -23,7 +23,7 @@ on:
 
 
 jobs:
-  linux:
+  linux-with-unit-test:
     concurrency: 
       group: linux-build-unit-test
       cancel-in-progress: false
@@ -34,7 +34,6 @@ jobs:
       matrix:
         cfg:
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-8 }
-          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:
       - name: Checkout D++
@@ -52,7 +51,6 @@ jobs:
         run: cd build && ninja 
 
       - name: Run unit tests
-        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
         run: cd build && ./test
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
@@ -80,6 +78,47 @@ jobs:
           name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.rpm'
 
+  linux-no-unit-tests:
+    name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
+    runs-on: ${{matrix.cfg.os}}
+    strategy:
+      fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
+      matrix:
+        cfg:
+          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
+
+    steps:
+      - name: Checkout D++
+        uses: actions/checkout@v2
+
+      - name: Install apt packages
+        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }}:${{ matrix.cfg.arch }} ninja-build libsodium-dev:${{ matrix.cfg.arch }} libopus-dev:${{ matrix.cfg.arch }} zlib1g-dev:${{ matrix.cfg.arch }} rpm:${{ matrix.cfg.arch }}
+
+      - name: Generate CMake
+        run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        env:
+          CXX: ${{matrix.cfg.cpp-version}}
+
+      - name: Build Project
+        run: cd build && ninja 
+
+      - name: Package distributable
+        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
+        run: cd build && cpack --verbose
+
+      - name: Upload Binary (DEB)
+        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
+          path: '${{github.workspace}}/build/*.deb'
+
+      - name: Upload Binary (RPM)
+        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
+          path: '${{github.workspace}}/build/*.rpm'
 
   macos:
     name: macOS x64
