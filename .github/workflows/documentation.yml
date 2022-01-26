@@ -19,11 +19,6 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - name: Concurrency check
-        uses: softprops/turnstyle@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
