@@ -522,6 +522,14 @@ embed& embed::set_footer(const embed_footer& f) {
 	return *this;
 }
 
+embed& embed::set_footer(const std::string& text, const std::string& icon_url) {
+	dpp::embed_footer f;
+	f.set_text(text);
+	f.set_icon(icon_url);
+	footer = f;
+	return *this;
+}
+
 embed& embed::set_provider(const std::string& name, const std::string& url) {
 	dpp::embed_provider p;
 	p.name = utility::utf8substr(name, 0, 256);
