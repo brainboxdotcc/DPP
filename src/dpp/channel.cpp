@@ -157,7 +157,6 @@ thread& thread::fill_from_json(json* j) {
 	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");
 	metadata.auto_archive_duration = int16_not_null(&json_metadata, "auto_archive_duration");
 	metadata.locked = bool_not_null(&json_metadata, "locked");
-	metadata.create_timestamp = ts_not_null(&json_metadata, "create_timestamp");
 
 	/* Only certain events set this */
 	if (j->find("member") != j->end())  {

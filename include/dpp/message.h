@@ -1092,6 +1092,8 @@ struct DPP_EXPORT message : public managed {
 		std::string name;
 		// the user who invoked the interaction
 		user usr;
+		// the member who invoked the interaction in the guild (maybe not set)
+		guild_member member;
 	} interaction;
 
 	/**
