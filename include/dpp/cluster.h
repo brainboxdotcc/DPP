@@ -2672,6 +2672,7 @@ public:
 	 * @brief Edit a role's position in a guild
 	 * 
 	 * Modify the positions of a set of role objects for the guild. Requires the `MANAGE_ROLES` permission.
+	 * Fires multiple `Guild Role Update` Gateway events.
 	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param r Role to change position of
