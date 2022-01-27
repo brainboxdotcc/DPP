@@ -36,20 +36,21 @@ set(CPACK_PACKAGE_VENDOR Brainbox.cc)	# Maker of the application
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "An incredibly lightweight C++ Discord library")
 set(CPACK_PACKAGE_DESCRIPTION "An incredibly lightweight C++ Discord library")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://dpp.dev/")
+set(CPACK_FREEBSD_PACKAGE_MAINTAINER "bsd@dpp.dev")
+set(CPACK_FREEBSD_PACKAGE_ORIGIN "misc/libdpp")
+set(CPACK_RPM_PACKAGE_LICENSE "Apache 2.0")
+set(CPACK_PACKAGE_CONTACT "https://discord.gg/dpp") # D++ Development Discord
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsodium23 (>= 1.0.17-1), libopus0 (>= 1.3-1)")
+set(CPACK_RPM_PACKAGE_REQUIRES "libsodium >= 1.0.17, opus >= 1.3.1")
+set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "An incredibly lightweight C++ Discord library")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(CPACK_DEBIAN_PACKAGE_SECTION "libs")
 
 ## Select generated based on what operating system
 if(WIN32)
 	set(CPACK_GENERATOR ZIP)
-elseif(UNIX)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(CPACK_GENERATOR "DEB;RPM")
-	set(CPACK_RPM_PACKAGE_LICENSE "Apache 2.0")
-	set(CPACK_PACKAGE_CONTACT "https://discord.gg/dpp") # D++ Development Discord
-	set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsodium23 (>= 1.0.17-1), libopus0 (>= 1.3-1)")
-	set(CPACK_RPM_PACKAGE_REQUIRES "libsodium >= 1.0.17, opus >= 1.3.1")
-	set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "An incredibly lightweight C++ Discord library")
-	set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-	set(CPACK_DEBIAN_PACKAGE_SECTION "libs")
-
+elseif(UNIX)
+	set(CPACK_GENERATOR "PKG")
 endif()
-
-
