@@ -572,6 +572,7 @@ public:
 	command_resolved resolved;				    //!< Resolved user/role etc
 	std::string locale;                                         //!< User's locale (language)
 	std::string guild_locale;                                   //!< Guild's locale (language) - for guild interactions only
+	cache_policy_t cache_policy;                                //!< Cache policy from cluster
 
 	/**
 	 * @brief Fill object properties from JSON
