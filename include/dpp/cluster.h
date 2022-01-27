@@ -1442,6 +1442,8 @@ public:
 	/**
 	 * @brief Create a slash command local to a guild
 	 *
+	 * @note Creating a command with the same name as an existing command for your application will overwrite the old command.
+	 *
 	 * @param s Slash command to create
 	 * @param guild_id Guild ID to create the slash command in
 	 * @param callback Function to call when the API call completes.
