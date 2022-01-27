@@ -224,6 +224,9 @@ jobs:
         run: |
           pwd
           ls -lah
-          whoami
-          env
-          freebsd-version
+          mkdir build
+          cd build
+          cmake ..
+          make -j8
+          make install
+          
