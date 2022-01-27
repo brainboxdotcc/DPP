@@ -1500,6 +1500,7 @@ public:
 	 * @brief Edit slash command permissions local to a guild,
 	 *		permissions are read from s.permissions
 	 *
+	 * @note You can only add up to 10 permission overwrites for a command
 	 * @param s Slash command to edit
 	 * @param guild_id Guild ID to edit the slash command in
 	 * @param callback Function to call when the API call completes.
