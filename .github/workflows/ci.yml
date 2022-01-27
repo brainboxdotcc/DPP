@@ -220,7 +220,7 @@ jobs:
       uses: vmactions/freebsd-vm@v0.1.5
       with:
         usesh: true
-        prepare: pkg install -y openssl-devel gcc gmake ninja cmake
+        prepare: pkg install -y openssl-devel gcc gmake ninja cmake git
         run: |
           pwd
           ls -lah
