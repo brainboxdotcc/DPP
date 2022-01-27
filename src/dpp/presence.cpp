@@ -218,9 +218,9 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 				}
 			}
 			if (act.find("secrets") != act.end()) {
-				a.secret.join = string_not_null(&act["secret"], "join");
-				a.secret.spectate = string_not_null(&act["secret"], "spectate");
-				a.secret.match = string_not_null(&act["secret"], "match");
+				a.secrets.join = string_not_null(&act["secret"], "join");
+				a.secrets.spectate = string_not_null(&act["secret"], "spectate");
+				a.secrets.match = string_not_null(&act["secret"], "match");
 			}
 			a.created_at = int64_not_null(&act, "created_at");
 			if (act.find("timestamps") != act.end()) {

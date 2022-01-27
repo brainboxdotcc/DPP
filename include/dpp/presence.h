@@ -273,7 +273,7 @@ public:
 	activity_party party;
 	/** Secrets for rich presence joining and spectating
 	 */
-	activity_secrets secret;
+	activity_secrets secrets;
 	/** Activity type
 	 */
 	activity_type type;
