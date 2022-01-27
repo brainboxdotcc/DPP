@@ -230,3 +230,11 @@ jobs:
           make -j2
           make install
           
+    - name: Package Distributable
+      run: cd build && cpack --verbose
+
+    - name: Upload Binaries (PKG)
+      uses: actions/upload-artifact@v2
+      with:
+        name: "libdpp - Debian Package ${{matrix.cfg.name}}"
+        path: "${{github.workspace}}/build/*.pkg"
