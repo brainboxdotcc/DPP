@@ -229,9 +229,7 @@ jobs:
           cmake ..
           make -j2
           make install
-          
-    - name: Package Distributable
-      run: cd build && cpack --verbose
+          cpack --verbose
 
     - name: Upload Binaries (BZ2)
       uses: actions/upload-artifact@v2
