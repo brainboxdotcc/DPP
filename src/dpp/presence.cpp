@@ -194,15 +194,15 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			a.type = (activity_type)int8_not_null(&act, "type");
 			a.url = string_not_null(&act, "url");
 			if (act.find("buttons") != act.end()) {
-				for (auto &l : act["buttons"]) {
-					activity_button ab;
-					if (l.is_string()) { // its may be just a string (label) because normal bots cannot access the button URLs
-						ab.label = l;
+				for (auto &b : act["buttons"]) {
+					activity_button btn;
+					if (b.is_string()) { // its may be just a string (label) because normal bots cannot access the button URLs
+						btn.label = b;
 					} else {
-						ab.label = string_not_null(&l, "label");
-						ab.url = string_not_null(&l, "url");
+						btn.label = string_not_null(&b, "label");
+						btn.url = string_not_null(&b, "url");
 					}
-					a.buttons.push_back(ab);
+					a.buttons.push_back(btn);
 				}
 			}
 			if (act.find("emoji") != act.end()) {
@@ -217,7 +217,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 					a.party.maximum_size = (int32_t)act["party"]["size"][1];
 				}
 			}
-			if (act.find("secret") != act.end()) {
+			if (act.find("secrets") != act.end()) {
 				a.secret.join = string_not_null(&act["secret"], "join");
 				a.secret.spectate = string_not_null(&act["secret"], "spectate");
 				a.secret.match = string_not_null(&act["secret"], "match");
@@ -229,7 +229,8 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			}
 			a.application_id = snowflake_not_null(&act, "application_id");
 			a.flags = int8_not_null(&act, "flags");
-	
+			a.is_instance = bool_not_null(&act, "instance");
+
 			activities.push_back(a);
 		}
 	}

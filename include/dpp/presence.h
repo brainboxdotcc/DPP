@@ -294,7 +294,7 @@ public:
 	uint8_t flags;
 	/** Whether or not the activity is an instanced game session
 	 */
-	bool is_instanced;
+	bool is_instance;
 
 	/**
 	 * @brief Get the assets large image url if they have one, otherwise returns an empty string
