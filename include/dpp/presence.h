@@ -113,23 +113,23 @@ enum activity_type : uint8_t {
  */
 enum activity_flags {
 	/// In an instance
-	af_instance	= 1 << 0,
+	af_instance						= 0b000000001,
 	/// Joining
-	af_join		= 1 << 1,
+	af_join							= 0b000000010,
 	/// Spectating
-	af_spectate	= 1 << 2,
+	af_spectate						= 0b000000100,
 	/// Sending join request
-	af_join_request	= 1 << 3,
+	af_join_request					= 0b000001000,
 	/// Synchronising
-	af_sync		= 1 << 4,
+	af_sync							= 0b000010000,
 	/// Playing
-	af_play		= 1 << 5,
+	af_play							= 0b000100000,
 	/// Party privacy friends
-	af_party_privacy_friends = 1 << 6,
+	af_party_privacy_friends 		= 0b001000000,
 	/// Party privacy voice channel
-	af_party_privacy_voice_channel = 1 << 7,
+	af_party_privacy_voice_channel 	= 0b010000000,
 	/// Embedded
-	af_embedded = 1 << 8
+	af_embedded 					= 0b100000000
 };
 
 /**
