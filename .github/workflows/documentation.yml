@@ -14,12 +14,11 @@ jobs:
     name: Build Documentation
     runs-on: ubuntu-20.04
 
-    steps:
-      - name: Concurrency check
-        uses: softprops/turnstyle@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    concurrency: 
+      group: docs-deployment
+      cancel-in-progress: false
 
+    steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
