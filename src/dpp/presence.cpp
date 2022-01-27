@@ -213,8 +213,10 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			if (act.find("party") != act.end()) {
 				a.party.id = snowflake_not_null(&act["party"], "id");
 				if (act["party"].find("size") != act.end()) { // "size" is an array of two integers
-					a.party.current_size = (int32_t)act["party"]["size"][0];
-					a.party.maximum_size = (int32_t)act["party"]["size"][1];
+					try {
+						a.party.current_size = act["party"]["size"][0].get<int32_t>();
+						a.party.maximum_size = act["party"]["size"][1].get<int32_t>();
+					} catch (std::exception &exception) {}
 				}
 			}
 			if (act.find("secrets") != act.end()) {
