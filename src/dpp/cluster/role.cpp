@@ -78,6 +78,30 @@ void cluster::role_edit_position(const class role &r, command_completion_event_t
 }
 
 
+void cluster::role_edit_positions(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback) {
+	if (roles.empty()) {
+		return;
+	}
+	json j = json::array();
+	for (auto & r : roles) {
+		j.push_back({ {"id", r.id}, {"position", r.position} });
+	}
+	std::cout << j << std::endl;
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "roles", m_patch, j.dump(), [guild_id, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			role_map roles;
+			confirmation_callback_t e("confirmation", confirmation(), http);
+			if (!e.is_error()) {
+				for (auto & curr_role : j) {
+					roles[snowflake_not_null(&curr_role, "id")] = role().fill_from_json(guild_id, &curr_role);
+				}
+			}
+			callback(confirmation_callback_t("role", roles, http));
+		}
+	});
+}
+
+
 void cluster::roles_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "roles", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
