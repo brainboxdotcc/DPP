@@ -23,6 +23,9 @@
 /* Unit tests go here */
 int main()
 {
+	std::string token(get_token());
+	std::vector<uint8_t> testaudio = load_test_audio();
+
 	set_test("READFILE", false);
 	std::string rf_test = dpp::utility::read_file("libdpp.so");
 	FILE* fp = fopen("libdpp.so", "rb");
@@ -30,9 +33,6 @@ int main()
 	size_t off = (size_t)ftell(fp);
 	fclose(fp);
 	set_test("READFILE", off == rf_test.length());
-
-	std::string token(get_token());
-	std::vector<uint8_t> testaudio = load_test_audio();
 
 	set_test("TIMESTAMPTOSTRING", false);
 	set_test("TIMESTAMPTOSTRING", dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
