@@ -233,8 +233,8 @@ jobs:
     - name: Package Distributable
       run: cd build && cpack --verbose
 
-    - name: Upload Binaries (PKG)
+    - name: Upload Binaries (BZ2)
       uses: actions/upload-artifact@v2
       with:
         name: "libdpp - Debian Package ${{matrix.cfg.name}}"
-        path: "${{github.workspace}}/build/*.pkg"
+        path: "${{github.workspace}}/build/*.tar.bz2"
