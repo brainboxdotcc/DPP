@@ -28,7 +28,7 @@ using json = nlohmann::json;
 namespace dpp {
 
 std::string activity::get_large_asset_url(uint16_t size) const {
-	if (!this->assets.large_image.empty() and this->application_id) {
+	if (!this->assets.large_image.empty() && this->application_id) {
 		return fmt::format("app-assets/{}/{}.png{}",
 						   utility::cdn_host,
 						   this->application_id,
@@ -41,7 +41,7 @@ std::string activity::get_large_asset_url(uint16_t size) const {
 }
 
 std::string activity::get_small_asset_url(uint16_t size) const {
-	if (!this->assets.large_image.empty() and this->application_id) {
+	if (!this->assets.large_image.empty() && this->application_id) {
 		return fmt::format("app-assets/{}/{}.png{}",
 						   utility::cdn_host,
 						   this->application_id,
