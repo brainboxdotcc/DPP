@@ -517,7 +517,9 @@ uint64_t guild::base_permissions(const user* member) const
 
 	for (auto& rid : gm.roles) {
 		role* r = dpp::find_role(rid);
-		permissions |= r->permissions;
+		if (r) {
+			permissions |= r->permissions;
+		}
 	}
 
 	if (permissions & p_administrator)

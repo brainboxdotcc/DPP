@@ -23,6 +23,7 @@
 #include <dpp/discord.h>
 #include <dpp/exception.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/cache.h>
 #include <iostream>
 
 namespace dpp {
@@ -346,11 +347,27 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.type = int8_not_null(&j, "type");
 	i.token = string_not_null(&j, "token");
 	i.version = int8_not_null(&j, "version");
-
 	if (j.contains("member") && !j.at("member").is_null()) {
 		j.at("member").get_to(i.member);
+		if (i.cache_policy.user_policy != dpp::cp_none) {
+			/* User caching on, lazy or aggressive - cache or update the member information */
+			guild* g = dpp::find_guild(i.guild_id);
+			if (g) {
+				g->members[i.member.user_id] = i.member;
+			}
+		}
 		if (j.at("member").contains("user") && !j.at("member").at("user").is_null()) {
 			j.at("member").at("user").get_to(i.usr);
+			/* Caching is on; store user if needed */
+			if (i.cache_policy.user_policy != dpp::cp_none) {
+				user* check = dpp::find_user(i.usr.id);
+				if (!check && i.usr.id) {
+					/* User does not exist yet, cache the partial as a user record */
+					check = new user();
+					*check = i.usr;
+					dpp::get_user_cache()->store(check);
+				}
+			}
 		}
 	}
 
@@ -548,7 +565,7 @@ interaction_modal_response& interaction_modal_response::set_title(const std::str
 	return *this;
 }
 
-command_permission::command_permission(snowflake id, command_permission_type &t, bool permission) :
+command_permission::command_permission(snowflake id, const command_permission_type t, bool permission) :
 	id(id), type(t), permission(permission) {
 }
 
