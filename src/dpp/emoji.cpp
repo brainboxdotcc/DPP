@@ -117,7 +117,7 @@ std::string emoji::get_mention() const {
 			return "<:" + format() + ">";
 		}
 	} else {
-		return "<:" + format() + ">";
+		return ":" + format() + ":";
 	}
 }
 
