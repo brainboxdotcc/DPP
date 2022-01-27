@@ -638,7 +638,7 @@ public:
 	 * @param t The permission type
 	 * @param permission True to allow, false, to disallow
 	 */
-	command_permission(snowflake id, command_permission_type &t, bool permission);
+	command_permission(snowflake id, const command_permission_type t, bool permission);
 };
 
 /**
