@@ -162,7 +162,14 @@ public:
 	snowflake id;
 	/** Whether the emoji is animated
 	 */
-	bool animated;
+	bool is_animated;
+
+	/**
+	 * @brief Format to name if unicode, name:id if has id or a:name:id if animated
+	 *
+	 * @return Formatted name for reactions
+	 */
+	std::string format() const;
 
 	/**
 	 * @brief Get the mention/ping for the emoji
@@ -177,7 +184,7 @@ public:
 /**
  * @brief An activity asset are the images and the hover text displayed in the rich presence
  */
-struct DPP_EXPORT activity_asset {
+struct DPP_EXPORT activity_assets {
 public:
 	/** The large asset image which usually contain snowflake ID or prefixed image ID
 	 */
@@ -192,7 +199,43 @@ public:
 	 */
 	std::string small_text;
 
-	activity_asset() = default;
+	activity_assets() = default;
+};
+
+/**
+ * @brief Secrets for Rich Presence joining and spectating
+ */
+struct DPP_EXPORT activity_secrets {
+public:
+	/** The secret for joining a party
+	 */
+	std::string join;
+	/** The secret for spectating a game
+	 */
+	std::string spectate;
+	/** The secret for a specific instanced match
+	 */
+	std::string match;
+
+	activity_secrets() = default;
+};
+
+/**
+ * @brief Information for the current party of the player
+ */
+struct DPP_EXPORT activity_party {
+public:
+	/** The ID of the party
+	 */
+	snowflake id;
+	/** The party's current size. Used to show the party's current size
+	 */
+	int32_t current_size;
+	/** The party's maximum size. Used to show the party's maximum size
+	 */
+	int32_t maximum_size;
+
+	activity_party() = default;
 };
 
 /**
@@ -213,7 +256,7 @@ public:
 	std::string details;
 	/** Images for the presence and their hover texts
 	 */
-	activity_asset assets;
+	activity_assets assets;
 	/** URL.
 	 * Only applicable for certain sites such a YouTube
 	 * Alias: details
@@ -225,6 +268,12 @@ public:
 	/** The emoji used for the custom status
 	 */
 	activity_emoji emoji;
+	/** Information of the current party if there is one
+	 */
+	activity_party party;
+	/** Secrets for rich presence joining and spectating
+	 */
+	activity_secrets secret;
 	/** Activity type
 	 */
 	activity_type type;
@@ -240,9 +289,12 @@ public:
 	/** Creating application (e.g. a linked account on the user's client)
 	 */
 	snowflake application_id;
-	/** Flags bitmask from activity_flags
+	/** Flags bitmask from dpp::activity_flags
 	 */
 	uint8_t flags;
+	/** Whether or not the activity is an instanced game session
+	 */
+	bool is_instanced;
 
 	/**
 	 * @brief Get the assets large image url if they have one, otherwise returns an empty string

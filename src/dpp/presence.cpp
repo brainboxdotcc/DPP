@@ -53,12 +53,25 @@ std::string activity::get_small_asset_url(uint16_t size) const {
 	}
 }
 
-activity_emoji::activity_emoji() : id(0), animated(false)
+activity_emoji::activity_emoji() : id(0), is_animated(false)
 {
 }
 
+std::string activity_emoji::format() const
+{
+	return id ? ((is_animated ? "a:" : "") + name + ":" + std::to_string(id)) : name;
+}
+
 std::string activity_emoji::get_mention() const {
-	return "<:" + (id ? ((animated ? "a:" : "") + name + ":" + std::to_string(id)) : name) + ">";
+	if (id) {
+		if (is_animated) {
+			return "<" + format() + ">";
+		} else {
+			return "<:" + format() + ">";
+		}
+	} else {
+		return ":" + format() + ":";
+	}
 }
 
 activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) :
@@ -195,7 +208,19 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			if (act.find("emoji") != act.end()) {
 				a.emoji.name = string_not_null(&act["emoji"], "name");
 				a.emoji.id = snowflake_not_null(&act["emoji"], "id");
-				a.emoji.animated = bool_not_null(&act["emoji"], "animated");
+				a.emoji.is_animated = bool_not_null(&act["emoji"], "animated");
+			}
+			if (act.find("party") != act.end()) {
+				a.party.id = snowflake_not_null(&act["party"], "id");
+				if (act["party"].find("size") != act.end()) { // "size" is an array of two integers
+					a.party.current_size = (int32_t)act["party"]["size"][0];
+					a.party.maximum_size = (int32_t)act["party"]["size"][1];
+				}
+			}
+			if (act.find("secret") != act.end()) {
+				a.secret.join = string_not_null(&act["secret"], "join");
+				a.secret.spectate = string_not_null(&act["secret"], "spectate");
+				a.secret.match = string_not_null(&act["secret"], "match");
 			}
 			a.created_at = int64_not_null(&act, "created_at");
 			if (act.find("timestamps") != act.end()) {
