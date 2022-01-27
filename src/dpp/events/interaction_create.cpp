@@ -45,6 +45,8 @@ using namespace dpp;
 void interaction_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	dpp::interaction i;
+	/* We must set here because we cant pass it through the nlohmann from_json() */
+	i.cache_policy = client->creator->cache_policy;
 	i.fill_from_json(&d);
 	/* There are two types of interactions, component interactions and
 	 * slash command interactions. Both fire different library events
