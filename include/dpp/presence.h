@@ -239,7 +239,7 @@ public:
 	std::vector<activity_button> buttons;
 	/** The emoji used for the custom status
 	 */
-	emoji status_emoji;
+	dpp::emoji emoji;
 	/** Information of the current party if there is one
 	 */
 	activity_party party;

@@ -193,10 +193,10 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 				}
 			}
 			if (act.find("emoji") != act.end()) {
-				a.status_emoji.name = string_not_null(&act["emoji"], "name");
-				a.status_emoji.id = snowflake_not_null(&act["emoji"], "id");
+				a.emoji.name = string_not_null(&act["emoji"], "name");
+				a.emoji.id = snowflake_not_null(&act["emoji"], "id");
 				if (bool_not_null(&act["emoji"], "animated"))
-					a.status_emoji.flags |= e_animated;
+					a.emoji.flags |= e_animated;
 			}
 			if (act.find("party") != act.end()) {
 				a.party.id = snowflake_not_null(&act["party"], "id");
