@@ -177,7 +177,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 				a.assets.small_image = string_not_null(&(act["assets"]), "small_image");
 				a.assets.small_text = string_not_null(&(act["assets"]), "small_text");
 			}
-			a.state = string_not_null(&act, "state"); // if user
+			a.state = string_not_null(&act, "state");
 			a.type = (activity_type)int8_not_null(&act, "type");
 			a.url = string_not_null(&act, "url");
 			if (act.find("buttons") != act.end()) {
@@ -193,10 +193,10 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 				}
 			}
 			if (act.find("emoji") != act.end()) {
-				a.emoji.name = string_not_null(&act["emoji"], "name");
-				a.emoji.id = snowflake_not_null(&act["emoji"], "id");
+				a.status_emoji.name = string_not_null(&act["emoji"], "name");
+				a.status_emoji.id = snowflake_not_null(&act["emoji"], "id");
 				if (bool_not_null(&act["emoji"], "animated"))
-					a.emoji.flags |= e_animated;
+					a.status_emoji.flags |= e_animated;
 			}
 			if (act.find("party") != act.end()) {
 				a.party.id = snowflake_not_null(&act["party"], "id");
