@@ -146,39 +146,8 @@ public:
 	 */
 	std::string url;
 
+	/** Constructor */
 	activity_button() = default;
-};
-
-/**
- * @brief The emoji used for a custom status
- */
-struct DPP_EXPORT activity_emoji {
-public:
-	/** The name of the emoji
-	 */
-	std::string name;
-	/** The ID of the emoji
-	 */
-	snowflake id;
-	/** Whether the emoji is animated
-	 */
-	bool is_animated;
-
-	/**
-	 * @brief Format to name if unicode, name:id if has id or a:name:id if animated
-	 *
-	 * @return Formatted name for reactions
-	 */
-	std::string format() const;
-
-	/**
-	 * @brief Get the mention/ping for the emoji
-	 *
-	 * @return std::string mention
-	 */
-	std::string get_mention() const;
-
-	activity_emoji();
 };
 
 /**
@@ -199,6 +168,7 @@ public:
 	 */
 	std::string small_text;
 
+	/** Constructor */
 	activity_assets() = default;
 };
 
@@ -217,6 +187,7 @@ public:
 	 */
 	std::string match;
 
+	/** Constructor */
 	activity_secrets() = default;
 };
 
@@ -235,7 +206,8 @@ public:
 	 */
 	int32_t maximum_size;
 
-	activity_party() = default;
+	/** Constructor */
+	activity_party();
 };
 
 /**
@@ -267,7 +239,7 @@ public:
 	std::vector<activity_button> buttons;
 	/** The emoji used for the custom status
 	 */
-	activity_emoji emoji;
+	emoji emoji;
 	/** Information of the current party if there is one
 	 */
 	activity_party party;
@@ -312,7 +284,7 @@ public:
 	 */
 	std::string get_small_asset_url(uint16_t size = 0) const;
 
-	activity() = default;
+	activity();
 
 	/**
 	 * @brief Construct a new activity

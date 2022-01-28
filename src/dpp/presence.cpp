@@ -29,7 +29,7 @@ namespace dpp {
 
 std::string activity::get_large_asset_url(uint16_t size) const {
 	if (!this->assets.large_image.empty() && this->application_id) {
-		return fmt::format("app-assets/{}/{}.png{}",
+		return fmt::format("{}/app-assets/{}/{}.png{}",
 						   utility::cdn_host,
 						   this->application_id,
 						   this->assets.large_image,
@@ -42,7 +42,7 @@ std::string activity::get_large_asset_url(uint16_t size) const {
 
 std::string activity::get_small_asset_url(uint16_t size) const {
 	if (!this->assets.large_image.empty() && this->application_id) {
-		return fmt::format("app-assets/{}/{}.png{}",
+		return fmt::format("{}/app-assets/{}/{}.png{}",
 						   utility::cdn_host,
 						   this->application_id,
 						   this->assets.large_image,
@@ -53,30 +53,17 @@ std::string activity::get_small_asset_url(uint16_t size) const {
 	}
 }
 
-activity_emoji::activity_emoji() : id(0), is_animated(false)
+activity_party::activity_party() : id(0), current_size(0), maximum_size(0)
 {
-}
-
-std::string activity_emoji::format() const
-{
-	return id ? ((is_animated ? "a:" : "") + name + ":" + std::to_string(id)) : name;
-}
-
-std::string activity_emoji::get_mention() const {
-	if (id) {
-		if (is_animated) {
-			return "<" + format() + ">";
-		} else {
-			return "<:" + format() + ">";
-		}
-	} else {
-		return ":" + format() + ":";
-	}
 }
 
 activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) :
 	 name(nam), state(stat), url(url_), type(typ)
 {	
+}
+
+activity::activity(): application_id(0)
+{
 }
 
 presence::presence() : user_id(0), guild_id(0), flags(0)
@@ -208,7 +195,8 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			if (act.find("emoji") != act.end()) {
 				a.emoji.name = string_not_null(&act["emoji"], "name");
 				a.emoji.id = snowflake_not_null(&act["emoji"], "id");
-				a.emoji.is_animated = bool_not_null(&act["emoji"], "animated");
+				if (bool_not_null(&act["emoji"], "animated"))
+					a.emoji.flags |= e_animated;
 			}
 			if (act.find("party") != act.end()) {
 				a.party.id = snowflake_not_null(&act["party"], "id");
