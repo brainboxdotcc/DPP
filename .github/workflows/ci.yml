@@ -234,5 +234,5 @@ jobs:
     - name: Upload Binaries (BZ2)
       uses: actions/upload-artifact@v2
       with:
-        name: "libdpp - Debian Package ${{matrix.cfg.name}}"
+        name: "libdpp - FreeBSD x64"
         path: "${{github.workspace}}/build/*.tar.bz2"
