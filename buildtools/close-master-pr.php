@@ -14,3 +14,19 @@ foreach ($master_prs as $pr) {
 	}
 }
 
+// Tidy up the workflow run list so it isnt littered with these
+exec("gh run list -w \"Close master-targetted PRs\"", $runs);
+$runindex = 0;
+foreach ($runs as $run) {
+	$run = preg_replace('/  /', ' ', $run);
+	$data = preg_split('/\s+/', $run);
+	$id = $data[sizeof($data) - 3];
+	$id = (int)$id;
+	if ($id > 0 && $runindex > 1) {
+		// Delete all but the first completed workflow run and this one
+		// (the first is the currently executing one!)
+		exec("gh api repos/brainboxdotcc/DPP/actions/runs/$id -X DELETE");
+		sleep(1);
+	}
+	$runindex++;
+}
