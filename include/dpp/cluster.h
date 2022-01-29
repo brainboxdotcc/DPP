@@ -1442,8 +1442,6 @@ public:
 	/**
 	 * @brief Create a slash command local to a guild
 	 *
-	 * @note Creating a command with the same name as an existing command for your application will overwrite the old command.
-	 *
 	 * @param s Slash command to create
 	 * @param guild_id Guild ID to create the slash command in
 	 * @param callback Function to call when the API call completes.
@@ -1502,7 +1500,6 @@ public:
 	 * @brief Edit slash command permissions local to a guild,
 	 *		permissions are read from s.permissions
 	 *
-	 * @note You can only add up to 10 permission overwrites for a command
 	 * @param s Slash command to edit
 	 * @param guild_id Guild ID to edit the slash command in
 	 * @param callback Function to call when the API call completes.
@@ -2492,7 +2489,6 @@ public:
 	 * 
 	 * Requires the `MANAGE_GUILD` permission.
 	 *
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to edit widget for
 	 * @param gw New guild widget information
 	 * @param callback Function to call when the API call completes.
