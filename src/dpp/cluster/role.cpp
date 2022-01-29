@@ -57,7 +57,7 @@ void cluster::role_edit(const class role &r, command_completion_event_t callback
 }
 
 
-void cluster::role_edit_positions(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback) {
+void cluster::roles_edit_position(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback) {
 	if (roles.empty()) {
 		return;
 	}
