@@ -269,7 +269,7 @@ public:
 	bool is_instance;
 
 	/**
-	 * @brief Get the assets large image url if they have one, otherwise returns an empty string
+	 * @brief Get the assets large image url if they have one, otherwise returns an empty string. In case of prefixed image IDs (mp:{image_id}) it returns an empty string.
 	 *
 	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized image is returned.
 	 * @return image url or empty string
@@ -277,7 +277,7 @@ public:
 	std::string get_large_asset_url(uint16_t size = 0) const;
 
 	/**
-	 * @brief Get the assets small image url if they have one, otherwise returns an empty string
+	 * @brief Get the assets small image url if they have one, otherwise returns an empty string. In case of prefixed image IDs (mp:{image_id}) it returns an empty string.
 	 *
 	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized image is returned.
 	 * @return image url or empty string
