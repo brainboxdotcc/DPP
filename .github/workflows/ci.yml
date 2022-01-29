@@ -210,4 +210,29 @@ jobs:
           name: "libdpp - RPM Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.rpm"
 
+  testfreebsd:
+    runs-on: macos-10.15
+    name: FreeBSD
+    steps:
+    - uses: actions/checkout@v2
+    - name: FreeBSD Build and Package
+      id: freebsdtest
+      uses: vmactions/freebsd-vm@v0.1.5
+      with:
+        usesh: true
+        prepare: pkg install -y openssl-devel gcc gmake ninja cmake git
+        run: |
+          pwd
+          ls -lah
+          mkdir build
+          cd build
+          cmake ..
+          make -j2
+          make install
+          cpack --verbose
 
+    - name: Upload Binaries (BZ2)
+      uses: actions/upload-artifact@v2
+      with:
+        name: "libdpp - FreeBSD x64"
+        path: "${{github.workspace}}/build/*.tar.bz2"

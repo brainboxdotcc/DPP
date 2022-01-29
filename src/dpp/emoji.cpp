@@ -106,18 +106,18 @@ emoji& emoji::load_image(const std::string &image_blob, const image_type type) {
 
 std::string emoji::format() const
 {
-	return id ? (name + ":" + std::to_string(id)) : name;
+	return id ? ((is_animated() ? "a:" : "") + name + ":" + std::to_string(id)) : name;
 }
 
 std::string emoji::get_mention() const {
 	if (id) {
 		if (is_animated()) {
-			return "<a:" + format() + ">";
+			return "<" + format() + ">";
 		} else {
 			return "<:" + format() + ">";
 		}
 	} else {
-		return "<:" + format() + ">";
+		return ":" + format() + ":";
 	}
 }
 
