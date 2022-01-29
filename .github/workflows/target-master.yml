@@ -1,7 +1,7 @@
 name: Close master-targetted PRs
 on:
   schedule:
-    - cron: '0,30 * * * *'
+    - cron: '*/15 * * * *'
 
 jobs:
   docs:
@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     concurrency: 
-      group: docs-deployment
-      cancel-in-progress: false
+      group: pr
+      cancel-in-progress: true
 
     steps:
       - name: Setup PHP
