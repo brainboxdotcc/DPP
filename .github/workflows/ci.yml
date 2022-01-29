@@ -212,7 +212,7 @@ jobs:
 
   testfreebsd:
     runs-on: macos-10.15
-    name: FreeBSD
+    name: FreeBSD (g++-10)
     steps:
     - uses: actions/checkout@v2
     - name: FreeBSD Build and Package
@@ -236,3 +236,24 @@ jobs:
       with:
         name: "libdpp - FreeBSD x64"
         path: "${{github.workspace}}/build/*.tar.bz2"
+
+  testopenbsd:
+    runs-on: macos-10.15
+    name: OpenBSD (g++-10)
+    steps:
+    - uses: actions/checkout@v2
+    - name: OpenBSD Build
+      id: freebsdtest
+      uses: vmactions/openbsd-vm@main
+      with:
+        usesh: true
+        prepare: pkg install -y openssl-devel gcc gmake ninja cmake git
+        run: |
+          pwd
+          ls -lah
+          mkdir build
+          cd build
+          cmake ..
+          make -j2
+          make install
+          cpack --verbose
