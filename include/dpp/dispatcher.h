@@ -578,15 +578,6 @@ struct DPP_EXPORT message_delete_t : public event_dispatch_t {
 	message* deleted;
 };
 
-/** @brief Application slash command deleted */
-struct DPP_EXPORT application_command_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	application_command_delete_t(class discord_client* client, const std::string& raw);
-};
-
 /** @brief Guild member remove */
 struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
 	/** Constructor
@@ -602,18 +593,6 @@ struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
 	 * @brief user being removed
 	 */
 	user* removed;
-};
-
-/**
- * @brief Create application slash command
- * 
- */
-struct DPP_EXPORT application_command_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	application_command_create_t(class discord_client* client, const std::string& raw);
 };
 
 /** @brief Session resumed */
@@ -1099,18 +1078,6 @@ struct DPP_EXPORT guild_member_update_t : public event_dispatch_t {
 	 * @brief member being updated
 	 */
 	guild_member updated;
-};
-
-/**
- * @brief Update application slash command
- * 
- */
-struct DPP_EXPORT application_command_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	application_command_update_t(class discord_client* client, const std::string& raw);
 };
 
 /** @brief Invite create */

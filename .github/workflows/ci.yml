@@ -23,7 +23,10 @@ on:
 
 
 jobs:
-  linux:
+  linux-with-unit-test:
+    concurrency: 
+      group: linux-build-unit-test
+      cancel-in-progress: false
     name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
     runs-on: ${{matrix.cfg.os}}
     strategy:
@@ -31,14 +34,13 @@ jobs:
       matrix:
         cfg:
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-8 }
-          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2
 
       - name: Install apt packages
-        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }}:${{ matrix.cfg.arch }} ninja-build libsodium-dev:${{ matrix.cfg.arch }} libopus-dev:${{ matrix.cfg.arch }} zlib1g-dev:${{ matrix.cfg.arch }} rpm:${{ matrix.cfg.arch }}
+        run: sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
@@ -49,7 +51,6 @@ jobs:
         run: cd build && ninja 
 
       - name: Run unit tests
-        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
         run: cd build && ./test
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
@@ -77,6 +78,29 @@ jobs:
           name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.rpm'
 
+  linux-no-unit-tests:
+    name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
+    runs-on: ${{matrix.cfg.os}}
+    strategy:
+      fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
+      matrix:
+        cfg:
+          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
+
+    steps:
+      - name: Checkout D++
+        uses: actions/checkout@v2
+
+      - name: Install apt packages
+        run: sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
+
+      - name: Generate CMake
+        run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        env:
+          CXX: ${{matrix.cfg.cpp-version}}
+
+      - name: Build Project
+        run: cd build && ninja 
 
   macos:
     name: macOS x64
@@ -186,4 +210,29 @@ jobs:
           name: "libdpp - RPM Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.rpm"
 
+  testfreebsd:
+    runs-on: macos-10.15
+    name: FreeBSD
+    steps:
+    - uses: actions/checkout@v2
+    - name: FreeBSD Build and Package
+      id: freebsdtest
+      uses: vmactions/freebsd-vm@v0.1.5
+      with:
+        usesh: true
+        prepare: pkg install -y openssl-devel gcc gmake ninja cmake git
+        run: |
+          pwd
+          ls -lah
+          mkdir build
+          cd build
+          cmake ..
+          make -j2
+          make install
+          cpack --verbose
 
+    - name: Upload Binaries (BZ2)
+      uses: actions/upload-artifact@v2
+      with:
+        name: "libdpp - FreeBSD x64"
+        path: "${{github.workspace}}/build/*.tar.bz2"
