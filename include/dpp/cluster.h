@@ -2635,20 +2635,6 @@ public:
 	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Edit multiple role's position in a guild
-	 *
-	 * Modify the positions of a set of role objects for the guild. Requires the `MANAGE_ROLES` permission.
-	 * Fires multiple `Guild Role Update` Gateway events.
-	 *
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 * @param guild_id Guild ID to change the role positions on
-	 * @param roles Vector of roles to change position of
-	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::role_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
-	 */
-	void role_edit_positions(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback = {});
-
-	/**
 	 * @brief Get a role for a guild
 	 *
 	 * @param guild_id Guild ID to get role for
@@ -2683,17 +2669,18 @@ public:
 	void role_edit(const class role &r, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Edit a role's position in a guild
-	 * 
-	 * Modify the position of a role. Requires the `MANAGE_ROLES` permission.
+	 * @brief Edit multiple role's position in a guild. Returns a list of all roles of the guild on success.
+	 *
+	 * Modify the positions of a set of role objects for the guild. Requires the `MANAGE_ROLES` permission.
 	 * Fires multiple `Guild Role Update` Gateway events.
-	 * 
+	 *
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 * @param r Role to change position of
+	 * @param guild_id Guild ID to change the role positions on
+	 * @param roles Vector of roles to change the positions of
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::role_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void role_edit_position(const class role &r, command_completion_event_t callback = {});
+	void role_edit_positions(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Delete a role
