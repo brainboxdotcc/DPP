@@ -78,6 +78,61 @@ std::string channel::get_mention() const {
 	return "<#" + std::to_string(id) + ">";
 }
 
+channel& channel::set_name(const std::string& name) {
+	this->name = utility::validate(name, 1, 100, "name must be at least 1 character");
+	return *this;
+}
+
+channel& channel::set_topic(const std::string& topic) {
+	this->topic = utility::utf8substr(topic, 0, 1024);
+	return *this;
+}
+
+channel& channel::set_parent_id(const snowflake parent_id) {
+	this->parent_id = parent_id;
+	return *this;
+}
+
+channel& channel::set_rate_limit_per_user(const uint16_t rate_limit_per_user) {
+	this->rate_limit_per_user = rate_limit_per_user;
+	return *this;
+}
+
+channel& channel::set_position(const uint16_t position) {
+	this->position = position;
+	return *this;
+}
+
+channel& channel::set_bitrate(const uint16_t bitrate) {
+	this->bitrate = bitrate;
+	return *this;
+}
+
+channel& channel::set_flags(const uint16_t flags) {
+	this->flags = flags;
+	return *this;
+}
+
+channel& channel::add_flag(const channel_flags flag) {
+	this->flags |= flag;
+	return *this;
+}
+
+channel& channel::remove_flag(const channel_flags flag) {
+	this->flags &= ~flag;
+	return *this;
+}
+
+channel& channel::set_nsfw(const bool is_nsfw) {
+	this->flags = (is_nsfw) ? this->flags | dpp::c_nsfw : this->flags & ~dpp::c_nsfw;;
+	return *this;
+}
+
+channel& channel::set_user_limit(const uint8_t user_limit) {
+	this->user_limit = user_limit;
+	return *this;
+}
+
 bool channel::is_nsfw() const {
 	return flags & dpp::c_nsfw;
 }

@@ -32,6 +32,7 @@ $categories = [
 	'documentation'	=> 	'## 📚 Documentation',
 	'style'			=> 	'## 💎 Style Changes',
 	'chore' 		=>	'## 🔧 Chore',
+	'misc' 		=>	'## 📜 Miscellaneous Changes',
 ];
 
 $catgroup = [];
@@ -59,7 +60,7 @@ foreach ($changelog as $change) {
 			continue;
 		}
 		// Groupings
-		if ((preg_match("/^" . $cat . ":/i", $change)) or (preg_match("/^\[" . $cat . "\//i", $change)) or (preg_match("/^\[" . $cat . ":/i", $change)) or (preg_match("/^" . $cat . "\//i", $change)) or (preg_match("/^" . $cat . ":/i", $change))) {
+		if ((preg_match("/^" . $cat . ":/i", $change)) or (preg_match("/^\[" . $cat . "\//i", $change)) or (preg_match("/^\[" . $cat . "\]/i", $change))or (preg_match("/^\[" . $cat . ":/i", $change)) or (preg_match("/^" . $cat . "\//i", $change)) or (preg_match("/^" . $cat . ":/i", $change))) {
 			if (!isset($catgroup[$header])) {
 				$catgroup[$header] = [];
 			}

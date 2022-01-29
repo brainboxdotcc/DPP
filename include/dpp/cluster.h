@@ -1833,14 +1833,27 @@ public:
 	 * @brief Edit a channel's permissions
 	 *
 	 * @param c Channel to set permissions for
-	 * @param overwrite_id Overwrite to change (a user or channel ID)
+	 * @param overwrite_id Overwrite to change (a user or role ID)
 	 * @param allow allow permissions
 	 * @param deny deny permissions
 	 * @param member true if the overwrite_id is a user id, false if it is a channel id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback = {});
+	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Edit a channel's permissions
+	 *
+	 * @param channel_id ID of the channel to set permissions for
+	 * @param overwrite_id Overwrite to change (a user or role ID)
+	 * @param allow allow permissions
+	 * @param deny deny permissions
+	 * @param member true if the overwrite_id is a user id, false if it is a channel id
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Delete a channel
