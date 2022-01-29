@@ -74,7 +74,7 @@ void cluster::role_edit_positions(snowflake guild_id, const std::vector<role> &r
 					roles[snowflake_not_null(&curr_role, "id")] = role().fill_from_json(guild_id, &curr_role);
 				}
 			}
-			callback(confirmation_callback_t("role", roles, http));
+			callback(confirmation_callback_t("role_map", roles, http));
 		}
 	});
 }
