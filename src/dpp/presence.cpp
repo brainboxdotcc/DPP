@@ -172,10 +172,10 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			a.name = string_not_null(&act, "name");
 			a.details = string_not_null(&act, "details");
 			if (act.find("assets") != act.end()) {
-				a.assets.large_image = string_not_null(&(act["assets"]), "large_image");
-				a.assets.large_text = string_not_null(&(act["assets"]), "large_text");
-				a.assets.small_image = string_not_null(&(act["assets"]), "small_image");
-				a.assets.small_text = string_not_null(&(act["assets"]), "small_text");
+				a.assets.large_image = string_not_null(&act["assets"], "large_image");
+				a.assets.large_text = string_not_null(&act["assets"], "large_text");
+				a.assets.small_image = string_not_null(&act["assets"], "small_image");
+				a.assets.small_text = string_not_null(&act["assets"], "small_text");
 			}
 			a.state = string_not_null(&act, "state");
 			a.type = (activity_type)int8_not_null(&act, "type");
@@ -200,7 +200,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			}
 			if (act.find("party") != act.end()) {
 				a.party.id = snowflake_not_null(&act["party"], "id");
-				if (act["party"].find("size") != act.end()) { // "size" is an array of two integers
+				if (act["party"].find("size") != act["party"].end()) { // "size" is an array of two integers
 					try {
 						a.party.current_size = act["party"]["size"][0].get<int32_t>();
 						a.party.maximum_size = act["party"]["size"][1].get<int32_t>();
@@ -214,8 +214,8 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			}
 			a.created_at = int64_not_null(&act, "created_at");
 			if (act.find("timestamps") != act.end()) {
-				a.start = int64_not_null(&(act["timestamps"]), "start");
-				a.end = int64_not_null(&(act["timestamps"]), "end");
+				a.start = int64_not_null(&act["timestamps"], "start");
+				a.end = int64_not_null(&act["timestamps"], "end");
 			}
 			a.application_id = snowflake_not_null(&act, "application_id");
 			a.flags = int8_not_null(&act, "flags");
