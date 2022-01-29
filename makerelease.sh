@@ -23,6 +23,9 @@ mv "./libdpp - Debian Package ARM64/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$
 mv "./libdpp - Debian Package ARMv7 HF/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm7hf.deb"
 mv "./libdpp - Debian Package ARMv6/libdpp-$NEWVER-Linux.deb" "./assets/libdpp-$NEWVER-linux-rpi-arm6.deb"
 
+# freebsd tar.bz2
+mv "./libdpp - FreeBSD x64/libdpp-$NEWVER-FreeBSD.tar.bz2" "./assets/libdpp-$NEWVER-freebsd-x64.tar.bz2"
+
 # win vs2019
 mv "./libdpp - Windows x64-Release-vs2019/libdpp-$NEWVER-win64.zip" "./assets/libdpp-$NEWVER-win64-release-vs2019.zip"
 mv "./libdpp - Windows x64-Debug-vs2019/libdpp-$NEWVER-win64.zip" "./assets/libdpp-$NEWVER-win64-debug-vs2019.zip"
@@ -88,7 +91,7 @@ rm -rf libdpp-$NEWVER-win32
 
 cd ..
 echo "Create release..."
-gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(/usr/bin/php ../buildtools/changelog.php)" ./assets/*.zip ./assets/*.deb ./assets/*.rpm
+gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(/usr/bin/php ../buildtools/changelog.php)" ./assets/*.zip ./assets/*.deb ./assets/*.rpm ./assets/*.tar.bz2
 echo "Cleaning up..."
 cd ..
 rm -rf temp
