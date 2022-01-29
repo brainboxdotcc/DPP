@@ -22,7 +22,7 @@
 
 /* Unit tests go here */
 int main()
-{
+{ 
 	std::string token(get_token());
 	std::vector<uint8_t> testaudio = load_test_audio();
 
