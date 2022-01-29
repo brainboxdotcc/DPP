@@ -640,6 +640,14 @@ public:
 	 * @param permission True to allow, false, to disallow
 	 */
 	command_permission(snowflake id, const command_permission_type t, bool permission);
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return command_permission& Reference to self
+	 */
+	command_permission &fill_from_json(nlohmann::json *j);
 };
 
 /**

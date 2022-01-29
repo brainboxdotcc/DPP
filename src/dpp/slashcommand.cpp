@@ -41,6 +41,10 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	name = string_not_null(j, "name");
 	description = string_not_null(j, "description");
 	version = snowflake_not_null(j, "version");
+	application_id = snowflake_not_null(j, "application_id");
+	default_permission = bool_not_null(j, "default_permission");
+	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
+	// TODO options missing
 	return *this;
 }
 
@@ -568,5 +572,13 @@ interaction_modal_response& interaction_modal_response::set_title(const std::str
 command_permission::command_permission(snowflake id, const command_permission_type t, bool permission) :
 	id(id), type(t), permission(permission) {
 }
+
+command_permission& command_permission::fill_from_json(nlohmann::json* j) {
+	id = snowflake_not_null(j, "id");
+	type = (command_permission_type)int8_not_null(j, "type");
+	permission = bool_not_null(j, "permission");
+	return *this;
+}
+
 
 };

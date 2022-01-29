@@ -108,6 +108,49 @@ void cluster::guild_bulk_command_create(const std::vector<slashcommand> &command
 	});
 }
 
+void cluster::guild_commands_get_permissions(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/permissions", m_get, "", [callback](json &j, const http_request_completion_t& http)  {
+		slashcommand_map slashcommands;
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto &curr_slashcommand: j) {
+				slashcommand s;
+				s.fill_from_json(&curr_slashcommand);
+				if (curr_slashcommand.find("permissions") != curr_slashcommand.end()) {
+					for (auto &curr_permission: curr_slashcommand["permissions"]) {
+						s.permissions.push_back(command_permission().fill_from_json(&curr_permission));
+					}
+				}
+				slashcommands[snowflake_not_null(&curr_slashcommand, "id")] = s;
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t("slashcommand_map", slashcommands, http));
+		}
+	});
+}
+
+void cluster::guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback) {
+	if (commands.empty()) {
+		return;
+	}
+	json j = json::array();
+	for (auto & s : commands) {
+		json command;
+		command["id"] = s.id;
+		command["permissions"] = json::array();
+		for (auto & c : s.permissions) {
+			command["permissions"].push_back(c);
+		}
+		j.push_back(command);
+	}
+	this->post_rest(API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/permissions", m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
 void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [s, this, guild_id, callback] (json &j, const http_request_completion_t& http) mutable {
 		if (callback) {
@@ -146,6 +189,24 @@ void cluster::guild_command_edit_permissions(const slashcommand &s, snowflake gu
 	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id) + "/permissions", m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::guild_command_get_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id) + "/permissions", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		slashcommand slashcommand;
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			slashcommand.fill_from_json(&j);
+			if (j.find("permissions") != j.end()) {
+				for (auto &permission: j["permissions"]) {
+					slashcommand.permissions.push_back(command_permission().fill_from_json(&permission));
+				}
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t("slashcommand", slashcommand, http));
 		}
 	});
 }
