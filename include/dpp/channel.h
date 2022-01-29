@@ -234,6 +234,99 @@ public:
 	virtual std::string build_json(bool with_id = false) const;
 
 	/**
+	 * @brief Set name of this channel object
+	 *
+	 * @param name Name to set
+	 * @return Reference to self, so these method calls may be chained 
+	 *
+	 * @note name will be truncated to 100 chars, if longer
+	 * @throw dpp::length_exception if length < 1
+	 */
+	channel& set_name(const std::string& name);
+
+	/**
+	 * @brief Set topic of this channel object
+	 *
+	 * @param topic Topic to set
+	 * @return Reference to self, so these method calls may be chained 
+	 *
+	 * @note topic will be truncated to 1024 chars, if longer
+	 */
+	channel& set_topic(const std::string& topic);
+
+	/**
+	 * @brief Set flags for this channel object
+	 *
+	 * @param flags Flag bitmask to set
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_flags(const uint16_t flags);
+
+	/* 
+	 * @brief Add (bitwise OR) a flag to this channel object
+	 * 	
+	 * @param flag Flag bit to set
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& add_flag(const channel_flags flag);
+
+	/* 
+	 * @brief Remove (bitwise NOT AND) a flag from this channel object
+	 * 	
+	 * @param flag Flag bit to set
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& remove_flag(const channel_flags flag);
+
+	/**
+	 * @brief Set position of this channel object
+	 *
+	 * @param position Position to set
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_position(const uint16_t position);
+
+	/**
+	 * @brief Set parent_id of this channel object
+	 *
+	 * @param parent_id Parent ID to set
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_parent_id(const snowflake parent_id);
+
+	/**
+	 * @brief Set user_limit of this channel object
+	 *
+	 * @param user_limit Limit to set
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_user_limit(const uint8_t user_limit);
+
+	/**
+	 * @brief Set bitrate of this channel object
+	 *
+	 * @param bitrate Bitrate to set
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_bitrate(const uint16_t bitrate);
+
+	/**
+	 * @brief Set nsfw property of this channel object
+	 *
+	 * @param is_nsfw true, if channel is nsfw
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_nsfw(const bool is_nsfw);
+
+	/**
+	 * @brief Set rate_limit_per_user of this channel object
+	 *
+	 * @param rate_limit_per_user rate_limit_per_user (slowmode in sec) to set
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_rate_limit_per_user(const uint16_t rate_limit_per_user);
+
+	/**
 	 * @brief Get the mention ping for the channel
 	 * 
 	 * @return std::string mention
