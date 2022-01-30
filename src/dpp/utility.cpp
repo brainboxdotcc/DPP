@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <fstream>
 #include <streambuf>
+#include <array>
 #include <dpp/fmt/format.h>
 
 #ifdef _WIN32
