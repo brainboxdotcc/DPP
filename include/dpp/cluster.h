@@ -2506,7 +2506,7 @@ public:
 	/**
 	 * @brief Edit guild widget
 	 * 
-	 * Requires the `MANAGE_GUILD` permission. 
+	 * Requires the `MANAGE_GUILD` permission.
 	 *
 	 * @param guild_id Guild ID to edit widget for
 	 * @param gw New guild widget information
