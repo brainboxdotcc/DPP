@@ -18,7 +18,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/exception.h>
 #include <dpp/role.h>
 #include <dpp/cache.h>

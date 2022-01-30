@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
+#include <dpp/user.h>
 #include <dpp/discordevents.h>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>

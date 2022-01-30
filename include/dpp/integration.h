@@ -20,7 +20,10 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <dpp/snowflake.h>
+#include <dpp/managed.h>
 #include <dpp/json_fwd.hpp>
+#include <unordered_map>
 
 namespace dpp {
 
@@ -67,7 +70,7 @@ struct DPP_EXPORT integration_app {
 	/// Integration summary
 	std::string summary;
 	/// Pointer to bot user
-	user* bot;
+	class user* bot;
 };
 
 /**

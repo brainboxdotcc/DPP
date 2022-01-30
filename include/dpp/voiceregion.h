@@ -20,7 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
+#include <unordered_map>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {

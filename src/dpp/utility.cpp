@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
+#include <dpp/utility.h>
 #include <dpp/stringops.h>
 #include <dpp/exception.h>
 #include <ctime>

@@ -21,7 +21,12 @@
 
 #pragma once
 #include <dpp/export.h>
+#include <dpp/snowflake.h>
+#include <dpp/managed.h>
+#include <dpp/utility.h>
+#include <dpp/voicestate.h>
 #include <dpp/json_fwd.hpp>
+#include <unordered_map>
 
 namespace dpp {
 

@@ -33,7 +33,6 @@
 #include <dpp/etf.h>
 #include <dpp/sysdep.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
 #include <dpp/exception.h>
 #include <dpp/nlohmann/json.hpp>
 #include <zlib.h>

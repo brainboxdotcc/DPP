@@ -21,7 +21,7 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
+#include <stdint.h>
 #include <map>
 #include <functional>
 
