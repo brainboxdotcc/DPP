@@ -23,6 +23,8 @@
 #include <dpp/export.h>
 #include <stdint.h>
 #include <map>
+#include <unordered_map>
+#include <stddef.h>
 #include <functional>
 
 namespace dpp {
