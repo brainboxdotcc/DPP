@@ -68,7 +68,7 @@ activity::activity(const activity_type typ, const std::string& nam, const std::s
 {	
 }
 
-activity::activity(): application_id(0)
+activity::activity(): start(0), end(0), application_id(0), flags(0)
 {
 }
 
