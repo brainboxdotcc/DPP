@@ -64,11 +64,11 @@ activity_party::activity_party() : id(0), current_size(0), maximum_size(0)
 }
 
 activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) :
-	 name(nam), state(stat), url(url_), type(typ)
-{	
+	 name(nam), state(stat), url(url_), type(typ), created_at(0), start(0), end(0), application_id(0), flags(0), is_instance(false)
+{
 }
 
-activity::activity(): start(0), end(0), application_id(0), flags(0)
+activity::activity(): created_at(0), start(0), end(0), application_id(0), flags(0), is_instance(false)
 {
 }
 
