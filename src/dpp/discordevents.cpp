@@ -104,6 +104,22 @@ void set_string_not_null(const json* j, const char *keyname, std::string &v) {
 	}
 }
 
+double double_not_null(const json* j, const char *keyname) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		return !k->is_null() && !k->is_string() ? k->get<double>() : 0;
+	} else {
+		return 0;
+	}
+}
+
+void set_double_not_null(const json* j, const char *keyname, double &v) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && !k->is_string() ? k->get<double>() : 0;
+	}
+}
+
 uint64_t int64_not_null(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
