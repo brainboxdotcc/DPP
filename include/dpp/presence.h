@@ -21,6 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
+#include <dpp/emoji.h>
 #include <dpp/json_fwd.hpp>
 #include <unordered_map>
 
