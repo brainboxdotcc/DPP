@@ -35,7 +35,6 @@
 #include <dpp/fmt/format.h>
 
 #ifdef _WIN32
-	#include <array>
 	#include <stdio.h>
 	#include <stdlib.h>
 	#define popen _popen
