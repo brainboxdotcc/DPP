@@ -221,7 +221,7 @@ public:
 	 * e.g. "Fortnite"
 	 */
 	std::string name;
-	/** State of activity.
+	/** State of activity or the custom user status.
 	 * e.g. "Waiting in lobby"
 	 */
 	std::string state;
