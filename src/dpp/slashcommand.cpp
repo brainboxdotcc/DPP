@@ -233,6 +233,8 @@ command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) 
 	} else { // else string
 		value.emplace<std::string>(string_not_null(j, "value"));
 	}
+
+	return *this;
 }
 
 command_option::command_option(command_option_type t, const std::string &n, const std::string &d, bool r) :
@@ -302,6 +304,8 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 		}
 	}
 	autocomplete = bool_not_null(j, "autocomplete");
+
+	return *this;
 }
 
 
