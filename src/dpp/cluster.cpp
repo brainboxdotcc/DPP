@@ -19,7 +19,6 @@
  *
  ************************************************************************************/
 #include <map>
-#include <dpp/discord.h>
 #include <dpp/exception.h>
 #include <dpp/cluster.h>
 #include <dpp/discordclient.h>

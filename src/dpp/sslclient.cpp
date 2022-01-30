@@ -57,7 +57,6 @@
 #include <iostream>
 #include <dpp/fmt/format.h>
 #include <dpp/sslclient.h>
-#include <dpp/discord.h>
 #include <dpp/exception.h>
 
 namespace dpp {

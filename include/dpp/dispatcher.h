@@ -20,20 +20,31 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
+#include <dpp/snowflake.h>
+#include <dpp/misc-enum.h>
+#include <dpp/managed.h>
+#include <dpp/utility.h>
+#include <dpp/role.h>
+#include <dpp/user.h>
+#include <dpp/channel.h>
+#include <dpp/guild.h>
+#include <dpp/invite.h>
+#include <dpp/emoji.h>
+#include <dpp/ban.h>
+#include <dpp/webhook.h>
+#include <dpp/presence.h>
 #include <dpp/message.h>
 #include <dpp/appcommand.h>
+#include <dpp/application.h>
+#include <dpp/scheduled_event.h>
+#include <dpp/stage_instance.h>
+#include <dpp/integration.h>
 #include <functional>
 #include <variant>
 #include <exception>
 #include <algorithm>
 
 namespace dpp {
-
-/**
- * @brief A returned event handle for an event which was attached
- */
-typedef size_t event_handle;
 
 /* Forward declaration */
 struct confirmation_callback_t;

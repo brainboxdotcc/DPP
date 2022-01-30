@@ -18,7 +18,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/message.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>

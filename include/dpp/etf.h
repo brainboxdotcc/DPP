@@ -33,7 +33,7 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
+#include <dpp/snowflake.h>
 #include <dpp/nlohmann/json.hpp>
 
 namespace dpp {

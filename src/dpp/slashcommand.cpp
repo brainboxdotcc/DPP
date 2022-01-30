@@ -20,7 +20,6 @@
  ************************************************************************************/
 #include <dpp/appcommand.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
 #include <dpp/exception.h>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/cache.h>

@@ -21,6 +21,9 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/json_fwd.hpp>
+#include <dpp/snowflake.h>
+#include <dpp/managed.h>
+#include <dpp/utility.h>
 
 namespace dpp {
 
