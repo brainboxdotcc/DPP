@@ -1872,6 +1872,7 @@ public:
 	/**
 	 * @brief Edit a channel's permissions
 	 *
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param c Channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
 	 * @param allow allow permissions
@@ -1885,6 +1886,7 @@ public:
 	/**
 	 * @brief Edit a channel's permissions
 	 *
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param channel_id ID of the channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
 	 * @param allow allow permissions
@@ -1917,6 +1919,7 @@ public:
 	/**
 	 * @brief Delete an invite
 	 *
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param invite Invite code to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
