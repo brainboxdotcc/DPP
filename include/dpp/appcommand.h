@@ -99,6 +99,14 @@ struct DPP_EXPORT command_option_choice {
 	 * @param v value to initialise with
 	 */
 	command_option_choice(const std::string &n, command_value v);
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return command_option_choice& Reference to self
+	 */
+	command_option_choice& fill_from_json(nlohmann::json* j);
 };
 
 /**
@@ -202,6 +210,14 @@ struct DPP_EXPORT command_option {
 	 * @throw dpp::exception You attempted to enable auto complete on a command_option that has choices added to it
 	 */
 	command_option& set_auto_complete(bool autocomp);
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return command_option& Reference to self
+	 */
+	command_option& fill_from_json(nlohmann::json* j);
 };
 
 /**

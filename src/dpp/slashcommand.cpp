@@ -43,7 +43,12 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	application_id = snowflake_not_null(j, "application_id");
 	default_permission = bool_not_null(j, "default_permission");
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
-	// TODO options missing
+	if (j->find("options") != j->end()) {
+		for (auto &option: (*j)["options"]) {
+			// recursive options parsing missing!
+			options.push_back(command_option().fill_from_json(&option));
+		}
+	}
 	return *this;
 }
 
@@ -77,7 +82,7 @@ void to_json(json& j, const command_option& opt) {
 	j["description"] = opt.description;
 	j["type"] = opt.type;
 	j["autocomplete"] = opt.autocomplete;
-	j["required"] = opt.required;
+	if (opt.required) j["required"] = opt.required;
 
 	/* Check for minimum and maximum values */
 	if (opt.type == dpp::co_number || opt.type == dpp::co_integer) {
@@ -215,6 +220,21 @@ command_option_choice::command_option_choice(const std::string &n, command_value
 {
 }
 
+command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) {
+	name = string_not_null(j, "name");
+	if ((*j)["value"].is_number_integer()) { // is int64
+		value.emplace<int64_t>(int64_not_null(j, "value"));
+	} else if ((*j)["value"].is_boolean()) { // is bool
+		value.emplace<bool>(bool_not_null(j, "value"));
+	} else if (snowflake_not_null(j, "value")) { // is snowflake
+		value.emplace<snowflake>(snowflake_not_null(j, "value"));
+	} else if ((*j)["value"].is_number()) { // is double
+		value.emplace<double>((*j)["value"]);
+	} else { // else string
+		value.emplace<std::string>(string_not_null(j, "value"));
+	}
+}
+
 command_option::command_option(command_option_type t, const std::string &n, const std::string &d, bool r) :
 	type(t), name(n), description(d), required(r), autocomplete(false)
 {
@@ -248,6 +268,40 @@ command_option& command_option::set_auto_complete(bool autocomp)
 	}
 	this->autocomplete = autocomp;
 	return *this;
+}
+
+command_option &command_option::fill_from_json(nlohmann::json *j) {
+	type = (command_option_type)int8_not_null(j, "type");
+	name = string_not_null(j, "name");
+	description = string_not_null(j, "name");
+	required = bool_not_null(j, "required");
+	if (j->find("choices") != j->end()) {
+		for (auto& jchoice : (*j)["choices"]) {
+			choices.push_back(command_option_choice().fill_from_json(&jchoice));
+		}
+	}
+	// TODO options recursive???
+
+	if (j->find("channel_types") != j->end()) {
+		for (auto& jtype : (*j)["channel_types"]) {
+			channel_types.push_back( (channel_type)jtype.get<int8_t>());
+		}
+	}
+	if (j->find("min_value") != j->end()) {
+		if ((*j)["min_value"].is_number_integer()) {
+			min_value.emplace<int64_t>(int64_not_null(j, "min_value"));
+		} else if ((*j)["min_value"].is_number()) {
+			min_value.emplace<double>(double_not_null(j, "min_value"));
+		}
+	}
+	if (j->find("max_value") != j->end()) {
+		if ((*j)["max_value"].is_number_integer()) {
+			min_value.emplace<int64_t>(int64_not_null(j, "max_value"));
+		} else if ((*j)["max_value"].is_number()) {
+			min_value.emplace<double>(double_not_null(j, "max_value"));
+		}
+	}
+	autocomplete = bool_not_null(j, "autocomplete");
 }
 
 
