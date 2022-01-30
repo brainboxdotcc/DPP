@@ -21,7 +21,12 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
+#include <dpp/snowflake.h>
+#include <dpp/misc-enum.h>
+#include <dpp/user.h>
+#include <dpp/guild.h>
+#include <dpp/role.h>
+#include <dpp/appcommand.h>
 #include <dpp/dispatcher.h>
 #include <dpp/json_fwd.hpp>
 #include <unordered_map>

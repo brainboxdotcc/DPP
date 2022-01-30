@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
+#include <dpp/appcommand.h>
 #include <dpp/cluster.h>
 #include <dpp/nlohmann/json.hpp>
 

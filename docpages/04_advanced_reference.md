@@ -50,7 +50,7 @@ if (a == b) {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use a space after the comma in parameter lists, and after closing brackets and before opening brackes except when calling a function, e.g.:
+Use a space after the comma in parameter lists, and after opening brackets and before closing brackets except when calling a function, e.g.:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 std::vector<std::string> clowns = { "pennywise", "bobo" };

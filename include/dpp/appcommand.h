@@ -20,8 +20,13 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <dpp/snowflake.h>
+#include <dpp/managed.h>
+#include <dpp/message.h>
+#include <dpp/channel.h>
+#include <dpp/role.h>
+#include <dpp/user.h>
 #include <variant>
-#include <dpp/discord.h>
 #include <dpp/json_fwd.hpp>
 
 namespace dpp {
@@ -31,9 +36,10 @@ namespace dpp {
  * This value represents that maximum. interaction_response::add_autocomplete_choice does not allow
  * adding more than this number of elements to the vector.
  */
-const size_t AUTOCOMPLETE_MAX_CHOICES = 25;
+#ifndef AUTOCOMPLETE_MAX_CHOICES
+	#define AUTOCOMPLETE_MAX_CHOICES 25
+#endif
 
-enum channel_type;
 /**
  * @brief Represents command option types.
  * These are the possible parameter value types.

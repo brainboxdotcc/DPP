@@ -18,12 +18,10 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <mutex>
 #include <iostream>
 #include <variant>
 #include <dpp/cache.h>
-#include <dpp/guild.h>
 #include <dpp/exception.h>
 
 namespace dpp {
@@ -84,19 +82,5 @@ cache_helper(channel, channel_cache, find_channel, get_channel_cache, get_channe
 cache_helper(role, role_cache, find_role, get_role_cache, get_role_count);
 cache_helper(guild, guild_cache, find_guild, get_guild_cache, get_guild_count);
 cache_helper(emoji, emoji_cache, find_emoji, get_emoji_cache, get_emoji_count);
-
-guild_member find_guild_member(const snowflake guild_id, const snowflake user_id) {
-	guild* g = find_guild(guild_id);
-	if (g) {
-		auto gm = g->members.find(user_id);
-		if (gm != g->members.end()) {
-			return gm->second;
-		}
-
-		throw dpp::cache_exception("Requested member not found in the guild cache!");
-	}
-	
-	throw dpp::cache_exception("Requested guild cache not found!");
-}
 
 };

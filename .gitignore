@@ -5,6 +5,7 @@ docs
 testdata/maxpower.pcm
 testdata/onandon.pcm
 docs/doxygen_sqlite3.db
+src/build
 .vs
 .misspell-fixer.ignore
 core

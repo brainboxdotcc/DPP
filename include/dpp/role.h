@@ -20,6 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <dpp/managed.h>
 #include <dpp/json_fwd.hpp>
 #include <dpp/guild.h>
 

@@ -18,48 +18,41 @@
  * limitations under the License.
  *
  ************************************************************************************/
-
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/json_fwd.hpp>
-#include <unordered_map>
+#include <string>
 
 namespace dpp {
 
-/**
- * @brief The ban class represents a ban on a guild.
- * 
- */
-class DPP_EXPORT ban {
-public:
-	/** The ban reason */
-	std::string reason;
-	/** User ID the ban applies to */
-	snowflake user_id;
-	
-	/** Constructor */
-	ban();
-
-	/** Destructor */
-	~ban();
-
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
+	/** @brief The managed class is the base class for various types that can
+	 * be stored in a cache that are identified by a dpp::snowflake id.
 	 */
-	ban& fill_from_json(nlohmann::json* j);
+	class DPP_EXPORT managed {
+	public:
+		/**
+		 * @brief Unique ID of object set by Discord.
+		 * This value contains a timestamp, worker ID, internal server ID, and an incrementing value.
+		 * Only the timestamp is relevant to us as useful metadata.
+		 */
+		snowflake id;
+		/**
+		 * @brief Constructor, initialises ID
+		 * @param nid ID to set
+		 */
+		managed(const snowflake nid = 0);
+		/**
+		 * @brief Destroy the managed object
+		 */
+		virtual ~managed() = default;
 
-	/**
-	 * @brief Build json representation of a ban
-	 * 
-	 * @return std::string stringified json
-	 */
-	std::string build_json() const;
-};
-
-/** A group of bans
- */
-typedef std::unordered_map<snowflake, ban> ban_map;
+		/**
+		 * @brief Get the creation time of this object according to Discord.
+		 * 
+		 * @return double creation time inferred from the snowflake ID.
+		 * The minimum possible value is the first second of 2015.
+		 */
+		double get_creation_time() const;
+	};
 
 };

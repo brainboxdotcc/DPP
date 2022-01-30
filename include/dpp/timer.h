@@ -21,8 +21,10 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
+#include <stdint.h>
 #include <map>
+#include <unordered_map>
+#include <stddef.h>
 #include <functional>
 
 namespace dpp {

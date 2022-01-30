@@ -18,7 +18,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/integration.h>
