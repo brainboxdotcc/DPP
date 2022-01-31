@@ -637,5 +637,21 @@ command_permission& command_permission::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
+guild_command_permissions::guild_command_permissions() : id(0), application_id(0), guild_id(0)
+{
+}
+
+guild_command_permissions &guild_command_permissions::fill_from_json(nlohmann::json *j) {
+	id = snowflake_not_null(j, "id");
+	application_id = snowflake_not_null(j, "application_id");
+	guild_id = snowflake_not_null(j, "guild_id");
+	if (j->find("permissions") != j->end()) {
+		for (auto &p : (*j)["permissions"]) {
+			permissions.push_back(command_permission().fill_from_json(&p));
+		}
+	}
+
+	return *this;
+}
 
 };

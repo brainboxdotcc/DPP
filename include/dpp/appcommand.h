@@ -691,6 +691,19 @@ public:
 	snowflake application_id;                     //!< the id of the application the command belongs to
 	snowflake guild_id;                           //!< the id of the guild
 	std::vector<command_permission> permissions;  //!< the permissions for the command in the guild
+
+	/**
+	 * @brief Construct a new guild command permissions object
+	 */
+	guild_command_permissions();
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return guild_command_permissions& Reference to self
+	 */
+	guild_command_permissions &fill_from_json(nlohmann::json *j);
 };
 
 /**
@@ -852,5 +865,10 @@ void to_json(nlohmann::json& j, const slashcommand& cmd);
  * @brief A group of application slash commands
  */
 typedef std::unordered_map<snowflake, slashcommand> slashcommand_map;
+
+/**
+ * @brief A group of guild command permissions
+ */
+typedef std::unordered_map<snowflake, guild_command_permissions> guild_command_permissions_map;
 
 };

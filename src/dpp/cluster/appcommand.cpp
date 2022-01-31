@@ -177,7 +177,7 @@ void cluster::guild_command_delete(snowflake id, snowflake guild_id, command_com
 void cluster::guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
 	json j;
 
-	if(s.permissions.size())  {
+	if(!s.permissions.empty())  {
 		j["permissions"] = json();
 
 		for(const auto& perm : s.permissions) {
@@ -187,8 +187,13 @@ void cluster::guild_command_edit_permissions(const slashcommand &s, snowflake gu
 	}
 
 	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id) + "/permissions", m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		guild_command_permissions permissions;
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			permissions.fill_from_json(&j);
+		}
 		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
+			callback(confirmation_callback_t("guild_command_permissions", permissions, http));
 		}
 	});
 }

@@ -103,6 +103,8 @@ typedef std::variant<
 		thread_member_map,
 		guild,
 		guild_map,
+		guild_command_permissions,
+		guild_command_permissions_map,
 		role,
 		role_map,
 		invite,
@@ -1504,14 +1506,13 @@ public:
 	void guild_command_edit(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Edit slash command permissions local to a guild,
-	 *		permissions are read from s.permissions
+	 * @brief Edit slash command permissions of a guild
 	 *
 	 * @note You can only add up to 10 permission overwrites for a command
-	 * @param s Slash command to edit
+	 * @param s Slash command to edit the permissions for
 	 * @param guild_id Guild ID to edit the slash command in
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::guild_command_permissions object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
