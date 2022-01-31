@@ -1489,6 +1489,8 @@ public:
 	/**
 	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
 	 *
+	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
+	 * you should use cluster::guild_bulk_command_create instead.
 	 * @param s Slash command to change
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1512,7 +1514,7 @@ public:
 	 * @param s Slash command to edit the permissions for
 	 * @param guild_id Guild ID to edit the slash command in
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::guild_command_permissions object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
@@ -1561,6 +1563,7 @@ public:
 	/**
 	 * @brief Get the application's slash commands for a guild
 	 *
+	 * @note Won't fetch guild command permissions, consider using dpp::guild_commands_get_permissions to get the permissions
 	 * @param guild_id Guild ID to get the slash commands for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().

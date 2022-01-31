@@ -63,7 +63,7 @@ void cluster::global_command_delete(snowflake id, command_completion_event_t cal
 }
 
 void cluster::global_command_edit(const slashcommand &s, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "commands/" + std::to_string(s.id), m_patch, s.build_json(true), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "commands/" + std::to_string(s.id), m_patch, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -113,8 +113,8 @@ void cluster::guild_commands_get_permissions(snowflake guild_id, command_complet
 		guild_command_permissions_map permissions_map;
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
-			for (auto & jpermissions : j) {
-				permissions_map[snowflake_not_null(&jpermissions, "id")] = guild_command_permissions().fill_from_json(&jpermissions);
+			for (auto & jperm : j) {
+				permissions_map[snowflake_not_null(&jperm, "id")] = guild_command_permissions().fill_from_json(&jperm);
 			}
 		}
 		if (callback) {
@@ -141,8 +141,8 @@ void cluster::guild_bulk_command_edit_permissions(const std::vector<slashcommand
 		guild_command_permissions_map permissions_map;
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
-			for (auto & jpermissions : j) {
-				permissions_map[snowflake_not_null(&jpermissions, "id")] = guild_command_permissions().fill_from_json(&jpermissions);
+			for (auto & jperm : j) {
+				permissions_map[snowflake_not_null(&jperm, "id")] = guild_command_permissions().fill_from_json(&jperm);
 			}
 		}
 		if (callback) {
@@ -187,13 +187,8 @@ void cluster::guild_command_edit_permissions(const slashcommand &s, snowflake gu
 	}
 
 	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id) + "/permissions", m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
-		guild_command_permissions permissions;
-		confirmation_callback_t e("confirmation", confirmation(), http);
-		if (!e.is_error()) {
-			permissions.fill_from_json(&j);
-		}
 		if (callback) {
-			callback(confirmation_callback_t("guild_command_permissions", permissions, http));
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
 	});
 }
