@@ -82,7 +82,7 @@ void to_json(json& j, const command_option& opt) {
 	j["description"] = opt.description;
 	j["type"] = opt.type;
 	j["autocomplete"] = opt.autocomplete;
-	if (opt.required) j["required"] = opt.required; // discords default is false
+	j["required"] = opt.required;
 
 	/* Check for minimum and maximum values */
 	if (opt.type == dpp::co_number || opt.type == dpp::co_integer) {
@@ -273,7 +273,7 @@ command_option& command_option::set_auto_complete(bool autocomp)
 }
 
 command_option &command_option::fill_from_json(nlohmann::json *j) {
-    uint8_t i = 20;
+    uint8_t i = 3; // maximum amount of nested options
     /*
      * Command options contains command options. Therefor the object is filled with recursion.
      */

@@ -1519,7 +1519,7 @@ public:
 	void guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Get the permissions for a slash command of a guild
+	 * @brief Get the permissions for a slash command of a guild. Permissions are read from s.permissions
 	 *
 	 * @param s Slash command to get the permissions for
 	 * @param guild_id Guild ID to get the permissions of

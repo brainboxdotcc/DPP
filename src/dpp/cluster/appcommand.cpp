@@ -63,7 +63,7 @@ void cluster::global_command_delete(snowflake id, command_completion_event_t cal
 }
 
 void cluster::global_command_edit(const slashcommand &s, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "commands/" + std::to_string(s.id), m_patch, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "commands/" + std::to_string(s.id), m_patch, s.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
