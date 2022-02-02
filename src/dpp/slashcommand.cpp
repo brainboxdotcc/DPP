@@ -45,7 +45,7 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
 	if (j->find("options") != j->end()) {
 		for (auto &option: (*j)["options"]) {
-			// recursive options parsing missing!
+			// options is filled recursive
 			options.push_back(command_option().fill_from_json(&option));
 		}
 	}
@@ -273,16 +273,29 @@ command_option& command_option::set_auto_complete(bool autocomp)
 }
 
 command_option &command_option::fill_from_json(nlohmann::json *j) {
-	type = (command_option_type)int8_not_null(j, "type");
-	name = string_not_null(j, "name");
-	description = string_not_null(j, "name");
-	required = bool_not_null(j, "required");
-	if (j->find("choices") != j->end()) {
-		for (auto& jchoice : (*j)["choices"]) {
-			choices.push_back(command_option_choice().fill_from_json(&jchoice));
-		}
-	}
-	// TODO options recursive???
+    uint8_t i = 20;
+    /*
+     * Command options contains command options. Therefor the object is filled with recursion.
+     */
+    std::function<void(nlohmann::json *, command_option &)> fill = [&i, &fill](nlohmann::json *j, command_option &o) {
+        o.type = (command_option_type)int8_not_null(j, "type");
+        o.name = string_not_null(j, "name");
+        o.description = string_not_null(j, "name");
+        o.required = bool_not_null(j, "required");
+        if (j->find("choices") != j->end()) {
+            for (auto& jchoice : (*j)["choices"]) {
+                o.choices.push_back(command_option_choice().fill_from_json(&jchoice));
+            }
+        }
+
+        if (j->find("options") != j->end() && i > 0) {
+            i--; // prevent infinite recursion call with a counter
+            for (auto &joption : (*j)["options"]) {
+                command_option p;
+                fill(&joption, p);
+                o.options.push_back(p);
+            }
+        }
 
 	if (j->find("channel_types") != j->end()) {
 		for (auto& jtype : (*j)["channel_types"]) {

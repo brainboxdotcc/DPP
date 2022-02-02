@@ -212,7 +212,7 @@ struct DPP_EXPORT command_option {
 	command_option& set_auto_complete(bool autocomp);
 
 	/**
-	 * @brief Fill object properties from JSON
+	 * @brief Fill object properties from JSON. Fills options recursively.
 	 *
 	 * @param j JSON to fill from
 	 * @return command_option& Reference to self
