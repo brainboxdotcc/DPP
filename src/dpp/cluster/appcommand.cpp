@@ -54,6 +54,14 @@ void cluster::global_command_create(const slashcommand &s, command_completion_ev
 	});
 }
 
+void cluster::global_command_get(snowflake id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/applications", std::to_string(me.id), "commands/" + std::to_string(id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("slashcommand", slashcommand().fill_from_json(&j), http));
+		}
+	});
+}
+
 void cluster::global_command_delete(snowflake id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/applications", std::to_string(me.id), "commands/" + std::to_string(id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

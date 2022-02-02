@@ -1439,6 +1439,15 @@ public:
 	void global_command_create(const slashcommand &s, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Get a global slash command
+	 *
+	 * @param id The ID of the slash command
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void global_command_get(snowflake id, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Get the audit log for a guild
 	 *
 	 * @param guild_id Guild to get the audit log of
