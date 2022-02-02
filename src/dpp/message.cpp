@@ -18,7 +18,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/message.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>
@@ -522,6 +521,14 @@ embed& embed::set_footer(const embed_footer& f) {
 	return *this;
 }
 
+embed& embed::set_footer(const std::string& text, const std::string& icon_url) {
+	dpp::embed_footer f;
+	f.set_text(text);
+	f.set_icon(icon_url);
+	footer = f;
+	return *this;
+}
+
 embed& embed::set_provider(const std::string& name, const std::string& url) {
 	dpp::embed_provider p;
 	p.name = utility::utf8substr(name, 0, 256);
@@ -573,17 +580,17 @@ embed& embed::set_url(const std::string &u) {
 }
 
 embed_footer& embed_footer::set_text(const std::string& t){
-	text = t; 
+	text = utility::utf8substr(t, 0, 2048);
 	return *this;
 }
 
-embed_footer& embed_footer::set_icon(const std::string& i){	 
+embed_footer& embed_footer::set_icon(const std::string& i){
 	icon_url = i;
 	return *this;
-}																				  
+}
 
-embed_footer& embed_footer::set_proxy(const std::string& p){	 
-	proxy_url = p;		  
+embed_footer& embed_footer::set_proxy(const std::string& p){
+	proxy_url = p;
 	return *this;
 }
 

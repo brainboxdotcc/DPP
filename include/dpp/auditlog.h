@@ -21,7 +21,7 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
+#include <dpp/snowflake.h>
 #include <dpp/json_fwd.hpp>
 #include <optional>
 

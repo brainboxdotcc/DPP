@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
+#include <dpp/appcommand.h>
 #include <dpp/cluster.h>
 #include <dpp/nlohmann/json.hpp>
 
@@ -108,6 +108,49 @@ void cluster::guild_bulk_command_create(const std::vector<slashcommand> &command
 	});
 }
 
+void cluster::guild_commands_get_permissions(snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/permissions", m_get, "", [callback](json &j, const http_request_completion_t& http)  {
+		guild_command_permissions_map permissions_map;
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & jperm : j) {
+				permissions_map[snowflake_not_null(&jperm, "id")] = guild_command_permissions().fill_from_json(&jperm);
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t("guild_command_permissions_map", permissions_map, http));
+		}
+	});
+}
+
+void cluster::guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback) {
+	if (commands.empty()) {
+		return;
+	}
+	json j = json::array();
+	for (auto & s : commands) {
+		json jcommand;
+		jcommand["id"] = s.id;
+		jcommand["permissions"] = json::array();
+		for (auto & c : s.permissions) {
+			jcommand["permissions"].push_back(c);
+		}
+		j.push_back(jcommand);
+	}
+	this->post_rest(API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/permissions", m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
+		guild_command_permissions_map permissions_map;
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & jperm : j) {
+				permissions_map[snowflake_not_null(&jperm, "id")] = guild_command_permissions().fill_from_json(&jperm);
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t("guild_command_permissions_map", permissions_map, http));
+		}
+	});
+}
+
 void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [s, this, guild_id, callback] (json &j, const http_request_completion_t& http) mutable {
 		if (callback) {
@@ -134,7 +177,7 @@ void cluster::guild_command_delete(snowflake id, snowflake guild_id, command_com
 void cluster::guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
 	json j;
 
-	if(s.permissions.size())  {
+	if(!s.permissions.empty())  {
 		j["permissions"] = json();
 
 		for(const auto& perm : s.permissions) {
@@ -146,6 +189,19 @@ void cluster::guild_command_edit_permissions(const slashcommand &s, snowflake gu
 	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id) + "/permissions", m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
+void cluster::guild_command_get_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
+	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(s.id) + "/permissions", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+		guild_command_permissions permissions;
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			permissions.fill_from_json(&j);
+		}
+		if (callback) {
+			callback(confirmation_callback_t("guild_command_permissions", permissions, http));
 		}
 	});
 }

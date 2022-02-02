@@ -18,8 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/appcommand.h>
+#include <dpp/message.h>
+#include <dpp/discordclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/fmt/format.h>
@@ -197,8 +198,6 @@ event_ctor(channel_delete_t, event_dispatch_t);
 event_ctor(channel_update_t, event_dispatch_t);
 event_ctor(ready_t, event_dispatch_t);
 event_ctor(message_delete_t, event_dispatch_t);
-event_ctor(application_command_delete_t, event_dispatch_t);
-event_ctor(application_command_create_t, event_dispatch_t);
 event_ctor(resumed_t, event_dispatch_t);
 event_ctor(guild_role_create_t, event_dispatch_t);
 event_ctor(typing_start_t, event_dispatch_t);
@@ -221,7 +220,6 @@ event_ctor(invite_delete_t, event_dispatch_t);
 event_ctor(guild_update_t, event_dispatch_t);
 event_ctor(guild_integrations_update_t, event_dispatch_t);
 event_ctor(guild_member_update_t, event_dispatch_t);
-event_ctor(application_command_update_t, event_dispatch_t);
 event_ctor(invite_create_t, event_dispatch_t);
 event_ctor(message_update_t, event_dispatch_t);
 event_ctor(user_update_t, event_dispatch_t);

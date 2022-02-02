@@ -18,10 +18,10 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/discordclient.h>
 #include <dpp/voicestate.h>
-#include <dpp/cache.h>
+#include <dpp/exception.h>
+#include <dpp/guild.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
@@ -517,7 +517,9 @@ uint64_t guild::base_permissions(const user* member) const
 
 	for (auto& rid : gm.roles) {
 		role* r = dpp::find_role(rid);
-		permissions |= r->permissions;
+		if (r) {
+			permissions |= r->permissions;
+		}
 	}
 
 	if (permissions & p_administrator)
@@ -650,6 +652,20 @@ std::string guild::get_splash_url(uint16_t size) const {
 	} else {
 		return std::string();
 	}
+}
+
+guild_member find_guild_member(const snowflake guild_id, const snowflake user_id) {
+	guild* g = find_guild(guild_id);
+	if (g) {
+		auto gm = g->members.find(user_id);
+		if (gm != g->members.end()) {
+			return gm->second;
+		}
+
+		throw dpp::cache_exception("Requested member not found in the guild cache!");
+	}
+	
+	throw dpp::cache_exception("Requested guild cache not found!");
 }
 
 
