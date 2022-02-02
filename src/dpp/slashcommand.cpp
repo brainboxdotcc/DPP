@@ -297,26 +297,29 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
             }
         }
 
-	if (j->find("channel_types") != j->end()) {
-		for (auto& jtype : (*j)["channel_types"]) {
-			channel_types.push_back( (channel_type)jtype.get<int8_t>());
-		}
-	}
-	if (j->find("min_value") != j->end()) {
-		if ((*j)["min_value"].is_number_integer()) {
-			min_value.emplace<int64_t>(int64_not_null(j, "min_value"));
-		} else if ((*j)["min_value"].is_number()) {
-			min_value.emplace<double>(double_not_null(j, "min_value"));
-		}
-	}
-	if (j->find("max_value") != j->end()) {
-		if ((*j)["max_value"].is_number_integer()) {
-			min_value.emplace<int64_t>(int64_not_null(j, "max_value"));
-		} else if ((*j)["max_value"].is_number()) {
-			min_value.emplace<double>(double_not_null(j, "max_value"));
-		}
-	}
-	autocomplete = bool_not_null(j, "autocomplete");
+        if (j->find("channel_types") != j->end()) {
+            for (auto& jtype : (*j)["channel_types"]) {
+                o.channel_types.push_back( (channel_type)jtype.get<int8_t>());
+            }
+        }
+        if (j->find("min_value") != j->end()) {
+            if ((*j)["min_value"].is_number_integer()) {
+                o.min_value.emplace<int64_t>(int64_not_null(j, "min_value"));
+            } else if ((*j)["min_value"].is_number()) {
+                o.min_value.emplace<double>(double_not_null(j, "min_value"));
+            }
+        }
+        if (j->find("max_value") != j->end()) {
+            if ((*j)["max_value"].is_number_integer()) {
+                o.min_value.emplace<int64_t>(int64_not_null(j, "max_value"));
+            } else if ((*j)["max_value"].is_number()) {
+                o.min_value.emplace<double>(double_not_null(j, "max_value"));
+            }
+        }
+        o.autocomplete = bool_not_null(j, "autocomplete");
+    };
+
+    fill(j, *this);
 
 	return *this;
 }
