@@ -222,16 +222,16 @@ command_option_choice::command_option_choice(const std::string &n, command_value
 
 command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) {
 	name = string_not_null(j, "name");
-	if ((*j)["value"].is_number_integer()) { // is int64
-		value.emplace<int64_t>(int64_not_null(j, "value"));
-	} else if ((*j)["value"].is_boolean()) { // is bool
-		value.emplace<bool>(bool_not_null(j, "value"));
-	} else if (snowflake_not_null(j, "value")) { // is snowflake
-		value.emplace<snowflake>(snowflake_not_null(j, "value"));
-	} else if ((*j)["value"].is_number()) { // is double
+	if ((*j)["value"].is_boolean()) { // is bool
+		value.emplace<bool>((*j)["value"]);
+	} else if ((*j)["value"].is_number_float()) { // is double
 		value.emplace<double>((*j)["value"]);
+	} else if ((*j)["value"].is_number_unsigned()) { // is snowflake
+		value.emplace<snowflake>((*j)["value"]);
+	} else if ((*j)["value"].is_number_integer()) { // is int64
+		value.emplace<int64_t>((*j)["value"]);
 	} else { // else string
-		value.emplace<std::string>(string_not_null(j, "value"));
+		value.emplace<std::string>((*j)["value"]);
 	}
 
 	return *this;
