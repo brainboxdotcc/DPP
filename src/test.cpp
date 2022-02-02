@@ -43,23 +43,23 @@ int main()
 		dpp::command_option_choice choice;
 		j["value"] = 54.321;
 		choice.fill_from_json(&j);
-		bool success_double = holds_alternative<double>(choice.value);
+		bool success_double = std::holds_alternative<double>(choice.value);
 		j["value"] = 8223372036854775807;
 		choice.fill_from_json(&j);
-		bool success_int = holds_alternative<int64_t>(choice.value);
+		bool success_int = std::holds_alternative<int64_t>(choice.value);
 		j["value"] = -8223372036854775807;
 		choice.fill_from_json(&j);
-		bool success_int2 = holds_alternative<int64_t>(choice.value);
+		bool success_int2 = std::holds_alternative<int64_t>(choice.value);
 		j["value"] = true;
 		choice.fill_from_json(&j);
-		bool success_bool = holds_alternative<bool>(choice.value);
+		bool success_bool = std::holds_alternative<bool>(choice.value);
 		dpp::snowflake s = 845266178036516757; // example snowflake
 		j["value"] = s;
 		choice.fill_from_json(&j);
-		bool success_snowflake = holds_alternative<dpp::snowflake>(choice.value);
+		bool success_snowflake = std::holds_alternative<dpp::snowflake>(choice.value);
 		j["value"] = "foobar";
 		choice.fill_from_json(&j);
-		bool success_string = holds_alternative<std::string>(choice.value);
+		bool success_string = std::holds_alternative<std::string>(choice.value);
 		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", (success_double && success_int && success_int2 && success_bool && success_snowflake && success_string));
 	}
 
