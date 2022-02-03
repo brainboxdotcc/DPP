@@ -18,14 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/discordvoiceclient.h>
+#include <dpp/guild.h>
+#include <dpp/voicestate.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
 

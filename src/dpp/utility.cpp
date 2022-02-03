@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
+#include <dpp/utility.h>
 #include <dpp/stringops.h>
 #include <dpp/exception.h>
 #include <ctime>
@@ -31,10 +31,10 @@
 #include <algorithm>
 #include <fstream>
 #include <streambuf>
+#include <array>
 #include <dpp/fmt/format.h>
 
 #ifdef _WIN32
-	#include <array>
 	#include <stdio.h>
 	#include <stdlib.h>
 	#define popen _popen

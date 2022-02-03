@@ -19,7 +19,6 @@
  *
  ************************************************************************************/
 #include <dpp/scheduled_event.h>
-#include <dpp/discord.h>
 #include <dpp/exception.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>

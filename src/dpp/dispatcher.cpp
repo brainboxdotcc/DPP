@@ -18,8 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/appcommand.h>
+#include <dpp/message.h>
+#include <dpp/discordclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/fmt/format.h>

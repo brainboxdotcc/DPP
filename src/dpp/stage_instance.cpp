@@ -19,7 +19,6 @@
  *
  ************************************************************************************/
 #include <dpp/stage_instance.h>
-#include <dpp/discord.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
