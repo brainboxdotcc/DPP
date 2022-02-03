@@ -20,7 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
+#include <dpp/snowflake.h>
 #include <dpp/json_fwd.hpp>
 
 #define event_decl(x) class x : public event { public: virtual void handle(dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };

@@ -18,23 +18,41 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discordevents.h>
-#include <dpp/cluster.h>
-#include <dpp/channel.h>
-#include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#pragma once
+#include <dpp/export.h>
+#include <stddef.h>
 
-using json = nlohmann::json;
+namespace dpp {
 
-namespace dpp { namespace events {
+	/** @brief Supported image types for profile pictures */
+	enum image_type {
+		/// image/png
+		i_png,
+		/// image/jpeg
+		i_jpg,
+		/// image/gif
+		i_gif
+	};
 
-using namespace dpp;
-void thread_member_update::handle(discord_client* client, json& j, const std::string& raw) {
-	if (!client->creator->on_thread_member_update.empty()) {
-		json& d = j["d"];
-		dpp::thread_member_update_t tm(client, raw);
-		tm.updated = thread_member().fill_from_json(&d);
-		client->creator->on_thread_member_update.call(tm);
-	}
-}
-}};
+	/** @brief Log levels */
+	enum loglevel {
+		/// Trace
+		ll_trace = 0,
+		/// Debug
+		ll_debug,
+		/// Information
+		ll_info,
+		/// Warning
+		ll_warning,
+		/// Error
+		ll_error,
+		/// Critical
+		ll_critical
+	};
+
+	/**
+	 * @brief A returned event handle for an event which was attached
+	 */
+	typedef size_t event_handle;
+
+};

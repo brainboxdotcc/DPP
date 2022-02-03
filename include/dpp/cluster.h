@@ -25,13 +25,19 @@
 #include <string>
 #include <map>
 #include <variant>
-#include <dpp/discord.h>
+#include <dpp/snowflake.h>
 #include <dpp/dispatcher.h>
+#include <dpp/misc-enum.h>
 #include <dpp/timer.h>
 #include <dpp/json_fwd.hpp>
 #include <dpp/discordclient.h>
+#include <dpp/voiceregion.h>
+#include <dpp/dtemplate.h>
+#include <dpp/prune.h>
+#include <dpp/auditlog.h>
 #include <dpp/queues.h>
 #include <dpp/cache.h>
+#include <dpp/intents.h>
 #include <algorithm>
 #include <iostream>
 #include <shared_mutex>
@@ -1833,14 +1839,27 @@ public:
 	 * @brief Edit a channel's permissions
 	 *
 	 * @param c Channel to set permissions for
-	 * @param overwrite_id Overwrite to change (a user or channel ID)
+	 * @param overwrite_id Overwrite to change (a user or role ID)
 	 * @param allow allow permissions
 	 * @param deny deny permissions
 	 * @param member true if the overwrite_id is a user id, false if it is a channel id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const class channel &c, snowflake overwrite_id, uint32_t allow, uint32_t deny, bool member, command_completion_event_t callback = {});
+	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Edit a channel's permissions
+	 *
+	 * @param channel_id ID of the channel to set permissions for
+	 * @param overwrite_id Overwrite to change (a user or role ID)
+	 * @param allow allow permissions
+	 * @param deny deny permissions
+	 * @param member true if the overwrite_id is a user id, false if it is a channel id
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Delete a channel
@@ -2487,7 +2506,7 @@ public:
 	/**
 	 * @brief Edit guild widget
 	 * 
-	 * Requires the `MANAGE_GUILD` permission. 
+	 * Requires the `MANAGE_GUILD` permission.
 	 *
 	 * @param guild_id Guild ID to edit widget for
 	 * @param gw New guild widget information
@@ -2669,17 +2688,18 @@ public:
 	void role_edit(const class role &r, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Edit a role's position in a guild
-	 * 
+	 * @brief Edit multiple role's position in a guild. Returns a list of all roles of the guild on success.
+	 *
 	 * Modify the positions of a set of role objects for the guild. Requires the `MANAGE_ROLES` permission.
 	 * Fires multiple `Guild Role Update` Gateway events.
-	 * 
+	 *
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 * @param r Role to change position of
+	 * @param guild_id Guild ID to change the roles position on
+	 * @param roles Vector of roles to change the positions of
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::role_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void role_edit_position(const class role &r, command_completion_event_t callback = {});
+	void roles_edit_position(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Delete a role

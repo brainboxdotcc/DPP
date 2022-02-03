@@ -18,9 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/commandhandler.h>
-#include <dpp/cache.h>
 #include <dpp/cluster.h>
 #include <dpp/exception.h>
 #include <dpp/stringops.h>

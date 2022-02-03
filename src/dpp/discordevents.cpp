@@ -25,7 +25,6 @@
 #include <time.h>
 #include <stdlib.h>
 #include <dpp/discordclient.h>
-#include <dpp/discord.h>
 #include <dpp/event.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>

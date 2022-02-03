@@ -21,6 +21,10 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/queues.h>
+#include <dpp/snowflake.h>
+#include <dpp/managed.h>
+#include <dpp/user.h>
+#include <dpp/guild.h>
 #include <optional>
 #include <variant>
 #include <dpp/json_fwd.hpp>
