@@ -20,6 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <dpp/misc-enum.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -30,95 +31,35 @@
  * @brief The main namespace for D++ functions. classes and types
  */
 namespace dpp {
-	/** @brief A 64 bit unsigned value representing many things on discord.
-	 * Discord calls the value a 'snowflake' value.
-	 */
-	typedef uint64_t snowflake;
-
-	/** @brief The managed class is the base class for various types that can
-	 * be stored in a cache that are identified by a dpp::snowflake id.
-	 */
-	class DPP_EXPORT managed {
-	public:
-		/**
-		 * @brief Unique ID of object set by Discord.
-		 * This value contains a timestamp, worker ID, internal server ID, and an incrementing value.
-		 * Only the timestamp is relevant to us as useful metadata.
-		 */
-		snowflake id;
-		/**
-		 * @brief Constructor, initialises ID
-		 * @param nid ID to set
-		 */
-		managed(const snowflake nid = 0);
-		/**
-		 * @brief Destroy the managed object
-		 */
-		virtual ~managed() = default;
-
-		/**
-		 * @brief Get the creation time of this object according to Discord.
-		 * 
-		 * @return double creation time inferred from the snowflake ID.
-		 * The minimum possible value is the first second of 2015.
-		 */
-		double get_creation_time() const;
-	};
-
-	/** @brief Supported image types for profile pictures */
-	enum image_type {
-		/// image/png
-		i_png,
-		/// image/jpeg
-		i_jpg,
-		/// image/gif
-		i_gif
-	};
-
-	/** @brief Log levels */
-	enum loglevel {
-		/// Trace
-		ll_trace = 0,
-		/// Debug
-		ll_debug,
-		/// Information
-		ll_info,
-		/// Warning
-		ll_warning,
-		/// Error
-		ll_error,
-		/// Critical
-		ll_critical
-	};
-
-	/**
-	 * @brief Timestamp formats for dpp::utility::timestamp()
-	 * 
-	 * @note These values are the actual character values specified by the Discord API
-	 * and should not be changed unless the Discord API changes the specification!
-	 * They have been sorted into numerical order of their ASCII value to keep C++ happy.
-	 */
-	enum time_format : uint8_t {
-		/// "20 April 2021" - Long Date
-		tf_long_date		=	'D',
-		/// "Tuesday, 20 April 2021 16:20" - Long Date/Time
-		tf_long_datetime	=	'F',
-		/// "2 months ago" - Relative Time		
-		tf_relative_time	=	'R',
-		/// "16:20:30" - Long Time
-		tf_long_time		=	'T',
-		/// "20/04/2021" - Short Date
-		tf_short_date		=	'd',
-		/// "20 April 2021 16:20" - Short Date/Time
-		tf_short_datetime	=	'f',
-		/// "16:20" - Short Time
-		tf_short_time		=	't',
-	};
 
 	/**
 	 * @brief Utility helper functions, generally for logging
 	 */
 	namespace utility {
+
+		/**
+		 * @brief Timestamp formats for dpp::utility::timestamp()
+		 * 
+		 * @note These values are the actual character values specified by the Discord API
+		 * and should not be changed unless the Discord API changes the specification!
+		 * They have been sorted into numerical order of their ASCII value to keep C++ happy.
+		 */
+		enum time_format : uint8_t {
+			/// "20 April 2021" - Long Date
+			tf_long_date		=	'D',
+			/// "Tuesday, 20 April 2021 16:20" - Long Date/Time
+			tf_long_datetime	=	'F',
+			/// "2 months ago" - Relative Time		
+			tf_relative_time	=	'R',
+			/// "16:20:30" - Long Time
+			tf_long_time		=	'T',
+			/// "20/04/2021" - Short Date
+			tf_short_date		=	'd',
+			/// "20 April 2021 16:20" - Short Date/Time
+			tf_short_datetime	=	'f',
+			/// "16:20" - Short Time
+			tf_short_time		=	't',
+		};
 
 		/**
 		 * @brief The base URL for CDN content such as profile pictures and guild icons.
@@ -375,25 +316,3 @@ namespace dpp {
 	};
 
 };
-
-#include <dpp/voicestate.h>
-#include <dpp/role.h>
-#include <dpp/user.h>
-#include <dpp/channel.h>
-#include <dpp/guild.h>
-#include <dpp/invite.h>
-#include <dpp/dtemplate.h>
-#include <dpp/emoji.h>
-#include <dpp/ban.h>
-#include <dpp/prune.h>
-#include <dpp/voiceregion.h>
-#include <dpp/integration.h>
-#include <dpp/webhook.h>
-#include <dpp/presence.h>
-#include <dpp/intents.h>
-#include <dpp/message.h>
-#include <dpp/appcommand.h>
-#include <dpp/stage_instance.h>
-#include <dpp/auditlog.h>
-#include <dpp/application.h>
-#include <dpp/scheduled_event.h>

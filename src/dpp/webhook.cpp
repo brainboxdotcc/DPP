@@ -20,13 +20,14 @@
  ************************************************************************************/
 #include <dpp/webhook.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/exception.h>
 
 namespace dpp {
 
 using json = nlohmann::json;
+
+const size_t MAX_ICON_SIZE = 256 * 1024;
 
 webhook::webhook() : managed(), type(w_incoming), guild_id(0), channel_id(0), user_id(0), application_id(0), image_data(nullptr)
 {
@@ -81,7 +82,7 @@ webhook& webhook::load_image(const std::string &image_blob, const image_type typ
 		{ i_jpg, "image/jpeg" },
 		{ i_png, "image/png" }
 	};
-	if (image_blob.size() > MAX_EMOJI_SIZE) {
+	if (image_blob.size() > MAX_ICON_SIZE) {
 		throw dpp::length_exception("Webhook icon file exceeds discord limit of 256 kilobytes");
 	}
 
