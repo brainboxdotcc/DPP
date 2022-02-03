@@ -190,7 +190,7 @@ std::string guild_member::build_json() const {
 		}
 	}
 	if (is_muted()) {
-		j["muted"] = true;
+		j["mute"] = true;
 	}
 	if (is_deaf()) {
 		j["deaf"] = true;
