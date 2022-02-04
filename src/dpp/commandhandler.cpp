@@ -28,7 +28,7 @@
 
 namespace dpp {
 
-param_info::param_info(parameter_type t, bool o, const std::string &d, const std::map<std::string, std::string> &opts) : type(t), optional(o), description(d), choices(opts)
+param_info::param_info(parameter_type t, bool o, const std::string &d, const std::map<command_value, std::string> &opts) : type(t), optional(o), description(d), choices(opts)
 {
 }
 

@@ -104,7 +104,7 @@ struct DPP_EXPORT param_info {
 	 * The key name is the string passed to the command handler
 	 * and the key value is its description displayed to the user.
 	 */
-	std::map<std::string, std::string> choices;
+	std::map<command_value, std::string> choices;
 
 	/**
 	 * @brief Construct a new param_info object
@@ -114,7 +114,7 @@ struct DPP_EXPORT param_info {
 	 * @param description The parameter description
 	 * @param opts The options for a multiple choice parameter
 	 */
-	param_info(parameter_type t, bool o, const std::string &description, const std::map<std::string, std::string> &opts = {});
+	param_info(parameter_type t, bool o, const std::string &description, const std::map<command_value, std::string> &opts = {});
 };
 
 /**
