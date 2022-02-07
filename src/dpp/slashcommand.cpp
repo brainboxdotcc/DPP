@@ -368,6 +368,8 @@ void from_json(const nlohmann::json& j, interaction& i) {
 				}
 			}
 		}
+		i.member.user_id = i.usr.id;
+		i.member.guild_id = i.guild_id;
 	}
 
 	if (j.contains("data") && !j.at("data").is_null()) {
