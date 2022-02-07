@@ -85,6 +85,8 @@ guild::guild() :
 
 
 guild_member::guild_member() :
+	guild_id(0),
+	user_id(0),
 	joined_at(0),
 	premium_since(0),
 	flags(0),
