@@ -160,6 +160,16 @@ struct DPP_EXPORT command_source {
 	 * @brief The user who issued the command
 	 */
 	user issuer;
+
+	/**
+	 * @brief Copy of the underlying interaction_create_t event, if it was an interaction create event
+	 */
+	std::optional<interaction_create_t> interaction_event;
+
+	/**
+	 * @brief Copy of the underlying message_create_t event, if it was a message create event
+	 */
+	std::optional<message_create_t> message_event;
 };
 
 /**
@@ -325,7 +335,7 @@ public:
 	 * 
 	 * @param msg message to parse
 	 */
-	void route(const dpp::message& msg);
+	void route(const struct dpp::message_create_t& event);
 
 	/**
 	 * @brief Route a command from the on_interaction_create function.
