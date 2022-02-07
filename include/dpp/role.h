@@ -73,7 +73,7 @@ enum role_permissions : uint64_t {
 	p_request_to_speak		=	0x00100000000,	//!< allows for requesting to speak in stage channels. (Discord: This permission is under active development and may be changed or removed.)
 	p_manage_events			=	0x00200000000,	//!< allows for management (creation, updating, deleting, starting) of scheduled events
 	p_manage_threads		=	0x00400000000,	//!< allows for deleting and archiving threads, and viewing all private threads
-	p_create_public_threads		=	0x00800000000,	//!< allows for creating threads
+	p_create_public_threads		=	0x00800000000,	//!< allows for creating public and announcement threads
 	p_create_private_threads	=	0x01000000000,	//!< allows for creating private threads
 	p_use_external_stickers		=	0x02000000000,	//!< allows the usage of custom stickers from other servers
 	p_send_messages_in_threads	=	0x04000000000,	//!< allows for sending messages in threads

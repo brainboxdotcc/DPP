@@ -2565,7 +2565,7 @@ public:
 	/**
 	 * @brief Edit guild widget
 	 * 
-	 * Requires the `MANAGE_GUILD` permission. 
+	 * Requires the `MANAGE_GUILD` permission.
 	 *
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to edit widget for

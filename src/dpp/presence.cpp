@@ -20,15 +20,56 @@
  ************************************************************************************/
 #include <dpp/presence.h>
 #include <dpp/discordevents.h>
+#include <dpp/utility.h>
+#include <dpp/emoji.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 
 namespace dpp {
 
+std::string activity::get_large_asset_url(uint16_t size) const {
+	// https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
+	if (!this->assets.large_image.empty() && this->application_id &&
+		this->assets.large_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
+		return fmt::format("{}/app-assets/{}/{}.png{}",
+						   utility::cdn_host,
+						   this->application_id,
+						   this->assets.large_image,
+						   utility::avatar_size(size)
+		);
+	} else {
+		return std::string();
+	}
+}
+
+std::string activity::get_small_asset_url(uint16_t size) const {
+	// https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
+	if (!this->assets.small_image.empty() && this->application_id &&
+		this->assets.small_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
+		return fmt::format("{}/app-assets/{}/{}.png{}",
+						   utility::cdn_host,
+						   this->application_id,
+						   this->assets.small_image,
+						   utility::avatar_size(size)
+		);
+	} else {
+		return std::string();
+	}
+}
+
+activity_party::activity_party() : id(0), current_size(0), maximum_size(0)
+{
+}
+
 activity::activity(const activity_type typ, const std::string& nam, const std::string& stat, const std::string& url_) :
-	 name(nam), state(stat), url(url_), type(typ)
-{	
+	 name(nam), state(stat), url(url_), type(typ), created_at(0), start(0), end(0), application_id(0), flags(0), is_instance(false)
+{
+}
+
+activity::activity(): created_at(0), start(0), end(0), application_id(0), flags(0), is_instance(false)
+{
 }
 
 presence::presence() : user_id(0), guild_id(0), flags(0)
@@ -135,18 +176,57 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 		for (auto & act : (*j)["activities"]) {
 			activity a;
 			a.name = string_not_null(&act, "name");
-			a.state = string_not_null(&act, "state"); // if user
-			if (a.state.empty()) a.state = string_not_null(&act, "details"); // if activity from bot, maybe?
+			a.details = string_not_null(&act, "details");
+			if (act.find("assets") != act.end()) {
+				a.assets.large_image = string_not_null(&act["assets"], "large_image");
+				a.assets.large_text = string_not_null(&act["assets"], "large_text");
+				a.assets.small_image = string_not_null(&act["assets"], "small_image");
+				a.assets.small_text = string_not_null(&act["assets"], "small_text");
+			}
+			a.state = string_not_null(&act, "state");
 			a.type = (activity_type)int8_not_null(&act, "type");
 			a.url = string_not_null(&act, "url");
+			if (act.find("buttons") != act.end()) {
+				for (auto &b : act["buttons"]) {
+					activity_button btn;
+					if (b.is_string()) { // its may be just a string (label) because normal bots cannot access the button URLs
+						btn.label = b;
+					} else {
+						btn.label = string_not_null(&b, "label");
+						btn.url = string_not_null(&b, "url");
+					}
+					a.buttons.push_back(btn);
+				}
+			}
+			if (act.find("emoji") != act.end()) {
+				a.emoji.name = string_not_null(&act["emoji"], "name");
+				a.emoji.id = snowflake_not_null(&act["emoji"], "id");
+				if (bool_not_null(&act["emoji"], "animated"))
+					a.emoji.flags |= e_animated;
+			}
+			if (act.find("party") != act.end()) {
+				a.party.id = snowflake_not_null(&act["party"], "id");
+				if (act["party"].find("size") != act["party"].end()) { // "size" is an array of two integers
+					try {
+						a.party.current_size = act["party"]["size"][0].get<int32_t>();
+						a.party.maximum_size = act["party"]["size"][1].get<int32_t>();
+					} catch (std::exception &exception) {}
+				}
+			}
+			if (act.find("secrets") != act.end()) {
+				a.secrets.join = string_not_null(&act["secret"], "join");
+				a.secrets.spectate = string_not_null(&act["secret"], "spectate");
+				a.secrets.match = string_not_null(&act["secret"], "match");
+			}
 			a.created_at = int64_not_null(&act, "created_at");
 			if (act.find("timestamps") != act.end()) {
-				a.start = int64_not_null(&(act["timestamps"]), "start");
-				a.end = int64_not_null(&(act["timestamps"]), "end");
+				a.start = int64_not_null(&act["timestamps"], "start");
+				a.end = int64_not_null(&act["timestamps"], "end");
 			}
 			a.application_id = snowflake_not_null(&act, "application_id");
 			a.flags = int8_not_null(&act, "flags");
-	
+			a.is_instance = bool_not_null(&act, "instance");
+
 			activities.push_back(a);
 		}
 	}
