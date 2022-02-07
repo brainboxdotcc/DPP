@@ -180,16 +180,14 @@ bool guild_member::has_animated_guild_avatar() const {
 
 std::string guild_member::build_json() const {
 	json j;
-	if (this->communication_disabled_until > 0) {
-		if (this->communication_disabled_until > std::time(nullptr)) {
-			j["communication_disabled_until"] = ts_to_string(this->communication_disabled_until);
-		} else {
-			j["communication_disabled_until"] = json::value_t::null;
-		}
+	if (this->communication_disabled_until == 0) {
+		j["communication_disabled_until"] = NULL;
+	} else {
+		j["communication_disabled_until"] = ts_to_string(this->communication_disabled_until);
 	}
 	if (!this->nickname.empty())
 		j["nick"] = this->nickname;
-	if (!this->roles.empty()) {
+	if (this->roles.size()) {
 		j["roles"] = {};
 		for (auto & role : roles) {
 			j["roles"].push_back(std::to_string(role));

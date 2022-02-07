@@ -159,9 +159,7 @@ public:
 	uint8_t flags;
 	/** User avatar (per-server avatar is a nitro only feature) */
 	utility::iconhash avatar;
-	/** timestamp of when the time out will be removed; until then, they cannot interact with the guild.
-	 * Set it to a non-zero time in the history if you want to remove the timeout
-	 */
+	/** timestamp of when the time out will be removed; until then, they cannot interact with the guild*/
 	time_t communication_disabled_until;
 
 	/** Default constructor */
