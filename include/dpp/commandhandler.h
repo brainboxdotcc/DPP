@@ -343,7 +343,7 @@ public:
 	 * Call this method from within your on_message_create with the received
 	 * dpp::message object if you have disabled automatic registration of events.
 	 * 
-	 * @param msg message to parse
+	 * @param event message create event to parse
 	 */
 	void route(const struct dpp::message_create_t& event);
 
