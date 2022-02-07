@@ -32,6 +32,14 @@ param_info::param_info(parameter_type t, bool o, const std::string &d, const std
 {
 }
 
+command_source::command_source(const struct message_create_t& event) : guild_id(event.msg.guild_id), channel_id(event.msg.channel_id), command_id(0), issuer(event.msg.author), message_event(event), interaction_event(std::nullopt)
+{
+}
+
+command_source::command_source(const struct interaction_create_t& event) : guild_id(event.command.guild_id), channel_id(event.command.channel_id), command_id(event.command.id), command_token(event.command.token), issuer(event.command.usr), message_event(std::nullopt), interaction_event(event)
+{
+}
+
 commandhandler::commandhandler(cluster* o, bool auto_hook_events, snowflake application_id) : slash_commands_enabled(false), owner(o), app_id(application_id)
 {
 	if (!application_id && o->me.id) {
@@ -286,13 +294,7 @@ void commandhandler::route(const struct dpp::message_create_t& event)
 			}
 
 			/* Call command handler */
-			command_source source;
-			source.command_id = 0;
-			source.guild_id = event.msg.guild_id;
-			source.channel_id = event.msg.channel_id;
-			source.issuer = event.msg.author;
-			source.message_event = event;
-			found_cmd->second.func(command, call_params, source);
+			found_cmd->second.func(command, call_params, command_source(event));
 		}
 	}
 }
@@ -403,14 +405,7 @@ void commandhandler::route(const struct interaction_create_t & event)
 		}
 
 		/* Call command handler */
-		command_source source;
-		source.command_id = event.command.id;
-		source.command_token = event.command.token;
-		source.guild_id = event.command.guild_id;
-		source.channel_id = event.command.channel_id;
-		source.issuer = event.command.usr;
-		source.interaction_event = event;
-		found_cmd->second.func(cmd.name, call_params, source);
+		found_cmd->second.func(cmd.name, call_params, command_source(event));
 	}
 }
 

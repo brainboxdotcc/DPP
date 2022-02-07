@@ -143,15 +143,15 @@ struct DPP_EXPORT command_source {
 	/**
 	 * @brief Sending guild id
 	 */
-	snowflake guild_id = 0;
+	snowflake guild_id;
 	/**
 	 * @brief Source channel id
 	 */
-	snowflake channel_id = 0;
+	snowflake channel_id;
 	/**
 	 * @brief Command ID of a slash command
 	 */
-	snowflake command_id = 0;
+	snowflake command_id;
 	/**
 	 * @brief Token for sending a slash command reply
 	 */
@@ -162,14 +162,24 @@ struct DPP_EXPORT command_source {
 	user issuer;
 
 	/**
+	 * @brief Copy of the underlying message_create_t event, if it was a message create event
+	 */
+	std::optional<message_create_t> message_event;
+
+	/**
 	 * @brief Copy of the underlying interaction_create_t event, if it was an interaction create event
 	 */
 	std::optional<interaction_create_t> interaction_event;
 
 	/**
-	 * @brief Copy of the underlying message_create_t event, if it was a message create event
+	 * @brief Construct a command_source object from a message_create_t event
 	 */
-	std::optional<message_create_t> message_event;
+	command_source(const struct message_create_t& event);
+
+	/**
+	 * @brief Construct a command_source object from an interaction_create_t event
+	 */
+	command_source(const struct interaction_create_t& event);
 };
 
 /**
