@@ -347,14 +347,6 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.token = string_not_null(&j, "token");
 	i.version = int8_not_null(&j, "version");
 	if (j.contains("member") && !j.at("member").is_null()) {
-		j.at("member").get_to(i.member);
-		if (i.cache_policy.user_policy != dpp::cp_none) {
-			/* User caching on, lazy or aggressive - cache or update the member information */
-			guild* g = dpp::find_guild(i.guild_id);
-			if (g) {
-				g->members[i.member.user_id] = i.member;
-			}
-		}
 		if (j.at("member").contains("user") && !j.at("member").at("user").is_null()) {
 			j.at("member").at("user").get_to(i.usr);
 			/* Caching is on; store user if needed */
@@ -366,6 +358,16 @@ void from_json(const nlohmann::json& j, interaction& i) {
 					*check = i.usr;
 					dpp::get_user_cache()->store(check);
 				}
+			}
+		}
+		j.at("member").get_to(i.member);
+		i.member.user_id = i.usr.id;
+		i.member.guild_id = i.guild_id;
+		if (i.cache_policy.user_policy != dpp::cp_none) {
+			/* User caching on, lazy or aggressive - cache or update the member information */
+			guild* g = dpp::find_guild(i.guild_id);
+			if (g) {
+				g->members[i.member.user_id] = i.member;
 			}
 		}
 	}
