@@ -134,6 +134,12 @@ channel& channel::set_user_limit(const uint8_t user_limit) {
 	return *this;
 }
 
+channel& channel::add_permission_overwrite(const snowflake id, const uint8_t type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+	permission_overwrite po {id, type, allowed_permissions, denied_permissions};
+	this->permission_overwrites.push_back(po);
+	return *this;
+}
+
 bool channel::is_nsfw() const {
 	return flags & dpp::c_nsfw;
 }
