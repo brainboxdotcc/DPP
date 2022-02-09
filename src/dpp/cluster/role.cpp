@@ -49,7 +49,7 @@ void cluster::role_edit(const class role &r, command_completion_event_t callback
 	if (p != j.end()) {
 		j.erase(p);
 	}
-	this->post_rest(API_PATH "/guilds", std::to_string(r.guild_id), "roles/" + std::to_string(r.id) , m_patch, j.dump(), [r, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(r.guild_id), "roles/" + std::to_string(r.id) , m_patch, j, [r, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}
