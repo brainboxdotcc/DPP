@@ -280,7 +280,7 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
     std::function<void(nlohmann::json *, command_option &)> fill = [&i, &fill](nlohmann::json *j, command_option &o) {
         o.type = (command_option_type)int8_not_null(j, "type");
         o.name = string_not_null(j, "name");
-        o.description = string_not_null(j, "name");
+        o.description = string_not_null(j, "description");
         o.required = bool_not_null(j, "required");
         if (j->find("choices") != j->end()) {
             for (auto& jchoice : (*j)["choices"]) {
