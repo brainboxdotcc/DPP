@@ -297,7 +297,6 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 
 	/**
 	 * @brief Reply to interaction with a dialog box
-	 * @note Experimental
 	 * 
 	 * @param mr Dialog box response to send
 	 * @param callback User function to execute when the api call completes.

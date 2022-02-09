@@ -1475,8 +1475,6 @@ int main() {
 
 Modal dialog interactions are a new Discord API feature that allow you to have pop-up windows which prompt the user to input information. Once the user has filled in this information, your program will receive an `on_form_submit` event which will contain the data which was input. You must use a slash command interaction response to submit your modal form data to Discord, via the `on_interaction_create` event. From here calling the `dialog` method of the `interaction_create_t` event object will trigger the dialog to appear.
 
-@warning This feature is currently in a closed beta, and requires whitelisting of your application by Discord. These documents and any library methods associated with this feature are subject to change until the feature is officially announced for general use!
-
 Each dialog box may have up to five rows of input fields. The example below demonstrates a simple setup with just one text input:
 
 ~~~~~~~~~~{.cpp}
