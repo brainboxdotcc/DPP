@@ -19,11 +19,24 @@
  *
  ************************************************************************************/
 #include "test.h"
+#include <dpp/httpsclient.h>
 
 /* Unit tests go here */
 int main()
-{ 
+{
 	std::string token(get_token());
+
+	dpp::multipart_response multipart = dpp::https_client::build_multipart(
+		"{\"content\":\"test\"}", {"test.txt", "rick.jpg"}, {"ABCDEFGHI", dpp::utility::read_file("rick.jpg")}
+	);
+	dpp::https_client c("discord.com", 443, "/api/channels/907951970017480707/messages", "POST", multipart.body,
+		{
+			{"Content-Type", multipart.mimetype},
+			{"Authorization", "Bot " + token}
+		}
+	);
+	exit(0);
+
 	std::vector<uint8_t> testaudio = load_test_audio();
 
 	set_test("READFILE", false);

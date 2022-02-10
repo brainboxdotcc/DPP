@@ -304,7 +304,7 @@ namespace dpp {
 		 * @return std::string Validated string, truncated if necessary.
 		 * @throw dpp::length_exception if value UTF8 length < _min
 		 */
-		std::string validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);
+		std::string DPP_EXPORT validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);
 
 		/**
 		 * @brief Return the url parameter for an avatar size, or empty if the size is 0
@@ -312,7 +312,16 @@ namespace dpp {
 		 * @param size size to generate url parameter for
 		 * @return std::string url parameter
 		 */
-		std::string avatar_size(uint32_t size);
+		std::string DPP_EXPORT avatar_size(uint32_t size);
+
+		/**
+		 * @brief Split (tokenize) a string into a vector, using the given separators
+		 * 
+		 * @param in Input string
+		 * @param sep Separator characters
+		 * @return std::vector<std::string> Tokenized strings 
+		 */
+		std::vector<std::string> DPP_EXPORT tokenize(std::string const &in, const char* sep = "\r\n");
 	};
 
 };
