@@ -21,6 +21,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include <dpp/httpsclient.h>
 #include <dpp/utility.h>
 #include <dpp/fmt/format.h>
