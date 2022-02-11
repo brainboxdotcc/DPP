@@ -103,6 +103,8 @@ typedef std::variant<
 		thread_member_map,
 		guild,
 		guild_map,
+		guild_command_permissions,
+		guild_command_permissions_map,
 		role,
 		role_map,
 		invite,
@@ -1437,6 +1439,15 @@ public:
 	void global_command_create(const slashcommand &s, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Get a global slash command
+	 *
+	 * @param id The ID of the slash command
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void global_command_get(snowflake id, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Get the audit log for a guild
 	 *
 	 * @param guild_id Guild to get the audit log of
@@ -1448,6 +1459,7 @@ public:
 	/**
 	 * @brief Create a slash command local to a guild
 	 *
+	 * @note Creating a command with the same name as an existing command for your application will overwrite the old command.
 	 * @param s Slash command to create
 	 * @param guild_id Guild ID to create the slash command in
 	 * @param callback Function to call when the API call completes.
@@ -1486,11 +1498,24 @@ public:
 	/**
 	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
 	 *
+	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
+	 * you should use cluster::guild_bulk_command_create instead.
 	 * @param s Slash command to change
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void global_command_edit(const slashcommand &s, command_completion_event_t callback = {});
+
+	/**
+	 * @brief Get a slash command of a guild
+	 *
+	 * @note The returned slash commands will not have permissions set, you need to use a permissions getter e.g. dpp::guild_commands_get_permissions to get the guild command permissions
+	 * @param id The ID of the slash command
+	 * @param guild_id Guild ID to get the slash command from
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_command_get(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Edit a slash command local to a guild
@@ -1503,17 +1528,38 @@ public:
 	void guild_command_edit(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Edit slash command permissions local to a guild,
-	 *		permissions are read from s.permissions
+	 * @brief Edit slash command permissions of a guild
 	 *
-	 * @param s Slash command to edit
+	 * @note You can only add up to 10 permission overwrites for a command
+	 * @param s Slash command to edit the permissions for
 	 * @param guild_id Guild ID to edit the slash command in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
+	/**
+	 * @brief Get the permissions for a slash command of a guild
+	 *
+	 * @param id The ID of the slash command to get the permissions for
+	 * @param guild_id Guild ID to get the permissions of
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_command_permissions object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_command_get_permissions(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
 
+	/**
+	 * @brief Edit/Overwrite the permissions of all existing slash commands in a guild
+	 *
+	 * @note You can only add up to 10 permission overwrites for a command
+	 *
+	 * @warning The endpoint will overwrite all existing permissions for all commands of the application in a guild, including slash commands, user commands, and message commands. Meaning that if you forgot to pass a slash command, the permissions of it might be removed.
+	 * @param commands A vector of slash commands to edit/overwrite the permissions for
+	 * @param guild_id Guild ID to edit permissions of the slash commands in
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_command_permissions_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Delete a global slash command (a bot can have a maximum of 100 of these)
@@ -1537,11 +1583,21 @@ public:
 	/**
 	 * @brief Get the application's slash commands for a guild
 	 *
+	 * @note The returned slash commands will not have permissions set, you need to use a permissions getter e.g. dpp::guild_commands_get_permissions to get the guild command permissions
 	 * @param guild_id Guild ID to get the slash commands for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_commands_get(snowflake guild_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get all slash command permissions of a guild
+	 *
+	 * @param guild_id Guild ID to get the slash commands permissions for
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::guild_command_permissions_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_commands_get_permissions(snowflake guild_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get the application's global slash commands
@@ -1838,6 +1894,7 @@ public:
 	/**
 	 * @brief Edit a channel's permissions
 	 *
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param c Channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
 	 * @param allow allow permissions
@@ -1851,6 +1908,7 @@ public:
 	/**
 	 * @brief Edit a channel's permissions
 	 *
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param channel_id ID of the channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
 	 * @param allow allow permissions
@@ -1883,6 +1941,7 @@ public:
 	/**
 	 * @brief Delete an invite
 	 *
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param invite Invite code to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2508,6 +2567,7 @@ public:
 	 * 
 	 * Requires the `MANAGE_GUILD` permission.
 	 *
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to edit widget for
 	 * @param gw New guild widget information
 	 * @param callback Function to call when the API call completes.

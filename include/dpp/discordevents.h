@@ -52,6 +52,20 @@ std::string string_not_null(const nlohmann::json* j, const char *keyname);
  */
 void set_string_not_null(const nlohmann::json* j, const char *keyname, std::string &v);
 
+/** @brief Returns a double from a json field value, if defined, else returns 0.
+ * @param j nlohmann::json instance to retrieve value from
+ * @param keyname key name to check for a value
+ * @return found value
+ */
+double double_not_null(const nlohmann::json* j, const char *keyname);
+
+/** @brief Sets a double from a json field value, if defined, else does nothing
+ * @param j nlohmann::json instance to retrieve value from
+ * @param keyname key name to check for a value
+ * @param v Value to change
+ */
+void set_double_not_null(const nlohmann::json* j, const char *keyname, double &v);
+
 /** @brief Returns a 64 bit unsigned integer from a json field value, if defined, else returns 0.
  * DO NOT use this for snowflakes, as usually snowflakes are wrapped in a string!
  * @param j nlohmann::json instance to retrieve value from
