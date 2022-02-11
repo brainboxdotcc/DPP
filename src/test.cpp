@@ -26,7 +26,7 @@ int main()
 {
 	std::string token(get_token());
 
-	dpp::multipart_response multipart = dpp::https_client::build_multipart(
+	dpp::multipart_content multipart = dpp::https_client::build_multipart(
 		"{\"content\":\"test\"}", {"test.txt", "rick.jpg"}, {"ABCDEFGHI", dpp::utility::read_file("rick.jpg")}
 	);
 	dpp::https_client c("discord.com", 443, "/api/channels/907951970017480707/messages", "POST", multipart.body,
@@ -35,6 +35,17 @@ int main()
 			{"Authorization", "Bot " + token}
 		}
 	);
+	std::string hdr1 = c.get_header("server");
+	std::string content1 = c.get_content();
+	std::cout << "hdr1: " << hdr1 << "\n";
+	std::cout << "c1: " << c.get_status() << " " << content1.length() << "\n";
+
+	dpp::https_client c2("neuron.brainbox.cc", 80, "/tmp/supersu-2-82.apk", "GET", "", {}, true);
+	std::string hdr2 = c2.get_header("server");
+	std::string content2 = c2.get_content();
+	std::cout << "hdr2: " << hdr2 << "\n";
+	std::cout << "c2: " << c2.get_status() << " " << content2.length() << "\n";
+
 	exit(0);
 
 	std::vector<uint8_t> testaudio = load_test_audio();

@@ -52,7 +52,7 @@ enum http_state : uint8_t {
 
 typedef std::multimap<std::string, std::string> http_headers;
 
-struct multipart_response {
+struct multipart_content {
 	std::string body;
 	std::string mimetype;
 };
@@ -79,6 +79,8 @@ class DPP_EXPORT https_client : public ssl_client
 
 	http_headers request_headers;
 
+	uint16_t status;
+
 	/** HTTP headers received on connecting/upgrading */
 	std::map<std::string, std::string> response_headers;
 
@@ -99,18 +101,23 @@ protected:
 
 public:
 
-	/** Connect to a specific HTTPS socket server.
-	 * @param hostname Hostname to connect to
-	 * @param port Port to connect to
-	 * @param urlpath The URL path components of the HTTP request to send
-	 * @param body The request body to send
+	/**
+	 * @brief Connect to a specific HTTP server.
+	 * 
+	 * @param hostname 
+	 * @param port 
+	 * @param urlpath 
+	 * @param verb 
+	 * @param req_body 
+	 * @param extra_headers 
+	 * @param plaintext_connection
 	 */
-        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {});
+        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false);
 
 	/** Destructor */
         virtual ~https_client();
 
-	static multipart_response build_multipart(const std::string &json, const std::vector<std::string>& filenames = {}, const std::vector<std::string>& contents = {});
+	static multipart_content build_multipart(const std::string &json, const std::vector<std::string>& filenames = {}, const std::vector<std::string>& contents = {});
 
 	/**
 	 * @brief Processes incoming data from the SSL socket input buffer.
@@ -126,6 +133,13 @@ public:
 
 	/** Fires every second from the underlying socket I/O loop, used for sending websocket pings */
 	virtual void one_second_timer();
+
+	std::string get_header(std::string header_name);
+
+	std::string get_content();
+
+	uint16_t get_status();
+
 };
 
 };

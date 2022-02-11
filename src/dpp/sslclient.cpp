@@ -90,7 +90,7 @@ public:
 #define BUFSIZZ 16 * 1240
 const int ERROR_STATUS = -1;
 
-ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) :
+ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade) :
 	nonblocking(false),
 	sfd(INVALID_SOCKET),
 	ssl(nullptr),
@@ -98,7 +98,8 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) :
 	hostname(_hostname),
 	port(_port),
 	bytes_out(0),
-	bytes_in(0)
+	bytes_in(0),
+	plaintext(plaintext_downgrade)
 {
 #ifndef WIN32
         signal(SIGALRM, SIG_IGN);
@@ -110,7 +111,11 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port) :
 	if (FD_SETSIZE < 1024) {
 		throw dpp::connection_exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
 	}
-	ssl = new opensslcontext();
+	if (plaintext) {
+		ssl = nullptr;
+	} else {
+		ssl = new opensslcontext();
+	}
 	this->connect();
 }
 
@@ -119,17 +124,6 @@ void ssl_client::connect()
 {
 	/* Initial connection is done in blocking mode. There is a timeout on it. */
 	nonblocking = false;
-	const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
-
-	/* Create SSL context */
-	ssl->ctx = SSL_CTX_new(method);
-	if (ssl->ctx == nullptr)
-		throw dpp::exception("Failed to create SSL client context!");
-
-	/* Create SSL session */
-	ssl->ssl = SSL_new(ssl->ctx);
-	if (ssl->ssl == nullptr)
-		throw dpp::exception("SSL_new failed!");
 
 	/* Resolve hostname to IP */
 	struct hostent *host;
@@ -174,15 +168,29 @@ void ssl_client::connect()
 	if (sfd == ERROR_STATUS)
 		throw dpp::exception(strerror(err));
 
-	/* We're good to go - hand the fd over to openssl */
-	SSL_set_fd(ssl->ssl, (int)sfd);
+	if (!plaintext) {
+		/* We're good to go - hand the fd over to openssl */
+		const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
 
-	status = SSL_connect(ssl->ssl);
-	if (status != 1) {
-		throw dpp::exception("SSL_connect error");
+		/* Create SSL context */
+		ssl->ctx = SSL_CTX_new(method);
+		if (ssl->ctx == nullptr)
+			throw dpp::exception("Failed to create SSL client context!");
+
+		/* Create SSL session */
+		ssl->ssl = SSL_new(ssl->ctx);
+		if (ssl->ssl == nullptr)
+			throw dpp::exception("SSL_new failed!");
+
+		SSL_set_fd(ssl->ssl, (int)sfd);
+
+		status = SSL_connect(ssl->ssl);
+		if (status != 1) {
+			throw dpp::exception("SSL_connect error");
+		}
+
+		this->cipher = SSL_get_cipher(ssl->ssl);
 	}
-
-	this->cipher = SSL_get_cipher(ssl->ssl);
 }
 
 void ssl_client::write(const std::string &data)
@@ -196,7 +204,11 @@ void ssl_client::write(const std::string &data)
 	if (nonblocking) {
 		obuffer += data;
 	} else {
-		SSL_write(ssl->ssl, data.data(), (int)data.length());
+		if (plaintext) {
+			::write(sfd, data.data(), data.length());
+		} else {
+			SSL_write(ssl->ssl, data.data(), (int)data.length());
+		}
 	}
 }
 
@@ -301,47 +313,60 @@ void ssl_client::read_loop()
 
 			/* Now check if there's data to read */
 			if((SAFE_FD_ISSET(sfd,&readfds) && !write_blocked_on_read) || (read_blocked_on_write && SAFE_FD_ISSET(sfd,&writefds))) {
-				do {
+				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					
-					r = SSL_read(ssl->ssl,ServerToClientBuffer,BUFSIZZ);
-
-					int e = SSL_get_error(ssl->ssl,r);
-
-					switch (e) {
-						case SSL_ERROR_NONE:
-							/* Data received, add it to the buffer */
-							if (r > 0) {
-								buffer.append(ServerToClientBuffer, r);
-								this->handle_buffer(buffer);
-								bytes_in += r;
-							}
-						break;
-						case SSL_ERROR_ZERO_RETURN:
-							/* End of data */
-							SSL_shutdown(ssl->ssl);
-							return;
-						break;
-						case SSL_ERROR_WANT_READ:
-							read_blocked = true;
-						break;
-								
-						/* We get a WANT_WRITE if we're trying to rehandshake and we block on a write during that rehandshake.
-						* We need to wait on the socket to be writeable but reinitiate the read when it is
-						*/
-						case SSL_ERROR_WANT_WRITE:
-							read_blocked_on_write = true;
-						break;
-						default:
-							return;
-						break;
+					r = ::read(sfd, ServerToClientBuffer, BUFSIZZ);
+					if (r <= 0) {
+						/* error or EOF */
+						return;
+					} else {
+						buffer.append(ServerToClientBuffer, r);
+						this->handle_buffer(buffer);
+						bytes_in += r;
 					}
+				} else {
+					do {
+						read_blocked_on_write = false;
+						read_blocked = false;
+						
+						r = SSL_read(ssl->ssl,ServerToClientBuffer,BUFSIZZ);
+						int e = SSL_get_error(ssl->ssl,r);
 
-					/* We need a check for read_blocked here because SSL_pending() doesn't work properly during the
-					* handshake. This check prevents a busy-wait loop around SSL_read()
-					*/
-				} while (SSL_pending(ssl->ssl) && !read_blocked);
+						switch (e) {
+							case SSL_ERROR_NONE:
+								/* Data received, add it to the buffer */
+								if (r > 0) {
+									buffer.append(ServerToClientBuffer, r);
+									this->handle_buffer(buffer);
+									bytes_in += r;
+								}
+							break;
+							case SSL_ERROR_ZERO_RETURN:
+								/* End of data */
+								SSL_shutdown(ssl->ssl);
+								return;
+							break;
+							case SSL_ERROR_WANT_READ:
+								read_blocked = true;
+							break;
+									
+							/* We get a WANT_WRITE if we're trying to rehandshake and we block on a write during that rehandshake.
+							* We need to wait on the socket to be writeable but reinitiate the read when it is
+							*/
+							case SSL_ERROR_WANT_WRITE:
+								read_blocked_on_write = true;
+							break;
+							default:
+								return;
+							break;
+						}
+
+						/* We need a check for read_blocked here because SSL_pending() doesn't work properly during the
+						* handshake. This check prevents a busy-wait loop around SSL_read()
+						*/
+					} while (SSL_pending(ssl->ssl) && !read_blocked);
+				}
 			}
 
 			/* Check for input on the sendq */
@@ -356,31 +381,45 @@ void ssl_client::read_loop()
 			if ((SAFE_FD_ISSET(sfd,&writefds) && ClientToServerLength) || (write_blocked_on_read && SAFE_FD_ISSET(sfd,&readfds))) {
 				write_blocked_on_read = false;
 				/* Try to write */
-				r = SSL_write(ssl->ssl, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength);
-				
-				switch(SSL_get_error(ssl->ssl,r)) {
-					/* We wrote something */
-					case SSL_ERROR_NONE:
+
+				if (plaintext) {
+					r = ::write(sfd, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength);
+
+					if (r < 0) {
+						/* Write error */
+						return;
+					} else {
 						ClientToServerLength -= r;
 						ClientToServerOffset += r;
 						bytes_out += r;
-					break;
-						
-					/* We would have blocked */
-					case SSL_ERROR_WANT_WRITE:
-					break;
-			
-					/* We get a WANT_READ if we're trying to rehandshake and we block onwrite during the current connection.
-					* We need to wait on the socket to be readable but reinitiate our write when it is
-					*/
-					case SSL_ERROR_WANT_READ:
-						write_blocked_on_read = true;
-					break;
+					}
+				} else {
+					r = SSL_write(ssl->ssl, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength);
+					
+					switch(SSL_get_error(ssl->ssl,r)) {
+						/* We wrote something */
+						case SSL_ERROR_NONE:
+							ClientToServerLength -= r;
+							ClientToServerOffset += r;
+							bytes_out += r;
+						break;
 							
-					/* Some other error */
-					default:
-						return;
-					break;
+						/* We would have blocked */
+						case SSL_ERROR_WANT_WRITE:
+						break;
+				
+						/* We get a WANT_READ if we're trying to rehandshake and we block onwrite during the current connection.
+						* We need to wait on the socket to be readable but reinitiate our write when it is
+						*/
+						case SSL_ERROR_WANT_READ:
+							write_blocked_on_read = true;
+						break;
+								
+						/* Some other error */
+						default:
+							return;
+						break;
+					}
 				}
 			}
 		}
@@ -407,7 +446,7 @@ bool ssl_client::handle_buffer(std::string &buffer)
 
 void ssl_client::close()
 {
-	if (ssl->ssl) {
+	if (!plaintext && ssl->ssl) {
 		SSL_free(ssl->ssl);
 		ssl->ssl = nullptr;
 	}
@@ -419,7 +458,7 @@ void ssl_client::close()
 	#else
 		::close(sfd);
 	#endif
-	if (ssl->ctx) {
+	if (!plaintext && ssl->ctx) {
 		SSL_CTX_free(ssl->ctx);
 		ssl->ctx = nullptr;
 	}
