@@ -236,7 +236,7 @@ public:
 	 */
 	std::string url;
 
-	/** Placeholder text for select menus and text inputs
+	/** Placeholder text for select menus and text inputs (max 100 characters)
 	 */
 	std::string placeholder;
 
@@ -250,11 +250,11 @@ public:
 	 */
 	int32_t max_values;
 
-	/** Minimum length for text input.
+	/** Minimum length for text input (0-4000)
 	 */
 	int32_t min_length;
 
-	/** Maximum length for text input
+	/** Maximum length for text input (1-4000)
 	 */
 	int32_t max_length;
 
@@ -265,6 +265,10 @@ public:
 	/** Disabled flag (for buttons)
 	 */
 	bool disabled;
+
+	/** Whether the text input is required to be filled
+	 */
+	bool required;
 
 	/** Current value (only filled or valid when populated from an on_form_submit event)
 	 */
