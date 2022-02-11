@@ -40,6 +40,15 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	name = string_not_null(j, "name");
 	description = string_not_null(j, "description");
 	version = snowflake_not_null(j, "version");
+	application_id = snowflake_not_null(j, "application_id");
+	default_permission = bool_not_null(j, "default_permission");
+	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
+	if (j->find("options") != j->end()) {
+		for (auto &option: (*j)["options"]) {
+			// options is filled recursive
+			options.push_back(command_option().fill_from_json(&option));
+		}
+	}
 	return *this;
 }
 
@@ -211,6 +220,23 @@ command_option_choice::command_option_choice(const std::string &n, command_value
 {
 }
 
+command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) {
+	name = string_not_null(j, "name");
+	if ((*j)["value"].is_boolean()) { // is bool
+		value.emplace<bool>((*j)["value"]);
+	} else if ((*j)["value"].is_number_float()) { // is double
+		value.emplace<double>((*j)["value"]);
+	} else if ((*j)["value"].is_number_unsigned()) { // is snowflake
+		value.emplace<snowflake>((*j)["value"]);
+	} else if ((*j)["value"].is_number_integer()) { // is int64
+		value.emplace<int64_t>((*j)["value"]);
+	} else { // else string
+		value.emplace<std::string>((*j)["value"]);
+	}
+
+	return *this;
+}
+
 command_option::command_option(command_option_type t, const std::string &n, const std::string &d, bool r) :
 	type(t), name(n), description(d), required(r), autocomplete(false)
 {
@@ -243,6 +269,58 @@ command_option& command_option::set_auto_complete(bool autocomp)
 		throw dpp::logic_exception("Can't set autocomplete=true if choices exist in the command_option");
 	}
 	this->autocomplete = autocomp;
+	return *this;
+}
+
+command_option &command_option::fill_from_json(nlohmann::json *j) {
+    uint8_t i = 3; // maximum amount of nested options
+    /*
+     * Command options contains command options. Therefor the object is filled with recursion.
+     */
+    std::function<void(nlohmann::json *, command_option &)> fill = [&i, &fill](nlohmann::json *j, command_option &o) {
+        o.type = (command_option_type)int8_not_null(j, "type");
+        o.name = string_not_null(j, "name");
+        o.description = string_not_null(j, "description");
+        o.required = bool_not_null(j, "required");
+        if (j->find("choices") != j->end()) {
+            for (auto& jchoice : (*j)["choices"]) {
+                o.choices.push_back(command_option_choice().fill_from_json(&jchoice));
+            }
+        }
+
+        if (j->find("options") != j->end() && i > 0) {
+            i--; // prevent infinite recursion call with a counter
+            for (auto &joption : (*j)["options"]) {
+                command_option p;
+                fill(&joption, p);
+                o.options.push_back(p);
+            }
+        }
+
+        if (j->find("channel_types") != j->end()) {
+            for (auto& jtype : (*j)["channel_types"]) {
+                o.channel_types.push_back( (channel_type)jtype.get<int8_t>());
+            }
+        }
+        if (j->find("min_value") != j->end()) {
+            if ((*j)["min_value"].is_number_integer()) {
+                o.min_value.emplace<int64_t>(int64_not_null(j, "min_value"));
+            } else if ((*j)["min_value"].is_number()) {
+                o.min_value.emplace<double>(double_not_null(j, "min_value"));
+            }
+        }
+        if (j->find("max_value") != j->end()) {
+            if ((*j)["max_value"].is_number_integer()) {
+                o.min_value.emplace<int64_t>(int64_not_null(j, "max_value"));
+            } else if ((*j)["max_value"].is_number()) {
+                o.min_value.emplace<double>(double_not_null(j, "max_value"));
+            }
+        }
+        o.autocomplete = bool_not_null(j, "autocomplete");
+    };
+
+    fill(j, *this);
+
 	return *this;
 }
 
@@ -568,6 +646,30 @@ interaction_modal_response& interaction_modal_response::set_title(const std::str
 
 command_permission::command_permission(snowflake id, const command_permission_type t, bool permission) :
 	id(id), type(t), permission(permission) {
+}
+
+command_permission& command_permission::fill_from_json(nlohmann::json* j) {
+	id = snowflake_not_null(j, "id");
+	type = (command_permission_type)int8_not_null(j, "type");
+	permission = bool_not_null(j, "permission");
+	return *this;
+}
+
+guild_command_permissions::guild_command_permissions() : id(0), application_id(0), guild_id(0)
+{
+}
+
+guild_command_permissions &guild_command_permissions::fill_from_json(nlohmann::json *j) {
+	id = snowflake_not_null(j, "id");
+	application_id = snowflake_not_null(j, "application_id");
+	guild_id = snowflake_not_null(j, "guild_id");
+	if (j->find("permissions") != j->end()) {
+		for (auto &p : (*j)["permissions"]) {
+			permissions.push_back(command_permission().fill_from_json(&p));
+		}
+	}
+
+	return *this;
 }
 
 };

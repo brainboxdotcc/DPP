@@ -99,6 +99,14 @@ struct DPP_EXPORT command_option_choice {
 	 * @param v value to initialise with
 	 */
 	command_option_choice(const std::string &n, command_value v);
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return command_option_choice& Reference to self
+	 */
+	command_option_choice& fill_from_json(nlohmann::json* j);
 };
 
 /**
@@ -202,6 +210,14 @@ struct DPP_EXPORT command_option {
 	 * @throw dpp::exception You attempted to enable auto complete on a command_option that has choices added to it
 	 */
 	command_option& set_auto_complete(bool autocomp);
+
+	/**
+	 * @brief Fill object properties from JSON. Fills options recursively.
+	 *
+	 * @param j JSON to fill from
+	 * @return command_option& Reference to self
+	 */
+	command_option& fill_from_json(nlohmann::json* j);
 };
 
 /**
@@ -646,6 +662,14 @@ public:
 	 * @param permission True to allow, false, to disallow
 	 */
 	command_permission(snowflake id, const command_permission_type t, bool permission);
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return command_permission& Reference to self
+	 */
+	command_permission &fill_from_json(nlohmann::json *j);
 };
 
 /**
@@ -667,6 +691,19 @@ public:
 	snowflake application_id;                     //!< the id of the application the command belongs to
 	snowflake guild_id;                           //!< the id of the guild
 	std::vector<command_permission> permissions;  //!< the permissions for the command in the guild
+
+	/**
+	 * @brief Construct a new guild command permissions object
+	 */
+	guild_command_permissions();
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return guild_command_permissions& Reference to self
+	 */
+	guild_command_permissions &fill_from_json(nlohmann::json *j);
 };
 
 /**
@@ -828,5 +865,10 @@ void to_json(nlohmann::json& j, const slashcommand& cmd);
  * @brief A group of application slash commands
  */
 typedef std::unordered_map<snowflake, slashcommand> slashcommand_map;
+
+/**
+ * @brief A group of guild command permissions
+ */
+typedef std::unordered_map<snowflake, guild_command_permissions> guild_command_permissions_map;
 
 };
