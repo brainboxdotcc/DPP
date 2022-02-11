@@ -1439,6 +1439,15 @@ public:
 	void global_command_create(const slashcommand &s, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Get a global slash command
+	 *
+	 * @param id The ID of the slash command
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void global_command_get(snowflake id, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Get the audit log for a guild
 	 *
 	 * @param guild_id Guild to get the audit log of
@@ -1498,6 +1507,17 @@ public:
 	void global_command_edit(const slashcommand &s, command_completion_event_t callback = {});
 
 	/**
+	 * @brief Get a slash command of a guild
+	 *
+	 * @note The returned slash commands will not have permissions set, you need to use a permissions getter e.g. dpp::guild_commands_get_permissions to get the guild command permissions
+	 * @param id The ID of the slash command
+	 * @param guild_id Guild ID to get the slash command from
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_command_get(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Edit a slash command local to a guild
 	 *
 	 * @param s Slash command to edit
@@ -1519,14 +1539,14 @@ public:
 	void guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
-	 * @brief Get the permissions for a slash command of a guild. Permissions are read from s.permissions
+	 * @brief Get the permissions for a slash command of a guild
 	 *
-	 * @param s Slash command to get the permissions for
+	 * @param id The ID of the slash command to get the permissions for
 	 * @param guild_id Guild ID to get the permissions of
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_command_permissions object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_get_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_get_permissions(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Edit/Overwrite the permissions of all existing slash commands in a guild
@@ -1563,7 +1583,7 @@ public:
 	/**
 	 * @brief Get the application's slash commands for a guild
 	 *
-	 * @note Won't fetch guild command permissions, consider using dpp::guild_commands_get_permissions to get the permissions
+	 * @note The returned slash commands will not have permissions set, you need to use a permissions getter e.g. dpp::guild_commands_get_permissions to get the guild command permissions
 	 * @param guild_id Guild ID to get the slash commands for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2545,7 +2565,7 @@ public:
 	/**
 	 * @brief Edit guild widget
 	 * 
-	 * Requires the `MANAGE_GUILD` permission. 
+	 * Requires the `MANAGE_GUILD` permission.
 	 *
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to edit widget for

@@ -48,7 +48,7 @@ enum role_permissions : uint64_t {
 	p_view_audit_log		=	0x00000000080,	//!< allows for viewing of audit logs
 	p_priority_speaker		=	0x00000000100,	//!< allows for using priority speaker in a voice channel
 	p_stream			=	0x00000000200,	//!< allows the user to go live
-	p_view_channel			=	0x00000000400,	//!< allows guild members to view a channel, which includes reading messages in text channels
+	p_view_channel			=	0x00000000400,	//!< allows guild members to view a channel, which includes reading messages in text channels and joining voice channels
 	p_send_messages			=	0x00000000800,	//!< allows for sending messages in a channel
 	p_send_tts_messages		=	0x00000001000,	//!< allows for sending of /tts messages
 	p_manage_messages		=	0x00000002000,	//!< allows for deletion of other users messages
@@ -73,7 +73,7 @@ enum role_permissions : uint64_t {
 	p_request_to_speak		=	0x00100000000,	//!< allows for requesting to speak in stage channels. (Discord: This permission is under active development and may be changed or removed.)
 	p_manage_events			=	0x00200000000,	//!< allows for management (creation, updating, deleting, starting) of scheduled events
 	p_manage_threads		=	0x00400000000,	//!< allows for deleting and archiving threads, and viewing all private threads
-	p_create_public_threads		=	0x00800000000,	//!< allows for creating threads
+	p_create_public_threads		=	0x00800000000,	//!< allows for creating public and announcement threads
 	p_create_private_threads	=	0x01000000000,	//!< allows for creating private threads
 	p_use_external_stickers		=	0x02000000000,	//!< allows the usage of custom stickers from other servers
 	p_send_messages_in_threads	=	0x04000000000,	//!< allows for sending messages in threads

@@ -222,16 +222,16 @@ command_option_choice::command_option_choice(const std::string &n, command_value
 
 command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) {
 	name = string_not_null(j, "name");
-	if ((*j)["value"].is_number_integer()) { // is int64
-		value.emplace<int64_t>(int64_not_null(j, "value"));
-	} else if ((*j)["value"].is_boolean()) { // is bool
-		value.emplace<bool>(bool_not_null(j, "value"));
-	} else if (snowflake_not_null(j, "value")) { // is snowflake
-		value.emplace<snowflake>(snowflake_not_null(j, "value"));
-	} else if ((*j)["value"].is_number()) { // is double
+	if ((*j)["value"].is_boolean()) { // is bool
+		value.emplace<bool>((*j)["value"]);
+	} else if ((*j)["value"].is_number_float()) { // is double
 		value.emplace<double>((*j)["value"]);
+	} else if ((*j)["value"].is_number_unsigned()) { // is snowflake
+		value.emplace<snowflake>((*j)["value"]);
+	} else if ((*j)["value"].is_number_integer()) { // is int64
+		value.emplace<int64_t>((*j)["value"]);
 	} else { // else string
-		value.emplace<std::string>(string_not_null(j, "value"));
+		value.emplace<std::string>((*j)["value"]);
 	}
 
 	return *this;
@@ -280,7 +280,7 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
     std::function<void(nlohmann::json *, command_option &)> fill = [&i, &fill](nlohmann::json *j, command_option &o) {
         o.type = (command_option_type)int8_not_null(j, "type");
         o.name = string_not_null(j, "name");
-        o.description = string_not_null(j, "name");
+        o.description = string_not_null(j, "description");
         o.required = bool_not_null(j, "required");
         if (j->find("choices") != j->end()) {
             for (auto& jchoice : (*j)["choices"]) {
@@ -425,14 +425,6 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.token = string_not_null(&j, "token");
 	i.version = int8_not_null(&j, "version");
 	if (j.contains("member") && !j.at("member").is_null()) {
-		j.at("member").get_to(i.member);
-		if (i.cache_policy.user_policy != dpp::cp_none) {
-			/* User caching on, lazy or aggressive - cache or update the member information */
-			guild* g = dpp::find_guild(i.guild_id);
-			if (g) {
-				g->members[i.member.user_id] = i.member;
-			}
-		}
 		if (j.at("member").contains("user") && !j.at("member").at("user").is_null()) {
 			j.at("member").at("user").get_to(i.usr);
 			/* Caching is on; store user if needed */
@@ -444,6 +436,16 @@ void from_json(const nlohmann::json& j, interaction& i) {
 					*check = i.usr;
 					dpp::get_user_cache()->store(check);
 				}
+			}
+		}
+		j.at("member").get_to(i.member);
+		i.member.user_id = i.usr.id;
+		i.member.guild_id = i.guild_id;
+		if (i.cache_policy.user_policy != dpp::cp_none) {
+			/* User caching on, lazy or aggressive - cache or update the member information */
+			guild* g = dpp::find_guild(i.guild_id);
+			if (g) {
+				g->members[i.member.user_id] = i.member;
 			}
 		}
 	}
