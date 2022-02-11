@@ -23,6 +23,7 @@
 #include <fstream>
 #include <algorithm>
 #include <stdlib.h>
+#include <climits>
 #include <dpp/httpsclient.h>
 #include <dpp/utility.h>
 #include <dpp/fmt/format.h>
@@ -148,7 +149,7 @@ bool https_client::handle_buffer(std::string &buffer)
 						if (response_headers.find("content-length") != response_headers.end()) {
 							content_length = std::stoull(response_headers["content-length"]);
 						} else {
-							content_length = std::numeric_limits<uint64_t>::max();
+							content_length = ULLONG_MAX;
 						}
 						state = HTTPS_CONTENT;
 						status = atoi(req_status[1].c_str());
