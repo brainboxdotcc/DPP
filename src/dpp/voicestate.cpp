@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
+#include <dpp/voicestate.h>
 #include <dpp/discordevents.h>
 #include <dpp/nlohmann/json.hpp>
 

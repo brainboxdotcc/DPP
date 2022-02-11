@@ -1,4 +1,3 @@
-#include <dpp/discord.h>
 /************************************************************************************
  *
  * D++, A Lightweight C++ library for Discord
@@ -19,30 +18,16 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
-#include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
-
-using json = nlohmann::json;
-
-namespace dpp { namespace events {
-
-using namespace dpp;
+#pragma once
+#include <dpp/export.h>
+#include <stdint.h>
 
 /**
- * @brief Handle event
- * 
- * @param client Websocket client (current shard)
- * @param j JSON data for the event
- * @param raw Raw JSON string
+ * @brief The main namespace for D++ functions. classes and types
  */
-void application_command_create::handle(discord_client* client, json &j, const std::string &raw) {
-}
-
-}};
+namespace dpp {
+	/** @brief A 64 bit unsigned value representing many things on discord.
+	 * Discord calls the value a 'snowflake' value.
+	 */
+	typedef uint64_t snowflake;
+};

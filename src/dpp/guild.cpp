@@ -18,10 +18,10 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/discordclient.h>
 #include <dpp/voicestate.h>
-#include <dpp/cache.h>
+#include <dpp/exception.h>
+#include <dpp/guild.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
@@ -85,6 +85,8 @@ guild::guild() :
 
 
 guild_member::guild_member() :
+	guild_id(0),
+	user_id(0),
 	joined_at(0),
 	premium_since(0),
 	flags(0),
@@ -180,17 +182,23 @@ bool guild_member::has_animated_guild_avatar() const {
 
 std::string guild_member::build_json() const {
 	json j;
-	j["communication_disabled_until"] = ts_to_string(this->communication_disabled_until);
+	if (this->communication_disabled_until > 0) {
+		if (this->communication_disabled_until > std::time(nullptr)) {
+			j["communication_disabled_until"] = ts_to_string(this->communication_disabled_until);
+		} else {
+			j["communication_disabled_until"] = json::value_t::null;
+		}
+	}
 	if (!this->nickname.empty())
 		j["nick"] = this->nickname;
-	if (this->roles.size()) {
+	if (!this->roles.empty()) {
 		j["roles"] = {};
 		for (auto & role : roles) {
 			j["roles"].push_back(std::to_string(role));
 		}
 	}
 	if (is_muted()) {
-		j["muted"] = true;
+		j["mute"] = true;
 	}
 	if (is_deaf()) {
 		j["deaf"] = true;
@@ -517,7 +525,9 @@ uint64_t guild::base_permissions(const user* member) const
 
 	for (auto& rid : gm.roles) {
 		role* r = dpp::find_role(rid);
-		permissions |= r->permissions;
+		if (r) {
+			permissions |= r->permissions;
+		}
 	}
 
 	if (permissions & p_administrator)
@@ -650,6 +660,20 @@ std::string guild::get_splash_url(uint16_t size) const {
 	} else {
 		return std::string();
 	}
+}
+
+guild_member find_guild_member(const snowflake guild_id, const snowflake user_id) {
+	guild* g = find_guild(guild_id);
+	if (g) {
+		auto gm = g->members.find(user_id);
+		if (gm != g->members.end()) {
+			return gm->second;
+		}
+
+		throw dpp::cache_exception("Requested member not found in the guild cache!");
+	}
+	
+	throw dpp::cache_exception("Requested guild cache not found!");
 }
 
 

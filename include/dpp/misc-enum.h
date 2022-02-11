@@ -18,31 +18,41 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
-#include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#pragma once
+#include <dpp/export.h>
+#include <stddef.h>
 
-using json = nlohmann::json;
+namespace dpp {
 
-namespace dpp { namespace events {
+	/** @brief Supported image types for profile pictures */
+	enum image_type {
+		/// image/png
+		i_png,
+		/// image/jpeg
+		i_jpg,
+		/// image/gif
+		i_gif
+	};
 
-using namespace dpp;
+	/** @brief Log levels */
+	enum loglevel {
+		/// Trace
+		ll_trace = 0,
+		/// Debug
+		ll_debug,
+		/// Information
+		ll_info,
+		/// Warning
+		ll_warning,
+		/// Error
+		ll_error,
+		/// Critical
+		ll_critical
+	};
 
-/**
- * @brief Handle event
- * 
- * @param client Websocket client (current shard)
- * @param j JSON data for the event
- * @param raw Raw JSON string
- */
-void application_command_update::handle(discord_client* client, json &j, const std::string &raw) {
-}
+	/**
+	 * @brief A returned event handle for an event which was attached
+	 */
+	typedef size_t event_handle;
 
-}};
+};

@@ -18,10 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
+#include <dpp/channel.h>
 #include <dpp/cache.h>
 #include <dpp/guild.h>
 #include <dpp/user.h>
+#include <dpp/role.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
@@ -76,6 +77,67 @@ channel::~channel()
 
 std::string channel::get_mention() const {
 	return "<#" + std::to_string(id) + ">";
+}
+
+channel& channel::set_name(const std::string& name) {
+	this->name = utility::validate(name, 1, 100, "name must be at least 1 character");
+	return *this;
+}
+
+channel& channel::set_topic(const std::string& topic) {
+	this->topic = utility::utf8substr(topic, 0, 1024);
+	return *this;
+}
+
+channel& channel::set_parent_id(const snowflake parent_id) {
+	this->parent_id = parent_id;
+	return *this;
+}
+
+channel& channel::set_rate_limit_per_user(const uint16_t rate_limit_per_user) {
+	this->rate_limit_per_user = rate_limit_per_user;
+	return *this;
+}
+
+channel& channel::set_position(const uint16_t position) {
+	this->position = position;
+	return *this;
+}
+
+channel& channel::set_bitrate(const uint16_t bitrate) {
+	this->bitrate = bitrate;
+	return *this;
+}
+
+channel& channel::set_flags(const uint16_t flags) {
+	this->flags = flags;
+	return *this;
+}
+
+channel& channel::add_flag(const channel_flags flag) {
+	this->flags |= flag;
+	return *this;
+}
+
+channel& channel::remove_flag(const channel_flags flag) {
+	this->flags &= ~flag;
+	return *this;
+}
+
+channel& channel::set_nsfw(const bool is_nsfw) {
+	this->flags = (is_nsfw) ? this->flags | dpp::c_nsfw : this->flags & ~dpp::c_nsfw;;
+	return *this;
+}
+
+channel& channel::set_user_limit(const uint8_t user_limit) {
+	this->user_limit = user_limit;
+	return *this;
+}
+
+channel& channel::add_permission_overwrite(const snowflake id, const uint8_t type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+	permission_overwrite po {id, type, allowed_permissions, denied_permissions};
+	this->permission_overwrites.push_back(po);
+	return *this;
 }
 
 bool channel::is_nsfw() const {
@@ -157,7 +219,6 @@ thread& thread::fill_from_json(json* j) {
 	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");
 	metadata.auto_archive_duration = int16_not_null(&json_metadata, "auto_archive_duration");
 	metadata.locked = bool_not_null(&json_metadata, "locked");
-	metadata.create_timestamp = ts_not_null(&json_metadata, "create_timestamp");
 
 	/* Only certain events set this */
 	if (j->find("member") != j->end())  {

@@ -22,7 +22,10 @@
 
 /* Unit tests go here */
 int main()
-{
+{ 
+	std::string token(get_token());
+	std::vector<uint8_t> testaudio = load_test_audio();
+
 	set_test("READFILE", false);
 	std::string rf_test = dpp::utility::read_file("libdpp.so");
 	FILE* fp = fopen("libdpp.so", "rb");
@@ -31,11 +34,34 @@ int main()
 	fclose(fp);
 	set_test("READFILE", off == rf_test.length());
 
-	std::string token(get_token());
-	std::vector<uint8_t> testaudio = load_test_audio();
-
 	set_test("TIMESTAMPTOSTRING", false);
 	set_test("TIMESTAMPTOSTRING", dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
+
+	{ // test dpp::command_option_choice::fill_from_json
+		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", false);
+		json j;
+		dpp::command_option_choice choice;
+		j["value"] = 54.321;
+		choice.fill_from_json(&j);
+		bool success_double = std::holds_alternative<double>(choice.value);
+		j["value"] = 8223372036854775807;
+		choice.fill_from_json(&j);
+		bool success_int = std::holds_alternative<int64_t>(choice.value);
+		j["value"] = -8223372036854775807;
+		choice.fill_from_json(&j);
+		bool success_int2 = std::holds_alternative<int64_t>(choice.value);
+		j["value"] = true;
+		choice.fill_from_json(&j);
+		bool success_bool = std::holds_alternative<bool>(choice.value);
+		dpp::snowflake s = 845266178036516757; // example snowflake
+		j["value"] = s;
+		choice.fill_from_json(&j);
+		bool success_snowflake = std::holds_alternative<dpp::snowflake>(choice.value);
+		j["value"] = "foobar";
+		choice.fill_from_json(&j);
+		bool success_string = std::holds_alternative<std::string>(choice.value);
+		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", (success_double && success_int && success_int2 && success_bool && success_snowflake && success_string));
+	}
 
 	set_test("TIMESTRINGTOTIMESTAMP", false);
 	json tj;

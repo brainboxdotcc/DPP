@@ -25,7 +25,6 @@
 #include <time.h>
 #include <stdlib.h>
 #include <dpp/discordclient.h>
-#include <dpp/discord.h>
 #include <dpp/event.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
@@ -102,6 +101,22 @@ void set_string_not_null(const json* j, const char *keyname, std::string &v) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
 		v = !k->is_null() && k->is_string() ? k->get<std::string>() : "";
+	}
+}
+
+double double_not_null(const json* j, const char *keyname) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		return !k->is_null() && !k->is_string() ? k->get<double>() : 0;
+	} else {
+		return 0;
+	}
+}
+
+void set_double_not_null(const json* j, const char *keyname, double &v) {
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && !k->is_string() ? k->get<double>() : 0;
 	}
 }
 
@@ -305,9 +320,6 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "WEBHOOKS_UPDATE", new dpp::events::webhooks_update() },
 	{ "INVITE_CREATE", new dpp::events::invite_create() },
 	{ "INVITE_DELETE", new dpp::events::invite_delete() },
-	{ "APPLICATION_COMMAND_CREATE", new dpp::events::application_command_create() },
-	{ "APPLICATION_COMMAND_UPDATE", new dpp::events::application_command_update() },
-	{ "APPLICATION_COMMAND_DELETE", new dpp::events::application_command_delete() },
 	{ "INTERACTION_CREATE", new dpp::events::interaction_create() },
 	{ "USER_UPDATE", new dpp::events::user_update() },
 	{ "GUILD_JOIN_REQUEST_DELETE", new dpp::events::guild_join_request_delete() },

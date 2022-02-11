@@ -18,7 +18,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/message.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>
@@ -522,6 +521,14 @@ embed& embed::set_footer(const embed_footer& f) {
 	return *this;
 }
 
+embed& embed::set_footer(const std::string& text, const std::string& icon_url) {
+	dpp::embed_footer f;
+	f.set_text(text);
+	f.set_icon(icon_url);
+	footer = f;
+	return *this;
+}
+
 embed& embed::set_provider(const std::string& name, const std::string& url) {
 	dpp::embed_provider p;
 	p.name = utility::utf8substr(name, 0, 256);
@@ -640,15 +647,12 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		{"tts", tts},
 		{"nonce", nonce},
 		{"flags", flags},
-		{"type", type}
+		{"type", type},
+		{"content", content}
 	});
 
 	if (with_id) {
 		j["id"] = std::to_string(id);
-	}
-
-	if (!content.empty()) {
-		j["content"] = content;
 	}
 
 	if(!author.username.empty()) {
@@ -714,47 +718,46 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		}
 		j["components"].push_back(n);
 	}
-	if (embeds.size()) {
-		j["embeds"] = json::array();
 
-		for (auto& embed : embeds) {
-			json e;
-			if (!embed.description.empty())
-				e["description"] = embed.description;
-			if (!embed.title.empty())
-				e["title"] = embed.title;
-			if (!embed.url.empty())
-				e["url"] = embed.url;
-			e["color"] = embed.color;
-			if (embed.footer.has_value()) {
-				e["footer"]["text"] = embed.footer->text;
-				e["footer"]["icon_url"] = embed.footer->icon_url;
-			}
-			if (embed.image.has_value()) {
-				e["image"]["url"] = embed.image->url;
-			}
-			if (embed.thumbnail.has_value()) {
-				e["thumbnail"]["url"] = embed.thumbnail->url;
-			}
-			if (embed.author.has_value()) {
-				e["author"]["name"] = embed.author->name;
-				e["author"]["url"] = embed.author->url;
-				e["author"]["icon_url"] = embed.author->icon_url;
-			}
-			if (embed.fields.size()) {
-				e["fields"] = json();
-				for (auto& field : embed.fields) {
-					json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
-					e["fields"].push_back(f);
-				}
-			}
-			if (embed.timestamp) {
-				e["timestamp"] = ts_to_string(embed.timestamp);
-			}
-
-				j["embeds"].push_back(e);
+	j["embeds"] = json::array();
+	for (auto& embed : embeds) {
+		json e;
+		if (!embed.description.empty())
+			e["description"] = embed.description;
+		if (!embed.title.empty())
+			e["title"] = embed.title;
+		if (!embed.url.empty())
+			e["url"] = embed.url;
+		e["color"] = embed.color;
+		if (embed.footer.has_value()) {
+			e["footer"]["text"] = embed.footer->text;
+			e["footer"]["icon_url"] = embed.footer->icon_url;
 		}
+		if (embed.image.has_value()) {
+			e["image"]["url"] = embed.image->url;
+		}
+		if (embed.thumbnail.has_value()) {
+			e["thumbnail"]["url"] = embed.thumbnail->url;
+		}
+		if (embed.author.has_value()) {
+			e["author"]["name"] = embed.author->name;
+			e["author"]["url"] = embed.author->url;
+			e["author"]["icon_url"] = embed.author->icon_url;
+		}
+		if (embed.fields.size()) {
+			e["fields"] = json();
+			for (auto& field : embed.fields) {
+				json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
+				e["fields"].push_back(f);
+			}
+		}
+		if (embed.timestamp) {
+			e["timestamp"] = ts_to_string(embed.timestamp);
+		}
+
+		j["embeds"].push_back(e);
 	}
+
 	return j.dump();
 }
 

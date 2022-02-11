@@ -20,11 +20,12 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <mutex>
+#include <dpp/snowflake.h>
+#include <dpp/managed.h>
+#include <dpp/utility.h>
+#include <dpp/voicestate.h>
 #include <string>
 #include <unordered_map>
-#include <map>
-#include <dpp/voicestate.h>
 
 namespace dpp {
 
@@ -158,7 +159,9 @@ public:
 	uint8_t flags;
 	/** User avatar (per-server avatar is a nitro only feature) */
 	utility::iconhash avatar;
-	/** timestamp of when the time out will be removed; until then, they cannot interact with the guild*/
+	/** timestamp of when the time out will be removed; until then, they cannot interact with the guild.
+	 * Set it to a non-zero time in the history if you want to remove the timeout
+	 */
 	time_t communication_disabled_until;
 
 	/** Default constructor */
@@ -810,5 +813,15 @@ void from_json(const nlohmann::json& j, guild_member& gm);
 /** A container of guild members */
 typedef std::unordered_map<snowflake, guild_member> guild_member_map;
 
+/**
+ * @brief Get the guild_member from cache of given IDs
+ *
+ * @param guild_id ID of the guild to find guild_member for
+ * @param user_id ID of the user to find guild_member for
+ *
+ * @throw dpp::cache_exception if the guild or guild_member is not found in the cache
+ * @return guild_member the cached object, if found
+ */
+guild_member DPP_EXPORT find_guild_member(const snowflake guild_id, const snowflake user_id);
 
 };

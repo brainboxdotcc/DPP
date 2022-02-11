@@ -21,8 +21,9 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
-#include <map>
+#include <dpp/snowflake.h>
+#include <dpp/managed.h>
+#include <unordered_map>
 #include <mutex>
 #include <shared_mutex>
 
@@ -258,7 +259,7 @@ public:
  */
 void DPP_EXPORT garbage_collection();
 
-#define cache_decl(type, setter, getter, counter) DPP_EXPORT type * setter (snowflake id); DPP_EXPORT cache<type> * getter ();  DPP_EXPORT uint64_t counter ();
+#define cache_decl(type, setter, getter, counter) DPP_EXPORT class type * setter (snowflake id); DPP_EXPORT cache<class type> * getter ();  DPP_EXPORT uint64_t counter ();
 
 /* Declare major caches */
 cache_decl(user, find_user, get_user_cache, get_user_count);
@@ -266,17 +267,6 @@ cache_decl(guild, find_guild, get_guild_cache, get_guild_count);
 cache_decl(role, find_role, get_role_cache, get_role_count);
 cache_decl(channel, find_channel, get_channel_cache, get_channel_count);
 cache_decl(emoji, find_emoji, get_emoji_cache, get_emoji_count);
-
-/**
- * @brief Get the guild_member from cache of given IDs
- *
- * @param guild_id ID of the guild to find guild_member for
- * @param user_id ID of the user to find guild_member for
- *
- * @throw dpp::cache_exception if the guild or guild_member is not found in the cache
- * @return guild_member the cached object, if found
- */
-guild_member DPP_EXPORT find_guild_member(const snowflake guild_id, const snowflake user_id);
 
 };
 
