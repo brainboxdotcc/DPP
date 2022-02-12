@@ -26,25 +26,34 @@ int main()
 {
 	std::string token(get_token());
 
-	/*dpp::http_connect_info hci;
+	dpp::http_connect_info hci;
+	set_test("HOSTINFO", false);
 
 	hci = dpp::https_client::get_host_info("https://test.com:444");
-	std::cout << "https://test.com:444 -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
-	hci = dpp::https_client::get_host_info("https://test.com");
-	std::cout << "https://test.com -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
-	hci = dpp::https_client::get_host_info("http://test.com");
-	std::cout << "http://test.com -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
-	hci = dpp::https_client::get_host_info("http://test.com:90");
-	std::cout << "http://test.com:90 -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
-	hci = dpp::https_client::get_host_info("test.com:97");
-	std::cout << "test.com:97 -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
-	hci = dpp::https_client::get_host_info("test.com");
-	std::cout << "test.com -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
+	bool hci_test = (hci.scheme == "https" && hci.hostname == "test.com" && hci.port == 444 && hci.is_ssl == true);
 
+	hci = dpp::https_client::get_host_info("https://test.com");
+	hci_test = hci_test && (hci.scheme == "https" && hci.hostname == "test.com" && hci.port == 443 && hci.is_ssl == true);
+
+	hci = dpp::https_client::get_host_info("http://test.com");
+	hci_test = hci_test && (hci.scheme == "http" && hci.hostname == "test.com" && hci.port == 80 && hci.is_ssl == false);
+
+	hci = dpp::https_client::get_host_info("http://test.com:90");
+	hci_test = hci_test && (hci.scheme == "http" && hci.hostname == "test.com" && hci.port == 90 && hci.is_ssl == false);
+
+	hci = dpp::https_client::get_host_info("test.com:97");
+	hci_test = hci_test && (hci.scheme == "http" && hci.hostname == "test.com" && hci.port == 97 && hci.is_ssl == false);
+
+	hci = dpp::https_client::get_host_info("test.com");
+	hci_test = hci_test && (hci.scheme == "http" && hci.hostname == "test.com" && hci.port == 80 && hci.is_ssl == false);
+
+	set_test("HOSTINFO", hci_test);
+
+	set_test("HTTPS", false);
 	dpp::multipart_content multipart = dpp::https_client::build_multipart(
-		"{\"content\":\"test\"}", {"test.txt", "rick.jpg"}, {"ABCDEFGHI", dpp::utility::read_file("rick.jpg")}
+		"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
 	);
-	dpp::https_client c("discord.com", 443, "/api/channels/907951970017480707/messages", "POST", multipart.body,
+	dpp::https_client c("discord.com", 443, "/api/channels/" + fmt::format("{}", TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
 		{
 			{"Content-Type", multipart.mimetype},
 			{"Authorization", "Bot " + token}
@@ -52,16 +61,13 @@ int main()
 	);
 	std::string hdr1 = c.get_header("server");
 	std::string content1 = c.get_content();
-	std::cout << "hdr1: " << hdr1 << "\n";
-	std::cout << "c1: " << c.get_status() << " " << content1.length() << "\n";
+	set_test("HTTPS", hdr1 == "cloudflare" && c.get_status() == 200);
 
-	dpp::https_client c2("neuron.brainbox.cc", 80, "/tmp/supersu-2-82.apk", "GET", "", {}, true);
-	std::string hdr2 = c2.get_header("server");
+	set_test("HTTP", false);
+	dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
+	std::string hdr2 = c2.get_header("location");
 	std::string content2 = c2.get_content();
-	std::cout << "hdr2: " << hdr2 << "\n";
-	std::cout << "c2: " << c2.get_status() << " " << content2.length() << "\n";
-
-	exit(0);*/
+	set_test("HTTP", hdr2 == "https://github.com/" && c2.get_status() == 301);
 
 	std::vector<uint8_t> testaudio = load_test_audio();
 
