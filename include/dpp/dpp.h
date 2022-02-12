@@ -61,6 +61,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/cache.h>
+#include <dpp/httpsclient.h>
 #include <dpp/queues.h>
 #include <dpp/commandhandler.h>
 
