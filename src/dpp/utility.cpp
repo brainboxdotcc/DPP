@@ -345,6 +345,14 @@ namespace dpp {
 			return result;
 		}
 
+		std::string bot_invite_url(const snowflake bot_id, const uint64_t permissions, const std::vector<std::string>& scopes) {
+			return fmt::format("https://discord.com/oauth2/authorize?client_id={}&permissions={}&scope={}",
+				bot_id,
+				permissions,
+				fmt::join(scopes, "+")
+			);
+		}
+
 	};
 
 };

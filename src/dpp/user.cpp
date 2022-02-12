@@ -78,6 +78,10 @@ std::string user::get_avatar_url(uint16_t size)  const {
 	);
 }
 
+std::string user::format_username() const {
+	return fmt::format("{0}#{1:04d}", username, discriminator);
+}
+
 std::string user::get_mention() const {
 	return "<@" + std::to_string(id) + ">";
 }
