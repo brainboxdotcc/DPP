@@ -20,6 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <string>
 #include <vector>
