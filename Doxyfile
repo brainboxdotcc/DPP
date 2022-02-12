@@ -805,9 +805,7 @@ EXCLUDE_SYMLINKS       = YES
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = */httplib.h \
-			*/httplib.cpp \
-			*/json_fwd.hpp \
+EXCLUDE_PATTERNS       = */json_fwd.hpp \
 			*/json.hpp \
 			*/format.cpp \
 			*/format.h \
@@ -831,7 +829,6 @@ EXCLUDE_PATTERNS       = */httplib.h \
 
 EXCLUDE_SYMBOLS	= nlohmann::* \
 			fmt::* \
-			httplib::* \
 			*thonk \
 			deps \
 			build \

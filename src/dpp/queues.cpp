@@ -25,7 +25,6 @@
 #endif
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
-#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <dpp/httpsclient.h>
 #include <dpp/fmt/format.h>
 #include <dpp/stringops.h>
@@ -160,12 +159,19 @@ http_request_completion_t http_request::run(cluster* owner) {
 		headers.emplace("Content-Type", multipart.mimetype);
 	}
 	http_connect_info hci = https_client::get_host_info(_host);
-	https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl);
-	rv.latency = dpp::utility::time_f() - start;
-	if (cli.get_status() < 100) {
+	try {
+		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl);
+		rv.latency = dpp::utility::time_f() - start;
+		if (cli.get_status() < 100) {
+			rv.error = h_connection;
+			owner->log(ll_error, fmt::format("HTTP(S) error on {} connection to {}:{}: Malformed HTTP response", hci.scheme, hci.hostname, hci.port));
+		} else {
+			populate_result(_url, owner, rv, cli);
+		}
+	}
+	catch (const std::exception& e) {
+		owner->log(ll_error, fmt::format("HTTP(S) error on {} connection to {}:{}: {}", hci.scheme, hci.hostname, hci.port, e.what()));
 		rv.error = h_connection;
-	} else {
-		populate_result(_url, owner, rv, cli);
 	}
 
 	/* Set completion flag */
