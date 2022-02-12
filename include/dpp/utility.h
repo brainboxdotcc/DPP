@@ -332,7 +332,6 @@ namespace dpp {
 		 * @return Invite URL
 		 */
 		std::string DPP_EXPORT bot_invite_url(const snowflake bot_id, const uint64_t permissions = 0, const std::vector<std::string>& scopes = {"bot", "applications.commands"});
-}
 	};
 
 };
