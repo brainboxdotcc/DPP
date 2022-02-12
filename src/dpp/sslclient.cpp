@@ -177,6 +177,11 @@ void ssl_client::connect()
 		if (ssl->ctx == nullptr)
 			throw dpp::exception("Failed to create SSL client context!");
 
+		/* Do not allow SSL 3.0, TLS 1.0 or 1.1
+		 * https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
+		 */
+		SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION);
+
 		/* Create SSL session */
 		ssl->ssl = SSL_new(ssl->ctx);
 		if (ssl->ssl == nullptr)
