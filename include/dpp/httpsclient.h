@@ -50,22 +50,54 @@ enum http_state : uint8_t {
 	HTTPS_DONE,
 };
 
+/**
+ * @brief Request headers
+ */
 typedef std::multimap<std::string, std::string> http_headers;
 
+/**
+ * @brief Represents a multipart mime body and the correct top-level mime type
+ * If a non-multipart request is passed in, this is represented as a plain body
+ * and the application/json mime type.
+ */
 struct multipart_content {
+	/**
+	 * @brief Multipart body
+	 */
 	std::string body;
+	/**
+	 * @brief MIME type
+	 */
 	std::string mimetype;
 };
 
+/**
+ * @brief Represents a HTTP scheme, hostname and port
+ * split into parts for easy use in https_client.
+ */
 struct http_connect_info {
+	/**
+	 * @brief True if the connection should be SSL
+	 */
 	bool is_ssl;
+	/**
+	 * @brief The request scheme, e.g. 'https' or 'http'
+	 */
 	std::string scheme;
+	/**
+	 * @brief The request hostname part, e.g. 'discord.com'
+	 */
 	std::string hostname;
+	/**
+	 * @brief The port number, either determined from the scheme,
+	 * or from the part of the hostname after a colon ":" character
+	 */
 	uint16_t port;
 };
 
 /**
- * @brief Implements a HTTPS socket client based on the SSL client
+ * @brief Implements a HTTPS socket client based on the SSL client.
+ * @note plaintext HTTP without SSL is also supported via a "downgrade" setting
  */
 class DPP_EXPORT https_client : public ssl_client
 {
@@ -143,22 +175,36 @@ public:
 	 * 
 	 * The constructor will attempt the connection, and return the content.
 	 * By the time the constructor completes, the HTTP request will be stored
-	 * in the object. This is a blocking call.
+	 * in the object.
 	 * 
-	 * @param hostname 
-	 * @param port 
-	 * @param urlpath 
-	 * @param verb 
-	 * @param req_body 
-	 * @param extra_headers 
-	 * @param plaintext_connection
-	 * @param request_timeout
+	 * @note This is a blocking call. It starts a loop which runs non-blocking
+	 * functions within it, but does not return until the request completes.
+	 * See queues.cpp for how to make this asyncronous.
+	 * 
+	 * @param hostname Hostname to connect to
+	 * @param port Port number to connect to, usually 443 for SSL and 80 for plaintext
+	 * @param urlpath path part of URL, e.g. "/api"
+	 * @param verb Request verb, e.g. GET or POST
+	 * @param req_body Request body, use dpp::https_client::build_multipart() to build a multipart MIME body (e.g. for multiple file upload)
+	 * @param extra_headers Additional request headers, e.g. user-agent, authorization, etc
+	 * @param plaintext_connection Set to true to make the connection plaintext (turns off SSL)
+	 * @param request_timeout How many seconds before the connection is considered failed if not finished
 	 */
         https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5);
 
-	/** Destructor */
+	/**
+	 * @brief Destroy the https client object
+	 */
         virtual ~https_client();
 
+	/**
+	 * @brief Build a multipart content from a set of files and some json
+	 * 
+	 * @param json The json content
+	 * @param filenames File names of files to send
+	 * @param contents Contents of each of the files to send
+	 * @return multipart mime content and headers
+	 */
 	static multipart_content build_multipart(const std::string &json, const std::vector<std::string>& filenames = {}, const std::vector<std::string>& contents = {});
 
 	/**
@@ -176,14 +222,47 @@ public:
 	/** Fires every second from the underlying socket I/O loop, used for sending websocket pings */
 	virtual void one_second_timer();
 
+	/**
+	 * @brief Get a HTTP response header
+	 * 
+	 * @param header_name Header name to find, case insensitive
+	 * @return Header content or empty string if not found
+	 */
 	const std::string get_header(std::string header_name) const;
 
+	/**
+	 * @brief Get all HTTP response headers
+	 * 
+	 * @return headers as a map
+	 */
 	const std::map<std::string, std::string> get_headers() const;
  
+	/**
+	 * @brief Get the response content
+	 * 
+	 * @return response content
+	 */
 	const std::string get_content() const;
 
+	/**
+	 * @brief Get the response HTTP status, e.g.
+	 * 200 for OK, 404 for not found, 429 for rate limited.
+	 * A value of 0 indicates the request was not completed.
+	 * 
+	 * @return uint16_t HTTP status
+	 */
 	uint16_t get_status() const;
 
+	/**
+	 * @brief Break down a scheme, hostname and port into
+	 * a http_connect_info.
+	 * 
+	 * All but the hostname portion are optional. The path component
+	 * should not be passed to this function.
+	 * 
+	 * @param url URL to break down
+	 * @return Split URL
+	 */
 	static http_connect_info get_host_info(std::string url);
 
 };

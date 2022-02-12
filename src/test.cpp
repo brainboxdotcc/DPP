@@ -19,7 +19,6 @@
  *
  ************************************************************************************/
 #include "test.h"
-#include <dpp/httpsclient.h>
 
 /* Unit tests go here */
 int main()
