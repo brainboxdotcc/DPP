@@ -31,7 +31,7 @@
 
 namespace dpp {
 
-https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection)
+https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout)
 	: ssl_client(hostname, fmt::format("{:d}", port), plaintext_connection),
 	state(HTTPS_HEADERS),
 	request_type(verb),
@@ -39,8 +39,10 @@ https_client::https_client(const std::string &hostname, uint16_t port,  const st
 	request_body(req_body),
 	content_length(0),
 	request_headers(extra_headers),
-	status(0)
+	status(0),
+	timeout(request_timeout)
 {
+	timeout = time(nullptr) + request_timeout;
 	nonblocking = true;
 	https_client::connect();
 }
@@ -99,7 +101,7 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 	}
 }
 
-std::string https_client::get_header(std::string header_name) {
+const std::string https_client::get_header(std::string header_name) const {
 	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
 		return std::tolower(c);
 	});
@@ -108,6 +110,10 @@ std::string https_client::get_header(std::string header_name) {
 		return hdrs->second;
 	}
 	return std::string();
+}
+
+const std::map<std::string, std::string> https_client::get_headers() const {
+	return response_headers;
 }
 
 https_client::~https_client()
@@ -184,29 +190,57 @@ bool https_client::handle_buffer(std::string &buffer)
 	return true;
 }
 
-uint16_t https_client::get_status() {
+uint16_t https_client::get_status() const {
 	return status;
 }
 
-std::string https_client::get_content() {
+const std::string https_client::get_content() const {
 	return body;
 }
 
-http_state https_client::get_state()
-{
+http_state https_client::get_state() {
 	return this->state;
 }
 
-void https_client::one_second_timer()
-{
+void https_client::one_second_timer() {
+	if (time(nullptr) >= timeout && this->state != HTTPS_DONE) {
+		this->close();
+	}
 }
 
-void https_client::close()
-{
+void https_client::close() {
 	if (state != HTTPS_DONE) {
 		state = HTTPS_DONE;
 		ssl_client::close();
 	}
+}
+
+http_connect_info https_client::get_host_info(std::string url) {
+	http_connect_info hci = { false, "http", "", 80};
+	if (url.substr(0, 8) == "https://") {
+		hci.port = 443;
+		hci.is_ssl = true;
+		hci.scheme = url.substr(0, 5);
+		url = url.substr(8, url.length());
+	} else if (url.substr(0, 7) == "http://") {
+		hci.scheme = url.substr(0, 4);
+		url = url.substr(7, url.length());
+	} else if (url.substr(0, 11) == "discord.com") {
+		hci.scheme = "https";
+		hci.is_ssl = true;
+		hci.port = 443;
+	}
+	size_t colon_pos = url.find(':');
+	if (colon_pos != std::string::npos) {
+		hci.hostname = url.substr(0, colon_pos);
+		hci.port = atoi(url.substr(colon_pos + 1, url.length()).c_str());
+		if (hci.port == 0) {
+			hci.port = 80;
+		}
+	} else {
+		hci.hostname = url;
+	}
+	return hci;
 }
 
 };

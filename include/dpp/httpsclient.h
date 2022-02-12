@@ -57,52 +57,93 @@ struct multipart_content {
 	std::string mimetype;
 };
 
+struct http_connect_info {
+	bool is_ssl;
+	std::string scheme;
+	std::string hostname;
+	uint16_t port;
+};
+
 /**
  * @brief Implements a HTTPS socket client based on the SSL client
  */
 class DPP_EXPORT https_client : public ssl_client
 {
-	/** Current HTTPS state */
+	/**
+	 * @brief Current connection state
+	 */
 	http_state state;
 
+	/**
+	 * @brief The type of the request, e.g. GET, POST
+	 */
 	std::string request_type;
 
-	/** Path part of URL for HTTPS connection */
+	/**
+	 * @brief Path part of URL for HTTPS connection
+	 */
 	std::string path;
 
+	/**
+	 * @brief The request body, e.g. form data
+	 */
 	std::string request_body;
 
-	/** Received HTTP body */
+	/**
+	 * @brief The response body, e.g. file content or JSON
+	 */
 	std::string body;
 
+	/**
+	 * @brief The reported length of the content. If this is
+	 * UULONG_MAX, then no length was reported by the server.
+	 */
 	uint64_t content_length;
 
+	/**
+	 * @brief Headers for the request, e.g. Authorization, etc.
+	 */
 	http_headers request_headers;
 
+	/**
+	 * @brief The status of the HTTP request from the server,
+	 * e.g. 200 for OK, 404 for not found. A value of 0 means
+	 * no request has been completed.
+	 */
 	uint16_t status;
 
-	/** HTTP headers received on connecting/upgrading */
-	std::map<std::string, std::string> response_headers;
-
-	/** Parse headers for a websocket frame from the buffer.
-	 * @param buffer The buffer to operate on. Will modify the string removing completed items from the head of the queue
+	/**
+	 * @brief Time at which the request should be abandoned
 	 */
-	bool parseheader(std::string &buffer);
+	time_t timeout;
+
+	/**
+	 * @brief Headers from the server's response, e.g. RateLimit
+	 * headers, cookies, etc.
+	 */
+	std::map<std::string, std::string> response_headers;
 
 protected:
 
-	/** Connect */
+	/**
+	 * @brief Start the connection
+	 */
 	virtual void connect();
 
-	/** Get websocket state
-	 * @return websocket state
+	/**
+	 * @brief Get request state
+	 * @return request state
 	 */
 	http_state get_state();
 
 public:
 
 	/**
-	 * @brief Connect to a specific HTTP server.
+	 * @brief Connect to a specific HTTP(S) server and complete a request.
+	 * 
+	 * The constructor will attempt the connection, and return the content.
+	 * By the time the constructor completes, the HTTP request will be stored
+	 * in the object. This is a blocking call.
 	 * 
 	 * @param hostname 
 	 * @param port 
@@ -111,8 +152,9 @@ public:
 	 * @param req_body 
 	 * @param extra_headers 
 	 * @param plaintext_connection
+	 * @param request_timeout
 	 */
-        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false);
+        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5);
 
 	/** Destructor */
         virtual ~https_client();
@@ -134,11 +176,15 @@ public:
 	/** Fires every second from the underlying socket I/O loop, used for sending websocket pings */
 	virtual void one_second_timer();
 
-	std::string get_header(std::string header_name);
+	const std::string get_header(std::string header_name) const;
 
-	std::string get_content();
+	const std::map<std::string, std::string> get_headers() const;
+ 
+	const std::string get_content() const;
 
-	uint16_t get_status();
+	uint16_t get_status() const;
+
+	static http_connect_info get_host_info(std::string url);
 
 };
 

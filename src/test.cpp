@@ -26,6 +26,21 @@ int main()
 {
 	std::string token(get_token());
 
+	/*dpp::http_connect_info hci;
+
+	hci = dpp::https_client::get_host_info("https://test.com:444");
+	std::cout << "https://test.com:444 -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
+	hci = dpp::https_client::get_host_info("https://test.com");
+	std::cout << "https://test.com -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
+	hci = dpp::https_client::get_host_info("http://test.com");
+	std::cout << "http://test.com -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
+	hci = dpp::https_client::get_host_info("http://test.com:90");
+	std::cout << "http://test.com:90 -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
+	hci = dpp::https_client::get_host_info("test.com:97");
+	std::cout << "test.com:97 -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
+	hci = dpp::https_client::get_host_info("test.com");
+	std::cout << "test.com -> " << hci.scheme << " " << hci.hostname << " " << hci.port << "\n";
+
 	dpp::multipart_content multipart = dpp::https_client::build_multipart(
 		"{\"content\":\"test\"}", {"test.txt", "rick.jpg"}, {"ABCDEFGHI", dpp::utility::read_file("rick.jpg")}
 	);
@@ -46,7 +61,7 @@ int main()
 	std::cout << "hdr2: " << hdr2 << "\n";
 	std::cout << "c2: " << c2.get_status() << " " << content2.length() << "\n";
 
-	exit(0);
+	exit(0);*/
 
 	std::vector<uint8_t> testaudio = load_test_audio();
 
