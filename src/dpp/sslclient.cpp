@@ -180,7 +180,8 @@ void ssl_client::connect()
 		/* Do not allow SSL 3.0, TLS 1.0 or 1.1
 		 * https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
 		 */
-		SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION);
+		if (!SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION))
+			throw dpp::exception("Failed to set minimum SSL version!");
 
 		/* Create SSL session */
 		ssl->ssl = SSL_new(ssl->ctx);
