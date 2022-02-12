@@ -184,6 +184,9 @@ void ssl_client::connect()
 
 		SSL_set_fd(ssl->ssl, (int)sfd);
 
+		/* Server name identification (SNI) */
+		SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
+
 		status = SSL_connect(ssl->ssl);
 		if (status != 1) {
 			throw dpp::exception("SSL_connect error");
