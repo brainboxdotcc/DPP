@@ -148,6 +148,7 @@ int main()
 
 			bot.guild_command_create(dpp::slashcommand().set_name("testcommand")
 				.set_description("Test command for DPP unit test")
+				.add_option(dpp::command_option(dpp::co_attachment, "file", "a file"))
 				.set_application_id(bot.me.id),
 				TEST_GUILD_ID, [&bot](const dpp::confirmation_callback_t &callback) {
 					if (!callback.is_error()) {
@@ -199,7 +200,6 @@ int main()
 								});
 							}
 						});
-
 					}
 				});
 		});
@@ -207,7 +207,7 @@ int main()
 		std::mutex loglock;
 		bot.on_log([&](const dpp::log_t & event) {
 			std::lock_guard<std::mutex> locker(loglock);
-			if (event.severity > dpp::ll_trace) {
+			if (event.severity >= dpp::ll_trace) {
 				std::cout << "[" << fmt::format("{:3.03f}", dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 			}
 			if (event.message == "Test log message") {

@@ -374,6 +374,8 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 			case co_number:
 				cdo.value = j.at("value").get<double>();
 				break;
+			case co_attachment:
+				cdo.value = snowflake_not_null(&j, "value");
 			case co_sub_command:
 			case co_sub_command_group:
 				/* Silences warning on clang, handled elsewhere */
@@ -471,6 +473,14 @@ void from_json(const nlohmann::json& j, interaction& i) {
 					json f = *v;
 					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
 					i.resolved.roles[id] = dpp::role().fill_from_json(i.guild_id, &f);
+				}
+			}
+			/* Attachments */
+			if (d_resolved.find("attachments") != d_resolved.end()) {
+				for (auto v = d_resolved["attachments"].begin(); v != d_resolved["attachments"].end(); ++v) {
+					json f = *v;
+					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					i.resolved.attachments.emplace(id, dpp::attachment(nullptr, &f));
 				}
 			}
 			/* Channels */
