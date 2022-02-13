@@ -242,7 +242,7 @@ enum interaction_response_type {
 	ir_deferred_update_message = 6,			//!< for components, ACK an interaction and edit the original message later; the user does not see a loading state
 	ir_update_message = 7,				//!< for components, edit the message the component was attached to
 	ir_autocomplete_reply = 8,			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
-	ir_modal_dialog = 9,				//!< A modal dialog box - Experimental
+	ir_modal_dialog = 9,				//!< A modal dialog box
 };
 
 /**
@@ -327,8 +327,6 @@ struct DPP_EXPORT interaction_response {
 
 /**
  * @brief Represents a modal dialog box response to an interaction.
- * 
- * @note This is currently experimental
  * 
  * A dialog box is a modal popup which appears to the user instead of a message. One or more
  * components are displayed on a form (the same component structure as within a dpp::message).
@@ -481,7 +479,7 @@ enum interaction_type {
 	it_application_command = 2,	//!< application command (slash command)
 	it_component_button = 3,	//!< button click (component interaction)
 	it_autocomplete = 4,		//!< Autocomplete interaction
-	it_modal_submit = 5,		//!< Modal form submission (experimental)
+	it_modal_submit = 5,		//!< Modal form submission
 };
 
 /**

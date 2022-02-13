@@ -166,6 +166,7 @@ void to_json(json& j, const component& cp) {
 	if (cp.type == cot_text) {
  		j["type"] = cp.type;
 		j["label"] = cp.label;
+		j["required"] = cp.required;
 		j["style"] = int(cp.text_style);
 		if (!cp.custom_id.empty()) {
 			j["custom_id"] = cp.custom_id;

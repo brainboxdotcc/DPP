@@ -41,7 +41,7 @@ enum component_type : uint8_t {
 	cot_button = 2,
 	/// Select menu
 	cot_selectmenu = 3,
-	/// Text input - Experimental
+	/// Text input
 	cot_text = 4,
 };
 
