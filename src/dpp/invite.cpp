@@ -48,6 +48,9 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 	temporary = bool_not_null(j, "temporary");
 	unique = bool_not_null(j, "unique");
 	uses = (j->find("uses") != j->end()) ? int32_not_null(j, "uses") : 0;
+	if (j->find("stage_instance") != j->end()) {
+		stage = stage_instance().fill_from_json(&((*j)["stage_instance"]));
+	}
 	return *this;
 }
 
