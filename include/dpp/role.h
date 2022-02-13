@@ -48,7 +48,7 @@ enum role_permissions : uint64_t {
 	p_view_audit_log		=	0x00000000080,	//!< allows for viewing of audit logs
 	p_priority_speaker		=	0x00000000100,	//!< allows for using priority speaker in a voice channel
 	p_stream			=	0x00000000200,	//!< allows the user to go live
-	p_view_channel			=	0x00000000400,	//!< allows guild members to view a channel, which includes reading messages in text channels
+	p_view_channel			=	0x00000000400,	//!< allows guild members to view a channel, which includes reading messages in text channels and joining voice channels
 	p_send_messages			=	0x00000000800,	//!< allows for sending messages in a channel
 	p_send_tts_messages		=	0x00000001000,	//!< allows for sending of /tts messages
 	p_manage_messages		=	0x00000002000,	//!< allows for deletion of other users messages

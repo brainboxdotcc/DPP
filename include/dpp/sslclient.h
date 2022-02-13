@@ -89,6 +89,8 @@ protected:
 	/** Bytes in */
 	uint64_t bytes_in;
 
+	bool plaintext;
+
 	/** Called every second */
 	virtual void one_second_timer();
 
@@ -138,9 +140,12 @@ public:
 	 * @brief Connect to a specified host and port. Throws std::runtime_error on fatal error.
 	 * @param _hostname The hostname to connect to
 	 * @param _port the Port number to connect to
+	 * @param plaintext_downgrade Set to true to connect using plaintext only, without initialising SSL.
+	 * Note that no Discord endpoints will function when downgraded. This option is provided only for
+	 * connection to non-Discord addresses such as within dpp::cluster::request().
 	 * @throw dpp::exception Failed to initialise connection
 	 */
-	ssl_client(const std::string &_hostname, const std::string &_port = "443");
+	ssl_client(const std::string &_hostname, const std::string &_port = "443", bool plaintext_downgrade = false);
 
 	/**
 	 * @brief Nonblocking I/O loop

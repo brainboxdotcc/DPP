@@ -82,7 +82,7 @@ class DPP_EXPORT websocket_client : public ssl_client
 	ws_opcode data_opcode;
 
 	/** HTTP headers received on connecting/upgrading */
-	std::map<std::string, std::string> HTTPHeaders;
+	std::map<std::string, std::string> http_headers;
 
 	/** Parse headers for a websocket frame from the buffer.
 	 * @param buffer The buffer to operate on. Will modify the string removing completed items from the head of the queue

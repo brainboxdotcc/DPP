@@ -35,7 +35,7 @@ namespace dpp {
 
 component::component() :
 	type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""),
-	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false)
+	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false), required(false)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -63,6 +63,7 @@ component& component::fill_from_json(nlohmann::json* j) {
 	} else if (type == cot_text) {
 		custom_id = string_not_null(j, "custom_id");
 		type = (component_type)int8_not_null(j, "type");
+		required = bool_not_null(j, "required");
 		json v = (*j)["value"];
 		if (!v.is_null() && v.is_number_integer()) {
 			value = v.get<int64_t>();
@@ -165,6 +166,7 @@ void to_json(json& j, const component& cp) {
 	if (cp.type == cot_text) {
  		j["type"] = cp.type;
 		j["label"] = cp.label;
+		j["required"] = cp.required;
 		j["style"] = int(cp.text_style);
 		if (!cp.custom_id.empty()) {
 			j["custom_id"] = cp.custom_id;
@@ -647,15 +649,12 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		{"tts", tts},
 		{"nonce", nonce},
 		{"flags", flags},
-		{"type", type}
+		{"type", type},
+		{"content", content}
 	});
 
 	if (with_id) {
 		j["id"] = std::to_string(id);
-	}
-
-	if (!content.empty()) {
-		j["content"] = content;
 	}
 
 	if(!author.username.empty()) {
@@ -721,47 +720,46 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		}
 		j["components"].push_back(n);
 	}
-	if (embeds.size()) {
-		j["embeds"] = json::array();
 
-		for (auto& embed : embeds) {
-			json e;
-			if (!embed.description.empty())
-				e["description"] = embed.description;
-			if (!embed.title.empty())
-				e["title"] = embed.title;
-			if (!embed.url.empty())
-				e["url"] = embed.url;
-			e["color"] = embed.color;
-			if (embed.footer.has_value()) {
-				e["footer"]["text"] = embed.footer->text;
-				e["footer"]["icon_url"] = embed.footer->icon_url;
-			}
-			if (embed.image.has_value()) {
-				e["image"]["url"] = embed.image->url;
-			}
-			if (embed.thumbnail.has_value()) {
-				e["thumbnail"]["url"] = embed.thumbnail->url;
-			}
-			if (embed.author.has_value()) {
-				e["author"]["name"] = embed.author->name;
-				e["author"]["url"] = embed.author->url;
-				e["author"]["icon_url"] = embed.author->icon_url;
-			}
-			if (embed.fields.size()) {
-				e["fields"] = json();
-				for (auto& field : embed.fields) {
-					json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
-					e["fields"].push_back(f);
-				}
-			}
-			if (embed.timestamp) {
-				e["timestamp"] = ts_to_string(embed.timestamp);
-			}
-
-				j["embeds"].push_back(e);
+	j["embeds"] = json::array();
+	for (auto& embed : embeds) {
+		json e;
+		if (!embed.description.empty())
+			e["description"] = embed.description;
+		if (!embed.title.empty())
+			e["title"] = embed.title;
+		if (!embed.url.empty())
+			e["url"] = embed.url;
+		e["color"] = embed.color;
+		if (embed.footer.has_value()) {
+			e["footer"]["text"] = embed.footer->text;
+			e["footer"]["icon_url"] = embed.footer->icon_url;
 		}
+		if (embed.image.has_value()) {
+			e["image"]["url"] = embed.image->url;
+		}
+		if (embed.thumbnail.has_value()) {
+			e["thumbnail"]["url"] = embed.thumbnail->url;
+		}
+		if (embed.author.has_value()) {
+			e["author"]["name"] = embed.author->name;
+			e["author"]["url"] = embed.author->url;
+			e["author"]["icon_url"] = embed.author->icon_url;
+		}
+		if (embed.fields.size()) {
+			e["fields"] = json();
+			for (auto& field : embed.fields) {
+				json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
+				e["fields"].push_back(f);
+			}
+		}
+		if (embed.timestamp) {
+			e["timestamp"] = ts_to_string(embed.timestamp);
+		}
+
+		j["embeds"].push_back(e);
 	}
+
 	return j.dump();
 }
 

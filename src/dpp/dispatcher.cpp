@@ -103,11 +103,14 @@ void interaction_create_t::reply(interaction_response_type t, const message & m,
 	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), callback);
 }
 
-void interaction_create_t::thinking(command_completion_event_t callback) const {
+void interaction_create_t::thinking(bool ephemeral, command_completion_event_t callback) const {
 	message msg;
 	msg.content = "*";
 	msg.guild_id = this->command.guild_id;
 	msg.channel_id = this->command.channel_id;
+	if (ephemeral) {
+		msg.set_flags(dpp::m_ephemeral);
+	}
 	this->reply(ir_deferred_channel_message_with_source, msg, callback);
 }
 

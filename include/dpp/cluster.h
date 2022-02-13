@@ -613,7 +613,7 @@ public:
 	 * 
 	 * @param on_tick The callback lambda to call for this timer when ticked
 	 * @param on_stop The callback lambda to call for this timer when it is stopped
-	 * @param frequency How often to tick the timer
+	 * @param frequency How often to tick the timer in seconds
 	 * @return timer A handle to the timer, used to remove that timer later
 	 */
 	timer start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop = {});

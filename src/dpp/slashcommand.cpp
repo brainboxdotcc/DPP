@@ -374,6 +374,8 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 			case co_number:
 				cdo.value = j.at("value").get<double>();
 				break;
+			case co_attachment:
+				cdo.value = snowflake_not_null(&j, "value");
 			case co_sub_command:
 			case co_sub_command_group:
 				/* Silences warning on clang, handled elsewhere */
@@ -425,14 +427,6 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.token = string_not_null(&j, "token");
 	i.version = int8_not_null(&j, "version");
 	if (j.contains("member") && !j.at("member").is_null()) {
-		j.at("member").get_to(i.member);
-		if (i.cache_policy.user_policy != dpp::cp_none) {
-			/* User caching on, lazy or aggressive - cache or update the member information */
-			guild* g = dpp::find_guild(i.guild_id);
-			if (g) {
-				g->members[i.member.user_id] = i.member;
-			}
-		}
 		if (j.at("member").contains("user") && !j.at("member").at("user").is_null()) {
 			j.at("member").at("user").get_to(i.usr);
 			/* Caching is on; store user if needed */
@@ -444,6 +438,16 @@ void from_json(const nlohmann::json& j, interaction& i) {
 					*check = i.usr;
 					dpp::get_user_cache()->store(check);
 				}
+			}
+		}
+		j.at("member").get_to(i.member);
+		i.member.user_id = i.usr.id;
+		i.member.guild_id = i.guild_id;
+		if (i.cache_policy.user_policy != dpp::cp_none) {
+			/* User caching on, lazy or aggressive - cache or update the member information */
+			guild* g = dpp::find_guild(i.guild_id);
+			if (g) {
+				g->members[i.member.user_id] = i.member;
 			}
 		}
 	}
@@ -469,6 +473,14 @@ void from_json(const nlohmann::json& j, interaction& i) {
 					json f = *v;
 					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
 					i.resolved.roles[id] = dpp::role().fill_from_json(i.guild_id, &f);
+				}
+			}
+			/* Attachments */
+			if (d_resolved.find("attachments") != d_resolved.end()) {
+				for (auto v = d_resolved["attachments"].begin(); v != d_resolved["attachments"].end(); ++v) {
+					json f = *v;
+					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					i.resolved.attachments.emplace(id, dpp::attachment(nullptr, &f));
 				}
 			}
 			/* Channels */
