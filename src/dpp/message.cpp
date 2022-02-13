@@ -35,7 +35,7 @@ namespace dpp {
 
 component::component() :
 	type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""),
-	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false)
+	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false), required(false)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -63,6 +63,7 @@ component& component::fill_from_json(nlohmann::json* j) {
 	} else if (type == cot_text) {
 		custom_id = string_not_null(j, "custom_id");
 		type = (component_type)int8_not_null(j, "type");
+		required = bool_not_null(j, "required");
 		json v = (*j)["value"];
 		if (!v.is_null() && v.is_number_integer()) {
 			value = v.get<int64_t>();
@@ -165,6 +166,7 @@ void to_json(json& j, const component& cp) {
 	if (cp.type == cot_text) {
  		j["type"] = cp.type;
 		j["label"] = cp.label;
+		j["required"] = cp.required;
 		j["style"] = int(cp.text_style);
 		if (!cp.custom_id.empty()) {
 			j["custom_id"] = cp.custom_id;
