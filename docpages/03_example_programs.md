@@ -24,6 +24,7 @@ The best way to experiment with these example programs is to delete the content 
 * \subpage context-menu "Context Menus"
 * \subpage webhooks "Webhooks"
 * \subpage cpp-eval-command-discord "Making an eval command in C++"
+* \subpage discord-application-command-file-upload "Using file parameters for application commands (slash commands)"
 
 
 \page firstbot Creating Your First Bot
@@ -1875,3 +1876,51 @@ g++ -std=c++17 -rdynamic -oeval eval.cpp -ldpp -ldl
 ### Example usage
 
 \image html eval_example.png
+
+\page discord-application-command-file-upload Using file parameters for application commands (slash commands)
+
+The program below demonstrates how to use the 'file' type parameter to an application command (slash command).
+You must first get the file_id via std::get, and then you can find the attachment details in the 'resolved'
+section, `event.command.resolved`.
+
+The file is uploaded to Discord's CDN so if you need it locally you should fetch the `.url` value, e.g. by using
+something like `dpp::cluster::request()`.
+
+~~~~~~~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
+int main()
+{
+        dpp::cluster bot("token");
+
+        bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
+                if (event.command.type == dpp::it_application_command) {
+                        dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
+                        if (cmd_data.name == "show") {
+                                dpp::snowflake file_id = std::get<dpp::snowflake>(event.get_parameter("file"));
+                                auto iter = event.command.resolved.attachments.find(file_id);
+                                if (iter != event.command.resolved.attachments.end()) {
+                                        const dpp::attachment& att = iter->second;
+                                        event.reply(dpp::ir_channel_message_with_source, att.url);
+                                }
+                        }
+                }
+        });
+
+        bot.on_ready([&bot](const dpp::ready_t & event) {
+
+                dpp::slashcommand newcommand;
+
+                newcommand.set_name("show")
+                        .set_description("Show an uploaded file")
+                        .set_application_id(bot.me.id)
+                        .add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image"));
+
+                bot.global_command_create(newcommand);
+        });
+
+        bot.start(false);
+
+        return 0;
+}
+~~~~~~~~~~~~~~~~
