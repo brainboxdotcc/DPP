@@ -44,12 +44,7 @@ void cluster::role_delete(snowflake guild_id, snowflake role_id, command_complet
 
 
 void cluster::role_edit(const class role &r, command_completion_event_t callback) {
-	json j = r.build_json(true);
-	auto p = j.find("position");
-	if (p != j.end()) {
-		j.erase(p);
-	}
-	this->post_rest(API_PATH "/guilds", std::to_string(r.guild_id), "roles/" + std::to_string(r.id) , m_patch, j.dump(), [r, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(r.guild_id), "roles/" + std::to_string(r.id) , m_patch, r.build_json(true), [r, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
 		}

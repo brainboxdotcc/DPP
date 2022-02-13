@@ -65,6 +65,10 @@ std::map<std::string, test_t> tests = {
 	{"READFILE", {"utility::read_file()", false, false}},
 	{"TIMESTAMPTOSTRING", {"dpp::ts_to_string()", false, false}},
 	{"TIMESTRINGTOTIMESTAMP", {"dpp::ts_not_null()", false, false}},
+	{"COMMANDOPTIONCHOICEFILLFROMJSON", {"dpp::command_option_choice::fill_from_json()", false, false}},
+	{"HOSTINFO", {"dpp::https_client::get_host_info()", false, false}},
+	{"HTTPS", {"dpp::https_client HTTPS request", false, false}},
+	{"HTTP", {"dpp::https_client HTTP request", false, false}},
 };
 
 double start = dpp::utility::time_f();

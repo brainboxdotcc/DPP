@@ -332,6 +332,18 @@ public:
 	channel& set_rate_limit_per_user(const uint16_t rate_limit_per_user);
 
 	/**
+	 * @brief Add a permission_overwrite to this channel object
+	 * 
+	 * @param id ID of the role or the member you want to add overwrite for
+	 * @param type type of overwrite (0 for role, 1 for member)
+	 * @param allowed_permissions bitmask of allowed permissions (refer to enum role_permissions) for this user/role in this channel
+	 * @param denied_permissions bitmask of denied permissions (refer to enum role_permissions) for this user/role in this channel
+	 *
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& add_permission_overwrite(const snowflake id, const uint8_t type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
+
+	/**
 	 * @brief Get the mention ping for the channel
 	 * 
 	 * @return std::string mention

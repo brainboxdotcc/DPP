@@ -333,6 +333,26 @@ namespace dpp {
 			return std::string();
 		}
 
+		std::vector<std::string> tokenize(std::string const &in, const char* sep) {
+			std::string::size_type b = 0;
+			std::vector<std::string> result;
+
+			while ((b = in.find_first_not_of(sep, b)) != std::string::npos) {
+				auto e = in.find(sep, b);
+				result.push_back(in.substr(b, e-b));
+				b = e;
+			}
+			return result;
+		}
+
+		std::string bot_invite_url(const snowflake bot_id, const uint64_t permissions, const std::vector<std::string>& scopes) {
+			return fmt::format("https://discord.com/oauth2/authorize?client_id={}&permissions={}&scope={}",
+				bot_id,
+				permissions,
+				fmt::join(scopes, "+")
+			);
+		}
+
 	};
 
 };

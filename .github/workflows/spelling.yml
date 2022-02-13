@@ -21,7 +21,6 @@ jobs:
         ^./include/dpp/nlohmann/json.hpp
         ^./include/dpp/presence.h:.*:nam
         ^./src/dpp/presence.cpp:.*:nam
-        ^./src/dpp/httplib.cpp
         ^./win32\
         " > ${{ runner.workspace }}/DPP/.misspell-fixer.ignore
     - uses: sobolevn/misspell-fixer-action@master
