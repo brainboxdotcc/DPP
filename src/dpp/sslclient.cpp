@@ -55,7 +55,6 @@
 #include <exception>
 #include <string>
 #include <iostream>
-#include <dpp/fmt/format.h>
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 
@@ -128,7 +127,7 @@ void ssl_client::connect()
 	/* Resolve hostname to IP */
 	struct hostent *host;
 	if ((host = gethostbyname(hostname.c_str())) == nullptr)
-		throw dpp::exception(fmt::format("Couldn't resolve hostname '{}'", hostname));
+		throw dpp::exception(std::string("Couldn't resolve hostname: ") + hostname);
 
 	addrinfo hints, *addrs;
 	
@@ -139,7 +138,7 @@ void ssl_client::connect()
 
 	int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
 	if (status != 0)
-		throw dpp::exception(fmt::format("getaddrinfo (host={}, port={}): ", hostname, port, gai_strerror(status)));
+		throw dpp::exception(std::string("getaddrinfo error: ") + gai_strerror(status));
 
 	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 	int err = 0;
@@ -316,7 +315,7 @@ void ssl_client::read_loop()
 			}
 
 			if (SAFE_FD_ISSET(sfd, &efds) || sfd == -1) {
-				this->log(dpp::ll_error, fmt::format("Error on SSL connection: {}", strerror(errno)));
+				this->log(dpp::ll_error, std::string("Error on SSL connection: ") +strerror(errno));
 				return;
 			}
 
@@ -434,7 +433,7 @@ void ssl_client::read_loop()
 		}
 	}
 	catch (const std::exception &e) {
-		log(ll_warning, fmt::format("Read loop ended: {}", e.what()));
+		log(ll_warning, std::string("Read loop ended: ") + e.what());
 	}
 }
 

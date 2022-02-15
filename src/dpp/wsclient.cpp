@@ -23,7 +23,7 @@
 #include <fstream>
 #include <dpp/wsclient.h>
 #include <dpp/utility.h>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 
 namespace dpp {
 

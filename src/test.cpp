@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include "test.h"
+#include <dpp/fmt-minimal.h>
 
 /* Unit tests go here */
 int main()

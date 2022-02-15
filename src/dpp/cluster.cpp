@@ -29,7 +29,7 @@
 #include <iostream>
 #include <dpp/nlohmann/json.hpp>
 #include <utility>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 #include <algorithm>
 
 namespace dpp {

@@ -26,7 +26,7 @@
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
 #include <dpp/httpsclient.h>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 #include <dpp/stringops.h>
 #include <dpp/version.h>
 

@@ -24,7 +24,6 @@ _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or st
 #endif
 #include <dpp/dpp.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 

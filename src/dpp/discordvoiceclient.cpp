@@ -31,7 +31,7 @@
 #include <dpp/cluster.h>
 #include <thread>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 #include <zlib.h>
 
 #ifdef HAVE_VOICE
@@ -106,12 +106,12 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	int opusError = 0;
 	encoder = opus_encoder_create(48000, 2, OPUS_APPLICATION_VOIP, &opusError);
 	if (opusError) {
-		throw dpp::voice_exception(fmt::format("discord_voice_client::discord_voice_client; opus_encoder_create() failed: {}", opusError));
+		throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_encoder_create() failed");
 	}
 	opusError = 0;
 	decoder = opus_decoder_create(48000, 2, &opusError);
 	if (opusError) {
-		throw dpp::voice_exception(fmt::format("discord_voice_client::discord_voice_client; opus_decoder_create() failed: {}", opusError));
+		throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_decoder_create() failed");
 	}
 	repacketizer = opus_repacketizer_create();
 	this->connect();
@@ -191,14 +191,14 @@ int discord_voice_client::udp_recv(char* data, size_t max_length)
 
 bool discord_voice_client::handle_frame(const std::string &data)
 {
-	log(dpp::ll_trace, fmt::format("R: {}", data));
+	log(dpp::ll_trace, std::string("R: ") + data);
 	json j;
 	
 	try {
 		j = json::parse(data);
 	}
 	catch (const std::exception &e) {
-		log(dpp::ll_error, fmt::format("discord_voice_client::handle_frame {} [{}]", e.what(), data));
+		log(dpp::ll_error, std::string("discord_voice_client::handle_frame ") + e.what() + ": " + data);
 		return true;
 	}
 
@@ -374,7 +374,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 						bound_port = ntohs(sin.sin_port);
 					}
 
-					log(ll_debug, fmt::format("External IP address: {}", external_ip));
+					log(ll_debug, "External IP address: " + external_ip);
 
 					this->write(json({
 						{ "op", 1 },

@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include "test.h"
+#include <dpp/fmt-minimal.h>
 
 /* Current list of unit tests */
 std::map<std::string, test_t> tests = {
