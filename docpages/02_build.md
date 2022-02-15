@@ -15,10 +15,8 @@ The way you build D++ varies from system to system. Please follow the guide belo
 
 ## 1. Build Source Code
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
+    cmake -B ./build
+    cmake --build ./build -j8
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
@@ -62,7 +60,7 @@ To build on windows follow these steps *exactly*. The build process depends on s
 \note **You do not need to build a copy from source** -- we have done this for you. Unless you consider yourself an **advanced user** you should [obtain a pre-made visual studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/) and completely skip this guide!
 
 
-1. Make sure you have Visual Studio 2019. The Community, Professional or Enterprise versions all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
+1. Make sure you have Visual Studio 2019 or Visual Studio 2022. The Community, Professional or Enterprise versions all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
 2. Check out the DPP project source using git
 3. From within Visual Studio 2019, click the "File" menu, choose "Open" then "CMake", and select the CMakeLists.txt within the project folder
    \image html winbuild_1.png
@@ -103,16 +101,23 @@ For voice support, additional dependencies are required:
 
 ## 3. Build Source Code
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
+    cmake -B ./build
+    cmake --build ./build -j8
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
 ## 4. Optional: Run test cases
 
-Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
+Run `./test` for unit test cases. 
+
+Set the following vars to values that suit your system. Create a test server for your test bot, where the bot has administrator. There really should be nobody but you and your test bot on this server, you'll have to set the server as a community server and make an event, at least one voice channel, one text channel. The user id can be the bot's user id.
+
+    export DPP_UNIT_TEST_TOKEN="ODI2ZSQ4CFYyMzgxUzkzzACy.HPL5PA.9qKR4uh8po63-pjYVrPAvQQO4ln"
+    export TEST_GUILD_ID="907951970017480704"
+    export TEST_TEXT_CHANNEL_ID="907951970017480707"
+    export TEST_VC_ID="907951970017480708"
+    export TEST_USER_ID="826535422381391913"
+    export TEST_EVENT_ID="909928577951203360"
 
 ## 5. Install globally
 
@@ -161,16 +166,23 @@ For voice support, additional dependencies are required
 
 ## 3. Build Source Code
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
+    cmake -B ./build
+    cmake --build ./build -j8
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
 ## 4. Optional: Run test cases
 
-Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
+Run `./test` for unit test cases. 
+
+Set the following vars to values that suit your system. Create a test server for your test bot, where the bot has administrator. There really should be nobody but you and your test bot on this server, you'll have to set the server as a community server and make an event, at least one voice channel, one text channel. The user id can be the bot's user id.
+
+    export DPP_UNIT_TEST_TOKEN="ODI2ZSQ4CFYyMzgxUzkzzACy.HPL5PA.9qKR4uh8po63-pjYVrPAvQQO4ln"
+    export TEST_GUILD_ID="907951970017480704"
+    export TEST_TEXT_CHANNEL_ID="907951970017480707"
+    export TEST_VC_ID="907951970017480708"
+    export TEST_USER_ID="826535422381391913"
+    export TEST_EVENT_ID="909928577951203360"
 
 ## 5. Install globally
 
