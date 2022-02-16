@@ -19,7 +19,6 @@
  *
  ************************************************************************************/
 #include "test.h"
-#include <dpp/fmt-minimal.h>
 
 /* Unit tests go here */
 int main()
@@ -53,7 +52,7 @@ int main()
 	dpp::multipart_content multipart = dpp::https_client::build_multipart(
 		"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
 	);
-	dpp::https_client c("discord.com", 443, "/api/channels/" + fmt::format("{}", TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
+	dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
 		{
 			{"Content-Type", multipart.mimetype},
 			{"Authorization", "Bot " + token}
@@ -72,8 +71,8 @@ int main()
 	std::vector<uint8_t> testaudio = load_test_audio();
 
 	set_test("READFILE", false);
-	std::string rf_test = dpp::utility::read_file("libdpp.so");
-	FILE* fp = fopen("libdpp.so", "rb");
+	std::string rf_test = dpp::utility::read_file(SHARED_OBJECT);
+	FILE* fp = fopen(SHARED_OBJECT, "rb");
 	fseek(fp, 0, SEEK_END);
 	size_t off = (size_t)ftell(fp);
 	fclose(fp);
@@ -208,8 +207,8 @@ int main()
 		std::mutex loglock;
 		bot.on_log([&](const dpp::log_t & event) {
 			std::lock_guard<std::mutex> locker(loglock);
-			if (event.severity >= dpp::ll_trace) {
-				std::cout << "[" << fmt::format("{:3.03f}", dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+			if (event.severity > dpp::ll_trace) {
+				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 			}
 			if (event.message == "Test log message") {
 				set_test("LOGGER", true);
