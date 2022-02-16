@@ -1637,11 +1637,11 @@ The above is just a very simple example. You can also send embed messages. All y
 
 ### What is an eval command anyway?
 
-Many times people will ask: "how do i make a command like 'eval' in C++". For the uninitiated, an `eval` command is a command often found in interpreted languages such as Javascript and Python, which allows the developer to pass in raw interpreter statements which are then executed within the context of the running program, without any sandboxing. Eval commands are plain **evil**.
+Many times people will ask: "how do i make a command like 'eval' in C++". For the uninitiated, an `eval` command is a command often found in interpreted languages such as Javascript and Python, which allows the developer to pass in raw interpreter statements which are then executed within the context of the running program, without any sandboxing. Eval commands are literally dangerous if not used correctly.
 
 Needless to say, this is very dangerous. If you are asking how to do this, and want to put this into your bot, we trust that you have a very good reason to do so and have considered alternatives before resorting to this. The code below is for educational purposes only and makes several assumptions:
 
-1. This code will only operate on UNUX-like systems such as Linux
+1. This code will only operate on UNIX-like systems such as Linux (doesn't include Darwin, like Mac OS though)
 2. It assumes you use GCC, and have `g++` installed on your server and in your $PATH
 3. The program will attempt to write to the current directory
 4. No security checks will be done against the code, except for to check that it is being run by the bot's developer by snowflake id. It is entirely possible to send an `!eval exit(0);` and make the bot quit, for example, or delete files from the host operating system, if misused or misconfigured.
@@ -1712,7 +1712,7 @@ int test_function() {
 /* Important: This code is for UNIX-like systems only, e.g.
  * Linux, BSD, OSX. It will NOT work on Windows!
  * Note for OSX you'll probably have to change all references
- * to .so to .dylib.
+ * from .so to .dylib.
  */
 int main()
 {
