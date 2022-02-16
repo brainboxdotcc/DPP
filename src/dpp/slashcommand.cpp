@@ -376,9 +376,9 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 				break;
 			case co_attachment:
 				cdo.value = snowflake_not_null(&j, "value");
+				break;
 			case co_sub_command:
 			case co_sub_command_group:
-				/* Silences warning on clang, handled elsewhere */
 			break;
 		}
 	}
