@@ -106,6 +106,12 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
         signal(SIGPIPE, SIG_IGN);
         signal(SIGCHLD, SIG_IGN);
         signal(SIGXFSZ, SIG_IGN);
+#else
+	// Set up winsock.
+	WSADATA wsadata;
+	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
+		throw dpp::connection_exception("WSAStartup failure");
+	}
 #endif
 	if (FD_SETSIZE < 1024) {
 		throw dpp::connection_exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
@@ -324,7 +330,7 @@ void ssl_client::read_loop()
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					r = ::read(sfd, ServerToClientBuffer, BUFSIZZ);
+					r = ::recv(sfd, ServerToClientBuffer, BUFSIZZ, 0);
 					if (r <= 0) {
 						/* error or EOF */
 						return;
@@ -391,7 +397,7 @@ void ssl_client::read_loop()
 				/* Try to write */
 
 				if (plaintext) {
-					r = ::write(sfd, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength);
+					r = ::send(sfd, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength, 0);
 
 					if (r < 0) {
 						/* Write error */

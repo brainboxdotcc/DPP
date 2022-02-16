@@ -52,21 +52,33 @@ int main()
 	dpp::multipart_content multipart = dpp::https_client::build_multipart(
 		"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
 	);
-	dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
-		{
-			{"Content-Type", multipart.mimetype},
-			{"Authorization", "Bot " + token}
-		}
-	);
-	std::string hdr1 = c.get_header("server");
-	std::string content1 = c.get_content();
-	set_test("HTTPS", hdr1 == "cloudflare" && c.get_status() == 200);
+	try {
+		dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
+			{
+				{"Content-Type", multipart.mimetype},
+				{"Authorization", "Bot " + token}
+			}
+		);
+		std::string hdr1 = c.get_header("server");
+		std::string content1 = c.get_content();
+		set_test("HTTPS", hdr1 == "cloudflare" && c.get_status() == 200);
+	}
+	catch (const dpp::exception& e) {
+		std::cout << e.what() << "\n";
+		set_test("HTTPS", false);
+	}
 
 	set_test("HTTP", false);
-	dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
-	std::string hdr2 = c2.get_header("location");
-	std::string content2 = c2.get_content();
-	set_test("HTTP", hdr2 == "https://github.com/" && c2.get_status() == 301);
+	try {
+		dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
+		std::string hdr2 = c2.get_header("location");
+		std::string content2 = c2.get_content();
+		set_test("HTTP", hdr2 == "https://github.com/" && c2.get_status() == 301);
+	}
+	catch (const dpp::exception& e) {
+		std::cout << e.what() << "\n";
+		set_test("HTTP", false);
+	}
 
 	std::vector<uint8_t> testaudio = load_test_audio();
 

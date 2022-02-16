@@ -129,6 +129,10 @@ std::vector<uint8_t> load_test_audio() {
 		input.read((char*)testaudio.data(), testaudio_size);
 		input.close();
 	}
+	else {
+		std::cout << "ERROR: Can't load ../testdata/Robot.pcm\n";
+		exit(1);
+	}
 	return testaudio;
 }
 

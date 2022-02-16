@@ -3270,8 +3270,8 @@ public:
 			/* Timer has finished, detach it from event.
 			 * Only allowed to tick once.
 			 */
-			owner->stop_timer(th);
 			ev.detach(listener_handle);
+			owner->stop_timer(th);
 		}, duration, on_end);
 	}
 
@@ -3280,8 +3280,8 @@ public:
 	 */
 	~timed_listener() {
 		/* Stop timer and detach event, but do not call on_end */
-		owner->stop_timer(th);
 		ev.detach(listener_handle);
+		owner->stop_timer(th);
 	}
 };
 
