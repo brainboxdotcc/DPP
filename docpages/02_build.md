@@ -106,24 +106,11 @@ For voice support, additional dependencies are required:
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
-## 4. Optional: Run test cases
-
-Run `./test` for unit test cases. 
-
-Set the following vars to values that suit your system. Create a test server for your test bot, where the bot has administrator. There really should be nobody but you and your test bot on this server, you'll have to set the server as a community server and make an event, at least one voice channel, one text channel. The user id can be the bot's user id.
-
-    export DPP_UNIT_TEST_TOKEN="ODI2ZSQ4CFYyMzgxUzkzzACy.HPL5PA.9qKR4uh8po63-pjYVrPAvQQO4ln"
-    export TEST_GUILD_ID="907951970017480704"
-    export TEST_TEXT_CHANNEL_ID="907951970017480707"
-    export TEST_VC_ID="907951970017480708"
-    export TEST_USER_ID="826535422381391913"
-    export TEST_EVENT_ID="909928577951203360"
-
-## 5. Install globally
+## 4. Install globally
 
     sudo make install
 
-## 6. Installation to a different directory
+## 5. Installation to a different directory
 
 If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
@@ -131,7 +118,7 @@ If you want to install the library, its dependencies and header files to a diffe
 
 Then once the build is complete, run `make install` to install to the location you specified.
 
-## 7. Using the library
+## 6. Using the library
 
 Once installed, you can make use of the library in standalone programs simply by including it and linking to it:
 
@@ -171,24 +158,11 @@ For voice support, additional dependencies are required
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
-## 4. Optional: Run test cases
-
-Run `./test` for unit test cases. 
-
-Set the following vars to values that suit your system. Create a test server for your test bot, where the bot has administrator. There really should be nobody but you and your test bot on this server, you'll have to set the server as a community server and make an event, at least one voice channel, one text channel. The user id can be the bot's user id.
-
-    export DPP_UNIT_TEST_TOKEN="ODI2ZSQ4CFYyMzgxUzkzzACy.HPL5PA.9qKR4uh8po63-pjYVrPAvQQO4ln"
-    export TEST_GUILD_ID="907951970017480704"
-    export TEST_TEXT_CHANNEL_ID="907951970017480707"
-    export TEST_VC_ID="907951970017480708"
-    export TEST_USER_ID="826535422381391913"
-    export TEST_EVENT_ID="909928577951203360"
-
-## 5. Install globally
+## 4. Install globally
 
     make install
 
-## 6. Installation to a different directory
+## 5. Installation to a different directory
 
 If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
@@ -214,5 +188,3 @@ Of course, this is just a proof of concept - you should really use a more robust
 If you are having trouble setting up CMake, you can try [our template bot](https://github.com/brainboxdotcc/templatebot).
 
 **Have fun!**
-
-
