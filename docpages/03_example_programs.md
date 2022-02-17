@@ -1649,7 +1649,7 @@ Needless to say, this is very dangerous. If you are asking how to do this, and w
 
 To create this program you must create two files, `eval.h` and `eval.cpp`. The header file lists forward declarations of functions that you will be able to use directly within your `eval` code. As well as this the entire of D++ will be available to the eval command via the local variable `bot`, and the entire `on_message_create` event variable via a local variable called `event`.
 
-The evaluated code will run within its own thread, so can execute for as long as it needs (but use common sense, don't go spawning a tight `while` loop that runs forever, you'll lock a thread at 100% CPU that wont ever end!).
+The evaluated code will run within its own thread, so can execute for as long as it needs (but use common sense, don't go spawning a tight `while` loop that runs forever, you'll lock a thread at 100% CPU that won't ever end!).
 
 ### Implementation details
 
