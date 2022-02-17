@@ -144,7 +144,7 @@ void interaction_create_t::edit_response(const std::string & mt, command_complet
 
 const command_value& interaction_create_t::get_parameter(const std::string& name) const
 {
-	/* Dummy STATIC return value for unknown options so we arent returning a value off the stack */
+	/* Dummy STATIC return value for unknown options so we aren't returning a value off the stack */
 	static command_value dummy_value = {};
 	const command_interaction& ci = std::get<command_interaction>(command.data);
 	for (auto i = ci.options.begin(); i != ci.options.end(); ++i) {

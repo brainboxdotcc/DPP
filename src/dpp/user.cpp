@@ -33,7 +33,7 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 3,       dpp::u_bughunter_1 },
 	{ 1 << 6,       dpp::u_house_bravery },
 	{ 1 << 7,       dpp::u_house_brilliance },
-	{ 1 << 8,       dpp::u_house_balanace },
+	{ 1 << 8,       dpp::u_house_ },
 	{ 1 << 9,       dpp::u_early_supporter },
 	{ 1 << 10,      dpp::u_team_user },
 	{ 1 << 14,      dpp::u_bughunter_2 },
@@ -135,8 +135,8 @@ bool user::is_house_brilliance() const {
 	 return this->flags & u_house_brilliance;
 }
 
-bool user::is_house_balanace() const {
-	 return this->flags & u_house_balanace;
+bool user::is_house_() const {
+	 return this->flags & u_house_;
 }
 
 bool user::is_early_supporter() const {
