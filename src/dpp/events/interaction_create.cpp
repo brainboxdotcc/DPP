@@ -81,6 +81,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 						case co_channel:
 						case co_role:
 						case co_user:
+						case co_attachment:
 						case co_mentionable:
 							opt.value = snowflake_not_null(&o, "value");
 							break;

@@ -22,7 +22,6 @@
 #include <dpp/cluster.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 
@@ -38,7 +37,7 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void resumed::handle(discord_client* client, json &j, const std::string &raw) {
-	client->log(dpp::ll_debug, fmt::format("Successfully resumed session id {}", client->sessionid));
+	client->log(dpp::ll_debug, std::string("Successfully resumed session id ") + client->sessionid);
 
 	client->ready = true;
 
