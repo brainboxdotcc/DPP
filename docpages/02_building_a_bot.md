@@ -4,7 +4,8 @@ If you are wanting to build a bot using C++, you're in the right place! The fast
 
 Click on a link below for a guide specifically for your system:
 
-* \subpage build-a-discord-bot-windows-visual-studio "Building a discord bot in Windows"
+* \subpage build-a-discord-bot-windows-visual-studio "Building a discord bot in Windows using Visual Studio"
+* \subpage build-a-discord-bot-windows-wsl "Building a discord bot in Windows using WSL (Windows Subsystem for Linux)"
 * \subpage buildcmake "Building a Discord Bot using CMake/UNIX"
 * \subpage building-a-cpp-discord-bot-in-repl "Creating a Discord bot in Repl.it"
 * \subpage creating-a-bot-application "Creating a Bot Account"
@@ -86,7 +87,7 @@ Your project directory should look like this:
 
 **Have fun!**
 
-\page build-a-discord-bot-windows-visual-studio Building a discord bot in Windows
+\page build-a-discord-bot-windows-visual-studio Building a discord bot in Windows using Visual Studio
 
 To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, follow the steps below to create a *working skeleton project you can build upon*.
 
@@ -128,6 +129,25 @@ To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, fo
 - Please note that if you change the architecture (step 13) you must reconfigure all of steps 7 through 12 again as these configurations are specific to each architecture. This is to allow for different sets of precompiled libs, e.g. for `x86`, `x64`, etc.
 - You should run your bot from a command prompt. If you do not, and it exits, you will not be able to see any output as the window will immediately close.
 - Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
+
+\page build-a-discord-bot-windows-wsl Building a discord bot in Windows using WSL (Windows Subsystem for Linux)
+
+This Tutorial teaches you how to create a lightweight environment for D++-development using **WSL** and **Visual Studio Code**
+\note This Tutorial will use <mark>WSL's default Ubuntu</mark>! You might use other Distros if you prefer, but keep in mind the setup process might be different!
+
+1. Make sure you have installed your WSL 2 environment properly using [this guide to setup up WSL](https://docs.microsoft.com/en-us/windows/wsl/install) and [this guide to connect to Visual Studio Code](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode).
+2. Now open PowerShell as an Admin and type `wsl` to start up your subsystem.
+\note If you want to set up a CMake project (recommended for production bots) now, consider continuing your path of becoming the master of all Discord bots [here](https://dpp.dev/buildcmake.html), otherwise keep following this guide!
+3. Go to your home directory using `cd ~`
+4. Download the latest build for your Distro using `wget [url here]`. In this guide we will use the v10.0.0 build for Ubuntu x86-64: `wget https://github.com/brainboxdotcc/DPP/releases/download/v10.0.0/libdpp-10.0.0-linux-x64.deb`
+\note replace the highlighted filenames with the package you downloaded earlier if you are using a different OS
+5. Finally install all required deps and the library using `sudo apt-get install libopus0 && sudo apt-get install -y libopus-dev && sudo apt-get install -y libsodium-dev && sudo dpkg -i `<mark>libdpp-10.0.0-linux-x64.deb</mark>` && rm `<mark>libdpp-10.0.0-linux-x64.deb</mark>
+### Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! <br/> For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
+6. Navigate to a folder of your choice using `cd your/path/here` or create a new directory using `mkdir MyBot && cd MyBot`
+7. Now that you've a folder to work in type `> mybot.cxx` to create a file you can work in!
+8. Now you can open this file in Visual Studio Code by pressing `CTRL+SHIFT+P` and typing `Remote-WSL: New WSL Window`. This will bring up a new window. In the new window, choose `open folder` and choose the folder you've created prior. Press OK and now you have your Folder opened as a Workspace!
+9. Add code to your CXX file and compile it by running `g++ -std=c++17 *.cxx -o bot -ldpp` in the same folder as your cxx file.
+10. start your bot by typing `./bot`!
 
 \page creating-a-bot-application Creating a Bot Account
 
