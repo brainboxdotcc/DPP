@@ -2818,7 +2818,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
+	void guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get current user's connections (linked accounts, e.g. steam, xbox).

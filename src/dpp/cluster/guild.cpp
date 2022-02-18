@@ -23,7 +23,7 @@
 
 namespace dpp {
 
-void cluster::current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
+void cluster::guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
 	std::string o;
 	if (nickname.empty()) {
 		o = "{\"nick\": null}";
