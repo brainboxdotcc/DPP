@@ -2808,12 +2808,12 @@ public:
 	/**
 	 * @brief Modify current member
 	 *
-	 * Modifies the nickname of the current user in a guild.
+	 * Modifies the current member in a guild.
 	 * Fires a `Guild Member Update` Gateway event.
 	 *
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
-	 * @param guild_id Guild ID to change nickname on
+	 * @param guild_id Guild ID to change on
 	 * @param nickname New nickname, or empty string to clear nickname
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
