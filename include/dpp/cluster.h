@@ -2170,7 +2170,7 @@ public:
 	 * Modifies the nickname of the current user in a guild.
 	 * Fires a `Guild Member Update` Gateway event.
 	 * 
-	 * @deprecated Deprecated in favor of Modify Current Member. Will be replaced by dpp::cluster::current_member_edit
+	 * @deprecated Deprecated in favor of Modify Current Member. Will be replaced by dpp::cluster::guild_current_member_edit
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to change nickname on
