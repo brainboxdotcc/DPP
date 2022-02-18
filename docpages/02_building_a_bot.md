@@ -133,7 +133,7 @@ To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, fo
 \page build-a-discord-bot-windows-wsl Building a discord bot in Windows using WSL (Windows Subsystem for Linux)
 
 This Tutorial teaches you how to create a lightweight environment for D++-development using **WSL** and **Visual Studio Code**
-\note This Tutorial will use <mark>WSL's default Ubuntu</mark>! You might use other Distros if you prefer, but keep in mind the setup process might be different!
+\note This Tutorial will use **WSL's default Ubuntu**! You might use other Distros if you prefer, but keep in mind the setup process might be different!
 
 1. Make sure you have installed your WSL 2 environment properly using [this guide to setup up WSL](https://docs.microsoft.com/en-us/windows/wsl/install) and [this guide to connect to Visual Studio Code](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode).
 2. Now open PowerShell as an Admin and type `wsl` to start up your subsystem.
@@ -141,7 +141,7 @@ This Tutorial teaches you how to create a lightweight environment for D++-develo
 3. Go to your home directory using `cd ~`
 4. Download the latest build for your Distro using `wget [url here]`. In this guide we will use the v10.0.0 build for Ubuntu x86-64: `wget https://github.com/brainboxdotcc/DPP/releases/download/v10.0.0/libdpp-10.0.0-linux-x64.deb`
 \note replace the highlighted filenames with the package you downloaded earlier if you are using a different OS
-5. Finally install all required deps and the library using `sudo apt-get install libopus0 && sudo apt-get install -y libopus-dev && sudo apt-get install -y libsodium-dev && sudo dpkg -i `<mark>libdpp-10.0.0-linux-x64.deb</mark>` && rm `<mark>libdpp-10.0.0-linux-x64.deb</mark>
+5. Finally install all required deps and the library using `sudo apt-get install libopus0 && sudo apt-get install -y libopus-dev && sudo apt-get install -y libsodium-dev && sudo dpkg -i ` **libdpp-10.0.0-linux-x64.deb** ` && rm ` **libdpp-10.0.0-linux-x64.deb**
 ### Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! <br/> For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
 6. Navigate to a folder of your choice using `cd your/path/here` or create a new directory using `mkdir MyBot && cd MyBot`
 7. Now that you've a folder to work in type `> mybot.cxx` to create a file you can work in!
