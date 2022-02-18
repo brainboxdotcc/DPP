@@ -1,6 +1,6 @@
 <?php
 
-// Comment on and close all PRs targetted at master branch
+// Comment on and close all PRs targeted at master branch
 
 // Magic sauce
 exec("gh pr list --base master | sed 's/\|/ /' |awk '{print $1}'", $master_prs);
@@ -14,7 +14,7 @@ foreach ($master_prs as $pr) {
 	}
 }
 
-// Tidy up the workflow run list so it isnt littered with these
+// Tidy up the workflow run list so it isn't littered with these
 exec("gh run list -w \"Close master-targetted PRs\"", $runs);
 $runindex = 0;
 foreach ($runs as $run) {
