@@ -52,27 +52,39 @@ int main()
 	dpp::multipart_content multipart = dpp::https_client::build_multipart(
 		"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
 	);
-	dpp::https_client c("discord.com", 443, "/api/channels/" + fmt::format("{}", TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
-		{
-			{"Content-Type", multipart.mimetype},
-			{"Authorization", "Bot " + token}
-		}
-	);
-	std::string hdr1 = c.get_header("server");
-	std::string content1 = c.get_content();
-	set_test("HTTPS", hdr1 == "cloudflare" && c.get_status() == 200);
+	try {
+		dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
+			{
+				{"Content-Type", multipart.mimetype},
+				{"Authorization", "Bot " + token}
+			}
+		);
+		std::string hdr1 = c.get_header("server");
+		std::string content1 = c.get_content();
+		set_test("HTTPS", hdr1 == "cloudflare" && c.get_status() == 200);
+	}
+	catch (const dpp::exception& e) {
+		std::cout << e.what() << "\n";
+		set_test("HTTPS", false);
+	}
 
 	set_test("HTTP", false);
-	dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
-	std::string hdr2 = c2.get_header("location");
-	std::string content2 = c2.get_content();
-	set_test("HTTP", hdr2 == "https://github.com/" && c2.get_status() == 301);
+	try {
+		dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
+		std::string hdr2 = c2.get_header("location");
+		std::string content2 = c2.get_content();
+		set_test("HTTP", hdr2 == "https://github.com/" && c2.get_status() == 301);
+	}
+	catch (const dpp::exception& e) {
+		std::cout << e.what() << "\n";
+		set_test("HTTP", false);
+	}
 
 	std::vector<uint8_t> testaudio = load_test_audio();
 
 	set_test("READFILE", false);
-	std::string rf_test = dpp::utility::read_file("libdpp.so");
-	FILE* fp = fopen("libdpp.so", "rb");
+	std::string rf_test = dpp::utility::read_file(SHARED_OBJECT);
+	FILE* fp = fopen(SHARED_OBJECT, "rb");
 	fseek(fp, 0, SEEK_END);
 	size_t off = (size_t)ftell(fp);
 	fclose(fp);
@@ -148,6 +160,7 @@ int main()
 
 			bot.guild_command_create(dpp::slashcommand().set_name("testcommand")
 				.set_description("Test command for DPP unit test")
+				.add_option(dpp::command_option(dpp::co_attachment, "file", "a file"))
 				.set_application_id(bot.me.id),
 				TEST_GUILD_ID, [&bot](const dpp::confirmation_callback_t &callback) {
 					if (!callback.is_error()) {
@@ -199,7 +212,6 @@ int main()
 								});
 							}
 						});
-
 					}
 				});
 		});
@@ -208,7 +220,7 @@ int main()
 		bot.on_log([&](const dpp::log_t & event) {
 			std::lock_guard<std::mutex> locker(loglock);
 			if (event.severity > dpp::ll_trace) {
-				std::cout << "[" << fmt::format("{:3.03f}", dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 			}
 			if (event.message == "Test log message") {
 				set_test("LOGGER", true);

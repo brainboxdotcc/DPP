@@ -302,7 +302,7 @@ namespace dpp {
 		std::string read_file(const std::string& filename)
 		{
 			try {
-				std::ifstream ifs(filename);
+				std::ifstream ifs(filename, std::ios::binary);
 				return std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 			}
 			catch (const std::exception& e) {
@@ -321,7 +321,7 @@ namespace dpp {
 		}
 
 
-		std::string DPP_EXPORT timestamp(time_t ts, time_format tf) {
+		std::string timestamp(time_t ts, time_format tf) {
 			char format[2] = { (char)tf, 0 };
 			return "<t:" + std::to_string(ts) + ":" + format + ">";
 		}

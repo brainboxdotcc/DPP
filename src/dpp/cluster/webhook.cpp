@@ -21,7 +21,6 @@
 #include <dpp/webhook.h>
 #include <dpp/cluster.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
 
 namespace dpp {
 
@@ -80,14 +79,7 @@ void cluster::edit_webhook_message(const class webhook &wh, const struct message
 
 
 void cluster::edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback) {
-	json jwh;
-	try {
-		jwh = json::parse(wh.build_json(true));
-	}
-	catch (const std::exception &e) {
-		log(ll_error, fmt::format("edit_webhook_with_token(): {}", e.what()));
-		return;
-	}
+	json jwh = json::parse(wh.build_json(true));
 	if (jwh.find("channel_id") != jwh.end()) {
 		jwh.erase(jwh.find("channel_id"));
 	}

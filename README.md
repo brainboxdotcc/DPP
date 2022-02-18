@@ -8,6 +8,7 @@
 
 ### Library features:
 
+* Support for Discord API v10
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
