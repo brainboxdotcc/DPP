@@ -15,10 +15,8 @@ The way you build D++ varies from system to system. Please follow the guide belo
 
 ## 1. Build Source Code
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
+    cmake -B ./build
+    cmake --build ./build -j8
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
@@ -62,7 +60,7 @@ To build on windows follow these steps *exactly*. The build process depends on s
 \note **You do not need to build a copy from source** -- we have done this for you. Unless you consider yourself an **advanced user** you should [obtain a pre-made visual studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/) and completely skip this guide!
 
 
-1. Make sure you have Visual Studio 2019. The Community, Professional or Enterprise versions all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
+1. Make sure you have Visual Studio 2019 or Visual Studio 2022. The Community, Professional or Enterprise versions all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
 2. Check out the DPP project source using git
 3. From within Visual Studio 2019, click the "File" menu, choose "Open" then "CMake", and select the CMakeLists.txt within the project folder
    \image html winbuild_1.png
@@ -103,22 +101,16 @@ For voice support, additional dependencies are required:
 
 ## 3. Build Source Code
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
+    cmake -B ./build
+    cmake --build ./build -j8
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
-## 4. Optional: Run test cases
-
-Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
-
-## 5. Install globally
+## 4. Install globally
 
     sudo make install
 
-## 6. Installation to a different directory
+## 5. Installation to a different directory
 
 If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
@@ -126,7 +118,7 @@ If you want to install the library, its dependencies and header files to a diffe
 
 Then once the build is complete, run `make install` to install to the location you specified.
 
-## 7. Using the library
+## 6. Using the library
 
 Once installed, you can make use of the library in standalone programs simply by including it and linking to it:
 
@@ -161,22 +153,16 @@ For voice support, additional dependencies are required
 
 ## 3. Build Source Code
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
+    cmake -B ./build
+    cmake --build ./build -j8
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
-## 4. Optional: Run test cases
-
-Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
-
-## 5. Install globally
+## 4. Install globally
 
     make install
 
-## 6. Installation to a different directory
+## 5. Installation to a different directory
 
 If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
@@ -202,5 +188,3 @@ Of course, this is just a proof of concept - you should really use a more robust
 If you are having trouble setting up CMake, you can try [our template bot](https://github.com/brainboxdotcc/templatebot).
 
 **Have fun!**
-
-

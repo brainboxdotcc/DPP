@@ -105,7 +105,7 @@ To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, fo
    \image html vsproj_5.png
 7. The next step is to populate the include directories and library directories sections with the paths to the D++ library and include files. The next steps will guide you through how to do this.
    \image html vsproj_6.png
-8. Click 'edit' when prompted to edit the include paths section. Add the path to the include folder you extracted to your machine, which we took note of earlier. Note that it is important to add the dpp-9.0 folder, not any other folder, to this list:
+8. Click 'edit' when prompted to edit the include paths section. Add the path to the include folder you extracted to your machine, which we took note of earlier. Note that it is important to add the dpp-10.0 folder, not any other folder, to this list:
    \image html vsproj_7.png
 9.  Going back to the previous window, now edit the library paths. Again click 'edit' when prompted to edit the library paths section. Add the path to the library folder you extracted to your machine, which we took note of earlier. Note that once more it is important to add the dpp-9.0 folder within it, not any other folder, to this list. Also be aware this is a **different folder** than the one you just added for includes!
     \image html vsproj_8.png

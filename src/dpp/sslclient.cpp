@@ -55,7 +55,6 @@
 #include <exception>
 #include <string>
 #include <iostream>
-#include <dpp/fmt/format.h>
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 
@@ -107,6 +106,12 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
         signal(SIGPIPE, SIG_IGN);
         signal(SIGCHLD, SIG_IGN);
         signal(SIGXFSZ, SIG_IGN);
+#else
+	// Set up winsock.
+	WSADATA wsadata;
+	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
+		throw dpp::connection_exception("WSAStartup failure");
+	}
 #endif
 	if (FD_SETSIZE < 1024) {
 		throw dpp::connection_exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
@@ -128,7 +133,7 @@ void ssl_client::connect()
 	/* Resolve hostname to IP */
 	struct hostent *host;
 	if ((host = gethostbyname(hostname.c_str())) == nullptr)
-		throw dpp::exception(fmt::format("Couldn't resolve hostname '{}'", hostname));
+		throw dpp::exception(std::string("Couldn't resolve hostname: ") + hostname);
 
 	addrinfo hints, *addrs;
 	
@@ -139,7 +144,7 @@ void ssl_client::connect()
 
 	int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
 	if (status != 0)
-		throw dpp::exception(fmt::format("getaddrinfo (host={}, port={}): ", hostname, port, gai_strerror(status)));
+		throw dpp::exception(std::string("getaddrinfo error: ") + gai_strerror(status));
 
 	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 	int err = 0;
@@ -177,12 +182,21 @@ void ssl_client::connect()
 		if (ssl->ctx == nullptr)
 			throw dpp::exception("Failed to create SSL client context!");
 
+		/* Do not allow SSL 3.0, TLS 1.0 or 1.1
+		 * https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
+		 */
+		if (!SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION))
+			throw dpp::exception("Failed to set minimum SSL version!");
+
 		/* Create SSL session */
 		ssl->ssl = SSL_new(ssl->ctx);
 		if (ssl->ssl == nullptr)
 			throw dpp::exception("SSL_new failed!");
 
 		SSL_set_fd(ssl->ssl, (int)sfd);
+
+		/* Server name identification (SNI) */
+		SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
 
 		status = SSL_connect(ssl->ssl);
 		if (status != 1) {
@@ -307,7 +321,7 @@ void ssl_client::read_loop()
 			}
 
 			if (SAFE_FD_ISSET(sfd, &efds) || sfd == -1) {
-				this->log(dpp::ll_error, fmt::format("Error on SSL connection: {}", strerror(errno)));
+				this->log(dpp::ll_error, std::string("Error on SSL connection: ") +strerror(errno));
 				return;
 			}
 
@@ -316,7 +330,7 @@ void ssl_client::read_loop()
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					r = ::read(sfd, ServerToClientBuffer, BUFSIZZ);
+					r = ::recv(sfd, ServerToClientBuffer, BUFSIZZ, 0);
 					if (r <= 0) {
 						/* error or EOF */
 						return;
@@ -383,7 +397,7 @@ void ssl_client::read_loop()
 				/* Try to write */
 
 				if (plaintext) {
-					r = ::write(sfd, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength);
+					r = ::send(sfd, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength, 0);
 
 					if (r < 0) {
 						/* Write error */
@@ -425,7 +439,7 @@ void ssl_client::read_loop()
 		}
 	}
 	catch (const std::exception &e) {
-		log(ll_warning, fmt::format("Read loop ended: {}", e.what()));
+		log(ll_warning, std::string("Read loop ended: ") + e.what());
 	}
 }
 

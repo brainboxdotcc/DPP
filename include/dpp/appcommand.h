@@ -64,7 +64,9 @@ enum command_option_type : uint8_t {
 	/** A mentionable. Includes users and roles */
 	co_mentionable = 9,
 	/** Any double between -2^53 and 2^53 */
-	co_number = 10
+	co_number = 10,
+	/** File attachment type */
+	co_attachment = 11,
 };
 
 /**
@@ -447,6 +449,10 @@ struct DPP_EXPORT command_resolved {
 	 * @brief Resolved messages
 	 */
 	std::map<dpp::snowflake, dpp::message> messages;
+	/**
+	 * @brief Resolved attachments
+	 */
+	std::map<dpp::snowflake, dpp::attachment> attachments;
 };
 
 /**

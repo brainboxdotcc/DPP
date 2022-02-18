@@ -20,6 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <string>
 #include <vector>
@@ -322,6 +323,16 @@ namespace dpp {
 		 * @return std::vector<std::string> Tokenized strings 
 		 */
 		std::vector<std::string> DPP_EXPORT tokenize(std::string const &in, const char* sep = "\r\n");
+
+		/**
+		 * @brief Create a bot invite
+		 * 
+		 * @param bot_id Bot ID
+		 * @param permissions Permissions of the bot to invite
+		 * @param scopes Scopes to use
+		 * @return Invite URL
+		 */
+		std::string DPP_EXPORT bot_invite_url(const snowflake bot_id, const uint64_t permissions = 0, const std::vector<std::string>& scopes = {"bot", "applications.commands"});
 	};
 
 };
