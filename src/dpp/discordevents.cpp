@@ -29,7 +29,6 @@
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
 #include <time.h>
 #include <iomanip>
 #include <sstream>
@@ -355,7 +354,7 @@ void discord_client::handle_event(const std::string &event, json &j, const std::
 			ev_iter->second->handle(this, j, raw);
 		}
 	} else {
-		log(dpp::ll_debug, fmt::format("Unhandled event: {}, {}", event, j.dump()));
+		log(dpp::ll_debug, "Unhandled event: " + event + ", " + j.dump());
 	}
 }
 

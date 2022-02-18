@@ -118,9 +118,9 @@ Yes! D++ supports sharding and also clustering (grouping of shards into one proc
 The documentation and website are built using Doxygen. To contribute to site pages, submit a Pull Request to the main repository. The site pages can be found within the `docpages` directory. Details of classes, variables, namespaces etc are auto generated from Doxygen comments within the library source code in the `include` and `src` folders.
 
 ## What version of the Discord API does this library support?
-D++ only supports Discord API v9, the latest version.
+D++ only supports Discord API v10, the latest version. D++ major version numbers match the supported Discord API version.
 
-## Does this Discord library support the v9 threads feature?
+## Does this Discord library support the threads feature?
 Yes! D++ supports Discord threads. You can create, edit and delete threads and also attach events watching for messages within threads.
 
 ## Does D++ require C++20 support?

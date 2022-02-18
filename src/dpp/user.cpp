@@ -21,7 +21,7 @@
 #include <dpp/user.h>
 #include <dpp/discordevents.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -76,6 +76,10 @@ std::string user::get_avatar_url(uint16_t size)  const {
 		(has_animated_icon() ? "gif" : "png"),
 		utility::avatar_size(size)
 	);
+}
+
+std::string user::format_username() const {
+	return fmt::format("{0}#{1:04d}", username, discriminator);
 }
 
 std::string user::get_mention() const {

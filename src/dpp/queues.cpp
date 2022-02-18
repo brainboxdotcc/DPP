@@ -25,9 +25,8 @@
 #endif
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
-#define CPPHTTPLIB_OPENSSL_SUPPORT
-#include <dpp/httplib.h>
-#include <dpp/fmt/format.h>
+#include <dpp/httpsclient.h>
+#include <dpp/fmt-minimal.h>
 #include <dpp/stringops.h>
 #include <dpp/version.h>
 
@@ -65,23 +64,23 @@ void http_request::complete(const http_request_completion_t &c) {
 }
 
 /* Fill a http_request_completion_t from a HTTP result */
-void populate_result(const std::string &url, cluster* owner, http_request_completion_t& rv, const httplib::Result &res) {
-	rv.status = res->status;
-	rv.body = res->body;
-	for (auto &v : res->headers) {
+void populate_result(const std::string &url, cluster* owner, http_request_completion_t& rv, const https_client &res) {
+	rv.status = res.get_status();
+	rv.body = res.get_content();
+	for (auto &v : res.get_headers()) {
 		rv.headers[v.first] = v.second;
 	}
 
 	/* This will be ignored for non-discord requests without rate limit headers */
 
-	rv.ratelimit_limit = from_string<uint64_t>(res->get_header_value("X-RateLimit-Limit"));
-	rv.ratelimit_remaining = from_string<uint64_t>(res->get_header_value("X-RateLimit-Remaining"));
-	rv.ratelimit_reset_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Reset-After"));
-	rv.ratelimit_bucket = res->get_header_value("X-RateLimit-Bucket");
-	rv.ratelimit_global = (res->get_header_value("X-RateLimit-Global") == "true");
+	rv.ratelimit_limit = from_string<uint64_t>(res.get_header("x-ratelimit-limit"));
+	rv.ratelimit_remaining = from_string<uint64_t>(res.get_header("x-ratelimit-remaining"));
+	rv.ratelimit_reset_after = from_string<uint64_t>(res.get_header("x-ratelimit-reset-after"));
+	rv.ratelimit_bucket = res.get_header("x-ratelimit-bucket");
+	rv.ratelimit_global = (res.get_header("x-ratelimit-global") == "true");
 	owner->rest_ping = rv.latency;
-	if (res->get_header_value("X-RateLimit-Retry-After") != "") {
-		rv.ratelimit_retry_after = from_string<uint64_t>(res->get_header_value("X-RateLimit-Retry-After"));
+	if (res.get_header("x-ratelimit-retry-after") != "") {
+		rv.ratelimit_retry_after = from_string<uint64_t>(res.get_header("x-ratelimit-retry-after"));
 	}
 	if (rv.status == 429) {
 		owner->log(ll_warning, fmt::format("Rate limited on endpoint {}, reset after {}s!", url, rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after));
@@ -119,128 +118,62 @@ http_request_completion_t http_request::run(cluster* owner) {
 		}
 	}
 
-	httplib::Client cli(_host.c_str());
-	/* This is for a reason :( - Some systems have really out of date cert stores */
-	cli.enable_server_certificate_verification(false);
-	cli.set_follow_location(true);
 
 	rv.ratelimit_limit = rv.ratelimit_remaining = rv.ratelimit_reset_after = rv.ratelimit_retry_after = 0;
 	rv.status = 0;
 	rv.latency = 0;
 	rv.ratelimit_global = false;
 
+	dpp::http_headers headers;
 	if (non_discord) {
 		/* Requests outside of Discord have their own headers an NEVER EVER send a bot token! */
-		httplib::Headers headers;
 		for (auto& r : req_headers) {
 			headers.emplace(r.first, r.second);
 		};
-		cli.set_default_headers(headers);
 	} else {
 		/* Always attach token and correct user agent when sending REST to Discord */
-		httplib::Headers headers = {
-			{"Authorization", std::string("Bot ") + owner->token},
-			{"User-Agent", http_version}
-		};
+		headers.emplace("Authorization", "Bot " + owner->token);
+		headers.emplace("User-Agent", http_version);
 		if (!reason.empty()) {
 			headers.emplace("X-Audit-Log-Reason", reason);
 		}
-		cli.set_default_headers(headers);
 		if (!empty(parameters)) {
 			_url = endpoint + "/" +parameters;
 		}
 	}
 
-	/* Because of the design of cpp-httplib we can't create a httplib::Result once and make this code
-	 * shorter. We have to use "auto res = ...". This is because httplib::Result has no default constructor
-	 * and needs to be passed a result and some other blackboxed rammel.
-	 */
-	switch (method) {
-		case m_get: {
-			if (auto res = cli.Get(_url.c_str())) {
-				rv.latency = dpp::utility::time_f() - start;
-				populate_result(_url, owner, rv, res);
-			} else {
-				rv.error = (http_error)res.error();
-			}
-		}
-		break;
-		case m_post: {
-			/* POST supports post data body */
-			if (!file_name.empty() && !file_content.empty()) {
-				if (non_discord) {
-					/* Outside Discord just post a standard non-multipart POST body */
-					if (auto res = cli.Post(_url.c_str(), postdata, mimetype.c_str())) {
-						rv.latency = dpp::utility::time_f() - start;
-						populate_result(_url, owner, rv, res);
-					} else {
-						rv.error = (http_error)res.error();
-					}
-				} else {
-					/* Special multipart mime body for Discord */
-					httplib::MultipartFormDataItems items  = {
-						{ "payload_json", postdata, "", mimetype }
-					};
+	std::map<http_method, std::string> request_verb = {
+		{m_get, "GET"},
+		{m_post, "POST"},
+		{m_put, "PUT"},
+		{m_patch, "PATCH"},
+		{m_delete, "DELETE"}
+	};
 
-					if (file_content.size() == 1) {
-						struct httplib::MultipartFormData file = { "file", file_content[0], file_name[0], "application/octet-stream" };
-						items.push_back(file);
-					} else {
-						for (size_t i = 0; i < file_content.size(); i++) {
-							struct httplib::MultipartFormData file = { fmt::format("files[{}]", i), file_content[i], file_name[i], "application/octet-stream" };
-							items.push_back(file);
-						}
-					}
+	multipart_content multipart;
+	if (non_discord) {
+		multipart = { postdata, "" };
+	} else {
 
-					if (auto res = cli.Post(_url.c_str(), items)) {
-						rv.latency = dpp::utility::time_f() - start;
-						populate_result(_url, owner, rv, res);
-					} else {
-						rv.error = (http_error)res.error();
-					}
-				}
-			} else {
-				/* Without a filename attached, use the same for both */
-				if (auto res = cli.Post(_url.c_str(), postdata, mimetype.c_str())) {
-					rv.latency = dpp::utility::time_f() - start;
-					populate_result(_url, owner, rv, res);
-				} else {
-					rv.error = (http_error)res.error();
-				}
-			}
-		}
-		break;
-		case m_patch: {
-			if (auto res = cli.Patch(_url.c_str(), postdata.c_str(), mimetype.c_str())) {
-				rv.latency = dpp::utility::time_f() - start;
-				populate_result(_url, owner, rv, res);
-			} else {
-				rv.error = (http_error)res.error();
-			}
-		}
-		break;
-		case m_put: {
-			/* PUT supports post data body */
-			if (auto res = cli.Put(_url.c_str(), postdata.c_str(), mimetype.c_str())) {
-				rv.latency = dpp::utility::time_f() - start;
-				populate_result(_url, owner, rv, res);
-			} else {
-				rv.error = (http_error)res.error();
-			}
-
-		}
-		break;
-		case m_delete: {
-			if (auto res = cli.Delete(_url.c_str())) {
-				rv.latency = dpp::utility::time_f() - start;
-				populate_result(_url, owner, rv, res);
-			} else {
-				rv.error = (http_error)res.error();
-			}
-
-		}
-		break;
+		multipart = https_client::build_multipart(postdata, file_name, file_content);
+		headers.emplace("Content-Type", multipart.mimetype);
 	}
+	http_connect_info hci = https_client::get_host_info(_host);
+	try {
+		https_client cli(hci.hostname, hci.port, _url, request_verb[method], multipart.body, headers, !hci.is_ssl);
+		rv.latency = dpp::utility::time_f() - start;
+		if (cli.get_status() < 100) {
+			rv.error = h_connection;
+			owner->log(ll_error, fmt::format("HTTP(S) error on {} connection to {}:{}: Malformed HTTP response", hci.scheme, hci.hostname, hci.port));
+		} else {
+			populate_result(_url, owner, rv, cli);
+		}
+	}
+	catch (const std::exception& e) {
+		owner->log(ll_error, fmt::format("HTTP(S) error on {} connection to {}:{}: {}", hci.scheme, hci.hostname, hci.port, e.what()));
+		rv.error = h_connection;
+	}
+
 	/* Set completion flag */
 	completed = true;
 	return rv;

@@ -22,7 +22,8 @@
 #include <iostream>
 #include <fstream>
 #include <dpp/wsclient.h>
-#include <dpp/fmt/format.h>
+#include <dpp/utility.h>
+#include <dpp/fmt-minimal.h>
 
 namespace dpp {
 
@@ -124,18 +125,6 @@ void websocket_client::write(const std::string &data)
 	}
 }
 
-std::vector<std::string> tokenize(std::string const &in, const char* sep = "\r\n") {
-	std::string::size_type b = 0;
-	std::vector<std::string> result;
-
-	while ((b = in.find_first_not_of(sep, b)) != std::string::npos) {
-		auto e = in.find(sep, b);
-		result.push_back(in.substr(b, e-b));
-		b = e;
-	}
-	return result;
-}
-
 bool websocket_client::handle_buffer(std::string &buffer)
 {
 	switch (state) {
@@ -150,19 +139,19 @@ bool websocket_client::handle_buffer(std::string &buffer)
 				buffer.erase(0, buffer.find("\r\n\r\n") + 4);
 
 				/* Process headers into map */
-				std::vector<std::string> h = tokenize(headers);
+				std::vector<std::string> h = utility::tokenize(headers);
 				if (h.size()) {
 					std::string status_line = h[0];
 					h.erase(h.begin());
 					/* HTTP/1.1 101 Switching Protocols */
-					std::vector<std::string> status = tokenize(status_line, " ");
+					std::vector<std::string> status = utility::tokenize(status_line, " ");
 					if (status.size() >= 3 && status[1] == "101") {
 						for(auto &hd : h) {
 							std::string::size_type sep = hd.find(": ");
 							if (sep != std::string::npos) {
 								std::string key = hd.substr(0, sep);
 								std::string value = hd.substr(sep + 2, hd.length());
-								HTTPHeaders[key] = value;
+								http_headers[key] = value;
 							}
 						}
 		

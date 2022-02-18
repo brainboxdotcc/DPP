@@ -41,8 +41,7 @@ namespace dpp {
 std::string url_encode(const std::string &value);
 
 /**
- * @brief Error values. Don't change the order or add extra values here,
- * as they map onto the error values of cpp-httplib
+ * @brief Error values. Most of these are currently unused in https_client.
  */
 enum http_error {
 	/// Request successful

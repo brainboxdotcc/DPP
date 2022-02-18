@@ -1,15 +1,17 @@
 name: misspell-fixer
 on:
   schedule:
-    - cron: '0 0 15 * *'
+    - cron: '0 0 1,15 * *'
 jobs:
   build:
     if: github.repository == 'brainboxdotcc/DPP'
     runs-on: ubuntu-latest
     env:
-      REF_BRANCH: ${{ github.ref }}
+      REF_BRANCH: dev
     steps:
     - uses: actions/checkout@v2
+      with:
+        ref: dev
     - name : Set a couple env variables
       run: |
         echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
@@ -21,7 +23,6 @@ jobs:
         ^./include/dpp/nlohmann/json.hpp
         ^./include/dpp/presence.h:.*:nam
         ^./src/dpp/presence.cpp:.*:nam
-        ^./src/dpp/httplib.cpp
         ^./win32\
         " > ${{ runner.workspace }}/DPP/.misspell-fixer.ignore
     - uses: sobolevn/misspell-fixer-action@master

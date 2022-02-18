@@ -613,7 +613,7 @@ public:
 	 * 
 	 * @param on_tick The callback lambda to call for this timer when ticked
 	 * @param on_stop The callback lambda to call for this timer when it is stopped
-	 * @param frequency How often to tick the timer
+	 * @param frequency How often to tick the timer in seconds
 	 * @return timer A handle to the timer, used to remove that timer later
 	 */
 	timer start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop = {});
@@ -1944,7 +1944,7 @@ public:
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param invite Invite code to delete
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void invite_delete(const std::string &invite, command_completion_event_t callback = {});
 
@@ -3065,7 +3065,7 @@ public:
 	 *
 	 * @param instance Stage instance to create
 	 * @param callback User function to execute when the api call completes
-	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
 	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
@@ -3270,8 +3270,8 @@ public:
 			/* Timer has finished, detach it from event.
 			 * Only allowed to tick once.
 			 */
-			owner->stop_timer(th);
 			ev.detach(listener_handle);
+			owner->stop_timer(th);
 		}, duration, on_end);
 	}
 
@@ -3280,8 +3280,8 @@ public:
 	 */
 	~timed_listener() {
 		/* Stop timer and detach event, but do not call on_end */
-		owner->stop_timer(th);
 		ev.detach(listener_handle);
+		owner->stop_timer(th);
 	}
 };
 

@@ -254,6 +254,15 @@ public:
 	 * @return true if icon is animated (gif)
 	 */
 	bool has_animated_icon() const;
+
+	/**
+	 * @brief Format a username into user#discriminator
+	 * 
+	 * For example Brain#0001
+	 * 
+	 * @return Formatted username and discriminator
+	 */
+	std::string format_username() const;
 };
 
 /**

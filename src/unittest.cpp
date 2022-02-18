@@ -66,6 +66,9 @@ std::map<std::string, test_t> tests = {
 	{"TIMESTAMPTOSTRING", {"dpp::ts_to_string()", false, false}},
 	{"TIMESTRINGTOTIMESTAMP", {"dpp::ts_not_null()", false, false}},
 	{"COMMANDOPTIONCHOICEFILLFROMJSON", {"dpp::command_option_choice::fill_from_json()", false, false}},
+	{"HOSTINFO", {"dpp::https_client::get_host_info()", false, false}},
+	{"HTTPS", {"dpp::https_client HTTPS request", false, false}},
+	{"HTTP", {"dpp::https_client HTTP request", false, false}},
 };
 
 double start = dpp::utility::time_f();
@@ -80,14 +83,14 @@ void set_test(const std::string &testname, bool success) {
 	auto i = tests.find(testname);
 	if (i != tests.end()) {
 		if (!i->second.executed) {
-			std::cout << "[" << fmt::format("{:3.03f}", get_time()) << "]: " << "[\u001b[33mTESTING\u001b[0m] " << i->second.description << "\n";
+			std::cout << "[" << std::fixed << std::setprecision(3)  << get_time() << "]: " << "[\u001b[33mTESTING\u001b[0m] " << i->second.description << "\n";
 		} else if (!success) {
-			std::cout << "[" << fmt::format("{:3.03f}", get_time()) << "]: " << "[\u001b[31mFAILED\u001b[0m] " << i->second.description << "\n";
+			std::cout << "[" << std::fixed << std::setprecision(3) << get_time() << "]: " << "[\u001b[31mFAILED\u001b[0m] " << i->second.description << "\n";
 		}
 		i->second.executed = true;
 		if (success) {
 			i->second.success = true;
-			std::cout << "[" << fmt::format("{:3.03f}", get_time()) << "]: " << "[\u001b[32mSUCCESS\u001b[0m] " << i->second.description << "\n";
+			std::cout << "[" << std::fixed << std::setprecision(3) << get_time() << "]: " << "[\u001b[32mSUCCESS\u001b[0m] " << i->second.description << "\n";
 		}
 	}
 }
@@ -103,16 +106,16 @@ double get_time() {
 int test_summary() {
 	/* Report on all test cases */
 	int failed = 0, passed = 0;
-	fmt::print("\u001b[37;1m\n\nUNIT TEST SUMMARY\n==================\n\u001b[0m");
+	std::cout << "\u001b[37;1m\n\nUNIT TEST SUMMARY\n==================\n\u001b[0m";
 	for (auto & t : tests) {
 		if (t.second.success == false || t.second.executed == false) {
 			failed++;
 		} else {
 			passed++;
 		}
-		fmt::print("{:50s} {:6s}\u001b[0m\n", t.second.description, t.second.executed && t.second.success ? "\u001b[32mPASS" : "\u001b[31mFAIL");
+		std::cout << std::left << std::setw(50) << t.second.description << " " << std::fixed << std::setw(6) << (t.second.executed && t.second.success ? "\u001b[32mPASS" : "\u001b[31mFAIL") << std::setw(0) << "\u001b[0m\n";
 	}
-	fmt::print("\u001b[37;1m\nExecution finished in {:.03f} seconds.\nFailed: {} Passed: {} Percentage: {:.02f}%\u001b[0m\n", get_time(), failed, passed, (float)(passed) / (float)(tests.size()) * 100.0f);
+	std::cout << "\u001b[37;1m\nExecution finished in " << std::fixed << std::setprecision(3) <<  get_time() << std::setprecision(0) << " seconds.\nFailed: " << failed << " Passed: " << passed << " Percentage: " << std::setprecision(2) << ((float)(passed) / (float)(tests.size()) * 100.0f) << "%\u001b[0m\n";
 	return failed;
 }
 
@@ -125,6 +128,10 @@ std::vector<uint8_t> load_test_audio() {
 		input.seekg(0, std::ios::beg);
 		input.read((char*)testaudio.data(), testaudio_size);
 		input.close();
+	}
+	else {
+		std::cout << "ERROR: Can't load ../testdata/Robot.pcm\n";
+		exit(1);
 	}
 	return testaudio;
 }

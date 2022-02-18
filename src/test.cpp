@@ -22,13 +22,69 @@
 
 /* Unit tests go here */
 int main()
-{ 
+{
 	std::string token(get_token());
+
+	dpp::http_connect_info hci;
+	set_test("HOSTINFO", false);
+
+	hci = dpp::https_client::get_host_info("https://test.com:444");
+	bool hci_test = (hci.scheme == "https" && hci.hostname == "test.com" && hci.port == 444 && hci.is_ssl == true);
+
+	hci = dpp::https_client::get_host_info("https://test.com");
+	hci_test = hci_test && (hci.scheme == "https" && hci.hostname == "test.com" && hci.port == 443 && hci.is_ssl == true);
+
+	hci = dpp::https_client::get_host_info("http://test.com");
+	hci_test = hci_test && (hci.scheme == "http" && hci.hostname == "test.com" && hci.port == 80 && hci.is_ssl == false);
+
+	hci = dpp::https_client::get_host_info("http://test.com:90");
+	hci_test = hci_test && (hci.scheme == "http" && hci.hostname == "test.com" && hci.port == 90 && hci.is_ssl == false);
+
+	hci = dpp::https_client::get_host_info("test.com:97");
+	hci_test = hci_test && (hci.scheme == "http" && hci.hostname == "test.com" && hci.port == 97 && hci.is_ssl == false);
+
+	hci = dpp::https_client::get_host_info("test.com");
+	hci_test = hci_test && (hci.scheme == "http" && hci.hostname == "test.com" && hci.port == 80 && hci.is_ssl == false);
+
+	set_test("HOSTINFO", hci_test);
+
+	set_test("HTTPS", false);
+	dpp::multipart_content multipart = dpp::https_client::build_multipart(
+		"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
+	);
+	try {
+		dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
+			{
+				{"Content-Type", multipart.mimetype},
+				{"Authorization", "Bot " + token}
+			}
+		);
+		std::string hdr1 = c.get_header("server");
+		std::string content1 = c.get_content();
+		set_test("HTTPS", hdr1 == "cloudflare" && c.get_status() == 200);
+	}
+	catch (const dpp::exception& e) {
+		std::cout << e.what() << "\n";
+		set_test("HTTPS", false);
+	}
+
+	set_test("HTTP", false);
+	try {
+		dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
+		std::string hdr2 = c2.get_header("location");
+		std::string content2 = c2.get_content();
+		set_test("HTTP", hdr2 == "https://github.com/" && c2.get_status() == 301);
+	}
+	catch (const dpp::exception& e) {
+		std::cout << e.what() << "\n";
+		set_test("HTTP", false);
+	}
+
 	std::vector<uint8_t> testaudio = load_test_audio();
 
 	set_test("READFILE", false);
-	std::string rf_test = dpp::utility::read_file("libdpp.so");
-	FILE* fp = fopen("libdpp.so", "rb");
+	std::string rf_test = dpp::utility::read_file(SHARED_OBJECT);
+	FILE* fp = fopen(SHARED_OBJECT, "rb");
 	fseek(fp, 0, SEEK_END);
 	size_t off = (size_t)ftell(fp);
 	fclose(fp);
@@ -68,7 +124,7 @@ int main()
 	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
 	tj["t2"] = "2022-01-19T17:18:14+00:00";
 	uint32_t inTimestamp = 1642612694;
-	set_test("TIMESTRINGTOTIMESTAMP", (uint64_t)dpp::ts_not_null(&tj, "t1") == inTimestamp and (uint64_t)dpp::ts_not_null(&tj, "t2") == inTimestamp);
+	set_test("TIMESTRINGTOTIMESTAMP", (uint64_t)dpp::ts_not_null(&tj, "t1") == inTimestamp && (uint64_t)dpp::ts_not_null(&tj, "t2") == inTimestamp);
 
 	set_test("TS", false); 
 	dpp::managed m(TEST_USER_ID);
@@ -104,6 +160,7 @@ int main()
 
 			bot.guild_command_create(dpp::slashcommand().set_name("testcommand")
 				.set_description("Test command for DPP unit test")
+				.add_option(dpp::command_option(dpp::co_attachment, "file", "a file"))
 				.set_application_id(bot.me.id),
 				TEST_GUILD_ID, [&bot](const dpp::confirmation_callback_t &callback) {
 					if (!callback.is_error()) {
@@ -155,7 +212,6 @@ int main()
 								});
 							}
 						});
-
 					}
 				});
 		});
@@ -164,7 +220,7 @@ int main()
 		bot.on_log([&](const dpp::log_t & event) {
 			std::lock_guard<std::mutex> locker(loglock);
 			if (event.severity > dpp::ll_trace) {
-				std::cout << "[" << fmt::format("{:3.03f}", dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 			}
 			if (event.message == "Test log message") {
 				set_test("LOGGER", true);

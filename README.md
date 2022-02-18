@@ -8,6 +8,7 @@
 
 ### Library features:
 
+* Support for Discord API v10
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
@@ -80,6 +81,5 @@ For voice support you require both of:
 
 ### Included Dependencies (Packaged with the library)
 * [nlohmann::json](https://github.com/nlohmann/json)
-* [fmt::format](https://github.com/fmt/format)
-* [cpp-httplib](https://github.com/yhirose/cpp-httplib)
+* [fmt::format](https://github.com/fmtlib/fmt)
 

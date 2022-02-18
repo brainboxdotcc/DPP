@@ -22,7 +22,7 @@
 #include <dpp/cluster.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 

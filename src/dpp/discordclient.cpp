@@ -30,7 +30,7 @@
 #include <dpp/cluster.h>
 #include <thread>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 #include <dpp/etf.h>
 #include <zlib.h>
 
