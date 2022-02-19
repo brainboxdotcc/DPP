@@ -206,7 +206,7 @@ You can read more about scopes and which you need for your application [here](ht
 
 To build a D++ bot in a repl.it instance, follow these steps. These steps are slightly more convoluted than installing D++ into a standard container as we don't have access to root in the conventional way or write access to any files outside of our home directory in a repl. This guide sidesteps the issue by locally extracting a libdpp deb file installer, and referencing the local dependencies from the command-line.
 
-1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v9.0.16/libdpp-9.0.16-linux-x64.deb`
+1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v10.0.0/libdpp-10.0.0-linux-x64.deb`
 2. Extract this deb file using `dpkg`:
 ```
 dpkg -x *.deb .
