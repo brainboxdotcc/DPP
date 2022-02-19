@@ -77,6 +77,7 @@ public:
 	 */
 	uint32_t uses;
 	/** The stage instance data if there is a public stage instance in the stage channel this invite is for
+	 * @deprecated Deprecated
 	 */
 	stage_instance stage;
 
