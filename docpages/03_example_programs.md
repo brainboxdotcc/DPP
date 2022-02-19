@@ -524,17 +524,14 @@ int main()
 
 	/* The interaction create event is fired when someone issues your commands */
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
-		if (event.command.type == dpp::it_application_command) {
-			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-			/* Check which command they ran */
-			if (cmd_data.name == "blep") {
-				/* Fetch a parameter value from the command parameters */
-				std::string animal = std::get<std::string>(event.get_parameter("animal"));
-				/* Reply to the command. There is an overloaded version of this
-				* call that accepts a dpp::message so you can send embeds.
-				*/
-				event.reply(dpp::ir_channel_message_with_source, fmt::format("Blep! You chose {}", animal));
-			}
+		/* Check which command they ran */
+		if (event.command.get_command_name() == "blep") {
+			/* Fetch a parameter value from the command parameters */
+			std::string animal = std::get<std::string>(event.get_parameter("animal"));
+			/* Reply to the command. There is an overloaded version of this
+			* call that accepts a dpp::message so you can send embeds.
+			*/
+			event.reply(fmt::format("Blep! You chose {}", animal));
 		}
 	});
 
@@ -669,7 +666,7 @@ int main()
 		/* Button clicks are still interactions, and must be replied to in some form to
 		 * prevent the "this interaction has failed" message from Discord to the user.
  		 */
-		event.reply(dpp::ir_channel_message_with_source, "You clicked: " + event.custom_id);
+		event.reply("You clicked: " + event.custom_id);
 	});
 
 	bot.start(false);
@@ -786,7 +783,7 @@ int main()
 		/* Select clicks are still interactions, and must be replied to in some form to
 		 * prevent the "this interaction has failed" message from Discord to the user.
 		 */
-		event.reply(dpp::ir_channel_message_with_source, "You clicked " + event.custom_id + " and chose: " + event.values[0]);
+		event.reply("You clicked " + event.custom_id + " and chose: " + event.values[0]);
 	});
 
 	bot.on_log([](const dpp::log_t & event) {
@@ -817,9 +814,9 @@ int main()
 
 	bot.on_button_click([&bot](const dpp::button_click_t & event) {
 		if (event.custom_id == "10") {
-			event.reply(dpp::ir_channel_message_with_source, dpp::message("Correct").set_flags(dpp::m_ephemeral));
+			event.reply(dpp::message("Correct").set_flags(dpp::m_ephemeral));
 		} else {
-			event.reply(dpp::ir_channel_message_with_source, dpp::message("Incorrect").set_flags(dpp::m_ephemeral));
+			event.reply(dpp::message("Incorrect").set_flags(dpp::m_ephemeral));
 		}
 	});
 
@@ -872,65 +869,64 @@ int main() {
 	
 	/* Executes on ready. */
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-	// Define a slash command.
-	dpp::slashcommand image;
-	    image.set_name("image");
-	    image.set_description("Send a specific image.");
-	    image.add_option(
+		// Define a slash command.
+		dpp::slashcommand image;
+		image.set_name("image");
+		image.set_description("Send a specific image.");
+		image.add_option(
 			// Create a subcommand type option.
- 	       	dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
+			dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
 				add_option(dpp::command_option(dpp::co_user, "user", "User to make a dog off.", false))
-			);
+		);
 		image.add_option(
 			// Create another subcommand type option.
-	        dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
+			dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
 				add_option(dpp::command_option(dpp::co_user, "user", "User to make a cat off.", false))
-			);
-	// Create command with a callback.
-	bot.global_command_create(image, [ & ]( const dpp::confirmation_callback_t &callback ) {
-	                    if(callback.is_error()) {
-	                        std::cout << callback.http_info.body <<  "\n" ;
-	                    }
+		);
+
+		// Create command with a callback.
+		bot.global_command_create(image, [ & ]( const dpp::confirmation_callback_t &callback ) {
+			if(callback.is_error()) {
+				std::cout << callback.http_info.body <<  "\n" ;
+			}
 		});
 	});
 
 	/* Use the on_interaction_create event to look for commands */
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
-    	    if (event.command.type == dpp::it_application_command) {
-        	    dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-
-				/* Check if the command is the image command. */
-				if(cmd_data.name == "image") {
-					/* Check if the subcommand is "dog" */
-					if(cmd_data.options[0].name == "dog") {	
-						/* Checks if the subcommand has any options. */
-						if(cmd_data.options[0].options.size() > 0) {
-							/* Get the user option as a snowflake. */
-							dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
-							event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a dog.", user)); 
-						} else {
-						/* Reply if there were no options.. */
-						event.reply(dpp::ir_channel_message_with_source, "<A picture of a dog.>");
-						}
-					}
-					/* Check if the subcommand is "cat" */
-					if(cmd_data.options[0].name == "cat") {
-						/* Checks if the subcommand has any options. */
-						if(cmd_data.options[0].options.size() > 0) {
-							/* Get the user option as a snowflake. */
-							dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
-							event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a cat.", user));
-						} else {
-						/* Reply if there were no options.. */
-						event.reply(dpp::ir_channel_message_with_source, "<A picture of a cat.>");
-						}
-					}
+		dpp::command_interaction cmd_data = event.command.get_command_interaction();
+		/* Check if the command is the image command. */
+		if(event.command.get_command_name() == "image") {
+			/* Check if the subcommand is "dog" */
+			if(cmd_data.options[0].name == "dog") {	
+				/* Checks if the subcommand has any options. */
+				if(cmd_data.options[0].options.size() > 0) {
+					/* Get the user option as a snowflake. */
+					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
+					event.reply(fmt::format("<@{}> has now been turned into a dog.", user)); 
+				} else {
+					/* Reply if there were no options.. */
+					event.reply("<A picture of a dog.>");
 				}
 			}
+			/* Check if the subcommand is "cat" */
+			if(cmd_data.options[0].name == "cat") {
+				/* Checks if the subcommand has any options. */
+				if(cmd_data.options[0].options.size() > 0) {
+					/* Get the user option as a snowflake. */
+					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
+					event.reply(fmt::format("<@{}> has now been turned into a cat.", user));
+				} else {
+					/* Reply if there were no options.. */
+					event.reply("<A picture of a cat.>");
+				}
+			}
+		}
 	});
 
 	bot.start(false);
-    return 0;
+	
+	return 0;
 } 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1196,17 +1192,14 @@ int main()
 
 	/* The interaction create event is fired when someone issues your commands */
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
-		if (event.command.type == dpp::it_application_command) {
-			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-			/* Check which command they ran */
-			if (cmd_data.name == "blep") {
-				/* Fetch a parameter value from the command parameters */
-				std::string animal = std::get<std::string>(event.get_parameter("animal"));
-				/* Reply to the command. There is an overloaded version of this
-				* call that accepts a dpp::message so you can send embeds.
-				*/
-				event.reply(dpp::ir_channel_message_with_source, "Blep! You chose " + animal);
-			}
+		/* Check which command they ran */
+		if (event.command.get_command_name() == "blep") {
+			/* Fetch a parameter value from the command parameters */
+			std::string animal = std::get<std::string>(event.get_parameter("animal"));
+			/* Reply to the command. There is an overloaded version of this
+			* call that accepts a dpp::message so you can send embeds.
+			*/
+			event.reply("Blep! You chose " + animal);
 		}
 	});
  
@@ -1485,26 +1478,23 @@ int main(int argc, char const *argv[])
 	});
 
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
-		if (event.command.type == dpp::it_application_command) {
-			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-			/* Check for our /dialog command */
-			if (cmd_data.name == "dialog") {
-				/* Instantiate an interaction_modal_response object */
-				dpp::interaction_modal_response modal("my_modal", "Please enter stuff");
-				/* Add a text component */
-				modal.add_component(
-					dpp::component().
-					set_label("Type rammel").
-					set_id("field_id").
-					set_type(dpp::cot_text).
-					set_placeholder("gumf").
-					set_min_length(1).
-					set_max_length(2000).
-					set_text_style(dpp::text_paragraph)
-				);
-				/* Trigger the dialog box. All dialog boxes are ephemeral */
-				event.dialog(modal);
-			}
+		/* Check for our /dialog command */
+		if (event.command.get_command_name() == "dialog") {
+			/* Instantiate an interaction_modal_response object */
+			dpp::interaction_modal_response modal("my_modal", "Please enter stuff");
+			/* Add a text component */
+			modal.add_component(
+				dpp::component().
+				set_label("Type rammel").
+				set_id("field_id").
+				set_type(dpp::cot_text).
+				set_placeholder("gumf").
+				set_min_length(1).
+				set_max_length(2000).
+				set_text_style(dpp::text_paragraph)
+			);
+			/* Trigger the dialog box. All dialog boxes are ephemeral */
+			event.dialog(modal);
 		}
 	});
 
@@ -1517,7 +1507,7 @@ int main(int argc, char const *argv[])
 		dpp::message m;
 		m.set_content("You entered: " + v).set_flags(dpp::m_ephemeral);
 		/* Emit a reply. Form submission is still an interaction and must generate some form of reply! */
-		event.reply(dpp::ir_channel_message_with_source, m);
+		event.reply(m);
 	});
 
 	/* Budget brand logger */
@@ -1563,20 +1553,18 @@ int main()
 
     /* Use the on_interaction_create event to look for application commands */
     bot.on_interaction_create([&](const dpp::interaction_create_t &event) {
-        if (event.command.type == dpp::it_application_command) {
-            dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
+         dpp::command_interaction cmd_data = event.command.get_command_interaction();
             
-            /* check if the command is a user context menu action */
-            if (cmd_data.type == dpp::ctxm_user) {
+         /* check if the command is a user context menu action */
+         if (cmd_data.type == dpp::ctxm_user) {
 
-                /* check if the context menu name is High Five */
-                if (cmd_data.name == "High Five") {
-                    dpp::user user = event.command.resolved.users.begin()->second; // the user who the command has been issued on
-                    dpp::user author = event.command.usr; // the user who clicked on the context menu
-                    event.reply(dpp::ir_channel_message_with_source, author.get_mention() + " slapped " + user.get_mention());
-                }
-            }
-        }
+             /* check if the context menu name is High Five */
+             if (cmd_data.name == "High Five") {
+                 dpp::user user = event.command.resolved.users.begin()->second; // the user who the command has been issued on
+                 dpp::user author = event.command.usr; // the user who clicked on the context menu
+                 event.reply(author.get_mention() + " slapped " + user.get_mention());
+             }
+         }
     });
 
     /* Start bot */
@@ -1892,7 +1880,7 @@ int main()
                                 auto iter = event.command.resolved.attachments.find(file_id);
                                 if (iter != event.command.resolved.attachments.end()) {
                                         const dpp::attachment& att = iter->second;
-                                        event.reply(dpp::ir_channel_message_with_source, att.url);
+                                        event.reply(att.url);
                                 }
                         }
                 }

@@ -125,7 +125,7 @@ namespace utility {
 	 * 
 	 * @return A logger for attaching to on_log
 	 */
-	std::function<void(const dpp::log_t&)> cout_logger();
+	std::function<void(const dpp::log_t&)> DPP_EXPORT cout_logger();
 };
 
 /** @brief Add user to scheduled event */
