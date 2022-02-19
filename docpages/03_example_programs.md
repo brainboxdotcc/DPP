@@ -1268,15 +1268,8 @@ int main() {
             // create a message
             dpp::message msg(event.msg.channel_id, "Hey there, i've got a new file!");
 
-            // attach the file
-            msg.set_file_content(dpp::utility::read_file("path_to_your_file.txt"));
-            
-            /*
-             * alternatively, you can put any other name in here.
-             * This name doesn't have to be the same as the uploaded filename.
-             * But it should have the same file extension.
-             */
-            msg.set_filename("file.txt");
+            // attach the file to the message
+            msg.add_file("foobar.txt", dpp::utility::read_file("path_to_your_file.txt"));
 
             // send the message
             bot.message_create(msg);
@@ -1311,8 +1304,7 @@ int main() {
 
                 // attach the image on success
                 if (httpRequestCompletion.status == 200) {
-                    msg.set_file_content(httpRequestCompletion.body);
-                    msg.set_filename("example-image.png"); // give the file a name
+                    msg.add_file("logo.png", httpRequestCompletion.body);
                 }
 
                 // send the message
@@ -1342,9 +1334,8 @@ int main() {
             // create a message
             dpp::message msg(event.msg.channel_id, "");
 
-            // attach the file to the message
-            msg.set_file_content(dpp::utility::read_file("path_to_your_image.jpg"));
-            msg.set_filename("image.jpg");
+            // attach the image to the message
+            msg.add_file("image.jpg", dpp::utility::read_file("path_to_your_image.jpg"));
 
             dpp::embed embed;
             embed.set_image("attachment://image.jpg"); // reference to the attached file
