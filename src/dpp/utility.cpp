@@ -33,6 +33,7 @@
 #include <streambuf>
 #include <array>
 #include <dpp/fmt/format.h>
+#include <dpp/dispatcher.h>
 
 #ifdef _WIN32
 	#include <stdio.h>
@@ -351,6 +352,14 @@ namespace dpp {
 				permissions,
 				fmt::join(scopes, "+")
 			);
+		}
+
+		std::function<void(const dpp::log_t&)> cout_logger() {
+			return [](const dpp::log_t& event) {
+				if (event.severity > dpp::ll_trace) {
+					std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+				}
+			};
 		}
 
 	};

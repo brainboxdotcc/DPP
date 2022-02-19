@@ -331,6 +331,39 @@ slashcommand& slashcommand::add_option(const command_option &o)
 	return *this;
 }
 
+command_interaction interaction::get_command_interaction() const {
+	if (std::holds_alternative<command_interaction>(data)) {
+		return std::get<command_interaction>(data);
+	} else {
+		throw dpp::logic_exception("Interaction is not for a command");
+	}
+}
+
+component_interaction interaction::get_component_interaction() const {
+	if (std::holds_alternative<component_interaction>(data)) {
+		return std::get<component_interaction>(data);
+	} else {
+		throw dpp::logic_exception("Interaction is not for a component");
+	}
+}
+
+autocomplete_interaction interaction::get_autocomplete_interaction() const {
+	if (std::holds_alternative<autocomplete_interaction>(data)) {
+		return std::get<autocomplete_interaction>(data);
+	} else {
+		throw dpp::logic_exception("Interaction is not for an autocomplete");
+	}
+}
+
+std::string interaction::get_command_name() const {
+	try {
+		return get_command_interaction().name;
+	}
+	catch (dpp::logic_exception&) {
+		return std::string();
+	}
+}
+
 interaction& interaction::fill_from_json(nlohmann::json* j) {
 	j->get_to(*this);
 	return *this;

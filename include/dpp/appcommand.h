@@ -601,6 +601,41 @@ public:
 	cache_policy_t cache_policy;                                //!< Cache policy from cluster
 
 	/**
+	 * @brief Get the command interaction object
+	 * 
+	 * @throw dpp::logic_exception if the interaction is not for a command
+	 * 
+	 * @return command_interaction object
+	 */
+	command_interaction get_command_interaction() const;
+
+	/**
+	 * @brief Get the component interaction object
+	 * 
+	 * @throw dpp::logic_exception if the interaction is not for a component
+	 * 
+	 * @return component_interaction object
+	 */
+	component_interaction get_component_interaction() const;
+
+	/**
+	 * @brief Get the autocomplete interaction object
+	 * 
+	 * @throw dpp::logic_exception if the interaction is not for an autocomplete
+	 * 
+	 * @return autocomplete_interaction object
+	 */
+	autocomplete_interaction get_autocomplete_interaction() const;
+
+	/**
+	 * @brief Get the command name for a command interaction
+	 * 
+	 * @return std::string command interaction, or empty string if the interaction
+	 * is not for a command.
+	 */
+	std::string get_command_name() const;
+
+	/**
 	 * @brief Fill object properties from JSON
 	 *
 	 * @param j JSON to fill from

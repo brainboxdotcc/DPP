@@ -115,6 +115,19 @@ struct DPP_EXPORT log_t : public event_dispatch_t {
 	log_t(const log_t&) = default; 	
 };
 
+namespace utility {
+	/**
+	 * @brief Get a default logger that outputs to std::cout.
+	 * e.g.
+	 * ```
+	 *     bot.on_log(dpp::utility::cout_logger());
+	 * ```
+	 * 
+	 * @return A logger for attaching to on_log
+	 */
+	std::function<void(const dpp::log_t&)> cout_logger();
+};
+
 /** @brief Add user to scheduled event */
 struct DPP_EXPORT guild_scheduled_event_user_add_t : public event_dispatch_t {
 	/** Constructor
@@ -294,6 +307,26 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback = {}) const;
+
+	/**
+	 * @brief Send a reply for this interaction.
+	 * Uses the default type of ir_channel_message_with_source, a simple message reply.
+	 * 
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void reply(const message & m, command_completion_event_t callback = {}) const;
+
+	/**
+	 * @brief Send a reply for this interaction.
+	 * Uses the default type of ir_channel_message_with_source, a simple message reply.
+	 * 
+	 * @param mt The string value to send, for simple text only messages
+	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void reply(const std::string & mt, command_completion_event_t callback = {}) const;
 
 	/**
 	 * @brief Reply to interaction with a dialog box
