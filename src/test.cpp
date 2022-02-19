@@ -227,6 +227,15 @@ int main()
 			}
 		});
 
+		set_test("RUNONCE", false);
+		uint8_t runs = 0;
+		for (int x = 0; x < 10; ++x) {
+			if (dpp::run_once<struct test_run>()) {
+				runs++;
+			}
+		}
+		set_test("RUNONCE", (runs == 1));
+
 		bot.on_message_reaction_add([&](const dpp::message_reaction_add_t & event) {
 			if (event.reacting_user.id == bot.me.id && event.reacting_emoji.name == "😄") {
 				set_test("REACTEVENT", true);

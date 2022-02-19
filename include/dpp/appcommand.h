@@ -808,9 +808,18 @@ public:
 	slashcommand();
 
 	/**
+	 * @brief Construct a new slashcommand object
+	 * 
+	 * @param _name Command name
+	 * @param _description Command description
+	 * @param _application_id Application id (usually the bot's user id)
+	 */
+	slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id);
+
+	/**
 	 * @brief Destroy the slashcommand object
 	 */
-	~slashcommand();
+	virtual ~slashcommand();
 
 	/**
 	 * @brief Add an option (parameter)
