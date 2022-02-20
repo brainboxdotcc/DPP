@@ -40,10 +40,98 @@ The two programs can be seen side by side below:
 </tr>
 <tr>
 <td>
-\image html cprog.png
+
+
+~~~~~~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
+/* Be sure to place your token in the line below.
+ * Follow steps here to get a token: https://dpp.dev/creating-a-bot-application.html
+ * You will also need to fill in your guild id. When you invite the bot, be sure to
+ * invite it with the scopes 'bot' and 'applications.commands', e.g.
+ * https://discord.com/oauth2/authorize?client_id=940762342495518720&scope=bot+applications.commands&permissions=139586816064
+ */
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
+
+int main()
+{
+    /* Create bot cluster */
+    dpp::cluster bot(BOT_TOKEN);
+
+    /* Handle slash command */
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
+        }
+    });
+
+    /* Register slash command here in on_ready */
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        /* Wrap command registration in run_once to make sure it doesnt run on every full reconnection */
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+        }
+    });
+
+    /* Output simple log messages to stdout */
+    bot.on_log(dpp::utility::cout_logger());
+
+    /* Start the bot */
+    bot.start(false);
+
+    return 0;
+}
+~~~~~~~~~~~~~~~
+
+
 </td>
 <td>
-\image html jsprog.png
+
+
+~~~~~~~~~~~~~~~{.cpp}
+let Discord = require('discord.js');
+
+/* Be sure to place your token in the line below.
+ * Follow steps here to get a token: https://dpp.dev/creating-a-bot-application.html
+ * You will also need to fill in your guild id. When you invite the bot, be sure to
+ * invite it with the scopes 'bot' and 'applications.commands', e.g.
+ * https://discord.com/oauth2/authorize?client_id=940762342495518720&scope=bot+applications.commands&permissions=139586816064
+ */
+let BOT_TOKEN   = 'add your token here';
+let MY_GUILD_ID = '825407338755653642';
+
+/* Create bot client */
+let bot = new Discord.Client({ intents: [] });
+
+/* Handle slash command */
+bot.on('interactionCreate', (interaction) => {
+    if (interaction.isCommand() && interaction.commandName === 'ping') {
+        interaction.reply({content: 'Pong!'});
+    }
+});
+
+/* Register slash command here in on_ready
+ * Uses .once to make sure it doesn't run on every full reconnection
+ */
+bot.once('ready', async () => {
+    let guild = await bot.guilds.fetch(MY_GUILD_ID);
+    await guild.commands.create({
+        name: 'ping',
+        description: "Ping pong!"
+    });
+});
+
+/* no default logging functionality */
+
+/* Start the bot */
+bot.login(BOT_TOKEN);
+‍
+‍
+‍
+~~~~~~~~~~~~~~~
+
+
 </td>
 </tr>
 </table>
