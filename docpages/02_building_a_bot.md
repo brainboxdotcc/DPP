@@ -142,7 +142,7 @@ This Tutorial teaches you how to create a lightweight environment for D++-develo
 4. Download the latest build for your Distro using `wget [url here]`. In this guide we will use the v10.0.0 build for Ubuntu x86-64: `wget https://github.com/brainboxdotcc/DPP/releases/download/v10.0.0/libdpp-10.0.0-linux-x64.deb`
 \note replace the highlighted filenames with the package you downloaded earlier if you are using a different OS
 5. Finally install all required deps and the library using `sudo apt-get install libopus0 && sudo apt-get install -y libopus-dev && sudo apt-get install -y libsodium-dev && sudo dpkg -i ` **libdpp-10.0.0-linux-x64.deb** ` && rm ` **libdpp-10.0.0-linux-x64.deb**
-### Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! <br/> For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
+### Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
 6. Navigate to a folder of your choice using `cd your/path/here` or create a new directory using `mkdir MyBot && cd MyBot`
 7. Now that you've a folder to work in type `> mybot.cxx` to create a file you can work in!
 8. Now you can open this file in Visual Studio Code by pressing `CTRL+SHIFT+P` and typing `Remote-WSL: New WSL Window`. This will bring up a new window. In the new window, choose `open folder` and choose the folder you've created prior. Press OK and now you have your Folder opened as a Workspace!
@@ -206,7 +206,7 @@ You can read more about scopes and which you need for your application [here](ht
 
 To build a D++ bot in a repl.it instance, follow these steps. These steps are slightly more convoluted than installing D++ into a standard container as we don't have access to root in the conventional way or write access to any files outside of our home directory in a repl. This guide sidesteps the issue by locally extracting a libdpp deb file installer, and referencing the local dependencies from the command-line.
 
-1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v9.0.16/libdpp-9.0.16-linux-x64.deb`
+1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v10.0.0/libdpp-10.0.0-linux-x64.deb`
 2. Extract this deb file using `dpkg`:
 ```
 dpkg -x *.deb .
