@@ -79,7 +79,7 @@ void cluster::timer_reschedule(timer_t* t) {
 	}
 }
 
-voidcluster::timers_tick() {
+void cluster::timers_tick() {
 	std::vector<timer_t*> scheduled;
 	{
 		time_t now = time(nullptr);

@@ -453,7 +453,7 @@ void discord_client::one_second_timer()
 	if (first_iter != shards.end()) {
 		dpp::discord_client* first_shard = first_iter->second;
 		if (first_shard == this) {
-			creator->tick_timers();
+			creator->timers_tick();
 
 			if ((time(NULL) % 60) == 0) {
 				dpp::garbage_collection();

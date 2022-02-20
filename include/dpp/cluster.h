@@ -451,7 +451,7 @@ class DPP_EXPORT cluster {
 	/**
 	 * @brief Tick active timers
 	 */
-	void tick_timers();
+	void timers_tick();
 
 	/**
 	 * @brief Reschedule a timer for its next tick
@@ -1736,7 +1736,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_reaction_delete_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
+	void message_reaction_emoji_delete(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1805,7 +1805,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_reaction_delete_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_reaction_emoji_delete(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Delete a message from a channel. The callback function is called when the message has been edited
@@ -2118,7 +2118,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_member_gets(snowflake guild_id, uint16_t limit, snowflake after, command_completion_event_t callback);
+	void guild_membes_get(snowflake guild_id, uint16_t limit, snowflake after, command_completion_event_t callback);
 
 	/**
 	 * @brief Add guild member. Needs a specific oauth2 scope, from which you get the access_token.

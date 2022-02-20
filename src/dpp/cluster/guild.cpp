@@ -233,7 +233,7 @@ void cluster::guild_nickname_set(snowflake guild_id, const std::string &nickname
 }
 
 
-voidcluster::guild_integration_sync(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
+void cluster::guild_integration_sync(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "integrations/" + std::to_string(integration_id), m_post, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));

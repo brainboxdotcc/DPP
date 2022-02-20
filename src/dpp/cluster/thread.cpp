@@ -24,7 +24,7 @@
 
 namespace dpp {
 
-voidcurrent_user_thread_join(snowflake thread_id, command_completion_event_t callback) {
+void cluster::current_user_thread_join(snowflake thread_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(thread_id), "/thread-members/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
@@ -33,7 +33,7 @@ voidcurrent_user_thread_join(snowflake thread_id, command_completion_event_t cal
 }
 
 
-voidcurrent_user_thread_leave(snowflake thread_id, command_completion_event_t callback) {
+void cluster::current_user_thread_leave(snowflake thread_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(thread_id), "/thread-members/@me", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));

@@ -139,7 +139,7 @@ void cluster::message_reaction_emoji_delete(snowflake message_id, snowflake chan
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_reaction_delete_emoji(m, reaction, callback);
+	message_reaction_emoji_delete(m, reaction, callback);
 }
 
 
