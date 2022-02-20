@@ -883,12 +883,12 @@ struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 };
 
 /** @brief Message delete bulk */
-struct DPP_EXPORT message_bulk_delete_t : public event_dispatch_t {
+struct DPP_EXPORT message_delete_bulk_t : public event_dispatch_t {
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
-	message_bulk_delete_t(class discord_client* client, const std::string& raw);
+	message_delete_bulk_t(class discord_client* client, const std::string& raw);
 	/**
 	 * @brief guild messages are being deleted upon
 	 */

@@ -940,9 +940,9 @@ public:
 	 * @brief Called when multiple messages are deleted from a channel or DM.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type message_bulk_delete_t&, and returns void.
+	 * The function signature for this event takes a single `const` reference of type message_delete_bulk_t&, and returns void.
 	 */
-	event_router_t<message_bulk_delete_t> on_message_bulk_delete;
+	event_router_t<message_delete_bulk_t> on_message_bulk_delete;
 
 	
 	/**
@@ -2118,7 +2118,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_membes_get(snowflake guild_id, uint16_t limit, snowflake after, command_completion_event_t callback);
+	void guild_members_get(snowflake guild_id, uint16_t limit, snowflake after, command_completion_event_t callback);
 
 	/**
 	 * @brief Add guild member. Needs a specific oauth2 scope, from which you get the access_token.
