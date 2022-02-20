@@ -70,7 +70,7 @@ int main()
     bot.on_ready([&bot](const dpp::ready_t& event) {
         /* Wrap command registration in run_once to make sure it doesnt run on every full reconnection */
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("Ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
         }
     });
 
