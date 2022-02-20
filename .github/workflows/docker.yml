@@ -8,6 +8,9 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    concurrency: 
+      group: docker-deployment
+      cancel-in-progress: false
     steps:
       -
         name: Set up QEMU
@@ -26,4 +29,4 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: brainboxdotcc/DPP
+          tags: brainboxdotcc/dpp
