@@ -135,7 +135,7 @@ bool user::is_house_brilliance() const {
 	 return this->flags & u_house_brilliance;
 }
 
-bool user::is_house_u_house_balance() const {
+bool user::is_house_balance() const {
 	 return this->flags & u_house_balance;
 }
 

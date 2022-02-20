@@ -204,7 +204,7 @@ public:
 	 *
 	 * @return true if in house brilliance
 	 */
-	bool is_house_() const;
+	bool is_house_balance() const;
 	/**
 	 * @brief Return true if user is an early supporter
 	 *
