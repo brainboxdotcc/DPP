@@ -196,7 +196,7 @@ bool websocket_client::parseheader(std::string &data)
 				if (len1 & WS_MASKBIT) {
 					len1 &= ~WS_MASKBIT;
 					payloadstartoffset += 2;
-					/* We don't handle masked data, because discord doesnt send it */
+					/* We don't handle masked data, because discord doesn't send it */
 					return true;
 				}
 

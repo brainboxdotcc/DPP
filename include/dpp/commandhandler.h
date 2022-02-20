@@ -120,7 +120,7 @@ struct DPP_EXPORT param_info {
 /**
  * @brief Parameter list used during registration.
  * Note that use of vector/pair is important here to preserve parameter order,
- * as opposed to unordered_map (which doesnt guarantee any order at all) and 
+ * as opposed to unordered_map (which doesn't guarantee any order at all) and 
  * std::map, which reorders keys alphabetically.
  */
 typedef std::vector<std::pair<std::string, param_info>> parameter_registration_t;
