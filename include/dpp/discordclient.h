@@ -150,7 +150,7 @@ protected:
 	friend class dpp::events::guild_create;
 
 	/**
-	 * @brief Needed to allow cluster::set_presence to use the ETF functions
+	 * @brief Needed to allow cluster::presence_set to use the ETF functions
 	 */
 	friend class dpp::cluster;
 

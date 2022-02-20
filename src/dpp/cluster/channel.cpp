@@ -32,7 +32,7 @@ void cluster::channel_create(const class channel &c, command_completion_event_t 
 	});
 }
 
-void cluster::channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback) {
+void cluster::channel_permission_delete(const class channel &c, snowflake overwrite_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(c.id), "permissions/" + std::to_string(overwrite_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
@@ -49,7 +49,7 @@ void cluster::channel_delete(snowflake channel_id, command_completion_event_t ca
 	});
 }
 
-void cluster::channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback) {
+void cluster::channel_permissions_edit(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback) {
 	json j({ {"allow", std::to_string(allow)}, {"deny", std::to_string(deny)}, {"type", member ? 1 : 0}  });
 	this->post_rest(API_PATH "/channels", std::to_string(c.id), "permissions/" + std::to_string(overwrite_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
@@ -58,7 +58,7 @@ void cluster::channel_edit_permissions(const class channel &c, const snowflake o
 	});
 }
 
-void cluster::channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback) {
+void cluster::channel_permissions_edit(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback) {
 	json j({ {"allow", std::to_string(allow)}, {"deny", std::to_string(deny)}, {"type", member ? 1 : 0}  });
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "permissions/" + std::to_string(overwrite_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
@@ -67,7 +67,7 @@ void cluster::channel_edit_permissions(const snowflake channel_id, const snowfla
 	});
 }
 
-void cluster::channel_edit_positions(const std::vector<channel> &c, command_completion_event_t callback) {
+void cluster::channel_positions_edit(const std::vector<channel> &c, command_completion_event_t callback) {
 	json j = json::array();
 	if (c.empty()) {
 		return;

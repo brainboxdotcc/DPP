@@ -24,7 +24,7 @@
 
 namespace dpp {
 
-void cluster::create_webhook(const class webhook &w, command_completion_event_t callback) {
+void cluster::webhook_create(const class webhook &w, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(w.channel_id), "webhooks", m_post, w.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
@@ -33,7 +33,7 @@ void cluster::create_webhook(const class webhook &w, command_completion_event_t 
 }
 
 
-void cluster::delete_webhook(snowflake webhook_id, command_completion_event_t callback) {
+void cluster::webhook_delete(snowflake webhook_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/webhooks", std::to_string(webhook_id), "", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
@@ -42,7 +42,7 @@ void cluster::delete_webhook(snowflake webhook_id, command_completion_event_t ca
 }
 
 
-void cluster::delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback) {
+void cluster::webhook_message_delete(const class webhook &wh, snowflake message_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
@@ -51,7 +51,7 @@ void cluster::delete_webhook_message(const class webhook &wh, snowflake message_
 }
 
 
-void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
+void cluster::webhook_with_token_delete(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/webhooks", std::to_string(webhook_id), dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
@@ -60,7 +60,7 @@ void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string 
 }
 
 
-void cluster::edit_webhook(const class webhook& wh, command_completion_event_t callback) {
+void cluster::webhook_edit(const class webhook& wh, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), "", m_patch, wh.build_json(true), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
@@ -69,7 +69,7 @@ void cluster::edit_webhook(const class webhook& wh, command_completion_event_t c
 }
 
 
-void cluster::edit_webhook_message(const class webhook &wh, const struct message& m, command_completion_event_t callback) {
+void cluster::webhook_message_edit(const class webhook &wh, const struct message& m, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
@@ -78,7 +78,7 @@ void cluster::edit_webhook_message(const class webhook &wh, const struct message
 }
 
 
-void cluster::edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback) {
+void cluster::webhook_with_token_edit(const class webhook& wh, command_completion_event_t callback) {
 	json jwh = json::parse(wh.build_json(true));
 	if (jwh.find("channel_id") != jwh.end()) {
 		jwh.erase(jwh.find("channel_id"));
@@ -91,7 +91,7 @@ void cluster::edit_webhook_with_token(const class webhook& wh, command_completio
 }
 
 
-void cluster::execute_webhook(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, command_completion_event_t callback) {
+void cluster::webhook_execute(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, command_completion_event_t callback) {
 	std::string parameters;
 	if (wait) {
 		parameters.append("&wait=true");
@@ -110,7 +110,7 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 }
 
 
-void cluster::get_channel_webhooks(snowflake channel_id, command_completion_event_t callback) {
+void cluster::channel_webhooks_get(snowflake channel_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			webhook_map webhooks;
@@ -126,7 +126,7 @@ void cluster::get_channel_webhooks(snowflake channel_id, command_completion_even
 }
 
 
-void cluster::get_guild_webhooks(snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_webhooks_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			webhook_map webhooks;
@@ -141,8 +141,7 @@ void cluster::get_guild_webhooks(snowflake guild_id, command_completion_event_t 
 	});
 }
 
-
-void cluster::get_webhook(snowflake webhook_id, command_completion_event_t callback) {
+void cluster::webhook_get(snowflake webhook_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/webhooks", std::to_string(webhook_id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
@@ -151,7 +150,7 @@ void cluster::get_webhook(snowflake webhook_id, command_completion_event_t callb
 }
 
 
-void cluster::get_webhook_message(const class webhook &wh, command_completion_event_t callback)
+void cluster::webhook_message_get(const class webhook &wh, command_completion_event_t callback)
 {
 	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/@original", m_get, "", [callback](json &j, const http_request_completion_t &http){
 		if (callback){
@@ -161,7 +160,7 @@ void cluster::get_webhook_message(const class webhook &wh, command_completion_ev
 }
 
 
-void cluster::get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
+void cluster::webhook_with_token_get(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/webhooks", std::to_string(webhook_id), dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));

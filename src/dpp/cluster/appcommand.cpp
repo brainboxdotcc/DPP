@@ -116,7 +116,7 @@ void cluster::guild_bulk_command_create(const std::vector<slashcommand> &command
 	});
 }
 
-void cluster::guild_commands_get_permissions(snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_commands_permissions_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/permissions", m_get, "", [callback](json &j, const http_request_completion_t& http)  {
 		guild_command_permissions_map permissions_map;
 		confirmation_callback_t e("confirmation", confirmation(), http);
@@ -131,7 +131,7 @@ void cluster::guild_commands_get_permissions(snowflake guild_id, command_complet
 	});
 }
 
-void cluster::guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_bulk_command_permissions_edit(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback) {
 	if (commands.empty()) {
 		return;
 	}
@@ -182,7 +182,7 @@ void cluster::guild_command_delete(snowflake id, snowflake guild_id, command_com
 	});
 }
 
-void cluster::guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_command_permissions_edit(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
 	json j;
 
 	if(!s.permissions.empty())  {
@@ -214,7 +214,7 @@ void cluster::guild_command_get(snowflake id, snowflake guild_id, command_comple
 	});
 }
 
-void cluster::guild_command_get_permissions(snowflake id, snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_command_permissions_get(snowflake id, snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/applications", std::to_string(me.id), "guilds/" + std::to_string(guild_id) + "/commands/" + std::to_string(id) + "/permissions", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		guild_command_permissions permissions;
 		confirmation_callback_t e("confirmation", confirmation(), http);

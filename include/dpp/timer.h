@@ -31,7 +31,7 @@ namespace dpp {
 
 /**
  * @brief Represents a timer handle.
- * Returned from cluster::start_timer and used by cluster::stop_timer.
+ * Returned from cluster::timer_start and used by cluster::timer_stop.
  * This is obtained from a simple incrementing value, internally.
  */
 typedef size_t timer;

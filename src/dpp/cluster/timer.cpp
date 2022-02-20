@@ -27,7 +27,7 @@ namespace dpp {
 timer lasthandle = 1;
 std::mutex timer_guard;
 
-timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop) {
+timer cluster::timer_start(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop) {
 	std::lock_guard<std::mutex> l(timer_guard);
 	timer_t* newtimer = new timer_t();
 
@@ -42,7 +42,7 @@ timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_c
 	return newtimer->handle;
 }
 
-bool cluster::stop_timer(timer t) {
+bool cluster::timer_stop(timer t) {
 	std::lock_guard<std::mutex> l(timer_guard);
 
 	auto i = timer_list.find(t);
@@ -79,7 +79,7 @@ void cluster::timer_reschedule(timer_t* t) {
 	}
 }
 
-void cluster::tick_timers() {
+voidcluster::timers_tick() {
 	std::vector<timer_t*> scheduled;
 	{
 		time_t now = time(nullptr);

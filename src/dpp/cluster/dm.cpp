@@ -23,7 +23,7 @@
 
 namespace dpp {
 
-void cluster::create_dm_channel(snowflake user_id, command_completion_event_t callback) {
+void cluster::dm_channel_create(snowflake user_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", "@me", "channels", m_post, json({{"recipient_id", std::to_string(user_id)}}).dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
@@ -31,7 +31,7 @@ void cluster::create_dm_channel(snowflake user_id, command_completion_event_t ca
 	});
 }
 
-void cluster::current_user_get_dms(command_completion_event_t callback) {
+void cluster::current_user_dms_get(command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", "@me", "channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			channel_map channels;

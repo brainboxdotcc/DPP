@@ -65,7 +65,7 @@ void cluster::current_user_get(command_completion_event_t callback) {
 	});
 }
 
-void cluster::current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress, time_t request_to_speak_timestamp, command_completion_event_t callback) {
+void cluster::current_user_voice_state_set(snowflake guild_id, snowflake channel_id, bool suppress, time_t request_to_speak_timestamp, command_completion_event_t callback) {
 	json j({
 		{"channel_id", channel_id},
 		{"suppress", suppress}
@@ -85,7 +85,7 @@ void cluster::current_user_set_voice_state(snowflake guild_id, snowflake channel
 	});
 }
 
-void cluster::user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress, command_completion_event_t callback) {
+void cluster::user_voice_state_set(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress, command_completion_event_t callback) {
 	json j({
 		{"channel_id", channel_id},
 		{"suppress", suppress}
@@ -112,7 +112,7 @@ void cluster::current_user_connections_get(command_completion_event_t callback) 
 	});
 }
 
-void cluster::current_user_get_guilds(command_completion_event_t callback) {
+void cluster::current_user_guilds_get(command_completion_event_t callback) {
 	this->post_rest(API_PATH "/users", "@me", "guilds", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			guild_map guilds;

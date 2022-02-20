@@ -24,7 +24,7 @@
 
 namespace dpp {
 
-void cluster::guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback) {
+void cluster::guild_from_template_create(const std::string &code, const std::string &name, command_completion_event_t callback) {
 	json params;
 	params["name"] = name;
 	this->post_rest(API_PATH "/guilds", "templates", code, m_post, params.dump(), [callback](json &j, const http_request_completion_t& http) {

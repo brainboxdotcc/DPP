@@ -89,7 +89,7 @@ void cluster::guild_delete(snowflake guild_id, command_completion_event_t callba
 }
 
 
-void cluster::guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
+void cluster::guild_integration_delete(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "integrations/" + std::to_string(integration_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
@@ -106,7 +106,7 @@ void cluster::guild_edit(const class guild &g, command_completion_event_t callba
 }
 
 
-void cluster::guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback) {
+void cluster::guild_widget_edit(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "widget", m_patch, gw.build_json(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild_widget", guild_widget().fill_from_json(&j), http));
@@ -115,7 +115,7 @@ void cluster::guild_edit_widget(snowflake guild_id, const class guild_widget &gw
 }
 
 
-void cluster::guild_get_ban(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
+void cluster::guild_ban_get(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("ban", ban().fill_from_json(&j), http));
@@ -124,7 +124,7 @@ void cluster::guild_get_ban(snowflake guild_id, snowflake user_id, command_compl
 }
 
 
-void cluster::guild_get_bans(snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_bans_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "bans", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		ban_map bans;
@@ -149,7 +149,7 @@ void cluster::guild_get(snowflake guild_id, command_completion_event_t callback)
 }
 
 
-void cluster::guild_get_integrations(snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_integrations_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "integrations", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		integration_map integrations;
 		confirmation_callback_t e("confirmation", confirmation(), http);
@@ -165,7 +165,7 @@ void cluster::guild_get_integrations(snowflake guild_id, command_completion_even
 }
 
 
-void cluster::guild_get_preview(snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_preview_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "preview", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild", guild().fill_from_json(nullptr, &j), http));
@@ -174,7 +174,7 @@ void cluster::guild_get_preview(snowflake guild_id, command_completion_event_t c
 }
 
 
-void cluster::guild_get_vanity(snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_vanity_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "vanity-url", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("invite", invite().fill_from_json(&j), http));
@@ -183,7 +183,7 @@ void cluster::guild_get_vanity(snowflake guild_id, command_completion_event_t ca
 }
 
 
-void cluster::guild_get_widget(snowflake guild_id, command_completion_event_t callback) {
+void cluster::guild_widget_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "widget", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("guild_widget", guild_widget().fill_from_json(&j), http));
@@ -201,7 +201,7 @@ void cluster::guild_modify_integration(snowflake guild_id, const class integrati
 }
 
 
-void cluster::guild_get_prune_counts(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback) {
+void cluster::guild_prune_counts_get(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "prune", m_get, pruneinfo.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("prune", prune().fill_from_json(&j), http));
@@ -218,7 +218,7 @@ void cluster::guild_begin_prune(snowflake guild_id, const struct prune& pruneinf
 }
 
 
-void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
+void cluster::guild_nickname_set(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
 	std::string o;
 	if (nickname.empty()) {
 		o = "{\"nick\": null}";
@@ -233,7 +233,7 @@ void cluster::guild_set_nickname(snowflake guild_id, const std::string &nickname
 }
 
 
-void cluster::guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
+voidcluster::guild_integration_sync(snowflake guild_id, snowflake integration_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "integrations/" + std::to_string(integration_id), m_post, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));

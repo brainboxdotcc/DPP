@@ -621,7 +621,7 @@ public:
 	/**
 	 * @brief Stop a ticking timer
 	 * 
-	 * @param t Timer handle received from cluster::start_timer
+	 * @param t Timer handle received from cluster::timer_start
 	 * @return bool True if the timer was stopped, false if it did not exist
 	 * @note If the timer has an on_stop lambda, the on_stop lambda will be called.
 	 */
@@ -1809,7 +1809,7 @@ public:
 
 	/**
 	 * @brief Delete a message from a channel. The callback function is called when the message has been edited
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param message_id Message ID to delete
 	 * @param channel_id Channel to delete from
@@ -1820,7 +1820,7 @@ public:
 
 	/**
 	 * @brief Bulk delete messages from a channel. The callback function is called when the message has been edited
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @note If any message provided older than 2 weeks or any duplicate message ID, it will fail.
 	 *
@@ -1858,7 +1858,7 @@ public:
 	 * 
 	 * All parameters to this endpoint are optional excluding `name`
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param c Channel to create
 	 * @param callback Function to call when the API call completes.
@@ -1868,7 +1868,7 @@ public:
 
 	/**
 	 * @brief Edit a channel
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param c Channel to edit/update
 	 * @param callback Function to call when the API call completes.
@@ -1883,7 +1883,7 @@ public:
 	 * Requires `MANAGE_CHANNELS` permission. Fires multiple `Channel Update Gateway` events.
 	 * Only channels to be modified are required.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param c Channel to change the position for
 	 * @param callback Function to call when the API call completes.
@@ -1894,7 +1894,7 @@ public:
 	/**
 	 * @brief Edit a channel's permissions
 	 *
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param c Channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
 	 * @param allow allow permissions
@@ -1908,7 +1908,7 @@ public:
 	/**
 	 * @brief Edit a channel's permissions
 	 *
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param channel_id ID of the channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
 	 * @param allow allow permissions
@@ -1921,7 +1921,7 @@ public:
 
 	/**
 	 * @brief Delete a channel
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param channel_id Channel id to delete
 	 * @param callback Function to call when the API call completes.
@@ -1941,7 +1941,7 @@ public:
 	/**
 	 * @brief Delete an invite
 	 *
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param invite Invite code to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1959,7 +1959,7 @@ public:
 
 	/**
 	 * @brief Create invite for a channel
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param c Channel to create an invite on
 	 * @param i Invite to create
@@ -2001,7 +2001,7 @@ public:
 
 	/**
 	 * @brief Remove a permission from a channel
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param c Channel to remove permission from
 	 * @param overwrite_id Overwrite to remove, user or channel ID
@@ -2040,7 +2040,7 @@ public:
 
 	/**
 	 * @brief Pin a message
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param channel_id Channel id to pin message on
 	 * @param message_id Message id to pin message on
@@ -2052,7 +2052,7 @@ public:
 	/**
 	 * @brief Unpin a message
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param channel_id Channel id to unpin message on
 	 * @param message_id Message id to unpin message on
 	 * @param callback Function to call when the API call completes.
@@ -2146,7 +2146,7 @@ public:
 	 * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
 	 * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param gm Guild member to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2171,7 +2171,7 @@ public:
 	 * Fires a `Guild Member Update` Gateway event.
 	 * 
 	 * @deprecated Deprecated in favor of Modify Current Member. Will be replaced by dpp::cluster::guild_current_member_edit
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param guild_id Guild ID to change nickname on
 	 * @param nickname New nickname, or empty string to clear nickname
@@ -2186,7 +2186,7 @@ public:
 	 * Adds a role to a guild member. Requires the `MANAGE_ROLES` permission.
 	 * Fires a Guild Member Update Gateway event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to add a role to
 	 * @param user_id User ID to add role to
 	 * @param role_id Role ID to add to the user
@@ -2201,7 +2201,7 @@ public:
 	 * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
 	 * Fires a `Guild Member Update` Gateway event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to remove role from user on
 	 * @param user_id User ID to remove role from
 	 * @param role_id Role to remove
@@ -2216,7 +2216,7 @@ public:
 	 * Remove a member from a guild. Requires `KICK_MEMBERS` permission.
 	 * Fires a `Guild Member Remove` Gateway event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to kick member from
 	 * @param user_id User ID to kick
 	 * @param callback Function to call when the API call completes.
@@ -2230,7 +2230,7 @@ public:
 	 * Create a guild ban, and optionally delete previous messages sent by the banned user.
 	 * Requires the `BAN_MEMBERS` permission. Fires a `Guild Ban Add` Gateway event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to add ban to
 	 * @param user_id User ID to ban
 	 * @param delete_message_days How many days of their user's messages to also delete
@@ -2246,7 +2246,7 @@ public:
 	 * Remove the ban for a user. Requires the `BAN_MEMBERS` permissions.
 	 * Fires a Guild Ban Remove Gateway event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild to delete ban from
 	 * @param user_id User ID to delete ban for
 	 * @param callback Function to call when the API call completes.
@@ -2376,7 +2376,7 @@ public:
 	 * Modify a guild's settings. Requires the `MANAGE_GUILD` permission. Returns the updated guild object on success.
 	 * Fires a `Guild Update Gateway` event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param g Guild to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2416,7 +2416,7 @@ public:
 	/**
 	 * @brief Create single emoji.
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param guild_id Guild ID to create emoji om
 	 * @param newemoji Emoji to create
@@ -2430,7 +2430,7 @@ public:
 	 * 
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to edit emoji on
 	 * @param newemoji Emoji to edit
 	 * @param callback Function to call when the API call completes.
@@ -2440,7 +2440,7 @@ public:
 
 	/**
 	 * @brief Delete a guild emoji
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param guild_id Guild ID to delete emoji on
 	 * @param emoji_id Emoji ID to delete
@@ -2473,7 +2473,7 @@ public:
 	 * By default, prune will not remove users with roles. You can optionally include specific roles in your prune by providing the `include_roles`
 	 * parameter. Any inactive user that has a subset of the provided role(s) will be included in the prune and users with additional roles will not.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to prune
 	 * @param pruneinfo Pruning info
 	 * @param callback Function to call when the API call completes.
@@ -2518,7 +2518,7 @@ public:
 
 	/**
 	 * @brief Modify guild integration
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param guild_id Guild ID to modify integration for
 	 * @param i Integration to modify
@@ -2533,7 +2533,7 @@ public:
 	 * Delete the attached integration object for the guild. Deletes any associated webhooks and kicks the associated bot if there is one.
 	 * Requires the `MANAGE_GUILD` permission. Fires a Guild Integrations Update Gateway event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to delete integration for
 	 * @param integration_id Integration ID to delete
 	 * @param callback Function to call when the API call completes.
@@ -2567,7 +2567,7 @@ public:
 	 * 
 	 * Requires the `MANAGE_GUILD` permission.
 	 *
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to edit widget for
 	 * @param gw New guild widget information
 	 * @param callback Function to call when the API call completes.
@@ -2588,7 +2588,7 @@ public:
 
 	/**
 	 * @brief Create a webhook
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param w Webhook to create
 	 * @param callback Function to call when the API call completes.
@@ -2635,7 +2635,7 @@ public:
 
 	/**
 	 * @brief Edit webhook
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param wh Webhook to edit
 	 * @param callback Function to call when the API call completes.
@@ -2654,7 +2654,7 @@ public:
 
 	/**
 	 * @brief Delete a webhook
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param webhook_id Webhook ID to delete
 	 * @param callback Function to call when the API call completes.
@@ -2728,7 +2728,7 @@ public:
 	 * Create a new role for the guild. Requires the `MANAGE_ROLES` permission. Returns the new role object on success.
 	 * Fires a `Guild Role Create` Gateway event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param r Role to create (guild ID is encapsulated in the role object)
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2740,7 +2740,7 @@ public:
 	 * 
 	 * Requires the `MANAGE_ROLES` permission. Returns the updated role on success. Fires a `Guild Role Update` Gateway event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param r Role to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2753,7 +2753,7 @@ public:
 	 * Modify the positions of a set of role objects for the guild. Requires the `MANAGE_ROLES` permission.
 	 * Fires multiple `Guild Role Update` Gateway events.
 	 *
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to change the roles position on
 	 * @param roles Vector of roles to change the positions of
 	 * @param callback Function to call when the API call completes.
@@ -2766,7 +2766,7 @@ public:
 	 * 
 	 * Requires the `MANAGE_ROLES` permission. Fires a `Guild Role Delete` Gateway event.
 	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 * @param guild_id Guild ID to delete the role on
 	 * @param role_id Role ID to delete
 	 * @param callback Function to call when the API call completes.
@@ -2811,7 +2811,7 @@ public:
 	 * Modifies the current member in a guild.
 	 * Fires a `Guild Member Update` Gateway event.
 	 *
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param guild_id Guild ID to change on
 	 * @param nickname New nickname, or empty string to clear nickname
@@ -2881,7 +2881,7 @@ public:
 
 	/**
 	 * @brief Create a thread
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
@@ -2896,7 +2896,7 @@ public:
 
 	/**
 	 * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
@@ -3010,7 +3010,7 @@ public:
 
 	/**
 	 * @brief Create a sticker in a guild
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param s Sticker to create. Must have its guild ID set.
 	 * @param callback Function to call when the API call completes.
@@ -3020,7 +3020,7 @@ public:
 
 	/**
 	 * @brief Modify a sticker in a guild
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param s Sticker to modify. Must have its guild ID and sticker ID set.
 	 * @param callback Function to call when the API call completes.
@@ -3030,7 +3030,7 @@ public:
 
 	/**
 	 * @brief Delete a sticker from a guild
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 *
 	 * @param sticker_id sticker ID to delete
 	 * @param guild_id guild ID to delete from
@@ -3081,7 +3081,7 @@ public:
 	 * @param instance Stage instance to create
 	 * @param callback User function to execute when the api call completes
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 */
 	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
 
@@ -3100,7 +3100,7 @@ public:
 	 * @param instance Stage instance to edit
 	 * @param callback User function to execute when the api call completes
 	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 */
 	void stage_instance_edit(const stage_instance& instance, command_completion_event_t callback = {});
 
@@ -3110,7 +3110,7 @@ public:
 	 * @param channel_id ID of the associated channel
 	 * @param callback User function to execute when the api call completes
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @note This method supports audit log reasons set by the cluster::audit_reason_set() method.
 	 */
 	void stage_instance_delete(const snowflake channel_id, command_completion_event_t callback = {});
 
