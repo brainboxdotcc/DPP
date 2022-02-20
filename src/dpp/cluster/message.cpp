@@ -34,7 +34,7 @@ void cluster::message_reaction_add(const struct message &m, const std::string &r
 void cluster::message_reaction_add(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback) {
 	message m(channel_id, "");
 	m.id = message_id;
-	message_add_reaction(m, reaction, callback);
+	message_reaction_add(m, reaction, callback);
 }
 
 
@@ -69,7 +69,7 @@ void cluster::message_all_reactions_delete(snowflake message_id, snowflake chann
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_delete_all_reactions(m, callback);
+	message_all_reactions_delete(m, callback);
 }
 
 
@@ -107,7 +107,7 @@ void cluster::message_own_reaction_delete(snowflake message_id, snowflake channe
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_delete_own_reaction(m, reaction, callback);
+	message_own_reaction_delete(m, reaction, callback);
 }
 
 
@@ -123,7 +123,7 @@ void cluster::message_reaction_delete(snowflake message_id, snowflake channel_id
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_delete_reaction(m, user_id, reaction, callback);
+	message_reaction_delete(m, user_id, reaction, callback);
 }
 
 
@@ -139,7 +139,7 @@ void cluster::message_reaction_emoji_delete(snowflake message_id, snowflake chan
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_delete_reaction_emoji(m, reaction, callback);
+	message_reaction_delete_emoji(m, reaction, callback);
 }
 
 
@@ -193,7 +193,7 @@ void cluster::message_reactions_get(snowflake message_id, snowflake channel_id, 
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_get_reactions(m, reaction, before, after, limit, callback);
+	message_reactions_get(m, reaction, before, after, limit, callback);
 }
 
 

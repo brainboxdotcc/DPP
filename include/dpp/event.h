@@ -100,7 +100,7 @@ event_decl(thread_members_update);
 event_decl(message_create);
 event_decl(message_update);
 event_decl(message_delete);
-event_decl(message_delete_bulk);
+event_decl(message_bulk_delete);
 
 /* Presence/typing */
 event_decl(presence_update);

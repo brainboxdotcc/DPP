@@ -47,7 +47,7 @@ void channel_create::handle(discord_client* client, json &j, const std::string &
 	dpp::get_channel_cache()->store(c);
 	if (c->recipients.size()) {
 		for (auto & u : c->recipients) {
-			client->creator->set_dm_channel(u, c->id);
+			client->creator->dm_channel_set(u, c->id);
 		}
 	}
 	dpp::guild* g = dpp::find_guild(c->guild_id);

@@ -102,7 +102,7 @@ public:
 	/**
 	 * @brief Get the handle for the created one-shot timer
 	 * 
-	 * @return timer handle for use with stop_timer
+	 * @return timer handle for use with timer_stop
 	 */
 	timer get_handle();
 

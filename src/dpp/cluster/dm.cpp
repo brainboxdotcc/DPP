@@ -49,9 +49,9 @@ void cluster::current_user_dms_get(command_completion_event_t callback) {
 void cluster::direct_message_create(snowflake user_id, const message &m, command_completion_event_t callback) {
 	/* Find out if a DM channel already exists */
 	message msg = m;
-	snowflake dm_channel_id = this->get_dm_channel(user_id);
+	snowflake dm_channel_id = this->dm_channel_get(user_id);
 	if (!dm_channel_id) {
-		this->create_dm_channel(user_id, [user_id, this, msg, callback](const dpp::confirmation_callback_t& completion) {
+		this->dm_channel_create(user_id, [user_id, this, msg, callback](const dpp::confirmation_callback_t& completion) {
 			/* NOTE: We are making copies in here for a REASON. Don't try and optimise out these
 			 * copies as if we use references, by the time the the thread completes for the callback
 			 * the reference is invalid and we get a crash or heap corruption!
@@ -59,7 +59,7 @@ void cluster::direct_message_create(snowflake user_id, const message &m, command
 			message m2 = msg;
 			dpp::channel c = std::get<channel>(completion.value);
 			m2.channel_id = c.id;
-			this->set_dm_channel(user_id, c.id);
+			this->dm_channel_set(user_id, c.id);
 			message_create(m2, callback);
 		});
 	} else {

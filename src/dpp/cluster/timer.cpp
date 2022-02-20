@@ -106,9 +106,9 @@ voidcluster::timers_tick() {
 
 oneshot_timer::oneshot_timer(class cluster* cl, uint64_t duration, timer_callback_t callback) : owner(cl) {
 	/* Create timer */
-	th = cl->start_timer([callback, this]() {
+	th = cl->timer_start([callback, this]() {
 		callback();
-		this->owner->stop_timer(this->th);
+		this->owner->timer_stop(this->th);
 	}, duration);
 }
 
@@ -117,7 +117,7 @@ timer oneshot_timer::get_handle() {
 }
 
 void oneshot_timer::cancel() {
-	owner->stop_timer(this->th);
+	owner->timer_stop(this->th);
 }
 
 oneshot_timer::~oneshot_timer() {

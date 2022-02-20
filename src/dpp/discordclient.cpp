@@ -448,7 +448,7 @@ void discord_client::one_second_timer()
 	 * We can't just get shard with the id 0 because this won't
 	 * work on a clustered environment
 	 */
-	auto shards = creator->get_shards();
+	auto shards = creator->shards_get();
 	auto first_iter = shards.begin();
 	if (first_iter != shards.end()) {
 		dpp::discord_client* first_shard = first_iter->second;

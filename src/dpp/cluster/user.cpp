@@ -128,7 +128,7 @@ void cluster::current_user_guilds_get(command_completion_event_t callback) {
 }
 
 
-void cluster::current_user_leave_guild(snowflake guild_id, command_completion_event_t callback) {
+void cluster::current_user_guild_leave(snowflake guild_id, command_completion_event_t callback) {
 	 this->post_rest(API_PATH "/users", "@me", "guilds/" + std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));

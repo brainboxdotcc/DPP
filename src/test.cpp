@@ -148,7 +148,7 @@ int main()
 		set_test("ICONHASH", (i.to_string() == dummyval));
 
 		/* This ensures we test both protocols, as voice is json and shard is etf */
-		bot.set_websocket_protocol(dpp::ws_etf);
+		bot.websocket_protocol_set(dpp::ws_etf);
 
 		bot.on_ready([&bot](const dpp::ready_t & event) {
 
@@ -179,7 +179,7 @@ int main()
 										set_test("MESSAGEDELETE", false);
 										dpp::message m = std::get<dpp::message>(callback.value);
 										set_test("REACTEVENT", false);
-										bot.message_add_reaction(m.id, TEST_TEXT_CHANNEL_ID, "😄", [](const dpp::confirmation_callback_t &callback) {
+										bot.message_reaction_add(m.id, TEST_TEXT_CHANNEL_ID, "😄", [](const dpp::confirmation_callback_t &callback) {
 											if (!callback.is_error()) {
 												set_test("REACT", true);
 											} else {
@@ -197,7 +197,7 @@ int main()
 												if (g) {
 													set_test("CACHE", true);
 													set_test("VOICECONN", false);
-													dpp::discord_client* s = bot.get_shard(0);
+													dpp::discord_client* s = bot.shard_get(0);
 													s->connect_voice(g->id, TEST_VC_ID, false, false);
 												} else {
 													set_test("CACHE", false);
@@ -348,7 +348,7 @@ int main()
 
 		set_test("TIMERSTART", false);
 		uint32_t ticks = 0;
-		dpp::timer th = bot.start_timer([&]() {
+		dpp::timer th = bot.timer_start([&]() {
 			if (ticks == 5) {
 				/* The simple test timer ticks every second.
 				 * If we get to 5 seconds, we know the timer is working.
@@ -392,8 +392,8 @@ int main()
 		singleparam_api_test(guild_get, TEST_GUILD_ID, dpp::guild, "GETGUILD");
 		singleparam_api_test_list(roles_get, TEST_GUILD_ID, dpp::role_map, "GETROLES");
 		singleparam_api_test_list(channels_get, TEST_GUILD_ID, dpp::channel_map, "GETCHANS");
-		singleparam_api_test_list(guild_get_invites, TEST_GUILD_ID, dpp::invite_map, "GETINVS");
-		singleparam_api_test_list(guild_get_bans, TEST_GUILD_ID, dpp::ban_map, "GETBANS");
+		singleparam_api_test_list(guild_invites_get, TEST_GUILD_ID, dpp::invite_map, "GETINVS");
+		singleparam_api_test_list(guild_bans_get, TEST_GUILD_ID, dpp::ban_map, "GETBANS");
 		singleparam_api_test_list(channel_pins_get, TEST_TEXT_CHANNEL_ID, dpp::message_map, "GETPINS");
 		singleparam_api_test_list(guild_events_get, TEST_GUILD_ID, dpp::scheduled_event_map, "GETEVENTS");
 		twoparam_api_test(guild_event_get, TEST_GUILD_ID, TEST_EVENT_ID, dpp::scheduled_event, "GETEVENT");
@@ -403,7 +403,7 @@ int main()
 
 		/* Test stopping timer */
 		set_test("TIMERSTOP", false);
-		set_test("TIMERSTOP", bot.stop_timer(th));
+		set_test("TIMERSTOP", bot.timer_stop(th));
 
 		set_test("USERCACHE", false);
 		dpp::user* u = dpp::find_user(TEST_USER_ID);

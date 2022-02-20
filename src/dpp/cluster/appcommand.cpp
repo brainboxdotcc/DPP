@@ -169,7 +169,7 @@ void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, co
 			slashcommand n;
 			n.fill_from_json(&j);
 			n.permissions = s.permissions;
-			guild_command_edit_permissions(n, guild_id);
+			guild_command_permissions_edit(n, guild_id);
 		}
 	});
 }

@@ -295,7 +295,7 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "MESSAGE_CREATE", new dpp::events::message_create() },
 	{ "MESSAGE_UPDATE", new dpp::events::message_update() },
 	{ "MESSAGE_DELETE", new dpp::events::message_delete() },
-	{ "MESSAGE_DELETE_BULK", new dpp::events::message_delete_bulk() },
+	{ "message_bulk_delete", new dpp::events::message_bulk_delete() },
 	{ "MESSAGE_REACTION_ADD", new dpp::events::message_reaction_add() },
 	{ "MESSAGE_REACTION_REMOVE", new dpp::events::message_reaction_remove() },
 	{ "MESSAGE_REACTION_REMOVE_ALL", new dpp::events::message_reaction_remove_all() },

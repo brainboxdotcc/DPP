@@ -223,7 +223,7 @@ event_ctor(message_reaction_remove_t, event_dispatch_t);
 event_ctor(guild_create_t, event_dispatch_t);
 event_ctor(channel_create_t, event_dispatch_t);
 event_ctor(message_reaction_remove_emoji_t, event_dispatch_t);
-event_ctor(message_delete_bulk_t, event_dispatch_t);
+event_ctor(message_bulk_delete_t, event_dispatch_t);
 event_ctor(guild_role_update_t, event_dispatch_t);
 event_ctor(guild_role_delete_t, event_dispatch_t);
 event_ctor(channel_pins_update_t, event_dispatch_t);
