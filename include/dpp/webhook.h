@@ -57,6 +57,24 @@ public:
 	webhook();
 
 	/**
+     * @brief Construct a new webhook object using the Webhook URL provided by Discord
+    */
+	webhook(std::string webhook_url)
+	{
+		token = webhook_url.substr(webhook_url.find_last_of("/") + 1); //find token
+		id = std::stoull(webhook_url.substr(sizeof("https://discord.com/api/webhooks/") - 1, 18)); //18 is the amount of characters a snowflake possesses
+	}
+
+	/**
+     * @brief Construct a new webhook object using the webhook ID and the webhook token
+    */
+	webhook(snowflake webhook_id, std::string webhook_token)
+	{
+		token = webhook_token;
+		id = webhook_id;
+	}
+
+	/**
 	 * @brief Destroy the webhook object
 	 */
 	~webhook();
