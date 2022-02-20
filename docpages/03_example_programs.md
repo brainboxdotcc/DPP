@@ -95,7 +95,7 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("Ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
         }
     });
 }
@@ -119,7 +119,7 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("Ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
         }
     });
 }
@@ -146,7 +146,7 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("Ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
         }
     });
 
@@ -192,7 +192,7 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("Ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
         }
     });
 
