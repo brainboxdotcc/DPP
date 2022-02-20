@@ -33,7 +33,20 @@ In this example we will create a C++ version of the [discord.js](https://discord
 
 The two programs can be seen side by side below:
 
-\image html progs.png
+<table>
+<tr>
+<th>D++</th>
+<th>Discord.js</td>
+</tr>
+<tr>
+<td>
+\image html cprog.png
+</td>
+<td>
+\image html jsprog.png
+</td>
+</tr>
+</table>
 
 Let's break this program down step by step:
 
@@ -43,11 +56,8 @@ Make sure to include the header file for the D++ library with the instruction \#
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    return 0;
+int main() {
 }
 ~~~~~~~~~~~~~~
 
@@ -55,135 +65,154 @@ int main()
 
 To make use of the library you must create a dpp::cluster object. This object is the main object in your program like the `Discord.Client` object in Discord.js.
 
-You can instantiate this class as shown below. Remember to put your bot token in the code where it says `"token"`!
+You can instantiate this class as shown below. Remember to put your bot token in the constant!
 
 ~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
 
-    return 0;
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
 }
 ~~~~~~~~~~~~~~~
 
 ### 3. Attach to an event
 
-To have a bot that does something, you should attach to some events. Let's start by attaching to the `on_ready` event (dpp::cluster::on_ready) which will notify your program when the bot is connected:
+To have a bot that does something, you should attach to some events. Let's start by attaching to the `on_ready` event (dpp::cluster::on_ready) which will notify your program when the bot is connected. In this event, we will register a slash
+command called 'ping'. We register this slash command against a guild, as it takes an hour for global commands to appear.
+Note that we must wrap our registration of the command in a template called `dpp::run_once` which prevents it from being re-run
+every time your bot does a full reconnection (e.g. if the connection fails).
 
 ~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
-    bot.on_ready([&bot](const auto & event) {
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
+
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(dpp::slashcommand("Ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+        }
     });
-
-    return 0;
 }
 ~~~~~~~~~~~~~~~~
 
-### 4. Attach to another event to receive messages
+### 4. Attach to another event to receive slash commands
 
-If you want to receive messages, you should also attach your program to the `on_message_create` event (dpp::cluster::on_message_create) which is the same as the Discord.js `message` event. You add this to your program after the `on_ready` event:
+If you want to handle a slash command, you should also attach your program to the `on_interaction_create` event (dpp::cluster::on_interaction_create) which is the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
-    bot.on_ready([&bot](const auto & event) {
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
+
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
     });
 
-    bot.on_message_create([&bot](const auto & event) {
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(dpp::slashcommand("Ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+        }
     });
-
-    return 0;
 }
 ~~~~~~~~~~~~~~
 
 ### 5 . Add some content to the events
 
-Attaching to an event is a good start, but to make a bot you should actually put some program code into the events. We will add some code to the `on_ready` event to output the bot's nickname (dpp::cluster::me) and some code into the `on_message_create` to look for messages that are the text `!ping` and reply with `!pong`:
+Attaching to an event is a good start, but to make a bot you should actually put some program code into the interaction event. We will add some code to the `on_interaction_create` to look for our slash command '/ping' and reply with `Pong!`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
-    bot.on_ready([&bot](const auto & event) {
-        std::cout << "Logged in as " << bot.me.username << "!\n";
-    });
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
 
-    bot.on_message_create([&bot](const auto & event) {
-        if (event.msg.content == "!ping") {
-            bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
         }
     });
 
-    bot.start(false);
-    return 0;
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(dpp::slashcommand("Ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+        }
+    });
+
 }
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's break down the code in the `on_message_create` event so that we can discuss what it is doing:
+Let's break down the code in the `on_interaction_create` event so that we can discuss what it is doing:
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-if (event.msg.content == "!ping") {
-	bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
-}
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
+        }
+    });
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-This code is simply comparing the message content `event.msg.content` (dpp::message_create_t::content) against the value in a constant string value `"!ping"`. If they match, then the `message_create` function is called.
+This code is simply comparing the command name `event.command.get_command_name()` (dpp::interaction::get_command_name) against the value in a constant string value `"ping"`. If they match, then the `event.reply` method is called.
 
-The `message_create` function (dpp::cluster::message_create) sends a message. There are many ways to call this function to send embed messages, upload files, and more, but for this simple demonstration we will just send some message text. The `message_create` function accepts a `dpp::message` object, which we create using two parameters:
-
-* The channel ID to send to, which we get from `event.msg.channel_id` (dpp::message_create_t::channel_id)
-* The message content, which for this demonstration we just make the static text `"Pong!"`.
+The `event.reply` function (dpp::interaction_crete_t::reply) replies to a slash command with a message. There are many ways to call this function to send embed messages, upload files, and more, but for this simple demonstration we will just send some message text.
 
 ### 6. Add code to start the bot!
 
 To make the bot start, we must call the cluster::start method, e.g. in our program by using `bot.start(false)`.
 
-The parameter which we set to false indicates if the function should return once all shards are created. Passing `false` here tells the program you do not need to do anything once `bot.start` is called, so the `return` statement directly afterwards is never reached:
+We also add a line to tell the library to output all its log information to the console, `bot.on_log(dpp::utility::cout_logger());` - if you wanted to do something more advanced, you can replace this parameter with a lambda just like all other events.
+
+The parameter which we set to false indicates if the function should return once all shards are created. Passing `false` here tells the program you do not need to do anything once `bot.start` is called.
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
-    bot.on_ready([&bot](const auto & event) {
-        std::cout << "Logged in as " << bot.me.username << "!\n";
-    });
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
 
-    bot.on_message_create([&bot](const auto & event) {
-        if (event.msg.content == "!ping") {
-            bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
         }
     });
 
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(dpp::slashcommand("Ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+        }
+    });
+
+    bot.on_log(dpp::utility::cout_logger());
+
     bot.start(false);
-    return 0;
 }
 ~~~~~~~~~~~~~~
 
-### 7. Run your bot
+### 7. Compile and run your bot
 
 Compile your bot using `g++ -std=c++17 -o test test.cpp -ldpp` (if your .cpp file is called `test.cpp`) and run it with `./test`.
+
+### 8. Inviting your bot to your server
+
+When you invite your bot, you must use the `applications.commands` and `bots` scopes to ensure your bot can create guild slash commands. For example:
+
+`https://discord.com/oauth2/authorize?client_id=YOUR-BOTS-ID-HERE&scope=bot+applications.commands&permissions=BOT-PERMISSIONS-HERE`
+
+Replace `YOUR-BOTS-ID-HERE` with your bot's user ID, and `BOT-PERMISSIONS-HERE` with the permissions your bot requires.
 
 **Congratulations** - you now have a working bot written using the D++ library!
 
