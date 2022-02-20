@@ -974,7 +974,7 @@ enum cache_policy_setting_t {
 	/**
 	 * @brief request aggressively on seeing new guilds, and also store missing data from messages.
 	 * This is the default behaviour and the least memory-efficient option. Memory usage will increase
-	 * over time, initiailly quite rapidly, and then linearly over time. It is the least cpu-intensive
+	 * over time, initially quite rapidly, and then linearly over time. It is the least cpu-intensive
 	 * setting.
 	 */
 	cp_aggressive = 0,
