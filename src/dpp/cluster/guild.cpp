@@ -23,6 +23,20 @@
 
 namespace dpp {
 
+void cluster::guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback) {
+	std::string o;
+	if (nickname.empty()) {
+		o = "{\"nick\": null}";
+	} else {
+		o = json({{"nick", nickname}}).dump();
+	}
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/@me", m_patch, o, [callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t("confirmation", confirmation(), http));
+		}
+	});
+}
+
 void cluster::guild_auditlog_get(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "audit-logs", m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

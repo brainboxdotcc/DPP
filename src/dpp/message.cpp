@@ -49,7 +49,7 @@ component& component::fill_from_json(nlohmann::json* j) {
 		for (json sub_component : (*j)["components"]) {
 			dpp::component new_component;
 			new_component.fill_from_json(&sub_component);
-			components.emplace_back(new_component);
+			components.emplace_back(new_component); 
 		}
 	} else if (type == cot_button) {
 		label = string_not_null(j, "label");

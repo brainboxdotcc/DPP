@@ -114,6 +114,9 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 		throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_decoder_create() failed");
 	}
 	repacketizer = opus_repacketizer_create();
+	if (!repacketizer) {
+		throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_repacketizer_create() failed");
+	}
 	this->connect();
 #else
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");
@@ -705,6 +708,10 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 
 		memset(out, 0, sizeof(encode_buffer));
 		repacketizer = opus_repacketizer_init(repacketizer);
+		if (!repacketizer) {
+			log(ll_warning, "opus_repacketizer_init(): failure");
+			return outDataSize;
+		}
 		for (size_t i = 0; i < (inDataSize / mEncFrameBytes); ++ i) {
 			const opus_int16* pcm = (opus_int16*)(input + i * mEncFrameBytes);
 			int ret = opus_encode(encoder, pcm, mEncFrameSize, out, 65536);

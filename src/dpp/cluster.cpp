@@ -51,13 +51,6 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 {
 	rest = new request_queue(this);
 	raw_rest = new request_queue(this);
-#ifdef _WIN32
-	// Set up winsock.
-	WSADATA wsadata;
-	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
-		throw dpp::connection_exception("WSAStartup failure");
-	}
-#endif
 }
 
 cluster::~cluster()

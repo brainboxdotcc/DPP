@@ -14,6 +14,7 @@ $categories = [
 	'bug'			=> 	'## 🐞 Bug Fixes',
 	'bugfix'		=> 	'## 🐞 Bug Fixes',
 	'fixed'			=> 	'## 🐞 Bug Fixes',
+	'fixes'                 =>      '## 🐞 Bug Fixes',
 	'perf'			=>	'## 🚀 Performance Improvements',
 	'performance'	=>	'## 🚀 Performance Improvements',
 	'impro'			=> 	'## ♻️ Refactoring',
@@ -21,6 +22,8 @@ $categories = [
 	'improvement'	=> 	'## ♻️ Refactoring',
 	'refactor'		=> 	'## ♻️ Refactoring',
 	'refactored'	=> 	'## ♻️ Refactoring',
+	'deprecated'    =>      '## ♻️ Refactoring',
+	'deprecate'    =>      '## ♻️ Refactoring',
 	'remove'		=> 	'## ♻️ Refactoring',
 	'change'		=> 	'## ♻️ Refactoring',
 	'changed'		=> 	'## ♻️ Refactoring',
@@ -33,13 +36,15 @@ $categories = [
 	'style'			=> 	'## 💎 Style Changes',
 	'chore' 		=>	'## 🔧 Chore',
 	'misc' 		=>	'## 📜 Miscellaneous Changes',
+	'update'          =>      '## 📜 Miscellaneous Changes',
+	'updated'          =>      '## 📜 Miscellaneous Changes',
 ];
 
 $catgroup = [];
 $changelog = [];
 
 // Magic sauce
-exec("git log --format=\"%s\" $(git log --no-walk --tags | head -n1 | cut -d ' ' -f 2)..HEAD", $changelog);
+exec("git log --format=\"%s\" $(git log --no-walk --tags | head -n1 | cut -d ' ' -f 2)..HEAD | grep -v '^Merge '", $changelog);
 
 // Leadin
 echo "The changelog is listed below:\n\nRelease Changelog\n===========\n";
