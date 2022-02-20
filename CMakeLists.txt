@@ -19,6 +19,7 @@
 cmake_minimum_required (VERSION 3.12)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_VOICE_SUPPORT "Build voice support" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 
 add_compile_definitions(DPP_BUILD)
@@ -94,26 +95,31 @@ if(NOT BUILD_SHARED_LIBS)
 endif()
 
 include("cmake/colour.cmake")
-if (MINGW OR NOT WIN32)
-	include("cmake/FindSodium.cmake")
-	include("cmake/FindOpus.cmake")
-endif()
 
-if(DEFINED OPUS_FOUND)
-	if(DEFINED sodium_VERSION_STRING)
-		add_compile_definitions(HAVE_VOICE)
-		
-		message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
-		
-		set(HAVE_VOICE 1)
+if (${BUILD_VOICE_SUPPORT})
+	if (MINGW OR NOT WIN32)
+		include("cmake/FindSodium.cmake")
+		include("cmake/FindOpus.cmake")
 	endif()
-endif()
 
-if(HAVE_VOICE)
-	message("-- Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
-else(HAVE_VOICE)
-	message("-- Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
-endif(HAVE_VOICE)
+	if(DEFINED OPUS_FOUND)
+		if(DEFINED sodium_VERSION_STRING)
+			add_compile_definitions(HAVE_VOICE)
+		
+			message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
+		
+			set(HAVE_VOICE 1)
+		endif()
+	endif()
+
+	if(HAVE_VOICE)
+		message("-- Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
+	else(HAVE_VOICE)
+		message("-- Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
+	endif(HAVE_VOICE)
+else()
+	message("-- Voice support disabled by cmake option")
+endif()
 
 aux_source_directory("src" coresrc)
 
