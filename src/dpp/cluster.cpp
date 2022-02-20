@@ -112,7 +112,7 @@ dpp::utility::uptime cluster::uptime()
 void cluster::start(bool return_after) {
 	/* Start up all shards */
 	if (numshards == 0) {
-		get_gateway_bot(std::bind(&cluster::auto_shard, this, std::placeholders::_1));
+		gateway_bot_get(std::bind(&cluster::auto_shard, this, std::placeholders::_1));
 		if (!return_after) {
 			while (true) {
 				std::this_thread::sleep_for(std::chrono::seconds(86400));
@@ -229,7 +229,7 @@ gateway::gateway(nlohmann::json* j) {
 	session_start_max_concurrency = int32_not_null(&((*j)["session_start_limit"]), "max_concurrency");
 }
 
-void cluster::presence_get(const dpp::presence &p) {
+void cluster::presence_set(const dpp::presence &p) {
 	json pres = json::parse(p.build_json());
 	for (auto& s : shards) {
 		if (s.second->is_connected()) {
