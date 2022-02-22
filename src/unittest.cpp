@@ -69,7 +69,8 @@ std::map<std::string, test_t> tests = {
 	{"HOSTINFO", {"dpp::https_client::get_host_info()", false, false}},
 	{"HTTPS", {"dpp::https_client HTTPS request", false, false}},
 	{"HTTP", {"dpp::https_client HTTP request", false, false}},
-	{"RUNONCE", {"dpp::run_once<T>", false, false}}
+	{"RUNONCE", {"dpp::run_once<T>", false, false}},
+	{"WEBHOOK", {"dpp::webhook construct from URL", false, false}},
 };
 
 double start = dpp::utility::time_f();

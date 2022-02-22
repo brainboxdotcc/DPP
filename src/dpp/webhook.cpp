@@ -33,20 +33,18 @@ webhook::webhook() : managed(), type(w_incoming), guild_id(0), channel_id(0), us
 {
 }
 
-webhook::webhook(std::string webhook_url)
+webhook::webhook(const std::string& webhook_url) : webhook()
 {
 	token = webhook_url.substr(webhook_url.find_last_of("/") + 1);
-	try
-	{
-		id = std::stoull(webhook_url.substr(std::string("https://discord.com/api/webhooks/").length(), webhook_url.find_last_of("/")));
+	try {
+		id = std::stoull(webhook_url.substr(strlen("https://discord.com/api/webhooks/"), webhook_url.find_last_of("/")));
 	}
-	catch (std::exception& e)
-	{
-		throw dpp::logic_exception(std::string("Your webhook's URL failed to parse! ID invalid.\n") + e.what());
+	catch (const std::exception& e) {
+		throw dpp::logic_exception(std::string("Failed to parse webhook URL: ") + e.what());
 	}
 }
 
-webhook::webhook(snowflake webhook_id, std::string webhook_token)
+webhook::webhook(const snowflake webhook_id, const std::string& webhook_token) : webhook()
 {
 	token = webhook_token;
 	id = webhook_id;
