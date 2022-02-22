@@ -103,7 +103,7 @@ struct DPP_EXPORT http_request_completion_t {
 
 /**
  * @brief Results of HTTP requests are called back to these std::function types.
- * @note Returned http_completion_events are called ASYNCRONOUSLY in your
+ * @note Returned http_completion_events are called ASYNCHRONOUSLY in your
  * code which means they execute in a separate thread. The completion events
  * arrive in order.
  */
