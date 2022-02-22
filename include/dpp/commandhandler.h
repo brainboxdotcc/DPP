@@ -138,6 +138,7 @@ typedef std::vector<std::pair<std::string, command_parameter>> parameter_list_t;
  * to the origin, which may be a slash command or a message. Both require different
  * response facilities but we want this to be transparent if you use the command
  * handler class.
+ * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
 struct DPP_EXPORT command_source {
 	/**
@@ -185,11 +186,13 @@ struct DPP_EXPORT command_source {
 /**
  * @brief The function definition for a command handler. Expects a command name string,
  * and a list of command parameters.
+ * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
 typedef std::function<void(const std::string&, const parameter_list_t&, command_source)> command_handler;
 
 /**
  * @brief Represents the details of a command added to the command handler class.
+ * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
 struct DPP_EXPORT command_info_t {
 	/**
@@ -213,6 +216,7 @@ struct DPP_EXPORT command_info_t {
  * 
  * It can automatically register slash commands, and handle routing of messages and interactions to separated command handler
  * functions.
+ * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
 class DPP_EXPORT commandhandler {
 private:
