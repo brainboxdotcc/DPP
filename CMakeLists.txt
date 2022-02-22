@@ -19,6 +19,8 @@
 cmake_minimum_required (VERSION 3.12)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_VOICE_SUPPORT "Build voice support" ON)
+option(RUN_LDCONFIG "Run ldconfig after installation" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 
 add_compile_definitions(DPP_BUILD)
@@ -94,26 +96,31 @@ if(NOT BUILD_SHARED_LIBS)
 endif()
 
 include("cmake/colour.cmake")
-if (MINGW OR NOT WIN32)
-	include("cmake/FindSodium.cmake")
-	include("cmake/FindOpus.cmake")
-endif()
 
-if(DEFINED OPUS_FOUND)
-	if(DEFINED sodium_VERSION_STRING)
-		add_compile_definitions(HAVE_VOICE)
-		
-		message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
-		
-		set(HAVE_VOICE 1)
+if (BUILD_VOICE_SUPPORT)
+	if (MINGW OR NOT WIN32)
+		include("cmake/FindSodium.cmake")
+		include("cmake/FindOpus.cmake")
 	endif()
-endif()
 
-if(HAVE_VOICE)
-	message("-- Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
-else(HAVE_VOICE)
-	message("-- Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
-endif(HAVE_VOICE)
+	if(DEFINED OPUS_FOUND)
+		if(DEFINED sodium_VERSION_STRING)
+			add_compile_definitions(HAVE_VOICE)
+		
+			message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
+		
+			set(HAVE_VOICE 1)
+		endif()
+	endif()
+
+	if(HAVE_VOICE)
+		message("-- Detected ${Green}libsodium${ColourReset} and ${Green}libopus${ColourReset}. VOICE support will be ${Green}enabled${ColourReset}")
+	else(HAVE_VOICE)
+		message("-- Could not detect ${Green}libsodium${ColourReset} and/or ${Green}libopus${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
+	endif(HAVE_VOICE)
+else()
+	message("-- Voice support disabled by cmake option")
+endif()
 
 aux_source_directory("src" coresrc)
 
@@ -188,13 +195,18 @@ foreach (fullmodname ${subdirlist})
 	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp")
 	
 	if(BUILD_SHARED_LIBS)
-        add_library(${modname} SHARED ${modsrc})
+		add_library(${modname} SHARED ${modsrc})
 	else()
 		add_library(${modname} STATIC ${modsrc})
 	endif()
-    target_include_directories(${modname} PUBLIC 
-       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
-    )
+	set_target_properties(${modname} 
+		PROPERTIES
+		VERSION ${CMAKE_PROJECT_VERSION}
+		SOVERSION ${CMAKE_PROJECT_VERSION}
+	)
+	target_include_directories(${modname} PUBLIC 
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+	)
 
 	if (WIN32 AND NOT MINGW)
 		if (NOT WINDOWS_32_BIT)
@@ -255,7 +267,7 @@ if(NOT WIN32)
 	include(GNUInstallDirs)
 	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 	install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostInstall.cmake)")
+	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DRUN_LDCONFIG=${RUN_LDCONFIG} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PostInstall.cmake)")
 
 	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/dpp.pc.in" "${CMAKE_BINARY_DIR}/dpp.pc" @ONLY)
 	install(FILES "${CMAKE_BINARY_DIR}/dpp.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")

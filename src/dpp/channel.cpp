@@ -211,7 +211,7 @@ thread& thread::fill_from_json(json* j) {
 	this->flags |= (type == GUILD_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
 
 	set_int8_not_null(j, "message_count", this->message_count);
-	set_int8_not_null(j, "memeber_count", this->member_count);
+	set_int8_not_null(j, "member_count", this->member_count);
 	auto json_metadata = (*j)["thread_metadata"];
 	metadata.archived = bool_not_null(&json_metadata, "archived");
 	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");

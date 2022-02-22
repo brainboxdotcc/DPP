@@ -56,7 +56,7 @@ enum user_flags : uint32_t {
 	/// User is a member of House Brilliance
 	u_house_brilliance =		0b00000000000100000000000,
 	/// User is a member of House Balance
-	u_house_balanace =		0b00000000001000000000000,
+	u_house_balance =		0b00000000001000000000000,
 	/// User is an early supporter
 	u_early_supporter =		0b00000000010000000000000,
 	/// User is a team user
@@ -204,7 +204,7 @@ public:
 	 *
 	 * @return true if in house brilliance
 	 */
-	bool is_house_balanace() const;
+	bool is_house_balance() const;
 	/**
 	 * @brief Return true if user is an early supporter
 	 *

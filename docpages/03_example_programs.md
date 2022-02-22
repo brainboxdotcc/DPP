@@ -33,7 +33,84 @@ In this example we will create a C++ version of the [discord.js](https://discord
 
 The two programs can be seen side by side below:
 
-\image html progs.png
+<table>
+<tr>
+<th>D++</th>
+<th>Discord.js</td>
+</tr>
+<tr>
+<td>
+
+
+~~~~~~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
+
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
+
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
+        }
+    });
+
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(
+                dpp::slashcommand("ping", "Ping pong!", bot.me.id),
+                MY_GUILD_ID
+            );
+        }
+    });
+
+    bot.on_log(dpp::utility::cout_logger());
+
+    bot.start(false);
+}
+~~~~~~~~~~~~~~~
+
+
+</td>
+<td>
+
+
+~~~~~~~~~~~~~~~{.cpp}
+let Discord = require('discord.js');
+
+
+let BOT_TOKEN   = 'add your token here';
+let MY_GUILD_ID = '825407338755653642';
+
+
+let bot = new Discord.Client({ intents: [] });
+
+
+bot.on('interactionCreate', (interaction) => {
+    if (interaction.isCommand() && interaction.commandName === 'ping') {
+        interaction.reply({content: 'Pong!'});
+    }
+});
+
+
+bot.once('ready', async () => {
+    let guild = await bot.guilds.fetch(MY_GUILD_ID);
+    await guild.commands.create({
+        name: 'ping',
+        description: "Ping pong!"
+    });
+});
+
+
+bot.login(BOT_TOKEN);‍
+~~~~~~~~~~~~~~~
+
+
+</td>
+</tr>
+</table>
 
 Let's break this program down step by step:
 
@@ -43,11 +120,8 @@ Make sure to include the header file for the D++ library with the instruction \#
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    return 0;
+int main() {
 }
 ~~~~~~~~~~~~~~
 
@@ -55,135 +129,154 @@ int main()
 
 To make use of the library you must create a dpp::cluster object. This object is the main object in your program like the `Discord.Client` object in Discord.js.
 
-You can instantiate this class as shown below. Remember to put your bot token in the code where it says `"token"`!
+You can instantiate this class as shown below. Remember to put your bot token in the constant!
 
 ~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
 
-    return 0;
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
 }
 ~~~~~~~~~~~~~~~
 
 ### 3. Attach to an event
 
-To have a bot that does something, you should attach to some events. Let's start by attaching to the `on_ready` event (dpp::cluster::on_ready) which will notify your program when the bot is connected:
+To have a bot that does something, you should attach to some events. Let's start by attaching to the `on_ready` event (dpp::cluster::on_ready) which will notify your program when the bot is connected. In this event, we will register a slash
+command called 'ping'. We register this slash command against a guild, as it takes an hour for global commands to appear.
+Note that we must wrap our registration of the command in a template called `dpp::run_once` which prevents it from being re-run
+every time your bot does a full reconnection (e.g. if the connection fails).
 
 ~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
-    bot.on_ready([&bot](const auto & event) {
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
+
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+        }
     });
-
-    return 0;
 }
 ~~~~~~~~~~~~~~~~
 
-### 4. Attach to another event to receive messages
+### 4. Attach to another event to receive slash commands
 
-If you want to receive messages, you should also attach your program to the `on_message_create` event (dpp::cluster::on_message_create) which is the same as the Discord.js `message` event. You add this to your program after the `on_ready` event:
+If you want to handle a slash command, you should also attach your program to the `on_interaction_create` event (dpp::cluster::on_interaction_create) which is the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
-    bot.on_ready([&bot](const auto & event) {
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
+
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
     });
 
-    bot.on_message_create([&bot](const auto & event) {
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+        }
     });
-
-    return 0;
 }
 ~~~~~~~~~~~~~~
 
 ### 5 . Add some content to the events
 
-Attaching to an event is a good start, but to make a bot you should actually put some program code into the events. We will add some code to the `on_ready` event to output the bot's nickname (dpp::cluster::me) and some code into the `on_message_create` to look for messages that are the text `!ping` and reply with `!pong`:
+Attaching to an event is a good start, but to make a bot you should actually put some program code into the interaction event. We will add some code to the `on_interaction_create` to look for our slash command '/ping' and reply with `Pong!`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
-    bot.on_ready([&bot](const auto & event) {
-        std::cout << "Logged in as " << bot.me.username << "!\n";
-    });
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
 
-    bot.on_message_create([&bot](const auto & event) {
-        if (event.msg.content == "!ping") {
-            bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
         }
     });
 
-    bot.start(false);
-    return 0;
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+        }
+    });
+
 }
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's break down the code in the `on_message_create` event so that we can discuss what it is doing:
+Let's break down the code in the `on_interaction_create` event so that we can discuss what it is doing:
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-if (event.msg.content == "!ping") {
-	bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
-}
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
+        }
+    });
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-This code is simply comparing the message content `event.msg.content` (dpp::message_create_t::content) against the value in a constant string value `"!ping"`. If they match, then the `message_create` function is called.
+This code is simply comparing the command name `event.command.get_command_name()` (dpp::interaction::get_command_name) against the value in a constant string value `"ping"`. If they match, then the `event.reply` method is called.
 
-The `message_create` function (dpp::cluster::message_create) sends a message. There are many ways to call this function to send embed messages, upload files, and more, but for this simple demonstration we will just send some message text. The `message_create` function accepts a `dpp::message` object, which we create using two parameters:
-
-* The channel ID to send to, which we get from `event.msg.channel_id` (dpp::message_create_t::channel_id)
-* The message content, which for this demonstration we just make the static text `"Pong!"`.
+The `event.reply` function (dpp::interaction_crete_t::reply) replies to a slash command with a message. There are many ways to call this function to send embed messages, upload files, and more, but for this simple demonstration we will just send some message text.
 
 ### 6. Add code to start the bot!
 
 To make the bot start, we must call the cluster::start method, e.g. in our program by using `bot.start(false)`.
 
-The parameter which we set to false indicates if the function should return once all shards are created. Passing `false` here tells the program you do not need to do anything once `bot.start` is called, so the `return` statement directly afterwards is never reached:
+We also add a line to tell the library to output all its log information to the console, `bot.on_log(dpp::utility::cout_logger());` - if you wanted to do something more advanced, you can replace this parameter with a lambda just like all other events.
+
+The parameter which we set to false indicates if the function should return once all shards are created. Passing `false` here tells the program you do not need to do anything once `bot.start` is called.
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
 
-int main()
-{
-    dpp::cluster bot("token");
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
-    bot.on_ready([&bot](const auto & event) {
-        std::cout << "Logged in as " << bot.me.username << "!\n";
-    });
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
 
-    bot.on_message_create([&bot](const auto & event) {
-        if (event.msg.content == "!ping") {
-            bot.message_create(dpp::message(event.msg.channel_id, "Pong!"));
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
         }
     });
 
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+        }
+    });
+
+    bot.on_log(dpp::utility::cout_logger());
+
     bot.start(false);
-    return 0;
 }
 ~~~~~~~~~~~~~~
 
-### 7. Run your bot
+### 7. Compile and run your bot
 
 Compile your bot using `g++ -std=c++17 -o test test.cpp -ldpp` (if your .cpp file is called `test.cpp`) and run it with `./test`.
+
+### 8. Inviting your bot to your server
+
+When you invite your bot, you must use the `applications.commands` and `bots` scopes to ensure your bot can create guild slash commands. For example:
+
+`https://discord.com/oauth2/authorize?client_id=YOUR-BOTS-ID-HERE&scope=bot+applications.commands&permissions=BOT-PERMISSIONS-HERE`
+
+Replace `YOUR-BOTS-ID-HERE` with your bot's user ID, and `BOT-PERMISSIONS-HERE` with the permissions your bot requires.
 
 **Congratulations** - you now have a working bot written using the D++ library!
 
@@ -524,17 +617,14 @@ int main()
 
 	/* The interaction create event is fired when someone issues your commands */
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
-		if (event.command.type == dpp::it_application_command) {
-			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-			/* Check which command they ran */
-			if (cmd_data.name == "blep") {
-				/* Fetch a parameter value from the command parameters */
-				std::string animal = std::get<std::string>(event.get_parameter("animal"));
-				/* Reply to the command. There is an overloaded version of this
-				* call that accepts a dpp::message so you can send embeds.
-				*/
-				event.reply(dpp::ir_channel_message_with_source, fmt::format("Blep! You chose {}", animal));
-			}
+		/* Check which command they ran */
+		if (event.command.get_command_name() == "blep") {
+			/* Fetch a parameter value from the command parameters */
+			std::string animal = std::get<std::string>(event.get_parameter("animal"));
+			/* Reply to the command. There is an overloaded version of this
+			* call that accepts a dpp::message so you can send embeds.
+			*/
+			event.reply(fmt::format("Blep! You chose {}", animal));
 		}
 	});
 
@@ -669,7 +759,7 @@ int main()
 		/* Button clicks are still interactions, and must be replied to in some form to
 		 * prevent the "this interaction has failed" message from Discord to the user.
  		 */
-		event.reply(dpp::ir_channel_message_with_source, "You clicked: " + event.custom_id);
+		event.reply("You clicked: " + event.custom_id);
 	});
 
 	bot.start(false);
@@ -786,7 +876,7 @@ int main()
 		/* Select clicks are still interactions, and must be replied to in some form to
 		 * prevent the "this interaction has failed" message from Discord to the user.
 		 */
-		event.reply(dpp::ir_channel_message_with_source, "You clicked " + event.custom_id + " and chose: " + event.values[0]);
+		event.reply("You clicked " + event.custom_id + " and chose: " + event.values[0]);
 	});
 
 	bot.on_log([](const dpp::log_t & event) {
@@ -817,9 +907,9 @@ int main()
 
 	bot.on_button_click([&bot](const dpp::button_click_t & event) {
 		if (event.custom_id == "10") {
-			event.reply(dpp::ir_channel_message_with_source, dpp::message("Correct").set_flags(dpp::m_ephemeral));
+			event.reply(dpp::message("Correct").set_flags(dpp::m_ephemeral));
 		} else {
-			event.reply(dpp::ir_channel_message_with_source, dpp::message("Incorrect").set_flags(dpp::m_ephemeral));
+			event.reply(dpp::message("Incorrect").set_flags(dpp::m_ephemeral));
 		}
 	});
 
@@ -872,65 +962,64 @@ int main() {
 	
 	/* Executes on ready. */
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-	// Define a slash command.
-	dpp::slashcommand image;
-	    image.set_name("image");
-	    image.set_description("Send a specific image.");
-	    image.add_option(
+		// Define a slash command.
+		dpp::slashcommand image;
+		image.set_name("image");
+		image.set_description("Send a specific image.");
+		image.add_option(
 			// Create a subcommand type option.
- 	       	dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
+			dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
 				add_option(dpp::command_option(dpp::co_user, "user", "User to make a dog off.", false))
-			);
+		);
 		image.add_option(
 			// Create another subcommand type option.
-	        dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
+			dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
 				add_option(dpp::command_option(dpp::co_user, "user", "User to make a cat off.", false))
-			);
-	// Create command with a callback.
-	bot.global_command_create(image, [ & ]( const dpp::confirmation_callback_t &callback ) {
-	                    if(callback.is_error()) {
-	                        std::cout << callback.http_info.body <<  "\n" ;
-	                    }
+		);
+
+		// Create command with a callback.
+		bot.global_command_create(image, [ & ]( const dpp::confirmation_callback_t &callback ) {
+			if(callback.is_error()) {
+				std::cout << callback.http_info.body <<  "\n" ;
+			}
 		});
 	});
 
 	/* Use the on_interaction_create event to look for commands */
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
-    	    if (event.command.type == dpp::it_application_command) {
-        	    dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-
-				/* Check if the command is the image command. */
-				if(cmd_data.name == "image") {
-					/* Check if the subcommand is "dog" */
-					if(cmd_data.options[0].name == "dog") {	
-						/* Checks if the subcommand has any options. */
-						if(cmd_data.options[0].options.size() > 0) {
-							/* Get the user option as a snowflake. */
-							dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
-							event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a dog.", user)); 
-						} else {
-						/* Reply if there were no options.. */
-						event.reply(dpp::ir_channel_message_with_source, "<A picture of a dog.>");
-						}
-					}
-					/* Check if the subcommand is "cat" */
-					if(cmd_data.options[0].name == "cat") {
-						/* Checks if the subcommand has any options. */
-						if(cmd_data.options[0].options.size() > 0) {
-							/* Get the user option as a snowflake. */
-							dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
-							event.reply(dpp::ir_channel_message_with_source, fmt::format("<@{}> has now been turned into a cat.", user));
-						} else {
-						/* Reply if there were no options.. */
-						event.reply(dpp::ir_channel_message_with_source, "<A picture of a cat.>");
-						}
-					}
+		dpp::command_interaction cmd_data = event.command.get_command_interaction();
+		/* Check if the command is the image command. */
+		if(event.command.get_command_name() == "image") {
+			/* Check if the subcommand is "dog" */
+			if(cmd_data.options[0].name == "dog") {	
+				/* Checks if the subcommand has any options. */
+				if(cmd_data.options[0].options.size() > 0) {
+					/* Get the user option as a snowflake. */
+					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
+					event.reply(fmt::format("<@{}> has now been turned into a dog.", user)); 
+				} else {
+					/* Reply if there were no options.. */
+					event.reply("<A picture of a dog.>");
 				}
 			}
+			/* Check if the subcommand is "cat" */
+			if(cmd_data.options[0].name == "cat") {
+				/* Checks if the subcommand has any options. */
+				if(cmd_data.options[0].options.size() > 0) {
+					/* Get the user option as a snowflake. */
+					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
+					event.reply(fmt::format("<@{}> has now been turned into a cat.", user));
+				} else {
+					/* Reply if there were no options.. */
+					event.reply("<A picture of a cat.>");
+				}
+			}
+		}
 	});
 
 	bot.start(false);
-    return 0;
+	
+	return 0;
 } 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1196,17 +1285,14 @@ int main()
 
 	/* The interaction create event is fired when someone issues your commands */
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
-		if (event.command.type == dpp::it_application_command) {
-			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-			/* Check which command they ran */
-			if (cmd_data.name == "blep") {
-				/* Fetch a parameter value from the command parameters */
-				std::string animal = std::get<std::string>(event.get_parameter("animal"));
-				/* Reply to the command. There is an overloaded version of this
-				* call that accepts a dpp::message so you can send embeds.
-				*/
-				event.reply(dpp::ir_channel_message_with_source, "Blep! You chose " + animal);
-			}
+		/* Check which command they ran */
+		if (event.command.get_command_name() == "blep") {
+			/* Fetch a parameter value from the command parameters */
+			std::string animal = std::get<std::string>(event.get_parameter("animal"));
+			/* Reply to the command. There is an overloaded version of this
+			* call that accepts a dpp::message so you can send embeds.
+			*/
+			event.reply("Blep! You chose " + animal);
 		}
 	});
  
@@ -1485,26 +1571,23 @@ int main(int argc, char const *argv[])
 	});
 
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
-		if (event.command.type == dpp::it_application_command) {
-			dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-			/* Check for our /dialog command */
-			if (cmd_data.name == "dialog") {
-				/* Instantiate an interaction_modal_response object */
-				dpp::interaction_modal_response modal("my_modal", "Please enter stuff");
-				/* Add a text component */
-				modal.add_component(
-					dpp::component().
-					set_label("Type rammel").
-					set_id("field_id").
-					set_type(dpp::cot_text).
-					set_placeholder("gumf").
-					set_min_length(1).
-					set_max_length(2000).
-					set_text_style(dpp::text_paragraph)
-				);
-				/* Trigger the dialog box. All dialog boxes are ephemeral */
-				event.dialog(modal);
-			}
+		/* Check for our /dialog command */
+		if (event.command.get_command_name() == "dialog") {
+			/* Instantiate an interaction_modal_response object */
+			dpp::interaction_modal_response modal("my_modal", "Please enter stuff");
+			/* Add a text component */
+			modal.add_component(
+				dpp::component().
+				set_label("Type rammel").
+				set_id("field_id").
+				set_type(dpp::cot_text).
+				set_placeholder("gumf").
+				set_min_length(1).
+				set_max_length(2000).
+				set_text_style(dpp::text_paragraph)
+			);
+			/* Trigger the dialog box. All dialog boxes are ephemeral */
+			event.dialog(modal);
 		}
 	});
 
@@ -1517,7 +1600,7 @@ int main(int argc, char const *argv[])
 		dpp::message m;
 		m.set_content("You entered: " + v).set_flags(dpp::m_ephemeral);
 		/* Emit a reply. Form submission is still an interaction and must generate some form of reply! */
-		event.reply(dpp::ir_channel_message_with_source, m);
+		event.reply(m);
 	});
 
 	/* Budget brand logger */
@@ -1563,20 +1646,18 @@ int main()
 
     /* Use the on_interaction_create event to look for application commands */
     bot.on_interaction_create([&](const dpp::interaction_create_t &event) {
-        if (event.command.type == dpp::it_application_command) {
-            dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
+         dpp::command_interaction cmd_data = event.command.get_command_interaction();
             
-            /* check if the command is a user context menu action */
-            if (cmd_data.type == dpp::ctxm_user) {
+         /* check if the command is a user context menu action */
+         if (cmd_data.type == dpp::ctxm_user) {
 
-                /* check if the context menu name is High Five */
-                if (cmd_data.name == "High Five") {
-                    dpp::user user = event.command.resolved.users.begin()->second; // the user who the command has been issued on
-                    dpp::user author = event.command.usr; // the user who clicked on the context menu
-                    event.reply(dpp::ir_channel_message_with_source, author.get_mention() + " slapped " + user.get_mention());
-                }
-            }
-        }
+             /* check if the context menu name is High Five */
+             if (cmd_data.name == "High Five") {
+                 dpp::user user = event.command.resolved.users.begin()->second; // the user who the command has been issued on
+                 dpp::user author = event.command.usr; // the user who clicked on the context menu
+                 event.reply(author.get_mention() + " slapped " + user.get_mention());
+             }
+         }
     });
 
     /* Start bot */
@@ -1628,11 +1709,11 @@ The above is just a very simple example. You can also send embed messages. All y
 
 ### What is an eval command anyway?
 
-Many times people will ask: "how do i make a command like 'eval' in C++". For the uninitiated, an `eval` command is a command often found in interpreted languages such as Javascript and Python, which allows the developer to pass in raw interpreter statements which are then executed within the context of the running program, without any sandboxing. Eval commands are plain **evil**.
+Many times people will ask: "how do i make a command like 'eval' in C++". For the uninitiated, an `eval` command is a command often found in interpreted languages such as Javascript and Python, which allows the developer to pass in raw interpreter statements which are then executed within the context of the running program, without any sandboxing. Eval commands are plain **evil**, if not properly coded in.
 
 Needless to say, this is very dangerous. If you are asking how to do this, and want to put this into your bot, we trust that you have a very good reason to do so and have considered alternatives before resorting to this. The code below is for educational purposes only and makes several assumptions:
 
-1. This code will only operate on UNUX-like systems such as Linux
+1. This code will only operate on UNIX-like systems such as Linux (not **Darwin**)
 2. It assumes you use GCC, and have `g++` installed on your server and in your $PATH
 3. The program will attempt to write to the current directory
 4. No security checks will be done against the code, except for to check that it is being run by the bot's developer by snowflake id. It is entirely possible to send an `!eval exit(0);` and make the bot quit, for example, or delete files from the host operating system, if misused or misconfigured.
@@ -1647,6 +1728,7 @@ The evaluated code will run within its own thread, so can execute for as long as
 This code operates by outputting your provided code to be evaluated into a simple boilerplate program which can be compiled to a
 shared object library (.so file). This .so file is then compiled with g++, using the `-shared` and `-fPIC` flags. If the program can be successfully compiled, it is then loaded using `dlopen()`, and the symbol `so_exec()` searched for within it, and called. This `so_exec()` function will contain the body of the code given to the eval command. Once this has been called and it has returned,
 the `dlclose()` function is called to unload the library, and finally any temporary files (such as the .so file and its corresponding .cpp file) are cleaned up.
+Docker is definitely recommended if you code on Windows/Mac OS, because docker desktop still uses a linux VM, so your code can easily use `.so` file and your code runs the same on your vps (if it also uses Linux distro)
 
 ### Source code
 
@@ -1703,7 +1785,7 @@ int test_function() {
 /* Important: This code is for UNIX-like systems only, e.g.
  * Linux, BSD, OSX. It will NOT work on Windows!
  * Note for OSX you'll probably have to change all references
- * to .so to .dylib.
+ * from .so to .dylib.
  */
 int main()
 {
@@ -1892,7 +1974,7 @@ int main()
                                 auto iter = event.command.resolved.attachments.find(file_id);
                                 if (iter != event.command.resolved.attachments.end()) {
                                         const dpp::attachment& att = iter->second;
-                                        event.reply(dpp::ir_channel_message_with_source, att.url);
+                                        event.reply(att.url);
                                 }
                         }
                 }

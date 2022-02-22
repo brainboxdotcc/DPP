@@ -2170,7 +2170,7 @@ public:
 	 * Modifies the nickname of the current user in a guild.
 	 * Fires a `Guild Member Update` Gateway event.
 	 * 
-	 * @deprecated Deprecated in favor of Modify Current Member.
+	 * @deprecated Deprecated in favor of Modify Current Member. Will be replaced by dpp::cluster::guild_current_member_edit
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to change nickname on
@@ -2804,6 +2804,21 @@ public:
 	 * On success the callback will contain a dpp::application object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void current_application_get(command_completion_event_t callback);
+
+	/**
+	 * @brief Modify current member
+	 *
+	 * Modifies the current member in a guild.
+	 * Fires a `Guild Member Update` Gateway event.
+	 *
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 *
+	 * @param guild_id Guild ID to change on
+	 * @param nickname New nickname, or empty string to clear nickname
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Get current user's connections (linked accounts, e.g. steam, xbox).
