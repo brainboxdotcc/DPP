@@ -38,7 +38,7 @@ webhook::webhook(std::string webhook_url)
 	token = webhook_url.substr(webhook_url.find_last_of("/") + 1);
 	try
 	{
-		id = std::stoull(webhook_url.substr(sizeof("https://discord.com/api/webhooks/") - 1, webhook_url.find_last_of("/")));
+		id = std::stoull(webhook_url.substr(std::string("https://discord.com/api/webhooks/").length(), webhook_url.find_last_of("/")));
 	}
 	catch (std::exception& e)
 	{
