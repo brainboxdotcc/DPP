@@ -1092,13 +1092,13 @@ struct DPP_EXPORT message : public managed {
 	 * @brief Reference to an interaction
 	 */
 	struct message_interaction_struct{
-		// id of the interaction
+		/// id of the interaction
 		snowflake id;
-		// type of interaction
+		/// type of interaction
 		uint8_t type;
-		// name of the application command
+		/// name of the application command
 		std::string name;
-		// the user who invoked the interaction
+		/// the user who invoked the interaction
 		user usr;
 	} interaction;
 

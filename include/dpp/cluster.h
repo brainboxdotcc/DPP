@@ -1144,7 +1144,7 @@ public:
 
 	
 	/**
-	 * @brief Called when a new intgration is attached to a guild by a user.
+	 * @brief Called when a new integration is attached to a guild by a user.
 	 * An integration is a connection to a guild of a user's associated accounts,
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
@@ -1394,7 +1394,7 @@ public:
 	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {});
 
 	/**
-	 * @brief Make a HTTP(S) request. For use when wanting asnyncronous access to HTTP APIs outside of Discord.
+	 * @brief Make a HTTP(S) request. For use when wanting asynchronous access to HTTP APIs outside of Discord.
 	 *
 	 * @param url Endpoint to post to, e.g. /api/guilds
 	 * @param method Method, e.g. GET, POST
@@ -2357,13 +2357,12 @@ public:
 	 * If you are trying to bootstrap a guild with additional roles, keep this in mind. The required id field within each role object is an
 	 * integer placeholder, and will be replaced by the API upon consumption. Its purpose is to allow you to overwrite a role's permissions
 	 * in a channel when also passing in channels with the channels array.
-	 * 
-		 * When using the channels parameter, the position field is ignored, and none of the default channels are created. The id field within
+	 * When using the channels parameter, the position field is ignored, and none of the default channels are created. The id field within
 	 * each channel object may be set to an integer placeholder, and will be replaced by the API upon consumption. Its purpose is to
 	 * allow you to create `GUILD_CATEGORY` channels by setting the `parent_id` field on any children to the category's id field.
 	 * Category channels must be listed before any children.
-	 * 
-		 * @note The region field is deprecated and is replaced by channel.rtc_region.
+	 *
+	 * @note The region field is deprecated and is replaced by channel.rtc_region.
 	 * @param g Guild to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().

@@ -267,7 +267,7 @@ public:
 	 */
 	channel& set_flags(const uint16_t flags);
 
-	/* 
+	/**
 	 * @brief Add (bitwise OR) a flag to this channel object
 	 * 	
 	 * @param flag Flag bit to set
@@ -275,7 +275,7 @@ public:
 	 */
 	channel& add_flag(const channel_flags flag);
 
-	/* 
+	/**
 	 * @brief Remove (bitwise NOT AND) a flag from this channel object
 	 * 	
 	 * @param flag Flag bit to set
@@ -541,7 +541,7 @@ public:
 };
 
 
-/*
+/**
  * @brief Serialize a thread_metadata object to json
  *
  * @param j JSON object to serialize to
@@ -549,7 +549,7 @@ public:
  */
 void to_json(nlohmann::json& j, const thread_metadata& tmdata);
 
-/*
+/**
  * @brief Serialize a permission_overwrite object to json
  *
  * @param j JSON object to serialize to
