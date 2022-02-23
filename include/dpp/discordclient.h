@@ -37,7 +37,7 @@
 
 using json = nlohmann::json;
 
-#define DISCORD_API_VERSION	"9"
+#define DISCORD_API_VERSION	"10"
 #define DEFAULT_GATEWAY		"gateway.discord.gg"
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
 namespace dpp {
@@ -47,7 +47,7 @@ class cluster;
 
 /**
  * @brief This is an opaque class containing zlib library specific structures.
- * We define it this way so that the public facing D++ library doesnt require
+ * We define it this way so that the public facing D++ library doesn't require
  * the zlib headers be available to build against it.
  */
 class zlibcontext;

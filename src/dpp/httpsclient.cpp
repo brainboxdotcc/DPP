@@ -26,7 +26,7 @@
 #include <climits>
 #include <dpp/httpsclient.h>
 #include <dpp/utility.h>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 #include <dpp/exception.h>
 
 namespace dpp {

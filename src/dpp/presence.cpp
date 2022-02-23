@@ -23,7 +23,7 @@
 #include <dpp/utility.h>
 #include <dpp/emoji.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 

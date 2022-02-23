@@ -22,6 +22,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/exception.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/stringops.h>
 #include <dpp/cache.h>
 #include <iostream>
 
@@ -30,6 +31,12 @@ namespace dpp {
 using json = nlohmann::json;
 
 slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1) {
+}
+
+slashcommand::slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id) : slashcommand() {
+	set_name(_name);
+	set_description(_description);
+	set_application_id(_application_id);
 }
 
 slashcommand::~slashcommand() {
@@ -192,7 +199,7 @@ slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
 }
 
 slashcommand& slashcommand::set_name(const std::string &n) {
-	name = utility::utf8substr(n, 0, 32);
+	name = lowercase(utility::utf8substr(n, 0, 32));
 	return *this;
 }
 
@@ -331,6 +338,39 @@ slashcommand& slashcommand::add_option(const command_option &o)
 	return *this;
 }
 
+command_interaction interaction::get_command_interaction() const {
+	if (std::holds_alternative<command_interaction>(data)) {
+		return std::get<command_interaction>(data);
+	} else {
+		throw dpp::logic_exception("Interaction is not for a command");
+	}
+}
+
+component_interaction interaction::get_component_interaction() const {
+	if (std::holds_alternative<component_interaction>(data)) {
+		return std::get<component_interaction>(data);
+	} else {
+		throw dpp::logic_exception("Interaction is not for a component");
+	}
+}
+
+autocomplete_interaction interaction::get_autocomplete_interaction() const {
+	if (std::holds_alternative<autocomplete_interaction>(data)) {
+		return std::get<autocomplete_interaction>(data);
+	} else {
+		throw dpp::logic_exception("Interaction is not for an autocomplete");
+	}
+}
+
+std::string interaction::get_command_name() const {
+	try {
+		return get_command_interaction().name;
+	}
+	catch (dpp::logic_exception&) {
+		return std::string();
+	}
+}
+
 interaction& interaction::fill_from_json(nlohmann::json* j) {
 	j->get_to(*this);
 	return *this;
@@ -376,9 +416,9 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 				break;
 			case co_attachment:
 				cdo.value = snowflake_not_null(&j, "value");
+				break;
 			case co_sub_command:
 			case co_sub_command_group:
-				/* Silences warning on clang, handled elsewhere */
 			break;
 		}
 	}

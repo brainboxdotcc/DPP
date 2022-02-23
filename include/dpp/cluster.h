@@ -1944,7 +1944,7 @@ public:
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param invite Invite code to delete
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void invite_delete(const std::string &invite, command_completion_event_t callback = {});
 
@@ -2170,7 +2170,7 @@ public:
 	 * Modifies the nickname of the current user in a guild.
 	 * Fires a `Guild Member Update` Gateway event.
 	 * 
-	 * @deprecated Deprecated in favor of Modify Current Member.
+	 * @deprecated Deprecated in favor of Modify Current Member. Will be replaced by dpp::cluster::guild_current_member_edit
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @param guild_id Guild ID to change nickname on
@@ -2806,6 +2806,21 @@ public:
 	void current_application_get(command_completion_event_t callback);
 
 	/**
+	 * @brief Modify current member
+	 *
+	 * Modifies the current member in a guild.
+	 * Fires a `Guild Member Update` Gateway event.
+	 *
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 *
+	 * @param guild_id Guild ID to change on
+	 * @param nickname New nickname, or empty string to clear nickname
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
+
+	/**
 	 * @brief Get current user's connections (linked accounts, e.g. steam, xbox).
 	 * This call requires the oauth2 `connections` scope and cannot be executed
 	 * against a bot token.
@@ -3065,7 +3080,7 @@ public:
 	 *
 	 * @param instance Stage instance to create
 	 * @param callback User function to execute when the api call completes
-	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
 	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
@@ -3270,8 +3285,8 @@ public:
 			/* Timer has finished, detach it from event.
 			 * Only allowed to tick once.
 			 */
-			owner->stop_timer(th);
 			ev.detach(listener_handle);
+			owner->stop_timer(th);
 		}, duration, on_end);
 	}
 
@@ -3280,8 +3295,8 @@ public:
 	 */
 	~timed_listener() {
 		/* Stop timer and detach event, but do not call on_end */
-		owner->stop_timer(th);
 		ev.detach(listener_handle);
+		owner->stop_timer(th);
 	}
 };
 

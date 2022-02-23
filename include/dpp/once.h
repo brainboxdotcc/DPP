@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors
+ * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,34 +19,28 @@
  *
  ************************************************************************************/
 #pragma once
+#include <dpp/export.h>
+#pragma once
 
-/* Compile-time assertion check for C++17 */
-// Investigate: MSVC doesn't like this
-//static_assert(__cplusplus >= 201703L, "D++ Requires a C++17 compatible compiler. Please ensure that you have enabled C++17 in your compiler flags.");
+namespace dpp {
 
-#ifdef DPP_BUILD
+	/**
+	 * @brief Run some code within an if() statement only once.
+	 * 
+	 * Use this template like this:
+	 * 
+	 * ```
+	 * if (dpp::run_once<struct any_unique_name_you_like_here>()) {
+	 *     // Your code here
+	 * }
+	 * ```
+	 * 
+	 * @tparam T any unique 'tag' identifier name
+	 * @return auto a true/false return to say if we should execute or not
+	 */
+	template <typename T> auto run_once() {
+		static auto called = false;
+		return !std::exchange(called, true);
+	};
 
-	#ifdef _WIN32
-		#include <dpp/win32_safe_warnings.h>
-	#endif
-
-	#ifdef _WIN32
-		#define DPP_EXPORT __declspec(dllexport)
-	#else
-		#define DPP_EXPORT
-	#endif
-#else
-	#ifdef _WIN32
-		#define DPP_EXPORT __declspec(dllimport)
-		/* This is required otherwise fmt::format requires additional file linkage to your project */
-		#define FMT_HEADER_ONLY
-	#else
-		#define DPP_EXPORT
-	#endif
-#endif
-
-#ifndef _WIN32
-	#define SOCKET int
-#else
-	#include <WinSock2.h>
-#endif
+};

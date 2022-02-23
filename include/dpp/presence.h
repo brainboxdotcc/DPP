@@ -307,7 +307,7 @@ public:
 	/** The user the presence applies to */
 	snowflake	user_id;
 
-	/** Guild ID. Apparently, Discord supports this internally but the client doesnt... */
+	/** Guild ID. Apparently, Discord supports this internally but the client doesn't... */
 	snowflake       guild_id;
 
 	/** Flags bitmask containing dpp::presence_flags */

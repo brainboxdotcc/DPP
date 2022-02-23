@@ -30,7 +30,7 @@
 #include <dpp/cluster.h>
 #include <thread>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 #include <dpp/etf.h>
 #include <zlib.h>
 
@@ -44,7 +44,7 @@ namespace dpp {
 
 /**
  * @brief This is an opaque class containing zlib library specific structures.
- * We define it this way so that the public facing D++ library doesnt require
+ * We define it this way so that the public facing D++ library doesn't require
  * the zlib headers be available to build against it.
  */
 class zlibcontext {
@@ -406,7 +406,7 @@ void discord_client::error(uint32_t errorcode)
 void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 {
 	if (!creator->on_log.empty()) {
-		/* Pass to user if theyve hooked the event */
+		/* Pass to user if they've hooked the event */
 		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;

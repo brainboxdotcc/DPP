@@ -601,6 +601,41 @@ public:
 	cache_policy_t cache_policy;                                //!< Cache policy from cluster
 
 	/**
+	 * @brief Get the command interaction object
+	 * 
+	 * @throw dpp::logic_exception if the interaction is not for a command
+	 * 
+	 * @return command_interaction object
+	 */
+	command_interaction get_command_interaction() const;
+
+	/**
+	 * @brief Get the component interaction object
+	 * 
+	 * @throw dpp::logic_exception if the interaction is not for a component
+	 * 
+	 * @return component_interaction object
+	 */
+	component_interaction get_component_interaction() const;
+
+	/**
+	 * @brief Get the autocomplete interaction object
+	 * 
+	 * @throw dpp::logic_exception if the interaction is not for an autocomplete
+	 * 
+	 * @return autocomplete_interaction object
+	 */
+	autocomplete_interaction get_autocomplete_interaction() const;
+
+	/**
+	 * @brief Get the command name for a command interaction
+	 * 
+	 * @return std::string command interaction, or empty string if the interaction
+	 * is not for a command.
+	 */
+	std::string get_command_name() const;
+
+	/**
 	 * @brief Fill object properties from JSON
 	 *
 	 * @param j JSON to fill from
@@ -773,9 +808,18 @@ public:
 	slashcommand();
 
 	/**
+	 * @brief Construct a new slashcommand object
+	 * 
+	 * @param _name Command name
+	 * @param _description Command description
+	 * @param _application_id Application id (usually the bot's user id)
+	 */
+	slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id);
+
+	/**
 	 * @brief Destroy the slashcommand object
 	 */
-	~slashcommand();
+	virtual ~slashcommand();
 
 	/**
 	 * @brief Add an option (parameter)

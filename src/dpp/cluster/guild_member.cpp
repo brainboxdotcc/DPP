@@ -20,19 +20,12 @@
  ************************************************************************************/
 #include <dpp/cluster.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 
 namespace dpp {
 
 void cluster::guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback) {
-	json j;
-	try {
-		j = json::parse(gm.build_json());
-	}
-	catch (const std::exception &e) {
-		log(ll_error, fmt::format("guild_add_member(): {}", e.what()));
-		return;
-	}
+	json j = json::parse(gm.build_json());
 	j["access_token"] = access_token;
 	this->post_rest(API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {

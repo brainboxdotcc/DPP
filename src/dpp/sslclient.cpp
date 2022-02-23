@@ -55,7 +55,6 @@
 #include <exception>
 #include <string>
 #include <iostream>
-#include <dpp/fmt/format.h>
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 
@@ -63,7 +62,7 @@ namespace dpp {
 
 /**
  * @brief This is an opaque class containing openssl library specific structures.
- * We define it this way so that the public facing D++ library doesnt require
+ * We define it this way so that the public facing D++ library doesn't require
  * the openssl headers be available to build against it.
  */
 class opensslcontext {
@@ -107,6 +106,12 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
         signal(SIGPIPE, SIG_IGN);
         signal(SIGCHLD, SIG_IGN);
         signal(SIGXFSZ, SIG_IGN);
+#else
+	// Set up winsock.
+	WSADATA wsadata;
+	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
+		throw dpp::connection_exception("WSAStartup failure");
+	}
 #endif
 	if (FD_SETSIZE < 1024) {
 		throw dpp::connection_exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
@@ -128,7 +133,7 @@ void ssl_client::connect()
 	/* Resolve hostname to IP */
 	struct hostent *host;
 	if ((host = gethostbyname(hostname.c_str())) == nullptr)
-		throw dpp::exception(fmt::format("Couldn't resolve hostname '{}'", hostname));
+		throw dpp::exception(std::string("Couldn't resolve hostname: ") + hostname);
 
 	addrinfo hints, *addrs;
 	
@@ -139,7 +144,7 @@ void ssl_client::connect()
 
 	int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
 	if (status != 0)
-		throw dpp::exception(fmt::format("getaddrinfo (host={}, port={}): ", hostname, port, gai_strerror(status)));
+		throw dpp::exception(std::string("getaddrinfo error: ") + gai_strerror(status));
 
 	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 	int err = 0;
@@ -316,7 +321,7 @@ void ssl_client::read_loop()
 			}
 
 			if (SAFE_FD_ISSET(sfd, &efds) || sfd == -1) {
-				this->log(dpp::ll_error, fmt::format("Error on SSL connection: {}", strerror(errno)));
+				this->log(dpp::ll_error, std::string("Error on SSL connection: ") +strerror(errno));
 				return;
 			}
 
@@ -325,7 +330,7 @@ void ssl_client::read_loop()
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					r = ::read(sfd, ServerToClientBuffer, BUFSIZZ);
+					r = ::recv(sfd, ServerToClientBuffer, BUFSIZZ, 0);
 					if (r <= 0) {
 						/* error or EOF */
 						return;
@@ -392,7 +397,7 @@ void ssl_client::read_loop()
 				/* Try to write */
 
 				if (plaintext) {
-					r = ::write(sfd, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength);
+					r = ::send(sfd, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength, 0);
 
 					if (r < 0) {
 						/* Write error */
@@ -434,7 +439,7 @@ void ssl_client::read_loop()
 		}
 	}
 	catch (const std::exception &e) {
-		log(ll_warning, fmt::format("Read loop ended: {}", e.what()));
+		log(ll_warning, std::string("Read loop ended: ") + e.what());
 	}
 }
 

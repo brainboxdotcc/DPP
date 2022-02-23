@@ -22,6 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/json_fwd.hpp>
+#include <dpp/stage_instance.h>
 #include <unordered_map>
 
 namespace dpp {
@@ -75,6 +76,10 @@ public:
 	 * @note Only set when using cluster::channel_invites_get
 	 */
 	uint32_t uses;
+	/** The stage instance data if there is a public stage instance in the stage channel this invite is for
+	 * @deprecated Deprecated
+	 */
+	stage_instance stage;
 
 	/** Constructor
 	 */

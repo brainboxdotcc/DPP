@@ -24,7 +24,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -67,7 +67,7 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 		auto t = (*j)["tags"];
 		/* This is broken on the Discord API.
 		 * Confirmed 25/11/2021, by quin#3017. If the value exists
-		 * as a null, this is the nitro role. If it doesnt exist at all, it is
+		 * as a null, this is the nitro role. If it doesn't exist at all, it is
 		 * NOT the nitro role. How obtuse.
 		 */
 		if (t.find("premium_subscriber") != t.end()) {

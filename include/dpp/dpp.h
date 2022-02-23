@@ -64,6 +64,7 @@
 #include <dpp/httpsclient.h>
 #include <dpp/queues.h>
 #include <dpp/commandhandler.h>
+#include <dpp/once.h>
 
 namespace dpp {
 

@@ -275,7 +275,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief Called by ssl_client when the socket is ready
 	 * for writing, at this point we pick the head item off
-	 * the buffer and send it. So long as it doesnt error
+	 * the buffer and send it. So long as it doesn't error
 	 * completely, we pop it off the head of the queue.
 	 */
 	void write_ready();
