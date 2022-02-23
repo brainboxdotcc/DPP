@@ -1684,24 +1684,15 @@ int main()
 {
     dpp::cluster bot(""); // normally, you put your bot token in here. But to just run a webhook its not required
 
-    /* create a webhook object */
-    dpp::webhook wh;
-    /* set the webhook ID */
-    wh.id = 833047646548133537;
-    /* set your webhook token */
-    wh.token = "ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE";
+    /* construct a webhook object using the URL you got from Discord*/
+    dpp::webhook wh("https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE");
+
     /* send a message with this webhook */
     bot.execute_webhook(wh, dpp::message("Have a great time here :smile:"));
 
     return 0;
 }
 ~~~~~~~~~~
-
-When creating a webhook, Discord gives you a webhook-URL that looks like this:
-
-`https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE`
-
-It contains the webhook ID and the token which you need.
 
 The above is just a very simple example. You can also send embed messages. All you have to do is to add an embed to the message you want to send. If you want to, you can also send it into a thread.
 
