@@ -334,7 +334,7 @@ struct DPP_EXPORT interaction_response {
  * components are displayed on a form (the same component structure as within a dpp::message).
  * When the user submits the form an on_form_submit event is dispatched to any listeners.
  */
-struct interaction_modal_response : public interaction_response {
+struct DPP_EXPORT interaction_modal_response : public interaction_response {
 private:
 	size_t current_row;
 public:
