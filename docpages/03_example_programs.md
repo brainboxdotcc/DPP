@@ -629,23 +629,25 @@ int main()
 	});
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
+	    if (dpp::run_once<struct register_bot_commands>()) {
 
-		dpp::slashcommand newcommand;
-		/* Create a new global command on ready event */
-		newcommand.set_name("blep")
-			.set_description("Send a random adorable animal photo")
-			.set_application_id(bot.me.id)
-			.add_option(
-				dpp::command_option(dpp::co_string, "animal", "The type of animal", true).
-					add_choice(dpp::command_option_choice("Dog", std::string("animal_dog"))).
-					add_choice(dpp::command_option_choice("Cat", std::string("animal_cat"))).
-					add_choice(dpp::command_option_choice("Penguin", std::string("animal_penguin")
-				)
-			)
-		);
+		    dpp::slashcommand newcommand;
+		    /* Create a new global command on ready event */
+		    newcommand.set_name("blep")
+		    	.set_description("Send a random adorable animal photo")
+		    	.set_application_id(bot.me.id)
+		    	.add_option(
+		    		dpp::command_option(dpp::co_string, "animal", "The type of animal", true).
+		    			add_choice(dpp::command_option_choice("Dog", std::string("animal_dog"))).
+		    			add_choice(dpp::command_option_choice("Cat", std::string("animal_cat"))).
+		    			add_choice(dpp::command_option_choice("Penguin", std::string("animal_penguin")
+		    		)
+		    	)
+		    );
 
-		/* Register the command */
-		bot.global_command_create(newcommand);
+		    /* Register the command */
+		    bot.global_command_create(newcommand);
+		}
 	});
 
 	bot.start(false);
@@ -962,27 +964,28 @@ int main() {
 	
 	/* Executes on ready. */
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-		// Define a slash command.
-		dpp::slashcommand image;
-		image.set_name("image");
-		image.set_description("Send a specific image.");
-		image.add_option(
-			// Create a subcommand type option.
-			dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
-				add_option(dpp::command_option(dpp::co_user, "user", "User to make a dog off.", false))
-		);
-		image.add_option(
-			// Create another subcommand type option.
-			dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
-				add_option(dpp::command_option(dpp::co_user, "user", "User to make a cat off.", false))
-		);
-
-		// Create command with a callback.
-		bot.global_command_create(image, [ & ]( const dpp::confirmation_callback_t &callback ) {
-			if(callback.is_error()) {
-				std::cout << callback.http_info.body <<  "\n" ;
-			}
-		});
+	    if (dpp::run_once<struct register_bot_commands>()) {
+	        // Define a slash command.
+	        dpp::slashcommand image;
+	        image.set_name("image");
+	        image.set_description("Send a specific image.");
+	        image.add_option(
+	    		// Create a subcommand type option.
+ 	           	dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
+	    			add_option(dpp::command_option(dpp::co_user, "user", "User to make a dog off.", false))
+	    		);
+	    	image.add_option(
+	    		// Create another subcommand type option.
+	            dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
+	    			add_option(dpp::command_option(dpp::co_user, "user", "User to make a cat off.", false))
+	    		);
+	        // Create command with a callback.
+	        bot.global_command_create(image, [ & ]( const dpp::confirmation_callback_t &callback ) {
+	            if(callback.is_error()) {
+	                std::cout << callback.http_info.body <<  "\n" ;
+	            }
+	    	});
+	    }
 	});
 
 	/* Use the on_interaction_create event to look for commands */
@@ -1269,18 +1272,20 @@ int main()
 	dpp::cluster bot("token");
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-		/* Create a new global command on ready event */
-		bot.global_command_create(dpp::slashcommand().set_name("blep")
-			.set_description("Send a random adorable animal photo")
-			.set_application_id(bot.me.id)
-			.add_option(
-				/* If you set the auto complete setting on a command option, it will trigger the on_auticomplete
-				 * event whenever discord needs to fill information for the choices. You cannot set any choices
-				 * here if you set the auto complete value to true.
-				 */
-				dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
-			)
-		);
+	    if (dpp::run_once<struct register_bot_commands>()) {
+		    /* Create a new global command once on ready event */
+		    bot.global_command_create(dpp::slashcommand().set_name("blep")
+		    	.set_description("Send a random adorable animal photo")
+		    	.set_application_id(bot.me.id)
+		    	.add_option(
+		    		/* If you set the auto complete setting on a command option, it will trigger the on_auticomplete
+		    		 * event whenever discord needs to fill information for the choices. You cannot set any choices
+		    		 * here if you set the auto complete value to true.
+		    		 */
+		    		dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
+		    	)
+		    );
+		}
 	});
 
 	/* The interaction create event is fired when someone issues your commands */
@@ -1564,10 +1569,12 @@ int main(int argc, char const *argv[])
 	dpp::cluster bot("token");
 
 	bot.on_ready([&](const dpp::ready_t & event) {
-		/* Create a slash command and register it as a global command */
-		dpp::slashcommand newcommand;
-		newcommand.set_name("dialog").set_description("Make a modal dialog box").set_application_id(bot.me.id);
-		bot.global_command_create(newcommand);
+	    if (dpp::run_once<struct register_bot_commands>()) {
+			/* Create a slash command and register it as a global command */
+		    dpp::slashcommand newcommand;
+		    newcommand.set_name("dialog").set_description("Make a modal dialog box").set_application_id(bot.me.id);
+		    bot.global_command_create(newcommand);
+		}
 	});
 
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
@@ -1635,13 +1642,15 @@ int main()
     dpp::cluster bot("token");
 
     bot.on_ready([&bot](const dpp::ready_t &event) {
-        dpp::slashcommand command;
-        /* Define a slash command */
-        command.set_name("High Five")
-                .set_type(dpp::ctxm_user)
-                .set_application_id(bot.me.id);
-        /* Register the command */
-        bot.guild_command_create(command, 857692897221033129); // you need to put your guild-id in here
+        if (dpp::run_once<struct register_bot_commands>()) {
+        	dpp::slashcommand command;
+        	/* Define a slash command */
+        	command.set_name("High Five")
+        	        .set_type(dpp::ctxm_user)
+        	        .set_application_id(bot.me.id);
+        	/* Register the command */
+        	bot.guild_command_create(command, 857692897221033129); // you need to put your guild-id in here
+        }
     });
 
     /* Use the on_interaction_create event to look for application commands */
@@ -1973,14 +1982,16 @@ int main()
 
         bot.on_ready([&bot](const dpp::ready_t & event) {
 
-                dpp::slashcommand newcommand;
+                if (dpp::run_once<struct register_bot_commands>()) {
+                        dpp::slashcommand newcommand;
 
-                newcommand.set_name("show")
-                        .set_description("Show an uploaded file")
-                        .set_application_id(bot.me.id)
-                        .add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image"));
+                        newcommand.set_name("show")
+                                .set_description("Show an uploaded file")
+                                .set_application_id(bot.me.id)
+                                .add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image"));
 
-                bot.global_command_create(newcommand);
+                        bot.global_command_create(newcommand);
+                }
         });
 
         bot.start(false);

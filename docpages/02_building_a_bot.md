@@ -190,7 +190,7 @@ So to invite the bot to your server, you must create an invitation URL.
 
 \image html create_application_navigate_to_url_generator.png
 
-3. Select the "bot" scope. If your bot uses slash commands, also select "applications.commands".
+3. Select the `bot` scope. If your bot uses slash commands, also select `applications.commands`.
 
 You can read more about scopes and which you need for your application [here](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes).
 
