@@ -89,11 +89,11 @@ namespace dpp {
 		void DPP_EXPORT exec(const std::string& cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
 
 		/**
-		 * @brief Return a mentionable timestamp (used in a discord embed)
+		 * @brief Return a mentionable timestamp (used in a discord embed). These timestamps will display the given timestamp in the user's timezone and locale.
 		 * 
 		 * @param ts Time stamp to convert
 		 * @param tf Format of timestamp using dpp::utility::time_format
-		 * @return std::string 
+		 * @return std::string The formatted timestamp
 		 */
 		std::string DPP_EXPORT timestamp(time_t ts, time_format tf);
 

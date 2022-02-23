@@ -310,7 +310,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 
 	/**
 	 * @brief Send a reply for this interaction.
-	 * Uses the default type of ir_channel_message_with_source, a simple message reply.
+	 * Uses the default type of dpp::ir_channel_message_with_source, a simple message reply.
 	 * 
 	 * @param m Message object to send. Not all fields are supported by Discord.
 	 * @param callback User function to execute when the api call completes.
@@ -320,7 +320,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 
 	/**
 	 * @brief Send a reply for this interaction.
-	 * Uses the default type of ir_channel_message_with_source, a simple message reply.
+	 * Uses the default type of dpp::ir_channel_message_with_source, a simple message reply.
 	 * 
 	 * @param mt The string value to send, for simple text only messages
 	 * @param callback User function to execute when the api call completes.
