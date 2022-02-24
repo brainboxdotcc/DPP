@@ -6,7 +6,7 @@
 ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) 
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
 
-D++ is a lightweight and simple library for Discord written in modern C++. It is designed to cover as much of the API specification as possible and to have a incredibly small memory footprint, even when caching large amounts of data.
+D++ is a lightweight and efficient library for Discord written in modern C++. It is designed to cover as much of the API specification as possible and to have a incredibly small memory footprint, even when caching large amounts of data.
 
 ### Library features:
 
@@ -36,8 +36,8 @@ The documentation is a work in progress, generated from the code comments and ma
 ```c++
 #include <dpp/dpp.h>
  
-const std::string    BOT_TOKEN    = "add your token here";
-const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
+const std::string    BOT_TOKEN = "add your token here";
+const dpp::snowflake GUILD_ID  =  825407338755653642;
  
 int main() {
     dpp::cluster bot(BOT_TOKEN);
