@@ -6,6 +6,8 @@
 ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) 
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
 
+D++ is a lightweight and simple library for Discord written in modern C++. It is designed to cover as much of the API specification as possible and to have a incredibly small memory footprint, even when caching large amounts of data.
+
 ### Library features:
 
 * Support for Discord API v10
@@ -28,6 +30,38 @@ This library is in use on [TriviaBot](https://triviabot.co.uk/) and [Sporks bot]
 The documentation is a work in progress, generated from the code comments and markdown using Doxygen.
 
 #### [View D++ library documentation](https://dpp.dev/)
+
+### Example
+
+```c++
+#include <dpp/dpp.h>
+ 
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
+ 
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
+ 
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+             event.reply("Pong!");
+         }
+    });
+ 
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(
+                dpp::slashcommand("ping", "Ping pong!", bot.me.id),
+                MY_GUILD_ID
+            );
+        }
+    });
+ 
+    bot.start(false);
+}
+```
+
+You can find more examples in our [example page](https://dpp.dev/firstbot.html).
 
 ## Supported Systems
 
