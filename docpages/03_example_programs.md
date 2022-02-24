@@ -1633,11 +1633,11 @@ int main()
 
     bot.on_ready([&bot](const dpp::ready_t &event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-        	dpp::slashcommand command("High Five", "Give this person high five", bot.me.id);
-        	/* Set the slash command type to context menu */
-        	command.set_type(dpp::ctxm_user);
-        	/* Register the command */
-        	bot.guild_command_create(command, 857692897221033129); // you need to put your guild-id in here
+            dpp::slashcommand command("High Five", "Give this person high five", bot.me.id);
+            /* Set the slash command type to context menu */
+            command.set_type(dpp::ctxm_user);
+            /* Register the command */
+            bot.guild_command_create(command, 857692897221033129); // you need to put your guild-id in here
         }
     });
 
