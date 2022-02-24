@@ -93,6 +93,15 @@ int main()
 	set_test("TIMESTAMPTOSTRING", false);
 	set_test("TIMESTAMPTOSTRING", dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
 
+	set_test("WEBHOOK", false);
+	try {
+		dpp::webhook test_wh("https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE");
+		set_test("WEBHOOK", (test_wh.token == "ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE") && (test_wh.id == 833047646548133537));
+	}
+	catch (const dpp::exception&) {
+		set_test("WEBHOOK", false);
+	}
+
 	{ // test dpp::command_option_choice::fill_from_json
 		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", false);
 		json j;
@@ -226,6 +235,15 @@ int main()
 				set_test("LOGGER", true);
 			}
 		});
+
+		set_test("RUNONCE", false);
+		uint8_t runs = 0;
+		for (int x = 0; x < 10; ++x) {
+			if (dpp::run_once<struct test_run>()) {
+				runs++;
+			}
+		}
+		set_test("RUNONCE", (runs == 1));
 
 		bot.on_message_reaction_add([&](const dpp::message_reaction_add_t & event) {
 			if (event.reacting_user.id == bot.me.id && event.reacting_emoji.name == "😄") {

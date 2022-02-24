@@ -47,7 +47,7 @@ class cluster;
 
 /**
  * @brief This is an opaque class containing zlib library specific structures.
- * We define it this way so that the public facing D++ library doesnt require
+ * We define it this way so that the public facing D++ library doesn't require
  * the zlib headers be available to build against it.
  */
 class zlibcontext;

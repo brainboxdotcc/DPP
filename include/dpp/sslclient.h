@@ -29,7 +29,7 @@ namespace dpp {
 
 /**
  * @brief This is an opaque class containing openssl library specific structures.
- * We define it this way so that the public facing D++ library doesnt require
+ * We define it this way so that the public facing D++ library doesn't require
  * the openssl headers be available to build against it.
  */
 class opensslcontext;

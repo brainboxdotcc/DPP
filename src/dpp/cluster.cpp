@@ -100,7 +100,7 @@ void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
 
 void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 	if (!on_log.empty()) {
-		/* Pass to user if theyve hooked the event */
+		/* Pass to user if they've hooked the event */
 		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
@@ -128,7 +128,7 @@ void cluster::start(bool return_after) {
 		log(ll_debug, fmt::format("Starting with {} shards...", numshards));
 
 		for (uint32_t s = 0; s < numshards; ++s) {
-			/* Filter out shards that arent part of the current cluster, if the bot is clustered */
+			/* Filter out shards that aren't part of the current cluster, if the bot is clustered */
 			if (s % maxclusters == cluster_id) {
 				/* Each discord_client spawns its own thread in its run() */
 				try {

@@ -179,7 +179,7 @@ public:
 	 * 
 	 * @note This is a blocking call. It starts a loop which runs non-blocking
 	 * functions within it, but does not return until the request completes.
-	 * See queues.cpp for how to make this asyncronous.
+	 * See queues.cpp for how to make this asynchronous.
 	 * 
 	 * @param hostname Hostname to connect to
 	 * @param port Port number to connect to, usually 443 for SSL and 80 for plaintext

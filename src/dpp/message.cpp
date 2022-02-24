@@ -161,6 +161,21 @@ component& component::set_max_length(uint32_t max_l)
 	return *this;
 }
 
+void to_json(json& j, const attachment& a) {
+	if (a.id) {
+		j["id"] = a.id;
+	}
+	if (a.size) {
+		j["size"] = a.size;
+	}
+	if (!a.filename.empty()) {
+		j["filename"] = a.filename;
+	}
+	if (!a.url.empty()) {
+		j["url"] = a.url;
+	}
+	j["ephemeral"] = a.ephemeral;
+}
 
 void to_json(json& j, const component& cp) {
 	if (cp.type == cot_text) {
@@ -719,6 +734,12 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 			n["components"].push_back(sn);
 		}
 		j["components"].push_back(n);
+	}
+
+	j["attachments"] = json::array();
+	for (auto& attachment : attachments) {
+		json a = attachment;
+		j["attachments"].push_back(a);
 	}
 
 	j["embeds"] = json::array();

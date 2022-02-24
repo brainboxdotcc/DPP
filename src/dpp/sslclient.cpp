@@ -62,7 +62,7 @@ namespace dpp {
 
 /**
  * @brief This is an opaque class containing openssl library specific structures.
- * We define it this way so that the public facing D++ library doesnt require
+ * We define it this way so that the public facing D++ library doesn't require
  * the openssl headers be available to build against it.
  */
 class opensslcontext {
@@ -219,9 +219,13 @@ void ssl_client::write(const std::string &data)
 		obuffer += data;
 	} else {
 		if (plaintext) {
-			::write(sfd, data.data(), data.length());
+			if (::write(sfd, data.data(), data.length()) != (int)data.length()) {
+				throw dpp::exception("write() failed");
+			}
 		} else {
-			SSL_write(ssl->ssl, data.data(), (int)data.length());
+			if (SSL_write(ssl->ssl, data.data(), (int)data.length()) != (int)data.length()) {
+				throw dpp::exception("SSL_write() failed");
+			}
 		}
 	}
 }

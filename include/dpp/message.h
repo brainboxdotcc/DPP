@@ -974,7 +974,7 @@ enum cache_policy_setting_t {
 	/**
 	 * @brief request aggressively on seeing new guilds, and also store missing data from messages.
 	 * This is the default behaviour and the least memory-efficient option. Memory usage will increase
-	 * over time, initiailly quite rapidly, and then linearly over time. It is the least cpu-intensive
+	 * over time, initially quite rapidly, and then linearly over time. It is the least cpu-intensive
 	 * setting.
 	 */
 	cp_aggressive = 0,
@@ -1092,13 +1092,13 @@ struct DPP_EXPORT message : public managed {
 	 * @brief Reference to an interaction
 	 */
 	struct message_interaction_struct{
-		// id of the interaction
+		/// id of the interaction
 		snowflake id;
-		// type of interaction
+		/// type of interaction
 		uint8_t type;
-		// name of the application command
+		/// name of the application command
 		std::string name;
-		// the user who invoked the interaction
+		/// the user who invoked the interaction
 		user usr;
 	} interaction;
 

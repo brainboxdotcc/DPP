@@ -66,9 +66,9 @@ enum intents {
 	i_guild_scheduled_events	= (1 << 16),
 	/// Default D++ intents (all non-privileged intents)
 	i_default_intents		= dpp::i_guilds | dpp::i_guild_bans | dpp::i_guild_emojis | dpp::i_guild_integrations | dpp::i_guild_webhooks | dpp::i_guild_invites | dpp::i_guild_voice_states | dpp::i_guild_messages | dpp::i_guild_message_reactions | dpp::i_guild_message_typing | dpp::i_direct_messages | dpp::i_direct_message_typing | dpp::i_direct_message_reactions | dpp::i_guild_scheduled_events,
-	// Privileged intents requiring ID
+	/// Privileged intents requiring ID
 	i_privileged_intents		= dpp::i_guild_members | dpp::i_guild_presences | dpp::i_message_content,
-	// Every single intent
+	/// Every single intent
 	i_all_intents			= dpp::i_default_intents | dpp::i_privileged_intents
 };
 

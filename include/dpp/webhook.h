@@ -57,6 +57,21 @@ public:
 	webhook();
 
 	/**
+	 * @brief Construct a new webhook object using the Webhook URL provided by Discord
+	 *
+	 * @param webhook_url a fully qualified web address of an existing webhook
+	 */
+	webhook(const std::string& webhook_url);
+
+	/**
+	 * @brief Construct a new webhook object using the webhook ID and the webhook token
+	 *
+	 * @param webhook_id id taken from a link of an existing webhook
+	 * @param webhook_token token taken from a link of an existing webhook
+	 */
+	webhook(const snowflake webhook_id, const std::string& webhook_token);
+
+	/**
 	 * @brief Destroy the webhook object
 	 */
 	~webhook();

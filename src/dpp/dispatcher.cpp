@@ -102,6 +102,16 @@ void interaction_create_t::reply(interaction_response_type t, const message & m,
 	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), callback);
 }
 
+void interaction_create_t::reply(const message & m, command_completion_event_t callback) const
+{
+	from->creator->interaction_response_create(
+		this->command.id,
+		this->command.token,
+		dpp::interaction_response(ir_channel_message_with_source, m),
+		callback
+	);
+}
+
 void interaction_create_t::thinking(bool ephemeral, command_completion_event_t callback) const {
 	message msg;
 	msg.content = "*";
@@ -121,6 +131,11 @@ void interaction_create_t::dialog(const interaction_modal_response& mr, command_
 void interaction_create_t::reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback) const
 {
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
+}
+
+void interaction_create_t::reply(const std::string & mt, command_completion_event_t callback) const
+{
+	this->reply(ir_channel_message_with_source, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
 void interaction_create_t::get_original_response(command_completion_event_t callback) const
@@ -144,7 +159,7 @@ void interaction_create_t::edit_response(const std::string & mt, command_complet
 
 const command_value& interaction_create_t::get_parameter(const std::string& name) const
 {
-	/* Dummy STATIC return value for unknown options so we arent returning a value off the stack */
+	/* Dummy STATIC return value for unknown options so we aren't returning a value off the stack */
 	static command_value dummy_value = {};
 	const command_interaction& ci = std::get<command_interaction>(command.data);
 	for (auto i = ci.options.begin(); i != ci.options.end(); ++i) {
