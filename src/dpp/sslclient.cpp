@@ -219,11 +219,11 @@ void ssl_client::write(const std::string &data)
 		obuffer += data;
 	} else {
 		if (plaintext) {
-			if (::write(sfd, data.data(), data.length()) != data.length()) {
+			if (::write(sfd, data.data(), data.length()) != (int)data.length()) {
 				throw dpp::exception("write() failed");
 			}
 		} else {
-			if (SSL_write(ssl->ssl, data.data(), (int)data.length()) != data.length()) {
+			if (SSL_write(ssl->ssl, data.data(), (int)data.length()) != (int)data.length()) {
 				throw dpp::exception("SSL_write() failed");
 			}
 		}
