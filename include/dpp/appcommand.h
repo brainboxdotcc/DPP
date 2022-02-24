@@ -810,11 +810,11 @@ public:
 	/**
 	 * @brief Construct a new slashcommand object
 	 * 
-	 * @param _name Command name
-	 * @param _description Command description
-	 * @param _application_id Application id (usually the bot's user id)
+	 * @param name Command name
+	 * @param description Command description
+	 * @param application_id Application id (usually the bot's user id)
 	 */
-	slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id);
+	slashcommand(const std::string &name, const std::string &description, const dpp::snowflake application_id);
 
 	/**
 	 * @brief Destroy the slashcommand object
