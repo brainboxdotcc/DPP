@@ -108,7 +108,7 @@ Replace the number after -j with a number suitable for your setup, usually the s
 
 ## 4. Install globally
 
-    sudo make install
+    cd build; sudo make install
 
 ## 5. Installation to a different directory
 
