@@ -6,7 +6,7 @@ D++ is a lightweight and simple library for Discord written in modern C++. It is
 
 It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contributed to by a dedicated team of developers.
 
-*This project is now in stable development and accepting PRs and feature requests — Don't be a stranger! If you want to contribute, just get in touch via [GitHub](https://github.com/brainboxdotcc/DPP) or our official [Discord server](https://discord.gg/dpp)!*
+*This project is in stable development and accepting PRs and feature requests — Don't be a stranger! If you want to contribute, just get in touch via [GitHub](https://github.com/brainboxdotcc/DPP) or our official [Discord server](https://discord.gg/dpp)!*
 
 <img src="code_editor.png" style="margin-top: 2rem; margin-bottom: 2rem"/><br />
 
@@ -16,6 +16,7 @@ You can download the latest releases and check out our source code from the [Git
 
 ## Library features
 
+* Support for Discord API v10
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
