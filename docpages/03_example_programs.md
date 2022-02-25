@@ -314,7 +314,7 @@ int main(int argc, char const *argv[])
 	}
 
 	/* Setup the bot */
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, robot, robot_size](const dpp::message_create_t & event) {
@@ -370,7 +370,7 @@ int main(int argc, char const *argv[])
 	 * You may use ffmpeg to encode songs to ogg opus:
 	 * ffmpeg -i /path/to/song -c:a libopus -ar 48000 -ac 2 -vn -b:a 96K /path/to/opus.ogg 
 	 */
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
@@ -528,7 +528,7 @@ When a user issues a command you may want to join their voice channel, e.g. in a
 int main(int argc, char const *argv[])
 {
 	/* Setup the bot */
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, robot, robot_size](const dpp::message_create_t & event) {
@@ -629,23 +629,22 @@ int main()
 	});
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
+	    if (dpp::run_once<struct register_bot_commands>()) {
 
-		dpp::slashcommand newcommand;
-		/* Create a new global command on ready event */
-		newcommand.set_name("blep")
-			.set_description("Send a random adorable animal photo")
-			.set_application_id(bot.me.id)
-			.add_option(
-				dpp::command_option(dpp::co_string, "animal", "The type of animal", true).
-					add_choice(dpp::command_option_choice("Dog", std::string("animal_dog"))).
-					add_choice(dpp::command_option_choice("Cat", std::string("animal_cat"))).
-					add_choice(dpp::command_option_choice("Penguin", std::string("animal_penguin")
-				)
-			)
-		);
+            /* Create a new global command on ready event */
+		    dpp::slashcommand newcommand("blep", "Send a random adorable animal photo", bot.me.id)
+		    newcommand.add_option(
+		    		dpp::command_option(dpp::co_string, "animal", "The type of animal", true).
+		    			add_choice(dpp::command_option_choice("Dog", std::string("animal_dog"))).
+		    			add_choice(dpp::command_option_choice("Cat", std::string("animal_cat"))).
+		    			add_choice(dpp::command_option_choice("Penguin", std::string("animal_penguin")
+		    		)
+		    	)
+		    );
 
-		/* Register the command */
-		bot.global_command_create(newcommand);
+		    /* Register the command */
+		    bot.global_command_create(newcommand);
+		}
 	});
 
 	bot.start(false);
@@ -730,9 +729,9 @@ D++ as an on_button_click event. To make use of this, use code as in this exampl
 #include <iostream>
 #include <dpp/message.h>
 
-int main()
-{
-	dpp::cluster bot("token");
+int main() {
+
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
 	/* Message handler to look for a command called !button */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
@@ -832,8 +831,8 @@ int main()
 
 	});
 
-
 	bot.start(false);
+
 	return 0;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -847,10 +846,9 @@ This example demonstrates receiving select menu clicks and sending response mess
 
 using json = nlohmann::json;
 
-int main()
-{
+int main() {
 
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
 	/* Message handler to look for a command called !select */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
@@ -900,10 +898,9 @@ This example demonstrates receiving button clicks and sending response messages.
 
 using json = nlohmann::json;
 
-int main()
-{
+int main() {
 
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
 
 	bot.on_button_click([&bot](const dpp::button_click_t & event) {
 		if (event.custom_id == "10") {
@@ -962,38 +959,37 @@ int main() {
 	
 	/* Executes on ready. */
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-		// Define a slash command.
-		dpp::slashcommand image;
-		image.set_name("image");
-		image.set_description("Send a specific image.");
-		image.add_option(
-			// Create a subcommand type option.
-			dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
-				add_option(dpp::command_option(dpp::co_user, "user", "User to make a dog off.", false))
-		);
-		image.add_option(
-			// Create another subcommand type option.
-			dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
-				add_option(dpp::command_option(dpp::co_user, "user", "User to make a cat off.", false))
-		);
-
-		// Create command with a callback.
-		bot.global_command_create(image, [ & ]( const dpp::confirmation_callback_t &callback ) {
-			if(callback.is_error()) {
-				std::cout << callback.http_info.body <<  "\n" ;
-			}
-		});
+	    if (dpp::run_once<struct register_bot_commands>()) {
+	        // Define a slash command.
+	        dpp::slashcommand image("image", "Send a specific image.", bot.me.id);
+	        image.add_option(
+	    		// Create a subcommand type option.
+ 	           	dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
+	    			add_option(dpp::command_option(dpp::co_user, "user", "User to make a dog off.", false))
+	    		);
+	    	image.add_option(
+	    		// Create another subcommand type option.
+	            dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
+	    			add_option(dpp::command_option(dpp::co_user, "user", "User to make a cat off.", false))
+	    		);
+	        // Create command with a callback.
+	        bot.global_command_create(image, [ & ]( const dpp::confirmation_callback_t &callback ) {
+	            if (callback.is_error()) {
+	                std::cout << callback.http_info.body <<  "\n" ;
+	            }
+	    	});
+	    }
 	});
 
 	/* Use the on_interaction_create event to look for commands */
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
 		dpp::command_interaction cmd_data = event.command.get_command_interaction();
 		/* Check if the command is the image command. */
-		if(event.command.get_command_name() == "image") {
+		if (event.command.get_command_name() == "image") {
 			/* Check if the subcommand is "dog" */
-			if(cmd_data.options[0].name == "dog") {	
+			if (cmd_data.options[0].name == "dog") {	
 				/* Checks if the subcommand has any options. */
-				if(cmd_data.options[0].options.size() > 0) {
+				if (cmd_data.options[0].options.size() > 0) {
 					/* Get the user option as a snowflake. */
 					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
 					event.reply(fmt::format("<@{}> has now been turned into a dog.", user)); 
@@ -1003,9 +999,9 @@ int main() {
 				}
 			}
 			/* Check if the subcommand is "cat" */
-			if(cmd_data.options[0].name == "cat") {
+			if (cmd_data.options[0].name == "cat") {
 				/* Checks if the subcommand has any options. */
-				if(cmd_data.options[0].options.size() > 0) {
+				if (cmd_data.options[0].options.size() > 0) {
 					/* Get the user option as a snowflake. */
 					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
 					event.reply(fmt::format("<@{}> has now been turned into a cat.", user));
@@ -1088,7 +1084,7 @@ int main(int argc, char const *argv[])
 	mpg123_delete(mh);
 
 	/* Setup the bot */
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, &pcmdata](const dpp::message_create_t & event) {
@@ -1157,7 +1153,7 @@ int main(int argc, char const *argv[])
 	/* Replace with the user's id you wish to record */
 	dpp::snowflake user_id = 407877550216314882;
 
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
 	FILE *fd;
 	fd = fopen("./me.pcm", "wb");
@@ -1211,7 +1207,7 @@ To make an embed use this.
 
 int main() {
     /* Setup the bot */
-    dpp::cluster bot("token");
+    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
 
     /* Message handler to look for a command called !embed */
     bot.on_message_create([&bot](const dpp::message_create_t & event) {
@@ -1269,18 +1265,18 @@ int main()
 	dpp::cluster bot("token");
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-		/* Create a new global command on ready event */
-		bot.global_command_create(dpp::slashcommand().set_name("blep")
-			.set_description("Send a random adorable animal photo")
-			.set_application_id(bot.me.id)
-			.add_option(
-				/* If you set the auto complete setting on a command option, it will trigger the on_auticomplete
-				 * event whenever discord needs to fill information for the choices. You cannot set any choices
-				 * here if you set the auto complete value to true.
-				 */
-				dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
-			)
-		);
+	    if (dpp::run_once<struct register_bot_commands>()) {
+		    /* Create a new global command once on ready event */
+		    bot.global_command_create(dpp::slashcommand("blep", "Send a random adorable animal photo", bot.me.id)
+		    	.add_option(
+		    		/* If you set the auto complete setting on a command option, it will trigger the on_auticomplete
+		    		 * event whenever discord needs to fill information for the choices. You cannot set any choices
+		    		 * here if you set the auto complete value to true.
+		    		 */
+		    		dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
+		    	)
+		    );
+		}
 	});
 
 	/* The interaction create event is fired when someone issues your commands */
@@ -1377,7 +1373,7 @@ The following example program shows how to request a file and attach it to a mes
 #include <dpp/dpp.h>
 
 int main() {
-    dpp::cluster bot("token");
+    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
     /* Message handler to look for a command called !file */
     bot.on_message_create([&bot](const dpp::message_create_t &event) {
@@ -1412,7 +1408,7 @@ Upload the image in the same message as the embed and then reference it in the e
 #include <dpp/dpp.h>
 
 int main() {
-    dpp::cluster bot("token");
+    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
     /* Message handler to look for a command called !file */
     bot.on_message_create([&bot](const dpp::message_create_t &event) {
@@ -1564,10 +1560,10 @@ int main(int argc, char const *argv[])
 	dpp::cluster bot("token");
 
 	bot.on_ready([&](const dpp::ready_t & event) {
-		/* Create a slash command and register it as a global command */
-		dpp::slashcommand newcommand;
-		newcommand.set_name("dialog").set_description("Make a modal dialog box").set_application_id(bot.me.id);
-		bot.global_command_create(newcommand);
+	    if (dpp::run_once<struct register_bot_commands>()) {
+			/* Create a slash command and register it as a global command */
+		    bot.global_command_create(dpp::slashcommand("dialog", "Make a modal dialog box", bot.me.id));
+		}
 	});
 
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
@@ -1635,13 +1631,15 @@ int main()
     dpp::cluster bot("token");
 
     bot.on_ready([&bot](const dpp::ready_t &event) {
-        dpp::slashcommand command;
-        /* Define a slash command */
-        command.set_name("High Five")
+        if (dpp::run_once<struct register_bot_commands>()) {
+            dpp::slashcommand command;
+            /* Define a slash command */
+            command.set_name("High Five")
                 .set_type(dpp::ctxm_user)
                 .set_application_id(bot.me.id);
-        /* Register the command */
-        bot.guild_command_create(command, 857692897221033129); // you need to put your guild-id in here
+            /* Register the command */
+            bot.guild_command_create(command, 857692897221033129); // you need to put your guild-id in here
+        }
     });
 
     /* Use the on_interaction_create event to look for application commands */
@@ -1973,14 +1971,13 @@ int main()
 
         bot.on_ready([&bot](const dpp::ready_t & event) {
 
-                dpp::slashcommand newcommand;
+                if (dpp::run_once<struct register_bot_commands>()) {
+                        dpp::slashcommand newcommand("show", "Show an uploaded file", bot.me.id);
 
-                newcommand.set_name("show")
-                        .set_description("Show an uploaded file")
-                        .set_application_id(bot.me.id)
-                        .add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image"));
+                        newcommand.add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image"));
 
-                bot.global_command_create(newcommand);
+                        bot.global_command_create(newcommand);
+                }
         });
 
         bot.start(false);

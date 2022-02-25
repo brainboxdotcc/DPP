@@ -168,7 +168,7 @@ In this example we named it "D++ Test Bot".
 
 \image html create_application_add_bot.png
 
-On the resulting screen, you’ll note a page with information regarding your new bot. You can edit your bot name, description, and avatar here if you want to.
+On the resulting screen, you’ll note a page with information regarding your new bot. You can edit your bot name, description, and avatar here if you want to. If you wish to read the message content from messages, you need to enable the message content intent in the "Privileged Gateway Intents" section.
 
 \image html create_application_bot_overview.png
 
@@ -190,7 +190,7 @@ So to invite the bot to your server, you must create an invitation URL.
 
 \image html create_application_navigate_to_url_generator.png
 
-3. Select the "bot" scope. If your bot uses slash commands, also select "applications.commands".
+3. Select the `bot` scope. If your bot uses slash commands, also select `applications.commands`.
 
 You can read more about scopes and which you need for your application [here](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes).
 
