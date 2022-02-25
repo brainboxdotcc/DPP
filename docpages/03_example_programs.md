@@ -631,9 +631,8 @@ int main()
 	bot.on_ready([&bot](const dpp::ready_t & event) {
 	    if (dpp::run_once<struct register_bot_commands>()) {
 
-		    dpp::slashcommand newcommand;
-		    /* Create a new global command on ready event */
-		    newcommand.set_name("blep", "Send a random adorable animal photo", bot.me.id)
+            /* Create a new global command on ready event */
+		    dpp::slashcommand newcommand("blep", "Send a random adorable animal photo", bot.me.id)
 		    	.add_option(
 		    		dpp::command_option(dpp::co_string, "animal", "The type of animal", true).
 		    			add_choice(dpp::command_option_choice("Dog", std::string("animal_dog"))).
