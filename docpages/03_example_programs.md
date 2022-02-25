@@ -314,7 +314,7 @@ int main(int argc, char const *argv[])
 	}
 
 	/* Setup the bot */
-	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to recieve message content
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, robot, robot_size](const dpp::message_create_t & event) {
@@ -528,7 +528,7 @@ When a user issues a command you may want to join their voice channel, e.g. in a
 int main(int argc, char const *argv[])
 {
 	/* Setup the bot */
-	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to recieve message content
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, robot, robot_size](const dpp::message_create_t & event) {
@@ -901,7 +901,7 @@ using json = nlohmann::json;
 
 int main() {
 
-	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to recieve message content
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
 
 	bot.on_button_click([&bot](const dpp::button_click_t & event) {
 		if (event.custom_id == "10") {
@@ -1208,7 +1208,7 @@ To make an embed use this.
 
 int main() {
     /* Setup the bot */
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to recieve message content
+    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
 
     /* Message handler to look for a command called !embed */
     bot.on_message_create([&bot](const dpp::message_create_t & event) {

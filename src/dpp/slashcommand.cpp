@@ -33,10 +33,10 @@ using json = nlohmann::json;
 slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1) {
 }
 
-slashcommand::slashcommand(const std::string &name, const std::string &description, const dpp::snowflake application_id) : slashcommand() {
-	set_name(name);
-	set_description(description);
-	set_application_id(application_id);
+slashcommand::slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id) : slashcommand() {
+	set_name(_name);
+	set_description(_description);
+	set_application_id(_application_id);
 }
 
 slashcommand::~slashcommand() {
