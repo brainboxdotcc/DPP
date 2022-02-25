@@ -61,7 +61,7 @@ int main() {
 }
 ```
 
-You can find more examples in our [example page](https://dpp.dev/firstbot.html).
+You can find more examples in our [example page](https://dpp.dev/md_docpages_03_example_programs.html).
 
 ## Supported Systems
 
@@ -81,7 +81,7 @@ Please read the [D++ Code Style Guide](https://dpp.dev/coding-standards.html) fo
 
 ## 💬 Get in touch
 
-If you have various suggestions, questions or want to discuss things with our community, Join our discord server!
+If you have various suggestions, questions or want to discuss things with our community, [Join our discord server](https://discord.gg/dpp)!
 Make a humorous reference to brains in your nickname to get access to a secret brain cult channel! :)
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp)
