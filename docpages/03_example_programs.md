@@ -51,6 +51,8 @@ const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 int main() {
     dpp::cluster bot(BOT_TOKEN);
 
+    bot.on_log(dpp::utility::cout_logger());
+
     bot.on_interaction_create([](const dpp::interaction_create_t& event) {
          if (event.command.get_command_name() == "ping") {
             event.reply("Pong!");
@@ -65,8 +67,6 @@ int main() {
             );
         }
     });
-
-    bot.on_log(dpp::utility::cout_logger());
 
     bot.start(false);
 }
@@ -248,6 +248,8 @@ const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 int main() {
     dpp::cluster bot(BOT_TOKEN);
 
+    bot.on_log(dpp::utility::cout_logger());
+
     bot.on_interaction_create([](const dpp::interaction_create_t& event) {
          if (event.command.get_command_name() == "ping") {
             event.reply("Pong!");
@@ -259,8 +261,6 @@ int main() {
             bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
         }
     });
-
-    bot.on_log(dpp::utility::cout_logger());
 
     bot.start(false);
 }
@@ -315,6 +315,8 @@ int main(int argc, char const *argv[])
 
 	/* Setup the bot */
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, robot, robot_size](const dpp::message_create_t & event) {
@@ -371,6 +373,8 @@ int main(int argc, char const *argv[])
 	 * ffmpeg -i /path/to/song -c:a libopus -ar 48000 -ac 2 -vn -b:a 96K /path/to/opus.ogg 
 	 */
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
@@ -530,6 +534,8 @@ int main(int argc, char const *argv[])
 	/* Setup the bot */
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
 
+        bot.on_log(dpp::utility::cout_logger());
+
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, robot, robot_size](const dpp::message_create_t & event) {
 
@@ -614,6 +620,8 @@ response object.
 int main()
 {
 	dpp::cluster bot("token");
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	/* The interaction create event is fired when someone issues your commands */
 	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
@@ -733,6 +741,8 @@ int main() {
 
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
+        bot.on_log(dpp::utility::cout_logger());
+
 	/* Message handler to look for a command called !button */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
 		if (event.msg.content == "!button") {
@@ -790,6 +800,8 @@ and allows you to decide how and where commands should be routed, either to an o
 int main()
 {
 	dpp::cluster bot("token");
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	/* Create command handler, and specify prefixes */
 	dpp::commandhandler command_handler(&bot);
@@ -850,6 +862,8 @@ int main() {
 
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
+        bot.on_log(dpp::utility::cout_logger());
+
 	/* Message handler to look for a command called !select */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
 		if (event.msg.content == "!select") {
@@ -877,12 +891,6 @@ int main() {
 		event.reply("You clicked " + event.custom_id + " and chose: " + event.values[0]);
 	});
 
-	bot.on_log([](const dpp::log_t & event) {
-		if (event.severity > dpp::ll_trace) {
-			std::cout << event.message << "\n";
-		}
-	});
-
 	bot.start(false);
 
 	return 0;
@@ -901,6 +909,8 @@ using json = nlohmann::json;
 int main() {
 
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	bot.on_button_click([&bot](const dpp::button_click_t & event) {
 		if (event.custom_id == "10") {
@@ -957,6 +967,8 @@ int main() {
 	/* Setup the bot */
 	dpp::cluster bot("token");
 	
+        bot.on_log(dpp::utility::cout_logger());
+
 	/* Executes on ready. */
 	bot.on_ready([&bot](const dpp::ready_t & event) {
 	    if (dpp::run_once<struct register_bot_commands>()) {
@@ -1086,6 +1098,8 @@ int main(int argc, char const *argv[])
 	/* Setup the bot */
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
+        bot.on_log(dpp::utility::cout_logger());
+
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, &pcmdata](const dpp::message_create_t & event) {
 		std::stringstream ss(event.msg.content);
@@ -1107,13 +1121,6 @@ int main(int argc, char const *argv[])
 				/* Stream the already decoded MP3 file. This passes the PCM data to the library to be encoded to OPUS */
 				v->voiceclient->send_audio_raw((uint16_t*)pcmdata.data(), pcmdata.size());
 			}
-		}
-	});
-
-	/* A basic logger */
-	bot.on_log([](const dpp::log_t & event) {
-		if (event.severity > dpp::ll_trace) {
-			std::cout << event.message << "\n";
 		}
 	});
 
@@ -1157,6 +1164,8 @@ int main(int argc, char const *argv[])
 
 	FILE *fd;
 	fd = fopen("./me.pcm", "wb");
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	/* Use the on_message_create event to look for commands */
 	bot.on_message_create([&bot, &fd](const dpp::message_create_t & event) {
@@ -1264,6 +1273,8 @@ int main()
 {
 	dpp::cluster bot("token");
 
+        bot.on_log(dpp::utility::cout_logger());
+
 	bot.on_ready([&bot](const dpp::ready_t & event) {
 	    if (dpp::run_once<struct register_bot_commands>()) {
 		    /* Create a new global command once on ready event */
@@ -1317,11 +1328,6 @@ int main()
 		}
 	});
 
-	/* Simple log event */
-	bot.on_log([&bot](const dpp::log_t & event) {
-		std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
-	});
-
 	bot.start(false);
 
 	return 0;
@@ -1342,7 +1348,9 @@ An example program:
 #include <dpp/dpp.h>
 
 int main() {
-    dpp::cluster bot("token");
+    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+
+    bot.on_log(dpp::utility::cout_logger());
 
     /* Message handler to look for a command called !file */
     bot.on_message_create([&bot](const dpp::message_create_t &event) {
@@ -1374,6 +1382,8 @@ The following example program shows how to request a file and attach it to a mes
 
 int main() {
     dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+
+    bot.on_log(dpp::utility::cout_logger());
 
     /* Message handler to look for a command called !file */
     bot.on_message_create([&bot](const dpp::message_create_t &event) {
@@ -1409,6 +1419,8 @@ Upload the image in the same message as the embed and then reference it in the e
 
 int main() {
     dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+
+    bot.on_log(dpp::utility::cout_logger());
 
     /* Message handler to look for a command called !file */
     bot.on_message_create([&bot](const dpp::message_create_t &event) {
@@ -1449,10 +1461,12 @@ exercise to the reader. For further reading please see the documentation of dpp:
 
 int main() {
 	/* Create bot */
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
 	/* Create a cache to contain types of dpp::message */
 	dpp::cache<dpp::message> message_cache;
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler */
 	bot.on_message_create([&](const dpp::message_create_t &event) {
@@ -1522,10 +1536,12 @@ public:
 
 int main() {
 	/* Create bot */
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
 	/* Pointer to reaction collector */
 	react_collector* r = nullptr;
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler */
 	bot.on_message_create([&](const dpp::message_create_t &event) {
@@ -1558,6 +1574,8 @@ Each dialog box may have up to five rows of input fields. The example below demo
 int main(int argc, char const *argv[])
 {
 	dpp::cluster bot("token");
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	bot.on_ready([&](const dpp::ready_t & event) {
 	    if (dpp::run_once<struct register_bot_commands>()) {
@@ -1599,11 +1617,6 @@ int main(int argc, char const *argv[])
 		event.reply(m);
 	});
 
-	/* Budget brand logger */
-	bot.on_log([&](const dpp::log_t & log) {
-		std::cout << log.message << "\n";
-	});
-
 	/* Start bot */
 	bot.start(false);
 	return 0;
@@ -1629,6 +1642,8 @@ The following example shows how to create and handle **user context menus**.
 int main()
 {
     dpp::cluster bot("token");
+
+    bot.on_log(dpp::utility::cout_logger());
 
     bot.on_ready([&bot](const dpp::ready_t &event) {
         if (dpp::run_once<struct register_bot_commands>()) {
@@ -1682,11 +1697,18 @@ int main()
 {
     dpp::cluster bot(""); // normally, you put your bot token in here. But to just run a webhook its not required
 
+    bot.on_log(dpp::utility::cout_logger());
+
     /* construct a webhook object using the URL you got from Discord */
     dpp::webhook wh("https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE");
 
     /* send a message with this webhook */
     bot.execute_webhook(wh, dpp::message("Have a great time here :smile:"));
+
+    /* Note: This is just to give the library time to deliver the webhook before it shuts down.
+     * You don't need this if this code is part of some other program.
+     */
+    sleep(2);
 
     return 0;
 }
@@ -1778,7 +1800,9 @@ int test_function() {
  */
 int main()
 {
-	dpp::cluster bot("token");
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+
+        bot.on_log(dpp::utility::cout_logger());
 
 	/* This won't work in a slash command very well yet, as there is not yet
 	 * a multi-line slash command input type.
@@ -1915,13 +1939,6 @@ int main()
 		}
 	});
 
-	/* A basic logger */
-	bot.on_log([](const dpp::log_t & event) {
-		if (event.severity > dpp::ll_trace) {
-			std::cout << event.message << "\n";
-		}
-	}); 
-
 	bot.start(false);
 	return 0;
 }
@@ -1954,6 +1971,8 @@ something like `dpp::cluster::request()`.
 int main()
 {
         dpp::cluster bot("token");
+
+        bot.on_log(dpp::utility::cout_logger());
 
         bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
                 if (event.command.type == dpp::it_application_command) {
