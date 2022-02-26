@@ -315,6 +315,9 @@ public:
 	 * @param event Class to pass as parameter to all listeners.
 	 */
 	void call(const T& event) const {
+		if (warning) {
+			warning();
+		}
 		std::shared_lock l(lock);
 		std::for_each(dispatch_container.begin(), dispatch_container.end(), [&](auto &ev) {
 			if (!event.is_cancelled()) {
@@ -323,6 +326,12 @@ public:
 		});
 	};
 
+	/**
+	 * @brief Set the warning callback object used to check that this
+	 * event is capable of running properly
+	 * 
+	 * @param warning_function A checking function to call
+	 */
 	void set_warning_callback(std::function<void()> warning_function) {
 		warning = warning_function;
 	}
