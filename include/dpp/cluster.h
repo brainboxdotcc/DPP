@@ -296,6 +296,11 @@ private:
 	 * as std::map is an ordered container.
 	 */
 	std::map<event_handle, std::function<void(const T&)>> dispatch_container;
+	/**
+	 * @brief A function to be called whenever the method is called, to check
+	 * some condition that is required for this event to trigger correctly.
+	 */
+	std::function<void()> warning;
 public:
 	/**
 	 * @brief Construct a new event_router_t object.
@@ -317,6 +322,10 @@ public:
 			}
 		});
 	};
+
+	void set_warning_callback(std::function<void()> warning_function) {
+		warning = warning_function;
+	}
 
 	/**
 	 * @brief Returns true if the container of listeners is empty,
@@ -366,6 +375,9 @@ public:
 	 * detach the listener from the event later if necessary.
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
+		if (warning) {
+			warning();
+		}
 		std::unique_lock l(lock);
 		event_handle h = __next_handle++;
 		dispatch_container.emplace(h, func);

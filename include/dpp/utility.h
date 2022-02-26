@@ -216,6 +216,13 @@ namespace dpp {
 			uptime(time_t diff);
 
 			/**
+			 * @brief Construct a new uptime object
+			 * 
+			 * @param diff A time_t to initialise the object from
+			 */
+			uptime(double diff);
+
+			/**
 			 * @brief Get uptime as string
 			 * 
 			 * @return std::string Uptime as string

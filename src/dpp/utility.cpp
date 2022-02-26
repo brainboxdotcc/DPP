@@ -92,6 +92,9 @@ namespace dpp {
 		uptime::uptime() : days(0), hours(0), mins(0), secs(0) {
 		}
 
+		uptime::uptime(double diff) : uptime((time_t)diff) {
+		}
+
 		uptime::uptime(time_t diff) : uptime() {
 			days = (uint16_t)(diff / (3600 * 24));
 			hours = (uint8_t)(diff % (3600 * 24) / 3600);
