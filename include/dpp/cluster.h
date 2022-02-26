@@ -2144,6 +2144,7 @@ public:
 	 * 
 	 * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update Gateway` event.
 	 * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
+	 * To remove a timeout, set the `communication_disabled_until` to a non-zero time in the history, e.g. 1.
 	 * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
 	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
