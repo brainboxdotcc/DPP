@@ -365,6 +365,47 @@ namespace dpp {
 			};
 		}
 
+		std::string markdown_escape(const std::string& text, bool escape_code_blocks) {
+			/**
+			 * @brief Represents the current state of the finite state machine
+			 * for the markdown_escape function.
+			 */
+			enum md_state {
+				/// normal text
+				md_normal = 0,
+				/// a paragraph code block, represented by three backticks
+				md_big_code_block = 1,
+				/// an inline code block, represented by one backtick
+				md_small_code_block = 2,
+			};
+
+			md_state state = md_normal;
+			std::string output;
+			const std::string markdown_chars("\\*_|~[]()");
+
+			for (size_t n = 0; n < text.length(); ++n) {
+				if (text.substr(n, 3) == "```") {
+					/* Start/end a paragraph code block */
+					output += (escape_code_blocks ? "\\`\\`\\`" : "```");
+					n += 2;
+					state = (state == md_normal) ? md_big_code_block : md_normal;
+				} else if (text[n] == '`' && (escape_code_blocks || state != md_big_code_block)) {
+					/* Start/end of an inline code block */
+					output += (escape_code_blocks ? "\\`" : "`");
+					state = (state == md_normal) ? md_small_code_block : md_normal;
+				} else {
+					/* Normal text */
+					if (escape_code_blocks || state == md_normal) {
+						/* Markdown sequence characters */
+						if (markdown_chars.find(text[n]) != std::string::npos) {
+							output += "\\";
+						}
+					}
+					output += text[n];
+				}
+			}
+			return output;
+		}
 	};
 
 };

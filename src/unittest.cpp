@@ -71,6 +71,8 @@ std::map<std::string, test_t> tests = {
 	{"HTTP", {"dpp::https_client HTTP request", false, false}},
 	{"RUNONCE", {"dpp::run_once<T>", false, false}},
 	{"WEBHOOK", {"dpp::webhook construct from URL", false, false}},
+	{"MD_ESC_1", {"Markdown escaping (ignore code block contents)", false, false}},
+	{"MD_ESC_2", {"Markdown escaping (escape code block contents)", false, false}},
 };
 
 double start = dpp::utility::time_f();

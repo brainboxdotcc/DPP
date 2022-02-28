@@ -340,5 +340,17 @@ namespace dpp {
 		 * @return Invite URL
 		 */
 		std::string DPP_EXPORT bot_invite_url(const snowflake bot_id, const uint64_t permissions = 0, const std::vector<std::string>& scopes = {"bot", "applications.commands"});
+
+		/**
+		 * @brief Escapes markdown sequences in a string
+		 * 
+		 * @param text Text to escape
+		 * @param escape_code_blocks If set to false, then code blocks are not escaped.
+		 * This means that you can still use a code block, and the text within will be left as-is.
+		 * If set to true, code blocks will also be escaped so that ` symbol may be used as a normal
+		 * character.
+		 * @return std::string escaped text
+		 */
+		std::string DPP_EXPORT markdown_escape(const std::string& text, bool escape_code_blocks = false);
 	};
 };
