@@ -77,7 +77,7 @@ enum role_permissions : uint64_t {
 	p_create_private_threads	=	0x01000000000,	//!< allows for creating private threads
 	p_use_external_stickers		=	0x02000000000,	//!< allows the usage of custom stickers from other servers
 	p_send_messages_in_threads	=	0x04000000000,	//!< allows for sending messages in threads
-	p_use_embedded_activities	=	0x08000000000,	//!< allows for launching activities (applications with the EMBEDDED flag) in a voice channel
+	p_use_embedded_activities	=	0x08000000000,	//!< allows for using activities (applications with the EMBEDDED flag) in a voice channel
 	p_moderate_members		=	0x10000000000,	//!< allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
 };
 
