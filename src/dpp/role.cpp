@@ -289,8 +289,8 @@ bool role::has_send_messages_in_threads() const {
 	return ((this->permissions & p_administrator) | (this->permissions & p_send_messages_in_threads));
 }
 
-bool role::has_start_embedded_activities() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_start_embedded_activities));
+bool role::has_use_embedded_activities() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_use_embedded_activities));
 }
 
 bool role::has_manage_events() const {
