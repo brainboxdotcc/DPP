@@ -22,7 +22,6 @@
 #include <dpp/cluster.h>
 #include <dpp/exception.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt-minimal.h>
 #include <sstream>
 

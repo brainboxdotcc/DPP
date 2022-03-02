@@ -285,6 +285,8 @@ extern DPP_EXPORT event_handle __next_handle;
  */
 template<class T> class event_router_t {
 private:
+	friend class cluster;
+
 	/**
 	 * @brief Thread safety mutex
 	 */
@@ -296,6 +298,24 @@ private:
 	 * as std::map is an ordered container.
 	 */
 	std::map<event_handle, std::function<void(const T&)>> dispatch_container;
+	/**
+	 * @brief A function to be called whenever the method is called, to check
+	 * some condition that is required for this event to trigger correctly.
+	 */
+	std::function<void()> warning;
+
+protected:
+
+	/**
+	 * @brief Set the warning callback object used to check that this
+	 * event is capable of running properly
+	 * 
+	 * @param warning_function A checking function to call
+	 */
+	void set_warning_callback(std::function<void()> warning_function) {
+		warning = warning_function;
+	}
+
 public:
 	/**
 	 * @brief Construct a new event_router_t object.
@@ -310,6 +330,9 @@ public:
 	 * @param event Class to pass as parameter to all listeners.
 	 */
 	void call(const T& event) const {
+		if (warning) {
+			warning();
+		}
 		std::shared_lock l(lock);
 		std::for_each(dispatch_container.begin(), dispatch_container.end(), [&](auto &ev) {
 			if (!event.is_cancelled()) {
@@ -366,6 +389,9 @@ public:
 	 * detach the listener from the event later if necessary.
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
+		if (warning) {
+			warning();
+		}
 		std::unique_lock l(lock);
 		event_handle h = __next_handle++;
 		dispatch_container.emplace(h, func);
@@ -2144,6 +2170,7 @@ public:
 	 * 
 	 * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update Gateway` event.
 	 * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
+	 * To remove a timeout, set the `communication_disabled_until` to a non-zero time in the past, e.g. 1.
 	 * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
 	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.

@@ -334,7 +334,7 @@ struct DPP_EXPORT interaction_response {
  * components are displayed on a form (the same component structure as within a dpp::message).
  * When the user submits the form an on_form_submit event is dispatched to any listeners.
  */
-struct interaction_modal_response : public interaction_response {
+struct DPP_EXPORT interaction_modal_response : public interaction_response {
 private:
 	size_t current_row;
 public:
@@ -590,7 +590,8 @@ public:
 	std::variant<command_interaction, component_interaction, autocomplete_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
-	snowflake message_id;					    //!< Originating message id
+	snowflake message_id;					    //!< Originating message id for context menu actions
+	message msg;						    //!< Originating message for context menu actions
 	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions
 	user usr;                                                   //!< Optional: user object for the invoking user, if invoked in a DM
 	std::string token;                                          //!< a continuation token for responding to the interaction
@@ -599,6 +600,11 @@ public:
 	std::string locale;                                         //!< User's locale (language)
 	std::string guild_locale;                                   //!< Guild's locale (language) - for guild interactions only
 	cache_policy_t cache_policy;                                //!< Cache policy from cluster
+
+	/**
+	 * @brief Construct a new interaction object
+	 */
+	interaction();
 
 	/**
 	 * @brief Get the command interaction object
