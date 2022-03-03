@@ -24,7 +24,7 @@
 namespace dpp {
 
 void cluster::message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction) + "/@me", m_put, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -96,7 +96,7 @@ void cluster::message_delete(snowflake message_id, snowflake channel_id, command
 
 
 void cluster::message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/@me", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction) + "/@me", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -112,7 +112,7 @@ void cluster::message_delete_own_reaction(snowflake message_id, snowflake channe
 
 
 void cluster::message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + "/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction) + "/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -128,7 +128,7 @@ void cluster::message_delete_reaction(snowflake message_id, snowflake channel_id
 
 
 void cluster::message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t("confirmation", confirmation(), http));
 		}
@@ -175,7 +175,7 @@ void cluster::message_get_reactions(const struct message &m, const std::string &
 	if (!parameters.empty()) {
 		parameters[0] = '?';
 	}
-	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + dpp::url_encode(reaction) + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction) + parameters, m_get, "", [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			user_map users;
 			confirmation_callback_t e("confirmation", confirmation(), http);

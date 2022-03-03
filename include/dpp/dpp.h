@@ -34,6 +34,7 @@
 #include <dpp/exception.h>
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
+#include <dpp/stringops.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>

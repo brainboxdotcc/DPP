@@ -352,5 +352,14 @@ namespace dpp {
 		 * @return std::string escaped text
 		 */
 		std::string DPP_EXPORT markdown_escape(const std::string& text, bool escape_code_blocks = false);
+
+		/**
+		 * @brief Encodes a url parameter similar to php urlencode()
+		 * 
+		 * @param value String to encode
+		 * @return std::string URL encoded string
+		 */
+		std::string url_encode(const std::string &value);
+
 	};
 };

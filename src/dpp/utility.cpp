@@ -73,7 +73,7 @@ namespace dpp {
 			localtime_r(&t, &timedata);
 			std::stringstream s;
 			s << std::put_time(&timedata, "%Y-%m-%d %H:%M:%S");
-			return s.str();
+			return trim(s.str());
 #endif
 		}
 
@@ -360,9 +360,32 @@ namespace dpp {
 		std::function<void(const dpp::log_t&)> cout_logger() {
 			return [](const dpp::log_t& event) {
 				if (event.severity > dpp::ll_trace) {
-					std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+					std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 				}
 			};
+		}
+
+		/* Hexadecimal sequence for URL encoding */
+		static const char* hex = "0123456789ABCDEF";
+
+		std::string url_encode(const std::string &value) {
+			// Reserve worst-case encoded length of string, input length * 3
+			std::string escaped(value.length() * 3, '\0');
+			char* data = escaped.data();
+			for (auto i = value.begin(); i != value.end(); ++i) {
+				unsigned char c = (unsigned char)(*i);
+				if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+					// Keep alphanumeric and other accepted characters intact
+					*data++ = c;
+				} else {
+					// Any other characters are percent-encoded
+					*data++ = '%';
+					*data++ = hex[c >> 4];
+					*data++ = hex[c & 0x0f];
+				}
+			}
+			*data = 0;
+			return escaped.data();
 		}
 
 		std::string markdown_escape(const std::string& text, bool escape_code_blocks) {

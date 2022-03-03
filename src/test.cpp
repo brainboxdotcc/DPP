@@ -57,6 +57,9 @@ int main\\(\\) {\n\
 \\`\\`\\`\n\
 Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* block\\`\n");
 
+	set_test("URLENC", false);
+	set_test("URLENC", dpp::utility::url_encode("ABC123_+\\|$*/AAA[]😄") == "ABC123_%2B%5C%7C%24%2A%2FAAA%5B%5D%F0%9F%98%84");
+
 	dpp::http_connect_info hci;
 	set_test("HOSTINFO", false);
 
