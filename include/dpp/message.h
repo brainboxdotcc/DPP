@@ -840,6 +840,13 @@ struct DPP_EXPORT sticker : public managed {
 	std::string build_json(bool with_id = true) const;
 
 	/**
+	 * @brief Get the sticker url
+	 *
+	 * @return std::string icon url
+	 */
+	std::string get_sticker_url() const;
+
+	/**
 	 * @brief Set the filename
 	 * 
 	 * @param fn filename
