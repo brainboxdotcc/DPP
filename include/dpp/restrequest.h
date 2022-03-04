@@ -144,5 +144,34 @@ template<> inline void rest_request_list<invite>(dpp::cluster* c, const char* ba
 		}
 	});
 }
+/**
+ * @brief Templated REST request helper to save on typing (for returned lists, specialised for voiceregions)
+ *  
+ * @tparam T singular type to return in lambda callback
+ * @tparam T map type to return in lambda callback
+ * @param c calling cluster
+ * @param basepath base path for API call
+ * @param major major API function
+ * @param minor minor API function
+ * @param method HTTP method
+ * @param postdata Post data or empty string
+ * @param key Key name of elements in the json list
+ * @param callback Callback lambda
+ */
+template<> inline void rest_request_list<voiceregion>(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback, const std::string& key) {
+	c->post_rest(basepath, major, minor, method, postdata, [callback](json &j, const http_request_completion_t& http) {
+		std::unordered_map<std::string, voiceregion> list;
+		confirmation_callback_t e("confirmation", confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_item : j) {
+				list[string_not_null(&curr_item, "id")] = voiceregion().fill_from_json(&curr_item);
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t(typeid(std::unordered_map<std::string, voiceregion>).name(), list, http));
+		}
+	});
+}
+
 
 };

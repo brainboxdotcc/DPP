@@ -19,41 +19,24 @@
  *
  ************************************************************************************/
 #include <dpp/stage_instance.h>
-#include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
 
 namespace dpp {
 
 void cluster::stage_instance_create(const stage_instance& si, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/stage-instances", "", "", m_post, si.build_json(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<stage_instance>(this, API_PATH "/stage-instances", "", "", m_post, si.build_json(), callback);
 }
 
 void cluster::stage_instance_get(const snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/stage-instances", std::to_string(channel_id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("stage_instance", stage_instance().fill_from_json(&j), http));
-		}
-	});
+	rest_request<stage_instance>(this, API_PATH "/stage-instances", std::to_string(channel_id), "", m_get, "", callback);
 }
 
 void cluster::stage_instance_edit(const stage_instance& si, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/stage-instances", std::to_string(si.channel_id), "", m_patch, si.build_json(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("stage_instance", stage_instance().fill_from_json(&j), http));
-		}
-	});
+	rest_request<stage_instance>(this, API_PATH "/stage-instances", std::to_string(si.channel_id), "", m_patch, si.build_json(), callback);
 }
 
 void cluster::stage_instance_delete(const snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/stage-instances", std::to_string(channel_id), "", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/stage-instances", std::to_string(channel_id), "", m_delete, "", callback);
 }
 
 };
