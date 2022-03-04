@@ -2576,7 +2576,7 @@ FMT_FUNC void report_system_error(int error_code,
 }
 
 // DEPRECATED!
-// This function is defined here and not inline for ABI compatiblity.
+// This function is defined here and not inline for ABI compatibility.
 FMT_FUNC void detail::error_handler::on_error(const char* message) {
   throw_format_error(message);
 }

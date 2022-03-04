@@ -46,7 +46,7 @@ extern template struct basic_data<void>;
 #endif
 
 #if __cplusplus < 201703L
-// DEPRECATED! These are here only for ABI compatiblity.
+// DEPRECATED! These are here only for ABI compatibility.
 template <typename T> constexpr const char basic_data<T>::digits[][2];
 template <typename T> constexpr const char basic_data<T>::hex_digits[];
 template <typename T> constexpr const char basic_data<T>::signs[];
