@@ -368,5 +368,23 @@ namespace dpp {
 		 */
 		std::string version();
 
+		/**
+		 * @brief Build a URL parameter string e.g. "a=b&c=d&e=f" from a map of key/value pairs.
+		 * Entries with empty key names or values are omitted.
+		 * 
+		 * @param parameters parameters to create a url query string for
+		 * @return std::string A correctly encoded url query string
+		 */
+		std::string make_url_parameters(const std::map<std::string, std::string>& parameters);
+
+		/**
+		 * @brief Build a URL parameter string e.g. "a=b&c=d&e=f" from a map of key/value pairs.
+		 * Entries with empty key names or zero values are omitted.
+		 * 
+		 * @param parameters parameters to create a url query string for
+		 * @return std::string A correctly encoded url query string
+		 */
+		std::string make_url_parameters(const std::map<std::string, uint64_t>& parameters);
+
 	};
 };

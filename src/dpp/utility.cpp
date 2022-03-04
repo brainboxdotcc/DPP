@@ -389,6 +389,29 @@ namespace dpp {
 			return escaped.data();
 		}
 
+		std::string make_url_parameters(const std::map<std::string, std::string>& parameters) {
+			std::string output;
+			for(auto& [k, v] : parameters) {
+				if (!k.empty() && !v.empty()) {
+					output.append("&").append(k).append("=").append(url_encode(v));
+				}
+			}
+			if (!output.empty()) {
+				output[0] = '?';
+			}
+			return output;
+		}
+
+		std::string make_url_parameters(const std::map<std::string, uint64_t>& parameters) {
+			std::map<std::string, std::string> params;
+			for(auto& [k, v] : parameters) {
+				if (v != 0) {
+					params[k] = std::to_string(v);
+				}
+			}
+			return make_url_parameters(params);
+		}
+
 		std::string markdown_escape(const std::string& text, bool escape_code_blocks) {
 			/**
 			 * @brief Represents the current state of the finite state machine
