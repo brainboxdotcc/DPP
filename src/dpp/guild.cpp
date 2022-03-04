@@ -380,6 +380,10 @@ void guild::rehash_members() {
 	members = n;
 }
 
+guild& guild::fill_from_json(nlohmann::json* d) {
+	return fill_from_json(nullptr, d);
+}
+
 
 guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	/* NOTE: This can be called by GUILD_UPDATE and also GUILD_CREATE.

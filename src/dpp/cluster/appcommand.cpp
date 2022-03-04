@@ -19,8 +19,6 @@
  *
  ************************************************************************************/
 #include <dpp/appcommand.h>
-#include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
 #include <dpp/restrequest.h>
 
 namespace dpp {

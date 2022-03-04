@@ -98,15 +98,16 @@ template<> inline void rest_request<confirmation>(dpp::cluster* c, const char* b
  * @param minor minor API function
  * @param method HTTP method
  * @param postdata Post data or empty string
+ * @param key Key name of elements in the json list
  * @param callback Callback lambda
  */
-template<class T> inline void rest_request_list(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback) {
-	c->post_rest(basepath, major, minor, method, postdata, [callback](json &j, const http_request_completion_t& http) {
+template<class T> inline void rest_request_list(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback, const std::string& key = "id") {
+	c->post_rest(basepath, major, minor, method, postdata, [key, callback](json &j, const http_request_completion_t& http) {
 		std::unordered_map<snowflake, T> list;
 		confirmation_callback_t e("confirmation", confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_item : j) {
-				list[snowflake_not_null(&curr_item, "id")] = T().fill_from_json(&curr_item);
+				list[snowflake_not_null(&curr_item, key.c_str())] = T().fill_from_json(&curr_item);
 			}
 		}
 		if (callback) {
@@ -126,9 +127,10 @@ template<class T> inline void rest_request_list(dpp::cluster* c, const char* bas
  * @param minor minor API function
  * @param method HTTP method
  * @param postdata Post data or empty string
+ * @param key Key name of elements in the json list
  * @param callback Callback lambda
  */
-template<> inline void rest_request_list<invite>(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback) {
+template<> inline void rest_request_list<invite>(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback, const std::string& key) {
 	c->post_rest(basepath, major, minor, method, postdata, [callback](json &j, const http_request_completion_t& http) {
 		std::unordered_map<std::string, invite> list;
 		confirmation_callback_t e("confirmation", confirmation(), http);

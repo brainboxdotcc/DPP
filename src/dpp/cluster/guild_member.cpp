@@ -18,20 +18,15 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt-minimal.h>
+#include <dpp/restrequest.h>
 
 namespace dpp {
 
 void cluster::guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback) {
 	json j = json::parse(gm.build_json());
 	j["access_token"] = access_token;
-	this->post_rest(API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_put, j.dump(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_put, j.dump(), callback);
 }
 
 
@@ -73,29 +68,17 @@ void cluster::guild_get_members(snowflake guild_id, uint16_t limit, snowflake af
 
 
 void cluster::guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_put, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_put, "", callback);
 }
 
 
 void cluster::guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_delete, "", callback);
 }
 
 
 void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", callback);
 }
 
 
