@@ -21,6 +21,7 @@
 #include <dpp/utility.h>
 #include <dpp/stringops.h>
 #include <dpp/exception.h>
+#include <dpp/version.h>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
@@ -428,6 +429,10 @@ namespace dpp {
 				}
 			}
 			return output;
+		}
+
+		std::string version() {
+			return DPP_VERSION_TEXT;
 		}
 	};
 

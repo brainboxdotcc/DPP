@@ -361,5 +361,12 @@ namespace dpp {
 		 */
 		std::string url_encode(const std::string &value);
 
+		/**
+		 * @brief Returns the library's version string
+		 * 
+		 * @return std::string version
+		 */
+		std::string version();
+
 	};
 };
