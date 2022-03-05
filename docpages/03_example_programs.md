@@ -1084,12 +1084,12 @@ int main(int argc, char const *argv[])
 	mpg123_getformat(mh, &rate, &channels, &encoding);
 
 	unsigned int counter = 0;
-	for (int totalBtyes = 0; mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK; ) {
+	for (int totalBytes = 0; mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK; ) {
 		for (auto i = 0; i < buffer_size; i++) {
 			pcmdata.push_back(buffer[i]);
 		}
 		counter += buffer_size;
-		totalBtyes += done;
+		totalBytes += done;
 	}
 	delete buffer;
 	mpg123_close(mh);
@@ -1280,7 +1280,7 @@ int main()
 		    /* Create a new global command once on ready event */
 		    bot.global_command_create(dpp::slashcommand("blep", "Send a random adorable animal photo", bot.me.id)
 		    	.add_option(
-		    		/* If you set the auto complete setting on a command option, it will trigger the on_auticomplete
+		    		/* If you set the auto complete setting on a command option, it will trigger the on_autocomplete
 		    		 * event whenever discord needs to fill information for the choices. You cannot set any choices
 		    		 * here if you set the auto complete value to true.
 		    		 */
