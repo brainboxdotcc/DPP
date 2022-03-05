@@ -39,7 +39,7 @@ jobs:
         with:
           push: true
           tags: brainboxdotcc/dpp
-      - # copy multiplatform image from dockerhub to quay and ghcr
+      - # copy multiplatform image from dockerhub to ghcr
         name: Push Image to multiple registries
         uses: akhilerm/tag-push-action@v2.0.0
         with:

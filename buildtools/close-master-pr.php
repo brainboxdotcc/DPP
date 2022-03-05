@@ -15,7 +15,7 @@ foreach ($master_prs as $pr) {
 }
 
 // Tidy up the workflow run list so it isn't littered with these
-exec("gh run list -w \"Close master-targetted PRs\"", $runs);
+exec("gh run list -w \"Close master-targeted PRs\"", $runs);
 $runindex = 0;
 foreach ($runs as $run) {
 	$run = preg_replace('/  /', ' ', $run);
