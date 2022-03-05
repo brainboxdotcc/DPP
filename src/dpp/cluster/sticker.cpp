@@ -26,7 +26,7 @@ namespace dpp {
 void cluster::guild_sticker_create(sticker &s, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(s.guild_id), "stickers", m_post, s.build_json(false), [callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t("sticker", sticker().fill_from_json(&j), http));
+			callback(confirmation_callback_t(sticker().fill_from_json(&j), http));
 		}
 	}, s.filename, s.filecontent);
 }

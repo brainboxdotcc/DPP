@@ -24,10 +24,10 @@
 namespace dpp {
 
 
-confirmation_callback_t::confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http)
-	: type(_type), http_info(_http), value(_value)
+confirmation_callback_t::confirmation_callback_t(const confirmable_t& _value, const http_request_completion_t& _http)
+	: http_info(_http), value(_value)
 {
-	if (type == "confirmation") {
+	if (std::holds_alternative<confirmation>(_value)) {
 		confirmation newvalue = std::get<confirmation>(_value);
 		newvalue.success = (http_info.status < 400);
 		value = newvalue;

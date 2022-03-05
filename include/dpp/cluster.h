@@ -210,10 +210,9 @@ struct DPP_EXPORT error_info {
  * @brief The results of a REST call wrapped in a convenient struct
  */
 struct DPP_EXPORT confirmation_callback_t {
-	/** Returned data type in confirmable_t, used to double check to avoid an exception if you wish */
-	std::string type;
 	/** Information about the HTTP call used to make the request */
 	http_request_completion_t http_info;
+
 	/** Value returned, wrapped in variant */
 	confirmable_t value;
 
@@ -225,11 +224,10 @@ struct DPP_EXPORT confirmation_callback_t {
 	/**
 	 * @brief Construct a new confirmation callback object
 	 *
-	 * @param _type The type of callback that is encapsulated in the confirmable_t
 	 * @param _value The value to encapsulate in the confirmable_t
 	 * @param _http The HTTP metadata from the REST call
 	 */
-	confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http);
+	confirmation_callback_t(const confirmable_t& _value, const http_request_completion_t& _http);
 
 	/**
 	 * @brief Returns true if the call resulted in an error rather than a legitimate value in the

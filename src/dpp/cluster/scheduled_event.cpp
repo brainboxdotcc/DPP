@@ -35,7 +35,7 @@ void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, comm
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "/users?with_member=true&limit=" + std::to_string(limit) + append, m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			event_member_map users;
-			confirmation_callback_t e("confirmation", confirmation(), http);
+			confirmation_callback_t e(confirmation(), http);
 			if (!e.is_error()) {
 				if (j.is_array()) {
 					for (auto & curr_user : j) {
@@ -47,7 +47,7 @@ void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, comm
 					}
 				}
 			}
-			callback(confirmation_callback_t("event_member_map", users, http));
+			callback(confirmation_callback_t(users, http));
 		}
 	});
 }
