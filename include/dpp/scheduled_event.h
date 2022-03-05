@@ -24,7 +24,7 @@
 #include <dpp/managed.h>
 #include <dpp/user.h>
 #include <dpp/guild.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 
 namespace dpp {
 
@@ -93,7 +93,7 @@ struct DPP_EXPORT event_member {
 /**
  * @brief A scheduled event
  */
-struct DPP_EXPORT scheduled_event : public managed {
+struct DPP_EXPORT scheduled_event : public managed  {
 	snowflake		guild_id;		//!< the guild id which the scheduled event belongs to
 	snowflake		channel_id;		//!< the channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL (may be empty)
 	snowflake		creator_id;		//!< Optional: the id of the user that created the scheduled event
@@ -198,7 +198,7 @@ struct DPP_EXPORT scheduled_event : public managed {
 	 *
 	 * @return scheduled_event& a reference to self
 	 */
-	scheduled_event& fill_from_json(const nlohmann::json* j);
+	 scheduled_event& fill_from_json(const nlohmann::json* j);
 
 	/**
 	 * @brief Build json for this object

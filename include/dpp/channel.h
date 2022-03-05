@@ -25,7 +25,7 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 
 namespace dpp {
@@ -131,7 +131,7 @@ struct DPP_EXPORT thread_metadata {
 /**
  * @brief represents membership of a user with a thread
  */
-struct DPP_EXPORT thread_member 
+struct DPP_EXPORT thread_member  
 {
 	/// ID of the thread member is part of
 	snowflake thread_id;
@@ -147,7 +147,7 @@ struct DPP_EXPORT thread_member
 	 * @param j json to read values from
 	 * @return A reference to self	
 	 */
-	thread_member& fill_from_json(nlohmann::json* j);
+	 thread_member& fill_from_json(nlohmann::json* j);
 };
 
 /** @brief A group of thread member objects*/
@@ -158,7 +158,7 @@ typedef std::unordered_map<snowflake, thread_member> thread_member_map;
  * There are one of these for every channel type except threads. Threads are
  * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
  */ 
-class DPP_EXPORT channel : public managed {
+class DPP_EXPORT channel : public managed  {
 public:
 	/** Flags bitmap */
 	uint16_t flags;
@@ -235,7 +235,7 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	channel& fill_from_json(nlohmann::json* j);
+	 channel& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build json for this channel object

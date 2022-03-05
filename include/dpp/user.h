@@ -20,7 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
@@ -78,7 +78,7 @@ enum user_flags : uint32_t {
 /**
  * @brief Represents a user on discord. May or may not be a member of a dpp::guild.
  */
-class DPP_EXPORT user : public managed {
+class DPP_EXPORT user : public managed  {
 public:
 	/** Discord username */
 	std::string username;
@@ -282,7 +282,7 @@ public:
 	 * @param j The json to fill this record from
 	 * @return Reference to self
 	 */
-	user_identified& fill_from_json(nlohmann::json* j);
+	 user_identified& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Construct a new user identified object

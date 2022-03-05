@@ -22,7 +22,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 
 namespace dpp {
@@ -31,7 +31,7 @@ namespace dpp {
  * @brief The ban class represents a ban on a guild.
  * 
  */
-class DPP_EXPORT ban {
+class DPP_EXPORT ban   {
 public:
 	/** The ban reason */
 	std::string reason;
@@ -48,7 +48,7 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	ban& fill_from_json(nlohmann::json* j);
+	 ban& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build json representation of a ban

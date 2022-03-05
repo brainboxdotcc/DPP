@@ -21,7 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 
 namespace dpp {
@@ -44,7 +44,7 @@ enum voicestate_flags {
  * These are stored in the dpp::guild object, and accessible there,
  * or via dpp::channel::get_voice_members
  */
-class DPP_EXPORT voicestate {
+class DPP_EXPORT voicestate   {
 public:
 	class discord_client*	shard;		//!< Owning shard
 	snowflake		guild_id;       //!< Optional: the guild id this voice state is for
@@ -69,7 +69,7 @@ public:
 	 * @param j JSON data to fill from
 	 * @return voicestate& Reference to self
 	 */
-	voicestate& fill_from_json(nlohmann::json* j);
+	 voicestate& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build json representation of the object

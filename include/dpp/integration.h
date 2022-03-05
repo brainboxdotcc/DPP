@@ -22,7 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 
 namespace dpp {

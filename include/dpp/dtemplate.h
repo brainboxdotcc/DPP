@@ -21,7 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 
 namespace dpp {
@@ -29,7 +29,7 @@ namespace dpp {
 /**
  * @brief Represents a guild template
  */
-class DPP_EXPORT dtemplate {
+class DPP_EXPORT dtemplate   {
 public:	
 	/**
 	 * @brief Template code
@@ -83,7 +83,13 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	dtemplate& fill_from_json(nlohmann::json* j);
+	 dtemplate& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the JSON for this object
+	 * 
+	 * @return std::string JSON content 
+	 */
 	std::string build_json() const;
 
 };

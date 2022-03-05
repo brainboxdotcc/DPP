@@ -27,7 +27,7 @@
 #include <dpp/guild.h>
 #include <optional>
 #include <variant>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 
 namespace dpp {
 

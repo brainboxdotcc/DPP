@@ -21,7 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <unordered_map>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 
 namespace dpp {
 
@@ -38,7 +38,7 @@ enum voiceregion_flags {
 /**
  * @brief Represents a voice region on discord
  */
-class DPP_EXPORT voiceregion {
+class DPP_EXPORT voiceregion   {
 public:
 	/**
 	 * @brief Voice server ID
@@ -71,7 +71,7 @@ public:
 	 * @param j JSON to fill from
 	 * @return voiceregion& Reference to self
 	 */
-	voiceregion& fill_from_json(nlohmann::json* j);
+	 voiceregion& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build a json string for this object

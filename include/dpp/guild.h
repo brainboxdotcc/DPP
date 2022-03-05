@@ -366,7 +366,7 @@ typedef std::unordered_map<snowflake, guild_member> members_container;
 /**
  * @brief Represents a guild on Discord (AKA a server)
  */
-class DPP_EXPORT guild : public managed {
+class DPP_EXPORT guild : public managed  {
 public:
 	/** Shard ID of the guild */
 	uint16_t shard_id;
@@ -504,7 +504,7 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	guild& fill_from_json(nlohmann::json* j);
+	 guild& fill_from_json(nlohmann::json* j);
 
 	/** Read class values from json object
 	 * @param shard originating shard

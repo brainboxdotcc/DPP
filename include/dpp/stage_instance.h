@@ -22,7 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 
 namespace dpp {
@@ -41,7 +41,7 @@ enum stage_privacy_level : uint8_t {
  * @brief A stage instance.
  * Stage instances are like a conference facility, with moderators/speakers and listeners.
  */
-struct DPP_EXPORT stage_instance : public managed {
+struct DPP_EXPORT stage_instance : public managed  {
 	/// The guild id of the associated Stage channel
 	snowflake guild_id;
 	/// The id of the associated Stage channel
@@ -68,7 +68,7 @@ struct DPP_EXPORT stage_instance : public managed {
 	 *
 	 * @return stage_instance& a reference to self
 	 */
-	stage_instance& fill_from_json(const nlohmann::json* j);
+	 stage_instance& fill_from_json(const nlohmann::json* j);
 
 	/**
 	 * @brief Build json for this object

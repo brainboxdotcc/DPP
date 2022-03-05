@@ -23,7 +23,7 @@
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 
 namespace dpp {
@@ -39,7 +39,7 @@ enum webhook_type {
 /**
  * @brief Represents a discord webhook
  */
-class DPP_EXPORT webhook : public managed {
+class DPP_EXPORT webhook : public managed  {
 public:
 	uint8_t type;   		//!< the type of the webhook
 	snowflake guild_id;     	//!< Optional: the guild id this webhook is for
@@ -82,7 +82,7 @@ public:
 	 * @param j JSON data
 	 * @return webhook& Reference to self
 	 */
-	webhook& fill_from_json(nlohmann::json* j);
+	 webhook& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build JSON string from object
