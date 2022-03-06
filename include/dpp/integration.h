@@ -22,8 +22,9 @@
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -76,7 +77,7 @@ struct DPP_EXPORT integration_app {
 /**
  * @brief Represents an integration on a guild, e.g. a connection to twitch.
  */
-class DPP_EXPORT integration : public managed {
+class DPP_EXPORT integration : public managed, public json_interface<integration> {
 public:
 	/** Integration name */
 	std::string name;
@@ -114,9 +115,10 @@ public:
 	integration& fill_from_json(nlohmann::json* j);
 
 	/** Build a json string from this object.
+	 * @param with_id Add ID to output
 	 * @return JSON string of the object
 	 */
-	std::string build_json() const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/** True if emoticons are enabled */
 	bool emoticons_enabled() const;

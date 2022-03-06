@@ -338,6 +338,9 @@ slashcommand& slashcommand::add_option(const command_option &o)
 	return *this;
 }
 
+interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), cache_policy({cp_aggressive, cp_aggressive, cp_aggressive}) {
+}
+
 command_interaction interaction::get_command_interaction() const {
 	if (std::holds_alternative<command_interaction>(data)) {
 		return std::get<command_interaction>(data);
@@ -460,6 +463,7 @@ void from_json(const nlohmann::json& j, interaction& i) {
 
 	if (j.find("message") != j.end()) {
 		const json& m = j["message"];
+		i.msg = message().fill_from_json((json*)&m, i.cache_policy);
 		set_snowflake_not_null(&m, "id", i.message_id);
 	}
 
@@ -615,7 +619,7 @@ interaction_modal_response& interaction_modal_response::fill_from_json(nlohmann:
 	return *this;
 }
 
-std::string interaction_response::build_json() const {
+std::string interaction_response::build_json(bool with_id) const {
 	json j;
 	j["type"] = this->type;
 	if (this->autocomplete_choices.empty()) {
@@ -649,7 +653,7 @@ interaction_modal_response::interaction_modal_response(const std::string& _custo
 	components.push_back(_components);
 }
 
-std::string interaction_modal_response::build_json() const {
+std::string interaction_modal_response::build_json(bool with_id) const {
 	json j;
 	j["type"] = this->type;
 	j["data"] = json::object();

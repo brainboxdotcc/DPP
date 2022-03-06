@@ -21,8 +21,9 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/managed.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/guild.h>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -89,7 +90,7 @@ enum role_permissions : uint64_t {
  * ID as the guild's ID. This is the base permission set applied to all users where no other role or override
  * applies, and is the starting value of the bit mask looped through to calculate channel permissions.
  */
-class DPP_EXPORT role : public managed {
+class DPP_EXPORT role : public managed, public json_interface<role>  {
 public:
 	/**
 	 * @brief Role name
@@ -144,7 +145,7 @@ public:
 	role& set_name(const std::string& n);
 
 	/**
-	 * @brief Set the colour object
+	 * @brief Set the colour
 	 * 
 	 * @param c Colour to set
 	 * @note There is an americanised version of this method, role::set_color().
@@ -153,7 +154,7 @@ public:
 	role& set_colour(uint32_t c);
 
 	/**
-	 * @brief Set the color object
+	 * @brief Set the color
 	 * 
 	 * @param c Colour to set
 	 * @note This is an alias of role::set_colour for American spelling.
@@ -162,7 +163,7 @@ public:
 	role& set_color(uint32_t c);
 
 	/**
-	 * @brief Set the flags object
+	 * @brief Set the flags
 	 * 
 	 * @param f Flags to set
 	 * @return role& reference to self
@@ -170,7 +171,7 @@ public:
 	role& set_flags(uint8_t f);
 
 	/**
-	 * @brief Set the integration id object
+	 * @brief Set the integration id
 	 * 
 	 * @param i Integration ID to set
 	 * @return role& reference to self
@@ -178,7 +179,7 @@ public:
 	role& set_integration_id(snowflake i);
 
 	/**
-	 * @brief Set the bot id object
+	 * @brief Set the bot id
 	 * 
 	 * @param b Bot ID to set
 	 * @return role& reference to self
@@ -186,12 +187,20 @@ public:
 	role& set_bot_id(snowflake b);
 
 	/**
-	 * @brief Set the guild id object
+	 * @brief Set the guild id
 	 * 
 	 * @param gid Guild ID to set
 	 * @return role& reference to self
 	 */
 	role& set_guild_id(snowflake gid);
+
+	/**
+	 * @brief Fill this role from json.
+	 * 
+	 * @param j The json data
+	 * @return A reference to self
+	 */
+	role& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Fill this role from json.
@@ -208,7 +217,7 @@ public:
 	 * @param with_id true if the ID is to be included in the json text
 	 * @return The json of the role
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Get the mention/ping for the role

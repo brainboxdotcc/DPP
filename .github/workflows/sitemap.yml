@@ -1,7 +1,7 @@
 name: Generate dpp.dev sitemap
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 6 * * 6'
 
 jobs:
   updater:

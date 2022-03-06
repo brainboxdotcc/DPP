@@ -50,6 +50,11 @@ role::~role()
 	}
 }
 
+role& role::fill_from_json(nlohmann::json* j)
+{
+	return fill_from_json(0, j);
+}
+
 role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 {
 	this->guild_id = _guild_id;

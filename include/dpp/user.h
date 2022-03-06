@@ -20,10 +20,11 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -78,7 +79,7 @@ enum user_flags : uint32_t {
 /**
  * @brief Represents a user on discord. May or may not be a member of a dpp::guild.
  */
-class DPP_EXPORT user : public managed {
+class DPP_EXPORT user : public managed, public json_interface<user>  {
 public:
 	/** Discord username */
 	std::string username;
@@ -109,6 +110,14 @@ public:
 	 * @return Reference to self
 	 */
 	user& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Convert to JSON string
+	 * 
+	 * @param with_id include ID in output
+	 * @return std::string JSON output
+	 */
+	virtual std::string build_json(bool with_id = true) const;
 
 	/**
 	 * @brief Get the avatar url of the user object
@@ -270,7 +279,7 @@ public:
  * These are not included in dpp::user as additional scopes are needed to fetch them
  * which bots do not normally have.
  */
-class DPP_EXPORT user_identified : public user {
+class DPP_EXPORT user_identified : public user, public json_interface<user_identified> {
 public:
 	utility::iconhash	banner;		//!< Optional: the user's banner hash    identify (may be empty)
 	uint32_t		accent_color;	//!< Optional: the user's banner color encoded as an integer representation of hexadecimal color code    identify (may be empty)
@@ -285,6 +294,14 @@ public:
 	user_identified& fill_from_json(nlohmann::json* j);
 
 	/**
+	 * @brief Convert to JSON string
+	 * 
+	 * @param with_id include ID in output
+	 * @return std::string JSON output
+	 */
+	virtual std::string build_json(bool with_id = true) const;
+
+	/**
 	 * @brief Construct a new user identified object
 	 */
 	user_identified();
@@ -294,13 +311,13 @@ public:
 	 */
 	virtual ~user_identified();
 
-    /**
+	/**
 	 * @brief Get the user identified's banner url if they have one, otherwise returns an empty string
 	 *
 	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized banner is returned.
 	 * @return std::string banner url or empty string
 	 */
-    std::string get_banner_url(uint16_t size = 0) const;
+	std::string get_banner_url(uint16_t size = 0) const;
 
 };
 

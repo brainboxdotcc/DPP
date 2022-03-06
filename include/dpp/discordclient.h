@@ -24,7 +24,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
@@ -163,7 +163,7 @@ protected:
 	 * @brief Disconnect from the connected voice channel on a guild
 	 * 
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
-	 * @param send_json True if we shold send a json message confirming we are leaving the VC
+	 * @param send_json True if we should send a json message confirming we are leaving the VC
 	 * Should be set to false if we already receive this message in an event.
 	 */
 	void disconnect_voice_internal(snowflake guild_id, bool send_json = true);

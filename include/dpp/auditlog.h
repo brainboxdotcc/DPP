@@ -22,8 +22,9 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <optional>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -169,7 +170,7 @@ struct DPP_EXPORT audit_entry {
 /**
  * @brief The auditlog class represents the audit log entry of a guild.
  */
-class DPP_EXPORT auditlog {
+class DPP_EXPORT auditlog : public json_interface<auditlog>  {
 public:
 	std::vector<audit_entry> entries;	//!< Audit log entries
 	
@@ -183,7 +184,7 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	auditlog& fill_from_json(nlohmann::json* j);
+	 auditlog& fill_from_json(nlohmann::json* j);
 };
 
 };

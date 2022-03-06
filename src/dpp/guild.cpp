@@ -180,7 +180,7 @@ bool guild_member::has_animated_guild_avatar() const {
 	return this->flags & gm_animated_avatar;
 }
 
-std::string guild_member::build_json() const {
+std::string guild_member::build_json(bool with_id) const {
 	json j;
 	if (this->communication_disabled_until > 0) {
 		if (this->communication_disabled_until > std::time(nullptr)) {
@@ -380,6 +380,10 @@ void guild::rehash_members() {
 	members = n;
 }
 
+guild& guild::fill_from_json(nlohmann::json* d) {
+	return fill_from_json(nullptr, d);
+}
+
 
 guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	/* NOTE: This can be called by GUILD_UPDATE and also GUILD_CREATE.
@@ -505,7 +509,7 @@ guild_widget& guild_widget::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string guild_widget::build_json() const {
+std::string guild_widget::build_json(bool with_id) const {
 	return json({{"channel_id", channel_id}, {"enabled", enabled}}).dump();
 }
 

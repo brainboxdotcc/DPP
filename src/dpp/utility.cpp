@@ -21,6 +21,7 @@
 #include <dpp/utility.h>
 #include <dpp/stringops.h>
 #include <dpp/exception.h>
+#include <dpp/version.h>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
@@ -73,7 +74,7 @@ namespace dpp {
 			localtime_r(&t, &timedata);
 			std::stringstream s;
 			s << std::put_time(&timedata, "%Y-%m-%d %H:%M:%S");
-			return s.str();
+			return trim(s.str());
 #endif
 		}
 
@@ -90,6 +91,9 @@ namespace dpp {
 		}
 
 		uptime::uptime() : days(0), hours(0), mins(0), secs(0) {
+		}
+
+		uptime::uptime(double diff) : uptime((time_t)diff) {
 		}
 
 		uptime::uptime(time_t diff) : uptime() {
@@ -357,11 +361,102 @@ namespace dpp {
 		std::function<void(const dpp::log_t&)> cout_logger() {
 			return [](const dpp::log_t& event) {
 				if (event.severity > dpp::ll_trace) {
-					std::cout << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+					std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
 				}
 			};
 		}
 
+		/* Hexadecimal sequence for URL encoding */
+		static const char* hex = "0123456789ABCDEF";
+
+		std::string url_encode(const std::string &value) {
+			// Reserve worst-case encoded length of string, input length * 3
+			std::string escaped(value.length() * 3, '\0');
+			char* data = escaped.data();
+			for (auto i = value.begin(); i != value.end(); ++i) {
+				unsigned char c = (unsigned char)(*i);
+				if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+					// Keep alphanumeric and other accepted characters intact
+					*data++ = c;
+				} else {
+					// Any other characters are percent-encoded
+					*data++ = '%';
+					*data++ = hex[c >> 4];
+					*data++ = hex[c & 0x0f];
+				}
+			}
+			*data = 0;
+			return escaped.data();
+		}
+
+		std::string make_url_parameters(const std::map<std::string, std::string>& parameters) {
+			std::string output;
+			for(auto& [k, v] : parameters) {
+				if (!k.empty() && !v.empty()) {
+					output.append("&").append(k).append("=").append(url_encode(v));
+				}
+			}
+			if (!output.empty()) {
+				output[0] = '?';
+			}
+			return output;
+		}
+
+		std::string make_url_parameters(const std::map<std::string, uint64_t>& parameters) {
+			std::map<std::string, std::string> params;
+			for(auto& [k, v] : parameters) {
+				if (v != 0) {
+					params[k] = std::to_string(v);
+				}
+			}
+			return make_url_parameters(params);
+		}
+
+		std::string markdown_escape(const std::string& text, bool escape_code_blocks) {
+			/**
+			 * @brief Represents the current state of the finite state machine
+			 * for the markdown_escape function.
+			 */
+			enum md_state {
+				/// normal text
+				md_normal = 0,
+				/// a paragraph code block, represented by three backticks
+				md_big_code_block = 1,
+				/// an inline code block, represented by one backtick
+				md_small_code_block = 2,
+			};
+
+			md_state state = md_normal;
+			std::string output;
+			const std::string markdown_chars("\\*_|~[]()");
+
+			for (size_t n = 0; n < text.length(); ++n) {
+				if (text.substr(n, 3) == "```") {
+					/* Start/end a paragraph code block */
+					output += (escape_code_blocks ? "\\`\\`\\`" : "```");
+					n += 2;
+					state = (state == md_normal) ? md_big_code_block : md_normal;
+				} else if (text[n] == '`' && (escape_code_blocks || state != md_big_code_block)) {
+					/* Start/end of an inline code block */
+					output += (escape_code_blocks ? "\\`" : "`");
+					state = (state == md_normal) ? md_small_code_block : md_normal;
+				} else {
+					/* Normal text */
+					if (escape_code_blocks || state == md_normal) {
+						/* Markdown sequence characters */
+						if (markdown_chars.find(text[n]) != std::string::npos) {
+							output += "\\";
+						}
+					}
+					output += text[n];
+				}
+			}
+			return output;
+		}
+
+		std::string version() {
+			return DPP_VERSION_TEXT;
+		}
 	};
 
 };

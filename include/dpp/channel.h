@@ -25,24 +25,29 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_interface.h>
 #include <unordered_map>
 
 namespace dpp {
 
 /** @brief Flag integers as received from and sent to discord */
 enum channel_type {
-	GUILD_TEXT	= 0,	//!< a text channel within a server
-	DM		= 1,	//!< a direct message between users
-	GUILD_VOICE	= 2,	//!< a voice channel within a server
-	GROUP_DM	= 3,	//!< a direct message between multiple users
-	GUILD_CATEGORY	= 4,	//!< an organizational category that contains up to 50 channels
-	GUILD_NEWS	= 5,	//!< a channel that users can follow and crosspost into their own server
-	GUILD_STORE	= 6,	//!< a channel in which game developers can sell their game on Discord
-	GUILD_NEWS_THREAD	= 10, //!< a temporary sub-channel within a GUILD_NEWS channel
-	GUILD_PUBLIC_THREAD	= 11, //!< a temporary sub-channel within a GUILD_TEXT channel
-	GUILD_PRIVATE_THREAD	= 12, //!< a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
-	GUILD_STAGE	= 13	//!< a "stage" channel, like a voice channel with one authorised speaker
+	GUILD_TEXT		= 0,	//!< a text channel within a server
+	DM			= 1,	//!< a direct message between users
+	GUILD_VOICE		= 2,	//!< a voice channel within a server
+	GROUP_DM		= 3,	//!< a direct message between multiple users
+	GUILD_CATEGORY		= 4,	//!< an organizational category that contains up to 50 channels
+	GUILD_NEWS		= 5,	//!< a channel that users can follow and crosspost into their own server
+	/**
+	 * @brief a channel in which game developers can sell their game on Discord
+	 * @deprecated store channels are deprecated by Discord
+	 */
+	GUILD_STORE		= 6,
+	GUILD_NEWS_THREAD	= 10,	//!< a temporary sub-channel within a GUILD_NEWS channel
+	GUILD_PUBLIC_THREAD	= 11,	//!< a temporary sub-channel within a GUILD_TEXT channel
+	GUILD_PRIVATE_THREAD	= 12,	//!< a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
+	GUILD_STAGE		= 13	//!< a "stage" channel, like a voice channel with one authorised speaker
 };
 /** @brief Our flags as stored in the object */
 enum channel_flags : uint16_t {
@@ -66,7 +71,10 @@ enum channel_flags : uint16_t {
 	c_category =		0b0000000000100000,
 	/// News channel
 	c_news =		0b0000000001000000,
-	/// Store page
+	/**
+	 * @brief a channel in which game developers can sell their game on Discord
+	 * @deprecated store channels are deprecated by Discord
+	 */
 	c_store =		0b0000000010000000,
 	/// Stage channel
 	c_stage =		0b0000000011000000,
@@ -124,7 +132,7 @@ struct DPP_EXPORT thread_metadata {
 /**
  * @brief represents membership of a user with a thread
  */
-struct DPP_EXPORT thread_member 
+struct DPP_EXPORT thread_member  
 {
 	/// ID of the thread member is part of
 	snowflake thread_id;
@@ -140,7 +148,7 @@ struct DPP_EXPORT thread_member
 	 * @param j json to read values from
 	 * @return A reference to self	
 	 */
-	thread_member& fill_from_json(nlohmann::json* j);
+	 thread_member& fill_from_json(nlohmann::json* j);
 };
 
 /** @brief A group of thread member objects*/
@@ -151,7 +159,7 @@ typedef std::unordered_map<snowflake, thread_member> thread_member_map;
  * There are one of these for every channel type except threads. Threads are
  * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
  */ 
-class DPP_EXPORT channel : public managed {
+class DPP_EXPORT channel : public managed, public json_interface<channel>  {
 public:
 	/** Flags bitmap */
 	uint16_t flags;
@@ -228,7 +236,7 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	channel& fill_from_json(nlohmann::json* j);
+	 channel& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build json for this channel object
@@ -444,6 +452,7 @@ public:
 
 	/**
 	 * @brief Returns true if the channel is a store channel
+	 * @deprecated store channels are deprecated by Discord
 	 * 
 	 * @return true if store channel
 	 */

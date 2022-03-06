@@ -216,6 +216,13 @@ namespace dpp {
 			uptime(time_t diff);
 
 			/**
+			 * @brief Construct a new uptime object
+			 * 
+			 * @param diff A time_t to initialise the object from
+			 */
+			uptime(double diff);
+
+			/**
 			 * @brief Get uptime as string
 			 * 
 			 * @return std::string Uptime as string
@@ -333,5 +340,51 @@ namespace dpp {
 		 * @return Invite URL
 		 */
 		std::string DPP_EXPORT bot_invite_url(const snowflake bot_id, const uint64_t permissions = 0, const std::vector<std::string>& scopes = {"bot", "applications.commands"});
+
+		/**
+		 * @brief Escapes markdown sequences in a string
+		 * 
+		 * @param text Text to escape
+		 * @param escape_code_blocks If set to false, then code blocks are not escaped.
+		 * This means that you can still use a code block, and the text within will be left as-is.
+		 * If set to true, code blocks will also be escaped so that ` symbol may be used as a normal
+		 * character.
+		 * @return std::string escaped text
+		 */
+		std::string DPP_EXPORT markdown_escape(const std::string& text, bool escape_code_blocks = false);
+
+		/**
+		 * @brief Encodes a url parameter similar to php urlencode()
+		 * 
+		 * @param value String to encode
+		 * @return std::string URL encoded string
+		 */
+		std::string url_encode(const std::string &value);
+
+		/**
+		 * @brief Returns the library's version string
+		 * 
+		 * @return std::string version
+		 */
+		std::string version();
+
+		/**
+		 * @brief Build a URL parameter string e.g. "a=b&c=d&e=f" from a map of key/value pairs.
+		 * Entries with empty key names or values are omitted.
+		 * 
+		 * @param parameters parameters to create a url query string for
+		 * @return std::string A correctly encoded url query string
+		 */
+		std::string make_url_parameters(const std::map<std::string, std::string>& parameters);
+
+		/**
+		 * @brief Build a URL parameter string e.g. "a=b&c=d&e=f" from a map of key/value pairs.
+		 * Entries with empty key names or zero values are omitted.
+		 * 
+		 * @param parameters parameters to create a url query string for
+		 * @return std::string A correctly encoded url query string
+		 */
+		std::string make_url_parameters(const std::map<std::string, uint64_t>& parameters);
+
 	};
 };

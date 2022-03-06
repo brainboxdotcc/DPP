@@ -57,6 +57,14 @@ user::~user()
 {
 }
 
+std::string user::build_json(bool with_id) const {
+	return "";
+}
+
+std::string user_identified::build_json(bool with_id) const {
+	return "";
+}
+
 user_identified::user_identified() : user(), accent_color(0), verified(false) {
 
 }

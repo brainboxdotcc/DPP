@@ -18,56 +18,28 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
 
 namespace dpp {
 
 void cluster::guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "emojis", m_post, newemoji.build_json(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("emoji", emoji().fill_from_json(&j), http));
-		}
-	});
+	rest_request<emoji>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis", m_post, newemoji.build_json(), callback);
 }
 
 void cluster::guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "emojis/" + std::to_string(emoji_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis/" + std::to_string(emoji_id), m_delete, "", callback);
 }
 
 void cluster::guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "emojis/" + std::to_string(newemoji.id), m_patch, newemoji.build_json(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("emoji", emoji().fill_from_json(&j), http));
-		}
-	});
+	rest_request<emoji>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis/" + std::to_string(newemoji.id), m_patch, newemoji.build_json(), callback);
 }
 
 void cluster::guild_emoji_get(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "emojis/" + std::to_string(emoji_id), m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("emoji", emoji().fill_from_json(&j), http));
-		}
-	});
+	rest_request<emoji>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis/" + std::to_string(emoji_id), m_get, "", callback);
 }
 
 void cluster::guild_emojis_get(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "emojis", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			emoji_map emojis;
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error()) {
-				for (auto & curr_emoji : j) {
-					emojis[snowflake_not_null(&curr_emoji, "id")] = emoji().fill_from_json(&curr_emoji);
-				}
-			}
-			callback(confirmation_callback_t("emoji_map", emojis, http));
-		}
-	});
+	rest_request_list<emoji>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis", m_get, "", callback);
 }
 
 };

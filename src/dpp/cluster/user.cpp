@@ -19,9 +19,8 @@
  *
  ************************************************************************************/
 #include <dpp/user.h>
-#include <dpp/cluster.h>
 #include <dpp/exception.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
 
 namespace dpp {
 
@@ -41,28 +40,15 @@ void cluster::current_user_edit(const std::string &nickname, const std::string& 
 		}
 		j["avatar"] = "data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length());
 	}
-	this->post_rest(API_PATH "/users", "@me", "", m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("user", user().fill_from_json(&j), http));
-		}
-	});
+	rest_request<user>(this, API_PATH "/users", "@me", "", m_patch, j.dump(), callback);
 }
 
-
 void cluster::current_application_get(command_completion_event_t callback) {
-	this->post_rest(API_PATH "/oauth2/applications", "@me", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("application", application().fill_from_json(&j), http));
-		}
-	});
+	rest_request<application>(this, API_PATH "/oauth2/applications", "@me", "", m_get, "", callback);
 }
 
 void cluster::current_user_get(command_completion_event_t callback) {
-	this->post_rest(API_PATH "/users", "@me", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("user_identified", user_identified().fill_from_json(&j), http));
-		}
-	});
+	rest_request<user_identified>(this, API_PATH "/users", "@me", "", m_get, "", callback);
 }
 
 void cluster::current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress, time_t request_to_speak_timestamp, command_completion_event_t callback) {
@@ -78,11 +64,7 @@ void cluster::current_user_set_voice_state(snowflake guild_id, snowflake channel
 	} else {
 		j["request_to_speak_timestamp"] = json::value_t::null;
 	}
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/voice-states/@me", m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/@me", m_patch, j.dump(), callback);
 }
 
 void cluster::user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress, command_completion_event_t callback) {
@@ -90,59 +72,23 @@ void cluster::user_set_voice_state(snowflake user_id, snowflake guild_id, snowfl
 		{"channel_id", channel_id},
 		{"suppress", suppress}
 	});
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/voice-states/" + std::to_string(user_id), m_patch, j.dump(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/voice-states/" + std::to_string(user_id), m_patch, j.dump(), callback);
 }
 
 void cluster::current_user_connections_get(command_completion_event_t callback) {
-	this->post_rest(API_PATH "/users", "@me", "connections", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			connection_map connections;
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error()) {
-				for (auto & curr_conn : j) {
-					connections[snowflake_not_null(&curr_conn, "id")] = connection().fill_from_json(&curr_conn);
-				}
-			}
-			callback(confirmation_callback_t("connection_map", connections, http));
-		}
-	});
+	rest_request_list<connection>(this, API_PATH "/users", "@me", "connections", m_get, "", callback);
 }
 
 void cluster::current_user_get_guilds(command_completion_event_t callback) {
-	this->post_rest(API_PATH "/users", "@me", "guilds", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			guild_map guilds;
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error()) {
-				for (auto & curr_guild : j) {
-					guilds[snowflake_not_null(&curr_guild, "id")] = guild().fill_from_json(nullptr, &curr_guild);
-				}
-			}
-			callback(confirmation_callback_t("guild_map", guilds, http));
-		}
-	});
+	rest_request_list<guild>(this, API_PATH "/users", "@me", "guilds", m_get, "", callback);
 }
-
 
 void cluster::current_user_leave_guild(snowflake guild_id, command_completion_event_t callback) {
-	 this->post_rest(API_PATH "/users", "@me", "guilds/" + std::to_string(guild_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	 });
+	rest_request<confirmation>(this, API_PATH "/users", "@me", "guilds/" + std::to_string(guild_id), m_delete, "", callback);
 }
 
-
 void cluster::user_get(snowflake user_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/users", std::to_string(user_id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("user_identified", user_identified().fill_from_json(&j), http));
-		}
-	});
+	rest_request<user_identified>(this, API_PATH "/users", std::to_string(user_id), "", m_get, "", callback);
 }
 
 };

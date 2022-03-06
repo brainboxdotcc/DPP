@@ -18,17 +18,12 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
 
 namespace dpp {
 
 void cluster::get_gateway_bot(command_completion_event_t callback) {
-	this->post_rest(API_PATH "/gateway", "bot", "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("gateway", gateway(&j), http));
-		}
-	});
+	rest_request<gateway>(this, API_PATH "/gateway", "bot", "", m_get, "", callback);
 }
 
 };

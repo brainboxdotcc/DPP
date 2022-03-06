@@ -46,7 +46,7 @@ voiceregion& voiceregion::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string voiceregion::build_json() const {
+std::string voiceregion::build_json(bool with_id) const {
 	return json({
 		{ "id", id },
 		{ "name", name },

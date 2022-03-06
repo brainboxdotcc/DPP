@@ -27,7 +27,8 @@
 #include <dpp/guild.h>
 #include <optional>
 #include <variant>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -202,7 +203,7 @@ struct DPP_EXPORT select_option {
  * guilds. The beta is **closed**. When this feature is
  * released, then the functionality will work correctly.
  */
-class DPP_EXPORT component {
+class DPP_EXPORT component : public json_interface<component> {
 public:
 	/** Component type, either a button or action row
 	 */
@@ -786,7 +787,7 @@ enum sticker_format : uint8_t {
 /**
  * @brief Represents stickers received in messages
  */
-struct DPP_EXPORT sticker : public managed {
+struct DPP_EXPORT sticker : public managed, public json_interface<sticker> {
 	/** Optional: for standard stickers, id of the pack the sticker is from
 	 */
 	snowflake	pack_id;
@@ -837,7 +838,7 @@ struct DPP_EXPORT sticker : public managed {
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	std::string build_json(bool with_id = true) const;
+	virtual std::string build_json(bool with_id = true) const;
 
 	/**
 	 * @brief Set the filename
@@ -860,7 +861,7 @@ struct DPP_EXPORT sticker : public managed {
 /**
  * @brief Represents a sticker pack (the built in groups of stickers that all nitro users get to use)
  */
-struct DPP_EXPORT sticker_pack : public managed {
+struct DPP_EXPORT sticker_pack : public managed, public json_interface<sticker_pack> {
 	/// the stickers in the pack
 	std::map<snowflake, sticker> stickers;
 	/// name of the sticker pack
@@ -889,7 +890,7 @@ struct DPP_EXPORT sticker_pack : public managed {
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	std::string build_json(bool with_id = true) const;
+	virtual std::string build_json(bool with_id = true) const;
 
 };
 

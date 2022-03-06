@@ -25,6 +25,41 @@ int main()
 {
 	std::string token(get_token());
 
+	std::string test_to_escape = "*** _This is a test_ ***\n```cpp\n\
+int main() {\n\
+    /* Comment */\n\
+    int answer = 42;\n\
+    return answer; // ___\n\
+};\n\
+```\n\
+Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
+
+	set_test("MD_ESC_1", false);
+	set_test("MD_ESC_2", false);
+	std::string escaped1 = dpp::utility::markdown_escape(test_to_escape);
+	std::string escaped2 = dpp::utility::markdown_escape(test_to_escape, true);
+	set_test("MD_ESC_1", escaped1 == "\\*\\*\\* \\_This is a test\\_ \\*\\*\\*\n\
+```cpp\n\
+int main() {\n\
+    /* Comment */\n\
+    int answer = 42;\n\
+    return answer; // ___\n\
+};\n\
+```\n\
+Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ `small *code* block`\n");
+	set_test("MD_ESC_2", escaped2 == "\\*\\*\\* \\_This is a test\\_ \\*\\*\\*\n\
+\\`\\`\\`cpp\n\
+int main\\(\\) {\n\
+    /\\* Comment \\*/\n\
+    int answer = 42;\n\
+    return answer; // \\_\\_\\_\n\
+};\n\
+\\`\\`\\`\n\
+Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* block\\`\n");
+
+	set_test("URLENC", false);
+	set_test("URLENC", dpp::utility::url_encode("ABC123_+\\|$*/AAA[]😄") == "ABC123_%2B%5C%7C%24%2A%2FAAA%5B%5D%F0%9F%98%84");
+
 	dpp::http_connect_info hci;
 	set_test("HOSTINFO", false);
 

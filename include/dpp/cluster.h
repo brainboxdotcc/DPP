@@ -29,7 +29,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/misc-enum.h>
 #include <dpp/timer.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/discordclient.h>
 #include <dpp/voiceregion.h>
 #include <dpp/dtemplate.h>
@@ -58,22 +58,41 @@ typedef std::map<uint32_t, class discord_client*> shard_list;
 struct DPP_EXPORT gateway {
 	/// Gateway websocket url
 	std::string url;
+
 	/// Number of suggested shards to start
 	uint32_t shards;
+
 	/// Total number of sessions that can be started
 	uint32_t session_start_total;
+
 	/// How many sessions are left
 	uint32_t session_start_remaining;
+
 	/// How many seconds until the session start quota resets
 	uint32_t session_start_reset_after;
+
 	/// How many sessions can be started at the same time
 	uint32_t session_start_max_concurrency;
+
 	/**
 	 * @brief Construct a new gateway object
 	 *
 	 * @param j JSON data to construct from
 	 */
 	gateway(nlohmann::json* j);
+
+	/**
+	 * @brief Construct a new gateway object
+	 */
+	gateway();
+
+	/**
+	 * @brief Fill this object from json
+	 * 
+	 * @param j json to fill from
+	 * @return gateway& reference to self
+	 */
+	gateway& fill_from_json(nlohmann::json* j);
 };
 
 /**
@@ -191,10 +210,9 @@ struct DPP_EXPORT error_info {
  * @brief The results of a REST call wrapped in a convenient struct
  */
 struct DPP_EXPORT confirmation_callback_t {
-	/** Returned data type in confirmable_t, used to double check to avoid an exception if you wish */
-	std::string type;
 	/** Information about the HTTP call used to make the request */
 	http_request_completion_t http_info;
+
 	/** Value returned, wrapped in variant */
 	confirmable_t value;
 
@@ -206,11 +224,10 @@ struct DPP_EXPORT confirmation_callback_t {
 	/**
 	 * @brief Construct a new confirmation callback object
 	 *
-	 * @param _type The type of callback that is encapsulated in the confirmable_t
 	 * @param _value The value to encapsulate in the confirmable_t
 	 * @param _http The HTTP metadata from the REST call
 	 */
-	confirmation_callback_t(const std::string &_type, const confirmable_t& _value, const http_request_completion_t& _http);
+	confirmation_callback_t(const confirmable_t& _value, const http_request_completion_t& _http);
 
 	/**
 	 * @brief Returns true if the call resulted in an error rather than a legitimate value in the
@@ -285,6 +302,8 @@ extern DPP_EXPORT event_handle __next_handle;
  */
 template<class T> class event_router_t {
 private:
+	friend class cluster;
+
 	/**
 	 * @brief Thread safety mutex
 	 */
@@ -296,6 +315,24 @@ private:
 	 * as std::map is an ordered container.
 	 */
 	std::map<event_handle, std::function<void(const T&)>> dispatch_container;
+	/**
+	 * @brief A function to be called whenever the method is called, to check
+	 * some condition that is required for this event to trigger correctly.
+	 */
+	std::function<void()> warning;
+
+protected:
+
+	/**
+	 * @brief Set the warning callback object used to check that this
+	 * event is capable of running properly
+	 * 
+	 * @param warning_function A checking function to call
+	 */
+	void set_warning_callback(std::function<void()> warning_function) {
+		warning = warning_function;
+	}
+
 public:
 	/**
 	 * @brief Construct a new event_router_t object.
@@ -310,6 +347,9 @@ public:
 	 * @param event Class to pass as parameter to all listeners.
 	 */
 	void call(const T& event) const {
+		if (warning) {
+			warning();
+		}
 		std::shared_lock l(lock);
 		std::for_each(dispatch_container.begin(), dispatch_container.end(), [&](auto &ev) {
 			if (!event.is_cancelled()) {
@@ -366,6 +406,9 @@ public:
 	 * detach the listener from the event later if necessary.
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
+		if (warning) {
+			warning();
+		}
 		std::unique_lock l(lock);
 		event_handle h = __next_handle++;
 		dispatch_container.emplace(h, func);
@@ -1434,7 +1477,7 @@ public:
 	 *
 	 * @param s Slash command to create
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void global_command_create(const slashcommand &s, command_completion_event_t callback = {});
 
@@ -1443,7 +1486,7 @@ public:
 	 *
 	 * @param id The ID of the slash command
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void global_command_get(snowflake id, command_completion_event_t callback = {});
 
@@ -1463,7 +1506,7 @@ public:
 	 * @param s Slash command to create
 	 * @param guild_id Guild ID to create the slash command in
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
 
@@ -1476,7 +1519,7 @@ public:
 	 * New guild commands will be available in the guild immediately. If the command did not already exist, it will count toward daily application command create limits.
 	 * @param guild_id Guild ID to create/update the slash commands in
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a list of dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a list of dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = {});
 
@@ -1491,7 +1534,7 @@ public:
 	 * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
 	 * Commands that do not already exist will count toward daily application command create limits.
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a list of dpp::slashcommmand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a list of dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback = {});
 
@@ -1636,16 +1679,11 @@ public:
 	 * @param around Messages should be retrieved around this ID if this is set to non-zero
 	 * @param before Messages before this ID should be retrieved if this is set to non-zero
 	 * @param after Messages after this ID should be retrieved if this is set to non-zero
-	 * @param limit This number of messages maximum should be returned.
-	 * If the number passed for `limit` is less than 100, then this will be executed in one REST call. If you
-	 * specify a limit greater than 100, then there will be one REST call per 100 messages.
-	 * @warning if you request a large number of messages this can and will take a long time. You should not
-	 * constantly do this, or you may get banned from the API by Discord as repeated calls to an endpoint
-	 * are strongly discouraged!
+	 * @param limit This number of messages maximum should be returned, up to a maximum of 100.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint32_t limit, command_completion_event_t callback);
+	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint64_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Send a message to a channel. The callback function is called when the message has been sent

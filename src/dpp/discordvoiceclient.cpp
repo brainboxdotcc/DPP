@@ -32,7 +32,6 @@
 #include <thread>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt-minimal.h>
-#include <zlib.h>
 
 #ifdef HAVE_VOICE
 #include <sodium.h>

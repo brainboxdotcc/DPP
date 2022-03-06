@@ -33,14 +33,6 @@
 namespace dpp {
 
 /**
- * @brief Encodes a url parameter similar to php urlencode()
- * 
- * @param value String to encode
- * @return * std::string URL encoded string
- */
-std::string url_encode(const std::string &value);
-
-/**
  * @brief Error values. Most of these are currently unused in https_client.
  */
 enum http_error {

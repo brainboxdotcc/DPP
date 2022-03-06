@@ -21,14 +21,15 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
 /**
  * @brief Defines a request to count prunable users, or start a prune operation
  */
-struct DPP_EXPORT prune {
+struct DPP_EXPORT prune : public json_interface<prune> {
 	/** Number of days to include in the prune
 	 */
 	uint32_t days = 0;
@@ -44,13 +45,13 @@ struct DPP_EXPORT prune {
 	 * @param j JSON object to fill from
 	 * @return A reference to self
 	 */
-	prune& fill_from_json(nlohmann::json* j);
+	 prune& fill_from_json(nlohmann::json* j);
 
 	/** Build JSON from this object.
 	 * @param with_prune_count True if the prune count boolean is to be set in the built JSON
 	 * @return The JSON text of the prune object
 	 */
-	std::string build_json(bool with_prune_count) const;
+	virtual std::string build_json(bool with_prune_count = false) const;
 
 };
 

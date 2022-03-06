@@ -19,38 +19,21 @@
  *
  ************************************************************************************/
 #include <dpp/role.h>
-#include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
 
 namespace dpp {
 
 void cluster::role_create(const class role &r, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(r.guild_id), "roles", m_post, r.build_json(), [r, callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
-		}
-	});
+	rest_request<role>(this, API_PATH "/guilds", std::to_string(r.guild_id), "roles", m_post, r.build_json(), callback);
 }
-
-
 
 void cluster::role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "roles/" + std::to_string(role_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "roles/" + std::to_string(role_id), m_delete, "", callback);
 }
-
 
 void cluster::role_edit(const class role &r, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(r.guild_id), "roles/" + std::to_string(r.id) , m_patch, r.build_json(true), [r, callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("role", role().fill_from_json(r.guild_id, &j), http));
-		}
-	});
+	rest_request<role>(this, API_PATH "/guilds", std::to_string(r.guild_id), "roles/" + std::to_string(r.id) , m_patch, r.build_json(true), callback);
 }
-
 
 void cluster::roles_edit_position(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback) {
 	if (roles.empty()) {
@@ -60,34 +43,11 @@ void cluster::roles_edit_position(snowflake guild_id, const std::vector<role> &r
 	for (auto & r : roles) {
 		j.push_back({ {"id", r.id}, {"position", r.position} });
 	}
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "roles", m_patch, j.dump(), [guild_id, callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			role_map roles;
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error()) {
-				for (auto & curr_role : j) {
-					roles[snowflake_not_null(&curr_role, "id")] = role().fill_from_json(guild_id, &curr_role);
-				}
-			}
-			callback(confirmation_callback_t("role_map", roles, http));
-		}
-	});
+	rest_request_list<role>(this, API_PATH "/guilds", std::to_string(guild_id), "roles", m_patch, j.dump(), callback);
 }
 
-
 void cluster::roles_get(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "roles", m_get, "", [guild_id, callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			role_map roles;
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error()) {
-				for (auto & curr_role : j) {
-					roles[snowflake_not_null(&curr_role, "id")] = role().fill_from_json(guild_id, &curr_role);
-				}
-			}
-			callback(confirmation_callback_t("role_map", roles, http));
-		}
-	});
+	rest_request_list<role>(this, API_PATH "/guilds", std::to_string(guild_id), "roles", m_get, "", callback);
 }
 
 };
