@@ -1047,11 +1047,15 @@ std::string sticker_pack::build_json(bool with_id) const {
 	return j.dump();
 }
 
-std::string sticker::get_sticker_url() const {
-	return fmt::format("{}/stickers/{}.{}",
-					   utility::cdn_host,
-					   this->id,
-					   this->format_type == sticker_format::sf_lottie ? "json" : "png");
+std::string sticker::get_url(bool accept_lottie) const {
+	if (this->format_type == sticker_format::sf_lottie && !accept_lottie) {
+		return std::string();
+	} else {
+		return fmt::format("{}/stickers/{}.{}",
+						   utility::cdn_host,
+						   this->id,
+						   this->format_type == sticker_format::sf_lottie ? "json" : "png");
+	}
 }
 
 sticker& sticker::set_filename(const std::string &fn) {

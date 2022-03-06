@@ -842,9 +842,10 @@ struct DPP_EXPORT sticker : public managed {
 	/**
 	 * @brief Get the sticker url
 	 *
-	 * @return std::string icon url
+	 * @param accept_lottie Whether to allow that [lottie](https://airbnb.io/lottie/#/) (json format) can be returned or not
+	 * @return std::string The sticker url or an empty string when its a lottie and accept_lottie is false
 	 */
-	std::string get_sticker_url() const;
+	std::string get_url(bool accept_lottie = true) const;
 
 	/**
 	 * @brief Set the filename
