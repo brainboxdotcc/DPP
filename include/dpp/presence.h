@@ -24,6 +24,7 @@
 #include <dpp/emoji.h>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -302,7 +303,7 @@ public:
 /**
  * @brief Represents user presence, e.g. what game they are playing and if they are online
  */
-class DPP_EXPORT presence   {
+class DPP_EXPORT presence : public json_interface<presence> {
 public:
 	/** The user the presence applies to */
 	snowflake	user_id;
@@ -351,9 +352,10 @@ public:
 	 * and includes websocket opcode 3. You will not get what you expect if you call this on a user's
 	 * presence received from on_presence_update or on_guild_create!
 	 * 
+	 * @param with_id Add ID to output
 	 * @return The JSON text of the presence
 	 */
-	std::string build_json() const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/** The users status on desktop
 	 * @return The user's status on desktop

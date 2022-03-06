@@ -619,7 +619,7 @@ interaction_modal_response& interaction_modal_response::fill_from_json(nlohmann:
 	return *this;
 }
 
-std::string interaction_response::build_json() const {
+std::string interaction_response::build_json(bool with_id) const {
 	json j;
 	j["type"] = this->type;
 	if (this->autocomplete_choices.empty()) {
@@ -653,7 +653,7 @@ interaction_modal_response::interaction_modal_response(const std::string& _custo
 	components.push_back(_components);
 }
 
-std::string interaction_modal_response::build_json() const {
+std::string interaction_modal_response::build_json(bool with_id) const {
 	json j;
 	j["type"] = this->type;
 	j["data"] = json::object();

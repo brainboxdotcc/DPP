@@ -25,6 +25,7 @@
 #include <dpp/managed.h>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -39,7 +40,7 @@ enum webhook_type {
 /**
  * @brief Represents a discord webhook
  */
-class DPP_EXPORT webhook : public managed  {
+class DPP_EXPORT webhook : public managed, public json_interface<webhook>  {
 public:
 	uint8_t type;   		//!< the type of the webhook
 	snowflake guild_id;     	//!< Optional: the guild id this webhook is for
@@ -90,7 +91,7 @@ public:
 	 * @param with_id Include the ID of the webhook in the json
 	 * @return std::string JSON encoded object
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Base64 encode image data and allocate it to image_data

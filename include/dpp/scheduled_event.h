@@ -25,6 +25,7 @@
 #include <dpp/user.h>
 #include <dpp/guild.h>
 #include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -206,7 +207,7 @@ struct DPP_EXPORT scheduled_event : public managed  {
 	 *
 	 * @return std::string Dumped json of this object
 	 */
-	std::string const build_json(bool with_id = false) const;
+	virtual std::string const build_json(bool with_id = false) const;
 };
 
 /**

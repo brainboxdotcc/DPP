@@ -26,6 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/user.h>
 #include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -87,7 +88,7 @@ public:
 /**
  * @brief The application class represents details of a bot application
  */
-class DPP_EXPORT application : public managed  {
+class DPP_EXPORT application : public managed, public json_interface<application>  {
 public:
 	std::string		name;			//!< the name of the app
 	utility::iconhash	icon;			//!< the icon hash of the app (may be empty)
@@ -117,7 +118,7 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	 application& fill_from_json(nlohmann::json* j);
+	application& fill_from_json(nlohmann::json* j);
 };
 
 /** A group of applications.

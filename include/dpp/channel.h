@@ -26,6 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
 #include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_interface.h>
 #include <unordered_map>
 
 namespace dpp {
@@ -158,7 +159,7 @@ typedef std::unordered_map<snowflake, thread_member> thread_member_map;
  * There are one of these for every channel type except threads. Threads are
  * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
  */ 
-class DPP_EXPORT channel : public managed  {
+class DPP_EXPORT channel : public managed, public json_interface<channel>  {
 public:
 	/** Flags bitmap */
 	uint16_t flags;

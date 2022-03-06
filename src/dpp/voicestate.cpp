@@ -83,7 +83,7 @@ bool voicestate::is_suppressed() const {
 	return flags & vs_suppress;
 }
 
-std::string voicestate::build_json() const {
+std::string voicestate::build_json(bool with_id) const {
 	return json({}).dump();
 }
 

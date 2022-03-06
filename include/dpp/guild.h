@@ -26,6 +26,7 @@
 #include <dpp/voicestate.h>
 #include <string>
 #include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -176,9 +177,10 @@ public:
 	/**
 	 * @brief Build json string for the member object
 	 * 
+	 * @param with_id Add ID to output
 	 * @return std::string json string
 	 */
-	std::string build_json() const;
+	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Returns true if the user is in time-out (communication disabled)
@@ -366,7 +368,7 @@ typedef std::unordered_map<snowflake, guild_member> members_container;
 /**
  * @brief Represents a guild on Discord (AKA a server)
  */
-class DPP_EXPORT guild : public managed  {
+class DPP_EXPORT guild : public managed, public json_interface<guild>  {
 public:
 	/** Shard ID of the guild */
 	uint16_t shard_id;
@@ -517,7 +519,7 @@ public:
 	 * @param with_id True if an ID is to be included in the JSON
 	 * @return JSON string
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Get the base permissions for a member on this guild,
@@ -799,9 +801,10 @@ public:
 	/**
 	 * @brief Build json for a guild widget
 	 *
+	 * @param with_id Add ID to output
 	 * @return std::string guild widget stringified json
 	 */
-	std::string build_json() const;
+	virtual std::string build_json(bool with_id = false) const;
 };
 
 /**
