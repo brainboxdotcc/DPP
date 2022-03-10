@@ -32,7 +32,7 @@
 namespace dpp {
 
 https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout)
-	: ssl_client(hostname, fmt::format("{:d}", port), plaintext_connection),
+	: ssl_client(hostname, fmt::format("{:d}", port), plaintext_connection, true),
 	state(HTTPS_HEADERS),
 	request_type(verb),
 	path(urlpath),
@@ -42,8 +42,8 @@ https_client::https_client(const std::string &hostname, uint16_t port,  const st
 	status(0),
 	timeout(request_timeout)
 {
+	nonblocking = false;
 	timeout = time(nullptr) + request_timeout;
-	nonblocking = true;
 	https_client::connect();
 }
 
@@ -57,10 +57,10 @@ void https_client::connect()
 	this->write(
 		fmt::format(
 
-			"{} {} HTTP/1.0\r\n"
+			"{} {} HTTP/1.1\r\n"
 			"Host: {}\r\n"
 			"pragma: no-cache\r\n"
-			"Connection: close\r\n"
+			"Connection: keep-alive\r\n"
 			"Content-Length: {}\r\n{}"
 			"\r\n{}",
 
@@ -116,79 +116,155 @@ const std::map<std::string, std::string> https_client::get_headers() const {
 	return response_headers;
 }
 
-https_client::~https_client()
-{
+https_client::~https_client() {
 }
 
 bool https_client::handle_buffer(std::string &buffer)
 {
-	switch (state) {
-		case HTTPS_HEADERS:
-			if (buffer.find("\r\n\r\n") != std::string::npos) {
-				/* Got all headers, proceed to new state */
+	bool state_changed = false;
+	do {
+		state_changed = false;
+		switch (state) {
+			case HTTPS_HEADERS:
+				if (buffer.find("\r\n\r\n") != std::string::npos) {
+					/* Got all headers, proceed to new state */
 
-				/* Get headers string */
-				std::string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
+					std::string unparsed = buffer;
 
-				/* Modify buffer, remove headers section */
-				buffer.erase(0, buffer.find("\r\n\r\n") + 4);
+					/* Get headers string */
+					std::string headers = buffer.substr(0, buffer.find("\r\n\r\n"));
 
-				/* Process headers into map */
-				std::vector<std::string> h = utility::tokenize(headers);
-				if (h.size()) {
-					std::string status_line = h[0];
-					h.erase(h.begin());
-					/* HTTP/1.1 200 OK */
-					std::vector<std::string> req_status = utility::tokenize(status_line, " ");
-					if (req_status.size() >= 3 && (req_status[0] == "HTTP/1.1" || req_status[0] == "HTTP/1.0") && atoi(req_status[1].c_str()) >= 100) {
-						for(auto &hd : h) {
-							std::string::size_type sep = hd.find(": ");
-							if (sep != std::string::npos) {
-								std::string key = hd.substr(0, sep);
-								std::string value = hd.substr(sep + 2, hd.length());
-								std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c){
-									return std::tolower(c);
-								});
-								response_headers[key] = value;
+					/* Modify buffer, remove headers section */
+					buffer.erase(0, buffer.find("\r\n\r\n") + 4);
+
+					/* Process headers into map */
+					std::vector<std::string> h = utility::tokenize(headers);
+					if (h.size()) {
+						std::string status_line = h[0];
+						h.erase(h.begin());
+						/* HTTP/1.1 200 OK */
+						std::vector<std::string> req_status = utility::tokenize(status_line, " ");
+						if (req_status.size() >= 3 && (req_status[0] == "HTTP/1.1" || req_status[0] == "HTTP/1.0") && atoi(req_status[1].c_str())) {
+							for(auto &hd : h) {
+								std::string::size_type sep = hd.find(": ");
+								if (sep != std::string::npos) {
+									std::string key = hd.substr(0, sep);
+									std::string value = hd.substr(sep + 2, hd.length());
+									std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c){
+										return std::tolower(c);
+									});
+									response_headers[key] = value;
+								}
 							}
-						}
-						if (response_headers.find("content-length") != response_headers.end()) {
-							content_length = std::stoull(response_headers["content-length"]);
+							if (response_headers.find("content-length") != response_headers.end()) {
+								content_length = std::stoull(response_headers["content-length"]);
+							} else {
+								content_length = ULLONG_MAX;
+							}
+							if (response_headers["connection"] == "close") {
+								keepalive = false;
+							}
+							chunked = false;
+							if (response_headers.find("transfer-encoding") != response_headers.end()) {
+								if (response_headers["transfer-encoding"].find("chunked") != std::string::npos) {
+									chunked = true;
+									waiting_end_marker = false;
+									chunk_size = 0;
+									chunk_receive = 0;
+									state = HTTPS_CHUNK_LEN;
+									state_changed = true;
+								}
+							}
+							status = atoi(req_status[1].c_str());
+							if (status == 204  || status < 200 || status == 304 || content_length == 0) {
+								return false;
+							} else if (!chunked) {
+								state = HTTPS_CONTENT;
+								state_changed = true;
+								continue;
+							}
+							return true;
 						} else {
-							content_length = ULLONG_MAX;
+							/* Non-HTTP-like response with invalid headers. Go no further. */
+							keepalive = false;
+							return false;
 						}
-						state = HTTPS_CONTENT;
-						status = atoi(req_status[1].c_str());
 					} else {
-						/* Non-HTTP-like response with invalid headers. Go no further. */
+						keepalive = false;
 						return false;
 					}
-				}
 
-				if (buffer.size()) {
-					body += buffer;
-					buffer.clear();
-					if (body.length() >= content_length) {
+				}
+			break;
+			case HTTPS_CHUNK_CONTENT: {
+				size_t to_read = buffer.size();
+				if (chunk_receive + buffer.size() > chunk_size) {
+					to_read = chunk_size - chunk_receive;
+				}
+				body += buffer.substr(0, to_read);
+				chunk_receive += to_read;
+				buffer.erase(0, to_read);
+				if (chunk_receive >= chunk_size) {
+					state = HTTPS_CHUNK_TRAILER;
+					state_changed = true;
+				} else {
+					return true;
+				}
+			}
+			break;
+			case HTTPS_CHUNK_LAST:
+			case HTTPS_CHUNK_TRAILER:
+				if (buffer.length() >= 2 && buffer.substr(0, 2) == "\r\n") {
+					if (state == HTTPS_CHUNK_LAST) {
 						state = HTTPS_DONE;
+						this->close();
+						return false;
+					} else {
+						state = HTTPS_CHUNK_LEN;
+						buffer.erase(0, 2);
 					}
+					state_changed = true;
 				}
-
-			}
-		break;
-		case HTTPS_CONTENT:
-			body += buffer;
-			buffer.clear();
-			if (body.length() >= content_length) {
-				state = HTTPS_DONE;
-			}
-		break;
-		case HTTPS_DONE:
-			this->close();
-			return false;
-		break;
-	}
+			break;
+			case HTTPS_CHUNK_LEN:
+				if (buffer.find("\r\n") != std::string::npos) {
+					chunk_receive = 0;
+					std::string chunk_length_str = buffer.substr(0, buffer.find("\r\n"));
+					buffer.erase(0, buffer.find("\r\n") + 2);
+					try {
+						size_t index = 0;
+						chunk_size = std::stoi(chunk_length_str, &index, 16);
+					}
+					catch (const std::exception&) {
+						keepalive = false;
+						return false;
+					}
+					state = HTTPS_CHUNK_CONTENT;
+					if (chunk_size == 0) {
+						state = HTTPS_CHUNK_LAST;
+						chunk_size = 2;
+					}
+					state_changed = true;
+				}
+			break;
+			case HTTPS_CONTENT:
+				body += buffer;
+				buffer.clear();
+				if (body.length() >= content_length) {
+					state = HTTPS_DONE;
+					this->close();
+					return false;
+				}
+			break;
+			case HTTPS_DONE:
+				this->close();
+				return false;
+			break;
+		}
+	} while (state_changed);
 	return true;
 }
+
 
 uint16_t https_client::get_status() const {
 	return status;
@@ -204,6 +280,7 @@ http_state https_client::get_state() {
 
 void https_client::one_second_timer() {
 	if (time(nullptr) >= timeout && this->state != HTTPS_DONE) {
+		keepalive = false;
 		this->close();
 	}
 }

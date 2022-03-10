@@ -254,6 +254,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 										set_test("MESSAGECREATE", false);
 									}
 								});
+							} else {
+								set_test("DELCOMMAND", false);
 							}
 						});
 					}

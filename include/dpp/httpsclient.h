@@ -48,6 +48,14 @@ enum http_state : uint8_t {
 	 * 
 	 */
 	HTTPS_DONE,
+
+	HTTPS_CHUNK_LEN,
+
+	HTTPS_CHUNK_TRAILER,
+
+	HTTPS_CHUNK_LAST,
+
+	HTTPS_CHUNK_CONTENT
 };
 
 /**
@@ -149,11 +157,18 @@ class DPP_EXPORT https_client : public ssl_client
 	 */
 	time_t timeout;
 
+	bool chunked;
+	bool waiting_end_marker;
+	size_t chunk_size;
+	size_t chunk_receive;
+
 	/**
 	 * @brief Headers from the server's response, e.g. RateLimit
 	 * headers, cookies, etc.
 	 */
 	std::map<std::string, std::string> response_headers;
+
+	bool do_buffer(std::string& buffer);
 
 protected:
 
