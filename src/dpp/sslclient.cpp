@@ -148,7 +148,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 				shutdown(iter->second.sfd, 2);
 				#ifdef _WIN32
 					if (sfd >= 0 && sfd < FD_SETSIZE) {
-						closesocket(iter->sfd);
+						closesocket(iter->second.sfd);
 					}
 				#else
 					::close(iter->second.sfd);
