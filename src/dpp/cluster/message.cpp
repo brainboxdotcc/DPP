@@ -121,7 +121,7 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 
 
 void cluster::message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
-	rest_request<message>(this, API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id), m_put, "", callback);
+	rest_request<message>(this, API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id), m_get, "", callback);
 }
 
 
