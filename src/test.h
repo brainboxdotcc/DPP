@@ -114,12 +114,12 @@ extern dpp::snowflake TEST_EVENT_ID;
 			if (g.size() > 0) { \
 				set_test(testname, true); \
 			} else { \
-				bot.log(dpp::ll_debug, cc.http_info.body); \
 				set_test(testname, false); \
+				bot.log(dpp::ll_debug, cc.http_info.body); \
 			} \
 		} else { \
-			bot.log(dpp::ll_debug, cc.http_info.body); \
 			set_test(testname, false); \
+			bot.log(dpp::ll_debug, cc.http_info.body); \
 		} \
 	});
 

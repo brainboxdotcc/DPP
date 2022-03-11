@@ -28,6 +28,7 @@
 #include <dpp/stringops.h>
 #include <dpp/exception.h>
 #include <dpp/cluster.h>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -1044,6 +1045,17 @@ std::string sticker_pack::build_json(bool with_id) const {
 		j["stickers"].push_back(json::parse(s.second.build_json(with_id)));
 	}
 	return j.dump();
+}
+
+std::string sticker::get_url(bool accept_lottie) const {
+	if (this->format_type == sticker_format::sf_lottie && !accept_lottie) {
+		return std::string();
+	} else {
+		return fmt::format("{}/stickers/{}.{}",
+						   utility::cdn_host,
+						   this->id,
+						   this->format_type == sticker_format::sf_lottie ? "json" : "png");
+	}
 }
 
 sticker& sticker::set_filename(const std::string &fn) {

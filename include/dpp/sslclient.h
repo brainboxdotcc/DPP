@@ -89,7 +89,14 @@ protected:
 	/** Bytes in */
 	uint64_t bytes_in;
 
+	/** True for a plain text connection */
 	bool plaintext;
+
+	/**
+	 * @brief True if we are establishing a new connection, false if otherwise.
+	 */
+	bool make_new;
+
 
 	/** Called every second */
 	virtual void one_second_timer();
@@ -137,15 +144,21 @@ public:
 	socket_notification_t custom_writeable_ready;
 
 	/**
+	 * @brief True if we are keeping the connection alive after it has finished
+	 */
+	bool keepalive;
+
+	/**
 	 * @brief Connect to a specified host and port. Throws std::runtime_error on fatal error.
 	 * @param _hostname The hostname to connect to
 	 * @param _port the Port number to connect to
 	 * @param plaintext_downgrade Set to true to connect using plaintext only, without initialising SSL.
+	 * @param reuse Attempt to reuse previous connections for this hostname and port, if available
 	 * Note that no Discord endpoints will function when downgraded. This option is provided only for
 	 * connection to non-Discord addresses such as within dpp::cluster::request().
 	 * @throw dpp::exception Failed to initialise connection
 	 */
-	ssl_client(const std::string &_hostname, const std::string &_port = "443", bool plaintext_downgrade = false);
+	ssl_client(const std::string &_hostname, const std::string &_port = "443", bool plaintext_downgrade = false, bool reuse = false);
 
 	/**
 	 * @brief Nonblocking I/O loop
