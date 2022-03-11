@@ -99,7 +99,7 @@ struct DPP_EXPORT scheduled_event : public managed  {
 	snowflake		channel_id;		//!< the channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL (may be empty)
 	snowflake		creator_id;		//!< Optional: the id of the user that created the scheduled event
 	std::string		name;			//!< the name of the scheduled event
-	std::string		description;		//!< Optional: the description of the scheduled event
+	std::string		description;		//!< Optional: the description of the scheduled event (1-1000 characters)
 	std::string		image;			//!< the image of the scheduled event (may be empty)
 	time_t			scheduled_start_time;	//!< the time the scheduled event will start
 	time_t			scheduled_end_time;	//!< the time the scheduled event will end, or null if the event does not have a scheduled time to end (may be empty)

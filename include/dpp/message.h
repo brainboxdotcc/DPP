@@ -237,7 +237,7 @@ public:
 	 */
 	std::string url;
 
-	/** Placeholder text for select menus and text inputs (max 100 characters)
+	/** Placeholder text for select menus and text inputs (max 150 characters)
 	 */
 	std::string placeholder;
 
@@ -386,7 +386,7 @@ public:
 	/**
 	 * @brief Set the placeholder
 	 * 
-	 * @param placeholder placeholder string. It will be truncated to the maximum length of 100 UTF-8 characters.
+	 * @param placeholder placeholder string. It will be truncated to the maximum length of 150 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
 	component& set_placeholder(const std::string &placeholder);
