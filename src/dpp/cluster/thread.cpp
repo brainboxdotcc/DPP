@@ -32,7 +32,7 @@ void cluster::current_user_leave_thread(snowflake thread_id, command_completion_
 }
 
 void cluster::threads_get_active(snowflake channel_id, command_completion_event_t callback) {
-	rest_request_list<thread>(this, API_PATH "/channels", std::to_string(channel_id), "/threads/active", m_get, "", callback);
+	rest_request_list<thread_map>(this, API_PATH "/channels", std::to_string(channel_id), "/threads/active", m_get, "", callback);
 }
 
 void cluster::threads_get_joined_private_archived(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback) {
@@ -40,7 +40,7 @@ void cluster::threads_get_joined_private_archived(snowflake channel_id, snowflak
 		{"before", before_id},
 		{"limit", limit},
 	});
-	rest_request_list<thread>(this, API_PATH "/channels", std::to_string(channel_id), "/users/@me/threads/archived/private" + parameters, m_get, "", callback);
+	rest_request_list<thread_map>(this, API_PATH "/channels", std::to_string(channel_id), "/users/@me/threads/archived/private" + parameters, m_get, "", callback);
 }
 
 void cluster::threads_get_private_archived(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback) {
@@ -48,7 +48,7 @@ void cluster::threads_get_private_archived(snowflake channel_id, time_t before_t
 		{"before", before_timestamp},
 		{"limit", limit},
 	});
-	rest_request_list<thread>(this, API_PATH "/channels", std::to_string(channel_id), "/threads/archived/private" + parameters, m_get, "", callback);
+	rest_request_list<thread_map>(this, API_PATH "/channels", std::to_string(channel_id), "/threads/archived/private" + parameters, m_get, "", callback);
 }
 
 void cluster::threads_get_public_archived(snowflake channel_id, time_t before_timestamp, uint16_t limit, command_completion_event_t callback) {
@@ -56,7 +56,7 @@ void cluster::threads_get_public_archived(snowflake channel_id, time_t before_ti
 		{"before", before_timestamp},
 		{"limit", limit},
 	});
-	rest_request_list<thread>(this, API_PATH "/channels", std::to_string(channel_id), "/threads/archived/public" + parameters, m_get, "", callback);
+	rest_request_list<thread_map>(this, API_PATH "/channels", std::to_string(channel_id), "/threads/archived/public" + parameters, m_get, "", callback);
 }
 
 void cluster::thread_member_get(const snowflake thread_id, const snowflake user_id, command_completion_event_t callback) {
@@ -64,7 +64,7 @@ void cluster::thread_member_get(const snowflake thread_id, const snowflake user_
 }
 
 void cluster::thread_members_get(snowflake thread_id, command_completion_event_t callback) {
-	rest_request_list<thread_member>(this, API_PATH "/channels", std::to_string(thread_id), "/threads-members", m_get, "", callback);
+	rest_request_list<thread_member_map>(this, API_PATH "/channels", std::to_string(thread_id), "/threads-members", m_get, "", callback);
 }
 
 void cluster::thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback)

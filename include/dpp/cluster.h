@@ -2321,7 +2321,7 @@ public:
 	 *
 	 * @param code Template code
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void template_get(const std::string &code, command_completion_event_t callback);
 
@@ -2340,7 +2340,7 @@ public:
 	 *
 	 * @param guild_id Guild ID to get templates for
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::guild_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::dtemplate_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_templates_get(snowflake guild_id, command_completion_event_t callback);
 
@@ -2351,7 +2351,7 @@ public:
 	 * @param name Template name to create
 	 * @param description Description of template to create
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_template_create(snowflake guild_id, const std::string &name, const std::string &description, command_completion_event_t callback);
 
@@ -2361,7 +2361,7 @@ public:
 	 * @param guild_id Guild to synchronise template for
 	 * @param code Code of template to synchronise
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
 
@@ -2373,7 +2373,7 @@ public:
 	 * @param name New name of template
 	 * @param description New description of template
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback = {});
 
@@ -3101,7 +3101,7 @@ public:
 	 *
 	 * @param guild_id Guild ID of the guild where the sticker is
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::sticker_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_stickers_get(snowflake guild_id, command_completion_event_t callback);
 
@@ -3109,7 +3109,7 @@ public:
 	 * @brief Get sticker packs
 	 *
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::sticker_pack_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void sticker_packs_get(command_completion_event_t callback);
 
@@ -3118,7 +3118,7 @@ public:
 	 *
 	 * @param instance Stage instance to create
 	 * @param callback User function to execute when the api call completes
-	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
 	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
@@ -3186,7 +3186,7 @@ public:
 	 * @param before Return user IDs that fall before this ID, if provided
 	 * @param after Return user IDs that fall after this ID, if provided
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::event_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_event_users_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback, uint8_t limit = 100, snowflake before = 0, snowflake after = 0);
 

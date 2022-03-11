@@ -47,7 +47,7 @@ void cluster::guild_template_modify(snowflake guild_id, const std::string &code,
 
 
 void cluster::guild_templates_get(snowflake guild_id, command_completion_event_t callback) {
-	rest_request_list<dtemplate>(this, API_PATH "/guilds", std::to_string(guild_id), "templates", m_get, "", callback);
+	rest_request_list<dtemplate_map>(this, API_PATH "/guilds", std::to_string(guild_id), "templates", m_get, "", callback);
 }
 
 
