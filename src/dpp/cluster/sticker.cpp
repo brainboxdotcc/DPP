@@ -44,7 +44,7 @@ void cluster::guild_sticker_modify(sticker &s, command_completion_event_t callba
 }
 
 void cluster::guild_stickers_get(snowflake guild_id, command_completion_event_t callback) {
-	rest_request_list<sticker_map>(this, API_PATH "/guilds", std::to_string(guild_id), "stickers", m_get, "", callback);
+	rest_request_list<sticker>(this, API_PATH "/guilds", std::to_string(guild_id), "stickers", m_get, "", callback);
 }
 
 void cluster::nitro_sticker_get(snowflake id, command_completion_event_t callback) {
@@ -52,7 +52,7 @@ void cluster::nitro_sticker_get(snowflake id, command_completion_event_t callbac
 }
 
 void cluster::sticker_packs_get(command_completion_event_t callback) {
-	rest_request<sticker_pack_map>(this, API_PATH "/sticker-packs", "", "", m_get, "", callback);
+	rest_request_list<sticker_pack>(this, API_PATH "/sticker-packs", "", "", m_get, "", callback);
 }
 
 };

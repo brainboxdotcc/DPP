@@ -24,7 +24,7 @@
 namespace dpp {
 
 void cluster::guild_events_get(snowflake guild_id, command_completion_event_t callback) {
-	rest_request_list<scheduled_event_map>(this, API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events?with_user_count=true", m_get, "", callback);
+	rest_request_list<scheduled_event>(this, API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events?with_user_count=true", m_get, "", callback);
 }
 
 void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback, uint8_t limit, snowflake before, snowflake after) {

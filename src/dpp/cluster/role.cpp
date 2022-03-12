@@ -43,11 +43,11 @@ void cluster::roles_edit_position(snowflake guild_id, const std::vector<role> &r
 	for (auto & r : roles) {
 		j.push_back({ {"id", r.id}, {"position", r.position} });
 	}
-	rest_request_list<role_map>(this, API_PATH "/guilds", std::to_string(guild_id), "roles", m_patch, j.dump(), callback);
+	rest_request_list<role>(this, API_PATH "/guilds", std::to_string(guild_id), "roles", m_patch, j.dump(), callback);
 }
 
 void cluster::roles_get(snowflake guild_id, command_completion_event_t callback) {
-	rest_request_list<role_map>(this, API_PATH "/guilds", std::to_string(guild_id), "roles", m_get, "", callback);
+	rest_request_list<role>(this, API_PATH "/guilds", std::to_string(guild_id), "roles", m_get, "", callback);
 }
 
 };

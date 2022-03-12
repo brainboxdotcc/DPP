@@ -72,12 +72,12 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 
 
 void cluster::get_channel_webhooks(snowflake channel_id, command_completion_event_t callback) {
-	rest_request_list<webhook_map>(this, API_PATH "/channels", std::to_string(channel_id), "webhooks", m_get, "", callback);
+	rest_request_list<webhook>(this, API_PATH "/channels", std::to_string(channel_id), "webhooks", m_get, "", callback);
 }
 
 
 void cluster::get_guild_webhooks(snowflake guild_id, command_completion_event_t callback) {
-	rest_request_list<webhook_map>(this, API_PATH "/guilds", std::to_string(guild_id), "webhooks", m_get, "", callback);
+	rest_request_list<webhook>(this, API_PATH "/guilds", std::to_string(guild_id), "webhooks", m_get, "", callback);
 }
 
 

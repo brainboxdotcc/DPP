@@ -76,11 +76,11 @@ void cluster::user_set_voice_state(snowflake user_id, snowflake guild_id, snowfl
 }
 
 void cluster::current_user_connections_get(command_completion_event_t callback) {
-	rest_request_list<connection_map>(this, API_PATH "/users", "@me", "connections", m_get, "", callback);
+	rest_request_list<connection>(this, API_PATH "/users", "@me", "connections", m_get, "", callback);
 }
 
 void cluster::current_user_get_guilds(command_completion_event_t callback) {
-	rest_request_list<guild_map>(this, API_PATH "/users", "@me", "guilds", m_get, "", callback);
+	rest_request_list<guild>(this, API_PATH "/users", "@me", "guilds", m_get, "", callback);
 }
 
 void cluster::current_user_leave_guild(snowflake guild_id, command_completion_event_t callback) {
