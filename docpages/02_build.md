@@ -59,7 +59,7 @@ To build on windows follow these steps *exactly*. The build process depends on s
 
 ## Wait a minute! Read this first!
 
-Note that **you do not need to follow this tutorial unless you plan to contribute to or modify the library itself**. Unless you consider yourself an **advanced user** with a specific **requirement to build from source** you should [obtain a pre-made visual studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/) and completely skip this guide! Instead, read \ref build-a-discord-bot-windows-visual-studio.
+\warning **You do not need to follow this tutorial unless you plan to contribute to or modify the library itself**. Unless you consider yourself an **advanced user** with a specific **requirement to build from source** you should [obtain a pre-made visual studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/) and completely skip this guide! Instead, read \ref build-a-discord-bot-windows-visual-studio.
 
 ## If you are absolutely sure you need this guide, read on:
 
