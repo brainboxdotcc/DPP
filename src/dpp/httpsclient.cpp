@@ -32,7 +32,7 @@
 namespace dpp {
 
 https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout)
-	: ssl_client(hostname, fmt::format("{:d}", port), plaintext_connection, true),
+	: ssl_client(hostname, fmt::format("{:d}", port), plaintext_connection, false),
 	state(HTTPS_HEADERS),
 	request_type(verb),
 	path(urlpath),
