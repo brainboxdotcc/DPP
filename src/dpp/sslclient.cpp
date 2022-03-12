@@ -80,6 +80,7 @@ public:
 };
 
 struct keepalive_cache_t {
+	time_t created;
 	opensslcontext* ssl;
 	dpp::socket sfd;
 };
@@ -138,7 +139,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 			ts.tv_sec = 0;
 			ts.tv_usec = 1;
 			int r = select(iter->second.sfd, nullptr, nullptr, &efds, &ts);
-			if (r < 0 || FD_ISSET(iter->second.sfd, &efds)) {
+			if (time(nullptr) > (iter->second.created + 60) || r < 0 || FD_ISSET(iter->second.sfd, &efds)) {
 				make_new = true;
 				/* This connection is dead, free its resources and make a new one */
 				if (iter->second.ssl->ssl) {
@@ -157,7 +158,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 					SSL_CTX_free(iter->second.ssl->ctx);
 					iter->second.ssl->ctx = nullptr;
 				}
-				iter->second.sfd = -1;
+				iter->second.sfd = INVALID_SOCKET;
 				delete iter->second.ssl;
 			} else {
 				/* Connection is good, lets use it */
@@ -317,7 +318,7 @@ void ssl_client::read_loop()
 	fd_set readfds, writefds, efds;
 	char ClientToServerBuffer[BUFSIZZ], ServerToClientBuffer[BUFSIZZ];
 
-	if (sfd == -1)  {
+	if (sfd == INVALID_SOCKET)  {
 		throw dpp::exception("Invalid file descriptor in read_loop()");
 	}
 	
@@ -383,7 +384,7 @@ void ssl_client::read_loop()
 			if (custom_readable_fd && custom_readable_fd() >= 0 && SAFE_FD_ISSET(custom_readable_fd(), &efds)) {
 			}
 
-			if (SAFE_FD_ISSET(sfd, &efds) || sfd == -1) {
+			if (SAFE_FD_ISSET(sfd, &efds) || sfd == INVALID_SOCKET) {
 				this->log(dpp::ll_error, std::string("Error on SSL connection: ") +strerror(errno));
 				return;
 			}
@@ -527,11 +528,12 @@ bool ssl_client::handle_buffer(std::string &buffer)
 
 void ssl_client::close()
 {
-	if (keepalive) {
+	if (keepalive && this->sfd != INVALID_SOCKET) {
 		std::string identifier((!plaintext ? "ssl://" : "tcp://") + hostname + ":" + port);
 		auto iter = keepalives.find(identifier);
 		if (iter == keepalives.end()) {
 			keepalive_cache_t kc;
+			kc.created = time(nullptr);
 			kc.sfd = this->sfd;
 			kc.ssl = this->ssl;
 			keepalives.emplace(identifier, kc);
@@ -555,7 +557,7 @@ void ssl_client::close()
 		SSL_CTX_free(ssl->ctx);
 		ssl->ctx = nullptr;
 	}
-	sfd = -1;
+	sfd = INVALID_SOCKET;
 	obuffer.clear();
 	buffer.clear();
 }
