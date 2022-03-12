@@ -428,7 +428,7 @@ namespace dpp {
 
 			md_state state = md_normal;
 			std::string output;
-			const std::string markdown_chars("\\*_|~[]()");
+			const std::string markdown_chars("\\*_|~[]()>");
 
 			for (size_t n = 0; n < text.length(); ++n) {
 				if (text.substr(n, 3) == "```") {

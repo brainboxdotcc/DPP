@@ -304,7 +304,7 @@ select_option& select_option::set_animated(bool anim) {
 
 
 component& component::set_placeholder(const std::string &_placeholder) {
-	placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
+	placeholder = dpp::utility::utf8substr(_placeholder, 0, 150);
 	return *this;
 }
 
