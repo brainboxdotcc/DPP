@@ -3148,7 +3148,7 @@ public:
 	/**
 	 * @brief Modify a sticker in a guild
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 * @https://discord.com/developers/docs/resources/sticker#modify-guild-sticker
+	 * @see https://discord.com/developers/docs/resources/sticker#modify-guild-sticker
 	 * @param s Sticker to modify. Must have its guild ID and sticker ID set.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3243,7 +3243,7 @@ public:
 
 	/**
 	 * @brief Get all voice regions
-	 * @See https://discord.com/developers/docs/resources/voice#list-voice-regions
+	 * @see https://discord.com/developers/docs/resources/voice#list-voice-regions
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::voiceregion_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
