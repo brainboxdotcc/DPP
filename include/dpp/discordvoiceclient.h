@@ -164,16 +164,16 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 #else
 	/** libopus encoder
 	 */
-	void* encoder;
+	[[maybe_unused]] void* encoder;
 
 	/** libopus decoder
 	 */
-	void* decoder;
+	[[maybe_unused]] void* decoder;
 
 	/** libopus repacketizer
 	 * (merges frames into one packet)
 	 */
-	void* repacketizer;
+	[[maybe_unused]] void* repacketizer;
 #endif
 
 	/** File descriptor for UDP connection

@@ -216,10 +216,14 @@ struct DPP_EXPORT confirmation_callback_t {
 	/** Value returned, wrapped in variant */
 	confirmable_t value;
 
+	const class cluster* bot;
+
 	/**
 	 * @brief Construct a new confirmation callback t object
 	 */
 	confirmation_callback_t() = default;
+
+	confirmation_callback_t(cluster* creator);
 
 	/**
 	 * @brief Construct a new confirmation callback object
@@ -227,7 +231,7 @@ struct DPP_EXPORT confirmation_callback_t {
 	 * @param _value The value to encapsulate in the confirmable_t
 	 * @param _http The HTTP metadata from the REST call
 	 */
-	confirmation_callback_t(const confirmable_t& _value, const http_request_completion_t& _http);
+	confirmation_callback_t(cluster* creator, const confirmable_t& _value, const http_request_completion_t& _http);
 
 	/**
 	 * @brief Returns true if the call resulted in an error rather than a legitimate value in the
@@ -1439,7 +1443,7 @@ public:
 	/**
 	 * @brief Make a HTTP(S) request. For use when wanting asynchronous access to HTTP APIs outside of Discord.
 	 *
-	 * @param url Endpoint to post to, e.g. /api/guilds
+	 * @param url Full URL to post to, e.g. https://api.somewhere.com/v1/foo/
 	 * @param method Method, e.g. GET, POST
 	 * @param callback Function to call when the HTTP call completes. No processing is done on the returned data.
 	 * @param postdata POST data
@@ -1451,23 +1455,25 @@ public:
 	/**
 	 * @brief Respond to a slash command
 	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
 	 * @param interaction_id Interaction id to respond to
 	 * @param token Token for the interaction webhook
 	 * @param r Response to send
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback = {});
+	void interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Respond to a slash command
+	 * @brief Edit response to a slash command
 	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
 	 * @param token Token for the interaction webhook
 	 * @param r Message to send
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_response_edit(const std::string &token, const message &r, command_completion_event_t callback = {});
+	void interaction_response_edit(const std::string &token, const message &r, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these).
@@ -1475,24 +1481,27 @@ public:
 	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
 	 * you should use cluster::guild_command_create instead.
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
 	 * @param s Slash command to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_command_create(const slashcommand &s, command_completion_event_t callback = {});
+	void global_command_create(const slashcommand &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a global slash command
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#get-global-application-command
 	 * @param id The ID of the slash command
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_command_get(snowflake id, command_completion_event_t callback = {});
+	void global_command_get(snowflake id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the audit log for a guild
 	 *
+	 * @see https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
 	 * @param guild_id Guild to get the audit log of
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::auditlog object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1502,26 +1511,28 @@ public:
 	/**
 	 * @brief Create a slash command local to a guild
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#create-guild-application-command
 	 * @note Creating a command with the same name as an existing command for your application will overwrite the old command.
 	 * @param s Slash command to create
 	 * @param guild_id Guild ID to create the slash command in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 
 	/**
 	 * @brief Create/overwrite guild slash commands.
 	 * Any existing guild slash commands on this guild will be deleted and replaced with these.
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-guild-application-commands
 	 * @param commands Vector of slash commands to create/update.
 	 * New guild commands will be available in the guild immediately. If the command did not already exist, it will count toward daily application command create limits.
 	 * @param guild_id Guild ID to create/update the slash commands in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a list of dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create/overwrite global slash commands.
@@ -1530,102 +1541,112 @@ public:
 	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
 	 * you should use cluster::guild_bulk_command_create instead.
 	 * 
+	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
 	 * @param commands Vector of slash commands to create/update.
 	 * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
 	 * Commands that do not already exist will count toward daily application command create limits.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a list of dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback = {});
+	void global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#edit-global-application-command
 	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
 	 * you should use cluster::guild_bulk_command_create instead.
 	 * @param s Slash command to change
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_command_edit(const slashcommand &s, command_completion_event_t callback = {});
+	void global_command_edit(const slashcommand &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a slash command of a guild
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#get-guild-application-command
 	 * @note The returned slash commands will not have permissions set, you need to use a permissions getter e.g. dpp::guild_commands_get_permissions to get the guild command permissions
 	 * @param id The ID of the slash command
 	 * @param guild_id Guild ID to get the slash command from
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_get(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_get(snowflake id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a slash command local to a guild
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#edit-guild-application-command
 	 * @param s Slash command to edit
 	 * @param guild_id Guild ID to edit the slash command in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_edit(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_edit(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit slash command permissions of a guild
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#edit-application-command-permissions
 	 * @note You can only add up to 10 permission overwrites for a command
 	 * @param s Slash command to edit the permissions for
 	 * @param guild_id Guild ID to edit the slash command in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the permissions for a slash command of a guild
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#get-application-command-permissions
 	 * @param id The ID of the slash command to get the permissions for
 	 * @param guild_id Guild ID to get the permissions of
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_command_permissions object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_get_permissions(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_get_permissions(snowflake id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit/Overwrite the permissions of all existing slash commands in a guild
 	 *
 	 * @note You can only add up to 10 permission overwrites for a command
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#batch-edit-application-command-permissions
 	 * @warning The endpoint will overwrite all existing permissions for all commands of the application in a guild, including slash commands, user commands, and message commands. Meaning that if you forgot to pass a slash command, the permissions of it might be removed.
 	 * @param commands A vector of slash commands to edit/overwrite the permissions for
 	 * @param guild_id Guild ID to edit permissions of the slash commands in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_command_permissions_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a global slash command (a bot can have a maximum of 100 of these)
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#delete-global-application-command
 	 * @param id Slash command to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_command_delete(snowflake id, command_completion_event_t callback = {});
+	void global_command_delete(snowflake id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a slash command local to a guild
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#delete-guild-application-command
 	 * @param id Slash command to delete
 	 * @param guild_id Guild ID to delete the slash command in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_delete(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_delete(snowflake id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the application's slash commands for a guild
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#get-guild-application-commands
 	 * @note The returned slash commands will not have permissions set, you need to use a permissions getter e.g. dpp::guild_commands_get_permissions to get the guild command permissions
 	 * @param guild_id Guild ID to get the slash commands for
 	 * @param callback Function to call when the API call completes.
@@ -1636,6 +1657,7 @@ public:
 	/**
 	 * @brief Get all slash command permissions of a guild
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#get-application-command-permissions
 	 * @param guild_id Guild ID to get the slash commands permissions for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_command_permissions_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1645,6 +1667,7 @@ public:
 	/**
 	 * @brief Get the application's global slash commands
 	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#get-global-application-commands
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -1653,16 +1676,19 @@ public:
 	/**
 	 * @brief Create a direct message, also create the channel for the direct message if needed
 	 *
+	 * @see https://discord.com/developers/docs/resources/user#create-dm
+	 * @see https://discord.com/developers/docs/resources/channel#create-message
 	 * @param user_id User ID of user to send message to
 	 * @param m Message object
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void direct_message_create(snowflake user_id, const message &m, command_completion_event_t callback = {});
+	void direct_message_create(snowflake user_id, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a message
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#get-channel-message
 	 * @param message_id Message ID
 	 * @param channel_id Channel ID
 	 * @param callback Function to call when the API call completes.
@@ -1675,6 +1701,7 @@ public:
 	 * 
 	 * This function will attempt to fetch as many messages as possible using multiple API calls if needed.
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#get-channel-messages
 	 * @param channel_id Channel ID to retrieve messages for
 	 * @param around Messages should be retrieved around this ID if this is set to non-zero
 	 * @param before Messages before this ID should be retrieved if this is set to non-zero
@@ -1688,65 +1715,72 @@ public:
 	/**
 	 * @brief Send a message to a channel. The callback function is called when the message has been sent
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#create-message
 	 * @param m Message to send
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_create(const struct message &m, command_completion_event_t callback = {});
+	void message_create(const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Crosspost a message. The callback function is called when the message has been sent
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#crosspost-message
 	 * @param message_id Message to crosspost
 	 * @param channel_id Channel ID to crosspost from
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
+	void message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a message on a channel. The callback function is called when the message has been edited
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#edit-message
 	 * @param m Message to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_edit(const struct message &m, command_completion_event_t callback = {});
+	void message_edit(const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#create-reaction
 	 * @param m Message to add a reaction to
 	 * @param reaction Reaction to add. Emojis should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
+	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character.
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-own-reaction
 	 * @param m Message to delete own reaction from
 	 * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-user-reaction
 	 * @param m Message to delete a user's reaction from
 	 * @param user_id User ID who's reaction you want to remove
 	 * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get reactions on a message for a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#get-reactions
 	 * @param m Message to get reactions for
 	 * @param reaction Reaction should be in the form emojiname:id or a unicode character
 	 * @param before Reactions before this ID should be retrieved if this is set to non-zero
@@ -1760,47 +1794,52 @@ public:
 	/**
 	 * @brief Delete all reactions on a message
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions
 	 * @param m Message to delete reactions from
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_all_reactions(const struct message &m, command_completion_event_t callback = {});
+	void message_delete_all_reactions(const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete all reactions on a message using a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
 	 * @param m Message to delete reactions from
 	 * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
 	 *
+	 * @see https://discord.com/developers/docs/topics/gateway#message-reaction-add
 	 * @param message_id Message to add reactions to
 	 * @param channel_id Channel to add reactions to
 	 * @param reaction Reaction to add. Emojis should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete own reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-own-reaction
 	 * @param message_id Message to delete reactions from
 	 * @param channel_id Channel to delete reactions from
 	 * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a user's reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-user-reaction
 	 * @param message_id Message to delete reactions from
 	 * @param channel_id Channel to delete reactions from
 	 * @param user_id User ID who's reaction you want to remove
@@ -1808,11 +1847,12 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get reactions on a message for a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#get-reactions
 	 * @param message_id Message to get reactions for
 	 * @param channel_id Channel to get reactions for
 	 * @param reaction Reaction should be in the form emojiname:id or a unicode character
@@ -1827,34 +1867,37 @@ public:
 	/**
 	 * @brief Delete all reactions on a message by id
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions
 	 * @param message_id Message to delete reactions from
 	 * @param channel_id Channel to delete reactions from
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_all_reactions(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
+	void message_delete_all_reactions(snowflake message_id, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete all reactions on a message using a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
 	 * @param message_id Message to delete reactions from
 	 * @param channel_id Channel to delete reactions from
 	 * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a message from a channel. The callback function is called when the message has been edited
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-message
 	 * @param message_id Message ID to delete
 	 * @param channel_id Channel to delete from
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
+	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Bulk delete messages from a channel. The callback function is called when the message has been edited
@@ -1862,16 +1905,18 @@ public:
 	 *
 	 * @note If any message provided older than 2 weeks or any duplicate message ID, it will fail.
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#bulk-delete-messages
 	 * @param message_ids List of message IDs to delete (at least 2 and at most 100 message IDs)
 	 * @param channel_id Channel to delete from
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = {});
+	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a channel
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#get-channel
 	 * @param c Channel ID to retrieve
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1881,6 +1926,7 @@ public:
 	/**
 	 * @brief Get all channels for a guild
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#get-channels
 	 * @param guild_id Guild ID to retrieve channels for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1897,22 +1943,22 @@ public:
 	 * All parameters to this endpoint are optional excluding `name`
 	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#create-channel
 	 * @param c Channel to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_create(const class channel &c, command_completion_event_t callback = {});
+	void channel_create(const class channel &c, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a channel
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#modify-channel
 	 * @param c Channel to edit/update
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit(const class channel &c, command_completion_event_t callback = {});
+	void channel_edit(const class channel &c, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit multiple channels positions
@@ -1922,16 +1968,17 @@ public:
 	 * Only channels to be modified are required.
 	 * 
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-channel-positions
 	 * @param c Channel to change the position for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_positions(const std::vector<channel> &c, command_completion_event_t callback = {});
+	void channel_edit_positions(const std::vector<channel> &c, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a channel's permissions
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param c Channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
@@ -1941,11 +1988,12 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = {});
+	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a channel's permissions
 	 *
+	 * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param channel_id ID of the channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
@@ -1955,21 +2003,22 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = {});
+	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a channel
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#deleteclose-channel
 	 * @param channel_id Channel id to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_delete(snowflake channel_id, command_completion_event_t callback = {});
+	void channel_delete(snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get details about an invite
 	 *
+	 * @see https://discord.com/developers/docs/resources/invite#get-invite
 	 * @param invite Invite code to get information on
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1979,16 +2028,18 @@ public:
 	/**
 	 * @brief Delete an invite
 	 *
+	 * @see https://discord.com/developers/docs/resources/invite#delete-invite
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param invite Invite code to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void invite_delete(const std::string &invite, command_completion_event_t callback = {});
+	void invite_delete(const std::string &invite, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get invites for a channel
 	 *
+	 * @see https://discord.com/developers/docs/resources/invite#get-invites
 	 * @param c Channel to get invites for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1998,17 +2049,17 @@ public:
 	/**
 	 * @brief Create invite for a channel
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#create-channel-invite
 	 * @param c Channel to create an invite on
 	 * @param i Invite to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback = {});
+	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a channel's pins
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#get-pinned-messages
 	 * @param channel_id Channel ID to get pins for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2017,7 +2068,7 @@ public:
 
 	/**
 	 * @brief Adds a recipient to a Group DM using their access token
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#group-dm-add-recipient
 	 * @param channel_id Channel id to add group DM recipients to
 	 * @param user_id User ID to add
 	 * @param access_token Access token from OAuth2
@@ -2025,85 +2076,85 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback = {});
+	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Removes a recipient from a Group DM
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#group-dm-remove-recipient
 	 * @param channel_id Channel ID of group DM
 	 * @param user_id User ID to remove from group DM
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback = {});
+	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove a permission from a channel
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#delete-channel-permission
 	 * @param c Channel to remove permission from
 	 * @param overwrite_id Overwrite to remove, user or channel ID
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback = {});
+	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Follow a news channel
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#follow-news-channel
 	 * @param c Channel id to follow
 	 * @param target_channel_id Channel to subscribe the channel to
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback = {});
+	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Trigger channel typing indicator
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
 	 * @param c Channel to set as typing on
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_typing(const class channel &c, command_completion_event_t callback = {});
+	void channel_typing(const class channel &c, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Trigger channel typing indicator
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
 	 * @param cid Channel ID to set as typing on
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_typing(snowflake cid, command_completion_event_t callback = {});
+	void channel_typing(snowflake cid, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Pin a message
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/channel#pin-message
 	 * @param channel_id Channel id to pin message on
 	 * @param message_id Message id to pin message on
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
+	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Unpin a message
-	 * 
+	 * @see https://discord.com/developers/docs/resources/channel#unpin-message
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param channel_id Channel id to unpin message on
 	 * @param message_id Message id to unpin message on
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
+	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a guild
 	 * 
 	 * Returns the guild object for the given id. This endpoint will also return approximate_member_count and approximate_presence_count
 	 * for the guild.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild
 	 * @param g Guild ID to retrieve
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2115,7 +2166,7 @@ public:
 	 * 
 	 * Returns the guild preview object for the given id `g`. If the user is not in the guild, then the guild
 	 * must be lurkable (it must be Discoverable or have a live public stage).
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-preview
 	 * @param g Guild ID to retrieve
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2124,7 +2175,7 @@ public:
 
 	/**
 	 * @brief Get a guild member
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-member
 	 * @param guild_id Guild ID to get member for
 	 * @param user_id User ID of member to get
 	 * @param callback Function to call when the API call completes.
@@ -2136,7 +2187,7 @@ public:
 	 * @brief Search for guild members based on whether their username or nickname starts with the given string.
 	 *
 	 * @note This endpoint is restricted according to whether the `GUILD_MEMBERS` Privileged Intent is enabled for your application.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#search-guild-members
 	 * @param guild_id Guild ID to search in
 	 * @param query Query string to match username(s) and nickname(s) against
 	 * @param limit max number of members to return (1-1000)
@@ -2149,7 +2200,7 @@ public:
 	 * @brief Get all guild members
 	 * 
 	 * @note This endpoint is restricted according to whether the `GUILD_MEMBERS` Privileged Intent is enabled for your application.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-members
 	 * @param guild_id Guild ID to get all members for
 	 * @param limit max number of members to return (1-1000)
 	 * @param after the highest user id in the previous page
@@ -2169,13 +2220,13 @@ public:
 	 * 
 	 * @note All parameters to this endpoint except for access_token are optional.
 	 * The bot must be a member of the guild with `CREATE_INSTANT_INVITE` permission.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#add-guild-member
 	 * @param gm Guild member to add
 	 * @param access_token Access token from Oauth2 scope
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback = {});
+	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit the properties of an existing guild member
@@ -2184,24 +2235,24 @@ public:
 	 * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
 	 * To remove a timeout, set the `communication_disabled_until` to a non-zero time in the past, e.g. 1.
 	 * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
-	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param gm Guild member to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = {});
+	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Moves the guild member to a other voice channel, if member is connected to one
-	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
 	 * @param channel_id Id of the channel to which the user is used
 	 * @param guild_id Guild id to which the user is connected
 	 * @param user_id User id, who should be moved
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback = {});
+	void guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Change current user nickname
@@ -2211,20 +2262,20 @@ public:
 	 * 
 	 * @deprecated Deprecated in favor of Modify Current Member. Will be replaced by dpp::cluster::guild_current_member_edit
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#modify-current-user-nick
 	 * @param guild_id Guild ID to change nickname on
 	 * @param nickname New nickname, or empty string to clear nickname
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
+	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add role to guild member
 	 * 
 	 * Adds a role to a guild member. Requires the `MANAGE_ROLES` permission.
 	 * Fires a Guild Member Update Gateway event.
-	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#add-guild-member-role
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to add a role to
 	 * @param user_id User ID to add role to
@@ -2232,14 +2283,14 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
+	void guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove role from guild member
 	 * 
 	 * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
 	 * Fires a `Guild Member Update` Gateway event.
-	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#remove-guild-member-role
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to remove role from user on
 	 * @param user_id User ID to remove role from
@@ -2247,28 +2298,28 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
+	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove (kick) a guild member
 	 * 
 	 * Remove a member from a guild. Requires `KICK_MEMBERS` permission.
 	 * Fires a `Guild Member Remove` Gateway event.
-	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#remove-guild-member
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to kick member from
 	 * @param user_id User ID to kick
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
+	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add guild ban
 	 * 
 	 * Create a guild ban, and optionally delete previous messages sent by the banned user.
 	 * Requires the `BAN_MEMBERS` permission. Fires a `Guild Ban Add` Gateway event.
-	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#create-guild-ban
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to add ban to
 	 * @param user_id User ID to ban
@@ -2277,27 +2328,27 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::ban object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback = {});
+	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete guild ban
 	 * 
 	 * Remove the ban for a user. Requires the `BAN_MEMBERS` permissions.
 	 * Fires a Guild Ban Remove Gateway event.
-	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#remove-guild-ban
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild to delete ban from
 	 * @param user_id User ID to delete ban for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
+	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild ban list
 	 * 
 	 * Requires the `BAN_MEMBERS` permission.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-bans
 	 * @param guild_id Guild ID to get bans for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::ban_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2308,7 +2359,7 @@ public:
 	 * @brief Get single guild ban
 	 * 
 	 * Requires the `BAN_MEMBERS` permission.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-ban
 	 * @param guild_id Guild ID to get ban for
 	 * @param user_id User ID of ban to retrieve
 	 * @param callback Function to call when the API call completes.
@@ -2318,7 +2369,7 @@ public:
 
 	/**
 	 * @brief Get a template
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild-template#get-guild-template
 	 * @param code Template code
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2327,17 +2378,19 @@ public:
 
 	/**
 	 * @brief Create a new guild based on a template.
-	 *
+	 * @note This endpoint can be used only by bots in less than 10 guilds.
+	 * @see https://discord.com/developers/docs/resources/guild-template#create-guild-from-guild-template
 	 * @param code Template code to create guild from
 	 * @param name Guild name to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback = {});
+	void guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild templates
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-template#get-guild-templates
 	 * @param guild_id Guild ID to get templates for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2347,6 +2400,7 @@ public:
 	/**
 	 * @brief Creates a template for the guild
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-template#create-guild-template
 	 * @param guild_id Guild to create template from
 	 * @param name Template name to create
 	 * @param description Description of template to create
@@ -2358,16 +2412,18 @@ public:
 	/**
 	 * @brief Syncs the template to the guild's current state.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-template#sync-guild-template
 	 * @param guild_id Guild to synchronise template for
 	 * @param code Code of template to synchronise
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
+	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Modifies the template's metadata.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-template#modify-guild-template
 	 * @param guild_id Guild ID of template to modify
 	 * @param code Template code to modify
 	 * @param name New name of template
@@ -2375,17 +2431,18 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback = {});
+	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Deletes the template
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-template#delete-guild-template
 	 * @param guild_id Guild ID of template to delete
 	 * @param code Template code to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
+	void guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a guild
@@ -2401,12 +2458,13 @@ public:
 	 * allow you to create `GUILD_CATEGORY` channels by setting the `parent_id` field on any children to the category's id field.
 	 * Category channels must be listed before any children.
 	 *
-	 * @note The region field is deprecated and is replaced by channel.rtc_region.
+	 * @see https://discord.com/developers/docs/resources/guild#create-guild
+	 * @note The region field is deprecated and is replaced by channel.rtc_region. This endpoint can be used only by bots in less than 10 guilds.
 	 * @param g Guild to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_create(const class guild &g, command_completion_event_t callback = {});
+	void guild_create(const class guild &g, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a guild
@@ -2414,27 +2472,30 @@ public:
 	 * Modify a guild's settings. Requires the `MANAGE_GUILD` permission. Returns the updated guild object on success.
 	 * Fires a `Guild Update Gateway` event.
 	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param g Guild to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_edit(const class guild &g, command_completion_event_t callback = {});
+	void guild_edit(const class guild &g, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a guild
 	 * 
 	 * Delete a guild permanently. User must be owner. Fires a `Guild Delete Gateway` event.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#delete-guild
 	 * @param guild_id Guild ID to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_delete(snowflake guild_id, command_completion_event_t callback = {});
+	void guild_delete(snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get all emojis for a guild
 	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#get-guild-emojis
 	 * @param guild_id Guild ID to get emojis for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2444,6 +2505,7 @@ public:
 	/**
 	 * @brief Get a single emoji
 	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#get-guild-emoji
 	 * @param guild_id Guild ID to get emoji for
 	 * @param emoji_id Emoji ID to get
 	 * @param callback Function to call when the API call completes.
@@ -2456,36 +2518,38 @@ public:
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#create-guild-emoji
 	 * @param guild_id Guild ID to create emoji om
 	 * @param newemoji Emoji to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
+	void guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a single emoji.
 	 * 
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
-	 * 
+	 * @see https://discord.com/developers/docs/resources/emoji#get-guild-emoji
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to edit emoji on
 	 * @param newemoji Emoji to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
+	void guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a guild emoji
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
+	 * @see https://discord.com/developers/docs/resources/emoji#delete-guild-emoji
 	 * @param guild_id Guild ID to delete emoji on
 	 * @param emoji_id Emoji ID to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = {});
+	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get prune counts
@@ -2495,6 +2559,7 @@ public:
 	 * include_roles parameter. Any inactive user that has a subset of the provided role(s) will be counted in the prune and users with additional
 	 * roles will not.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-prune-count
 	 * @param guild_id Guild ID to count for pruning
 	 * @param pruneinfo Pruning info
 	 * @param callback Function to call when the API call completes.
@@ -2511,13 +2576,14 @@ public:
 	 * By default, prune will not remove users with roles. You can optionally include specific roles in your prune by providing the `include_roles`
 	 * parameter. Any inactive user that has a subset of the provided role(s) will be included in the prune and users with additional roles will not.
 	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#begin-guild-prune
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to prune
 	 * @param pruneinfo Pruning info
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::prune object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback = {});
+	void guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild voice regions.
@@ -2526,6 +2592,7 @@ public:
 	 * Returns a list of voice region objects for the guild. Unlike the similar /voice route, this returns VIP servers when
 	 * the guild is VIP-enabled.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-voice-regions
 	 * @param guild_id Guild ID to get voice regions for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::voiceregion_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2537,6 +2604,7 @@ public:
 	 * 
 	 * Returns a list of invite objects (with invite metadata) for the guild. Requires the `MANAGE_GUILD` permission.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-invites
 	 * @param guild_id Guild ID to get invites for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2548,6 +2616,7 @@ public:
 	 * 
 	 * Requires the `MANAGE_GUILD` permission.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-integrations
 	 * @param guild_id Guild ID to get integrations for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::integration_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2558,12 +2627,13 @@ public:
 	 * @brief Modify guild integration
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-integration
 	 * @param guild_id Guild ID to modify integration for
 	 * @param i Integration to modify
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::integration object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback = {});
+	void guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete guild integration
@@ -2571,29 +2641,32 @@ public:
 	 * Delete the attached integration object for the guild. Deletes any associated webhooks and kicks the associated bot if there is one.
 	 * Requires the `MANAGE_GUILD` permission. Fires a Guild Integrations Update Gateway event.
 	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#delete-guild-integration
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to delete integration for
 	 * @param integration_id Integration ID to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
+	void guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Sync guild integration
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#sync-guild-integration
 	 * @param guild_id Guild ID to sync integration on
 	 * @param integration_id Integration ID to synchronise
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
+	void guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild widget
 	 * 
 	 * Requires the `MANAGE_GUILD` permission.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-widget
 	 * @param guild_id Guild ID to get widget for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_widget object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2605,19 +2678,20 @@ public:
 	 * 
 	 * Requires the `MANAGE_GUILD` permission.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-widget
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to edit widget for
 	 * @param gw New guild widget information
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_widget object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback = {});
+	void guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild vanity url, if enabled
 	 * 
 	 * Returns a partial dpp::invite object for guilds with that feature enabled. Requires the `MANAGE_GUILD` permission. code will be null if a vanity url for the guild is not set.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-vanity-url
 	 * @param guild_id Guild to get vanity URL for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2627,16 +2701,16 @@ public:
 	/**
 	 * @brief Create a webhook
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#create-webhook
 	 * @param w Webhook to create
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void create_webhook(const class webhook &w, command_completion_event_t callback = {});
+	void create_webhook(const class webhook &w, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild webhooks
-	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
 	 * @param guild_id Guild ID to get webhooks for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2645,7 +2719,7 @@ public:
 
 	/**
 	 * @brief Get channel webhooks
-	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
 	 * @param channel_id Channel ID to get webhooks for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2654,7 +2728,7 @@ public:
 
 	/**
 	 * @brief Get webhook
-	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#get-webhook
 	 * @param webhook_id Webhook ID to get
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2663,7 +2737,7 @@ public:
 
 	/**
 	 * @brief Get webhook using token
-	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#get-webhook-with-token
 	 * @param webhook_id Webhook ID to retrieve
 	 * @param token Token of webhook
 	 * @param callback Function to call when the API call completes.
@@ -2674,45 +2748,46 @@ public:
 	/**
 	 * @brief Edit webhook
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#modify-webhook
 	 * @param wh Webhook to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_webhook(const class webhook& wh, command_completion_event_t callback = {});
+	void edit_webhook(const class webhook& wh, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit webhook with token (token is encapsulated in the webhook object)
-	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
 	 * @param wh Webhook to edit (should include token)
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback = {});
+	void edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a webhook
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#delete-webhook
 	 * @param webhook_id Webhook ID to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_webhook(snowflake webhook_id, command_completion_event_t callback = {});
+	void delete_webhook(snowflake webhook_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete webhook with token
-	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#delete-webhook-with-token
 	 * @param webhook_id Webhook ID to delete
 	 * @param token Token of webhook to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback = {});
+	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Execute webhook
 	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#execute-webhook
 	 * @param wh Webhook to execute
 	 * @param m Message to send
 	 * @param wait waits for server confirmation of message send before response, and returns the created message body
@@ -2720,40 +2795,50 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, command_completion_event_t callback = {});
+	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get webhook message
 	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#get-webhook-message
 	 * @param wh Webhook to get the original message for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_webhook_message(const class webhook &wh, command_completion_event_t callback = {});
+	void get_webhook_message(const class webhook &wh, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit webhook message
 	 *
+	 * When the content field is edited, the mentions array in the message object will be reconstructed from scratch based on
+	 * the new content. The allowed_mentions field of the edit request controls how this happens. If there is no explicit
+	 * allowed_mentions in the edit request, the content will be parsed with default allowances, that is, without regard to
+	 * whether or not an allowed_mentions was present in the request that originally created the message.
+	 * 
+	 * @see https://discord.com/developers/docs/resources/webhook#edit-webhook-message
+	 * @note the attachments array must contain all attachments that should be present after edit, including retained and new attachments provided in the request body.
 	 * @param wh Webhook to edit message for
 	 * @param m New message
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_webhook_message(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
+	void edit_webhook_message(const class webhook &wh, const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete webhook message
 	 *
+	 * @see https://discord.com/developers/docs/resources/webhook#delete-webhook-message
 	 * @param wh Webhook to delete message for
 	 * @param message_id Message ID to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = {});
+	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a role for a guild
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#get-guild-roles
 	 * @param guild_id Guild ID to get role for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2766,24 +2851,26 @@ public:
 	 * Create a new role for the guild. Requires the `MANAGE_ROLES` permission. Returns the new role object on success.
 	 * Fires a `Guild Role Create` Gateway event.
 	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#create-guild-role
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param r Role to create (guild ID is encapsulated in the role object)
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void role_create(const class role &r, command_completion_event_t callback = {});
+	void role_create(const class role &r, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a role on a guild
 	 * 
 	 * Requires the `MANAGE_ROLES` permission. Returns the updated role on success. Fires a `Guild Role Update` Gateway event.
 	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-role
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param r Role to edit
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void role_edit(const class role &r, command_completion_event_t callback = {});
+	void role_edit(const class role &r, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit multiple role's position in a guild. Returns a list of all roles of the guild on success.
@@ -2791,30 +2878,33 @@ public:
 	 * Modify the positions of a set of role objects for the guild. Requires the `MANAGE_ROLES` permission.
 	 * Fires multiple `Guild Role Update` Gateway events.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-role-positions
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to change the roles position on
 	 * @param roles Vector of roles to change the positions of
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void roles_edit_position(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback = {});
+	void roles_edit_position(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a role
 	 * 
 	 * Requires the `MANAGE_ROLES` permission. Fires a `Guild Role Delete` Gateway event.
 	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#delete-guild-role
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to delete the role on
 	 * @param role_id Role ID to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback = {});
+	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a user by id
 	 *
+	 * @see https://discord.com/developers/docs/resources/user#get-user
 	 * @param user_id User ID to retrieve
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2828,6 +2918,7 @@ public:
 	/**
 	 * @brief Get current (bot) user
 	 *
+	 * @see https://discord.com/developers/docs/resources/user#get-current-user
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
@@ -2838,6 +2929,7 @@ public:
 	/**
 	 * @brief Get current (bot) application
 	 *
+	 * @see https://discord.com/developers/docs/topics/oauth2#get-current-bot-application-information
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::application object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -2850,19 +2942,19 @@ public:
 	 * Fires a `Guild Member Update` Gateway event.
 	 *
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild#modify-current-member
 	 * @param guild_id Guild ID to change on
 	 * @param nickname New nickname, or empty string to clear nickname
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
+	void guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get current user's connections (linked accounts, e.g. steam, xbox).
 	 * This call requires the oauth2 `connections` scope and cannot be executed
 	 * against a bot token.
-	 *
+	 * @see https://discord.com/developers/docs/resources/user#get-user-connections
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::connection_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -2870,7 +2962,7 @@ public:
 
 	/**
 	 * @brief Get current (bot) user guilds
-	 *
+	 * @see https://discord.com/developers/docs/resources/user#get-current-user-guilds
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -2881,7 +2973,7 @@ public:
 	 *
 	 * Modifies the current member in a guild. Returns the updated guild_member object on success.
 	 * Fires a `Guild Member Update` Gateway event.
-	 * 
+	 * @see https://discord.com/developers/docs/resources/user#modify-current-user
 	 * @param nickname Nickname to set
 	 * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
 	 * @param type Type of image for avatar
@@ -2889,11 +2981,11 @@ public:
 	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
  	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
 	 */
-	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = {});
+	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get current user DM channels
-	 *
+	 * 
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::channel_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -2901,26 +2993,27 @@ public:
 
 	/**
 	 * @brief Create a dm channel
-	 *
+	 * @see https://discord.com/developers/docs/resources/user#create-dm
 	 * @param user_id User ID to create DM channel with
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void create_dm_channel(snowflake user_id, command_completion_event_t callback = {});
+	void create_dm_channel(snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Leave a guild
-	 *
+	 * @see https://discord.com/developers/docs/resources/user#leave-guild
 	 * @param guild_id Guild ID to leave
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = {});
+	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a thread
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild#create-guild-channel
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
 	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
@@ -2930,12 +3023,12 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback = {});
+	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
 	 * @param message_id message to start thread with
@@ -2944,49 +3037,49 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback = {});
+	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Join a thread
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param thread_id Thread ID to join
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void current_user_join_thread(snowflake thread_id, command_completion_event_t callback = {});
+	void current_user_join_thread(snowflake thread_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Leave a thread
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param thread_id Thread ID to leave
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void current_user_leave_thread(snowflake thread_id, command_completion_event_t callback = {});
+	void current_user_leave_thread(snowflake thread_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add a member to a thread
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param thread_id Thread ID to add to
 	 * @param user_id Member ID to add
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
+	void thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove a member from a thread
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param thread_id Thread ID to remove from
 	 * @param user_id Member ID to remove
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_member_remove(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
+	void thread_member_remove(snowflake thread_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a thread member
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param thread_id Thread to get member for
 	 * @param user_id ID of the user to get
 	 * @param callback Function to call when the API call completes
@@ -2996,7 +3089,7 @@ public:
 
 	/**
 	 * @brief Get members of a thread
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param thread_id Thread to get members for
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3005,7 +3098,7 @@ public:
 
 	/**
 	 * @brief Get active threads in a channel (Sorted by ID in descending order)
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param channel_id Channel to get active threads for
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3014,7 +3107,7 @@ public:
 
 	/**
 	 * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
@@ -3025,7 +3118,7 @@ public:
 
 	/**
 	 * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
@@ -3037,7 +3130,7 @@ public:
 	/**
 	 * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
 
-	 *
+	 * @see https://discord.com/developers/docs/topics/thread
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_id Get threads before this id
 	 * @param limit Number of threads to get
@@ -3049,37 +3142,37 @@ public:
 	/**
 	 * @brief Create a sticker in a guild
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/sticker#create-guild-sticker
 	 * @param s Sticker to create. Must have its guild ID set.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sticker_create(sticker &s, command_completion_event_t callback = {});
+	void guild_sticker_create(sticker &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Modify a sticker in a guild
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/sticker#modify-guild-sticker
 	 * @param s Sticker to modify. Must have its guild ID and sticker ID set.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sticker_modify(sticker &s, command_completion_event_t callback = {});
+	void guild_sticker_modify(sticker &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a sticker from a guild
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 *
+	 * @see https://discord.com/developers/docs/resources/sticker#delete-guild-sticker
 	 * @param sticker_id sticker ID to delete
 	 * @param guild_id guild ID to delete from
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sticker_delete(snowflake sticker_id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_sticker_delete(snowflake sticker_id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a nitro sticker
-	 *
+	 * @see https://discord.com/developers/docs/resources/sticker#get-sticker
 	 * @param id Id of sticker to get.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3088,7 +3181,7 @@ public:
 
 	/**
 	 * @brief Get a guild sticker
-	 *
+	 * @see https://discord.com/developers/docs/resources/sticker#get-guild-sticker
 	 * @param id Id of sticker to get.
 	 * @param guild_id Guild ID of the guild where the sticker is
 	 * @param callback Function to call when the API call completes.
@@ -3098,7 +3191,7 @@ public:
 
 	/**
 	 * @brief Get all guild stickers
-	 *
+	 * @see https://discord.com/developers/docs/resources/sticker#get-guild-stickers
 	 * @param guild_id Guild ID of the guild where the sticker is
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3107,7 +3200,7 @@ public:
 
 	/**
 	 * @brief Get sticker packs
-	 *
+	 * @see https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker_pack_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -3115,17 +3208,17 @@ public:
 
 	/**
 	 * @brief Create a stage instance on a stage channel.
-	 *
+	 * @see https://discord.com/developers/docs/resources/stage-instance#create-stage-instance
 	 * @param instance Stage instance to create
 	 * @param callback User function to execute when the api call completes
 	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
-	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
+	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the stage instance associated with the channel id, if it exists.
-	 *
+	 * @see https://discord.com/developers/docs/resources/stage-instance#get-stage-instance
 	 * @param channel_id ID of the associated channel
 	 * @param callback User function to execute when the api call completes
 	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3134,27 +3227,27 @@ public:
 
 	/**
 	 * @brief Edit a stage instance.
-	 *
+	 * @see https://discord.com/developers/docs/resources/stage-instance#modify-stage-instance
 	 * @param instance Stage instance to edit
 	 * @param callback User function to execute when the api call completes
 	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
-	void stage_instance_edit(const stage_instance& instance, command_completion_event_t callback = {});
+	void stage_instance_edit(const stage_instance& instance, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a stage instance.
-	 *
+	 * @see https://discord.com/developers/docs/resources/stage-instance#delete-stage-instance
 	 * @param channel_id ID of the associated channel
 	 * @param callback User function to execute when the api call completes
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
-	void stage_instance_delete(const snowflake channel_id, command_completion_event_t callback = {});
+	void stage_instance_delete(const snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get all voice regions
-	 *
+	 * @see https://discord.com/developers/docs/resources/voice#list-voice-regions
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::voiceregion_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -3162,7 +3255,7 @@ public:
 
 	/**
 	 * @brief Get the gateway information for the bot using the token
-	 *
+	 * @see https://discord.com/developers/docs/topics/gateway#get-gateway-bot
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::gateway object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
@@ -3170,7 +3263,7 @@ public:
 
 	/**
 	 * @brief Get all scheduled events for a guild
-	 *
+	 * @see https://discord.com/developers/docs/resources/guild-scheduled-event#list-scheduled-events-for-guild
 	 * @param guild_id Guild to get events for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3180,6 +3273,7 @@ public:
 	/**
 	 * @brief Get users RSVP'd to an event
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event-users
 	 * @param guild_id Guild to get user list for
 	 * @param event_id Guild to get user list for
 	 * @param limit Maximum number of results to return
@@ -3193,34 +3287,38 @@ public:
 	/**
 	 * @brief Create a scheduled event on a guild
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event
 	 * @param event Event to create (guild ID must be populated)
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_event_create(const scheduled_event& event, command_completion_event_t callback = {});
+	void guild_event_create(const scheduled_event& event, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a scheduled event from a guild
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-scheduled-event#delete-guild-scheduled-event
 	 * @param event_id Event ID to delete
 	 * @param guild_id Guild ID of event to delete
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_event_delete(snowflake event_id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_event_delete(snowflake event_id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit/modify a scheduled event on a guild
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event
 	 * @param event Event to create (event ID and guild ID must be populated)
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_event_edit(const scheduled_event& event, command_completion_event_t callback = {});
+	void guild_event_edit(const scheduled_event& event, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a scheduled event for a guild
 	 *
+	 * @see https://discord.com/developers/docs/resources/guild-scheduled-event#get-guild-scheduled-event
 	 * @param guild_id Guild to get event for
 	 * @param event_id Event ID to get
 	 * @param callback Function to call when the API call completes.
@@ -3236,11 +3334,12 @@ public:
 	 * There are currently several caveats for this endpoint:
 	 * 
 	 * - `channel_id` must currently point to a stage channel.
-		 * - current user must already have joined `channel_id`.
-		 * - You must have the `MUTE_MEMBERS` permission to unsuppress yourself. You can always suppress yourself.
-		 * - You must have the `REQUEST_TO_SPEAK` permission to request to speak. You can always clear your own request to speak.
-		 * - You are able to set `request_to_speak_timestamp` to any present or future time.
-	 * 
+	 * - current user must already have joined `channel_id`.
+	 * - You must have the `MUTE_MEMBERS` permission to unsuppress yourself. You can always suppress yourself.
+	 * - You must have the `REQUEST_TO_SPEAK` permission to request to speak. You can always clear your own request to speak.
+	 * - You are able to set `request_to_speak_timestamp` to any present or future time.
+	 *
+	 * @see https://discord.com/developers/docs/resources/guild#modify-current-user-voice-state 
 	 * @param guild_id Guild to set voice state on
 	 * @param channel_id Stage channel to set voice state on
 	 * @param callback Function to call when the API call completes.
@@ -3249,7 +3348,7 @@ public:
 	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @throw std::logic_exception You attempted to set a request_to_speak_timestamp in the past which is not the value of 0.
 	 */
-	void current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0, command_completion_event_t callback = {});
+	void current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Set a user's voice state on a stage channel
@@ -3264,6 +3363,7 @@ public:
 	 * - When unsuppressed, non-bot users will have their `request_to_speak_timestamp` set to the current time. Bot users will not.
 	 * - When suppressed, the user will have their `request_to_speak_timestamp` removed.
 	 * 
+	 * @see https://discord.com/developers/docs/resources/guild#modify-user-voice-state
 	 * @param user_id The user to set the voice state of
 	 * @param guild_id Guild to set voice state on
 	 * @param channel_id Stage channel to set voice state on
@@ -3271,7 +3371,7 @@ public:
 	 * @param suppress True if the user's audio should be suppressed, false if it should not
 	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = {});
+	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = utility::log_error());
 
 };
 

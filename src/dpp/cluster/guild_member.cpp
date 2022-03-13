@@ -31,27 +31,27 @@ void cluster::guild_add_member(const guild_member& gm, const std::string &access
 
 
 void cluster::guild_edit_member(const guild_member& gm, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [&gm, callback](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_patch, gm.build_json(), [this, &gm, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(guild_member().fill_from_json(&j, gm.guild_id, gm.user_id), http));
+			callback(confirmation_callback_t(this, guild_member().fill_from_json(&j, gm.guild_id, gm.user_id), http));
 		}
 	});
 }
 
 
 void cluster::guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_get, "", [callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_get, "", [this, callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(guild_member().fill_from_json(&j, guild_id, user_id), http));
+			callback(confirmation_callback_t(this, guild_member().fill_from_json(&j, guild_id, user_id), http));
 		}
 	});
 }
 
 
 void cluster::guild_get_members(snowflake guild_id, uint16_t limit, snowflake after, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), fmt::format("members?limit={}&after={}", limit, after), m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), fmt::format("members?limit={}&after={}", limit, after), m_get, "", [this, callback, guild_id](json &j, const http_request_completion_t& http) {
 		guild_member_map guild_members;
-		confirmation_callback_t e(confirmation(), http);
+		confirmation_callback_t e(this, confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_member : j) {
 				if (curr_member.find("user") != curr_member.end()) {
@@ -61,7 +61,7 @@ void cluster::guild_get_members(snowflake guild_id, uint16_t limit, snowflake af
 			}
 		}
 		if (callback) {
-			callback(confirmation_callback_t(guild_members, http));
+			callback(confirmation_callback_t(this, guild_members, http));
 		}
 	});
 }
@@ -86,18 +86,18 @@ void cluster::guild_member_move(const snowflake channel_id, const snowflake guil
     json j;
     j["channel_id"] = channel_id;
 
-    this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(), [guild_id, user_id, callback](json &j, const http_request_completion_t& http) {
+    this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(), [this, guild_id, user_id, callback](json &j, const http_request_completion_t& http) {
 	if (callback) {
-	    callback(confirmation_callback_t(guild_member().fill_from_json(&j, guild_id, user_id), http));
+	    callback(confirmation_callback_t(this, guild_member().fill_from_json(&j, guild_id, user_id), http));
 	}
     });
 }
 
 
 void cluster::guild_search_members(snowflake guild_id, const std::string& query, uint16_t limit, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), fmt::format("members/search?query=\"{}\"&limit={}", utility::url_encode(query), limit), m_get, "", [callback, guild_id] (json &j, const http_request_completion_t& http) {
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), fmt::format("members/search?query=\"{}\"&limit={}", utility::url_encode(query), limit), m_get, "", [this, callback, guild_id] (json &j, const http_request_completion_t& http) {
 		guild_member_map guild_members;
-		confirmation_callback_t e(confirmation(), http);
+		confirmation_callback_t e(this, confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_member : j) {
 				if (curr_member.find("user") != curr_member.end()) {
@@ -107,7 +107,7 @@ void cluster::guild_search_members(snowflake guild_id, const std::string& query,
 			}
 		}
 		if (callback) {
-			callback(confirmation_callback_t(guild_members, http));
+			callback(confirmation_callback_t(this, guild_members, http));
 		}
 	});
 }

@@ -89,7 +89,7 @@ void cluster::guild_bulk_command_edit_permissions(const std::vector<slashcommand
 void cluster::guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/applications", std::to_string(s.application_id ? s.application_id : me.id), "guilds/" + std::to_string(guild_id) + "/commands", m_post, s.build_json(false), [s, this, guild_id, callback] (json &j, const http_request_completion_t& http) mutable {
 		if (callback) {
-			callback(confirmation_callback_t(slashcommand().fill_from_json(&j), http));
+			callback(confirmation_callback_t(this, slashcommand().fill_from_json(&j), http));
 		}
 
 		if (http.status < 300 && s.permissions.size()) {
@@ -134,17 +134,17 @@ void cluster::guild_commands_get(snowflake guild_id, command_completion_event_t 
 }
 
 void cluster::interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback) {
-	this->post_rest_multipart(API_PATH "/interactions", std::to_string(interaction_id), utility::url_encode(token) + "/callback", m_post, r.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest_multipart(API_PATH "/interactions", std::to_string(interaction_id), utility::url_encode(token) + "/callback", m_post, r.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(confirmation(), http));
+			callback(confirmation_callback_t(this, confirmation(), http));
 		}
 	}, r.msg->filename, r.msg->filecontent);
 }
 
 void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
-	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), utility::url_encode(token) + "/messages/@original", m_patch, m.build_json(), [callback](json &j, const http_request_completion_t& http) {
+	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), utility::url_encode(token) + "/messages/@original", m_patch, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(confirmation(), http));
+			callback(confirmation_callback_t(this, confirmation(), http));
 		}
 	}, m.filename, m.filecontent);
 }
