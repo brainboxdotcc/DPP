@@ -55,17 +55,17 @@ void to_json(nlohmann::json& j, const permission_overwrite& po) {
 
 channel::channel() :
 	managed(),
-	flags(0),
-	guild_id(0),
-	position(0),
-	last_message_id(0),
-	user_limit(0),
-	bitrate(0),
-	rate_limit_per_user(0),
 	owner_id(0),
 	parent_id(0),
+	guild_id(0),
+	last_message_id(0),
 	last_pin_timestamp(0),
-	permissions(0)
+	permissions(0),
+	flags(0),
+	position(0),
+	bitrate(0),
+	rate_limit_per_user(0),
+	user_limit(0)
 {
 }
 
@@ -133,7 +133,7 @@ channel& channel::set_user_limit(const uint8_t user_limit) {
 }
 
 channel& channel::add_permission_overwrite(const snowflake id, const uint8_t type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
-	permission_overwrite po {id, type, allowed_permissions, denied_permissions};
+	permission_overwrite po {id, allowed_permissions, denied_permissions, type};
 	this->permission_overwrites.push_back(po);
 	return *this;
 }
