@@ -95,6 +95,8 @@ struct DPP_EXPORT command_option_choice : public json_interface<command_option_c
 	 */
 	command_option_choice() = default;
 
+	virtual ~command_option_choice() = default;
+
 	/**
 	 * @brief Construct a new command option choice object
 	 *
@@ -153,6 +155,8 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 * @brief Construct a new command option object
 	 */
 	command_option() = default;
+
+	virtual ~command_option() = default;
 
 	/**
 	 * @brief Construct a new command option object
@@ -509,8 +513,8 @@ struct DPP_EXPORT command_interaction {
 	snowflake id;                              //!< the ID of the invoked command
 	std::string name;                          //!< the name of the invoked command
 	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
-    slashcommand_contextmenu_type type;        //!< type of the command interaction
-    dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions. e.g. user id or message id whom clicked or tapped with the context menu https://discord.com/developers/docs/interactions/application-commands#user-commands
+	slashcommand_contextmenu_type type;        //!< type of the command interaction
+	dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions. e.g. user id or message id whom clicked or tapped with the context menu https://discord.com/developers/docs/interactions/application-commands#user-commands
 };
 
 /**
@@ -608,6 +612,8 @@ public:
 	 */
 	interaction();
 
+	virtual ~interaction() = default;
+
 	/**
 	 * @brief Get the command interaction object
 	 * 
@@ -701,6 +707,8 @@ public:
 	 */
 	command_permission() = default;
 
+	virtual ~command_permission() = default;
+
 	/**
 	 * @brief Construct a new command permission object
 	 *
@@ -743,6 +751,8 @@ public:
 	 * @brief Construct a new guild command permissions object
 	 */
 	guild_command_permissions();
+
+	virtual ~guild_command_permissions() = default;
 
 	/**
 	 * @brief Fill object properties from JSON
