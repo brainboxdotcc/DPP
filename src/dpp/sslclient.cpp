@@ -95,7 +95,7 @@ thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
  */
-#define BUFSIZZ 16 * 1240
+#define DPP_BUFSIZE 16 * 1024
 const int ERROR_STATUS = -1;
 
 ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
@@ -316,7 +316,7 @@ void ssl_client::read_loop()
 	size_t ClientToServerLength = 0, ClientToServerOffset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
 	fd_set readfds, writefds, efds;
-	char ClientToServerBuffer[BUFSIZZ], ServerToClientBuffer[BUFSIZZ];
+	char ClientToServerBuffer[DPP_BUFSIZE], ServerToClientBuffer[DPP_BUFSIZE];
 
 	if (sfd == INVALID_SOCKET)  {
 		throw dpp::exception("Invalid file descriptor in read_loop()");
@@ -394,7 +394,7 @@ void ssl_client::read_loop()
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					r = ::recv(sfd, ServerToClientBuffer, BUFSIZZ, 0);
+					r = ::recv(sfd, ServerToClientBuffer, DPP_BUFSIZE, 0);
 					if (r <= 0) {
 						/* error or EOF */
 						return;
@@ -410,7 +410,7 @@ void ssl_client::read_loop()
 						read_blocked_on_write = false;
 						read_blocked = false;
 						
-						r = SSL_read(ssl->ssl,ServerToClientBuffer,BUFSIZZ);
+						r = SSL_read(ssl->ssl,ServerToClientBuffer,DPP_BUFSIZE);
 						int e = SSL_get_error(ssl->ssl,r);
 
 						switch (e) {
@@ -453,8 +453,8 @@ void ssl_client::read_loop()
 
 			/* Check for input on the sendq */
 			if (obuffer.length() && ClientToServerLength == 0) {
-				memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length());
-				ClientToServerLength = obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length();
+				memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length());
+				ClientToServerLength = obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length();
 				obuffer = obuffer.substr(ClientToServerLength, obuffer.length());
 				ClientToServerOffset = 0;
 			}

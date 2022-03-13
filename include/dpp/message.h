@@ -237,7 +237,7 @@ public:
 	 */
 	std::string url;
 
-	/** Placeholder text for select menus and text inputs (max 100 characters)
+	/** Placeholder text for select menus and text inputs (max 150 characters)
 	 */
 	std::string placeholder;
 
@@ -307,7 +307,7 @@ public:
 
 	/** Destructor
 	 */
-	~component() = default;
+	virtual ~component() = default;
 
 	/**
 	 * @brief Set the type of the component. Button components
@@ -386,7 +386,7 @@ public:
 	/**
 	 * @brief Set the placeholder
 	 * 
-	 * @param placeholder placeholder string. It will be truncated to the maximum length of 100 UTF-8 characters.
+	 * @param placeholder placeholder string. It will be truncated to the maximum length of 150 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
 	component& set_placeholder(const std::string &placeholder);
@@ -828,6 +828,8 @@ struct DPP_EXPORT sticker : public managed, public json_interface<sticker> {
 	 */
 	sticker();
 
+	virtual ~sticker() = default;
+
 	/** Read class values from json object
 	 * @param j A json object to read from
 	 * @return A reference to self
@@ -887,6 +889,8 @@ struct DPP_EXPORT sticker_pack : public managed, public json_interface<sticker_p
 	 * @brief Construct a new sticker pack object
 	 */
 	sticker_pack();
+
+	virtual ~sticker_pack() = default;
 
 	/** Read class values from json object
 	 * @param j A json object to read from
@@ -963,17 +967,17 @@ enum message_type {
 	/// Discovery grace period warning 2
 	mt_guild_discovery_grace_period_final_warning	= 17,
 	/// Thread Created 
-	mt_thread_created			= 18,
+	mt_thread_created				= 18,
 	/// Reply
 	mt_reply					= 19,
 	/// Application command
 	mt_application_command				= 20,
 	/// Thread starter message
-	mt_thread_starter_message	= 21,
+	mt_thread_starter_message			= 21,
 	/// Invite reminder
 	mt_guild_invite_reminder			= 22,
 	/// Context Menu Command
-	mt_context_menu_command 	= 23
+	mt_context_menu_command 			= 23
 };
 
 /**
@@ -1162,7 +1166,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Destroy the message object
 	 */
-	~message();
+	virtual ~message();
 
 	/**
 	 * @brief Construct a new message object with a channel and content

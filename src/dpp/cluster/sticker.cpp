@@ -52,7 +52,7 @@ void cluster::nitro_sticker_get(snowflake id, command_completion_event_t callbac
 }
 
 void cluster::sticker_packs_get(command_completion_event_t callback) {
-	rest_request<sticker_pack>(this, API_PATH "/sticker-packs", "", "", m_get, "", callback);
+	rest_request_list<sticker_pack>(this, API_PATH "/sticker-packs", "", "", m_get, "", callback);
 }
 
 };
