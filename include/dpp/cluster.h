@@ -216,10 +216,14 @@ struct DPP_EXPORT confirmation_callback_t {
 	/** Value returned, wrapped in variant */
 	confirmable_t value;
 
+	const class cluster* bot;
+
 	/**
 	 * @brief Construct a new confirmation callback t object
 	 */
 	confirmation_callback_t() = default;
+
+	confirmation_callback_t(cluster* creator);
 
 	/**
 	 * @brief Construct a new confirmation callback object
@@ -227,7 +231,7 @@ struct DPP_EXPORT confirmation_callback_t {
 	 * @param _value The value to encapsulate in the confirmable_t
 	 * @param _http The HTTP metadata from the REST call
 	 */
-	confirmation_callback_t(const confirmable_t& _value, const http_request_completion_t& _http);
+	confirmation_callback_t(cluster* creator, const confirmable_t& _value, const http_request_completion_t& _http);
 
 	/**
 	 * @brief Returns true if the call resulted in an error rather than a legitimate value in the
@@ -1458,7 +1462,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback = {});
+	void interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit response to a slash command
@@ -1469,7 +1473,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_response_edit(const std::string &token, const message &r, command_completion_event_t callback = {});
+	void interaction_response_edit(const std::string &token, const message &r, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these).
@@ -1482,7 +1486,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_command_create(const slashcommand &s, command_completion_event_t callback = {});
+	void global_command_create(const slashcommand &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a global slash command
@@ -1492,7 +1496,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_command_get(snowflake id, command_completion_event_t callback = {});
+	void global_command_get(snowflake id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the audit log for a guild
@@ -1514,7 +1518,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 
 	/**
@@ -1528,7 +1532,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a list of dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create/overwrite global slash commands.
@@ -1544,7 +1548,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a list of dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback = {});
+	void global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
@@ -1556,7 +1560,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_command_edit(const slashcommand &s, command_completion_event_t callback = {});
+	void global_command_edit(const slashcommand &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a slash command of a guild
@@ -1568,7 +1572,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_get(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_get(snowflake id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a slash command local to a guild
@@ -1579,7 +1583,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_edit(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_edit(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit slash command permissions of a guild
@@ -1591,7 +1595,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_edit_permissions(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the permissions for a slash command of a guild
@@ -1602,7 +1606,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_command_permissions object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_get_permissions(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_get_permissions(snowflake id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit/Overwrite the permissions of all existing slash commands in a guild
@@ -1616,7 +1620,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_command_permissions_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a global slash command (a bot can have a maximum of 100 of these)
@@ -1626,7 +1630,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void global_command_delete(snowflake id, command_completion_event_t callback = {});
+	void global_command_delete(snowflake id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a slash command local to a guild
@@ -1637,7 +1641,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_command_delete(snowflake id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_command_delete(snowflake id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the application's slash commands for a guild
@@ -1679,7 +1683,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void direct_message_create(snowflake user_id, const message &m, command_completion_event_t callback = {});
+	void direct_message_create(snowflake user_id, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a message
@@ -1716,7 +1720,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_create(const struct message &m, command_completion_event_t callback = {});
+	void message_create(const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Crosspost a message. The callback function is called when the message has been sent
@@ -1727,7 +1731,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
+	void message_crosspost(snowflake message_id, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a message on a channel. The callback function is called when the message has been edited
@@ -1737,7 +1741,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_edit(const struct message &m, command_completion_event_t callback = {});
+	void message_edit(const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1748,7 +1752,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
+	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1759,7 +1763,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1771,7 +1775,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get reactions on a message for a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1795,7 +1799,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_all_reactions(const struct message &m, command_completion_event_t callback = {});
+	void message_delete_all_reactions(const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete all reactions on a message using a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1806,7 +1810,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1818,7 +1822,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete own reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1830,7 +1834,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a user's reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1843,7 +1847,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get reactions on a message for a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1869,7 +1873,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_all_reactions(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
+	void message_delete_all_reactions(snowflake message_id, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete all reactions on a message using a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1881,7 +1885,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = {});
+	void message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a message from a channel. The callback function is called when the message has been edited
@@ -1893,7 +1897,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback = {});
+	void message_delete(snowflake message_id, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Bulk delete messages from a channel. The callback function is called when the message has been edited
@@ -1907,7 +1911,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = {});
+	void message_delete_bulk(const std::vector<snowflake> &message_ids, snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a channel
@@ -1944,7 +1948,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_create(const class channel &c, command_completion_event_t callback = {});
+	void channel_create(const class channel &c, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a channel
@@ -1954,7 +1958,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit(const class channel &c, command_completion_event_t callback = {});
+	void channel_edit(const class channel &c, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit multiple channels positions
@@ -1969,7 +1973,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_positions(const std::vector<channel> &c, command_completion_event_t callback = {});
+	void channel_edit_positions(const std::vector<channel> &c, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a channel's permissions
@@ -1984,7 +1988,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = {});
+	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a channel's permissions
@@ -1999,7 +2003,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = {});
+	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a channel
@@ -2009,7 +2013,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_delete(snowflake channel_id, command_completion_event_t callback = {});
+	void channel_delete(snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get details about an invite
@@ -2030,7 +2034,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void invite_delete(const std::string &invite, command_completion_event_t callback = {});
+	void invite_delete(const std::string &invite, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get invites for a channel
@@ -2051,7 +2055,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback = {});
+	void channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a channel's pins
@@ -2072,7 +2076,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback = {});
+	void gdm_add(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Removes a recipient from a Group DM
@@ -2082,7 +2086,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback = {});
+	void gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove a permission from a channel
@@ -2093,7 +2097,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback = {});
+	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Follow a news channel
@@ -2103,7 +2107,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback = {});
+	void channel_follow_news(const class channel &c, snowflake target_channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Trigger channel typing indicator
@@ -2112,7 +2116,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_typing(const class channel &c, command_completion_event_t callback = {});
+	void channel_typing(const class channel &c, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Trigger channel typing indicator
@@ -2121,7 +2125,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_typing(snowflake cid, command_completion_event_t callback = {});
+	void channel_typing(snowflake cid, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Pin a message
@@ -2132,7 +2136,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
+	void message_pin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Unpin a message
@@ -2143,7 +2147,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = {});
+	void message_unpin(snowflake channel_id, snowflake message_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a guild
@@ -2222,7 +2226,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback = {});
+	void guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit the properties of an existing guild member
@@ -2237,7 +2241,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = {});
+	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Moves the guild member to a other voice channel, if member is connected to one
@@ -2248,7 +2252,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_member object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback = {});
+	void guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Change current user nickname
@@ -2264,7 +2268,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
+	void guild_set_nickname(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add role to guild member
@@ -2279,7 +2283,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
+	void guild_member_add_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove role from guild member
@@ -2294,7 +2298,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = {});
+	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove (kick) a guild member
@@ -2308,7 +2312,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
+	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add guild ban
@@ -2324,7 +2328,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::ban object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback = {});
+	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete guild ban
@@ -2338,7 +2342,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = {});
+	void guild_ban_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild ban list
@@ -2381,7 +2385,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback = {});
+	void guild_create_from_template(const std::string &code, const std::string &name, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild templates
@@ -2414,7 +2418,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
+	void guild_template_sync(snowflake guild_id, const std::string &code, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Modifies the template's metadata.
@@ -2427,7 +2431,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::dtemplate object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback = {});
+	void guild_template_modify(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Deletes the template
@@ -2438,7 +2442,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback = {});
+	void guild_template_delete(snowflake guild_id, const std::string &code, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a guild
@@ -2460,7 +2464,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_create(const class guild &g, command_completion_event_t callback = {});
+	void guild_create(const class guild &g, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a guild
@@ -2474,7 +2478,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_edit(const class guild &g, command_completion_event_t callback = {});
+	void guild_edit(const class guild &g, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a guild
@@ -2486,7 +2490,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_delete(snowflake guild_id, command_completion_event_t callback = {});
+	void guild_delete(snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get all emojis for a guild
@@ -2520,7 +2524,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
+	void guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a single emoji.
@@ -2533,7 +2537,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::emoji object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = {});
+	void guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a guild emoji
@@ -2545,7 +2549,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = {});
+	void guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get prune counts
@@ -2579,7 +2583,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::prune object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback = {});
+	void guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild voice regions.
@@ -2629,7 +2633,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::integration object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback = {});
+	void guild_modify_integration(snowflake guild_id, const class integration &i, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete guild integration
@@ -2644,7 +2648,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
+	void guild_delete_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Sync guild integration
@@ -2655,7 +2659,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = {});
+	void guild_sync_integration(snowflake guild_id, snowflake integration_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild widget
@@ -2681,7 +2685,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_widget object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback = {});
+	void guild_edit_widget(snowflake guild_id, const class guild_widget &gw, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild vanity url, if enabled
@@ -2702,7 +2706,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void create_webhook(const class webhook &w, command_completion_event_t callback = {});
+	void create_webhook(const class webhook &w, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get guild webhooks
@@ -2749,7 +2753,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_webhook(const class webhook& wh, command_completion_event_t callback = {});
+	void edit_webhook(const class webhook& wh, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit webhook with token (token is encapsulated in the webhook object)
@@ -2758,7 +2762,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::webhook object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback = {});
+	void edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a webhook
@@ -2768,7 +2772,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_webhook(snowflake webhook_id, command_completion_event_t callback = {});
+	void delete_webhook(snowflake webhook_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete webhook with token
@@ -2778,7 +2782,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback = {});
+	void delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Execute webhook
@@ -2791,7 +2795,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, command_completion_event_t callback = {});
+	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get webhook message
@@ -2801,7 +2805,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_webhook_message(const class webhook &wh, command_completion_event_t callback = {});
+	void get_webhook_message(const class webhook &wh, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit webhook message
@@ -2818,7 +2822,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_webhook_message(const class webhook &wh, const struct message &m, command_completion_event_t callback = {});
+	void edit_webhook_message(const class webhook &wh, const struct message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete webhook message
@@ -2829,7 +2833,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = {});
+	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a role for a guild
@@ -2853,7 +2857,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void role_create(const class role &r, command_completion_event_t callback = {});
+	void role_create(const class role &r, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a role on a guild
@@ -2866,7 +2870,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void role_edit(const class role &r, command_completion_event_t callback = {});
+	void role_edit(const class role &r, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit multiple role's position in a guild. Returns a list of all roles of the guild on success.
@@ -2881,7 +2885,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::role_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void roles_edit_position(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback = {});
+	void roles_edit_position(snowflake guild_id, const std::vector<role> &roles, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a role
@@ -2895,7 +2899,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback = {});
+	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a user by id
@@ -2944,7 +2948,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = {});
+	void guild_current_member_edit(snowflake guild_id, const std::string &nickname, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get current user's connections (linked accounts, e.g. steam, xbox).
@@ -2977,7 +2981,7 @@ public:
 	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
  	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
 	 */
-	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = {});
+	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get current user DM channels
@@ -2994,7 +2998,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void create_dm_channel(snowflake user_id, command_completion_event_t callback = {});
+	void create_dm_channel(snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Leave a guild
@@ -3003,7 +3007,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = {});
+	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a thread
@@ -3019,7 +3023,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback = {});
+	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
@@ -3033,7 +3037,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback = {});
+	void thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Join a thread
@@ -3042,7 +3046,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void current_user_join_thread(snowflake thread_id, command_completion_event_t callback = {});
+	void current_user_join_thread(snowflake thread_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Leave a thread
@@ -3051,7 +3055,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void current_user_leave_thread(snowflake thread_id, command_completion_event_t callback = {});
+	void current_user_leave_thread(snowflake thread_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add a member to a thread
@@ -3061,7 +3065,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
+	void thread_member_add(snowflake thread_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove a member from a thread
@@ -3071,7 +3075,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void thread_member_remove(snowflake thread_id, snowflake user_id, command_completion_event_t callback = {});
+	void thread_member_remove(snowflake thread_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a thread member
@@ -3143,7 +3147,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sticker_create(sticker &s, command_completion_event_t callback = {});
+	void guild_sticker_create(sticker &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Modify a sticker in a guild
@@ -3153,7 +3157,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sticker_modify(sticker &s, command_completion_event_t callback = {});
+	void guild_sticker_modify(sticker &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a sticker from a guild
@@ -3164,7 +3168,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sticker_delete(snowflake sticker_id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_sticker_delete(snowflake sticker_id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a nitro sticker
@@ -3210,7 +3214,7 @@ public:
 	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
-	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = {});
+	void stage_instance_create(const stage_instance& instance, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get the stage instance associated with the channel id, if it exists.
@@ -3229,7 +3233,7 @@ public:
 	 * On success the callback will contain a dpp::stage_instance object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
-	void stage_instance_edit(const stage_instance& instance, command_completion_event_t callback = {});
+	void stage_instance_edit(const stage_instance& instance, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a stage instance.
@@ -3239,7 +3243,7 @@ public:
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 */
-	void stage_instance_delete(const snowflake channel_id, command_completion_event_t callback = {});
+	void stage_instance_delete(const snowflake channel_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get all voice regions
@@ -3288,7 +3292,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_event_create(const scheduled_event& event, command_completion_event_t callback = {});
+	void guild_event_create(const scheduled_event& event, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a scheduled event from a guild
@@ -3299,7 +3303,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_event_delete(snowflake event_id, snowflake guild_id, command_completion_event_t callback = {});
+	void guild_event_delete(snowflake event_id, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit/modify a scheduled event on a guild
@@ -3309,7 +3313,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::scheduled_event_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_event_edit(const scheduled_event& event, command_completion_event_t callback = {});
+	void guild_event_edit(const scheduled_event& event, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get a scheduled event for a guild
@@ -3344,7 +3348,7 @@ public:
 	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @throw std::logic_exception You attempted to set a request_to_speak_timestamp in the past which is not the value of 0.
 	 */
-	void current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0, command_completion_event_t callback = {});
+	void current_user_set_voice_state(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Set a user's voice state on a stage channel
@@ -3367,7 +3371,7 @@ public:
 	 * @param suppress True if the user's audio should be suppressed, false if it should not
 	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = {});
+	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = utility::log_error());
 
 };
 
