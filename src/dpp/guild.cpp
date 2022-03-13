@@ -499,7 +499,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	return *this;
 }
 
-guild_widget::guild_widget() : enabled(false), channel_id(0)
+guild_widget::guild_widget() : channel_id(0), enabled(false)
 {
 }
 
