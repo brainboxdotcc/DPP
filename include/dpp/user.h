@@ -123,7 +123,7 @@ public:
 	 * @brief Get the avatar url of the user object
 	 *
 	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized avatar is returned.
-	 * @return std::string avatar url
+	 * @return std::string avatar url. If the user doesn't have an avatar, the default user avatar url is returned
 	 */
 	std::string get_avatar_url(uint16_t size = 0) const;
 
