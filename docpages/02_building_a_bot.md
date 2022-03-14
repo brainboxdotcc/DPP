@@ -198,7 +198,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 Then open the "File" menu and click on "Reload CMake Project" to reload the CMake configuration.
 
-\image build-clion-reload-cmake-project.png
+\image html build-clion-reload-cmake-project.png
 
 ### Add an example program
 
