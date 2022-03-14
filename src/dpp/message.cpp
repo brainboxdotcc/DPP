@@ -695,7 +695,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 
 	j["allowed_mentions"] = json::object();
 	j["allowed_mentions"]["parse"] = json::array();
-	if (allowed_mentions.parse_everyone || allowed_mentions.parse_roles || allowed_mentions.parse_users || !allowed_mentions.replied_user || allowed_mentions.users.size() || allowed_mentions.roles.size()) {
+	if (allowed_mentions.parse_everyone || allowed_mentions.parse_roles || allowed_mentions.parse_users || allowed_mentions.replied_user || allowed_mentions.users.size() || allowed_mentions.roles.size()) {
 		if (allowed_mentions.parse_everyone) {
 			j["allowed_mentions"]["parse"].push_back("everyone");
 		}
