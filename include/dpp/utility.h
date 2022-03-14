@@ -359,14 +359,14 @@ namespace dpp {
 		 * @param value String to encode
 		 * @return std::string URL encoded string
 		 */
-		std::string url_encode(const std::string &value);
+		std::string DPP_EXPORT url_encode(const std::string &value);
 
 		/**
 		 * @brief Returns the library's version string
 		 * 
 		 * @return std::string version
 		 */
-		std::string version();
+		std::string DPP_EXPORT version();
 
 		/**
 		 * @brief Build a URL parameter string e.g. "a=b&c=d&e=f" from a map of key/value pairs.
@@ -375,7 +375,7 @@ namespace dpp {
 		 * @param parameters parameters to create a url query string for
 		 * @return std::string A correctly encoded url query string
 		 */
-		std::string make_url_parameters(const std::map<std::string, std::string>& parameters);
+		std::string DPP_EXPORT make_url_parameters(const std::map<std::string, std::string>& parameters);
 
 		/**
 		 * @brief Build a URL parameter string e.g. "a=b&c=d&e=f" from a map of key/value pairs.
@@ -384,7 +384,7 @@ namespace dpp {
 		 * @param parameters parameters to create a url query string for
 		 * @return std::string A correctly encoded url query string
 		 */
-		std::string make_url_parameters(const std::map<std::string, uint64_t>& parameters);
+		std::string DPP_EXPORT make_url_parameters(const std::map<std::string, uint64_t>& parameters);
 
 	};
 };
