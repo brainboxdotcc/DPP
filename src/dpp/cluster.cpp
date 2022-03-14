@@ -26,6 +26,7 @@
 #include <dpp/message.h>
 #include <dpp/cache.h>
 #include <dpp/once.h>
+#include <dpp/sync.h>
 #include <chrono>
 #include <iostream>
 #include <dpp/nlohmann/json.hpp>
@@ -105,26 +106,6 @@ cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
 
 
 
-void cluster::auto_shard(const confirmation_callback_t &shardinfo) {
-	gateway g = std::get<gateway>(shardinfo.value);
-	numshards = g.shards;
-	if (g.shards) {
-		log(ll_info, fmt::format("Auto Shard: Bot requires {} shard{}", g.shards, (g.shards > 1) ? "s" : ""));
-		if (g.session_start_remaining < g.shards) {
-			log(ll_critical, fmt::format("Auto Shard: Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later."));
-		} else {
-			log(ll_debug, fmt::format("Auto Shard: {} of {} session starts remaining", g.session_start_remaining, g.session_start_total));
-			cluster::start(true);
-		}
-	} else {
-		if (shardinfo.is_error()) {
-			throw dpp::rest_exception(fmt::format("Auto Shard: Could not get shard count ({} [code: {}]). Cluster startup aborted.", shardinfo.get_error().message, shardinfo.get_error().code));
-		} else {
-			throw dpp::rest_exception("Auto Shard: Could not get shard count (unknown error, check your connection). Cluster startup aborted.");
-		}
-	}
-}
-
 void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 	if (!on_log.empty()) {
 		/* Pass to user if they've hooked the event */
@@ -143,7 +124,20 @@ dpp::utility::uptime cluster::uptime()
 void cluster::start(bool return_after) {
 	/* Start up all shards */
 	if (numshards == 0) {
-		get_gateway_bot(std::bind(&cluster::auto_shard, this, std::placeholders::_1));
+		gateway g = dpp_sync(gateway, this, get_gateway_bot);
+		numshards = g.shards;
+		if (g.shards) {
+			log(ll_info, fmt::format("Auto Shard: Bot requires {} shard{}", g.shards, (g.shards > 1) ? "s" : ""));
+			if (g.session_start_remaining < g.shards) {
+				log(ll_critical, fmt::format("Auto Shard: Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later."));
+			} else {
+				log(ll_debug, fmt::format("Auto Shard: {} of {} session starts remaining", g.session_start_remaining, g.session_start_total));
+				cluster::start(true);
+			}
+		} else {
+			log(ll_critical, fmt::format("Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection."));
+			return;
+		}
 		if (!return_after) {
 			while (true) {
 				std::this_thread::sleep_for(std::chrono::seconds(86400));

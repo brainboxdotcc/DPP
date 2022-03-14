@@ -488,14 +488,6 @@ class DPP_EXPORT cluster {
 	timer_next_t next_timer;
 
 	/**
-	 * @brief Accepts result from /gateway/bot REST API call and populates numshards with it
-	 *
-	 * @param shardinfo Received HTTP data from API call
-	 * @throw dpp::exception Thrown if REST request to obtain shard count fails
-	 */
-	void auto_shard(const confirmation_callback_t &shardinfo);
-
-	/**
 	 * @brief Tick active timers
 	 */
 	void tick_timers();
