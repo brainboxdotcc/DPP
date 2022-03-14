@@ -35,8 +35,8 @@ namespace dpp {
 #define DPP_COMMA ,
 
 /**
- * @brief Call a D++ REST function syncronously.
- * Syncronously calling a REST function means IT WILL BLOCK. This is a Bad Thing™️ and strongly discouraged.
+ * @brief Call a D++ REST function synchronously.
+ * Synchronously calling a REST function means IT WILL BLOCK. This is a Bad Thing™️ and strongly discouraged.
  * There are very few circumstances you actually need this. If you do need to use this, you'll know it.
  * @param type The type of value to be returned from the REST call
  * @param cluster A pointer to a dpp::cluster object
