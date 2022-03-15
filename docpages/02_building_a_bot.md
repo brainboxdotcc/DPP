@@ -7,6 +7,7 @@ Click on a link below for a guide specifically for your system:
 * \subpage creating-a-bot-application "Creating a Bot Token"
 * \subpage build-a-discord-bot-windows-visual-studio "Building a discord bot in Windows using Visual Studio"
 * \subpage build-a-discord-bot-windows-wsl "Building a discord bot in Windows using WSL (Windows Subsystem for Linux)"
+* \subpage build-a-discord-bot-linux-clion "Building a discord bot in Linux using CLion"
 * \subpage buildcmake "Building a Discord Bot using CMake/UNIX"
 * \subpage building-a-cpp-discord-bot-in-repl "Creating a Discord bot in Repl.it"
 
@@ -109,7 +110,7 @@ To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, fo
 
 \page build-a-discord-bot-windows-wsl Building a discord bot in Windows using WSL (Windows Subsystem for Linux)
 
-This Tutorial teaches you how to create a lightweight environment for D++-development using **WSL** and **Visual Studio Code**
+This tutorial teaches you how to create a lightweight environment for D++-development using **WSL** and **Visual Studio Code**
 \note This Tutorial will use **WSL's default Ubuntu**! You might use other Distros if you prefer, but keep in mind the setup process might be different!
 
 1. Make sure you have installed your WSL 2 environment properly using [this guide to setup up WSL](https://docs.microsoft.com/en-us/windows/wsl/install) and [this guide to connect to Visual Studio Code](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode).
@@ -125,6 +126,123 @@ This Tutorial teaches you how to create a lightweight environment for D++-develo
 8. Now you can open this file in Visual Studio Code by pressing `CTRL+SHIFT+P` and typing `Remote-WSL: New WSL Window`. This will bring up a new window. In the new window, choose `open folder` and choose the folder you've created prior. Press OK and now you have your Folder opened as a Workspace!
 9. Add code to your CXX file and compile it by running `g++ -std=c++17 *.cxx -o bot -ldpp` in the same folder as your cxx file.
 10. start your bot by typing `./bot`!
+
+\page build-a-discord-bot-linux-clion Building a discord bot in Linux using CLion
+
+This tutorial teaches you how to create a _working skeleton project you can build upon_, using the JetBrains-IDE **[CLion](https://www.jetbrains.com/clion/)**.
+
+\note This tutorial will use **Ubuntu**! You might use other Distros if you prefer, but keep in mind the setup process might be different!
+
+Make sure you have CLion installed and works fine (run a _hello-world program_). You can [download CLion here](https://www.jetbrains.com/de-de/clion/download/).
+
+## Setup a project
+
+Create a new project. Select C++17 as the Language standard, or C++20 if you want something more recent.
+
+We'll use the following file structure as a _skeleton project you can build upon_:
+
+    - your_project/
+        |-- libs/
+        |-- src/
+            |-- main.cpp
+        |-- CMakeLists.txt
+
+
+Create the directories in your project and move the by CLion generated _hello-world main.cpp_ in the `src/` directory.
+
+In the `libs/` directory, clone D++ with: `git clone https://github.com/brainboxdotcc/DPP.git`. You can also clone [spdlog](https://github.com/gabime/spdlog) into it if you need a logger.
+
+Your project directory should look like this:
+
+\image html build-clion-project-structure.png
+
+### Configure CMake file
+
+Paste this CMake configuration in the `CMakeLists.txt` and adapt it according to your needs:
+
+~~~~~~~~~~~~~~{.cmake}
+# minimum CMake version required
+cmake_minimum_required(VERSION 3.15)
+# Project name, version and description
+project(discord-bot VERSION 1.0 DESCRIPTION "A discord bot")
+
+# Add DPP as dependency
+add_subdirectory(libs/DPP)
+add_subdirectory(libs/spdlog) # if you need a logger. Don't forget to clone sources
+                              # in the `libs/` directory
+
+# Create an executable
+add_executable(${PROJECT_NAME}
+    src/main.cpp
+    # your others files...
+)
+
+# Linking libraries
+target_link_libraries(${PROJECT_NAME}
+    dpp
+    spdlog # Like before, if you need spdlog
+)
+
+# Specify includes
+target_include_directories(${PROJECT_NAME} PRIVATE
+    libs/DPP/include
+    libs/spdlog/include # Like before, if you need spdlog
+)
+
+# Set C++ version
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 17 # or 20 if you want something more recent
+    CXX_STANDARD_REQUIRED ON
+)
+~~~~~~~~~~~~~~
+
+Then open the "File" menu and click on "Reload CMake Project" to reload the CMake configuration.
+
+\image html build-clion-reload-cmake-project.png
+
+### Add an example program
+
+The next step is to write the bot. Copy and paste the following [example program](https://dpp.dev/firstbot.html) in the `main.cpp` and set your bot token (see [Creating a Bot Token](https://dpp.dev/creating-a-bot-application.html)) and guild ID to the example program:
+
+
+~~~~~~~~~~~~~~~{.cpp}
+#include <dpp/dpp.h>
+
+const std::string    BOT_TOKEN    = "add your token here";
+const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
+
+int main() {
+    dpp::cluster bot(BOT_TOKEN);
+
+    bot.on_log(dpp::utility::cout_logger());
+
+    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+         if (event.command.get_command_name() == "ping") {
+            event.reply("Pong!");
+        }
+    });
+
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            bot.guild_command_create(
+                dpp::slashcommand("ping", "Ping pong!", bot.me.id),
+                MY_GUILD_ID
+            );
+        }
+    });
+
+    bot.start(false);
+}
+~~~~~~~~~~~~~~~
+
+
+Hit the green "Run" button in the top-right to run the bot.
+
+**Congratulations, you've successfully set up a bot!**
+
+## Troubleshooting
+
+- Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
 
 \page creating-a-bot-application Creating a Bot Token
 
