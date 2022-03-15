@@ -146,9 +146,11 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 					SSL_free(iter->second.ssl->ssl);
 					iter->second.ssl->ssl = nullptr;
 				}
-				shutdown(iter->second.sfd, 2);
+				if (iter->second.sfd != INVALID_SOCKET) {
+					shutdown(iter->second.sfd, 2);
+				}
 				#ifdef _WIN32
-					if (sfd >= 0 && sfd < FD_SETSIZE) {
+					if (iter->second.sfd >= 0 && iter->second.sfd < FD_SETSIZE) {
 						closesocket(iter->second.sfd);
 					}
 				#else
@@ -279,7 +281,7 @@ void ssl_client::write(const std::string &data)
 		obuffer += data;
 	} else {
 		if (plaintext) {
-			if (::write(sfd, data.data(), data.length()) != (int)data.length()) {
+			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data.length(), 0) != (int)data.length()) {
 				throw dpp::exception("write() failed");
 			}
 		} else {
