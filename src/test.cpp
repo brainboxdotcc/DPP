@@ -236,7 +236,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 											if (!callback.is_error()) {
 												set_test("MESSAGEDELETE", true);
-												set_test("CACHE", false);
 											} else {
 												set_test("MESSAGEDELETE", false);
 											}
@@ -303,6 +302,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					set_test("PRESENCE", true);
 				}
 				dpp::guild* g = dpp::find_guild(TEST_GUILD_ID);
+				set_test("CACHE", false);
 				if (g) {
 					set_test("CACHE", true);
 					set_test("VOICECONN", false);

@@ -124,7 +124,7 @@ dpp::utility::uptime cluster::uptime()
 void cluster::start(bool return_after) {
 	/* Start up all shards */
 	if (numshards == 0) {
-		gateway g = dpp_sync(gateway, this, get_gateway_bot);
+		gateway g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
 		numshards = g.shards;
 		if (g.shards) {
 			log(ll_info, fmt::format("Auto Shard: Bot requires {} shard{}", g.shards, (g.shards > 1) ? "s" : ""));
