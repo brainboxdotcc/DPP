@@ -26,6 +26,7 @@ You can download the latest releases and check out our source code from the [Git
 * The entire Discord API is available for use in the library
 * Stable [Windows support](https://dpp.dev/buildwindows.html)
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6), Debian x86/x64 and RPM based distributions
+* Highly scalable for large amounts of guilds and users
 
 ## Supported Operating Systems
 

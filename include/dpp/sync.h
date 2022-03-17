@@ -25,55 +25,69 @@
 
 namespace dpp {
 
-/*
- * DPP_VA_COMMA() expands to nothing if given no arguments and a comma if
- * given 1 to 8 arguments.  Bad things happen if given more than 8
- * arguments.  Don't do it.
- */
-#define DPP_VA_COMMA(...) DPP_GET_LAST_ARG(,##__VA_ARGS__,DPP_COMMA,DPP_COMMA,DPP_COMMA,DPP_COMMA,DPP_COMMA,DPP_COMMA,DPP_COMMA,DPP_COMMA,)
-#define DPP_GET_LAST_ARG(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,...) a10
-#define DPP_COMMA ,
-
 /**
  * @brief Call a D++ REST function synchronously.
- * Synchronously calling a REST function means IT WILL BLOCK. This is a Bad Thing™️ and strongly discouraged.
+ * 
+ * Synchronously calling a REST function means *IT WILL BLOCK* - This is a Bad Thing™ and strongly discouraged.
  * There are very few circumstances you actually need this. If you do need to use this, you'll know it.
- * @param type The type of value to be returned from the REST call
- * @param cluster A pointer to a dpp::cluster object
- * @param func The function in dpp::cluster to call
- * @param ... Any number of required parameters to the function, minus the callback
- * @return The returned data type
- * @throw dpp::rest_exception Will throw on failure to complete the request.
- * Exceptions are thrown in the thread which called dpp_sync().
+ * 
+ * Example:
+ * 
+ * ```cpp
+ * dpp::message m = dpp::sync<dpp::message>(&bot, &dpp::cluster::message_create, dpp::message(channel_id, "moo."));
+ * ```
+ * 
+ * @warning As previously mentioned, this template will block. It is ill-advised to call this outside of
+ * a separate thread and this should never be directly used in any event such as dpp::cluster::on_interaction_create!
+ * @tparam T type of expected return value, should match up with the method called
+ * @tparam F Type of class method in dpp::cluster to call.
+ * @tparam Ts Function parameters in method call
+ * @param c A pointer to dpp::cluster object
+ * @param func pointer to class method in dpp::cluster to call. This can call any
+ * dpp::cluster member function who's last parameter is a dpp::command_completion_event_t callback type.
+ * @param args Zero or more arguments for the method call
+ * @return An instantiated object of type T
+ * @throw dpp::rest_exception On failure of the method call, an exception is thrown
  */
-#define dpp_sync(type, cluster, func, ...) \
-	([cluster]() -> type { \
-		bool completed = false; \
-		bool except = false; \
-		std::string message; \
-		type _t = {}; \
- 		(cluster)->func( __VA_ARGS__ DPP_VA_COMMA(__VA_ARGS__) [&except, &message, &_t, &completed](const auto& cc) { \
-		 	if (cc.is_error()) { \
-				message = cc.get_error().message; \
-			 	except = true; \
-			} else { \
-				try { \
-					_t = std::get<type>(cc.value); \
-				} \
-				catch (const std::exception& e) { \
-					message = e.what(); \
-					except = true; \
-				} \
-			} \
-			completed = true; \
-		}); \
-		do { \
-			std::this_thread::sleep_for(std::chrono::microseconds(10)); \
-		} while (!completed); \
-		if (except) { \
-			throw dpp::rest_exception(message); \
-		} \
-		return _t; \
-	})()
+template<typename T, class F, class... Ts> T sync(class cluster* c, F func, Ts... args) {
+	bool completed = false;
+	bool except = false;
+	std::string message;
+	/* Passing _t into the lambda is SAFE here, as this function is 
+	 * guaranteed to stick around until execution of the REST call is finished.
+	 */
+	T _t = {};
+	/* (obj ->* func) is the obscure syntax for calling a method pointer on an object instance */
+	(c ->* func)(args..., [&except, &message, &_t, &completed](const auto& cc) {
+		if (cc.is_error()) {
+			message = cc.get_error().message;
+			except = true;
+		} else {
+			try {
+				_t = std::get<T>(cc.value);
+			}
+			catch (const std::exception& e) {
+				/* As we are inside a separate thread here, we can't just
+				 * let this exception loose into the stack. It'll be thrown
+				 * in a place where the user has no means to catch it. Instead
+				 * record the failure, and re-throw later from the calling
+				 * thread.
+				 */
+				message = e.what();
+				except = true;
+			}
+		}
+		std::exchange(completed, true);
+	});
+	/* Wait for the thread to be completed */
+	do {
+		std::this_thread::sleep_for(std::chrono::microseconds(50));
+	} while (!completed);
+	if (except) {
+		/* Re-throw any exceptions encountered on the other thread */
+		throw dpp::rest_exception(message);
+	}
+	return _t;
+}
 
 };

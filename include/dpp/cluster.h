@@ -216,6 +216,7 @@ struct DPP_EXPORT confirmation_callback_t {
 	/** Value returned, wrapped in variant */
 	confirmable_t value;
 
+	/** Owner/creator of the callback object */
 	const class cluster* bot;
 
 	/**
@@ -223,11 +224,17 @@ struct DPP_EXPORT confirmation_callback_t {
 	 */
 	confirmation_callback_t() = default;
 
+	/**
+	 * @brief Construct a new confirmation callback t object
+	 * 
+	 * @param creator owning cluster object
+	 */
 	confirmation_callback_t(cluster* creator);
 
 	/**
 	 * @brief Construct a new confirmation callback object
 	 *
+	 * @param creator owning cluster object
 	 * @param _value The value to encapsulate in the confirmable_t
 	 * @param _http The HTTP metadata from the REST call
 	 */
