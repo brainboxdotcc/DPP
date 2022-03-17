@@ -251,7 +251,6 @@ target_compile_features(dpp PRIVATE cxx_override)
 target_compile_features(dpp PRIVATE cxx_thread_local)
 target_compile_features(dpp PRIVATE cxx_variadic_templates)
 target_compile_features(dpp PRIVATE cxx_attribute_deprecated)
-target_compile_features(dpp PRIVATE cxx_auto_type)
 
 if (DPP_BUILD_TEST)
 	add_executable(test ${coresrc})

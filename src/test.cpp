@@ -295,6 +295,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
+		set_test("SYNC", false);
+		dpp::message m = dpp::sync<dpp::message>(&bot, &dpp::cluster::message_create, dpp::message(TEST_TEXT_CHANNEL_ID, "TEST"));
+		set_test("SYNC", m.content == "TEST");
+
 		bot.on_guild_create([&](const dpp::guild_create_t & event) {
 			if (event.created->id == TEST_GUILD_ID) {
 				set_test("GUILDCREATE", true);

@@ -58,7 +58,7 @@ template<typename T, class F, class... Ts> T sync(class cluster* c, F func, Ts..
 	 */
 	T _t = {};
 	/* (obj ->* func) is the obscure syntax for calling a method pointer on an object instance */
-	(c ->* func)(&args..., [&except, &message, &_t, &completed](const auto& cc) {
+	(c ->* func)(args..., [&except, &message, &_t, &completed](const auto& cc) {
 		if (cc.is_error()) {
 			message = cc.get_error().message;
 			except = true;
