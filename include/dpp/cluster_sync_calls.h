@@ -333,7 +333,7 @@ inline confirmation interaction_response_create_sync(snowflake interaction_id, c
  *
  * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
  * @param token Token for the interaction webhook
- * @param r Message to send
+ * @param m Message to send
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  * @see dpp::cluster::interaction_response_edit
@@ -1309,7 +1309,7 @@ inline invite invite_get_sync(const std::string &invitecode) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message message_create_sync(const message &m) {
+inline message message_create_sync(const struct message &m) {
 	return dpp::sync<message>(this, &cluster::message_create, m);
 }
 
@@ -1346,7 +1346,7 @@ inline message message_crosspost_sync(snowflake message_id, snowflake channel_id
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation message_delete_bulk_sync(const std::vector<snowflake>& message_ids, snowflake channel_id) {
+inline confirmation message_delete_bulk_sync(const std::vector<snowflake> &message_ids, snowflake channel_id) {
 	return dpp::sync<confirmation>(this, &cluster::message_delete_bulk, message_ids, channel_id);
 }
 
@@ -1380,7 +1380,7 @@ inline confirmation message_delete_sync(snowflake message_id, snowflake channel_
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message message_edit_sync(const message &m) {
+inline message message_edit_sync(const struct message &m) {
 	return dpp::sync<message>(this, &cluster::message_edit, m);
 }
 
@@ -1993,7 +1993,7 @@ inline thread_map threads_get_joined_private_archived_sync(snowflake channel_id,
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline thread_map threads_get_private_archived_sync(snowflake channel_id, time_t before_timestamp, uint16_t limit) {
+inline thread_map threads_get_private_archived_sync(snowflake channel_id,  time_t before_timestamp, uint16_t limit) {
 	return dpp::sync<thread_map>(this, &cluster::threads_get_private_archived, channel_id, before_timestamp, limit);
 }
 
@@ -2136,7 +2136,7 @@ inline confirmation thread_member_remove_sync(snowflake thread_id, snowflake use
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline user current_user_edit_sync(const std::string &nickname, const std::string& image_blob, const image_type type) {
+inline user current_user_edit_sync(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png) {
 	return dpp::sync<user>(this, &cluster::current_user_edit, nickname, image_blob, type);
 }
 
@@ -2198,7 +2198,7 @@ inline user_identified current_user_get_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation current_user_set_voice_state_sync(snowflake guild_id, snowflake channel_id, bool suppress, time_t request_to_speak_timestamp) {
+inline confirmation current_user_set_voice_state_sync(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0) {
 	return dpp::sync<confirmation>(this, &cluster::current_user_set_voice_state, guild_id, channel_id, suppress, request_to_speak_timestamp);
 }
 
@@ -2227,7 +2227,7 @@ inline confirmation current_user_set_voice_state_sync(snowflake guild_id, snowfl
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation user_set_voice_state_sync(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress) {
+inline confirmation user_set_voice_state_sync(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false) {
 	return dpp::sync<confirmation>(this, &cluster::user_set_voice_state, user_id, guild_id, channel_id, suppress);
 }
 
@@ -2430,7 +2430,7 @@ inline webhook edit_webhook_sync(const class webhook& wh) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message edit_webhook_message_sync(const class webhook &wh, const struct message& m) {
+inline message edit_webhook_message_sync(const class webhook &wh, const struct message &m) {
 	return dpp::sync<message>(this, &cluster::edit_webhook_message, wh, m);
 }
 
@@ -2464,7 +2464,7 @@ inline webhook edit_webhook_with_token_sync(const class webhook& wh) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message execute_webhook_sync(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id) {
+inline message execute_webhook_sync(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0) {
 	return dpp::sync<message>(this, &cluster::execute_webhook, wh, m, wait, thread_id);
 }
 

@@ -1469,11 +1469,11 @@ public:
 	 *
 	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response
 	 * @param token Token for the interaction webhook
-	 * @param r Message to send
+	 * @param m Message to send
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void interaction_response_edit(const std::string &token, const message &r, command_completion_event_t callback = utility::log_error());
+	void interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these).

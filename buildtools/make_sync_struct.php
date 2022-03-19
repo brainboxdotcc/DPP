@@ -92,10 +92,12 @@ foreach ($clustercpp as $cpp) {
 				$parameterNames[] = trim(preg_replace('/[\s\*\&]+/', '', $parts[count($parts) - 1]));
 			}
 			$content .= getComments($currentFunction, $returnType, $parameterNames) . "\n";
+			$fullParameters = getFullParameters($currentFunction, $parameterNames);
 			$parameterNames = trim(join(', ', $parameterNames));
 			if (!empty($parameterNames)) {
 				$parameterNames = ', ' . $parameterNames;
 			}
+			$parameters = !empty($fullParameters) ? $fullParameters : $parameters;
 			$content .= "inline $returnType {$currentFunction}_sync($parameters) {\n\treturn dpp::sync<$returnType>(this, &cluster::$currentFunction$parameterNames);\n}\n\n";
 		}
 		$currentFunction = $parameters = $returnType = '';
@@ -107,6 +109,18 @@ $content .= <<<EOT
 /* End of auto-generated definitions */
 
 EOT;
+
+function getFullParameters(string $currentFunction, array $parameters): string {
+	global $header;
+	$arr = [];
+	foreach ($header as $line) {
+		if (preg_match('/^\s*void\s+' . $currentFunction . '\s*\((.*' . join('.*', $parameters) . '.*)command_completion_event_t\s*callback\s*/', $line, $matches)) {
+			return preg_replace('/,\s*$/', '', $matches[1]);
+		}
+	}
+	return '';
+}
+
 
 function getComments(string $currentFunction, string $returnType, array $parameters): string {
 	global $header;
