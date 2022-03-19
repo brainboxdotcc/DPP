@@ -80,6 +80,7 @@ public:
 };
 
 struct keepalive_cache_t {
+	time_t created;
 	opensslcontext* ssl;
 	dpp::socket sfd;
 };
@@ -94,7 +95,7 @@ thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
  */
-#define BUFSIZZ 16 * 1240
+#define DPP_BUFSIZE 16 * 1024
 const int ERROR_STATUS = -1;
 
 ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
@@ -138,16 +139,18 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 			ts.tv_sec = 0;
 			ts.tv_usec = 1;
 			int r = select(iter->second.sfd, nullptr, nullptr, &efds, &ts);
-			if (r < 0 || FD_ISSET(iter->second.sfd, &efds)) {
+			if (time(nullptr) > (iter->second.created + 60) || r < 0 || FD_ISSET(iter->second.sfd, &efds)) {
 				make_new = true;
 				/* This connection is dead, free its resources and make a new one */
 				if (iter->second.ssl->ssl) {
 					SSL_free(iter->second.ssl->ssl);
 					iter->second.ssl->ssl = nullptr;
 				}
-				shutdown(iter->second.sfd, 2);
+				if (iter->second.sfd != INVALID_SOCKET) {
+					shutdown(iter->second.sfd, 2);
+				}
 				#ifdef _WIN32
-					if (sfd >= 0 && sfd < FD_SETSIZE) {
+					if (iter->second.sfd >= 0 && iter->second.sfd < FD_SETSIZE) {
 						closesocket(iter->second.sfd);
 					}
 				#else
@@ -157,7 +160,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 					SSL_CTX_free(iter->second.ssl->ctx);
 					iter->second.ssl->ctx = nullptr;
 				}
-				iter->second.sfd = -1;
+				iter->second.sfd = INVALID_SOCKET;
 				delete iter->second.ssl;
 			} else {
 				/* Connection is good, lets use it */
@@ -278,7 +281,7 @@ void ssl_client::write(const std::string &data)
 		obuffer += data;
 	} else {
 		if (plaintext) {
-			if (::write(sfd, data.data(), data.length()) != (int)data.length()) {
+			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data.length(), 0) != (int)data.length()) {
 				throw dpp::exception("write() failed");
 			}
 		} else {
@@ -315,9 +318,9 @@ void ssl_client::read_loop()
 	size_t ClientToServerLength = 0, ClientToServerOffset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
 	fd_set readfds, writefds, efds;
-	char ClientToServerBuffer[BUFSIZZ], ServerToClientBuffer[BUFSIZZ];
+	char ClientToServerBuffer[DPP_BUFSIZE], ServerToClientBuffer[DPP_BUFSIZE];
 
-	if (sfd == -1)  {
+	if (sfd == INVALID_SOCKET)  {
 		throw dpp::exception("Invalid file descriptor in read_loop()");
 	}
 	
@@ -383,7 +386,7 @@ void ssl_client::read_loop()
 			if (custom_readable_fd && custom_readable_fd() >= 0 && SAFE_FD_ISSET(custom_readable_fd(), &efds)) {
 			}
 
-			if (SAFE_FD_ISSET(sfd, &efds) || sfd == -1) {
+			if (SAFE_FD_ISSET(sfd, &efds) || sfd == INVALID_SOCKET) {
 				this->log(dpp::ll_error, std::string("Error on SSL connection: ") +strerror(errno));
 				return;
 			}
@@ -393,7 +396,7 @@ void ssl_client::read_loop()
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					r = ::recv(sfd, ServerToClientBuffer, BUFSIZZ, 0);
+					r = ::recv(sfd, ServerToClientBuffer, DPP_BUFSIZE, 0);
 					if (r <= 0) {
 						/* error or EOF */
 						return;
@@ -409,7 +412,7 @@ void ssl_client::read_loop()
 						read_blocked_on_write = false;
 						read_blocked = false;
 						
-						r = SSL_read(ssl->ssl,ServerToClientBuffer,BUFSIZZ);
+						r = SSL_read(ssl->ssl,ServerToClientBuffer,DPP_BUFSIZE);
 						int e = SSL_get_error(ssl->ssl,r);
 
 						switch (e) {
@@ -452,8 +455,8 @@ void ssl_client::read_loop()
 
 			/* Check for input on the sendq */
 			if (obuffer.length() && ClientToServerLength == 0) {
-				memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length());
-				ClientToServerLength = obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length();
+				memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length());
+				ClientToServerLength = obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length();
 				obuffer = obuffer.substr(ClientToServerLength, obuffer.length());
 				ClientToServerOffset = 0;
 			}
@@ -527,11 +530,12 @@ bool ssl_client::handle_buffer(std::string &buffer)
 
 void ssl_client::close()
 {
-	if (keepalive) {
+	if (keepalive && this->sfd != INVALID_SOCKET) {
 		std::string identifier((!plaintext ? "ssl://" : "tcp://") + hostname + ":" + port);
 		auto iter = keepalives.find(identifier);
 		if (iter == keepalives.end()) {
 			keepalive_cache_t kc;
+			kc.created = time(nullptr);
 			kc.sfd = this->sfd;
 			kc.ssl = this->ssl;
 			keepalives.emplace(identifier, kc);
@@ -555,7 +559,7 @@ void ssl_client::close()
 		SSL_CTX_free(ssl->ctx);
 		ssl->ctx = nullptr;
 	}
-	sfd = -1;
+	sfd = INVALID_SOCKET;
 	obuffer.clear();
 	buffer.clear();
 }

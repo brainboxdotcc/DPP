@@ -38,7 +38,7 @@ void cluster::message_add_reaction(snowflake message_id, snowflake channel_id, c
 void cluster::message_create(const message &m, command_completion_event_t callback) {
 	this->post_rest_multipart(API_PATH "/channels", std::to_string(m.channel_id), "messages", m_post, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(message(this).fill_from_json(&j), http));
+			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
 	}, m.filename, m.filecontent);
 }
@@ -114,14 +114,14 @@ void cluster::message_delete_reaction_emoji(snowflake message_id, snowflake chan
 void cluster::message_edit(const message &m, command_completion_event_t callback) {
 	this->post_rest_multipart(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id), m_patch, m.build_json(true), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(message(this).fill_from_json(&j), http));
+			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
 	}, m.filename, m.filecontent);
 }
 
 
 void cluster::message_get(snowflake message_id, snowflake channel_id, command_completion_event_t callback) {
-	rest_request<message>(this, API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id), m_put, "", callback);
+	rest_request<message>(this, API_PATH "/channels", std::to_string(channel_id), "messages/" + std::to_string(message_id), m_get, "", callback);
 }
 
 

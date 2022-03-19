@@ -83,15 +83,15 @@ class DPP_EXPORT user : public managed, public json_interface<user>  {
 public:
 	/** Discord username */
 	std::string username;
+	/** Avatar hash */
+	utility::iconhash avatar;
+	/** Flags built from a bitmask of values in dpp::user_flags */
+	uint32_t flags;
 	/** Discriminator (aka tag), 4 digits usually displayed with leading zeroes.
 	 *
 	 * @note To print the discriminator with leading zeroes, use something like `fmt::format("{:04d}", discriminator)`
 	 */
 	uint16_t discriminator;
-	/** Avatar hash */
-	utility::iconhash avatar;
-	/** Flags built from a bitmask of values in dpp::user_flags */
-	uint32_t flags;
 	/** Reference count of how many guilds this user is in */
 	uint8_t refcount;
 
@@ -281,11 +281,11 @@ public:
  */
 class DPP_EXPORT user_identified : public user, public json_interface<user_identified> {
 public:
+	std::string		locale;		//!< Optional: the user's chosen language option identify
+	std::string		email;		//!< Optional: the user's email  email (may be empty)
 	utility::iconhash	banner;		//!< Optional: the user's banner hash    identify (may be empty)
 	uint32_t		accent_color;	//!< Optional: the user's banner color encoded as an integer representation of hexadecimal color code    identify (may be empty)
-	std::string		locale;		//!< Optional: the user's chosen language option identify
 	bool			verified;	//!< Optional: whether the email on this account has been verified       email
-	std::string		email;		//!< Optional: the user's email  email (may be empty)
 	
 	/** Fill this record from json.
 	 * @param j The json to fill this record from

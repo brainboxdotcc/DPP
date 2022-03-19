@@ -29,3 +29,4 @@
  */
 
 _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
+_Pragma("warning( disable : 5105 )"); // 5105 is to do with macro warnings

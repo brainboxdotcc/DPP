@@ -34,6 +34,7 @@
 #include <streambuf>
 #include <array>
 #include <dpp/fmt/format.h>
+#include <dpp/cluster.h>
 #include <dpp/dispatcher.h>
 
 #ifdef _WIN32
@@ -362,6 +363,16 @@ namespace dpp {
 			return [](const dpp::log_t& event) {
 				if (event.severity > dpp::ll_trace) {
 					std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+				}
+			};
+		}
+
+		std::function<void(const dpp::confirmation_callback_t& detail)> log_error() {
+			return [](const dpp::confirmation_callback_t& detail) {
+				if (detail.is_error()) {
+					if (detail.bot) {
+						detail.bot->log(dpp::ll_error, fmt::format("Error {} [{}] on API request, returned content was: {}", detail.get_error().code, detail.get_error().message, detail.http_info.body));
+					}
 				}
 			};
 		}

@@ -140,9 +140,9 @@ void interaction_create_t::reply(const std::string & mt, command_completion_even
 
 void interaction_create_t::get_original_response(command_completion_event_t callback) const
 {
-	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_get, "", [callback](json &j, const http_request_completion_t& http) {
+	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(message().fill_from_json(&j), http));
+			callback(confirmation_callback_t(from->creator, message().fill_from_json(&j), http));
 		}
 	});
 }

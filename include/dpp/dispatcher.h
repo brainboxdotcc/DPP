@@ -126,6 +126,14 @@ namespace utility {
 	 * @return A logger for attaching to on_log
 	 */
 	std::function<void(const dpp::log_t&)> DPP_EXPORT cout_logger();
+
+	/**
+	 * @brief The default callback handler for API calls.
+	 * on error, sends the error to the logger.
+	 * 
+	 * @return A lambda for attaching to an API callback
+	 */
+	std::function<void(const dpp::confirmation_callback_t& detail)> DPP_EXPORT log_error();
 };
 
 /** @brief Add user to scheduled event */
