@@ -38,6 +38,7 @@
 #include <dpp/queues.h>
 #include <dpp/cache.h>
 #include <dpp/intents.h>
+#include <dpp/sync.h>
 #include <algorithm>
 #include <iostream>
 #include <shared_mutex>
@@ -3371,6 +3372,8 @@ public:
 	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = utility::log_error());
+
+#include <dpp/cluster_sync_calls.h>
 
 };
 
