@@ -55,7 +55,7 @@ int main() {
         if (dpp::run_once<struct register_bot_commands>()) {
             bot.guild_command_create(
                 dpp::slashcommand("ping", "Ping pong!", bot.me.id),
-                MY_GUILD_ID
+                GUILD_ID
             );
         }
     });
