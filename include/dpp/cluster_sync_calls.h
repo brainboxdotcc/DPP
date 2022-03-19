@@ -39,6 +39,7 @@
  * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
  * Commands that do not already exist will count toward daily application command create limits.
  * @return slashcommand_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::global_bulk_command_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -57,6 +58,7 @@ inline slashcommand_map global_bulk_command_create_sync(const std::vector<slashc
  * @see https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
  * @param s Slash command to create
  * @return slashcommand returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::global_command_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -72,6 +74,7 @@ inline slashcommand global_command_create_sync(const slashcommand &s) {
  * @see https://discord.com/developers/docs/interactions/application-commands#get-global-application-command
  * @param id The ID of the slash command
  * @return slashcommand returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::global_command_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -87,6 +90,7 @@ inline slashcommand global_command_get_sync(snowflake id) {
  * @see https://discord.com/developers/docs/interactions/application-commands#delete-global-application-command
  * @param id Slash command to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::global_command_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -104,6 +108,7 @@ inline confirmation global_command_delete_sync(snowflake id) {
  * you should use cluster::guild_bulk_command_create instead.
  * @param s Slash command to change
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::global_command_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -118,6 +123,7 @@ inline confirmation global_command_edit_sync(const slashcommand &s) {
  *
  * @see https://discord.com/developers/docs/interactions/application-commands#get-global-application-commands
  * @return slashcommand_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::global_commands_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -136,6 +142,7 @@ inline slashcommand_map global_commands_get_sync() {
  * New guild commands will be available in the guild immediately. If the command did not already exist, it will count toward daily application command create limits.
  * @param guild_id Guild ID to create/update the slash commands in
  * @return slashcommand_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_bulk_command_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -151,6 +158,7 @@ inline slashcommand_map guild_bulk_command_create_sync(const std::vector<slashco
  * @see https://discord.com/developers/docs/interactions/application-commands#get-application-command-permissions
  * @param guild_id Guild ID to get the slash commands permissions for
  * @return guild_command_permissions_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_commands_get_permissions
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -170,6 +178,7 @@ inline guild_command_permissions_map guild_commands_get_permissions_sync(snowfla
  * @param commands A vector of slash commands to edit/overwrite the permissions for
  * @param guild_id Guild ID to edit permissions of the slash commands in
  * @return guild_command_permissions_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_bulk_command_edit_permissions
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -187,6 +196,7 @@ inline guild_command_permissions_map guild_bulk_command_edit_permissions_sync(co
  * @param s Slash command to create
  * @param guild_id Guild ID to create the slash command in
  * @return slashcommand returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_command_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -203,6 +213,7 @@ inline slashcommand guild_command_create_sync(const slashcommand &s, snowflake g
  * @param id Slash command to delete
  * @param guild_id Guild ID to delete the slash command in
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_command_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -220,6 +231,7 @@ inline confirmation guild_command_delete_sync(snowflake id, snowflake guild_id) 
  * @param s Slash command to edit the permissions for
  * @param guild_id Guild ID to edit the slash command in
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_command_edit_permissions
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -237,6 +249,7 @@ inline confirmation guild_command_edit_permissions_sync(const slashcommand &s, s
  * @param id The ID of the slash command
  * @param guild_id Guild ID to get the slash command from
  * @return slashcommand returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_command_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -253,6 +266,7 @@ inline slashcommand guild_command_get_sync(snowflake id, snowflake guild_id) {
  * @param id The ID of the slash command to get the permissions for
  * @param guild_id Guild ID to get the permissions of
  * @return guild_command_permissions returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_command_get_permissions
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -269,6 +283,7 @@ inline guild_command_permissions guild_command_get_permissions_sync(snowflake id
  * @param s Slash command to edit
  * @param guild_id Guild ID to edit the slash command in
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_command_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -285,6 +300,7 @@ inline confirmation guild_command_edit_sync(const slashcommand &s, snowflake gui
  * @note The returned slash commands will not have permissions set, you need to use a permissions getter e.g. dpp::guild_commands_get_permissions to get the guild command permissions
  * @param guild_id Guild ID to get the slash commands for
  * @return slashcommand_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_commands_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -302,6 +318,7 @@ inline slashcommand_map guild_commands_get_sync(snowflake guild_id) {
  * @param token Token for the interaction webhook
  * @param r Response to send
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::interaction_response_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -318,6 +335,7 @@ inline confirmation interaction_response_create_sync(snowflake interaction_id, c
  * @param token Token for the interaction webhook
  * @param r Message to send
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::interaction_response_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -340,6 +358,7 @@ inline confirmation interaction_response_edit_sync(const std::string &token, con
  * @see https://discord.com/developers/docs/resources/channel#create-channel
  * @param c Channel to create
  * @return channel returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -356,6 +375,7 @@ inline channel channel_create_sync(const class channel &c) {
  * @param c Channel to remove permission from
  * @param overwrite_id Overwrite to remove, user or channel ID
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_delete_permission
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -371,6 +391,7 @@ inline confirmation channel_delete_permission_sync(const class channel &c, snowf
  * @see https://discord.com/developers/docs/resources/channel#deleteclose-channel
  * @param channel_id Channel id to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -391,6 +412,7 @@ inline confirmation channel_delete_sync(snowflake channel_id) {
  * @see https://discord.com/developers/docs/resources/guild#modify-guild-channel-positions
  * @param c Channel to change the position for
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_edit_positions
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -406,6 +428,7 @@ inline confirmation channel_edit_positions_sync(const std::vector<channel> &c) {
  * @see https://discord.com/developers/docs/resources/channel#modify-channel
  * @param c Channel to edit/update
  * @return channel returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -421,6 +444,7 @@ inline channel channel_edit_sync(const class channel &c) {
  * @param c Channel id to follow
  * @param target_channel_id Channel to subscribe the channel to
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_follow_news
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -436,6 +460,7 @@ inline confirmation channel_follow_news_sync(const class channel &c, snowflake t
  * @see https://discord.com/developers/docs/resources/channel#get-channel
  * @param c Channel ID to retrieve
  * @return channel returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -452,6 +477,7 @@ inline channel channel_get_sync(snowflake c) {
  * @param c Channel to create an invite on
  * @param i Invite to create
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_invite_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -467,6 +493,7 @@ inline confirmation channel_invite_create_sync(const class channel &c, const cla
  * @see https://discord.com/developers/docs/resources/invite#get-invites
  * @param c Channel to get invites for
  * @return invite_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_invites_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -482,6 +509,7 @@ inline invite_map channel_invites_get_sync(const class channel &c) {
  * @see https://discord.com/developers/docs/resources/channel#get-channels
  * @param guild_id Guild ID to retrieve channels for
  * @return channel_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channels_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -496,6 +524,7 @@ inline channel_map channels_get_sync(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/user#create-dm
  * @param user_id User ID to create DM channel with
  * @return channel returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::create_dm_channel
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -509,6 +538,7 @@ inline channel create_dm_channel_sync(snowflake user_id) {
  * @brief Get current user DM channels
  * 
  * @return channel_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_user_get_dms
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -526,6 +556,7 @@ inline channel_map current_user_get_dms_sync() {
  * @param user_id User ID of user to send message to
  * @param m Message object
  * @return message returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::direct_message_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -543,6 +574,7 @@ inline message direct_message_create_sync(snowflake user_id, const message &m) {
  * @param access_token Access token from OAuth2
  * @param nick Nickname of user to apply to the chat
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::gdm_add
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -558,6 +590,7 @@ inline confirmation gdm_add_sync(snowflake channel_id, snowflake user_id, const 
  * @param channel_id Channel ID of group DM
  * @param user_id User ID to remove from group DM
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::gdm_remove
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -576,6 +609,7 @@ inline confirmation gdm_remove_sync(snowflake channel_id, snowflake user_id) {
  * @param guild_id Guild ID to create emoji om
  * @param newemoji Emoji to create
  * @return emoji returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_emoji_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -593,6 +627,7 @@ inline emoji guild_emoji_create_sync(snowflake guild_id, const class emoji& newe
  * @param guild_id Guild ID to delete emoji on
  * @param emoji_id Emoji ID to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_emoji_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -611,6 +646,7 @@ inline confirmation guild_emoji_delete_sync(snowflake guild_id, snowflake emoji_
  * @param guild_id Guild ID to edit emoji on
  * @param newemoji Emoji to edit
  * @return emoji returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_emoji_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -627,6 +663,7 @@ inline emoji guild_emoji_edit_sync(snowflake guild_id, const class emoji& newemo
  * @param guild_id Guild ID to get emoji for
  * @param emoji_id Emoji ID to get
  * @return emoji returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_emoji_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -642,6 +679,7 @@ inline emoji guild_emoji_get_sync(snowflake guild_id, snowflake emoji_id) {
  * @see https://discord.com/developers/docs/resources/emoji#get-guild-emojis
  * @param guild_id Guild ID to get emojis for
  * @return emoji_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_emojis_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -655,6 +693,7 @@ inline emoji_map guild_emojis_get_sync(snowflake guild_id) {
  * @brief Get the gateway information for the bot using the token
  * @see https://discord.com/developers/docs/topics/gateway#get-gateway-bot
  * @return gateway returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::get_gateway_bot
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -675,6 +714,7 @@ inline gateway get_gateway_bot_sync() {
  * @param guild_id Guild ID to change on
  * @param nickname New nickname, or empty string to clear nickname
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_current_member_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -690,6 +730,7 @@ inline confirmation guild_current_member_edit_sync(snowflake guild_id, const std
  * @see https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
  * @param guild_id Guild to get the audit log of
  * @return auditlog returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_auditlog_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -711,6 +752,7 @@ inline auditlog guild_auditlog_get_sync(snowflake guild_id) {
  * @param delete_message_days How many days of their user's messages to also delete
  * @param reason Reason for ban
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_ban_add
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -730,6 +772,7 @@ inline confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, ui
  * @param guild_id Guild to delete ban from
  * @param user_id User ID to delete ban for
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_ban_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -757,6 +800,7 @@ inline confirmation guild_ban_delete_sync(snowflake guild_id, snowflake user_id)
  * @note The region field is deprecated and is replaced by channel.rtc_region. This endpoint can be used only by bots in less than 10 guilds.
  * @param g Guild to create
  * @return guild returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -774,6 +818,7 @@ inline guild guild_create_sync(const class guild &g) {
  * @see https://discord.com/developers/docs/resources/guild#delete-guild
  * @param guild_id Guild ID to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -794,6 +839,7 @@ inline confirmation guild_delete_sync(snowflake guild_id) {
  * @param guild_id Guild ID to delete integration for
  * @param integration_id Integration ID to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_delete_integration
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -813,6 +859,7 @@ inline confirmation guild_delete_integration_sync(snowflake guild_id, snowflake 
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param g Guild to edit
  * @return guild returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -832,6 +879,7 @@ inline guild guild_edit_sync(const class guild &g) {
  * @param guild_id Guild ID to edit widget for
  * @param gw New guild widget information
  * @return guild_widget returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_edit_widget
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -849,6 +897,7 @@ inline guild_widget guild_edit_widget_sync(snowflake guild_id, const class guild
  * @param guild_id Guild ID to get ban for
  * @param user_id User ID of ban to retrieve
  * @return ban returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_ban
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -865,6 +914,7 @@ inline ban guild_get_ban_sync(snowflake guild_id, snowflake user_id) {
  * @see https://discord.com/developers/docs/resources/guild#get-guild-bans
  * @param guild_id Guild ID to get bans for
  * @return ban_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_bans
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -887,6 +937,7 @@ inline guild guild_get_sync(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/guild#get-guild-integrations
  * @param guild_id Guild ID to get integrations for
  * @return integration_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_integrations
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -908,6 +959,7 @@ inline guild guild_get_preview_sync(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/guild#get-guild-vanity-url
  * @param guild_id Guild to get vanity URL for
  * @return invite returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_vanity
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -925,6 +977,7 @@ inline invite guild_get_vanity_sync(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/guild#get-guild-widget
  * @param guild_id Guild ID to get widget for
  * @return guild_widget returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_widget
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -942,6 +995,7 @@ inline guild_widget guild_get_widget_sync(snowflake guild_id) {
  * @param guild_id Guild ID to modify integration for
  * @param i Integration to modify
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_modify_integration
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -963,6 +1017,7 @@ inline confirmation guild_modify_integration_sync(snowflake guild_id, const clas
  * @param guild_id Guild ID to count for pruning
  * @param pruneinfo Pruning info
  * @return prune returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_prune_counts
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -986,6 +1041,7 @@ inline prune guild_get_prune_counts_sync(snowflake guild_id, const struct prune&
  * @param guild_id Guild ID to prune
  * @param pruneinfo Pruning info
  * @return prune returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_begin_prune
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1007,6 +1063,7 @@ inline prune guild_begin_prune_sync(snowflake guild_id, const struct prune& prun
  * @param guild_id Guild ID to change nickname on
  * @param nickname New nickname, or empty string to clear nickname
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_set_nickname
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1023,6 +1080,7 @@ inline confirmation guild_set_nickname_sync(snowflake guild_id, const std::strin
  * @param guild_id Guild ID to sync integration on
  * @param integration_id Integration ID to synchronise
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_sync_integration
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1047,6 +1105,7 @@ inline confirmation guild_sync_integration_sync(snowflake guild_id, snowflake in
  * @param gm Guild member to add
  * @param access_token Access token from Oauth2 scope
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_add_member
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1067,6 +1126,7 @@ inline confirmation guild_add_member_sync(const guild_member& gm, const std::str
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param gm Guild member to edit
  * @return guild_member returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_edit_member
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1082,6 +1142,7 @@ inline guild_member guild_edit_member_sync(const guild_member& gm) {
  * @param guild_id Guild ID to get member for
  * @param user_id User ID of member to get
  * @return guild_member returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_member
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1100,6 +1161,7 @@ inline guild_member guild_get_member_sync(snowflake guild_id, snowflake user_id)
  * @param limit max number of members to return (1-1000)
  * @param after the highest user id in the previous page
  * @return guild_member_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_members
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1120,6 +1182,7 @@ inline guild_member_map guild_get_members_sync(snowflake guild_id, uint16_t limi
  * @param user_id User ID to add role to
  * @param role_id Role ID to add to the user
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_member_add_role
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1139,6 +1202,7 @@ inline confirmation guild_member_add_role_sync(snowflake guild_id, snowflake use
  * @param guild_id Guild ID to kick member from
  * @param user_id User ID to kick
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_member_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1159,6 +1223,7 @@ inline confirmation guild_member_delete_sync(snowflake guild_id, snowflake user_
  * @param user_id User ID to remove role from
  * @param role_id Role to remove
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_member_delete_role
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1175,6 +1240,7 @@ inline confirmation guild_member_delete_role_sync(snowflake guild_id, snowflake 
  * @param guild_id Guild id to which the user is connected
  * @param user_id User id, who should be moved
  * @return guild_member returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_member_move
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1193,6 +1259,7 @@ inline guild_member guild_member_move_sync(const snowflake channel_id, const sno
  * @param query Query string to match username(s) and nickname(s) against
  * @param limit max number of members to return (1-1000)
  * @return guild_member_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_search_members
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1210,6 +1277,7 @@ inline guild_member_map guild_search_members_sync(snowflake guild_id, const std:
  * @see https://discord.com/developers/docs/resources/guild#get-guild-invites
  * @param guild_id Guild ID to get invites for
  * @return invite_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_invites
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1235,6 +1303,7 @@ inline invite invite_get_sync(const std::string &invitecode) {
  * @see https://discord.com/developers/docs/resources/channel#create-message
  * @param m Message to send
  * @return message returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::message_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1251,6 +1320,7 @@ inline message message_create_sync(const message &m) {
  * @param message_id Message to crosspost
  * @param channel_id Channel ID to crosspost from
  * @return message returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::message_crosspost
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1270,6 +1340,7 @@ inline message message_crosspost_sync(snowflake message_id, snowflake channel_id
  * @param message_ids List of message IDs to delete (at least 2 and at most 100 message IDs)
  * @param channel_id Channel to delete from
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::message_delete_bulk
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1287,6 +1358,7 @@ inline confirmation message_delete_bulk_sync(const std::vector<snowflake>& messa
  * @param message_id Message ID to delete
  * @param channel_id Channel to delete from
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::message_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1302,6 +1374,7 @@ inline confirmation message_delete_sync(snowflake message_id, snowflake channel_
  * @see https://discord.com/developers/docs/resources/channel#edit-message
  * @param m Message to edit
  * @return message returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::message_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1318,6 +1391,7 @@ inline message message_edit_sync(const message &m) {
  * @param message_id Message ID
  * @param channel_id Channel ID
  * @return message returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::message_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1334,6 +1408,7 @@ inline message message_get_sync(snowflake message_id, snowflake channel_id) {
  * @param channel_id Channel id to pin message on
  * @param message_id Message id to pin message on
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::message_pin
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1355,6 +1430,7 @@ inline confirmation message_pin_sync(snowflake channel_id, snowflake message_id)
  * @param after Messages after this ID should be retrieved if this is set to non-zero
  * @param limit This number of messages maximum should be returned, up to a maximum of 100.
  * @return message_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::messages_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1371,6 +1447,7 @@ inline message_map messages_get_sync(snowflake channel_id, snowflake around, sno
  * @param channel_id Channel id to unpin message on
  * @param message_id Message id to unpin message on
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::message_unpin
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1385,6 +1462,7 @@ inline confirmation message_unpin_sync(snowflake channel_id, snowflake message_i
  * @see https://discord.com/developers/docs/resources/channel#get-pinned-messages
  * @param channel_id Channel ID to get pins for
  * @return message_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::channel_pins_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1404,6 +1482,7 @@ inline message_map channel_pins_get_sync(snowflake channel_id) {
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param r Role to create (guild ID is encapsulated in the role object)
  * @return role returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::role_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1423,6 +1502,7 @@ inline role role_create_sync(const class role &r) {
  * @param guild_id Guild ID to delete the role on
  * @param role_id Role ID to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::role_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1441,6 +1521,7 @@ inline confirmation role_delete_sync(snowflake guild_id, snowflake role_id) {
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param r Role to edit
  * @return role returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::role_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1461,6 +1542,7 @@ inline role role_edit_sync(const class role &r) {
  * @param guild_id Guild ID to change the roles position on
  * @param roles Vector of roles to change the positions of
  * @return role_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::roles_edit_position
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1476,6 +1558,7 @@ inline role_map roles_edit_position_sync(snowflake guild_id, const std::vector<r
  * @see https://discord.com/developers/docs/resources/guild#get-guild-roles
  * @param guild_id Guild ID to get role for
  * @return role_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::roles_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1490,6 +1573,7 @@ inline role_map roles_get_sync(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/guild-scheduled-event#list-scheduled-events-for-guild
  * @param guild_id Guild to get events for
  * @return scheduled_event_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_events_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1505,6 +1589,7 @@ inline scheduled_event_map guild_events_get_sync(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event
  * @param event Event to create (guild ID must be populated)
  * @return scheduled_event returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_event_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1521,6 +1606,7 @@ inline scheduled_event guild_event_create_sync(const scheduled_event& event) {
  * @param event_id Event ID to delete
  * @param guild_id Guild ID of event to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_event_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1536,6 +1622,7 @@ inline confirmation guild_event_delete_sync(snowflake event_id, snowflake guild_
  * @see https://discord.com/developers/docs/resources/guild-scheduled-event#modify-guild-scheduled-event
  * @param event Event to create (event ID and guild ID must be populated)
  * @return scheduled_event returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_event_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1552,6 +1639,7 @@ inline scheduled_event guild_event_edit_sync(const scheduled_event& event) {
  * @param guild_id Guild to get event for
  * @param event_id Event ID to get
  * @return scheduled_event returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_event_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1571,6 +1659,7 @@ inline stage_instance stage_instance_create_sync(const stage_instance& si) {
  * @see https://discord.com/developers/docs/resources/stage-instance#get-stage-instance
  * @param channel_id ID of the associated channel
  * @return stage_instance returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::stage_instance_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1591,6 +1680,7 @@ inline stage_instance stage_instance_edit_sync(const stage_instance& si) {
  * @param channel_id ID of the associated channel
  * @return confirmation returned object on completion
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * \memberof dpp::cluster
  * @see dpp::cluster::stage_instance_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1606,6 +1696,7 @@ inline confirmation stage_instance_delete_sync(const snowflake channel_id) {
  * @see https://discord.com/developers/docs/resources/sticker#create-guild-sticker
  * @param s Sticker to create. Must have its guild ID set.
  * @return sticker returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_sticker_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1622,6 +1713,7 @@ inline sticker guild_sticker_create_sync(sticker &s) {
  * @param sticker_id sticker ID to delete
  * @param guild_id guild ID to delete from
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_sticker_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1637,6 +1729,7 @@ inline confirmation guild_sticker_delete_sync(snowflake sticker_id, snowflake gu
  * @param id Id of sticker to get.
  * @param guild_id Guild ID of the guild where the sticker is
  * @return sticker returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_sticker_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1652,6 +1745,7 @@ inline sticker guild_sticker_get_sync(snowflake id, snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/sticker#modify-guild-sticker
  * @param s Sticker to modify. Must have its guild ID and sticker ID set.
  * @return sticker returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_sticker_modify
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1666,6 +1760,7 @@ inline sticker guild_sticker_modify_sync(sticker &s) {
  * @see https://discord.com/developers/docs/resources/sticker#get-guild-stickers
  * @param guild_id Guild ID of the guild where the sticker is
  * @return sticker_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_stickers_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1680,6 +1775,7 @@ inline sticker_map guild_stickers_get_sync(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/sticker#get-sticker
  * @param id Id of sticker to get.
  * @return sticker returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::nitro_sticker_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1693,6 +1789,7 @@ inline sticker nitro_sticker_get_sync(snowflake id) {
  * @brief Get sticker packs
  * @see https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs
  * @return sticker_pack_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::sticker_packs_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1709,6 +1806,7 @@ inline sticker_pack_map sticker_packs_get_sync() {
  * @param code Template code to create guild from
  * @param name Guild name to create
  * @return guild returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_create_from_template
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1726,6 +1824,7 @@ inline guild guild_create_from_template_sync(const std::string &code, const std:
  * @param name Template name to create
  * @param description Description of template to create
  * @return dtemplate returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_template_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1742,6 +1841,7 @@ inline dtemplate guild_template_create_sync(snowflake guild_id, const std::strin
  * @param guild_id Guild ID of template to delete
  * @param code Template code to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_template_delete
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1760,6 +1860,7 @@ inline confirmation guild_template_delete_sync(snowflake guild_id, const std::st
  * @param name New name of template
  * @param description New description of template
  * @return dtemplate returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_template_modify
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1775,6 +1876,7 @@ inline dtemplate guild_template_modify_sync(snowflake guild_id, const std::strin
  * @see https://discord.com/developers/docs/resources/guild-template#get-guild-templates
  * @param guild_id Guild ID to get templates for
  * @return dtemplate_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_templates_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1791,6 +1893,7 @@ inline dtemplate_map guild_templates_get_sync(snowflake guild_id) {
  * @param guild_id Guild to synchronise template for
  * @param code Code of template to synchronise
  * @return dtemplate returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_template_sync
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1805,6 +1908,7 @@ inline dtemplate guild_template_sync_sync(snowflake guild_id, const std::string 
  * @see https://discord.com/developers/docs/resources/guild-template#get-guild-template
  * @param code Template code
  * @return dtemplate returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::template_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1819,6 +1923,7 @@ inline dtemplate template_get_sync(const std::string &code) {
  * @see https://discord.com/developers/docs/topics/thread
  * @param thread_id Thread ID to join
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_user_join_thread
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1833,6 +1938,7 @@ inline confirmation current_user_join_thread_sync(snowflake thread_id) {
  * @see https://discord.com/developers/docs/topics/thread
  * @param thread_id Thread ID to leave
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_user_leave_thread
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1847,6 +1953,7 @@ inline confirmation current_user_leave_thread_sync(snowflake thread_id) {
  * @see https://discord.com/developers/docs/topics/thread
  * @param channel_id Channel to get active threads for
  * @return thread_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::threads_get_active
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1863,6 +1970,7 @@ inline thread_map threads_get_active_sync(snowflake channel_id) {
  * @param before_id Get threads before this id
  * @param limit Number of threads to get
  * @return thread_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::threads_get_joined_private_archived
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1879,6 +1987,7 @@ inline thread_map threads_get_joined_private_archived_sync(snowflake channel_id,
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
  * @return thread_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::threads_get_private_archived
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1895,6 +2004,7 @@ inline thread_map threads_get_private_archived_sync(snowflake channel_id, time_t
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
  * @return thread_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::threads_get_public_archived
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1910,6 +2020,7 @@ inline thread_map threads_get_public_archived_sync(snowflake channel_id, time_t 
  * @param thread_id Thread to get member for
  * @param user_id ID of the user to get
  * @return thread_member returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::thread_member_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1924,6 +2035,7 @@ inline thread_member thread_member_get_sync(const snowflake thread_id, const sno
  * @see https://discord.com/developers/docs/topics/thread
  * @param thread_id Thread to get members for
  * @return thread_member_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::thread_members_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1945,6 +2057,7 @@ inline thread_member_map thread_members_get_sync(snowflake thread_id) {
  * @param invitable whether non-moderators can add other non-moderators to a thread; only available when creating a private thread
  * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
  * @return thread returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::thread_create
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1964,6 +2077,7 @@ inline thread thread_create_sync(const std::string& thread_name, snowflake chann
  * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
  * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
  * @return thread returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::thread_create_with_message
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1979,6 +2093,7 @@ inline thread thread_create_with_message_sync(const std::string& thread_name, sn
  * @param thread_id Thread ID to add to
  * @param user_id Member ID to add
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::thread_member_add
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1994,6 +2109,7 @@ inline confirmation thread_member_add_sync(snowflake thread_id, snowflake user_i
  * @param thread_id Thread ID to remove from
  * @param user_id Member ID to remove
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::thread_member_remove
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2014,6 +2130,7 @@ inline confirmation thread_member_remove_sync(snowflake thread_id, snowflake use
  * @param type Type of image for avatar
  * @return user returned object on completion
  	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_user_edit
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2028,6 +2145,7 @@ inline user current_user_edit_sync(const std::string &nickname, const std::strin
  *
  * @see https://discord.com/developers/docs/topics/oauth2#get-current-bot-application-information
  * @return application returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_application_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2044,6 +2162,7 @@ inline application current_application_get_sync() {
  * @return user_identified returned object on completion
  * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
  * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_user_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2073,6 +2192,7 @@ inline user_identified current_user_get_sync() {
  * @param suppress True if the user's audio should be suppressed, false if it should not
  * @param request_to_speak_timestamp The time at which we requested to speak, or 0 to clear the request. The time set here must be the current time or in the future.
  * @throw std::logic_exception You attempted to set a request_to_speak_timestamp in the past which is not the value of 0.
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_user_set_voice_state
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2101,6 +2221,7 @@ inline confirmation current_user_set_voice_state_sync(snowflake guild_id, snowfl
  * @param channel_id Stage channel to set voice state on
  * @return confirmation returned object on completion
  * @param suppress True if the user's audio should be suppressed, false if it should not
+ * \memberof dpp::cluster
  * @see dpp::cluster::user_set_voice_state
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2116,6 +2237,7 @@ inline confirmation user_set_voice_state_sync(snowflake user_id, snowflake guild
  * against a bot token.
  * @see https://discord.com/developers/docs/resources/user#get-user-connections
  * @return connection_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_user_connections_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2129,6 +2251,7 @@ inline connection_map current_user_connections_get_sync() {
  * @brief Get current (bot) user guilds
  * @see https://discord.com/developers/docs/resources/user#get-current-user-guilds
  * @return guild_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_user_get_guilds
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2143,6 +2266,7 @@ inline guild_map current_user_get_guilds_sync() {
  * @see https://discord.com/developers/docs/resources/user#leave-guild
  * @param guild_id Guild ID to leave
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::current_user_leave_guild
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2162,6 +2286,7 @@ inline confirmation current_user_leave_guild_sync(snowflake guild_id) {
  * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
  * @note unless you want something special from `dpp::user_identified` or you've turned off caching, you have no need to call this.
  * Call `dpp::find_user` instead that looks up the user in the cache rather than a REST call.
+ * \memberof dpp::cluster
  * @see dpp::cluster::user_get
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2175,6 +2300,7 @@ inline user_identified user_get_sync(snowflake user_id) {
  * @brief Get all voice regions
  * @see https://discord.com/developers/docs/resources/voice#list-voice-regions
  * @return voiceregion_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::get_voice_regions
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2194,6 +2320,7 @@ inline voiceregion_map get_voice_regions_sync() {
  * @see https://discord.com/developers/docs/resources/guild#get-guild-voice-regions
  * @param guild_id Guild ID to get voice regions for
  * @return voiceregion_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::guild_get_voice_regions
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2209,6 +2336,7 @@ inline voiceregion_map guild_get_voice_regions_sync(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/webhook#create-webhook
  * @param w Webhook to create
  * @return webhook returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::create_webhook
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2224,6 +2352,7 @@ inline webhook create_webhook_sync(const class webhook &w) {
  * @see https://discord.com/developers/docs/resources/webhook#delete-webhook
  * @param webhook_id Webhook ID to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::delete_webhook
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2240,6 +2369,7 @@ inline confirmation delete_webhook_sync(snowflake webhook_id) {
  * @param wh Webhook to delete message for
  * @param message_id Message ID to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::delete_webhook_message
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2255,6 +2385,7 @@ inline confirmation delete_webhook_message_sync(const class webhook &wh, snowfla
  * @param webhook_id Webhook ID to delete
  * @param token Token of webhook to delete
  * @return confirmation returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::delete_webhook_with_token
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2270,6 +2401,7 @@ inline confirmation delete_webhook_with_token_sync(snowflake webhook_id, const s
  * @see https://discord.com/developers/docs/resources/webhook#modify-webhook
  * @param wh Webhook to edit
  * @return webhook returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::edit_webhook
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2292,6 +2424,7 @@ inline webhook edit_webhook_sync(const class webhook& wh) {
  * @param wh Webhook to edit message for
  * @param m New message
  * @return message returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::edit_webhook_message
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2306,6 +2439,7 @@ inline message edit_webhook_message_sync(const class webhook &wh, const struct m
  * @see https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
  * @param wh Webhook to edit (should include token)
  * @return webhook returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::edit_webhook_with_token
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2324,6 +2458,7 @@ inline webhook edit_webhook_with_token_sync(const class webhook& wh) {
  * @param wait waits for server confirmation of message send before response, and returns the created message body
  * @param thread_id Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived
  * @return message returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::execute_webhook
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2338,6 +2473,7 @@ inline message execute_webhook_sync(const class webhook &wh, const struct messag
  * @see https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
  * @param channel_id Channel ID to get webhooks for
  * @return webhook_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::get_channel_webhooks
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2352,6 +2488,7 @@ inline webhook_map get_channel_webhooks_sync(snowflake channel_id) {
  * @see https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
  * @param guild_id Guild ID to get webhooks for
  * @return webhook_map returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::get_guild_webhooks
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2366,6 +2503,7 @@ inline webhook_map get_guild_webhooks_sync(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/webhook#get-webhook
  * @param webhook_id Webhook ID to get
  * @return webhook returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::get_webhook
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2381,6 +2519,7 @@ inline webhook get_webhook_sync(snowflake webhook_id) {
  * @see https://discord.com/developers/docs/resources/webhook#get-webhook-message
  * @param wh Webhook to get the original message for
  * @return message returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::get_webhook_message
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2396,6 +2535,7 @@ inline message get_webhook_message_sync(const class webhook &wh) {
  * @param webhook_id Webhook ID to retrieve
  * @param token Token of webhook
  * @return webhook returned object on completion
+ * \memberof dpp::cluster
  * @see dpp::cluster::get_webhook_with_token
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.

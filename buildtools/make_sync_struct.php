@@ -126,6 +126,7 @@ function getComments(string $currentFunction, string $returnType, array $paramet
 					$part = array_slice($header, $n, $x - 1);
 					array_splice($part, count($part) - 1, 0,
 						[
+							" * \memberof dpp::cluster",
 							" * @see dpp::cluster::" . $currentFunction,
 							" * @throw dpp::rest_exception upon failure to execute REST function",
 							" * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.",
