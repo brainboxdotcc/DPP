@@ -2136,7 +2136,7 @@ inline confirmation thread_member_remove_sync(snowflake thread_id, snowflake use
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline user current_user_edit_sync(const std::string &nickname, const std::string& image_blob, const image_type type) {
+inline user current_user_edit_sync(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png) {
 	return dpp::sync<user>(this, &cluster::current_user_edit, nickname, image_blob, type);
 }
 
@@ -2188,9 +2188,9 @@ inline user_identified current_user_get_sync() {
  * @see https://discord.com/developers/docs/resources/guild#modify-current-user-voice-state 
  * @param guild_id Guild to set voice state on
  * @param channel_id Stage channel to set voice state on
- * @return confirmation returned object on completion
  * @param suppress True if the user's audio should be suppressed, false if it should not
  * @param request_to_speak_timestamp The time at which we requested to speak, or 0 to clear the request. The time set here must be the current time or in the future.
+ * @return confirmation returned object on completion
  * @throw std::logic_exception You attempted to set a request_to_speak_timestamp in the past which is not the value of 0.
  * \memberof dpp::cluster
  * @see dpp::cluster::current_user_set_voice_state
@@ -2198,7 +2198,7 @@ inline user_identified current_user_get_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation current_user_set_voice_state_sync(snowflake guild_id, snowflake channel_id, bool suppress, time_t request_to_speak_timestamp) {
+inline confirmation current_user_set_voice_state_sync(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0) {
 	return dpp::sync<confirmation>(this, &cluster::current_user_set_voice_state, guild_id, channel_id, suppress, request_to_speak_timestamp);
 }
 
@@ -2219,15 +2219,15 @@ inline confirmation current_user_set_voice_state_sync(snowflake guild_id, snowfl
  * @param user_id The user to set the voice state of
  * @param guild_id Guild to set voice state on
  * @param channel_id Stage channel to set voice state on
- * @return confirmation returned object on completion
  * @param suppress True if the user's audio should be suppressed, false if it should not
+ * @return confirmation returned object on completion
  * \memberof dpp::cluster
  * @see dpp::cluster::user_set_voice_state
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation user_set_voice_state_sync(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress) {
+inline confirmation user_set_voice_state_sync(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false) {
 	return dpp::sync<confirmation>(this, &cluster::user_set_voice_state, user_id, guild_id, channel_id, suppress);
 }
 
@@ -2464,7 +2464,7 @@ inline webhook edit_webhook_with_token_sync(const class webhook& wh) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message execute_webhook_sync(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id) {
+inline message execute_webhook_sync(const class webhook &wh, const struct message& m, bool wait = false, snowflake thread_id = 0) {
 	return dpp::sync<message>(this, &cluster::execute_webhook, wh, m, wait, thread_id);
 }
 
