@@ -132,6 +132,7 @@ function getComments(string $currentFunction, string $returnType, array $paramet
 			$messageToRemove = -1;
 			for ($n = $i; $n != 0; --$n, $x++) {
 				$header[$n] = preg_replace('/^\t+/', '', $header[$n]);
+				$header[$n] = preg_replace('/@see (.+?)$/', '@see dpp::cluster::' . $currentFunction. "\n * @see \\1", $header[$n]);
 				$header[$n] = preg_replace('/@param callback .*$/', '@return ' . $returnType . ' returned object on completion', $header[$n]);
 				if (preg_match('/\s*\* On success /i', $header[$n])) {
 					$header[$n] = "";
@@ -141,7 +142,6 @@ function getComments(string $currentFunction, string $returnType, array $paramet
 					array_splice($part, count($part) - 1, 0,
 						[
 							" * \memberof dpp::cluster",
-							" * @see dpp::cluster::" . $currentFunction,
 							" * @throw dpp::rest_exception upon failure to execute REST function",
 							" * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.",
 							" * Avoid direct use of this function inside an event handler.",
