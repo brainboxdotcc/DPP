@@ -926,6 +926,12 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			this->embeds.emplace_back(embed(&e));
 		}
 	}
+	if (d->find("components") != d->end()) {
+		json & el = (*d)["components"];
+		for (auto& e : el) {
+			this->components.emplace_back(component().fill_from_json(&e));
+		}
+	}
 	this->content = string_not_null(d, "content");
 	this->sent = ts_not_null(d, "timestamp");
 	this->edited = ts_not_null(d, "edited_timestamp");
