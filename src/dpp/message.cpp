@@ -57,6 +57,12 @@ component& component::fill_from_json(nlohmann::json* j) {
 		style = static_cast<component_style>(int8_not_null(j, "style"));
 		custom_id = string_not_null(j, "custom_id");
 		disabled = bool_not_null(j, "disabled");
+		if (j->contains("emoji")) {
+			json emo = (*j)["emoji"];
+			emoji.id = snowflake_not_null(&emo, "id");
+			emoji.name = string_not_null(&emo, "name");
+			emoji.animated = bool_not_null(&emo, "animated");
+		}
 	} else if (type == cot_selectmenu) {
 		label = "";
 		custom_id = string_not_null(j, "custom_id");
