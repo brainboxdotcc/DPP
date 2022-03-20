@@ -1703,12 +1703,7 @@ int main()
     dpp::webhook wh("https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE");
 
     /* send a message with this webhook */
-    bot.execute_webhook(wh, dpp::message("Have a great time here :smile:"));
-
-    /* Note: This is just to give the library time to deliver the webhook before it shuts down.
-     * You don't need this if this code is part of some other program.
-     */
-    sleep(2);
+    bot.execute_webhook_sync(wh, dpp::message("Have a great time here :smile:"));
 
     return 0;
 }
