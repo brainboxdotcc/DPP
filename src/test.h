@@ -21,6 +21,7 @@
 #undef DPP_BUILD
 #ifdef _WIN32
 _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
+_Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or structures with stl member variables
 #endif
 #include <dpp/dpp.h>
 #include <dpp/nlohmann/json.hpp>
@@ -114,12 +115,12 @@ extern dpp::snowflake TEST_EVENT_ID;
 			if (g.size() > 0) { \
 				set_test(testname, true); \
 			} else { \
-				bot.log(dpp::ll_debug, cc.http_info.body); \
 				set_test(testname, false); \
+				bot.log(dpp::ll_debug, cc.http_info.body); \
 			} \
 		} else { \
-			bot.log(dpp::ll_debug, cc.http_info.body); \
 			set_test(testname, false); \
+			bot.log(dpp::ll_debug, cc.http_info.body); \
 		} \
 	});
 

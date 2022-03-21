@@ -55,6 +55,7 @@
 #include <exception>
 #include <string>
 #include <iostream>
+#include <unordered_map>
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 
@@ -78,6 +79,14 @@ public:
 	SSL_CTX* ctx;
 };
 
+struct keepalive_cache_t {
+	time_t created;
+	opensslcontext* ssl;
+	dpp::socket sfd;
+};
+
+thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
+
 /* NOTE: Upper bounds check not required: https://docs.microsoft.com/en-us/windows/win32/winsock/select-and-fd---2 */
 #define SAFE_FD_SET(a, b) { if (a >= 0) { FD_SET(a, b); }}
 #define SAFE_FD_ISSET(a, b) ((a >= 0) ? FD_ISSET(a, b) : 0)
@@ -86,10 +95,10 @@ public:
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
  * it'd go unused.
  */
-#define BUFSIZZ 16 * 1240
+#define DPP_BUFSIZE 16 * 1024
 const int ERROR_STATUS = -1;
 
-ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade) :
+ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
 	nonblocking(false),
 	sfd(INVALID_SOCKET),
 	ssl(nullptr),
@@ -98,7 +107,9 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	port(_port),
 	bytes_out(0),
 	bytes_in(0),
-	plaintext(plaintext_downgrade)
+	plaintext(plaintext_downgrade),
+	make_new(true),
+	keepalive(reuse)
 {
 #ifndef WIN32
         signal(SIGALRM, SIG_IGN);
@@ -116,10 +127,58 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	if (FD_SETSIZE < 1024) {
 		throw dpp::connection_exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
 	}
-	if (plaintext) {
-		ssl = nullptr;
-	} else {
-		ssl = new opensslcontext();
+	if (keepalive) {
+		std::string identifier((!plaintext ? "ssl://" : "tcp://") + hostname + ":" + port);
+		auto iter = keepalives.find(identifier);
+		if (iter != keepalives.end()) {
+			/* Found a keepalive connection, check it is still connected/valid via select for error */
+			fd_set efds;
+			FD_ZERO(&efds);
+			SAFE_FD_SET(iter->second.sfd, &efds);
+			timeval ts;
+			ts.tv_sec = 0;
+			ts.tv_usec = 1;
+			int r = select(iter->second.sfd, nullptr, nullptr, &efds, &ts);
+			if (time(nullptr) > (iter->second.created + 60) || r < 0 || FD_ISSET(iter->second.sfd, &efds)) {
+				make_new = true;
+				/* This connection is dead, free its resources and make a new one */
+				if (iter->second.ssl->ssl) {
+					SSL_free(iter->second.ssl->ssl);
+					iter->second.ssl->ssl = nullptr;
+				}
+				if (iter->second.sfd != INVALID_SOCKET) {
+					shutdown(iter->second.sfd, 2);
+				}
+				#ifdef _WIN32
+					if (iter->second.sfd >= 0 && iter->second.sfd < FD_SETSIZE) {
+						closesocket(iter->second.sfd);
+					}
+				#else
+					::close(iter->second.sfd);
+				#endif
+				if (iter->second.ssl->ctx) {
+					SSL_CTX_free(iter->second.ssl->ctx);
+					iter->second.ssl->ctx = nullptr;
+				}
+				iter->second.sfd = INVALID_SOCKET;
+				delete iter->second.ssl;
+			} else {
+				/* Connection is good, lets use it */
+				this->sfd = iter->second.sfd;
+				this->ssl = iter->second.ssl;
+				make_new = false;
+			}
+			/* We don't keep in-flight connections in the keepalives list */
+			keepalives.erase(iter);
+		}
+
+	}
+	if (make_new) {
+		if (plaintext) {
+			ssl = nullptr;
+		} else {
+			ssl = new opensslcontext();
+		}
 	}
 	this->connect();
 }
@@ -130,80 +189,83 @@ void ssl_client::connect()
 	/* Initial connection is done in blocking mode. There is a timeout on it. */
 	nonblocking = false;
 
-	/* Resolve hostname to IP */
-	struct hostent *host;
-	if ((host = gethostbyname(hostname.c_str())) == nullptr)
-		throw dpp::exception(std::string("Couldn't resolve hostname: ") + hostname);
+	if (make_new) {
+		/* Resolve hostname to IP */
+		struct hostent *host;
+		if ((host = gethostbyname(hostname.c_str())) == nullptr)
+			throw dpp::exception(std::string("Couldn't resolve hostname: ") + hostname);
 
-	addrinfo hints, *addrs;
-	
-	memset(&hints, 0, sizeof(addrinfo));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
+		addrinfo hints, *addrs;
+		
+		memset(&hints, 0, sizeof(addrinfo));
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
 
-	int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
-	if (status != 0)
-		throw dpp::exception(std::string("getaddrinfo error: ") + gai_strerror(status));
+		int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
+		if (status != 0)
+			throw dpp::exception(std::string("getaddrinfo error: ") + gai_strerror(status));
 
-	/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
-	int err = 0;
-	for (struct addrinfo *addr = addrs; addr != nullptr; addr = addr->ai_next) {
-		sfd = ::socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
-		if (sfd == ERROR_STATUS) {
+		/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
+		int err = 0;
+		for (struct addrinfo *addr = addrs; addr != nullptr; addr = addr->ai_next) {
+			sfd = ::socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
+			if (sfd == ERROR_STATUS) {
+				err = errno;
+				continue;
+			} else if (::connect(sfd, addr->ai_addr, (int)addr->ai_addrlen) == 0) {
+				break;
+			}
 			err = errno;
-			continue;
-		} else if (::connect(sfd, addr->ai_addr, (int)addr->ai_addrlen) == 0) {
-			break;
+			shutdown(sfd, 2);
+		#ifdef _WIN32
+			if (sfd >= 0 && sfd < FD_SETSIZE) {
+				closesocket(sfd);
+			}
+		#else
+			::close(sfd);
+		#endif
+			sfd = ERROR_STATUS;
 		}
-		err = errno;
-		shutdown(sfd, 2);
-	#ifdef _WIN32
-		if (sfd >= 0 && sfd < FD_SETSIZE) {
-			closesocket(sfd);
-		}
-	#else
-		::close(sfd);
-	#endif
-		sfd = ERROR_STATUS;
-	}
-	freeaddrinfo(addrs);
+		freeaddrinfo(addrs);
 
-	/* Check if none of the IPs yielded a valid connection */
-	if (sfd == ERROR_STATUS)
-		throw dpp::exception(strerror(err));
-
-	if (!plaintext) {
-		/* We're good to go - hand the fd over to openssl */
-		const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
-
-		/* Create SSL context */
-		ssl->ctx = SSL_CTX_new(method);
-		if (ssl->ctx == nullptr)
-			throw dpp::exception("Failed to create SSL client context!");
-
-		/* Do not allow SSL 3.0, TLS 1.0 or 1.1
-		 * https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
-		 */
-		if (!SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION))
-			throw dpp::exception("Failed to set minimum SSL version!");
-
-		/* Create SSL session */
-		ssl->ssl = SSL_new(ssl->ctx);
-		if (ssl->ssl == nullptr)
-			throw dpp::exception("SSL_new failed!");
-
-		SSL_set_fd(ssl->ssl, (int)sfd);
-
-		/* Server name identification (SNI) */
-		SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
-
-		status = SSL_connect(ssl->ssl);
-		if (status != 1) {
-			throw dpp::exception("SSL_connect error");
+		/* Check if none of the IPs yielded a valid connection */
+		if (sfd == ERROR_STATUS) {
+			throw dpp::exception(strerror(err));
 		}
 
-		this->cipher = SSL_get_cipher(ssl->ssl);
+		if (!plaintext) {
+			/* We're good to go - hand the fd over to openssl */
+			const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
+
+			/* Create SSL context */
+			ssl->ctx = SSL_CTX_new(method);
+			if (ssl->ctx == nullptr)
+				throw dpp::exception("Failed to create SSL client context!");
+
+			/* Do not allow SSL 3.0, TLS 1.0 or 1.1
+			* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
+			*/
+			if (!SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION))
+				throw dpp::exception("Failed to set minimum SSL version!");
+
+			/* Create SSL session */
+			ssl->ssl = SSL_new(ssl->ctx);
+			if (ssl->ssl == nullptr)
+				throw dpp::exception("SSL_new failed!");
+
+			SSL_set_fd(ssl->ssl, (int)sfd);
+
+			/* Server name identification (SNI) */
+			SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
+
+			status = SSL_connect(ssl->ssl);
+			if (status != 1) {
+				throw dpp::exception("SSL_connect error");
+			}
+
+			this->cipher = SSL_get_cipher(ssl->ssl);
+		}
 	}
 }
 
@@ -219,7 +281,7 @@ void ssl_client::write(const std::string &data)
 		obuffer += data;
 	} else {
 		if (plaintext) {
-			if (::write(sfd, data.data(), data.length()) != (int)data.length()) {
+			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data.length(), 0) != (int)data.length()) {
 				throw dpp::exception("write() failed");
 			}
 		} else {
@@ -256,9 +318,9 @@ void ssl_client::read_loop()
 	size_t ClientToServerLength = 0, ClientToServerOffset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
 	fd_set readfds, writefds, efds;
-	char ClientToServerBuffer[BUFSIZZ], ServerToClientBuffer[BUFSIZZ];
+	char ClientToServerBuffer[DPP_BUFSIZE], ServerToClientBuffer[DPP_BUFSIZE];
 
-	if (sfd == -1)  {
+	if (sfd == INVALID_SOCKET)  {
 		throw dpp::exception("Invalid file descriptor in read_loop()");
 	}
 	
@@ -324,7 +386,7 @@ void ssl_client::read_loop()
 			if (custom_readable_fd && custom_readable_fd() >= 0 && SAFE_FD_ISSET(custom_readable_fd(), &efds)) {
 			}
 
-			if (SAFE_FD_ISSET(sfd, &efds) || sfd == -1) {
+			if (SAFE_FD_ISSET(sfd, &efds) || sfd == INVALID_SOCKET) {
 				this->log(dpp::ll_error, std::string("Error on SSL connection: ") +strerror(errno));
 				return;
 			}
@@ -334,13 +396,15 @@ void ssl_client::read_loop()
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					r = ::recv(sfd, ServerToClientBuffer, BUFSIZZ, 0);
+					r = ::recv(sfd, ServerToClientBuffer, DPP_BUFSIZE, 0);
 					if (r <= 0) {
 						/* error or EOF */
 						return;
 					} else {
 						buffer.append(ServerToClientBuffer, r);
-						this->handle_buffer(buffer);
+						if (!this->handle_buffer(buffer)) {
+							return;
+						}
 						bytes_in += r;
 					}
 				} else {
@@ -348,7 +412,7 @@ void ssl_client::read_loop()
 						read_blocked_on_write = false;
 						read_blocked = false;
 						
-						r = SSL_read(ssl->ssl,ServerToClientBuffer,BUFSIZZ);
+						r = SSL_read(ssl->ssl,ServerToClientBuffer,DPP_BUFSIZE);
 						int e = SSL_get_error(ssl->ssl,r);
 
 						switch (e) {
@@ -356,7 +420,9 @@ void ssl_client::read_loop()
 								/* Data received, add it to the buffer */
 								if (r > 0) {
 									buffer.append(ServerToClientBuffer, r);
-									this->handle_buffer(buffer);
+									if (!this->handle_buffer(buffer)) {
+										return;
+									}
 									bytes_in += r;
 								}
 							break;
@@ -389,8 +455,8 @@ void ssl_client::read_loop()
 
 			/* Check for input on the sendq */
 			if (obuffer.length() && ClientToServerLength == 0) {
-				memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length());
-				ClientToServerLength = obuffer.length() > BUFSIZZ ? BUFSIZZ : obuffer.length();
+				memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length());
+				ClientToServerLength = obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length();
 				obuffer = obuffer.substr(ClientToServerLength, obuffer.length());
 				ClientToServerOffset = 0;
 			}
@@ -464,6 +530,19 @@ bool ssl_client::handle_buffer(std::string &buffer)
 
 void ssl_client::close()
 {
+	if (keepalive && this->sfd != INVALID_SOCKET) {
+		std::string identifier((!plaintext ? "ssl://" : "tcp://") + hostname + ":" + port);
+		auto iter = keepalives.find(identifier);
+		if (iter == keepalives.end()) {
+			keepalive_cache_t kc;
+			kc.created = time(nullptr);
+			kc.sfd = this->sfd;
+			kc.ssl = this->ssl;
+			keepalives.emplace(identifier, kc);
+		}
+		return;
+	}
+
 	if (!plaintext && ssl->ssl) {
 		SSL_free(ssl->ssl);
 		ssl->ssl = nullptr;
@@ -480,7 +559,7 @@ void ssl_client::close()
 		SSL_CTX_free(ssl->ctx);
 		ssl->ctx = nullptr;
 	}
-	sfd = -1;
+	sfd = INVALID_SOCKET;
 	obuffer.clear();
 	buffer.clear();
 }
@@ -488,7 +567,9 @@ void ssl_client::close()
 ssl_client::~ssl_client()
 {
 	this->close();
-	delete ssl;
+	if (!keepalive) {
+		delete ssl;
+	}
 }
 
 };

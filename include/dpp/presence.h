@@ -22,8 +22,9 @@
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/emoji.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -115,21 +116,21 @@ enum activity_type : uint8_t {
  */
 enum activity_flags {
 	/// In an instance
-	af_instance						= 0b000000001,
+	af_instance					= 0b000000001,
 	/// Joining
-	af_join							= 0b000000010,
+	af_join						= 0b000000010,
 	/// Spectating
-	af_spectate						= 0b000000100,
+	af_spectate					= 0b000000100,
 	/// Sending join request
 	af_join_request					= 0b000001000,
 	/// Synchronising
-	af_sync							= 0b000010000,
+	af_sync						= 0b000010000,
 	/// Playing
-	af_play							= 0b000100000,
+	af_play						= 0b000100000,
 	/// Party privacy friends
-	af_party_privacy_friends 		= 0b001000000,
+	af_party_privacy_friends 			= 0b001000000,
 	/// Party privacy voice channel
-	af_party_privacy_voice_channel 	= 0b010000000,
+	af_party_privacy_voice_channel			= 0b010000000,
 	/// Embedded
 	af_embedded 					= 0b100000000
 };
@@ -302,7 +303,7 @@ public:
 /**
  * @brief Represents user presence, e.g. what game they are playing and if they are online
  */
-class DPP_EXPORT presence {
+class DPP_EXPORT presence : public json_interface<presence> {
 public:
 	/** The user the presence applies to */
 	snowflake	user_id;
@@ -343,7 +344,7 @@ public:
 	 * @param j JSON object to fill from
 	 * @return A reference to self
 	 */
-	presence& fill_from_json(nlohmann::json* j);
+	 presence& fill_from_json(nlohmann::json* j);
 
 	/** Build JSON from this object.
 	 * 
@@ -351,9 +352,10 @@ public:
 	 * and includes websocket opcode 3. You will not get what you expect if you call this on a user's
 	 * presence received from on_presence_update or on_guild_create!
 	 * 
+	 * @param with_id Add ID to output
 	 * @return The JSON text of the presence
 	 */
-	std::string build_json() const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/** The users status on desktop
 	 * @return The user's status on desktop

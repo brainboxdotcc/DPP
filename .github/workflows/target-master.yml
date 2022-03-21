@@ -1,4 +1,4 @@
-name: Close master-targetted PRs
+name: Close master-targeted PRs
 on:
   pull_request:
     branches:

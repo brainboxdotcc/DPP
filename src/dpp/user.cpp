@@ -47,14 +47,22 @@ namespace dpp {
 
 user::user() :
 	managed(),
-	discriminator(0),
 	flags(0),
+	discriminator(0),
 	refcount(1)
 {
 }
 
 user::~user()
 {
+}
+
+std::string user::build_json(bool with_id) const {
+	return "";
+}
+
+std::string user_identified::build_json(bool with_id) const {
+	return "";
 }
 
 user_identified::user_identified() : user(), accent_color(0), verified(false) {
@@ -68,14 +76,21 @@ std::string user::get_avatar_url(uint16_t size)  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
-	return fmt::format("{}/avatars/{}/{}{}.{}{}",
-		utility::cdn_host,
-		this->id,
-		(has_animated_icon() ? "a_" : ""),
-		this->avatar.to_string(),
-		(has_animated_icon() ? "gif" : "png"),
-		utility::avatar_size(size)
-	);
+	if (this->avatar.to_string().empty()) {
+		return fmt::format("{}/embed/avatars/{}.png",
+						   utility::cdn_host,
+						   this->discriminator % 5
+		);
+	} else {
+		return fmt::format("{}/avatars/{}/{}{}.{}{}",
+						   utility::cdn_host,
+						   this->id,
+						   (has_animated_icon() ? "a_" : ""),
+						   this->avatar.to_string(),
+						   (has_animated_icon() ? "gif" : "png"),
+						   utility::avatar_size(size)
+		);
+	}
 }
 
 std::string user::format_username() const {

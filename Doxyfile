@@ -2120,7 +2120,7 @@ UML_LIMIT_NUM_FIELDS   = 10
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-TEMPLATE_RELATIONS     = NO
+TEMPLATE_RELATIONS     = YES
 
 # If the INCLUDE_GRAPH, ENABLE_PREPROCESSING and SEARCH_INCLUDES tags are set to
 # YES then doxygen will generate a graph for each documented file showing the
@@ -2260,7 +2260,7 @@ MAX_DOT_GRAPH_DEPTH    = 0
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_TRANSPARENT	= NO
+DOT_TRANSPARENT	= YES
 
 # Set the DOT_MULTI_TARGETS tag to YES allow dot to generate multiple output
 # files in one run (i.e. multiple -o and -T options on the command line). This
@@ -2287,6 +2287,7 @@ GENERATE_LEGEND	= YES
 DOT_CLEANUP	    = YES
 
 
-TOC_INCLUDE_HEADINGS = 3
+TOC_INCLUDE_HEADINGS = 4
 
 DOT_GRAPH_MAX_NODES = 100
+

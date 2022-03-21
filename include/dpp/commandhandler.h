@@ -28,7 +28,7 @@
 #include <dpp/role.h>
 #include <dpp/appcommand.h>
 #include <dpp/dispatcher.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 #include <vector>
 #include <functional>

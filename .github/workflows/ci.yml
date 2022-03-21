@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install apt packages
-        run: sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
@@ -89,7 +89,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install apt packages
-        run: sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
@@ -184,7 +184,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Packages
-        run: sudo apt update && sudo apt install cmake ninja-build rpm
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake ninja-build rpm
 
       - name: Generate CMakeFiles
         run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DCMAKE_BUILD_TYPE=Release -G Ninja ..
@@ -207,29 +207,29 @@ jobs:
           name: "libdpp - RPM Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.rpm"
 
-  testfreebsd:
-    runs-on: macos-10.15
-    name: FreeBSD (g++-10)
-    steps:
-    - uses: actions/checkout@v2
-    - name: FreeBSD Build and Package
-      id: freebsdtest
-      uses: vmactions/freebsd-vm@v0.1.5
-      with:
-        usesh: true
-        prepare: pkg install -y openssl-devel gcc gmake ninja cmake git
-        run: |
-          pwd
-          ls -lah
-          mkdir build
-          cd build
-          cmake ..
-          make -j2
-          make install
-          cpack --verbose
-
-    - name: Upload Binaries (BZ2)
-      uses: actions/upload-artifact@v2
-      with:
-        name: "libdpp - FreeBSD x64"
-        path: "${{github.workspace}}/build/*.tar.bz2"
+#  testfreebsd:
+#   runs-on: macos-10.15
+#   name: FreeBSD (g++-10)
+#   steps:
+#   - uses: actions/checkout@v2
+#   - name: FreeBSD Build and Package
+#     id: freebsdtest
+#     uses: vmactions/freebsd-vm@v0.1.5
+#     with:
+#        usesh: true
+#       prepare: pkg install -y openssl-devel gcc gmake ninja cmake git
+#       run: |
+#         pwd
+#         ls -lah
+#          mkdir build
+#          cd build
+#          cmake ..
+#          make -j2
+#          make install
+#          cpack --verbose
+#
+#    - name: Upload Binaries (BZ2)
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: "libdpp - FreeBSD x64"
+#        path: "${{github.workspace}}/build/*.tar.bz2"

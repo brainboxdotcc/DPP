@@ -518,7 +518,7 @@ class DPP_EXPORT etf_parser {
 	 * @brief Append double value to ETF buffer
 	 * 
 	 * @param b  buffer to append to
-	 * @param f doule to append
+	 * @param f double to append
 	 * @throw std::exception Buffer cannot be extended
 	 */
 	void append_double(etf_buffer *b, double f);

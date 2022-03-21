@@ -30,7 +30,9 @@ namespace dpp { namespace events {
 
 using namespace dpp;
 
+#ifndef _DOXYGEN_
 std::mutex protect_the_loot;
+#endif
 
 /**
  * @brief Handle event

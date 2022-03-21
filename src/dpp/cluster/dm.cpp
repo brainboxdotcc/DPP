@@ -18,32 +18,16 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
 
 namespace dpp {
 
 void cluster::create_dm_channel(snowflake user_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/users", "@me", "channels", m_post, json({{"recipient_id", std::to_string(user_id)}}).dump(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("channel", channel().fill_from_json(&j), http));
-		}
-	});
+	rest_request<channel>(this, API_PATH "/users", "@me", "channels", m_post, json({{"recipient_id", std::to_string(user_id)}}).dump(), callback);
 }
 
 void cluster::current_user_get_dms(command_completion_event_t callback) {
-	this->post_rest(API_PATH "/users", "@me", "channels", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			channel_map channels;
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error()) {
-				for (auto & curr_channel: j) {
-					channels[snowflake_not_null(&curr_channel, "id")] = channel().fill_from_json(&curr_channel);
-				}
-			}
-			callback(confirmation_callback_t("channel_map", channels, http));
-		}
-	});
+	rest_request_list<channel>(this, API_PATH "/users", "@me", "channels", m_get, "", callback);
 }
 
 void cluster::direct_message_create(snowflake user_id, const message &m, command_completion_event_t callback) {
@@ -72,19 +56,11 @@ void cluster::gdm_add(snowflake channel_id, snowflake user_id, const std::string
 	json params;
 	params["access_token"] = access_token;
 	params["nick"] = nick;
-	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_put, params.dump(), [callback](json &j, const http_request_completion_t& http) {
-	if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_put, params.dump(), callback);
 }
 
 void cluster::gdm_remove(snowflake channel_id, snowflake user_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_delete, "", callback);
 }
 
 };

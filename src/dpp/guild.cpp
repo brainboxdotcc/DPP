@@ -59,26 +59,26 @@ namespace dpp {
 
 guild::guild() :
 	managed(),
-	shard_id(0),
-	flags(0),
 	owner_id(0),
 	afk_channel_id(0),
-	afk_timeout(0),
-	widget_channel_id(0),
-	verification_level(ver_none),
-	default_message_notifications(0),
-	explicit_content_filter(expl_disabled),
-	mfa_level(mfa_none),
 	application_id(0),
 	system_channel_id(0),
 	rules_channel_id(0),
-	member_count(0),
-	premium_tier(0),
-	premium_subscription_count(0),
 	public_updates_channel_id(0),
-	max_video_channel_users(0),
+	widget_channel_id(0),
+	member_count(0),
+	flags(0),
 	max_presences(0),
 	max_members(0),
+	shard_id(0),
+	premium_subscription_count(0),
+	max_video_channel_users(0),
+	afk_timeout(0),
+	default_message_notifications(0),
+	premium_tier(0),
+	verification_level(ver_none),
+	explicit_content_filter(expl_disabled),
+	mfa_level(mfa_none),
 	nsfw_level(nsfw_default)
 {
 }
@@ -87,10 +87,10 @@ guild::guild() :
 guild_member::guild_member() :
 	guild_id(0),
 	user_id(0),
+	communication_disabled_until(0),
 	joined_at(0),
 	premium_since(0),
-	flags(0),
-	communication_disabled_until(0)
+	flags(0)
 {
 }
 
@@ -180,7 +180,7 @@ bool guild_member::has_animated_guild_avatar() const {
 	return this->flags & gm_animated_avatar;
 }
 
-std::string guild_member::build_json() const {
+std::string guild_member::build_json(bool with_id) const {
 	json j;
 	if (this->communication_disabled_until > 0) {
 		if (this->communication_disabled_until > std::time(nullptr)) {
@@ -380,6 +380,10 @@ void guild::rehash_members() {
 	members = n;
 }
 
+guild& guild::fill_from_json(nlohmann::json* d) {
+	return fill_from_json(nullptr, d);
+}
+
 
 guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	/* NOTE: This can be called by GUILD_UPDATE and also GUILD_CREATE.
@@ -495,7 +499,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	return *this;
 }
 
-guild_widget::guild_widget() : enabled(false), channel_id(0)
+guild_widget::guild_widget() : channel_id(0), enabled(false)
 {
 }
 
@@ -505,7 +509,7 @@ guild_widget& guild_widget::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string guild_widget::build_json() const {
+std::string guild_widget::build_json(bool with_id) const {
 	return json({{"channel_id", channel_id}, {"enabled", enabled}}).dump();
 }
 

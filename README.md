@@ -20,6 +20,7 @@ D++ is a lightweight and efficient library for Discord written in modern C++. It
 * The entire Discord API is available for use in the library
 * Stable [Windows support](https://dpp.dev/buildwindows.html)
 * Ready-made compiled packages for Windows, Raspberry Pi (ARM64/ARM7/ARMv6), Debian x86/x64 and RPM based distributions
+* Highly scalable for large amounts of guilds and users
 
 Want to help? Drop me a line or send a PR.
 
@@ -32,6 +33,8 @@ The documentation is a work in progress, generated from the code comments and ma
 #### [View D++ library documentation](https://dpp.dev/)
 
 ### Example
+
+This is a simple ping-pong example using slash commands.
 
 ```c++
 #include <dpp/dpp.h>
@@ -52,7 +55,7 @@ int main() {
         if (dpp::run_once<struct register_bot_commands>()) {
             bot.guild_command_create(
                 dpp::slashcommand("ping", "Ping pong!", bot.me.id),
-                MY_GUILD_ID
+                GUILD_ID
             );
         }
     });

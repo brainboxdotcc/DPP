@@ -57,8 +57,11 @@ If you are having trouble setting up CMake, you can try [our template bot](https
 
 To build on windows follow these steps *exactly*. The build process depends on specific libraries being installed on your system in specific locations.
 
-\note **You do not need to build a copy from source** -- we have done this for you. Unless you consider yourself an **advanced user** you should [obtain a pre-made visual studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/) and completely skip this guide!
+## Wait a minute! Read this first!
 
+\warning **You do not need to follow this tutorial unless you plan to contribute to or modify the library itself**. Unless you consider yourself an **advanced user** with a specific **requirement to build from source** you should [obtain a pre-made visual studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/) and completely skip this guide! Instead, read \ref build-a-discord-bot-windows-visual-studio.
+
+## If you are absolutely sure you need this guide, read on:
 
 1. Make sure you have Visual Studio 2019 or Visual Studio 2022. The Community, Professional or Enterprise versions all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
 2. Check out the DPP project source using git

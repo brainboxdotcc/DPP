@@ -21,9 +21,10 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 
-#define event_decl(x) class x : public event { public: virtual void handle(dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
+#define event_decl(x,wstype) /** @brief Internal event handler for wstype websocket events. Called for each websocket message of this type. @internal */ \
+	class x : public event { public: virtual void handle(dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
 
 namespace dpp { 
 
@@ -49,96 +50,96 @@ public:
 };
 
 /* Internal logger */
-event_decl(logger);
+event_decl(logger,LOG);
 
 /* Guilds */
-event_decl(guild_create);
-event_decl(guild_update);
-event_decl(guild_delete);
-event_decl(guild_ban_add);
-event_decl(guild_ban_remove);
-event_decl(guild_emojis_update);
-event_decl(guild_integrations_update);
-event_decl(guild_join_request_delete);
-event_decl(guild_stickers_update);
+event_decl(guild_create,GUILD_CREATE);
+event_decl(guild_update,GUILD_UPDATE);
+event_decl(guild_delete,GUILD_DELETE);
+event_decl(guild_ban_add,GUILD_BAN_ADD);
+event_decl(guild_ban_remove,GUILD_BAN_REMOVE);
+event_decl(guild_emojis_update,GUILD_EMOJIS_UPDATE);
+event_decl(guild_integrations_update,GUILD_INTEGRATIONS_UPDATE);
+event_decl(guild_join_request_delete,GUILD_JOIN_REQUEST_DELETE);
+event_decl(guild_stickers_update,GUILD_STICKERS_UPDATE);
 
 /* Stage channels */
-event_decl(stage_instance_create);
-event_decl(stage_instance_update);
-event_decl(stage_instance_delete);
+event_decl(stage_instance_create,STAGE_INSTANCE_CREATE);
+event_decl(stage_instance_update,STAGE_INSTANCE_UPDATE);
+event_decl(stage_instance_delete,STAGE_INSTANCE_DELETE);
 
 /* Guild members */
-event_decl(guild_member_add);
-event_decl(guild_member_remove);
-event_decl(guild_members_chunk);
-event_decl(guild_member_update);
+event_decl(guild_member_add,GUILD_MEMBER_ADD);
+event_decl(guild_member_remove,GUILD_MEMBER_REMOVE);
+event_decl(guild_members_chunk,GUILD_MEMBERS_CHUNK);
+event_decl(guild_member_update,GUILD_MEMBERS_UPDATE);
 
 /* Guild roles */
-event_decl(guild_role_create);
-event_decl(guild_role_update);
-event_decl(guild_role_delete);
+event_decl(guild_role_create,GUILD_ROLE_CREATE);
+event_decl(guild_role_update,GUILD_ROLE_UPDATE);
+event_decl(guild_role_delete,GUILD_ROLE_DELETE);
 
 /* Session state */
-event_decl(resumed);
-event_decl(ready);
+event_decl(resumed,RESUMED);
+event_decl(ready,READY);
 
 /* Channels */
-event_decl(channel_create);
-event_decl(channel_update);
-event_decl(channel_delete);
-event_decl(channel_pins_update);
+event_decl(channel_create,CHANNEL_CREATE);
+event_decl(channel_update,CHANNEL_UPDATE);
+event_decl(channel_delete,CHANNEL_DELETE);
+event_decl(channel_pins_update,CHANNEL_PINS_UPDATE);
 
 /* Threads */
-event_decl(thread_create);
-event_decl(thread_update);
-event_decl(thread_delete);
-event_decl(thread_list_sync);
-event_decl(thread_member_update);
-event_decl(thread_members_update);
+event_decl(thread_create,THREAD_CREATE);
+event_decl(thread_update,THREAD_UPDATE);
+event_decl(thread_delete,THREAD_DELETE);
+event_decl(thread_list_sync,THREAD_LIST_SYNC);
+event_decl(thread_member_update,THREAD_MEMBER_UPDATE);
+event_decl(thread_members_update,THREAD_MEMBERS_UPDATE);
 
 /* Messages */
-event_decl(message_create);
-event_decl(message_update);
-event_decl(message_delete);
-event_decl(message_delete_bulk);
+event_decl(message_create,MESSAGE_CREATE);
+event_decl(message_update,MESSAGE_UPDATE);
+event_decl(message_delete,MESSAGE_DELETE);
+event_decl(message_delete_bulk,MESSAGE_DELETE_BULK);
 
 /* Presence/typing */
-event_decl(presence_update);
-event_decl(typing_start);
+event_decl(presence_update,PRESENCE_UPDATE);
+event_decl(typing_start,TYPING_START);
 
 /* Users (outside of guild) */
-event_decl(user_update);
+event_decl(user_update,USER_UPDATE);
 
 /* Message reactions */
-event_decl(message_reaction_add);
-event_decl(message_reaction_remove);
-event_decl(message_reaction_remove_all);
-event_decl(message_reaction_remove_emoji);
+event_decl(message_reaction_add,MESSAGE_REACTION_ADD);
+event_decl(message_reaction_remove,MESSAGE_REACTION_REMOVE);
+event_decl(message_reaction_remove_all,MESSAGE_REACTION_REMOVE_ALL);
+event_decl(message_reaction_remove_emoji,MESSAGE_REACTION_REMOVE_EMOJI);
 
 /* Invites */
-event_decl(invite_create);
-event_decl(invite_delete);
+event_decl(invite_create,INVITE_CREATE);
+event_decl(invite_delete,INVITE_DELETE);
 
 /* Voice */
-event_decl(voice_state_update);
-event_decl(voice_server_update);
+event_decl(voice_state_update,VOICE_STATE_UPDATE);
+event_decl(voice_server_update,VOICE_SERVER_UPDATE);
 
 /* Webhooks */
-event_decl(webhooks_update);
+event_decl(webhooks_update,WEBHOOKS_UPDATE);
 
 /* Application commands */
-event_decl(interaction_create);
+event_decl(interaction_create,INTERACTION_CREATE);
 
 /* Integrations */
-event_decl(integration_create);
-event_decl(integration_update);
-event_decl(integration_delete);
+event_decl(integration_create,INTEGRATION_CREATE);
+event_decl(integration_update,INTEGRATION_UPDATE);
+event_decl(integration_delete,INTEGRATION_DELETE);
 
 /* Scheduled events */
-event_decl(guild_scheduled_event_create);
-event_decl(guild_scheduled_event_update);
-event_decl(guild_scheduled_event_delete);
-event_decl(guild_scheduled_event_user_add);
-event_decl(guild_scheduled_event_user_remove);
+event_decl(guild_scheduled_event_create,GUILD_SCHEDULED_EVENT_CREATE);
+event_decl(guild_scheduled_event_update,GUILD_SCHEDULED_EVENT_UPDATE);
+event_decl(guild_scheduled_event_delete,GUILD_SCHEDULED_EVENT_DELETE);
+event_decl(guild_scheduled_event_user_add,GUILD_SCHEDULED_EVENT_USER_ADD);
+event_decl(guild_scheduled_event_user_remove,GUILD_SCHEDULED_EVENT_USER_REMOVE);
 
 }};

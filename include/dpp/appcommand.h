@@ -27,7 +27,8 @@
 #include <dpp/role.h>
 #include <dpp/user.h>
 #include <variant>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -85,7 +86,7 @@ typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, doub
  * meaning it can hold different potential types (see dpp::command_value)
  * that you can retrieve with std::get().
  */
-struct DPP_EXPORT command_option_choice {
+struct DPP_EXPORT command_option_choice : public json_interface<command_option_choice>  {
 	std::string name;	//!< Option name (1-32 chars)
 	command_value value;	//!< Option value
 
@@ -93,6 +94,8 @@ struct DPP_EXPORT command_option_choice {
 	 * @brief Construct a new command option choice object
 	 */
 	command_option_choice() = default;
+
+	virtual ~command_option_choice() = default;
 
 	/**
 	 * @brief Construct a new command option choice object
@@ -134,7 +137,7 @@ typedef std::variant<std::monostate, int64_t, double> command_option_range;
  * Adding options acts like sub-commands and can contain more
  * options.
  */
-struct DPP_EXPORT command_option {
+struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	command_option_type type;                    //!< Option type (what type of value is accepted)
 	std::string name;                            //!< Option name (1-32 chars)
 	std::string description;                     //!< Option description (1-100 chars)
@@ -152,6 +155,8 @@ struct DPP_EXPORT command_option {
 	 * @brief Construct a new command option object
 	 */
 	command_option() = default;
+
+	virtual ~command_option() = default;
 
 	/**
 	 * @brief Construct a new command option object
@@ -219,7 +224,7 @@ struct DPP_EXPORT command_option {
 	 * @param j JSON to fill from
 	 * @return command_option& Reference to self
 	 */
-	command_option& fill_from_json(nlohmann::json* j);
+	 command_option& fill_from_json(nlohmann::json* j);
 };
 
 /**
@@ -257,7 +262,7 @@ enum interaction_response_type {
  *
  * `mymessage.flags |= dpp::m_ephemeral;`
  */
-struct DPP_EXPORT interaction_response {
+struct DPP_EXPORT interaction_response : public json_interface<interaction_response>   {
 
 	/**
 	 * @brief Response type from dpp::interaction_response_type.
@@ -310,7 +315,7 @@ struct DPP_EXPORT interaction_response {
 	 *
 	 * @return std::string JSON string
 	 */
-	virtual std::string build_json() const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Add a command option choice
@@ -334,7 +339,7 @@ struct DPP_EXPORT interaction_response {
  * components are displayed on a form (the same component structure as within a dpp::message).
  * When the user submits the form an on_form_submit event is dispatched to any listeners.
  */
-struct DPP_EXPORT interaction_modal_response : public interaction_response {
+struct DPP_EXPORT interaction_modal_response : public interaction_response, public json_interface<interaction_modal_response> {
 private:
 	size_t current_row;
 public:
@@ -406,14 +411,15 @@ public:
 	 * @param j JSON to fill from
 	 * @return interaction_response& Reference to self
 	 */
-	interaction_modal_response& fill_from_json(nlohmann::json* j);
+	 interaction_modal_response& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build a json string for this object
+	 * @param with_id include id in json output
 	 *
 	 * @return std::string JSON string
 	 */
-	virtual std::string build_json() const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Destroy the interaction modal response object
@@ -507,8 +513,8 @@ struct DPP_EXPORT command_interaction {
 	snowflake id;                              //!< the ID of the invoked command
 	std::string name;                          //!< the name of the invoked command
 	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
-    slashcommand_contextmenu_type type;        //!< type of the command interaction
-    dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions. e.g. user id or message id whom clicked or tapped with the context menu https://discord.com/developers/docs/interactions/application-commands#user-commands
+	slashcommand_contextmenu_type type;        //!< type of the command interaction
+	dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions. e.g. user id or message id whom clicked or tapped with the context menu https://discord.com/developers/docs/interactions/application-commands#user-commands
 };
 
 /**
@@ -583,7 +589,7 @@ void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
  * @brief An interaction represents a user running a command and arrives
  * via the dpp::cluster::on_interaction_create event.
  */
-class DPP_EXPORT interaction : public managed {
+class DPP_EXPORT interaction : public managed, public json_interface<interaction>  {
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
 	uint8_t	type;                                               //!< the type of interaction
@@ -605,6 +611,8 @@ public:
 	 * @brief Construct a new interaction object
 	 */
 	interaction();
+
+	virtual ~interaction() = default;
 
 	/**
 	 * @brief Get the command interaction object
@@ -688,7 +696,7 @@ enum command_permission_type {
  * @brief Application command permissions allow you to enable or
  * disable commands for specific users or roles within a guild
  */
-class DPP_EXPORT command_permission {
+class DPP_EXPORT command_permission : public json_interface<command_permission>   {
 public:
 	snowflake id;                  //!< the ID of the role or user
 	command_permission_type type;  //!< the type of permission
@@ -698,6 +706,8 @@ public:
 	 * @brief Construct a new command permission object
 	 */
 	command_permission() = default;
+
+	virtual ~command_permission() = default;
 
 	/**
 	 * @brief Construct a new command permission object
@@ -730,7 +740,7 @@ void to_json(nlohmann::json& j, const command_permission& cp);
 /**
  * @brief Returned when fetching the permissions for a command in a guild.
  */
-class DPP_EXPORT guild_command_permissions {
+class DPP_EXPORT guild_command_permissions : public json_interface<guild_command_permissions>  {
 public:
 	snowflake id;                                 //!< the id of the command
 	snowflake application_id;                     //!< the id of the application the command belongs to
@@ -742,6 +752,8 @@ public:
 	 */
 	guild_command_permissions();
 
+	virtual ~guild_command_permissions() = default;
+
 	/**
 	 * @brief Fill object properties from JSON
 	 *
@@ -749,6 +761,7 @@ public:
 	 * @return guild_command_permissions& Reference to self
 	 */
 	guild_command_permissions &fill_from_json(nlohmann::json *j);
+
 };
 
 /**
@@ -765,7 +778,7 @@ void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
  */
-class DPP_EXPORT slashcommand : public managed {
+class DPP_EXPORT slashcommand : public managed, public json_interface<slashcommand>  {
 public:
 	/**
 	 * @brief Application id (usually matches your bots id)
@@ -894,7 +907,7 @@ public:
 	 * @param j JSON to fill from
 	 * @return slashcommand& Reference to self
 	 */
-	slashcommand& fill_from_json(nlohmann::json* j);
+	 slashcommand& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build a json string for this object
@@ -902,7 +915,7 @@ public:
 	 * @param with_id True if to include the ID in the JSON
 	 * @return std::string JSON string
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 };
 
 /**

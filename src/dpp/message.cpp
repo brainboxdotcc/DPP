@@ -57,6 +57,12 @@ component& component::fill_from_json(nlohmann::json* j) {
 		style = static_cast<component_style>(int8_not_null(j, "style"));
 		custom_id = string_not_null(j, "custom_id");
 		disabled = bool_not_null(j, "disabled");
+		if (j->contains("emoji")) {
+			json emo = (*j)["emoji"];
+			emoji.id = snowflake_not_null(&emo, "id");
+			emoji.name = string_not_null(&emo, "name");
+			emoji.animated = bool_not_null(&emo, "animated");
+		}
 	} else if (type == cot_selectmenu) {
 		label = "";
 		custom_id = string_not_null(j, "custom_id");
@@ -304,7 +310,7 @@ select_option& select_option::set_animated(bool anim) {
 
 
 component& component::set_placeholder(const std::string &_placeholder) {
-	placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
+	placeholder = dpp::utility::utf8substr(_placeholder, 0, 150);
 	return *this;
 }
 
@@ -695,7 +701,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 
 	j["allowed_mentions"] = json::object();
 	j["allowed_mentions"]["parse"] = json::array();
-	if (allowed_mentions.parse_everyone || allowed_mentions.parse_roles || allowed_mentions.parse_users || !allowed_mentions.replied_user || allowed_mentions.users.size() || allowed_mentions.roles.size()) {
+	if (allowed_mentions.parse_everyone || allowed_mentions.parse_roles || allowed_mentions.parse_users || allowed_mentions.replied_user || allowed_mentions.users.size() || allowed_mentions.roles.size()) {
 		if (allowed_mentions.parse_everyone) {
 			j["allowed_mentions"]["parse"].push_back("everyone");
 		}
@@ -924,6 +930,12 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		json & el = (*d)["embeds"];
 		for (auto& e : el) {
 			this->embeds.emplace_back(embed(&e));
+		}
+	}
+	if (d->find("components") != d->end()) {
+		json & el = (*d)["components"];
+		for (auto& e : el) {
+			this->components.emplace_back(component().fill_from_json(&e));
 		}
 	}
 	this->content = string_not_null(d, "content");

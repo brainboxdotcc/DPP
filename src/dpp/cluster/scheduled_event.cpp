@@ -19,38 +19,23 @@
  *
  ************************************************************************************/
 #include <dpp/scheduled_event.h>
-#include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
 
 namespace dpp {
 
 void cluster::guild_events_get(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events?with_user_count=true", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			scheduled_event_map events;
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error()) {
-				for (auto & curr_event : j) {
-					events[snowflake_not_null(&curr_event, "id")] = scheduled_event().fill_from_json(&curr_event);
-				}
-			}
-			callback(confirmation_callback_t("scheduled_event_map", events, http));
-		}
-	});
+	rest_request_list<scheduled_event>(this, API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events?with_user_count=true", m_get, "", callback);
 }
 
 void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback, uint8_t limit, snowflake before, snowflake after) {
-	std::string append;
-	if (before) {
-		append += "&before=" + std::to_string(before);
-	}
-	if (after) {
-		append += "&after=" + std::to_string(after);
-	}
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "/users?with_member=true&limit=" + std::to_string(limit) + append, m_get, "", [callback, guild_id](json &j, const http_request_completion_t& http) {
+	std::string append = utility::make_url_parameters({
+		{"before", before},
+		{"after", after},
+	});
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "/users?with_member=true&limit=" + std::to_string(limit) + append, m_get, "", [this, callback, guild_id](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			event_member_map users;
-			confirmation_callback_t e("confirmation", confirmation(), http);
+			confirmation_callback_t e(this, confirmation(), http);
 			if (!e.is_error()) {
 				if (j.is_array()) {
 					for (auto & curr_user : j) {
@@ -62,41 +47,25 @@ void cluster::guild_event_users_get(snowflake guild_id, snowflake event_id, comm
 					}
 				}
 			}
-			callback(confirmation_callback_t("event_member_map", users, http));
+			callback(confirmation_callback_t(this, users, http));
 		}
 	});
 }
 
 void cluster::guild_event_create(const scheduled_event& event, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(event.guild_id), "/scheduled-events", m_post, event.build_json(false), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("scheduled_event", scheduled_event().fill_from_json(&j), http));
-		}
-	});
+	rest_request<scheduled_event>(this, API_PATH "/guilds", std::to_string(event.guild_id), "/scheduled-events", m_post, event.build_json(false), callback);
 }
 
 void cluster::guild_event_delete(snowflake event_id, snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id), m_delete, "", callback);
 }
 
 void cluster::guild_event_edit(const scheduled_event& event, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(event.guild_id), "/scheduled-events/" + std::to_string(event.id), m_patch, event.build_json(true), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("scheduled_event", scheduled_event().fill_from_json(&j), http));
-		}
-	});
+	rest_request<scheduled_event>(this, API_PATH "/guilds", std::to_string(event.guild_id), "/scheduled-events/" + std::to_string(event.id), m_patch, event.build_json(true), callback);
 }
 
 void cluster::guild_event_get(snowflake guild_id, snowflake event_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "?with_user_count=true", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("scheduled_event", scheduled_event().fill_from_json(&j), http));
-		}
-	});
+	rest_request<scheduled_event>(this, API_PATH "/guilds", std::to_string(guild_id), "/scheduled-events/" + std::to_string(event_id) + "?with_user_count=true", m_get, "", callback);
 }
 
 };

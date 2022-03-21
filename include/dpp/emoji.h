@@ -23,8 +23,9 @@
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -47,7 +48,7 @@ enum emoji_flags : uint8_t {
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class DPP_EXPORT emoji : public managed {
+class DPP_EXPORT emoji : public managed, public json_interface<emoji>  {
 public:
 	/**
 	 * @brief Emoji name
@@ -99,7 +100,7 @@ public:
 	 * @param with_id include the id in the JSON
 	 * @return std::string json data
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Emoji requires colons

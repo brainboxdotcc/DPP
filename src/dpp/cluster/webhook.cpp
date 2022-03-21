@@ -19,62 +19,37 @@
  *
  ************************************************************************************/
 #include <dpp/webhook.h>
-#include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
 
 namespace dpp {
 
 void cluster::create_webhook(const class webhook &w, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(w.channel_id), "webhooks", m_post, w.build_json(false), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
-		}
-	});
+	rest_request<webhook>(this, API_PATH "/channels", std::to_string(w.channel_id), "webhooks", m_post, w.build_json(false), callback);
 }
 
 
 void cluster::delete_webhook(snowflake webhook_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/webhooks", std::to_string(webhook_id), "", m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/webhooks", std::to_string(webhook_id), "", m_delete, "", callback);
 }
 
 
 void cluster::delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/" + std::to_string(message_id), m_delete, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/" + std::to_string(message_id), m_delete, "", callback);
 }
 
 
 void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/webhooks", std::to_string(webhook_id), dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("confirmation", confirmation(), http));
-		}
-	});
+	rest_request<confirmation>(this, API_PATH "/webhooks", std::to_string(webhook_id), utility::url_encode(token), m_get, "", callback);
 }
 
 
 void cluster::edit_webhook(const class webhook& wh, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), "", m_patch, wh.build_json(true), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
-		}
-	});
+	rest_request<webhook>(this, API_PATH "/webhooks", std::to_string(wh.id), "", m_patch, wh.build_json(true), callback);
 }
 
 
 void cluster::edit_webhook_message(const class webhook &wh, const struct message& m, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
-		}
-	});
+	rest_request<message>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(false), callback);
 }
 
 
@@ -83,90 +58,41 @@ void cluster::edit_webhook_with_token(const class webhook& wh, command_completio
 	if (jwh.find("channel_id") != jwh.end()) {
 		jwh.erase(jwh.find("channel_id"));
 	}
-	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(wh.token), m_patch, jwh.dump(), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
-		}
-	});
+	rest_request<webhook>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(wh.token), m_patch, jwh.dump(), callback);
 }
 
 
 void cluster::execute_webhook(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, command_completion_event_t callback) {
-	std::string parameters;
-	if (wait) {
-		parameters.append("&wait=true");
-	}
-	if (thread_id) {
-		parameters.append("&thread_id=" + std::to_string(thread_id));
-	}
-	if (!parameters.empty()) {
-		parameters[0] = '?';
-	}
-	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(!wh.token.empty() ? wh.token: token) + parameters, m_post, m.build_json(false), [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
-		}
+	std::string parameters = utility::make_url_parameters({
+		{"wait", wait},
+		{"thread_id", thread_id},
 	});
+	rest_request<message>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + parameters, m_post, m.build_json(false), callback);
 }
 
 
 void cluster::get_channel_webhooks(snowflake channel_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/channels", std::to_string(channel_id), "webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			webhook_map webhooks;
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error()) {
-				for (auto & curr_webhook: j) {
-					webhooks[snowflake_not_null(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
-				}
-			}
-			callback(confirmation_callback_t("webhook_map", webhooks, http));
-		}
-	});
+	rest_request_list<webhook>(this, API_PATH "/channels", std::to_string(channel_id), "webhooks", m_get, "", callback);
 }
 
 
 void cluster::get_guild_webhooks(snowflake guild_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "webhooks", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			webhook_map webhooks;
-			confirmation_callback_t e("confirmation", confirmation(), http);
-			if (!e.is_error()) {
-				for (auto & curr_webhook: j) {
-					webhooks[snowflake_not_null(&curr_webhook, "id")] = webhook().fill_from_json(&curr_webhook);
-				}
-			}
-			callback(confirmation_callback_t("webhook_map", webhooks, http));
-		}
-	});
+	rest_request_list<webhook>(this, API_PATH "/guilds", std::to_string(guild_id), "webhooks", m_get, "", callback);
 }
 
 
 void cluster::get_webhook(snowflake webhook_id, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/webhooks", std::to_string(webhook_id), "", m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
-		}
-	});
+	rest_request<webhook>(this, API_PATH "/webhooks", std::to_string(webhook_id), "", m_get, "", callback);
 }
 
 
-void cluster::get_webhook_message(const class webhook &wh, command_completion_event_t callback)
-{
-	this->post_rest(API_PATH "/webhooks", std::to_string(wh.id), dpp::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/@original", m_get, "", [callback](json &j, const http_request_completion_t &http){
-		if (callback){
-			callback(confirmation_callback_t("message", message().fill_from_json(&j), http));
-		}
-	});
+void cluster::get_webhook_message(const class webhook &wh, command_completion_event_t callback) {
+	rest_request<message>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/@original", m_get, "", callback);
 }
 
 
 void cluster::get_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/webhooks", std::to_string(webhook_id), dpp::url_encode(token), m_get, "", [callback](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t("webhook", webhook().fill_from_json(&j), http));
-		}
-	});
+	rest_request<webhook>(this, API_PATH "/webhooks", std::to_string(webhook_id), utility::url_encode(token), m_get, "", callback);
 }
 
 };

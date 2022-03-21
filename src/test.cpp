@@ -25,6 +25,8 @@ int main()
 {
 	std::string token(get_token());
 
+	std::cout << "Running unit tests. Guild ID: " << TEST_GUILD_ID << " Text Channel ID: " << TEST_TEXT_CHANNEL_ID << " VC ID: " << TEST_VC_ID << " User ID: " << TEST_USER_ID << " Event ID: " << TEST_EVENT_ID << "\n";
+
 	std::string test_to_escape = "*** _This is a test_ ***\n```cpp\n\
 int main() {\n\
     /* Comment */\n\
@@ -56,6 +58,9 @@ int main\\(\\) {\n\
 };\n\
 \\`\\`\\`\n\
 Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* block\\`\n");
+
+	set_test("URLENC", false);
+	set_test("URLENC", dpp::utility::url_encode("ABC123_+\\|$*/AAA[]😄") == "ABC123_%2B%5C%7C%24%2A%2FAAA%5B%5D%F0%9F%98%84");
 
 	dpp::http_connect_info hci;
 	set_test("HOSTINFO", false);
@@ -231,18 +236,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 											if (!callback.is_error()) {
 												set_test("MESSAGEDELETE", true);
-												set_test("CACHE", false);
-
-												dpp::guild* g = dpp::find_guild(TEST_GUILD_ID);
-
-												if (g) {
-													set_test("CACHE", true);
-													set_test("VOICECONN", false);
-													dpp::discord_client* s = bot.get_shard(0);
-													s->connect_voice(g->id, TEST_VC_ID, false, false);
-												} else {
-													set_test("CACHE", false);
-												}
 											} else {
 												set_test("MESSAGEDELETE", false);
 											}
@@ -251,6 +244,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 										set_test("MESSAGECREATE", false);
 									}
 								});
+							} else {
+								set_test("DELCOMMAND", false);
 							}
 						});
 					}
@@ -300,11 +295,26 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
+		set_test("SYNC", false);
+		dpp::message m = dpp::sync<dpp::message>(&bot, &dpp::cluster::message_create, dpp::message(TEST_TEXT_CHANNEL_ID, "TEST"));
+		set_test("SYNC", m.content == "TEST");
+
 		bot.on_guild_create([&](const dpp::guild_create_t & event) {
 			if (event.created->id == TEST_GUILD_ID) {
 				set_test("GUILDCREATE", true);
 				if (event.presences.size() && event.presences.begin()->second.user_id > 0) {
 					set_test("PRESENCE", true);
+				}
+				dpp::guild* g = dpp::find_guild(TEST_GUILD_ID);
+				set_test("CACHE", false);
+				if (g) {
+					set_test("CACHE", true);
+					set_test("VOICECONN", false);
+					dpp::discord_client* s = bot.get_shard(0);
+					s->connect_voice(g->id, TEST_VC_ID, false, false);
+				}
+				else {
+					set_test("CACHE", false);
 				}
 			}
 		});
@@ -341,10 +351,12 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						if (m.channel_id == ch_id) {
 							set_test("MSGCREATESEND", true);
 						} else {
+							bot.log(dpp::ll_debug, cc.http_info.body);
 							set_test("MSGCREATESEND", false);
 						}
 						bot.message_delete(m.id, m.channel_id);
-					} else { 
+					} else {
+						bot.log(dpp::ll_debug, cc.http_info.body);
 						set_test("MSGCREATESEND", false);
 					}
 				});
@@ -367,6 +379,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							}
 							set_test("MSGCREATEREPLY", true);
 						} else {
+							bot.log(dpp::ll_debug, cc.http_info.body);
 							set_test("MSGCREATEREPLY", false);
 						}
 						bot.message_delete(m.id, m.channel_id);

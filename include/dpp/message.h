@@ -27,7 +27,8 @@
 #include <dpp/guild.h>
 #include <optional>
 #include <variant>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -202,7 +203,7 @@ struct DPP_EXPORT select_option {
  * guilds. The beta is **closed**. When this feature is
  * released, then the functionality will work correctly.
  */
-class DPP_EXPORT component {
+class DPP_EXPORT component : public json_interface<component> {
 public:
 	/** Component type, either a button or action row
 	 */
@@ -236,7 +237,7 @@ public:
 	 */
 	std::string url;
 
-	/** Placeholder text for select menus and text inputs (max 100 characters)
+	/** Placeholder text for select menus and text inputs (max 150 characters)
 	 */
 	std::string placeholder;
 
@@ -306,7 +307,7 @@ public:
 
 	/** Destructor
 	 */
-	~component() = default;
+	virtual ~component() = default;
 
 	/**
 	 * @brief Set the type of the component. Button components
@@ -385,7 +386,7 @@ public:
 	/**
 	 * @brief Set the placeholder
 	 * 
-	 * @param placeholder placeholder string. It will be truncated to the maximum length of 100 UTF-8 characters.
+	 * @param placeholder placeholder string. It will be truncated to the maximum length of 150 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
 	component& set_placeholder(const std::string &placeholder);
@@ -609,7 +610,7 @@ struct DPP_EXPORT embed {
 
 	 /** Set the footer of the embed. Returns the embed itself so these method calls may be "chained"
 	  * @param text string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
-	  * @param icon_url url to set as footer icon url
+	  * @param icon_url an url to set as footer icon url
 	  * @return A reference to self
 	  */
 	embed& set_footer(const std::string& text, const std::string& icon_url);
@@ -786,7 +787,7 @@ enum sticker_format : uint8_t {
 /**
  * @brief Represents stickers received in messages
  */
-struct DPP_EXPORT sticker : public managed {
+struct DPP_EXPORT sticker : public managed, public json_interface<sticker> {
 	/** Optional: for standard stickers, id of the pack the sticker is from
 	 */
 	snowflake	pack_id;
@@ -827,6 +828,8 @@ struct DPP_EXPORT sticker : public managed {
 	 */
 	sticker();
 
+	virtual ~sticker() = default;
+
 	/** Read class values from json object
 	 * @param j A json object to read from
 	 * @return A reference to self
@@ -837,7 +840,7 @@ struct DPP_EXPORT sticker : public managed {
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	std::string build_json(bool with_id = true) const;
+	virtual std::string build_json(bool with_id = true) const;
 
 	/**
 	 * @brief Get the sticker url
@@ -868,7 +871,7 @@ struct DPP_EXPORT sticker : public managed {
 /**
  * @brief Represents a sticker pack (the built in groups of stickers that all nitro users get to use)
  */
-struct DPP_EXPORT sticker_pack : public managed {
+struct DPP_EXPORT sticker_pack : public managed, public json_interface<sticker_pack> {
 	/// the stickers in the pack
 	std::map<snowflake, sticker> stickers;
 	/// name of the sticker pack
@@ -887,6 +890,8 @@ struct DPP_EXPORT sticker_pack : public managed {
 	 */
 	sticker_pack();
 
+	virtual ~sticker_pack() = default;
+
 	/** Read class values from json object
 	 * @param j A json object to read from
 	 * @return A reference to self
@@ -897,7 +902,7 @@ struct DPP_EXPORT sticker_pack : public managed {
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	std::string build_json(bool with_id = true) const;
+	virtual std::string build_json(bool with_id = true) const;
 
 };
 
@@ -962,17 +967,17 @@ enum message_type {
 	/// Discovery grace period warning 2
 	mt_guild_discovery_grace_period_final_warning	= 17,
 	/// Thread Created 
-	mt_thread_created			= 18,
+	mt_thread_created				= 18,
 	/// Reply
 	mt_reply					= 19,
 	/// Application command
 	mt_application_command				= 20,
 	/// Thread starter message
-	mt_thread_starter_message	= 21,
+	mt_thread_starter_message			= 21,
 	/// Invite reminder
 	mt_guild_invite_reminder			= 22,
 	/// Context Menu Command
-	mt_context_menu_command 	= 23
+	mt_context_menu_command 			= 23
 };
 
 /**
@@ -1161,7 +1166,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Destroy the message object
 	 */
-	~message();
+	virtual ~message();
 
 	/**
 	 * @brief Construct a new message object with a channel and content
