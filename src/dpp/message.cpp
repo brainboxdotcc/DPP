@@ -145,6 +145,15 @@ component& component::set_disabled(bool disable)
 	return *this;
 }
 
+component& component::set_required(bool require)
+{
+	if (type == cot_action_row) {
+		set_type(cot_button);
+	}
+	required = require;
+	return *this;
+}
+
 component& component::set_emoji(const std::string& name, dpp::snowflake id, bool animated)
 {
 	if (type == cot_action_row) {

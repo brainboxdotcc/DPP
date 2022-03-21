@@ -384,6 +384,15 @@ public:
 	component& set_disabled(bool disable);
 
 	/**
+	 * @brief Set if this component is required.
+	 * Defaults to false on all created components.
+	 *
+	 * @param disable True to require this, false to make it optional.
+	 * @return component& Reference to self
+	 */
+	component& set_required(bool require);
+
+	/**
 	 * @brief Set the placeholder
 	 * 
 	 * @param placeholder placeholder string. It will be truncated to the maximum length of 150 UTF-8 characters.
