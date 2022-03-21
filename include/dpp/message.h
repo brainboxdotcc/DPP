@@ -387,7 +387,7 @@ public:
 	 * @brief Set if this component is required.
 	 * Defaults to false on all created components.
 	 *
-	 * @param disable True to require this, false to make it optional.
+	 * @param require True to require this, false to make it optional.
 	 * @return component& Reference to self
 	 */
 	component& set_required(bool require);
