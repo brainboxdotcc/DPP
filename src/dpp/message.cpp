@@ -317,9 +317,8 @@ select_option& select_option::set_animated(bool anim) {
 	return *this;
 }
 
-
 component& component::set_placeholder(const std::string &_placeholder) {
-	placeholder = dpp::utility::utf8substr(_placeholder, 0, 150);
+	placeholder = dpp::utility::utf8substr(_placeholder, 0, (this->type == cot_text) ? 100 : 150);
 	return *this;
 }
 

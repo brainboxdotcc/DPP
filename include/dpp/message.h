@@ -237,7 +237,7 @@ public:
 	 */
 	std::string url;
 
-	/** Placeholder text for select menus and text inputs (max 150 characters)
+	/** Placeholder text for select menus and text inputs (max 150 characters for select menus, 100 characters for text inputs)
 	 */
 	std::string placeholder;
 
