@@ -93,6 +93,16 @@ component& component::add_component(const component& c)
 component& component::set_type(component_type ct)
 {
 	type = ct;
+	if (type == cot_text || type == cot_button) {
+		label = dpp::utility::utf8substr(label, 0, 80);
+	} else if (type == cot_selectmenu) {
+		label = dpp::utility::utf8substr(label, 0, 100);
+	}
+	if(type == cot_text) {
+		placeholder = dpp::utility::utf8substr(placeholder, 0, 100);
+	} else if (type == cot_selectmenu) {
+		placeholder = dpp::utility::utf8substr(placeholder, 0, 150);
+	}
 	return *this;
 }
 
@@ -101,7 +111,22 @@ component& component::set_label(const std::string &l)
 	if (type == cot_action_row) {
 		set_type(cot_button);
 	}
-	label = utility::utf8substr(l, 0, 80);
+	if (type == cot_text || type == cot_button) {
+		label = dpp::utility::utf8substr(l, 0, 80);
+	} else if (type == cot_selectmenu) {
+		label = dpp::utility::utf8substr(l, 0, 100);
+	} else {
+		label = l;
+	}
+	return *this;
+}
+
+component& component::set_value(const std::string &val)
+{
+	if (type == cot_action_row) {
+		set_type(cot_text);
+	}
+	value = dpp::utility::utf8substr(val, 0, 4000);
 	return *this;
 }
 
@@ -197,6 +222,7 @@ void to_json(json& j, const component& cp) {
 	if (cp.type == cot_text) {
  		j["type"] = cp.type;
 		j["label"] = cp.label;
+		j["value"] = std::get<std::string>(cp.value);
 		j["required"] = cp.required;
 		j["style"] = int(cp.text_style);
 		if (!cp.custom_id.empty()) {
@@ -236,7 +262,6 @@ void to_json(json& j, const component& cp) {
 			j["emoji"]["name"] = cp.emoji.name;
 		}
 	} else if (cp.type == cot_selectmenu) {
-
 		j["type"] = cp.type;
 		j["custom_id"] = cp.custom_id;
 		//j["disabled"] = cp.disabled;
@@ -318,7 +343,13 @@ select_option& select_option::set_animated(bool anim) {
 }
 
 component& component::set_placeholder(const std::string &_placeholder) {
-	placeholder = dpp::utility::utf8substr(_placeholder, 0, (this->type == cot_text) ? 100 : 150);
+	if(type == cot_text) {
+		placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
+	} else if (type == cot_selectmenu) {
+		placeholder = dpp::utility::utf8substr(_placeholder, 0, 150);
+	} else {
+		placeholder = _placeholder;
+	}
 	return *this;
 }
 
