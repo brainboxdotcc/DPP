@@ -36,6 +36,15 @@ int main() {\n\
 ```\n\
 Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 
+	set_test("COMPARISON", false);
+	dpp::user u1;
+	dpp::user u2;
+	dpp::user u3;
+	u1.id = u2.id = 666;
+	u3.id = 777;
+	set_test("COMPARISON", u1 == u2 && u1 != u3);
+
+
 	set_test("MD_ESC_1", false);
 	set_test("MD_ESC_2", false);
 	std::string escaped1 = dpp::utility::markdown_escape(test_to_escape);

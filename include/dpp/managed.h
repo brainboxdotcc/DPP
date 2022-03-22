@@ -53,6 +53,24 @@ namespace dpp {
 		 * The minimum possible value is the first second of 2015.
 		 */
 		double get_creation_time() const;
+
+		/**
+		 * @brief Comparison operator for comparing two managed objects by id
+		 * 
+		 * @param other Other object to compare against
+		 * @return true objects are the same id
+		 * @return false objects are not the same id
+		 */
+		bool operator==(const managed& other) const noexcept;
+
+		/**
+		 * @brief Comparison operator for comparing two managed objects by id
+		 * 
+		 * @param other Other object to compare against
+		 * @return true objects are not the same id
+		 * @return false objects are the same id
+		 */
+		bool operator!=(const managed& other) const noexcept;
 	};
 
 };

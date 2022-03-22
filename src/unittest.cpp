@@ -75,6 +75,7 @@ std::map<std::string, test_t> tests = {
 	{"MD_ESC_2", {"Markdown escaping (escape code block contents)", false, false}},
 	{"URLENC", {"URL encoding", false, false}},
 	{"SYNC", {"dpp::sync<T>()", false, false}},
+	{"COMPARISON", {"dpp::manged object comparison", false, false}},
 };
 
 double start = dpp::utility::time_f();

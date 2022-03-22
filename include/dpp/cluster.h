@@ -2315,6 +2315,21 @@ public:
 	void guild_member_delete(snowflake guild_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Remove (kick) a guild member with a reason
+	 *  
+	 * Remove a member from a guild. Requires `KICK_MEMBERS` permission.
+	 * Fires a `Guild Member Remove` Gateway event.
+	 * @see https://discord.com/developers/docs/resources/guild#remove-guild-member
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @param guild_id Guild ID to kick member from
+	 * @param user_id User ID to kick
+	 * @param reason Reason for kick
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_member_kick(snowflake guild_id, snowflake user_id, const std::string& reason = "", command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Add guild ban
 	 * 
 	 * Create a guild ban, and optionally delete previous messages sent by the banned user.
