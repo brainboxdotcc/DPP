@@ -224,7 +224,7 @@ void to_json(json& j, const component& cp) {
 		j["label"] = cp.label;
 		j["required"] = cp.required;
 		j["style"] = int(cp.text_style);
-		if (!cp.value.empty()) {
+		if (std::holds_alternative<std::string>(cp.value) && std::get<std::string>(cp.value).empty()) {
 			j["value"] = std::get<std::string>(cp.value);
 		}
 		if (!cp.custom_id.empty()) {
