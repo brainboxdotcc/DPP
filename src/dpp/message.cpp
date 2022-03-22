@@ -222,9 +222,11 @@ void to_json(json& j, const component& cp) {
 	if (cp.type == cot_text) {
  		j["type"] = cp.type;
 		j["label"] = cp.label;
-		j["value"] = std::get<std::string>(cp.value);
 		j["required"] = cp.required;
 		j["style"] = int(cp.text_style);
+		if (!cp.value.empty()) {
+			j["value"] = std::get<std::string>(cp.value);
+		}
 		if (!cp.custom_id.empty()) {
 			j["custom_id"] = cp.custom_id;
 		}
