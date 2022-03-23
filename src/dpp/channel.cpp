@@ -87,6 +87,11 @@ channel& channel::set_topic(const std::string& topic) {
 	return *this;
 }
 
+channel& channel::set_guild_id(const snowflake guild_id) {
+	this->guild_id = guild_id;
+	return *this;
+}
+
 channel& channel::set_parent_id(const snowflake parent_id) {
 	this->parent_id = parent_id;
 	return *this;
