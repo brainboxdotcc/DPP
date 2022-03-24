@@ -58,6 +58,7 @@ $cppcontent .= <<<EOT
 #include <dpp/snowflake.h>
 #include <dpp/cluster.h>
 
+namespace dpp {
 
 EOT;
 
@@ -120,6 +121,8 @@ $content .= <<<EOT
 
 EOT;
 $cppcontent .= <<<EOT
+
+};
 
 /* End of auto-generated definitions */
 

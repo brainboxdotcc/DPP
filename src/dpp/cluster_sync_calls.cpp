@@ -31,6 +31,8 @@
 #include <dpp/snowflake.h>
 #include <dpp/cluster.h>
 
+namespace dpp {
+
 slashcommand_map cluster::global_bulk_command_create_sync(const std::vector<slashcommand> &commands) {
 	return dpp::sync<slashcommand_map>(this, &cluster::global_bulk_command_create, commands);
 }
@@ -619,5 +621,6 @@ webhook cluster::get_webhook_with_token_sync(snowflake webhook_id, const std::st
 	return dpp::sync<webhook>(this, &cluster::get_webhook_with_token, webhook_id, token);
 }
 
+};
 
 /* End of auto-generated definitions */
