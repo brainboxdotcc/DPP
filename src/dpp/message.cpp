@@ -121,7 +121,7 @@ component& component::set_label(const std::string &l)
 	return *this;
 }
 
-component& component::set_value(const std::string &val)
+component& component::set_default_value(const std::string &val)
 {
 	if (type == cot_action_row) {
 		set_type(cot_text);

@@ -343,14 +343,14 @@ public:
 	component& set_label(const std::string &label);
 
 	/**
-	 * @brief Set the value of the modal component.
+	 * @brief Set the default value of the text input component.
 	 * For action rows, this field is ignored. Setting the
 	 * value will auto-set the type to dpp::cot_text.
 	 *
 	 * @param value Value text to set. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
-	component& set_value(const std::string &val);
+	component& set_default_value(const std::string &val);
 
 	/**
 	 * @brief Set the url for dpp::cos_link types.
