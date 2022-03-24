@@ -77,6 +77,12 @@ void cluster::guild_member_delete(snowflake guild_id, snowflake user_id, command
 }
 
 
+void cluster::guild_member_kick(snowflake guild_id, snowflake user_id, const std::string& reason, command_completion_event_t callback) {
+	set_audit_reason(reason);
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_delete, "", callback);
+}
+
+
 void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", callback);
 }

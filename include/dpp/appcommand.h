@@ -368,7 +368,7 @@ public:
 	 * @brief Construct a new interaction modal response object
 	 * 
 	 * @param _custom_id Custom ID of the modal form
-	 * @param _title Title of the modal form
+	 * @param _title Title of the modal form. It will be truncated to the maximum length of 45 UTF-8 characters.
 	 * @param _components Components to add to the modal form
 	 */
 	interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components = {});

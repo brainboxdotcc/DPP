@@ -300,6 +300,14 @@ public:
 	channel& set_position(const uint16_t position);
 
 	/**
+	 * @brief Set guild_id of this channel object
+	 *
+	 * @param guild_id Guild ID to set
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_guild_id(const snowflake guild_id);
+
+	/**
 	 * @brief Set parent_id of this channel object
 	 *
 	 * @param parent_id Parent ID to set
