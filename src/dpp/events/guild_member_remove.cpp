@@ -18,17 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/guild.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -48,20 +42,22 @@ void guild_member_remove::handle(discord_client* client, json &j, const std::str
 
 	dpp::guild_member_remove_t gmr(client, raw);
 
-	gmr.removing_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	gmr.removing_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 
 	if (client->creator->cache_policy.user_policy == dpp::cp_none) {
 		dpp::user u;
 		u.fill_from_json(&(d["user"]));
 		gmr.removed = &u;
-		if (client->creator->dispatch.guild_member_remove)
-			client->creator->dispatch.guild_member_remove(gmr);
+		if (!client->creator->on_guild_member_remove.empty()) {
+			client->creator->on_guild_member_remove.call(gmr);
+		}
 	} else {
 
-		gmr.removed = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));
+		gmr.removed = dpp::find_user(snowflake_not_null(&(d["user"]), "id"));
 
-		if (client->creator->dispatch.guild_member_remove)
-			client->creator->dispatch.guild_member_remove(gmr);
+		if (!client->creator->on_guild_member_remove.empty()) {
+			client->creator->on_guild_member_remove.call(gmr);
+		}
 
 		if (gmr.removing_guild && gmr.removed) {
 			auto i = gmr.removing_guild->members.find(gmr.removed->id);

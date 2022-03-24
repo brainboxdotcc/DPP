@@ -20,9 +20,15 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
+#include <dpp/queues.h>
+#include <dpp/snowflake.h>
+#include <dpp/managed.h>
+#include <dpp/user.h>
+#include <dpp/guild.h>
 #include <optional>
-#include <dpp/json_fwd.hpp>
+#include <variant>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -35,7 +41,19 @@ enum component_type : uint8_t {
 	/// Clickable button
 	cot_button = 2,
 	/// Select menu
-	cot_selectmenu = 3
+	cot_selectmenu = 3,
+	/// Text input
+	cot_text = 4,
+};
+
+/**
+ * @brief Types of text input
+ */
+enum text_style_type : uint8_t {
+	/// Intended for short single-line text.
+	text_short = 1,
+	/// Intended for much longer inputs.
+	text_paragraph = 2,
 };
 
 /**
@@ -54,24 +72,42 @@ enum component_style : uint8_t {
 	cos_link
 };
 
-struct CoreExport select_option {
+/**
+ * @brief An option for a select component
+ */
+struct DPP_EXPORT select_option {
+	/**
+	 * @brief Label for option
+	 */
 	std::string label;
+	/**
+	 * @brief Value for option
+	 */
 	std::string value;
+	/**
+	 * @brief Description of option
+	 */
 	std::string description;
+	/**
+	 * @brief True if option is the default option
+	 */
 	bool is_default;
-	/** Emoji definition. To set an emoji on your button
+	/**
+	 * @brief Emoji definition. To set an emoji on your button
 	 * you must set one of either the name or id fields.
 	 * The easiest way is to use the component::set_emoji
 	 * method.
 	 */
 	struct inner_select_emoji {
-		/** Set the name field to the name of the emoji.
+		/**
+		 * @brief Set the name field to the name of the emoji.
 		 * For built in unicode emojis, set this to the
 		 * actual unicode value of the emoji e.g. "😄"
 		 * and not for example ":smile:"
 		 */
 		std::string name;
-		/** The emoji ID value for emojis that are custom
+		/**
+		 * @brief The emoji ID value for emojis that are custom
 		 * ones belonging to a guild. The same rules apply
 		 * as with other emojis, that the bot must be on
 		 * the guild where the emoji resides and it must
@@ -79,26 +115,75 @@ struct CoreExport select_option {
 		 * lack of boosts etc)
 		 */
 		dpp::snowflake id = 0;
-		/** True if the emoji is animated. Only applies to
+		/**
+		 * @brief True if the emoji is animated. Only applies to
 		 * custom emojis.
 		 */
 		bool animated = false;
 	} emoji;
 
+	/**
+	 * @brief Construct a new select option object
+	 */
 	select_option();
 
+	/**
+	 * @brief Construct a new select option object
+	 * 
+	 * @param label Label of option
+	 * @param value Value of option
+	 * @param description Description of option
+	 */
 	select_option(const std::string &label, const std::string &value, const std::string &description = "");
 
+	/**
+	 * @brief Set the label
+	 * 
+	 * @param l the user-facing name of the option. It will be truncated to the maximum length of 100 UTF-8 characters.
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_label(const std::string &l);
 
+	/**
+	 * @brief Set the value
+	 * 
+	 * @param v value to set. It will be truncated to the maximum length of 100 UTF-8 characters.
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_value(const std::string &v);
 
+	/**
+	 * @brief Set the description
+	 * 
+	 * @param d description to set. It will be truncated to the maximum length of 100 UTF-8 characters.
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_description(const std::string &d);
-	
+
+	/**
+	 * @brief Set the emoji
+	 * 
+	 * @param n emoji name
+	 * @param id emoji id for custom emojis
+	 * @param animated true if animated emoji
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_emoji(const std::string &n, dpp::snowflake id = 0, bool animated = false);
 
+	/**
+	 * @brief Set the option as default
+	 * 
+	 * @param def true to set the option as default
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_default(bool def);
 
+	/**
+	 * @brief Set the emoji as animated
+	 * 
+	 * @param anim true if animated
+	 * @return select_option& reference to self for chaining
+	 */
 	select_option& set_animated(bool anim);
 };
 
@@ -118,17 +203,17 @@ struct CoreExport select_option {
  * guilds. The beta is **closed**. When this feature is
  * released, then the functionality will work correctly.
  */
-class CoreExport component {
+class DPP_EXPORT component : public json_interface<component> {
 public:
 	/** Component type, either a button or action row
 	 */
 	component_type type;
 
-	/** Sub commponents, buttons on an action row
+	/** Sub components, buttons on an action row
 	 */
 	std::vector<component> components;
 
-	/** Component label (for buttons).
+	/** Component label (for buttons, text inputs).
 	 * Maximum of 80 characters.
 	 */
 	std::string label;
@@ -137,7 +222,12 @@ public:
 	 */
 	component_style style;
 
-	/** Component id (for buttons).
+	/**
+	 * @brief Text style (for text inputs)
+	 */
+	text_style_type text_style;
+
+	/** Component id (for buttons, menus, text inputs).
 	 * Maximum of 100 characters.
 	 */
 	std::string custom_id;
@@ -147,7 +237,7 @@ public:
 	 */
 	std::string url;
 
-	/** Placeholder text for select menus
+	/** Placeholder text for select menus and text inputs (max 150 characters)
 	 */
 	std::string placeholder;
 
@@ -161,6 +251,14 @@ public:
 	 */
 	int32_t max_values;
 
+	/** Minimum length for text input (0-4000)
+	 */
+	int32_t min_length;
+
+	/** Maximum length for text input (1-4000)
+	 */
+	int32_t max_length;
+
 	/** Select options for select menus
 	 */
 	std::vector<select_option> options;
@@ -168,6 +266,15 @@ public:
 	/** Disabled flag (for buttons)
 	 */
 	bool disabled;
+
+	/** Whether the text input is required to be filled
+	 */
+	bool required;
+
+	/** Value of the modal (filled or valid when populated from an
+	 * on_form_submit event, or from the set_value function)
+	 */
+	std::variant<std::monostate, std::string, int64_t, double> value;
 
 	/** Emoji definition. To set an emoji on your button
 	 * you must set one of either the name or id fields.
@@ -201,7 +308,7 @@ public:
 
 	/** Destructor
 	 */
-	~component() = default;
+	virtual ~component() = default;
 
 	/**
 	 * @brief Set the type of the component. Button components
@@ -217,21 +324,40 @@ public:
 	component& set_type(component_type ct);
 
 	/**
+	 * @brief Set the text style of a text component
+	 * @note Sets type to `cot_text`
+	 * 
+	 * @param ts Text style type to set
+	 * @return component& reference to self
+	 */
+	component& set_text_style(text_style_type ts);
+
+	/**
 	 * @brief Set the label of the component, e.g. button text.
 	 * For action rows, this field is ignored. Setting the
 	 * label will auto-set the type to dpp::cot_button.
 	 *
-	 * @param label Label text to set
+	 * @param label Label text to set. It will be truncated to the maximum length of 80 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
 	component& set_label(const std::string &label);
+
+	/**
+	 * @brief Set the default value of the text input component.
+	 * For action rows, this field is ignored. Setting the
+	 * value will auto-set the type to dpp::cot_text.
+	 *
+	 * @param value Value text to set. It will be truncated to the maximum length of 4000 UTF-8 characters.
+	 * @return component& Reference to self
+	 */
+	component& set_default_value(const std::string &val);
 
 	/**
 	 * @brief Set the url for dpp::cos_link types.
 	 * Calling this function sets the style to dpp::cos_link
 	 * and the type to dpp::cot_button.
 	 *
-	 * @param url URL to set, maximum length of 512 characters
+	 * @param url URL to set. It will be truncated to the maximum length of 512 UTF-8 characters.
 	 * @return component& reference to self.
 	 */
 	component& set_url(const std::string &url);
@@ -253,6 +379,8 @@ public:
 	 *
 	 * @param id Custom ID string to set. This ID will be sent
 	 * for any on_button_click events related to the button.
+	 * @note The maximum length of the Custom ID is 100 UTF-8 codepoints.
+	 * If your Custom ID is longer than this, it will be truncated.
 	 * @return component& Reference to self
 	 */
 	component& set_id(const std::string &id);
@@ -262,17 +390,67 @@ public:
 	 * Defaults to false on all created components.
 	 *
 	 * @param disable True to disable, false to disable.
-	 * @return component&
+	 * @return component& Reference to self
 	 */
 	component& set_disabled(bool disable);
 
+	/**
+	 * @brief Set if this component is required.
+	 * Defaults to false on all created components.
+	 *
+	 * @param require True to require this, false to make it optional.
+	 * @return component& Reference to self
+	 */
+	component& set_required(bool require);
 
+	/**
+	 * @brief Set the placeholder
+	 * 
+	 * @param placeholder placeholder string. It will be truncated to the
+	 * maximum length of 150 UTF-8 characters for select menus, and 100 UTF-8
+	 * characters for modals.
+	 * @return component& Reference to self
+	 */
 	component& set_placeholder(const std::string &placeholder);
 
+	/**
+	 * @brief Set the min value
+	 * 
+	 * @param min_values min value to set
+	 * @return component& Reference to self
+	 */
 	component& set_min_values(uint32_t min_values);
 
+	/**
+	 * @brief Set the max value
+	 * 
+	 * @param max_values max value to set
+	 * @return component& Reference to self
+	 */
 	component& set_max_values(uint32_t max_values);
 
+	/**
+	 * @brief Set the min length of text input
+	 * 
+	 * @param min_l min value to set
+	 * @return component& Reference to self
+	 */
+	component& set_min_length(uint32_t min_l);
+
+	/**
+	 * @brief Set the max length of text input
+	 * 
+	 * @param max_l max value to set
+	 * @return component& Reference to self
+	 */
+	component& set_max_length(uint32_t max_l);
+
+	/**
+	 * @brief Add a select option
+	 * 
+	 * @param option option to add
+	 * @return component& Reference to self
+	 */
 	component& add_select_option(const select_option &option);
 
 	/**
@@ -310,17 +488,12 @@ public:
 	 */
 	component& fill_from_json(nlohmann::json* j);
 
-	/** Build JSON from this object.
-	 * @return The JSON text of the invite
-	 */
-	std::string build_json() const;
-
 };
 
 /**
  * @brief A footer in a dpp::embed
  */
-struct CoreExport embed_footer {
+struct DPP_EXPORT embed_footer {
 	/** Footer text */
 	std::string text;
 	/** Footer icon url */
@@ -329,7 +502,7 @@ struct CoreExport embed_footer {
 	std::string proxy_url;
 
 	/** Set footer's text. Returns footer itself so these methods may be "chained"
-	 * @param t string to set as footer text
+	 * @param t string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
 	 * @return A reference to self
 	 */
 	embed_footer& set_text(const std::string& t);
@@ -350,7 +523,7 @@ struct CoreExport embed_footer {
 /**
  * @brief An video, image or thumbnail in a dpp::embed
  */
-struct CoreExport embed_image {
+struct DPP_EXPORT embed_image {
 	/** URL to image or video */
 	std::string url;
 	/** Proxied image url */
@@ -364,7 +537,7 @@ struct CoreExport embed_image {
 /**
  * @brief Embed provider in a dpp::embed. Received from discord but cannot be sent
  */
-struct CoreExport embed_provider {
+struct DPP_EXPORT embed_provider {
 	/** Provider name */
 	std::string name;
 	/** Provider URL */
@@ -374,7 +547,7 @@ struct CoreExport embed_provider {
 /**
  * @brief Author within a dpp::embed object
  */
-struct CoreExport embed_author {
+struct DPP_EXPORT embed_author {
 	/** Author name */
 	std::string name;
 	/** Author url */
@@ -388,7 +561,7 @@ struct CoreExport embed_author {
 /**
  * @brief A dpp::embed may contain zero or more fields
  */
-struct CoreExport embed_field {
+struct DPP_EXPORT embed_field {
 	/** Name of field */
 	std::string name;
 	/** Value of field (max length 1000) */
@@ -400,7 +573,7 @@ struct CoreExport embed_field {
 /**
  * @brief A rich embed for display within a dpp::message
  */
-struct CoreExport embed {
+struct DPP_EXPORT embed {
 	/** Optional: title of embed */
 	std::string			title;
 	/** Optional: type of embed (always "rich" for webhook embeds) */
@@ -440,30 +613,41 @@ struct CoreExport embed {
 	~embed();
 
 	/** Set embed title. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param text The text of the title. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @return A reference to self
 	 */
 	embed& set_title(const std::string &text);
 
 	/** Set embed description. Returns the embed itself so these method calls may be "chained"
-	 * @param text The text of the title
+	 * @param text The text of the title. It will be truncated to the maximum length of 4096 UTF-8 characters.
 	 * @return A reference to self
 	 */
 	embed& set_description(const std::string &text);
 
-	/**
-	 * @brief Set the footer of the embed
-	 * 
+	/** Set the footer of the embed. Returns the embed itself so these method calls may be "chained"
 	 * @param f the footer to set
-	 * @return embed& a reference to self
+	 * @return A reference to self
 	 */
 	embed& set_footer(const embed_footer& f);
+
+	 /** Set the footer of the embed. Returns the embed itself so these method calls may be "chained"
+	  * @param text string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
+	  * @param icon_url an url to set as footer icon url
+	  * @return A reference to self
+	  */
+	embed& set_footer(const std::string& text, const std::string& icon_url);
 
 	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
 	 * @param col The colour of the embed
 	 * @return A reference to self
 	 */
 	embed& set_color(uint32_t col);
+
+	/** Set embed timestamp. Returns the embed itself so these method calls may be "chained"
+	 * @param tstamp The timestamp to show in the footer, should be in UTC
+	 * @return A reference to self
+	 */
+	embed& set_timestamp(time_t tstamp);
 
 	/** Set embed url. Returns the embed itself so these method calls may be "chained"
 	 * @param url the url of the embed
@@ -472,8 +656,8 @@ struct CoreExport embed {
 	embed& set_url(const std::string &url);
 
 	/** Add an embed field. Returns the embed itself so these method calls may be "chained"
-	 * @param name The name of the field
-	 * @param value The value of the field (max length 1000)
+	 * @param name The name of the field. It will be truncated to the maximum length of 256 UTF-8 characters.
+	 * @param value The value of the field. It will be truncated to the maximum length of 1024 UTF-8 characters.
 	 * @param is_inline Whether or not to display the field 'inline' or on its own line
 	 * @return A reference to self
 	 */
@@ -486,7 +670,7 @@ struct CoreExport embed {
 	embed& set_author(const dpp::embed_author& a);
 
 	/** Set embed author. Returns the embed itself so these method calls may be "chained"
-	 * @param name The name of the author
+	 * @param name The name of the author. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @param url The url of the author
 	 * @param icon_url The icon URL of the author
 	 * @return A reference to self
@@ -494,7 +678,7 @@ struct CoreExport embed {
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 
 	/** Set embed provider. Returns the embed itself so these method calls may be "chained"
-	 * @param name The provider name
+	 * @param name The provider name. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @param url The provider url
 	 * @return A reference to self
 	 */
@@ -520,9 +704,9 @@ struct CoreExport embed {
 };
 
 /**
- * @brief Represets a reaction to a dpp::message
+ * @brief Represents a reaction to a dpp::message
  */
-struct CoreExport reaction {
+struct DPP_EXPORT reaction {
 	/** Number of times this reaction has been added */
 	uint32_t count;
 	/** Reaction was from the bot's id */
@@ -552,7 +736,7 @@ struct CoreExport reaction {
 /**
  * @brief Represents an attachment in a dpp::message
  */
-struct CoreExport attachment {
+struct DPP_EXPORT attachment {
 	/** ID of attachment */
 	snowflake id;
 	/** Size of the attachment in bytes */
@@ -571,24 +755,41 @@ struct CoreExport attachment {
 	std::string content_type;
 	/** Whether this attachment is ephemeral, if applicable */
 	bool ephemeral;
+	/** Owning message */
+	struct message* owner;
 
 	/**
 	 * @brief Constructs a new attachment object.
+	 * @param o Owning dpp::message object
 	 */
-	attachment();
+	attachment(struct message* o);
 
 	/**
 	 * @brief Constructs a new attachment object from a JSON object.
+	 * @param o Owning dpp::message object
 	 * @param j JSON to read information from
 	 */
-	attachment(nlohmann::json* j);
+	attachment(struct message* o, nlohmann::json* j);
 
 	/**
 	 * @brief Destructs the attachment object.
 	 */
 	~attachment() = default;
+
+	/**
+	 * @brief Download this attachment
+	 * @param callback A callback which is called when the download completes.
+	 * @note The content of the file will be in the http_info.body parameter of the
+	 * callback parameter.
+	 * @throw dpp::exception If there is no owner associated with this attachment that
+	 * itself has an owning cluster, this method will throw a dpp::exception when called.
+	 */
+	void download(http_completion_event callback) const;
 };
 
+/**
+ * @brief Represents the type of a sticker
+ */
 enum sticker_type : uint8_t {
 	/// Nitro pack sticker
 	st_standard = 1,
@@ -608,28 +809,25 @@ enum sticker_format : uint8_t {
 /**
  * @brief Represents stickers received in messages
  */
-struct CoreExport sticker {
-	/** @brief The ID of the sticker
-	 */
-	snowflake	id;
+struct DPP_EXPORT sticker : public managed, public json_interface<sticker> {
 	/** Optional: for standard stickers, id of the pack the sticker is from
 	 */
 	snowflake	pack_id;
 	/** The name of the sticker */
 	std::string	name;
 	/// description of the sticker (may be empty)
-	std::string     description;    
+	std::string	 description;	
 	/** for guild stickers, the Discord name of a unicode emoji representing the sticker's expression.
 	 * for standard stickers, a comma-separated list of related expressions.
 	 */
-	std::string     tags;
+	std::string	 tags;
 	/**
 	 * @brief Asset ID
 	 * @deprecated now an empty string but still sent by discord.
 	 * While discord still send this empty string value we will still have a field
 	 * here in the library.
 	 */
-	std::string     asset;
+	std::string	 asset;
 	/** The type of sticker */
 	sticker_type	type;
 	/// type of sticker format
@@ -652,6 +850,8 @@ struct CoreExport sticker {
 	 */
 	sticker();
 
+	virtual ~sticker() = default;
+
 	/** Read class values from json object
 	 * @param j A json object to read from
 	 * @return A reference to self
@@ -662,7 +862,15 @@ struct CoreExport sticker {
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	std::string build_json(bool with_id = true) const;
+	virtual std::string build_json(bool with_id = true) const;
+
+	/**
+	 * @brief Get the sticker url
+	 *
+	 * @param accept_lottie Whether to allow that [lottie](https://airbnb.io/lottie/#/) (json format) can be returned or not
+	 * @return std::string The sticker url or an empty string when its a lottie and accept_lottie is false
+	 */
+	std::string get_url(bool accept_lottie = true) const;
 
 	/**
 	 * @brief Set the filename
@@ -682,26 +890,29 @@ struct CoreExport sticker {
 
 };
 
-struct CoreExport sticker_pack {
-	/// id of the sticker pack
-	snowflake       id;
+/**
+ * @brief Represents a sticker pack (the built in groups of stickers that all nitro users get to use)
+ */
+struct DPP_EXPORT sticker_pack : public managed, public json_interface<sticker_pack> {
 	/// the stickers in the pack
 	std::map<snowflake, sticker> stickers;
 	/// name of the sticker pack
-	std::string     name;
+	std::string	 name;
 	/// id of the pack's SKU
-	snowflake       sku_id;
+	snowflake	   sku_id;
 	/// Optional: id of a sticker in the pack which is shown as the pack's icon
-	snowflake       cover_sticker_id;
+	snowflake	   cover_sticker_id;
 	/// description of the sticker pack
-	std::string     description;
+	std::string	 description;
 	/// id of the sticker pack's banner image
-	snowflake       banner_asset_id;
+	snowflake	   banner_asset_id;
 
 	/**
 	 * @brief Construct a new sticker pack object
 	 */
 	sticker_pack();
+
+	virtual ~sticker_pack() = default;
 
 	/** Read class values from json object
 	 * @param j A json object to read from
@@ -713,7 +924,7 @@ struct CoreExport sticker_pack {
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	std::string build_json(bool with_id = true) const;
+	virtual std::string build_json(bool with_id = true) const;
 
 };
 
@@ -778,32 +989,38 @@ enum message_type {
 	/// Discovery grace period warning 2
 	mt_guild_discovery_grace_period_final_warning	= 17,
 	/// Thread Created 
-	mt_thread_created			= 18,
+	mt_thread_created				= 18,
 	/// Reply
 	mt_reply					= 19,
 	/// Application command
 	mt_application_command				= 20,
 	/// Thread starter message
-	mt_thread_starter_message	= 21,
+	mt_thread_starter_message			= 21,
 	/// Invite reminder
 	mt_guild_invite_reminder			= 22,
 	/// Context Menu Command
-	mt_context_menu_command 	= 23
+	mt_context_menu_command 			= 23
 };
 
+/**
+ * @brief Represents the caching policy of a cache in the library.
+ */
 enum cache_policy_setting_t {
 	/**
 	 * @brief request aggressively on seeing new guilds, and also store missing data from messages.
-	 * This is the default behaviour.
+	 * This is the default behaviour and the least memory-efficient option. Memory usage will increase
+	 * over time, initially quite rapidly, and then linearly over time. It is the least cpu-intensive
+	 * setting.
 	 */
 	cp_aggressive = 0,
 	/**
-	 * @brief only cache when there is relavent activity, e.g. a message to the bot.
+	 * @brief only cache when there is relevant activity, e.g. a message to the bot.
+	 * This is a good middle-ground, memory usage will increase linearly over time.
 	 */
 	cp_lazy = 1,
 	/**
 	 * @brief Don't cache anything. Fill details when we see them.
-	 * (NOT IMPLEMENTED YET)
+	 * This is the most memory-efficient option but consumes more CPU time
 	 */
 	cp_none = 2
 };
@@ -812,13 +1029,13 @@ enum cache_policy_setting_t {
  * @brief Represents the caching policy of the cluster.
  * 
  * Channels and guilds are always cached as these caches are used
- * interally by the library. The memory usage of these is minimal.
+ * internally by the library. The memory usage of these is minimal.
  * 
  * All default to 'aggressive' which means to actively attempt to cache,
  * going out of the way to fill the caches completely. On large bots this
  * can take a LOT of RAM.
  */
-struct CoreExport cache_policy_t {
+struct DPP_EXPORT cache_policy_t {
 	/**
 	 * @brief Caching policy for users and guild members
 	 */
@@ -838,15 +1055,13 @@ struct CoreExport cache_policy_t {
 /**
  * @brief Represents messages sent and received on Discord
  */
-struct CoreExport message {
-	/** id of the message */
-	snowflake       id;
+struct DPP_EXPORT message : public managed {
 	/** id of the channel the message was sent in */
-	snowflake       channel_id;
+	snowflake	   channel_id;
 	/** Optional: id of the guild the message was sent in */
-	snowflake       guild_id;
+	snowflake	   guild_id;
 	/** the author of this message (not guaranteed to be a valid user) */
-	user*		author;
+	user		author;
 	/** Optional: member properties for this message's author */
 	guild_member	member;
 	/** contents of the message */
@@ -862,11 +1077,12 @@ struct CoreExport message {
 	/** whether this message mentions everyone */
 	bool   		mention_everyone;
 	/** users specifically mentioned in the message */
-	std::vector<snowflake>	mentions;
-	/** roles specifically mentioned in this message */
+	std::vector<std::pair<user, guild_member>>	mentions;
+	/** roles specifically mentioned in this message (only IDs currently)*/
 	std::vector<snowflake> mention_roles;
-	/** Optional: channels specifically mentioned in this message */
-	std::vector<snowflake> mention_channels;
+	/** Channels mentioned in the message. (Discord: not all types supported)
+	 * Discord: Only textual channels that are visible to everyone in a lurkable guild will ever be included. Only crossposted messages (via Channel Following) currently include mention_channels at all. (includes ID, Guild ID, Type, Name)*/
+	std::vector<channel> mention_channels;
 	/** any attached files */
 	std::vector<attachment> attachments;
 	/** zero or more dpp::embed objects */
@@ -885,17 +1101,17 @@ struct CoreExport message {
 	std::vector<sticker> stickers;
 
 	/** Name of file to upload (for use server-side in discord's url) */
-	std::string	filename;
+	std::vector<std::string>	filename;
 
 	/** File content to upload (raw binary) */
-	std::string	filecontent;
+	std::vector<std::string>	filecontent;
 
 	/** Message type */
-	uint8_t		type;
+	message_type type;
 
-	/** Self allocated user for caching being off */
-	user		self_author;
-
+	/**
+	 * @brief Reference to another message, e.g. a reply
+	 */
 	struct message_ref {
 		/// id of the originating message
 		snowflake message_id;
@@ -907,25 +1123,54 @@ struct CoreExport message {
 		bool fail_if_not_exists;
 	} message_reference;
 
+	/**
+	 * @brief Reference to an interaction
+	 */
 	struct message_interaction_struct{
-		// id of the interaction
+		/// id of the interaction
 		snowflake id;
-		// type of interaction
+		/// type of interaction
 		uint8_t type;
-		// name of the application command
+		/// name of the application command
 		std::string name;
-		// the user who invoked the interaction
+		/// the user who invoked the interaction
 		user usr;
 	} interaction;
 
+	/**
+	 * @brief Allowed mentions details
+	 */
 	struct allowed_ref {
+		/**
+		 * @brief Set to true to parse user mentions in the text
+		 */
 		bool parse_users;
+		/**
+		 * @brief Set to true to at-everyone and at-here mentions in the text
+		 */
 		bool parse_everyone;
+		/**
+		 * @brief Set to true to parse role mentions in the text
+		 */
 		bool parse_roles;
+		/**
+		 * @brief Set to true to mention the user who sent the message this one is replying to
+		 */
 		bool replied_user;
+		/**
+		 * @brief List of users to allow pings for 
+		 */
 		std::vector<snowflake> users;
+		/**
+		 * @brief List of roles to allow pings for 
+		 */
 		std::vector<snowflake> roles;
 	} allowed_mentions;
+
+	/**
+	 * @brief The cluster which created this message object
+	 */
+	class cluster* owner;
 
 	/**
 	 * @brief Construct a new message object
@@ -933,15 +1178,23 @@ struct CoreExport message {
 	message();
 
 	/**
+	 * @brief Construct a new message object
+	 * @param o Owning cluster, passed down to various things such as dpp::attachment.
+	 * Owning cluster is optional (can be nullptr) and if nulled, will prevent some functions
+	 * such as attachment::download from functioning (they will throw, if used)
+	 */
+	message(class cluster* o);
+
+	/**
 	 * @brief Destroy the message object
 	 */
-	~message();
+	virtual ~message();
 
 	/**
 	 * @brief Construct a new message object with a channel and content
 	 *
 	 * @param channel_id The channel to send the message to
-	 * @param content The content of the message
+	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
@@ -957,7 +1210,7 @@ struct CoreExport message {
 	/**
 	 * @brief Construct a new message object with content
 	 *
-	 * @param content The content of the message
+	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(const std::string &content, message_type type = mt_default);
@@ -1090,7 +1343,7 @@ struct CoreExport message {
 	message& set_type(message_type t);
 
 	/**
-	 * @brief Set the filename
+	 * @brief Set the filename of the last file in list
 	 * 
 	 * @param fn filename
 	 * @return message& reference to self
@@ -1098,7 +1351,7 @@ struct CoreExport message {
 	message& set_filename(const std::string &fn);
 
 	/**
-	 * @brief Set the file content
+	 * @brief Set the file content of the last file in list
 	 * 
 	 * @param fc raw file content contained in std::string
 	 * @return message& reference to self
@@ -1106,9 +1359,18 @@ struct CoreExport message {
 	message& set_file_content(const std::string &fc);
 
 	/**
+	 * @brief Add a file to the message
+	 *
+	 * @param filename filename
+	 * @param filecontent raw file content contained in std::string
+	 * @return message& reference to self
+	 */
+	message& add_file(const std::string &filename, const std::string &filecontent);
+
+	/**
 	 * @brief Set the message content
 	 * 
-	 * @param c message content
+	 * @param c message content. It will be truncated to the maximum length of 2000 UTF-8 characters.
 	 * @return message& reference to self
 	 */
 	message& set_content(const std::string &c);

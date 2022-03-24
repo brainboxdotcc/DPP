@@ -18,17 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -36,7 +30,9 @@ namespace dpp { namespace events {
 
 using namespace dpp;
 
+#ifndef _DOXYGEN_
 std::mutex protect_the_loot;
+#endif
 
 /**
  * @brief Handle event
@@ -46,7 +42,7 @@ std::mutex protect_the_loot;
  * @param raw Raw JSON string
  */
 void ready::handle(discord_client* client, json &j, const std::string &raw) {
-	client->log(dpp::ll_info, fmt::format("Shard {}/{} ready!", client->shard_id, client->max_shards));
+	client->log(dpp::ll_info, fmt::format("Shard id {} ({}/{}) ready!", client->shard_id, client->shard_id + 1, client->max_shards));
 	client->sessionid = j["d"]["session_id"];
 
 	client->ready = true;
@@ -57,11 +53,11 @@ void ready::handle(discord_client* client, json &j, const std::string &raw) {
 		client->creator->me.fill_from_json(&(j["d"]["user"]));
 	}
 
-	if (client->creator->dispatch.ready) {
+	if (!client->creator->on_ready.empty()) {
 		dpp::ready_t r(client, raw);
 		r.session_id = client->sessionid;
 		r.shard_id = client->shard_id;
-		client->creator->dispatch.ready(r);
+		client->creator->on_ready.call(r);
 	}
 }
 

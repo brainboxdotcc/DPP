@@ -26,12 +26,17 @@
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
+#include <dpp/exception.h>
+#include <dpp/cluster.h>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
 namespace dpp {
 
-component::component() : type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""), disabled(false), min_values(-1), max_values(-1)
+component::component() :
+	type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""),
+	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false), required(false)
 {
 	emoji.animated = false;
 	emoji.id = 0;
@@ -40,23 +45,40 @@ component::component() : type(static_cast<component_type>(1)), label(""), style(
 
 
 component& component::fill_from_json(nlohmann::json* j) {
-	type = static_cast<component_type>(Int8NotNull(j, "type"));
+	type = static_cast<component_type>(int8_not_null(j, "type"));
 	if (type == cot_action_row) {
-		components;
 		for (json sub_component : (*j)["components"]) {
 			dpp::component new_component;
 			new_component.fill_from_json(&sub_component);
-			components.push_back(new_component);
+			components.emplace_back(new_component); 
 		}
 	} else if (type == cot_button) {
-		label = StringNotNull(j, "label");
-		style = static_cast<component_style>(Int8NotNull(j, "style"));
-		custom_id = StringNotNull(j, "custom_id");
-		disabled = BoolNotNull(j, "disabled");
+		label = string_not_null(j, "label");
+		style = static_cast<component_style>(int8_not_null(j, "style"));
+		custom_id = string_not_null(j, "custom_id");
+		disabled = bool_not_null(j, "disabled");
+		if (j->contains("emoji")) {
+			json emo = (*j)["emoji"];
+			emoji.id = snowflake_not_null(&emo, "id");
+			emoji.name = string_not_null(&emo, "name");
+			emoji.animated = bool_not_null(&emo, "animated");
+		}
 	} else if (type == cot_selectmenu) {
 		label = "";
-		custom_id = StringNotNull(j, "custom_id");
-		disabled = BoolNotNull(j, "disabled");
+		custom_id = string_not_null(j, "custom_id");
+		disabled = bool_not_null(j, "disabled");
+	} else if (type == cot_text) {
+		custom_id = string_not_null(j, "custom_id");
+		type = (component_type)int8_not_null(j, "type");
+		required = bool_not_null(j, "required");
+		json v = (*j)["value"];
+		if (!v.is_null() && v.is_number_integer()) {
+			value = v.get<int64_t>();
+		} else if (!v.is_null() && v.is_number_float()) {
+			value = v.get<double>();
+		} else if (!v.is_null() && v.is_string()) {
+			value = v.get<std::string>();
+		}
 	}
 	return *this;
 }
@@ -64,13 +86,23 @@ component& component::fill_from_json(nlohmann::json* j) {
 component& component::add_component(const component& c)
 {
 	set_type(cot_action_row);
-	components.push_back(c);
+	components.emplace_back(c);
 	return *this;
 }
 
 component& component::set_type(component_type ct)
 {
 	type = ct;
+	if (type == cot_text || type == cot_button) {
+		label = dpp::utility::utf8substr(label, 0, 80);
+	} else if (type == cot_selectmenu) {
+		label = dpp::utility::utf8substr(label, 0, 100);
+	}
+	if(type == cot_text) {
+		placeholder = dpp::utility::utf8substr(placeholder, 0, 100);
+	} else if (type == cot_selectmenu) {
+		placeholder = dpp::utility::utf8substr(placeholder, 0, 150);
+	}
 	return *this;
 }
 
@@ -79,7 +111,22 @@ component& component::set_label(const std::string &l)
 	if (type == cot_action_row) {
 		set_type(cot_button);
 	}
-	label = utility::utf8substr(l, 0, 80);
+	if (type == cot_text || type == cot_button) {
+		label = dpp::utility::utf8substr(l, 0, 80);
+	} else if (type == cot_selectmenu) {
+		label = dpp::utility::utf8substr(l, 0, 100);
+	} else {
+		label = l;
+	}
+	return *this;
+}
+
+component& component::set_default_value(const std::string &val)
+{
+	if (type == cot_action_row) {
+		set_type(cot_text);
+	}
+	value = dpp::utility::utf8substr(val, 0, 4000);
 	return *this;
 }
 
@@ -87,6 +134,13 @@ component& component::set_style(component_style cs)
 {
 	set_type(cot_button);
 	style = cs;
+	return *this;
+}
+
+component& component::set_text_style(text_style_type ts)
+{
+	set_type(cot_text);
+	text_style = ts;
 	return *this;
 }
 
@@ -116,6 +170,15 @@ component& component::set_disabled(bool disable)
 	return *this;
 }
 
+component& component::set_required(bool require)
+{
+	if (type == cot_action_row) {
+		set_type(cot_button);
+	}
+	required = require;
+	return *this;
+}
+
 component& component::set_emoji(const std::string& name, dpp::snowflake id, bool animated)
 {
 	if (type == cot_action_row) {
@@ -127,36 +190,94 @@ component& component::set_emoji(const std::string& name, dpp::snowflake id, bool
 	return *this;
 }
 
-std::string component::build_json() const {
-	json j;
-	if (type == component_type::cot_action_row) {
-		j["type"] = 1;
-		json new_components;
-		for (component new_component : components) {
-			new_components.push_back(new_component.build_json());
+component& component::set_min_length(uint32_t min_l)
+{
+	min_length = min_l;
+	return *this;
+}
+
+component& component::set_max_length(uint32_t max_l)
+{
+	max_length = max_l;
+	return *this;
+}
+
+void to_json(json& j, const attachment& a) {
+	if (a.id) {
+		j["id"] = a.id;
+	}
+	if (a.size) {
+		j["size"] = a.size;
+	}
+	if (!a.filename.empty()) {
+		j["filename"] = a.filename;
+	}
+	if (!a.url.empty()) {
+		j["url"] = a.url;
+	}
+	j["ephemeral"] = a.ephemeral;
+}
+
+void to_json(json& j, const component& cp) {
+	if (cp.type == cot_text) {
+ 		j["type"] = cp.type;
+		j["label"] = cp.label;
+		j["required"] = cp.required;
+		j["style"] = int(cp.text_style);
+		if (std::holds_alternative<std::string>(cp.value) && !std::get<std::string>(cp.value).empty()) {
+			j["value"] = std::get<std::string>(cp.value);
 		}
-		j["components"] = new_components;
-	} else if (type == component_type::cot_button) {
-		j["type"] = 2;
-		j["label"] = label;
-		j["style"] = int(style);
-		j["custom_id"] = custom_id;
-		j["disabled"] = disabled;
-	} else if (type == component_type::cot_selectmenu) {
-		j["type"] = 3;
-		j["custom_id"] = custom_id;
-		//j["disabled"] = disabled;
-		if (!placeholder.empty()) {
-			j["placeholder"] = placeholder;
+		if (!cp.custom_id.empty()) {
+			j["custom_id"] = cp.custom_id;
 		}
-		if (min_values >= 0) {
-			j["min_values"] = min_values;
+		if (!cp.placeholder.empty()) {
+			j["placeholder"] = cp.placeholder;
 		}
-		if (max_values >= 0) {
-			j["max_values"] = max_values;
+		if (cp.min_length > 0) {
+			j["min_length"] = cp.min_length;
+		}
+		if (cp.max_length > 0) {
+			j["max_length"] = cp.max_length;
+		}
+	}
+	if (cp.type == cot_button) {
+		j["type"] = cp.type;
+		j["label"] = cp.label;
+		j["style"] = int(cp.style);
+		if (cp.type == cot_button && cp.style != cos_link && !cp.custom_id.empty()) {
+			/* Links cannot have a custom id */
+			j["custom_id"] = cp.custom_id;
+		}
+		if (cp.type == cot_button && cp.style == cos_link && !cp.url.empty()) {
+			j["url"] = cp.url;
+		}
+		j["disabled"] = cp.disabled;
+
+		if (cp.emoji.id || !cp.emoji.name.empty()) {
+			j["emoji"] = {};
+			j["emoji"]["animated"] = cp.emoji.animated;
+		}
+		if (cp.emoji.id) {
+			j["emoji"]["id"] = std::to_string(cp.emoji.id);
+		}
+		if (!cp.emoji.name.empty()) {
+			j["emoji"]["name"] = cp.emoji.name;
+		}
+	} else if (cp.type == cot_selectmenu) {
+		j["type"] = cp.type;
+		j["custom_id"] = cp.custom_id;
+		//j["disabled"] = cp.disabled;
+		if (!cp.placeholder.empty()) {
+			j["placeholder"] = cp.placeholder;
+		}
+		if (cp.min_values >= 0) {
+			j["min_values"] = cp.min_values;
+		}
+		if (cp.max_values >= 0) {
+			j["max_values"] = cp.max_values;
 		}
 		j["options"] = json::array();
-		for (auto opt : options) {
+		for (auto opt : cp.options) {
 			json o;
 			if (!opt.description.empty()) {
 				o["description"] = opt.description;
@@ -176,17 +297,19 @@ std::string component::build_json() const {
 				if (opt.emoji.id) {
 					o["emoji"]["id"] = std::to_string(opt.emoji.id);
 				}
+				if (opt.emoji.animated) {
+					o["emoji"]["animated"] = true;
+				}
 			}
 			j["options"].push_back(o);
 		}
 	}
-	return j.dump();
 }
 
 select_option::select_option() : is_default(false) {
 }
 
-select_option::select_option(const std::string &_label, const std::string &_value, const std::string &_description) : is_default(false), label(_label), value(_value), description(_description) {
+select_option::select_option(const std::string &_label, const std::string &_value, const std::string &_description) : label(_label), value(_value), description(_description), is_default(false) {
 }
 
 select_option& select_option::set_label(const std::string &l) {
@@ -221,9 +344,14 @@ select_option& select_option::set_animated(bool anim) {
 	return *this;
 }
 
-
 component& component::set_placeholder(const std::string &_placeholder) {
-	placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
+	if(type == cot_text) {
+		placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
+	} else if (type == cot_selectmenu) {
+		placeholder = dpp::utility::utf8substr(_placeholder, 0, 150);
+	} else {
+		placeholder = _placeholder;
+	}
 	return *this;
 }
 
@@ -239,19 +367,18 @@ component& component::set_max_values(uint32_t _max_values) {
 
 component& component::add_select_option(const select_option &option) {
 	if (options.size() <= 25) {
-		options.push_back(option);
+		options.emplace_back(option);
 	}
 	return *this;
 }
 
-embed::~embed() {
-}
+embed::~embed() = default;
 
 embed::embed() : timestamp(0), color(0) {
 }
 
-message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0), edited(0), flags(0),
-	type(mt_default), tts(false), mention_everyone(false), pinned(false), webhook_id(0)
+message::message() : managed(0), channel_id(0), guild_id(0), sent(0), edited(0), tts(false),
+	mention_everyone(false), pinned(false), webhook_id(0), flags(0), type(mt_default), owner(nullptr)
 {
 	message_reference.channel_id = 0;
 	message_reference.guild_id = 0;
@@ -263,11 +390,12 @@ message::message() : id(0), channel_id(0), guild_id(0), author(nullptr), sent(0)
 	allowed_mentions.parse_users = false;
 	allowed_mentions.parse_everyone = false;
 	allowed_mentions.parse_roles = false;
-	/* The documentation for discord is INCORRECT. This defaults to true, and must be set to false.
-	 * The default ctor reflects this.
-	 */
-	allowed_mentions.replied_user = true;
+	allowed_mentions.replied_user = false;
 
+}
+
+message::message(class cluster* o) : message() {
+	owner = o;
 }
 
 message& message::set_reference(snowflake _message_id, snowflake _guild_id, snowflake _channel_id, bool fail_if_not_exists) {
@@ -296,13 +424,13 @@ message::message(snowflake _channel_id, const std::string &_content, message_typ
 
 message& message::add_component(const component& c)
 {
-	components.push_back(c);
+	components.emplace_back(c);
 	return *this;
 }
 
 message& message::add_embed(const embed& e)
 {
-	embeds.push_back(e);
+	embeds.emplace_back(e);
 	return *this;
 }
 
@@ -320,13 +448,27 @@ message& message::set_type(message_type t)
 
 message& message::set_filename(const std::string &fn)
 {
-	filename = fn;
+	if (filename.empty()) {
+		filename.push_back(fn);
+	} else {
+		filename[filename.size() - 1] = fn;
+	}
 	return *this;
 }
 
 message& message::set_file_content(const std::string &fc)
 {
-	filecontent = fc;
+	if (filecontent.empty()) {
+		filecontent.push_back(fc);
+	} else {
+		filecontent[filecontent.size() - 1] = fc;
+	}
+	return *this;
+}
+
+message& message::add_file(const std::string &fn, const std::string &fc) {
+	filecontent.push_back(fc);
+	filename.push_back(fn);
 	return *this;
 }
 
@@ -343,22 +485,22 @@ message::message(const std::string &_content, message_type t) : message() {
 
 message::message(snowflake _channel_id, const embed& _embed) : message() {
 	channel_id = _channel_id;
-	embeds.push_back(_embed);
+	embeds.emplace_back(_embed);
 }
 
 embed::embed(json* j) : embed() {
-	title = StringNotNull(j, "title");
-	type = StringNotNull(j, "type");
-	description = StringNotNull(j, "description");
-	url = StringNotNull(j, "url");
-	timestamp = TimestampNotNull(j, "timestamp");
-	color = Int32NotNull(j, "color");
+	title = string_not_null(j, "title");
+	type = string_not_null(j, "type");
+	description = string_not_null(j, "description");
+	url = string_not_null(j, "url");
+	timestamp = ts_not_null(j, "timestamp");
+	color = int32_not_null(j, "color");
 	if (j->find("footer") != j->end()) {
 		dpp::embed_footer f;
 		json& fj = (*j)["footer"];
-		f.text = StringNotNull(&fj, "text");
-		f.icon_url = StringNotNull(&fj, "icon_url");
-		f.proxy_url = StringNotNull(&fj, "proxy_url");
+		f.text = string_not_null(&fj, "text");
+		f.icon_url = string_not_null(&fj, "icon_url");
+		f.proxy_url = string_not_null(&fj, "proxy_url");
 		footer = f;
 	}
 	std::vector<std::string> type_list = { "image", "video", "thumbnail" };
@@ -366,10 +508,10 @@ embed::embed(json* j) : embed() {
 		if (j->find(s) != j->end()) {
 			embed_image curr;
 			json& fi = (*j)[s];
-			curr.url = StringNotNull(&fi, "url");
-			curr.height = StringNotNull(&fi, "height");
-			curr.width = StringNotNull(&fi, "width");
-			curr.proxy_url = StringNotNull(&fi, "proxy_url");
+			curr.url = string_not_null(&fi, "url");
+			curr.height = string_not_null(&fi, "height");
+			curr.width = string_not_null(&fi, "width");
+			curr.proxy_url = string_not_null(&fi, "proxy_url");
 			if (s == "image") {
 				image = curr;
 			} else if (s == "video") {
@@ -382,26 +524,26 @@ embed::embed(json* j) : embed() {
 	if (j->find("provider") != j->end()) {
 		json &p = (*j)["provider"];
 		dpp::embed_provider pr;
-		pr.name = StringNotNull(&p, "name");
-		pr.url = StringNotNull(&p, "url");
+		pr.name = string_not_null(&p, "name");
+		pr.url = string_not_null(&p, "url");
 		provider = pr;
 	}
 	if (j->find("author") != j->end()) {
 		json &a = (*j)["author"];
 		dpp::embed_author au;
-		au.name = StringNotNull(&a, "name");
-		au.url = StringNotNull(&a, "url");
-		au.icon_url = StringNotNull(&a, "icon_url");
-		au.proxy_icon_url = StringNotNull(&a, "proxy_icon_url");
+		au.name = string_not_null(&a, "name");
+		au.url = string_not_null(&a, "url");
+		au.icon_url = string_not_null(&a, "icon_url");
+		au.proxy_icon_url = string_not_null(&a, "proxy_icon_url");
 		author = au;
 	}
 	if (j->find("fields") != j->end()) {
 		json &fl = (*j)["fields"];
 		for (auto & field : fl) {
 			embed_field f;
-			f.name = StringNotNull(&field, "name");
-			f.value = StringNotNull(&field, "value");
-			f.is_inline = BoolNotNull(&field, "inline");
+			f.name = string_not_null(&field, "name");
+			f.value = string_not_null(&field, "value");
+			f.is_inline = bool_not_null(&field, "inline");
 			fields.push_back(f);
 		}
 	}
@@ -424,6 +566,12 @@ embed& embed::set_author(const embed_author& a)
 	return *this;
 }
 
+embed& embed::set_timestamp(time_t tstamp)
+{
+	timestamp = tstamp;
+	return *this;
+}
+
 embed& embed::set_author(const std::string& name, const std::string& url, const std::string& icon_url) {
 	dpp::embed_author a;
 	a.name = utility::utf8substr(name, 0, 256);
@@ -434,6 +582,14 @@ embed& embed::set_author(const std::string& name, const std::string& url, const 
 }
 
 embed& embed::set_footer(const embed_footer& f) {
+	footer = f;
+	return *this;
+}
+
+embed& embed::set_footer(const std::string& text, const std::string& icon_url) {
+	dpp::embed_footer f;
+	f.set_text(text);
+	f.set_icon(icon_url);
 	footer = f;
 	return *this;
 }
@@ -489,17 +645,17 @@ embed& embed::set_url(const std::string &u) {
 }
 
 embed_footer& embed_footer::set_text(const std::string& t){
-	text = t; 
-	return *this;     
+	text = utility::utf8substr(t, 0, 2048);
+	return *this;
 }
 
-embed_footer& embed_footer::set_icon(const std::string& i){     
+embed_footer& embed_footer::set_icon(const std::string& i){
 	icon_url = i;
-	return *this;           
-}                                                                                  
+	return *this;
+}
 
-embed_footer& embed_footer::set_proxy(const std::string& p){     
-	proxy_url = p;          
+embed_footer& embed_footer::set_proxy(const std::string& p){
+	proxy_url = p;
 	return *this;
 }
 
@@ -513,29 +669,40 @@ reaction::reaction(json* j) {
 	count = (*j)["count"];
 	me = (*j)["me"];
 	json emoji = (*j)["emoji"];
-	emoji_id = SnowflakeNotNull(&emoji, "id");
-	emoji_name = StringNotNull(&emoji, "name");
+	emoji_id = snowflake_not_null(&emoji, "id");
+	emoji_name = string_not_null(&emoji, "name");
 }
 
-attachment::attachment() 
+attachment::attachment(struct message* o) 
 	: id(0)
 	, size(0)
 	, width(0)
 	, height(0)
 	, ephemeral(false)
+	, owner(o)
 {
 }
 
-attachment::attachment(json *j) : attachment() {
-	this->id = SnowflakeNotNull(j, "id");
+attachment::attachment(struct message* o, json *j) : attachment(o) {
+	this->id = snowflake_not_null(j, "id");
 	this->size = (*j)["size"];
 	this->filename = (*j)["filename"];
 	this->url = (*j)["url"];
 	this->proxy_url = (*j)["proxy_url"];
-	this->width = Int32NotNull(j, "width");
-	this->height = Int32NotNull(j, "height");
-	this->content_type = StringNotNull(j, "content_type");
-	this->ephemeral = BoolNotNull(j, "ephemeral");
+	this->width = int32_not_null(j, "width");
+	this->height = int32_not_null(j, "height");
+	this->content_type = string_not_null(j, "content_type");
+	this->ephemeral = bool_not_null(j, "ephemeral");
+}
+
+void attachment::download(http_completion_event callback) const {
+	/* Download attachment if there is one attached to this object */
+	if (!owner->owner) {
+		throw dpp::logic_exception("attachment has no owning message/cluster");
+	}
+	if (callback && this->id && !this->url.empty()) {
+		owner->owner->request(this->url, dpp::m_get, callback);
+	}
 }
 
 std::string message::build_json(bool with_id, bool is_interaction_response) const {
@@ -545,21 +712,18 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		{"tts", tts},
 		{"nonce", nonce},
 		{"flags", flags},
-		{"type", type}
+		{"type", type},
+		{"content", content}
 	});
 
 	if (with_id) {
 		j["id"] = std::to_string(id);
 	}
 
-	if (!content.empty()) {
-		j["content"] = content;
+	if(!author.username.empty()) {
+		/* Used for webhooks */
+		j["username"] = author.username;
 	}
-
-    if(author != nullptr) {
-        /* Used for webhooks */
-        j["username"] = author->username;
-    }
 
 	/* Populate message reference */
 	if (message_reference.channel_id || message_reference.guild_id || message_reference.message_id) {
@@ -578,7 +742,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 
 	j["allowed_mentions"] = json::object();
 	j["allowed_mentions"]["parse"] = json::array();
-	if (allowed_mentions.parse_everyone || allowed_mentions.parse_roles || allowed_mentions.parse_users || !allowed_mentions.replied_user || allowed_mentions.users.size() || allowed_mentions.roles.size()) {
+	if (allowed_mentions.parse_everyone || allowed_mentions.parse_roles || allowed_mentions.parse_users || allowed_mentions.replied_user || allowed_mentions.users.size() || allowed_mentions.roles.size()) {
 		if (allowed_mentions.parse_everyone) {
 			j["allowed_mentions"]["parse"].push_back("everyone");
 		}
@@ -590,6 +754,8 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		}
 		if (!allowed_mentions.replied_user) {
 			j["allowed_mentions"]["replied_user"] = false;
+		} else {
+			j["allowed_mentions"]["replied_user"] = true;
 		}
 		if (allowed_mentions.users.size()) {
 			j["allowed_mentions"]["users"] = json::array();
@@ -606,136 +772,63 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 	}
 
 
-	if (components.size()) {
-		j["components"] = json::array();
-	}
+	j["components"] = json::array();
 	for (auto & component : components) {
 		json n;
 		n["type"] = cot_action_row;
 		n["components"] = {};
-		json sn;
 		for (auto & subcomponent  : component.components) {
-			if (subcomponent.type == cot_button) {
-				sn["type"] = subcomponent.type;
-				sn["label"] = subcomponent.label;
-				sn["style"] = int(subcomponent.style);
-				if (subcomponent.type == cot_button && subcomponent.style != cos_link && !subcomponent.custom_id.empty()) {
-					/* Links cannot have a custom id */
-					sn["custom_id"] = subcomponent.custom_id;
-				}
-				if (subcomponent.type == cot_button && subcomponent.style == cos_link && !subcomponent.url.empty()) {
-					sn["url"] = subcomponent.url;
-				}
-				sn["disabled"] = subcomponent.disabled;
-
-				if (subcomponent.emoji.id || !subcomponent.emoji.name.empty()) {
-					sn["emoji"] = {};
-					sn["emoji"]["animated"] = subcomponent.emoji.animated;
-				}
-				if (subcomponent.emoji.id) {
-					sn["emoji"]["id"] = std::to_string(subcomponent.emoji.id);
-				}
-				if (!subcomponent.emoji.name.empty()) {
-					sn["emoji"]["name"] = subcomponent.emoji.name;
-				}
-			} else if (subcomponent.type == cot_selectmenu) {
-
-				sn["type"] = subcomponent.type;
-				sn["custom_id"] = subcomponent.custom_id;
-				//sn["disabled"] = subcomponent.disabled;
-				if (!subcomponent.placeholder.empty()) {
-					sn["placeholder"] = subcomponent.placeholder;
-				}
-				if (subcomponent.min_values >= 0) {
-					sn["min_values"] = subcomponent.min_values;
-				}
-				if (subcomponent.max_values >= 0) {
-					sn["max_values"] = subcomponent.max_values;
-				}
-				sn["options"] = json::array();
-				for (auto opt : subcomponent.options) {
-					json o;
-					if (!opt.description.empty()) {
-						o["description"] = opt.description;
-					}
-					if (!opt.label.empty()) {
-						o["label"] = opt.label;
-					}
-					if (!opt.value.empty()) {
-						o["value"] = opt.value;
-					}
-					if (opt.is_default) {
-						o["default"] = true;
-					}
-					if (!opt.emoji.name.empty()) {
-						o["emoji"] = json::object();
-						o["emoji"]["name"] = opt.emoji.name;
-						if (opt.emoji.id) {
-							o["emoji"]["id"] = std::to_string(opt.emoji.id);
-						}
-						if (opt.emoji.animated) {
-							o["emoji"]["animated"] = true;
-						}
-					}
-					sn["options"].push_back(o);
-				}
-			}
-
+			json sn = subcomponent;
 			n["components"].push_back(sn);
 		}
 		j["components"].push_back(n);
 	}
-	if (embeds.size()) {
-		j["embeds"] = json::array();
 
-		for (auto& embed : embeds) {
-			json e;
-			if (!embed.description.empty())
-				e["description"] = embed.description;
-			if (!embed.title.empty())
-				e["title"] = embed.title;
-			if (!embed.url.empty())
-				e["url"] = embed.url;
-			e["color"] = embed.color;
-			if (embed.footer.has_value()) {
-				e["footer"]["text"] = embed.footer->text;
-				e["footer"]["icon_url"] = embed.footer->icon_url;
-			}
-			if (embed.image.has_value()) {
-				e["image"]["url"] = embed.image->url;
-			}
-			if (embed.thumbnail.has_value()) {
-				e["thumbnail"]["url"] = embed.thumbnail->url;
-			}
-			if (embed.author.has_value()) {
-				e["author"]["name"] = embed.author->name;
-				e["author"]["url"] = embed.author->url;
-				e["author"]["icon_url"] = embed.author->icon_url;
-			}
-			if (embed.fields.size()) {
-				e["fields"] = json();
-				for (auto& field : embed.fields) {
-					json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
-					e["fields"].push_back(f);
-				}
-			}
-			if (embed.timestamp != 0) {
-				std::ostringstream ss;
-				struct tm t;
-			
-			#ifdef _WIN32
-				gmtime_s(&t, &embed.timestamp);
-			#else
-				gmtime_r(&embed.timestamp, &t);
-			#endif
-				
-				ss << std::put_time(&t, "%FT%TZ");
-				e["timestamp"] = ss.str();
-			}
-
-				j["embeds"].push_back(e);
-		}
+	j["attachments"] = json::array();
+	for (auto& attachment : attachments) {
+		json a = attachment;
+		j["attachments"].push_back(a);
 	}
+
+	j["embeds"] = json::array();
+	for (auto& embed : embeds) {
+		json e;
+		if (!embed.description.empty())
+			e["description"] = embed.description;
+		if (!embed.title.empty())
+			e["title"] = embed.title;
+		if (!embed.url.empty())
+			e["url"] = embed.url;
+		e["color"] = embed.color;
+		if (embed.footer.has_value()) {
+			e["footer"]["text"] = embed.footer->text;
+			e["footer"]["icon_url"] = embed.footer->icon_url;
+		}
+		if (embed.image.has_value()) {
+			e["image"]["url"] = embed.image->url;
+		}
+		if (embed.thumbnail.has_value()) {
+			e["thumbnail"]["url"] = embed.thumbnail->url;
+		}
+		if (embed.author.has_value()) {
+			e["author"]["name"] = embed.author->name;
+			e["author"]["url"] = embed.author->url;
+			e["author"]["icon_url"] = embed.author->icon_url;
+		}
+		if (embed.fields.size()) {
+			e["fields"] = json();
+			for (auto& field : embed.fields) {
+				json f({ {"name", field.name}, {"value", field.value}, {"inline", field.is_inline} });
+				e["fields"].push_back(f);
+			}
+		}
+		if (embed.timestamp) {
+			e["timestamp"] = ts_to_string(embed.timestamp);
+		}
+
+		j["embeds"].push_back(e);
+	}
+
 	return j.dump();
 }
 
@@ -772,14 +865,13 @@ bool message::is_loading() const {
 	return flags & m_loading;
 }
 
-message::~message() {
-}
+message::~message() = default;
 
 
 message& message::fill_from_json(json* d, cache_policy_t cp) {
-	this->id = SnowflakeNotNull(d, "id");
-	this->channel_id = SnowflakeNotNull(d, "channel_id");
-	this->guild_id = SnowflakeNotNull(d, "guild_id");
+	this->id = snowflake_not_null(d, "id");
+	this->channel_id = snowflake_not_null(d, "channel_id");
+	this->guild_id = snowflake_not_null(d, "guild_id");
 	/* We didn't get a guild id. See if we can find one in the channel */
 	if (guild_id == 0 && channel_id != 0) {
 		dpp::channel* c = dpp::find_channel(this->channel_id);
@@ -787,59 +879,60 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			this->guild_id = c->guild_id;
 		}
 	}
-	this->flags = Int8NotNull(d, "flags");
-	this->type = Int8NotNull(d, "type");
-	this->author = nullptr;
-	user* authoruser = nullptr;
+	this->flags = int8_not_null(d, "flags");
+	this->type = static_cast<message_type>(int8_not_null(d, "type"));
+	this->author = user();
 	/* May be null, if its null cache it from the partial */
 	if (d->find("author") != d->end()) {
 		json &j_author = (*d)["author"];
 		if (cp.user_policy == dpp::cp_none) {
 			/* User caching off! Allocate a temp user to be deleted in destructor */
-			authoruser = &self_author;
-			this->author = &self_author;
-			self_author.fill_from_json(&j_author);
+			this->author.fill_from_json(&j_author);
 		} else {
 			/* User caching on - aggressive or lazy - create a cached user entry */
-			authoruser = find_user(SnowflakeNotNull(&j_author, "id"));
+			user* authoruser = find_user(snowflake_not_null(&j_author, "id"));
 			if (!authoruser) {
 				/* User does not exist yet, cache the partial as a user record */
 				authoruser = new user();
 				authoruser->fill_from_json(&j_author);
 				get_user_cache()->store(authoruser);
 			}
-			this->author = authoruser;
+			this->author = *authoruser;
 		}
 	}
 	if (d->find("interaction") != d->end()) {
 		json& inter = (*d)["interaction"];
-		interaction.id = SnowflakeNotNull(&inter, "id");
-		interaction.name = StringNotNull(&inter, "name");
-		interaction.type = Int8NotNull(&inter, "type");
+		interaction.id = snowflake_not_null(&inter, "id");
+		interaction.name = string_not_null(&inter, "name");
+		interaction.type = int8_not_null(&inter, "type");
 		if (inter.contains("user") && !inter["user"].is_null()) from_json(inter["user"], interaction.usr);
 	}
 	if (d->find("sticker_items") != d->end()) {
 		json &sub = (*d)["sticker_items"];
 		for (auto & sticker_raw : sub) {
-			stickers.push_back(dpp::sticker().fill_from_json(&sticker_raw));
+			stickers.emplace_back(dpp::sticker().fill_from_json(&sticker_raw));
 		}
 	}
 	if (d->find("mentions") != d->end()) {
 		json &sub = (*d)["mentions"];
 		for (auto & m : sub) {
-			mentions.push_back(SnowflakeNotNull(&m, "id"));
+			dpp::user u = dpp::user().fill_from_json(&m);
+			dpp::guild_member gm = dpp::guild_member().fill_from_json(static_cast<json*>(&m["member"]), this->guild_id, u.id);
+			mentions.push_back({u, gm});
 		}
 	}
 	if (d->find("mention_roles") != d->end()) {
-		json &sub = (*d)["mention_roles"];
-		for (auto & m : sub) {
-			mention_roles.push_back(from_string<snowflake>(m, std::dec));
+		for (auto & m : (*d)["mention_roles"]) {
+			try {
+				snowflake rid = std::stoull(static_cast<const std::string&>(m));
+				mention_roles.push_back(rid);
+			} catch (const std::exception&) {}
 		}
 	}
 	if (d->find("mention_channels") != d->end()) {
 		json &sub = (*d)["mention_channels"];
 		for (auto & m : sub) {
-			mention_channels.push_back(SnowflakeNotNull(&m, "id"));
+			mention_channels.emplace_back(dpp::channel().fill_from_json(&m));
 		}
 	}
 	/* Fill in member record, cache uncached ones */
@@ -847,9 +940,9 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->member = {};
 	if (g && d->find("member") != d->end()) {
 		json& mi = (*d)["member"];
-		snowflake uid = SnowflakeNotNull(&(mi["user"]), "id");
-		if (!uid && authoruser) {
-			uid = authoruser->id;
+		snowflake uid = snowflake_not_null(&(mi["user"]), "id");
+		if (!uid && author.id) {
+			uid = author.id;
 		}
 		if (cp.user_policy == dpp::cp_none) {
 			/* User caching off! Just fill in directly but dont store member to guild */
@@ -858,18 +951,18 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			/* User caching on, lazy or aggressive - cache the member information */
 			auto thismember = g->members.find(uid);
 			if (thismember == g->members.end()) {
-				if (uid != 0 && authoruser) {
+				if (uid != 0 && author.id) {
 					guild_member gm;
 					gm.fill_from_json(&mi, g->id, uid);
-					g->members[authoruser->id] = gm;
+					g->members[author.id] = gm;
 					this->member = gm;
 				}
 			} else {
 				/* Update roles etc */
 				this->member = thismember->second;
-				if (authoruser) {
-					this->member.fill_from_json(&mi, g->id, authoruser->id);
-					g->members[authoruser->id] = this->member;
+				if (author.id) {
+					this->member.fill_from_json(&mi, g->id, author.id);
+					g->members[author.id] = this->member;
 				}
 			}
 		}
@@ -877,48 +970,61 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	if (d->find("embeds") != d->end()) {
 		json & el = (*d)["embeds"];
 		for (auto& e : el) {
-			this->embeds.push_back(embed(&e));
+			this->embeds.emplace_back(embed(&e));
 		}
 	}
-	this->content = StringNotNull(d, "content");
-	this->sent = TimestampNotNull(d, "timestamp");
-	this->edited = TimestampNotNull(d, "edited_timestamp");
-	this->tts = BoolNotNull(d, "tts");
-	this->mention_everyone = BoolNotNull(d, "mention_everyone");
+	if (d->find("components") != d->end()) {
+		json & el = (*d)["components"];
+		for (auto& e : el) {
+			this->components.emplace_back(component().fill_from_json(&e));
+		}
+	}
+	this->content = string_not_null(d, "content");
+	this->sent = ts_not_null(d, "timestamp");
+	this->edited = ts_not_null(d, "edited_timestamp");
+	this->tts = bool_not_null(d, "tts");
+	this->mention_everyone = bool_not_null(d, "mention_everyone");
 	if (d->find("reactions") != d->end()) {
 		json & el = (*d)["reactions"];
 		for (auto& e : el) {
-			this->reactions.push_back(reaction(&e));
+			this->reactions.emplace_back(reaction(&e));
 		}
 	}
 	if (((*d)["nonce"]).is_string()) {
-		this->nonce = StringNotNull(d, "nonce");
+		this->nonce = string_not_null(d, "nonce");
 	} else {
-		this->nonce = std::to_string(SnowflakeNotNull(d, "nonce"));
+		this->nonce = std::to_string(snowflake_not_null(d, "nonce"));
 	}
-	this->pinned = BoolNotNull(d, "pinned");
-	this->webhook_id = SnowflakeNotNull(d, "webhook_id");
+	this->pinned = bool_not_null(d, "pinned");
+	this->webhook_id = snowflake_not_null(d, "webhook_id");
 	for (auto& e : (*d)["attachments"]) {
-		this->attachments.push_back(attachment(&e));
+		this->attachments.emplace_back(attachment(this, &e));
+	}
+	if (d->find("message_reference") != d->end()) {
+		json& mr = (*d)["message_reference"];
+		message_reference.channel_id = snowflake_not_null(&mr, "channel_id");
+		message_reference.guild_id = snowflake_not_null(&mr, "guild_id");
+		message_reference.message_id = snowflake_not_null(&mr, "message_id");
+		message_reference.fail_if_not_exists = bool_not_null(&mr, "fail_if_not_exists");
 	}
 	return *this;
 }
 
-sticker::sticker() : id(0), pack_id(0), guild_id(0), type(st_standard), format_type(sf_png), available(true), sort_value(0) {
+sticker::sticker() : managed(0), pack_id(0), type(st_standard), format_type(sf_png), available(true), guild_id(0), sort_value(0) {
 }
 
 sticker& sticker::fill_from_json(nlohmann::json* j) {
-	this->id = SnowflakeNotNull(j, "id");
-	this->pack_id = SnowflakeNotNull(j, "pack_id");
-	this->name = StringNotNull(j, "name");
-	this->description = StringNotNull(j, "description");
-	this->tags = StringNotNull(j, "tags");
-	this->asset = StringNotNull(j, "asset");
-	this->guild_id = SnowflakeNotNull(j, "guild_id");
-	this->type = static_cast<sticker_type>(Int8NotNull(j, "type"));
-	this->format_type = static_cast<sticker_format>(Int8NotNull(j, "format_type"));
-	this->available = BoolNotNull(j, "available");
-	this->sort_value = Int8NotNull(j, "sort_value");
+	this->id = snowflake_not_null(j, "id");
+	this->pack_id = snowflake_not_null(j, "pack_id");
+	this->name = string_not_null(j, "name");
+	this->description = string_not_null(j, "description");
+	this->tags = string_not_null(j, "tags");
+	this->asset = string_not_null(j, "asset");
+	this->guild_id = snowflake_not_null(j, "guild_id");
+	this->type = static_cast<sticker_type>(int8_not_null(j, "type"));
+	this->format_type = static_cast<sticker_format>(int8_not_null(j, "format_type"));
+	this->available = bool_not_null(j, "available");
+	this->sort_value = int8_not_null(j, "sort_value");
 	if (j->find("user") != j->end()) {
 		sticker_user.fill_from_json(&((*j)["user"]));
 	}
@@ -952,20 +1058,20 @@ std::string sticker::build_json(bool with_id) const {
 	return j.dump();
 }
 
-sticker_pack::sticker_pack() : id(0), sku_id(0), cover_sticker_id(0), banner_asset_id(0) {
+sticker_pack::sticker_pack() : managed(0), sku_id(0), cover_sticker_id(0), banner_asset_id(0) {
 }
 
 sticker_pack& sticker_pack::fill_from_json(nlohmann::json* j) {
-	this->id = SnowflakeNotNull(j, "id");
-	this->sku_id = SnowflakeNotNull(j, "sku_id");
-	this->cover_sticker_id = SnowflakeNotNull(j, "cover_sticker_id");
-	this->banner_asset_id = SnowflakeNotNull(j, "banner_asset_id");
-	this->name = StringNotNull(j, "name");
-	this->description = StringNotNull(j, "description");
+	this->id = snowflake_not_null(j, "id");
+	this->sku_id = snowflake_not_null(j, "sku_id");
+	this->cover_sticker_id = snowflake_not_null(j, "cover_sticker_id");
+	this->banner_asset_id = snowflake_not_null(j, "banner_asset_id");
+	this->name = string_not_null(j, "name");
+	this->description = string_not_null(j, "description");
 	if (j->find("stickers") != j->end()) {
 		json & sl = (*j)["stickers"];
 		for (auto& s : sl) {
-			this->stickers[SnowflakeNotNull(&s, "id")] = sticker().fill_from_json(&s);
+			this->stickers[snowflake_not_null(&s, "id")] = sticker().fill_from_json(&s);
 		}
 	}
 	return *this;
@@ -992,6 +1098,17 @@ std::string sticker_pack::build_json(bool with_id) const {
 		j["stickers"].push_back(json::parse(s.second.build_json(with_id)));
 	}
 	return j.dump();
+}
+
+std::string sticker::get_url(bool accept_lottie) const {
+	if (this->format_type == sticker_format::sf_lottie && !accept_lottie) {
+		return std::string();
+	} else {
+		return fmt::format("{}/stickers/{}.{}",
+						   utility::cdn_host,
+						   this->id,
+						   this->format_type == sticker_format::sf_lottie ? "json" : "png");
+	}
 }
 
 sticker& sticker::set_filename(const std::string &fn) {

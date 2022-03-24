@@ -8,6 +8,7 @@ SET(CMAKE_CXX_COMPILER ${COMPILER_ROOT}/aarch64-linux-gnu-g++-8)
 # Below call is necessary to avoid non-RT problem.
 SET(CMAKE_LIBRARY_ARCHITECTURE aarch64-linux-gnu)
 SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE aarch64)
+SET(CPACK_RPM_PACKAGE_ARCHITECTURE aarch64)
 
 SET(RASPBERRY_ROOT_PATH ${CMAKE_SOURCE_DIR}/arm_raspberry)
 SET(RASPBERRY_KINETIC_PATH ${RASPBERRY_ROOT_PATH}/opt/ros/kinetic)
@@ -44,6 +45,7 @@ EXECUTE_PROCESS(COMMAND printf "deb [arch=amd64] http://archive.ubuntu.com/ubunt
 	OUTPUT_FILE TMPFILE)
 EXECUTE_PROCESS(COMMAND sudo mv TMPFILE /etc/apt/sources.list)
 EXECUTE_PROCESS(COMMAND sudo dpkg --add-architecture arm64)
+EXECUTE_PROCESS(COMMAND sudo apt-add-repository -y ppa:canonical-kernel-team/ppa)
 EXECUTE_PROCESS(COMMAND sudo apt update)
 EXECUTE_PROCESS(COMMAND sudo apt install -y cmake ninja-build gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu zlib1g-dev:arm64 libssl-dev:arm64 libopus-dev:arm64 libsodium-dev:arm64)
 EXECUTE_PROCESS(COMMAND sudo mv /usr/lib/aarch64-linux-gnu/pkgconfig/libsodium.pc /usr/lib/pkgconfig/)

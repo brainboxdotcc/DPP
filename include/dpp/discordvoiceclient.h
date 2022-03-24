@@ -22,7 +22,7 @@
 
 #include <dpp/export.h>
 
-#include <errno.h>
+#include <cerrno>
 
 #ifdef _WIN32
 #include <WinSock2.h>
@@ -37,20 +37,21 @@
 #include <unistd.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <signal.h>
-#include <string.h>
+#include <csignal>
+#include <cstring>
 #include <string>
 #include <map>
 #include <vector>
-#include <dpp/json_fwd.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/discordevents.h>
+#include <dpp/socket.h>
 #include <queue>
 #include <thread>
 #include <deque>
@@ -68,7 +69,10 @@ namespace dpp {
 // Forward declaration
 class cluster;
 
-struct CoreExport voice_out_packet {
+/**
+ * @brief An opus-encoded RTP packet to be sent out to a voice channel
+ */
+struct DPP_EXPORT voice_out_packet {
 	/** 
 	 * @brief Each string is a UDP packet.
 	 * Generally these will be RTP.
@@ -85,7 +89,7 @@ struct CoreExport voice_out_packet {
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
  */
-class CoreExport discord_voice_client : public websocket_client
+class DPP_EXPORT discord_voice_client : public websocket_client
 {
 	/** Mutex for outbound packet stream */
 	std::mutex stream_mutex;
@@ -100,7 +104,7 @@ class CoreExport discord_voice_client : public websocket_client
 	std::thread* runner;
 
 	/** Run shard loop under a thread */
-	void ThreadRun();
+	void thread_run();
 
 	/** Last connect time of voice session */
 	time_t connect_time;
@@ -174,11 +178,11 @@ class CoreExport discord_voice_client : public websocket_client
 
 	/** File descriptor for UDP connection
 	 */
-	SOCKET fd;
+	dpp::socket fd;
 
 	/** Socket address of voice server
 	 */
-	struct sockaddr_in servaddr;
+	sockaddr_in servaddr;
 
 	/** Secret key for encrypting voice.
 	 * If it has been sent, this is non-null and points to a 
@@ -197,6 +201,9 @@ class CoreExport discord_voice_client : public websocket_client
 	 */
 	uint32_t timestamp;
 
+	/**
+	 * Last sent packet high-resolution timestamp
+	 */
 	std::chrono::high_resolution_clock::time_point last_timestamp;
 
 	/**
@@ -235,7 +242,7 @@ class CoreExport discord_voice_client : public websocket_client
 	 * @param length length of data to send
 	 * @return int bytes sent. Will return -1 if we cannot send
 	 */
-	int UDPSend(const char* data, size_t length);
+	int udp_send(const char* data, size_t length);
 
 	/**
 	 * @brief Receive data from UDP socket immediately.
@@ -245,7 +252,7 @@ class CoreExport discord_voice_client : public websocket_client
 	 * @return int bytes received. -1 if there is an error
 	 * (e.g. EAGAIN)
 	 */
-	int UDPRecv(char* data, size_t max_length);
+	int udp_recv(char* data, size_t max_length);
 
 	/**
 	 * @brief This hooks the ssl_client, returning the file
@@ -254,7 +261,7 @@ class CoreExport discord_voice_client : public websocket_client
 	 * 
 	 * @return int file descriptor or -1
 	 */
-	int WantWrite();
+	dpp::socket want_write();
 
 	/**
 	 * @brief This hooks the ssl_client, returning the file
@@ -263,22 +270,22 @@ class CoreExport discord_voice_client : public websocket_client
 	 * 
 	 * @return int file descriptor or -1
 	 */
-	int WantRead();
+	dpp::socket want_read();
 
 	/**
 	 * @brief Called by ssl_client when the socket is ready
 	 * for writing, at this point we pick the head item off
-	 * the buffer and send it. So long as it doesnt error
+	 * the buffer and send it. So long as it doesn't error
 	 * completely, we pop it off the head of the queue.
 	 */
-	void WriteReady();
+	void write_ready();
 
 	/**
 	 * @brief Called by ssl_client when there is data to be
 	 * read. At this point we insert that data into the
 	 * input queue.
 	 */
-	void ReadReady();
+	void read_ready();
 
 	/**
 	 * @brief Send data to the UDP socket, using the buffer.
@@ -287,7 +294,7 @@ class CoreExport discord_voice_client : public websocket_client
 	 * @param len length of packet
 	 * @param duration duration of opus packet
 	 */
-	void Send(const char* packet, size_t len, uint64_t duration);
+	void send(const char* packet, size_t len, uint64_t duration);
 
 	/**
 	 * @brief Queue a message to be sent via the websocket
@@ -297,20 +304,20 @@ class CoreExport discord_voice_client : public websocket_client
 	 * (this is for urgent messages such as heartbeat, presence, so they can take precedence over
 	 * chunk requests etc)
 	 */
-	void QueueMessage(const std::string &j, bool to_front = false);
+	void queue_message(const std::string &j, bool to_front = false);
 
 	/**
 	 * @brief Clear the outbound message queue
 	 * 
 	 */
-	void ClearQueue();
+	void clear_queue();
 
 	/**
 	 * @brief Get the size of the outbound message queue
 	 * 
 	 * @return The size of the queue
 	 */
-	size_t GetQueueSize();
+	size_t get_queue_size();
 
 	/**
 	 * @brief Encode a byte buffer using opus codec.
@@ -322,6 +329,7 @@ class CoreExport discord_voice_client : public websocket_client
 	 * @param outDataSize Output data length, should be at least equal to the input size.
 	 * Will be adjusted on return to the actual compressed data size.
 	 * @return size_t The compressed data size that was encoded.
+	 * @throw dpp::voice_exception If data length to encode is invalid or voice support not compiled into D++
 	 */
 	size_t encode(uint8_t *input, size_t inDataSize, uint8_t *output, size_t &outDataSize);
 
@@ -368,9 +376,12 @@ public:
 	 * @param severity The log level from dpp::loglevel
 	 * @param msg The log message to output
 	 */
-	virtual void log(dpp::loglevel severity, const std::string &msg);
+	virtual void log(dpp::loglevel severity, const std::string &msg) const;
 
-	/** Fires every second from the underlying socket I/O loop, used for sending heartbeats */
+	/**
+	 * @brief Fires every second from the underlying socket I/O loop, used for sending heartbeats
+	 * @throw dpp::exception if the socket needs to disconnect
+	 */
 	virtual void one_second_timer();
 
 	/**
@@ -402,6 +413,7 @@ public:
 	 * @param _token The voice session token to use for identifying to the websocket
 	 * @param _session_id The voice session id to identify with
 	 * @param _host The voice server hostname to connect to (hostname:port format)
+	 * @throw dpp::voice_exception Sodium or Opus failed to initialise, or D++ is not compiled with voice support
 	 */
 	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host);
 
@@ -410,17 +422,18 @@ public:
 
 	/** Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
-	 * @returns True if a frame has been handled
+	 * @return bool True if a frame has been handled
+	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
-	virtual bool HandleFrame(const std::string &buffer);
+	virtual bool handle_frame(const std::string &buffer);
 
 	/** Handle a websocket error.
 	 * @param errorcode The error returned from the websocket
 	 */
-	virtual void Error(uint32_t errorcode);
+	virtual void error(uint32_t errorcode);
 
 	/** Start and monitor I/O loop */
-	void Run();
+	void run();
 
 	/**
 	 * @brief Send raw audio to the voice channel.
@@ -443,11 +456,13 @@ public:
 	 * The audio data should be 48000Hz signed 16 bit audio.
 	 * 
 	 * @param length The length of the audio data. The length should
-	 * be a multiple of 4 (2x 16 bit stero channels) with a maximum
+	 * be a multiple of 4 (2x 16 bit stereo channels) with a maximum
 	 * length of 11520, which is a complete opus frame at highest
 	 * quality.
 	 * 
 	 * @return discord_voice_client& Reference to self
+	 * 
+	 * @throw dpp::voice_exception If data length is invalid or voice support not compiled into D++
 	 */
 	discord_voice_client& send_audio_raw(uint16_t* audio_data, const size_t length);
 
@@ -474,6 +489,8 @@ public:
 	 * e.g. that audio frames are not too large or contain
 	 * an incorrect format. Discord will still expect the same frequency
 	 * and bit width of audio and the same signedness.
+	 * 
+	 * @throw dpp::voice_exception If data length is invalid or voice support not compiled into D++
 	 */
 	discord_voice_client& send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration);
 
@@ -499,6 +516,8 @@ public:
 	 * e.g. that audio frames are not too large or contain
 	 * an incorrect format. Discord will still expect the same frequency
 	 * and bit width of audio and the same signedness.
+	 * 
+	 * @throw dpp::voice_exception If data length is invalid or voice support not compiled into D++
 	 */
 	discord_voice_client& send_audio_opus(uint8_t* opus_packet, const size_t length);
 
@@ -509,6 +528,7 @@ public:
 	 * timescale this is in milliseconds. Allowed values are 2.5,
 	 * 5, 10, 20, 40 or 60 milliseconds.
 	 * @return discord_voice_client& Reference to self
+	 * @throw dpp::voice_exception if voice support is not compiled into D++
 	 */
 	discord_voice_client& send_silence(const uint64_t duration);
 
@@ -518,6 +538,7 @@ public:
 	 * @param new_timescale Timescale to set. This defaults to 1000000,
 	 * which means 1 millisecond.
 	 * @return discord_voice_client& Reference to self
+	 * @throw dpp::voice_exception If data length is invalid or voice support not compiled into D++
 	 */
 	discord_voice_client& set_timescale(uint64_t new_timescale);
 
@@ -589,7 +610,7 @@ public:
 	 * @brief Insert a track marker into the audio
 	 * output buffer.
 	 * A track marker is an arbitrary flag in the
-	 * buffer contents that indictes the end of some
+	 * buffer contents that indicates the end of some
 	 * block of audio of significance to the sender.
 	 * This may be a song from a streaming site, or
 	 * some voice audio/speech, a sound effect, or
@@ -617,7 +638,7 @@ public:
 	void skip_to_next_marker();
 
 	/**
-	 * @brief Get the metdata string associated with each inserted marker.
+	 * @brief Get the metadata string associated with each inserted marker.
 	 * 
 	 * @return const std::vector<std::string>& list of metadata strings
 	 */

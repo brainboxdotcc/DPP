@@ -1,8 +1,32 @@
 name: D++ CI
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - '**Dockerfile'
+      - '**.cxx'
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+      - '**.cmake'
+      - '**ci.yml'
+      - '**CMakeLists.txt'
+  pull_request:
+    paths:
+      - '**Dockerfile'
+      - '**.cxx'
+      - '**.cpp'
+      - '**.h'
+      - '**.hpp'
+      - '**.cmake'
+      - '**ci.yml'
+      - '**CMakeLists.txt'
+
 
 jobs:
-  linux:
+  linux-with-unit-test:
+    concurrency: 
+      group: linux-build-unit-test
+      cancel-in-progress: false
     name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
     runs-on: ${{matrix.cfg.os}}
     strategy:
@@ -10,6 +34,54 @@ jobs:
       matrix:
         cfg:
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-8 }
+
+    steps:
+      - name: Checkout D++
+        uses: actions/checkout@v2
+
+      - name: Install apt packages
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
+
+      - name: Generate CMake
+        run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        env:
+          CXX: ${{matrix.cfg.cpp-version}}
+
+      - name: Build Project
+        run: cd build && ninja 
+
+      - name: Run unit tests
+        run: cd build && ./test
+        env:
+          DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
+          TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
+          TEST_TEXT_CHANNEL_ID: ${{secrets.TEST_TEXT_CHANNEL_ID}}
+          TEST_VC_ID: ${{secrets.TEST_VC_ID}}
+          TEST_USER_ID: ${{secrets.TEST_USER_ID}}
+          TEST_EVENT_ID: ${{secrets.TEST_EVENT_ID}}
+
+      - name: Package distributable
+        run: cd build && cpack --verbose
+
+      - name: Upload Binary (DEB)
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
+          path: '${{github.workspace}}/build/*.deb'
+
+      - name: Upload Binary (RPM)
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
+          path: '${{github.workspace}}/build/*.rpm'
+
+  linux-no-unit-tests:
+    name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
+    runs-on: ${{matrix.cfg.os}}
+    strategy:
+      fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
+      matrix:
+        cfg:
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:
@@ -17,26 +89,15 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install apt packages
-        run: sudo dpkg --add-architecture i386 && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }}:${{ matrix.cfg.arch }} ninja-build libsodium-dev:${{ matrix.cfg.arch }} libopus-dev:${{ matrix.cfg.arch }} zlib1g-dev:${{ matrix.cfg.arch }}
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja ..
+        run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
       - name: Build Project
-        run: cd build && ninja
-
-      - name: Package distributable
-        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
-        run: cd build && cpack
-
-      - name: Upload Binary
-        if: ${{ matrix.cfg.cpp-version == 'g++-8' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
-          path: '${{github.workspace}}/build/*.deb'
+        run: cd build && ninja 
 
   macos:
     name: macOS x64
@@ -52,20 +113,24 @@ jobs:
         run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 
       - name: Build Project
-        run: cd build && ninja
+        run: cd build && ninja 
 
   windows: # Windows x64 and x86 build matrix
     strategy:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
         cfg:
-        - { name: x64,  arch: x64, config: Release }
-        - { name: x64,  arch: x64, config: Debug }
-        - { name: x86,  arch: x86, config: Release }
-        - { name: x86,  arch: x86, config: Debug }
+        - { name: x64,  arch: x64, config: Release, vs: '2019', os: 'windows-2019', vsv: '16' }
+        - { name: x64,  arch: x64, config: Debug, vs: '2019', os: 'windows-2019', vsv: '16' }
+        - { name: x86,  arch: x86, config: Release, vs: '2019', os: 'windows-2019', vsv: '16' }
+        - { name: x86,  arch: x86, config: Debug, vs: '2019', os: 'windows-2019', vsv: '16' }
+        - { name: x64,  arch: x64, config: Release, vs: '2022', os: 'windows-2022', vsv: '17' }
+        - { name: x64,  arch: x64, config: Debug, vs: '2022', os: 'windows-2022', vsv: '17' }
+        - { name: x86,  arch: x86, config: Release, vs: '2022', os: 'windows-2022', vsv: '17' }
+        - { name: x86,  arch: x86, config: Debug, vs: '2022', os: 'windows-2022', vsv: '17' }
 
-    name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}"
-    runs-on: windows-2019
+    name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
+    runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2
@@ -75,16 +140,16 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1.0.2
 
-      - name: Install chocolatey packages (x64)
-        run: choco install ninja -y
+      - name: Install chocolatey packages ${{ matrix.cfg.arch}}
+        uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio 16 2019" ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" ..
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
-        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -G "Visual Studio 16 2019" -A Win32 -T host=x86 ..
+        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
 
       - name: Build Project
         run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}}
@@ -94,12 +159,12 @@ jobs:
         run: xcopy /s/q main\build\Debug main\build\Release\
 
       - name: Package distributable
-        run: cd main/build && cpack
+        run: cd main/build && cpack --verbose
 
       - name: Upload Binary
         uses: actions/upload-artifact@v2
         with:
-          name: "libdpp - Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}"
+          name: "libdpp - Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
           path: '${{github.workspace}}/main/build/*.zip'
 
   cross-compiles:
@@ -119,20 +184,52 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Packages
-        run: sudo apt update && sudo apt install cmake ninja-build
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake ninja-build rpm
 
       - name: Generate CMakeFiles
         run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 
       - name: Compile Source
-        run: cd build && sudo ninja
+        run: cd build && sudo ninja 
 
       - name: Package Distributable
-        run: cd build && cpack
+        run: cd build && cpack --verbose
 
-      - name: Upload Binaries
+      - name: Upload Binaries (DEB)
         uses: actions/upload-artifact@v2
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.deb"
 
+      - name: Upload Binaries (RPM)
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - RPM Package ${{matrix.cfg.name}}"
+          path: "${{github.workspace}}/build/*.rpm"
+
+#  testfreebsd:
+#   runs-on: macos-10.15
+#   name: FreeBSD (g++-10)
+#   steps:
+#   - uses: actions/checkout@v2
+#   - name: FreeBSD Build and Package
+#     id: freebsdtest
+#     uses: vmactions/freebsd-vm@v0.1.5
+#     with:
+#        usesh: true
+#       prepare: pkg install -y openssl-devel gcc gmake ninja cmake git
+#       run: |
+#         pwd
+#         ls -lah
+#          mkdir build
+#          cd build
+#          cmake ..
+#          make -j2
+#          make install
+#          cpack --verbose
+#
+#    - name: Upload Binaries (BZ2)
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: "libdpp - FreeBSD x64"
+#        path: "${{github.workspace}}/build/*.tar.bz2"

@@ -8,7 +8,12 @@ include(${SELF_DIR}/libdpp.cmake)
 
 ## Set OpenSSl directory for macos. It is also in our main CMakeLists.txt, but this file is independent from that.
 if(APPLE)
-    set(OPENSSL_ROOT_DIR /usr/local/opt/openssl)
+	if(CMAKE_APPLE_SILICON_PROCESSOR)
+		set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl")
+	else()
+		set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
+	endif()
+	find_package(OpenSSL REQUIRED)
 endif()
 
 # Search for libdpp dependencies

@@ -18,19 +18,24 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
 #include <dpp/commandhandler.h>
-#include <dpp/cache.h>
 #include <dpp/cluster.h>
-#include <dpp/dispatcher.h>
+#include <dpp/exception.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/fmt-minimal.h>
 #include <sstream>
 
 namespace dpp {
 
-param_info::param_info(parameter_type t, bool o, const std::string &d, const std::map<std::string, std::string> &opts) : type(t), optional(o), description(d), choices(opts)
+param_info::param_info(parameter_type t, bool o, const std::string &d, const std::map<command_value, std::string> &opts) : type(t), optional(o), description(d), choices(opts)
+{
+}
+
+command_source::command_source(const struct message_create_t& event) : guild_id(event.msg.guild_id), channel_id(event.msg.channel_id), command_id(0), issuer(event.msg.author), message_event(event), interaction_event(std::nullopt)
+{
+}
+
+command_source::command_source(const struct interaction_create_t& event) : guild_id(event.command.guild_id), channel_id(event.command.channel_id), command_id(event.command.id), command_token(event.command.token), issuer(event.command.usr), message_event(std::nullopt), interaction_event(event)
 {
 }
 
@@ -40,12 +45,14 @@ commandhandler::commandhandler(cluster* o, bool auto_hook_events, snowflake appl
 		app_id = o->me.id;
 	}
 	if (auto_hook_events) {
-		o->on_interaction_create([this](const dpp::interaction_create_t &event) {
+		interactions = o->on_interaction_create([this](const dpp::interaction_create_t &event) {
 			this->route(event);
 		});
-		o->on_message_create([this](const dpp::message_create_t & event) {
-			this->route(*event.msg);
+		messages = o->on_message_create([this](const dpp::message_create_t & event) {
+			this->route(event);
 		});
+	} else {
+		interactions = messages = 0;
 	}
 
 }
@@ -58,18 +65,18 @@ commandhandler& commandhandler::set_owner(cluster* o)
 
 commandhandler::~commandhandler()
 {
+	if (messages && interactions) {
+		owner->on_message_create.detach(messages);
+		owner->on_interaction_create.detach(interactions);
+	}
 }
 
 commandhandler& commandhandler::add_prefix(const std::string &prefix)
 {
-	prefixes.push_back(prefix);
+	prefixes.emplace_back(prefix);
 	if (prefix == "/") {
-		if (!slash_commands_enabled) {
-			/* Register existing slash commands */
-			slash_commands_enabled = true;
-		} else {
-			slash_commands_enabled = true;
-		}
+		/* Register existing slash commands */
+		slash_commands_enabled = true;
 	}
 	return *this;
 }
@@ -84,7 +91,7 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 	if (slash_commands_enabled) {
 		if (this->app_id == 0) {
 			if (owner->me.id == 0) {
-				throw dpp::exception("Command handler not ready (i don't know my application ID)");
+				throw dpp::logic_exception("Command handler not ready (i don't know my application ID)");
 			} else {
 				this->app_id = owner->me.id;
 			}
@@ -94,7 +101,7 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 		newcommand.set_name(lowercase(command)).set_description(description).set_application_id(this->app_id);
 
 		for (auto& parameter : parameters) {
-			command_option_type cot;
+			command_option_type cot = co_string;
 			switch (parameter.second.type) {
 				case pt_boolean:
 					cot = co_boolean;
@@ -132,9 +139,9 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 			if (bulk_registration_list_guild.find(guild_id) == bulk_registration_list_guild.end()) {
 				bulk_registration_list_guild[guild_id] = {};
 			}
-			bulk_registration_list_guild[guild_id].push_back(newcommand);
+			bulk_registration_list_guild[guild_id].emplace_back(newcommand);
 		} else {
-			bulk_registration_list_global.push_back(newcommand);
+			bulk_registration_list_global.emplace_back(newcommand);
 		}
 	}
 	return *this;
@@ -151,7 +158,7 @@ commandhandler& commandhandler::register_commands()
 	}
 	owner->global_bulk_command_create(bulk_registration_list_global, [this](const dpp::confirmation_callback_t &callback) {
 		if (callback.is_error()) {
-			this->owner->log(dpp::ll_error, fmt::format("Failed to register global slash commands: {}", callback.http_info.body));
+			this->owner->log(dpp::ll_error, "Failed to register global slash commands: " + callback.http_info.body);
 		}
 	});	
 	return *this;
@@ -159,7 +166,6 @@ commandhandler& commandhandler::register_commands()
 
 bool commandhandler::string_has_prefix(std::string &str)
 {
-	size_t str_length = utility::utf8len(str);
 	for (auto& p : prefixes) {
 		size_t prefix_length = utility::utf8len(p);
 		if (utility::utf8substr(str, 0, prefix_length) == p) {
@@ -174,9 +180,9 @@ bool commandhandler::string_has_prefix(std::string &str)
  * There isn't really a way around this for many things because there is no 'resolved' member for it.
  * We only get resolved information for the user issuing the command.
  */
-void commandhandler::route(const class dpp::message& msg)
+void commandhandler::route(const struct dpp::message_create_t& event)
 {
-	std::string msg_content = msg.content;
+	std::string msg_content = event.msg.content;
 	if (string_has_prefix(msg_content)) {
 		/* Put the string into stringstream to parse parameters at spaces.
 		 * We use stringstream as it handles multiple spaces etc nicely.
@@ -188,7 +194,7 @@ void commandhandler::route(const class dpp::message& msg)
 		auto found_cmd = commands.find(lowercase(command));
 		if (found_cmd != commands.end()) {
 			/* Filter out guild specific commands that are not for the current guild */
-			if (found_cmd->second.guild_id && found_cmd->second.guild_id != msg.guild_id) {
+			if (found_cmd->second.guild_id && found_cmd->second.guild_id != event.msg.guild_id) {
 				return;
 			}
 
@@ -218,7 +224,7 @@ void commandhandler::route(const class dpp::message& msg)
 						std::string x;
 						ss >> x;
 						if (x.length() > 4 && x[0] == '<' && x[1] == '&') {
-							snowflake rid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
+							snowflake rid = from_string<uint64_t>(x.substr(2, x.length() - 1));
 							role* r = dpp::find_role(rid);
 							if (r) {
 								param = *r;
@@ -230,7 +236,7 @@ void commandhandler::route(const class dpp::message& msg)
 						std::string x;
 						ss >> x;
 						if (x.length() > 4 && x[0] == '<' && x[1] == '#') {
-							snowflake cid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
+							snowflake cid = from_string<uint64_t>(x.substr(2, x.length() - 1));
 							channel* c = dpp::find_channel(cid);
 							if (c) {
 								param = *c;
@@ -242,12 +248,12 @@ void commandhandler::route(const class dpp::message& msg)
 						std::string x;
 						ss >> x;
 						if (x.length() > 4 && x[0] == '<' && x[1] == '@') {
-							snowflake uid = from_string<uint64_t>(x.substr(2, x.length() - 1), std::dec);
+							snowflake uid = from_string<uint64_t>(x.substr(2, x.length() - 1));
 							user* u = dpp::find_user(uid);
 							if (u) {
 								dpp::resolved_user m;
 								m.user = *u;
-								dpp::guild* g = dpp::find_guild(msg.guild_id);
+								dpp::guild* g = dpp::find_guild(event.msg.guild_id);
 								if (g->members.find(uid) != g->members.end()) {
 									m.member = g->members[uid];
 								}
@@ -283,21 +289,16 @@ void commandhandler::route(const class dpp::message& msg)
 				}
 
 				/* Add parameter to the list */
-				call_params.push_back(std::make_pair(p.first, param));
+				call_params.emplace_back(p.first, param);
 			}
 
 			/* Call command handler */
-			command_source source;
-			source.command_id = 0;
-			source.guild_id = msg.guild_id;
-			source.channel_id = msg.channel_id;
-			source.issuer = msg.author;
-			found_cmd->second.func(command, call_params, source);
+			found_cmd->second.func(command, call_params, command_source(event));
 		}
 	}
 }
 
-void commandhandler::route(const class interaction_create_t & event)
+void commandhandler::route(const struct interaction_create_t & event)
 {
 	/* We don't need to check for prefixes here, slash command interactions
 	 * dont have prefixes at all.
@@ -390,6 +391,7 @@ void commandhandler::route(const class interaction_create_t & event)
 					bool b = std::get<bool>(slash_parameter);
 					param = b;
 				}
+				break;
 				case pt_double: {
 					double b = std::get<double>(slash_parameter);
 					param = b;
@@ -398,50 +400,41 @@ void commandhandler::route(const class interaction_create_t & event)
 			}
 
 			/* Add parameter to the list */
-			call_params.push_back(std::make_pair(p.first, param));
+			call_params.emplace_back(p.first, param);
 		}
 
 		/* Call command handler */
-		command_source source;
-		source.command_id = event.command.id;
-		source.command_token = event.command.token;
-		source.guild_id = event.command.guild_id;
-		source.channel_id = event.command.channel_id;
-		source.issuer = (user*)&event.command.usr;
-		found_cmd->second.func(cmd.name, call_params, source);
+		found_cmd->second.func(cmd.name, call_params, command_source(event));
 	}
 }
 
-void commandhandler::reply(const dpp::message &m, command_source source)
+void commandhandler::reply(const dpp::message &m, command_source source, command_completion_event_t callback)
 {
 	dpp::message msg = m;
+	msg.owner = this->owner;
 	msg.guild_id = source.guild_id;
 	msg.channel_id = source.channel_id;
 	if (!source.command_token.empty() && source.command_id) {
-		owner->interaction_response_create(source.command_id, source.command_token, dpp::interaction_response(ir_channel_message_with_source, msg), [this](const dpp::confirmation_callback_t &callback) {
-			if (callback.is_error()) {
-				this->owner->log(dpp::ll_error, fmt::format("Failed to send interaction response: {}", callback.http_info.body));
-			}
-		});
+		owner->interaction_response_create(source.command_id, source.command_token, dpp::interaction_response(ir_channel_message_with_source, msg), callback);
 	} else {
-		owner->message_create(msg);
+		owner->message_create(msg, callback);
 	}
 }
 
-void commandhandler::thinking(command_source source)
+void commandhandler::thinking(command_source source, command_completion_event_t callback)
 {
-	dpp::message msg;
+	dpp::message msg(this->owner);
 	msg.content = "*";
 	msg.guild_id = source.guild_id;
 	msg.channel_id = source.channel_id;
 	if (!source.command_token.empty() && source.command_id) {
-		owner->interaction_response_create(source.command_id, source.command_token, dpp::interaction_response(ir_deferred_channel_message_with_source, msg));
+		owner->interaction_response_create(source.command_id, source.command_token, dpp::interaction_response(ir_deferred_channel_message_with_source, msg), callback);
 	}
 }
 
-void commandhandler::thonk(command_source source)
+void commandhandler::thonk(command_source source, command_completion_event_t callback)
 {
-	thinking(source);
+	thinking(source, callback);
 }
 
 };

@@ -18,17 +18,10 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -44,14 +37,15 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void typing_start::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.typing_start) {
+	if (!client->creator->on_typing_start.empty()) {
 		json& d = j["d"];
 		dpp::typing_start_t ts(client, raw);
-		ts.typing_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
-		ts.typing_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
-		ts.typing_user = dpp::find_user(SnowflakeNotNull(&d, "user_id"));
-		ts.timestamp = TimestampNotNull(&d, "timestamp");
-		client->creator->dispatch.typing_start(ts);
+		ts.typing_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
+		ts.typing_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
+		ts.user_id = snowflake_not_null(&d, "user_id");
+		ts.typing_user = dpp::find_user(ts.user_id);
+		ts.timestamp = ts_not_null(&d, "timestamp");
+		client->creator->on_typing_start.call(ts);
 	}
 }
 

@@ -17,3 +17,4 @@ When contributing to this repository, please do not feel intimidated! We welcome
    build will compile on various platforms before release and makes precompiled versions of the library.
 8. If you are on the discord server for the project and your PR is accepted, let a moderator know and we
    will grant you the 'Contributors' role.
+

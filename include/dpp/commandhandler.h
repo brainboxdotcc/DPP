@@ -21,8 +21,14 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/snowflake.h>
+#include <dpp/misc-enum.h>
+#include <dpp/user.h>
+#include <dpp/guild.h>
+#include <dpp/role.h>
+#include <dpp/appcommand.h>
+#include <dpp/dispatcher.h>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 #include <vector>
 #include <functional>
@@ -37,7 +43,7 @@ namespace dpp {
  * The Discord API provides both if a parameter is a user ping,
  * so we offer both in a combined structure.
  */
-struct CoreExport resolved_user {
+struct DPP_EXPORT resolved_user {
 	/**
 	 * @brief Holds user information
 	 */
@@ -75,7 +81,7 @@ enum parameter_type {
  * Note that for non-slash commands optional parameters can only be at the end of
  * the list of parameters.
  */
-struct CoreExport param_info {
+struct DPP_EXPORT param_info {
 
 	/**
 	 * @brief Type of parameter
@@ -98,7 +104,7 @@ struct CoreExport param_info {
 	 * The key name is the string passed to the command handler
 	 * and the key value is its description displayed to the user.
 	 */
-	std::map<std::string, std::string> choices;
+	std::map<command_value, std::string> choices;
 
 	/**
 	 * @brief Construct a new param_info object
@@ -108,13 +114,13 @@ struct CoreExport param_info {
 	 * @param description The parameter description
 	 * @param opts The options for a multiple choice parameter
 	 */
-	param_info(parameter_type t, bool o, const std::string &description, const std::map<std::string, std::string> &opts = {});
+	param_info(parameter_type t, bool o, const std::string &description, const std::map<command_value, std::string> &opts = {});
 };
 
 /**
  * @brief Parameter list used during registration.
  * Note that use of vector/pair is important here to preserve parameter order,
- * as opposed to unordered_map (which doesnt guarantee any order at all) and 
+ * as opposed to unordered_map (which doesn't guarantee any order at all) and 
  * std::map, which reorders keys alphabetically.
  */
 typedef std::vector<std::pair<std::string, param_info>> parameter_registration_t;
@@ -132,20 +138,21 @@ typedef std::vector<std::pair<std::string, command_parameter>> parameter_list_t;
  * to the origin, which may be a slash command or a message. Both require different
  * response facilities but we want this to be transparent if you use the command
  * handler class.
+ * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
-struct CoreExport command_source {
+struct DPP_EXPORT command_source {
 	/**
 	 * @brief Sending guild id
 	 */
-	snowflake guild_id = 0;
+	snowflake guild_id;
 	/**
 	 * @brief Source channel id
 	 */
-	snowflake channel_id = 0;
+	snowflake channel_id;
 	/**
 	 * @brief Command ID of a slash command
 	 */
-	snowflake command_id = 0;
+	snowflake command_id;
 	/**
 	 * @brief Token for sending a slash command reply
 	 */
@@ -153,19 +160,41 @@ struct CoreExport command_source {
 	/**
 	 * @brief The user who issued the command
 	 */
-	user* issuer;
+	user issuer;
+
+	/**
+	 * @brief Copy of the underlying message_create_t event, if it was a message create event
+	 */
+	std::optional<message_create_t> message_event;
+
+	/**
+	 * @brief Copy of the underlying interaction_create_t event, if it was an interaction create event
+	 */
+	std::optional<interaction_create_t> interaction_event;
+
+	/**
+	 * @brief Construct a command_source object from a message_create_t event
+	 */
+	command_source(const struct message_create_t& event);
+
+	/**
+	 * @brief Construct a command_source object from an interaction_create_t event
+	 */
+	command_source(const struct interaction_create_t& event);
 };
 
 /**
  * @brief The function definition for a command handler. Expects a command name string,
  * and a list of command parameters.
+ * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
 typedef std::function<void(const std::string&, const parameter_list_t&, command_source)> command_handler;
 
 /**
  * @brief Represents the details of a command added to the command handler class.
+ * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
-struct CoreExport command_info_t {
+struct DPP_EXPORT command_info_t {
 	/**
 	 * @brief Function reference for the handler. This is std::function so it can represent
 	 * a class member, a lambda or a raw C function pointer.
@@ -185,8 +214,11 @@ struct CoreExport command_info_t {
 /**
  * @brief The commandhandler class represents a group of commands, prefixed or slash commands with handling functions.
  * 
+ * It can automatically register slash commands, and handle routing of messages and interactions to separated command handler
+ * functions.
+ * @deprecated commandhandler and message commands are deprecated and dpp::slashcommand is encouraged as a replacement.
  */
-class CoreExport commandhandler {
+class DPP_EXPORT commandhandler {
 private:
 	/**
 	 * @brief List of guild commands to bulk register
@@ -223,6 +255,16 @@ public:
 	snowflake app_id;
 
 	/**
+	 * @brief Interaction event handle
+	 */
+	event_handle interactions;
+
+	/**
+	 * @brief Message event handle
+	 */
+	event_handle messages;
+
+	/**
 	 * @brief Returns true if the string has a known prefix on the start.
 	 * Modifies string to remove prefix if it returns true.
 	 * 
@@ -239,8 +281,9 @@ public:
 	 * 
 	 * @param o Owning cluster to attach to
 	 * @param auto_hook_events Set to true to automatically hook the on_interaction_create
-	 * and on_message events. Only do this if you have no other use for these events than
-	 * commands that are handled by the command handler (this is usually the case).
+	 * and on_message events. You should not need to set this to false unless you have a specific
+	 * use case, as D++ supports multiple listeners to an event, so will allow the commandhandler
+	 * to hook to your command events without disrupting other uses for the events you may have.
 	 * @param application_id The application id of the bot. If not specified, the class will
 	 * look within the cluster object and use cluster::me::id instead.
 	 */
@@ -278,14 +321,22 @@ public:
 	 * @param description The description of the command, shown for slash commands
 	 * @param guild_id The guild ID to restrict the command to. For slash commands causes registration of a guild command as opposed to a global command.
 	 * @return commandhandler& reference to self
+	 * @throw dpp::logic_exception if application ID cannot be determined
 	 */
 	commandhandler& add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, const std::string &description = "", snowflake guild_id = 0);
 
 	/**
 	 * @brief Register all slash commands with Discord
-	 * This method must be called if you are using the "/" prefix to mark the end of commands
-	 * being added to the handler. Note that this uses bulk registration and will replace any
+	 * This method must be called at least once  if you are using the "/" prefix to mark the
+	 * end of commands being added to the handler. Note that this uses bulk registration and will replace any
 	 * existing slash commands.
+	 * 
+	 * Note that if you have previously registered your commands and they have not changed, you do
+	 * not need to call this again. Discord retains a cache of previously added commands.
+	 * 
+	 * @note Registration of global slash commands can take up to an hour to appear on Discord.
+	 * This is a Discord API limitation. For rapid testing use guild specific commands by specifying
+	 * a guild ID when declaring the command.
 	 * 
 	 * @return commandhandler& Reference to self for chaining method calls
 	 */
@@ -294,20 +345,20 @@ public:
 	/**
 	 * @brief Route a command from the on_message_create function.
 	 * Call this method from within your on_message_create with the received
-	 * dpp::message object.
+	 * dpp::message object if you have disabled automatic registration of events.
 	 * 
-	 * @param msg message to parse
+	 * @param event message create event to parse
 	 */
-	void route(const class dpp::message& msg);
+	void route(const struct dpp::message_create_t& event);
 
 	/**
 	 * @brief Route a command from the on_interaction_create function.
 	 * Call this method from your on_interaction_create with the received
-	 * dpp::interaction_create_t object.
+	 * dpp::interaction_create_t object if you have disabled automatic registration of events.
 	 * 
 	 * @param event command interaction event to parse
 	 */
-	void route(const class interaction_create_t & event);
+	void route(const struct interaction_create_t & event);
 
 	/**
 	 * @brief Reply to a command.
@@ -318,8 +369,9 @@ public:
 	 * 
 	 * @param m message to reply with.
 	 * @param source source of the command
+	 * @param callback User function to execute when the api call completes.
 	 */
-	void reply(const dpp::message &m, command_source source);
+	void reply(const dpp::message &m, command_source source, command_completion_event_t callback = {});
 
 	/**
 	 * @brief Reply to a command without a message, causing the discord client
@@ -330,11 +382,12 @@ public:
 	 * seconds.
 	 * 
 	 * @param source source of the command
+	 * @param callback User function to execute when the api call completes.
 	 */
-	void thinking(command_source source);
+	void thinking(command_source source, command_completion_event_t callback = {});
 
 	/* Easter egg */
-	void thonk(command_source source);
+	void thonk(command_source source, command_completion_event_t callback = {});
 
 };
 

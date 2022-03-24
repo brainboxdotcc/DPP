@@ -11,6 +11,7 @@ SET(CMAKE_CXX_COMPILER ${COMPILER_ROOT}/bin/arm-linux-gnueabihf-g++)
 # Below call is necessary to avoid non-RT problem.
 SET(CMAKE_LIBRARY_ARCHITECTURE arm-linux-gnueabihf)
 SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE armhf)
+SET(CPACK_RPM_PACKAGE_ARCHITECTURE armhf)
 
 SET(RASPBERRY_ROOT_PATH ${CMAKE_CURRENT_LIST_DIR}/arm_raspberry)
 SET(RASPBERRY_KINETIC_PATH ${RASPBERRY_ROOT_PATH}/opt/ros/kinetic)
@@ -53,11 +54,11 @@ SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} --sysroot=${RASPBERRY_ROOT_PAT
 
 SET(LD_LIBRARY_PATH ${RASPBERRY_KINETIC_PATH}/lib)
 
-EXECUTE_PROCESS(COMMAND wget -P ${CMAKE_SOURCE_DIR}/rootfs -q http://archive.raspbian.org/raspbian/pool/main/z/zlib/zlib1g_1.2.11.dfsg-1_armhf.deb http://archive.raspbian.org/raspbian/pool/main/z/zlib/zlib1g-dev_1.2.11.dfsg-1_armhf.deb http://archive.raspbian.org/raspbian/pool/main/o/openssl/libssl1.1_1.1.1l-1_armhf.deb http://archive.raspbian.org/raspbian/pool/main/o/openssl/libssl-dev_1.1.1l-1_armhf.deb https://github.com/Pro/raspi-toolchain/releases/download/v1.0.2/raspi-toolchain.tar.gz)
+EXECUTE_PROCESS(COMMAND wget -P ${CMAKE_SOURCE_DIR}/rootfs -q http://content.dpp.dev/zlib1g_1.2.11.dfsg-1_armhf.deb http://content.dpp.dev/zlib1g-dev_1.2.11.dfsg-1_armhf.deb http://content.dpp.dev/libssl1.1_1.1.1m-1_armhf.deb http://content.dpp.dev/libssl-dev_1.1.1m-1_armhf.deb https://content.dpp.dev/raspi-toolchain.tar.gz)
 
 EXECUTE_PROCESS(
 	COMMAND tar -xzf ${CMAKE_SOURCE_DIR}/rootfs/raspi-toolchain.tar.gz -C /opt
 	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/zlib1g-dev_1.2.11.dfsg-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs
 	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/zlib1g_1.2.11.dfsg-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs
-	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/libssl-dev_1.1.1l-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs
-	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/libssl1.1_1.1.1l-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs)
+	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/libssl-dev_1.1.1m-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs
+	COMMAND sudo dpkg-deb -x ${CMAKE_SOURCE_DIR}/rootfs/libssl1.1_1.1.1m-1_armhf.deb ${CMAKE_SOURCE_DIR}/rootfs)

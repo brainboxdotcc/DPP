@@ -20,9 +20,8 @@
  ************************************************************************************/
 #include <dpp/emoji.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/dispatcher.h>
+#include <dpp/exception.h>
 
 namespace dpp {
 
@@ -32,31 +31,28 @@ emoji::emoji() : managed(), user_id(0), flags(0), image_data(nullptr)
 {
 }
 
-emoji::emoji(const std::string n, const snowflake i, const uint8_t f)
-	: managed(i), user_id(0), flags(f), image_data(nullptr), name(n)
+emoji::emoji(const std::string n, const snowflake i, const uint8_t f) : managed(i), name(n), user_id(0), flags(f), image_data(nullptr)
 {	
 }
 
 emoji::~emoji() {
-	if (image_data) {
-		delete image_data;
-	}
+    delete image_data;
 }
 
 emoji& emoji::fill_from_json(nlohmann::json* j) {
-	id = SnowflakeNotNull(j, "id");
-	name = StringNotNull(j, "name");
+	id = snowflake_not_null(j, "id");
+	name = string_not_null(j, "name");
 	if (j->find("user") != j->end()) {
 		json & user = (*j)["user"];
-		user_id = SnowflakeNotNull(&user, "id");
+		user_id = snowflake_not_null(&user, "id");
 	}
-	if (BoolNotNull(j, "require_colons"))
+	if (bool_not_null(j, "require_colons"))
 		flags |= e_require_colons;
-	if (BoolNotNull(j, "managed"))
+	if (bool_not_null(j, "managed"))
 		flags |= e_managed;
-	if (BoolNotNull(j, "animated"))
+	if (bool_not_null(j, "animated"))
 		flags |= e_animated;
-	if (BoolNotNull(j, "available"))
+	if (bool_not_null(j, "available"))
 		flags |= e_available;
 	return *this;
 }
@@ -96,21 +92,34 @@ emoji& emoji::load_image(const std::string &image_blob, const image_type type) {
 		{ i_png, "image/png" }
 	};
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
-		throw dpp::exception("Emoji file exceeds discord limit of 256 kilobytes");
+		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
 	}
-	if (image_data) {
-		/* If there's already image data defined, free the old data, to prevent a memory leak */
-		delete image_data;
-	}
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length()));
+
+	/* If there's already image data defined, free the old data, to prevent a memory leak */
+	delete image_data;
+
+	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length()));
 
 	return *this;
 }
 
 std::string emoji::format() const
 {
-	return id ? (name + ":" + std::to_string(id)) : name;
+	return id ? ((is_animated() ? "a:" : "") + name + ":" + std::to_string(id)) : name;
 }
+
+std::string emoji::get_mention() const {
+	if (id) {
+		if (is_animated()) {
+			return "<" + format() + ">";
+		} else {
+			return "<:" + format() + ">";
+		}
+	} else {
+		return ":" + format() + ":";
+	}
+}
+
 
 };
 

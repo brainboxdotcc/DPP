@@ -1,4 +1,3 @@
-#include <dpp/discord.h>
 /************************************************************************************
  *
  * D++, A Lightweight C++ library for Discord
@@ -19,16 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/stage_instance.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -44,15 +38,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void stage_instance_delete::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.stage_instance_delete) {
+	if (!client->creator->on_stage_instance_delete.empty()) {
 		json& d = j["d"];
 		dpp::stage_instance_delete_t sid(client, raw);
-		sid.id = SnowflakeNotNull(&d, "id");
-		sid.channel_id = SnowflakeNotNull(&d, "channel_id");
-		sid.guild_id = SnowflakeNotNull(&d, "channel_id");
-		sid.privacy_level = dpp::Int8NotNull(&d, "privacy_level");
-		sid.topic = StringNotNull(&d, "topic");
-		client->creator->dispatch.stage_instance_delete(sid);
+		sid.deleted.fill_from_json(&d);
+		client->creator->on_stage_instance_delete.call(sid);
 	}
 }
 

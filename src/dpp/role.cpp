@@ -18,10 +18,13 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
+#include <dpp/exception.h>
+#include <dpp/role.h>
+#include <dpp/cache.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -47,24 +50,36 @@ role::~role()
 	}
 }
 
+role& role::fill_from_json(nlohmann::json* j)
+{
+	return fill_from_json(0, j);
+}
+
 role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 {
 	this->guild_id = _guild_id;
-	this->name = StringNotNull(j, "name");
-	this->icon = StringNotNull(j, "icon");
-	this->unicode_emoji = StringNotNull(j, "unicode_emoji");
-	this->id = SnowflakeNotNull(j, "id");
-	this->colour = Int32NotNull(j, "color");
-	this->position = Int8NotNull(j, "position");
-	this->permissions = SnowflakeNotNull(j, "permissions");
-	this->flags |= BoolNotNull(j, "hoist") ? dpp::r_hoist : 0;
-	this->flags |= BoolNotNull(j, "managed") ? dpp::r_managed : 0;
-	this->flags |= BoolNotNull(j, "mentionable") ? dpp::r_mentionable : 0;
+	this->name = string_not_null(j, "name");
+	this->icon = string_not_null(j, "icon");
+	this->unicode_emoji = string_not_null(j, "unicode_emoji");
+	this->id = snowflake_not_null(j, "id");
+	this->colour = int32_not_null(j, "color");
+	this->position = int8_not_null(j, "position");
+	this->permissions = snowflake_not_null(j, "permissions");
+	this->flags |= bool_not_null(j, "hoist") ? dpp::r_hoist : 0;
+	this->flags |= bool_not_null(j, "managed") ? dpp::r_managed : 0;
+	this->flags |= bool_not_null(j, "mentionable") ? dpp::r_mentionable : 0;
 	if (j->find("tags") != j->end()) {
 		auto t = (*j)["tags"];
-		this->flags |= BoolNotNull(&t, "premium_subscriber") ? dpp::r_premium_subscriber : 0;
-		this->bot_id = SnowflakeNotNull(&t, "bot_id");
-		this->integration_id = SnowflakeNotNull(&t, "integration_id");
+		/* This is broken on the Discord API.
+		 * Confirmed 25/11/2021, by quin#3017. If the value exists
+		 * as a null, this is the nitro role. If it doesn't exist at all, it is
+		 * NOT the nitro role. How obtuse.
+		 */
+		if (t.find("premium_subscriber") != t.end()) {
+			this->flags |= dpp::r_premium_subscriber;
+		}
+		this->bot_id = snowflake_not_null(&t, "bot_id");
+		this->integration_id = snowflake_not_null(&t, "integration_id");
 	}
 	return *this;
 }
@@ -74,6 +89,9 @@ std::string role::build_json(bool with_id) const {
 
 	if (with_id) {
 		j["id"] = std::to_string(id);
+	}
+	if (!name.empty()) {
+		j["name"] = name;
 	}
 	if (colour) {
 		j["color"] = colour;
@@ -92,17 +110,21 @@ std::string role::build_json(bool with_id) const {
 	return j.dump();
 }
 
+std::string role::get_mention() const {
+	return "<&" + std::to_string(id) + ">";
+}
+
 role& role::load_image(const std::string &image_blob, const image_type type) {
 	static const std::map<image_type, std::string> mimetypes = {
 		{ i_gif, "image/gif" },
 		{ i_jpg, "image/jpeg" },
 		{ i_png, "image/png" }
 	};
-	if (image_data) {
-		/* If there's already image data defined, free the old data, to prevent a memory leak */
-		delete image_data;
-	}
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length()));
+
+	/* If there's already image data defined, free the old data, to prevent a memory leak */
+	delete image_data;
+
+	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length()));
 
 	return *this;
 }
@@ -272,7 +294,86 @@ bool role::has_send_messages_in_threads() const {
 	return ((this->permissions & p_administrator) | (this->permissions & p_send_messages_in_threads));
 }
 
-bool role::has_start_embedded_activities() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_start_embedded_activities));
+bool role::has_use_embedded_activities() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_use_embedded_activities));
 }
+
+bool role::has_manage_events() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_manage_events));
+}
+
+bool role::has_moderate_members() const {
+	return ((this->permissions & p_administrator) | (this->permissions & p_moderate_members));
+}
+
+role& role::set_name(const std::string& n) {
+	name = utility::validate(n, 1, 100, "Role name too short");
+	return *this;
+}
+
+role& role::set_colour(uint32_t c) {
+	colour = c;
+	return *this;
+}
+
+role& role::set_color(uint32_t c) {
+	return set_colour(c);
+}
+
+role& role::set_flags(uint8_t f) {
+	flags = f;
+	return *this;
+}
+
+role& role::set_integration_id(snowflake i) {
+	integration_id = i;
+	return *this;
+}
+
+role& role::set_bot_id(snowflake b) {
+	bot_id = b;
+	return *this;
+}
+
+role& role::set_guild_id(snowflake gid) {
+	guild_id = gid;
+	return *this;
+}
+
+members_container role::get_members() const {
+	members_container gm;
+	guild* g = dpp::find_guild(this->guild_id);
+	if (g) {
+		if (this->guild_id == this->id) {
+			/* Special shortcircuit for everyone-role. Always includes all users. */
+			return g->members;
+		}
+		for (auto & m : g->members) {
+			/* Iterate all members and use std::find on their role list to see who has this role */
+			auto i = std::find(m.second.roles.begin(), m.second.roles.end(), this->id);
+			if (i != m.second.roles.end()) {
+				gm[m.second.user_id] = m.second;
+			}
+		}
+	}
+	return gm;
+}
+
+std::string role::get_icon_url(uint16_t size) const {
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	 * At some point in the future this URL *will* change!
+	 */
+	if (!this->icon.to_string().empty()) {
+		return fmt::format("{}/role-icons/{}/{}.png{}",
+						   utility::cdn_host,
+						   this->id,
+						   this->icon.to_string(),
+						   utility::avatar_size(size)
+		);
+	} else {
+		return std::string();
+	}
+}
+
+
 };

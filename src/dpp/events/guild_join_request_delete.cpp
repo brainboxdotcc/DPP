@@ -18,17 +18,10 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -44,12 +37,12 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void guild_join_request_delete::handle(class discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.guild_join_request_delete) {
+	if (!client->creator->on_guild_join_request_delete.empty()) {
 		json& d = j["d"];
 		dpp::guild_join_request_delete_t grd(client, raw);
-		grd.user_id = SnowflakeNotNull(&d, "user_id");
-		grd.guild_id = SnowflakeNotNull(&d, "guild_id");
-		client->creator->dispatch.guild_join_request_delete(grd);
+		grd.user_id = snowflake_not_null(&d, "user_id");
+		grd.guild_id = snowflake_not_null(&d, "guild_id");
+		client->creator->on_guild_join_request_delete.call(grd);
 	}
 }
 

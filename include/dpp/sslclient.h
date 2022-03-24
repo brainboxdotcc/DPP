@@ -20,26 +20,38 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <dpp/misc-enum.h>
 #include <string>
 #include <functional>
-#include <dpp/discord.h>
+#include <dpp/socket.h>
 
 namespace dpp {
 
-/** This is an opaque class containing openssl library specific structures.
- * We define it this way so that the public facing D++ library doesnt require
+/**
+ * @brief This is an opaque class containing openssl library specific structures.
+ * We define it this way so that the public facing D++ library doesn't require
  * the openssl headers be available to build against it.
  */
 class opensslcontext;
 
 /**
+ * @brief A callback for socket status
+ */
+typedef std::function<dpp::socket()> socket_callback_t;
+
+/**
+ * @brief A socket notification callback
+ */
+typedef std::function<void()> socket_notification_t;
+
+/**
  * @brief Implements a simple non-blocking SSL stream client.
  * 
- * Note that although the design is non-blocking the Run() method will
+ * Note that although the design is non-blocking the run() method will
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
  */
-class CoreExport ssl_client
+class DPP_EXPORT ssl_client
 {
 protected:
 	/** Input buffer received from openssl */
@@ -54,7 +66,7 @@ protected:
 	bool nonblocking;
 
 	/** Raw file descriptor of connection */
-	SOCKET sfd;
+	dpp::socket sfd;
 
 	/** Openssl opaque contexts */
 	opensslcontext* ssl;
@@ -77,11 +89,23 @@ protected:
 	/** Bytes in */
 	uint64_t bytes_in;
 
+	/** True for a plain text connection */
+	bool plaintext;
+
+	/**
+	 * @brief True if we are establishing a new connection, false if otherwise.
+	 */
+	bool make_new;
+
+
 	/** Called every second */
 	virtual void one_second_timer();
 
-	/** Start connection */
-	virtual void Connect();
+	/**
+	 * @brief Start SSL connection and connect to TCP endpoint
+	 * @throw dpp::exception Failed to initialise connection
+	 */
+	virtual void connect();
 public:
 	/** Get total bytes sent */
 	uint64_t get_bytes_out();
@@ -98,7 +122,7 @@ public:
 	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread!
 	 * Returning -1 means that you don't want to be notified.
 	 */
-	std::function<int()> custom_readable_fd;
+	socket_callback_t custom_readable_fd;
 
 	/**
 	 * @brief Attaching an additional file descriptor to this function will send notifications when you are able to write
@@ -107,27 +131,38 @@ public:
 	 * NOTE: Only hook this if you NEED it as it can increase CPU usage of the thread! You should toggle this
 	 * to -1 when you do not have anything to write otherwise it'll keep triggering repeatedly (it is level triggered).
 	 */
-	std::function<int()> custom_writeable_fd;
+	socket_callback_t custom_writeable_fd;
 
 	/**
 	 * @brief This event will be called when you can read from the custom fd
 	 */
-	std::function<void()> custom_readable_ready;
+	socket_notification_t custom_readable_ready;
 
 	/**
 	 * @brief This event will be called when you can write to a custom fd
 	 */
-	std::function<void()> custom_writeable_ready;
+	socket_notification_t custom_writeable_ready;
+
+	/**
+	 * @brief True if we are keeping the connection alive after it has finished
+	 */
+	bool keepalive;
 
 	/**
 	 * @brief Connect to a specified host and port. Throws std::runtime_error on fatal error.
 	 * @param _hostname The hostname to connect to
 	 * @param _port the Port number to connect to
+	 * @param plaintext_downgrade Set to true to connect using plaintext only, without initialising SSL.
+	 * @param reuse Attempt to reuse previous connections for this hostname and port, if available
+	 * Note that no Discord endpoints will function when downgraded. This option is provided only for
+	 * connection to non-Discord addresses such as within dpp::cluster::request().
+	 * @throw dpp::exception Failed to initialise connection
 	 */
-	ssl_client(const std::string &_hostname, const std::string &_port = "443");
+	ssl_client(const std::string &_hostname, const std::string &_port = "443", bool plaintext_downgrade = false, bool reuse = false);
 
 	/**
 	 * @brief Nonblocking I/O loop
+	 * @throw std::exception Any std::exception (or derivative) thrown from read_loop() causes reconnection of the shard
 	 */
 	void read_loop();
 

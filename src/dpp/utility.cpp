@@ -18,8 +18,10 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
+#include <dpp/utility.h>
 #include <dpp/stringops.h>
+#include <dpp/exception.h>
+#include <dpp/version.h>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
@@ -28,8 +30,19 @@
 #include <chrono>
 #include <ctime>
 #include <algorithm>
-#include <iomanip>
+#include <fstream>
+#include <streambuf>
+#include <array>
 #include <dpp/fmt/format.h>
+#include <dpp/cluster.h>
+#include <dpp/dispatcher.h>
+
+#ifdef _WIN32
+	#include <stdio.h>
+	#include <stdlib.h>
+	#define popen _popen
+	#define pclose _pclose
+#endif
 
 using namespace std::literals;
 
@@ -62,7 +75,7 @@ namespace dpp {
 			localtime_r(&t, &timedata);
 			std::stringstream s;
 			s << std::put_time(&timedata, "%Y-%m-%d %H:%M:%S");
-			return s.str();
+			return trim(s.str());
 #endif
 		}
 
@@ -79,6 +92,9 @@ namespace dpp {
 		}
 
 		uptime::uptime() : days(0), hours(0), mins(0), secs(0) {
+		}
+
+		uptime::uptime(double diff) : uptime((time_t)diff) {
 		}
 
 		uptime::uptime(time_t diff) : uptime() {
@@ -108,14 +124,21 @@ namespace dpp {
 		}
 
 		void iconhash::set(const std::string &hash) {
+			std::string clean_hash(hash);
 			if (hash.empty()) {	// Clear values if empty hash
 				first = second = 0;
 				return;
 			}
-			if (hash.length() != 32)
-				throw std::length_error("iconhash must be exactly 32 characters in length");
-			this->first = from_string<uint64_t>(hash.substr(0, 16), std::hex);
-			this->second = from_string<uint64_t>(hash.substr(16, 16), std::hex);
+			if (hash.length() == 34 && hash.substr(0, 2) == "a_") {
+				/* Someone passed in an animated icon. numpty.
+				 * Clean that mess up!
+				 */
+				clean_hash = hash.substr(2);
+			}
+			if (clean_hash.length() != 32)
+				throw std::length_error("iconhash must be exactly 32 characters in length, passed value is: '" + clean_hash + "'");
+			this->first = from_string<uint64_t>(clean_hash.substr(0, 16), std::hex);
+			this->second = from_string<uint64_t>(clean_hash.substr(16, 16), std::hex);
 		}
 
 		iconhash::iconhash(const std::string &hash) {
@@ -134,23 +157,29 @@ namespace dpp {
 				return fmt::format("{:016x}{:016x}", this->first, this->second);
 		}
 
-		void debug_dump(uint8_t* data, size_t length) {
+		std::string debug_dump(uint8_t* data, size_t length) {
+			std::ostringstream out;
 			size_t addr = (size_t)data;
 			size_t extra = addr % 16;
 			if (extra != 0) {
 				addr -= extra;
-				std::cout << fmt::format("[{:016X}] : ", addr);
+				out << fmt::format("[{:016X}] : ", addr);
 			}
 			for (size_t n = 0; n < extra; ++n) {
-				std::cout << "-- ";
+				out << "-- ";
 			}
+			std::string ascii;
 			for (uint8_t* ptr = data; ptr < data + length; ++ptr) {
 				if (((size_t)ptr % 16) == 0) {
-					std::cout << fmt::format("\n[{:016X}] : ", (size_t)ptr);
+					out << fmt::format("    {}\n[{:016X}] : ", ascii, (size_t)ptr);
+					ascii.clear();
 				}
-				std::cout << fmt::format("{:02X} ", *ptr);
+				ascii.push_back(*ptr >= ' ' && *ptr <= '~' ? *ptr : '.');
+				out << fmt::format("{:02X} ", *ptr);
 			}
-			std::cout << "\n";
+			out << "    " << ascii;
+			out << "\n";
+			return out.str();
 		}
 
 		std::string bytes(uint64_t c) {
@@ -167,8 +196,16 @@ namespace dpp {
 			}
 		}
 
+		uint32_t rgb(float red, float green, float blue) {
+			return (((uint32_t)(red * 255)) << 16) | (((uint32_t)(green * 255)) << 8) | ((uint32_t)(blue * 255));
+		}
+
+		/* NOTE: Parameters here are `int` instead of `uint32_t` or `uint8_t` to prevent ambiguity error with rgb(float, float, float) */
+		uint32_t rgb(int red, int green, int blue) {
+			return ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
+		}
+
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
-#ifndef _WIN32
 			auto t = std::thread([cmd, parameters, callback]() {
 				std::array<char, 128> buffer;
 				std::vector<std::string> my_parameters = parameters;
@@ -182,18 +219,16 @@ namespace dpp {
 				cmd_and_parameters << " 2>&1";
 				std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd_and_parameters.str().c_str(), "r"), pclose);
 				if (!pipe) {
-					return "";
+					return;
 				}
-				while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+				while (fgets(buffer.data(), (int)buffer.size(), pipe.get()) != nullptr) {
 					result += buffer.data();
 				}
 				if (callback) {
 					callback(result);
 				}
-				return "";
 			});
 			t.detach();
-#endif
 		}
 
 		size_t utf8len(const std::string &str)
@@ -268,6 +303,170 @@ namespace dpp {
 				return "";
 
 			return str.substr(min, max);
+		}
+
+		std::string read_file(const std::string& filename)
+		{
+			try {
+				std::ifstream ifs(filename, std::ios::binary);
+				return std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+			}
+			catch (const std::exception& e) {
+				/* Rethrow as dpp::file_exception */
+				throw dpp::file_exception(e.what());
+			}
+		}
+
+		std::string validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message) {
+			if (utf8len(value) < _min) {
+				throw dpp::length_exception(exception_message);
+			} else if (utf8len(value) > _max) {
+				return utf8substr(value, 0, _max);
+			}
+			return value;
+		}
+
+
+		std::string timestamp(time_t ts, time_format tf) {
+			char format[2] = { (char)tf, 0 };
+			return "<t:" + std::to_string(ts) + ":" + format + ">";
+		}
+
+		std::string avatar_size(uint32_t size) {
+			if (size) {
+				return "?size=" + std::to_string(size);
+			}
+			return std::string();
+		}
+
+		std::vector<std::string> tokenize(std::string const &in, const char* sep) {
+			std::string::size_type b = 0;
+			std::vector<std::string> result;
+
+			while ((b = in.find_first_not_of(sep, b)) != std::string::npos) {
+				auto e = in.find(sep, b);
+				result.push_back(in.substr(b, e-b));
+				b = e;
+			}
+			return result;
+		}
+
+		std::string bot_invite_url(const snowflake bot_id, const uint64_t permissions, const std::vector<std::string>& scopes) {
+			return fmt::format("https://discord.com/oauth2/authorize?client_id={}&permissions={}&scope={}",
+				bot_id,
+				permissions,
+				fmt::join(scopes, "+")
+			);
+		}
+
+		std::function<void(const dpp::log_t&)> cout_logger() {
+			return [](const dpp::log_t& event) {
+				if (event.severity > dpp::ll_trace) {
+					std::cout << "[" << dpp::utility::current_date_time() << "] " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+				}
+			};
+		}
+
+		std::function<void(const dpp::confirmation_callback_t& detail)> log_error() {
+			return [](const dpp::confirmation_callback_t& detail) {
+				if (detail.is_error()) {
+					if (detail.bot) {
+						detail.bot->log(dpp::ll_error, fmt::format("Error {} [{}] on API request, returned content was: {}", detail.get_error().code, detail.get_error().message, detail.http_info.body));
+					}
+				}
+			};
+		}
+
+		/* Hexadecimal sequence for URL encoding */
+		static const char* hex = "0123456789ABCDEF";
+
+		std::string url_encode(const std::string &value) {
+			// Reserve worst-case encoded length of string, input length * 3
+			std::string escaped(value.length() * 3, '\0');
+			char* data = escaped.data();
+			for (auto i = value.begin(); i != value.end(); ++i) {
+				unsigned char c = (unsigned char)(*i);
+				if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+					// Keep alphanumeric and other accepted characters intact
+					*data++ = c;
+				} else {
+					// Any other characters are percent-encoded
+					*data++ = '%';
+					*data++ = hex[c >> 4];
+					*data++ = hex[c & 0x0f];
+				}
+			}
+			*data = 0;
+			return escaped.data();
+		}
+
+		std::string make_url_parameters(const std::map<std::string, std::string>& parameters) {
+			std::string output;
+			for(auto& [k, v] : parameters) {
+				if (!k.empty() && !v.empty()) {
+					output.append("&").append(k).append("=").append(url_encode(v));
+				}
+			}
+			if (!output.empty()) {
+				output[0] = '?';
+			}
+			return output;
+		}
+
+		std::string make_url_parameters(const std::map<std::string, uint64_t>& parameters) {
+			std::map<std::string, std::string> params;
+			for(auto& [k, v] : parameters) {
+				if (v != 0) {
+					params[k] = std::to_string(v);
+				}
+			}
+			return make_url_parameters(params);
+		}
+
+		std::string markdown_escape(const std::string& text, bool escape_code_blocks) {
+			/**
+			 * @brief Represents the current state of the finite state machine
+			 * for the markdown_escape function.
+			 */
+			enum md_state {
+				/// normal text
+				md_normal = 0,
+				/// a paragraph code block, represented by three backticks
+				md_big_code_block = 1,
+				/// an inline code block, represented by one backtick
+				md_small_code_block = 2,
+			};
+
+			md_state state = md_normal;
+			std::string output;
+			const std::string markdown_chars("\\*_|~[]()>");
+
+			for (size_t n = 0; n < text.length(); ++n) {
+				if (text.substr(n, 3) == "```") {
+					/* Start/end a paragraph code block */
+					output += (escape_code_blocks ? "\\`\\`\\`" : "```");
+					n += 2;
+					state = (state == md_normal) ? md_big_code_block : md_normal;
+				} else if (text[n] == '`' && (escape_code_blocks || state != md_big_code_block)) {
+					/* Start/end of an inline code block */
+					output += (escape_code_blocks ? "\\`" : "`");
+					state = (state == md_normal) ? md_small_code_block : md_normal;
+				} else {
+					/* Normal text */
+					if (escape_code_blocks || state == md_normal) {
+						/* Markdown sequence characters */
+						if (markdown_chars.find(text[n]) != std::string::npos) {
+							output += "\\";
+						}
+					}
+					output += text[n];
+				}
+			}
+			return output;
+		}
+
+		std::string version() {
+			return DPP_VERSION_TEXT;
 		}
 	};
 

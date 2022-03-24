@@ -8,6 +8,7 @@ SET(CMAKE_CXX_COMPILER ${COMPILER_ROOT}/arm-linux-gnueabihf-g++-8)
 # Below call is necessary to avoid non-RT problem.
 SET(CMAKE_LIBRARY_ARCHITECTURE arm-linux-gnueabihf)
 SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE armhf)
+SET(CPACK_RPM_PACKAGE_ARCHITECTURE armhf)
 
 SET(RASPBERRY_ROOT_PATH ${CMAKE_SOURCE_DIR}/arm_raspberry)
 SET(RASPBERRY_KINETIC_PATH ${RASPBERRY_ROOT_PATH}/opt/ros/kinetic)

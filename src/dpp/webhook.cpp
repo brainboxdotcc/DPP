@@ -20,16 +20,34 @@
  ************************************************************************************/
 #include <dpp/webhook.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/dispatcher.h>
+#include <dpp/exception.h>
 
 namespace dpp {
 
 using json = nlohmann::json;
 
+const size_t MAX_ICON_SIZE = 256 * 1024;
+
 webhook::webhook() : managed(), type(w_incoming), guild_id(0), channel_id(0), user_id(0), application_id(0), image_data(nullptr)
 {
+}
+
+webhook::webhook(const std::string& webhook_url) : webhook()
+{
+	token = webhook_url.substr(webhook_url.find_last_of("/") + 1);
+	try {
+		id = std::stoull(webhook_url.substr(strlen("https://discord.com/api/webhooks/"), webhook_url.find_last_of("/")));
+	}
+	catch (const std::exception& e) {
+		throw dpp::logic_exception(std::string("Failed to parse webhook URL: ") + e.what());
+	}
+}
+
+webhook::webhook(const snowflake webhook_id, const std::string& webhook_token) : webhook()
+{
+	token = webhook_token;
+	id = webhook_id;
 }
 
 webhook::~webhook() {
@@ -39,18 +57,18 @@ webhook::~webhook() {
 }
 
 webhook& webhook::fill_from_json(nlohmann::json* j) {
-	id = SnowflakeNotNull(j, "id");
-	type = Int8NotNull(j, "type");
-	channel_id = SnowflakeNotNull(j, "channel_id");
-	guild_id = SnowflakeNotNull(j, "guild_id");
+	id = snowflake_not_null(j, "id");
+	type = int8_not_null(j, "type");
+	channel_id = snowflake_not_null(j, "channel_id");
+	guild_id = snowflake_not_null(j, "guild_id");
 	if (j->find("user") != j->end()) {
 		json & user = (*j)["user"];
-		user_id = SnowflakeNotNull(&user, "id");
+		user_id = snowflake_not_null(&user, "id");
 	}
-	name = StringNotNull(j, "name");
-	avatar = StringNotNull(j, "name");
-	token = StringNotNull(j, "token");
-	application_id = SnowflakeNotNull(j, "application_id");
+	name = string_not_null(j, "name");
+	avatar = string_not_null(j, "name");
+	token = string_not_null(j, "token");
+	application_id = snowflake_not_null(j, "application_id");
 
 	return *this;
 }
@@ -75,20 +93,19 @@ std::string webhook::build_json(bool with_id) const {
 	return j.dump();
 }
 
-webhook& webhook::load_image(const std::string &image_blob, const image_type type) {
+webhook& webhook::load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded) {
 	static const std::map<image_type, std::string> mimetypes = {
 		{ i_gif, "image/gif" },
 		{ i_jpg, "image/jpeg" },
 		{ i_png, "image/png" }
 	};
-	if (image_blob.size() > MAX_EMOJI_SIZE) {
-		throw dpp::exception("Webhook icon file exceeds discord limit of 256 kilobytes");
+	if (image_blob.size() > MAX_ICON_SIZE) {
+		throw dpp::length_exception("Webhook icon file exceeds discord limit of 256 kilobytes");
 	}
-	if (image_data) {
-		/* If there's already image data defined, free the old data, to prevent a memory leak */
-		delete image_data;
-	}
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), image_blob.length()));
+
+	/* If there's already image data defined, free the old data, to prevent a memory leak */
+	delete image_data;
+	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + (is_base64_encoded ? image_blob : base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length())));
 
 	return *this;
 }

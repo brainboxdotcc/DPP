@@ -18,17 +18,12 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/guild.h>
+#include <dpp/ban.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -45,12 +40,12 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void guild_ban_add::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.guild_ban_add) {
+	if (!client->creator->on_guild_ban_add.empty()) {
 		json &d = j["d"];
 		dpp::guild_ban_add_t gba(client, raw);
-		gba.banning_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+		gba.banning_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 		gba.banned = dpp::user().fill_from_json(&(d["user"]));
-		client->creator->dispatch.guild_ban_add(gba);
+		client->creator->on_guild_ban_add.call(gba);
 	}
 }
 

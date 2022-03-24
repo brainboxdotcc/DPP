@@ -30,6 +30,7 @@
 #include <sstream>
 #include <iostream>
 
+namespace dpp {
 /**
  * @brief Convert a string to lowercase using tolower()
  * 
@@ -41,7 +42,7 @@ template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>&
 {
     std::basic_string<T> s2 = s;
     std::transform(s2.begin(), s2.end(), s2.begin(), tolower);
-    return std::move(s2);
+    return s2;
 }
 
 /**
@@ -55,7 +56,7 @@ template <typename T> std::basic_string<T> uppercase(const std::basic_string<T>&
 {
     std::basic_string<T> s2 = s;
     std::transform(s2.begin(), s2.end(), s2.begin(), toupper);
-    return std::move(s2);
+    return s2;
 }
 
 /**
@@ -100,7 +101,7 @@ inline std::string trim(std::string s)
  * @param value Value
  * @return std::string number with commas added 
  */
-template<class T> std::string Comma(T value)
+template<class T> std::string comma(T value)
 {
 	std::stringstream ss;
 	ss.imbue(std::locale(""));
@@ -126,3 +127,57 @@ template <typename T> T from_string(const std::string &s, std::ios_base & (*f)(s
 	return t;
 }
 
+/**
+ * @brief  Convert any value from a string to another type using stringstream.
+ * 
+ * @tparam T Type to convert to 
+ * @param s String to convert from
+ * @return T Returned numeric value
+ *
+ * @note Base 10 for numeric conversions.
+ */
+template <typename T> T from_string(const std::string &s)
+{
+	T t;
+	std::istringstream iss(s);
+	iss >> t;
+	return t;
+}
+
+/**
+ * @brief Specialised conversion of uint64_t from string
+ * 
+ * @tparam int64_t 
+ * @param s string to convert 
+ * @return uint64_t return value
+ */
+template <uint64_t> uint64_t from_string(const std::string &s)
+{
+	return std::stoull(s, 0, 10);
+}
+
+/**
+ * @brief Specialised conversion of uint32_t from string
+ * 
+ * @tparam uint32_t 
+ * @param s string to convert
+ * @return uint32_t return value
+ */
+template <uint32_t> uint32_t from_string(const std::string &s)
+{
+	return std::stoul(s, 0, 10);
+}
+
+/**
+ * @brief Specialised conversion of int from string
+ * 
+ * @tparam int 
+ * @param s string to convert
+ * @return int return value
+ */
+template <int> int from_string(const std::string &s)
+{
+	return std::stoi(s, 0, 10);
+}
+
+};

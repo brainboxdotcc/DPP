@@ -18,14 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/guild.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
 
@@ -44,12 +39,12 @@ using namespace dpp;
  */
 void guild_update::handle(discord_client* client, json &j, const std::string &raw) {
        json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(from_string<uint64_t>(d["id"].get<std::string>(), std::dec));
+	dpp::guild* g = dpp::find_guild(from_string<uint64_t>(d["id"].get<std::string>()));
 	if (g) {
 		g->fill_from_json(client, &d);
 		if (!g->is_unavailable()) {
 			if (client->creator->cache_policy.role_policy != dpp::cp_none && d.find("roles") != d.end()) {
-				for (int rc = 0; rc < g->roles.size(); ++rc) {
+				for (size_t rc = 0; rc < g->roles.size(); ++rc) {
 					dpp::role* oldrole = dpp::find_role(g->roles[rc]);
 					dpp::get_role_cache()->remove(oldrole);
 				}
@@ -63,10 +58,10 @@ void guild_update::handle(discord_client* client, json &j, const std::string &ra
 			}
 		}
 
-		if (client->creator->dispatch.guild_update) {
+		if (!client->creator->on_guild_update.empty()) {
 			dpp::guild_update_t gu(client, raw);
 			gu.updated = g;
-			client->creator->dispatch.guild_update(gu);
+			client->creator->on_guild_update.call(gu);
 		}
 	}
 }

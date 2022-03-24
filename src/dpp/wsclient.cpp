@@ -22,27 +22,29 @@
 #include <iostream>
 #include <fstream>
 #include <dpp/wsclient.h>
-#include <dpp/fmt/format.h>
+#include <dpp/utility.h>
+#include <dpp/fmt-minimal.h>
 
 namespace dpp {
 
-const unsigned char WS_MASKBIT = (1 << 7);
-const unsigned char WS_FINBIT = (1 << 7);
+const unsigned char WS_MASKBIT = (1u << 7u);
+const unsigned char WS_FINBIT = (1u << 7u);
 const unsigned char WS_PAYLOAD_LENGTH_MAGIC_LARGE = 126;
 const unsigned char WS_PAYLOAD_LENGTH_MAGIC_HUGE = 127;
 const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
 const size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
 const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
-websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath)
+websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath, ws_opcode opcode)
 	: ssl_client(hostname, port),
-	state(HTTP_HEADERS),
 	key(fmt::format("{:16x}", time(nullptr))),
-	path(urlpath)
+	state(HTTP_HEADERS),
+	path(urlpath),
+	data_opcode(opcode)
 {
 }
 
-void websocket_client::Connect()
+void websocket_client::connect()
 {
 	state = HTTP_HEADERS;
 	/* Send headers synchronously */
@@ -67,20 +69,20 @@ websocket_client::~websocket_client()
 {
 }
 
-bool websocket_client::HandleFrame(const std::string &buffer)
+bool websocket_client::handle_frame(const std::string &buffer)
 {
 	/* This is a stub for classes that derive the websocket client */
 	return true;
 }
 
-size_t websocket_client::FillHeader(unsigned char* outbuf, size_t sendlength, ws_opcode opcode)
+size_t websocket_client::fill_header(unsigned char* outbuf, size_t sendlength, ws_opcode opcode)
 {
 	size_t pos = 0;
 	outbuf[pos++] = WS_FINBIT | opcode;
 
 	if (sendlength <= WS_MAX_PAYLOAD_LENGTH_SMALL)
 	{
-		outbuf[pos++] = sendlength;
+		outbuf[pos++] = (unsigned int)sendlength;
 	}
 	else if (sendlength <= WS_MAX_PAYLOAD_LENGTH_LARGE)
 	{
@@ -116,23 +118,11 @@ void websocket_client::write(const std::string &data)
 		ssl_client::write(data);
 	} else {
 		unsigned char out[MAXHEADERSIZE];
-		size_t s = this->FillHeader(out, data.length(), OP_TEXT);
+		size_t s = this->fill_header(out, data.length(), this->data_opcode);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
 		ssl_client::write(data);
 	}
-}
-
-std::vector<std::string> tokenize(std::string const &in, const char* sep = "\r\n") {
-	std::string::size_type b = 0;
-	std::vector<std::string> result;
-
-	while ((b = in.find_first_not_of(sep, b)) != std::string::npos) {
-		auto e = in.find(sep, b);
-		result.push_back(in.substr(b, e-b));
-		b = e;
-	}
-	return result;
 }
 
 bool websocket_client::handle_buffer(std::string &buffer)
@@ -149,19 +139,19 @@ bool websocket_client::handle_buffer(std::string &buffer)
 				buffer.erase(0, buffer.find("\r\n\r\n") + 4);
 
 				/* Process headers into map */
-				std::vector<std::string> h = tokenize(headers);
+				std::vector<std::string> h = utility::tokenize(headers);
 				if (h.size()) {
 					std::string status_line = h[0];
 					h.erase(h.begin());
 					/* HTTP/1.1 101 Switching Protocols */
-					std::vector<std::string> status = tokenize(status_line, " ");
+					std::vector<std::string> status = utility::tokenize(status_line, " ");
 					if (status.size() >= 3 && status[1] == "101") {
 						for(auto &hd : h) {
 							std::string::size_type sep = hd.find(": ");
 							if (sep != std::string::npos) {
 								std::string key = hd.substr(0, sep);
 								std::string value = hd.substr(sep + 2, hd.length());
-								HTTPHeaders[key] = value;
+								http_headers[key] = value;
 							}
 						}
 		
@@ -180,7 +170,7 @@ bool websocket_client::handle_buffer(std::string &buffer)
 	return true;
 }
 
-ws_state websocket_client::GetState()
+ws_state websocket_client::get_state()
 {
 	return this->state;
 }
@@ -200,15 +190,13 @@ bool websocket_client::parseheader(std::string &data)
 			case OP_PING:
 			case OP_PONG:
 			{
-				std::string payload;
-
 				unsigned char len1 = data[1];
 				unsigned int payloadstartoffset = 2;
 
 				if (len1 & WS_MASKBIT) {
 					len1 &= ~WS_MASKBIT;
 					payloadstartoffset += 2;
-					/* We don't handle masked data, because discord doesnt send it */
+					/* We don't handle masked data, because discord doesn't send it */
 					return true;
 				}
 
@@ -246,22 +234,16 @@ bool websocket_client::parseheader(std::string &data)
 					return false;
 				}
 
-				/* Copy from buffer into string */
-				const std::string::iterator endit = data.begin() + payloadstartoffset + len;
-				for (std::string::const_iterator i = data.begin() + payloadstartoffset; i != endit; ++i) {
-					const unsigned char c = (unsigned char)*i;
-					payload.push_back(c);
-				}
-		
-				/* Remove this frame from the input buffer */
-				data.erase(data.begin(), endit);
-
 				if ((opcode & ~WS_FINBIT) == OP_PING || (opcode & ~WS_FINBIT) == OP_PONG) {
-					HandlePingPong((opcode & ~WS_FINBIT) == OP_PING, payload);
+					handle_ping_pong((opcode & ~WS_FINBIT) == OP_PING, data.substr(payloadstartoffset, len));
 				} else {
 					/* Pass this frame to the deriving class */
-					this->HandleFrame(payload);
+					this->handle_frame(data.substr(payloadstartoffset, len));
 				}
+
+				/* Remove this frame from the input buffer */
+				data.erase(data.begin(), data.begin() + payloadstartoffset + len);
+
 				return true;
 			}
 			break;
@@ -271,14 +253,14 @@ bool websocket_client::parseheader(std::string &data)
 				uint16_t error = data[2] & 0xff;
 			       	error <<= 8;
 				error |= (data[3] & 0xff);
-				this->Error(error);
+				this->error(error);
 				return false;
 			}
 			break;
 
 			default:
 			{
-				this->Error(0);
+				this->error(0);
 				return false;
 			}
 			break;
@@ -293,26 +275,26 @@ void websocket_client::one_second_timer()
 		/* For sending pings, we send with payload */
 		unsigned char out[MAXHEADERSIZE];
 		std::string payload = "keepalive";
-		size_t s = this->FillHeader(out, payload.length(), OP_PING);
+		size_t s = this->fill_header(out, payload.length(), OP_PING);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
 		ssl_client::write(payload);
 	}
 }
 
-void websocket_client::HandlePingPong(bool ping, const std::string &payload)
+void websocket_client::handle_ping_pong(bool ping, const std::string &payload)
 {
 	unsigned char out[MAXHEADERSIZE];
 	if (ping) {
 		/* For receiving pings we echo back their payload with the type OP_PONG */
-		size_t s = this->FillHeader(out, payload.length(), OP_PONG);
+		size_t s = this->fill_header(out, payload.length(), OP_PONG);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
 		ssl_client::write(payload);
 	}
 }
 
-void websocket_client::Error(uint32_t errorcode)
+void websocket_client::error(uint32_t errorcode)
 {
 }
 

@@ -21,22 +21,27 @@
 #pragma once
 
 /* Compile-time assertion check for C++17 */
-// Investigate: MSVC doesnt like this
+// Investigate: MSVC doesn't like this
 //static_assert(__cplusplus >= 201703L, "D++ Requires a C++17 compatible compiler. Please ensure that you have enabled C++17 in your compiler flags.");
 
 #ifdef DPP_BUILD
+
 	#ifdef _WIN32
-		#define CoreExport __declspec(dllexport)
+		#include <dpp/win32_safe_warnings.h>
+	#endif
+
+	#ifdef _WIN32
+		#define DPP_EXPORT __declspec(dllexport)
 	#else
-		#define CoreExport
+		#define DPP_EXPORT
 	#endif
 #else
 	#ifdef _WIN32
-		#define CoreExport __declspec(dllimport)
+		#define DPP_EXPORT __declspec(dllimport)
 		/* This is required otherwise fmt::format requires additional file linkage to your project */
 		#define FMT_HEADER_ONLY
 	#else
-		#define CoreExport
+		#define DPP_EXPORT
 	#endif
 #endif
 

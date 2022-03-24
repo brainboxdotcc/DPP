@@ -18,17 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/guild.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -46,19 +40,19 @@ using namespace dpp;
 void guild_member_add::handle(discord_client* client, json &j, const std::string &raw) {
 	json d = j["d"];
 
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	dpp::guild_member_add_t gmr(client, raw);
 	if (g) {
 		if (client->creator->cache_policy.user_policy == dpp::cp_none) {
 			dpp::guild_member gm;
-			gm.fill_from_json(&d, g->id, SnowflakeNotNull(&(d["user"]), "id"));
+			gm.fill_from_json(&d, g->id, snowflake_not_null(&(d["user"]), "id"));
 			gmr.added = gm;
-			if (client->creator->dispatch.guild_member_add) {
+			if (!client->creator->on_guild_member_add.empty()) {
 				gmr.adding_guild = g;
-				client->creator->dispatch.guild_member_add(gmr);
+				client->creator->on_guild_member_add.call(gmr);
 			}
 		} else {
-			dpp::user* u = dpp::find_user(SnowflakeNotNull(&(d["user"]), "id"));
+			dpp::user* u = dpp::find_user(snowflake_not_null(&(d["user"]), "id"));
 			if (!u) {
 				u = new dpp::user();
 				u->fill_from_json(&(d["user"]));
@@ -75,9 +69,9 @@ void guild_member_add::handle(discord_client* client, json &j, const std::string
 			} else if (u && u->id) {
 				gmr.added = g->members.find(u->id)->second;
 			}
-			if (client->creator->dispatch.guild_member_add) {
+			if (!client->creator->on_guild_member_add.empty()) {
 				gmr.adding_guild = g;
-				client->creator->dispatch.guild_member_add(gmr);
+				client->creator->on_guild_member_add.call(gmr);
 			}
 		}
 	}

@@ -20,7 +20,10 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/snowflake.h>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -42,7 +45,7 @@ enum voicestate_flags {
  * These are stored in the dpp::guild object, and accessible there,
  * or via dpp::channel::get_voice_members
  */
-class CoreExport voicestate {
+class DPP_EXPORT voicestate : public json_interface<voicestate> {
 public:
 	class discord_client*	shard;		//!< Owning shard
 	snowflake		guild_id;       //!< Optional: the guild id this voice state is for
@@ -67,14 +70,15 @@ public:
 	 * @param j JSON data to fill from
 	 * @return voicestate& Reference to self
 	 */
-	voicestate& fill_from_json(nlohmann::json* j);
+	 voicestate& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build json representation of the object
 	 * 
+	 * @param with_id Add ID to output
 	 * @return std::string JSON string
 	 */
-	std::string build_json() const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/// Return true if user is deafened
 	bool is_deaf() const;
@@ -88,7 +92,7 @@ public:
 	/// Return true if user deafened themselves
 	bool is_self_deaf() const;
 
-	/// Return true if the user is streamig
+	/// Return true if the user is streaming
 	bool self_stream() const;
 
 	/// Return true if the user is in video

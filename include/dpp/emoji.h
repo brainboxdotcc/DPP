@@ -20,8 +20,12 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/snowflake.h>
+#include <dpp/misc-enum.h>
+#include <dpp/managed.h>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -30,7 +34,7 @@ namespace dpp {
 /**
  * @brief Flags for dpp::emoji
  */
-enum emoji_flags {
+enum emoji_flags : uint8_t {
 	/// Emoji requires colons
 	e_require_colons = 0b00000001,
 	/// Managed (introduced by application)
@@ -44,7 +48,7 @@ enum emoji_flags {
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class CoreExport emoji : public managed {
+class DPP_EXPORT emoji : public managed, public json_interface<emoji>  {
 public:
 	/**
 	 * @brief Emoji name
@@ -96,7 +100,7 @@ public:
 	 * @param with_id include the id in the JSON
 	 * @return std::string json data
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Emoji requires colons
@@ -136,6 +140,7 @@ public:
 	 * @param image_blob Image binary data
 	 * @param type Type of image
 	 * @return emoji& Reference to self
+	 * @throw dpp::exception Image content exceeds discord maximum of 256 kilobytes
 	 */
 	emoji& load_image(const std::string &image_blob, const image_type type);
 
@@ -145,6 +150,13 @@ public:
 	 * @return Formatted name for reactions
 	 */
 	std::string format() const;
+
+	/**
+	 * @brief Get the mention/ping for the emoji
+	 * 
+	 * @return std::string mention
+	 */
+	std::string get_mention() const;
 };
 
 /**

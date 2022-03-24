@@ -18,17 +18,12 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/guild.h>
+#include <dpp/integration.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -44,11 +39,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void guild_integrations_update::handle(class discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.guild_integrations_update) {
+	if (!client->creator->on_guild_integrations_update.empty()) {
 		json& d = j["d"];
 		dpp::guild_integrations_update_t giu(client, raw);
-		giu.updating_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
-		client->creator->dispatch.guild_integrations_update(giu);
+		giu.updating_guild = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
+		client->creator->on_guild_integrations_update.call(giu);
 	}
 }
 

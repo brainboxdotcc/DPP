@@ -15,22 +15,16 @@ The way you build D++ varies from system to system. Please follow the guide belo
 
 ## 1. Build Source Code
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
+    cmake -B ./build
+    cmake --build ./build -j8
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
-## 2. Optional: Run test cases
+## 2. Install to /usr/local/include and /usr/local/lib
 
-Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
+    cd build; sudo make install
 
-## 3. Install to /usr/local/include and /usr/local/lib
-
-    sudo make install
-
-## 4. Installation to a different directory
+## 3. Installation to a different directory
 
 If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
@@ -38,7 +32,7 @@ If you want to install the library, its dependencies and header files to a diffe
 
 Then once the build is complete, run `make install` to install to the location you specified.
 
-## 5. Using the library
+## 4. Using the library
 
 Once installed to the /usr/local directory, you can make use of the library in standalone programs simply by including it and linking to it:
 
@@ -63,9 +57,13 @@ If you are having trouble setting up CMake, you can try [our template bot](https
 
 To build on windows follow these steps *exactly*. The build process depends on specific libraries being installed on your system in specific locations.
 
-\note You should not need to build a copy of the library for windows — DLL and LIB files for Windows and Visual Studio 2019 are be provided in the GitHub version releases. Unless you wish to submit fixes and enhancements to the library itself, you may find it easier to use these releases instead.
+## Wait a minute! Read this first!
 
-1. Make sure you have Visual Studio 2019. The Community, Professional or Enterprise versions all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
+\warning **You do not need to follow this tutorial unless you plan to contribute to or modify the library itself**. Unless you consider yourself an **advanced user** with a specific **requirement to build from source** you should [obtain a pre-made visual studio template containing the latest D++ build (for 32 and 64 bit, release and debug profiles) by clicking here](https://github.com/brainboxdotcc/windows-bot-template/) and completely skip this guide! Instead, read \ref build-a-discord-bot-windows-visual-studio.
+
+## If you are absolutely sure you need this guide, read on:
+
+1. Make sure you have Visual Studio 2019 or Visual Studio 2022. The Community, Professional or Enterprise versions all work, however you will probably want to install Community. You do **NOT** want to use *Visual Studio Code* for this. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/).
 2. Check out the DPP project source using git
 3. From within Visual Studio 2019, click the "File" menu, choose "Open" then "CMake", and select the CMakeLists.txt within the project folder
    \image html winbuild_1.png
@@ -106,22 +104,16 @@ For voice support, additional dependencies are required:
 
 ## 3. Build Source Code
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
+    cmake -B ./build
+    cmake --build ./build -j8
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
-## 4. Optional: Run test cases
+## 4. Install globally
 
-Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
+    cd build; sudo make install
 
-## 5. Install globally
-
-    sudo make install
-
-## 6. Installation to a different directory
+## 5. Installation to a different directory
 
 If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
@@ -129,7 +121,7 @@ If you want to install the library, its dependencies and header files to a diffe
 
 Then once the build is complete, run `make install` to install to the location you specified.
 
-## 7. Using the library
+## 6. Using the library
 
 Once installed, you can make use of the library in standalone programs simply by including it and linking to it:
 
@@ -164,22 +156,16 @@ For voice support, additional dependencies are required
 
 ## 3. Build Source Code
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j8
+    cmake -B ./build
+    cmake --build ./build -j8
     
 Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
-## 4. Optional: Run test cases
+## 4. Install globally
 
-Run `./test` for unit test cases. You will need to create a `config.json` file in the directory above the executable file with a valid bot token in it. See the example file `config.example.json` for an example of the correct format.
+    cd build; make install
 
-## 5. Install globally
-
-    make install
-
-## 6. Installation to a different directory
+## 5. Installation to a different directory
 
 If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
@@ -205,5 +191,3 @@ Of course, this is just a proof of concept - you should really use a more robust
 If you are having trouble setting up CMake, you can try [our template bot](https://github.com/brainboxdotcc/templatebot).
 
 **Have fun!**
-
-

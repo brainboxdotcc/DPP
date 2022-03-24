@@ -26,31 +26,35 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-invite::invite() : guild_id(0), channel_id(0), inviter_id(0), target_user_id(0), target_user_type(1), approximate_presence_count(0), approximate_member_count(0)
+invite::invite() : expires_at(0), guild_id(0), channel_id(0), inviter_id(0), target_user_id(0), target_user_type(1), approximate_presence_count(0), approximate_member_count(0), uses(0)
 {
 }
 
-invite::~invite() {
-}
+invite::~invite() = default;
 
 
 invite& invite::fill_from_json(nlohmann::json* j) {
-	code = StringNotNull(j, "code");
-	guild_id = (j->find("guild") != j->end()) ? SnowflakeNotNull(&((*j)["guild_id"]), "id") : 0;
-	channel_id = (j->find("channel") != j->end()) ? SnowflakeNotNull(&((*j)["channel"]), "id") : 0;
-	inviter_id = (j->find("inviter") != j->end()) ? SnowflakeNotNull(&((*j)["inviter"]), "id") : 0;
-	target_user_id = (j->find("target_user") != j->end()) ? SnowflakeNotNull(&((*j)["target_user"]), "id") : 0;
-	target_user_type = Int8NotNull(j, "target_user_type");
-	approximate_presence_count = Int32NotNull(j, "approximate_presence_count");
-	approximate_member_count = Int32NotNull(j, "approximate_member_count");
-	max_age = Int32NotNull(j, "max_age");
-	max_uses = Int32NotNull(j, "max_uses");
-	temporary = BoolNotNull(j, "temporary");
-	unique = BoolNotNull(j, "unique");
+	code = string_not_null(j, "code");
+	expires_at = (j->find("expires_at") != j->end()) ? ts_not_null(j, "expires_at") : 0;
+	guild_id = (j->find("guild") != j->end()) ? snowflake_not_null(&((*j)["guild"]), "id") : 0;
+	channel_id = (j->find("channel") != j->end()) ? snowflake_not_null(&((*j)["channel"]), "id") : 0;
+	inviter_id = (j->find("inviter") != j->end()) ? snowflake_not_null(&((*j)["inviter"]), "id") : 0;
+	target_user_id = (j->find("target_user") != j->end()) ? snowflake_not_null(&((*j)["target_user"]), "id") : 0;
+	target_user_type = int8_not_null(j, "target_user_type");
+	approximate_presence_count = int32_not_null(j, "approximate_presence_count");
+	approximate_member_count = int32_not_null(j, "approximate_member_count");
+	max_age = int32_not_null(j, "max_age");
+	max_uses = int32_not_null(j, "max_uses");
+	temporary = bool_not_null(j, "temporary");
+	unique = bool_not_null(j, "unique");
+	uses = (j->find("uses") != j->end()) ? int32_not_null(j, "uses") : 0;
+	if (j->find("stage_instance") != j->end()) {
+		stage = stage_instance().fill_from_json(&((*j)["stage_instance"]));
+	}
 	return *this;
 }
 
-std::string invite::build_json() const {
+std::string invite::build_json(bool with_id) const {
 	json j;
 	if (max_age > 0)
 		j["max_age"] = max_age;

@@ -20,33 +20,29 @@
  ************************************************************************************/
 #include <dpp/auditlog.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
 #include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
 
 using json = nlohmann::json;
 
-auditlog::auditlog()
-{
-}
+auditlog::auditlog() = default;
 
-auditlog::~auditlog() {
-}
+auditlog::~auditlog() = default;
 
 auditlog& auditlog::fill_from_json(nlohmann::json* j) {
 	for (auto & ai : (*j)["audit_log_entries"]) {
 		audit_entry ae;
-		ae.id = SnowflakeNotNull(&ai, "id");
-		ae.event = (audit_type)Int8NotNull(&ai, "action_type");
-		ae.user_id = SnowflakeNotNull(&ai, "user_id");
-		ae.target_id = SnowflakeNotNull(&ai, "target_id");
-		ae.reason = StringNotNull(&ai, "reason");
+		ae.id = snowflake_not_null(&ai, "id");
+		ae.event = (audit_type)int8_not_null(&ai, "action_type");
+		ae.user_id = snowflake_not_null(&ai, "user_id");
+		ae.target_id = snowflake_not_null(&ai, "target_id");
+		ae.reason = string_not_null(&ai, "reason");
 		if (j->find("changes") != j->end()) {
 			auto &c = ai["changes"];
 			for (auto & change : c) {
 				audit_change ac;
-				ac.key = StringNotNull(&change, "key");
+				ac.key = string_not_null(&change, "key");
 				if (change.find("new_value") != change.end()) {
 					ac.new_value = change["new_value"].dump();
 				}
@@ -58,17 +54,17 @@ auditlog& auditlog::fill_from_json(nlohmann::json* j) {
 		if (j->find("options") != j->end()) {
 			auto &o = ai["options"];
 			audit_extra opts;
-			opts.channel_id = SnowflakeNotNull(&o, "channel_id");
-			opts.count = StringNotNull(&o, "count");
-			opts.delete_member_days = StringNotNull(&o, "delete_member_days");
-			opts.id = SnowflakeNotNull(&o, "id");
-			opts.members_removed = StringNotNull(&o, "members_removed");
-			opts.message_id = SnowflakeNotNull(&o, "message_id");
-			opts.role_name = StringNotNull(&o, "role_name");
-			opts.type = StringNotNull(&o, "type");
+			opts.channel_id = snowflake_not_null(&o, "channel_id");
+			opts.count = string_not_null(&o, "count");
+			opts.delete_member_days = string_not_null(&o, "delete_member_days");
+			opts.id = snowflake_not_null(&o, "id");
+			opts.members_removed = string_not_null(&o, "members_removed");
+			opts.message_id = snowflake_not_null(&o, "message_id");
+			opts.role_name = string_not_null(&o, "role_name");
+			opts.type = string_not_null(&o, "type");
 			ae.options = opts;
 		}
-		this->entries.push_back(ae);
+		this->entries.emplace_back(ae);
 	}
 	return *this;
 }

@@ -20,15 +20,17 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/snowflake.h>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
 /**
  * @brief Represents a guild template
  */
-class CoreExport dtemplate {
+class DPP_EXPORT dtemplate : public json_interface<dtemplate>  {
 public:	
 	/**
 	 * @brief Template code
@@ -82,8 +84,15 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	dtemplate& fill_from_json(nlohmann::json* j);
-	std::string build_json() const;
+	 dtemplate& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the JSON for this object
+	 * 
+	 * @param with_id Add ID to output
+	 * @return std::string JSON content 
+	 */
+	virtual std::string build_json(bool with_id = false) const;
 
 };
 

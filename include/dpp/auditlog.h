@@ -21,9 +21,10 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/snowflake.h>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <optional>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -100,13 +101,37 @@ enum audit_type {
 	/// Guild integration update
 	ae_integration_update		=	81,
 	/// Guild integration delete
-	ae_integration_delete		=	82
+	ae_integration_delete		=	82,
+	/// Stage instance create
+	ae_stage_instance_create	=	83,
+	/// Stage instance update
+	ae_stage_instance_update	=	84,
+	/// stage instance delete
+	ae_stage_instance_delete	=	85,
+	/// Sticker create
+	ae_sticker_create		=	90,
+	/// Sticker update
+	ae_sticker_update		=	91,
+	/// Sticker delete
+	ae_sticker_delete		=	92,
+	/// Scheduled event creation
+	ae_guild_scheduled_event_create	=	100,
+	/// Scheduled event update
+	ae_guild_scheduled_event_update	=	101,
+	/// Scheduled event deletion
+	ae_guild_scheduled_event_delete	=	102,
+	/// Thread create
+	ae_thread_create		=	110,
+	/// Thread update
+	ae_thread_update		=	111,
+	/// Thread delete
+	ae_thread_delete		=	112
 };
 
 /**
  * @brief Defines audit log changes
  */
-struct CoreExport audit_change {
+struct DPP_EXPORT audit_change {
 	/// Optional: Serialised new value of the key
 	std::string	new_value;
 	/// Optional: Serialised old value of the key
@@ -118,7 +143,7 @@ struct CoreExport audit_change {
 /**
  * @brief Extra information for an audit log entry
  */
-struct CoreExport audit_extra {
+struct DPP_EXPORT audit_extra {
 	std::string 	delete_member_days;	//!< number of days after which inactive members were kicked
 	std::string	members_removed;	//!< number of members removed by the prune
 	snowflake	channel_id;		//!< channel in which the entities were targeted
@@ -132,7 +157,7 @@ struct CoreExport audit_extra {
 /**
  * @brief An individual audit log entry
  */
-struct CoreExport audit_entry {
+struct DPP_EXPORT audit_entry {
 	snowflake			id;		//!< id of the entry
 	snowflake			target_id;	//!< id of the affected entity (webhook, user, role, etc.) (may be empty)
 	std::vector<audit_change>	changes;	//!< Optional: changes made to the target_id
@@ -145,7 +170,7 @@ struct CoreExport audit_entry {
 /**
  * @brief The auditlog class represents the audit log entry of a guild.
  */
-class CoreExport auditlog {
+class DPP_EXPORT auditlog : public json_interface<auditlog>  {
 public:
 	std::vector<audit_entry> entries;	//!< Audit log entries
 	
@@ -159,7 +184,7 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	auditlog& fill_from_json(nlohmann::json* j);
+	 auditlog& fill_from_json(nlohmann::json* j);
 };
 
 };

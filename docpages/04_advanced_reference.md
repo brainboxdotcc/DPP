@@ -3,6 +3,8 @@
 * \subpage clusters-shards-guilds "Clusters, Shards and Guilds"
 * \subpage thread-model "Thread Model"
 * \subpage coding-standards "Coding Style Standards"
+* \subpage unit-tests "Unit Tests"
+* \subpage lambdas-and-locals "Ownership of local variables and safely transferring into a lambda"
 
 \page clusters-shards-guilds Clusters, Shards and Guilds
 
@@ -49,7 +51,7 @@ if (a == b) {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use a space after the comma in parameter lists, and after closing brackets and before opening brackes except when calling a function, e.g.:
+Use a space after the comma in parameter lists, and after opening brackets and before closing brackets except when calling a function, e.g.:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 std::vector<std::string> clowns = { "pennywise", "bobo" };
@@ -67,23 +69,26 @@ Constants and macros should be all `UPPERCASE` with `SNAKE_CASE` to separate wor
 All comments should be in `doxygen` format (similar to javadoc). Please see existing class definitions for an example. You should use doxygen style comments in a class definition inside a header file, and can use any other comment types within the .cpp file. Be liberal with comments, especially if your code makes any assumptions!
 
 ## Symbol exporting
-If you export a class which is to be accessible to users, be sure to prefix it with the `CoreExport` macro, for example:
+If you export a class which is to be accessible to users, be sure to prefix it with the `DPP_EXPORT` macro, for example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-class CoreExport my_new_class {
+class DPP_EXPORT my_new_class {
 public:
 	int hats;
 	int clowns;
 };
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The `CoreExport` macro ensures that on certain platforms (notably Windows) the symbol is exported to be available to the library user.
+The `DPP_EXPORT` macro ensures that on certain platforms (notably Windows) the symbol is exported to be available to the library user.
 
 ## Public vs private vs protected
-It is a design philosophy of D++ that everything possible in a class should be public, unless the user really does not need it (you should consider justifying in comments why) or user adjustment of the variable could badly break the functioning of the library. Avoid the use of accessors for setting/getting values in a class, except for bit fields, where you should provide accessors for setting and getting individual bits (for example, see `user.h`), or in the event you want to provide a "fluent" interface.
+It is a design philosophy of D++ that everything possible in a class should be public, unless the user really does not need it (you should consider justifying in comments why) or user adjustment of the variable could badly break the functioning of the library. Avoid the use of accessors for setting/getting values in a class, except for bit fields, where you should provide accessors for setting and getting individual bits (for example, see `user.h`), or in the event you want to provide a "fluent" interface. The exception to this is where you want to provide a logic validation of a field, for example if you have a string field with a minimum and maximum length, you can provide a setter the user can *optionally use* which will validate their input.
 
-## Inheritence
-Keep levels of inheritence low. If you need to inherit more than 3 levels deep, it is probable that the design could be simplified. Remember that at scale, there can be tens of millions of certain classes and each level of virtual nesting adds to the `vtable` of that object's instance in RAM.
+## Exceptions
+All exceptions thrown should derive from dpp::exception (see dpp/exception.h) - when validating string lengths, a string which is too long should be truncated using dpp::utility::utf8substr and any strings that are too short should throw a dpp::length_exception.
+
+## Inheritance
+Keep levels of inheritance low. If you need to inherit more than 3 levels deep, it is probable that the design could be simplified. Remember that at scale, there can be tens of millions of certain classes and each level of virtual nesting adds to the `vtable` of that object's instance in RAM.
 
 ## Bit field packing
 Where discord provides boolean flags, if the user is expected to store many of the object in RAM, or in cache, you should pack all these booleans into bit fields (see `user.h` and `channel.h` for examples). In the event that the object is transient, such as an interaction or a message, packing the data into bit fields is counter intuitive. Remember that you should provide specific accessors for bit field values!
@@ -104,7 +109,7 @@ If a value will only hold values up to 255, use `uint8_t`. If a value cannot hol
 Where possible, if you are adding methods to a class you should consider fluent design. Fluent design is the use of class methods tha return a reference to self (via `return *this`), so that you can chain object method calls together (in the way `dpp::message` and `dpp::embed` do). For example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-class CoreExport my_new_class {
+class DPP_EXPORT my_new_class {
 public:
 	int hats;
 	int clowns;
@@ -141,3 +146,86 @@ All types for the library should be within the `dpp` namespace. There are a coup
 All pull requests ("PRs") should be submitted against the `dev` branch in GitHub. It’s good to have descriptive commit messages, or PR titles so that other contributors can understand about your commit or the PR Created. Read [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.3/) for information on how we like to format commit messages.
 
 All PRs must pass the [GitHub Actions](https://github.com/brainboxdotcc/DPP/actions) tests before being allowed to be merged. This is to ensure that no code committed into the project fails to compile on any of our officially supported platforms or architectures.
+
+\page unit-tests Unit Tests
+
+## Running Unit Tests
+
+If you are adding functionality to DPP, make sure to run unit tests. This makes sure that the changes do not break anything. All pull requests must pass all unit tests before merging.
+
+Before running test cases, create a test server for your test bot. You should:
+
+* Make sure that the server only has you and your test bot, and no one else
+* Give your bot the administrator permission
+* Enable community for the server
+* Make an event
+* Create at least one voice channel
+* Create at least one text channel
+
+Then, set the following variables to the appropriate values. (This uses a fake token, don't bother trying to use it.)
+
+    export DPP_UNIT_TEST_TOKEN="ODI2ZSQ4CFYyMzgxUzkzzACy.HPL5PA.9qKR4uh8po63-pjYVrPAvQQO4ln"
+    export TEST_GUILD_ID="907951970017480704"
+    export TEST_TEXT_CHANNEL_ID="907951970017480707"
+    export TEST_VC_ID="907951970017480708"
+    export TEST_USER_ID="826535422381391913"
+    export TEST_EVENT_ID="909928577951203360"
+
+Then, after cloning and building DPP, run `./build/test` for unit test cases. 
+
+\page lambdas-and-locals Ownership of local variables and safely transferring into a lambda
+
+If you are reading this page, you have likely been sent here by someone helping you diagnose why your bot is crashing or why seemingly invalid values are being passed into lambdas within your program that uses D++.
+
+It is important to remember that when you put a lambda callback onto a function in D++, that this lambda will execute at some point in the **future**. As with all things in the future and as 80s Sci Fi movies will tell you, when you reach the future things may well have changed!
+
+\image html delorean-time-travel.gif
+
+To explain this situation and how it causes issues i'd like you to imagine the age old magic trick, where a magician sets a fine table full of cutlery, pots, pans and wine. He indicates to the audience that this is authentic, then with a whip of his wrist, he whips the tablecloth away, leaving the cutlery and other tableware in place (if he is any good as a magician!)
+
+Now imagine the following code scenario. We will describe this code scenario as the magic trick above, in the steps below:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+bot.on_message_create([&bot](const dpp::message_create_t & event) {
+	int myvar = 0;
+	bot.message_create(dpp::message(event.msg.channel_id, "foobar"), [&](const auto & cc) {
+		myvar = 42;
+	});
+});
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this scenario, the outer event, `on_message_create` is your tablecloth. The lambda inside the `bot.message_create` is the tableware and cutlery. The following chain of events happens in this code:
+
+* The magician executes his magic trick (D++ the `bot.on_message_create entering` the outer lambda)
+* Your code executes `bot.message_create()` inside this outer lambda
+* D++ inserts your request to send a message into its queue, in another thread. The inner lambda, where you might later set `myvar = 42` is safely copied into the queue for later calling.
+* The tablecloth is whipped away... in other words, `bot.on_message_create` ends, and all local variables including `myvar` become invalid
+* At a later time (usually 80ms through to anything up to 4 seconds depending on rate limits!) the message is sent, and your inner lambda which was saved at the earlier step is called.
+* Your inner lambda attempts to set `myvar` to 42... but `myvar` no longer exists, as the outer lambda has been destroyed....
+* The table wobbles... the cutlery shakes... and...
+* Best case scenario: you access invalid RAM no longer owned by your program by trying to write to `myvar`, and [your bot outright crashes horribly](https://www.youtube.com/watch?v=sm8qb2kP-fQ)!
+* Worse case scenario: you silently corrupt ram and end up spending days trying to track down a bug that subtly breaks your bot...
+
+The situation i am trying to describe here is one of object and variable ownership. When you call a lambda, **always assume that every non global reference outside of that lambda will be invalid when the lambda is called**! For any non-global variable always take a **copy** of the variable (not reference, or pointer). Global variables or those declared directly in `main()` are safe to pass as references.
+
+For example, if we were to fix the broken code above, we could rewrite it like this:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+bot.on_message_create([&bot](const dpp::message_create_t & event) {
+	int myvar = 0;
+	bot.message_create(dpp::message(event.msg.channel_id, "foobar"), [myvar](const auto & cc) {
+		myvar = 42;
+	});
+	std::cout << "here\n";
+});
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note however that when you set myvar within the inner lambda, this does **not effect** the value of the var outside it. Lambdas should be considered self-contained silos, and as they execute in other threads should not be relied upon to set anything that exists **outside of that lambda**.
+
+\warning Always avoid just using `[&]` in a lambda to access all in the scope above. It is unlikely that half of this scope will still even be valid by the time you get a look at it!
+
+Similarly, and important to note, your program **will not wait for bot.message_create to send its message and call its lambda** before continuing on to print `here`. It will instantly insert the request into its queue and bail straight back out (see the steps above) and immediately print the text.
+
+If you do want to get variables out of your lambda, create a class, or call a separate function, and pass what you need into that function from the lambda **by value** or alternatively, you can use `std::bind` to bind a lambda directly to an object's method instead (this is great for modular bots).
+
+If you are stuck, as this is a complex subject please do feel free to ask on the [official support server](https://discord.gg/dpp)!

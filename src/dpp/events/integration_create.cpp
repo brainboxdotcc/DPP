@@ -18,17 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/integration.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -45,11 +39,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void integration_create::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.integration_create) {
+	if (!client->creator->on_integration_create.empty()) {
 		json& d = j["d"];
 		dpp::integration_create_t ic(client, raw);
 		ic.created_integration = dpp::integration().fill_from_json(&d);
-		client->creator->dispatch.integration_create(ic);
+		client->creator->on_integration_create.call(ic);
 	}
 }
 

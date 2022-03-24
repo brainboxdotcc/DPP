@@ -18,18 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/message.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/dispatcher.h>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -46,13 +39,12 @@ using namespace dpp;
  */
 void message_create::handle(discord_client* client, json &j, const std::string &raw) {
 
-	if (client->creator->dispatch.message_create) {
+	if (!client->creator->on_message_create.empty()) {
 		json d = j["d"];
 		dpp::message_create_t msg(client, raw);
-		dpp::message m;
-		m.fill_from_json(&d, client->creator->cache_policy);	
-		msg.msg = &m;
-		client->creator->dispatch.message_create(msg);
+		msg.msg.fill_from_json(&d, client->creator->cache_policy);
+		msg.msg.owner = client->creator;
+		client->creator->on_message_create.call(msg);
 	}
 }
 
