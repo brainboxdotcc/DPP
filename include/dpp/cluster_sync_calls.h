@@ -26,7 +26,6 @@
  *
  * To re-generate this header file re-run the script!
  */ 
-
 /**
  * @brief Create/overwrite global slash commands.
  * Any existing global slash commands will be deleted and replaced with these.
@@ -45,9 +44,7 @@
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline slashcommand_map global_bulk_command_create_sync(const std::vector<slashcommand> &commands) {
-	return dpp::sync<slashcommand_map>(this, &cluster::global_bulk_command_create, commands);
-}
+slashcommand_map global_bulk_command_create_sync(const std::vector<slashcommand> &commands);
 
 /**
  * @brief Create a global slash command (a bot can have a maximum of 100 of these).
@@ -64,9 +61,7 @@ inline slashcommand_map global_bulk_command_create_sync(const std::vector<slashc
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline slashcommand global_command_create_sync(const slashcommand &s) {
-	return dpp::sync<slashcommand>(this, &cluster::global_command_create, s);
-}
+slashcommand global_command_create_sync(const slashcommand &s);
 
 /**
  * @brief Get a global slash command
@@ -80,9 +75,7 @@ inline slashcommand global_command_create_sync(const slashcommand &s) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline slashcommand global_command_get_sync(snowflake id) {
-	return dpp::sync<slashcommand>(this, &cluster::global_command_get, id);
-}
+slashcommand global_command_get_sync(snowflake id);
 
 /**
  * @brief Delete a global slash command (a bot can have a maximum of 100 of these)
@@ -96,9 +89,7 @@ inline slashcommand global_command_get_sync(snowflake id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation global_command_delete_sync(snowflake id) {
-	return dpp::sync<confirmation>(this, &cluster::global_command_delete, id);
-}
+confirmation global_command_delete_sync(snowflake id);
 
 /**
  * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
@@ -114,9 +105,7 @@ inline confirmation global_command_delete_sync(snowflake id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation global_command_edit_sync(const slashcommand &s) {
-	return dpp::sync<confirmation>(this, &cluster::global_command_edit, s);
-}
+confirmation global_command_edit_sync(const slashcommand &s);
 
 /**
  * @brief Get the application's global slash commands
@@ -129,9 +118,7 @@ inline confirmation global_command_edit_sync(const slashcommand &s) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline slashcommand_map global_commands_get_sync() {
-	return dpp::sync<slashcommand_map>(this, &cluster::global_commands_get);
-}
+slashcommand_map global_commands_get_sync();
 
 /**
  * @brief Create/overwrite guild slash commands.
@@ -148,9 +135,7 @@ inline slashcommand_map global_commands_get_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline slashcommand_map guild_bulk_command_create_sync(const std::vector<slashcommand> &commands, snowflake guild_id) {
-	return dpp::sync<slashcommand_map>(this, &cluster::guild_bulk_command_create, commands, guild_id);
-}
+slashcommand_map guild_bulk_command_create_sync(const std::vector<slashcommand> &commands, snowflake guild_id);
 
 /**
  * @brief Get all slash command permissions of a guild
@@ -164,9 +149,7 @@ inline slashcommand_map guild_bulk_command_create_sync(const std::vector<slashco
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_command_permissions_map guild_commands_get_permissions_sync(snowflake guild_id) {
-	return dpp::sync<guild_command_permissions_map>(this, &cluster::guild_commands_get_permissions, guild_id);
-}
+guild_command_permissions_map guild_commands_get_permissions_sync(snowflake guild_id);
 
 /**
  * @brief Edit/Overwrite the permissions of all existing slash commands in a guild
@@ -184,9 +167,7 @@ inline guild_command_permissions_map guild_commands_get_permissions_sync(snowfla
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_command_permissions_map guild_bulk_command_edit_permissions_sync(const std::vector<slashcommand> &commands, snowflake guild_id) {
-	return dpp::sync<guild_command_permissions_map>(this, &cluster::guild_bulk_command_edit_permissions, commands, guild_id);
-}
+guild_command_permissions_map guild_bulk_command_edit_permissions_sync(const std::vector<slashcommand> &commands, snowflake guild_id);
 
 /**
  * @brief Create a slash command local to a guild
@@ -202,9 +183,7 @@ inline guild_command_permissions_map guild_bulk_command_edit_permissions_sync(co
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline slashcommand guild_command_create_sync(const slashcommand &s, snowflake guild_id) {
-	return dpp::sync<slashcommand>(this, &cluster::guild_command_create, s, guild_id);
-}
+slashcommand guild_command_create_sync(const slashcommand &s, snowflake guild_id);
 
 /**
  * @brief Delete a slash command local to a guild
@@ -219,9 +198,7 @@ inline slashcommand guild_command_create_sync(const slashcommand &s, snowflake g
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_command_delete_sync(snowflake id, snowflake guild_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_command_delete, id, guild_id);
-}
+confirmation guild_command_delete_sync(snowflake id, snowflake guild_id);
 
 /**
  * @brief Edit slash command permissions of a guild
@@ -237,9 +214,7 @@ inline confirmation guild_command_delete_sync(snowflake id, snowflake guild_id) 
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_command_edit_permissions_sync(const slashcommand &s, snowflake guild_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_command_edit_permissions, s, guild_id);
-}
+confirmation guild_command_edit_permissions_sync(const slashcommand &s, snowflake guild_id);
 
 /**
  * @brief Get a slash command of a guild
@@ -255,9 +230,7 @@ inline confirmation guild_command_edit_permissions_sync(const slashcommand &s, s
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline slashcommand guild_command_get_sync(snowflake id, snowflake guild_id) {
-	return dpp::sync<slashcommand>(this, &cluster::guild_command_get, id, guild_id);
-}
+slashcommand guild_command_get_sync(snowflake id, snowflake guild_id);
 
 /**
  * @brief Get the permissions for a slash command of a guild
@@ -272,9 +245,7 @@ inline slashcommand guild_command_get_sync(snowflake id, snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_command_permissions guild_command_get_permissions_sync(snowflake id, snowflake guild_id) {
-	return dpp::sync<guild_command_permissions>(this, &cluster::guild_command_get_permissions, id, guild_id);
-}
+guild_command_permissions guild_command_get_permissions_sync(snowflake id, snowflake guild_id);
 
 /**
  * @brief Edit a slash command local to a guild
@@ -289,9 +260,7 @@ inline guild_command_permissions guild_command_get_permissions_sync(snowflake id
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_command_edit_sync(const slashcommand &s, snowflake guild_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_command_edit, s, guild_id);
-}
+confirmation guild_command_edit_sync(const slashcommand &s, snowflake guild_id);
 
 /**
  * @brief Get the application's slash commands for a guild
@@ -306,9 +275,7 @@ inline confirmation guild_command_edit_sync(const slashcommand &s, snowflake gui
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline slashcommand_map guild_commands_get_sync(snowflake guild_id) {
-	return dpp::sync<slashcommand_map>(this, &cluster::guild_commands_get, guild_id);
-}
+slashcommand_map guild_commands_get_sync(snowflake guild_id);
 
 /**
  * @brief Respond to a slash command
@@ -324,9 +291,7 @@ inline slashcommand_map guild_commands_get_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation interaction_response_create_sync(snowflake interaction_id, const std::string &token, const interaction_response &r) {
-	return dpp::sync<confirmation>(this, &cluster::interaction_response_create, interaction_id, token, r);
-}
+confirmation interaction_response_create_sync(snowflake interaction_id, const std::string &token, const interaction_response &r);
 
 /**
  * @brief Edit response to a slash command
@@ -341,9 +306,7 @@ inline confirmation interaction_response_create_sync(snowflake interaction_id, c
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation interaction_response_edit_sync(const std::string &token, const message &m) {
-	return dpp::sync<confirmation>(this, &cluster::interaction_response_edit, token, m);
-}
+confirmation interaction_response_edit_sync(const std::string &token, const message &m);
 
 /**
  * @brief Create a channel
@@ -364,9 +327,7 @@ inline confirmation interaction_response_edit_sync(const std::string &token, con
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline channel channel_create_sync(const class channel &c) {
-	return dpp::sync<channel>(this, &cluster::channel_create, c);
-}
+channel channel_create_sync(const class channel &c);
 
 /**
  * @brief Remove a permission from a channel
@@ -381,9 +342,7 @@ inline channel channel_create_sync(const class channel &c) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation channel_delete_permission_sync(const class channel &c, snowflake overwrite_id) {
-	return dpp::sync<confirmation>(this, &cluster::channel_delete_permission, c, overwrite_id);
-}
+confirmation channel_delete_permission_sync(const class channel &c, snowflake overwrite_id);
 
 /**
  * @brief Delete a channel
@@ -397,9 +356,7 @@ inline confirmation channel_delete_permission_sync(const class channel &c, snowf
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation channel_delete_sync(snowflake channel_id) {
-	return dpp::sync<confirmation>(this, &cluster::channel_delete, channel_id);
-}
+confirmation channel_delete_sync(snowflake channel_id);
 
 /**
  * @brief Edit multiple channels positions
@@ -418,9 +375,7 @@ inline confirmation channel_delete_sync(snowflake channel_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation channel_edit_positions_sync(const std::vector<channel> &c) {
-	return dpp::sync<confirmation>(this, &cluster::channel_edit_positions, c);
-}
+confirmation channel_edit_positions_sync(const std::vector<channel> &c);
 
 /**
  * @brief Edit a channel
@@ -434,9 +389,7 @@ inline confirmation channel_edit_positions_sync(const std::vector<channel> &c) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline channel channel_edit_sync(const class channel &c) {
-	return dpp::sync<channel>(this, &cluster::channel_edit, c);
-}
+channel channel_edit_sync(const class channel &c);
 
 /**
  * @brief Follow a news channel
@@ -450,9 +403,7 @@ inline channel channel_edit_sync(const class channel &c) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation channel_follow_news_sync(const class channel &c, snowflake target_channel_id) {
-	return dpp::sync<confirmation>(this, &cluster::channel_follow_news, c, target_channel_id);
-}
+confirmation channel_follow_news_sync(const class channel &c, snowflake target_channel_id);
 
 /**
  * @brief Get a channel
@@ -466,9 +417,7 @@ inline confirmation channel_follow_news_sync(const class channel &c, snowflake t
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline channel channel_get_sync(snowflake c) {
-	return dpp::sync<channel>(this, &cluster::channel_get, c);
-}
+channel channel_get_sync(snowflake c);
 
 /**
  * @brief Create invite for a channel
@@ -483,9 +432,7 @@ inline channel channel_get_sync(snowflake c) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation channel_invite_create_sync(const class channel &c, const class invite &i) {
-	return dpp::sync<confirmation>(this, &cluster::channel_invite_create, c, i);
-}
+confirmation channel_invite_create_sync(const class channel &c, const class invite &i);
 
 /**
  * @brief Get invites for a channel
@@ -499,9 +446,7 @@ inline confirmation channel_invite_create_sync(const class channel &c, const cla
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline invite_map channel_invites_get_sync(const class channel &c) {
-	return dpp::sync<invite_map>(this, &cluster::channel_invites_get, c);
-}
+invite_map channel_invites_get_sync(const class channel &c);
 
 /**
  * @brief Get all channels for a guild
@@ -515,9 +460,7 @@ inline invite_map channel_invites_get_sync(const class channel &c) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline channel_map channels_get_sync(snowflake guild_id) {
-	return dpp::sync<channel_map>(this, &cluster::channels_get, guild_id);
-}
+channel_map channels_get_sync(snowflake guild_id);
 
 /**
  * @brief Create a dm channel
@@ -530,9 +473,7 @@ inline channel_map channels_get_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline channel create_dm_channel_sync(snowflake user_id) {
-	return dpp::sync<channel>(this, &cluster::create_dm_channel, user_id);
-}
+channel create_dm_channel_sync(snowflake user_id);
 
 /**
  * @brief Get current user DM channels
@@ -543,9 +484,7 @@ inline channel create_dm_channel_sync(snowflake user_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline channel_map current_user_get_dms_sync() {
-	return dpp::sync<channel_map>(this, &cluster::current_user_get_dms);
-}
+channel_map current_user_get_dms_sync();
 
 /**
  * @brief Create a direct message, also create the channel for the direct message if needed
@@ -562,9 +501,7 @@ inline channel_map current_user_get_dms_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message direct_message_create_sync(snowflake user_id, const message &m) {
-	return dpp::sync<message>(this, &cluster::direct_message_create, user_id, m);
-}
+message direct_message_create_sync(snowflake user_id, const message &m);
 
 /**
  * @brief Adds a recipient to a Group DM using their access token
@@ -580,9 +517,7 @@ inline message direct_message_create_sync(snowflake user_id, const message &m) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation gdm_add_sync(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick) {
-	return dpp::sync<confirmation>(this, &cluster::gdm_add, channel_id, user_id, access_token, nick);
-}
+confirmation gdm_add_sync(snowflake channel_id, snowflake user_id, const std::string &access_token, const std::string &nick);
 
 /**
  * @brief Removes a recipient from a Group DM
@@ -596,9 +531,7 @@ inline confirmation gdm_add_sync(snowflake channel_id, snowflake user_id, const 
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation gdm_remove_sync(snowflake channel_id, snowflake user_id) {
-	return dpp::sync<confirmation>(this, &cluster::gdm_remove, channel_id, user_id);
-}
+confirmation gdm_remove_sync(snowflake channel_id, snowflake user_id);
 
 /**
  * @brief Create single emoji.
@@ -615,9 +548,7 @@ inline confirmation gdm_remove_sync(snowflake channel_id, snowflake user_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline emoji guild_emoji_create_sync(snowflake guild_id, const class emoji& newemoji) {
-	return dpp::sync<emoji>(this, &cluster::guild_emoji_create, guild_id, newemoji);
-}
+emoji guild_emoji_create_sync(snowflake guild_id, const class emoji& newemoji);
 
 /**
  * @brief Delete a guild emoji
@@ -633,9 +564,7 @@ inline emoji guild_emoji_create_sync(snowflake guild_id, const class emoji& newe
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_emoji_delete_sync(snowflake guild_id, snowflake emoji_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_emoji_delete, guild_id, emoji_id);
-}
+confirmation guild_emoji_delete_sync(snowflake guild_id, snowflake emoji_id);
 
 /**
  * @brief Edit a single emoji.
@@ -652,9 +581,7 @@ inline confirmation guild_emoji_delete_sync(snowflake guild_id, snowflake emoji_
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline emoji guild_emoji_edit_sync(snowflake guild_id, const class emoji& newemoji) {
-	return dpp::sync<emoji>(this, &cluster::guild_emoji_edit, guild_id, newemoji);
-}
+emoji guild_emoji_edit_sync(snowflake guild_id, const class emoji& newemoji);
 
 /**
  * @brief Get a single emoji
@@ -669,9 +596,7 @@ inline emoji guild_emoji_edit_sync(snowflake guild_id, const class emoji& newemo
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline emoji guild_emoji_get_sync(snowflake guild_id, snowflake emoji_id) {
-	return dpp::sync<emoji>(this, &cluster::guild_emoji_get, guild_id, emoji_id);
-}
+emoji guild_emoji_get_sync(snowflake guild_id, snowflake emoji_id);
 
 /**
  * @brief Get all emojis for a guild
@@ -685,9 +610,7 @@ inline emoji guild_emoji_get_sync(snowflake guild_id, snowflake emoji_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline emoji_map guild_emojis_get_sync(snowflake guild_id) {
-	return dpp::sync<emoji_map>(this, &cluster::guild_emojis_get, guild_id);
-}
+emoji_map guild_emojis_get_sync(snowflake guild_id);
 
 /**
  * @brief Get the gateway information for the bot using the token
@@ -699,9 +622,7 @@ inline emoji_map guild_emojis_get_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline gateway get_gateway_bot_sync() {
-	return dpp::sync<gateway>(this, &cluster::get_gateway_bot);
-}
+gateway get_gateway_bot_sync();
 
 /**
  * @brief Modify current member
@@ -720,9 +641,7 @@ inline gateway get_gateway_bot_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_current_member_edit_sync(snowflake guild_id, const std::string &nickname) {
-	return dpp::sync<confirmation>(this, &cluster::guild_current_member_edit, guild_id, nickname);
-}
+confirmation guild_current_member_edit_sync(snowflake guild_id, const std::string &nickname);
 
 /**
  * @brief Get the audit log for a guild
@@ -736,9 +655,7 @@ inline confirmation guild_current_member_edit_sync(snowflake guild_id, const std
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline auditlog guild_auditlog_get_sync(snowflake guild_id) {
-	return dpp::sync<auditlog>(this, &cluster::guild_auditlog_get, guild_id);
-}
+auditlog guild_auditlog_get_sync(snowflake guild_id);
 
 /**
  * @brief Add guild ban
@@ -758,9 +675,7 @@ inline auditlog guild_auditlog_get_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason) {
-	return dpp::sync<confirmation>(this, &cluster::guild_ban_add, guild_id, user_id, delete_message_days, reason);
-}
+confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason);
 
 /**
  * @brief Delete guild ban
@@ -778,9 +693,7 @@ inline confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, ui
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_ban_delete_sync(snowflake guild_id, snowflake user_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_ban_delete, guild_id, user_id);
-}
+confirmation guild_ban_delete_sync(snowflake guild_id, snowflake user_id);
 
 /**
  * @brief Create a guild
@@ -806,9 +719,7 @@ inline confirmation guild_ban_delete_sync(snowflake guild_id, snowflake user_id)
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild guild_create_sync(const class guild &g) {
-	return dpp::sync<guild>(this, &cluster::guild_create, g);
-}
+guild guild_create_sync(const class guild &g);
 
 /**
  * @brief Delete a guild
@@ -824,9 +735,7 @@ inline guild guild_create_sync(const class guild &g) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_delete_sync(snowflake guild_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_delete, guild_id);
-}
+confirmation guild_delete_sync(snowflake guild_id);
 
 /**
  * @brief Delete guild integration
@@ -845,9 +754,7 @@ inline confirmation guild_delete_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_delete_integration_sync(snowflake guild_id, snowflake integration_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_delete_integration, guild_id, integration_id);
-}
+confirmation guild_delete_integration_sync(snowflake guild_id, snowflake integration_id);
 
 /**
  * @brief Edit a guild
@@ -865,9 +772,7 @@ inline confirmation guild_delete_integration_sync(snowflake guild_id, snowflake 
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild guild_edit_sync(const class guild &g) {
-	return dpp::sync<guild>(this, &cluster::guild_edit, g);
-}
+guild guild_edit_sync(const class guild &g);
 
 /**
  * @brief Edit guild widget
@@ -885,9 +790,7 @@ inline guild guild_edit_sync(const class guild &g) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_widget guild_edit_widget_sync(snowflake guild_id, const class guild_widget &gw) {
-	return dpp::sync<guild_widget>(this, &cluster::guild_edit_widget, guild_id, gw);
-}
+guild_widget guild_edit_widget_sync(snowflake guild_id, const class guild_widget &gw);
 
 /**
  * @brief Get single guild ban
@@ -903,9 +806,7 @@ inline guild_widget guild_edit_widget_sync(snowflake guild_id, const class guild
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline ban guild_get_ban_sync(snowflake guild_id, snowflake user_id) {
-	return dpp::sync<ban>(this, &cluster::guild_get_ban, guild_id, user_id);
-}
+ban guild_get_ban_sync(snowflake guild_id, snowflake user_id);
 
 /**
  * @brief Get guild ban list
@@ -920,14 +821,10 @@ inline ban guild_get_ban_sync(snowflake guild_id, snowflake user_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline ban_map guild_get_bans_sync(snowflake guild_id) {
-	return dpp::sync<ban_map>(this, &cluster::guild_get_bans, guild_id);
-}
+ban_map guild_get_bans_sync(snowflake guild_id);
 
 
-inline guild guild_get_sync(snowflake guild_id) {
-	return dpp::sync<guild>(this, &cluster::guild_get, guild_id);
-}
+guild guild_get_sync(snowflake guild_id);
 
 /**
  * @brief Get guild integrations
@@ -943,14 +840,10 @@ inline guild guild_get_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline integration_map guild_get_integrations_sync(snowflake guild_id) {
-	return dpp::sync<integration_map>(this, &cluster::guild_get_integrations, guild_id);
-}
+integration_map guild_get_integrations_sync(snowflake guild_id);
 
 
-inline guild guild_get_preview_sync(snowflake guild_id) {
-	return dpp::sync<guild>(this, &cluster::guild_get_preview, guild_id);
-}
+guild guild_get_preview_sync(snowflake guild_id);
 
 /**
  * @brief Get guild vanity url, if enabled
@@ -965,9 +858,7 @@ inline guild guild_get_preview_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline invite guild_get_vanity_sync(snowflake guild_id) {
-	return dpp::sync<invite>(this, &cluster::guild_get_vanity, guild_id);
-}
+invite guild_get_vanity_sync(snowflake guild_id);
 
 /**
  * @brief Get guild widget
@@ -983,9 +874,7 @@ inline invite guild_get_vanity_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_widget guild_get_widget_sync(snowflake guild_id) {
-	return dpp::sync<guild_widget>(this, &cluster::guild_get_widget, guild_id);
-}
+guild_widget guild_get_widget_sync(snowflake guild_id);
 
 /**
  * @brief Modify guild integration
@@ -1001,9 +890,7 @@ inline guild_widget guild_get_widget_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_modify_integration_sync(snowflake guild_id, const class integration &i) {
-	return dpp::sync<confirmation>(this, &cluster::guild_modify_integration, guild_id, i);
-}
+confirmation guild_modify_integration_sync(snowflake guild_id, const class integration &i);
 
 /**
  * @brief Get prune counts
@@ -1023,9 +910,7 @@ inline confirmation guild_modify_integration_sync(snowflake guild_id, const clas
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline prune guild_get_prune_counts_sync(snowflake guild_id, const struct prune& pruneinfo) {
-	return dpp::sync<prune>(this, &cluster::guild_get_prune_counts, guild_id, pruneinfo);
-}
+prune guild_get_prune_counts_sync(snowflake guild_id, const struct prune& pruneinfo);
 
 /**
  * @brief Begin guild prune
@@ -1047,9 +932,7 @@ inline prune guild_get_prune_counts_sync(snowflake guild_id, const struct prune&
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline prune guild_begin_prune_sync(snowflake guild_id, const struct prune& pruneinfo) {
-	return dpp::sync<prune>(this, &cluster::guild_begin_prune, guild_id, pruneinfo);
-}
+prune guild_begin_prune_sync(snowflake guild_id, const struct prune& pruneinfo);
 
 /**
  * @brief Change current user nickname
@@ -1069,9 +952,7 @@ inline prune guild_begin_prune_sync(snowflake guild_id, const struct prune& prun
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_set_nickname_sync(snowflake guild_id, const std::string &nickname) {
-	return dpp::sync<confirmation>(this, &cluster::guild_set_nickname, guild_id, nickname);
-}
+confirmation guild_set_nickname_sync(snowflake guild_id, const std::string &nickname);
 
 /**
  * @brief Sync guild integration
@@ -1086,9 +967,7 @@ inline confirmation guild_set_nickname_sync(snowflake guild_id, const std::strin
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_sync_integration_sync(snowflake guild_id, snowflake integration_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_sync_integration, guild_id, integration_id);
-}
+confirmation guild_sync_integration_sync(snowflake guild_id, snowflake integration_id);
 
 /**
  * @brief Add guild member. Needs a specific oauth2 scope, from which you get the access_token.
@@ -1111,9 +990,7 @@ inline confirmation guild_sync_integration_sync(snowflake guild_id, snowflake in
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_add_member_sync(const guild_member& gm, const std::string &access_token) {
-	return dpp::sync<confirmation>(this, &cluster::guild_add_member, gm, access_token);
-}
+confirmation guild_add_member_sync(const guild_member& gm, const std::string &access_token);
 
 /**
  * @brief Edit the properties of an existing guild member
@@ -1132,9 +1009,7 @@ inline confirmation guild_add_member_sync(const guild_member& gm, const std::str
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_member guild_edit_member_sync(const guild_member& gm) {
-	return dpp::sync<guild_member>(this, &cluster::guild_edit_member, gm);
-}
+guild_member guild_edit_member_sync(const guild_member& gm);
 
 /**
  * @brief Get a guild member
@@ -1148,9 +1023,7 @@ inline guild_member guild_edit_member_sync(const guild_member& gm) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_member guild_get_member_sync(snowflake guild_id, snowflake user_id) {
-	return dpp::sync<guild_member>(this, &cluster::guild_get_member, guild_id, user_id);
-}
+guild_member guild_get_member_sync(snowflake guild_id, snowflake user_id);
 
 /**
  * @brief Get all guild members
@@ -1167,9 +1040,7 @@ inline guild_member guild_get_member_sync(snowflake guild_id, snowflake user_id)
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_member_map guild_get_members_sync(snowflake guild_id, uint16_t limit, snowflake after) {
-	return dpp::sync<guild_member_map>(this, &cluster::guild_get_members, guild_id, limit, after);
-}
+guild_member_map guild_get_members_sync(snowflake guild_id, uint16_t limit, snowflake after);
 
 /**
  * @brief Add role to guild member
@@ -1188,9 +1059,7 @@ inline guild_member_map guild_get_members_sync(snowflake guild_id, uint16_t limi
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_member_add_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_member_add_role, guild_id, user_id, role_id);
-}
+confirmation guild_member_add_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id);
 
 /**
  * @brief Remove (kick) a guild member
@@ -1208,9 +1077,7 @@ inline confirmation guild_member_add_role_sync(snowflake guild_id, snowflake use
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_member_delete_sync(snowflake guild_id, snowflake user_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_member_delete, guild_id, user_id);
-}
+confirmation guild_member_delete_sync(snowflake guild_id, snowflake user_id);
 
 /**
  * @brief Remove (kick) a guild member with a reason
@@ -1229,9 +1096,7 @@ inline confirmation guild_member_delete_sync(snowflake guild_id, snowflake user_
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_member_kick_sync(snowflake guild_id, snowflake user_id, const std::string& reason = "") {
-	return dpp::sync<confirmation>(this, &cluster::guild_member_kick, guild_id, user_id, reason);
-}
+confirmation guild_member_kick_sync(snowflake guild_id, snowflake user_id, const std::string& reason = "");
 
 /**
  * @brief Remove role from guild member
@@ -1250,9 +1115,7 @@ inline confirmation guild_member_kick_sync(snowflake guild_id, snowflake user_id
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_member_delete_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_member_delete_role, guild_id, user_id, role_id);
-}
+confirmation guild_member_delete_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id);
 
 /**
  * @brief Moves the guild member to a other voice channel, if member is connected to one
@@ -1267,9 +1130,7 @@ inline confirmation guild_member_delete_role_sync(snowflake guild_id, snowflake 
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_member guild_member_move_sync(const snowflake channel_id, const snowflake guild_id, const snowflake user_id) {
-	return dpp::sync<guild_member>(this, &cluster::guild_member_move, channel_id, guild_id, user_id);
-}
+guild_member guild_member_move_sync(const snowflake channel_id, const snowflake guild_id, const snowflake user_id);
 
 /**
  * @brief Search for guild members based on whether their username or nickname starts with the given string.
@@ -1286,9 +1147,7 @@ inline guild_member guild_member_move_sync(const snowflake channel_id, const sno
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_member_map guild_search_members_sync(snowflake guild_id, const std::string& query, uint16_t limit) {
-	return dpp::sync<guild_member_map>(this, &cluster::guild_search_members, guild_id, query, limit);
-}
+guild_member_map guild_search_members_sync(snowflake guild_id, const std::string& query, uint16_t limit);
 
 /**
  * @brief Get guild invites
@@ -1304,19 +1163,13 @@ inline guild_member_map guild_search_members_sync(snowflake guild_id, const std:
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline invite_map guild_get_invites_sync(snowflake guild_id) {
-	return dpp::sync<invite_map>(this, &cluster::guild_get_invites, guild_id);
-}
+invite_map guild_get_invites_sync(snowflake guild_id);
 
 
-inline invite invite_delete_sync(const std::string &invitecode) {
-	return dpp::sync<invite>(this, &cluster::invite_delete, invitecode);
-}
+invite invite_delete_sync(const std::string &invitecode);
 
 
-inline invite invite_get_sync(const std::string &invitecode) {
-	return dpp::sync<invite>(this, &cluster::invite_get, invitecode);
-}
+invite invite_get_sync(const std::string &invitecode);
 
 /**
  * @brief Send a message to a channel. The callback function is called when the message has been sent
@@ -1330,9 +1183,7 @@ inline invite invite_get_sync(const std::string &invitecode) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message message_create_sync(const struct message &m) {
-	return dpp::sync<message>(this, &cluster::message_create, m);
-}
+message message_create_sync(const struct message &m);
 
 /**
  * @brief Crosspost a message. The callback function is called when the message has been sent
@@ -1347,9 +1198,7 @@ inline message message_create_sync(const struct message &m) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message message_crosspost_sync(snowflake message_id, snowflake channel_id) {
-	return dpp::sync<message>(this, &cluster::message_crosspost, message_id, channel_id);
-}
+message message_crosspost_sync(snowflake message_id, snowflake channel_id);
 
 /**
  * @brief Bulk delete messages from a channel. The callback function is called when the message has been edited
@@ -1367,9 +1216,7 @@ inline message message_crosspost_sync(snowflake message_id, snowflake channel_id
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation message_delete_bulk_sync(const std::vector<snowflake> &message_ids, snowflake channel_id) {
-	return dpp::sync<confirmation>(this, &cluster::message_delete_bulk, message_ids, channel_id);
-}
+confirmation message_delete_bulk_sync(const std::vector<snowflake> &message_ids, snowflake channel_id);
 
 /**
  * @brief Delete a message from a channel. The callback function is called when the message has been edited
@@ -1385,9 +1232,7 @@ inline confirmation message_delete_bulk_sync(const std::vector<snowflake> &messa
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation message_delete_sync(snowflake message_id, snowflake channel_id) {
-	return dpp::sync<confirmation>(this, &cluster::message_delete, message_id, channel_id);
-}
+confirmation message_delete_sync(snowflake message_id, snowflake channel_id);
 
 /**
  * @brief Edit a message on a channel. The callback function is called when the message has been edited
@@ -1401,9 +1246,7 @@ inline confirmation message_delete_sync(snowflake message_id, snowflake channel_
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message message_edit_sync(const struct message &m) {
-	return dpp::sync<message>(this, &cluster::message_edit, m);
-}
+message message_edit_sync(const struct message &m);
 
 /**
  * @brief Get a message
@@ -1418,9 +1261,7 @@ inline message message_edit_sync(const struct message &m) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message message_get_sync(snowflake message_id, snowflake channel_id) {
-	return dpp::sync<message>(this, &cluster::message_get, message_id, channel_id);
-}
+message message_get_sync(snowflake message_id, snowflake channel_id);
 
 /**
  * @brief Pin a message
@@ -1435,9 +1276,7 @@ inline message message_get_sync(snowflake message_id, snowflake channel_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation message_pin_sync(snowflake channel_id, snowflake message_id) {
-	return dpp::sync<confirmation>(this, &cluster::message_pin, channel_id, message_id);
-}
+confirmation message_pin_sync(snowflake channel_id, snowflake message_id);
 
 /**
  * @brief Get multiple messages.
@@ -1457,9 +1296,7 @@ inline confirmation message_pin_sync(snowflake channel_id, snowflake message_id)
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message_map messages_get_sync(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint64_t limit) {
-	return dpp::sync<message_map>(this, &cluster::messages_get, channel_id, around, before, after, limit);
-}
+message_map messages_get_sync(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint64_t limit);
 
 /**
  * @brief Unpin a message
@@ -1474,9 +1311,7 @@ inline message_map messages_get_sync(snowflake channel_id, snowflake around, sno
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation message_unpin_sync(snowflake channel_id, snowflake message_id) {
-	return dpp::sync<confirmation>(this, &cluster::message_unpin, channel_id, message_id);
-}
+confirmation message_unpin_sync(snowflake channel_id, snowflake message_id);
 
 /**
  * @brief Get a channel's pins
@@ -1489,9 +1324,7 @@ inline confirmation message_unpin_sync(snowflake channel_id, snowflake message_i
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message_map channel_pins_get_sync(snowflake channel_id) {
-	return dpp::sync<message_map>(this, &cluster::channel_pins_get, channel_id);
-}
+message_map channel_pins_get_sync(snowflake channel_id);
 
 /**
  * @brief Create a role on a guild
@@ -1509,9 +1342,7 @@ inline message_map channel_pins_get_sync(snowflake channel_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline role role_create_sync(const class role &r) {
-	return dpp::sync<role>(this, &cluster::role_create, r);
-}
+role role_create_sync(const class role &r);
 
 /**
  * @brief Delete a role
@@ -1529,9 +1360,7 @@ inline role role_create_sync(const class role &r) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation role_delete_sync(snowflake guild_id, snowflake role_id) {
-	return dpp::sync<confirmation>(this, &cluster::role_delete, guild_id, role_id);
-}
+confirmation role_delete_sync(snowflake guild_id, snowflake role_id);
 
 /**
  * @brief Edit a role on a guild
@@ -1548,9 +1377,7 @@ inline confirmation role_delete_sync(snowflake guild_id, snowflake role_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline role role_edit_sync(const class role &r) {
-	return dpp::sync<role>(this, &cluster::role_edit, r);
-}
+role role_edit_sync(const class role &r);
 
 /**
  * @brief Edit multiple role's position in a guild. Returns a list of all roles of the guild on success.
@@ -1569,9 +1396,7 @@ inline role role_edit_sync(const class role &r) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline role_map roles_edit_position_sync(snowflake guild_id, const std::vector<role> &roles) {
-	return dpp::sync<role_map>(this, &cluster::roles_edit_position, guild_id, roles);
-}
+role_map roles_edit_position_sync(snowflake guild_id, const std::vector<role> &roles);
 
 /**
  * @brief Get a role for a guild
@@ -1585,9 +1410,7 @@ inline role_map roles_edit_position_sync(snowflake guild_id, const std::vector<r
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline role_map roles_get_sync(snowflake guild_id) {
-	return dpp::sync<role_map>(this, &cluster::roles_get, guild_id);
-}
+role_map roles_get_sync(snowflake guild_id);
 
 /**
  * @brief Get all scheduled events for a guild
@@ -1600,9 +1423,7 @@ inline role_map roles_get_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline scheduled_event_map guild_events_get_sync(snowflake guild_id) {
-	return dpp::sync<scheduled_event_map>(this, &cluster::guild_events_get, guild_id);
-}
+scheduled_event_map guild_events_get_sync(snowflake guild_id);
 
 /**
  * @brief Create a scheduled event on a guild
@@ -1616,9 +1437,7 @@ inline scheduled_event_map guild_events_get_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline scheduled_event guild_event_create_sync(const scheduled_event& event) {
-	return dpp::sync<scheduled_event>(this, &cluster::guild_event_create, event);
-}
+scheduled_event guild_event_create_sync(const scheduled_event& event);
 
 /**
  * @brief Delete a scheduled event from a guild
@@ -1633,9 +1452,7 @@ inline scheduled_event guild_event_create_sync(const scheduled_event& event) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_event_delete_sync(snowflake event_id, snowflake guild_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_event_delete, event_id, guild_id);
-}
+confirmation guild_event_delete_sync(snowflake event_id, snowflake guild_id);
 
 /**
  * @brief Edit/modify a scheduled event on a guild
@@ -1649,9 +1466,7 @@ inline confirmation guild_event_delete_sync(snowflake event_id, snowflake guild_
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline scheduled_event guild_event_edit_sync(const scheduled_event& event) {
-	return dpp::sync<scheduled_event>(this, &cluster::guild_event_edit, event);
-}
+scheduled_event guild_event_edit_sync(const scheduled_event& event);
 
 /**
  * @brief Get a scheduled event for a guild
@@ -1666,14 +1481,10 @@ inline scheduled_event guild_event_edit_sync(const scheduled_event& event) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline scheduled_event guild_event_get_sync(snowflake guild_id, snowflake event_id) {
-	return dpp::sync<scheduled_event>(this, &cluster::guild_event_get, guild_id, event_id);
-}
+scheduled_event guild_event_get_sync(snowflake guild_id, snowflake event_id);
 
 
-inline stage_instance stage_instance_create_sync(const stage_instance& si) {
-	return dpp::sync<stage_instance>(this, &cluster::stage_instance_create, si);
-}
+stage_instance stage_instance_create_sync(const stage_instance& si);
 
 /**
  * @brief Get the stage instance associated with the channel id, if it exists.
@@ -1686,14 +1497,10 @@ inline stage_instance stage_instance_create_sync(const stage_instance& si) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline stage_instance stage_instance_get_sync(const snowflake channel_id) {
-	return dpp::sync<stage_instance>(this, &cluster::stage_instance_get, channel_id);
-}
+stage_instance stage_instance_get_sync(const snowflake channel_id);
 
 
-inline stage_instance stage_instance_edit_sync(const stage_instance& si) {
-	return dpp::sync<stage_instance>(this, &cluster::stage_instance_edit, si);
-}
+stage_instance stage_instance_edit_sync(const stage_instance& si);
 
 /**
  * @brief Delete a stage instance.
@@ -1707,9 +1514,7 @@ inline stage_instance stage_instance_edit_sync(const stage_instance& si) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation stage_instance_delete_sync(const snowflake channel_id) {
-	return dpp::sync<confirmation>(this, &cluster::stage_instance_delete, channel_id);
-}
+confirmation stage_instance_delete_sync(const snowflake channel_id);
 
 /**
  * @brief Create a sticker in a guild
@@ -1723,9 +1528,7 @@ inline confirmation stage_instance_delete_sync(const snowflake channel_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline sticker guild_sticker_create_sync(sticker &s) {
-	return dpp::sync<sticker>(this, &cluster::guild_sticker_create, s);
-}
+sticker guild_sticker_create_sync(sticker &s);
 
 /**
  * @brief Delete a sticker from a guild
@@ -1740,9 +1543,7 @@ inline sticker guild_sticker_create_sync(sticker &s) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_sticker_delete_sync(snowflake sticker_id, snowflake guild_id) {
-	return dpp::sync<confirmation>(this, &cluster::guild_sticker_delete, sticker_id, guild_id);
-}
+confirmation guild_sticker_delete_sync(snowflake sticker_id, snowflake guild_id);
 
 /**
  * @brief Get a guild sticker
@@ -1756,9 +1557,7 @@ inline confirmation guild_sticker_delete_sync(snowflake sticker_id, snowflake gu
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline sticker guild_sticker_get_sync(snowflake id, snowflake guild_id) {
-	return dpp::sync<sticker>(this, &cluster::guild_sticker_get, id, guild_id);
-}
+sticker guild_sticker_get_sync(snowflake id, snowflake guild_id);
 
 /**
  * @brief Modify a sticker in a guild
@@ -1772,9 +1571,7 @@ inline sticker guild_sticker_get_sync(snowflake id, snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline sticker guild_sticker_modify_sync(sticker &s) {
-	return dpp::sync<sticker>(this, &cluster::guild_sticker_modify, s);
-}
+sticker guild_sticker_modify_sync(sticker &s);
 
 /**
  * @brief Get all guild stickers
@@ -1787,9 +1584,7 @@ inline sticker guild_sticker_modify_sync(sticker &s) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline sticker_map guild_stickers_get_sync(snowflake guild_id) {
-	return dpp::sync<sticker_map>(this, &cluster::guild_stickers_get, guild_id);
-}
+sticker_map guild_stickers_get_sync(snowflake guild_id);
 
 /**
  * @brief Get a nitro sticker
@@ -1802,9 +1597,7 @@ inline sticker_map guild_stickers_get_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline sticker nitro_sticker_get_sync(snowflake id) {
-	return dpp::sync<sticker>(this, &cluster::nitro_sticker_get, id);
-}
+sticker nitro_sticker_get_sync(snowflake id);
 
 /**
  * @brief Get sticker packs
@@ -1816,9 +1609,7 @@ inline sticker nitro_sticker_get_sync(snowflake id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline sticker_pack_map sticker_packs_get_sync() {
-	return dpp::sync<sticker_pack_map>(this, &cluster::sticker_packs_get);
-}
+sticker_pack_map sticker_packs_get_sync();
 
 /**
  * @brief Create a new guild based on a template.
@@ -1833,9 +1624,7 @@ inline sticker_pack_map sticker_packs_get_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild guild_create_from_template_sync(const std::string &code, const std::string &name) {
-	return dpp::sync<guild>(this, &cluster::guild_create_from_template, code, name);
-}
+guild guild_create_from_template_sync(const std::string &code, const std::string &name);
 
 /**
  * @brief Creates a template for the guild
@@ -1851,9 +1640,7 @@ inline guild guild_create_from_template_sync(const std::string &code, const std:
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline dtemplate guild_template_create_sync(snowflake guild_id, const std::string &name, const std::string &description) {
-	return dpp::sync<dtemplate>(this, &cluster::guild_template_create, guild_id, name, description);
-}
+dtemplate guild_template_create_sync(snowflake guild_id, const std::string &name, const std::string &description);
 
 /**
  * @brief Deletes the template
@@ -1868,9 +1655,7 @@ inline dtemplate guild_template_create_sync(snowflake guild_id, const std::strin
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation guild_template_delete_sync(snowflake guild_id, const std::string &code) {
-	return dpp::sync<confirmation>(this, &cluster::guild_template_delete, guild_id, code);
-}
+confirmation guild_template_delete_sync(snowflake guild_id, const std::string &code);
 
 /**
  * @brief Modifies the template's metadata.
@@ -1887,9 +1672,7 @@ inline confirmation guild_template_delete_sync(snowflake guild_id, const std::st
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline dtemplate guild_template_modify_sync(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description) {
-	return dpp::sync<dtemplate>(this, &cluster::guild_template_modify, guild_id, code, name, description);
-}
+dtemplate guild_template_modify_sync(snowflake guild_id, const std::string &code, const std::string &name, const std::string &description);
 
 /**
  * @brief Get guild templates
@@ -1903,9 +1686,7 @@ inline dtemplate guild_template_modify_sync(snowflake guild_id, const std::strin
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline dtemplate_map guild_templates_get_sync(snowflake guild_id) {
-	return dpp::sync<dtemplate_map>(this, &cluster::guild_templates_get, guild_id);
-}
+dtemplate_map guild_templates_get_sync(snowflake guild_id);
 
 /**
  * @brief Syncs the template to the guild's current state.
@@ -1920,9 +1701,7 @@ inline dtemplate_map guild_templates_get_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline dtemplate guild_template_sync_sync(snowflake guild_id, const std::string &code) {
-	return dpp::sync<dtemplate>(this, &cluster::guild_template_sync, guild_id, code);
-}
+dtemplate guild_template_sync_sync(snowflake guild_id, const std::string &code);
 
 /**
  * @brief Get a template
@@ -1935,9 +1714,7 @@ inline dtemplate guild_template_sync_sync(snowflake guild_id, const std::string 
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline dtemplate template_get_sync(const std::string &code) {
-	return dpp::sync<dtemplate>(this, &cluster::template_get, code);
-}
+dtemplate template_get_sync(const std::string &code);
 
 /**
  * @brief Join a thread
@@ -1950,9 +1727,7 @@ inline dtemplate template_get_sync(const std::string &code) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation current_user_join_thread_sync(snowflake thread_id) {
-	return dpp::sync<confirmation>(this, &cluster::current_user_join_thread, thread_id);
-}
+confirmation current_user_join_thread_sync(snowflake thread_id);
 
 /**
  * @brief Leave a thread
@@ -1965,9 +1740,7 @@ inline confirmation current_user_join_thread_sync(snowflake thread_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation current_user_leave_thread_sync(snowflake thread_id) {
-	return dpp::sync<confirmation>(this, &cluster::current_user_leave_thread, thread_id);
-}
+confirmation current_user_leave_thread_sync(snowflake thread_id);
 
 /**
  * @brief Get active threads in a channel (Sorted by ID in descending order)
@@ -1980,9 +1753,7 @@ inline confirmation current_user_leave_thread_sync(snowflake thread_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline thread_map threads_get_active_sync(snowflake channel_id) {
-	return dpp::sync<thread_map>(this, &cluster::threads_get_active, channel_id);
-}
+thread_map threads_get_active_sync(snowflake channel_id);
 
 /**
  * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
@@ -1997,9 +1768,7 @@ inline thread_map threads_get_active_sync(snowflake channel_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline thread_map threads_get_joined_private_archived_sync(snowflake channel_id, snowflake before_id, uint16_t limit) {
-	return dpp::sync<thread_map>(this, &cluster::threads_get_joined_private_archived, channel_id, before_id, limit);
-}
+thread_map threads_get_joined_private_archived_sync(snowflake channel_id, snowflake before_id, uint16_t limit);
 
 /**
  * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
@@ -2014,9 +1783,7 @@ inline thread_map threads_get_joined_private_archived_sync(snowflake channel_id,
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline thread_map threads_get_private_archived_sync(snowflake channel_id,  time_t before_timestamp, uint16_t limit) {
-	return dpp::sync<thread_map>(this, &cluster::threads_get_private_archived, channel_id, before_timestamp, limit);
-}
+thread_map threads_get_private_archived_sync(snowflake channel_id,  time_t before_timestamp, uint16_t limit);
 
 /**
  * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
@@ -2031,9 +1798,7 @@ inline thread_map threads_get_private_archived_sync(snowflake channel_id,  time_
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline thread_map threads_get_public_archived_sync(snowflake channel_id, time_t before_timestamp, uint16_t limit) {
-	return dpp::sync<thread_map>(this, &cluster::threads_get_public_archived, channel_id, before_timestamp, limit);
-}
+thread_map threads_get_public_archived_sync(snowflake channel_id, time_t before_timestamp, uint16_t limit);
 
 /**
  * @brief Get a thread member
@@ -2047,9 +1812,7 @@ inline thread_map threads_get_public_archived_sync(snowflake channel_id, time_t 
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline thread_member thread_member_get_sync(const snowflake thread_id, const snowflake user_id) {
-	return dpp::sync<thread_member>(this, &cluster::thread_member_get, thread_id, user_id);
-}
+thread_member thread_member_get_sync(const snowflake thread_id, const snowflake user_id);
 
 /**
  * @brief Get members of a thread
@@ -2062,9 +1825,7 @@ inline thread_member thread_member_get_sync(const snowflake thread_id, const sno
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline thread_member_map thread_members_get_sync(snowflake thread_id) {
-	return dpp::sync<thread_member_map>(this, &cluster::thread_members_get, thread_id);
-}
+thread_member_map thread_members_get_sync(snowflake thread_id);
 
 /**
  * @brief Create a thread
@@ -2084,9 +1845,7 @@ inline thread_member_map thread_members_get_sync(snowflake thread_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline thread thread_create_sync(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user) {
-	return dpp::sync<thread>(this, &cluster::thread_create, thread_name, channel_id, auto_archive_duration, thread_type, invitable, rate_limit_per_user);
-}
+thread thread_create_sync(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user);
 
 /**
  * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
@@ -2104,9 +1863,7 @@ inline thread thread_create_sync(const std::string& thread_name, snowflake chann
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline thread thread_create_with_message_sync(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user) {
-	return dpp::sync<thread>(this, &cluster::thread_create_with_message, thread_name, channel_id, message_id, auto_archive_duration, rate_limit_per_user);
-}
+thread thread_create_with_message_sync(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user);
 
 /**
  * @brief Add a member to a thread
@@ -2120,9 +1877,7 @@ inline thread thread_create_with_message_sync(const std::string& thread_name, sn
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation thread_member_add_sync(snowflake thread_id, snowflake user_id) {
-	return dpp::sync<confirmation>(this, &cluster::thread_member_add, thread_id, user_id);
-}
+confirmation thread_member_add_sync(snowflake thread_id, snowflake user_id);
 
 /**
  * @brief Remove a member from a thread
@@ -2136,9 +1891,7 @@ inline confirmation thread_member_add_sync(snowflake thread_id, snowflake user_i
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation thread_member_remove_sync(snowflake thread_id, snowflake user_id) {
-	return dpp::sync<confirmation>(this, &cluster::thread_member_remove, thread_id, user_id);
-}
+confirmation thread_member_remove_sync(snowflake thread_id, snowflake user_id);
 
 /**
  * @brief Edit current (bot) user
@@ -2157,9 +1910,7 @@ inline confirmation thread_member_remove_sync(snowflake thread_id, snowflake use
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline user current_user_edit_sync(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png) {
-	return dpp::sync<user>(this, &cluster::current_user_edit, nickname, image_blob, type);
-}
+user current_user_edit_sync(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png);
 
 /**
  * @brief Get current (bot) application
@@ -2172,9 +1923,7 @@ inline user current_user_edit_sync(const std::string &nickname, const std::strin
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline application current_application_get_sync() {
-	return dpp::sync<application>(this, &cluster::current_application_get);
-}
+application current_application_get_sync();
 
 /**
  * @brief Get current (bot) user
@@ -2189,9 +1938,7 @@ inline application current_application_get_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline user_identified current_user_get_sync() {
-	return dpp::sync<user_identified>(this, &cluster::current_user_get);
-}
+user_identified current_user_get_sync();
 
 /**
  * @brief Set the bot's voice state on a stage channel
@@ -2219,9 +1966,7 @@ inline user_identified current_user_get_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation current_user_set_voice_state_sync(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0) {
-	return dpp::sync<confirmation>(this, &cluster::current_user_set_voice_state, guild_id, channel_id, suppress, request_to_speak_timestamp);
-}
+confirmation current_user_set_voice_state_sync(snowflake guild_id, snowflake channel_id, bool suppress = false, time_t request_to_speak_timestamp = 0);
 
 /**
  * @brief Set a user's voice state on a stage channel
@@ -2248,9 +1993,7 @@ inline confirmation current_user_set_voice_state_sync(snowflake guild_id, snowfl
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation user_set_voice_state_sync(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false) {
-	return dpp::sync<confirmation>(this, &cluster::user_set_voice_state, user_id, guild_id, channel_id, suppress);
-}
+confirmation user_set_voice_state_sync(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false);
 
 /**
  * @brief Get current user's connections (linked accounts, e.g. steam, xbox).
@@ -2264,9 +2007,7 @@ inline confirmation user_set_voice_state_sync(snowflake user_id, snowflake guild
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline connection_map current_user_connections_get_sync() {
-	return dpp::sync<connection_map>(this, &cluster::current_user_connections_get);
-}
+connection_map current_user_connections_get_sync();
 
 /**
  * @brief Get current (bot) user guilds
@@ -2278,9 +2019,7 @@ inline connection_map current_user_connections_get_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline guild_map current_user_get_guilds_sync() {
-	return dpp::sync<guild_map>(this, &cluster::current_user_get_guilds);
-}
+guild_map current_user_get_guilds_sync();
 
 /**
  * @brief Leave a guild
@@ -2293,9 +2032,7 @@ inline guild_map current_user_get_guilds_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation current_user_leave_guild_sync(snowflake guild_id) {
-	return dpp::sync<confirmation>(this, &cluster::current_user_leave_guild, guild_id);
-}
+confirmation current_user_leave_guild_sync(snowflake guild_id);
 
 /**
  * @brief Get a user by id
@@ -2313,9 +2050,7 @@ inline confirmation current_user_leave_guild_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline user_identified user_get_sync(snowflake user_id) {
-	return dpp::sync<user_identified>(this, &cluster::user_get, user_id);
-}
+user_identified user_get_sync(snowflake user_id);
 
 /**
  * @brief Get all voice regions
@@ -2327,9 +2062,7 @@ inline user_identified user_get_sync(snowflake user_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline voiceregion_map get_voice_regions_sync() {
-	return dpp::sync<voiceregion_map>(this, &cluster::get_voice_regions);
-}
+voiceregion_map get_voice_regions_sync();
 
 /**
  * @brief Get guild voice regions.
@@ -2347,9 +2080,7 @@ inline voiceregion_map get_voice_regions_sync() {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline voiceregion_map guild_get_voice_regions_sync(snowflake guild_id) {
-	return dpp::sync<voiceregion_map>(this, &cluster::guild_get_voice_regions, guild_id);
-}
+voiceregion_map guild_get_voice_regions_sync(snowflake guild_id);
 
 /**
  * @brief Create a webhook
@@ -2363,9 +2094,7 @@ inline voiceregion_map guild_get_voice_regions_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline webhook create_webhook_sync(const class webhook &w) {
-	return dpp::sync<webhook>(this, &cluster::create_webhook, w);
-}
+webhook create_webhook_sync(const class webhook &w);
 
 /**
  * @brief Delete a webhook
@@ -2379,9 +2108,7 @@ inline webhook create_webhook_sync(const class webhook &w) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation delete_webhook_sync(snowflake webhook_id) {
-	return dpp::sync<confirmation>(this, &cluster::delete_webhook, webhook_id);
-}
+confirmation delete_webhook_sync(snowflake webhook_id);
 
 /**
  * @brief Delete webhook message
@@ -2396,9 +2123,7 @@ inline confirmation delete_webhook_sync(snowflake webhook_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation delete_webhook_message_sync(const class webhook &wh, snowflake message_id) {
-	return dpp::sync<confirmation>(this, &cluster::delete_webhook_message, wh, message_id);
-}
+confirmation delete_webhook_message_sync(const class webhook &wh, snowflake message_id);
 
 /**
  * @brief Delete webhook with token
@@ -2412,9 +2137,7 @@ inline confirmation delete_webhook_message_sync(const class webhook &wh, snowfla
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline confirmation delete_webhook_with_token_sync(snowflake webhook_id, const std::string &token) {
-	return dpp::sync<confirmation>(this, &cluster::delete_webhook_with_token, webhook_id, token);
-}
+confirmation delete_webhook_with_token_sync(snowflake webhook_id, const std::string &token);
 
 /**
  * @brief Edit webhook
@@ -2428,9 +2151,7 @@ inline confirmation delete_webhook_with_token_sync(snowflake webhook_id, const s
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline webhook edit_webhook_sync(const class webhook& wh) {
-	return dpp::sync<webhook>(this, &cluster::edit_webhook, wh);
-}
+webhook edit_webhook_sync(const class webhook& wh);
 
 /**
  * @brief Edit webhook message
@@ -2451,9 +2172,7 @@ inline webhook edit_webhook_sync(const class webhook& wh) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message edit_webhook_message_sync(const class webhook &wh, const struct message &m) {
-	return dpp::sync<message>(this, &cluster::edit_webhook_message, wh, m);
-}
+message edit_webhook_message_sync(const class webhook &wh, const struct message &m);
 
 /**
  * @brief Edit webhook with token (token is encapsulated in the webhook object)
@@ -2466,9 +2185,7 @@ inline message edit_webhook_message_sync(const class webhook &wh, const struct m
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline webhook edit_webhook_with_token_sync(const class webhook& wh) {
-	return dpp::sync<webhook>(this, &cluster::edit_webhook_with_token, wh);
-}
+webhook edit_webhook_with_token_sync(const class webhook& wh);
 
 /**
  * @brief Execute webhook
@@ -2485,9 +2202,7 @@ inline webhook edit_webhook_with_token_sync(const class webhook& wh) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message execute_webhook_sync(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0) {
-	return dpp::sync<message>(this, &cluster::execute_webhook, wh, m, wait, thread_id);
-}
+message execute_webhook_sync(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0);
 
 /**
  * @brief Get channel webhooks
@@ -2500,9 +2215,7 @@ inline message execute_webhook_sync(const class webhook &wh, const struct messag
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline webhook_map get_channel_webhooks_sync(snowflake channel_id) {
-	return dpp::sync<webhook_map>(this, &cluster::get_channel_webhooks, channel_id);
-}
+webhook_map get_channel_webhooks_sync(snowflake channel_id);
 
 /**
  * @brief Get guild webhooks
@@ -2515,9 +2228,7 @@ inline webhook_map get_channel_webhooks_sync(snowflake channel_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline webhook_map get_guild_webhooks_sync(snowflake guild_id) {
-	return dpp::sync<webhook_map>(this, &cluster::get_guild_webhooks, guild_id);
-}
+webhook_map get_guild_webhooks_sync(snowflake guild_id);
 
 /**
  * @brief Get webhook
@@ -2530,9 +2241,7 @@ inline webhook_map get_guild_webhooks_sync(snowflake guild_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline webhook get_webhook_sync(snowflake webhook_id) {
-	return dpp::sync<webhook>(this, &cluster::get_webhook, webhook_id);
-}
+webhook get_webhook_sync(snowflake webhook_id);
 
 /**
  * @brief Get webhook message
@@ -2546,9 +2255,7 @@ inline webhook get_webhook_sync(snowflake webhook_id) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline message get_webhook_message_sync(const class webhook &wh) {
-	return dpp::sync<message>(this, &cluster::get_webhook_message, wh);
-}
+message get_webhook_message_sync(const class webhook &wh);
 
 /**
  * @brief Get webhook using token
@@ -2562,9 +2269,7 @@ inline message get_webhook_message_sync(const class webhook &wh) {
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-inline webhook get_webhook_with_token_sync(snowflake webhook_id, const std::string &token) {
-	return dpp::sync<webhook>(this, &cluster::get_webhook_with_token, webhook_id, token);
-}
+webhook get_webhook_with_token_sync(snowflake webhook_id, const std::string &token);
 
 
 /* End of auto-generated definitions */

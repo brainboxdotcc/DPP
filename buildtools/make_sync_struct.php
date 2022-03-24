@@ -20,7 +20,6 @@ $forcedReturn = [
 $header = explode("\n", file_get_contents('include/dpp/cluster.h'));
 $state = 0;
 $currentFunction = $parameters = $returnType = '';
-$content = '';
 $content = <<<EOT
 /************************************************************************************
  *
@@ -51,6 +50,14 @@ $content = <<<EOT
  * To re-generate this header file re-run the script!
  */ 
 
+EOT;
+$cppcontent = $content;
+$cppcontent .= <<<EOT
+
+#include <dpp/export.h>
+#include <dpp/snowflake.h>
+#include <dpp/cluster.h>
+
 
 EOT;
 
@@ -62,6 +69,7 @@ if ($them <= $us) {
 }
 
 echo "-- Autogenerating include/dpp/cluster_sync_calls.h\n";
+echo "-- Autogenerating src/dpp/cluster_sync_calls.cpp\n";
 
 foreach ($clustercpp as $cpp) {
 	if ($state == 0 && preg_match('/^\s*void\s+cluster::([^(]+)\s*\((.*)command_completion_event_t\s*callback\s*\)/', $cpp, $matches)) {
@@ -97,14 +105,21 @@ foreach ($clustercpp as $cpp) {
 			if (!empty($parameterNames)) {
 				$parameterNames = ', ' . $parameterNames;
 			}
+			$noDefaults = $parameters;
 			$parameters = !empty($fullParameters) ? $fullParameters : $parameters;
-			$content .= "inline $returnType {$currentFunction}_sync($parameters) {\n\treturn dpp::sync<$returnType>(this, &cluster::$currentFunction$parameterNames);\n}\n\n";
+			$content .= "$returnType {$currentFunction}_sync($parameters);\n\n";
+			$cppcontent .= "$returnType cluster::{$currentFunction}_sync($noDefaults) {\n\treturn dpp::sync<$returnType>(this, &cluster::$currentFunction$parameterNames);\n}\n\n";
 		}
 		$currentFunction = $parameters = $returnType = '';
 		$state = 0;
 	}
 }
 $content .= <<<EOT
+
+/* End of auto-generated definitions */
+
+EOT;
+$cppcontent .= <<<EOT
 
 /* End of auto-generated definitions */
 
@@ -157,3 +172,4 @@ function getComments(string $currentFunction, string $returnType, array $paramet
 }
 
 file_put_contents('include/dpp/cluster_sync_calls.h', $content);
+file_put_contents('src/dpp/cluster_sync_calls.cpp', $cppcontent);
