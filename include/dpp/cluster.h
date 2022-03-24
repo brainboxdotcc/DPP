@@ -3421,7 +3421,7 @@ public:
 		/* Attach event */
 		listener_handle = ev(listener);
 		/* Create timer */
-		th = cl->start_timer([this]() {
+		th = cl->start_timer([this](dpp::timer timer_handle) {
 			/* Timer has finished, detach it from event.
 			 * Only allowed to tick once.
 			 */
@@ -3492,7 +3492,7 @@ public:
 				stored.push_back(*v);
 			}
 		};
-		tl = new dpp::timed_listener<event_router_t<T>, std::function<void(const T&)>>(cl, duration, event, f, [this]() {
+		tl = new dpp::timed_listener<event_router_t<T>, std::function<void(const T&)>>(cl, duration, event, f, [this](dpp::timer timer_handle) {
 			if (!triggered) {
 				triggered = true;
 				completed(stored);

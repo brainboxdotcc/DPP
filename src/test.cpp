@@ -402,7 +402,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test("TIMERSTART", false);
 		uint32_t ticks = 0;
-		dpp::timer th = bot.start_timer([&]() {
+		dpp::timer th = bot.start_timer([&](dpp::timer timer_handle) {
 			if (ticks == 5) {
 				/* The simple test timer ticks every second.
 				 * If we get to 5 seconds, we know the timer is working.
@@ -419,7 +419,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test("ONESHOT", false);
 		bool once = false;
-		dpp::oneshot_timer ost(&bot, 5, [&]() {
+		dpp::oneshot_timer ost(&bot, 5, [&](dpp::timer timer_handle) {
 			if (!once) {
 				set_test("ONESHOT", true);
 			} else {

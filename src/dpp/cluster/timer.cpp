@@ -50,7 +50,7 @@ bool cluster::stop_timer(timer t) {
 		timer_t* tptr = i->second;
 		if (tptr->on_stop) {
 			/* If there is an on_stop event, call it */
-			tptr->on_stop();
+			tptr->on_stop(t);
 		}
 		timer_list.erase(i);
 		auto j = next_timer.find(tptr->next_tick);
@@ -98,7 +98,7 @@ void cluster::tick_timers() {
 	}
 	for (auto & t : scheduled) {
 		/* Call handler */
-		t->on_tick();
+		t->on_tick(t->handle);
 		/* Reschedule for next tick */
 		timer_reschedule(t);
 	}
@@ -106,8 +106,8 @@ void cluster::tick_timers() {
 
 oneshot_timer::oneshot_timer(class cluster* cl, uint64_t duration, timer_callback_t callback) : owner(cl) {
 	/* Create timer */
-	th = cl->start_timer([callback, this]() {
-		callback();
+	th = cl->start_timer([callback, this](dpp::timer timer_handle) {
+		callback(this->get_handle());
 		this->owner->stop_timer(this->th);
 	}, duration);
 }
