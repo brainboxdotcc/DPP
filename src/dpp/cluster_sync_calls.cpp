@@ -296,8 +296,8 @@ confirmation cluster::guild_member_delete_sync(snowflake guild_id, snowflake use
 	return dpp::sync<confirmation>(this, &cluster::guild_member_delete, guild_id, user_id);
 }
 
-confirmation cluster::guild_member_kick_sync(snowflake guild_id, snowflake user_id, const std::string& reason) {
-	return dpp::sync<confirmation>(this, &cluster::guild_member_kick, guild_id, user_id, reason);
+confirmation cluster::guild_member_kick_sync(snowflake guild_id, snowflake user_id) {
+	return dpp::sync<confirmation>(this, &cluster::guild_member_kick, guild_id, user_id);
 }
 
 confirmation cluster::guild_member_timeout_sync(snowflake guild_id, snowflake user_id, time_t communication_disabled_until) {
