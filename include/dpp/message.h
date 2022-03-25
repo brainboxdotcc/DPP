@@ -185,6 +185,12 @@ struct DPP_EXPORT select_option {
 	 * @return select_option& reference to self for chaining
 	 */
 	select_option& set_animated(bool anim);
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	select_option& fill_from_json(nlohmann::json* j);
 };
 
 /**
