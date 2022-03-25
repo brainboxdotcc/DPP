@@ -50,15 +50,19 @@ namespace dpp {
  * @throw dpp::rest_exception On failure of the method call, an exception is thrown
  */
 template<typename T, class F, class... Ts> T sync(class cluster* c, F func, Ts... args) {
-	bool completed = false;
 	bool except = false;
 	std::string message;
+
+    std::mutex sync_mutex;
+    std::unique_lock<std::mutex> sync_guard(sync_mutex);
+    std::condition_variable sync;
+
 	/* Passing _t into the lambda is SAFE here, as this function is 
 	 * guaranteed to stick around until execution of the REST call is finished.
 	 */
 	T _t = {};
 	/* (obj ->* func) is the obscure syntax for calling a method pointer on an object instance */
-	(c ->* func)(args..., [&except, &message, &_t, &completed](const auto& cc) {
+	(c ->* func)(args..., [&sync, &except, &message, &_t](const auto& cc) {
 		if (cc.is_error()) {
 			message = cc.get_error().message;
 			except = true;
@@ -77,12 +81,16 @@ template<typename T, class F, class... Ts> T sync(class cluster* c, F func, Ts..
 				except = true;
 			}
 		}
-		std::exchange(completed, true);
+
+        // unblock calling thread
+        sync.notify_all();
 	});
-	/* Wait for the thread to be completed */
-	do {
-		std::this_thread::sleep_for(std::chrono::microseconds(50));
-	} while (!completed);
+
+    /* blocking this thread until rest request
+     * is finished
+     */
+    sync.wait(sync_guard);
+
 	if (except) {
 		/* Re-throw any exceptions encountered on the other thread */
 		throw dpp::rest_exception(message);
