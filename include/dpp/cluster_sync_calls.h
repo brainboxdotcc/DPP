@@ -1069,6 +1069,7 @@ confirmation guild_member_add_role_sync(snowflake guild_id, snowflake user_id, s
  * @see dpp::cluster::guild_member_delete
  * @see https://discord.com/developers/docs/resources/guild#remove-guild-member
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @deprecated Replaced by dpp::cluster::guild_member_kick
  * @param guild_id Guild ID to kick member from
  * @param user_id User ID to kick
  * @return confirmation returned object on completion
@@ -1080,7 +1081,7 @@ confirmation guild_member_add_role_sync(snowflake guild_id, snowflake user_id, s
 confirmation guild_member_delete_sync(snowflake guild_id, snowflake user_id);
 
 /**
- * @brief Remove (kick) a guild member with a reason
+ * @brief Remove (kick) a guild member
  *  
  * Remove a member from a guild. Requires `KICK_MEMBERS` permission.
  * Fires a `Guild Member Remove` Gateway event.
@@ -1089,14 +1090,13 @@ confirmation guild_member_delete_sync(snowflake guild_id, snowflake user_id);
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param guild_id Guild ID to kick member from
  * @param user_id User ID to kick
- * @param reason Reason for kick
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation guild_member_kick_sync(snowflake guild_id, snowflake user_id, const std::string& reason = "");
+confirmation guild_member_kick_sync(snowflake guild_id, snowflake user_id);
 
 /**
  * @brief Set the timeout of a guild member
