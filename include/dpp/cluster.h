@@ -2231,7 +2231,7 @@ public:
 	/**
 	 * @brief Edit the properties of an existing guild member
 	 * 
-	 * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update Gateway` event.
+	 * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update` Gateway event.
 	 * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
 	 * To remove a timeout, set the `communication_disabled_until` to a non-zero time in the past, e.g. 1.
 	 * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
@@ -2245,6 +2245,10 @@ public:
 
 	/**
 	 * @brief Moves the guild member to a other voice channel, if member is connected to one
+	 *
+	 * Fires a `Guild Member Update` Gateway event.
+	 * @note When moving members to channels, the API user __must__ have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
 	 * @param channel_id Id of the channel to which the user is used
 	 * @param guild_id Guild id to which the user is connected
@@ -2274,7 +2278,7 @@ public:
 	 * @brief Add role to guild member
 	 * 
 	 * Adds a role to a guild member. Requires the `MANAGE_ROLES` permission.
-	 * Fires a Guild Member Update Gateway event.
+	 * Fires a `Guild Member Update` Gateway event.
 	 * @see https://discord.com/developers/docs/resources/guild#add-guild-member-role
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to add a role to
@@ -2328,6 +2332,20 @@ public:
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_member_kick(snowflake guild_id, snowflake user_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Set the timeout of a guild member
+	 *
+	 * Fires a `Guild Member Update` Gateway event.
+	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @param guild_id Guild ID to timeout the member in
+	 * @param user_id User ID to set the timeout for
+	 * @param communication_disabled_until The timestamp when the user's timeout will expire (up to 28 days in the future). Set to 0 to remove the timeout
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_member_timeout(snowflake guild_id, snowflake user_id, time_t communication_disabled_until, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add guild ban
@@ -3436,7 +3454,7 @@ public:
 		/* Attach event */
 		listener_handle = ev(listener);
 		/* Create timer */
-		th = cl->start_timer([this]() {
+		th = cl->start_timer([this](dpp::timer timer_handle) {
 			/* Timer has finished, detach it from event.
 			 * Only allowed to tick once.
 			 */
@@ -3507,7 +3525,7 @@ public:
 				stored.push_back(*v);
 			}
 		};
-		tl = new dpp::timed_listener<event_router_t<T>, std::function<void(const T&)>>(cl, duration, event, f, [this]() {
+		tl = new dpp::timed_listener<event_router_t<T>, std::function<void(const T&)>>(cl, duration, event, f, [this](dpp::timer timer_handle) {
 			if (!triggered) {
 				triggered = true;
 				completed(stored);

@@ -39,7 +39,7 @@ typedef size_t timer;
 /**
  * @brief The type for a timer callback
  */
-typedef std::function<void()> timer_callback_t;
+typedef std::function<void(timer)> timer_callback_t;
 
 /**
  * @brief Used internally to store state of active timers

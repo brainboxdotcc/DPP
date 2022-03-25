@@ -267,7 +267,7 @@ On the resulting screen, you’ll note a page with information regarding your ne
 
 \image html create_application_bot_overview.png
 
-In this panel, you can get your bot token. A bot token looks like this: `OTAyOTMxODU1NTU1MzE3ODUw.YXlm0g.9oYCt-XHXVH_z9qAytzmVRzKWTg`
+In this panel, you can get your bot token by clicking "Reset Token". A bot token looks like this: `OTAyOTMxODU1NTU1MzE3ODUw.YXlm0g.9oYCt-XHXVH_z9qAytzmVRzKWTg`
 
 \warning **Do not share this token** with anybody! If you ever somehow compromise your current bot token or see your bot in danger, you can regenerate the token in the panel.
 
@@ -294,6 +294,10 @@ You can read more about scopes and which you need for your application [here](ht
 \note For bots with elevated permissions, Discord enforces two-factor authentication on the bot owner's account when added to servers that have server-wide 2FA enabled.
 
 5. Copy and paste the resulting URL in your browser. Choose a server to invite the bot to, and click "Authorize".
+
+## Troubleshooting
+
+- Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
 
 \page building-a-cpp-discord-bot-in-repl Creating a Discord bot in Repl.it
 
