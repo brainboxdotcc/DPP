@@ -32,7 +32,6 @@
 #include <dpp/cluster.h>
 
 namespace dpp {
-
 slashcommand_map cluster::global_bulk_command_create_sync(const std::vector<slashcommand> &commands) {
 	return dpp::sync<slashcommand_map>(this, &cluster::global_bulk_command_create, commands);
 }
@@ -299,6 +298,10 @@ confirmation cluster::guild_member_delete_sync(snowflake guild_id, snowflake use
 
 confirmation cluster::guild_member_kick_sync(snowflake guild_id, snowflake user_id, const std::string& reason) {
 	return dpp::sync<confirmation>(this, &cluster::guild_member_kick, guild_id, user_id, reason);
+}
+
+confirmation cluster::guild_member_timeout_sync(snowflake guild_id, snowflake user_id, time_t communication_disabled_until) {
+	return dpp::sync<confirmation>(this, &cluster::guild_member_timeout, guild_id, user_id, communication_disabled_until);
 }
 
 confirmation cluster::guild_member_delete_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id) {
@@ -620,6 +623,7 @@ message cluster::get_webhook_message_sync(const class webhook &wh) {
 webhook cluster::get_webhook_with_token_sync(snowflake webhook_id, const std::string &token) {
 	return dpp::sync<webhook>(this, &cluster::get_webhook_with_token, webhook_id, token);
 }
+
 
 };
 

@@ -995,7 +995,7 @@ confirmation guild_add_member_sync(const guild_member& gm, const std::string &ac
 /**
  * @brief Edit the properties of an existing guild member
  * 
- * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update Gateway` event.
+ * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update` Gateway event.
  * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
  * To remove a timeout, set the `communication_disabled_until` to a non-zero time in the past, e.g. 1.
  * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
@@ -1046,7 +1046,7 @@ guild_member_map guild_get_members_sync(snowflake guild_id, uint16_t limit, snow
  * @brief Add role to guild member
  * 
  * Adds a role to a guild member. Requires the `MANAGE_ROLES` permission.
- * Fires a Guild Member Update Gateway event.
+ * Fires a `Guild Member Update` Gateway event.
  * @see dpp::cluster::guild_member_add_role
  * @see https://discord.com/developers/docs/resources/guild#add-guild-member-role
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
@@ -1099,6 +1099,24 @@ confirmation guild_member_delete_sync(snowflake guild_id, snowflake user_id);
 confirmation guild_member_kick_sync(snowflake guild_id, snowflake user_id, const std::string& reason = "");
 
 /**
+ * @brief Set the timeout of a guild member
+ *
+ * Fires a `Guild Member Update` Gateway event.
+ * @see dpp::cluster::guild_member_timeout
+ * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param guild_id Guild ID to timeout the member in
+ * @param user_id User ID to set the timeout for
+ * @param communication_disabled_until The timestamp when the user's timeout will expire (up to 28 days in the future). Set to 0 to remove the timeout
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation guild_member_timeout_sync(snowflake guild_id, snowflake user_id, time_t communication_disabled_until);
+
+/**
  * @brief Remove role from guild member
  * 
  * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
@@ -1119,6 +1137,10 @@ confirmation guild_member_delete_role_sync(snowflake guild_id, snowflake user_id
 
 /**
  * @brief Moves the guild member to a other voice channel, if member is connected to one
+ *
+ * Fires a `Guild Member Update` Gateway event.
+ * @note When moving members to channels, the API user __must__ have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @see dpp::cluster::guild_member_move
  * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
  * @param channel_id Id of the channel to which the user is used
