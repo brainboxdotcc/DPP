@@ -25,7 +25,7 @@
  * DO NOT EDIT BY HAND!
  *
  * To re-generate this header file re-run the script!
- */
+ */ 
 
 /**
  * @brief Create/overwrite global slash commands.
