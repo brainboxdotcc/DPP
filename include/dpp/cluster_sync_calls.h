@@ -1213,7 +1213,7 @@ inline confirmation guild_member_delete_sync(snowflake guild_id, snowflake user_
 }
 
 /**
- * @brief Remove (kick) a guild member
+ * @brief Remove (kick) a guild member with a reason
  *  
  * Remove a member from a guild. Requires `KICK_MEMBERS` permission.
  * Fires a `Guild Member Remove` Gateway event.
