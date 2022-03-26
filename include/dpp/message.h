@@ -128,6 +128,11 @@ struct DPP_EXPORT select_option : public json_interface<select_option> {
 	select_option();
 
 	/**
+	 * @brief Destructs the select option object.
+	 */
+	virtual ~select_option() = default;
+
+	/**
 	 * @brief Construct a new select option object
 	 * 
 	 * @param label Label of option
