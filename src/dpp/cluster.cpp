@@ -83,6 +83,8 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 
 cluster::~cluster()
 {
+    this->terminating.notify_all();
+
 	delete rest;
 	delete raw_rest;
 	/* Free memory for active timers */
@@ -139,9 +141,10 @@ void cluster::start(bool return_after) {
 			return;
 		}
 		if (!return_after) {
-			while (true) {
-				std::this_thread::sleep_for(std::chrono::seconds(86400));
-			}
+            std::mutex thread_mutex;
+            std::unique_lock<std::mutex> thread_lock(thread_mutex);
+
+			this->terminating.wait(thread_lock);
 		}
 	} else {
 		start_time = time(NULL);
