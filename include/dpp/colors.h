@@ -75,6 +75,6 @@ namespace dpp {
 			aquamarine = 0x7FFFD4,
 			blue_green = 0x088F8F,
 			raspberry = 0xE30B5C,
-			scarlet_red = 0xFF2400
+			scarlet_red = 0xFF2400;
 	};
 };
