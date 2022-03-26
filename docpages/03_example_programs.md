@@ -1224,7 +1224,7 @@ int main() {
 
             /* create the embed */
             dpp::embed embed = dpp::embed().
-                set_color(0x0099ff).
+                set_color(dpp::colors::sti_blue).
                 set_title("Some name").
                 set_url("https://dpp.dev/").
                 set_author("Some name", "https://dpp.dev/", "https://dpp.dev/DPP-Logo.png").
