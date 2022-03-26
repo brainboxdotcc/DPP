@@ -75,7 +75,7 @@ enum component_style : uint8_t {
 /**
  * @brief An option for a select component
  */
-struct DPP_EXPORT select_option {
+struct DPP_EXPORT select_option : public json_interface<select_option> {
 	/**
 	 * @brief Label for option
 	 */
