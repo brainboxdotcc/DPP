@@ -53,7 +53,7 @@ namespace dpp {
 			tahiti_gold = 0xE67E22,
 			cinnabar = 0xE74C3C,
 			submarine = 0x95A5A6,
-			hoki = 0x607D8B,
+			blue_aquamarine = 0x607D8B,
 			deep_sea = 0x11806A,
 			sea_green = 0x1F8B4C,
 			endeavour = 0x206694,
