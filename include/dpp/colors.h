@@ -63,6 +63,16 @@ namespace dpp {
 			rust = 0xA84300,
 			brown = 0x992D22,
 			gray_chateau = 0x979C9F,
-			bismark = 0x546E7A
+			bismark = 0x546E7A,
+		        sti_blue = 0x0E4BEF,
+		        wrx_blue = 0x00247D,
+		        rallyart_crimson = 0xE60012,
+		        lime = 0x00FF00,
+		        forest_green = 0x228B22,
+		        cadmium_green = 0x097969,
+		        aquamarine = 0x7FFFD4,
+		        blue_green = 0x088F8F,
+		        raspberry = 0xE30B5C,
+		        scarlet_red = 0xFF2400
 	};
 };
