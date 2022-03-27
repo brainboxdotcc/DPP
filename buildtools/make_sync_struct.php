@@ -130,7 +130,6 @@ EOT;
 
 function getFullParameters(string $currentFunction, array $parameters): string {
 	global $header;
-	$arr = [];
 	foreach ($header as $line) {
 		if (preg_match('/^\s*void\s+' . $currentFunction . '\s*\((.*' . join('.*', $parameters) . '.*)command_completion_event_t\s*callback\s*/', $line, $matches)) {
 			return preg_replace('/,\s*$/', '', $matches[1]);
@@ -146,9 +145,8 @@ function getComments(string $currentFunction, string $returnType, array $paramet
 	foreach ($header as $i => $line) {
 		if (preg_match('/^\s*void\s+' . $currentFunction . '\s*\(.*' . join('.*', $parameters) . '.*command_completion_event_t\s*callback\s*/', $line)) {
 			/* Backpeddle */
-			$x = 1;
-			$messageToRemove = -1;
-			for ($n = $i; $n != 0; --$n, $x++) {
+			$lineIndex = 1;
+			for ($n = $i; $n != 0; --$n, $lineIndex++) {
 				$header[$n] = preg_replace('/^\t+/', '', $header[$n]);
 				$header[$n] = preg_replace('/@see (.+?)$/', '@see dpp::cluster::' . $currentFunction. "\n * @see \\1", $header[$n]);
 				$header[$n] = preg_replace('/@param callback .*$/', '@return ' . $returnType . ' returned object on completion', $header[$n]);
@@ -156,7 +154,7 @@ function getComments(string $currentFunction, string $returnType, array $paramet
 					$header[$n] = "";
 				}
 				if (preg_match('/\s*\/\*\*\s*$/', $header[$n])) {
-					$part = array_slice($header, $n, $x - 1);
+					$part = array_slice($header, $n, $lineIndex - 1);
 					array_splice($part, count($part) - 1, 0,
 						[
 							" * \memberof dpp::cluster",
