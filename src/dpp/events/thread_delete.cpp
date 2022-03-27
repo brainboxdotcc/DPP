@@ -26,7 +26,7 @@
 
 using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using namespace dpp;
 void thread_delete::handle(discord_client* client, json& j, const std::string& raw) {
@@ -48,4 +48,4 @@ void thread_delete::handle(discord_client* client, json& j, const std::string& r
 		}
 	}
 }
-}};
+};

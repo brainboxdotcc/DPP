@@ -26,7 +26,7 @@
 
 using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using namespace dpp;
 
@@ -52,4 +52,4 @@ void message_reaction_remove_emoji::handle(discord_client* client, json &j, cons
 
 }
 
-}};
+};

@@ -27,7 +27,7 @@
 
 using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using namespace dpp;
 
@@ -67,8 +67,8 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 				}
 			}
 			if (client->creator->cache_policy.user_policy != dpp::cp_none) {
-				for (auto gm = g->members.begin(); gm != g->members.end(); ++gm) {
-					dpp::user* u = dpp::find_user(gm->second.user_id);
+				for (auto & member : g->members) {
+					dpp::user* u = dpp::find_user(member.second.user_id);
 					if (u) {
 						u->refcount--;
 						if (u->refcount < 1) {
@@ -90,4 +90,4 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 	}
 }
 
-}};
+};
