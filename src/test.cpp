@@ -189,6 +189,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("CLUSTER", false);
 	try {
 		dpp::cluster bot(token, dpp::i_all_intents);
+		bot.set_websocket_protocol(dpp::ws_etf);
 		set_test("CLUSTER", true);
 		set_test("CONNECTION", false);
 		set_test("GUILDCREATE", false);
