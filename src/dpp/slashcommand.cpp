@@ -39,8 +39,7 @@ slashcommand::slashcommand(const std::string &_name, const std::string &_descrip
 	set_application_id(_application_id);
 }
 
-slashcommand::~slashcommand() {
-}
+slashcommand::~slashcommand() = default;
 
 slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
@@ -370,7 +369,7 @@ std::string interaction::get_command_name() const {
 		return get_command_interaction().name;
 	}
 	catch (dpp::logic_exception&) {
-		return std::string();
+		return {};
 	}
 }
 
@@ -645,7 +644,7 @@ void to_json(json& j, const component& cp);
 
 interaction_modal_response::interaction_modal_response() : interaction_response(ir_modal_dialog), current_row(0) {
 	// Default to one empty row
-	components.push_back({});
+	components.emplace_back();
 }
 
 interaction_modal_response::interaction_modal_response(const std::string& _custom_id, const std::string& _title, const std::vector<component> _components) : 
@@ -684,7 +683,7 @@ interaction_modal_response& interaction_modal_response::add_component(const comp
 interaction_modal_response& interaction_modal_response::add_row() {
 	if (components.size() < 5) {
 		current_row++;
-		components.push_back({});
+		components.emplace_back();
 	} else {
 		throw dpp::logic_exception("A modal dialog can only have a maximum of five component rows");
 	}

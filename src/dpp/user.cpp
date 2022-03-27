@@ -53,9 +53,7 @@ user::user() :
 {
 }
 
-user::~user()
-{
-}
+user::~user() = default;
 
 std::string user::build_json(bool with_id) const {
 	return "";
@@ -69,8 +67,7 @@ user_identified::user_identified() : user(), accent_color(0), verified(false) {
 
 }
 
-user_identified::~user_identified() {
-}
+user_identified::~user_identified() = default;
 
 std::string user::get_avatar_url(uint16_t size)  const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
@@ -210,12 +207,12 @@ std::string user_identified::get_banner_url(uint16_t size) const {
 						   utility::avatar_size(size)
 		);
 	} else {
-		return std::string();
+		return {};
 	}
 }
 
 void from_json(const nlohmann::json& j, user_identified& u) {
-	dpp::user* user_type = dynamic_cast<user*>(&u);
+	auto user_type = dynamic_cast<user*>(&u);
 	from_json(j, *user_type);
 	u.email = string_not_null(&j, "email");
 	u.locale = string_not_null(&j, "locale");

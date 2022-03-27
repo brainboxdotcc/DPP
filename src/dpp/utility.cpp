@@ -48,13 +48,13 @@ using namespace std::literals;
 
 namespace dpp {
 
-	namespace utility {
+namespace utility {
+using std::string;
 
-		double time_f()
-		{
-			using namespace std::chrono;
-			auto tp = system_clock::now() + 0ns;
-			return tp.time_since_epoch().count() / 1000000000.0;
+double time_f() {
+  using namespace std::chrono;
+  auto tp = system_clock::now() + 0ns;
+  return tp.time_since_epoch().count() / 1000000000.0;
 		}
 
 		bool has_voice() {
@@ -159,7 +159,7 @@ namespace dpp {
 
 		std::string debug_dump(uint8_t* data, size_t length) {
 			std::ostringstream out;
-			size_t addr = (size_t)data;
+			auto addr = (size_t)data;
 			size_t extra = addr % 16;
 			if (extra != 0) {
 				addr -= extra;
@@ -285,7 +285,7 @@ namespace dpp {
 				if (q <= start + leng || leng == std::string::npos)
 					max = i;
 
-				unsigned char c = (unsigned char)str[i];
+				auto c = (unsigned char)str[i];
 				if (c < 0x80)
 					i += 0;
 				else if ((c & 0xE0) == 0xC0)
@@ -309,8 +309,10 @@ namespace dpp {
 		{
 			try {
 				std::ifstream ifs(filename, std::ios::binary);
-				return std::string((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
-			}
+                                return string{
+                                    (std::istreambuf_iterator<char>(ifs)),
+                                    (std::istreambuf_iterator<char>())};
+                        }
 			catch (const std::exception& e) {
 				/* Rethrow as dpp::file_exception */
 				throw dpp::file_exception(e.what());
@@ -336,7 +338,7 @@ namespace dpp {
 			if (size) {
 				return "?size=" + std::to_string(size);
 			}
-			return std::string();
+			return {};
 		}
 
 		std::vector<std::string> tokenize(std::string const &in, const char* sep) {
@@ -384,8 +386,8 @@ namespace dpp {
 			// Reserve worst-case encoded length of string, input length * 3
 			std::string escaped(value.length() * 3, '\0');
 			char* data = escaped.data();
-			for (auto i = value.begin(); i != value.end(); ++i) {
-				unsigned char c = (unsigned char)(*i);
+			for (auto i : value) {
+				auto c = (unsigned char)i;
 				if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
 					// Keep alphanumeric and other accepted characters intact
 					*data++ = c;
@@ -444,7 +446,7 @@ namespace dpp {
 			for (size_t n = 0; n < text.length(); ++n) {
 				if (text.substr(n, 3) == "```") {
 					/* Start/end a paragraph code block */
-					output += (escape_code_blocks ? "\\`\\`\\`" : "```");
+					output += (escape_code_blocks ? R"(\`\`\`)" : "```");
 					n += 2;
 					state = (state == md_normal) ? md_big_code_block : md_normal;
 				} else if (text[n] == '`' && (escape_code_blocks || state != md_big_code_block)) {
@@ -468,6 +470,5 @@ namespace dpp {
 		std::string version() {
 			return DPP_VERSION_TEXT;
 		}
-	};
-
+                }; // namespace utility
 };

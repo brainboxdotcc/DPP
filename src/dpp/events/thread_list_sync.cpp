@@ -26,7 +26,7 @@
 
 using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using namespace dpp;
 void thread_list_sync::handle(discord_client* client, json& j, const std::string& raw) {
@@ -56,4 +56,4 @@ void thread_list_sync::handle(discord_client* client, json& j, const std::string
 		}
 	}
 }
-}};
+};

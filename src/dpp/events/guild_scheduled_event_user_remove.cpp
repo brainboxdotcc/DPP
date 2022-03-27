@@ -25,7 +25,7 @@
 
 using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using namespace dpp;
 
@@ -48,4 +48,4 @@ void guild_scheduled_event_user_remove::handle(discord_client* client, json &j, 
 	}
 }
 
-}};
+};

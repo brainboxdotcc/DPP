@@ -26,7 +26,7 @@
 
 using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using namespace dpp;
 
@@ -46,4 +46,4 @@ void integration_update::handle(discord_client* client, json &j, const std::stri
 	}
 }
 
-}};
+};

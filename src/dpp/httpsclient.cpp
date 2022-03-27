@@ -22,7 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include <stdlib.h>
+#include <cstdlib>
 #include <climits>
 #include <dpp/httpsclient.h>
 #include <dpp/utility.h>
@@ -86,7 +86,7 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 		content += "\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name=\"payload_json\"" + two_cr;
 		content += json + "\r\n";
 		if (filenames.size() == 1 && contents.size() == 1) {
-			content += mime_part_start + "name=\"file\"; filename=\"" + filenames[0] + "\"" + two_cr;
+			content += mime_part_start + R"(name="file"; filename=")" + filenames[0] + "\"" + two_cr;
 			content += contents[0];
 		} else {
 			/* Multiple files */
@@ -116,8 +116,7 @@ const std::map<std::string, std::string> https_client::get_headers() const {
 	return response_headers;
 }
 
-https_client::~https_client() {
-}
+https_client::~https_client() = default;
 
 bool https_client::handle_buffer(std::string &buffer)
 {

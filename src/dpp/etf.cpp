@@ -39,6 +39,7 @@
 #include <iostream>
 
 namespace dpp {
+using std::string;
 
 using json = nlohmann::json;
 
@@ -215,10 +216,7 @@ void etf_parser::append_binary(etf_buffer *b, const char *bytes, size_t size) {
 	buffer_write(b, (const char *)buf, 5);
 }
 
-etf_parser::etf_parser()
-{
-}
-
+etf_parser::etf_parser() = default;
 etf_parser::~etf_parser() = default;
 
 
@@ -269,8 +267,8 @@ const char* etf_parser::read_string(uint32_t length) {
 }
 
 json etf_parser::process_atom(const char* atom, uint16_t length) {
-	if (atom == NULL) {
-		return json();
+	if (atom == nullptr) {
+		return {};
 	}
 
 	json j;
@@ -334,7 +332,7 @@ json etf_parser::decode_list() {
 
 	const auto tailMarker = read_8_bits();
 	if (tailMarker != ett_nil) {
-		return json();
+		return {};
 	}
 
 	return array;
@@ -368,8 +366,8 @@ json etf_parser::decode_float() {
 	const uint8_t FLOAT_LENGTH = 31;
 	const char* floatStr = read_string(FLOAT_LENGTH);
 
-	if (floatStr == NULL) {
-		return json();
+	if (floatStr == nullptr) {
+		return {};
 	}
 
 	double number;
@@ -380,7 +378,7 @@ json etf_parser::decode_float() {
 	auto count = sscanf(nullTerimated, "%lf", &number);
 
 	if (count != 1) {
-		return json();
+		return {};
 	}
 
 	json j = number;
@@ -426,13 +424,16 @@ json etf_parser::decode_bigint(uint32_t digits) {
 		}
 	}
 
-	if (sign == 0) {
-		json j = std::to_string(value);
-		return j;
-	} else {
-		json j = std::to_string(-((int64_t)value));
-		return j;
+	char outBuffer[32] = {0}; // 9223372036854775807
+	const char* const formatString = sign == 0 ? "%llu" : "-%lld";
+	const int res = sprintf(outBuffer, formatString, value);
+
+	if (res < 0) {
+		throw dpp::parse_exception("Decode big integer failed");
 	}
+	const auto length = (uint8_t)res;
+	json j = std::string(outBuffer, length);
+	return j;
 }
 
 json etf_parser::decode_bigint_small() {
@@ -448,8 +449,8 @@ json etf_parser::decode_bigint_large() {
 json etf_parser::decode_binary() {
 	const auto length = read_32_bits();
 	const char* str = read_string(length);
-	if (str == NULL) {
-		return json();
+	if (str == nullptr) {
+		return {};
 	}
 	std::string s = std::string(str, length);
 	json j = std::string(str, length);
@@ -459,8 +460,8 @@ json etf_parser::decode_binary() {
 json etf_parser::decode_string() {
 	const auto length = read_16_bits();
 	const char* str = read_string(length);
-	if (str == NULL) {
-		return json();
+	if (str == nullptr) {
+		return {};
 	}
 	json j = std::string(str, length);
 	return j;
@@ -643,14 +644,14 @@ void etf_parser::inner_build(const json* i, etf_buffer* b)
 		/* Numeric integer types by size */
 		int64_t number = i->get<int64_t>();
 		if (number >= 0 && number <= 127) {
-			unsigned char num = (unsigned char)number;
+			auto num = (unsigned char)number;
 			append_small_integer(b, num);
 		}
 		else if (number >= std::numeric_limits<uint32_t>::max() - 1) {
 			append_unsigned_long_long(b, number);
 		}
 		else {
-			int32_t num32 = (int32_t)number;
+			auto num32 = (int32_t)number;
 			append_integer(b, num32);
 		}
 	}
@@ -713,7 +714,7 @@ std::string etf_parser::build(const json& j) {
 	etf_buffer pk(1024 * 1024);
 	append_version(&pk);
 	inner_build(&j, &pk);
-	return std::string(pk.buf.data(), pk.length);
+        return string{pk.buf.data(), pk.length};
 }
 
 etf_buffer::etf_buffer(size_t initial) {
@@ -723,5 +724,4 @@ etf_buffer::etf_buffer(size_t initial) {
 
 etf_buffer::~etf_buffer() = default;
 
-};
-
+}; // namespace dpp

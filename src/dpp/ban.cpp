@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,25 +26,23 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-ban::ban() : user_id(0)
-{
-}
+ban::ban() : user_id(0) {}
 
 ban::~ban() = default;
 
-ban& ban::fill_from_json(nlohmann::json* j) {
-	reason = string_not_null(j, "reason");
-	if (j->find("user") != j->end()) {
-		json & user = (*j)["user"];
-		user_id = snowflake_not_null(&user, "id");
-	}
-	return *this;
+ban &ban::fill_from_json(nlohmann::json *j) {
+  reason = string_not_null(j, "reason");
+  if (j->find("user") != j->end()) {
+	json &user = (*j)["user"];
+	user_id = snowflake_not_null(&user, "id");
+  }
+  return *this;
 }
 
 std::string ban::build_json(bool with_id) const {
-	/* This is an unused stub, because sending a ban is simple as a user id and a reason */
-	return "{}";
+  /* This is an unused stub, because sending a ban is simple as a user id and a
+   * reason */
+  return "{}";
 }
 
-};
-
+}; // namespace dpp

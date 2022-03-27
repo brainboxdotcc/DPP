@@ -172,7 +172,7 @@ std::string guild_member::get_avatar_url(uint16_t size)  const {
 			utility::avatar_size(size)
 		);
 	} else {
-		return std::string();
+		return {};
 	}
 }
 
@@ -380,8 +380,8 @@ std::string guild::build_json(bool with_id) const {
 void guild::rehash_members() {
 	members_container n;
 	n.reserve(members.size());
-	for (auto t = members.begin(); t != members.end(); ++t) {
-		n.insert(*t);
+	for (auto & member : members) {
+		n.insert(member);
 	}
 	members = n;
 }
@@ -554,10 +554,10 @@ uint64_t guild::permission_overwrites(const uint64_t base_permissions, const use
 		return ~0;
 
 	int64_t permissions = base_permissions;
-	for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
-		if (it->id == id && it->type == ot_role) {
-			permissions &= ~it->deny;
-			permissions |= it->allow;
+	for (const auto & permission_overwrite : channel->permission_overwrites) {
+		if (permission_overwrite.id == id && permission_overwrite.type == ot_role) {
+			permissions &= ~permission_overwrite.deny;
+			permissions |= permission_overwrite.allow;
 			break;
 		}
 	}
@@ -575,10 +575,10 @@ uint64_t guild::permission_overwrites(const uint64_t base_permissions, const use
 		if (rid == id)
 			continue;
 
-		for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
-			if ((rid == it->id && it->type == ot_role) || (member->id == it->id && it->type == ot_member)) {
-				allow |= it->allow;
-				deny |= it->deny;
+		for (const auto & permission_overwrite : channel->permission_overwrites) {
+			if ((rid == permission_overwrite.id && permission_overwrite.type == ot_role) || (member->id == permission_overwrite.id && permission_overwrite.type == ot_member)) {
+				allow |= permission_overwrite.allow;
+				deny |= permission_overwrite.deny;
 				break;
 			}
 		}
@@ -620,7 +620,7 @@ std::string guild::get_banner_url(uint16_t size) const {
 						   utility::avatar_size(size)
 		);
 	} else {
-		return std::string();
+		return {};
 	}
 }
 
@@ -636,7 +636,7 @@ std::string guild::get_discovery_splash_url(uint16_t size) const {
 						   utility::avatar_size(size)
 		);
 	} else {
-		return std::string();
+		return {};
 	}
 }
 
@@ -654,7 +654,7 @@ std::string guild::get_icon_url(uint16_t size) const {
 						   utility::avatar_size(size)
 		);
 	} else {
-		return std::string();
+		return {};
 	}
 }
 
@@ -670,7 +670,7 @@ std::string guild::get_splash_url(uint16_t size) const {
 						   utility::avatar_size(size)
 		);
 	} else {
-		return std::string();
+		return {};
 	}
 }
 

@@ -40,7 +40,7 @@ std::string activity::get_large_asset_url(uint16_t size) const {
 						   utility::avatar_size(size)
 		);
 	} else {
-		return std::string();
+		return {};
 	}
 }
 
@@ -55,7 +55,7 @@ std::string activity::get_small_asset_url(uint16_t size) const {
 						   utility::avatar_size(size)
 		);
 	} else {
-		return std::string();
+		return {};
 	}
 }
 

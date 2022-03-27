@@ -27,7 +27,7 @@
 
 using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using namespace dpp;
 
@@ -67,4 +67,4 @@ void guild_role_update::handle(discord_client* client, json &j, const std::strin
 	}
 }
 
-}};
+};

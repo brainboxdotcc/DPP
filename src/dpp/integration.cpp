@@ -42,9 +42,7 @@ integration::integration() :
 	app.bot = nullptr;
 }
 
-integration::~integration()
-{
-}
+integration::~integration() = default;
 
 integration& integration::fill_from_json(nlohmann::json* j)
 {
@@ -116,7 +114,7 @@ bool integration::expiry_kicks_user() const {
 	return flags & if_expire_kick;
 }
 
-connection::connection() : id(0), revoked(false), verified(false), friend_sync(false), show_activity(false), visible(false) {
+connection::connection() : id(nullptr), revoked(false), verified(false), friend_sync(false), show_activity(false), visible(false) {
 }
 
 connection& connection::fill_from_json(nlohmann::json* j) {

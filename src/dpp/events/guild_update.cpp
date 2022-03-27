@@ -26,7 +26,7 @@
 
 using json = nlohmann::json;
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using namespace dpp;
 
@@ -44,13 +44,13 @@ void guild_update::handle(discord_client* client, json &j, const std::string &ra
 		g->fill_from_json(client, &d);
 		if (!g->is_unavailable()) {
 			if (client->creator->cache_policy.role_policy != dpp::cp_none && d.find("roles") != d.end()) {
-				for (size_t rc = 0; rc < g->roles.size(); ++rc) {
-					dpp::role* oldrole = dpp::find_role(g->roles[rc]);
+				for (unsigned long rc : g->roles) {
+					dpp::role* oldrole = dpp::find_role(rc);
 					dpp::get_role_cache()->remove(oldrole);
 				}
 				g->roles.clear();
 				for (auto & role : d["roles"]) {
-					dpp::role *r = new dpp::role();
+					auto r = new dpp::role();
 					r->fill_from_json(g->id, &role);
 					dpp::get_role_cache()->store(r);
 					g->roles.push_back(r->id);
@@ -66,4 +66,4 @@ void guild_update::handle(discord_client* client, json &j, const std::string &ra
 	}
 }
 
-}};
+};

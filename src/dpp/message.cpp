@@ -33,6 +33,7 @@
 using json = nlohmann::json;
 
 namespace dpp {
+using std::string;
 
 component::component() :
 	type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""),
@@ -314,8 +315,10 @@ void to_json(json& j, const component& cp) {
 select_option::select_option() : is_default(false) {
 }
 
-select_option::select_option(const std::string &_label, const std::string &_value, const std::string &_description) : label(_label), value(_value), description(_description), is_default(false) {
-}
+select_option::select_option(const string &_label, const std::string &_value,
+                             const std::string &_description)
+    : label(_label), value(_value), description(_description),
+      is_default(false) {}
 
 select_option& select_option::set_label(const std::string &l) {
 	label = dpp::utility::utf8substr(l, 0, 100);
@@ -936,7 +939,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		for (auto & m : sub) {
 			dpp::user u = dpp::user().fill_from_json(&m);
 			dpp::guild_member gm = dpp::guild_member().fill_from_json(static_cast<json*>(&m["member"]), this->guild_id, u.id);
-			mentions.push_back({u, gm});
+			mentions.emplace_back(u, gm);
 		}
 	}
 	if (d->find("mention_roles") != d->end()) {
@@ -1120,7 +1123,7 @@ std::string sticker_pack::build_json(bool with_id) const {
 
 std::string sticker::get_url(bool accept_lottie) const {
 	if (this->format_type == sticker_format::sf_lottie && !accept_lottie) {
-		return std::string();
+		return {};
 	} else {
 		return fmt::format("{}/stickers/{}.{}",
 						   utility::cdn_host,
@@ -1139,5 +1142,4 @@ sticker& sticker::set_file_content(const std::string &fc) {
 	return *this;
 }
 
-
-};
+}; // namespace dpp

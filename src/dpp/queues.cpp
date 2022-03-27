@@ -249,7 +249,7 @@ void request_queue::in_loop()
 					newbucket.remaining = rv.ratelimit_remaining;
 					newbucket.reset_after = rv.ratelimit_reset_after;
 					newbucket.retry_after = rv.ratelimit_retry_after;
-					newbucket.timestamp = time(NULL);
+					newbucket.timestamp = time(nullptr);
 					globally_ratelimited = rv.ratelimit_global;
 					if (globally_ratelimited) {
 						globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
@@ -259,7 +259,7 @@ void request_queue::in_loop()
 					/* Make a new entry in the completion list and notify */
 					{
 						std::lock_guard<std::mutex> lock(out_mutex);
-						http_request_completion_t* hrc = new http_request_completion_t();
+						auto* hrc = new http_request_completion_t();
 						*hrc = rv;
 						responses_out.push(std::make_pair(hrc, req));
 						out_ready.notify_one();

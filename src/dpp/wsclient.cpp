@@ -65,9 +65,7 @@ void websocket_client::connect()
 	);
 }
 
-websocket_client::~websocket_client()
-{
-}
+websocket_client::~websocket_client() = default;
 
 bool websocket_client::handle_frame(const std::string &buffer)
 {
@@ -210,8 +208,8 @@ bool websocket_client::parseheader(std::string &data)
 						return false;
 					}
 
-					unsigned char len2 = (unsigned char)data[2];
-					unsigned char len3 = (unsigned char)data[3];
+					auto len2 = (unsigned char)data[2];
+					auto len3 = (unsigned char)data[3];
 					len = (len2 << 8) | len3;
 
 					payloadstartoffset += 2;
@@ -223,7 +221,7 @@ bool websocket_client::parseheader(std::string &data)
 					}
 					len = 0;
 					for (int v = 2, shift = 56; v < 10; ++v, shift -= 8) {
-						unsigned char l = (unsigned char)data[v];
+						auto l = (unsigned char)data[v];
 						len |= (uint64_t)(l & 0xff) << shift;
 					}
 					payloadstartoffset += 8;
@@ -271,7 +269,7 @@ bool websocket_client::parseheader(std::string &data)
 
 void websocket_client::one_second_timer()
 {
-	if (((time(NULL) % 20) == 0) && (state == CONNECTED)) {
+	if (((time(nullptr) % 20) == 0) && (state == CONNECTED)) {
 		/* For sending pings, we send with payload */
 		unsigned char out[MAXHEADERSIZE];
 		std::string payload = "keepalive";

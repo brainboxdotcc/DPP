@@ -29,7 +29,7 @@ std::mutex timer_guard;
 
 timer cluster::start_timer(timer_callback_t on_tick, uint64_t frequency, timer_callback_t on_stop) {
 	std::lock_guard<std::mutex> l(timer_guard);
-	timer_t* newtimer = new timer_t();
+	auto newtimer = new timer_t();
 
 	newtimer->handle = lasthandle++;
 	newtimer->next_tick = time(nullptr) + frequency;
@@ -84,9 +84,9 @@ void cluster::tick_timers() {
 	{
 		time_t now = time(nullptr);
 		std::lock_guard<std::mutex> l(timer_guard);
-		for (auto i = next_timer.begin(); i != next_timer.end(); ++i) {
-			if (now >= i->second->next_tick) {
-				scheduled.push_back(i->second);
+		for (auto & i : next_timer) {
+			if (now >= i.second->next_tick) {
+				scheduled.push_back(i.second);
 			} else {
 				/* The first time we encounter an entry which is not due,
 				 * we can bail out, because std::map is ordered storage so
