@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +20,9 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/snowflake.h>
-#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/json_interface.h>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/snowflake.h>
 
 namespace dpp {
 
@@ -30,29 +30,30 @@ namespace dpp {
  * @brief Defines a request to count prunable users, or start a prune operation
  */
 struct DPP_EXPORT prune : public json_interface<prune> {
-	/** Number of days to include in the prune
-	 */
-	uint32_t days = 0;
-	/** Roles to include in the prune (empty to include everyone)
-	 */
-	std::vector<snowflake> include_roles;
-	/** True if the count of pruneable users should be returned
-	 * (discord recommend not using this on big guilds)
-	 */
-	bool compute_prune_count;
+  /** Number of days to include in the prune
+   */
+  uint32_t days = 0;
+  /** Roles to include in the prune (empty to include everyone)
+   */
+  std::vector<snowflake> include_roles;
+  /** True if the count of pruneable users should be returned
+   * (discord recommend not using this on big guilds)
+   */
+  bool compute_prune_count;
 
-	/** Fill this object from json.
-	 * @param j JSON object to fill from
-	 * @return A reference to self
-	 */
-	 prune& fill_from_json(nlohmann::json* j);
+  /** Fill this object from json.
+   * @param j JSON object to fill from
+   * @return A reference to self
+   */
+  prune &fill_from_json(nlohmann::json *j);
 
-	/** Build JSON from this object.
-	 * @param with_prune_count True if the prune count boolean is to be set in the built JSON
-	 * @return The JSON text of the prune object
-	 */
-	virtual std::string build_json(bool with_prune_count = false) const;
-
+  /** Build JSON from this object.
+   * @param with_prune_count True if the prune count boolean is to be set in the
+   * built JSON
+   * @return The JSON text of the prune object
+   */
+  [[nodiscard]] std::string
+  build_json(bool with_prune_count = false) const override;
 };
 
-};
+}; // namespace dpp

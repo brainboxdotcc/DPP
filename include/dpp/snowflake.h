@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,15 +19,15 @@
  *
  ************************************************************************************/
 #pragma once
+#include <cstdint>
 #include <dpp/export.h>
-#include <stdint.h>
 
 /**
  * @brief The main namespace for D++ functions. classes and types
  */
 namespace dpp {
-	/** @brief A 64 bit unsigned value representing many things on discord.
-	 * Discord calls the value a 'snowflake' value.
-	 */
-	typedef uint64_t snowflake;
-};
+/** @brief A 64 bit unsigned value representing many things on discord.
+ * Discord calls the value a 'snowflake' value.
+ */
+using snowflake = uint64_t;
+}; // namespace dpp

@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2022 Craig Edwards and D++ contributors 
+ * Copyright 2022 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,26 +20,28 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <utility>
 
 namespace dpp {
 
-	/**
-	 * @brief Run some code within an if() statement only once.
-	 * 
-	 * Use this template like this:
-	 * 
-	 * ```
-	 * if (dpp::run_once<struct any_unique_name_you_like_here>()) {
-	 *     // Your code here
-	 * }
-	 * ```
-	 * 
-	 * @tparam T any unique 'tag' identifier name
-	 * @return auto a true/false return to say if we should execute or not
-	 */
-	template <typename T> auto run_once() {
-		static auto called = false;
-		return !std::exchange(called, true);
-	};
-
+/**
+ * @brief Run some code within an if() statement only once.
+ *
+ * Use this template like this:
+ *
+ * ```
+ * if (dpp::run_once<struct any_unique_name_you_like_here>()) {
+ *     // Your code here
+ * }
+ * ```
+ *
+ * @tparam T any unique 'tag' identifier name
+ * @return auto a true/false return to say if we should execute or not
+ */
+template <typename T>
+auto run_once() {
+  static auto called = false;
+  return !std::exchange(called, true);
 };
+
+}; // namespace dpp

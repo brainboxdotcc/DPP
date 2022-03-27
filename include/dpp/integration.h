@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,151 +20,156 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/snowflake.h>
+#include <dpp/json_interface.h>
 #include <dpp/managed.h>
 #include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/snowflake.h>
 #include <unordered_map>
-#include <dpp/json_interface.h>
 
 namespace dpp {
 
 /**
  * @brief Integration types
  */
-enum integration_type {
-	/// Twitch integration
-	i_twitch,
-	/// YouTube integration
-	i_youtube,
-	/// Discord integration
-	i_discord
+enum integration_type
+{
+  /// Twitch integration
+  i_twitch,
+  /// YouTube integration
+  i_youtube,
+  /// Discord integration
+  i_discord
 };
 
 /**
  * @brief Integration flags
  */
-enum integration_flags {
-	/// Integration enabled
-	if_enabled =     0b00000001,
-	/// Integration syncing
-	if_syncing =     0b00000010,
-	/// Emoji integration
-	if_emoticons =   0b00000100,
-	/// Integration revoked
-	if_revoked =     0b00001000,
-	/// Kick users when their subscription expires
-	if_expire_kick = 0b00010000,
+enum integration_flags
+{
+  /// Integration enabled
+  if_enabled = 0b00000001,
+  /// Integration syncing
+  if_syncing = 0b00000010,
+  /// Emoji integration
+  if_emoticons = 0b00000100,
+  /// Integration revoked
+  if_revoked = 0b00001000,
+  /// Kick users when their subscription expires
+  if_expire_kick = 0b00010000,
 };
 
 /**
  * @brief An application that has been integrated
  */
 struct DPP_EXPORT integration_app {
-	/// Integration id
-	snowflake id;
-	/// Name
-	std::string name;
-	/// Icon
-	std::string icon;
-	/// Description
-	std::string description;
-	/// Integration summary
-	std::string summary;
-	/// Pointer to bot user
-	class user* bot;
+  /// Integration id
+  snowflake id;
+  /// Name
+  std::string name;
+  /// Icon
+  std::string icon;
+  /// Description
+  std::string description;
+  /// Integration summary
+  std::string summary;
+  /// Pointer to bot user
+  class user *bot;
 };
 
 /**
  * @brief Represents an integration on a guild, e.g. a connection to twitch.
  */
-class DPP_EXPORT integration : public managed, public json_interface<integration> {
+class DPP_EXPORT integration : public managed,
+							   public json_interface<integration>
+{
 public:
-	/** Integration name */
-	std::string name;
-	/** Integration type */
-	integration_type type;
-	/** Integration flags from dpp::integration_flags */
-	uint8_t flags;
-	/** Role id */
-	snowflake role_id;
-	/** User id */
-	snowflake user_id;
-	/** Expiry grace period */
-	uint32_t expire_grace_period;
-	/** Sync time */
-	time_t synced_at;
-	/** Subscriber count */
-	uint32_t subscriber_count;
-	/* Account id */
-	std::string account_id;
-	/* Account name */
-	std::string account_name;
-	/* Integration application */
-	integration_app app;
+  /** Integration name */
+  std::string name;
+  /** Integration type */
+  integration_type type;
+  /** Integration flags from dpp::integration_flags */
+  uint8_t flags;
+  /** Role id */
+  snowflake role_id;
+  /** User id */
+  snowflake user_id;
+  /** Expiry grace period */
+  uint32_t expire_grace_period;
+  /** Sync time */
+  time_t synced_at;
+  /** Subscriber count */
+  uint32_t subscriber_count;
+  /* Account id */
+  std::string account_id;
+  /* Account name */
+  std::string account_name;
+  /* Integration application */
+  integration_app app;
 
-	/** Default constructor */
-	integration();
+  /** Default constructor */
+  integration();
 
-	/** Default destructor */
-	~integration();
+  /** Default destructor */
+  ~integration() override;
 
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	integration& fill_from_json(nlohmann::json* j);
+  /** Read class values from json object
+   * @param j A json object to read from
+   * @return A reference to self
+   */
+  integration &fill_from_json(nlohmann::json *j);
 
-	/** Build a json string from this object.
-	 * @param with_id Add ID to output
-	 * @return JSON string of the object
-	 */
-	virtual std::string build_json(bool with_id = false) const;
+  /** Build a json string from this object.
+   * @param with_id Add ID to output
+   * @return JSON string of the object
+   */
+  [[nodiscard]] std::string build_json(bool with_id = false) const override;
 
-	/** True if emoticons are enabled */
-	bool emoticons_enabled() const;
-	/** True if integration is enabled */
-	bool is_enabled() const;
-	/** True if is syncing */
-	bool is_syncing() const;
-	/** True if has been revoked */
-	bool is_revoked() const;
-	/** True if expiring kicks the user */
-	bool expiry_kicks_user() const;
+  /** True if emoticons are enabled */
+  [[nodiscard]] bool emoticons_enabled() const;
+  /** True if integration is enabled */
+  [[nodiscard]] bool is_enabled() const;
+  /** True if is syncing */
+  [[nodiscard]] bool is_syncing() const;
+  /** True if has been revoked */
+  [[nodiscard]] bool is_revoked() const;
+  /** True if expiring kicks the user */
+  [[nodiscard]] bool expiry_kicks_user() const;
 };
 
 /**
  * @brief The connection object that the user has attached.
  */
-class DPP_EXPORT connection {
+class DPP_EXPORT connection
+{
 public:
-	std::string			id;		//!< id of the connection account
-	std::string			name;		//!< the username of the connection account
-	std::string			type;		//!< the service of the connection (twitch, youtube)
-	bool				revoked;	//!< Optional: whether the connection is revoked
-	std::vector<integration>	integrations;	//!< Optional: an array of partial server integrations
-	bool				verified;	//!< whether the connection is verified
-	bool				friend_sync;	//!< whether friend sync is enabled for this connection
-	bool				show_activity;	//!< whether activities related to this connection will be shown in presence updates
-	bool				visible;	//!< visibility of this connection
+  std::string id;   //!< id of the connection account
+  std::string name; //!< the username of the connection account
+  std::string type; //!< the service of the connection (twitch, youtube)
+  bool revoked;     //!< Optional: whether the connection is revoked
+  std::vector<integration>
+	  integrations;   //!< Optional: an array of partial server integrations
+  bool verified;      //!< whether the connection is verified
+  bool friend_sync;   //!< whether friend sync is enabled for this connection
+  bool show_activity; //!< whether activities related to this connection will be
+                      //!< shown in presence updates
+  bool visible;       //!< visibility of this connection
 
-	/**
-	 * @brief Construct a new connection object
-	 */
-	connection();
+  /**
+   * @brief Construct a new connection object
+   */
+  connection();
 
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	connection& fill_from_json(nlohmann::json* j);
-
+  /** Read class values from json object
+   * @param j A json object to read from
+   * @return A reference to self
+   */
+  connection &fill_from_json(nlohmann::json *j);
 };
 
 /** A group of integrations */
-typedef std::unordered_map<snowflake, integration> integration_map;
+using integration_map = std::unordered_map<snowflake, integration>;
 
 /** A group of connections */
-typedef std::unordered_map<snowflake, connection> connection_map;
+using connection_map = std::unordered_map<snowflake, connection>;
 
-};
-
+}; // namespace dpp

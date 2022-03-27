@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +21,9 @@
 #pragma once
 
 #if !defined(DPP_VERSION_LONG)
-#define DPP_VERSION_LONG 0x00100005
+#define DPP_VERSION_LONG  0x00100005
 #define DPP_VERSION_SHORT 100005
-#define DPP_VERSION_TEXT "D++ 10.0.5 (20-Mar-2022)"
+#define DPP_VERSION_TEXT  "D++ 10.0.5 (20-Mar-2022)"
 
 #define DPP_VERSION_MAJOR ((DPP_VERSION_LONG & 0x00ff0000) >> 16)
 #define DPP_VERSION_MINOR ((DPP_VERSION_LONG & 0x0000ff00) >> 8)

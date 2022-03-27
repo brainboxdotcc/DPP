@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,100 +20,102 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <unordered_map>
-#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/json_interface.h>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <unordered_map>
 
 namespace dpp {
 
 /**
  * @brief Flags related to a voice region
  */
-enum voiceregion_flags {
-	v_optimal	= 0x00000001,
-	v_deprecated	= 0x00000010,
-	v_custom	= 0x00000100,
-	v_vip		= 0x00001000
+enum voiceregion_flags
+{
+  v_optimal = 0x00000001,
+  v_deprecated = 0x00000010,
+  v_custom = 0x00000100,
+  v_vip = 0x00001000
 };
 
 /**
  * @brief Represents a voice region on discord
  */
-class DPP_EXPORT voiceregion : public json_interface<voiceregion> {
+class DPP_EXPORT voiceregion : public json_interface<voiceregion>
+{
 public:
-	/**
-	 * @brief Voice server ID
-	 */
-	std::string id;
+  /**
+   * @brief Voice server ID
+   */
+  std::string id;
 
-	/**
-	 * @brief Voice server name
-	 */
-	std::string name;
+  /**
+   * @brief Voice server name
+   */
+  std::string name;
 
-	/**
-	 * @brief Flags bitmap
-	 */
-	uint8_t flags;
+  /**
+   * @brief Flags bitmap
+   */
+  uint8_t flags;
 
-	/**
-	 * @brief Construct a new voiceregion object
-	 */
-	voiceregion();
+  /**
+   * @brief Construct a new voiceregion object
+   */
+  voiceregion();
 
-	/**
-	 * @brief Destroy the voiceregion object
-	 */
-	~voiceregion();
+  /**
+   * @brief Destroy the voiceregion object
+   */
+  ~voiceregion();
 
-	/**
-	 * @brief Fill object properties from JSON
-	 * 
-	 * @param j JSON to fill from
-	 * @return voiceregion& Reference to self
-	 */
-	 voiceregion& fill_from_json(nlohmann::json* j);
+  /**
+   * @brief Fill object properties from JSON
+   *
+   * @param j JSON to fill from
+   * @return voiceregion& Reference to self
+   */
+  voiceregion &fill_from_json(nlohmann::json *j);
 
-	/**
-	 * @brief Build a json string for this object
-	 * 
-	 * @param with_id Add ID to output
-	 * @return std::string JSON string
-	 */
-	std::string build_json(bool with_id = false) const;
+  /**
+   * @brief Build a json string for this object
+   *
+   * @param with_id Add ID to output
+   * @return std::string JSON string
+   */
+  [[nodiscard]] std::string build_json(bool with_id = false) const override;
 
-	/**
-	 * @brief True if is the optimal voice server
-	 * 
-	 * @return true if optimal 
-	 */
-	bool is_optimal() const;
+  /**
+   * @brief True if is the optimal voice server
+   *
+   * @return true if optimal
+   */
+  [[nodiscard]] bool is_optimal() const;
 
-	/**
-	 * @brief True if is a deprecated voice server
-	 * 
-	 * @return true if deprecated
-	 */
-	bool is_deprecated() const;
+  /**
+   * @brief True if is a deprecated voice server
+   *
+   * @return true if deprecated
+   */
+  [[nodiscard]] bool is_deprecated() const;
 
-	/**
-	 * @brief True if is a custom voice server
-	 * 
-	 * @return true if custom
-	 */
-	bool is_custom() const;
+  /**
+   * @brief True if is a custom voice server
+   *
+   * @return true if custom
+   */
+  [[nodiscard]] bool is_custom() const;
 
-	/**
-	 * @brief True if is a VIP voice server
-	 * 
-	 * @return true if VIP 
-	 */
-	bool is_vip() const;
+  /**
+   * @brief True if is a VIP voice server
+   *
+   * @return true if VIP
+   */
+  [[nodiscard]] bool is_vip() const;
 };
 
 /**
  * @brief A group of voice regions
  */
-typedef std::unordered_map<std::string, voiceregion> voiceregion_map;
+using voiceregion_map = std::unordered_map<std::string, voiceregion>;
 
-};
+}; // namespace dpp

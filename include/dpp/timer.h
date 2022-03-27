@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,12 +20,12 @@
  ************************************************************************************/
 
 #pragma once
+#include <cstddef>
+#include <cstdint>
 #include <dpp/export.h>
-#include <stdint.h>
+#include <functional>
 #include <map>
 #include <unordered_map>
-#include <stddef.h>
-#include <functional>
 
 namespace dpp {
 
@@ -34,49 +34,49 @@ namespace dpp {
  * Returned from cluster::start_timer and used by cluster::stop_timer.
  * This is obtained from a simple incrementing value, internally.
  */
-typedef size_t timer;
+using timer = size_t;
 
 /**
  * @brief The type for a timer callback
  */
-typedef std::function<void(timer)> timer_callback_t;
+using timer_callback_t = std::function<void(timer)>;
 
 /**
  * @brief Used internally to store state of active timers
  */
 struct DPP_EXPORT timer_t {
-	/**
-	 * @brief Timer handle
-	 */
-	timer handle;
-	/**
-	 * @brief Next timer tick as unix epoch
-	 */
-	time_t next_tick;
-	/**
-	 * @brief Frequency between ticks
-	 */
-	uint64_t frequency;
-	/**
-	 * @brief Lambda to call on tick
-	 */
-	timer_callback_t on_tick;
-	/**
-	 * @brief Lambda to call on stop (optional)
-	 */
-	timer_callback_t on_stop;
+  /**
+   * @brief Timer handle
+   */
+  timer handle;
+  /**
+   * @brief Next timer tick as unix epoch
+   */
+  time_t next_tick;
+  /**
+   * @brief Frequency between ticks
+   */
+  uint64_t frequency;
+  /**
+   * @brief Lambda to call on tick
+   */
+  timer_callback_t on_tick;
+  /**
+   * @brief Lambda to call on stop (optional)
+   */
+  timer_callback_t on_stop;
 };
 
 /**
- * @brief A map of timers, ordered by earliest first so that map::begin() is always the 
- * soonest to be due.
+ * @brief A map of timers, ordered by earliest first so that map::begin() is
+ * always the soonest to be due.
  */
-typedef std::multimap<time_t, timer_t*> timer_next_t;
+using timer_next_t = std::multimap<time_t, timer_t *>;
 
 /**
  * @brief A map of timers stored by handle
  */
-typedef std::unordered_map<timer, timer_t*> timer_reg_t;
+using timer_reg_t = std::unordered_map<timer, timer_t *>;
 
 /**
  * @brief Trigger a timed event once.
@@ -85,39 +85,39 @@ typedef std::unordered_map<timer, timer_t*> timer_reg_t;
 class DPP_EXPORT oneshot_timer
 {
 private:
-	/// Owning cluster
-	class cluster* owner;
-	/// Timer handle
-	timer th;
+  /// Owning cluster
+  class cluster *owner;
+  /// Timer handle
+  timer th;
+
 public:
-	/**
-	 * @brief Construct a new oneshot timer object
-	 * 
-	 * @param cl cluster owner
-	 * @param duration duration before firing
-	 * @param callback callback to call on firing
-	 */
-	oneshot_timer(class cluster* cl, uint64_t duration, timer_callback_t callback);
+  /**
+   * @brief Construct a new oneshot timer object
+   *
+   * @param cl cluster owner
+   * @param duration duration before firing
+   * @param callback callback to call on firing
+   */
+  oneshot_timer(class cluster *cl, uint64_t duration,
+                timer_callback_t callback);
 
-	/**
-	 * @brief Get the handle for the created one-shot timer
-	 * 
-	 * @return timer handle for use with stop_timer
-	 */
-	timer get_handle();
+  /**
+   * @brief Get the handle for the created one-shot timer
+   *
+   * @return timer handle for use with stop_timer
+   */
+  timer get_handle();
 
-	/**
-	 * @brief Cancel the one shot timer immediately.
-	 * Callback function is not called.
-	 */
-	void cancel();
+  /**
+   * @brief Cancel the one shot timer immediately.
+   * Callback function is not called.
+   */
+  void cancel();
 
-	/**
-	 * @brief Destroy the oneshot timer object
-	 */
-	~oneshot_timer();
+  /**
+   * @brief Destroy the oneshot timer object
+   */
+  ~oneshot_timer();
 };
 
-
-
-};
+}; // namespace dpp

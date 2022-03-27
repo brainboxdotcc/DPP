@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,47 +21,48 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/snowflake.h>
-#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/json_interface.h>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/snowflake.h>
 #include <unordered_map>
 
 namespace dpp {
 
 /**
  * @brief The ban class represents a ban on a guild.
- * 
+ *
  */
-class DPP_EXPORT ban : public json_interface<ban> {
+class DPP_EXPORT ban : public json_interface<ban>
+{
 public:
-	/** The ban reason */
-	std::string reason;
-	/** User ID the ban applies to */
-	snowflake user_id;
-	
-	/** Constructor */
-	ban();
+  /** The ban reason */
+  std::string reason;
+  /** User ID the ban applies to */
+  snowflake user_id;
 
-	/** Destructor */
-	~ban();
+  /** Constructor */
+  ban();
 
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	 ban& fill_from_json(nlohmann::json* j);
+  /** Destructor */
+  ~ban();
 
-	/**
-	 * @brief Build json representation of a ban
-	 * @param with_id Include ID in json
-	 * 
-	 * @return std::string stringified json
-	 */
-	std::string build_json(bool with_id = false) const;
+  /** Read class values from json object
+   * @param j A json object to read from
+   * @return A reference to self
+   */
+  ban &fill_from_json(nlohmann::json *j);
+
+  /**
+   * @brief Build json representation of a ban
+   * @param with_id Include ID in json
+   *
+   * @return std::string stringified json
+   */
+  [[nodiscard]] std::string build_json(bool with_id = false) const override;
 };
 
 /** A group of bans
  */
-typedef std::unordered_map<snowflake, ban> ban_map;
+using ban_map = std::unordered_map<snowflake, ban>;
 
-};
+}; // namespace dpp

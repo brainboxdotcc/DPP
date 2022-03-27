@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,40 +19,42 @@
  *
  ************************************************************************************/
 #pragma once
+#include <cstddef>
 #include <dpp/export.h>
-#include <stddef.h>
 
 namespace dpp {
 
-	/** @brief Supported image types for profile pictures */
-	enum image_type {
-		/// image/png
-		i_png,
-		/// image/jpeg
-		i_jpg,
-		/// image/gif
-		i_gif
-	};
-
-	/** @brief Log levels */
-	enum loglevel {
-		/// Trace
-		ll_trace = 0,
-		/// Debug
-		ll_debug,
-		/// Information
-		ll_info,
-		/// Warning
-		ll_warning,
-		/// Error
-		ll_error,
-		/// Critical
-		ll_critical
-	};
-
-	/**
-	 * @brief A returned event handle for an event which was attached
-	 */
-	typedef size_t event_handle;
-
+/** @brief Supported image types for profile pictures */
+enum image_type
+{
+  /// image/png
+  i_png,
+  /// image/jpeg
+  i_jpg,
+  /// image/gif
+  i_gif
 };
+
+/** @brief Log levels */
+enum loglevel
+{
+  /// Trace
+  ll_trace = 0,
+  /// Debug
+  ll_debug,
+  /// Information
+  ll_info,
+  /// Warning
+  ll_warning,
+  /// Error
+  ll_error,
+  /// Critical
+  ll_critical
+};
+
+/**
+ * @brief A returned event handle for an event which was attached
+ */
+using event_handle = size_t;
+
+}; // namespace dpp

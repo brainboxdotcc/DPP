@@ -6,14 +6,13 @@
 #endif
 #endif
 
-namespace dpp
-{
-	/**
-	 * @brief Represents a socket file descriptor.
-	 * This is used to ensure parity between windows and unix-like systems.
-	 */
-	typedef SOCKET socket;
-}
+namespace dpp {
+/**
+ * @brief Represents a socket file descriptor.
+ * This is used to ensure parity between windows and unix-like systems.
+ */
+using socket = SOCKET;
+} // namespace dpp
 
 #ifndef SOCKET_ERROR
 /**

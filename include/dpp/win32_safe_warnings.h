@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,13 +20,15 @@
  ************************************************************************************/
 #pragma once
 
-/* This file contains pragmas to disable warnings on win32 builds with msvc only.
- * It is only included during build of D++ itself, and not when including the headers
- * into a user's project.
- * 
- * Before adding a warning here please be ABSOLUTELY SURE it is one we cannot easily fix
- * and is to be silenced, thrown into the sarlacc pit to be eaten for 1000 years...
+/* This file contains pragmas to disable warnings on win32 builds with msvc
+ * only. It is only included during build of D++ itself, and not when including
+ * the headers into a user's project.
+ *
+ * Before adding a warning here please be ABSOLUTELY SURE it is one we cannot
+ * easily fix and is to be silenced, thrown into the sarlacc pit to be eaten for
+ * 1000 years...
  */
 
-_Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or structures with stl member variables
+_Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or
+                                      // structures with stl member variables
 _Pragma("warning( disable : 5105 )"); // 5105 is to do with macro warnings
