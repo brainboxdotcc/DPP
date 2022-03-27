@@ -125,6 +125,14 @@ enum guild_flags : uint32_t {
 };
 
 /**
+ * @brief Additional boolean flag values for guild, as guild_flags is full
+ */
+enum guild_flags_extra : uint8_t {
+	/** Guild has premium progress bar enabled */
+	g_premium_progress_bar_enabled =	0b00000001,
+};
+
+/**
  * @brief Various flags that can be used to indicate the status of a guild member
  */
 enum guild_member_flags : uint8_t {
@@ -491,6 +499,11 @@ public:
 	 */
 	guild_nsfw_level_t nsfw_level;
 
+	/**
+	 * @brief Additional flags
+	 */
+	uint8_t flags_extra;
+
 	/** Default constructor, zeroes all values */
 	guild();
 
@@ -554,37 +567,37 @@ public:
 	 */
 	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false);
 
-    /**
+	/**
 	 * @brief Get the banner url of the guild if it have one, otherwise returns an empty string
 	 *
 	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized banner is returned.
 	 * @return std::string banner url or empty string
 	 */
-    std::string get_banner_url(uint16_t size = 0) const;
+	std::string get_banner_url(uint16_t size = 0) const;
 
-    /**
+	/**
 	 * @brief Get the discovery splash url of the guild if it have one, otherwise returns an empty string
 	 *
 	 * @param size The size of the discovery splash in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized discovery splash is returned.
 	 * @return std::string discovery splash url or empty string
 	 */
-    std::string get_discovery_splash_url(uint16_t size = 0) const;
+	std::string get_discovery_splash_url(uint16_t size = 0) const;
 
-    /**
+	/**
 	 * @brief Get the icon url of the guild if it have one, otherwise returns an empty string
 	 *
 	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized icon is returned.
 	 * @return std::string icon url or empty string
 	 */
-    std::string get_icon_url(uint16_t size = 0) const;
+	std::string get_icon_url(uint16_t size = 0) const;
 
-    /**
+	/**
 	 * @brief Get the splash url of the guild if it have one, otherwise returns an empty string
 	 *
 	 * @param size The size of the splash in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized splash is returned.
 	 * @return std::string splash url or empty string
 	 */
-    std::string get_splash_url(uint16_t size = 0) const;
+	std::string get_splash_url(uint16_t size = 0) const;
 
 	/**
 	 * @brief Set the name of the guild in the object
@@ -763,6 +776,12 @@ public:
 	 * @return bool has channel banners
 	 */
 	bool has_channel_banners() const;
+
+	/**
+	 * @brief True if the premium progress bar is enabled
+	 * @return bool has progress bar enabled
+	 */
+	bool has_premium_progress_bar_enabled() const;
 };
 
 /** A container of guilds */
