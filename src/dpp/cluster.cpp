@@ -83,7 +83,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 
 cluster::~cluster()
 {
-        this->terminating.notify_all();
+	this->terminating.notify_all();
 
 	delete rest;
 	delete raw_rest;
@@ -125,12 +125,12 @@ dpp::utility::uptime cluster::uptime()
 
 void cluster::start(bool return_after) {
 
-        auto block_calling_thread = [this]() {
-            std::mutex thread_mutex;
-            std::unique_lock<std::mutex> thread_lock(thread_mutex);
+	auto block_calling_thread = [this]() {
+		std::mutex thread_mutex;
+		std::unique_lock<std::mutex> thread_lock(thread_mutex);
 
-            this->terminating.wait(thread_lock);
-        };
+		this->terminating.wait(thread_lock);
+	};
 
 	/* Start up all shards */
 	if (numshards == 0) {
@@ -149,7 +149,7 @@ void cluster::start(bool return_after) {
 			return;
 		}
 		if (!return_after)
-                    block_calling_thread();
+			block_calling_thread();
 
 	} else {
 		start_time = time(NULL);
@@ -183,9 +183,9 @@ void cluster::start(bool return_after) {
 		});
 
 		log(ll_debug, "Shards started.");
-
-                if (!return_after)
-                    block_calling_thread();
+		
+		if (!return_after)
+		    block_calling_thread();
 	}
 }
 

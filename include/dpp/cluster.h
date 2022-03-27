@@ -559,10 +559,10 @@ public:
 	 */
 	websocket_protocol_t ws_mode;
 
-        /**
-         * @brief Condition variable notified when the cluster is terminating.
-         */
-        std::condition_variable terminating;
+	/**
+	 * @brief Condition variable notified when the cluster is terminating.
+	 */
+	std::condition_variable terminating;
 
 	/**
 	 * @brief Constructor for creating a cluster. All but the token are optional.
