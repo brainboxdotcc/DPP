@@ -426,8 +426,13 @@ json etf_parser::decode_bigint(uint32_t digits) {
 		}
 	}
 
-	json j = std::to_string(sign == 0 ? value : -value);
-	return j;
+	if (sign == 0) {
+		json j = std::to_string(value);
+		return j;
+	} else {
+		json j = std::to_string(-((int64_t)value));
+		return j;
+	}
 }
 
 json etf_parser::decode_bigint_small() {
