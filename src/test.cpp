@@ -96,7 +96,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	set_test("HTTPS", false);
 	dpp::multipart_content multipart = dpp::https_client::build_multipart(
-		"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
+		R"({"content":"test"})", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
 	);
 	try {
 		dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
@@ -132,7 +132,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	std::string rf_test = dpp::utility::read_file(SHARED_OBJECT);
 	FILE* fp = fopen(SHARED_OBJECT, "rb");
 	fseek(fp, 0, SEEK_END);
-	size_t off = (size_t)ftell(fp);
+	auto off = (size_t)ftell(fp);
 	fclose(fp);
 	set_test("READFILE", off == rf_test.length());
 
@@ -189,7 +189,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("CLUSTER", false);
 	try {
 		dpp::cluster bot(token, dpp::i_all_intents);
-		bot.set_websocket_protocol(dpp::ws_etf);
 		set_test("CLUSTER", true);
 		set_test("CONNECTION", false);
 		set_test("GUILDCREATE", false);
@@ -306,7 +305,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		set_test("SYNC", false);
-		dpp::message m = dpp::sync<dpp::message>(&bot, &dpp::cluster::message_create, dpp::message(TEST_TEXT_CHANNEL_ID, "TEST"));
+		auto m = dpp::sync<dpp::message>(&bot, &dpp::cluster::message_create, dpp::message(TEST_TEXT_CHANNEL_ID, "TEST"));
 		set_test("SYNC", m.content == "TEST");
 
 		bot.on_guild_create([&](const dpp::guild_create_t & event) {
@@ -440,7 +439,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test("CUSTOMCACHE", false);
 		dpp::cache<test_cached_object_t> testcache;
-		test_cached_object_t* tco = new test_cached_object_t(666);
+		auto tco = new test_cached_object_t(666);
 		tco->foo = "bar";
 		testcache.store(tco);
 		test_cached_object_t* found_tco = testcache.find(666);

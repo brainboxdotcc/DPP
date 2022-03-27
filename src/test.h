@@ -48,12 +48,12 @@ struct test_t {
 class test_cached_object_t : public dpp::managed {
 public:
 	test_cached_object_t(dpp::snowflake _id) : dpp::managed(_id) { };
-	virtual ~test_cached_object_t() = default;
+	~test_cached_object_t() override = default;
 	std::string foo;
 };
 
 /* How long the unit tests can run for */
-const int64_t TEST_TIMEOUT = 60;
+[[maybe_unused]] const int64_t TEST_TIMEOUT = 60;
 
 #define SAFE_GETENV(var) (getenv(var) && *(getenv(var)) ? getenv(var) : "0")
 
@@ -222,7 +222,7 @@ class message_collector : public dpp::message_collector {
 public:
 	message_collector(dpp::cluster* cl, uint64_t duration) : dpp::message_collector(cl, duration) { }
 
-	virtual void completed(const std::vector<dpp::message>& list) {
+	void completed(const std::vector<dpp::message>& list) override {
 		set_test("MSGCOLLECT", list.size() > 0);
 	}
 };
