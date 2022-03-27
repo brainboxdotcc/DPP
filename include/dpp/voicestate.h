@@ -47,12 +47,13 @@ enum voicestate_flags {
  */
 class DPP_EXPORT voicestate : public json_interface<voicestate> {
 public:
-	class discord_client*	shard;		//!< Owning shard
-	snowflake		guild_id;       //!< Optional: the guild id this voice state is for
-	snowflake		channel_id;     //!< the channel id this user is connected to (may be empty)
-	snowflake		user_id;        //!< the user id this voice state is for
-	std::string		session_id;     //!< the session id for this voice state
-	uint8_t			flags;		//!< Voice state flags
+	class discord_client*	shard;             //!< Owning shard
+	snowflake		guild_id;          //!< Optional: the guild id this voice state is for
+	snowflake		channel_id;        //!< the channel id this user is connected to (may be empty)
+	snowflake		user_id;           //!< the user id this voice state is for
+	std::string		session_id;        //!< the session id for this voice state
+	uint8_t			flags;             //!< Voice state flags
+	time_t			request_to_speak;  //!< Time requested to speak, or 0
 
 	/**
 	 * @brief Construct a new voicestate object
