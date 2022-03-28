@@ -1,7 +1,7 @@
 BasedOnStyle: LLVM
 AlignArrayOfStructures: Left
 Standard: c++17
-TabWidth: 4
+TabWidth: 8
 UseTab: Always
 AllowShortIfStatementsOnASingleLine: false
 SpacesInCStyleCastParentheses: false
