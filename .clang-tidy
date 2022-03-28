@@ -7,7 +7,6 @@ Index:
 
 Diagnostics:
   ClangTidy:
-    Add: modernize*
-    Remove: modernize-use-trailing-return-type
+    Remove: modernize*
     CheckOptions:
       readability-identifier-naming.VariableCase: lower_case
