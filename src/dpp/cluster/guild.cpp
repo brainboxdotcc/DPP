@@ -78,8 +78,13 @@ void cluster::guild_get_ban(snowflake guild_id, snowflake user_id, command_compl
 }
 
 
-void cluster::guild_get_bans(snowflake guild_id, command_completion_event_t callback) {
-	rest_request_list<ban>(this, API_PATH "/guilds", std::to_string(guild_id), "bans", m_get, "", callback, "user_id");
+void cluster::guild_get_bans(snowflake guild_id, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
+	std::string parameters = utility::make_url_parameters({
+		{"before", before},
+		{"after", after},
+		{"limit", limit},
+	});
+	rest_request_list<ban>(this, API_PATH "/guilds", std::to_string(guild_id), "bans" + parameters, m_get, "", callback, "user_id");
 }
 
 

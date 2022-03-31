@@ -815,13 +815,16 @@ ban guild_get_ban_sync(snowflake guild_id, snowflake user_id);
  * @see dpp::cluster::guild_get_bans
  * @see https://discord.com/developers/docs/resources/guild#get-guild-bans
  * @param guild_id Guild ID to get bans for
+ * @param before If non-zero, all bans for user ids before this user id will be returned up to the limit
+ * @param after if non-zero, all bans for user ids after this user id will be returned up to the limit
+ * @param limit the maximum number of bans to retrieve in this call up to a maximum of 1000
  * @return ban_map returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-ban_map guild_get_bans_sync(snowflake guild_id);
+ban_map guild_get_bans_sync(snowflake guild_id, snowflake before, snowflake after, snowflake limit);
 
 
 guild guild_get_sync(snowflake guild_id);

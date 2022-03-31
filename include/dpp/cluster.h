@@ -2388,10 +2388,13 @@ public:
 	 * Requires the `BAN_MEMBERS` permission.
 	 * @see https://discord.com/developers/docs/resources/guild#get-guild-bans
 	 * @param guild_id Guild ID to get bans for
+	 * @param before If non-zero, all bans for user ids before this user id will be returned up to the limit
+	 * @param after if non-zero, all bans for user ids after this user id will be returned up to the limit
+	 * @param limit the maximum number of bans to retrieve in this call up to a maximum of 1000
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::ban_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_get_bans(snowflake guild_id, command_completion_event_t callback);
+	void guild_get_bans(snowflake guild_id, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Get single guild ban

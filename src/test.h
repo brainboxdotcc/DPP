@@ -125,6 +125,26 @@ extern dpp::snowflake TEST_EVENT_ID;
 	});
 
 /**
+ * @brief Perform a test of a REST base API call with one parameter that returns a list
+ */
+#define multiparam_api_test_list(func_name, param, return_type, testname) \
+	set_test(testname, false); \
+	bot.func_name (param, 0, 0, 1000, [&](const dpp::confirmation_callback_t &cc) { \
+		if (!cc.is_error()) { \
+			return_type g = std::get<return_type>(cc.value); \
+			if (g.size() > 0) { \
+				set_test(testname, true); \
+			} else { \
+				set_test(testname, false); \
+				bot.log(dpp::ll_debug, cc.http_info.body); \
+			} \
+		} else { \
+			set_test(testname, false); \
+			bot.log(dpp::ll_debug, cc.http_info.body); \
+		} \
+	});
+
+/**
  * @brief Perform a test of a REST base API call with two parameters
  */
 #define twoparam_api_test_list(func_name, param1, param2, return_type, testname) \
