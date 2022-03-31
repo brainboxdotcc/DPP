@@ -39,7 +39,7 @@ namespace dpp {
  * @param postdata Post data or empty string
  * @param callback Callback lambda
  */
-template<class T> inline void rest_request(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback) {
+template<class T> inline void rest_request(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback = utility::log_error()) {
 	c->post_rest(basepath, major, minor, method, postdata, [c, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(c, T().fill_from_json(&j), http));
@@ -101,7 +101,7 @@ template<> inline void rest_request<confirmation>(dpp::cluster* c, const char* b
  * @param key Key name of elements in the json list
  * @param callback Callback lambda
  */
-template<class T> inline void rest_request_list(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback, const std::string& key = "id") {
+template<class T> inline void rest_request_list(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback = utility::log_error(), const std::string& key = "id") {
 	c->post_rest(basepath, major, minor, method, postdata, [c, key, callback](json &j, const http_request_completion_t& http) {
 		std::unordered_map<snowflake, T> list;
 		confirmation_callback_t e(c, confirmation(), http);
