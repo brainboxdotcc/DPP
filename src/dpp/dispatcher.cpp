@@ -170,7 +170,7 @@ void interaction_create_t::delete_original_response(command_completion_event_t c
 {
 	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_delete, "", [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(from->creator, message().fill_from_json(&j), http));
+			callback(confirmation_callback_t(from->creator, confirmation(), http));
 		}
 	});
 }
