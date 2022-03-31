@@ -228,8 +228,8 @@ ban cluster::guild_get_ban_sync(snowflake guild_id, snowflake user_id) {
 	return dpp::sync<ban>(this, &cluster::guild_get_ban, guild_id, user_id);
 }
 
-ban_map cluster::guild_get_bans_sync(snowflake guild_id) {
-	return dpp::sync<ban_map>(this, &cluster::guild_get_bans, guild_id);
+ban_map cluster::guild_get_bans_sync(snowflake guild_id, snowflake before, snowflake after, snowflake limit) {
+	return dpp::sync<ban_map>(this, &cluster::guild_get_bans, guild_id, before, after, limit);
 }
 
 guild cluster::guild_get_sync(snowflake guild_id) {
