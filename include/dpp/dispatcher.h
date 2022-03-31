@@ -346,14 +346,6 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void dialog(const interaction_modal_response& mr, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
-	 * @brief Get original response message for this interaction
-	 *
-	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
-	 */
-	void get_original_response(command_completion_event_t callback) const;
-
-	/**
 	 * @brief Edit the response for this interaction
 	 *
 	 * @param m Message object to send. Not all fields are supported by Discord.
@@ -372,14 +364,6 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void edit_response(const std::string & mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
-	 * @brief Delete the original response for this interaction
-	 *
-	 * @param callback User function to execute when the api call completes.
-	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
-	 */
-	void delete_original_response(command_completion_event_t callback = utility::log_error());
-
-	/**
 	 * @brief Set the bot to 'thinking' state
 	 *
 	 * @param ephemeral True if the thinking state should be ephemeral
@@ -387,6 +371,31 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void thinking(bool ephemeral = false, command_completion_event_t callback = utility::log_error()) const;
+
+	/**
+	 * @brief Get original response message for this interaction
+	 *
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void get_original_response(command_completion_event_t callback) const;
+
+	/**
+	 * @brief Edit original response message for this interaction
+	 *
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void edit_original_response(const message & m, command_completion_event_t callback = utility::log_error()) const;
+
+	/**
+	 * @brief Delete original response message for this interaction. This cannot be used on an ephemeral interaction response.
+	 *
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void delete_original_response(command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Get a command line parameter
