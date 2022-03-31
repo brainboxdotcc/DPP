@@ -57,12 +57,22 @@ if ($githubstyle) {
 	echo "The changelog is listed below:\n\n__**Release Changelog**__\n";
 }
 
+// Case insensitive removal of duplicates
+$changelog = array_intersect_key($changelog, array_unique(array_map("strtolower", $changelog)));
+
 foreach ($changelog as $change) {
 	
 	// Wrap anything that looks like a symbol name in backticks
 	$change = preg_replace('/([\w_\/]+\.\w+|\S+\(\)|\w+::\w+|dpp::\w+|utility::\w+|(\w+_\w+)+)/', '`$1`', $change);
 	$change = preg_replace("/vs(\d+)/", "Visual Studio $1", $change);
 	$change = preg_replace("/\bfaq\b/", "FAQ", $change);
+	$change = preg_replace("/\bdiscord\b/", "Discord", $change);
+	$change = preg_replace("/\bmicrosoft\b/", "Microsoft", $change);
+	$change = preg_replace("/\bwindows\b/", "Windows", $change);
+	$change = preg_replace("/\blinux\b/", "Linux", $change);
+	$change = preg_replace("/\sarm(\d+)\s/i", ' ARM$1 ', $change);
+	$change = preg_replace("/\b(was|is|wo)nt\b/i", '$1n\'t', $change);
+	$change = preg_replace("/\bfreebsd\b/", 'FreeBSD', $change);
 	
 	// Match keywords against categories
 	$matched = false;
@@ -97,7 +107,7 @@ foreach ($catgroup as $cat => $list) {
 	foreach ($list as $item) {
 		// Exclude bad commit messages like 'typo fix', 'test push' etc by pattern
 		if (!preg_match("/^(typo|test|fix)\s\w+$/", $item)) {
-			echo ($githubstyle ? '-' : '•') . ' ' . $item . "\n";
+			echo ($githubstyle ? '-' : '•') . ' ' . ucfirst(str_replace('@','', $item)) . "\n";
 		}
 	}
 }
@@ -109,3 +119,4 @@ if (!$githubstyle) {
 	echo 'The ' . $version . ' download can be found here: <https://github.com/brainboxdotcc/DPP/releases/tag/v' . $version . '>';
 	echo "\n";
 }
+
