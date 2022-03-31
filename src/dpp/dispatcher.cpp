@@ -138,6 +138,16 @@ void interaction_create_t::reply(const std::string & mt, command_completion_even
 	this->reply(ir_channel_message_with_source, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
+void interaction_create_t::edit_response(const message & m, command_completion_event_t callback) const
+{
+	from->creator->interaction_response_edit(this->command.token, m, callback);
+}
+
+void interaction_create_t::edit_response(const std::string & mt, command_completion_event_t callback) const
+{
+	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command), callback);
+}
+
 void interaction_create_t::get_original_response(command_completion_event_t callback) const
 {
 	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
@@ -163,16 +173,6 @@ void interaction_create_t::delete_original_response(command_completion_event_t c
 			callback(confirmation_callback_t(from->creator, message().fill_from_json(&j), http));
 		}
 	});
-}
-
-void interaction_create_t::edit_response(const message & m, command_completion_event_t callback) const
-{
-	from->creator->interaction_response_edit(this->command.token, m, callback);
-}
-
-void interaction_create_t::edit_response(const std::string & mt, command_completion_event_t callback) const
-{
-	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
 const command_value& interaction_create_t::get_parameter(const std::string& name) const
