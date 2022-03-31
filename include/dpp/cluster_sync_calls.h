@@ -824,7 +824,7 @@ ban guild_get_ban_sync(snowflake guild_id, snowflake user_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-ban_map guild_get_bans_sync(snowflake guild_id, snowflake before = 0, snowflake after = 0, snowflake limit = 1000);
+ban_map guild_get_bans_sync(snowflake guild_id, snowflake before, snowflake after, snowflake limit);
 
 
 guild guild_get_sync(snowflake guild_id);
