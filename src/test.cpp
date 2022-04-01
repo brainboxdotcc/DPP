@@ -189,6 +189,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("CLUSTER", false);
 	try {
 		dpp::cluster bot(token, dpp::i_all_intents);
+		bot.set_websocket_protocol(dpp::ws_etf);
 		set_test("CLUSTER", true);
 		set_test("CONNECTION", false);
 		set_test("GUILDCREATE", false);
@@ -241,7 +242,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 												set_test("REACT", false);
 											}
 										});
-										bot.message_delete(m.id, TEST_TEXT_CHANNEL_ID, [&bot](const dpp::confirmation_callback_t &callback) {
+										bot.message_delete(m.id, TEST_TEXT_CHANNEL_ID, [](const dpp::confirmation_callback_t &callback) {
 
 											if (!callback.is_error()) {
 												set_test("MESSAGEDELETE", true);
@@ -411,7 +412,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test("TIMERSTART", false);
 		uint32_t ticks = 0;
-		dpp::timer th = bot.start_timer([&]() {
+		dpp::timer th = bot.start_timer([&](dpp::timer timer_handle) {
 			if (ticks == 5) {
 				/* The simple test timer ticks every second.
 				 * If we get to 5 seconds, we know the timer is working.
@@ -428,7 +429,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test("ONESHOT", false);
 		bool once = false;
-		dpp::oneshot_timer ost(&bot, 5, [&]() {
+		dpp::oneshot_timer ost(&bot, 5, [&](dpp::timer timer_handle) {
 			if (!once) {
 				set_test("ONESHOT", true);
 			} else {
@@ -456,7 +457,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		singleparam_api_test_list(roles_get, TEST_GUILD_ID, dpp::role_map, "GETROLES");
 		singleparam_api_test_list(channels_get, TEST_GUILD_ID, dpp::channel_map, "GETCHANS");
 		singleparam_api_test_list(guild_get_invites, TEST_GUILD_ID, dpp::invite_map, "GETINVS");
-		singleparam_api_test_list(guild_get_bans, TEST_GUILD_ID, dpp::ban_map, "GETBANS");
+		multiparam_api_test_list(guild_get_bans, TEST_GUILD_ID, dpp::ban_map, "GETBANS");
 		singleparam_api_test_list(channel_pins_get, TEST_TEXT_CHANNEL_ID, dpp::message_map, "GETPINS");
 		singleparam_api_test_list(guild_events_get, TEST_GUILD_ID, dpp::scheduled_event_map, "GETEVENTS");
 		twoparam_api_test(guild_event_get, TEST_GUILD_ID, TEST_EVENT_ID, dpp::scheduled_event, "GETEVENT");

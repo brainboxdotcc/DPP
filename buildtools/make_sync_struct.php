@@ -20,7 +20,6 @@ $forcedReturn = [
 $header = explode("\n", file_get_contents('include/dpp/cluster.h'));
 $state = 0;
 $currentFunction = $parameters = $returnType = '';
-$content = '';
 $content = <<<EOT
 /************************************************************************************
  *
@@ -51,6 +50,15 @@ $content = <<<EOT
  * To re-generate this header file re-run the script!
  */ 
 
+EOT;
+$cppcontent = $content;
+$cppcontent .= <<<EOT
+
+#include <dpp/export.h>
+#include <dpp/snowflake.h>
+#include <dpp/cluster.h>
+
+namespace dpp {
 
 EOT;
 
@@ -62,6 +70,7 @@ if ($them <= $us) {
 }
 
 echo "-- Autogenerating include/dpp/cluster_sync_calls.h\n";
+echo "-- Autogenerating src/dpp/cluster_sync_calls.cpp\n";
 
 foreach ($clustercpp as $cpp) {
 	if ($state == 0 && preg_match('/^\s*void\s+cluster::([^(]+)\s*\((.*)command_completion_event_t\s*callback\s*\)/', $cpp, $matches)) {
@@ -97,8 +106,10 @@ foreach ($clustercpp as $cpp) {
 			if (!empty($parameterNames)) {
 				$parameterNames = ', ' . $parameterNames;
 			}
+			$noDefaults = $parameters;
 			$parameters = !empty($fullParameters) ? $fullParameters : $parameters;
-			$content .= "inline $returnType {$currentFunction}_sync($parameters) {\n\treturn dpp::sync<$returnType>(this, &cluster::$currentFunction$parameterNames);\n}\n\n";
+			$content .= "$returnType {$currentFunction}_sync($parameters);\n\n";
+			$cppcontent .= "$returnType cluster::{$currentFunction}_sync($noDefaults) {\n\treturn dpp::sync<$returnType>(this, &cluster::$currentFunction$parameterNames);\n}\n\n";
 		}
 		$currentFunction = $parameters = $returnType = '';
 		$state = 0;
@@ -109,10 +120,16 @@ $content .= <<<EOT
 /* End of auto-generated definitions */
 
 EOT;
+$cppcontent .= <<<EOT
+
+};
+
+/* End of auto-generated definitions */
+
+EOT;
 
 function getFullParameters(string $currentFunction, array $parameters): string {
 	global $header;
-	$arr = [];
 	foreach ($header as $line) {
 		if (preg_match('/^\s*void\s+' . $currentFunction . '\s*\((.*' . join('.*', $parameters) . '.*)command_completion_event_t\s*callback\s*/', $line, $matches)) {
 			return preg_replace('/,\s*$/', '', $matches[1]);
@@ -128,9 +145,8 @@ function getComments(string $currentFunction, string $returnType, array $paramet
 	foreach ($header as $i => $line) {
 		if (preg_match('/^\s*void\s+' . $currentFunction . '\s*\(.*' . join('.*', $parameters) . '.*command_completion_event_t\s*callback\s*/', $line)) {
 			/* Backpeddle */
-			$x = 1;
-			$messageToRemove = -1;
-			for ($n = $i; $n != 0; --$n, $x++) {
+			$lineIndex = 1;
+			for ($n = $i; $n != 0; --$n, $lineIndex++) {
 				$header[$n] = preg_replace('/^\t+/', '', $header[$n]);
 				$header[$n] = preg_replace('/@see (.+?)$/', '@see dpp::cluster::' . $currentFunction. "\n * @see \\1", $header[$n]);
 				$header[$n] = preg_replace('/@param callback .*$/', '@return ' . $returnType . ' returned object on completion', $header[$n]);
@@ -138,7 +154,7 @@ function getComments(string $currentFunction, string $returnType, array $paramet
 					$header[$n] = "";
 				}
 				if (preg_match('/\s*\/\*\*\s*$/', $header[$n])) {
-					$part = array_slice($header, $n, $x - 1);
+					$part = array_slice($header, $n, $lineIndex - 1);
 					array_splice($part, count($part) - 1, 0,
 						[
 							" * \memberof dpp::cluster",
@@ -157,3 +173,4 @@ function getComments(string $currentFunction, string $returnType, array $paramet
 }
 
 file_put_contents('include/dpp/cluster_sync_calls.h', $content);
+file_put_contents('src/dpp/cluster_sync_calls.cpp', $cppcontent);

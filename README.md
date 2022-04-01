@@ -105,6 +105,7 @@ We love people's support in growing and improving. Be sure to leave a ⭐️ if 
 * AppleClang (12.0 or higher)
 * Microsoft Visual Studio 2019 or 2022 (16.x/17.x)
 * [mingw-w64](https://www.mingw-w64.org/) (gcc version 8 or higher)
+
 Other compilers may work (either newer versions of those listed above, or different compilers entirely) but have not been tested by us.
 
 ### External Dependencies (You must install these)

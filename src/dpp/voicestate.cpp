@@ -26,7 +26,7 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-voicestate::voicestate() : shard(nullptr), guild_id(0), channel_id(0), user_id(0)
+voicestate::voicestate() : shard(nullptr), guild_id(0), channel_id(0), user_id(0), request_to_speak(0)
 {
 }
 
@@ -37,6 +37,7 @@ voicestate& voicestate::fill_from_json(nlohmann::json* j) {
 	channel_id = snowflake_not_null(j, "channel_id");
 	user_id = snowflake_not_null(j, "user_id");
 	session_id = string_not_null(j, "session_id");
+	request_to_speak = ts_not_null(j, "request_to_speak_timestamp");
 	flags = 0;
 	if (bool_not_null(j, "deaf"))
 		flags |= vs_deaf;
@@ -84,6 +85,7 @@ bool voicestate::is_suppressed() const {
 }
 
 std::string voicestate::build_json(bool with_id) const {
+	/* Voicestates are never sent from a bot */
 	return json({}).dump();
 }
 

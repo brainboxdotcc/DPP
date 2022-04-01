@@ -67,6 +67,11 @@ component& component::fill_from_json(nlohmann::json* j) {
 		label = "";
 		custom_id = string_not_null(j, "custom_id");
 		disabled = bool_not_null(j, "disabled");
+		if (j->contains("options")) {
+			for(json opt : (*j)["options"]) {
+				options.push_back(dpp::select_option().fill_from_json(&opt));
+			}
+		}
 	} else if (type == cot_text) {
 		custom_id = string_not_null(j, "custom_id");
 		type = (component_type)int8_not_null(j, "type");
@@ -341,6 +346,19 @@ select_option& select_option::set_emoji(const std::string &n, dpp::snowflake id,
 
 select_option& select_option::set_animated(bool anim) {
 	emoji.animated = anim;
+	return *this;
+}
+
+select_option& select_option::fill_from_json(nlohmann::json* j) {
+	label = string_not_null(j, "label");
+	value = string_not_null(j, "value");
+	description = string_not_null(j, "description");
+	if (j->contains("emoji")) {
+		const json& emoj = (*j)["emoji"];
+		emoji.animated = bool_not_null(&emoj, "animated");
+		emoji.name = string_not_null(&emoj, "name");
+		emoji.id = snowflake_not_null(&emoj, "id");
+	}
 	return *this;
 }
 
