@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,7 @@
 #include <dpp/role.h>
 #include <dpp/appcommand.h>
 #include <dpp/dispatcher.h>
+#include <dpp/utility.h>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 #include <vector>
@@ -371,7 +372,7 @@ public:
 	 * @param source source of the command
 	 * @param callback User function to execute when the api call completes.
 	 */
-	void reply(const dpp::message &m, command_source source, command_completion_event_t callback = {});
+	void reply(const dpp::message &m, command_source source, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Reply to a command without a message, causing the discord client
@@ -384,10 +385,10 @@ public:
 	 * @param source source of the command
 	 * @param callback User function to execute when the api call completes.
 	 */
-	void thinking(command_source source, command_completion_event_t callback = {});
+	void thinking(command_source source, command_completion_event_t callback = utility::log_error());
 
 	/* Easter egg */
-	void thonk(command_source source, command_completion_event_t callback = {});
+	void thonk(command_source source, command_completion_event_t callback = utility::log_error());
 
 };
 

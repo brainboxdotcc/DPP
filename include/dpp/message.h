@@ -75,7 +75,7 @@ enum component_style : uint8_t {
 /**
  * @brief An option for a select component
  */
-struct DPP_EXPORT select_option {
+struct DPP_EXPORT select_option : public json_interface<select_option> {
 	/**
 	 * @brief Label for option
 	 */
@@ -126,6 +126,11 @@ struct DPP_EXPORT select_option {
 	 * @brief Construct a new select option object
 	 */
 	select_option();
+
+	/**
+	 * @brief Destructs the select option object.
+	 */
+	virtual ~select_option() = default;
 
 	/**
 	 * @brief Construct a new select option object
@@ -185,6 +190,12 @@ struct DPP_EXPORT select_option {
 	 * @return select_option& reference to self for chaining
 	 */
 	select_option& set_animated(bool anim);
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	select_option& fill_from_json(nlohmann::json* j);
 };
 
 /**

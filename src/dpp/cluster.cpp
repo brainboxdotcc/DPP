@@ -83,6 +83,8 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 
 cluster::~cluster()
 {
+	this->terminating.notify_all();
+
 	delete rest;
 	delete raw_rest;
 	/* Free memory for active timers */
@@ -122,6 +124,14 @@ dpp::utility::uptime cluster::uptime()
 }
 
 void cluster::start(bool return_after) {
+
+	auto block_calling_thread = [this]() {
+		std::mutex thread_mutex;
+		std::unique_lock<std::mutex> thread_lock(thread_mutex);
+
+		this->terminating.wait(thread_lock);
+	};
+
 	/* Start up all shards */
 	if (numshards == 0) {
 		gateway g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
@@ -138,11 +148,9 @@ void cluster::start(bool return_after) {
 			log(ll_critical, fmt::format("Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection."));
 			return;
 		}
-		if (!return_after) {
-			while (true) {
-				std::this_thread::sleep_for(std::chrono::seconds(86400));
-			}
-		}
+		if (!return_after)
+			block_calling_thread();
+
 	} else {
 		start_time = time(NULL);
 
@@ -175,12 +183,9 @@ void cluster::start(bool return_after) {
 		});
 
 		log(ll_debug, "Shards started.");
-
-		if (!return_after) {
-			while (true) {
-				std::this_thread::sleep_for(std::chrono::seconds(86400));
-			}
-		}
+		
+		if (!return_after)
+		    block_calling_thread();
 	}
 }
 

@@ -79,7 +79,8 @@ guild::guild() :
 	verification_level(ver_none),
 	explicit_content_filter(expl_disabled),
 	mfa_level(mfa_none),
-	nsfw_level(nsfw_default)
+	nsfw_level(nsfw_default),
+	flags_extra(0)
 {
 }
 
@@ -247,6 +248,10 @@ bool guild::has_vanity_url() const {
 	return this->flags & g_vanity_url;
 }
 
+bool guild::has_premium_progress_bar_enabled() const {
+	return this->flags_extra & g_premium_progress_bar_enabled;
+}
+
 bool guild::has_channel_banners() const {
 	return this->flags & g_channel_banners;
 }
@@ -359,6 +364,7 @@ std::string guild::build_json(bool with_id) const {
 	if (system_channel_id) {
 		j["system_channel_id"] = system_channel_id;
 	}
+	j["premium_progress_bar_enabled"] = (bool)(flags_extra & g_premium_progress_bar_enabled);
 	if (rules_channel_id) {
 		j["rules_channel_id"] = rules_channel_id;
 	}
@@ -417,6 +423,8 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 
 		this->flags |= bool_not_null(d, "large") ? dpp::g_large : 0;
 		this->flags |= bool_not_null(d, "widget_enabled") ? dpp::g_widget_enabled : 0;
+
+		this->flags_extra |= bool_not_null(d, "premium_progress_bar_enabled") ? dpp::g_premium_progress_bar_enabled : 0;
 
 		for (auto & feature : (*d)["features"]) {
 			auto f = featuremap.find(feature.get<std::string>());
