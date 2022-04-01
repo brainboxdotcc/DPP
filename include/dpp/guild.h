@@ -378,7 +378,7 @@ public:
 	/** Guild name */
 	std::string name;
 
-	/** Server description for communities */
+	/** Server description */
 	std::string description;
 
 	/**
