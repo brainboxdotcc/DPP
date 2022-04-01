@@ -68,7 +68,7 @@ struct DPP_EXPORT integration_app {
 	std::string icon;
 	/// Description
 	std::string description;
-	/// Integration summary
+	/// Integration summary @deprecated Removed by Discord
 	std::string summary;
 	/// Pointer to bot user
 	class user* bot;
