@@ -342,8 +342,10 @@ void request_queue::out_loop()
 /* Post a http_request into the queue */
 void request_queue::post_request(http_request* req)
 {
-	std::unique_lock lock(in_mutex);
-	requests_in[req->endpoint].push_back(req);
+	{
+		std::unique_lock lock(in_mutex);
+		requests_in[req->endpoint].push_back(req);
+	}
 	in_ready.notify_one();
 }
 
