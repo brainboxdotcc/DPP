@@ -25,7 +25,7 @@
 #include <queue>
 #include <map>
 #include <thread>
-#include <mutex>
+#include <shared_mutex>
 #include <vector>
 #include <functional>
 #include <condition_variable>
@@ -243,10 +243,10 @@ private:
 	class cluster* creator;
 
 	/** Inbound queue mutex thread safety */
-	std::mutex in_mutex;
+	std::shared_mutex in_mutex;
 
 	/** Outbound queue mutex thread safety */
-	std::mutex out_mutex;
+	std::shared_mutex out_mutex;
 
 	/** Inbound queue thread */
 	std::thread* in_thread;

@@ -814,6 +814,7 @@ ban guild_get_ban_sync(snowflake guild_id, snowflake user_id);
  * Requires the `BAN_MEMBERS` permission.
  * @see dpp::cluster::guild_get_bans
  * @see https://discord.com/developers/docs/resources/guild#get-guild-bans
+ * @note Provide a user ID to `before` and `after` for pagination. Users will always be returned in ascending order by the user ID. If both before and after are provided, only before is respected.
  * @param guild_id Guild ID to get bans for
  * @param before If non-zero, all bans for user ids before this user id will be returned up to the limit
  * @param after if non-zero, all bans for user ids after this user id will be returned up to the limit

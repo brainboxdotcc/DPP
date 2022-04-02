@@ -202,7 +202,7 @@ void request_queue::in_loop()
 	while (!terminating) {
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
-		in_ready.wait_for(lock, std::chrono::seconds(1));
+		in_ready.wait_for(lock, std::chrono::milliseconds(100));
 		/* New request to be sent! */
 
 		if (!globally_ratelimited) {
@@ -210,7 +210,11 @@ void request_queue::in_loop()
 			std::map<std::string, std::vector<http_request*>> requests_in_copy;
 			{
 				/* Make a safe copy within a mutex */
-				std::lock_guard<std::mutex> lock(in_mutex);	
+				std::shared_lock lock(in_mutex);
+				if (requests_in.empty()) {
+					/* Nothing to copy, wait again */
+					continue;
+				}
 				requests_in_copy = requests_in;
 			}
 
@@ -258,7 +262,7 @@ void request_queue::in_loop()
 
 					/* Make a new entry in the completion list and notify */
 					{
-						std::lock_guard<std::mutex> lock(out_mutex);
+						std::unique_lock lock(out_mutex);
 						http_request_completion_t* hrc = new http_request_completion_t();
 						*hrc = rv;
 						responses_out.push(std::make_pair(hrc, req));
@@ -268,7 +272,7 @@ void request_queue::in_loop()
 			}
 
 			{
-				std::lock_guard<std::mutex> lock(in_mutex);
+				std::unique_lock lock(in_mutex);
 				bool again = false;
 				do {
 					again = false;
@@ -303,25 +307,27 @@ void request_queue::out_loop()
 
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
-		out_ready.wait_for(lock, std::chrono::seconds(1));
+		out_ready.wait_for(lock, std::chrono::milliseconds(100));
 		time_t now = time(nullptr);
 
 		/* A request has been completed! */
 		std::pair<http_request_completion_t*, http_request*> queue_head = {};
+		bool pop_element = false;
 		{
-			std::lock_guard<std::mutex> lock(out_mutex);
-			if (responses_out.size()) {
-				queue_head = responses_out.front();
-				responses_out.pop();
-			}
+			std::shared_lock lock(out_mutex);
+			pop_element = responses_out.size();
+		}
+		if (pop_element) {
+			std::unique_lock lock(out_mutex);
+			queue_head = responses_out.front();
+			responses_out.pop();
 		}
 
 		if (queue_head.first && queue_head.second) {
 			queue_head.second->complete(*queue_head.first);
+			/* Queue deletions for 60 seconds from now */
+			responses_to_delete.insert(std::make_pair(now + 60, queue_head));
 		}
-
-		/* Queue deletions for 60 seconds from now */
-		responses_to_delete.insert(std::make_pair(now + 60, queue_head));
 
 		/* Check for deletable items every second regardless of select status */
 		while (responses_to_delete.size() && now >= responses_to_delete.begin()->first) {
@@ -336,7 +342,7 @@ void request_queue::out_loop()
 /* Post a http_request into the queue */
 void request_queue::post_request(http_request* req)
 {
-	std::lock_guard<std::mutex> lock(in_mutex);
+	std::unique_lock lock(in_mutex);
 	requests_in[req->endpoint].push_back(req);
 	in_ready.notify_one();
 }
