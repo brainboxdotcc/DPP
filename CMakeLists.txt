@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.16)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_VOICE_SUPPORT "Build voice support" ON)
@@ -230,6 +230,13 @@ foreach (fullmodname ${subdirlist})
 	)
 	target_include_directories(${modname} PUBLIC 
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+	)
+
+	target_precompile_headers(
+		${modname}
+		PRIVATE
+		"${PROJECT_SOURCE_DIR}/include/dpp/nlohmann/json.hpp"
+		"${PROJECT_SOURCE_DIR}/include/dpp/nlohmann/json_fwd.hpp"
 	)
 
 	if (WIN32 AND NOT MINGW)

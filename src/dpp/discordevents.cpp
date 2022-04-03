@@ -18,7 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#define _XOPEN_SOURCE
+#ifndef _XOPEN_SOURCE
+	#define _XOPEN_SOURCE
+#endif
 #include <string>
 #include <iostream>
 #include <fstream>
