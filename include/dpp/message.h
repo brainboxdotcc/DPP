@@ -1385,6 +1385,22 @@ struct DPP_EXPORT message : public managed {
 	 * @return message& reference to self
 	 */
 	message& set_content(const std::string &c);
+	
+	/**
+	 * @brief Set the channel id
+	 * 
+	 * @param _channel_id channel id
+	 * @return message& reference to self
+	 */
+	message& set_channel_id(snowflake _channel_id);
+
+	/**
+	 * @brief Set the channel id
+	 * 
+	 * @param _guild_id channel id
+	 * @return message& reference to self
+	 */
+	message& set_guild_id(snowflake _guild_id);
 };
 
 /** A group of messages */

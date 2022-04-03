@@ -496,6 +496,16 @@ message& message::set_content(const std::string &c)
 	return *this;
 }
 
+message& message::set_channel_id(snowflake _channel_id) {
+	channel_id = _channel_id;
+	return *this;
+}
+
+message& message::set_guild_id(snowflake _guild_id) {
+	guild_id = _guild_id;
+	return *this;
+}
+
 message::message(const std::string &_content, message_type t) : message() {
 	content = utility::utf8substr(_content, 0, 2000);
 	type = t;
