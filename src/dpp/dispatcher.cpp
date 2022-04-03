@@ -150,27 +150,27 @@ void interaction_create_t::edit_response(const std::string & mt, command_complet
 
 void interaction_create_t::get_original_response(command_completion_event_t callback) const
 {
-	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
+	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_get, "", [creator = this->from->creator, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(from->creator, message().fill_from_json(&j), http));
+			callback(confirmation_callback_t(creator, message().fill_from_json(&j), http));
 		}
 	});
 }
 
 void interaction_create_t::edit_original_response(const message & m, command_completion_event_t callback) const
 {
-	from->creator->post_rest_multipart(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_patch, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
+	from->creator->post_rest_multipart(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_patch, m.build_json(), [creator = this->from->creator, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(from->creator, message().fill_from_json(&j), http));
+			callback(confirmation_callback_t(creator, message().fill_from_json(&j), http));
 		}
 	}, m.filename, m.filecontent);
 }
 
 void interaction_create_t::delete_original_response(command_completion_event_t callback) const
 {
-	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_delete, "", [this, callback](json &j, const http_request_completion_t& http) {
+	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_delete, "", [creator = this->from->creator, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(from->creator, confirmation(), http));
+			callback(confirmation_callback_t(creator, confirmation(), http));
 		}
 	});
 }
