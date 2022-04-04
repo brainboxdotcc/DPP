@@ -152,6 +152,8 @@ public:
 	std::string mimetype;
 	/** Request headers (non-discord requests only) */
 	std::multimap<std::string, std::string> req_headers;
+	/** Waiting for rate limit to expire */
+	bool waiting;
 
 	/** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _endpoint The API endpoint, e.g. /api/guilds
