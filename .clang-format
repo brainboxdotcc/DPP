@@ -1,0 +1,23 @@
+BasedOnStyle: LLVM
+AlignArrayOfStructures: Left
+Standard: c++17
+TabWidth: 8
+UseTab: Always
+AllowShortIfStatementsOnASingleLine: false
+SpacesInCStyleCastParentheses: false
+SpacesInAngles: Never
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: Consecutive
+AlignOperands: AlignAfterOperator
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: false
+AllowShortLambdasOnASingleLine: Inline
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true
+  AfterStruct: false
+  AfterCaseLabel: false
+  SplitEmptyFunction: false
+  AfterClass: true
