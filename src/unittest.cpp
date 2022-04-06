@@ -76,6 +76,8 @@ std::map<std::string, test_t> tests = {
 	{"URLENC", {"URL encoding", false, false}},
 	{"SYNC", {"dpp::sync<T>()", false, false}},
 	{"COMPARISON", {"dpp::manged object comparison", false, false}},
+	{"CHANNELCACHE", {"dpp::find_channel()", false, false}},
+	{"CHANNELTYPES", {"dpp::channel type flags", false, false}},
 };
 
 double start = dpp::utility::time_f();

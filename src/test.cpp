@@ -472,6 +472,12 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("USERCACHE", false);
 		dpp::user* u = dpp::find_user(TEST_USER_ID);
 		set_test("USERCACHE", u);
+		set_test("CHANNELCACHE", false);
+		set_test("CHANNELTYPES", false);
+		dpp::channel* c = dpp::find_channel(TEST_TEXT_CHANNEL_ID);
+		dpp::channel* c2 = dpp::find_channel(TEST_VC_ID);
+		set_test("CHANNELCACHE", c && c2);
+		set_test("CHANNELTYPES", c && c->is_text_channel() && !c->is_voice_channel() && c2 && c2->is_voice_channel() && !c2->is_text_channel());
 
 		wait_for_tests();
 

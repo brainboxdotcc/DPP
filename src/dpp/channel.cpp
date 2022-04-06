@@ -31,6 +31,8 @@ using json = nlohmann::json;
 
 namespace dpp {
 
+const uint8_t CHANNEL_TYPE_MASK = 0b00001111;
+
 thread_member& thread_member::fill_from_json(nlohmann::json* j) {
 	set_snowflake_not_null(j, "id", this->thread_id);
 	set_snowflake_not_null(j, "user_id", this->user_id);
@@ -61,10 +63,10 @@ channel::channel() :
 	last_message_id(0),
 	last_pin_timestamp(0),
 	permissions(0),
-	flags(0),
 	position(0),
 	bitrate(0),
 	rate_limit_per_user(0),
+	flags(0),
 	user_limit(0)
 {
 }
@@ -148,39 +150,39 @@ bool channel::is_nsfw() const {
 }
 
 bool channel::is_text_channel() const {
-	return flags & dpp::c_text;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_TEXT;
 }
 
 bool channel::is_dm() const {
-	return flags & dpp::c_dm;
+	return (flags & CHANNEL_TYPE_MASK) == DM;
 }
 
 bool channel::is_voice_channel() const {
-	return flags & dpp::c_voice;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_VOICE;
 }
 
 bool channel::is_group_dm() const {
-	return (flags & (dpp::c_dm | dpp::c_group)) == (dpp::c_dm | dpp::c_group);
+	return (flags & CHANNEL_TYPE_MASK) == GROUP_DM;
 }
 
 bool channel::is_category() const {
-	return flags & dpp::c_category;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_CATEGORY;
 }
 
 bool channel::is_forum() const {
-	return flags & dpp::c_forum;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_FORUM;
 }
 
 bool channel::is_stage_channel() const {
-	return flags & dpp::c_stage;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_STAGE;
 }
 
 bool channel::is_news_channel() const {
-	return flags & dpp::c_news;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_NEWS;
 }
 
 bool channel::is_store_channel() const {
-	return flags & dpp::c_store;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_STORE;
 }
 
 bool channel::is_video_auto() const {
@@ -198,24 +200,22 @@ bool channel::is_video_720p() const {
 
 
 bool thread::is_news_thread() const {
-	return flags & dpp::c_news_thread;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_NEWS_THREAD;
 }
 
 bool thread::is_public_thread() const {
-	return flags & dpp::c_public_thread;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_PUBLIC_THREAD;
 }
 
 bool thread::is_private_thread() const {
-	return flags & dpp::c_private_thread;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_PRIVATE_THREAD;
 }
 
 thread& thread::fill_from_json(json* j) {
 	channel::fill_from_json(j);
 
 	uint8_t type = int8_not_null(j, "type");
-	this->flags |= (type == CHANNEL_NEWS_THREAD) ? dpp::c_news_thread : 0;
-	this->flags |= (type == CHANNEL_PUBLIC_THREAD) ? dpp::c_public_thread : 0;
-	this->flags |= (type == CHANNEL_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
+	this->flags |= (type & CHANNEL_TYPE_MASK);
 
 	set_int8_not_null(j, "message_count", this->message_count);
 	set_int8_not_null(j, "member_count", this->member_count);
@@ -251,18 +251,10 @@ channel& channel::fill_from_json(json* j) {
 	set_snowflake_not_null(j, "owner_id", this->owner_id);
 	set_snowflake_not_null(j, "parent_id", this->parent_id);
 	this->bitrate = int16_not_null(j, "bitrate")/1024;
-	uint8_t type = int8_not_null(j, "type");
 	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
-	this->flags |= (type == CHANNEL_TEXT) ? dpp::c_text : 0;
-	this->flags |= (type == CHANNEL_VOICE) ? dpp::c_voice : 0;
-	this->flags |= (type == DM) ? dpp::c_dm : 0;
-	this->flags |= (type == GROUP_DM) ? (dpp::c_group | dpp::c_dm) : 0;
-	this->flags |= (type == CHANNEL_CATEGORY) ? dpp::c_category : 0;
-	this->flags |= (type == CHANNEL_NEWS) ? dpp::c_news : 0;
-	this->flags |= (type == CHANNEL_STORE) ? dpp::c_store : 0;
-	this->flags |= (type == CHANNEL_STAGE) ? dpp::c_stage : 0;
-	this->flags |= (type == CHANNEL_DIRECTORY) ? dpp::c_directory : 0;
-	this->flags |= (type == CHANNEL_FORUM) ? dpp::c_forum : 0;
+
+	uint8_t type = int8_not_null(j, "type");
+	this->flags |= (type & CHANNEL_TYPE_MASK);
 
 	uint8_t vqm = int8_not_null(j, "video_quality_mode");
 	if (vqm == 2) {
@@ -317,19 +309,8 @@ channel& channel::fill_from_json(json* j) {
 
 std::string thread::build_json(bool with_id) const {
 	json j = json::parse(channel::build_json(with_id));
-	if (is_news_thread()) {
-		/* News thread */
-		j["type"] = CHANNEL_NEWS_THREAD;
-		j["thread_metadata"] = this->metadata;
-	} else if (is_public_thread()) {
-		/* Public thread */
-		j["type"] = CHANNEL_PUBLIC_THREAD;
-		j["thread_metadata"] = this->metadata;
-	} else {
-		/* Private thread */
-		j["type"] = CHANNEL_PRIVATE_THREAD;
-		j["thread_metadata"] = this->metadata;
-	}
+	j["type"] = (flags & CHANNEL_TYPE_MASK);
+	j["thread_metadata"] = this->metadata;
 	return j.dump();
 }
 
@@ -360,34 +341,12 @@ std::string channel::build_json(bool with_id) const {
 		j["user_limit"] = user_limit; 
 		j["bitrate"] = bitrate*1024;
 	}
+	j["type"] = (flags & CHANNEL_TYPE_MASK);
 	if (!is_dm()) {
 		if (parent_id) {
 			j["parent_id"] = std::to_string(parent_id);
 		}
-		if (is_text_channel()) {
-			j["type"] = CHANNEL_TEXT;
-		} else if (is_voice_channel()) {
-			j["type"] = CHANNEL_VOICE;
-		} else if (is_category()) {
-			j["type"] = CHANNEL_CATEGORY;
-		} else if (is_stage_channel()) {
-			j["type"] = CHANNEL_STAGE;
-		} else if (is_news_channel()) {
-			j["type"] = CHANNEL_NEWS;
-		} else if (is_store_channel()) {
-			j["type"] = CHANNEL_STORE;
-		} else if (is_category()) {
-			j["type"] = CHANNEL_CATEGORY;
-		} else if (is_forum()) {
-			j["type"] = CHANNEL_FORUM;
-		}
 		j["nsfw"] = is_nsfw();
-	} else {
-		if (is_group_dm()) {
-			j["type"] = GROUP_DM;
-		} else  {
-			j["type"] = DM;
-		}
 	}
 	
 	return j.dump();

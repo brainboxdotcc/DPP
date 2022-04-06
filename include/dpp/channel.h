@@ -32,7 +32,7 @@
 namespace dpp {
 
 /** @brief Flag integers as received from and sent to discord */
-enum channel_type {
+enum channel_type : uint8_t {
 	CHANNEL_TEXT		= 0,	//!< a text channel within a server
 	DM			= 1,	//!< a direct message between users
 	CHANNEL_VOICE		= 2,	//!< a voice channel within a server
@@ -51,50 +51,17 @@ enum channel_type {
 	CHANNEL_DIRECTORY	= 14,   //!< the channel in a [hub](https://support.discord.com/hc/en-us/articles/4406046651927-Discord-Student-Hubs-FAQ) containing the listed servers
 	CHANNEL_FORUM		= 15	//!< forum channel, coming soon(tm)
 };
-/** @brief Our flags as stored in the object */
-enum channel_flags : uint16_t {
-	/**
-	 * @brief video quality mode 720p
-	 * This is a dummy value as it does nothing, in comparison to
-	 * c_video_quality_720p which actually sets the bit!
-	 */
-	c_video_quality_auto =	0b0000000000000000,
-	/// Video quality forced to 720p
-	c_directory =		0b0010000000000001,
+
+/** @brief Our flags as stored in the object
+ * @note The bottom four bits of this flag are reserved to contain the channel_type values
+ * listed above as provided by Discord. If discord add another value > 15, we will have to
+ * shuffle these values upwards by one bit.
+ */
+enum channel_flags : uint8_t {
 	/// NSFW Gated Channel
-	c_nsfw =		0b0000000000000010,
-	/// Text channel
-	c_text =		0b0000000000000100,
-	/// Direct Message
-	c_dm =			0b0000000000001000,
-	/// Voice channel
-	c_voice =		0b0000000000010000,
-	/// Group
-	c_group =		0b0000000000100000,
-	/// Category
-	c_category =		0b0000000001000000,
-	/// News channel
-	c_news =		0b0000000010000000,
-	/**
-	 * @brief a channel in which game developers can sell their game on Discord
-	 * @deprecated store channels are deprecated by Discord
-	 */
-	c_store =		0b0000000100000000,
-	/// Stage channel
-	c_stage =		0b0000001000000000,
-	/// News thread
-	c_news_thread =		0b0000010000000000,
-	/// Public thread
-	c_public_thread = 	0b0000100000000000,
-	/// Private thread
-	c_private_thread =	0b0001000000000000,
+	c_nsfw =		0b00010000,
 	/// Video quality forced to 720p
-	c_video_quality_720p =	0b0010000000000000,
-	/**
-	 * @brief Forum channel
-	 * @note This feature is not implemented by Discord yet and the name is subject to possible change!
-	 */
-	c_forum =		0b0100000000000000,
+	c_video_quality_720p =	0b00100000,
 };
 
 /**
@@ -220,9 +187,6 @@ public:
 	 */
 	uint64_t permissions;
 
-	/** Flags bitmap */
-	uint16_t flags;
-	
 	/** Sorting position, lower number means higher up the list */
 	uint16_t position;
 
@@ -232,6 +196,9 @@ public:
 	/** amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected*/
 	uint16_t rate_limit_per_user;
 
+	/** Flags bitmap */
+	uint8_t flags;
+	
 	/** Maximum user limit for voice channels (0-99) */
 	uint8_t user_limit;
 
