@@ -167,18 +167,20 @@ bool channel::is_category() const {
 	return flags & dpp::c_category;
 }
 
+bool channel::is_forum() const {
+	return flags & dpp::c_forum;
+}
+
 bool channel::is_stage_channel() const {
-	return (flags & dpp::c_stage) == dpp::c_stage;
+	return flags & dpp::c_stage;
 }
 
 bool channel::is_news_channel() const {
-	/* Important: Stage/News overlap to pack more values in a byte */
-	return !is_stage_channel() && (flags & dpp::c_news);
+	return flags & dpp::c_news;
 }
 
 bool channel::is_store_channel() const {
-	/* Important: Stage/Store overlap to pack more values in a byte */
-	return !is_stage_channel() && (flags & dpp::c_store);
+	return flags & dpp::c_store;
 }
 
 bool channel::is_video_auto() const {
@@ -191,7 +193,7 @@ bool channel::is_video_auto() const {
 }
 
 bool channel::is_video_720p() const {
-	return (flags & dpp::c_video_quality_720p);
+	return flags & dpp::c_video_quality_720p;
 }
 
 
@@ -211,9 +213,9 @@ thread& thread::fill_from_json(json* j) {
 	channel::fill_from_json(j);
 
 	uint8_t type = int8_not_null(j, "type");
-	this->flags |= (type == GUILD_NEWS_THREAD) ? dpp::c_news_thread : 0;
-	this->flags |= (type == GUILD_PUBLIC_THREAD) ? dpp::c_public_thread : 0;
-	this->flags |= (type == GUILD_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
+	this->flags |= (type == CHANNEL_NEWS_THREAD) ? dpp::c_news_thread : 0;
+	this->flags |= (type == CHANNEL_PUBLIC_THREAD) ? dpp::c_public_thread : 0;
+	this->flags |= (type == CHANNEL_PRIVATE_THREAD) ? dpp::c_private_thread : 0;
 
 	set_int8_not_null(j, "message_count", this->message_count);
 	set_int8_not_null(j, "member_count", this->member_count);
@@ -251,14 +253,16 @@ channel& channel::fill_from_json(json* j) {
 	this->bitrate = int16_not_null(j, "bitrate")/1024;
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
-	this->flags |= (type == GUILD_TEXT) ? dpp::c_text : 0;
-	this->flags |= (type == GUILD_VOICE) ? dpp::c_voice : 0;
+	this->flags |= (type == CHANNEL_TEXT) ? dpp::c_text : 0;
+	this->flags |= (type == CHANNEL_VOICE) ? dpp::c_voice : 0;
 	this->flags |= (type == DM) ? dpp::c_dm : 0;
 	this->flags |= (type == GROUP_DM) ? (dpp::c_group | dpp::c_dm) : 0;
-	this->flags |= (type == GUILD_CATEGORY) ? dpp::c_category : 0;
-	this->flags |= (type == GUILD_NEWS) ? dpp::c_news : 0;
-	this->flags |= (type == GUILD_STORE) ? dpp::c_store : 0;
-	this->flags |= (type == GUILD_STAGE) ? dpp::c_stage : 0;
+	this->flags |= (type == CHANNEL_CATEGORY) ? dpp::c_category : 0;
+	this->flags |= (type == CHANNEL_NEWS) ? dpp::c_news : 0;
+	this->flags |= (type == CHANNEL_STORE) ? dpp::c_store : 0;
+	this->flags |= (type == CHANNEL_STAGE) ? dpp::c_stage : 0;
+	this->flags |= (type == CHANNEL_DIRECTORY) ? dpp::c_directory : 0;
+	this->flags |= (type == CHANNEL_FORUM) ? dpp::c_forum : 0;
 
 	uint8_t vqm = int8_not_null(j, "video_quality_mode");
 	if (vqm == 2) {
@@ -315,15 +319,15 @@ std::string thread::build_json(bool with_id) const {
 	json j = json::parse(channel::build_json(with_id));
 	if (is_news_thread()) {
 		/* News thread */
-		j["type"] = GUILD_NEWS_THREAD;
+		j["type"] = CHANNEL_NEWS_THREAD;
 		j["thread_metadata"] = this->metadata;
 	} else if (is_public_thread()) {
 		/* Public thread */
-		j["type"] = GUILD_PUBLIC_THREAD;
+		j["type"] = CHANNEL_PUBLIC_THREAD;
 		j["thread_metadata"] = this->metadata;
 	} else {
 		/* Private thread */
-		j["type"] = GUILD_PRIVATE_THREAD;
+		j["type"] = CHANNEL_PRIVATE_THREAD;
 		j["thread_metadata"] = this->metadata;
 	}
 	return j.dump();
@@ -361,18 +365,21 @@ std::string channel::build_json(bool with_id) const {
 			j["parent_id"] = std::to_string(parent_id);
 		}
 		if (is_text_channel()) {
-			j["type"] = GUILD_TEXT;
+			j["type"] = CHANNEL_TEXT;
 		} else if (is_voice_channel()) {
-			j["type"] = GUILD_VOICE;
+			j["type"] = CHANNEL_VOICE;
 		} else if (is_category()) {
-			j["type"] = GUILD_CATEGORY;
+			j["type"] = CHANNEL_CATEGORY;
 		} else if (is_stage_channel()) {
-			/* Order is important, as GUILD_STAGE overlaps NEWS and STORE */
-			j["type"] = GUILD_STAGE;
+			j["type"] = CHANNEL_STAGE;
 		} else if (is_news_channel()) {
-			j["type"] = GUILD_NEWS;
+			j["type"] = CHANNEL_NEWS;
 		} else if (is_store_channel()) {
-			j["type"] = GUILD_STORE;
+			j["type"] = CHANNEL_STORE;
+		} else if (is_category()) {
+			j["type"] = CHANNEL_CATEGORY;
+		} else if (is_forum()) {
+			j["type"] = CHANNEL_FORUM;
 		}
 		j["nsfw"] = is_nsfw();
 	} else {

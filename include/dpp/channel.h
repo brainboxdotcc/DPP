@@ -33,22 +33,23 @@ namespace dpp {
 
 /** @brief Flag integers as received from and sent to discord */
 enum channel_type {
-	GUILD_TEXT		= 0,	//!< a text channel within a server
+	CHANNEL_TEXT		= 0,	//!< a text channel within a server
 	DM			= 1,	//!< a direct message between users
-	GUILD_VOICE		= 2,	//!< a voice channel within a server
+	CHANNEL_VOICE		= 2,	//!< a voice channel within a server
 	GROUP_DM		= 3,	//!< a direct message between multiple users
-	GUILD_CATEGORY		= 4,	//!< an organizational category that contains up to 50 channels
-	GUILD_NEWS		= 5,	//!< a channel that users can follow and crosspost into their own server
+	CHANNEL_CATEGORY	= 4,	//!< an organizational category that contains up to 50 channels
+	CHANNEL_NEWS		= 5,	//!< a channel that users can follow and crosspost into their own server
 	/**
 	 * @brief a channel in which game developers can sell their game on Discord
 	 * @deprecated store channels are deprecated by Discord
 	 */
-	GUILD_STORE		= 6,
-	GUILD_NEWS_THREAD	= 10,	//!< a temporary sub-channel within a GUILD_NEWS channel
-	GUILD_PUBLIC_THREAD	= 11,	//!< a temporary sub-channel within a GUILD_TEXT channel
-	GUILD_PRIVATE_THREAD	= 12,	//!< a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
-	GUILD_STAGE		= 13,	//!< a "stage" channel, like a voice channel with one authorised speaker
-	GUILD_DIRECTORY = 14    //!< the channel in a [hub](https://support.discord.com/hc/en-us/articles/4406046651927-Discord-Student-Hubs-FAQ) containing the listed servers
+	CHANNEL_STORE		= 6,
+	CHANNEL_NEWS_THREAD	= 10,	//!< a temporary sub-channel within a GUILD_NEWS channel
+	CHANNEL_PUBLIC_THREAD	= 11,	//!< a temporary sub-channel within a GUILD_TEXT channel
+	CHANNEL_PRIVATE_THREAD	= 12,	//!< a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
+	CHANNEL_STAGE		= 13,	//!< a "stage" channel, like a voice channel with one authorised speaker
+	CHANNEL_DIRECTORY	= 14,   //!< the channel in a [hub](https://support.discord.com/hc/en-us/articles/4406046651927-Discord-Student-Hubs-FAQ) containing the listed servers
+	CHANNEL_FORUM		= 15	//!< forum channel, coming soon(tm)
 };
 /** @brief Our flags as stored in the object */
 enum channel_flags : uint16_t {
@@ -58,35 +59,42 @@ enum channel_flags : uint16_t {
 	 * c_video_quality_720p which actually sets the bit!
 	 */
 	c_video_quality_auto =	0b0000000000000000,
+	/// Video quality forced to 720p
+	c_directory =		0b0010000000000001,
 	/// NSFW Gated Channel
-	c_nsfw =		0b0000000000000001,
+	c_nsfw =		0b0000000000000010,
 	/// Text channel
-	c_text =		0b0000000000000010,
+	c_text =		0b0000000000000100,
 	/// Direct Message
-	c_dm =			0b0000000000000100,
+	c_dm =			0b0000000000001000,
 	/// Voice channel
-	c_voice =		0b0000000000001000,
+	c_voice =		0b0000000000010000,
 	/// Group
-	c_group =		0b0000000000010000,
+	c_group =		0b0000000000100000,
 	/// Category
-	c_category =		0b0000000000100000,
+	c_category =		0b0000000001000000,
 	/// News channel
-	c_news =		0b0000000001000000,
+	c_news =		0b0000000010000000,
 	/**
 	 * @brief a channel in which game developers can sell their game on Discord
 	 * @deprecated store channels are deprecated by Discord
 	 */
-	c_store =		0b0000000010000000,
+	c_store =		0b0000000100000000,
 	/// Stage channel
-	c_stage =		0b0000000011000000,
+	c_stage =		0b0000001000000000,
 	/// News thread
-	c_news_thread =		0b0000000011100000,
+	c_news_thread =		0b0000010000000000,
 	/// Public thread
-	c_public_thread = 	0b0000000011110000,
+	c_public_thread = 	0b0000100000000000,
 	/// Private thread
-	c_private_thread =	0b0000000011111000,
+	c_private_thread =	0b0001000000000000,
 	/// Video quality forced to 720p
-	c_video_quality_720p =	0b0000000100000000,
+	c_video_quality_720p =	0b0010000000000000,
+	/**
+	 * @brief Forum channel
+	 * @note This feature is not implemented by Discord yet and the name is subject to possible change!
+	 */
+	c_forum =		0b0100000000000000,
 };
 
 /**
@@ -451,6 +459,14 @@ public:
 	 * @return true if a category
 	 */
 	bool is_category() const;
+
+	/**
+	 * @brief Returns true if the channel is a forum
+	 * @note This feature is not implemented by Discord yet and the name is subject to possible change!
+	 * 
+	 * @return true if a category
+	 */
+	bool is_forum() const;
 
 	/**
 	 * @brief Returns true if the channel is a news channel
