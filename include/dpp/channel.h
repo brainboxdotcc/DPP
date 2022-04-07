@@ -36,7 +36,11 @@ enum channel_type : uint8_t {
 	CHANNEL_TEXT		= 0,	//!< a text channel within a server
 	DM			= 1,	//!< a direct message between users
 	CHANNEL_VOICE		= 2,	//!< a voice channel within a server
-	GROUP_DM		= 3,	//!< a direct message between multiple users
+	/**
+	 * @brief a direct message between multiple users
+	 * @deprecated this channel type was intended to be used with the now deprecated GameBridge SDK. Existing group dms with bots will continue to function, but newly created channels will be unusable
+	 */
+	GROUP_DM		= 3,
 	CHANNEL_CATEGORY	= 4,	//!< an organizational category that contains up to 50 channels
 	CHANNEL_NEWS		= 5,	//!< a channel that users can follow and crosspost into their own server
 	/**
