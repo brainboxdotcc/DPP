@@ -330,7 +330,7 @@ int main(int argc, char const *argv[])
 		if (command == ".join") {
 			dpp::guild * g = dpp::find_guild(event.msg.guild_id);
 			if (!g->connect_member_voice(event.msg.author.id)) {
-				bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
+				bot.message_create(dpp::message(event.msg.channel_id, "You don't seem to be on a voice channel! :("));
 			}
 		}
 
@@ -572,7 +572,7 @@ int main(int argc, char const *argv[])
 			if (join_vc) {
 				if (!g->connect_member_voice(event.msg.author.id)) {
 					/* The user issuing the command is not on any voice channel, we can't do anything */
-					bot.message_create(dpp::message(channel_id, "You don't seem to be on a voice channel! :("));
+					bot.message_create(dpp::message(event.msg.channel_id, "You don't seem to be on a voice channel! :("));
 				} else {
 					/* We are now connecting to a vc. Wait for on_voice_ready 
 					 * event, and then send the audio within that event:
