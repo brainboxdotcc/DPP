@@ -117,12 +117,12 @@ public:
 #ifndef _DOXYGEN_
 	#define derived_exception(name, ancestor) class name : public ancestor { \
 	public: \
-		using dpp::exception::exception; \
+		using ancestor::exception; \
 		name() = default; \
-		explicit name(const char* what) : exception(what) { } \
-		name(const char* what, size_t len) : exception(what, len) { } \
-		explicit name(const std::string& what) : exception(what) { } \
-		explicit name(std::string&& what) : exception(what) { } \
+		explicit name(const char* what) : ancestor(what) { } \
+		name(const char* what, size_t len) : ancestor(what, len) { } \
+		explicit name(const std::string& what) : ancestor(what) { } \
+		explicit name(std::string&& what) : ancestor(what) { } \
 		name(const name&) = default; \
 		name(name&&) = default; \
 		~name() override = default; \
@@ -180,12 +180,18 @@ public:
 	 * @note This is a stub for documentation purposes. For full information on supported methods please see dpp::exception.
 	 */
 	class cache_exception : public dpp::exception { };
+	/**
+	 * @brief Represents an attempt to construct a cluster with an invalid bot token. 
+	 * @note This is a stub for documentation purposes. For full information on supported methods please see dpp::exception.
+	 */
+	class invalid_token_exception : public dpp::exception { };
 #else
 	derived_exception(logic_exception, dpp::exception);
 	derived_exception(file_exception, dpp::exception);
 	derived_exception(connection_exception, dpp::exception);
 	derived_exception(voice_exception, dpp::exception);
 	derived_exception(rest_exception, dpp::exception);
+	derived_exception(invalid_token_exception, dpp::rest_exception);
 	derived_exception(length_exception, dpp::exception);
 	derived_exception(parse_exception, dpp::exception);
 	derived_exception(cache_exception, dpp::exception);

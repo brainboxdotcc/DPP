@@ -143,8 +143,20 @@ void cluster::start(bool return_after) {
 
 	/* Start up all shards */
 	if (numshards == 0) {
-		gateway g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
-		numshards = g.shards;
+		gateway g;
+		try {
+			g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
+			numshards = g.shards;
+		}
+		catch (const dpp::rest_exception& e) {
+			if (std::string(e.what()) == "401: Unauthorized") {
+				/* Throw special form of exception for invalid token */
+				throw dpp::invalid_token_exception("Invalid bot token (401: Unauthorized when getting gateway shard count)");
+			} else {
+				/* Rethrow */
+				throw e;
+			}
+		}
 		if (g.shards) {
 			log(ll_info, fmt::format("Auto Shard: Bot requires {} shard{}", g.shards, (g.shards > 1) ? "s" : ""));
 			if (g.session_start_remaining < g.shards) {
