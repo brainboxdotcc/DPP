@@ -89,6 +89,7 @@ rm -rf libdpp-$NEWVER-win32
 cd ..
 echo "Create release..."
 gh release create "v$NEWVER" --draft --title "v$NEWVER release" --notes "$(/usr/bin/php ../buildtools/changelog.php)" ./assets/*.zip ./assets/*.deb ./assets/*.rpm
+gh release create -R brainboxdotcc/windows-bot-template "v$NEWVER" --draft --title "v$NEWVER release" --notes "This release packages DPP v$NEWVER into the windows bot template"
 echo "Cleaning up..."
 cd ..
 rm -rf temp
