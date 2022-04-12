@@ -7,5 +7,6 @@ testdata/onandon.pcm
 docs/doxygen_sqlite3.db
 src/build
 .vs
+*.autosave
 .misspell-fixer.ignore
 core

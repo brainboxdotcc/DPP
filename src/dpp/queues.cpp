@@ -34,7 +34,6 @@ namespace dpp {
 
 static std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, " + std::to_string(DPP_VERSION_MAJOR) + "." + std::to_string(DPP_VERSION_MINOR) + "." + std::to_string(DPP_VERSION_PATCH) + ")";
 static const char* DISCORD_HOST = "https://discord.com";
-const uint32_t in_thread_pool_size = 8;
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent)
  : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false)
@@ -181,12 +180,25 @@ http_request_completion_t http_request::run(cluster* owner) {
 	return rv;
 }
 
-request_queue::request_queue(class cluster* owner) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0)
+request_queue::request_queue(class cluster* owner, uint32_t request_threads) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0), in_thread_pool_size(request_threads)
 {
 	for (uint32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
 		requests_in.push_back(new in_thread(owner, this));
 	}
 	out_thread = new std::thread(&request_queue::out_loop, this);
+}
+
+void request_queue::add_request_threads(uint32_t request_threads)
+{
+	for (uint32_t in_alloc_ex = 0; in_alloc_ex < request_threads; ++in_alloc_ex) {
+		requests_in.push_back(new in_thread(creator, this));
+	}
+	in_thread_pool_size += request_threads;
+}
+
+uint32_t request_queue::get_request_thread_count()
+{
+	return in_thread_pool_size;
 }
 
 in_thread::in_thread(class cluster* owner, class request_queue* req_q) : terminating(false), requests(req_q), creator(owner)
@@ -373,15 +385,15 @@ void in_thread::post_request(http_request* req)
 inline uint32_t hash(const char *s)
 {
 	uint32_t hashval;
-	for (hashval = 0; *s != 0; s++)
+	for (hashval = 17; *s != 0; s++)
 		hashval = *s + 31 * hashval;
-	return hashval % in_thread_pool_size;
+	return hashval;
 }
 
 /* Post a http_request into a request queue */
 void request_queue::post_request(http_request* req)
 {
-	requests_in[hash(req->endpoint.c_str())]->post_request(req);
+	requests_in[hash(req->endpoint.c_str()) % in_thread_pool_size]->post_request(req);
 }
 
 bool request_queue::is_globally_ratelimited() const

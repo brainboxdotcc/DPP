@@ -394,6 +394,11 @@ protected:
 	uint64_t globally_limited_for;
 
 	/**
+	 * @brief Number of request threads in the thread pool
+	 */
+	uint32_t in_thread_pool_size;
+
+	/**
 	 * @brief Outbound queue thread loop
 	 */
 	void out_loop();
@@ -402,9 +407,26 @@ public:
 	/**
 	 * @brief constructor
 	 * @param owner The creating cluster.
+	 * @param request_threads The number of http request threads to allocate to the threadpool.
+	 * By default eight threads are allocated.
 	 * Side effects: Creates threads for the queue
 	 */
-	request_queue(class cluster* owner);
+	request_queue(class cluster* owner, uint32_t request_threads = 8);
+
+	/**
+	 * @brief Add more request threads to the library at runtime.
+	 * @note You should do this at a quiet time when there are few requests happening.
+	 * This will reorganise the hashing used to place requests into the thread pool so if you do
+	 * this while the bot is busy there is a small chance of receiving "429 rate limited" errors.
+	 * @param request_threads Number of threads to add. It is not possible to scale down at runtime.
+	 */
+	void add_request_threads(uint32_t request_threads);
+
+	/**
+	 * @brief Get the request thread count
+	 * @return uint32_t number of request threads that are active
+	 */
+	uint32_t get_request_thread_count();
 
 	/**
 	 * @brief Destroy the request queue object.

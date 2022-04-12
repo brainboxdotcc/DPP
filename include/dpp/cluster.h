@@ -574,9 +574,10 @@ public:
 	 * @param maxclusters The total number of clusters that are active, which may be on separate processes or even separate machines.
 	 * @param compressed Whether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
 	 * @param policy Set the user caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
+	 * @param request_threads The number of threads to allocate for making HTTP requests. This defaults to 8. You can increase this at runtime via the objects returned from get_rest() and get_raw_rest().
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
-	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = {cp_aggressive, cp_aggressive, cp_aggressive});
+	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = {cp_aggressive, cp_aggressive, cp_aggressive}, uint32_t request_threads = 8);
 
 	/**
 	 * @brief dpp::cluster is non-copyable
@@ -592,6 +593,18 @@ public:
 	 * @brief Destroy the cluster object
 	 */
 	virtual ~cluster();
+
+	/**
+	 * @brief Get the rest_queue object which handles HTTPS requests to Discord
+	 * @return request_queue* pointer to request_queue object
+	 */
+	request_queue* get_rest();
+
+	/**
+	 * @brief Get the raw rest_queue object which handles all HTTP(S) requests that are not directed at Discord
+	 * @return request_queue* pointer to request_queue object
+	 */
+	request_queue* get_raw_rest();
 
 	/**
 	 * @brief Set the websocket protocol for all shards on this cluster.
