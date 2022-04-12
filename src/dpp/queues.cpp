@@ -34,6 +34,7 @@ namespace dpp {
 
 static std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, " + std::to_string(DPP_VERSION_MAJOR) + "." + std::to_string(DPP_VERSION_MINOR) + "." + std::to_string(DPP_VERSION_PATCH) + ")";
 static const char* DISCORD_HOST = "https://discord.com";
+const uint32_t in_thread_pool_size = 8;
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent)
  : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false)
@@ -182,31 +183,45 @@ http_request_completion_t http_request::run(cluster* owner) {
 
 request_queue::request_queue(class cluster* owner) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0)
 {
-	in_thread = new std::thread(&request_queue::in_loop, this);
+	for (uint32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
+		requests_in.push_back(new in_thread(owner, this));
+	}
 	out_thread = new std::thread(&request_queue::out_loop, this);
+}
+
+in_thread::in_thread(class cluster* owner, class request_queue* req_q) : terminating(false), requests(req_q), creator(owner)
+{
+	this->in_thr = new std::thread(&in_thread::in_loop, this);
+}
+
+in_thread::~in_thread()
+{
+	terminating = true;
+	in_ready.notify_one();
+	in_thr->join();
+	delete in_thr;
 }
 
 request_queue::~request_queue()
 {
-	creator->log(ll_debug, "REST request_queue shutting down");
 	terminating = true;
-	in_ready.notify_one();
 	out_ready.notify_one();
-	in_thread->join();
 	out_thread->join();
-	delete in_thread;
 	delete out_thread;
+	for (auto& ri : requests_in) {
+		delete ri;
+	}
 }
 
-void request_queue::in_loop()
+void in_thread::in_loop()
 {
 	while (!terminating) {
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
-		in_ready.wait_for(lock, std::chrono::milliseconds(50));
+		in_ready.wait_for(lock, std::chrono::milliseconds(100));
 		/* New request to be sent! */
 
-		if (!globally_ratelimited) {
+		if (!requests->globally_ratelimited) {
 
 			std::map<std::string, std::vector<http_request*>> requests_in_copy;
 			{
@@ -256,9 +271,9 @@ void request_queue::in_loop()
 					newbucket.reset_after = rv.ratelimit_reset_after;
 					newbucket.retry_after = rv.ratelimit_retry_after;
 					newbucket.timestamp = time(NULL);
-					globally_ratelimited = rv.ratelimit_global;
-					if (globally_ratelimited) {
-						globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
+					requests->globally_ratelimited = rv.ratelimit_global;
+					if (requests->globally_ratelimited) {
+						requests->globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
 					}
 					buckets[req->endpoint] = newbucket;
 
@@ -266,10 +281,10 @@ void request_queue::in_loop()
 					http_request_completion_t* hrc = new http_request_completion_t();
 					*hrc = rv;
 					{
-						std::unique_lock lock(out_mutex);
-						responses_out.push(std::make_pair(hrc, req));
+						std::unique_lock lock(requests->out_mutex);
+						requests->responses_out.push(std::make_pair(hrc, req));
 					}
-					out_ready.notify_one();
+					requests->out_ready.notify_one();
 				}
 			}
 
@@ -292,15 +307,14 @@ void request_queue::in_loop()
 			}
 
 		} else {
-			if (globally_limited_for > 0) {
-				std::this_thread::sleep_for(std::chrono::seconds(globally_limited_for));
-				globally_limited_for = 0;
+			if (requests->globally_limited_for > 0) {
+				std::this_thread::sleep_for(std::chrono::seconds(requests->globally_limited_for));
+				requests->globally_limited_for = 0;
 			}
-			globally_ratelimited = false;
+			requests->globally_ratelimited = false;
 			in_ready.notify_one();
 		}
 	}
-	creator->log(ll_debug, "REST in-queue shutting down");
 }
 
 void request_queue::out_loop()
@@ -335,17 +349,44 @@ void request_queue::out_loop()
 			responses_to_delete.erase(responses_to_delete.begin());
 		}
 	}
-	creator->log(ll_debug, "REST out-queue shutting down");
 }
 
 /* Post a http_request into the queue */
-void request_queue::post_request(http_request* req)
+void in_thread::post_request(http_request* req)
 {
 	{
 		std::unique_lock lock(in_mutex);
 		requests_in[req->endpoint].push_back(req);
 	}
 	in_ready.notify_one();
+}
+
+/* Simple hash function for hashing urls into thread pool values,
+ * ensuring that the same url always ends up on the same thread,
+ * which means that it will be part of the same ratelimit bucket.
+ * I did consider std::hash for this, but std::hash returned even
+ * numbers for absolutely every string i passed it on g++ 10.0,
+ * so this was a no-no. There are also much bigger more complex
+ * hash functions that claim to be really fast, but this is
+ * readable and small and fits the requirement exactly.
+ */
+inline uint32_t hash(const char *s)
+{
+	uint32_t hashval;
+	for (hashval = 0; *s != 0; s++)
+		hashval = *s + 31 * hashval;
+	return hashval % in_thread_pool_size;
+}
+
+/* Post a http_request into a request queue */
+void request_queue::post_request(http_request* req)
+{
+	requests_in[hash(req->endpoint.c_str())]->post_request(req);
+}
+
+bool request_queue::is_globally_ratelimited() const
+{
+	return this->globally_ratelimited;
 }
 
 };
