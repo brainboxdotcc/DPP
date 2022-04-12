@@ -426,7 +426,7 @@ public:
 	 * @brief Get the request thread count
 	 * @return uint32_t number of request threads that are active
 	 */
-	uint32_t get_request_thread_count();
+	uint32_t get_request_thread_count() const;
 
 	/**
 	 * @brief Destroy the request queue object.

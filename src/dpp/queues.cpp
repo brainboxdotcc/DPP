@@ -196,7 +196,7 @@ void request_queue::add_request_threads(uint32_t request_threads)
 	in_thread_pool_size += request_threads;
 }
 
-uint32_t request_queue::get_request_thread_count()
+uint32_t request_queue::get_request_thread_count() const
 {
 	return in_thread_pool_size;
 }

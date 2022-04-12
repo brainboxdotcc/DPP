@@ -72,7 +72,7 @@ public:
 	 * @param j JSON to fill from
 	 * @return voiceregion& Reference to self
 	 */
-	 voiceregion& fill_from_json(nlohmann::json* j);
+	voiceregion& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build a json string for this object

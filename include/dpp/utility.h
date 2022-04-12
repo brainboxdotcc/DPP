@@ -29,12 +29,12 @@
 #include <functional>
 
 /**
- * @brief The main namespace for D++ functions. classes and types
+ * @brief The main namespace for D++ functions, classes and types
  */
 namespace dpp {
 
 	/**
-	 * @brief Utility helper functions, generally for logging
+	 * @brief Utility helper functions, generally for logging, running programs, time/date manipulation, etc
 	 */
 	namespace utility {
 
@@ -124,8 +124,20 @@ namespace dpp {
 
 			/**
 			 * @brief Construct a new iconhash object
+			 * @param _first Leftmost portion of the hash value
+			 * @param _second Rightmost portion of the hash value
 			 */
-			iconhash();
+			iconhash(uint64_t _first = 0, uint64_t _second = 0);
+
+			/**
+			 * @brief Construct a new iconhash object
+			 */
+			iconhash(const iconhash&);
+
+			/**
+			 * @brief Destroy the iconhash object
+			 */
+			~iconhash();
 
 			/**
 			 * @brief Construct a new iconhash object
@@ -147,6 +159,14 @@ namespace dpp {
 			 * string is not exactly 32 characters long.
 			 */
 			iconhash& operator=(const std::string &assignment);
+
+			/**
+			 * @brief Check if one iconhash is equal to another
+			 * 
+			 * @param other other iconhash to compare
+			 * @return True if the iconhash objects match
+			 */
+			bool operator==(const iconhash& other) const;
 
 			/**
 			 * @brief Change value of iconhash object
@@ -227,21 +247,21 @@ namespace dpp {
 			 * 
 			 * @return std::string Uptime as string
 			 */
-			std::string to_string();
+			std::string to_string() const;
 
 			/**
 			 * @brief Get uptime as seconds
 			 * 
 			 * @return uint64_t Uptime as seconds
 			 */
-			uint64_t to_secs();
+			uint64_t to_secs() const;
 
 			/**
 			 * @brief Get uptime as milliseconds
 			 * 
 			 * @return uint64_t Uptime as milliseconds
 			 */
-			uint64_t to_msecs();
+			uint64_t to_msecs() const;
 		};
 
 		/**
@@ -252,7 +272,7 @@ namespace dpp {
 		 * @param blue blue value, between 0 and 1 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
-		uint32_t rgb(float red, float green, float blue);
+		uint32_t DPP_EXPORT rgb(float red, float green, float blue);
 
 		/**
 		 * @brief Convert ints to RGB for sending in embeds
@@ -262,7 +282,7 @@ namespace dpp {
 		 * @param blue blue value, between 0 and 255 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
-		uint32_t rgb(int red, int green, int blue);
+		uint32_t DPP_EXPORT rgb(int red, int green, int blue);
 
 		/**
 		 * @brief Output hex values of a section of memory for debugging

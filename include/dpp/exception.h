@@ -184,7 +184,7 @@ public:
 	 * @brief Represents an attempt to construct a cluster with an invalid bot token. 
 	 * @note This is a stub for documentation purposes. For full information on supported methods please see dpp::exception.
 	 */
-	class invalid_token_exception : public dpp::exception { };
+	class invalid_token_exception : public dpp::rest_exception { };
 #else
 	derived_exception(logic_exception, exception);
 	derived_exception(file_exception, exception);

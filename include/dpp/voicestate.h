@@ -71,7 +71,7 @@ public:
 	 * @param j JSON data to fill from
 	 * @return voicestate& Reference to self
 	 */
-	 voicestate& fill_from_json(nlohmann::json* j);
+	voicestate& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build json representation of the object
