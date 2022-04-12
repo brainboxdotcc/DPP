@@ -115,9 +115,9 @@ public:
 };
 
 #ifndef _DOXYGEN_
-	#define derived_exception(name, ancestor) class name : public ancestor { \
+	#define derived_exception(name, ancestor) class name : public dpp::ancestor { \
 	public: \
-		using ancestor::exception; \
+		using dpp::ancestor::ancestor; \
 		name() = default; \
 		explicit name(const char* what) : ancestor(what) { } \
 		name(const char* what, size_t len) : ancestor(what, len) { } \
@@ -186,15 +186,15 @@ public:
 	 */
 	class invalid_token_exception : public dpp::exception { };
 #else
-	derived_exception(logic_exception, dpp::exception);
-	derived_exception(file_exception, dpp::exception);
-	derived_exception(connection_exception, dpp::exception);
-	derived_exception(voice_exception, dpp::exception);
-	derived_exception(rest_exception, dpp::exception);
-	derived_exception(invalid_token_exception, dpp::rest_exception);
-	derived_exception(length_exception, dpp::exception);
-	derived_exception(parse_exception, dpp::exception);
-	derived_exception(cache_exception, dpp::exception);
+	derived_exception(logic_exception, exception);
+	derived_exception(file_exception, exception);
+	derived_exception(connection_exception, exception);
+	derived_exception(voice_exception, exception);
+	derived_exception(rest_exception, exception);
+	derived_exception(invalid_token_exception, rest_exception);
+	derived_exception(length_exception, exception);
+	derived_exception(parse_exception, exception);
+	derived_exception(cache_exception, exception);
 #endif
 
 };
