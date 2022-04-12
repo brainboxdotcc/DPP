@@ -367,7 +367,7 @@ protected:
 	 * There are a set number of these defined by a constant in queues.cpp. A request is always placed
 	 * on the same element in this vector, based upon its url, so that two conditions are satisfied:
 	 * 1) Any requests for the same ratelimit bucket are handled by the same thread in the pool so that
-	 * they do not create unneccessary 429 errors,
+	 * they do not create unnecessary 429 errors,
 	 * 2) Requests for different endpoints go into different buckets, so that they may be requested in parallel
 	 * A global ratelimit event pauses all threads in the pool. These are few and far between.
 	 */
