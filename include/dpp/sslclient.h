@@ -32,7 +32,7 @@ namespace dpp {
  * We define it this way so that the public facing D++ library doesn't require
  * the openssl headers be available to build against it.
  */
-class opensslcontext;
+class openssl_connection;
 
 /**
  * @brief A callback for socket status
@@ -47,49 +47,72 @@ typedef std::function<void()> socket_notification_t;
 /**
  * @brief Implements a simple non-blocking SSL stream client.
  * 
- * Note that although the design is non-blocking the run() method will
+ * @note although the design is non-blocking the run() method will
  * execute in an infinite loop until the socket disconnects. This is intended
  * to be run within a std::thread.
  */
 class DPP_EXPORT ssl_client
 {
 protected:
-	/** Input buffer received from openssl */
+	/**
+	 * @brief Input buffer received from socket
+	 */
 	std::string buffer;
 
-	/** Output buffer for sending to openssl */
+	/**
+	 * @brief Output buffer for sending to socket
+	 */
 	std::string obuffer;
 
-	/** True if in nonblocking mode. The socket switches to nonblocking mode
+	/**
+	 * @brief True if in nonblocking mode. The socket switches to nonblocking mode
 	 * once ReadLoop is called.
 	 */
 	bool nonblocking;
 
-	/** Raw file descriptor of connection */
+	/**
+	 * @brief Raw file descriptor of connection
+	 */
 	dpp::socket sfd;
 
-	/** Openssl opaque contexts */
-	opensslcontext* ssl;
+	/**
+	 * @brief Openssl opaque contexts
+	 */
+	openssl_connection* ssl;
 
-	/** SSL cipher in use */
+	/**
+	 * @brief SSL cipher in use
+	 */
 	std::string cipher;
 
-	/** For timers */
+	/**
+	 * @brief For timers
+	 */
 	time_t last_tick;
 
-	/** Hostname connected to */
+	/**
+	 * @brief Hostname connected to
+	 */
 	std::string hostname;
 
-	/** Port connected to */
+	/**
+	 * @brief Port connected to
+	 */
 	std::string port;
 
-	/** Bytes out */
+	/**
+	 * @brief Bytes out
+	 */
 	uint64_t bytes_out;
 
-	/** Bytes in */
+	/**
+	 * @brief Bytes in
+	 */
 	uint64_t bytes_in;
 
-	/** True for a plain text connection */
+	/**
+	 * @brief True for a plain text connection
+	 */
 	bool plaintext;
 
 	/**
@@ -98,7 +121,9 @@ protected:
 	bool make_new;
 
 
-	/** Called every second */
+	/**
+	 * @brief Called every second
+	 */
 	virtual void one_second_timer();
 
 	/**
@@ -107,13 +132,22 @@ protected:
 	 */
 	virtual void connect();
 public:
-	/** Get total bytes sent */
+	/**
+	 * @brief Get the bytes out objectGet total bytes sent
+	 * @return uint64_t bytes sent
+	 */
 	uint64_t get_bytes_out();
 	
-	/** Get total bytes received */
+	/**
+	 * @brief Get total bytes received
+	 * @return uint64_t bytes received
+	 */
 	uint64_t get_bytes_in();
 
-	/** Get SSL cipher name */
+	/**
+	 * @brief Get SSL cipher name
+	 * @return std::string ssl cipher name
+	 */
 	std::string get_cipher();
 
 	/**
@@ -172,25 +206,27 @@ public:
 	virtual ~ssl_client();
 
 	/**
-	 * @brief Handle input from the input buffer.
+	 * @brief Handle input from the input buffer. This function will be called until
+	 * all data in the buffer has been processed and the buffer is empty.
 	 * @param buffer the buffer content. Will be modified removing any processed front elements
+	 * @return bool True if the socket should remain connected
 	 */
 	virtual bool handle_buffer(std::string &buffer);
 
 	/**
 	 * @brief Write to the output buffer.
 	 * @param data Data to be written to the buffer
+	 * @note The data may not be written immediately and may be written at a later time to the socket.
 	 */
 	virtual void write(const std::string &data);
 
 	/**
-	 * @brief Close SSL connection
+	 * @brief Close socket connection
 	 */
 	virtual void close();
 
 	/**
 	 * @brief Log a message
-	 * 
 	 * @param severity severity of log message
 	 * @param msg Log message to send
 	 */

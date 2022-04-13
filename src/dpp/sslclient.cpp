@@ -66,25 +66,31 @@ namespace dpp {
  * We define it this way so that the public facing D++ library doesn't require
  * the openssl headers be available to build against it.
  */
-class opensslcontext {
+class openssl_connection {
 public:
 	/**
 	 * @brief OpenSSL session
 	 */
 	SSL* ssl;
-
-	/**
-	 * @brief OpenSSL context
-	 */
-	SSL_CTX* ctx;
 };
 
+/**
+ * @brief Keepalive cache record
+ */
 struct keepalive_cache_t {
 	time_t created;
-	opensslcontext* ssl;
+	openssl_connection* ssl;
 	dpp::socket sfd;
 };
 
+/**
+ * @brief OpenSSL context
+ */
+thread_local SSL_CTX* openssl_context = nullptr;
+
+/**
+ * @brief Keepalive sessions, per-thread
+ */
 thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
 
 /* NOTE: Upper bounds check not required: https://docs.microsoft.com/en-us/windows/win32/winsock/select-and-fd---2 */
@@ -156,10 +162,6 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 				#else
 					::close(iter->second.sfd);
 				#endif
-				if (iter->second.ssl->ctx) {
-					SSL_CTX_free(iter->second.ssl->ctx);
-					iter->second.ssl->ctx = nullptr;
-				}
 				iter->second.sfd = INVALID_SOCKET;
 				delete iter->second.ssl;
 			} else {
@@ -177,7 +179,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 		if (plaintext) {
 			ssl = nullptr;
 		} else {
-			ssl = new opensslcontext();
+			ssl = new openssl_connection();
 		}
 	}
 	this->connect();
@@ -235,22 +237,25 @@ void ssl_client::connect()
 		}
 
 		if (!plaintext) {
-			/* We're good to go - hand the fd over to openssl */
-			const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
+			/* Each thread needs a context, but we don't need to make a new one for each connection */
+			if (!openssl_context) {
+				/* We're good to go - hand the fd over to openssl */
+				const SSL_METHOD *method = TLS_client_method(); /* Create new client-method instance */
 
-			/* Create SSL context */
-			ssl->ctx = SSL_CTX_new(method);
-			if (ssl->ctx == nullptr)
-				throw dpp::exception("Failed to create SSL client context!");
+				/* Create SSL context */
+				openssl_context = SSL_CTX_new(method);
+				if (openssl_context == nullptr)
+					throw dpp::exception("Failed to create SSL client context!");
 
-			/* Do not allow SSL 3.0, TLS 1.0 or 1.1
-			* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
-			*/
-			if (!SSL_CTX_set_min_proto_version(ssl->ctx, TLS1_2_VERSION))
-				throw dpp::exception("Failed to set minimum SSL version!");
+				/* Do not allow SSL 3.0, TLS 1.0 or 1.1
+				* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
+				*/
+				if (!SSL_CTX_set_min_proto_version(openssl_context, TLS1_2_VERSION))
+					throw dpp::exception("Failed to set minimum SSL version!");
+			}
 
 			/* Create SSL session */
-			ssl->ssl = SSL_new(ssl->ctx);
+			ssl->ssl = SSL_new(openssl_context);
 			if (ssl->ssl == nullptr)
 				throw dpp::exception("SSL_new failed!");
 
@@ -555,10 +560,6 @@ void ssl_client::close()
 	#else
 		::close(sfd);
 	#endif
-	if (!plaintext && ssl->ctx) {
-		SSL_CTX_free(ssl->ctx);
-		ssl->ctx = nullptr;
-	}
 	sfd = INVALID_SOCKET;
 	obuffer.clear();
 	buffer.clear();

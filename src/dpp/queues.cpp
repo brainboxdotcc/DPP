@@ -188,12 +188,13 @@ request_queue::request_queue(class cluster* owner, uint32_t request_threads) : c
 	out_thread = new std::thread(&request_queue::out_loop, this);
 }
 
-void request_queue::add_request_threads(uint32_t request_threads)
+request_queue& request_queue::add_request_threads(uint32_t request_threads)
 {
 	for (uint32_t in_alloc_ex = 0; in_alloc_ex < request_threads; ++in_alloc_ex) {
 		requests_in.push_back(new in_thread(creator, this));
 	}
 	in_thread_pool_size += request_threads;
+	return *this;
 }
 
 uint32_t request_queue::get_request_thread_count() const
@@ -391,9 +392,10 @@ inline uint32_t hash(const char *s)
 }
 
 /* Post a http_request into a request queue */
-void request_queue::post_request(http_request* req)
+request_queue& request_queue::post_request(http_request* req)
 {
 	requests_in[hash(req->endpoint.c_str()) % in_thread_pool_size]->post_request(req);
+	return *this;
 }
 
 bool request_queue::is_globally_ratelimited() const

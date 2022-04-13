@@ -28,9 +28,17 @@
 
 namespace dpp {
 
-
+/**
+ * @brief Websocket protocol types available on Discord
+ */
 enum websocket_protocol_t : uint8_t {
+	/**
+	 * @brief JSON data, text, UTF-8 character set
+	 */
 	ws_json = 0,
+	/**
+	 * @brief Erlang Term Format (ETF) binary protocol
+	 */
 	ws_etf = 1
 };
 
@@ -69,41 +77,58 @@ enum ws_opcode : uint8_t
  */
 class DPP_EXPORT websocket_client : public ssl_client
 {
-	/** Connection key used in the HTTP headers */
+	/**
+	 * @brief Connection key used in the HTTP headers
+	 */
 	std::string key;
 
-	/** Current websocket state */
+	/**
+	 * @brief Current websocket state
+	 */
 	ws_state state;
 
-	/** Path part of URL for websocket */
+	/**
+	 * @brief Path part of URL for websocket
+	 */
 	std::string path;
 
-	/** Data opcode, represents the type of frames we send */
+	/**
+	 * @brief Data opcode, represents the type of frames we send
+	 */
 	ws_opcode data_opcode;
 
-	/** HTTP headers received on connecting/upgrading */
+	/**
+	 * @brief HTTP headers received on connecting/upgrading
+	 */
 	std::map<std::string, std::string> http_headers;
 
-	/** Parse headers for a websocket frame from the buffer.
+	/**
+	 * @brief Parse headers for a websocket frame from the buffer.
 	 * @param buffer The buffer to operate on. Will modify the string removing completed items from the head of the queue
+	 * @return true if a complete header has been received
 	 */
 	bool parseheader(std::string &buffer);
 
-	/** Unpack a frame and pass completed frames up the stack.
+	/**
+	 * @brief Unpack a frame and pass completed frames up the stack.
 	 * @param buffer The buffer to operate on. Gets modified to remove completed frames on the head of the buffer
 	 * @param offset The offset to start at (reserved for future use)
 	 * @param first True if is the first element (reserved for future use)
+	 * @return true if a complete frame has been received
 	 */
 	bool unpack(std::string &buffer, uint32_t offset, bool first = true);
 
-	/** Fill a header for outbound messages
+	/**
+	 * @brief Fill a header for outbound messages
 	 * @param outbuf The raw frame to fill
 	 * @param sendlength The size of the data to encapsulate
 	 * @param opcode the ws_opcode to send in the header
+	 * @return size of filled header
 	 */
 	size_t fill_header(unsigned char* outbuf, size_t sendlength, ws_opcode opcode);
 
-	/** Handle ping and pong requests.
+	/**
+	 * @brief Handle ping and pong requests.
 	 * @param ping True if this is a ping, false if it is a pong 
 	 * @param payload The ping payload, to be returned as-is for a ping
 	 */
@@ -111,17 +136,21 @@ class DPP_EXPORT websocket_client : public ssl_client
 
 protected:
 
-	/** (Re)connect */
+	/**
+	 * @brief (Re)connect
+	 */
 	virtual void connect();
 
-	/** Get websocket state
+	/**
+	 * @brief Get websocket state
 	 * @return websocket state
 	 */
 	ws_state get_state();
 
 public:
 
-	/** Connect to a specific websocket server.
+	/**
+	 * @brief Connect to a specific websocket server.
 	 * @param hostname Hostname to connect to
 	 * @param port Port to connect to
 	 * @param urlpath The URL path components of the HTTP request to send
@@ -131,19 +160,19 @@ public:
 	 */
         websocket_client(const std::string &hostname, const std::string &port = "443", const std::string &urlpath = "", ws_opcode opcode = OP_BINARY);
 
-	/** Destructor */
+	/**
+	 * @brief Destroy the websocket client object
+	 */
         virtual ~websocket_client();
 
 	/**
 	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.
-	 * 
 	 * @param data The data to send.
 	 */
         virtual void write(const std::string &data);
 
 	/**
 	 * @brief Processes incoming frames from the SSL socket input buffer.
-	 * 
 	 * @param buffer The buffer contents. Can modify this value removing the head elements when processed.
 	 */
         virtual bool handle_buffer(std::string &buffer);
@@ -168,7 +197,9 @@ public:
 	 */
 	virtual void error(uint32_t errorcode);
 
-	/** Fires every second from the underlying socket I/O loop, used for sending websocket pings */
+	/**
+	 * @brief Fires every second from the underlying socket I/O loop, used for sending websocket pings
+	 */
 	virtual void one_second_timer();
 };
 

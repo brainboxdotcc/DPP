@@ -399,8 +399,9 @@ bool discord_voice_client::handle_frame(const std::string &data)
 	return true;
 }
 
-void discord_voice_client::pause_audio(bool pause) {
+discord_voice_client& discord_voice_client::pause_audio(bool pause) {
 	this->paused = pause;
+	return *this;
 }
 
 bool discord_voice_client::is_paused() {
@@ -422,9 +423,10 @@ dpp::utility::uptime discord_voice_client::get_remaining() {
 	return dpp::utility::uptime((time_t)ceil(fp_secs));
 }
 
-void discord_voice_client::stop_audio() {
+discord_voice_client& discord_voice_client::stop_audio() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	outbuf.clear();
+	return *this;
 }
 
 void discord_voice_client::send(const char* packet, size_t len, uint64_t duration) {
@@ -745,7 +747,7 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 	return outDataSize;
 }
 
-void discord_voice_client::insert_marker(const std::string& metadata) {
+discord_voice_client& discord_voice_client::insert_marker(const std::string& metadata) {
 	/* Insert a track marker. A track marker is a single 16 bit value of 0xFFFF.
 	 * This is too small to be a valid RTP packet so the send function knows not
 	 * to actually send it, and instead to skip it
@@ -757,6 +759,7 @@ void discord_voice_client::insert_marker(const std::string& metadata) {
 		track_meta.push_back(metadata);
 		tracks++;
 	}
+	return *this;
 }
 
 uint32_t discord_voice_client::get_tracks_remaining() {
@@ -767,7 +770,7 @@ uint32_t discord_voice_client::get_tracks_remaining() {
 		return tracks + 1;
 }
 
-void discord_voice_client::skip_to_next_marker() {
+discord_voice_client& discord_voice_client::skip_to_next_marker() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	/* Keep popping the first entry off the outbuf until the first entry is a track marker */
 	while (!outbuf.empty() && outbuf[0].packet.size() != sizeof(uint16_t) && ((uint16_t)(*(outbuf[0].packet.data()))) != AUDIO_TRACK_MARKER) {
@@ -782,6 +785,7 @@ void discord_voice_client::skip_to_next_marker() {
 	if (!track_meta.empty()) {
 		track_meta.erase(track_meta.begin());
 	}
+	return *this;
 }
 
 discord_voice_client& discord_voice_client::send_silence(const uint64_t duration) {

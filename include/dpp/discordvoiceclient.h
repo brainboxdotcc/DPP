@@ -91,22 +91,34 @@ struct DPP_EXPORT voice_out_packet {
  */
 class DPP_EXPORT discord_voice_client : public websocket_client
 {
-	/** Mutex for outbound packet stream */
+	/**
+	 * @brief Mutex for outbound packet stream
+	 */
 	std::mutex stream_mutex;
 
-	/** Mutex for message queue */
+	/**
+	 * @brief Mutex for message queue
+	 */
 	std::mutex queue_mutex;
 
-	/** Queue of outbound messages */
+	/**
+	 * @brief Queue of outbound messages
+	 */
 	std::deque<std::string> message_queue;
 
-	/** Thread this connection is executing on */
+	/**
+	 * @brief Thread this connection is executing on
+	 */
 	std::thread* runner;
 
-	/** Run shard loop under a thread */
+	/**
+	 * @brief Run shard loop under a thread
+	 */
 	void thread_run();
 
-	/** Last connect time of voice session */
+	/**
+	 * @brief Last connect time of voice session
+	 */
 	time_t connect_time;
 
 	/**
@@ -139,99 +151,118 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 */
 	std::vector<voice_out_packet> outbuf;
 
-	/** Input  buffer. Each string is a received UDP
+	/**
+	 * @brief Input buffer. Each string is a received UDP
 	 * packet. These will usually be RTP.
 	 */
 	std::vector<std::string> inbuf;
 
-	/** If true, audio packet sending is paused
+	/**
+	 * @brief If true, audio packet sending is paused
 	 */
 	bool paused;
 
 #ifdef HAVE_VOICE
-	/** libopus encoder
+	/**
+	 * @brief libopus encoder
 	 */
 	OpusEncoder* encoder;
 
-	/** libopus decoder
+	/**
+	 * @brief libopus decoder
 	 */
 	OpusDecoder* decoder;
 
-	/** libopus repacketizer
+	/**
+	 * @brief libopus repacketizer
 	 * (merges frames into one packet)
 	 */
 	OpusRepacketizer* repacketizer;
 #else
-	/** libopus encoder
+	/**
+	 * @brief libopus encoder
 	 */
 	void* encoder;
 
-	/** libopus decoder
+	/**
+	 * @brief libopus decoder
 	 */
 	void* decoder;
 
-	/** libopus repacketizer
+	/**
+	 * @brief libopus repacketizer
 	 * (merges frames into one packet)
 	 */
 	void* repacketizer;
 #endif
 
-	/** File descriptor for UDP connection
+	/**
+	 * @brief File descriptor for UDP connection
 	 */
 	dpp::socket fd;
 
-	/** Socket address of voice server
+	/**
+	 * @brief Socket address of voice server
 	 */
 	sockaddr_in servaddr;
 
-	/** Secret key for encrypting voice.
+	/**
+	 * @brief Secret key for encrypting voice.
 	 * If it has been sent, this is non-null and points to a 
 	 * sequence of exactly 32 bytes.
 	 */
 	uint8_t* secret_key;
 
-	/** Sequence number of outbound audio. This is incremented
+	/**
+	 * @brief Sequence number of outbound audio. This is incremented
 	 * once per frame sent.
 	 */
 	uint16_t sequence;
 
-	/** Timestamp value used in outbound audio. Each packet
+	/**
+	 * @brief Timestamp value used in outbound audio. Each packet
 	 * has the timestamp value which is incremented to match
 	 * how many frames are sent.
 	 */
 	uint32_t timestamp;
 
 	/**
-	 * Last sent packet high-resolution timestamp
+	 * @brief Last sent packet high-resolution timestamp
 	 */
 	std::chrono::high_resolution_clock::time_point last_timestamp;
 
 	/**
-	 * Maps receiving ssrc to user id
+	 * @brief Maps receiving ssrc to user id
 	 */
 	std::unordered_map<uint32_t, snowflake> ssrcMap;
 
-	/** This is set to true if we have started sending audio.
+	/**
+	 * @brief This is set to true if we have started sending audio.
 	 * When this moves from false to true, this causes the
 	 * client to send the 'talking' notification to the websocket.
 	 */
 	bool sending;
 
-	/** Number of track markers in the buffer. For example if there
+	/**
+	 * @brief Number of track markers in the buffer. For example if there
 	 * are two track markers in the buffer there are 3 tracks.
-	 * Special case:
+	 * 
+	 * **Special case:**
+	 * 
 	 * If the buffer is empty, there are zero tracks in the
 	 * buffer.
 	 */
 	uint32_t tracks;
 
-	/** Meta data associated with each track.
+	/**
+	 * @brief Meta data associated with each track.
 	 * Arbitrary string that the user can set via
-	 * dpp::discord_voice_client::AddMarker
+	 * dpp::discord_voice_client::add_marker
 	 */
 	std::vector<std::string> track_meta;
 
-	/** Encoding buffer for opus repacketizer and encode
+	/** 
+	 * @brief Encoding buffer for opus repacketizer and encode
 	 */
 	uint8_t encode_buffer[65536];
 
@@ -335,42 +366,64 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 
 public:
 
-	/** Owning cluster */
+	/**
+	 * @brief Owning cluster
+	 */
 	class dpp::cluster* creator;
 
-	/* This needs to be static, we only initialise libsodium once per program start,
-	* so initialising it on first use in a voice connection is best.
-	*/
+	/**
+	 * @brief This needs to be static, we only initialise libsodium once per program start,
+	 * so initialising it on first use in a voice connection is best.
+	 */
 	static bool sodium_initialised;
 
-	/** True when the thread is shutting down */
+	/**
+	 * @brief True when the thread is shutting down
+	 */
 	bool terminating;
 
-	/** Decode received voice packets to PCM */
+	/**
+	 * @brief Decode received voice packets to PCM
+	 */
 	bool decode_voice_recv;
 
-	/** Heartbeat interval for sending heartbeat keepalive */
+	/**
+	 * @brief Heartbeat interval for sending heartbeat keepalive
+	 */
 	uint32_t heartbeat_interval;
 
-	/** Last heartbeat */
+	/**
+	 * @brief Last voice channel websocket heartbeat
+	 */
 	time_t last_heartbeat;
 
-	/** Thread ID */
+	/**
+	 * @brief Thread ID
+	 */
 	std::thread::native_handle_type thread_id;
 
-	/** Discord voice session token */
+	/**
+	 * @brief Discord voice session token
+	 */
 	std::string token;
 
-	/** Discord voice session id */
+	/**
+	 * @brief Discord voice session id
+	 */
 	std::string sessionid;
 
-	/** Server ID */
+	/**
+	 * @brief Server ID
+	 */
 	snowflake server_id;
 
-	/** Channel ID */
+	/**
+	 * @brief Channel ID
+	 */
 	snowflake channel_id;
 
-	/** Log a message to whatever log the user is using.
+	/**
+	 * @brief Log a message to whatever log the user is using.
 	 * The logged message is passed up the chain to the on_log event in user code which can then do whatever
 	 * it wants to do with it.
 	 * @param severity The log level from dpp::loglevel
@@ -417,28 +470,34 @@ public:
 	 */
 	discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host);
 
-	/** Destructor */
+	/**
+	 * @brief Destroy the discord voice client object
+	 */
 	virtual ~discord_voice_client();
 
-	/** Handle JSON from the websocket.
+	/**
+	 * @brief Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
 	 * @return bool True if a frame has been handled
 	 * @throw dpp::exception If there was an error processing the frame, or connection to UDP socket failed
 	 */
 	virtual bool handle_frame(const std::string &buffer);
 
-	/** Handle a websocket error.
+	/**
+	 * @brief Handle a websocket error.
 	 * @param errorcode The error returned from the websocket
 	 */
 	virtual void error(uint32_t errorcode);
 
-	/** Start and monitor I/O loop */
+	/**
+	 * @brief Start and monitor I/O loop
+	 */
 	void run();
 
 	/**
 	 * @brief Send raw audio to the voice channel.
 	 * 
-	 * You should send an audio packet of n11520 bytes.
+	 * You should send an audio packet of 11520 bytes.
 	 * Note that this function can be costly as it has to opus encode
 	 * the PCM audio on the fly, and also encrypt it with libsodium.
 	 * 
@@ -564,14 +623,16 @@ public:
 	 * @brief Pause sending of audio
 	 * 
 	 * @param pause True to pause, false to resume
+	 * @return reference to self
 	 */
-	void pause_audio(bool pause);
+	discord_voice_client& pause_audio(bool pause);
 
 	/**
 	 * @brief Immediately stop all audio.
 	 * Clears the packet queue.
+	 * @return reference to self
 	 */
-	void stop_audio();
+	discord_voice_client& stop_audio();
 
 	/**
 	 * @brief Returns true if we are playing audio
@@ -620,8 +681,9 @@ public:
 	 * function.
 	 * @param metadata Arbitrary information related to this
 	 * track
+	 * @return reference to self
 	 */
-	void insert_marker(const std::string& metadata = "");
+	discord_voice_client& insert_marker(const std::string& metadata = "");
 
 	/**
 	 * @brief Skip tp the next track marker,
@@ -634,8 +696,9 @@ public:
 	 * function.
 	 * @note It is possible to use this function
 	 * while the output stream is paused.
+	 * @return reference to self
 	 */
-	void skip_to_next_marker();
+	discord_voice_client& skip_to_next_marker();
 
 	/**
 	 * @brief Get the metadata string associated with each inserted marker.

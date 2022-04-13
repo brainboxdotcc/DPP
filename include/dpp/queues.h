@@ -419,8 +419,9 @@ public:
 	 * This will reorganise the hashing used to place requests into the thread pool so if you do
 	 * this while the bot is busy there is a small chance of receiving "429 rate limited" errors.
 	 * @param request_threads Number of threads to add. It is not possible to scale down at runtime.
+	 * @return reference to self
 	 */
-	void add_request_threads(uint32_t request_threads);
+	request_queue& add_request_threads(uint32_t request_threads);
 
 	/**
 	 * @brief Get the request thread count
@@ -440,8 +441,9 @@ public:
 	 * @note Will use a simple hash function to determine which of the 'in queues' to place
 	 * this request onto.
 	 * @param req request to add
+	 * @return reference to self
 	 */
-	void post_request(http_request *req);
+	request_queue& post_request(http_request *req);
 
 	/**
 	 * @brief Returns true if the bot is currently globally rate limited

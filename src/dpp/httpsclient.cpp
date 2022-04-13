@@ -168,7 +168,6 @@ bool https_client::handle_buffer(std::string &buffer)
 							if (response_headers.find("transfer-encoding") != response_headers.end()) {
 								if (response_headers["transfer-encoding"].find("chunked") != std::string::npos) {
 									chunked = true;
-									waiting_end_marker = false;
 									chunk_size = 0;
 									chunk_receive = 0;
 									state = HTTPS_CHUNK_LEN;

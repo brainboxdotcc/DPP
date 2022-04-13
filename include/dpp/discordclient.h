@@ -126,13 +126,15 @@ public:
 	 * Needs hosname, token and session_id to be set or does nothing.
 	 * 
 	 * @param guild_id Guild to connect to the voice channel on
+	 * @return reference to self
 	 */
-	void connect(snowflake guild_id);
+	voiceconn& connect(snowflake guild_id);
 
 	/**
 	 * @brief Disconnect from the currently connected voice channel
+	 * @return reference to self
 	 */
-	void disconnect();
+	voiceconn& disconnect();
 };
 
 /** @brief Implements a discord client. Each discord_client connects to one shard and derives from a websocket client. */
@@ -170,13 +172,19 @@ protected:
 
 private:
 
-	/** Mutex for message queue */
+	/**
+	 * @brief Mutex for message queue
+	 */
 	std::mutex queue_mutex;
 
-	/** Queue of outbound messages */
+	/**
+	 * @brief Queue of outbound messages
+	 */
 	std::deque<std::string> message_queue;
 
-	/** Thread this shard is executing on */
+	/**
+	 * @brief Thread this shard is executing on
+	 */
 	std::thread* runner;
 
 	/**
@@ -185,13 +193,19 @@ private:
 	 */
 	void thread_run();
 
-	/** If true, stream compression is enabled */
+	/**
+	 * @brief If true, stream compression is enabled
+	 */
 	bool compressed;
 
-	/** ZLib decompression buffer */
+	/**
+	 * @brief ZLib decompression buffer
+	 */
 	unsigned char* decomp_buffer;
 
-	/** Decompressed string */
+	/**
+	 * @brief Decompressed string
+	 */
 	std::string decompressed;
 
 	/**
@@ -202,16 +216,24 @@ private:
 	 */
 	zlibcontext* zlib;
 
-	/** Total decompressed received bytes */
+	/**
+	 * @brief Total decompressed received bytes
+	 */
 	uint64_t decompressed_total;
 
-	/** Last connect time of cluster */
+	/**
+	 * @brief Last connect time of cluster
+	 */
 	time_t connect_time;
 
-	/** Time last ping sent to websocket, in fractional seconds */
+	/**
+	 * @brief Time last ping sent to websocket, in fractional seconds
+	 */
 	double ping_start;
 
-	/** ETF parser for when in ws_etf mode */
+	/**
+	 * @brief ETF parser for when in ws_etf mode
+	 */
 	class etf_parser* etf;
 
 	/**
@@ -220,7 +242,7 @@ private:
 	 * call etf::build().
 	 * 
 	 * @param json nlohmann::json object to convert
-	 * @return * std::string string output in the correct format
+	 * @return std::string string output in the correct format
 	 */
 	std::string jsonobj_to_string(const nlohmann::json& json);
 
@@ -236,61 +258,99 @@ private:
 	void end_zlib();
 
 public:
-	/** Owning cluster */
+	/**
+	 * @brief Owning cluster
+	 */
 	class dpp::cluster* creator;
 
-	/** Heartbeat interval for sending heartbeat keepalive */
+	/**
+	 * @brief Heartbeat interval for sending heartbeat keepalive
+	 * @note value in milliseconds
+	 */
 	uint32_t heartbeat_interval;
 
-	/** Last heartbeat */
+	/**
+	 * @brief Last heartbeat
+	 */
 	time_t last_heartbeat;
 
-	/** Shard ID of this client */
+	/**
+	 * @brief Shard ID of this client
+	 */
 	uint32_t shard_id;
 
-	/** Total number of shards */
+	/**
+	 * @brief Total number of shards
+	 */
 	uint32_t max_shards;
 
-	/** Thread ID */
+	/**
+	 * @brief Thread ID
+	 */
 	std::thread::native_handle_type thread_id;
 
-	/** Last sequence number received, for resumes and pings */
+	/**
+	 * @brief Last sequence number received, for resumes and pings
+	 */
 	uint64_t last_seq;
 
-	/** Discord bot token */
+	/**
+	 * @brief Discord bot token
+	 */
 	std::string token;
 
-	/** Privileged gateway intents */
+	/**
+	 * @brief Privileged gateway intents
+	 */
 	uint32_t intents;
 
-	/** Discord session id */
+	/**
+	 * @brief Discord session id
+	 */
 	std::string sessionid;
 
-	/** Mutex for voice connections map */
+	/**
+	 * @brief Mutex for voice connections map
+	 */
 	std::mutex voice_mutex;
 
-	/** Resume count */
+	/**
+	 * @brief Resume count
+	 */
 	uint32_t resumes;
 
-	/** Reconnection count */
+	/**
+	 * @brief Reconnection count
+	 */
 	uint32_t reconnects;
 
-	/** Websocket latency in fractional seconds */
+	/**
+	 * @brief Websocket latency in fractional seconds
+	 */
 	double websocket_ping;
 
-	/** True if READY or RESUMED has been received */
+	/**
+	 * @brief True if READY or RESUMED has been received
+	 */
 	bool ready;
 
-	/** Last heartbeat ACK (opcode 11) */
+	/**
+	 * @brief Last heartbeat ACK (opcode 11)
+	 */
 	time_t last_heartbeat_ack;
 
-	/** Current websocket protocol, currently either ETF or JSON */
+	/** 
+	 * @brief Current websocket protocol, currently either ETF or JSON
+	 */
 	websocket_protocol_t protocol;
 
-	/** List of voice channels we are connecting to keyed by guild id */
+	/**
+	 * @brief List of voice channels we are connecting to keyed by guild id
+	 */
 	std::unordered_map<snowflake, voiceconn*> connecting_voice_channels;
 
-	/** Log a message to whatever log the user is using.
+	/**
+	 * @brief Log a message to whatever log the user is using.
 	 * The logged message is passed up the chain to the on_log event in user code which can then do whatever
 	 * it wants to do with it.
 	 * @param severity The log level from dpp::loglevel
@@ -298,7 +358,8 @@ public:
 	 */
 	virtual void log(dpp::loglevel severity, const std::string &msg) const;
 
-	/** Handle an event (opcode 0)
+	/**
+	 * @brief Handle an event (opcode 0)
 	 * @param event Event name, e.g. MESSAGE_CREATE
 	 * @param j JSON object for the event content
 	 * @param raw Raw JSON event string
@@ -341,8 +402,9 @@ public:
 
 	/**
 	 * @brief Clear the outbound message queue
+	 * @return reference to self
 	 */
-	void clear_queue();
+	discord_client& clear_queue();
 
 	/**
 	 * @brief Get the size of the outbound message queue
@@ -378,26 +440,33 @@ public:
 	 */
 	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
 
-	/** Destructor */
+	/**
+	 * @brief Destroy the discord client object
+	 */
 	virtual ~discord_client();
 
-	/** Get decompressed total bytes received */
+	/**
+	 * @brief Get the decompressed bytes in objectGet decompressed total bytes received
+	 * @return uint64_t bytes received
+	 */
 	uint64_t get_decompressed_bytes_in();
 
-	/** Handle JSON from the websocket.
+	/**
+	 * @brief Handle JSON from the websocket.
 	 * @param buffer The entire buffer content from the websocket client
 	 * @returns True if a frame has been handled
 	 */
 	virtual bool handle_frame(const std::string &buffer);
 
-	/** Handle a websocket error.
+	/**
+	 * @brief Handle a websocket error.
 	 * @param errorcode The error returned from the websocket
 	 */
 	virtual void error(uint32_t errorcode);
 
 	/**
 	 * @brief Start and monitor I/O loop.
-	 * Note that this is a blocking call and is usually executed within a
+	 * @note this is a blocking call and is usually executed within a
 	 * thread by whatever creates the object.
 	 */
 	void run();
@@ -409,15 +478,17 @@ public:
 	 * @param channel_id Channel ID of the voice channel
 	 * @param self_mute True if the bot should mute itself
 	 * @param self_deaf True if the bot should deafen itself
+	 * @return reference to self
 	 */
-	void connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false);
+	discord_client& connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false);
 
 	/**
 	 * @brief Disconnect from the connected voice channel on a guild
 	 * 
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
+	 * @return reference to self
 	 */
-	void disconnect_voice(snowflake guild_id);
+	discord_client& disconnect_voice(snowflake guild_id);
 
 	/**
 	 * @brief Get the dpp::voiceconn object for a specific guild on this shard.

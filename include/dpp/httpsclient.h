@@ -49,12 +49,25 @@ enum http_state : uint8_t {
 	 */
 	HTTPS_DONE,
 
+	/**
+	 * @brief Received chunk length
+	 * 
+	 */
 	HTTPS_CHUNK_LEN,
 
+	/**
+	 * @brief Received chunk trailing CRLF
+	 */
 	HTTPS_CHUNK_TRAILER,
 
+	/**
+	 * @brief The last received chunk is the final chunk
+	 */
 	HTTPS_CHUNK_LAST,
 
+	/**
+	 * @brief Receiving contents of a chunk
+	 */
 	HTTPS_CHUNK_CONTENT
 };
 
@@ -157,9 +170,19 @@ class DPP_EXPORT https_client : public ssl_client
 	 */
 	time_t timeout;
 
+	/**
+	 * @brief If true the content is chunked encoding
+	 */
 	bool chunked;
-	bool waiting_end_marker;
+
+	/**
+	 * @brief Size of current chunk
+	 */
 	size_t chunk_size;
+
+	/**
+	 * @brief Number of bytes received in current chunk
+	 */
 	size_t chunk_receive;
 
 	/**
@@ -168,6 +191,12 @@ class DPP_EXPORT https_client : public ssl_client
 	 */
 	std::map<std::string, std::string> response_headers;
 
+	/**
+	 * @brief Handle input buffer
+	 * 
+	 * @param buffer Buffer to read
+	 * @return returns true if the connection should remain open
+	 */
 	bool do_buffer(std::string& buffer);
 
 protected:
@@ -234,7 +263,9 @@ public:
 	 */
         virtual void close();
 
-	/** Fires every second from the underlying socket I/O loop, used for sending websocket pings */
+	/**
+	 * @brief Fires every second from the underlying socket I/O loop, used for timeouts
+	 */
 	virtual void one_second_timer();
 
 	/**
