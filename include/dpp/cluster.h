@@ -60,9 +60,9 @@ struct DPP_EXPORT version_checker {
 	version_checker() {
 		#ifdef _WIN32
 			#ifdef _DEBUG
-				you_are_using_a_release_build_of_dpp_on_a_debug_project()
+				you_are_using_a_release_build_of_dpp_on_a_debug_project();
 			#else
-				you_are_using_a_debug_build_of_dpp_on_a_release_project()
+				you_are_using_a_debug_build_of_dpp_on_a_release_project();
 			#endif
 		#endif
 	}
