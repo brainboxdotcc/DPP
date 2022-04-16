@@ -54,19 +54,18 @@ namespace dpp {
  */
 thread_local std::string audit_reason;
 
-event_handle __next_handle = 1;
-
 /**
  * @brief Make a warning lambda for missing message intents
- * 
+ *
+ * @tparam T type of parameter for the event in the router 
  * @param cl Creating cluster
  * @param required_intent Intent which is required
  * @param message Message to display
- * @return std::function<void()> Returned lambda
+ * @return std::function<void(const T&)> Returned lambda
  */
-std::function<void()> make_intent_warning(cluster* cl, const intents required_intent, const std::string& message) {
-	return [cl, required_intent, message]() {
-		if (!(cl->intents & required_intent)) {
+template<typename T> std::function<void(const T&)> make_intent_warning(cluster* cl, const intents required_intent, const std::string& message) {
+	return [cl, required_intent, message](const T& event) {
+		if (!(cl->intents & required_intent) && event.msg.guild_id) {
 			cl->log(ll_warning, message);
 		}
 	};
@@ -82,13 +81,18 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	raw_rest = new request_queue(this, request_threads);
 
 	/* Add checks for missing intents, these emit a one-off warning to the log if bound without the right intents */
-	std::function<void()> message_intents_warning = make_intent_warning(this, i_message_content, "You have attached an event to cluster::on_message_*() but have not specified the privileged intent dpp::i_message_content. Message content, embeds, attachments, and components on received guild messages will be empty.");
-	std::function<void()> member_intents_warning = make_intent_warning(this, i_guild_members, "You have attached an event to cluster::on_guild_member_*() but have not specified the privileged intent dpp::i_guild_members. These events will not fire, and the cache will only fill when a user interacts with the bot or channels.");
-	on_message_create.set_warning_callback(message_intents_warning);
-	on_message_update.set_warning_callback(message_intents_warning);
-	on_guild_member_add.set_warning_callback(member_intents_warning);
-	on_guild_member_remove.set_warning_callback(member_intents_warning);
-	on_guild_member_update.set_warning_callback(member_intents_warning);
+	on_message_create.set_warning_callback(
+		make_intent_warning<message_create_t>(
+			this,
+			i_message_content,
+			"You have attached an event to cluster::on_message_create() but have not specified the privileged intent dpp::i_message_content. Message content, embeds, attachments, and components on received guild messages will be empty.")
+	);
+	on_message_update.set_warning_callback(
+		make_intent_warning<message_update_t>(
+			this,
+			i_message_content,
+			"You have attached an event to cluster::on_message_update() but have not specified the privileged intent dpp::i_message_content. Message content, embeds, attachments, and components on received guild messages will be empty.")
+	);
 }
 
 cluster::~cluster()
