@@ -1169,7 +1169,7 @@ struct DPP_EXPORT message_update_t : public event_dispatch_t {
 	/**
 	 * @brief message being updated
 	 */
-	message* updated;
+	message msg;
 };
 
 /** @brief User update */
