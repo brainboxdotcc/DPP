@@ -24,9 +24,6 @@
 namespace dpp {
 
 void cluster::global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback) {
-	if (commands.empty()) {
-		return;
-	}
 	json j = json::array();
 	for (auto & s : commands) {
 		j.push_back(json::parse(s.build_json(false)));
