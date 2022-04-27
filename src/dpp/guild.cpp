@@ -199,12 +199,8 @@ std::string guild_member::build_json(bool with_id) const {
 			j["roles"].push_back(std::to_string(role));
 		}
 	}
-	if (is_muted()) {
-		j["mute"] = true;
-	}
-	if (is_deaf()) {
-		j["deaf"] = true;
-	}
+	j["mute"] = is_muted();
+	j["deaf"] = is_deaf();
 	return j.dump();
 }
 
