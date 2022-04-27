@@ -199,7 +199,7 @@ std::string guild_member::build_json(bool with_id) const {
 			j["roles"].push_back(std::to_string(role));
 		}
 	}
-	j["mute"] = is_mute();
+	j["mute"] = is_muted();
 	j["deaf"] = is_deaf();
 	return j.dump();
 }
