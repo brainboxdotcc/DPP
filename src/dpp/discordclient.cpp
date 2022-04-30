@@ -657,8 +657,6 @@ bool voiceconn::is_active() {
 
 voiceconn& voiceconn::disconnect() {
 	if (this->is_active()) {
-		voiceclient->terminating = true;
-		voiceclient->close();
 		delete voiceclient;
 		voiceclient = nullptr;
 	}
