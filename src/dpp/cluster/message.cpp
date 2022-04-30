@@ -23,16 +23,17 @@
 
 namespace dpp {
 
-void cluster::message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction) + "/@me", m_put, "", callback);
+void cluster::message_add_reaction(const struct message &m, const std::string &reaction, bool url_encode, command_completion_event_t callback) {
+	std::string _reaction = url_encode ? utility::url_encode(reaction) : reaction;
+
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + _reaction + "/@me", m_put, "", callback);
 }
 
-void cluster::message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback) {
+void cluster::message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, bool url_encode, command_completion_event_t callback) {
 	message m(channel_id, "");
 	m.id = message_id;
-	message_add_reaction(m, reaction, callback);
+	message_add_reaction(m, reaction, url_encode, callback);
 }
-
 
 
 void cluster::message_create(const message &m, command_completion_event_t callback) {
@@ -75,39 +76,44 @@ void cluster::message_delete(snowflake message_id, snowflake channel_id, command
 }
 
 
-void cluster::message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction) + "/@me", m_delete, "", callback);
+void cluster::message_delete_own_reaction(const struct message &m, const std::string &reaction, bool url_encode, command_completion_event_t callback) {
+	std::string _reaction = url_encode ? utility::url_encode(reaction) : reaction;
+
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + _reaction + "/@me", m_delete, "", callback);
 }
 
-void cluster::message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback) {
+void cluster::message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, bool url_encode, command_completion_event_t callback) {
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_delete_own_reaction(m, reaction, callback);
+	message_delete_own_reaction(m, reaction, url_encode, callback);
 }
 
+void cluster::message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, bool url_encode, command_completion_event_t callback) {
+	std::string _reaction = url_encode ? utility::url_encode(reaction) : reaction;
 
-void cluster::message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback) {
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction) + "/" + std::to_string(user_id), m_delete, "", callback);
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + _reaction + "/" + std::to_string(user_id), m_delete, "", callback);
 }
 
-void cluster::message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback) {
+void cluster::message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, bool url_encode, command_completion_event_t callback) {
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_delete_reaction(m, user_id, reaction, callback);
+	message_delete_reaction(m, user_id, reaction, url_encode, callback);
 }
 
 
-void cluster::message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback) {
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction), m_delete, "", callback);
+void cluster::message_delete_reaction_emoji(const struct message &m, const std::string &reaction, bool url_encode, command_completion_event_t callback) {
+	std::string _reaction = url_encode ? utility::url_encode(reaction) : reaction;
+
+	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + _reaction, m_delete, "", callback);
 }
 
-void cluster::message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback) {
+void cluster::message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, bool url_encode, command_completion_event_t callback) {
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_delete_reaction_emoji(m, reaction, callback);
+	message_delete_reaction_emoji(m, reaction, url_encode, callback);
 }
 
 
@@ -125,20 +131,23 @@ void cluster::message_get(snowflake message_id, snowflake channel_id, command_co
 }
 
 
-void cluster::message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
+void cluster::message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, bool url_encode, command_completion_event_t callback) {
 	std::string parameters = utility::make_url_parameters({
 		{"before", before},
 		{"after", after},
 		{"limit", limit},
 	});
-	rest_request_list<user>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + utility::url_encode(reaction) + parameters, m_get, "", callback);
+
+	std::string _reaction = url_encode ? utility::url_encode(reaction) : reaction;
+
+	rest_request_list<user>(this, API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id) + "/reactions/" + _reaction + parameters, m_get, "", callback);
 }
 
-void cluster::message_get_reactions(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback) {
+void cluster::message_get_reactions(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit, bool url_encode, command_completion_event_t callback) {
 	message m(channel_id, "");
 	m.id = message_id;
 	m.owner = this;
-	message_get_reactions(m, reaction, before, after, limit, callback);
+	message_get_reactions(m, reaction, before, after, limit, url_encode, callback);
 }
 
 

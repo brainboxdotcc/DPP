@@ -1788,10 +1788,11 @@ public:
 	 * @see https://discord.com/developers/docs/resources/channel#create-reaction
 	 * @param m Message to add a reaction to
 	 * @param reaction Reaction to add. Emojis should be in the form emojiname:id
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_add_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+	void message_add_reaction(const struct message &m, const std::string &reaction, bool url_encode, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1799,10 +1800,11 @@ public:
 	 * @see https://discord.com/developers/docs/resources/channel#delete-own-reaction
 	 * @param m Message to delete own reaction from
 	 * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_own_reaction(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+	void message_delete_own_reaction(const struct message &m, const std::string &reaction, bool url_encode, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1811,10 +1813,11 @@ public:
 	 * @param m Message to delete a user's reaction from
 	 * @param user_id User ID who's reaction you want to remove
 	 * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+	void message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction, bool url_encode, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get reactions on a message for a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1825,10 +1828,11 @@ public:
 	 * @param before Reactions before this ID should be retrieved if this is set to non-zero
 	 * @param after Reactions before this ID should be retrieved if this is set to non-zero
 	 * @param limit This number of reactions maximum should be returned
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
+	void message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit, bool url_encode, command_completion_event_t callback);
 
 	/**
 	 * @brief Delete all reactions on a message
@@ -1846,10 +1850,11 @@ public:
 	 * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
 	 * @param m Message to delete reactions from
 	 * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+	void message_delete_reaction_emoji(const struct message &m, const std::string &reaction, bool url_encode, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1858,10 +1863,11 @@ public:
 	 * @param message_id Message to add reactions to
 	 * @param channel_id Channel to add reactions to
 	 * @param reaction Reaction to add. Emojis should be in the form emojiname:id
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+	void message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, bool url_encode, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete own reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
@@ -1870,10 +1876,11 @@ public:
 	 * @param message_id Message to delete reactions from
 	 * @param channel_id Channel to delete reactions from
 	 * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+	void message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction, bool url_encode, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a user's reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1883,10 +1890,11 @@ public:
 	 * @param channel_id Channel to delete reactions from
 	 * @param user_id User ID who's reaction you want to remove
 	 * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+	void message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction, bool url_encode, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get reactions on a message for a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
@@ -1898,10 +1906,11 @@ public:
 	 * @param before Reactions before this ID should be retrieved if this is set to non-zero
 	 * @param after Reactions before this ID should be retrieved if this is set to non-zero
 	 * @param limit This number of reactions maximum should be returned
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_get_reactions(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit, command_completion_event_t callback);
+	void message_get_reactions(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit, bool url_encode, command_completion_event_t callback);
 
 	/**
 	 * @brief Delete all reactions on a message by id
@@ -1921,10 +1930,11 @@ public:
 	 * @param message_id Message to delete reactions from
 	 * @param channel_id Channel to delete reactions from
 	 * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
+	 * @param url_encode Should the reaction be url-encoded. Useful for when unicode emoji cannot be used
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, command_completion_event_t callback = utility::log_error());
+	void message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction, bool url_encode, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a message from a channel. The callback function is called when the message has been edited

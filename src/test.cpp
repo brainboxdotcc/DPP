@@ -235,7 +235,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 										set_test("MESSAGEDELETE", false);
 										dpp::message m = std::get<dpp::message>(callback.value);
 										set_test("REACTEVENT", false);
-										bot.message_add_reaction(m.id, TEST_TEXT_CHANNEL_ID, "😄", [](const dpp::confirmation_callback_t &callback) {
+										bot.message_add_reaction(m.id, TEST_TEXT_CHANNEL_ID, "😄", true, [](const dpp::confirmation_callback_t &callback) {
 											if (!callback.is_error()) {
 												set_test("REACT", true);
 											} else {
