@@ -116,7 +116,7 @@ foreach ($catgroup as $cat => $list) {
 echo "\n\n**Thank you for using D++!**\n\n";
 if (!$githubstyle) {
 	$version = $argv[2];
-	echo 'The ' . $version . ' download can be found here: <https://github.com/brainboxdotcc/DPP/releases/tag/v' . $version . '>';
+	echo 'The ' . $version . ' download can be found here: <https://dl.dpp.dev/' . $version . '>';
 	echo "\n";
 }
 

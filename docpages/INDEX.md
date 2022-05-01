@@ -12,7 +12,22 @@ It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contr
 
 ## Downloads
 
-You can download the latest releases and check out our source code from the [GitHub Repository](https://github.com/brainboxdotcc/DPP/releases).
+The following downloads are for the most recent version:
+
+* [Source Code](https://github.com/brainboxdotcc/DPP)
+* [x64 Linux .deb (64 bit Debian, Ubuntu etc)](https://dl.dpp.dev/latest)
+* [x86 Linux .deb (32 bit Debian, Ubuntu etc)](https://dl.dpp.dev/latest/linux-i386)
+* [x64 Linux .rpm (64 bit Redhat, CentOS etc)](https://dl.dpp.dev/latest/linux-x64/rpm)
+* [x86 Linux .rpm (32 bit Redhat, CentOS etc)](https://dl.dpp.dev/latest/linux-i386/rpm)
+* [x64 Windows (64 bit vs2019 release build)](https://dl.dpp.dev/latest/win64-release-vs2019)
+* [x64 Windows (64 bit vs2022 release build)](https://dl.dpp.dev/latest/win64-release-vs2022)
+* [x64 Windows (64 bit vs2019 debug build)](https://dl.dpp.dev/latest/win64-debug-vs2019)
+* [x64 Windows (64 bit vs2022 debug build)](https://dl.dpp.dev/latest/win64-debug-vs2022)
+* [ARM6 Linux .deb (32 bit Raspberry Pi 1, 2)](https://dl.dpp.dev/latest/linux-rpi-arm6)
+* [ARM7 Linux .deb (32 bit Raspberry Pi 3, 4)](https://dl.dpp.dev/latest/linux-rpi-arm7hf)
+* [ARM64 Linux .deb (64 bit Raspberry Pi 4, Smartphones)](https://dl.dpp.dev/latest/linux-rpi-arm64)
+
+You can find further releases in other architectures and formats or the source code on the [GitHub Repository](https://github.com/brainboxdotcc/DPP/releases). For a realtime JSON format list of download all download links, click [here](https://dl.dpp.dev/json)
 
 ## Library features
 
