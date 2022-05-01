@@ -47,30 +47,29 @@ project(discord-bot VERSION 1.0 DESCRIPTION "A discord bot")
 
 # Add DPP as dependency
 add_subdirectory(libs/DPP)
-add_subdirectory(libs/spdlog) # if you need a logger. Don't forget to clone sources
-                              # in the `libs/` directory
+# You can also add any other libs you want to use
 
 # Create an executable
 add_executable(${PROJECT_NAME}
     src/main.cpp
-    # your others files...
+    # your other files...
 )
 
 # Linking libraries
 target_link_libraries(${PROJECT_NAME}
     dpp
-    spdlog # Like before, if you need spdlog
+    # Add any other libs you want to use here
 )
 
 # Specify includes
 target_include_directories(${PROJECT_NAME} PRIVATE
     libs/DPP/include
-    libs/spdlog/include # Like before, if you need spdlog
+    # Remember to add the include directories of any other libraries too
 )
 
 # Set C++ version
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    CXX_STANDARD 17 # or 20 if you want something more recent
+    CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
 ~~~~~~~~~~~~~~
@@ -80,7 +79,6 @@ Your project directory should look like this:
     - your_project/
         |-- libs/
             |-- DPP
-            |-- spdlog # again, only if you need it
         |-- src/
             |-- main.cpp
         |-- CMakeLists.txt
@@ -117,8 +115,8 @@ This Tutorial will use WSL's default distribution, **Ubuntu**! You might use oth
 1. Make sure you have installed your WSL 2 environment properly using [this guide to setup up WSL](https://docs.microsoft.com/en-us/windows/wsl/install) and [this guide to connect to Visual Studio Code](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode).
 2. Now open PowerShell as an Admin and type `wsl` to start up your subsystem. If you want to set up a CMake project (recommended for production bots) now, consider continuing your path of becoming the master of all Discord bots [here](https://dpp.dev/buildcmake.html), otherwise keep following this guide!
 3. Go to your home directory using `cd ~`
-4. Download the latest build for your Distro using `wget [url here]`. In this guide we will use the v10.0.1 build for Ubuntu x86-64: `wget https://github.com/brainboxdotcc/DPP/releases/download/v10.0.17/libdpp-10.0.17-linux-x64.deb`. Replace the highlighted filenames with the package you downloaded earlier if you are using a different OS, and remember to change the version numbers in this link to fetch the latest versions of D++!
-5. Finally install all required deps and the library using `sudo apt-get install libopus0 && sudo apt-get install -y libopus-dev && sudo apt-get install -y libsodium-dev && sudo dpkg -i ` **libdpp-10.0.1-linux-x64.deb** ` && rm ` **libdpp-10.0.17-linux-x64.deb**
+4. Download the latest build for your Distro using `wget [url here]`. In this guide we will use the v10.0.1 build for Ubuntu x86-64: `wget https://github.com/brainboxdotcc/DPP/releases/download/v10.0.7/libdpp-10.0.7-linux-x64.deb`. Replace the highlighted filenames with the package you downloaded earlier if you are using a different OS, and remember to change the version numbers in this link to fetch the latest versions of D++!
+5. Finally install all required deps and the library using `sudo apt-get install libopus0 && sudo apt-get install -y libopus-dev && sudo apt-get install -y libsodium-dev && sudo dpkg -i libdpp-10.0.7-linux-x64.deb && rm libdpp-10.0.7-linux-x64.deb`
 6. Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
 7. Navigate to a folder of your choice using `cd your/path/here` or create a new directory using `mkdir MyBot && cd MyBot`
 8. Now that you've a folder to work in type `> mybot.cxx` to create a file you can work in!
@@ -294,7 +292,7 @@ That's because you've created a bot application, but it's not on any server righ
 
 To build a D++ bot in a repl.it instance, follow these steps. These steps are slightly more convoluted than installing D++ into a standard container as we don't have access to root in the conventional way or write access to any files outside of our home directory in a repl. This guide sidesteps the issue by locally extracting a libdpp deb file installer, and referencing the local dependencies from the command-line.
 
-1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v10.0.1/libdpp-10.0.17-linux-x64.deb`
+1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v10.0.7/libdpp-10.0.7-linux-x64.deb`
 2. Extract this deb file using `dpkg`:
 ```
 dpkg -x *.deb .
