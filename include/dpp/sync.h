@@ -49,7 +49,7 @@ namespace dpp {
      * @return An instantiated object of type T
      * @throw dpp::rest_exception On failure of the method call, an exception is thrown
      */
-    template<typename T, class F, class... Ts> T sync(class cluster* c, F func, Ts... args) {
+    template<typename T, class F, class... Ts> T sync(class cluster* c, F func, Ts&&... args) {
         bool except = false;
         std::string message;
 
@@ -62,7 +62,7 @@ namespace dpp {
          */
         T _t = {};
         /* (obj ->* func) is the obscure syntax for calling a method pointer on an object instance */
-        (c ->* func)(args..., [&sync, &except, &message, &_t](const auto& cc) {
+        (c ->* func)(std::forward<Ts>(args)..., [&sync, &except, &message, &_t](const auto& cc) {
             if (cc.is_error()) {
                 message = cc.get_error().message;
                 except = true;
