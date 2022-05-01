@@ -42,13 +42,22 @@ slashcommand::slashcommand(const std::string &_name, const std::string &_descrip
 slashcommand::~slashcommand() {
 }
 
+slashcommand& slashcommand::set_dm_permission(bool dm) {
+	dm_permission = dm;
+}
+
+slashcommand& slashcommand::set_default_permissions(uint64_t defaults) {
+	default_permissions = defaults;
+}
+
 slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	name = string_not_null(j, "name");
 	description = string_not_null(j, "description");
 	version = snowflake_not_null(j, "version");
 	application_id = snowflake_not_null(j, "application_id");
-	default_permission = bool_not_null(j, "default_permission");
+	// DEPRECATED
+	// default_permission = bool_not_null(j, "default_permission");
 	default_member_permissions = snowflake_not_null(j, "default_member_permissions");
 	dm_permission = bool_not_null(j, "dm_permission");
 
@@ -219,7 +228,8 @@ void to_json(json& j, const slashcommand& p) {
 		}
 	}
 
-	j["default_permission"] = p.default_permission;
+	// DEPRECATED
+	// j["default_permission"] = p.default_permission;
 	j["application_id"] = std::to_string(p.application_id);
 }
 

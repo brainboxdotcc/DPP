@@ -833,7 +833,8 @@ public:
 	std::vector<command_option> options;
 
 	/**
-	 * @brief whether the command is enabled by default when the app is added to a guild
+	 * @brief whether the command is enabled by default when the app is added to a guild.
+	 * This has no effect as the default_member_permissions value is used instead.
 	 * @deprecated Discord discourage use of this value and instead you should use default_member_permissions.
 	 */
 	bool default_permission;
@@ -866,7 +867,8 @@ public:
 
 	/**
 	 * @brief True if this command should be allowed in a DM
-	 * D++ defaults this to true.
+	 * D++ defaults this to false. Cannot be set to true in a guild
+	 * command, only a global command.
 	 */
 	bool dm_permission;
 
@@ -898,6 +900,23 @@ public:
 	 * @return slashcommand& reference to self for fluent chaining
 	 */
 	slashcommand& add_localization(const std::string& language, const std::string& _name, const std::string& _description);
+
+	/**
+	 * @brief Set the dm permission for the command
+	 * 
+	 * @param dm true to allow this command in dms
+	 * @return slashcommand& reference to self
+	 */
+	slashcommand& set_dm_permission(bool dm);
+
+	/**
+	 * @brief Set the default permissions of the slash command,
+	 * this is a permission bitmask.
+	 * 
+	 * @param defaults default permissions to set
+	 * @return slashcommand& reference to self
+	 */
+	slashcommand& set_default_permissions(uint64_t defaults);
 
 	/**
 	 * @brief Add an option (parameter)
