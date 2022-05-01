@@ -30,7 +30,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1), default_member_permissions(p_use_application_commands), dm_permission(true) {
+slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1), default_member_permissions(p_use_application_commands), dm_permission(false) {
 }
 
 slashcommand::slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id) : slashcommand() {
@@ -182,7 +182,9 @@ void to_json(json& j, const slashcommand& p) {
 	}
 
 	j["default_member_permissions"] = std::to_string(p.default_member_permissions);
-	j["dm_permission"] = p.dm_permission;
+	if (p.dm_permission) {
+		j["dm_permission"] = p.dm_permission;
+	}
 
 	if (p.name_localizations.size()) {
 		j["name_localizations"] = json::object();
