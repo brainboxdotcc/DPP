@@ -111,21 +111,20 @@ To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, fo
 \page build-a-discord-bot-windows-wsl Building a discord bot in Windows using WSL (Windows Subsystem for Linux)
 
 This tutorial teaches you how to create a lightweight environment for D++-development using **WSL** and **Visual Studio Code**
-\note This Tutorial will use **WSL's default Ubuntu**! You might use other Distros if you prefer, but keep in mind the setup process might be different!
+
+This Tutorial will use WSL's default distribution, **Ubuntu**! You might use other Distros if you prefer, but keep in mind the setup process might be different!
 
 1. Make sure you have installed your WSL 2 environment properly using [this guide to setup up WSL](https://docs.microsoft.com/en-us/windows/wsl/install) and [this guide to connect to Visual Studio Code](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode).
-2. Now open PowerShell as an Admin and type `wsl` to start up your subsystem.
-\note If you want to set up a CMake project (recommended for production bots) now, consider continuing your path of becoming the master of all Discord bots [here](https://dpp.dev/buildcmake.html), otherwise keep following this guide!
+2. Now open PowerShell as an Admin and type `wsl` to start up your subsystem. If you want to set up a CMake project (recommended for production bots) now, consider continuing your path of becoming the master of all Discord bots [here](https://dpp.dev/buildcmake.html), otherwise keep following this guide!
 3. Go to your home directory using `cd ~`
-4. Download the latest build for your Distro using `wget [url here]`. In this guide we will use the v10.0.1 build for Ubuntu x86-64: `wget https://github.com/brainboxdotcc/DPP/releases/download/v10.0.1/libdpp-10.0.1-linux-x64.deb`
-\note replace the highlighted filenames with the package you downloaded earlier if you are using a different OS
-5. Finally install all required deps and the library using `sudo apt-get install libopus0 && sudo apt-get install -y libopus-dev && sudo apt-get install -y libsodium-dev && sudo dpkg -i ` **libdpp-10.0.1-linux-x64.deb** ` && rm ` **libdpp-10.0.1-linux-x64.deb**
-### Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
-6. Navigate to a folder of your choice using `cd your/path/here` or create a new directory using `mkdir MyBot && cd MyBot`
-7. Now that you've a folder to work in type `> mybot.cxx` to create a file you can work in!
-8. Now you can open this file in Visual Studio Code by pressing `CTRL+SHIFT+P` and typing `Remote-WSL: New WSL Window`. This will bring up a new window. In the new window, choose `open folder` and choose the folder you've created prior. Press OK and now you have your Folder opened as a Workspace!
-9. Add code to your CXX file and compile it by running `g++ -std=c++17 *.cxx -o bot -ldpp` in the same folder as your cxx file.
-10. start your bot by typing `./bot`!
+4. Download the latest build for your Distro using `wget [url here]`. In this guide we will use the v10.0.1 build for Ubuntu x86-64: `wget https://github.com/brainboxdotcc/DPP/releases/download/v10.0.17/libdpp-10.0.17-linux-x64.deb`. Replace the highlighted filenames with the package you downloaded earlier if you are using a different OS, and remember to change the version numbers in this link to fetch the latest versions of D++!
+5. Finally install all required deps and the library using `sudo apt-get install libopus0 && sudo apt-get install -y libopus-dev && sudo apt-get install -y libsodium-dev && sudo dpkg -i ` **libdpp-10.0.1-linux-x64.deb** ` && rm ` **libdpp-10.0.17-linux-x64.deb**
+6. Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
+7. Navigate to a folder of your choice using `cd your/path/here` or create a new directory using `mkdir MyBot && cd MyBot`
+8. Now that you've a folder to work in type `> mybot.cxx` to create a file you can work in!
+9. Now you can open this file in Visual Studio Code by pressing `CTRL+SHIFT+P` and typing `Remote-WSL: New WSL Window`. This will bring up a new window. In the new window, choose `open folder` and choose the folder you've created prior. Press OK and now you have your Folder opened as a Workspace!
+10. Add code to your CXX file and compile it by running `g++ -std=c++17 *.cxx -o bot -ldpp` in the same folder as your cxx file.
+11. start your bot by typing `./bot`!
 
 \page build-a-discord-bot-linux-clion Building a discord bot in Linux using CLion
 
@@ -254,11 +253,8 @@ To create a new application, take the steps as follows:
 
 1. Sign in to the [Discord developer portal](https://discord.com/developers/applications) and click on "New Application" on the top right.
 2. Next, enter a name for the application in the pop-up and press the "Create" button.
-
 \image html create_application_confirm_popup.png
-
 In this example we named it "D++ Test Bot".
-
 3. Move on by click the "Bot" tab in the left-hand side of the screen. Now click the "Add Bot" button on the right and confirm that you want to add the bot to your application.
 
 \image html create_application_add_bot.png
@@ -276,24 +272,17 @@ In this panel, you can get your bot token by clicking "Reset Token". A bot token
 Once you've created your bot in the discord developer portal, you may wonder:
 > Where is my bot now, I can't see him on my server?!
 
-That's because you've created a bot application, but it's not on any server right now.
-
-So to invite the bot to your server, you must create an invitation URL.
+That's because you've created a bot application, but it's not on any server right now. So, to invite the bot to your server, you must create an invitation URL.
 
 1. go again into the [Applications page](https://discord.com/developers/applications) and click on your bot.
 2. Go to the "OAuth2" tab and click on the subpage "URL Generator".
-
 \image html create_application_navigate_to_url_generator.png
-
-3. Select the `bot` scope. If your bot uses slash commands, also select `applications.commands`.
-
-You can read more about scopes and which you need for your application [here](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes).
-
+3. Select the `bot` scope. If your bot uses slash commands, also select `applications.commands`. You can read more about scopes and which you need for your application [here](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes).
 4. Choose the permissions required for your bot to function in the "Bot Permissions" section.
+5. Copy and paste the resulting URL in your browser. Choose a server to invite the bot to, and click "Authorize".
+
 
 \note For bots with elevated permissions, Discord enforces two-factor authentication on the bot owner's account when added to servers that have server-wide 2FA enabled.
-
-5. Copy and paste the resulting URL in your browser. Choose a server to invite the bot to, and click "Authorize".
 
 ## Troubleshooting
 
@@ -305,7 +294,7 @@ You can read more about scopes and which you need for your application [here](ht
 
 To build a D++ bot in a repl.it instance, follow these steps. These steps are slightly more convoluted than installing D++ into a standard container as we don't have access to root in the conventional way or write access to any files outside of our home directory in a repl. This guide sidesteps the issue by locally extracting a libdpp deb file installer, and referencing the local dependencies from the command-line.
 
-1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v10.0.1/libdpp-10.0.0-linux-x64.deb`
+1. Use wget, or the upload button, to get the precompiled x64 release into your repl as a file, e.g. `https://github.com/brainboxdotcc/DPP/releases/download/v10.0.1/libdpp-10.0.17-linux-x64.deb`
 2. Extract this deb file using `dpkg`:
 ```
 dpkg -x *.deb .
