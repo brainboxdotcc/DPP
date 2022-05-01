@@ -74,7 +74,11 @@ void https_client::connect()
 
 multipart_content https_client::build_multipart(const std::string &json, const std::vector<std::string>& filenames, const std::vector<std::string>& contents) {
 	if (filenames.empty() && contents.empty()) {
-		return { json, "application/json" };
+		if (!json.empty()) {
+			return { json, "application/json" };
+		} else {
+			return {json, ""};
+		}
 	} else {
 		const std::string two_cr("\r\n\r\n");
 		const std::string boundary(fmt::format("-------------{:8x}{:16x}", time(nullptr) + time(nullptr), time(nullptr) * time(nullptr)));
