@@ -866,7 +866,10 @@ bool message::is_crossposted() const {
 
 bool message::is_crosspost() const {
 	return flags & m_is_crosspost;
+}
 
+bool message::is_dm() const {
+	return guild_id == 0;
 }
 
 bool message::suppress_embeds() const {

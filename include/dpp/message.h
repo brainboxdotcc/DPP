@@ -1401,6 +1401,13 @@ struct DPP_EXPORT message : public managed {
 	 * @return message& reference to self
 	 */
 	message& set_guild_id(snowflake _guild_id);
+
+	/**
+	 * @brief Returns true if the message is from a DM
+	 * 
+	 * @return true if message is a DM
+	 */
+	bool is_dm() const;
 };
 
 /** A group of messages */

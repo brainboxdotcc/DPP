@@ -30,7 +30,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1) {
+slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1), default_member_permissions(p_use_application_commands), dm_permission(true) {
 }
 
 slashcommand::slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id) : slashcommand() {
@@ -49,6 +49,9 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	version = snowflake_not_null(j, "version");
 	application_id = snowflake_not_null(j, "application_id");
 	default_permission = bool_not_null(j, "default_permission");
+	default_member_permissions = snowflake_not_null(j, "default_member_permissions");
+	dm_permission = bool_not_null(j, "dm_permission");
+
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
 	if (j->find("options") != j->end()) {
 		for (auto &option: (*j)["options"]) {
@@ -72,6 +75,12 @@ void to_json(json& j, const command_option_choice& choice) {
 	} else {
 		j["value"] = std::get<std::string>(choice.value);
 	}
+	if (choice.name_localizations.size()) {
+		j["name_localizations"] = json::object();
+		for(auto& loc : choice.name_localizations) {
+			j["name_localizations"][loc.first] = loc.second;
+		}
+	}
 }
 
 command_option& command_option::set_min_value(command_option_range min_v) {
@@ -90,6 +99,19 @@ void to_json(json& j, const command_option& opt) {
 	j["type"] = opt.type;
 	j["autocomplete"] = opt.autocomplete;
 	j["required"] = opt.required;
+
+	if (opt.name_localizations.size()) {
+		j["name_localizations"] = json::object();
+		for(auto& loc : opt.name_localizations) {
+			j["name_localizations"][loc.first] = loc.second;
+		}
+	}
+	if (opt.description_localizations.size()) {
+		j["description_localizations"] = json::object();
+		for(auto& loc : opt.description_localizations) {
+			j["description_localizations"][loc.first] = loc.second;
+		}
+	}
 
 	/* Check for minimum and maximum values */
 	if (opt.type == dpp::co_number || opt.type == dpp::co_integer) {
@@ -157,6 +179,22 @@ void to_json(json& j, const slashcommand& p) {
 	/* Only send this if set to something other than ctxm_none */
 	if (p.type != ctxm_none) {
 		j["type"] = p.type;
+	}
+
+	j["default_member_permissions"] = std::to_string(p.default_member_permissions);
+	j["dm_permission"] = p.dm_permission;
+
+	if (p.name_localizations.size()) {
+		j["name_localizations"] = json::object();
+		for(auto& loc : p.name_localizations) {
+			j["name_localizations"][loc.first] = loc.second;
+		}
+	}
+	if (p.description_localizations.size()) {
+		j["description_localizations"] = json::object();
+		for(auto& loc : p.description_localizations) {
+			j["description_localizations"][loc.first] = loc.second;
+		}
 	}
 
 	if (p.type != ctxm_user && p.type != ctxm_message) {
@@ -240,6 +278,11 @@ command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) 
 	} else { // else string
 		value.emplace<std::string>((*j)["value"]);
 	}
+	if (j->find("name_localizations") != j->end()) {
+		for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
+			name_localizations[loc.key()] = loc.value();
+		}
+	}
 
 	return *this;
 }
@@ -294,6 +337,17 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
                 o.choices.push_back(command_option_choice().fill_from_json(&jchoice));
             }
         }
+
+	if (j->find("name_localizations") != j->end()) {
+		for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
+			o.name_localizations[loc.key()] = loc.value();
+		}
+	}
+	if (j->find("description_localizations") != j->end()) {
+		for(auto loc = (*j)["description_localizations"].begin(); loc != (*j)["description_localizations"].end(); ++loc) {
+			o.description_localizations[loc.key()] = loc.value();
+		}
+	}
 
         if (j->find("options") != j->end() && i > 0) {
             i--; // prevent infinite recursion call with a counter
@@ -383,6 +437,22 @@ std::string interaction::build_json(bool with_id) const {
 	/* There is no facility to build the json of an interaction as bots don't send them, only the API sends them as an event payload */
 	return "";
 }
+
+slashcommand& slashcommand::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
+	name_localizations[language] = _name;
+	description_localizations[language] = _description;
+}
+
+command_option_choice& command_option_choice::add_localization(const std::string& language, const std::string& _name) {
+	name_localizations[language] = _name;
+}
+
+command_option_choice& command_option_choice::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
+	name_localizations[language] = _name;
+	description_localizations[language] = _description;
+}
+
+
 
 void from_json(const nlohmann::json& j, command_data_option& cdo) {
 	cdo.name = string_not_null(&j, "name");
