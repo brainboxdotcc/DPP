@@ -44,10 +44,12 @@ slashcommand::~slashcommand() {
 
 slashcommand& slashcommand::set_dm_permission(bool dm) {
 	dm_permission = dm;
+	return *this;
 }
 
 slashcommand& slashcommand::set_default_permissions(uint64_t defaults) {
-	default_permissions = defaults;
+	default_member_permissions = defaults;
+	return *this;
 }
 
 slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
