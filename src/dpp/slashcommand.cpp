@@ -441,18 +441,19 @@ std::string interaction::build_json(bool with_id) const {
 slashcommand& slashcommand::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
 	name_localizations[language] = _name;
 	description_localizations[language] = _description;
+	return *this;
 }
 
 command_option_choice& command_option_choice::add_localization(const std::string& language, const std::string& _name) {
 	name_localizations[language] = _name;
+	return *this;
 }
 
-command_option_choice& command_option_choice::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
+command_option& command_option::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
 	name_localizations[language] = _name;
 	description_localizations[language] = _description;
+	return *this;
 }
-
-
 
 void from_json(const nlohmann::json& j, command_data_option& cdo) {
 	cdo.name = string_not_null(&j, "name");

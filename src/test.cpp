@@ -217,7 +217,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			bot.guild_command_create(dpp::slashcommand().set_name("testcommand")
 				.set_description("Test command for DPP unit test")
 				.add_option(dpp::command_option(dpp::co_attachment, "file", "a file"))
-				.set_application_id(bot.me.id),
+				.set_application_id(bot.me.id)
+				.add_localization("fr", "zut", "Ou est la salor dans Discord?"),
 				TEST_GUILD_ID, [&bot](const dpp::confirmation_callback_t &callback) {
 					if (!callback.is_error()) {
 						set_test("APPCOMMAND", true);
