@@ -193,9 +193,7 @@ void to_json(json& j, const slashcommand& p) {
 	}
 
 	j["default_member_permissions"] = std::to_string(p.default_member_permissions);
-	if (p.dm_permission) {
-		j["dm_permission"] = p.dm_permission;
-	}
+	j["dm_permission"] = p.dm_permission;
 
 	if (p.name_localizations.size()) {
 		j["name_localizations"] = json::object();
