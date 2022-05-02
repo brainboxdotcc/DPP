@@ -1647,29 +1647,25 @@ int main()
 
     bot.on_ready([&bot](const dpp::ready_t &event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            dpp::slashcommand command;
-            /* Define a slash command */
-            command.set_name("High Five")
-                .set_type(dpp::ctxm_user)
-                .set_application_id(bot.me.id);
             /* Register the command */
-            bot.guild_command_create(command, 857692897221033129); // you need to put your guild-id in here
+            bot.guild_command_create(
+		dpp::slashcommand()
+                    .set_name("High Five")
+                    .set_type(dpp::ctxm_user)
+                    .set_application_id(bot.me.id),
+                857692897221033129 // you need to put your guild-id in here
+            );
         }
     });
 
     /* Use the on_interaction_create event to look for application commands */
-    bot.on_interaction_create([&](const dpp::interaction_create_t &event) {
+    bot.on_user_context_menu([&](const dpp::user_context_menu_t &event) {
          dpp::command_interaction cmd_data = event.command.get_command_interaction();
-            
-         /* check if the command is a user context menu action */
-         if (cmd_data.type == dpp::ctxm_user) {
-
-             /* check if the context menu name is High Five */
-             if (cmd_data.name == "High Five") {
-                 dpp::user user = event.command.resolved.users.begin()->second; // the user who the command has been issued on
-                 dpp::user author = event.command.usr; // the user who clicked on the context menu
-                 event.reply(author.get_mention() + " slapped " + user.get_mention());
-             }
+         /* check if the context menu name is High Five */
+         if (cmd_data.name == "High Five") {
+             dpp::user user = event.get_user(); // the user who the command has been issued on
+             dpp::user author = event.command.usr; // the user who clicked on the context menu
+             event.reply(author.get_mention() + " slapped " + user.get_mention());
          }
     });
 
