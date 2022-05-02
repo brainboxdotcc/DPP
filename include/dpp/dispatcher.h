@@ -514,6 +514,83 @@ struct DPP_EXPORT autocomplete_t : public interaction_create_t {
 	std::vector<dpp::command_option> options;
 };
 
+/**
+ * @brief Base class for context menu interactions, e.g. right click on
+ * user or message.
+ */
+struct DPP_EXPORT context_menu_t : public interaction_create_t {
+public:
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	context_menu_t(class discord_client* client, const std::string& raw);
+};
+
+/**
+ * @brief Event parameter for context menu interactions for messages
+ */
+struct DPP_EXPORT message_context_menu_t : public context_menu_t {
+
+	/**
+	 * @brief Related message
+	 */
+	message ctx_message;
+public:
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	message_context_menu_t(class discord_client* client, const std::string& raw);
+
+	/**
+	 * @brief Get the message which was right-clicked on
+	 * 
+	 * @return message right-clicked on
+	 */
+	message get_message();
+
+	/**
+	 * @brief Set the message object for this event
+	 * 
+	 * @param m message to set
+	 * @return message_context_menu_t& reference to self for fluent chaining
+	 */
+	message_context_menu_t& set_message(const message& m);
+};
+
+/**
+ * @brief Event parameter for context menu interactions for users
+ */
+struct DPP_EXPORT user_context_menu_t : public context_menu_t {
+
+	/**
+	 * @brief Related user
+	 */
+	user ctx_user;
+public:
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	user_context_menu_t(class discord_client* client, const std::string& raw);
+
+	/**
+	 * @brief Get the user which was right-clicked on
+	 * 
+	 * @return user right clicked on
+	 */
+	user get_user();
+
+	/**
+	 * @brief Set the user object for this event
+	 * 
+	 * @param u user to set
+	 * @return user_context_menu_t& reference to self for fluent chaining
+	 */
+	user_context_menu_t& set_user(const user& u);
+
+};
 
 /**
  * @brief Click on select

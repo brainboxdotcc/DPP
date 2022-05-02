@@ -861,6 +861,24 @@ public:
 	event_router_t<select_click_t> on_select_click;
 
 	/**
+	 * @brief Called when a user right-clicks or long-presses on a message,
+	 * where a slash command is bound to the ctxm_message command type.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
+	 */
+	event_router_t<message_context_menu_t> on_message_context_menu;
+
+	/**
+	 * @brief Called when a user right-clicks or long-presses on a user,
+	 * where a slash command is bound to the ctxm_user command type.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
+	 */
+	event_router_t<user_context_menu_t> on_user_context_menu;
+
+	/**
 	 * @brief Called when a modal dialog is submitted.
 	 * Form submits are triggered by discord when modal dialogs are submitted which you have
 	 * associated with a slash command using dpp::interaction_modal_response.

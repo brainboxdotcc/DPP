@@ -43,12 +43,36 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 	/* We must set here because we cant pass it through the nlohmann from_json() */
 	i.cache_policy = client->creator->cache_policy;
 	i.fill_from_json(&d);
-	/* There are two types of interactions, component interactions and
-	 * slash command interactions. Both fire different library events
-	 * so ensure they are dispatched properly.
+	/* There are several types of interactions, component interactions,
+	 * auto complete interactions, dialog interactions and slash command
+	 * interactions. Both fire different library events so ensure they are
+	 * dispatched properly.
 	 */
 	if (i.type == it_application_command) {
+		/* Slash command is split again into chat input, and the two context menu types */
+		command_interaction cmd_data = i.get_command_interaction();
+		if (cmd_data.type == ctxm_message && !client->creator->on_message_context_menu.empty()) {
+			if (i.resolved.messages.size()) {
+				/* Message right-click context menu */
+				message_context_menu_t mcm(client, raw);
+				mcm.command = i;
+				mcm.set_message(i.resolved.messages.begin()->second);
+				client->creator->on_message_context_menu.call(mcm);
+			}
+		} else if (cmd_data.type == ctxm_user && !client->creator->on_user_context_menu.empty()) {
+			if (i.resolved.users.size()) {
+				/* User right-click context menu */
+				user_context_menu_t ucm(client, raw);
+				ucm.command = i;
+				ucm.set_user(i.resolved.users.begin()->second);
+				client->creator->on_user_context_menu.call(ucm);
+			}
+		}
 		if (!client->creator->on_interaction_create.empty()) {
+			/* Standard chat input. Note that for backwards compatibility, context menu
+			 * events still find their way here. At some point in the future, receiving
+			 * ctxm_user and ctxm_message inputs to this event will be depreciated.
+			 */
 			dpp::interaction_create_t ic(client, raw);
 			ic.command = i;
 			client->creator->on_interaction_create.call(ic);
@@ -116,8 +140,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				ic.component_type = bi.component_type;
 				client->creator->on_button_click.call(ic);
 			}
-		}
-		if (bi.component_type == cotype_select) {
+		} else if (bi.component_type == cotype_select) {
 			if (!client->creator->on_select_click.empty()) {
 				dpp::select_click_t ic(client, raw);
 				ic.command = i;

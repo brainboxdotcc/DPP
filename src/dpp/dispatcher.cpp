@@ -53,6 +53,34 @@ bool event_dispatch_t::is_cancelled() const
 	return stop_event;
 }
 
+context_menu_t::context_menu_t(class discord_client* client, const std::string& raw) : interaction_create_t(client, raw) {
+}
+
+message_context_menu_t::message_context_menu_t(class discord_client* client, const std::string& raw) : context_menu_t(client, raw) {
+}
+
+message message_context_menu_t::get_message() {
+	return ctx_message;
+}
+
+message_context_menu_t& message_context_menu_t::set_message(const message& m) {
+	ctx_message = m;
+	return *this;
+}
+
+user_context_menu_t::user_context_menu_t(class discord_client* client, const std::string& raw) : context_menu_t(client, raw) {
+}
+
+user user_context_menu_t::get_user() {
+	return ctx_user;
+}
+
+user_context_menu_t& user_context_menu_t::set_user(const user& u) {
+	ctx_user = u;
+	return *this;
+}
+
+
 void message_create_t::send(const std::string& m, command_completion_event_t callback) const
 {
 	this->send(dpp::message(m), callback);
