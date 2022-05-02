@@ -123,6 +123,11 @@ void interaction_create_t::thinking(bool ephemeral, command_completion_event_t c
 	this->reply(ir_deferred_channel_message_with_source, msg, callback);
 }
 
+void interaction_create_t::reply(command_completion_event_t callback) const
+{
+	this->reply(ir_deferred_update_message, message(), callback);
+}
+
 void interaction_create_t::dialog(const interaction_modal_response& mr, command_completion_event_t callback) const
 {
 	from->creator->interaction_response_create(this->command.id, this->command.token, mr, callback);

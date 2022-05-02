@@ -296,6 +296,16 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 */
 	interaction_create_t(class discord_client* client, const std::string& raw);
 
+
+	/**
+	 * @brief Acknowledge interaction without displaying a message to the user,
+	 * for use with button and select menu components.
+	 * 
+	 * @param callback User function to execute when the api call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void reply(command_completion_event_t callback = utility::log_error()) const;
+
 	/**
 	 * @brief Send a reply for this interaction
 	 * 
