@@ -451,7 +451,6 @@ json etf_parser::decode_binary() {
 	if (str == NULL) {
 		return json();
 	}
-	std::string s = std::string(str, length);
 	json j = std::string(str, length);
 	return j;
 }
