@@ -40,50 +40,50 @@ cd assets
 ## VS2019
 
 # 64 bit windows
-mkdir -p libdpp-$NEWVER-win64/bin
-cp ../../win32/bin/*.dll libdpp-$NEWVER-win64/bin
-zip -g libdpp-$NEWVER-win64-release-vs2019.zip libdpp-$NEWVER-win64/bin/*
-rm -rf libdpp-$NEWVER-win64
+mkdir -p "libdpp-$NEWVER-win64/bin"
+cp ../../win32/bin/*.dll "libdpp-$NEWVER-win64/bin"
+zip -g "libdpp-$NEWVER-win64-release-vs2019.zip" "libdpp-$NEWVER-win64/bin/"*
+rm -rf "libdpp-$NEWVER-win64"
 
-mkdir -p libdpp-$NEWVER-win64/bin
-cp ../../win32/bin/*.dll libdpp-$NEWVER-win64/bin
-zip -g libdpp-$NEWVER-win64-debug-vs2019.zip libdpp-$NEWVER-win64/bin/*
-rm -rf libdpp-$NEWVER-win64
+mkdir -p "libdpp-$NEWVER-win64/bin"
+cp ../../win32/bin/*.dll "libdpp-$NEWVER-win64/bin"
+zip -g "libdpp-$NEWVER-win64-debug-vs2019.zip" "libdpp-$NEWVER-win64/bin/"*
+rm -rf "libdpp-$NEWVER-win64"
 
 # 32 bit windows
-mkdir -p libdpp-$NEWVER-win32/bin
-cp ../../win32/32/bin/*.dll libdpp-$NEWVER-win32/bin
-zip -g libdpp-$NEWVER-win32-release-vs2019.zip libdpp-$NEWVER-win32/bin/*
-rm -rf libdpp-$NEWVER-win32
+mkdir -p "libdpp-$NEWVER-win32/bin"
+cp ../../win32/32/bin/*.dll "libdpp-$NEWVER-win32/bin"
+zip -g "libdpp-$NEWVER-win32-release-vs2019.zip" "libdpp-$NEWVER-win32/bin/"*
+rm -rf "libdpp-$NEWVER-win32"
 
-mkdir -p libdpp-$NEWVER-win32/bin
-cp ../../win32/32/bin/*.dll libdpp-$NEWVER-win32/bin
-zip -g libdpp-$NEWVER-win32-debug-vs2019.zip libdpp-$NEWVER-win32/bin/*
-rm -rf libdpp-$NEWVER-win32
+mkdir -p "libdpp-$NEWVER-win32/bin"
+cp ../../win32/32/bin/*.dll "libdpp-$NEWVER-win32/bin"
+zip -g "libdpp-$NEWVER-win32-debug-vs2019.zip" "libdpp-$NEWVER-win32/bin/"*
+rm -rf "libdpp-$NEWVER-win32"
 
 ## VS2022
 
 # 64 bit windows
-mkdir -p libdpp-$NEWVER-win64/bin
-cp ../../win32/bin/*.dll libdpp-$NEWVER-win64/bin
-zip -g libdpp-$NEWVER-win64-release-vs2022.zip libdpp-$NEWVER-win64/bin/*
-rm -rf libdpp-$NEWVER-win64
+mkdir -p "libdpp-$NEWVER-win64/bin"
+cp ../../win32/bin/*.dll "libdpp-$NEWVER-win64/bin"
+zip -g "libdpp-$NEWVER-win64-release-vs2022.zip" "libdpp-$NEWVER-win64/bin/"*
+rm -rf "libdpp-$NEWVER-win64"
 
-mkdir -p libdpp-$NEWVER-win64/bin
-cp ../../win32/bin/*.dll libdpp-$NEWVER-win64/bin
-zip -g libdpp-$NEWVER-win64-debug-vs2022.zip libdpp-$NEWVER-win64/bin/*
-rm -rf libdpp-$NEWVER-win64
+mkdir -p "libdpp-$NEWVER-win64/bin"
+cp ../../win32/bin/*.dll "libdpp-$NEWVER-win64/bin"
+zip -g "libdpp-$NEWVER-win64-debug-vs2022.zip" "libdpp-$NEWVER-win64/bin/"*
+rm -rf "libdpp-$NEWVER-win64"
 
 # 32 bit windows
-mkdir -p libdpp-$NEWVER-win32/bin
-cp ../../win32/32/bin/*.dll libdpp-$NEWVER-win32/bin
-zip -g libdpp-$NEWVER-win32-release-vs2022.zip libdpp-$NEWVER-win32/bin/*
-rm -rf libdpp-$NEWVER-win32
+mkdir -p "libdpp-$NEWVER-win32/bin"
+cp ../../win32/32/bin/*.dll "libdpp-$NEWVER-win32/bin"
+zip -g "libdpp-$NEWVER-win32-release-vs2022.zip" "libdpp-$NEWVER-win32/bin/"*
+rm -rf "libdpp-$NEWVER-win32"
 
-mkdir -p libdpp-$NEWVER-win32/bin
-cp ../../win32/32/bin/*.dll libdpp-$NEWVER-win32/bin
-zip -g libdpp-$NEWVER-win32-debug-vs2022.zip libdpp-$NEWVER-win32/bin/*
-rm -rf libdpp-$NEWVER-win32
+mkdir -p "libdpp-$NEWVER-win32/bin"
+cp ../../win32/32/bin/*.dll "libdpp-$NEWVER-win32/bin"
+zip -g "libdpp-$NEWVER-win32-debug-vs2022.zip" "libdpp-$NEWVER-win32/bin/"*
+rm -rf "libdpp-$NEWVER-win32"
 
 
 cd ..

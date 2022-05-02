@@ -284,9 +284,9 @@ void websocket_client::one_second_timer()
 
 void websocket_client::handle_ping_pong(bool ping, const std::string &payload)
 {
-	unsigned char out[MAXHEADERSIZE];
 	if (ping) {
 		/* For receiving pings we echo back their payload with the type OP_PONG */
+		unsigned char out[MAXHEADERSIZE];
 		size_t s = this->fill_header(out, payload.length(), OP_PONG);
 		std::string header((const char*)out, s);
 		ssl_client::write(header);
