@@ -1,5 +1,5 @@
 #!/bin/bash
-NEWVER=$(cat include/dpp/version.h  | grep DPP_VERSION_TEXT | sed 's/\|/ /' |awk '{print $4}')
+NEWVER=$(grep DPP_VERSION_TEXT include/dpp/version.h | sed 's/\|/ /' | awk '{print $4}')
 echo "Building and tagging release $NEWVER"
 mkdir temp
 cd temp
