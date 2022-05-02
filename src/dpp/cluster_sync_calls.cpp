@@ -104,6 +104,26 @@ confirmation cluster::interaction_response_edit_sync(const std::string &token, c
 	return dpp::sync<confirmation>(this, &cluster::interaction_response_edit, token, m);
 }
 
+confirmation cluster::interaction_followup_create_sync(const std::string &token, const message &m) {
+	return dpp::sync<confirmation>(this, &cluster::interaction_followup_create, token, m);
+}
+
+confirmation cluster::interaction_followup_edit_original_sync(const std::string &token, const message &m) {
+	return dpp::sync<confirmation>(this, &cluster::interaction_followup_edit_original, token, m);
+}
+
+confirmation cluster::interaction_followup_delete_sync(const std::string &token) {
+	return dpp::sync<confirmation>(this, &cluster::interaction_followup_delete, token);
+}
+
+confirmation cluster::interaction_followup_edit_sync(const std::string &token, const message &m) {
+	return dpp::sync<confirmation>(this, &cluster::interaction_followup_edit, token, m);
+}
+
+message cluster::interaction_followup_get_sync(const std::string &token, snowflake message_id) {
+	return dpp::sync<message>(this, &cluster::interaction_followup_get, token, message_id);
+}
+
 channel cluster::channel_create_sync(const class channel &c) {
 	return dpp::sync<channel>(this, &cluster::channel_create, c);
 }

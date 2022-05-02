@@ -143,4 +143,36 @@ void cluster::interaction_response_edit(const std::string &token, const message 
 	}, m.filename, m.filecontent);
 }
 
+void cluster::interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback) {
+	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), utility::url_encode(token), m_post, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t(this, confirmation(), http));
+		}
+	}, m.filename, m.filecontent);
+}
+
+void cluster::interaction_followup_edit_original(const std::string &token, const message &m, command_completion_event_t callback) {
+	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), utility::url_encode(token) + "/messages/@original", m_patch, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t(this, confirmation(), http));
+		}
+	}, m.filename, m.filecontent);
+}
+
+void cluster::interaction_followup_delete(const std::string &token, command_completion_event_t callback) {
+	rest_request<confirmation>(this, API_PATH "/webhooks",std::to_string(me.id), utility::url_encode(token) + "/messages/@original", m_delete, "", callback);
+}
+
+void cluster::interaction_followup_edit(const std::string &token, const message &m, command_completion_event_t callback) {
+	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), utility::url_encode(token) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t(this, confirmation(), http));
+		}
+	}, m.filename, m.filecontent);
+}
+
+void cluster::interaction_followup_get(const std::string &token, snowflake message_id, command_completion_event_t callback) {
+	rest_request<message>(this, API_PATH "/webhooks",std::to_string(me.id), utility::url_encode(token) + "/messages/" + std::to_string(message_id), m_get, "", callback);
+}
+
 };

@@ -1515,6 +1515,56 @@ public:
 	void interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Create a followup message to a slash command
+	 * 
+	 * @param token Token for the interaction webhook
+	 * @param m followup message to create
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback);
+
+	/**
+	 * @brief Edit original followup message to a slash command
+	 * This is an alias for cluster::interaction_response_edit
+	 * @see cluster::interaction_response_edit
+	 * 
+	 * @param token Token for the interaction webhook
+	 * @param m message to edit, the ID should be set
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void interaction_followup_edit_original(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief 
+	 * 
+	 * @param token Token for the interaction webhook
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void interaction_followup_delete(const std::string &token, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Edit followup message to a slash command
+	 * The message ID in the message you pass should be correctly set to that of a followup message you previously sent
+	 * @param token Token for the interaction webhook
+	 * @param m message to edit, the ID should be set
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void interaction_followup_edit(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get the followup message to a slash command
+	 * @param token Token for the interaction webhook
+	 * @param message_id message to retrieve
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void interaction_followup_get(const std::string &token, snowflake message_id, command_completion_event_t callback);
+
+	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these).
 	 * 
 	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
