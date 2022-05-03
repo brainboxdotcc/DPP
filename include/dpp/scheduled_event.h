@@ -207,7 +207,7 @@ struct DPP_EXPORT scheduled_event : public managed, public json_interface<schedu
 	 *
 	 * @return std::string Dumped json of this object
 	 */
-	virtual std::string build_json(bool with_id = false) const;
+	std::string build_json(bool with_id = false) const;
 };
 
 /**

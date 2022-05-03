@@ -91,7 +91,7 @@ public:
 	 * @param with_id Include the ID of the webhook in the json
 	 * @return std::string JSON encoded object
 	 */
-	virtual std::string build_json(bool with_id = false) const;
+	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Base64 encode image data and allocate it to image_data

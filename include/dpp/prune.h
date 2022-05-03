@@ -51,7 +51,7 @@ struct DPP_EXPORT prune : public json_interface<prune> {
 	 * @param with_prune_count True if the prune count boolean is to be set in the built JSON
 	 * @return The JSON text of the prune object
 	 */
-	virtual std::string build_json(bool with_prune_count = false) const;
+	std::string build_json(bool with_prune_count = false) const;
 
 };
 

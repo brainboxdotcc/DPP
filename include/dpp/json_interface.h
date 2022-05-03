@@ -33,6 +33,11 @@ namespace dpp {
 	 * @tparam T Type of class that implements the interface
 	 */
 	template<typename T> struct DPP_EXPORT json_interface {
+	protected:
+		/* Must not destruct through pointer to json_interface. */
+		~json_interface() = default;
+
+	public:
 		/**
 		 * @brief Convert object from nlohmann::json
 		 * 
@@ -49,7 +54,7 @@ namespace dpp {
 		 * @param with_id Include the ID in the JSON
 		 * @return std::string JSON string version of object
 		 */
-		virtual std::string build_json(bool with_id = false) const {
+		std::string build_json(bool with_id = false) const {
 			throw dpp::logic_exception("JSON interface doesn't implement build_json");
 		}
 	};

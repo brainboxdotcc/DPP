@@ -77,7 +77,7 @@ struct DPP_EXPORT stage_instance : public managed, public json_interface<stage_i
 	 * @param with_id include ID
 	 * @return std::string Dumped json of this object
 	 */
-	virtual std::string build_json(bool with_id = false) const;
+	std::string build_json(bool with_id = false) const;
 };
 
 /** A group of stage instances */
