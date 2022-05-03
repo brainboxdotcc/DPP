@@ -161,6 +161,7 @@ bool discord_voice_client::is_playing() {
 
 void discord_voice_client::thread_run()
 {
+	utility::set_thread_name(std::string("vc/") + std::to_string(server_id));
 	do {
 		ssl_client::read_loop();
 		ssl_client::close();

@@ -38,10 +38,18 @@
 #include <dpp/dispatcher.h>
 
 #ifdef _WIN32
+	#include <locale>
+	#include <codecvt>
+	#include <string>
 	#include <stdio.h>
 	#include <stdlib.h>
+	#include <processthreadsapi.h>
 	#define popen _popen
 	#define pclose _pclose
+#endif
+
+#ifdef HAVE_PRCTL
+	#include <sys/prctl.h>
 #endif
 
 using namespace std::literals;
@@ -215,6 +223,7 @@ namespace dpp {
 
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 			auto t = std::thread([cmd, parameters, callback]() {
+				utility::set_thread_name("async_exec");
 				std::array<char, 128> buffer;
 				std::vector<std::string> my_parameters = parameters;
 				std::string result;
@@ -475,6 +484,21 @@ namespace dpp {
 
 		std::string version() {
 			return DPP_VERSION_TEXT;
+		}
+
+		void set_thread_name(const std::string& name) {
+			#ifdef HAVE_PRCTL
+				prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name.c_str()), NULL, NULL, NULL);
+			#else
+				#if HAVE_PTHREAD_SETNAME_NP
+					pthread_setname_np(name.c_str());
+				#endif
+			#endif
+			#ifdef _WIN32
+				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+				std::wstring wide_name = converter.from_bytes(name);
+				SetThreadDescription(GetCurrentThread(), wide_name.c_str());
+			#endif
 		}
 	};
 

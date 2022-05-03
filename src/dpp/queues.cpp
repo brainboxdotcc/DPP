@@ -185,7 +185,7 @@ http_request_completion_t http_request::run(cluster* owner) {
 request_queue::request_queue(class cluster* owner, uint32_t request_threads) : creator(owner), terminating(false), globally_ratelimited(false), globally_limited_for(0), in_thread_pool_size(request_threads)
 {
 	for (uint32_t in_alloc = 0; in_alloc < in_thread_pool_size; ++in_alloc) {
-		requests_in.push_back(new in_thread(owner, this));
+		requests_in.push_back(new in_thread(owner, this, in_alloc));
 	}
 	out_thread = new std::thread(&request_queue::out_loop, this);
 }
@@ -193,7 +193,7 @@ request_queue::request_queue(class cluster* owner, uint32_t request_threads) : c
 request_queue& request_queue::add_request_threads(uint32_t request_threads)
 {
 	for (uint32_t in_alloc_ex = 0; in_alloc_ex < request_threads; ++in_alloc_ex) {
-		requests_in.push_back(new in_thread(creator, this));
+		requests_in.push_back(new in_thread(creator, this, in_alloc_ex + in_thread_pool_size));
 	}
 	in_thread_pool_size += request_threads;
 	return *this;
@@ -204,9 +204,9 @@ uint32_t request_queue::get_request_thread_count() const
 	return in_thread_pool_size;
 }
 
-in_thread::in_thread(class cluster* owner, class request_queue* req_q) : terminating(false), requests(req_q), creator(owner)
+in_thread::in_thread(class cluster* owner, class request_queue* req_q, uint32_t index) : terminating(false), requests(req_q), creator(owner)
 {
-	this->in_thr = new std::thread(&in_thread::in_loop, this);
+	this->in_thr = new std::thread(&in_thread::in_loop, this, index);
 }
 
 in_thread::~in_thread()
@@ -228,8 +228,9 @@ request_queue::~request_queue()
 	}
 }
 
-void in_thread::in_loop()
+void in_thread::in_loop(uint32_t index)
 {
+	utility::set_thread_name(fmt::format("http_req/{}", index));
 	while (!terminating) {
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
@@ -334,6 +335,7 @@ void in_thread::in_loop()
 
 void request_queue::out_loop()
 {
+	utility::set_thread_name("req_callback");
 	while (!terminating) {
 
 		std::mutex mtx;

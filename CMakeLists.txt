@@ -23,6 +23,8 @@ option(BUILD_VOICE_SUPPORT "Build voice support" ON)
 option(RUN_LDCONFIG "Run ldconfig after installation" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 
+include(CheckCXXSymbolExists)
+
 add_compile_definitions(DPP_BUILD)
 
 #if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -42,6 +44,9 @@ math(EXPR DPP_VERSION_PATCH ${CMAKE_MATCH_3})
 string(CONCAT DPP_VERSION ${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSION_PATCH})
 
 project(libdpp VERSION ${DPP_VERSION} LANGUAGES CXX)
+
+check_cxx_symbol_exists(prctl "sys/prctl.h" HAVE_PRCTL)
+check_cxx_symbol_exists(pthread_setname_np "pthread.h" HAVE_PTHREAD_SETNAME_NP)
 
 if(WIN32 AND NOT MINGW)
 	if (NOT WINDOWS_32_BIT)
@@ -284,6 +289,13 @@ if (DPP_BUILD_TEST)
 	add_executable(test ${coresrc})
 	target_compile_features(test PRIVATE cxx_std_17)
 	target_link_libraries(test PUBLIC ${modname})
+endif()
+
+if(HAVE_PRCTL)
+	target_compile_definitions(dpp PRIVATE HAVE_PRCTL)
+endif()
+if(HAVE_PTHREAD_SETNAME_NP)
+	target_compile_definitions(dpp PRIVATE HAVE_PTHREAD_SETNAME_NP)
 endif()
 
 if(WIN32 AND NOT MINGW)

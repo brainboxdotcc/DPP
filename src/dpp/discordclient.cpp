@@ -128,6 +128,7 @@ void discord_client::end_zlib()
 
 void discord_client::thread_run()
 {
+	utility::set_thread_name(std::string("shard/") + std::to_string(shard_id));
 	setup_zlib();
 	do {
 		bool error = false;

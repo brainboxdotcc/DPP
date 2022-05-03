@@ -406,5 +406,12 @@ namespace dpp {
 		 */
 		std::string DPP_EXPORT make_url_parameters(const std::map<std::string, uint64_t>& parameters);
 
+		/**
+		 * @brief Set the name of the current thread for debugging and statistical reporting
+		 * 
+		 * @param name New name to set
+		 */
+		void DPP_EXPORT set_thread_name(const std::string& name);
+
 	};
 };

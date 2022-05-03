@@ -284,16 +284,18 @@ private:
 
 	/**
 	 * @brief Inbound queue thread loop
+	 * @param index Thread index
 	 */
-	void in_loop();
+	void in_loop(uint32_t index);
 public:
 	/**
 	 * @brief Construct a new in thread object
 	 * 
 	 * @param owner Owning cluster
 	 * @param req_q Owning request queue
+	 * @param index Thread index number
 	 */
-	in_thread(class cluster* owner, class request_queue* req_q);
+	in_thread(class cluster* owner, class request_queue* req_q, uint32_t index);
 
 	/**
 	 * @brief Destroy the in thread object
