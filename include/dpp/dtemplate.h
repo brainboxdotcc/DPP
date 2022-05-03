@@ -92,7 +92,7 @@ public:
 	 * @param with_id Add ID to output
 	 * @return std::string JSON content 
 	 */
-	virtual std::string build_json(bool with_id = false) const;
+	std::string build_json(bool with_id = false) const;
 
 };
 

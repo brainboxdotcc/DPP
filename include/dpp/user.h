@@ -117,7 +117,7 @@ public:
 	 * @param with_id include ID in output
 	 * @return std::string JSON output
 	 */
-	virtual std::string build_json(bool with_id = true) const;
+	std::string build_json(bool with_id = true) const;
 
 	/**
 	 * @brief Get the avatar url of the user object
@@ -299,7 +299,7 @@ public:
 	 * @param with_id include ID in output
 	 * @return std::string JSON output
 	 */
-	virtual std::string build_json(bool with_id = true) const;
+	std::string build_json(bool with_id = true) const;
 
 	/**
 	 * @brief Construct a new user identified object
