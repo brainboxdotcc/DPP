@@ -531,7 +531,7 @@ public:
 	 * @param with_id True if an ID is to be included in the JSON
 	 * @return JSON string
 	 */
-	virtual std::string build_json(bool with_id = false) const;
+	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Get the base permissions for a member on this guild,
@@ -829,7 +829,7 @@ public:
 	 * @param with_id Add ID to output
 	 * @return std::string guild widget stringified json
 	 */
-	virtual std::string build_json(bool with_id = false) const;
+	std::string build_json(bool with_id = false) const;
 };
 
 /**

@@ -355,7 +355,7 @@ public:
 	 * @param with_id Add ID to output
 	 * @return The JSON text of the presence
 	 */
-	virtual std::string build_json(bool with_id = false) const;
+	std::string build_json(bool with_id = false) const;
 
 	/** The users status on desktop
 	 * @return The user's status on desktop

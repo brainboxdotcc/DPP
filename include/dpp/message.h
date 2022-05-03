@@ -873,7 +873,7 @@ struct DPP_EXPORT sticker : public managed, public json_interface<sticker> {
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	virtual std::string build_json(bool with_id = true) const;
+	std::string build_json(bool with_id = true) const;
 
 	/**
 	 * @brief Get the sticker url
@@ -935,7 +935,7 @@ struct DPP_EXPORT sticker_pack : public managed, public json_interface<sticker_p
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	virtual std::string build_json(bool with_id = true) const;
+	std::string build_json(bool with_id = true) const;
 
 };
 
