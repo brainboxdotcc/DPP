@@ -206,6 +206,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		/* This ensures we test both protocols, as voice is json and shard is etf */
 		bot.set_websocket_protocol(dpp::ws_etf);
 
+		bot.on_form_submit([&](const dpp::form_submit_t & event) {
+		});
+
 		bot.on_ready([&bot](const dpp::ready_t & event) {
 
 			set_test("CONNECTION", true);

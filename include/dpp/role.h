@@ -217,7 +217,7 @@ public:
 	 * @param with_id true if the ID is to be included in the json text
 	 * @return The json of the role
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Get the mention/ping for the role

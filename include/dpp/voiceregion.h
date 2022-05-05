@@ -80,7 +80,7 @@ public:
 	 * @param with_id Add ID to output
 	 * @return std::string JSON string
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief True if is the optimal voice server

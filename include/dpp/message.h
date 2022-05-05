@@ -873,7 +873,7 @@ struct DPP_EXPORT sticker : public managed, public json_interface<sticker> {
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	std::string build_json(bool with_id = true) const;
+	virtual std::string build_json(bool with_id = true) const;
 
 	/**
 	 * @brief Get the sticker url
@@ -935,7 +935,7 @@ struct DPP_EXPORT sticker_pack : public managed, public json_interface<sticker_p
 	 * @param with_id True if the ID is to be set in the JSON structure
 	 * @return The JSON text of the invite
 	 */
-	std::string build_json(bool with_id = true) const;
+	virtual std::string build_json(bool with_id = true) const;
 
 };
 
@@ -1263,7 +1263,7 @@ struct DPP_EXPORT message : public managed {
 	 * This will exclude some fields that are not valid in interactions at this time.
 	 * @return The JSON text of the message
 	 */
-	std::string build_json(bool with_id = false, bool is_interaction_response = false) const;
+	virtual std::string build_json(bool with_id = false, bool is_interaction_response = false) const;
 
 	/**
 	 * @brief Returns true if the message was crossposted to other servers

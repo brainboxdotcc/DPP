@@ -118,7 +118,7 @@ public:
 	 * @param with_id Add ID to output
 	 * @return JSON string of the object
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/** True if emoticons are enabled */
 	bool emoticons_enabled() const;

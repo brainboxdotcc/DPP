@@ -100,7 +100,7 @@ public:
 	 * @param with_id Include ID in JSON
 	 * @return The JSON text of the invite
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 };
 

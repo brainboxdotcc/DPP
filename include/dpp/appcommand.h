@@ -341,7 +341,7 @@ struct DPP_EXPORT interaction_response : public json_interface<interaction_respo
 	 *
 	 * @return std::string JSON string
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Add a command option choice

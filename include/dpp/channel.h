@@ -224,7 +224,7 @@ public:
 	 * @param with_id include the ID in the json
 	 * @return std::string JSON string
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set name of this channel object
