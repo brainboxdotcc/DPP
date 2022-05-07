@@ -548,7 +548,7 @@ public:
 	 * 
 	 * @return message right-clicked on
 	 */
-	message get_message();
+	message get_message() const;
 
 	/**
 	 * @brief Set the message object for this event
@@ -580,7 +580,7 @@ public:
 	 * 
 	 * @return user right clicked on
 	 */
-	user get_user();
+	user get_user() const;
 
 	/**
 	 * @brief Set the user object for this event

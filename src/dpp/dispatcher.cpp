@@ -59,7 +59,7 @@ context_menu_t::context_menu_t(class discord_client* client, const std::string& 
 message_context_menu_t::message_context_menu_t(class discord_client* client, const std::string& raw) : context_menu_t(client, raw) {
 }
 
-message message_context_menu_t::get_message() {
+message message_context_menu_t::get_message() const {
 	return ctx_message;
 }
 
@@ -71,7 +71,7 @@ message_context_menu_t& message_context_menu_t::set_message(const message& m) {
 user_context_menu_t::user_context_menu_t(class discord_client* client, const std::string& raw) : context_menu_t(client, raw) {
 }
 
-user user_context_menu_t::get_user() {
+user user_context_menu_t::get_user() const {
 	return ctx_user;
 }
 
