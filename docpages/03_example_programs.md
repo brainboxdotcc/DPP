@@ -1650,8 +1650,8 @@ int main()
             /* Register the command */
             bot.guild_command_create(
 		dpp::slashcommand()
+					.set_type(dpp::ctxm_user)
                     .set_name("High Five")
-                    .set_type(dpp::ctxm_user)
                     .set_application_id(bot.me.id),
                 857692897221033129 // you need to put your guild-id in here
             );
