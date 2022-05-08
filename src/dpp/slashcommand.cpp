@@ -249,7 +249,7 @@ slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
 }
 
 slashcommand& slashcommand::set_name(const std::string &n) {
-	name = lowercase(utility::utf8substr(n, 0, 32));
+	name = utility::utf8substr(n, 0, 32);
 	return *this;
 }
 
