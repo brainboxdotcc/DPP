@@ -126,6 +126,8 @@ enum audit_type {
 	ae_thread_update		=	111,
 	/// Thread delete
 	ae_thread_delete		=	112,
+	// Application command permissions update
+	ae_appcommand_permission_update	=	121,
 	/// Auto moderation rule creation
 	ae_automod_rule_create		=	140,
 	/// Auto moderation rule update
