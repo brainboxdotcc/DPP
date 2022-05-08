@@ -245,11 +245,18 @@ std::string slashcommand::build_json(bool with_id) const {
 
 slashcommand& slashcommand::set_type(slashcommand_contextmenu_type t) {
 	type = t;
+	if (type == ctxm_chat_input) {
+		name = lowercase(name);
+	}
 	return *this;
 }
 
 slashcommand& slashcommand::set_name(const std::string &n) {
-	name = lowercase(utility::utf8substr(n, 0, 32));
+	if (type == ctxm_chat_input) {
+		name = lowercase(utility::utf8substr(n, 0, 32));
+	} else {
+		name = utility::utf8substr(n, 0, 32);
+	}
 	return *this;
 }
 

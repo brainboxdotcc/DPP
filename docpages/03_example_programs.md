@@ -1650,19 +1650,18 @@ int main()
             /* Register the command */
             bot.guild_command_create(
 		dpp::slashcommand()
+					.set_type(dpp::ctxm_user)
                     .set_name("High Five")
-                    .set_type(dpp::ctxm_user)
                     .set_application_id(bot.me.id),
                 857692897221033129 // you need to put your guild-id in here
             );
         }
     });
 
-    /* Use the on_interaction_create event to look for application commands */
+    /* Use the on_user_context_menu event to look for user context menu actions */
     bot.on_user_context_menu([&](const dpp::user_context_menu_t &event) {
-         dpp::command_interaction cmd_data = event.command.get_command_interaction();
          /* check if the context menu name is High Five */
-         if (cmd_data.name == "High Five") {
+         if (event.command.get_command_name() == "High Five") {
              dpp::user user = event.get_user(); // the user who the command has been issued on
              dpp::user author = event.command.usr; // the user who clicked on the context menu
              event.reply(author.get_mention() + " slapped " + user.get_mention());

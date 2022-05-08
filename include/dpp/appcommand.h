@@ -930,6 +930,7 @@ public:
 	 * @brief Set the type of the slash command (only for context menu entries)
 	 * 
 	 * @param _type Type of context menu entry this command represents
+	 * @note If the type is dpp::slashcommand_contextmenu_type::ctxm_chat_input, the command name will be set to lowercase.
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_type(slashcommand_contextmenu_type _type);
@@ -940,6 +941,7 @@ public:
 	 * @param n name of command
 	 * @note The maximum length of a command name is 32 UTF-8 codepoints.
 	 * If your command name is longer than this, it will be truncated.
+	 * The command name will be set to lowercase on the default dpp::slashcommand_contextmenu_type::ctxm_chat_input type.
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_name(const std::string &n);
