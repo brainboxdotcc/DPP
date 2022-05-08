@@ -1658,7 +1658,7 @@ int main()
         }
     });
 
-    /* Use the on_interaction_create event to look for application commands */
+    /* Use the on_user_context_menu event to look for user context menu actions */
     bot.on_user_context_menu([&](const dpp::user_context_menu_t &event) {
          /* check if the context menu name is High Five */
          if (event.command.get_command_name() == "High Five") {
