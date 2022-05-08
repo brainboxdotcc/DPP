@@ -129,9 +129,11 @@ enum guild_flags : uint32_t {
  */
 enum guild_flags_extra : uint8_t {
 	/** Guild has premium progress bar enabled */
-	g_premium_progress_bar_enabled =		0b00000001,
+	g_premium_progress_bar_enabled =	0b00000001,
 	/** Guild can have an animated banner (doesn't mean it actually has one though) */
 	g_animated_banner =			0b00000010,
+	/** Guild has auto moderation */
+	g_auto_moderation =			0b00000100,
 };
 
 /**
@@ -693,6 +695,12 @@ public:
 	 * @return bool can have animated banner image
 	 */
 	bool has_animated_banner() const;
+
+	/**
+	 * @brief Guild has auto moderation features
+	 * @return bool has auto moderation features
+	 */
+	bool has_auto_moderation() const;
 
 	/**
 	 * @brief Guild has access to set an animated guild icon

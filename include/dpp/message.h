@@ -962,6 +962,42 @@ enum message_flags {
 };
 
 /**
+ * @brief Represents possible values for the dpp::embed type field.
+ * These are loosely defined by the API docs and do not influence how the client renders embeds.
+ * The only type a bot can send is dpp::embed_type::emt_rich.
+ */
+namespace embed_type {
+	/**
+	 * @brief Rich text
+	 */
+	const std::string emt_rich = "rich";
+	/**
+	 * @brief Image
+	 */
+	const std::string emt_image = "image";
+	/**
+	 * @brief Video link
+	 */
+	const std::string emt_video = "video";
+	/**
+	 * @brief Animated gif
+	 */
+	const std::string emt_gifv = "gifv";
+	/**
+	 * @brief Article
+	 */
+	const std::string emt_article = "article";
+	/**
+	 * @brief Link URL
+	 */
+	const std::string emt_link = "link";
+	/**
+	 * @brief Auto moderation filter
+	 */
+	const std::string emt_automod = "auto_moderation_message";
+};
+
+/**
  * @brief Message types for dpp::message::type
  */
 enum message_type {
@@ -1010,7 +1046,9 @@ enum message_type {
 	/// Invite reminder
 	mt_guild_invite_reminder			= 22,
 	/// Context Menu Command
-	mt_context_menu_command 			= 23
+	mt_context_menu_command 			= 23,
+	/// Auto moderation action
+	mt_auto_moderation_action			= 24,
 };
 
 /**
