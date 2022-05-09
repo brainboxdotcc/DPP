@@ -43,6 +43,7 @@
 #include <variant>
 #include <exception>
 #include <algorithm>
+#include <string>
 
 namespace dpp {
 
@@ -1598,18 +1599,24 @@ struct DPP_EXPORT voice_receive_t : public event_dispatch_t {
 	 * @brief Constructor
 	 * @param client The shard the event originated on.
 	 * WILL ALWAYS be NULL.
-	 * @param raw Raw event text as JSON
+	 * @param raw Raw event text as UDP packet.
 	 */
 	voice_receive_t(class discord_client* client, const std::string &raw);
 	class discord_voice_client* voice_client;
 	/**
-	 * @brief Audio data, encoded as 48kHz stereo PCM or Opus
+	 * @brief Audio data, encoded as 48kHz stereo PCM or Opus,
+	 * @deprecated Please switch to using audio_data.
 	 */
-	uint8_t* audio;
+	uint8_t* audio = nullptr;
 	/**
 	 * @brief Size of audio buffer
+	 * @deprecated Please switch to using audio_data.
 	 */
-	size_t audio_size;
+	size_t audio_size = 0;
+	/**
+	 * @brief Audio data, encoded as 48kHz stereo PCM or Opus,
+	 */
+	std::basic_string<uint8_t> audio_data;
 	/**
 	 * @brief User ID of speaker (zero if unknown)
 	 */

@@ -56,6 +56,9 @@
 #include <thread>
 #include <deque>
 #include <mutex>
+#include <memory>
+#include <future>
+#include <functional>
 #include <chrono>
 
 using json = nlohmann::json;
@@ -152,10 +155,109 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::vector<voice_out_packet> outbuf;
 
 	/**
-	 * @brief Input buffer. Each string is a received UDP
-	 * packet. These will usually be RTP.
+	 * @brief Data type of RTP packet sequence number field.
 	 */
-	std::vector<std::string> inbuf;
+	using rtp_seq_t = uint16_t;
+	using rtp_timestamp_t = uint32_t;
+
+	/**
+	 * @brief Keeps track of the voice payload to deliver to voice handlers.
+	 */
+	struct voice_payload {
+		/**
+		 * @brief The sequence number of the RTP packet that generated this
+		 * voice payload.
+		 */
+		rtp_seq_t seq;
+		/**
+		 * @brief The timestamp of the RTP packet that generated this voice
+		 * payload.
+		 *
+		 * The timestamp is used to detect the order around where sequence
+		 * number wraps around.
+		 */
+		rtp_timestamp_t timestamp;
+		/**
+		 * @brief The event payload that voice handlers receive.
+		 */
+		std::unique_ptr<voice_receive_t> vr;
+		
+		/**
+		 * @brief For priority_queue sorting.
+		 * @return true if "this" has lower priority that "other",
+		 *         i.e. appears later in the queue; false otherwise.
+		 */
+		bool operator<(const voice_payload& other) const;
+	};
+
+	struct voice_payload_parking_lot {
+		/**
+		 * @brief The range of RTP packet sequence number and timestamp in the lot.
+		 *
+		 * The minimum is used to drop packets that arrive too late. Packets
+		 * less than the minimum have been delivered to voice handlers and
+		 * there is no going back. Unfortunately we just have to drop them.
+		 *
+		 * The maximum is used, at flush time, to calculate the minimum for
+		 * the next batch. The maximum is also updated every time we receive an
+		 * RTP packet with a larger value.
+		 */
+		struct seq_range_t {
+			rtp_seq_t min_seq, max_seq;
+			rtp_timestamp_t min_timestamp, max_timestamp;
+		} range;
+		/**
+		 * @brief The queue of parked voice payloads.
+		 * 
+		 * We group payloads and deliver them to handlers periodically as the
+		 * handling of out-of-order RTP packets. Payloads in between flushes
+		 * are parked and sorted in this queue.
+		 */
+		std::priority_queue<voice_payload> parked_payloads;
+#ifdef HAVE_VOICE
+		/**
+		 * @brief libopus decoder
+		 *
+		 * Shared with the voice courier thread that does the decoding.
+		 * This is not protected by a mutex because only the courier thread
+		 * uses the decoder.
+		 */
+		std::shared_ptr<OpusDecoder> decoder;
+#endif
+	};
+	/**
+	 * @brief Thread used to deliver incoming voice data to handlers.
+	 */
+	std::thread voice_courier;
+	/**
+	 * @brief Shared state between this voice client and the courier thread.
+	 */
+	struct courier_shared_state_t {
+		/**
+		 * @brief Protects all following members.
+		 */
+		std::mutex mtx;
+		/**
+		 * @brief Signaled when there is a new payload to deliver or terminating state has changed.
+		 */
+		std::condition_variable signal_iteration;
+		/**
+		 * @brief Voice buffers to be reported to handler, grouped by speaker.
+		 *
+		 * Buffers are parked here and flushed every 500ms.
+		 */
+		std::map<snowflake, voice_payload_parking_lot> parked_voice_payloads;
+		/**
+		 * @brief Used to signal termination.
+		 *
+		 * @note Pending payloads are delivered first before termination.
+		 */
+		bool terminating = false;
+	} voice_courier_shared_state;
+	/**
+	 * @brief The run loop of the voice courier thread.
+	 */
+	static void voice_courier_loop(discord_voice_client&, courier_shared_state_t&);
 
 	/**
 	 * @brief If true, audio packet sending is paused
@@ -169,11 +271,6 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	OpusEncoder* encoder;
 
 	/**
-	 * @brief libopus decoder
-	 */
-	OpusDecoder* decoder;
-
-	/**
 	 * @brief libopus repacketizer
 	 * (merges frames into one packet)
 	 */
@@ -183,11 +280,6 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief libopus encoder
 	 */
 	void* encoder;
-
-	/**
-	 * @brief libopus decoder
-	 */
-	void* decoder;
 
 	/**
 	 * @brief libopus repacketizer
@@ -381,11 +473,6 @@ public:
 	 * @brief True when the thread is shutting down
 	 */
 	bool terminating;
-
-	/**
-	 * @brief Decode received voice packets to PCM
-	 */
-	bool decode_voice_recv;
 
 	/**
 	 * @brief Heartbeat interval for sending heartbeat keepalive
