@@ -138,6 +138,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						 */
 						voice_receive_t vr(nullptr, "");
 						vr.voice_client = &client;
+						vr.user_id = d.user_id;
 						vr.audio_data.assign(reinterpret_cast<uint8_t*>(pcm),
 						                     samples * opus_channel_count * sizeof(opus_int16));
 
@@ -569,7 +570,7 @@ void discord_voice_client::read_ready()
 
 		vp.vr->voice_client = this;
 
-		{   /* Get the User ID of the speaker */
+		{	/* Get the User ID of the speaker */
 			uint32_t speaker_ssrc;
 			std::memcpy(&speaker_ssrc, &packet[8], sizeof(uint32_t));
 			speaker_ssrc = ntohl(speaker_ssrc);
