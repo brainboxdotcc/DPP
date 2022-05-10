@@ -309,9 +309,11 @@ bool discord_client::handle_frame(const std::string &buffer)
 							}
 						}
 					};
+					/* Users don't use intents so this isn't required
 					if (this->intents) {
 						obj["d"]["intents"] = this->intents;
 					}
+					*/
 					this->write(jsonobj_to_string(obj));
 					this->connect_time = creator->last_identify = time(NULL);
 					reconnects++;
