@@ -66,6 +66,21 @@ bool discord_voice_client::voice_payload::operator<(const voice_payload& other) 
 	return seq > other.seq || timestamp > other.timestamp;
 }
 
+size_t audio_mix(int16_t* pcm_mix, int16_t* pcm, size_t park_count, int samples, int& max_samples) {
+	/* Mix the combined stream if combined audio is bound */
+	if (park_count == 0) {
+		memcpy(pcm_mix, pcm, samples * opus_channel_count * sizeof(int16_t));
+	} else {
+		for (int32_t v = 0; v < samples * opus_channel_count; v += sizeof(int16_t)) {
+			*(pcm_mix + v) = (*(pcm_mix + v) / 2) + (*(pcm + v) / 2);
+		}
+	}
+	if (samples > max_samples) {
+		max_samples = samples;
+	}
+	return park_count + 1;
+}
+
 void discord_voice_client::voice_courier_loop(discord_voice_client& client, courier_shared_state_t& shared_state) {
 #ifdef HAVE_VOICE
 	while (true) {
@@ -110,13 +125,17 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			}
 		}
 
-		if (client.creator->on_voice_receive.empty()) {
+		if (client.creator->on_voice_receive.empty() && client.creator->on_voice_receive_combined.empty()) {
 			/*
 			 * We do this check late, to ensure this thread drains the data
 			 * and prevents accumulating them even when there are no handlers.
 			 */
 			continue;
 		}
+
+		opus_int16 pcm_mix[23040] = { 0 };
+		size_t park_count = 0;
+		int max_samples = 0;
 
 		for (auto& d : flush_data) {
 			for (rtp_seq_t seq = d.min_seq; !d.parked_payloads.empty(); ++seq) {
@@ -146,7 +165,14 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						vr.audio = vr.audio_data.data();
 						vr.audio_size = vr.audio_data.length();
 
-						client.creator->on_voice_receive.call(vr);
+						/* Mix the combined stream if combined audio is bound */
+						if (!client.creator->on_voice_receive_combined.empty()) {
+							park_count = audio_mix((int16_t*)&pcm_mix, (int16_t*)&pcm, park_count, samples, max_samples);
+						}
+
+						if (!client.creator->on_voice_receive.empty()) {
+							client.creator->on_voice_receive.call(vr);
+						}
 					}
 				} else {
 					voice_receive_t& vr = *d.parked_payloads.top().vr;
@@ -155,15 +181,39 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						vr.audio_data.assign(reinterpret_cast<uint8_t*>(pcm),
 						                     samples * opus_channel_count * sizeof(opus_int16));
 						// for backwards compatibility; remove soon
+						vr.voice_client = &client;
+						vr.user_id = d.user_id;
 						vr.audio = vr.audio_data.data();
 						vr.audio_size = vr.audio_data.length();
 
-						client.creator->on_voice_receive.call(vr);
+						/* Mix the combined stream if combined audio is bound */
+						if (!client.creator->on_voice_receive_combined.empty()) {
+							park_count = audio_mix((int16_t*)&pcm_mix, (int16_t*)&pcm, park_count, samples, max_samples);
+						}
+
+						if (!client.creator->on_voice_receive.empty()) {
+							client.creator->on_voice_receive.call(vr);
+						}
 					}
 
 					d.parked_payloads.pop();
 				}
 			}
+		}
+
+		/* If combined receive is bound, dispatch it */
+		if (park_count && !client.creator->on_voice_receive_combined.empty()) {
+			voice_receive_t vr(nullptr, "");
+			vr.voice_client = &client;
+			vr.audio_data.assign(reinterpret_cast<uint8_t*>(pcm_mix),
+				max_samples * opus_channel_count * sizeof(opus_int16));
+			// for backwards compatibility; remove soon
+			vr.audio = vr.audio_data.data();
+			vr.audio_size = vr.audio_data.length();
+			vr.user_id = 0;
+
+			client.creator->on_voice_receive_combined.call(vr);
+
 		}
 	}
 #endif
@@ -602,7 +652,7 @@ void discord_voice_client::read_ready()
 		}
 
 		std::basic_string_view<uint8_t> decrypted_data{encrypted_data, encrypted_data_len - crypto_box_MACBYTES};
-		if (const bool uses_extension = (packet[0] >> 4) & 0b0001) {
+		if (const bool uses_extension [[maybe_unused]] = (packet[0] >> 4) & 0b0001) {
 			/* Skip the RTP Extensions */
 			size_t ext_len = 0;
 			{

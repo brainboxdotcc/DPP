@@ -1428,6 +1428,15 @@ public:
 	 */
 	event_router_t<voice_receive_t> on_voice_receive;
 
+	/**
+	 * @brief Called when new audio data is received, combined and mixed for all speaking users.
+	 * 
+	 * @note Receiving audio for bots is not officially supported by discord.
+	 * 
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type voice_receive_t&, and returns void.
+	 */
+	event_router_t<voice_receive_t> on_voice_receive_combined;
 	
 	/**
 	 * @brief Called when sending of audio passes over a track marker.
