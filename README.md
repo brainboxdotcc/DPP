@@ -1,5 +1,5 @@
-# D++
-## An incredibly lightweight C++ Discord library
+# User-D++
+## An incredibly lightweight C++ Discord library that I changed literally two lines in and now has self-bot functionality :)
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp) 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) 
