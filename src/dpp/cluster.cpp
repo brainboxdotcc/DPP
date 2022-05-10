@@ -158,7 +158,7 @@ void cluster::start(bool return_after) {
 		gateway g;
 		try {
 			g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
-			numshards = g.shards;
+			numshards = g.shards = g.session_start_remaining = 1;
 		}
 		catch (const dpp::rest_exception& e) {
 			if (std::string(e.what()) == "401: Unauthorized") {
