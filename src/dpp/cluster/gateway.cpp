@@ -23,7 +23,7 @@
 namespace dpp {
 
 void cluster::get_gateway_bot(command_completion_event_t callback) {
-	rest_request<gateway>(this, API_PATH "/gateway", "bot", "", m_get, "", callback);
+	rest_request<gateway>(this, API_PATH "", "gateway", "", m_get, "", callback);
 }
 
 };
