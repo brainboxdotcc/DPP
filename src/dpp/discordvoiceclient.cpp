@@ -70,6 +70,7 @@ bool discord_voice_client::voice_payload::operator<(const voice_payload& other) 
 	return seq > other.seq || timestamp > other.timestamp;
 }
 
+#ifdef HAVE_VOICE
 size_t audio_mix(discord_voice_client& client, opus_int32* pcm_mix, const opus_int16* pcm, size_t park_count, int samples, int& max_samples) {
 	/* Mix the combined stream if combined audio is bound */
 	if (client.creator->on_voice_receive_combined.empty()) {
@@ -82,6 +83,7 @@ size_t audio_mix(discord_voice_client& client, opus_int32* pcm_mix, const opus_i
 	max_samples = std::max(samples, max_samples);
 	return park_count + 1;
 }
+#endif
 
 void discord_voice_client::voice_courier_loop(discord_voice_client& client, courier_shared_state_t& shared_state) {
 #ifdef HAVE_VOICE
