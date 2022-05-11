@@ -21,6 +21,7 @@
 #include <string_view>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #ifndef WIN32
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -66,18 +67,16 @@ bool discord_voice_client::voice_payload::operator<(const voice_payload& other) 
 	return seq > other.seq || timestamp > other.timestamp;
 }
 
-size_t audio_mix(int16_t* pcm_mix, int16_t* pcm, size_t park_count, int samples, int& max_samples) {
+size_t audio_mix(discord_voice_client& client, opus_int32* pcm_mix, const opus_int16* pcm, size_t park_count, int samples, int& max_samples) {
 	/* Mix the combined stream if combined audio is bound */
-	if (park_count == 0) {
-		memcpy(pcm_mix, pcm, samples * opus_channel_count * sizeof(int16_t));
-	} else {
-		for (int32_t v = 0; v < samples * opus_channel_count; v += sizeof(int16_t)) {
-			*(pcm_mix + v) = (*(pcm_mix + v) / 2) + (*(pcm + v) / 2);
-		}
+	if (client.creator->on_voice_receive_combined.empty()) {
+		return 0;
 	}
-	if (samples > max_samples) {
-		max_samples = samples;
+	/* We must upsample the data to 32 bits wide, otherwise we could overflow */
+	for (opus_int32 v = 0; v < samples * opus_channel_count; ++v) {
+		pcm_mix[v] += pcm[v];
 	}
+	max_samples = std::max(samples, max_samples);
 	return park_count + 1;
 }
 
@@ -133,7 +132,11 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			continue;
 		}
 
-		opus_int16 pcm_mix[23040] = { 0 };
+		/* This 32 bit PCM audio buffer is an upmixed version of the streams
+		 * combined for all users. This is a wider width audio buffer so that
+	 	 * there is no clipping when there are many loud audio sources at once.
+		 */
+		opus_int32 pcm_mix[23040] = { 0 };
 		size_t park_count = 0;
 		int max_samples = 0;
 
@@ -155,45 +158,21 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						 * Since this sample comes from a lost packet,
 						 * we can only pretend there is an event, without any raw payload byte.
 						 */
-						voice_receive_t vr(nullptr, "");
-						vr.voice_client = &client;
-						vr.user_id = d.user_id;
-						vr.audio_data.assign(reinterpret_cast<uint8_t*>(pcm),
-						                     samples * opus_channel_count * sizeof(opus_int16));
+						voice_receive_t vr(nullptr, "", &client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
+							samples * opus_channel_count * sizeof(opus_int16));
 
-						// for backwards compatibility; remove soon
-						vr.audio = vr.audio_data.data();
-						vr.audio_size = vr.audio_data.length();
-
-						/* Mix the combined stream if combined audio is bound */
-						if (!client.creator->on_voice_receive_combined.empty()) {
-							park_count = audio_mix((int16_t*)&pcm_mix, (int16_t*)&pcm, park_count, samples, max_samples);
-						}
-
-						if (!client.creator->on_voice_receive.empty()) {
-							client.creator->on_voice_receive.call(vr);
-						}
+						park_count = audio_mix(client, pcm_mix, pcm, park_count, samples, max_samples);
+						client.creator->on_voice_receive.call(vr);
 					}
 				} else {
 					voice_receive_t& vr = *d.parked_payloads.top().vr;
 					if (int samples = opus_decode(d.decoder.get(), vr.audio_data.data(), vr.audio_data.length(), pcm, 5760, 0);
 					    samples >= 0) {
-						vr.audio_data.assign(reinterpret_cast<uint8_t*>(pcm),
-						                     samples * opus_channel_count * sizeof(opus_int16));
-						// for backwards compatibility; remove soon
-						vr.voice_client = &client;
-						vr.user_id = d.user_id;
-						vr.audio = vr.audio_data.data();
-						vr.audio_size = vr.audio_data.length();
+						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
+							samples * opus_channel_count * sizeof(opus_int16));
 
-						/* Mix the combined stream if combined audio is bound */
-						if (!client.creator->on_voice_receive_combined.empty()) {
-							park_count = audio_mix((int16_t*)&pcm_mix, (int16_t*)&pcm, park_count, samples, max_samples);
-						}
-
-						if (!client.creator->on_voice_receive.empty()) {
-							client.creator->on_voice_receive.call(vr);
-						}
+						park_count = audio_mix(client, pcm_mix, pcm, park_count, samples, max_samples);
+						client.creator->on_voice_receive.call(vr);
 					}
 
 					d.parked_payloads.pop();
@@ -202,18 +181,16 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		}
 
 		/* If combined receive is bound, dispatch it */
-		if (park_count && !client.creator->on_voice_receive_combined.empty()) {
-			voice_receive_t vr(nullptr, "");
-			vr.voice_client = &client;
-			vr.audio_data.assign(reinterpret_cast<uint8_t*>(pcm_mix),
+		if (park_count) {
+			/* Downsample the 32 bit samples back to 16 bit */
+			opus_int16 pcm_downsample[23040] = { 0 };
+			for (int v = 0; v < max_samples * opus_channel_count; ++v) {
+				pcm_downsample[v] = pcm_mix[v] / park_count;
+			}
+			voice_receive_t vr(nullptr, "", &client, 0, reinterpret_cast<uint8_t*>(pcm_downsample),
 				max_samples * opus_channel_count * sizeof(opus_int16));
-			// for backwards compatibility; remove soon
-			vr.audio = vr.audio_data.data();
-			vr.audio_size = vr.audio_data.length();
-			vr.user_id = 0;
 
 			client.creator->on_voice_receive_combined.call(vr);
-
 		}
 	}
 #endif
@@ -365,11 +342,11 @@ bool discord_voice_client::handle_frame(const std::string &data)
 				if (j.find("d") != j.end() && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null())
 				{
 					snowflake u_id = snowflake_not_null(&j["d"], "user_id");
-					auto it = std::find_if(ssrcMap.begin(), ssrcMap.end(),
+					auto it = std::find_if(ssrc_map.begin(), ssrc_map.end(),
 					   [&u_id](const auto & p) { return p.second == u_id; });
 
-					if (it != ssrcMap.end()) {
-						ssrcMap.erase(it);
+					if (it != ssrc_map.end()) {
+						ssrc_map.erase(it);
 					}
 
 					if (!creator->on_voice_client_disconnect.empty())
@@ -393,7 +370,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 				{
 					uint32_t u_ssrc = j["d"]["ssrc"].get<uint32_t>();
 					snowflake u_id = snowflake_not_null(&j["d"], "user_id");
-					ssrcMap[u_ssrc] = u_id;
+					ssrc_map[u_ssrc] = u_id;
 
 					if (!creator->on_voice_client_speaking.empty()) {
 						voice_client_speaking_t vcs(nullptr, data);
@@ -624,7 +601,7 @@ void discord_voice_client::read_ready()
 			uint32_t speaker_ssrc;
 			std::memcpy(&speaker_ssrc, &packet[8], sizeof(uint32_t));
 			speaker_ssrc = ntohl(speaker_ssrc);
-			vp.vr->user_id = ssrcMap[speaker_ssrc];
+			vp.vr->user_id = ssrc_map[speaker_ssrc];
 		}
 
 		/* Get the sequence number of the voice UDP packet */
