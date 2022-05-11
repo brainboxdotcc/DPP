@@ -18,14 +18,17 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#ifndef WIN32
+	#include <unistd.h>
+	#include <arpa/inet.h>
+#else
+	/* Windows #define's min() and max(), breaking std::max(). stupid stupid stupid... */
+	#define NOMINMAX
+#endif
 #include <string_view>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#ifndef WIN32
-#include <unistd.h>
-#include <arpa/inet.h>
-#endif
 #include <dpp/exception.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/cache.h>
@@ -34,12 +37,12 @@
 #include <dpp/fmt-minimal.h>
 
 #ifdef HAVE_VOICE
-#include <sodium.h>
-#include <opus/opus.h>
+	#include <sodium.h>
+	#include <opus/opus.h>
 #else
-struct OpusDecoder {};
-struct OpusEncoder {};
-struct OpusRepacketizer {};
+	struct OpusDecoder {};
+	struct OpusEncoder {};
+	struct OpusRepacketizer {};
 #endif
 
 namespace dpp {
