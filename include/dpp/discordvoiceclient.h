@@ -221,14 +221,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 		 * This is not protected by a mutex because only the courier thread
 		 * uses the decoder.
 		 */
-#ifdef HAVE_VOICE
 		std::shared_ptr<OpusDecoder> decoder;
-#else
-		/* A dummy value to preserve binary ABI compatibility between
-		 * versions of the library built with and without voice
-		 */
-		std::shared_ptr<size_t> decoder;
-#endif
 	};
 	/**
 	 * @brief Thread used to deliver incoming voice data to handlers.
