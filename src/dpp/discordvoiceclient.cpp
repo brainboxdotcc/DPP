@@ -587,7 +587,7 @@ void discord_voice_client::read_ready()
 	uint8_t buffer[65535];
 	int r = this->udp_recv((char*)buffer, sizeof(buffer));
 
-	if (r > 0 && !creator->on_voice_receive.empty()) {
+	if (r > 0 && (!creator->on_voice_receive.empty() || !creator->on_voice_receive_combined.empty())) {
 		const std::basic_string_view<uint8_t> packet{buffer, static_cast<size_t>(r)};
 		constexpr size_t header_size = 12;
 		if (static_cast<size_t>(r) < header_size) {
