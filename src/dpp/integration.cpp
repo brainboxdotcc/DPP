@@ -68,11 +68,11 @@ integration& integration::fill_from_json(nlohmann::json* j)
 	if (int8_not_null(j, "expire_behavior"))
 		this->flags |= if_expire_kick;
 	this->expire_grace_period = int32_not_null(j, "expire_grace_period");
-	if (j->find("user") != j->end()) {
+	if (j->contains("user")) {
 		auto t = (*j)["user"];
 		this->user_id = snowflake_not_null(&t, "user_id");
 	}
-	if (j->find("application") != j->end()) {
+	if (j->contains("application")) {
 		auto & t = (*j)["application"];
 		this->app.id = snowflake_not_null(&t, "id");
 		if (t.find("bot") != t.end()) {
@@ -128,7 +128,7 @@ connection& connection::fill_from_json(nlohmann::json* j) {
 	this->friend_sync = bool_not_null(j, "friend_sync");
 	this->show_activity = bool_not_null(j, "show_activity");
 	this->visible = (int32_not_null(j, "visibility") == 1);
-	if (j->find("integrations") != j->end()) {
+	if (j->contains("integrations")) {
 		integrations.reserve((*j)["integrations"].size());
 		for (auto & i : (*j)["integrations"]) {
 			integrations.emplace_back(integration().fill_from_json(&i));

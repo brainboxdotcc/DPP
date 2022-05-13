@@ -34,7 +34,7 @@ ban::~ban() = default;
 
 ban& ban::fill_from_json(nlohmann::json* j) {
 	reason = string_not_null(j, "reason");
-	if (j->find("user") != j->end()) {
+	if (j->contains("user")) {
 		json & user = (*j)["user"];
 		user_id = snowflake_not_null(&user, "id");
 	}

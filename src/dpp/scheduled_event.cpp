@@ -127,7 +127,7 @@ scheduled_event& scheduled_event::fill_from_json(const json* j) {
 	if (i != j->end()) {
 		set_string_not_null(&((*j)["entity_metadata"]), "location", this->entity_metadata.location);
 	}
-	if (j->find("creator") != j->end()) {
+	if (j->contains("creator")) {
 		json u = (*j)["creator"];
 		creator.fill_from_json(&u);
 	}

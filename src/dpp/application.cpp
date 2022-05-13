@@ -58,7 +58,7 @@ application& application::fill_from_json(nlohmann::json* j) {
 		cover_image = ci;
 	}
 	set_int32_not_null(j, "flags", flags);
-	if (j->at("team")) {
+	if (j->contains("team")) {
 		json& t = (*j)["team"];
 		std::string i = string_not_null(&t, "icon");
 		if (!i.empty()) {

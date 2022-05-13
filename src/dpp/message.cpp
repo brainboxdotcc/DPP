@@ -523,7 +523,7 @@ embed::embed(json* j) : embed() {
 	url = string_not_null(j, "url");
 	timestamp = ts_not_null(j, "timestamp");
 	color = int32_not_null(j, "color");
-	if (j->find("footer") != j->end()) {
+	if (j->contains("footer")) {
 		dpp::embed_footer f;
 		json& fj = (*j)["footer"];
 		f.text = string_not_null(&fj, "text");
@@ -533,7 +533,7 @@ embed::embed(json* j) : embed() {
 	}
 	std::vector<std::string> type_list = { "image", "video", "thumbnail" };
 	for (auto& s : type_list) {
-		if (j->find(s) != j->end()) {
+		if (j->contains(s)) {
 			embed_image curr;
 			json& fi = (*j)[s];
 			curr.url = string_not_null(&fi, "url");
@@ -549,14 +549,14 @@ embed::embed(json* j) : embed() {
 			}
 		}
 	}
-	if (j->find("provider") != j->end()) {
+	if (j->contains("provider")) {
 		json &p = (*j)["provider"];
 		dpp::embed_provider pr;
 		pr.name = string_not_null(&p, "name");
 		pr.url = string_not_null(&p, "url");
 		provider = pr;
 	}
-	if (j->find("author") != j->end()) {
+	if (j->contains("author")) {
 		json &a = (*j)["author"];
 		dpp::embed_author au;
 		au.name = string_not_null(&a, "name");
@@ -565,7 +565,7 @@ embed::embed(json* j) : embed() {
 		au.proxy_icon_url = string_not_null(&a, "proxy_icon_url");
 		author = au;
 	}
-	if (j->find("fields") != j->end()) {
+	if (j->contains("fields")) {
 		json &fl = (*j)["fields"];
 		for (auto & field : fl) {
 			embed_field f;
@@ -1056,7 +1056,7 @@ sticker& sticker::fill_from_json(nlohmann::json* j) {
 	this->format_type = static_cast<sticker_format>(int8_not_null(j, "format_type"));
 	this->available = bool_not_null(j, "available");
 	this->sort_value = int8_not_null(j, "sort_value");
-	if (j->find("user") != j->end()) {
+	if (j->contains("user")) {
 		sticker_user.fill_from_json(&((*j)["user"]));
 	}
 
@@ -1099,7 +1099,7 @@ sticker_pack& sticker_pack::fill_from_json(nlohmann::json* j) {
 	this->banner_asset_id = snowflake_not_null(j, "banner_asset_id");
 	this->name = string_not_null(j, "name");
 	this->description = string_not_null(j, "description");
-	if (j->find("stickers") != j->end()) {
+	if (j->contains("stickers")) {
 		json & sl = (*j)["stickers"];
 		for (auto& s : sl) {
 			this->stickers[snowflake_not_null(&s, "id")] = sticker().fill_from_json(&s);
