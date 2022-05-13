@@ -88,6 +88,7 @@ size_t audio_mix(discord_voice_client& client, opus_int32* pcm_mix, const opus_i
 
 void discord_voice_client::voice_courier_loop(discord_voice_client& client, courier_shared_state_t& shared_state) {
 #ifdef HAVE_VOICE
+	utility::set_thread_name(std::string("vcourier/") + std::to_string(client.server_id));
 	while (true) {
 		constexpr std::chrono::milliseconds iteration_interval(500);
 		std::this_thread::sleep_for(iteration_interval);
