@@ -335,10 +335,6 @@ public:
 	 * Note that if you have previously registered your commands and they have not changed, you do
 	 * not need to call this again. Discord retains a cache of previously added commands.
 	 * 
-	 * @note Registration of global slash commands can take up to an hour to appear on Discord.
-	 * This is a Discord API limitation. For rapid testing use guild specific commands by specifying
-	 * a guild ID when declaring the command.
-	 * 
 	 * @return commandhandler& Reference to self for chaining method calls
 	 */
 	commandhandler& register_commands();
