@@ -159,7 +159,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 		}
 	}
 
-	if (j->find("status") != j->end()) {
+	if (j->contains("status")) {
 		flags &= PF_CLEAR_STATUS;
 		std::string main = string_not_null(j, "status");
 		if (main == "online")
@@ -171,7 +171,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 	}
 
 
-	if (j->find("activities") != j->end()) {
+	if (j->contains("activities")) {
 		activities.clear();
 		for (auto & act : (*j)["activities"]) {
 			activity a;

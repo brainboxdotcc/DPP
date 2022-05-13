@@ -42,7 +42,7 @@ emoji::~emoji() {
 emoji& emoji::fill_from_json(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	name = string_not_null(j, "name");
-	if (j->find("user") != j->end()) {
+	if (j->contains("user")) {
 		json & user = (*j)["user"];
 		user_id = snowflake_not_null(&user, "id");
 	}

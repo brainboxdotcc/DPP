@@ -64,7 +64,7 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	dm_permission = bool_not_null(j, "dm_permission");
 
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
-	if (j->find("options") != j->end()) {
+	if (j->contains("options")) {
 		for (auto &option: (*j)["options"]) {
 			// options is filled recursive
 			options.push_back(command_option().fill_from_json(&option));
@@ -297,7 +297,7 @@ command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) 
 	} else { // else string
 		value.emplace<std::string>((*j)["value"]);
 	}
-	if (j->find("name_localizations") != j->end()) {
+	if (j->contains("name_localizations")) {
 		for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
 			name_localizations[loc.key()] = loc.value();
 		}
@@ -351,24 +351,24 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
         o.name = string_not_null(j, "name");
         o.description = string_not_null(j, "description");
         o.required = bool_not_null(j, "required");
-        if (j->find("choices") != j->end()) {
+        if (j->contains("choices")) {
             for (auto& jchoice : (*j)["choices"]) {
                 o.choices.push_back(command_option_choice().fill_from_json(&jchoice));
             }
         }
 
-	if (j->find("name_localizations") != j->end()) {
+	if (j->contains("name_localizations")) {
 		for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
 			o.name_localizations[loc.key()] = loc.value();
 		}
 	}
-	if (j->find("description_localizations") != j->end()) {
+	if (j->contains("description_localizations")) {
 		for(auto loc = (*j)["description_localizations"].begin(); loc != (*j)["description_localizations"].end(); ++loc) {
 			o.description_localizations[loc.key()] = loc.value();
 		}
 	}
 
-        if (j->find("options") != j->end() && i > 0) {
+        if (j->contains("options") && i > 0) {
             i--; // prevent infinite recursion call with a counter
             for (auto &joption : (*j)["options"]) {
                 command_option p;
@@ -377,19 +377,19 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
             }
         }
 
-        if (j->find("channel_types") != j->end()) {
+        if (j->contains("channel_types")) {
             for (auto& jtype : (*j)["channel_types"]) {
                 o.channel_types.push_back( (channel_type)jtype.get<int8_t>());
             }
         }
-        if (j->find("min_value") != j->end()) {
+        if (j->contains("min_value")) {
             if ((*j)["min_value"].is_number_integer()) {
                 o.min_value.emplace<int64_t>(int64_not_null(j, "min_value"));
             } else if ((*j)["min_value"].is_number()) {
                 o.min_value.emplace<double>(double_not_null(j, "min_value"));
             }
         }
-        if (j->find("max_value") != j->end()) {
+        if (j->contains("max_value")) {
             if ((*j)["max_value"].is_number_integer()) {
                 o.min_value.emplace<int64_t>(int64_not_null(j, "max_value"));
             } else if ((*j)["max_value"].is_number()) {
@@ -690,7 +690,7 @@ interaction_response::interaction_response(interaction_response_type t) : intera
 
 interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 	type = (interaction_response_type)int8_not_null(j, "type");
-	if (j->find("data") != j->end()) {
+	if (j->contains("data")) {
 		msg->fill_from_json(&((*j)["data"]));
 	}
 	return *this;
@@ -810,7 +810,7 @@ guild_command_permissions &guild_command_permissions::fill_from_json(nlohmann::j
 	id = snowflake_not_null(j, "id");
 	application_id = snowflake_not_null(j, "application_id");
 	guild_id = snowflake_not_null(j, "guild_id");
-	if (j->find("permissions") != j->end()) {
+	if (j->contains("permissions")) {
 		for (auto &p : (*j)["permissions"]) {
 			permissions.push_back(command_permission().fill_from_json(&p));
 		}

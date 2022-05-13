@@ -35,11 +35,11 @@ invite::~invite() = default;
 
 invite& invite::fill_from_json(nlohmann::json* j) {
 	code = string_not_null(j, "code");
-	expires_at = (j->find("expires_at") != j->end()) ? ts_not_null(j, "expires_at") : 0;
-	guild_id = (j->find("guild") != j->end()) ? snowflake_not_null(&((*j)["guild"]), "id") : 0;
-	channel_id = (j->find("channel") != j->end()) ? snowflake_not_null(&((*j)["channel"]), "id") : 0;
-	inviter_id = (j->find("inviter") != j->end()) ? snowflake_not_null(&((*j)["inviter"]), "id") : 0;
-	target_user_id = (j->find("target_user") != j->end()) ? snowflake_not_null(&((*j)["target_user"]), "id") : 0;
+	expires_at = (j->contains("expires_at")) ? ts_not_null(j, "expires_at") : 0;
+	guild_id = (j->contains("guild")) ? snowflake_not_null(&((*j)["guild"]), "id") : 0;
+	channel_id = (j->contains("channel")) ? snowflake_not_null(&((*j)["channel"]), "id") : 0;
+	inviter_id = (j->contains("inviter")) ? snowflake_not_null(&((*j)["inviter"]), "id") : 0;
+	target_user_id = (j->contains("target_user")) ? snowflake_not_null(&((*j)["target_user"]), "id") : 0;
 	target_user_type = int8_not_null(j, "target_user_type");
 	approximate_presence_count = int32_not_null(j, "approximate_presence_count");
 	approximate_member_count = int32_not_null(j, "approximate_member_count");
@@ -47,8 +47,8 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 	max_uses = int32_not_null(j, "max_uses");
 	temporary = bool_not_null(j, "temporary");
 	unique = bool_not_null(j, "unique");
-	uses = (j->find("uses") != j->end()) ? int32_not_null(j, "uses") : 0;
-	if (j->find("stage_instance") != j->end()) {
+	uses = (j->contains("uses")) ? int32_not_null(j, "uses") : 0;
+	if (j->contains("stage_instance")) {
 		stage = stage_instance().fill_from_json(&((*j)["stage_instance"]));
 	}
 	return *this;

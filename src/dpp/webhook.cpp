@@ -61,7 +61,7 @@ webhook& webhook::fill_from_json(nlohmann::json* j) {
 	type = int8_not_null(j, "type");
 	channel_id = snowflake_not_null(j, "channel_id");
 	guild_id = snowflake_not_null(j, "guild_id");
-	if (j->find("user") != j->end()) {
+	if (j->contains("user")) {
 		json & user = (*j)["user"];
 		user_id = snowflake_not_null(&user, "id");
 	}
