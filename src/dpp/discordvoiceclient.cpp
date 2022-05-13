@@ -18,32 +18,38 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <string>
+#ifndef WIN32
+	#include <unistd.h>
+	#include <arpa/inet.h>
+#else
+	/* Windows #define's min() and max(), breaking std::max(). stupid stupid stupid... */
+	#define NOMINMAX
+#endif
+#include <string_view>
 #include <iostream>
 #include <fstream>
-#ifndef WIN32
-#include <unistd.h>
-#include <arpa/inet.h>
-#endif
+#include <algorithm>
+#include <cmath>
 #include <dpp/exception.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
-#include <thread>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt-minimal.h>
 
 #ifdef HAVE_VOICE
-#include <sodium.h>
-#include <opus/opus.h>
+	#include <sodium.h>
+	#include <opus/opus.h>
 #else
-struct OpusDecoder {};
-struct OpusEncoder {};
-struct OpusRepacketizer {};
+	struct OpusDecoder {};
+	struct OpusEncoder {};
+	struct OpusRepacketizer {};
 #endif
 
 namespace dpp {
 
+constexpr int32_t opus_sample_rate_hz = 48000;
+constexpr int32_t opus_channel_count = 2;
 std::string external_ip;
 
 /**
@@ -61,6 +67,149 @@ struct rtp_header {
 
 bool discord_voice_client::sodium_initialised = false;
 
+bool discord_voice_client::voice_payload::operator<(const voice_payload& other) const {
+	return seq > other.seq || timestamp > other.timestamp;
+}
+
+#ifdef HAVE_VOICE
+size_t audio_mix(discord_voice_client& client, opus_int32* pcm_mix, const opus_int16* pcm, size_t park_count, int samples, int& max_samples) {
+	/* Mix the combined stream if combined audio is bound */
+	if (client.creator->on_voice_receive_combined.empty()) {
+		return 0;
+	}
+	/* We must upsample the data to 32 bits wide, otherwise we could overflow */
+	for (opus_int32 v = 0; v < samples * opus_channel_count; ++v) {
+		pcm_mix[v] += pcm[v];
+	}
+	max_samples = std::max(samples, max_samples);
+	return park_count + 1;
+}
+#endif
+
+void discord_voice_client::voice_courier_loop(discord_voice_client& client, courier_shared_state_t& shared_state) {
+#ifdef HAVE_VOICE
+	while (true) {
+		constexpr std::chrono::milliseconds iteration_interval(500);
+		std::this_thread::sleep_for(iteration_interval);
+		
+		struct flush_data_t {
+			snowflake user_id;
+			rtp_seq_t min_seq;
+			std::priority_queue<voice_payload> parked_payloads;
+			std::vector<std::function<void(OpusDecoder&)>> pending_decoder_ctls;
+			std::shared_ptr<OpusDecoder> decoder;
+		};
+		std::vector<flush_data_t> flush_data;
+
+		/*
+		 * Transport the payloads onto this thread, and
+		 * release the lock as soon as possible.
+		 */
+		{
+			std::unique_lock lk(shared_state.mtx);
+
+			shared_state.signal_iteration.wait(lk, [&shared_state] {
+ 				return    !shared_state.parked_voice_payloads.empty()
+				       || shared_state.terminating;
+ 			});
+
+			if (shared_state.terminating && shared_state.parked_voice_payloads.empty()) {
+				/* We have delivered all data to handlers. Terminate now. */
+				break;
+			}
+
+			/* mitigates vector resizing while holding the mutex */
+			flush_data.reserve(shared_state.parked_voice_payloads.size());
+
+			for (auto& [user_id, parking_lot] : shared_state.parked_voice_payloads) {
+				flush_data.push_back(flush_data_t{user_id,
+				                                  parking_lot.range.min_seq,
+				                                  std::move(parking_lot.parked_payloads),
+				                                  /* Quickly check if we already have a decoder and only take the pending ctls if so. */
+				                                  parking_lot.decoder ? std::move(parking_lot.pending_decoder_ctls)
+				                                                      : decltype(parking_lot.pending_decoder_ctls){},
+				                                  parking_lot.decoder});
+				parking_lot.range.min_seq = parking_lot.range.max_seq + 1;
+				parking_lot.range.min_timestamp = parking_lot.range.max_timestamp + 1;
+			}
+		}
+
+		if (client.creator->on_voice_receive.empty() && client.creator->on_voice_receive_combined.empty()) {
+			/*
+			 * We do this check late, to ensure this thread drains the data
+			 * and prevents accumulating them even when there are no handlers.
+			 */
+			continue;
+		}
+
+		/* This 32 bit PCM audio buffer is an upmixed version of the streams
+		 * combined for all users. This is a wider width audio buffer so that
+	 	 * there is no clipping when there are many loud audio sources at once.
+		 */
+		opus_int32 pcm_mix[23040] = { 0 };
+		size_t park_count = 0;
+		int max_samples = 0;
+
+		for (auto& d : flush_data) {
+			for (rtp_seq_t seq = d.min_seq; !d.parked_payloads.empty(); ++seq) {
+				if (!d.decoder) {
+					continue;
+				}
+
+				for (const auto& decoder_ctl : d.pending_decoder_ctls) {
+					decoder_ctl(*d.decoder);
+				}
+
+				opus_int16 pcm[23040];
+				if (d.parked_payloads.top().seq != seq) {
+					/*
+					 * Lost a packet with sequence number "seq",
+					 * But Opus decoder might be able to guess something.
+					 */
+					if (int samples = opus_decode(d.decoder.get(), nullptr, 0, pcm, 5760, 0);
+					    samples >= 0) {
+						/*
+						 * Since this sample comes from a lost packet,
+						 * we can only pretend there is an event, without any raw payload byte.
+						 */
+						voice_receive_t vr(nullptr, "", &client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
+							samples * opus_channel_count * sizeof(opus_int16));
+
+						park_count = audio_mix(client, pcm_mix, pcm, park_count, samples, max_samples);
+						client.creator->on_voice_receive.call(vr);
+					}
+				} else {
+					voice_receive_t& vr = *d.parked_payloads.top().vr;
+					if (int samples = opus_decode(d.decoder.get(), vr.audio_data.data(), vr.audio_data.length(), pcm, 5760, 0);
+					    samples >= 0) {
+						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
+							samples * opus_channel_count * sizeof(opus_int16));
+
+						park_count = audio_mix(client, pcm_mix, pcm, park_count, samples, max_samples);
+						client.creator->on_voice_receive.call(vr);
+					}
+
+					d.parked_payloads.pop();
+				}
+			}
+		}
+
+		/* If combined receive is bound, dispatch it */
+		if (park_count) {
+			/* Downsample the 32 bit samples back to 16 bit */
+			opus_int16 pcm_downsample[23040] = { 0 };
+			for (int v = 0; v < max_samples * opus_channel_count; ++v) {
+				pcm_downsample[v] = pcm_mix[v] / park_count;
+			}
+			voice_receive_t vr(nullptr, "", &client, 0, reinterpret_cast<uint8_t*>(pcm_downsample),
+				max_samples * opus_channel_count * sizeof(opus_int16));
+
+			client.creator->on_voice_receive_combined.call(vr);
+		}
+	}
+#endif
+}
+
 discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _channel_id, snowflake _server_id, const std::string &_token, const std::string &_session_id, const std::string &_host)
 	   : websocket_client(_host.substr(0, _host.find(":")), _host.substr(_host.find(":") + 1, _host.length()), "/?v=4", OP_TEXT),
 	runner(nullptr),
@@ -71,7 +220,6 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	paused(false),
 #if HAVE_VOICE
 	encoder(nullptr),
-	decoder(nullptr),
 	repacketizer(nullptr),
 #endif
 	fd(INVALID_SOCKET),
@@ -83,11 +231,6 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	tracks(0),
 	creator(_cluster),
 	terminating(false),
-#ifdef HAVE_VOICE
-	decode_voice_recv(true),
-#else
-	decode_voice_recv(false),
-#endif
 	heartbeat_interval(0),
 	last_heartbeat(time(nullptr)),
 	token(_token),
@@ -103,14 +246,9 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 		discord_voice_client::sodium_initialised = true;
 	}
 	int opusError = 0;
-	encoder = opus_encoder_create(48000, 2, OPUS_APPLICATION_VOIP, &opusError);
+	encoder = opus_encoder_create(opus_sample_rate_hz, opus_channel_count, OPUS_APPLICATION_VOIP, &opusError);
 	if (opusError) {
 		throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_encoder_create() failed");
-	}
-	opusError = 0;
-	decoder = opus_decoder_create(48000, 2, &opusError);
-	if (opusError) {
-		throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_decoder_create() failed");
 	}
 	repacketizer = opus_repacketizer_create();
 	if (!repacketizer) {
@@ -135,13 +273,16 @@ discord_voice_client::~discord_voice_client()
 		opus_encoder_destroy(encoder);
 		encoder = nullptr;
 	}
-	if (decoder) {
-		opus_decoder_destroy(decoder);
-		decoder = nullptr;
-	}
 	if (repacketizer) {
 		opus_repacketizer_destroy(repacketizer);
 		repacketizer = nullptr;
+	}
+	if (voice_courier.joinable()) {
+		{
+			std::lock_guard lk(voice_courier_shared_state.mtx);
+			voice_courier_shared_state.terminating = true;
+		}
+		voice_courier.join();
 	}
 #endif
 	if (secret_key) {
@@ -215,11 +356,12 @@ bool discord_voice_client::handle_frame(const std::string &data)
 				if (j.find("d") != j.end() && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null())
 				{
 					snowflake u_id = snowflake_not_null(&j["d"], "user_id");
-					auto it = std::find_if(ssrcMap.begin(), ssrcMap.end(),
+					auto it = std::find_if(ssrc_map.begin(), ssrc_map.end(),
 					   [&u_id](const auto & p) { return p.second == u_id; });
 
-					if (it != ssrcMap.end()) 
-						ssrcMap.erase(it);
+					if (it != ssrc_map.end()) {
+						ssrc_map.erase(it);
+					}
 
 					if (!creator->on_voice_client_disconnect.empty())
 					{
@@ -242,7 +384,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 				{
 					uint32_t u_ssrc = j["d"]["ssrc"].get<uint32_t>();
 					snowflake u_id = snowflake_not_null(&j["d"], "user_id");
-					ssrcMap[u_ssrc] = u_id;
+					ssrc_map[u_ssrc] = u_id;
 
 					if (!creator->on_voice_client_speaking.empty()) {
 						voice_client_speaking_t vcs(nullptr, data);
@@ -445,70 +587,118 @@ void discord_voice_client::read_ready()
 	int r = this->udp_recv((char*)buffer, sizeof(buffer));
 
 	if (r > 0 && !creator->on_voice_receive.empty()) {
-		voice_receive_t vr(nullptr, std::string((const char*)buffer, r));
-		vr.voice_client = this;
-		vr.audio = nullptr;
-		vr.audio_size = 0;
-
-		if (r < 12) 
+		const std::basic_string_view<uint8_t> packet{buffer, static_cast<size_t>(r)};
+		constexpr size_t header_size = 12;
+		if (static_cast<size_t>(r) < header_size) {
+			/* Invalid RTP payload */
 			return;
+		}
 
-		/* Get the User ID of the speaker */
-		uint32_t speaker_ssrc;
-		std::memcpy(&speaker_ssrc, buffer + 8, sizeof(uint32_t));
-		speaker_ssrc = ntohl(speaker_ssrc);
-		vr.user_id = ssrcMap[speaker_ssrc];
+		if (uint8_t payload_type = packet[1] & 0b0111'1111;
+		    72 <= payload_type && payload_type <= 76) {
+			/*
+			 * This is an RTCP payload. Discord is known to send
+			 * RTCP Receiver Reports.
+			 *
+			 * See https://datatracker.ietf.org/doc/html/rfc3551#section-6
+			 */
+			return;
+		}
+
+		voice_payload vp{0, // seq, populate later
+		                 0, // timestamp, populate later
+		                 std::make_unique<voice_receive_t>(nullptr, std::string((char*)buffer, r))};
+
+		vp.vr->voice_client = this;
+
+		{	/* Get the User ID of the speaker */
+			uint32_t speaker_ssrc;
+			std::memcpy(&speaker_ssrc, &packet[8], sizeof(uint32_t));
+			speaker_ssrc = ntohl(speaker_ssrc);
+			vp.vr->user_id = ssrc_map[speaker_ssrc];
+		}
+
+		/* Get the sequence number of the voice UDP packet */
+		std::memcpy(&vp.seq, &packet[2], sizeof(rtp_seq_t));
+		vp.seq = ntohs(vp.seq);
+		/* Get the timestamp of the voice UDP packet */
+		std::memcpy(&vp.timestamp, &packet[4], sizeof(rtp_timestamp_t));
+		vp.timestamp = ntohl(vp.timestamp);
 
 		/* Nonce is the RTP Header with zero padding */
 		uint8_t nonce[24] = { 0 };
-		std::memcpy(nonce, buffer, 12);
+		std::memcpy(nonce, &packet[0], header_size);
 
+		/* Get the number of CSRC in header */
+		const size_t csrc_count = packet[0] & 0b0000'1111;
 		/* Skip to the encrypted voice data */
-		uint8_t *packet = buffer + 12;
+		const ptrdiff_t offset_to_data = header_size + sizeof(uint32_t) * csrc_count;
+		uint8_t* encrypted_data = buffer + offset_to_data;
+		const size_t encrypted_data_len = r - offset_to_data;
 
-		if (crypto_secretbox_open_easy(packet, packet, r - 12, nonce, secret_key))
+		if (crypto_secretbox_open_easy(encrypted_data, encrypted_data,
+		                               encrypted_data_len, nonce, secret_key)) {
+			/* Invalid Discord RTP payload. */
 			return;
-
-		uint32_t packet_len = r - 12 - crypto_box_MACBYTES;
-
-		if (!(packet[0] == 0xbe && packet[1] == 0xde && packet_len > 4))
-			return;
-		
-		/* Skip the RTP Extensions */
-		uint16_t header_extension_len;
-		memcpy(&header_extension_len, packet + 2, sizeof(uint16_t));
-		header_extension_len = ntohs(header_extension_len);
-
-		size_t offset = 4;
-		for (size_t i = 0; i < header_extension_len; i++) {
-			uint8_t byte = packet[offset];
-			offset++;
-			if (byte == 0) 
-				continue;
-			offset += 1 + (byte >> 4u);
 		}
-		uint8_t byte = packet[offset];
-		if (byte == 0x00 || byte == 0x02) offset++;
 
-		/* We're left with the decrypted opus packet */
-		packet = packet + offset;
-		packet_len -= (uint32_t)offset;
+		std::basic_string_view<uint8_t> decrypted_data{encrypted_data, encrypted_data_len - crypto_box_MACBYTES};
+		if (const bool uses_extension [[maybe_unused]] = (packet[0] >> 4) & 0b0001) {
+			/* Skip the RTP Extensions */
+			size_t ext_len = 0;
+			{
+				uint16_t ext_len_in_words;
+				memcpy(&ext_len_in_words, &decrypted_data[2], sizeof(uint16_t));
+				ext_len_in_words = ntohs(ext_len_in_words);
+				ext_len = sizeof(uint32_t) * ext_len_in_words;
+			}
+			constexpr size_t ext_header_len = sizeof(uint16_t) * 2;
+			decrypted_data = decrypted_data.substr(ext_header_len + ext_len);
+		}
 
-		if (decode_voice_recv)
+		/*
+		 * We're left with the decrypted, opus-encoded data.
+		 * Park the payload and decode on the voice courier thread.
+		 */
+		vp.vr->audio_data.assign(decrypted_data);
+
 		{
-			opus_int16 pcm[23040];
-			int samples = opus_decode(decoder, packet, packet_len, pcm, 5760, 0);
-			if (samples < 0)
+			std::lock_guard lk(voice_courier_shared_state.mtx);
+			auto& [range, payload_queue, pending_decoder_ctls, decoder] = voice_courier_shared_state.parked_voice_payloads[vp.vr->user_id];
+
+			if (!decoder)
+			{
+				/*
+				 * Most likely this is the first time we encounter this speaker.
+				 * Do some initialization for not only the decoder but also the range.
+				 */
+				range.min_seq = vp.seq;
+				range.min_timestamp = vp.timestamp;
+
+				int opus_error = 0;
+				decoder.reset(opus_decoder_create(opus_sample_rate_hz, opus_channel_count, &opus_error),
+				              &opus_decoder_destroy);
+				if (opus_error) {
+					throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_decoder_create() failed");
+				}
+			}
+
+			if (vp.seq < range.min_seq && vp.timestamp < range.min_timestamp) {
+				/* This packet arrived too late. We can only discard it. */
 				return;
-			vr.audio = (uint8_t *)pcm;
-			vr.audio_size = samples * 4; // 2 channels, 2 byte samples (2 * 2)
-			creator->on_voice_receive.call(vr);
+			}
+			range.max_seq = vp.seq;
+			range.max_timestamp = vp.timestamp;
+			payload_queue.push(std::move(vp));
 		}
-		else
-		{
-			vr.audio = packet;
-			vr.audio_size = packet_len;
-			creator->on_voice_receive.call(vr);
+
+		voice_courier_shared_state.signal_iteration.notify_one();
+
+		if (!voice_courier.joinable()) {
+			/* Courier thread is not running, start it */
+			voice_courier = std::thread(&voice_courier_loop,
+			                            std::ref(*this),
+			                            std::ref(voice_courier_shared_state));
 		}
 	}
 #else
@@ -638,6 +828,49 @@ void discord_voice_client::error(uint32_t errorcode)
 		this->terminating = true;
 		log(dpp::ll_error, "This is a non-recoverable error, giving up on voice connection");
 	}
+}
+
+void discord_voice_client::set_user_gain(snowflake user_id, float factor)
+{
+#ifdef HAVE_VOICE
+	int16_t gain;
+
+	if (factor < 0.0f) {
+		/* Invalid factor; must be nonnegative. */
+		return;
+	} else if (factor == 0.0f) {
+		/*
+		 * Client probably wants to mute the user,
+		 * but log10(0) is undefined, so let's
+		 * hardcode the gain to the Opus minimum
+		 * for clients.
+		 */
+		gain = -32768;
+	} else {
+		/*
+		 * OPUS_SET_GAIN takes a value (x) in Q8 dB units.
+		 * factor = 10^(x / (20 * 256))
+		 * x = log_10(factor) * 20 * 256
+		 */
+		gain = std::log10(factor) * 20 * 256;
+	}
+
+	std::lock_guard lk(voice_courier_shared_state.mtx);
+
+	voice_courier_shared_state
+		/*
+		 * Use of the modifying operator[] is intentional;
+		 * this is so that we can set ctls on the decoder
+		 * even before the user speaks. The decoder doesn't
+		 * even have to be ready now, and the setting doesn't
+		 * actually take place until we receive some voice
+		 * from that speaker.
+		 */
+		.parked_voice_payloads[user_id]
+		.pending_decoder_ctls.push_back([gain](OpusDecoder& decoder) {
+			opus_decoder_ctl(&decoder, OPUS_SET_GAIN(gain));
+		});
+#endif
 }
 
 void discord_voice_client::log(dpp::loglevel severity, const std::string &msg) const

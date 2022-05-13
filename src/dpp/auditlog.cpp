@@ -38,7 +38,7 @@ auditlog& auditlog::fill_from_json(nlohmann::json* j) {
 		ae.user_id = snowflake_not_null(&ai, "user_id");
 		ae.target_id = snowflake_not_null(&ai, "target_id");
 		ae.reason = string_not_null(&ai, "reason");
-		if (j->find("changes") != j->end()) {
+		if (j->contains("changes")) {
 			auto &c = ai["changes"];
 			for (auto & change : c) {
 				audit_change ac;
@@ -51,7 +51,7 @@ auditlog& auditlog::fill_from_json(nlohmann::json* j) {
 				}
 			}
 		}
-		if (j->find("options") != j->end()) {
+		if (j->contains("options")) {
 			auto &o = ai["options"];
 			audit_extra opts;
 			opts.channel_id = snowflake_not_null(&o, "channel_id");

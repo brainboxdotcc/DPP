@@ -209,6 +209,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		bot.on_form_submit([&](const dpp::form_submit_t & event) {
 		});
 
+		/* This is near impossible to test without a 'clean room' voice channel.
+		 * We attach this event just so that the decoder events are fired while we
+		 * are sending audio later, this way if the audio receive code is plain unstable
+		 * the test suite will crash and fail.
+		 */
+		bot.on_voice_receive_combined([&](auto& event) {
+		});
+
 		bot.on_ready([&bot](const dpp::ready_t & event) {
 
 			set_test("CONNECTION", true);

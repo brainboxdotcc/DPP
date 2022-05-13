@@ -40,7 +40,6 @@ This is a simple ping-pong example using slash commands.
 #include <dpp/dpp.h>
  
 const std::string    BOT_TOKEN = "add your token here";
-const dpp::snowflake GUILD_ID  =  825407338755653642;
  
 int main() {
     dpp::cluster bot(BOT_TOKEN);
@@ -53,9 +52,8 @@ int main() {
  
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(
+            bot.global_command_create(
                 dpp::slashcommand("ping", "Ping pong!", bot.me.id),
-                GUILD_ID
             );
         }
     });

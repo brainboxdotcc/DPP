@@ -1428,6 +1428,15 @@ public:
 	 */
 	event_router_t<voice_receive_t> on_voice_receive;
 
+	/**
+	 * @brief Called when new audio data is received, combined and mixed for all speaking users.
+	 * 
+	 * @note Receiving audio for bots is not officially supported by discord.
+	 * 
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type voice_receive_t&, and returns void.
+	 */
+	event_router_t<voice_receive_t> on_voice_receive_combined;
 	
 	/**
 	 * @brief Called when sending of audio passes over a track marker.
@@ -1585,9 +1594,6 @@ public:
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these).
 	 * 
-	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
-	 * you should use cluster::guild_command_create instead.
-	 *
 	 * @see https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
 	 * @param s Slash command to create
 	 * @param callback Function to call when the API call completes.
@@ -1645,9 +1651,6 @@ public:
 	 * @brief Create/overwrite global slash commands.
 	 * Any existing global slash commands will be deleted and replaced with these.
 	 *
-	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
-	 * you should use cluster::guild_bulk_command_create instead.
-	 * 
 	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
 	 * @param commands Vector of slash commands to create/update.
 	 * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
@@ -1661,8 +1664,6 @@ public:
 	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
 	 *
 	 * @see https://discord.com/developers/docs/interactions/application-commands#edit-global-application-command
-	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
-	 * you should use cluster::guild_bulk_command_create instead.
 	 * @param s Slash command to change
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().

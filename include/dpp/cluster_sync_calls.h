@@ -30,13 +30,10 @@
  * @brief Create/overwrite global slash commands.
  * Any existing global slash commands will be deleted and replaced with these.
  *
- * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
- * you should use cluster::guild_bulk_command_create instead.
- * 
  * @see dpp::cluster::global_bulk_command_create
  * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
  * @param commands Vector of slash commands to create/update.
- * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
+ * overwriting existing commands that are registered globally for this application.
  * Commands that do not already exist will count toward daily application command create limits.
  * @return slashcommand_map returned object on completion
  * \memberof dpp::cluster
@@ -49,9 +46,6 @@ slashcommand_map global_bulk_command_create_sync(const std::vector<slashcommand>
 /**
  * @brief Create a global slash command (a bot can have a maximum of 100 of these).
  * 
- * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
- * you should use cluster::guild_command_create instead.
- *
  * @see dpp::cluster::global_command_create
  * @see https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
  * @param s Slash command to create
@@ -96,8 +90,6 @@ confirmation global_command_delete_sync(snowflake id);
  *
  * @see dpp::cluster::global_command_edit
  * @see https://discord.com/developers/docs/interactions/application-commands#edit-global-application-command
- * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
- * you should use cluster::guild_bulk_command_create instead.
  * @param s Slash command to change
  * @return confirmation returned object on completion
  * \memberof dpp::cluster

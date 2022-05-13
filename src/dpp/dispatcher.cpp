@@ -249,6 +249,23 @@ const command_value& autocomplete_t::get_parameter(const std::string& name) cons
 	return dummy_b_value;
 }
 
+voice_receive_t::voice_receive_t(class discord_client* client, const std::string &raw, class discord_voice_client* vc, snowflake _user_id, uint8_t* pcm, size_t length) : event_dispatch_t(client, raw), voice_client(vc), user_id(_user_id) {
+	reassign(vc, _user_id, pcm, length);
+}
+
+void voice_receive_t::reassign(class discord_voice_client* vc, snowflake _user_id, uint8_t* pcm, size_t length) {
+	voice_client = vc;
+	user_id = _user_id;
+
+	audio_data.assign(pcm, length);
+
+	// for backwards compatibility; remove soon
+	audio = audio_data.data();
+	audio_size = audio_data.length();
+	
+}
+
+
 /* Standard default constructors that call the parent constructor, for events */
 event_ctor(guild_join_request_delete_t, event_dispatch_t);
 event_ctor(stage_instance_create_t, event_dispatch_t);

@@ -226,7 +226,7 @@ thread& thread::fill_from_json(json* j) {
 	metadata.locked = bool_not_null(&json_metadata, "locked");
 
 	/* Only certain events set this */
-	if (j->find("member") != j->end())  {
+	if (j->contains("member"))  {
 		member.fill_from_json(&((*j)["member"]));
 	}
 	
@@ -265,14 +265,14 @@ channel& channel::fill_from_json(json* j) {
 		this->flags |= dpp::c_video_quality_720p;
 	}
 
-	if (j->find("recipients") != j->end()) {
+	if (j->contains("recipients")) {
 		recipients = {};
 		for (auto & r : (*j)["recipients"]) {
 			recipients.push_back(from_string<uint64_t>(r["id"].get<std::string>()));
 		}
 	}
 
-	if (j->find("permission_overwrites") != j->end()) {
+	if (j->contains("permission_overwrites")) {
 		permission_overwrites = {};
 		for (auto & overwrite : (*j)["permission_overwrites"]) {
 			permission_overwrite po;
@@ -287,7 +287,7 @@ channel& channel::fill_from_json(json* j) {
 	/* Note: This is only set when the channel is in the resolved set from an interaction.
 	 * When set it contains the invokers permissions on channel. Any other time, contains 0.
 	 */
-	if (j->find("permissions") != j->end()) {
+	if (j->contains("permissions")) {
 		set_snowflake_not_null(j, "permissions", permissions);
 	}
 
