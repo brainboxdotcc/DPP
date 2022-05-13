@@ -29,6 +29,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <cmath>
 #include <dpp/exception.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/cache.h>
@@ -95,6 +96,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			snowflake user_id;
 			rtp_seq_t min_seq;
 			std::priority_queue<voice_payload> parked_payloads;
+			std::vector<std::function<void(OpusDecoder&)>> pending_decoder_ctls;
 			std::shared_ptr<OpusDecoder> decoder;
 		};
 		std::vector<flush_data_t> flush_data;
@@ -123,6 +125,9 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 				flush_data.push_back(flush_data_t{user_id,
 				                                  parking_lot.range.min_seq,
 				                                  std::move(parking_lot.parked_payloads),
+				                                  /* Quickly check if we already have a decoder and only take the pending ctls if so. */
+				                                  parking_lot.decoder ? std::move(parking_lot.pending_decoder_ctls)
+				                                                      : decltype(parking_lot.pending_decoder_ctls){},
 				                                  parking_lot.decoder});
 				parking_lot.range.min_seq = parking_lot.range.max_seq + 1;
 				parking_lot.range.min_timestamp = parking_lot.range.max_timestamp + 1;
@@ -149,6 +154,10 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			for (rtp_seq_t seq = d.min_seq; !d.parked_payloads.empty(); ++seq) {
 				if (!d.decoder) {
 					continue;
+				}
+
+				for (const auto& decoder_ctl : d.pending_decoder_ctls) {
+					decoder_ctl(*d.decoder);
 				}
 
 				opus_int16 pcm[23040];
@@ -655,7 +664,7 @@ void discord_voice_client::read_ready()
 
 		{
 			std::lock_guard lk(voice_courier_shared_state.mtx);
-			auto& [range, payload_queue, decoder] = voice_courier_shared_state.parked_voice_payloads[vp.vr->user_id];
+			auto& [range, payload_queue, pending_decoder_ctls, decoder] = voice_courier_shared_state.parked_voice_payloads[vp.vr->user_id];
 
 			if (!decoder)
 			{
@@ -819,6 +828,49 @@ void discord_voice_client::error(uint32_t errorcode)
 		this->terminating = true;
 		log(dpp::ll_error, "This is a non-recoverable error, giving up on voice connection");
 	}
+}
+
+void discord_voice_client::set_user_gain(snowflake user_id, float factor)
+{
+#ifdef HAVE_VOICE
+	int16_t gain;
+
+	if (factor < 0.0f) {
+		/* Invalid factor; must be nonnegative. */
+		return;
+	} else if (factor == 0.0f) {
+		/*
+		 * Client probably wants to mute the user,
+		 * but log10(0) is undefined, so let's
+		 * hardcode the gain to the Opus minimum
+		 * for clients.
+		 */
+		gain = -32768;
+	} else {
+		/*
+		 * OPUS_SET_GAIN takes a value (x) in Q8 dB units.
+		 * factor = 10^(x / (20 * 256))
+		 * x = log_10(factor) * 20 * 256
+		 */
+		gain = std::log10(factor) * 20 * 256;
+	}
+
+	std::lock_guard lk(voice_courier_shared_state.mtx);
+
+	voice_courier_shared_state
+		/*
+		 * Use of the modifying operator[] is intentional;
+		 * this is so that we can set ctls on the decoder
+		 * even before the user speaks. The decoder doesn't
+		 * even have to be ready now, and the setting doesn't
+		 * actually take place until we receive some voice
+		 * from that speaker.
+		 */
+		.parked_voice_payloads[user_id]
+		.pending_decoder_ctls.push_back([gain](OpusDecoder& decoder) {
+			opus_decoder_ctl(&decoder, OPUS_SET_GAIN(gain));
+		});
+#endif
 }
 
 void discord_voice_client::log(dpp::loglevel severity, const std::string &msg) const

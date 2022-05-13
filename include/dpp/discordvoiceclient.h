@@ -215,6 +215,10 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 		 */
 		std::priority_queue<voice_payload> parked_payloads;
 		/**
+		 * @brief The decoder ctls to be set on the decoder.
+		 */
+		std::vector<std::function<void(OpusDecoder&)>> pending_decoder_ctls;
+		/**
 		 * @brief libopus decoder
 		 *
 		 * Shared with the voice courier thread that does the decoding.
@@ -506,6 +510,24 @@ public:
 	 * @brief Channel ID
 	 */
 	snowflake channel_id;
+
+	/**
+	 * @brief Sets the gain for the specified user.
+	 *
+	 * Similar to the User Volume slider, controls the listening volume per user.
+	 * Uses native Opus gain control, so clients don't have to perform extra
+	 * audio processing.
+	 *
+	 * The gain setting will affect the both individual and combined voice audio.
+	 *
+	 * The gain value can also be set even before the user connects to the voice
+	 * channel.
+	 *
+	 * @param user_id The ID of the user where the gain is to be controlled.
+	 * @param factor Nonnegative factor to scale the amplitude by, where 1.f reverts
+	 *               to the default volume.
+	 */
+	void set_user_gain(snowflake user_id, float factor);
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
