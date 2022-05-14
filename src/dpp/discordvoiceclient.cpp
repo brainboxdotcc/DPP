@@ -283,6 +283,7 @@ discord_voice_client::~discord_voice_client()
 			std::lock_guard lk(voice_courier_shared_state.mtx);
 			voice_courier_shared_state.terminating = true;
 		}
+		voice_courier_shared_state.signal_iteration.notify_one();
 		voice_courier.join();
 	}
 #endif
