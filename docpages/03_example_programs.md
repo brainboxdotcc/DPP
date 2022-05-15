@@ -46,7 +46,6 @@ The two programs can be seen side by side below:
 #include <dpp/dpp.h>
 
 const std::string    BOT_TOKEN    = "add your token here";
-const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
 int main() {
     dpp::cluster bot(BOT_TOKEN);
@@ -61,9 +60,8 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(
-                dpp::slashcommand("ping", "Ping pong!", bot.me.id),
-                MY_GUILD_ID
+            bot.global_command_create(
+                dpp::slashcommand("ping", "Ping pong!", bot.me.id)
             );
         }
     });
@@ -82,7 +80,6 @@ let Discord = require('discord.js');
 
 
 let BOT_TOKEN   = 'add your token here';
-let MY_GUILD_ID = '825407338755653642';
 
 
 let bot = new Discord.Client({ intents: [] });
@@ -96,8 +93,7 @@ bot.on('interactionCreate', (interaction) => {
 
 
 bot.once('ready', async () => {
-    let guild = await bot.guilds.fetch(MY_GUILD_ID);
-    await guild.commands.create({
+    await client.commands.create({
         name: 'ping',
         description: "Ping pong!"
     });
@@ -171,7 +167,6 @@ If you want to handle a slash command, you should also attach your program to th
 #include <dpp/dpp.h>
 
 const std::string    BOT_TOKEN    = "add your token here";
-const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
 int main() {
     dpp::cluster bot(BOT_TOKEN);
@@ -181,7 +176,7 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
         }
     });
 }
@@ -195,7 +190,6 @@ Attaching to an event is a good start, but to make a bot you should actually put
 #include <dpp/dpp.h>
 
 const std::string    BOT_TOKEN    = "add your token here";
-const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
 int main() {
     dpp::cluster bot(BOT_TOKEN);
@@ -208,7 +202,7 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
         }
     });
 
@@ -241,7 +235,6 @@ The parameter which we set to false indicates if the function should return once
 #include <dpp/dpp.h>
 
 const std::string    BOT_TOKEN    = "add your token here";
-const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
 int main() {
     dpp::cluster bot(BOT_TOKEN);
@@ -256,7 +249,7 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
         }
     });
 
