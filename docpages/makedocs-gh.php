@@ -78,7 +78,7 @@ foreach ($tags as $tag) {
 	$tag = preg_replace("/^v/", "", $tag);
 	if (!empty($tag)) {
 		$asyncRunners[$tag] = true;
-		exec("nohup " . PHP_BINARY . " makedocs-gh-single.php " . escapeshellarg($tag) . " " . escapeshellarg($orig_tag) . " &");
+		exec("nohup " . PHP_BINARY . " docpages/makedocs-gh-single.php " . escapeshellarg($tag) . " " . escapeshellarg($orig_tag) . " &");
 	}
 }
 
