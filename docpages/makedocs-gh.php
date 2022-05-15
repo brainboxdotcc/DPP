@@ -78,7 +78,12 @@ foreach ($tags as $tag) {
 	$tag = preg_replace("/^v/", "", $tag);
 	if (!empty($tag)) {
 		$asyncRunners[$tag] = true;
-		system("screen -S runner_$tag " . PHP_BINARY . " docpages/makedocs-gh-single.php " . escapeshellarg($tag) . " " . escapeshellarg($orig_tag));
+		$pid = pcntl_fork();
+		if ($pid == 0) {
+			posix_setsid();
+			pcntl_exec(PHP_BINARY, ["docpages/makedocs-gh-single.php", $tag, $orig_tag], $_ENV);
+			exit(0);
+		}
 	}
 }
 
