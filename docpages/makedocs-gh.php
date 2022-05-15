@@ -78,18 +78,18 @@ foreach ($tags as $tag) {
 	$tag = preg_replace("/^v/", "", $tag);
 	if (!empty($tag)) {
 		$asyncRunners[$tag] = true;
-		exec("screen -S runner_$tag " . PHP_BINARY . " docpages/makedocs-gh-single.php " . escapeshellarg($tag) . " " . escapeshellarg($orig_tag));
+		system("screen -S runner_$tag " . PHP_BINARY . " docpages/makedocs-gh-single.php " . escapeshellarg($tag) . " " . escapeshellarg($orig_tag));
 	}
 }
 
 /* Wait for all async tasks to complete */
 while (count($asyncRunners)) {
 	foreach ($asyncRunners as $tag => $discarded) {
-		if (file_get_contents("/tmp/completion_$tag") == $tag) {
+		if (file_exists("/tmp/completion_$tag") && file_get_contents("/tmp/completion_$tag") == $tag) {
 			unset($asyncRunners[$tag]);
+			echo "Runner for $tag is completed.\n";
 		}
 	}
-	system("screen -ls");
 	sleep(10);
 }
 
