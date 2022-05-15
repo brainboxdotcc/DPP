@@ -6,7 +6,7 @@ if (count($argv) > 1 && $argv[1] == 'nodeploy') {
 }
 
 /* Sanity checks */
-system("sudo apt-get install graphviz >/dev/null");
+system("sudo apt-get install graphviz screen >/dev/null");
 system("echo \$GITHUB_TOKEN | gh auth login --with-token ");
 system("gh auth status");
 system("git clone https://braindigitalis:\$PERSONAL_ACCESS_TOKEN@github.com/brainboxdotcc/dpp-web.git /home/runner/dpp-web >/dev/null");
@@ -78,7 +78,7 @@ foreach ($tags as $tag) {
 	$tag = preg_replace("/^v/", "", $tag);
 	if (!empty($tag)) {
 		$asyncRunners[$tag] = true;
-		exec("nohup " . PHP_BINARY . " docpages/makedocs-gh-single.php " . escapeshellarg($tag) . " " . escapeshellarg($orig_tag) . " &");
+		exec("screen -S runner_$tag " . PHP_BINARY . " docpages/makedocs-gh-single.php " . escapeshellarg($tag) . " " . escapeshellarg($orig_tag));
 	}
 }
 
@@ -89,6 +89,7 @@ while (count($asyncRunners)) {
 			unset($asyncRunners[$tag]);
 		}
 	}
+	system("screen -ls");
 	sleep(10);
 }
 

@@ -26,7 +26,9 @@ $hdr = str_replace("option value='/$tag/'", "option selected value='/$tag/'", $h
 /* Rewrite version info in header */
 file_put_contents("docpages/header.html", $hdr);		
 shell_exec("/usr/local/bin/doxygen >/dev/null");
-mkdir("/home/runner/dpp-web/$tag");
+if (!file_exists("/home/runner/dpp-web/$tag")) {
+	mkdir("/home/runner/dpp-web/$tag");
+}
 chdir("docs");
 system("rsync -r --include='*' '.' '/home/runner/dpp-web/".$tag."' >/dev/null");
 chdir("/");
