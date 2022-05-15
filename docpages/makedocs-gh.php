@@ -95,7 +95,7 @@ while (count($asyncRunners)) {
 			echo "Runner for $tag is completed.\n";
 		}
 	}
-	sleep(10);
+	sleep(1);
 }
 
 /* Commit and push everything to the github pages repo */
