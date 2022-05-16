@@ -109,11 +109,6 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		{
 			std::unique_lock lk(shared_state.mtx);
 
-			shared_state.signal_iteration.wait(lk, [&shared_state] {
- 				return    !shared_state.parked_voice_payloads.empty()
-				       || shared_state.terminating;
- 			});
-
 			/* mitigates vector resizing while holding the mutex */
 			flush_data.reserve(shared_state.parked_voice_payloads.size());
 
@@ -131,9 +126,18 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 				parking_lot.range.min_timestamp = parking_lot.range.max_timestamp + 1;
 			}
             
-			if (shared_state.terminating && !has_payload_to_deliver) {
-				/* We have delivered all data to handlers. Terminate now. */
-				break;
+			if (!has_payload_to_deliver) {
+				if (shared_state.terminating) {
+					/* We have delivered all data to handlers. Terminate now. */
+					break;
+				}
+
+				shared_state.signal_iteration.wait(lk);
+				/*
+				 * More data came or about to terminate, or just a spurious wake.
+				 * We need to collect the payloads again to determine what to do next.
+				 */
+				continue;
 			}
 		}
 
@@ -154,15 +158,13 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		int max_samples = 0;
 
 		for (auto& d : flush_data) {
+			if (!d.decoder) {
+				continue;
+			}
+			for (const auto& decoder_ctl : d.pending_decoder_ctls) {
+				decoder_ctl(*d.decoder);
+			}
 			for (rtp_seq_t seq = d.min_seq; !d.parked_payloads.empty(); ++seq) {
-				if (!d.decoder) {
-					continue;
-				}
-
-				for (const auto& decoder_ctl : d.pending_decoder_ctls) {
-					decoder_ctl(*d.decoder);
-				}
-
 				opus_int16 pcm[23040];
 				if (d.parked_payloads.top().seq != seq) {
 					/*
