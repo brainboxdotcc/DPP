@@ -212,7 +212,7 @@ int main() {
 
     bot.on_log(dpp::utility::cout_logger());
 
-    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
          if (event.command.get_command_name() == "ping") {
             event.reply("Pong!");
         }

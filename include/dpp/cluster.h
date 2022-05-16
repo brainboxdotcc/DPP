@@ -828,6 +828,15 @@ public:
 	 */
 	event_router_t<interaction_create_t> on_interaction_create;
 
+	/**
+	 * @brief Called when a slash command is issued.
+	 * Only ctxm_chat_input types of interaction are routed to this event.
+	 * For an example of this in action please see \ref slashcommands
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type interaction_create_t&, and returns void.
+	 */
+	event_router_t<slashcommand_t> on_slashcommand;
 	
 	/**
 	 * @brief Called when a button is clicked attached to a message.

@@ -278,6 +278,7 @@ event_ctor(button_click_t, interaction_create_t);
 event_ctor(autocomplete_t, interaction_create_t);
 event_ctor(select_click_t, interaction_create_t);
 event_ctor(form_submit_t, interaction_create_t);
+event_ctor(slashcommand_t, interaction_create_t);
 event_ctor(guild_delete_t, event_dispatch_t);
 event_ctor(channel_delete_t, event_dispatch_t);
 event_ctor(channel_update_t, event_dispatch_t);

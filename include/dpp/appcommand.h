@@ -613,7 +613,9 @@ void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
 
 /**
  * @brief An interaction represents a user running a command and arrives
- * via the dpp::cluster::on_interaction_create event.
+ * via the dpp::cluster::on_interaction_create event. This is further split
+ * into the events on_form_submit, on_slashcommand, on_user_context_menu,
+ * on_button_click, on_select_menu, etc.
  */
 class DPP_EXPORT interaction : public managed, public json_interface<interaction>  {
 public:

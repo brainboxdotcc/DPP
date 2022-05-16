@@ -428,6 +428,15 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	virtual ~interaction_create_t() = default;
 };
 
+struct DPP_EXPORT slashcommand_t : public interaction_create_t {
+public:
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	slashcommand_t(class discord_client* client, const std::string& raw);
+};
+
 /**
  * @brief Click on button
  */
