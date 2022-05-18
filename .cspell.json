@@ -79,6 +79,8 @@
 	],
 	"flagWords": [
 		"hte"
-	]
+	],
+	"allowCompoundWords": true,
+	"useCompounds": true
 }
 
