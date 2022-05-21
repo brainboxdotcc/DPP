@@ -51,6 +51,12 @@ void cluster::channel_edit_positions(const std::vector<channel> &c, command_comp
 	}
 	for (auto & ch : c) {
 		json cj({ {"id", ch.id}, {"position", ch.position}  });	
+		if (ch.parent_id) {
+			cj["parent_id"] = std::to_string(ch.parent_id);
+		}
+		if (ch.flags & c_lock_permissions) {
+			cj["lock_permissions"] = true;
+		}
 		j.push_back(cj);
 	}
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(c[0].guild_id), "channels/" + std::to_string(c[0].id), m_patch, j.dump(), callback);
