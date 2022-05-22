@@ -134,6 +134,11 @@ channel& channel::set_nsfw(const bool is_nsfw) {
 	return *this;
 }
 
+channel& channel::set_lock_permissions(const bool is_lock_permissions) {
+	this->flags = (is_lock_permissions) ? this->flags | dpp::c_lock_permissions : this->flags & ~dpp::c_lock_permissions;
+	return *this;
+}
+
 channel& channel::set_user_limit(const uint8_t user_limit) {
 	this->user_limit = user_limit;
 	return *this;
@@ -147,6 +152,10 @@ channel& channel::add_permission_overwrite(const snowflake id, const uint8_t typ
 
 bool channel::is_nsfw() const {
 	return flags & dpp::c_nsfw;
+}
+
+bool channel::is_locked_permissions() const {
+	return flags & dpp::c_lock_permissions;
 }
 
 bool channel::is_text_channel() const {
@@ -347,6 +356,9 @@ std::string channel::build_json(bool with_id) const {
 			j["parent_id"] = std::to_string(parent_id);
 		}
 		j["nsfw"] = is_nsfw();
+	}
+	if (flags & c_lock_permissions) {
+		j["lock_permissions"] = true;
 	}
 	
 	return j.dump();

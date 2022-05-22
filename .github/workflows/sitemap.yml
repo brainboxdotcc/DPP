@@ -6,6 +6,7 @@ on:
 jobs:
   updater:
     name: Generate Sitemap
+    if: github.repository == 'brainboxdotcc/DPP'
     runs-on: ubuntu-20.04
 
     env:
