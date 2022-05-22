@@ -1736,6 +1736,7 @@ public:
 	 * @param guild_id Guild ID to edit permissions of the slash commands in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_command_permissions_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @deprecated This has been disabled with updates to Permissions v2. You can use guild_command_edit_permissions instead
 	 */
 	void guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
