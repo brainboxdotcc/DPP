@@ -59,6 +59,19 @@ application& application::fill_from_json(nlohmann::json* j) {
 		cover_image = ci;
 	}
 	set_int32_not_null(j, "flags", flags);
+	if (j->contains("tags")) {
+		for (const auto& tag : (*j)["tags"]) {
+			this->tags.push_back(to_string(tag));
+		}
+	}
+	if (j->contains("install_params")) {
+		json& p = (*j)["install_params"];
+		set_snowflake_not_null(&p, "permissions", this->install_params.permissions);
+		for (const auto& scope : p["scopes"]) {
+			this->install_params.scopes.push_back(to_string(scope));
+		}
+	}
+	set_string_not_null(j, "custom_install_url", custom_install_url);
 	if (j->contains("team")) {
 		json& t = (*j)["team"];
 		std::string i = string_not_null(&t, "icon");
