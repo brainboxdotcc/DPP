@@ -68,7 +68,7 @@ struct rtp_header {
 bool discord_voice_client::sodium_initialised = false;
 
 bool discord_voice_client::voice_payload::operator<(const voice_payload& other) const {
-	return seq > other.seq || timestamp > other.timestamp;
+	return timestamp > other.timestamp;
 }
 
 #ifdef HAVE_VOICE
