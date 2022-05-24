@@ -161,7 +161,7 @@ int main() {
 
 ### 4. Attach to another event to receive slash commands
 
-If you want to handle a slash command, you should also attach your program to the `on_slashcommand` event (dpp::cluster::on_slashcommand) which is the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
+If you want to handle a slash command, you should also attach your program to the `on_slashcommand` event (dpp::cluster::on_slashcommand) which is basically the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -221,7 +221,7 @@ Let's break down the code in the `on_slashcommand` event so that we can discuss 
 
 This code is simply comparing the command name `event.command.get_command_name()` (dpp::interaction::get_command_name) against the value in a constant string value `"ping"`. If they match, then the `event.reply` method is called.
 
-The `event.reply` function (dpp::interaction_crete_t::reply) replies to a slash command with a message. There are many ways to call this function to send embed messages, upload files, and more, but for this simple demonstration we will just send some message text.
+The `event.reply` function (dpp::slashcommand_t::reply) replies to a slash command with a message. There are many ways to call this function to send embed messages, upload files, and more, but for this simple demonstration we will just send some message text.
 
 ### 6. Add code to start the bot!
 
