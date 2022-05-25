@@ -357,16 +357,16 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
             }
         }
 
-	if (j->contains("name_localizations")) {
-		for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
-			o.name_localizations[loc.key()] = loc.value();
+		if (j->contains("name_localizations")) {
+			for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
+				o.name_localizations[loc.key()] = loc.value();
+			}
 		}
-	}
-	if (j->contains("description_localizations")) {
-		for(auto loc = (*j)["description_localizations"].begin(); loc != (*j)["description_localizations"].end(); ++loc) {
-			o.description_localizations[loc.key()] = loc.value();
+		if (j->contains("description_localizations")) {
+			for(auto loc = (*j)["description_localizations"].begin(); loc != (*j)["description_localizations"].end(); ++loc) {
+				o.description_localizations[loc.key()] = loc.value();
+			}
 		}
-	}
 
         if (j->contains("options") && i > 0) {
             i--; // prevent infinite recursion call with a counter

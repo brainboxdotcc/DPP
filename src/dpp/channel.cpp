@@ -26,6 +26,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -422,8 +423,12 @@ std::string channel::get_icon_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->icon.to_string().empty()) {
-		// TODO implement this, endpoint for that isn't finished yet https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
-		return std::string();
+		return fmt::format("{}/channel-icons/{}/{}.png{}",
+						   utility::cdn_host,
+						   this->id,
+						   this->icon.to_string(),
+						   utility::avatar_size(size)
+		);
 	} else {
 		return std::string();
 	}
