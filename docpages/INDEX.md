@@ -1,4 +1,4 @@
-# D++ Developer Documentation
+# D++: A C++ Discord API Library for Bots
 
 ## What is D++ (DPP)?
 
