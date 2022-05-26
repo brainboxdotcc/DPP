@@ -468,7 +468,7 @@ struct DPP_EXPORT command_resolved {
 	/**
 	 * @brief Resolved total guild member permissions in the channel, including overwrites
 	 */
-	std::map<dpp::snowflake, uint64_t> member_permissions;
+	std::map<dpp::snowflake, permission> member_permissions;
 	/**
 	 * @brief Resolved roles
 	 */
@@ -866,7 +866,7 @@ public:
 	 * D++ defaults this to p_use_application_commands.
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 */
-	uint64_t default_member_permissions;
+	permission default_member_permissions;
 
 	/**
 	 * @brief True if this command should be allowed in a DM
@@ -918,6 +918,13 @@ public:
 	 * 
 	 * @param defaults default permissions to set
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
+	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * command.set_default_permissions(dpp::p_manage_roles | dpp::p_manage_nicknames | dpp::p_manage_guild);
+	 * ```
+	 *
 	 * @return slashcommand& reference to self
 	 */
 	slashcommand& set_default_permissions(uint64_t defaults);

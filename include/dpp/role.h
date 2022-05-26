@@ -64,7 +64,7 @@ public:
 	/** Role position */
 	uint8_t position;
 	/** Role permissions bitmask values from dpp::permissions */
-	uint64_t permissions;
+	permission permissions;
 	/** Role flags from dpp::role_flags */
 	uint8_t flags;
 	/** Integration id if any (e.g. role is a bot's role created when it was invited) */

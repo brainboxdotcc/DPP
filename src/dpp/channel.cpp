@@ -32,6 +32,10 @@ using json = nlohmann::json;
 
 namespace dpp {
 
+permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0) {}
+
+permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type) : id(id), allow(allow), deny(deny), type(type) {}
+
 const uint8_t CHANNEL_TYPE_MASK = 0b00001111;
 
 thread_member& thread_member::fill_from_json(nlohmann::json* j) {
@@ -145,7 +149,7 @@ channel& channel::set_user_limit(const uint8_t user_limit) {
 	return *this;
 }
 
-channel& channel::add_permission_overwrite(const snowflake id, const uint8_t type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+channel& channel::add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
 	permission_overwrite po {id, allowed_permissions, denied_permissions, type};
 	this->permission_overwrites.push_back(po);
 	return *this;
@@ -365,7 +369,7 @@ std::string channel::build_json(bool with_id) const {
 	return j.dump();
 }
 
-uint64_t channel::get_user_permissions(const user* member) const
+permission channel::get_user_permissions(const user* member) const
 {
 	if (member == nullptr)
 		return 0;
