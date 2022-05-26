@@ -67,6 +67,10 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				ucm.set_user(i.resolved.users.begin()->second);
 				client->creator->on_user_context_menu.call(ucm);
 			}
+		} else if (cmd_data.type == ctxm_chat_input && !client->creator->on_slashcommand.empty()) {
+			dpp::slashcommand_t sc(client, raw);
+			sc.command = i;
+			client->creator->on_slashcommand.call(sc);
 		}
 		if (!client->creator->on_interaction_create.empty()) {
 			/* Standard chat input. Note that for backwards compatibility, context menu

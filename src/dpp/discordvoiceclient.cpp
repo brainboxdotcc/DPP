@@ -109,20 +109,12 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		{
 			std::unique_lock lk(shared_state.mtx);
 
-			shared_state.signal_iteration.wait(lk, [&shared_state] {
- 				return    !shared_state.parked_voice_payloads.empty()
-				       || shared_state.terminating;
- 			});
-
-			if (shared_state.terminating && shared_state.parked_voice_payloads.empty()) {
-				/* We have delivered all data to handlers. Terminate now. */
-				break;
-			}
-
 			/* mitigates vector resizing while holding the mutex */
 			flush_data.reserve(shared_state.parked_voice_payloads.size());
 
+			bool has_payload_to_deliver = false;
 			for (auto& [user_id, parking_lot] : shared_state.parked_voice_payloads) {
+				has_payload_to_deliver = has_payload_to_deliver || !parking_lot.parked_payloads.empty();
 				flush_data.push_back(flush_data_t{user_id,
 				                                  parking_lot.range.min_seq,
 				                                  std::move(parking_lot.parked_payloads),
@@ -132,6 +124,20 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 				                                  parking_lot.decoder});
 				parking_lot.range.min_seq = parking_lot.range.max_seq + 1;
 				parking_lot.range.min_timestamp = parking_lot.range.max_timestamp + 1;
+			}
+            
+			if (!has_payload_to_deliver) {
+				if (shared_state.terminating) {
+					/* We have delivered all data to handlers. Terminate now. */
+					break;
+				}
+
+				shared_state.signal_iteration.wait(lk);
+				/*
+				 * More data came or about to terminate, or just a spurious wake.
+				 * We need to collect the payloads again to determine what to do next.
+				 */
+				continue;
 			}
 		}
 
@@ -152,15 +158,13 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		int max_samples = 0;
 
 		for (auto& d : flush_data) {
+			if (!d.decoder) {
+				continue;
+			}
+			for (const auto& decoder_ctl : d.pending_decoder_ctls) {
+				decoder_ctl(*d.decoder);
+			}
 			for (rtp_seq_t seq = d.min_seq; !d.parked_payloads.empty(); ++seq) {
-				if (!d.decoder) {
-					continue;
-				}
-
-				for (const auto& decoder_ctl : d.pending_decoder_ctls) {
-					decoder_ctl(*d.decoder);
-				}
-
 				opus_int16 pcm[23040];
 				if (d.parked_payloads.top().seq != seq) {
 					/*
@@ -283,6 +287,7 @@ discord_voice_client::~discord_voice_client()
 			std::lock_guard lk(voice_courier_shared_state.mtx);
 			voice_courier_shared_state.terminating = true;
 		}
+		voice_courier_shared_state.signal_iteration.notify_one();
 		voice_courier.join();
 	}
 #endif

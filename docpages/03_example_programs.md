@@ -46,14 +46,13 @@ The two programs can be seen side by side below:
 #include <dpp/dpp.h>
 
 const std::string    BOT_TOKEN    = "add your token here";
-const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
 int main() {
     dpp::cluster bot(BOT_TOKEN);
 
     bot.on_log(dpp::utility::cout_logger());
 
-    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
          if (event.command.get_command_name() == "ping") {
             event.reply("Pong!");
         }
@@ -61,9 +60,8 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(
-                dpp::slashcommand("ping", "Ping pong!", bot.me.id),
-                MY_GUILD_ID
+            bot.global_command_create(
+                dpp::slashcommand("ping", "Ping pong!", bot.me.id)
             );
         }
     });
@@ -82,7 +80,6 @@ let Discord = require('discord.js');
 
 
 let BOT_TOKEN   = 'add your token here';
-let MY_GUILD_ID = '825407338755653642';
 
 
 let bot = new Discord.Client({ intents: [] });
@@ -96,8 +93,7 @@ bot.on('interactionCreate', (interaction) => {
 
 
 bot.once('ready', async () => {
-    let guild = await bot.guilds.fetch(MY_GUILD_ID);
-    await guild.commands.create({
+    await client.commands.create({
         name: 'ping',
         description: "Ping pong!"
     });
@@ -165,23 +161,22 @@ int main() {
 
 ### 4. Attach to another event to receive slash commands
 
-If you want to handle a slash command, you should also attach your program to the `on_interaction_create` event (dpp::cluster::on_interaction_create) which is the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
+If you want to handle a slash command, you should also attach your program to the `on_slashcommand` event (dpp::cluster::on_slashcommand) which is the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 
 const std::string    BOT_TOKEN    = "add your token here";
-const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
 int main() {
     dpp::cluster bot(BOT_TOKEN);
 
-    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
     });
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
         }
     });
 }
@@ -189,18 +184,17 @@ int main() {
 
 ### 5 . Add some content to the events
 
-Attaching to an event is a good start, but to make a bot you should actually put some program code into the interaction event. We will add some code to the `on_interaction_create` to look for our slash command '/ping' and reply with `Pong!`:
+Attaching to an event is a good start, but to make a bot you should actually put some program code into the interaction event. We will add some code to the `on_slashcommand` to look for our slash command '/ping' and reply with `Pong!`:
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 
 const std::string    BOT_TOKEN    = "add your token here";
-const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
 int main() {
     dpp::cluster bot(BOT_TOKEN);
 
-    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
          if (event.command.get_command_name() == "ping") {
             event.reply("Pong!");
         }
@@ -208,17 +202,17 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
         }
     });
 
 }
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Let's break down the code in the `on_interaction_create` event so that we can discuss what it is doing:
+Let's break down the code in the `on_slashcommand` event so that we can discuss what it is doing:
 
 ~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
          if (event.command.get_command_name() == "ping") {
             event.reply("Pong!");
         }
@@ -241,14 +235,13 @@ The parameter which we set to false indicates if the function should return once
 #include <dpp/dpp.h>
 
 const std::string    BOT_TOKEN    = "add your token here";
-const dpp::snowflake MY_GUILD_ID  =  825407338755653642;
 
 int main() {
     dpp::cluster bot(BOT_TOKEN);
 
     bot.on_log(dpp::utility::cout_logger());
 
-    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
          if (event.command.get_command_name() == "ping") {
             event.reply("Pong!");
         }
@@ -256,7 +249,7 @@ int main() {
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         if (dpp::run_once<struct register_bot_commands>()) {
-            bot.guild_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id), MY_GUILD_ID);
+            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
         }
     });
 
@@ -600,7 +593,7 @@ system and for users to easily explore and get help with available commands thro
 To add a slash command you should use the dpp::cluster::global_command_create method for global commands (available to all guilds)
 or dpp::cluster::guild_command_create to create a local command (available only to one guild).
 
-When a user issues these commands the reply will arrive via the on_interaction_create event which you can hook, and take action
+When a user issues these commands the reply will arrive via the `on_slashcommand` event which you can hook, and take action
 when you see your commands. It is possible to reply to an interaction by using either the dpp::interaction_create_t::reply method,
 or by manually instantiating an object of type dpp::interaction_response and attaching a dpp::message object to it.
 
@@ -622,7 +615,7 @@ int main()
    bot.on_log(dpp::utility::cout_logger());
 
 	/* The interaction create event is fired when someone issues your commands */
-	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "blep") {
 			/* Fetch a parameter value from the command parameters */
@@ -786,7 +779,7 @@ prefixed channel messages) you should consider instantiating a dpp::commandhandl
 commands and their parameters to functions in your program. A simple example of using this object to route commands is shown below, and will
 route both the /ping (global slash command) and .ping (prefixed channel message command) to a lambda where a reply can be generated.
 
-\note	This example automatically hooks the dpp::cluster::on_message_create and dpp::cluster::on_interaction_create events. This can be overridden if needed to allow you to still make use of these functions for your own code, if you need to do this please see the constructor documentation for dpp::commandhandler.
+\note	This example automatically hooks the dpp::cluster::on_message_create and dpp::cluster::on_slashcommand events. This can be overridden if needed to allow you to still make use of these functions for your own code, if you need to do this please see the constructor documentation for dpp::commandhandler.
 
 Note that because the dpp::commandhandler::add_command method accepts a std::function as the command handler, you may point a command handler
 at a simple lambda (as shown in this example), a function pointer, or an instantiated class method of an object. This is extremely flexible
@@ -991,8 +984,8 @@ int main() {
 	    }
 	});
 
-	/* Use the on_interaction_create event to look for commands */
-	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
+	/* Use the on_slashcommand event to look for commands */
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
 		dpp::command_interaction cmd_data = event.command.get_command_interaction();
 		/* Check if the command is the image command. */
 		if (event.command.get_command_name() == "image") {
@@ -1289,7 +1282,7 @@ int main()
 	});
 
 	/* The interaction create event is fired when someone issues your commands */
-	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "blep") {
 			/* Fetch a parameter value from the command parameters */
@@ -1561,7 +1554,7 @@ int main() {
 
 \page modal-dialog-interactions Modal Dialog Interactions
 
-Modal dialog interactions are a new Discord API feature that allow you to have pop-up windows which prompt the user to input information. Once the user has filled in this information, your program will receive an `on_form_submit` event which will contain the data which was input. You must use a slash command interaction response to submit your modal form data to Discord, via the `on_interaction_create` event. From here calling the `dialog` method of the `interaction_create_t` event object will trigger the dialog to appear.
+Modal dialog interactions are a new Discord API feature that allow you to have pop-up windows which prompt the user to input information. Once the user has filled in this information, your program will receive an `on_form_submit` event which will contain the data which was input. You must use a slash command interaction response to submit your modal form data to Discord, via the `on_slashcommand` event. From here calling the `dialog` method of the `interaction_create_t` event object will trigger the dialog to appear.
 
 Each dialog box may have up to five rows of input fields. The example below demonstrates a simple setup with just one text input:
 
@@ -1582,7 +1575,7 @@ int main(int argc, char const *argv[])
 		}
 	});
 
-	bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
 		/* Check for our /dialog command */
 		if (event.command.get_command_name() == "dialog") {
 			/* Instantiate an interaction_modal_response object */
@@ -1962,7 +1955,7 @@ int main()
 
         bot.on_log(dpp::utility::cout_logger());
 
-        bot.on_interaction_create([&bot](const dpp::interaction_create_t & event) {
+        bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
                 if (event.command.type == dpp::it_application_command) {
                         dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
                         if (cmd_data.name == "show") {

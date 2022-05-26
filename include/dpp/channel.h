@@ -66,6 +66,8 @@ enum channel_flags : uint8_t {
 	c_nsfw =		0b00010000,
 	/// Video quality forced to 720p
 	c_video_quality_720p =	0b00100000,
+	/// Lock permissions (only used when updating channel positions)
+	c_lock_permissions =	0b01000000,
 };
 
 /**
@@ -320,6 +322,15 @@ public:
 	channel& set_nsfw(const bool is_nsfw);
 
 	/**
+	 * @brief Set lock permissions property of this channel object
+	 * Used only with the reorder channels method
+	 *
+	 * @param is_lock_permissions true, if we are to inherit permissions from the category
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_lock_permissions(const bool is_lock_permissions);
+
+	/**
 	 * @brief Set rate_limit_per_user of this channel object
 	 *
 	 * @param rate_limit_per_user rate_limit_per_user (slowmode in sec) to set
@@ -395,6 +406,14 @@ public:
 	 * @return true if NSFW
 	 */
 	bool is_nsfw() const;
+
+	/**
+	 * @brief Returns true if the permissions are to be synched with the category it is in.
+	 * Used only and set manually when using the reorder channels method.
+	 * 
+	 * @return true if keeping permissions
+	 */
+	bool is_locked_permissions() const;
 
 	/**
 	 * @brief Returns true if the channel is a text channel

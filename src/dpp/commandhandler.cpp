@@ -45,7 +45,7 @@ commandhandler::commandhandler(cluster* o, bool auto_hook_events, snowflake appl
 		app_id = o->me.id;
 	}
 	if (auto_hook_events) {
-		interactions = o->on_interaction_create([this](const dpp::interaction_create_t &event) {
+		interactions = o->on_slashcommand([this](const dpp::slashcommand_t &event) {
 			this->route(event);
 		});
 		messages = o->on_message_create([this](const dpp::message_create_t & event) {
@@ -67,7 +67,7 @@ commandhandler::~commandhandler()
 {
 	if (messages && interactions) {
 		owner->on_message_create.detach(messages);
-		owner->on_interaction_create.detach(interactions);
+		owner->on_slashcommand.detach(interactions);
 	}
 }
 
@@ -298,7 +298,7 @@ void commandhandler::route(const struct dpp::message_create_t& event)
 	}
 }
 
-void commandhandler::route(const struct interaction_create_t & event)
+void commandhandler::route(const struct slashcommand_t & event)
 {
 	/* We don't need to check for prefixes here, slash command interactions
 	 * dont have prefixes at all.

@@ -3,9 +3,12 @@ name: Bug report
 about: Create a report to help us improve
 title: ''
 labels: bug
-assignees: ''
+assignees: braindigitalis
 
 ---
+
+**Git commit reference**
+The git commit reference of the version you are using, obtainable via `git show -s --format="%H"`
 
 **Describe the bug**
 A clear and concise description of what the bug is.
@@ -23,7 +26,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **System Details:**
- - OS: [e.g. iOS8.1]
+ - OS: [e.g. Debian Bullseye]
  - Discord Client used for testing [mobile, desktop, web]
 
 **Additional context**
