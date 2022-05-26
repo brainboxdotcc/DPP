@@ -33,7 +33,7 @@
  * @see dpp::cluster::global_bulk_command_create
  * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
  * @param commands Vector of slash commands to create/update.
- * overwriting existing commands that are registered globally for this application.
+ * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
  * Commands that do not already exist will count toward daily application command create limits.
  * @return slashcommand_map returned object on completion
  * \memberof dpp::cluster
@@ -154,6 +154,7 @@ guild_command_permissions_map guild_commands_get_permissions_sync(snowflake guil
  * @param commands A vector of slash commands to edit/overwrite the permissions for
  * @param guild_id Guild ID to edit permissions of the slash commands in
  * @return guild_command_permissions_map returned object on completion
+ * @deprecated This has been disabled with updates to Permissions v2. You can use guild_command_edit_permissions instead
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.

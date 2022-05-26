@@ -174,6 +174,26 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", (success_double && success_int && success_int2 && success_bool && success_snowflake && success_string));
 	}
 
+	{
+		set_test("PERMISSION_CLASS", false);
+		bool success = false;
+		auto p = dpp::permission();
+		p = 16;
+		success = p == 16 && success;
+		p |= 4;
+		success = p == 20 && success;
+		p <<= 8;
+		success = p == 4096 && success;
+		auto s = std::to_string(p);
+		success = s == "4096" && success;
+		json j;
+		j["value"] = p;
+		success = dpp::snowflake_not_null(&j, "value") == 4096 && success;
+		p.set(8);
+		success = p.has(8) && success;
+		set_test("PERMISSION_CLASS", success);
+	}
+
 	set_test("TIMESTRINGTOTIMESTAMP", false);
 	json tj;
 	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
