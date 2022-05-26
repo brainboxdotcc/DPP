@@ -37,12 +37,6 @@ enum role_flags : uint8_t {
 };
 
 /**
- * @brief Represents the various discord permissions
- * @deprecated Use dpp::permissions instead.
- */
-using role_permissions = permissions;
-
-/**
  * @brief Represents a role within a dpp::guild.
  * Roles are combined via logical OR of the permission bitmasks, then channel-specific overrides
  * can be applied on top, deny types apply a logic NOT to the bit mask, and allows apply a logical OR.

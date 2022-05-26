@@ -71,7 +71,13 @@ enum permissions : uint64_t {
 };
 
 /**
- * @brief Represents a permission bitmask which are hold in an uint64_t
+ * @brief Represents the various discord permissions
+ * @deprecated Use dpp::permissions instead.
+ */
+using role_permissions = permissions;
+
+/**
+ * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are hold in an uint64_t
  */
 class permission {
 private:
@@ -106,19 +112,19 @@ public:
 
 	/**
 	 * @brief Add a permission with the Bitwise OR operation
-	 * @param p The permission from dpp::permissions to add
+	 * @param p The permissions (from dpp::permissions) to add
 	 */
 	void add(uint64_t p);
 
 	/**
 	 * @brief Set a permission with the Bitwise AND operation
-	 * @param p The permission from dpp::permissions to set
+	 * @param p The permissions (from dpp::permissions) to set
 	 */
 	void set(uint64_t p);
 
 	/**
 	 * @brief Remove a permission with the Bitwise NOT operation
-	 * @param p The permission from dpp::permissions to remove
+	 * @param p The permissions (from dpp::permissions) to remove
 	 */
 	void remove(uint64_t p);
 };
