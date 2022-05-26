@@ -80,7 +80,7 @@ private:
 	 */
 	uint64_t value;
 public:
-	template<typename T> permission(T v);
+	permission(const uint64_t& value);
 
 	/**
  	 * @brief Construct a permission object
@@ -90,6 +90,8 @@ public:
 	operator uint64_t() const;
 
 	operator uint64_t &();
+
+	operator nlohmann::json() const;
 
 	/**
 	 * @brief Check if it has a permission flag set

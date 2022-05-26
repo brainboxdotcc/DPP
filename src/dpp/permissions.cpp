@@ -18,12 +18,12 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#pragma once
 #include <dpp/permissions.h>
+#include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
 
-template<typename T> permission::permission(T v) : value(v) {};
+permission::permission(const uint64_t &value) : value(value) {}
 
 permission::permission() : permission(0) {}
 
@@ -32,6 +32,10 @@ permission::operator uint64_t() const {
 }
 
 permission::operator uint64_t &() {
+	return value;
+}
+
+permission::operator nlohmann::json() const {
 	return value;
 }
 
