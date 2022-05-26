@@ -97,10 +97,22 @@ public:
  	 */
 	permission();
 
+	/**
+	 * @brief For acting like an integer
+	 * @return The permission bitmask value
+	 */
 	operator uint64_t() const;
 
+	/**
+	 * @brief For acting like an integer
+	 * @return A reference to the permission bitmask value
+	 */
 	operator uint64_t &();
 
+	/**
+	 * @brief For building json
+	 * @return The permission bitmask value
+	 */
 	operator nlohmann::json() const;
 
 	/**
@@ -113,20 +125,23 @@ public:
 	/**
 	 * @brief Add a permission with the Bitwise OR operation
 	 * @param p The permissions (from dpp::permissions) to add
+	 * @return permission& reference to self for chaining
 	 */
-	void add(uint64_t p);
+	const permission& add(uint64_t p);
 
 	/**
 	 * @brief Set a permission with the Bitwise AND operation
 	 * @param p The permissions (from dpp::permissions) to set
+	 * @return permission& reference to self for chaining
 	 */
-	void set(uint64_t p);
+	const permission& set(uint64_t p);
 
 	/**
 	 * @brief Remove a permission with the Bitwise NOT operation
 	 * @param p The permissions (from dpp::permissions) to remove
+	 * @return permission& reference to self for chaining
 	 */
-	void remove(uint64_t p);
+	const permission& remove(uint64_t p);
 };
 
 }

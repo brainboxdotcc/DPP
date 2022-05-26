@@ -43,16 +43,19 @@ bool permission::has(uint64_t p) const {
 	return (value & p);
 }
 
-void permission::add(uint64_t p) {
+const permission& permission::add(uint64_t p) {
 	value |= p;
+	return *this;
 }
 
-void permission::set(uint64_t p) {
+const permission& permission::set(uint64_t p) {
 	value = p;
+	return *this;
 }
 
-void permission::remove(uint64_t p) {
+const permission& permission::remove(uint64_t p) {
 	value &= ~p;
+	return *this;
 }
 
 }
