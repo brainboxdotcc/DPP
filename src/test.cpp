@@ -179,16 +179,16 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		bool success = false;
 		auto p = dpp::permission();
 		p = 16;
-		success = p == 16 && success;
+		success = p == 16;
 		p |= 4;
 		success = p == 20 && success;
-		p <<= 8;
-		success = p == 4096 && success;
+		p <<= 8; // left shift
+		success = p == 5120 && success;
 		auto s = std::to_string(p);
-		success = s == "4096" && success;
+		success = s == "5120" && success;
 		json j;
 		j["value"] = p;
-		success = dpp::snowflake_not_null(&j, "value") == 4096 && success;
+		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
 		p.set(8);
 		success = p.has(8) && success;
 		set_test("PERMISSION_CLASS", success);
