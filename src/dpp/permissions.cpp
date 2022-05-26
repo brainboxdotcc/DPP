@@ -40,7 +40,7 @@ permission::operator nlohmann::json() const {
 }
 
 bool permission::has(uint64_t p) const {
-	return (value & p);
+	return (value & p) == p;
 }
 
 const permission& permission::add(uint64_t p) {
