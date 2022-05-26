@@ -343,8 +343,8 @@ public:
 	 * 
 	 * @param id ID of the role or the member you want to add overwrite for
 	 * @param type type of overwrite (0 for role, 1 for member)
-	 * @param allowed_permissions bitmask of allowed permissions (refer to enum role_permissions) for this user/role in this channel
-	 * @param denied_permissions bitmask of denied permissions (refer to enum role_permissions) for this user/role in this channel
+	 * @param allowed_permissions bitmask of allowed permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param denied_permissions bitmask of denied permissions (refer to enum dpp::permissions) for this user/role in this channel
 	 *
 	 * @return Reference to self, so these method calls may be chained 
 	 */

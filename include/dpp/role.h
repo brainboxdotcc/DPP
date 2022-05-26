@@ -38,7 +38,7 @@ enum role_flags : uint8_t {
 /**
  * @brief Represents the various discord permissions
  */
-enum role_permissions : uint64_t {
+enum permissions : uint64_t {
 	p_create_instant_invite		=	0x00000000001,	//!< allows creation of instant invites
 	p_kick_members			=	0x00000000002,	//!< allows kicking members
 	p_ban_members			=	0x00000000004,	//!< allows banning members
@@ -83,6 +83,12 @@ enum role_permissions : uint64_t {
 };
 
 /**
+ * @brief Represents the various discord permissions
+ * @deprecated Use dpp::permissions instead.
+ */
+using role_permissions = permissions;
+
+/**
  * @brief Represents a role within a dpp::guild.
  * Roles are combined via logical OR of the permission bitmasks, then channel-specific overrides
  * can be applied on top, deny types apply a logic NOT to the bit mask, and allows apply a logical OR.
@@ -109,7 +115,7 @@ public:
 	uint32_t colour;
 	/** Role position */
 	uint8_t position;
-	/** Role permissions bitmask values from dpp::role_permissions */
+	/** Role permissions bitmask values from dpp::permissions */
 	uint64_t permissions;
 	/** Role flags from dpp::role_flags */
 	uint8_t flags;
