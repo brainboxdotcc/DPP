@@ -66,7 +66,7 @@ enum application_flags : uint32_t {
  * @brief Represents the settings for the bot/application's in-app authorization link
  */
 struct DPP_EXPORT application_install_params {
-	uint64_t permissions;	//!< The dpp::permissions to request for the bot role
+	uint64_t permissions;	//!< A bitmask of dpp::permissions to request for the bot role
 	std::vector<std::string> scopes;	//!< The [scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes) as strings to add the application to the server with
 };
 
