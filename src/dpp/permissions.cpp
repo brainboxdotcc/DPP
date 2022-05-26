@@ -36,7 +36,7 @@ permission::operator uint64_t &() {
 }
 
 permission::operator nlohmann::json() const {
-	return value;
+	return std::to_string(value);
 }
 
 bool permission::has(uint64_t p) const {

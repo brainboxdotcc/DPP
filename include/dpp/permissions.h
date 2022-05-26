@@ -80,7 +80,7 @@ using role_permissions = permissions;
  * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are hold in an uint64_t
  */
 class permission {
-private:
+protected:
 	/**
 	 * @brief The permission bitmask value
 	 */
@@ -111,12 +111,12 @@ public:
 
 	/**
 	 * @brief For building json
-	 * @return The permission bitmask value
+	 * @return The permission bitmask value as a string
 	 */
 	operator nlohmann::json() const;
 
 	/**
-	 * @brief Check if it has a permission flag set
+	 * @brief Check if it has a permission flag set. It uses the Bitwise AND operator
 	 * @param p The permission flag from dpp::permissions
 	 * @return True if it has the permission
 	 */
@@ -130,7 +130,7 @@ public:
 	const permission& add(uint64_t p);
 
 	/**
-	 * @brief Set a permission with the Bitwise AND operation
+	 * @brief Assign a permission. This will reset the bitmask to the new value.
 	 * @param p The permissions (from dpp::permissions) to set
 	 * @return permission& reference to self for chaining
 	 */
