@@ -78,6 +78,7 @@ std::map<std::string, test_t> tests = {
 	{"COMPARISON", {"dpp::manged object comparison", false, false}},
 	{"CHANNELCACHE", {"dpp::find_channel()", false, false}},
 	{"CHANNELTYPES", {"dpp::channel type flags", false, false}},
+	{"PERMISSION_CLASS", {"testing dpp::permission functionality", false, false}},
 };
 
 double start = dpp::utility::time_f();

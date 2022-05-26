@@ -26,6 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
 #include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/permissions.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
 
@@ -81,17 +82,31 @@ enum overwrite_type : uint8_t {
 };
 
 /**
- * @brief channel permission overwrites
+ * @brief Channel permission overwrites
  */
 struct DPP_EXPORT permission_overwrite {
-	/// Overwrite id
+	/// ID of the role or the member
 	snowflake id;
-	/// Allow mask
-	uint64_t allow;
-	/// Deny mask
-	uint64_t deny;
-	/// Overwrite type
+	/// Bitmask of allowed permissions
+	permission allow;
+	/// Bitmask of denied permissions
+	permission deny;
+	/// Type of overwrite. See dpp::overwrite_type
 	uint8_t type;
+
+	/**
+	 * @brief Construct a new permission_overwrite object
+	 */
+	permission_overwrite();
+
+	/**
+	 * @brief Construct a new permission_overwrite object
+	 * @param id ID of the role or the member to create the overwrite for
+	 * @param allow Bitmask of allowed permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param deny Bitmask of denied permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param type Type of overwrite
+	 */
+	permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type);
 };
 
 
@@ -191,7 +206,7 @@ public:
 	 * it contains the calculated permission bitmask of the user issuing the command
 	 * within this channel.
 	 */
-	uint64_t permissions;
+	permission permissions;
 
 	/** Sorting position, lower number means higher up the list */
 	uint16_t position;
@@ -342,13 +357,13 @@ public:
 	 * @brief Add a permission_overwrite to this channel object
 	 * 
 	 * @param id ID of the role or the member you want to add overwrite for
-	 * @param type type of overwrite (0 for role, 1 for member)
-	 * @param allowed_permissions bitmask of allowed permissions (refer to enum role_permissions) for this user/role in this channel
-	 * @param denied_permissions bitmask of denied permissions (refer to enum role_permissions) for this user/role in this channel
+	 * @param type type of overwrite
+	 * @param allowed_permissions bitmask of allowed permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param denied_permissions bitmask of denied permissions (refer to enum dpp::permissions) for this user/role in this channel
 	 *
 	 * @return Reference to self, so these method calls may be chained 
 	 */
-	channel& add_permission_overwrite(const snowflake id, const uint8_t type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
+	channel& add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
 
 	/**
 	 * @brief Get the mention ping for the channel
@@ -361,11 +376,11 @@ public:
 	 * @brief Get the user permissions for a user on this channel
 	 * 
 	 * @param member The user to return permissions for
-	 * @return uint64_t Permissions bitmask made of bits in role_permissions.
+	 * @return permission Permissions bitmask made of bits in dpp::permissions.
 	 * Note that if the user is not on the channel or the guild is
 	 * not in the cache, the function will always return 0.
 	 */
-	uint64_t get_user_permissions(const class user* member) const;
+	permission get_user_permissions(const class user* member) const;
 
 	/**
 	 * @brief Return a map of members on the channel, built from the guild's

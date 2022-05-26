@@ -24,6 +24,7 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
+#include <dpp/permissions.h>
 #include <string>
 #include <unordered_map>
 #include <dpp/json_interface.h>
@@ -540,9 +541,9 @@ public:
 	 * before permission overwrites are applied.
 	 *
 	 * @param member member to get permissions for
-	 * @return uint64_t permissions bitmask
+	 * @return permission permissions bitmask
 	 */
-	uint64_t base_permissions(const class user* member) const;
+	permission base_permissions(const class user* member) const;
 
 	/**
 	 * @brief Get the permission overwrites for a member
@@ -552,9 +553,9 @@ public:
 	 * from channel::base_permissions
 	 * @param member Member to fetch permissions for
 	 * @param channel Channel to fetch permissions against
-	 * @return uint64_t Merged permissions bitmask of overwrites.
+	 * @return permission Merged permissions bitmask of overwrites.
 	 */
-	uint64_t permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
+	permission permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
 
 	/**
 	 * @brief Rehash members map
