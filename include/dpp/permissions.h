@@ -71,7 +71,7 @@ enum permissions : uint64_t {
 };
 
 /**
- * @brief Permission type which holds the permission bitmask in an uint64_t
+ * @brief Represents a permission bitmask which are hold in an uint64_t
  */
 class permission {
 private:
@@ -80,6 +80,10 @@ private:
 	 */
 	uint64_t value;
 public:
+	/**
+	 * @brief Construct a permission object
+	 * @param value A permission bitmask
+	 */
 	permission(const uint64_t& value);
 
 	/**
