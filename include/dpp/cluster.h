@@ -2419,8 +2419,24 @@ public:
 	 * @param role_id Role to remove
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @deprecated Use dpp::cluster::guild_member_remove_role instead
 	 */
 	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Remove role from guild member
+	 *
+	 * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
+	 * Fires a `Guild Member Update` Gateway event.
+	 * @see https://discord.com/developers/docs/resources/guild#remove-guild-member-role
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @param guild_id Guild ID to remove role from user on
+	 * @param user_id User ID to remove role from
+	 * @param role_id Role to remove
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_member_remove_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove (kick) a guild member
