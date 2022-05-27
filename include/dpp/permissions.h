@@ -20,7 +20,6 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <type_traits>
 
 namespace dpp {
 
@@ -87,24 +86,6 @@ protected:
 	 */
 	uint64_t value;
 
-	/**
-	 * @brief Internal function called by add() to apply iterative changes
-	 * @param p flags to add
-	 */
-	void add_one(uint64_t p);
-
-	/**
-	 * @brief Internal function called by set() to apply iterative changes
-	 * @param p flags to set
-	 */
-	void set_one(uint64_t p);
-
-	/**
-	 * @brief Internal function called by remove() to apply iterative changes
-	 * @param p flags to remove
-	 */
-	void remove_one(uint64_t p);
-
 public:
 	/**
 	 * @brief Construct a permission object
@@ -164,10 +145,9 @@ public:
 	 *
 	 * @return permission& reference to self for chaining
 	 */
-	template <typename... Args> permission& add(Args&&... args) {
-		[[maybe_unused]]
-		int dummy[] = { 0, ((void) add_one(std::forward<Args>(args)),0)... };
-		return *this;
+	template <typename... T>
+	void add(T... values) {
+		(value |= (0 | ... | values));
 	}
 
 	/**
@@ -183,11 +163,9 @@ public:
 	 *
 	 * @return permission& reference to self for chaining
 	 */
-	template <typename... Args> permission& set(Args&&... args) {
-		this->set_one(0);
-		[[maybe_unused]]
-		int dummy[] = { 0, ((void) add_one(std::forward<Args>(args)),0)... };
-		return *this;
+	template <typename... T>
+	void set(T... values) {
+		(value = (0 | ... | values));
 	}
 
 	/**
@@ -204,10 +182,9 @@ public:
 	 *
 	 * @return permission& reference to self for chaining
 	 */
-	template <typename... Args> permission& remove(Args&&... args) {
-		[[maybe_unused]]
-		int dummy[] = { 0, ((void) remove_one(std::forward<Args>(args)),0)... };
-		return *this;
+	template <typename... T>
+	void remove(T... values) {
+		(value &= ~(0 | ... | values));
 	}
 };
 
