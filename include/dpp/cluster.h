@@ -825,12 +825,15 @@ public:
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type interaction_create_t&, and returns void.
+	 *
+	 * @note There are dedicated events to handle slashcommands (See dpp::cluster::on_slashcommand),
+	 * user context menus (See dpp::cluster::on_user_context_menu) and message context menus (See dpp::cluster::on_message_context_menu)
 	 */
 	event_router_t<interaction_create_t> on_interaction_create;
 
 	/**
 	 * @brief Called when a slash command is issued.
-	 * Only ctxm_chat_input types of interaction are routed to this event.
+	 * Only dpp::ctxm_chat_input types of interaction are routed to this event.
 	 * For an example of this in action please see \ref slashcommands
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -871,7 +874,7 @@ public:
 
 	/**
 	 * @brief Called when a user right-clicks or long-presses on a message,
-	 * where a slash command is bound to the ctxm_message command type.
+	 * where a slash command is bound to the dpp::ctxm_message command type.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
@@ -880,7 +883,7 @@ public:
 
 	/**
 	 * @brief Called when a user right-clicks or long-presses on a user,
-	 * where a slash command is bound to the ctxm_user command type.
+	 * where a slash command is bound to the dpp::ctxm_user command type.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
