@@ -20,6 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <type_traits>
 
 namespace dpp {
 
@@ -85,6 +86,25 @@ protected:
 	 * @brief The permission bitmask value
 	 */
 	uint64_t value;
+
+	/**
+	 * @brief Internal function called by remove() to apply iterative changes
+	 * @param p flags to add
+	 */
+	void add_one(uint64_t p);
+
+	/**
+	 * @brief Internal function called by remove() to apply iterative changes
+	 * @param p flags to set
+	 */
+	void set_one(uint64_t p);
+
+	/**
+	 * @brief Internal function called by remove() to apply iterative changes
+	 * @param p flags to remove
+	 */
+	void remove_one(uint64_t p);
+
 public:
 	/**
 	 * @brief Construct a permission object
@@ -124,24 +144,40 @@ public:
 
 	/**
 	 * @brief Add a permission with the Bitwise OR operation
-	 * @param p The permissions (from dpp::permissions) to add
+	 * @tparam Args one or more uint64_t permission bits
+	 * @param args The permissions (from dpp::permissions) to set
 	 * @return permission& reference to self for chaining
 	 */
-	const permission& add(uint64_t p);
+	template <typename... Args> permission& add(Args&&... args) {
+		[[maybe_unused]]
+		int dummy[] = { 0, ((void) add_one(std::forward<Args>(args)),0)... };
+		return *this;
+	}
 
 	/**
 	 * @brief Assign a permission. This will reset the bitmask to the new value.
-	 * @param p The permissions (from dpp::permissions) to set
+	 * @tparam Args one or more uint64_t permission bits
+	 * @param args The permissions (from dpp::permissions) to set
 	 * @return permission& reference to self for chaining
 	 */
-	const permission& set(uint64_t p);
+	template <typename... Args> permission& set(Args&&... args) {
+		this->set_one(0);
+		[[maybe_unused]]
+		int dummy[] = { 0, ((void) add_one(std::forward<Args>(args)),0)... };
+		return *this;
+	}
 
 	/**
 	 * @brief Remove a permission with the Bitwise NOT operation
-	 * @param p The permissions (from dpp::permissions) to remove
+	 * @tparam Args one or more uint64_t permission bits
+	 * @param args The permissions (from dpp::permissions) to remove
 	 * @return permission& reference to self for chaining
 	 */
-	const permission& remove(uint64_t p);
+	template <typename... Args> permission& remove(Args&&... args) {
+		[[maybe_unused]]
+		int dummy[] = { 0, ((void) remove_one(std::forward<Args>(args)),0)... };
+		return *this;
+	}
 };
 
 }

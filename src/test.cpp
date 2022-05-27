@@ -195,8 +195,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		json j;
 		j["value"] = p;
 		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
-		p.set(8);
-		success = p.has(8) && success;
+		p.set(dpp::p_administrator, dpp::p_ban_members);
+		success = p.has(dpp::p_administrator) && p.has(dpp::p_ban_members) && success;
 		set_test("PERMISSION_CLASS", success);
 	}
 
