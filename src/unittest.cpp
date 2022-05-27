@@ -61,7 +61,7 @@ std::map<std::string, test_t> tests = {
 	{"PRESENCE", {tt_online, "Presence intent", false, false}},
 	{"CUSTOMCACHE", {tt_offline, "Instantiate a cache", false, false}},
 	{"MSGCOLLECT", {tt_online, "message_collector", false, false}},
-	{"TS", {tt_offline, "managed::get_creation_date()", false, false}},
+	{"TS", {tt_online, "managed::get_creation_date()", false, false}},
 	{"READFILE", {tt_offline, "utility::read_file()", false, false}},
 	{"TIMESTAMPTOSTRING", {tt_offline, "dpp::ts_to_string()", false, false}},
 	{"TIMESTRINGTOTIMESTAMP", {tt_offline, "dpp::ts_not_null()", false, false}},
