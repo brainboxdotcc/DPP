@@ -146,8 +146,9 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	void add(T... values) {
+	permission& add(T... values) {
 		(value |= (0 | ... | values));
+		return *this;
 	}
 
 	/**
@@ -164,8 +165,9 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	void set(T... values) {
+	permission& set(T... values) {
 		(value = (0 | ... | values));
+		return *this;
 	}
 
 	/**
@@ -183,8 +185,9 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	void remove(T... values) {
+	permission& remove(T... values) {
 		(value &= ~(0 | ... | values));
+		return *this;
 	}
 };
 
