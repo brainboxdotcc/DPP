@@ -602,7 +602,7 @@ basic text-only messages (if your message is 'ephemeral' you must use this) and 
 replies. Please note that at present, Discord only supports a small subset of message and embed features within an interaction
 response object.
 
-\note You can also use the unified command handler, which lets you combine channel based message commands and slash commands under the same lambda with the same code like they were one and the same. Note that after April of 2022 Discord will be discouraging bots from using commands that are prefixed messages via means of a privileged message intent. It is advised that you exclusively use slash commands, or the unified handler with only a prefix of "/" going forward for any new bots you create and look to migrating existing bots to this setup.
+\note You can also use the unified command handler, which lets you combine channel based message commands and slash commands under the same lambda with the same code like they were one and the same. Note that after August of 2022 Discord will be discouraging bots from using commands that are prefixed messages via means of a privileged message intent. It is advised that you exclusively use slash commands, or the unified handler with only a prefix of "/" going forward for any new bots you create and look to migrating existing bots to this setup.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -614,7 +614,7 @@ int main()
 
    bot.on_log(dpp::utility::cout_logger());
 
-	/* The interaction create event is fired when someone issues your commands */
+	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "blep") {
@@ -1200,14 +1200,14 @@ int main(int argc, char const *argv[])
 
 You might have seen these special messages, often sent by bots. In this section, we will show how to create an embed.
 
-To make an embed use this.
+@note Because this example utilizes message content, it requires the message content privileged intent. 
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 
 int main() {
     /* Setup the bot */
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
+    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
     /* Message handler to look for a command called !embed */
     bot.on_message_create([&bot](const dpp::message_create_t & event) {
@@ -1334,6 +1334,8 @@ To attach a file to a message, you can upload a local image.
 D++ has this helper function to read a file: `dpp::utility::read_file`.
 
 An example program:
+
+@note Because these examples utilizes message content, they require the message content privileged intent.
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
