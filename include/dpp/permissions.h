@@ -133,8 +133,8 @@ public:
 
 	/**
 	 * @brief Add a permission with the Bitwise OR operation
-	 * @tparam Args one or more uint64_t permission bits
-	 * @param args The permissions (from dpp::permissions) to add
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to add
 	 *
 	 * **Example:**
 	 *
@@ -153,8 +153,8 @@ public:
 
 	/**
 	 * @brief Assign a permission. This will reset the bitmask to the new value.
-	 * @tparam Args one or more uint64_t permission bits
-	 * @param args The permissions (from dpp::permissions) to set
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to set
 	 *
 	 * **Example:**
 	 *
@@ -172,8 +172,8 @@ public:
 
 	/**
 	 * @brief Remove a permission with the Bitwise NOT operation
-	 * @tparam Args one or more uint64_t permission bits
-	 * @param args The permissions (from dpp::permissions) to remove
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to remove
 	 *
 	 * **Example:**
 	 *
