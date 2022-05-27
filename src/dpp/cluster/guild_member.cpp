@@ -99,6 +99,11 @@ void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, sn
 }
 
 
+void cluster::guild_member_remove_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", callback);
+}
+
+
 void cluster::guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback) {
     json j;
     j["channel_id"] = channel_id;

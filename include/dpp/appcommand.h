@@ -913,17 +913,10 @@ public:
 	slashcommand& set_dm_permission(bool dm);
 
 	/**
-	 * @brief Set the default permissions of the slash command,
-	 * this is a permission bitmask.
+	 * @brief Set the default permissions of the slash command
 	 * 
-	 * @param defaults default permissions to set
+	 * @param defaults default permissions to set. This is a permission bitmask
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
-	 *
-	 * **Example:**
-	 *
-	 * ```cpp
-	 * command.set_default_permissions(dpp::p_manage_roles | dpp::p_manage_nicknames | dpp::p_manage_guild);
-	 * ```
 	 *
 	 * @return slashcommand& reference to self
 	 */

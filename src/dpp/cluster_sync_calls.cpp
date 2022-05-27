@@ -328,6 +328,10 @@ confirmation cluster::guild_member_delete_role_sync(snowflake guild_id, snowflak
 	return dpp::sync<confirmation>(this, &cluster::guild_member_delete_role, guild_id, user_id, role_id);
 }
 
+confirmation cluster::guild_member_remove_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id) {
+	return dpp::sync<confirmation>(this, &cluster::guild_member_remove_role, guild_id, user_id, role_id);
+}
+
 guild_member cluster::guild_member_move_sync(const snowflake channel_id, const snowflake guild_id, const snowflake user_id) {
 	return dpp::sync<guild_member>(this, &cluster::guild_member_move, channel_id, guild_id, user_id);
 }
