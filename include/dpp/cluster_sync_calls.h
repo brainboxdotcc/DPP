@@ -1191,12 +1191,32 @@ confirmation guild_member_timeout_sync(snowflake guild_id, snowflake user_id, ti
  * @param user_id User ID to remove role from
  * @param role_id Role to remove
  * @return confirmation returned object on completion
+ * @deprecated Use dpp::cluster::guild_member_remove_role instead
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
 confirmation guild_member_delete_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id);
+
+/**
+ * @brief Remove role from guild member
+ *
+ * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
+ * Fires a `Guild Member Update` Gateway event.
+ * @see dpp::cluster::guild_member_remove_role
+ * @see https://discord.com/developers/docs/resources/guild#remove-guild-member-role
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param guild_id Guild ID to remove role from user on
+ * @param user_id User ID to remove role from
+ * @param role_id Role to remove
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation guild_member_remove_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id);
 
 /**
  * @brief Moves the guild member to a other voice channel, if member is connected to one

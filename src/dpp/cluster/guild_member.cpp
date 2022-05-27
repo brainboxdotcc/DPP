@@ -95,7 +95,7 @@ void cluster::guild_member_timeout(snowflake guild_id, snowflake user_id, time_t
 
 
 void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
-	guild_member_remove_role(guild_id, user_id, role_id, callback);
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", callback);
 }
 
 
