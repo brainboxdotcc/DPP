@@ -43,16 +43,4 @@ bool permission::has(uint64_t p) const {
 	return (value & p) == p;
 }
 
-void permission::add_one(uint64_t p) {
-	value |= p;
-}
-
-void permission::set_one(uint64_t p) {
-	value = p;
-}
-
-void permission::remove_one(uint64_t p) {
-	value &= ~p;
-}
-
 }
