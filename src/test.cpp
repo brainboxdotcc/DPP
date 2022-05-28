@@ -196,11 +196,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		j["value"] = p;
 		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
 		p.set(dpp::p_administrator, dpp::p_ban_members);
+		success = p.has(dpp::p_administrator) && success;
 		success = p.has(dpp::p_administrator) && p.has(dpp::p_ban_members) && success;
+		success = p.has(dpp::p_administrator, dpp::p_ban_members) && success;
 		success = p.has(dpp::p_administrator | dpp::p_ban_members) && success;
 
 		p.set(dpp::p_administrator);
-		success = ! p.has(dpp::p_administrator | dpp::p_ban_members) && success; // must return false because they're not both set
+		success = ! p.has(dpp::p_administrator, dpp::p_ban_members) && success; // must return false because they're not both set
+		success = ! p.has(dpp::p_administrator | dpp::p_ban_members) && success;
 		set_test("PERMISSION_CLASS", success);
 	}
 
