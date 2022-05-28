@@ -67,7 +67,11 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 		{"wait", wait},
 		{"thread_id", thread_id},
 	});
-	rest_request<message>(this, API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + parameters, m_post, m.build_json(false), callback);
+	this->post_rest_multipart(API_PATH API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + parameters, m_post, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
+		}
+	}, m.filename, m.filecontent);
 }
 
 

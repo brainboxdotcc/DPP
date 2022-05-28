@@ -259,7 +259,7 @@ int main() {
 
 ### 7. Compile and run your bot
 
-Compile your bot using `g++ -std=c++17 -o test test.cpp -ldpp` (if your .cpp file is called `test.cpp`) and run it with `./test`.
+Compile your bot using `g++ -std=c++17 -o bot bot.cpp -ldpp` (if your .cpp file is called `bot.cpp`) and run it with `./bot`.
 
 ### 8. Inviting your bot to your server
 

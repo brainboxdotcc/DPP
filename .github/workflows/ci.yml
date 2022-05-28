@@ -51,7 +51,7 @@ jobs:
         run: cd build && ninja 
 
       - name: Run unit tests
-        run: cd build && ./test
+        run: cd build && ctest -VV
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
           TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
