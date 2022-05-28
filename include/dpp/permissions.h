@@ -147,8 +147,9 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	permission& add(T... values) {
-		(value |= (0 | ... | values));
+	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
+	add(T... values) {
+		value |= (0 | ... | values);
 		return *this;
 	}
 
@@ -166,8 +167,9 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	permission& set(T... values) {
-		(value = (0 | ... | values));
+	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
+	set(T... values) {
+		value = (0 | ... | values);
 		return *this;
 	}
 
@@ -186,8 +188,9 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	permission& remove(T... values) {
-		(value &= ~(0 | ... | values));
+	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
+	remove(T... values) {
+		value &= ~(0 | ... | values);
 		return *this;
 	}
 };

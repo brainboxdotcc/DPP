@@ -428,6 +428,9 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	virtual ~interaction_create_t() = default;
 };
 
+/**
+ * @brief User has issued a slash command
+ */
 struct DPP_EXPORT slashcommand_t : public interaction_create_t {
 public:
 	/** Constructor

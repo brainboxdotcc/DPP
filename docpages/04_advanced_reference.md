@@ -162,7 +162,7 @@ Before running test cases, create a test server for your test bot. You should:
 * Create at least one voice channel
 * Create at least one text channel
 
-Then, set the following variables to the appropriate values. (This uses a fake token, don't bother trying to use it.)
+Then, set the following variables to the appropriate values. (Below is a fake token, don't bother trying to use it)
 
     export DPP_UNIT_TEST_TOKEN="ODI2ZSQ4CFYyMzgxUzkzzACy.HPL5PA.9qKR4uh8po63-pjYVrPAvQQO4ln"
     export TEST_GUILD_ID="907951970017480704"
@@ -171,7 +171,9 @@ Then, set the following variables to the appropriate values. (This uses a fake t
     export TEST_USER_ID="826535422381391913"
     export TEST_EVENT_ID="909928577951203360"
 
-Then, after cloning and building DPP, run `./build/test` for unit test cases. 
+Then, after cloning and building DPP, run `cd build && ctest -VV` for unit test cases. 
+
+If you do not specify the `DPP_UNIT_TEST_TOKEN` environment variable, a subset of the tests will run which do not require discord connectivity.
 
 \page lambdas-and-locals Ownership of local variables and safely transferring into a lambda
 
