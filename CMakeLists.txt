@@ -286,9 +286,16 @@ target_compile_features(dpp PRIVATE cxx_variadic_templates)
 target_compile_features(dpp PRIVATE cxx_attribute_deprecated)
 
 if (DPP_BUILD_TEST)
-	add_executable(test ${coresrc})
-	target_compile_features(test PRIVATE cxx_std_17)
-	target_link_libraries(test PUBLIC ${modname})
+	enable_testing(${PROJECT_SOURCE_DIR})
+	add_executable(unittest ${coresrc})
+	target_compile_features(unittest PRIVATE cxx_std_17)
+	target_link_libraries(unittest PUBLIC ${modname})
+	add_test(
+		NAME unittests
+		COMMAND unittest
+		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+	)
+
 endif()
 
 if(HAVE_PRCTL)
@@ -333,3 +340,4 @@ include("cmake/CPackSetup.cmake")						# Setup information for packaging and dis
 
 # CPack initialization for distribution
 include(CPack)
+
