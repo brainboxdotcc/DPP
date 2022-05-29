@@ -2977,6 +2977,7 @@ public:
 	 * @see https://discord.com/developers/docs/resources/webhook#get-webhook-message
 	 * @param wh Webhook to get the original message for
 	 * @param message_id The message ID
+	 * @param thread_id ID of the thread the message is in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
