@@ -82,11 +82,12 @@ foreach ($clustercpp as $cpp) {
 	} elseif ($state == 1) {
 		if (preg_match('/^\}\s*$/', $cpp)) {
 			$state = 2;
+		/* look for the return type of the method */
 		} elseif (preg_match('/rest_request<([^>]+)>/', $cpp, $matches)) {
 			$returnType = $matches[1];
 		} elseif (preg_match('/rest_request_list<([^>]+)>/', $cpp, $matches)) {
 			$returnType = $matches[1] . '_map';
-		} elseif (preg_match('/callback\(confirmation_callback_t\(\w+, ([^(]+)\(\).*, \w+\)\)/', $cpp, $matches)) {
+		} elseif (preg_match('/callback\(confirmation_callback_t\(\w+, ([^(]+)\(.*, \w+\)\)/', $cpp, $matches)) {
 			$returnType = $matches[1];
 		} elseif (!empty($forcedReturn[$currentFunction])) {
 			$returnType = $forcedReturn[$currentFunction];
