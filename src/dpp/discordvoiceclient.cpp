@@ -73,7 +73,7 @@ bool discord_voice_client::voice_payload::operator<(const voice_payload& other) 
 	}
 
 	constexpr rtp_seq_t wrap_around_test_boundary = 5000;
-	if (seq < wrap_around_test_boundary != other.seq < wrap_around_test_boundary) {
+	if ((seq < wrap_around_test_boundary) != (other.seq < wrap_around_test_boundary)) {
 		/* Match the cases where exactly one of the sequence numbers "may have"
 		 * wrapped around.
 		 *
