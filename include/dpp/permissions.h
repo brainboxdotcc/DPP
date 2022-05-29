@@ -117,19 +117,23 @@ public:
 	operator nlohmann::json() const;
 
 	/**
-	 * @brief Check if it has a permission flag set. It uses the Bitwise AND operator
-	 * @param p The permission flag from dpp::permissions
+	 * @brief Check for permission flags set. It uses the Bitwise AND operator
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to check for
 	 *
 	 * **Example:**
 	 *
 	 * ```cpp
-	 * bool is_mod = permission.has(dpp::p_kick_members | dpp::p_ban_members);
+	 * bool is_mod = permission.has(dpp::p_kick_members, dpp::p_ban_members);
 	 * // Returns true if the permission bitmask contains p_kick_members and p_ban_members
 	 * ```
 	 *
-	 * @return True if it has the permission
+	 * @return bool True if it has all the given permissions
 	 */
-	bool has(uint64_t p) const;
+	template <typename... T>
+	bool has(T... values) const {
+		return (value & (0 | ... | values)) == (0 | ... | values);
+	}
 
 	/**
 	 * @brief Add a permission with the Bitwise OR operation
