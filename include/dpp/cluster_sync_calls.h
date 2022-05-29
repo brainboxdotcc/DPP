@@ -2222,13 +2222,14 @@ confirmation delete_webhook_sync(snowflake webhook_id);
  * @see https://discord.com/developers/docs/resources/webhook#delete-webhook-message
  * @param wh Webhook to delete message for
  * @param message_id Message ID to delete
+ * @param thread_id ID of the thread the message is in
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation delete_webhook_message_sync(const class webhook &wh, snowflake message_id);
+confirmation delete_webhook_message_sync(const class webhook &wh, snowflake message_id, snowflake thread_id = 0);
 
 /**
  * @brief Delete webhook with token
@@ -2271,13 +2272,14 @@ webhook edit_webhook_sync(const class webhook& wh);
  * @note the attachments array must contain all attachments that should be present after edit, including retained and new attachments provided in the request body.
  * @param wh Webhook to edit message for
  * @param m New message
+ * @param thread_id ID of the thread the message is in
  * @return message returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-message edit_webhook_message_sync(const class webhook &wh, const struct message &m);
+message edit_webhook_message_sync(const class webhook &wh, const struct message &m, snowflake thread_id = 0);
 
 /**
  * @brief Edit webhook with token (token is encapsulated in the webhook object)
@@ -2354,13 +2356,15 @@ webhook get_webhook_sync(snowflake webhook_id);
  * @see dpp::cluster::get_webhook_message
  * @see https://discord.com/developers/docs/resources/webhook#get-webhook-message
  * @param wh Webhook to get the original message for
+ * @param message_id The message ID
+ * @param thread_id ID of the thread the message is in
  * @return message returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-message get_webhook_message_sync(const class webhook &wh);
+message get_webhook_message_sync(const class webhook &wh, snowflake message_id, snowflake thread_id = 0);
 
 /**
  * @brief Get webhook using token
