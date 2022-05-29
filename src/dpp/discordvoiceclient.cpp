@@ -73,8 +73,9 @@ bool discord_voice_client::voice_payload::operator<(const voice_payload& other) 
 	}
 
 	constexpr rtp_seq_t wrap_around_test_boundary = 5000;
-	if ((seq < wrap_around_test_boundary) != (other.seq < wrap_around_test_boundary)) {
-		/* Match the cases where exactly one of the sequence numbers "may have"
+	if ((seq < wrap_around_test_boundary && other.seq >= wrap_around_test_boundary)
+    	    || (seq >= wrap_around_test_boundary && other.seq < wrap_around_test_boundary)) {
+    		/* Match the cases where exactly one of the sequence numbers "may have"
 		 * wrapped around.
 		 *
 		 * Examples:
@@ -96,7 +97,8 @@ bool discord_voice_client::voice_payload::operator<(const voice_payload& other) 
 		 */
 
 		/* Casts here ensure the sum wraps around and not implicitly converted to
-		 * wider types. */
+		 * wider types.
+		 */
 		return   static_cast<rtp_seq_t>(seq + wrap_around_test_boundary)
 		       > static_cast<rtp_seq_t>(other.seq + wrap_around_test_boundary);
 	} else {
