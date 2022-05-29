@@ -5,25 +5,25 @@ exec("cat src/dpp/cluster/*.cpp", $clustercpp);
 
 /* These methods have signatures incompatible with this script */
 $blacklist = [
-	'channel_edit_permissions',
-	'message_add_reaction',
-	'message_delete_reaction',
-	'message_delete_reaction_emoji',
-	'message_delete_all_reactions',
-	'message_delete_own_reaction',
-	'message_get_reactions',
-	'channel_typing',
+    'channel_edit_permissions',
+    'message_add_reaction',
+    'message_delete_reaction',
+    'message_delete_reaction_emoji',
+    'message_delete_all_reactions',
+    'message_delete_own_reaction',
+    'message_get_reactions',
+    'channel_typing',
 ];
 
 /* The script cannot determine the correct return type of these methods,
  * so we specify it by hand here.
  */
 $forcedReturn = [
-	'direct_message_create' => 'message',
-	'guild_get_members' => 'guild_member_map',
-	'guild_search_members' => 'guild_member_map',
-	'message_create' => 'message',
-	'message_edit' => 'message',
+    'direct_message_create' => 'message',
+    'guild_get_members' => 'guild_member_map',
+    'guild_search_members' => 'guild_member_map',
+    'message_create' => 'message',
+    'message_edit' => 'message',
 ];
 
 /* Get the contents of cluster.h into an array */
@@ -64,7 +64,7 @@ $content = <<<EOT
  * DO NOT EDIT BY HAND!
  *
  * To re-generate this header file re-run the script!
- */ 
+ */
 
 EOT;
 $cppcontent = $content;
@@ -82,8 +82,8 @@ EOT;
 $us = file_exists('include/dpp/cluster_sync_calls.h') ? filemtime('include/dpp/cluster_sync_calls.h') : 0;
 $them = filemtime('include/dpp/cluster.h');
 if ($them <= $us) {
-	echo "-- No change required.\n";
-	exit(0);
+    echo "-- No change required.\n";
+    exit(0);
 }
 
 echo "-- Autogenerating include/dpp/cluster_sync_calls.h\n";
@@ -91,57 +91,57 @@ echo "-- Autogenerating src/dpp/cluster_sync_calls.cpp\n";
 
 /* Scan every line of the C++ source */
 foreach ($clustercpp as $cpp) {
-	/* Look for declaration of function body */
-	if ($state == STATE_SEARCH_FOR_FUNCTION &&
-		preg_match('/^\s*void\s+cluster::([^(]+)\s*\((.*)command_completion_event_t\s*callback\s*\)/', $cpp, $matches)) {
-		$currentFunction = $matches[1];
-		$parameters = preg_replace('/,\s*$/', '', $matches[2]);
-		if (!in_array($currentFunction, $blacklist)) {
-			$state = STATE_IN_FUNCTION;
-		}
-	/* Scan function body */
-	} elseif ($state == STATE_IN_FUNCTION) {
-		/* End of function */
-		if (preg_match('/^\}\s*$/', $cpp)) {
-			$state = STATE_END_OF_FUNCTION;
-		/* look for the return type of the method */
-		} elseif (preg_match('/rest_request<([^>]+)>/', $cpp, $matches)) {
-			/* rest_request<T> */
-			$returnType = $matches[1];
-		} elseif (preg_match('/rest_request_list<([^>]+)>/', $cpp, $matches)) {
-			/* rest_request_list<T> */
-			$returnType = $matches[1] . '_map';
-		} elseif (preg_match('/callback\(confirmation_callback_t\(\w+, ([^(]+)\(.*, \w+\)\)/', $cpp, $matches)) {
-			/* confirmation_callback_t */
-			$returnType = $matches[1];
-		} elseif (!empty($forcedReturn[$currentFunction])) {
-			/* Forced return type */
-			$returnType = $forcedReturn[$currentFunction];
-		}
-	}
-	/* Completed parsing of function body */
-	if ($state == STATE_END_OF_FUNCTION && !empty($currentFunction) && !empty($returnType)) {
-		if (!in_array($currentFunction, $blacklist)) {
-			$parameterList = explode(',', $parameters);
-			$parameterNames = [];
-			foreach ($parameterList as $parameter) {
-				$parts = explode(' ', trim($parameter));
-				$parameterNames[] = trim(preg_replace('/[\s\*\&]+/', '', $parts[count($parts) - 1]));
-			}
-			$content .= getComments($currentFunction, $returnType, $parameterNames) . "\n";
-			$fullParameters = getFullParameters($currentFunction, $parameterNames);
-			$parameterNames = trim(join(', ', $parameterNames));
-			if (!empty($parameterNames)) {
-				$parameterNames = ', ' . $parameterNames;
-			}
-			$noDefaults = $parameters;
-			$parameters = !empty($fullParameters) ? $fullParameters : $parameters;
-			$content .= "$returnType {$currentFunction}_sync($parameters);\n\n";
-			$cppcontent .= "$returnType cluster::{$currentFunction}_sync($noDefaults) {\n\treturn dpp::sync<$returnType>(this, &cluster::$currentFunction$parameterNames);\n}\n\n";
-		}
-		$currentFunction = $parameters = $returnType = '';
-		$state = STATE_SEARCH_FOR_FUNCTION;
-	}
+    /* Look for declaration of function body */
+    if ($state == STATE_SEARCH_FOR_FUNCTION &&
+        preg_match('/^\s*void\s+cluster::([^(]+)\s*\((.*)command_completion_event_t\s*callback\s*\)/', $cpp, $matches)) {
+        $currentFunction = $matches[1];
+        $parameters = preg_replace('/,\s*$/', '', $matches[2]);
+        if (!in_array($currentFunction, $blacklist)) {
+            $state = STATE_IN_FUNCTION;
+        }
+        /* Scan function body */
+    } elseif ($state == STATE_IN_FUNCTION) {
+        /* End of function */
+        if (preg_match('/^\}\s*$/', $cpp)) {
+            $state = STATE_END_OF_FUNCTION;
+            /* look for the return type of the method */
+        } elseif (preg_match('/rest_request<([^>]+)>/', $cpp, $matches)) {
+            /* rest_request<T> */
+            $returnType = $matches[1];
+        } elseif (preg_match('/rest_request_list<([^>]+)>/', $cpp, $matches)) {
+            /* rest_request_list<T> */
+            $returnType = $matches[1] . '_map';
+        } elseif (preg_match('/callback\(confirmation_callback_t\(\w+, ([^(]+)\(.*, \w+\)\)/', $cpp, $matches)) {
+            /* confirmation_callback_t */
+            $returnType = $matches[1];
+        } elseif (!empty($forcedReturn[$currentFunction])) {
+            /* Forced return type */
+            $returnType = $forcedReturn[$currentFunction];
+        }
+    }
+    /* Completed parsing of function body */
+    if ($state == STATE_END_OF_FUNCTION && !empty($currentFunction) && !empty($returnType)) {
+        if (!in_array($currentFunction, $blacklist)) {
+            $parameterList = explode(',', $parameters);
+            $parameterNames = [];
+            foreach ($parameterList as $parameter) {
+                $parts = explode(' ', trim($parameter));
+                $parameterNames[] = trim(preg_replace('/[\s\*\&]+/', '', $parts[count($parts) - 1]));
+            }
+            $content .= getComments($currentFunction, $returnType, $parameterNames) . "\n";
+            $fullParameters = getFullParameters($currentFunction, $parameterNames);
+            $parameterNames = trim(join(', ', $parameterNames));
+            if (!empty($parameterNames)) {
+                $parameterNames = ', ' . $parameterNames;
+            }
+            $noDefaults = $parameters;
+            $parameters = !empty($fullParameters) ? $fullParameters : $parameters;
+            $content .= "$returnType {$currentFunction}_sync($parameters);\n\n";
+            $cppcontent .= "$returnType cluster::{$currentFunction}_sync($noDefaults) {\n\treturn dpp::sync<$returnType>(this, &cluster::$currentFunction$parameterNames);\n}\n\n";
+        }
+        $currentFunction = $parameters = $returnType = '';
+        $state = STATE_SEARCH_FOR_FUNCTION;
+    }
 }
 $content .= <<<EOT
 
@@ -164,13 +164,13 @@ EOT;
  */
 function getFullParameters(string $currentFunction, array $parameters): string
 {
-	global $header;
-	foreach ($header as $line) {
-		if (preg_match('/^\s*void\s+' . $currentFunction . '\s*\((.*' . join('.*', $parameters) . '.*)command_completion_event_t\s*callback\s*/', $line, $matches)) {
-			return preg_replace('/,\s*$/', '', $matches[1]);
-		}
-	}
-	return '';
+    global $header;
+    foreach ($header as $line) {
+        if (preg_match('/^\s*void\s+' . $currentFunction . '\s*\((.*' . join('.*', $parameters) . '.*)command_completion_event_t\s*callback\s*/', $line, $matches)) {
+            return preg_replace('/,\s*$/', '', $matches[1]);
+        }
+    }
+    return '';
 }
 
 /**
@@ -183,36 +183,36 @@ function getFullParameters(string $currentFunction, array $parameters): string
  */
 function getComments(string $currentFunction, string $returnType, array $parameters): string
 {
-	global $header;
-	/* First find the function */
-	foreach ($header as $i => $line) {
-		if (preg_match('/^\s*void\s+' . $currentFunction . '\s*\(.*' . join('.*', $parameters) . '.*command_completion_event_t\s*callback\s*/', $line)) {
-			/* Backpeddle */
-			$lineIndex = 1;
-			for ($n = $i; $n != 0; --$n, $lineIndex++) {
-				$header[$n] = preg_replace('/^\t+/', '', $header[$n]);
-				$header[$n] = preg_replace('/@see (.+?)$/', '@see dpp::cluster::' . $currentFunction. "\n * @see \\1", $header[$n]);
-				$header[$n] = preg_replace('/@param callback .*$/', '@return ' . $returnType . ' returned object on completion', $header[$n]);
-				if (preg_match('/\s*\* On success /i', $header[$n])) {
-					$header[$n] = "";
-				}
-				if (preg_match('/\s*\/\*\*\s*$/', $header[$n])) {
-					$part = array_slice($header, $n, $lineIndex - 1);
-					array_splice($part, count($part) - 1, 0,
-						[
-							" * \memberof dpp::cluster",
-							" * @throw dpp::rest_exception upon failure to execute REST function",
-							" * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.",
-							" * Avoid direct use of this function inside an event handler.",
-						]
-					);
-					return str_replace("\n\n", "\n", join("\n", $part));
-				}
-			}
-			return '';
-		}
-	}
-	return '';
+    global $header;
+    /* First find the function */
+    foreach ($header as $i => $line) {
+        if (preg_match('/^\s*void\s+' . $currentFunction . '\s*\(.*' . join('.*', $parameters) . '.*command_completion_event_t\s*callback\s*/', $line)) {
+            /* Backpeddle */
+            $lineIndex = 1;
+            for ($n = $i; $n != 0; --$n, $lineIndex++) {
+                $header[$n] = preg_replace('/^\t+/', '', $header[$n]);
+                $header[$n] = preg_replace('/@see (.+?)$/', '@see dpp::cluster::' . $currentFunction . "\n * @see \\1", $header[$n]);
+                $header[$n] = preg_replace('/@param callback .*$/', '@return ' . $returnType . ' returned object on completion', $header[$n]);
+                if (preg_match('/\s*\* On success /i', $header[$n])) {
+                    $header[$n] = "";
+                }
+                if (preg_match('/\s*\/\*\*\s*$/', $header[$n])) {
+                    $part = array_slice($header, $n, $lineIndex - 1);
+                    array_splice($part, count($part) - 1, 0,
+                        [
+                            " * \memberof dpp::cluster",
+                            " * @throw dpp::rest_exception upon failure to execute REST function",
+                            " * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.",
+                            " * Avoid direct use of this function inside an event handler.",
+                        ]
+                    );
+                    return str_replace("\n\n", "\n", join("\n", $part));
+                }
+            }
+            return '';
+        }
+    }
+    return '';
 }
 
 /* Finished parsing, output autogenerated files */
