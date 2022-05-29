@@ -604,8 +604,8 @@ confirmation cluster::delete_webhook_sync(snowflake webhook_id) {
 	return dpp::sync<confirmation>(this, &cluster::delete_webhook, webhook_id);
 }
 
-confirmation cluster::delete_webhook_message_sync(const class webhook &wh, snowflake message_id) {
-	return dpp::sync<confirmation>(this, &cluster::delete_webhook_message, wh, message_id);
+confirmation cluster::delete_webhook_message_sync(const class webhook &wh, snowflake message_id, snowflake thread_id) {
+	return dpp::sync<confirmation>(this, &cluster::delete_webhook_message, wh, message_id, thread_id);
 }
 
 confirmation cluster::delete_webhook_with_token_sync(snowflake webhook_id, const std::string &token) {
@@ -614,38 +614,6 @@ confirmation cluster::delete_webhook_with_token_sync(snowflake webhook_id, const
 
 webhook cluster::edit_webhook_sync(const class webhook& wh) {
 	return dpp::sync<webhook>(this, &cluster::edit_webhook, wh);
-}
-
-message cluster::edit_webhook_message_sync(const class webhook &wh, const struct message& m) {
-	return dpp::sync<message>(this, &cluster::edit_webhook_message, wh, m);
-}
-
-webhook cluster::edit_webhook_with_token_sync(const class webhook& wh) {
-	return dpp::sync<webhook>(this, &cluster::edit_webhook_with_token, wh);
-}
-
-message cluster::execute_webhook_sync(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id) {
-	return dpp::sync<message>(this, &cluster::execute_webhook, wh, m, wait, thread_id);
-}
-
-webhook_map cluster::get_channel_webhooks_sync(snowflake channel_id) {
-	return dpp::sync<webhook_map>(this, &cluster::get_channel_webhooks, channel_id);
-}
-
-webhook_map cluster::get_guild_webhooks_sync(snowflake guild_id) {
-	return dpp::sync<webhook_map>(this, &cluster::get_guild_webhooks, guild_id);
-}
-
-webhook cluster::get_webhook_sync(snowflake webhook_id) {
-	return dpp::sync<webhook>(this, &cluster::get_webhook, webhook_id);
-}
-
-message cluster::get_webhook_message_sync(const class webhook &wh) {
-	return dpp::sync<message>(this, &cluster::get_webhook_message, wh);
-}
-
-webhook cluster::get_webhook_with_token_sync(snowflake webhook_id, const std::string &token) {
-	return dpp::sync<webhook>(this, &cluster::get_webhook_with_token, webhook_id, token);
 }
 
 

@@ -2222,13 +2222,14 @@ confirmation delete_webhook_sync(snowflake webhook_id);
  * @see https://discord.com/developers/docs/resources/webhook#delete-webhook-message
  * @param wh Webhook to delete message for
  * @param message_id Message ID to delete
+ * @param thread_id ID of the thread the message is in
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation delete_webhook_message_sync(const class webhook &wh, snowflake message_id);
+confirmation delete_webhook_message_sync(const class webhook &wh, snowflake message_id, snowflake thread_id = 0);
 
 /**
  * @brief Delete webhook with token
@@ -2257,124 +2258,6 @@ confirmation delete_webhook_with_token_sync(snowflake webhook_id, const std::str
  * Avoid direct use of this function inside an event handler.
  */
 webhook edit_webhook_sync(const class webhook& wh);
-
-/**
- * @brief Edit webhook message
- *
- * When the content field is edited, the mentions array in the message object will be reconstructed from scratch based on
- * the new content. The allowed_mentions field of the edit request controls how this happens. If there is no explicit
- * allowed_mentions in the edit request, the content will be parsed with default allowances, that is, without regard to
- * whether or not an allowed_mentions was present in the request that originally created the message.
- * 
- * @see dpp::cluster::edit_webhook_message
- * @see https://discord.com/developers/docs/resources/webhook#edit-webhook-message
- * @note the attachments array must contain all attachments that should be present after edit, including retained and new attachments provided in the request body.
- * @param wh Webhook to edit message for
- * @param m New message
- * @return message returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-message edit_webhook_message_sync(const class webhook &wh, const struct message &m);
-
-/**
- * @brief Edit webhook with token (token is encapsulated in the webhook object)
- * @see dpp::cluster::edit_webhook_with_token
- * @see https://discord.com/developers/docs/resources/webhook#modify-webhook-with-token
- * @param wh Webhook to edit (should include token)
- * @return webhook returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-webhook edit_webhook_with_token_sync(const class webhook& wh);
-
-/**
- * @brief Execute webhook
- *
- * @see dpp::cluster::execute_webhook
- * @see https://discord.com/developers/docs/resources/webhook#execute-webhook
- * @param wh Webhook to execute
- * @param m Message to send
- * @param wait waits for server confirmation of message send before response, and returns the created message body
- * @param thread_id Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived
- * @return message returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-message execute_webhook_sync(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0);
-
-/**
- * @brief Get channel webhooks
- * @see dpp::cluster::get_channel_webhooks
- * @see https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
- * @param channel_id Channel ID to get webhooks for
- * @return webhook_map returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-webhook_map get_channel_webhooks_sync(snowflake channel_id);
-
-/**
- * @brief Get guild webhooks
- * @see dpp::cluster::get_guild_webhooks
- * @see https://discord.com/developers/docs/resources/webhook#get-guild-webhooks
- * @param guild_id Guild ID to get webhooks for
- * @return webhook_map returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-webhook_map get_guild_webhooks_sync(snowflake guild_id);
-
-/**
- * @brief Get webhook
- * @see dpp::cluster::get_webhook
- * @see https://discord.com/developers/docs/resources/webhook#get-webhook
- * @param webhook_id Webhook ID to get
- * @return webhook returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-webhook get_webhook_sync(snowflake webhook_id);
-
-/**
- * @brief Get webhook message
- *
- * @see dpp::cluster::get_webhook_message
- * @see https://discord.com/developers/docs/resources/webhook#get-webhook-message
- * @param wh Webhook to get the original message for
- * @return message returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-message get_webhook_message_sync(const class webhook &wh);
-
-/**
- * @brief Get webhook using token
- * @see dpp::cluster::get_webhook_with_token
- * @see https://discord.com/developers/docs/resources/webhook#get-webhook-with-token
- * @param webhook_id Webhook ID to retrieve
- * @param token Token of webhook
- * @return webhook returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-webhook get_webhook_with_token_sync(snowflake webhook_id, const std::string &token);
 
 
 /* End of auto-generated definitions */
