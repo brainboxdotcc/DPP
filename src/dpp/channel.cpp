@@ -212,6 +212,9 @@ bool channel::is_video_720p() const {
 	return flags & dpp::c_video_quality_720p;
 }
 
+bool channel::is_pinned_thread() const {
+	return flags & dpp::c_pinned_thread;
+}
 
 bool thread::is_news_thread() const {
 	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_NEWS_THREAD;
@@ -269,6 +272,9 @@ channel& channel::fill_from_json(json* j) {
 
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type & CHANNEL_TYPE_MASK);
+
+	uint8_t dflags = int8_not_null(j, "flags");
+	this->flags |= (dflags & dpp::dc_pinned_thread) ? dpp::c_pinned_thread : 0;
 
 	uint8_t vqm = int8_not_null(j, "video_quality_mode");
 	if (vqm == 2) {
