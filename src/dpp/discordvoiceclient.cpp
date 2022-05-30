@@ -18,12 +18,22 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#ifndef WIN32
-	#include <unistd.h>
-	#include <arpa/inet.h>
-#else
+
+#ifdef _WIN32
 	/* Windows #define's min() and max(), breaking std::max(). stupid stupid stupid... */
 	#define NOMINMAX
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <arpa/inet.h>
+	#include <netinet/in.h>
+	#include <resolv.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <netinet/tcp.h>
+	#include <unistd.h>
 #endif
 #include <string_view>
 #include <iostream>
