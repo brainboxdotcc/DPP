@@ -69,6 +69,16 @@ enum channel_flags : uint8_t {
 	c_video_quality_720p =	0b00100000,
 	/// Lock permissions (only used when updating channel positions)
 	c_lock_permissions =	0b01000000,
+	/// Thread pinned in a forum (type 15) channel
+	c_pinned_thread =	0b10000000,
+};
+
+/**
+ * @brief The flags in discord channel's raw "flags" field. We use these for serialisation only, right now. Might be better to create a new field than to make the existing channel::flags from uint8_t to uint16_t, if discord adds more flags in future.
+ */
+enum discord_channel_flags : uint8_t {
+	/// Thread pinned in a forum (type 15) channel
+	dc_pinned_thread = 0b00000001,
 };
 
 /**
@@ -508,6 +518,13 @@ public:
 	 * @return true if video quality is 720p
 	 */
 	bool is_video_720p() const;
+
+	/**
+	 * @brief Returns true if channel is a pinned thread in forum
+	 *
+	 * @return true, if channel is a pinned thread in forum
+	 */
+	bool is_pinned_thread() const;
 
 };
 
