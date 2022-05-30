@@ -21,9 +21,6 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#ifndef _WIN32
-#include <unistd.h>
-#endif
 #include <dpp/exception.h>
 #include <dpp/discordclient.h>
 #include <dpp/cache.h>
@@ -33,6 +30,19 @@
 #include <dpp/fmt-minimal.h>
 #include <dpp/etf.h>
 #include <zlib.h>
+#ifdef _WIN32
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <netinet/in.h>
+	#include <resolv.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <netinet/tcp.h>
+	#include <unistd.h>
+#endif
 
 #define PATH_UNCOMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json"
 #define PATH_COMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"

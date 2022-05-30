@@ -362,6 +362,7 @@ void discord_voice_client::run()
 
 int discord_voice_client::udp_send(const char* data, size_t length)
 {
+	sockaddr_in servaddr;
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(this->port);
