@@ -358,7 +358,7 @@ public:
 	 * For action rows, this field is ignored. Setting the
 	 * value will auto-set the type to dpp::cot_text.
 	 *
-	 * @param value Value text to set. It will be truncated to the maximum length of 4000 UTF-8 characters.
+	 * @param val Value text to set. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
 	component& set_default_value(const std::string &val);
