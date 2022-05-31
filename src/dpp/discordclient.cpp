@@ -41,7 +41,6 @@
 	#include <netdb.h>
 	#include <sys/socket.h>
 	#include <netinet/tcp.h>
-	#include <unistd.h>
 #endif
 
 #define PATH_UNCOMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json"

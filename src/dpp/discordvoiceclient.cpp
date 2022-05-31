@@ -33,7 +33,6 @@
 	#include <netdb.h>
 	#include <sys/socket.h>
 	#include <netinet/tcp.h>
-	#include <unistd.h>
 #endif
 #include <string_view>
 #include <iostream>
