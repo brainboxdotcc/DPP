@@ -18,12 +18,21 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#ifndef WIN32
-	#include <unistd.h>
-	#include <arpa/inet.h>
-#else
+
+#ifdef _WIN32
 	/* Windows #define's min() and max(), breaking std::max(). stupid stupid stupid... */
 	#define NOMINMAX
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <arpa/inet.h>
+	#include <netinet/in.h>
+	#include <resolv.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <netinet/tcp.h>
 #endif
 #include <string_view>
 #include <iostream>
@@ -362,6 +371,7 @@ void discord_voice_client::run()
 
 int discord_voice_client::udp_send(const char* data, size_t length)
 {
+	sockaddr_in servaddr;
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(this->port);

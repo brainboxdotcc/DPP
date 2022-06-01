@@ -23,20 +23,6 @@
 #include <dpp/export.h>
 
 #include <cerrno>
-
-#ifdef _WIN32
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <io.h>
-#else
-#include <netinet/in.h>
-#include <resolv.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/tcp.h>
-#include <unistd.h>
-#endif
-
 #include <cstdio>
 #include <cstdlib>
 #include <sys/types.h>
@@ -294,11 +280,6 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief File descriptor for UDP connection
 	 */
 	dpp::socket fd;
-
-	/**
-	 * @brief Socket address of voice server
-	 */
-	sockaddr_in servaddr;
 
 	/**
 	 * @brief Secret key for encrypting voice.
