@@ -293,7 +293,7 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
-extern DPP_EXPORT event_handle __next_handle;
+extern DPP_EXPORT event_handle _next_handle;
 
 /**
  * @brief Handles routing of an event to multiple listeners.
@@ -442,7 +442,7 @@ public:
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
 		std::unique_lock l(lock);
-		event_handle h = __next_handle++;
+		event_handle h = _next_handle++;
 		dispatch_container.emplace(h, func);
 		return h;		
 	}
