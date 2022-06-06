@@ -762,10 +762,11 @@ void discord_voice_client::write_ready()
 	uint64_t duration = 0;
 	bool track_marker_found = false;
 	uint64_t bufsize = 0;
+	send_audio_type_t type = satype_recorded_audio; 
 	{
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (!this->paused && outbuf.size()) {
-
+			type = send_audio_type;
 			if (outbuf[0].packet.size() == 2 && ((uint16_t)(*(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
 				track_marker_found = true;
@@ -782,11 +783,14 @@ void discord_voice_client::write_ready()
 		}
 	}
 	if (duration) {
-		std::chrono::nanoseconds latency = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last_timestamp);
-		std::chrono::nanoseconds sleep_time = std::chrono::nanoseconds(duration) - latency;
-		if (sleep_time.count() > 0) {
-			std::this_thread::sleep_for(sleep_time);
+		if (type == satype_recorded_audio) {
+			std::chrono::nanoseconds latency = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last_timestamp);
+			std::chrono::nanoseconds sleep_time = std::chrono::nanoseconds(duration) - latency;
+			if (sleep_time.count() > 0) {
+				std::this_thread::sleep_for(sleep_time);
+			}
 		}
+
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (!creator->on_voice_buffer_send.empty()) {
 			voice_buffer_send_t snd(nullptr, "");
@@ -1076,6 +1080,15 @@ discord_voice_client& discord_voice_client::skip_to_next_marker() {
 discord_voice_client& discord_voice_client::send_silence(const uint64_t duration) {
 	uint8_t silence_packet[3] = { 0xf8, 0xff, 0xfe };
 	send_audio_opus(silence_packet, 3, duration);
+	return *this;
+}
+
+discord_voice_client& discord_voice_client::set_send_audio_type(send_audio_type_t type)
+{
+	{
+		std::lock_guard<std::mutex> lock(this->stream_mutex);
+		send_audio_type = type;
+	}
 	return *this;
 }
 
