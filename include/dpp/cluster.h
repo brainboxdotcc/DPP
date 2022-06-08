@@ -2965,10 +2965,11 @@ public:
 	 * @param m Message to send
 	 * @param wait waits for server confirmation of message send before response, and returns the created message body
 	 * @param thread_id Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived
+	 * @param thread_name Name of thread to create (requires the webhook channel to be a forum channel)
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
+	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, std::string thread_name = "", command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get webhook message
