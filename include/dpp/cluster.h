@@ -2087,8 +2087,7 @@ public:
 	 * Modify the positions of a set of channel objects for the guild.
 	 * Requires `MANAGE_CHANNELS` permission. Fires multiple `Channel Update Gateway` events.
 	 * Only channels to be modified are required.
-	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 *
 	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-channel-positions
 	 * @param c Channel to change the position for
 	 * @param callback Function to call when the API call completes.
