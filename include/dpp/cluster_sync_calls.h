@@ -2310,7 +2310,7 @@ webhook edit_webhook_with_token_sync(const class webhook& wh);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-message execute_webhook_sync(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, std::string thread_name = "");
+message execute_webhook_sync(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, const std::string& thread_name = "");
 
 /**
  * @brief Get channel webhooks

@@ -624,7 +624,7 @@ webhook cluster::edit_webhook_with_token_sync(const class webhook& wh) {
 	return dpp::sync<webhook>(this, &cluster::edit_webhook_with_token, wh);
 }
 
-message cluster::execute_webhook_sync(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, std::string thread_name) {
+message cluster::execute_webhook_sync(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, const std::string& thread_name) {
 	return dpp::sync<message>(this, &cluster::execute_webhook, wh, m, wait, thread_id, thread_name);
 }
 
