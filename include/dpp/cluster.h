@@ -2495,9 +2495,25 @@ public:
 	 * @param delete_message_days How many days of their user's messages to also delete
 	 * @param reason Reason for ban
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::ban object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @deprecated Discord deprecated the reason parameter in the json body. Use the similar method to this without the reason param and use cluster::set_audit_log_reason() to set the reason.
 	 */
 	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Add guild ban
+	 *
+	 * Create a guild ban, and optionally delete previous messages sent by the banned user.
+	 * Requires the `BAN_MEMBERS` permission. Fires a `Guild Ban Add` Gateway event.
+	 * @see https://discord.com/developers/docs/resources/guild#create-guild-ban
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @param guild_id Guild ID to add ban to
+	 * @param user_id User ID to ban
+	 * @param delete_message_days How many days of their user's messages to also delete (0-7). Defaults to 0
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete guild ban
