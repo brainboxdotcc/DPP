@@ -72,12 +72,18 @@ void cluster::edit_webhook_with_token(const class webhook& wh, command_completio
 }
 
 
-void cluster::execute_webhook(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, command_completion_event_t callback) {
+void cluster::execute_webhook(const class webhook &wh, const struct message& m, bool wait, snowflake thread_id, const std::string& thread_name, command_completion_event_t callback) {
 	std::string parameters = utility::make_url_parameters({
 		{"wait", wait},
 		{"thread_id", thread_id},
 	});
-	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + parameters, m_post, m.build_json(false), [this, callback](json &j, const http_request_completion_t& http) {
+	std::string body;
+	if (!thread_name.empty()) { // only use json::parse if thread_name is set
+		json j = json::parse(m.build_json(false));
+		j["thread_name"] = thread_name;
+		body = j.dump();
+	}
+	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + parameters, m_post, !body.empty() ? body : m.build_json(false), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
