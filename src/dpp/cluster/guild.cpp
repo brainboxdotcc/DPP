@@ -133,7 +133,7 @@ void cluster::guild_get_prune_counts(snowflake guild_id, const struct prune& pru
 }
 
 void cluster::guild_begin_prune(snowflake guild_id, const struct prune& pruneinfo, command_completion_event_t callback) {
-	rest_request<prune>(this, API_PATH "/guilds", std::to_string(guild_id), "prune", m_get, pruneinfo.build_json(true), callback);
+	rest_request<prune>(this, API_PATH "/guilds", std::to_string(guild_id), "prune", m_post, pruneinfo.build_json(true), callback);
 }
 
 
