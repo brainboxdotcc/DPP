@@ -32,18 +32,6 @@ void cluster::guild_auditlog_get(snowflake guild_id, command_completion_event_t 
 }
 
 
-void cluster::guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback) {
-	json j;
-	if (delete_message_days > 7)
-		delete_message_days = 7;
-	if (!reason.empty())
-		j["reason"] = reason;
-	if (delete_message_days)
-		j["delete_message_days"] = delete_message_days;
-	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_put, j.dump(), callback);
-}
-
-
 void cluster::guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, command_completion_event_t callback) {
 	json j;
 	if (delete_message_days > 7)
