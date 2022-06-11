@@ -717,7 +717,7 @@ auditlog guild_auditlog_get_sync(snowflake guild_id);
 
 /**
  * @brief Add guild ban
- * 
+ *
  * Create a guild ban, and optionally delete previous messages sent by the banned user.
  * Requires the `BAN_MEMBERS` permission. Fires a `Guild Ban Add` Gateway event.
  * @see dpp::cluster::guild_ban_add
@@ -725,15 +725,14 @@ auditlog guild_auditlog_get_sync(snowflake guild_id);
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param guild_id Guild ID to add ban to
  * @param user_id User ID to ban
- * @param delete_message_days How many days of their user's messages to also delete
- * @param reason Reason for ban
+ * @param delete_message_days How many days of their user's messages to also delete (0-7). Defaults to 0
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason);
+confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_days = 0);
 
 /**
  * @brief Delete guild ban
