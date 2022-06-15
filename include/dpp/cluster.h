@@ -837,7 +837,7 @@ public:
 	 * For an example of this in action please see \ref slashcommands
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type interaction_create_t&, and returns void.
+	 * The function signature for this event takes a single `const` reference of type slashcommand_t&, and returns void.
 	 */
 	event_router_t<slashcommand_t> on_slashcommand;
 	
@@ -877,7 +877,7 @@ public:
 	 * where a slash command is bound to the dpp::ctxm_message command type.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
+	 * The function signature for this event takes a single `const` reference of type message_context_menu_t&, and returns void.
 	 */
 	event_router_t<message_context_menu_t> on_message_context_menu;
 
@@ -886,7 +886,7 @@ public:
 	 * where a slash command is bound to the dpp::ctxm_user command type.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
+	 * The function signature for this event takes a single `const` reference of type user_context_menu_t&, and returns void.
 	 */
 	event_router_t<user_context_menu_t> on_user_context_menu;
 
