@@ -307,9 +307,9 @@ bool discord_client::handle_frame(const std::string &buffer)
 								{ "token", this->token },
 								{ "properties",
 									{
-										{ "$os", "Linux" },
-										{ "$browser", "D++" },
-										{ "$device", "D++" }
+										{ "os", "Linux" },
+										{ "browser", "D++" },
+										{ "device", "D++" }
 									}
 								},
 								{ "shard", json::array({ shard_id, max_shards }) },
