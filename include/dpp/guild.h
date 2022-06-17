@@ -138,7 +138,8 @@ enum guild_flags_extra : uint8_t {
 };
 
 /**
- * @brief Various flags that can be used to indicate the status of a guild member
+ * @brief Various flags that can be used to indicate the status of a guild member.
+ * @note Use set_mute and set_deaf member functions and do not toggle the bits yourself.
  */
 enum guild_member_flags : uint8_t {
 	/** Member deafened in voice channels */
@@ -149,6 +150,8 @@ enum guild_member_flags : uint8_t {
 	gm_pending =		0b00100,
 	/** Member has animated guild-specific avatar */
 	gm_animated_avatar = 	0b01000,
+	/** gm_deaf or gm_mute has been toggled */
+	gm_voice_action = 			0b10000,
 };
 
 /**
