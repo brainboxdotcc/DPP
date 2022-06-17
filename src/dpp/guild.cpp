@@ -108,11 +108,13 @@ guild_member& guild_member::set_nickname(const std::string& nick) {
 
 guild_member& guild_member::set_mute(const bool is_muted) {
 	this->flags = (is_muted) ? flags | gm_mute : flags & ~gm_mute;
+	this->flags |= gm_voice_action;
 	return *this;
 }
 
 guild_member& guild_member::set_deaf(const bool is_deafened) {
 	this->flags = (is_deafened) ? flags | gm_deaf : flags & ~gm_deaf;
+	this->flags |= gm_voice_action;
 	return *this;
 }
 
@@ -125,6 +127,7 @@ guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, sn
 	this->guild_id = g_id;
 	this->user_id = u_id;
 	j->get_to(*this);
+
 	return *this;
 }
 
@@ -200,8 +203,12 @@ std::string guild_member::build_json(bool with_id) const {
 			j["roles"].push_back(std::to_string(role));
 		}
 	}
-	j["mute"] = is_muted();
-	j["deaf"] = is_deaf();
+
+	if (flags & gm_voice_action) {
+		j["mute"] = is_muted();
+		j["deaf"] = is_deaf();
+	}
+
 	return j.dump();
 }
 
