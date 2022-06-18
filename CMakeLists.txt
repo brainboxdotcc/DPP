@@ -219,8 +219,6 @@ set(modules_dir "src")
 
 file(GLOB subdirlist ${modules_dir}/dpp)
 
-
-
 foreach (fullmodname ${subdirlist})
     get_filename_component(modname ${fullmodname} NAME)
     set (modsrc "")
@@ -241,6 +239,12 @@ foreach (fullmodname ${subdirlist})
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
 	)
 
+	target_precompile_headers(
+		${modname}
+		PRIVATE
+		"${PROJECT_SOURCE_DIR}/include/dpp/nlohmann/json.hpp"
+		"${PROJECT_SOURCE_DIR}/include/dpp/nlohmann/json_fwd.hpp"
+	)
 
 	if (WIN32 AND NOT MINGW)
 		if (NOT WINDOWS_32_BIT)
@@ -269,62 +273,7 @@ foreach (fullmodname ${subdirlist})
 		
 		include_directories(${OPUS_INCLUDE_DIRS} ${sodium_INCLUDE_DIR})
 	endif()
-
-
-target_precompile_headers(${modname}
-PRIVATE
-"<variant>"
-"<utility>"
-"<unordered_map>"
-"<type_traits>"
-"<string>"
-"<stdint.h>"
-"<stddef.h>"
-"<map>"
-"<iostream>"
-"<functional>"
-"include/dpp/stringops.h"
-"include/dpp/snowflake.h"
-"include/dpp/nlohmann/json_fwd.hpp"
-"include/dpp/nlohmann/json.hpp"
-"include/dpp/managed.h"
-"include/dpp/json_interface.h"
-"include/dpp/export.h"
-"include/dpp/discordevents.h"
-"include/dpp/cluster.h"
-"<cstdint>"
-"<cstddef>"
-"<algorithm>"
-)
 endforeach()
-
-target_precompile_headers(dpp
-	PRIVATE
-	"${PROJECT_SOURCE_DIR}/include/dpp/nlohmann/json.hpp"
-	"${PROJECT_SOURCE_DIR}/include/dpp/nlohmann/json_fwd.hpp"
-	"<variant>"
-	"<utility>"
-	"<unordered_map>"
-	"<type_traits>"
-	"<string>"
-	"<stdint.h>"
-	"<stddef.h>"
-	"<map>"
-	"<iostream>"
-	"<functional>"
-	"include/dpp/stringops.h"
-	"include/dpp/snowflake.h"
-	"include/dpp/nlohmann/json_fwd.hpp"
-	"include/dpp/nlohmann/json.hpp"
-	"include/dpp/managed.h"
-	"include/dpp/json_interface.h"
-	"include/dpp/export.h"
-	"include/dpp/discordevents.h"
-	"include/dpp/cluster.h"
-	"<cstdint>"
-	"<cstddef>"
-	"<algorithm>"
-	)
 
 target_compile_features(dpp PRIVATE cxx_std_17)
 target_compile_features(dpp PRIVATE cxx_constexpr)
@@ -393,4 +342,3 @@ include("cmake/CPackSetup.cmake")						# Setup information for packaging and dis
 
 # CPack initialization for distribution
 include(CPack)
-
