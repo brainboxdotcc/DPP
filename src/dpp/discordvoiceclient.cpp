@@ -22,6 +22,7 @@
 #ifdef _WIN32
 	/* Windows #define's min() and max(), breaking std::max(). stupid stupid stupid... */
 	#define NOMINMAX
+
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
 	#include <io.h>
@@ -34,6 +35,7 @@
 	#include <sys/socket.h>
 	#include <netinet/tcp.h>
 #endif
+#include <limits>
 #include <string_view>
 #include <iostream>
 #include <fstream>
