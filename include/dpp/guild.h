@@ -554,7 +554,7 @@ public:
 	 *
 	 * @param base_permissions base permissions before overwrites,
 	 * from channel::base_permissions
-	 * @param member Member to fetch permissions for
+	 * @param member Member to resolve the permissions for
 	 * @param channel Channel to fetch permissions against
 	 * @return permission Merged permissions bitmask of overwrites.
 	 */
