@@ -1191,19 +1191,19 @@ struct DPP_EXPORT message : public managed {
 	 */
 	struct allowed_ref {
 		/**
-		 * @brief Set to true to parse user mentions in the text
+		 * @brief Set to true to parse user mentions in the text. Default is false
 		 */
 		bool parse_users;
 		/**
-		 * @brief Set to true to at-everyone and at-here mentions in the text
+		 * @brief Set to true to at-everyone and at-here mentions in the text. Default is false
 		 */
 		bool parse_everyone;
 		/**
-		 * @brief Set to true to parse role mentions in the text
+		 * @brief Set to true to parse role mentions in the text. Default is false
 		 */
 		bool parse_roles;
 		/**
-		 * @brief Set to true to mention the user who sent the message this one is replying to
+		 * @brief Set to true to mention the user who sent the message this one is replying to. Default is false
 		 */
 		bool replied_user;
 		/**
@@ -1396,6 +1396,7 @@ struct DPP_EXPORT message : public managed {
 	 * 
 	 * @param fn filename
 	 * @return message& reference to self
+	 * @deprecated Use message::add_file instead
 	 */
 	message& set_filename(const std::string &fn);
 
@@ -1404,6 +1405,7 @@ struct DPP_EXPORT message : public managed {
 	 * 
 	 * @param fc raw file content contained in std::string
 	 * @return message& reference to self
+	 * @deprecated Use message::add_file instead
 	 */
 	message& set_file_content(const std::string &fc);
 

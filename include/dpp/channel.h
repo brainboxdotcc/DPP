@@ -385,7 +385,7 @@ public:
 	/**
 	 * @brief Get the user permissions for a user on this channel
 	 * 
-	 * @param member The user to return permissions for
+	 * @param member The user to resolve the permissions for
 	 * @return permission Permissions bitmask made of bits in dpp::permissions.
 	 * Note that if the user is not on the channel or the guild is
 	 * not in the cache, the function will always return 0.
