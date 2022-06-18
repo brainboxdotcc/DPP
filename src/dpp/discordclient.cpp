@@ -53,7 +53,7 @@
 #define STRINGIFY_(a) #a
 
 #ifndef DPP_OS
-#define DPP_OS "unknown"
+#define DPP_OS unknown
 #endif
 
 namespace dpp {
