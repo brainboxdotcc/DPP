@@ -49,6 +49,13 @@
 #define PATH_COMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf&compress=zlib-stream"
 #define DECOMP_BUFFER_SIZE	512 * 1024
 
+#define STRINGIFY(a) STRINGIFY_(a)
+#define STRINGIFY_(a) #a
+
+#ifndef DPP_OS
+#define DPP_OS "unknown"
+#endif
+
 namespace dpp {
 
 /**
@@ -307,7 +314,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 								{ "token", this->token },
 								{ "properties",
 									{
-										{ "os", "Linux" },
+										{ "os", STRINGIFY(DPP_OS) },
 										{ "browser", "D++" },
 										{ "device", "D++" }
 									}
