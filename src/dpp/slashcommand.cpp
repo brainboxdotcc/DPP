@@ -575,8 +575,23 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			}
 		}
 		j.at("member").get_to(i.member);
-		i.member.user_id = i.usr.id;
-		i.member.guild_id = i.guild_id;
+// 		i.member.user_id = i.usr.id;
+// 		i.member.guild_id = i.guild_id;
+//              Unfortunately, you cannot send a response in a direct message using a slash command. The response will be sent in the same channel as the slash 
+//              command was executed. You can send the response as a normal message.
+		//You'll have to manually get the member, by either getting it from the cache or fetching it from the API.
+		
+// 		const user = client.users.cache.get(interaction.member.user.id);
+// 		user.send("Hello").catch(console.error);
+		
+		// or you can use this
+		client.ws.on("INTERACTION_CREATE", async interaction => {
+    		const guild = client.guilds.cache.get(interaction.guild_id);
+    		const user = client.users.cache.get(interaction.member.user.id);
+
+    		user.send(`hello, you used the ${interaction.data.name.toLowerCase()} command in ${guild.name}`).catch(console.error);
+		});
+		
 		if (i.cache_policy.user_policy != dpp::cp_none) {
 			/* User caching on, lazy or aggressive - cache or update the member information */
 			guild* g = dpp::find_guild(i.guild_id);
