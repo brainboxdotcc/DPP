@@ -22,7 +22,6 @@
 #ifdef _WIN32
 	/* Windows #define's min() and max(), breaking std::max(). stupid stupid stupid... */
 	#define NOMINMAX
-
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
 	#include <io.h>
@@ -35,7 +34,6 @@
 	#include <sys/socket.h>
 	#include <netinet/tcp.h>
 #endif
-#include <limits>
 #include <string_view>
 #include <iostream>
 #include <fstream>
@@ -127,7 +125,7 @@ size_t audio_mix(discord_voice_client& client, opus_int32* pcm_mix, const opus_i
 	for (opus_int32 v = 0; v < samples * opus_channel_count; ++v) {
 		pcm_mix[v] += pcm[v];
 	}
-	max_samples = std::max(samples, max_samples);
+	max_samples = (std::max)(samples, max_samples);
 	return park_count + 1;
 }
 #endif
