@@ -904,7 +904,7 @@ public:
 	/**
 	 * @brief Called when a guild is deleted.
 	 * A guild can be deleted via the bot being kicked, the bot leaving the guild
-	 * explicitly with dpp::guild_delete, or via the guild being unavailable due to
+	 * explicitly with dpp::cluster::guild_delete, or via the guild being unavailable due to
 	 * an outage.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -938,7 +938,7 @@ public:
 	
 	/**
 	 * @brief Called when a shard is connected and ready.
-	 * A set of on_guild_create events will follow this event.
+	 * A set of cluster::on_guild_create events will follow this event.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type ready_t&, and returns void.
@@ -1006,7 +1006,7 @@ public:
 	
 	/**
 	 * @brief Called when a set of members is received for a guild.
-	 * D++ will request these for all new guilds if needed, after the on_guild_create
+	 * D++ will request these for all new guilds if needed, after the cluster::on_guild_create
 	 * events.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1220,7 +1220,7 @@ public:
 	
 	/**
 	 * @brief Called when a user is updated.
-	 * This is separate to guild_member_update and includes things such as an avatar change,
+	 * This is separate to cluster::on_guild_member_update and includes things such as an avatar change,
 	 * username change, discriminator change or change in subscription status for nitro.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1234,6 +1234,7 @@ public:
 	 * Note that D++ does not cache messages. If you want to cache these objects you
 	 * should create something yourself within your bot. Caching of messages is not on
 	 * the roadmap to be supported as it consumes excessive amounts of RAM.
+	 * For an example for caching of messages, please see \ref caching-messages
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type message_create_t&, and returns void.
@@ -1294,8 +1295,8 @@ public:
 
 	
 	/**
-	 * @brief Called when a thread is created
-	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
+	 * @brief Called when a thread is created.
+	 * Note that threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_create_t&, and returns void.
@@ -1322,8 +1323,8 @@ public:
 
 	
 	/**
-	 * @brief Called when thread list is synced (upon gaining access to a channel)
-	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
+	 * @brief Called when thread list is synced (upon gaining access to a channel).
+	 * Note that threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_list_sync_t&, and returns void.
@@ -1398,7 +1399,7 @@ public:
 	 * @brief Called when packets are sent from the voice buffer.
 	 * The voice buffer contains packets that are already encoded with Opus and encrypted
 	 * with Sodium, and merged into packets by the repacketizer, which is done in the
-	 * dpp::discord_voice_client::send_audio method. You should use the buffer size properties
+	 * dpp::discord_voice_client::send_audio_opus method. You should use the buffer size properties
 	 * of dpp::voice_buffer_send_t to determine if you should fill the buffer with more
 	 * content.
 	 *
