@@ -556,7 +556,7 @@ public:
 	 * @param member member to get permissions for
 	 * @return permission permissions bitmask
 	 */
-	permission base_permissions(const guild_member& member) const;
+	permission base_permissions(const guild_member* member) const;
 
 	/**
 	 * @brief Get the permission overwrites for a member
@@ -579,7 +579,7 @@ public:
 	 * @param channel Channel to get permission overwrites for
 	 * @return permission Merged permissions bitmask of overwrites.
 	 */
-	permission permission_overwrites(const guild_member& member, const channel& channel) const;
+	permission permission_overwrites(const guild_member* member, const channel* channel) const;
 
 	/**
 	 * @brief Rehash members map

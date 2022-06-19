@@ -565,15 +565,15 @@ permission guild::base_permissions(const user* member) const
 	return permissions;
 }
 
-permission guild::base_permissions(const guild_member &member) const {
-	if (owner_id == member.user_id)
+permission guild::base_permissions(const guild_member *member) const {
+	if (owner_id == member->user_id)
 		return ~0;
 
 	role* everyone = dpp::find_role(id);
 
 	permission permissions = everyone->permissions;
 
-	for (auto& rid : member.roles) {
+	for (auto& rid : member->roles) {
 		role* r = dpp::find_role(rid);
 		if (r) {
 			permissions |= r->permissions;
@@ -628,14 +628,14 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 	return permissions;
 }
 
-permission guild::permission_overwrites(const guild_member &member, const channel& channel) const {
+permission guild::permission_overwrites(const guild_member *member, const channel* channel) const {
 	permission base_permissions = this->base_permissions(member);
 
 	if (base_permissions & p_administrator)
 		return ~0;
 
 	permission permissions = base_permissions;
-	for (auto it = channel.permission_overwrites.begin(); it != channel.permission_overwrites.end(); ++it) {
+	for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
 		if (it->id == id && it->type == ot_role) {
 			permissions &= ~it->deny;
 			permissions |= it->allow;
@@ -643,21 +643,17 @@ permission guild::permission_overwrites(const guild_member &member, const channe
 		}
 	}
 
-	auto mi = members.find(member.user_id);
-	if (mi == members.end())
-		return 0;
-	guild_member gm = mi->second;
 	uint64_t allow = 0;
 	uint64_t deny = 0;
 
-	for (auto& rid : gm.roles) {
+	for (auto& rid : member->roles) {
 
 		/* Skip \@everyone, calculated above */
 		if (rid == id)
 			continue;
 
-		for (auto it = channel.permission_overwrites.begin(); it != channel.permission_overwrites.end(); ++it) {
-			if ((rid == it->id && it->type == ot_role) || (member.user_id == it->id && it->type == ot_member)) {
+		for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
+			if ((rid == it->id && it->type == ot_role) || (member->user_id == it->id && it->type == ot_member)) {
 				allow |= it->allow;
 				deny |= it->deny;
 				break;

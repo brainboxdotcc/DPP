@@ -25,6 +25,7 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
+#include <dpp/guild.h>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/permissions.h>
 #include <dpp/json_interface.h>
@@ -389,8 +390,18 @@ public:
 	 * @return permission Permissions bitmask made of bits in dpp::permissions.
 	 * Note that if the user is not on the channel or the guild is
 	 * not in the cache, the function will always return 0.
+	 * @deprecated
 	 */
 	permission get_user_permissions(const class user* member) const;
+
+	/**
+	 * @brief Get the user permissions for a user on this channel including channel overwrites
+	 *
+	 * @param member The user to resolve the permissions for
+	 * @return permission Permissions bitmask made of bits in dpp::permissions.
+	 * Note that if the user is not on the channel, the function will always return 0.
+	 */
+	permission get_user_permissions(const guild_member* member) const;
 
 	/**
 	 * @brief Return a map of members on the channel, built from the guild's
