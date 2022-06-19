@@ -541,7 +541,7 @@ public:
 
 	/**
 	 * @brief Get the base permissions for a member on this guild,
-	 * before permission overwrites are applied.
+	 * before channel overwrites are applied.
 	 *
 	 * @param member member to get permissions for
 	 * @return permission permissions bitmask
