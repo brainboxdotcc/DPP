@@ -387,7 +387,7 @@ permission channel::get_user_permissions(const user* member) const
 	return g->permission_overwrites(g->base_permissions(member), member, this);
 }
 
-permission channel::get_user_permissions(const guild_member* member) const
+permission channel::get_member_overwrites(const guild_member* member) const
 {
 	guild* g = dpp::find_guild(guild_id);
 	if (g == nullptr)
@@ -401,11 +401,8 @@ std::map<snowflake, guild_member*> channel::get_members() {
 	guild* g = dpp::find_guild(guild_id);
 	if (g) {
 		for (auto m = g->members.begin(); m != g->members.end(); ++m) {
-			user* u = dpp::find_user(m->second.user_id);
-			if (u) {
-				if (get_user_permissions(u) & p_view_channel) {
-					rv[m->second.user_id] = &(m->second);
-				}
+			if (get_member_overwrites(&m->second) & p_view_channel) {
+				rv[m->second.user_id] = &(m->second);
 			}
 		}
 	}

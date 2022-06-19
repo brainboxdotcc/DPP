@@ -397,11 +397,11 @@ public:
 	/**
 	 * @brief Get the user permissions for a user on this channel including channel overwrites
 	 *
-	 * @param member The user to resolve the permissions for
+	 * @param member The member to resolve the permissions for
 	 * @return permission Permissions bitmask made of bits in dpp::permissions.
-	 * Note that if the user is not on the channel, the function will always return 0.
+	 * @note If the guild this channel belongs to is not in the cache, the function will always return 0.
 	 */
-	permission get_user_permissions(const guild_member* member) const;
+	permission get_member_overwrites(const guild_member* member) const;
 
 	/**
 	 * @brief Return a map of members on the channel, built from the guild's
