@@ -545,8 +545,18 @@ public:
 	 *
 	 * @param member member to get permissions for
 	 * @return permission permissions bitmask
+	 * @deprecated
 	 */
 	permission base_permissions(const class user* member) const;
+
+	/**
+	 * @brief Get the base permissions for a member on this guild,
+	 * before channel overwrites are applied.
+	 *
+	 * @param member member to get permissions for
+	 * @return permission permissions bitmask
+	 */
+	permission base_permissions(const guild_member& member) const;
 
 	/**
 	 * @brief Get the permission overwrites for a member
@@ -557,8 +567,19 @@ public:
 	 * @param member Member to resolve the permissions for
 	 * @param channel Channel to fetch permissions against
 	 * @return permission Merged permissions bitmask of overwrites.
+	 * @deprecated
 	 */
 	permission permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
+
+	/**
+	 * @brief Get the permission overwrites for a member
+	 * merged into a bitmask.
+	 *
+	 * @param member Member to resolve the permissions for
+	 * @param channel Channel to get permission overwrites for
+	 * @return permission Merged permissions bitmask of overwrites.
+	 */
+	permission permission_overwrites(const guild_member& member, const channel& channel) const;
 
 	/**
 	 * @brief Rehash members map
