@@ -566,6 +566,9 @@ permission guild::base_permissions(const user* member) const
 }
 
 permission guild::base_permissions(const guild_member *member) const {
+	if (member == nullptr)
+		return 0;
+
 	if (owner_id == member->user_id)
 		return ~0;
 
@@ -629,6 +632,9 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 }
 
 permission guild::permission_overwrites(const guild_member *member, const channel* channel) const {
+	if (member == nullptr || channel == nullptr)
+		return 0;
+
 	permission base_permissions = this->base_permissions(member);
 
 	if (base_permissions & p_administrator)

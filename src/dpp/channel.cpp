@@ -389,6 +389,9 @@ permission channel::get_user_permissions(const user* member) const
 
 permission channel::get_member_overwrites(const guild_member* member) const
 {
+	if (member == nullptr)
+		return 0;
+
 	guild* g = dpp::find_guild(guild_id);
 	if (g == nullptr)
 		return 0;
