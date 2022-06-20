@@ -375,16 +375,16 @@ std::string channel::build_json(bool with_id) const {
 	return j.dump();
 }
 
-permission channel::get_user_permissions(const user* member) const
+permission channel::get_user_permissions(const user* user) const
 {
-	if (member == nullptr)
+	if (user == nullptr)
 		return 0;
 
 	guild* g = dpp::find_guild(guild_id);
 	if (g == nullptr)
 		return 0;
 
-	return g->permission_overwrites(g->base_permissions(member), member, this);
+	return g->permission_overwrites(g->base_permissions(user), user, this);
 }
 
 permission channel::get_member_overwrites(const guild_member* member) const

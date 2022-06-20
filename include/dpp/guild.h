@@ -543,11 +543,12 @@ public:
 	 * @brief Get the base permissions for a member on this guild,
 	 * before channel overwrites are applied.
 	 *
-	 * @param member member to get permissions for
+	 * @param user User to get permissions for
 	 * @return permission permissions bitmask
-	 * @deprecated
+	 * @note The method will search for the guild member in the cache by the user id.
+	 * If the guild member is not in cache, the method will always return 0.
 	 */
-	permission base_permissions(const class user* member) const;
+	permission base_permissions(const class user* user) const;
 
 	/**
 	 * @brief Get the base permissions for a member on this guild,
@@ -559,21 +560,20 @@ public:
 	permission base_permissions(const guild_member* member) const;
 
 	/**
-	 * @brief Get the permission overwrites for a member
-	 * merged into a bitmask.
+	 * @brief Get the permission overwrites for a member in a channel.
 	 *
 	 * @param base_permissions base permissions before overwrites,
 	 * from channel::base_permissions
-	 * @param member Member to resolve the permissions for
-	 * @param channel Channel to fetch permissions against
+	 * @param user User to resolve the permissions for
+	 * @param channel Channel to get permission overwrites for
 	 * @return permission Merged permissions bitmask of overwrites.
-	 * @deprecated
+	 * @note The method will search for the guild member in the cache by the user id.
+	 * If the guild member is not in cache, the method will always return 0.
 	 */
-	permission permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
+	permission permission_overwrites(const uint64_t base_permissions, const user* user, const channel* channel) const;
 
 	/**
-	 * @brief Get the permission overwrites for a member
-	 * merged into a bitmask.
+	 * @brief Get the permission overwrites for a member in a channel.
 	 *
 	 * @param member Member to resolve the permissions for
 	 * @param channel Channel to get permission overwrites for
