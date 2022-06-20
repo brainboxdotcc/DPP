@@ -25,7 +25,6 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
-#include <dpp/guild.h>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/permissions.h>
 #include <dpp/json_interface.h>
@@ -399,7 +398,7 @@ public:
 	 * @return permission Permissions bitmask made of bits in dpp::permissions.
 	 * @note If the guild this channel belongs to is not in the cache, the function will always return 0.
 	 */
-	permission get_member_overwrites(const guild_member* member) const;
+	permission get_member_overwrites(const class guild_member* member) const;
 
 	/**
 	 * @brief Return a map of members on the channel, built from the guild's
@@ -407,6 +406,7 @@ public:
 	 * Does not return reliable information for voice channels, use
 	 * dpp::channel::get_voice_members() instead for this.
 	 * @return A map of guild members keyed by user id.
+	 * @note If the guild this channel belongs to is not in the cache, the function will always return 0.
 	 */
 	std::map<snowflake, class guild_member*> get_members();
 
