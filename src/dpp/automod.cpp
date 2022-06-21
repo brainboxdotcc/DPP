@@ -33,7 +33,7 @@ automod_action::automod_action() : channel_id(0), duration_seconds(0)
 automod_action::~automod_action() = default;
 
 automod_action& automod_action::fill_from_json(nlohmann::json* j) {
-	type = (automod_action_type)uint8_not_null(j, "type");
+	type = (automod_action_type)int8_not_null(j, "type");
 	switch (type) {
 		case amod_action_send_alert:
 			channel_id = snowflake_not_null(&((*j)["metadata"]), "channel_id");
@@ -41,11 +41,9 @@ automod_action& automod_action::fill_from_json(nlohmann::json* j) {
 		case amod_action_timeout:
 			duration_seconds = int32_not_null(&((*j)["metadata"]), "duration_seconds");
 			break;
-	}
-	if (j->contains("user")) {
-		json & user = (*j)["user"];
-		user_id = snowflake_not_null(&user, "id");
-	}
+		default:
+			break;
+	};
 	return *this;
 }
 
@@ -66,13 +64,21 @@ std::string automod_action::build_json(bool with_id) const {
 				j["metadata"]["duration_seconds"] = duration_seconds;
 			}
 			break;
-	}
+		default:
+			break;
+	};
 	return j.dump();
 }
 
 automod_metadata::~automod_metadata() = default;
 
 automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
+	for (auto k : (*j)["keyword_filter"]) {
+		keywords.push_back(k);
+	}
+	for (auto k : (*j)["presets"]) {
+		presets.push_back((automod_preset_type)k.get<uint32_t>());
+	}
 	return *this;
 }
 
@@ -84,13 +90,13 @@ automod_rule::automod_rule() : managed(), guild_id(0), creator_id(0), event_type
 {
 }
 
-automod_action::~automod_action() = default;
+automod_rule::~automod_rule() = default;
 
-automod_action& ban::fill_from_json(nlohmann::json* j) {
+automod_rule& automod_rule::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string automod_action::build_json(bool with_id) const {
+std::string automod_rule::build_json(bool with_id) const {
 	return "{}";
 }
 

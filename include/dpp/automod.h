@@ -54,8 +54,8 @@ enum automod_trigger_type : uint8_t {
 };
 
 struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
-	std::vector<std::string> keyword_filter;
-	std::vector<automod_preset_type> keyword_preset_types;
+	std::vector<std::string> keywords;
+	std::vector<automod_preset_type> presets;
 
 	virtual ~automod_metadata();
 

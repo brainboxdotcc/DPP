@@ -78,15 +78,15 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 		{"thread_id", thread_id},
 	});
 	std::string body;
-	if (!thread_name.empty() || wh.image_data || wh.avatar || !wh.name.empty()) { // only use json::parse if thread_name is set
+	if (!thread_name.empty() || wh.image_data || !wh.avatar.empty() || !wh.name.empty()) { // only use json::parse if thread_name is set
 		json j = json::parse(m.build_json(false));
 		if (!thread_name.empty()) {
 			j["thread_name"] = thread_name;
 		}
-		if (wh.avatar) {
+		if (!wh.avatar.empty()) {
 			j["avatar_url"] = wh.avatar;
 		} else if (wh.image_data) {
-			j["avatar_url"] = *image_data;
+			j["avatar_url"] = *wh.image_data;
 		}
 		if (!wh.name.empty()) {
 			j["username"] = wh.name;
