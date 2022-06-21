@@ -540,7 +540,7 @@ public:
 	std::string build_json(bool with_id = false) const;
 
 	/**
-	 * @brief Get the base permissions for a member on this guild,
+	 * @brief Compute the base permissions for a member on this guild,
 	 * before channel overwrites are applied.
 	 *
 	 * @param user User to get permissions for
@@ -551,7 +551,7 @@ public:
 	permission base_permissions(const class user* user) const;
 
 	/**
-	 * @brief Get the base permissions for a member on this guild,
+	 * @brief Compute the base permissions for a member on this guild,
 	 * before channel overwrites are applied.
 	 *
 	 * @param member member to get permissions for
@@ -560,12 +560,12 @@ public:
 	permission base_permissions(const guild_member* member) const;
 
 	/**
-	 * @brief Get the permission overwrites for a member in a channel.
+	 * @brief Compute the permission overwrites for a member in a channel, including base permissions.
 	 *
 	 * @param base_permissions base permissions before overwrites,
 	 * from channel::base_permissions
 	 * @param user User to resolve the permissions for
-	 * @param channel Channel to get permission overwrites for
+	 * @param channel Channel to compute permission overwrites for
 	 * @return permission Merged permissions bitmask of overwrites.
 	 * @note The method will search for the guild member in the cache by the user id.
 	 * If the guild member is not in cache, the method will always return 0.
@@ -573,10 +573,10 @@ public:
 	permission permission_overwrites(const uint64_t base_permissions, const user* user, const channel* channel) const;
 
 	/**
-	 * @brief Get the permission overwrites for a member in a channel.
+	 * @brief Compute the permission overwrites for a member in a channel, including base permissions.
 	 *
 	 * @param member Member to resolve the permissions for
-	 * @param channel Channel to get permission overwrites for
+	 * @param channel Channel to compute permission overwrites for
 	 * @return permission Merged permissions bitmask of overwrites.
 	 */
 	permission permission_overwrites(const guild_member* member, const channel* channel) const;

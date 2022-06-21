@@ -383,16 +383,17 @@ public:
 	std::string get_mention() const;
 
 	/**
-	 * @brief Get the user permissions for a member on this channel including channel overwrites
+	 * @brief Get the user permissions for a member on this channel, including channel overwrites.
 	 * 
 	 * @param user The user to resolve the permissions for
 	 * @return permission Permissions bitmask made of bits in dpp::permissions.
-	 * @note If the guild member is not in cache, the method will always return 0.
+	 * @note The method will search for the guild member in the cache by the user id.
+	 * If the guild member is not in cache, the method will always return 0.
 	 */
 	permission get_user_permissions(const class user* user) const;
 
 	/**
-	 * @brief Get the user permissions for a member on this channel including channel overwrites
+	 * @brief Get the user permissions for a member on this channel, including channel overwrites.
 	 *
 	 * @param member The member to resolve the permissions for
 	 * @return permission Permissions bitmask made of bits in dpp::permissions.
