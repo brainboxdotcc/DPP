@@ -543,31 +543,12 @@ permission guild::base_permissions(const user* user) const {
 	if (user == nullptr)
 		return 0;
 
-	if (owner_id == user->id)
-		return ~0; // return all permissions if it's the owner of the guild
-
-	role* everyone = dpp::find_role(id);
-	if (everyone == nullptr)
-		return 0;
-
 	auto mi = members.find(user->id);
 	if (mi == members.end())
 		return 0;
 	guild_member gm = mi->second;
 
-	permission permissions = everyone->permissions;
-
-	for (auto& rid : gm.roles) {
-		role* r = dpp::find_role(rid);
-		if (r) {
-			permissions |= r->permissions;
-		}
-	}
-
-	if (permissions & p_administrator)
-		return ~0;
-
-	return permissions;
+	return base_permissions(&gm);
 }
 
 permission guild::base_permissions(const guild_member *member) const {
