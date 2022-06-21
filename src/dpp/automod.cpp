@@ -83,7 +83,17 @@ automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
 }
 
 std::string automod_metadata::build_json(bool with_id) const {
-	return "{}";
+	json j;
+	j["keyword_filter"] = json::array();
+	j["presets"] = json::array();
+	for (auto v : keywords) {
+		j["keyword_filter"].push_back(v);
+	}
+	for (auto v : presets) {
+		j["presets"].push_back((uint32_t)v);
+	}
+	return j.dump();
+
 }
 
 automod_rule::automod_rule() : managed(), guild_id(0), creator_id(0), event_type(amod_message_send), trigger_type(amod_type_keyword), enabled(true)
@@ -93,11 +103,65 @@ automod_rule::automod_rule() : managed(), guild_id(0), creator_id(0), event_type
 automod_rule::~automod_rule() = default;
 
 automod_rule& automod_rule::fill_from_json(nlohmann::json* j) {
+	id = snowflake_not_null(j, "id");
+	guild_id = snowflake_not_null(j, "guild_id");
+	name = string_not_null(j, "name");
+	creator_id = snowflake_not_null(j, "creator_id");
+	event_type = (automod_event_type)int8_not_null(j, "event_type");
+	trigger_type = (automod_trigger_type)int8_not_null(j, "trigger_type");
+	if (j->at("trigger_metadata")) {
+		trigger_metadata.fill_from_json(&((*j)["trigger_metadata"]));
+	}
+	enabled = bool_not_null(j, "enabled");
+	exempt_roles.clear();
+	exempt_channels.clear();
+	for (auto k : (*j)["automod_actions"]) {
+		actions.push_back(automod_action().fill_from_json(&k));
+	}
+	for (auto k : (*j)["exempt_roles"]) {
+		exempt_roles.push_back(stoull(k.get<std::string>()));
+	}
+	for (auto k : (*j)["exempt_channels"]) {
+		exempt_channels.push_back(stoull(k.get<std::string>()));
+	}
 	return *this;
 }
 
 std::string automod_rule::build_json(bool with_id) const {
-	return "{}";
+	json j;
+	if (with_id && id) {
+		j["id"] = std::to_string(id);
+	}
+	if (guild_id) {
+		j["guild_id"] = std::to_string(guild_id);
+	}
+	j["name"] = name;
+	j["enabled"] = enabled;
+	j["event_type"] = event_type;
+	j["trigger_type"] = trigger_type;
+	j["trigger_metadata"] = json::parse(trigger_metadata.build_json());
+	if (actions.size()) {
+		j["actions"] = json::array();
+		json& act = j["actions"];
+		for (auto v : actions) {
+			act.push_back(json::parse(v.build_json()));
+		}
+	}
+	if (exempt_roles.size()) {
+		j["exempt_roles"] = json::array();
+		json& roles = j["exempt_roles"];
+		for (auto v : exempt_roles) {
+			roles.push_back(std::to_string(v));
+		}
+	}
+	if (exempt_channels.size()) {
+		j["exempt_channels"] = json::array();
+		json& channels = j["exempt_channels"];
+		for (auto v : exempt_channels) {
+			channels.push_back(std::to_string(v));
+		}
+	}
+	return j.dump();
 }
 
 };
