@@ -539,15 +539,17 @@ std::string guild_widget::build_json(bool with_id) const {
 }
 
 
-permission guild::base_permissions(const user* user) const
-{
+permission guild::base_permissions(const user* user) const {
 	if (user == nullptr)
 		return 0;
 
 	if (owner_id == user->id)
-		return ~0; // owner of the guild
+		return ~0; // return all permissions if it's the owner of the guild
 
 	role* everyone = dpp::find_role(id);
+	if (everyone == nullptr)
+		return 0;
+
 	auto mi = members.find(user->id);
 	if (mi == members.end())
 		return 0;
@@ -573,9 +575,11 @@ permission guild::base_permissions(const guild_member *member) const {
 		return 0;
 
 	if (owner_id == member->user_id)
-		return ~0; // owner of the guild
+		return ~0; // return all permissions if it's the owner of the guild
 
 	role* everyone = dpp::find_role(id);
+	if (everyone == nullptr)
+		return 0;
 
 	permission permissions = everyone->permissions;
 
@@ -592,8 +596,7 @@ permission guild::base_permissions(const guild_member *member) const {
 	return permissions;
 }
 
-permission guild::permission_overwrites(const uint64_t base_permissions, const user* user, const channel* channel) const
-{
+permission guild::permission_overwrites(const uint64_t base_permissions, const user* user, const channel* channel) const {
 	if (user == nullptr || channel == nullptr)
 		return 0;
 
@@ -613,6 +616,7 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 	if (mi == members.end())
 		return 0;
 	guild_member gm = mi->second;
+
 	uint64_t allow = 0;
 	uint64_t deny = 0;
 
