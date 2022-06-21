@@ -31,6 +31,7 @@
 #include <dpp/invite.h>
 #include <dpp/emoji.h>
 #include <dpp/ban.h>
+#include <dpp/automod.h>
 #include <dpp/webhook.h>
 #include <dpp/presence.h>
 #include <dpp/message.h>
@@ -229,6 +230,58 @@ struct DPP_EXPORT guild_scheduled_event_delete_t : public event_dispatch_t {
 	 * @brief deleted event
 	 */
 	scheduled_event deleted;
+};
+
+/** @brief Create automod rule */
+struct DPP_EXPORT automod_rule_create_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	automod_rule_create_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief updated event
+	 */
+	automod_rule created;
+};
+
+/** @brief Update automod rule */
+struct DPP_EXPORT automod_rule_update_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	automod_rule_update_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief updated event
+	 */
+	automod_rule updated;
+};
+
+/** @brief Delete automod rule */
+struct DPP_EXPORT automod_rule_delete_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	automod_rule_delete_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief updated event
+	 */
+	automod_rule deleted;
+};
+
+/** @brief Execute/trigger automod rule */
+struct DPP_EXPORT automod_rule_execute_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	automod_rule_execute_t(class discord_client* client, const std::string& raw);
 };
 
 

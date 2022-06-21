@@ -1151,7 +1151,39 @@ public:
 	 */
 	event_router_t<webhooks_update_t> on_webhooks_update;
 
+	/**
+	 * @brief Called when a new automod rule is created.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_create_t&, and returns void.
+	 */
+	event_router_t<automod_rule_create_t> on_automod_rule_create;
+
+
+	/**
+	 * @brief Called when an automod rule is updated.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_update_t&, and returns void.
+	 */
+	event_router_t<automod_rule_update_t> on_automod_rule_update;
 	
+	/**
+	 * @brief Called when an automod rule is deleted.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_delete_t&, and returns void.
+	 */
+	event_router_t<automod_rule_delete_t> on_automod_rule_delete;
+
+	/**
+	 * @brief Called when an automod rule is triggered/executed.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_execute_t&, and returns void.
+	 */
+	event_router_t<automod_rule_execute_t> on_automod_rule_execute;
+
 	/**
 	 * @brief Called when a new member joins a guild.
 	 *
