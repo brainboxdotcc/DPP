@@ -282,6 +282,18 @@ struct DPP_EXPORT automod_rule_execute_t : public event_dispatch_t {
 	 * @param raw Raw event text as JSON
 	 */
 	automod_rule_execute_t(class discord_client* client, const std::string& raw);
+
+	snowflake		guild_id;			//!< the id of the guild in which action was executed
+	automod_action		action;				//!< the action which was executed
+	snowflake		rule_id;			//!< the id of the rule which action belongs to
+	automod_trigger_type	rule_trigger_type;		//!< the trigger type of rule which was triggered
+	snowflake		user_id;			//!< the id of the user which generated the content which triggered the rule
+	snowflake		channel_id;			//!< Optional: the id of the channel in which user content was posted
+	snowflake		message_id;			//!< Optional: the id of any user message which content belongs to
+	snowflake		alert_system_message_id;	//!< Optional: the id of any system auto moderation messages posted as a result of this action
+	std::string		content;			//!< the user generated text content
+	std::string		matched_keyword;		//!< the word or phrase configured in the rule that triggered the rule (may be empty)
+	std::string		matched_content;		//!< the substring in content that triggered the rule (may be empty)
 };
 
 

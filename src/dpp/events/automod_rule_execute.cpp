@@ -40,7 +40,17 @@ void automod_rule_execute::handle(discord_client* client, json &j, const std::st
 	if (!client->creator->on_automod_rule_execute.empty()) {
 		json& d = j["d"];
 		automod_rule_execute_t are(client, raw);
-		//arc.created = automod_rule().fill_from_json(&d);
+		are.guild_id = snowflake_not_null(&d, "guild_id");
+		are.action = dpp::automod_action().fill_from_json(&(d["action"]));
+		are.rule_id = snowflake_not_null(&d, "rule_id");
+		are.rule_trigger_type = (automod_trigger_type)int8_not_null(&d, "rule_trigger_type");
+		are.user_id = snowflake_not_null(&d, "user_id");
+		are.channel_id = snowflake_not_null(&d, "channel_id");
+		are.message_id = snowflake_not_null(&d, "message_id");
+		are.alert_system_message_id = snowflake_not_null(&d, "alert_system_message_id");
+		are.content = string_not_null(&d, "content");
+		are.matched_keyword = string_not_null(&d, "matched_keyword");
+		are.matched_content = string_not_null(&d, "matched_content");
 		client->creator->on_automod_rule_execute.call(are);
 	}
 }
