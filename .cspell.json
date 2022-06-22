@@ -77,7 +77,8 @@
 		"gifv",
 		"ctls",
 		"ctest",
-		"automod"
+		"automod",
+		"amod"
 	],
 	"flagWords": [
 		"hte"
