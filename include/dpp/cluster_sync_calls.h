@@ -368,6 +368,70 @@ confirmation interaction_followup_edit_sync(const std::string &token, const mess
 message interaction_followup_get_sync(const std::string &token, snowflake message_id);
 
 /**
+ * @brief Get all auto moderation rules for a guild
+ * 
+ * @param guild_id Guild id of the auto moderation rule
+ * @return automod_rule_map returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+automod_rule_map automod_rules_get_sync(snowflake guild_id);
+
+/**
+ * @brief Get a single auto moderation rule
+ * 
+ * @param guild_id Guild id of the auto moderation rule
+ * @param rule_id  Rule id to retrieve
+ * @return automod_rule returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+automod_rule automod_rule_get_sync(snowflake guild_id, snowflake rule_id);
+
+/**
+ * @brief Create an auto moderation rule
+ * 
+ * @param guild_id Guild id of the auto moderation rule
+ * @param r Auto moderation rule to create
+ * @return automod_rule returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+automod_rule automod_rule_create_sync(snowflake guild_id, const automod_rule& r);
+
+/**
+ * @brief Edit an auto moderation rule
+ * 
+ * @param guild_id Guild id of the auto moderation rule
+ * @param r Auto moderation rule to edit. The rule's id must be set.
+ * @return automod_rule returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+automod_rule automod_rule_edit_sync(snowflake guild_id, const automod_rule& r);
+
+/**
+ * @brief Delete an auto moderation rule
+ * 
+ * @param guild_id Guild id of the auto moderation rule
+ * @param rule_id Auto moderation rule id to delete
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation automod_rule_delete_sync(snowflake guild_id, snowflake rule_id);
+
+/**
  * @brief Create a channel
  * 
  * Create a new channel object for the guild. Requires the `MANAGE_CHANNELS` permission. If setting permission overwrites,
