@@ -548,16 +548,14 @@ permission guild::base_permissions(const user* user) const {
 		return 0;
 	guild_member gm = mi->second;
 
-	return base_permissions(&gm);
+	return base_permissions(gm);
 }
 
-permission guild::base_permissions(const guild_member *member) const {
-	if (member == nullptr)
-		return 0;
+permission guild::base_permissions(const guild_member &member) const {
 
 	/* this method is written with the help of discord's pseudocode available here https://discord.com/developers/docs/topics/permissions#permission-overwrites */
 
-	if (owner_id == member->user_id)
+	if (owner_id == member.user_id)
 		return ~0; // return all permissions if it's the owner of the guild
 
 	role* everyone = dpp::find_role(id);
@@ -566,7 +564,7 @@ permission guild::base_permissions(const guild_member *member) const {
 
 	permission permissions = everyone->permissions;
 
-	for (auto& rid : member->roles) {
+	for (auto& rid : member.roles) {
 		role* r = dpp::find_role(rid);
 		if (r) {
 			permissions |= r->permissions;
@@ -639,9 +637,7 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 	return permissions;
 }
 
-permission guild::permission_overwrites(const guild_member *member, const channel* channel) const {
-	if (member == nullptr || channel == nullptr)
-		return 0;
+permission guild::permission_overwrites(const guild_member &member, const channel &channel) const {
 
 	permission base_permissions = this->base_permissions(member);
 
@@ -654,7 +650,7 @@ permission guild::permission_overwrites(const guild_member *member, const channe
 	permission permissions = base_permissions;
 
 	// find \@everyone role overwrite and apply it.
-	for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
+	for (auto it = channel.permission_overwrites.begin(); it != channel.permission_overwrites.end(); ++it) {
 		if (it->id == this->id && it->type == ot_role) {
 			permissions &= ~it->deny;
 			permissions |= it->allow;
@@ -666,13 +662,13 @@ permission guild::permission_overwrites(const guild_member *member, const channe
 	uint64_t allow = 0;
 	uint64_t deny = 0;
 
-	for (auto& rid : member->roles) {
+	for (auto& rid : member.roles) {
 
 		/* Skip \@everyone role to not break the hierarchy. It's calculated above */
 		if (rid == this->id)
 			continue;
 
-		for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
+		for (auto it = channel.permission_overwrites.begin(); it != channel.permission_overwrites.end(); ++it) {
 			if (rid == it->id && it->type == ot_role) {
 				deny |= it->deny;
 				allow |= it->allow;
@@ -685,8 +681,8 @@ permission guild::permission_overwrites(const guild_member *member, const channe
 	permissions |= allow;
 
 	// Apply member specific overwrite if exists.
-	for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
-		if (member->user_id == it->id && it->type == ot_member) {
+	for (auto it = channel.permission_overwrites.begin(); it != channel.permission_overwrites.end(); ++it) {
+		if (member.user_id == it->id && it->type == ot_member) {
 			permissions &= ~it->deny;
 			permissions |= it->allow;
 			break;
