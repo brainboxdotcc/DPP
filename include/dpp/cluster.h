@@ -186,7 +186,9 @@ typedef std::variant<
 		scheduled_event,
 		scheduled_event_map,
 		event_member,
-		event_member_map
+		event_member_map,
+		automod_rule,
+		automod_rule_map
 	> confirmable_t;
 
 /**
@@ -1151,7 +1153,39 @@ public:
 	 */
 	event_router_t<webhooks_update_t> on_webhooks_update;
 
+	/**
+	 * @brief Called when a new automod rule is created.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_create_t&, and returns void.
+	 */
+	event_router_t<automod_rule_create_t> on_automod_rule_create;
+
+
+	/**
+	 * @brief Called when an automod rule is updated.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_update_t&, and returns void.
+	 */
+	event_router_t<automod_rule_update_t> on_automod_rule_update;
 	
+	/**
+	 * @brief Called when an automod rule is deleted.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_delete_t&, and returns void.
+	 */
+	event_router_t<automod_rule_delete_t> on_automod_rule_delete;
+
+	/**
+	 * @brief Called when an automod rule is triggered/executed.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_execute_t&, and returns void.
+	 */
+	event_router_t<automod_rule_execute_t> on_automod_rule_execute;
+
 	/**
 	 * @brief Called when a new member joins a guild.
 	 *
@@ -3551,6 +3585,55 @@ public:
 	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get all auto moderation rules for a guild
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::automod_rule_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rules_get(snowflake guild_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get a single auto moderation rule
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param rule_id  Rule id to retrieve
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::automod_rule object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rule_get(snowflake guild_id, snowflake rule_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Create an auto moderation rule
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param r Auto moderation rule to create
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::automod_rule object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rule_create(snowflake guild_id, const automod_rule& r, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Edit an auto moderation rule
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param r Auto moderation rule to edit. The rule's id must be set.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::automod_rule object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rule_edit(snowflake guild_id, const automod_rule& r, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Delete an auto moderation rule
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param rule_id Auto moderation rule id to delete
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rule_delete(snowflake guild_id, snowflake rule_id, command_completion_event_t callback = utility::log_error());
 
 #include <dpp/cluster_sync_calls.h>
 

@@ -342,6 +342,10 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "GUILD_SCHEDULED_EVENT_DELETE", new dpp::events::guild_scheduled_event_delete() },
 	{ "GUILD_SCHEDULED_EVENT_USER_ADD", new dpp::events::guild_scheduled_event_user_add() },
 	{ "GUILD_SCHEDULED_EVENT_USER_REMOVE", new dpp::events::guild_scheduled_event_user_remove() },
+	{ "AUTO_MODERATION_RULE_CREATE", new dpp::events::automod_rule_create() },
+	{ "AUTO_MODERATION_RULE_UPDATE", new dpp::events::automod_rule_update() },
+	{ "AUTO_MODERATION_RULE_DELETE", new dpp::events::automod_rule_delete() },
+	{ "AUTO_MODERATION_ACTION_EXECUTION", new dpp::events::automod_rule_execute() },
 };
 
 void discord_client::handle_event(const std::string &event, json &j, const std::string &raw)
