@@ -29,34 +29,91 @@
 
 namespace dpp {
 
+/**
+ * @brief Possible types of preset filter lists
+ */
 enum automod_preset_type : uint8_t {
+	/**
+	 * @brief Strong swearing
+	 */
 	amod_preset_profanity = 1,
+	/**
+	 * @brief Sexual phrases and words
+	 */
 	amod_preset_sexual_content = 2,
+	/**
+	 * @brief Racial and other slurs, hate speech
+	 */
 	amod_preset_slurs = 3,
 };
 
+/**
+ * @brief Action types to perform on filtering
+ */
 enum automod_action_type : uint8_t {
+	/**
+	 * @brief Block the message
+	 */
 	amod_action_block_message = 1,
+	/**
+	 * @brief Send an alert to a given channel
+	 */
 	amod_action_send_alert = 2,
+	/**
+	 * @brief time out the user
+	 */
 	amod_action_timeout = 3,
 };
 
+/**
+ * @brief Event types, only message send is currently supported
+ */
 enum automod_event_type : uint8_t {
-	/// Trigger on message send
+	/**
+	 * @brief Trigger on message send
+	 */
 	amod_message_send = 1,
 };
 
+/**
+ * @brief Types of moderation to trigger
+ */
 enum automod_trigger_type : uint8_t {
+	/**
+	 * @brief Keyword filtering
+	 */
 	amod_type_keyword = 1,
+	/**
+	 * @brief Harmful/malware links
+	 */
 	amod_type_harmful_link = 2,
+	/**
+	 * @brief Spamming
+	 */
 	amod_type_spam = 3,
+	/**
+	 * @brief Preset lists of filter words
+	 */
 	amod_type_keyword_preset = 4,
 };
 
+/**
+ * @brief Metadata associated with an automod action
+ */
 struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
+	/**
+	 * @brief Keywords to moderate
+	 */
 	std::vector<std::string> keywords;
+	/**
+	 * @brief Preset keyword list types to moderate
+	 * @see automod_preset_type
+	 */
 	std::vector<automod_preset_type> presets;
 
+	/**
+	 * @brief Destroy the automod metadata object
+	 */
 	virtual ~automod_metadata();
 
 	/**
@@ -76,13 +133,34 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 
 };
 
+/**
+ * @brief Represents an automod action
+ */
 struct DPP_EXPORT automod_action : public json_interface<automod_action> {
+	/**
+	 * @brief Type of action to take
+	 */
 	automod_action_type type;
+
+	/**
+	 * @brief Channel ID, for type amod_action_send_alert
+	 */
 	snowflake channel_id;
+
+	/**
+	 * @brief Silence duration in seconds, for amod_action_timeout
+	 * 
+	 */
 	int32_t duration_seconds;
 
+	/**
+	 * @brief Construct a new automod action object
+	 */
 	automod_action();
 
+	/**
+	 * @brief Destroy the automod action object
+	 */
 	virtual ~automod_action();
 
 	/**
@@ -101,22 +179,65 @@ struct DPP_EXPORT automod_action : public json_interface<automod_action> {
 	virtual std::string build_json(bool with_id = false) const;
 };
 
+/**
+ * @brief Represnets an automod rule
+ */
 class DPP_EXPORT automod_rule : public managed, public json_interface<automod_rule> {
 public:
-	snowflake       	id;		//!< the id of this rule
-	snowflake       	guild_id;	//!< the guild which this rule belongs to
-	std::string     	name;		//!< the rule name
-	snowflake       	creator_id;	//!< the user which first created this rule
-	automod_event_type	event_type;	//!< the rule event type
-	automod_trigger_type	trigger_type;	//!< the rule trigger type
-	automod_metadata	trigger_metadata;//!< the rule trigger metadata
-	std::vector<automod_action> actions;	//!< the actions which will execute when the rule is triggered
-	bool			enabled;	//!< whether the rule is enabled
-	std::vector<snowflake>	exempt_roles;	//!< the role ids that should not be affected by the rule (Maximum of 20)
-	std::vector<snowflake>	exempt_channels;//!< the channel ids that should not be affected by the rule (Maximum of 50)
+	/**
+	 * @brief the id of this rule
+	 */
+	snowflake       	id;
+	/**
+	 * @brief the guild which this rule belongs to
+	 */
+	snowflake       	guild_id;
+	/**
+	 * @brief the rule name
+	 */
+	std::string     	name;
+	/**
+	 * @brief The user which first created this rule
+	 */
+	snowflake       	creator_id;
+	/**
+	 * @brief The rule event type
+	 */
+	automod_event_type	event_type;
+	/**
+	 * @brief The rule trigger type
+	 */
+	automod_trigger_type	trigger_type;
+	/**
+	 * @brief The rule trigger metadata
+	 * 
+	 */
+	automod_metadata	trigger_metadata;
+	/**
+	 * @brief the actions which will execute when the rule is triggered
+	 */
+	std::vector<automod_action> actions;
+	/**
+	 * @brief Whether the rule is enabled
+	 */
+	bool			enabled;
+	/**
+	 * @brief the role ids that should not be affected by the rule (Maximum of 20)
+	 */
+	std::vector<snowflake>	exempt_roles;
+	/**
+	 * @brief the channel ids that should not be affected by the rule (Maximum of 50)
+	 */
+	std::vector<snowflake>	exempt_channels;
 
+	/**
+	 * @brief Construct a new automod rule object
+	 */
 	automod_rule();
 
+	/**
+	 * @brief Destroy the automod rule object
+	 */
 	virtual ~automod_rule();
 
 	/**
