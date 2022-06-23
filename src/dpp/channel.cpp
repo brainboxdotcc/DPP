@@ -375,16 +375,24 @@ std::string channel::build_json(bool with_id) const {
 	return j.dump();
 }
 
-permission channel::get_user_permissions(const user* member) const
-{
-	if (member == nullptr)
+permission channel::get_user_permissions(const user* user) const {
+	if (user == nullptr)
 		return 0;
 
 	guild* g = dpp::find_guild(guild_id);
 	if (g == nullptr)
 		return 0;
 
-	return g->permission_overwrites(g->base_permissions(member), member, this);
+	return g->permission_overwrites(g->base_permissions(user), user, this);
+}
+
+permission channel::get_user_permissions(const guild_member &member) const {
+
+	guild* g = dpp::find_guild(guild_id);
+	if (g == nullptr)
+		return 0;
+
+	return g->permission_overwrites(member, *this);
 }
 
 std::map<snowflake, guild_member*> channel::get_members() {
@@ -392,11 +400,8 @@ std::map<snowflake, guild_member*> channel::get_members() {
 	guild* g = dpp::find_guild(guild_id);
 	if (g) {
 		for (auto m = g->members.begin(); m != g->members.end(); ++m) {
-			user* u = dpp::find_user(m->second.user_id);
-			if (u) {
-				if (get_user_permissions(u) & p_view_channel) {
-					rv[m->second.user_id] = &(m->second);
-				}
+			if (g->permission_overwrites(m->second, *this) & p_view_channel) {
+				rv[m->second.user_id] = &(m->second);
 			}
 		}
 	}

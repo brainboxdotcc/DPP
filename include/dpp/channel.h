@@ -383,14 +383,25 @@ public:
 	std::string get_mention() const;
 
 	/**
-	 * @brief Get the user permissions for a user on this channel
+	 * @brief Get the user overall permissions for a member on this channel, including channel overwrites.
 	 * 
-	 * @param member The user to resolve the permissions for
+	 * @param user The user to resolve the permissions for
 	 * @return permission Permissions bitmask made of bits in dpp::permissions.
-	 * Note that if the user is not on the channel or the guild is
-	 * not in the cache, the function will always return 0.
+	 * @note Requires role cache to be enabled (it's enabled by default).
+	 *
+	 * @note The method will search for the guild member in the cache by the users id.
+	 * If the guild member is not in cache, the method will always return 0.
 	 */
-	permission get_user_permissions(const class user* member) const;
+	permission get_user_permissions(const class user* user) const;
+
+	/**
+	 * @brief Get the overall user permissions for a member on this channel, including channel overwrites.
+	 *
+	 * @param member The member to resolve the permissions for
+	 * @return The permission overwrites for the member. Made of bits in dpp::permissions.
+	 * @note Requires role cache to be enabled (it's enabled by default).
+	 */
+	permission get_user_permissions(const class guild_member &member) const;
 
 	/**
 	 * @brief Return a map of members on the channel, built from the guild's
@@ -398,6 +409,7 @@ public:
 	 * Does not return reliable information for voice channels, use
 	 * dpp::channel::get_voice_members() instead for this.
 	 * @return A map of guild members keyed by user id.
+	 * @note If the guild this channel belongs to is not in the cache, the function will always return 0.
 	 */
 	std::map<snowflake, class guild_member*> get_members();
 

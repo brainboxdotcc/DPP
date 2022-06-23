@@ -540,25 +540,58 @@ public:
 	std::string build_json(bool with_id = false) const;
 
 	/**
-	 * @brief Get the base permissions for a member on this guild,
-	 * before permission overwrites are applied.
+	 * @brief Compute the base permissions for a member on this guild,
+	 * before channel overwrites are applied.
+	 * This method takes into consideration the following cases:
+	 *   - Guild owner
+	 *   - Guild roles including \@everyone
+	 *
+	 * @param user User to get permissions for
+	 * @return permission permissions bitmask
+	 * @note Requires role cache to be enabled (it's enabled by default).
+	 *
+	 * @note The method will search for the guild member in the cache by the users id.
+	 * If the guild member is not in cache, the method will always return 0.
+	 */
+	permission base_permissions(const class user* user) const;
+
+	/**
+	 * @brief Compute the base permissions for a member on this guild,
+	 * before channel overwrites are applied.
+	 * This method takes into consideration the following cases:
+	 *   - Guild owner
+	 *   - Guild roles including \@everyone
 	 *
 	 * @param member member to get permissions for
 	 * @return permission permissions bitmask
+	 * @note Requires role cache to be enabled (it's enabled by default).
 	 */
-	permission base_permissions(const class user* member) const;
+	permission base_permissions(const guild_member &member) const;
 
 	/**
-	 * @brief Get the permission overwrites for a member
-	 * merged into a bitmask.
+	 * @brief Compute the permission overwrites for a member in a channel, including base permissions.
 	 *
 	 * @param base_permissions base permissions before overwrites,
 	 * from channel::base_permissions
-	 * @param member Member to resolve the permissions for
-	 * @param channel Channel to fetch permissions against
+	 * @param user User to resolve the permissions for
+	 * @param channel Channel to compute permission overwrites for
 	 * @return permission Merged permissions bitmask of overwrites.
+	 * @note Requires role cache to be enabled (it's enabled by default).
+	 *
+	 * @note The method will search for the guild member in the cache by the users id.
+	 * If the guild member is not in cache, the method will always return 0.
 	 */
-	permission permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
+	permission permission_overwrites(const uint64_t base_permissions, const user* user, const channel* channel) const;
+
+	/**
+	 * @brief Compute the permission overwrites for a member in a channel, including base permissions.
+	 *
+	 * @param member Member to resolve the permissions for
+	 * @param channel Channel to compute permission overwrites for
+	 * @return permission Merged permissions bitmask of overwrites.
+	 * @note Requires role cache to be enabled (it's enabled by default).
+	 */
+	permission permission_overwrites(const guild_member &member, const channel &channel) const;
 
 	/**
 	 * @brief Rehash members map

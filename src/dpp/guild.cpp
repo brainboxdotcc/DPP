@@ -539,20 +539,32 @@ std::string guild_widget::build_json(bool with_id) const {
 }
 
 
-permission guild::base_permissions(const user* member) const
-{
-	if (owner_id == member->id)
-		return ~0;
+permission guild::base_permissions(const user* user) const {
+	if (user == nullptr)
+		return 0;
 
-	role* everyone = dpp::find_role(id);
-	auto mi = members.find(member->id);
+	auto mi = members.find(user->id);
 	if (mi == members.end())
 		return 0;
 	guild_member gm = mi->second;
 
+	return base_permissions(gm);
+}
+
+permission guild::base_permissions(const guild_member &member) const {
+
+	/* this method is written with the help of discord's pseudocode available here https://discord.com/developers/docs/topics/permissions#permission-overwrites */
+
+	if (owner_id == member.user_id)
+		return ~0; // return all permissions if it's the owner of the guild
+
+	role* everyone = dpp::find_role(id);
+	if (everyone == nullptr)
+		return 0;
+
 	permission permissions = everyone->permissions;
 
-	for (auto& rid : gm.roles) {
+	for (auto& rid : member.roles) {
 		role* r = dpp::find_role(rid);
 		if (r) {
 			permissions |= r->permissions;
@@ -565,37 +577,46 @@ permission guild::base_permissions(const user* member) const
 	return permissions;
 }
 
-permission guild::permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const
-{
+permission guild::permission_overwrites(const uint64_t base_permissions, const user* user, const channel* channel) const {
+	if (user == nullptr || channel == nullptr)
+		return 0;
+
+	/* this method is written with the help of discord's pseudocode available here https://discord.com/developers/docs/topics/permissions#permission-overwrites */
+
+	// ADMINISTRATOR overrides any potential permission overwrites, so there is nothing to do here.
 	if (base_permissions & p_administrator)
 		return ~0;
 
 	permission permissions = base_permissions;
+
+	// find \@everyone role overwrite and apply it.
 	for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
-		if (it->id == id && it->type == ot_role) {
+		if (it->id == this->id && it->type == ot_role) {
 			permissions &= ~it->deny;
 			permissions |= it->allow;
 			break;
 		}
 	}
 
-	auto mi = members.find(member->id);
+	auto mi = members.find(user->id);
 	if (mi == members.end())
 		return 0;
 	guild_member gm = mi->second;
+
+	// Apply role specific overwrites.
 	uint64_t allow = 0;
 	uint64_t deny = 0;
 
 	for (auto& rid : gm.roles) {
 
-		/* Skip \@everyone, calculated above */
-		if (rid == id)
+		/* Skip \@everyone role to not break the hierarchy. It's calculated above */
+		if (rid == this->id)
 			continue;
 
 		for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
-			if ((rid == it->id && it->type == ot_role) || (member->id == it->id && it->type == ot_member)) {
-				allow |= it->allow;
+			if (rid == it->id && it->type == ot_role) {
 				deny |= it->deny;
+				allow |= it->allow;
 				break;
 			}
 		}
@@ -603,6 +624,70 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 
 	permissions &= ~deny;
 	permissions |= allow;
+
+	// Apply member specific overwrite if exists.
+	for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
+		if (gm.user_id == it->id && it->type == ot_member) {
+			permissions &= ~it->deny;
+			permissions |= it->allow;
+			break;
+		}
+	}
+
+	return permissions;
+}
+
+permission guild::permission_overwrites(const guild_member &member, const channel &channel) const {
+
+	permission base_permissions = this->base_permissions(member);
+
+	/* this method is written with the help of discord's pseudocode available here https://discord.com/developers/docs/topics/permissions#permission-overwrites */
+
+	// ADMINISTRATOR overrides any potential permission overwrites, so there is nothing to do here.
+	if (base_permissions & p_administrator)
+		return ~0;
+
+	permission permissions = base_permissions;
+
+	// find \@everyone role overwrite and apply it.
+	for (auto it = channel.permission_overwrites.begin(); it != channel.permission_overwrites.end(); ++it) {
+		if (it->id == this->id && it->type == ot_role) {
+			permissions &= ~it->deny;
+			permissions |= it->allow;
+			break;
+		}
+	}
+
+	// Apply role specific overwrites.
+	uint64_t allow = 0;
+	uint64_t deny = 0;
+
+	for (auto& rid : member.roles) {
+
+		/* Skip \@everyone role to not break the hierarchy. It's calculated above */
+		if (rid == this->id)
+			continue;
+
+		for (auto it = channel.permission_overwrites.begin(); it != channel.permission_overwrites.end(); ++it) {
+			if (rid == it->id && it->type == ot_role) {
+				deny |= it->deny;
+				allow |= it->allow;
+				break;
+			}
+		}
+	}
+
+	permissions &= ~deny;
+	permissions |= allow;
+
+	// Apply member specific overwrite if exists.
+	for (auto it = channel.permission_overwrites.begin(); it != channel.permission_overwrites.end(); ++it) {
+		if (member.user_id == it->id && it->type == ot_member) {
+			permissions &= ~it->deny;
+			permissions |= it->allow;
+			break;
+		}
+	}
 
 	return permissions;
 }
