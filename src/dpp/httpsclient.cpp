@@ -54,22 +54,24 @@ void https_client::connect()
 	for (auto& [k,v] : request_headers) {
 		map_headers += k + ": " + v + "\r\n";
 	}
-	this->write(
-		fmt::format(
+	if (this->sfd != SOCKET_ERROR) {
+		this->write(
+			fmt::format(
 
-			"{} {} HTTP/1.1\r\n"
-			"Host: {}\r\n"
-			"pragma: no-cache\r\n"
-			"Connection: keep-alive\r\n"
-			"Content-Length: {}\r\n{}"
-			"\r\n{}",
+				"{} {} HTTP/1.1\r\n"
+				"Host: {}\r\n"
+				"pragma: no-cache\r\n"
+				"Connection: keep-alive\r\n"
+				"Content-Length: {}\r\n{}"
+				"\r\n{}",
 
-			this->request_type, this->path, this->hostname,
-			this->request_body.length(), map_headers,
-			this->request_body
-		)
-	);
-	read_loop();
+				this->request_type, this->path, this->hostname,
+				this->request_body.length(), map_headers,
+				this->request_body
+			)
+		);
+		read_loop();
+	}
 }
 
 multipart_content https_client::build_multipart(const std::string &json, const std::vector<std::string>& filenames, const std::vector<std::string>& contents) {
@@ -282,7 +284,7 @@ http_state https_client::get_state() {
 }
 
 void https_client::one_second_timer() {
-	if (time(nullptr) >= timeout && this->state != HTTPS_DONE) {
+	if ((this->sfd == SOCKET_ERROR || time(nullptr) >= timeout) && this->state != HTTPS_DONE) {
 		keepalive = false;
 		this->close();
 	}
