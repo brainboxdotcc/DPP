@@ -60,6 +60,9 @@
 #include <dpp/exception.h>
 #include <dpp/utility.h>
 
+/* Maximum allowed time in milliseconds for socket read/write timeouts and connect() */
+#define SOCKET_OP_TIMEOUT 5000
+
 namespace dpp {
 
 /**
@@ -103,6 +106,8 @@ thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
  * it'd go unused.
  */
 #define DPP_BUFSIZE 16 * 1024
+
+/* Represents a failed socket system call, e.g. connect() failure */
 const int ERROR_STATUS = -1;
 
 /**
@@ -147,7 +152,7 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 			SAFE_FD_SET(sockfd, &efds);
 			timeval ts;
 			ts.tv_sec = 0;
-			ts.tv_usec = 50000;
+			ts.tv_usec = timeout_ms * 1000;
 			int r = select(sockfd + 1, nullptr, &writefds, &efds, &ts);
 			if (r > 0 && SAFE_FD_ISSET(sockfd, &writefds) && !SAFE_FD_ISSET(sockfd, &efds)) {
 				rc = 0;
@@ -271,25 +276,21 @@ void ssl_client::connect()
 		if (status != 0)
 			throw dpp::connection_exception(std::string("getaddrinfo error: ") + gai_strerror(status));
 
-		/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 		int err = 0;
-		for (struct addrinfo *addr = addrs; addr != nullptr; addr = addr->ai_next) {
-			sfd = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-			if (sfd == ERROR_STATUS) {
-				err = errno;
-				continue;
-			} else if (connect_with_timeout(sfd, addr->ai_addr, (int)addr->ai_addrlen, 5000) == 0) {
-				break;
-			}
+		struct addrinfo *addr = addrs;
+		sfd = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+		if (sfd == ERROR_STATUS) {
 			err = errno;
-			shutdown(sfd, 2);
-		#ifdef _WIN32
+		} else if (connect_with_timeout(sfd, addr->ai_addr, (int)addr->ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
+#ifdef _WIN32
 			if (sfd >= 0 && sfd < FD_SETSIZE) {
 				closesocket(sfd);
 			}
-		#else
+#else
+			err = errno;
+			shutdown(sfd, 2);
+#endif
 			::close(sfd);
-		#endif
 			sfd = ERROR_STATUS;
 		}
 		freeaddrinfo(addrs);
@@ -330,8 +331,8 @@ void ssl_client::connect()
 #ifndef _WIN32
 			/* On Linux, we can set socket timeouts so that SSL_connect eventually gives up */
 			timeval tv;
-			tv.tv_sec = 5;
-			tv.tv_usec = 0;
+			tv.tv_sec = 0;
+			tv.tv_usec = SOCKET_OP_TIMEOUT * 1000;
 			setsockopt(sfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 			setsockopt(sfd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 #endif
