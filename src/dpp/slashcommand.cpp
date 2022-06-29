@@ -550,6 +550,7 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.application_id = snowflake_not_null(&j, "application_id");
 	i.channel_id = snowflake_not_null(&j, "channel_id");
 	i.guild_id = snowflake_not_null(&j, "guild_id");
+	i.app_permissions = snowflake_not_null(&j, "app_permissions");
 
 	if (j.find("message") != j.end()) {
 		const json& m = j["message"];
