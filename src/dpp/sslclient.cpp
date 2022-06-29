@@ -158,7 +158,7 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 	}
 #ifdef _WIN32
 	mode = 0;
-	int result = ioctlsocket(sockfd, FIONBIO, &mode);
+	result = ioctlsocket(sockfd, FIONBIO, &mode);
 	if (result != NO_ERROR)
 		throw dpp::connection_exception("Can't switch socket to blocking mode!");
 #else
@@ -463,7 +463,7 @@ void ssl_client::read_loop()
 				custom_readable_ready();
 			}
 			if (SAFE_FD_ISSET(sfd, &efds) || sfd == INVALID_SOCKET) {
-				throw new dpp::connection_exception(strerror(errno));
+				throw dpp::connection_exception(strerror(errno));
 			}
 
 			/* Now check if there's data to read */
