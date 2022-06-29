@@ -267,11 +267,11 @@ void ssl_client::connect()
 	if (make_new) {
 		/* Resolve hostname to IP */
 		int err = 0;
-		addrinfo addr = resolve_hostname(hostname, port);
-		sfd = ::socket(addr.ai_family, addr.ai_socktype, addr.ai_protocol);
+		const dns_cache_entry* addr = resolve_hostname(hostname, port);
+		sfd = ::socket(addr->addr.ai_family, addr->addr.ai_socktype, addr->addr.ai_protocol);
 		if (sfd == ERROR_STATUS) {
 			err = errno;
-		} else if (connect_with_timeout(sfd, addr.ai_addr, (int)addr.ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
+		} else if (connect_with_timeout(sfd, (sockaddr*)&addr->ai_addr, (int)addr->addr.ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
 #ifdef _WIN32
 			if (sfd >= 0 && sfd < FD_SETSIZE) {
 				closesocket(sfd);

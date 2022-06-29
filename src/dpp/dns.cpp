@@ -19,39 +19,81 @@
  *
  ************************************************************************************/
 
+#include <dpp/dns.h>
 #include <errno.h>
-#ifdef _WIN32
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <io.h>
-#else
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#endif
-#include <sys/types.h>
 #include <exception>
-#include <string>
+#include <shared_mutex>
 #include <dpp/exception.h>
 
 namespace dpp
 {
-	addrinfo resolve_hostname(const std::string& hostname, const std::string& port)
+	/* One hour in seconds */
+	constexpr time_t one_hour = 60 * 60;
+
+	/* Thread safety mutex for dns cache */
+	std::shared_mutex dns_cache_mutex;
+
+	/* Cache container */
+	dns_cache_t dns_cache;
+
+	const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::string& port)
 	{
-		addrinfo rv, hints, *addrs;
+		addrinfo hints, *addrs;
+		dns_cache_t::const_iterator iter;
+		time_t now = time(nullptr);
 		int error;
+
+		/* Thread safety scope */
+		{
+			/* Check cache for existing DNS record. This can use a shared lock. */
+			std::shared_lock dns_cache_lock(dns_cache_mutex);
+			iter = dns_cache.find(hostname);
+			if (iter != dns_cache.end() && now < iter->second->expire_timestamp) {
+				/* there is a cached entry that is still valid, return it */
+				return iter->second;
+			}
+		}
+		if (iter != dns_cache.end()) {
+			/* there is a cached entry, but it has expired,
+			 * delete and free it, and fall through to a new lookup.
+			 * We must use a unique lock here as we modify the cache.
+			 */
+			std::unique_lock dns_cache_lock(dns_cache_mutex);
+			delete iter->second;
+			dns_cache.erase(iter);
+		}
 		
+		/* The hints indicate what sort of DNS results we are interested in.
+		 * To change this to support IPv6, one change we need to make here is
+		 * to change AF_INET to AF_UNSPEC. Everything else should just work fine.
+		 */
 		memset(&hints, 0, sizeof(addrinfo));
-		hints.ai_family = AF_UNSPEC;
+		hints.ai_family = AF_INET; // IPv6 explicitly unsupported by Discord
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_protocol = IPPROTO_TCP;
 
 		if ((error = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs))) {
 			throw dpp::connection_exception(std::string("getaddrinfo error: ") + gai_strerror(error));
 		}
-		rv = *addrs;
-		freeaddrinfo(addrs);
-		return rv;
-	}
 
+		/* Thread safety scope */
+		{
+			/* Update cache, requires unique lock */
+			std::unique_lock dns_cache_lock(dns_cache_mutex);
+			dns_cache_entry* cache_entry = new dns_cache_entry();
+
+			/* The sockaddr struct contains a bunch of raw pointers that we
+			 * must copy to the cache, before freeing it with freeaddrinfo().
+			 * Icky icky C APIs.
+			 */
+			memcpy(&cache_entry->addr, addrs, sizeof(addrinfo));
+			memcpy(&cache_entry->ai_addr, addrs->ai_addr, addrs->ai_addrlen);
+			cache_entry->expire_timestamp = now + one_hour;
+			dns_cache[hostname] = cache_entry;
+
+			/* Now we're done with this horrible struct, free it and return */
+			freeaddrinfo(addrs);
+			return cache_entry;
+		}
+	}
 };
