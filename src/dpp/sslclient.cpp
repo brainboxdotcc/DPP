@@ -59,6 +59,7 @@
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 #include <dpp/utility.h>
+#include <dpp/dns.h>
 
 /* Maximum allowed time in milliseconds for socket read/write timeouts and connect() */
 #define SOCKET_OP_TIMEOUT 5000
@@ -265,23 +266,12 @@ void ssl_client::connect()
 
 	if (make_new) {
 		/* Resolve hostname to IP */
-		addrinfo hints, *addrs;
-		
-		memset(&hints, 0, sizeof(addrinfo));
-		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
-
-		int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
-		if (status != 0)
-			throw dpp::connection_exception(std::string("getaddrinfo error: ") + gai_strerror(status));
-
 		int err = 0;
-		struct addrinfo *addr = addrs;
-		sfd = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+		addrinfo addr = resolve_hostname(hostname, port);
+		sfd = ::socket(addr.ai_family, addr.ai_socktype, addr.ai_protocol);
 		if (sfd == ERROR_STATUS) {
 			err = errno;
-		} else if (connect_with_timeout(sfd, addr->ai_addr, (int)addr->ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
+		} else if (connect_with_timeout(sfd, addr.ai_addr, (int)addr.ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
 #ifdef _WIN32
 			if (sfd >= 0 && sfd < FD_SETSIZE) {
 				closesocket(sfd);
@@ -293,7 +283,6 @@ void ssl_client::connect()
 			::close(sfd);
 			sfd = ERROR_STATUS;
 		}
-		freeaddrinfo(addrs);
 
 		/* Check if none of the IPs yielded a valid connection */
 		if (sfd == ERROR_STATUS) {
@@ -336,8 +325,7 @@ void ssl_client::connect()
 			setsockopt(sfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 			setsockopt(sfd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 #endif
-			status = SSL_connect(ssl->ssl);
-			if (status != 1) {
+			if (SSL_connect(ssl->ssl) != 1) {
 				throw dpp::connection_exception("SSL_connect error");
 			}
 
