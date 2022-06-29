@@ -391,9 +391,9 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
         }
         if (j->contains("max_value")) {
             if ((*j)["max_value"].is_number_integer()) {
-                o.min_value.emplace<int64_t>(int64_not_null(j, "max_value"));
+                o.max_value.emplace<int64_t>(int64_not_null(j, "max_value"));
             } else if ((*j)["max_value"].is_number()) {
-                o.min_value.emplace<double>(double_not_null(j, "max_value"));
+                o.max_value.emplace<double>(double_not_null(j, "max_value"));
             }
         }
         o.autocomplete = bool_not_null(j, "autocomplete");
