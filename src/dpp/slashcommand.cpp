@@ -561,6 +561,7 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.token = string_not_null(&j, "token");
 	i.version = int8_not_null(&j, "version");
 	if (j.contains("member") && !j.at("member").is_null()) {
+		/* Command invoked from a guild */
 		if (j.at("member").contains("user") && !j.at("member").at("user").is_null()) {
 			j.at("member").at("user").get_to(i.usr);
 			/* Caching is on; store user if needed */
@@ -584,6 +585,11 @@ void from_json(const nlohmann::json& j, interaction& i) {
 				g->members[i.member.user_id] = i.member;
 			}
 		}
+	} else if (j.at("user") && !j.at("user").is_null()) {
+		/* Command invoked from a DM */
+		j.at("user").get_to(i.usr);
+		i.member.user_id = i.usr.id;
+		i.member.guild_id = 0;
 	}
 
 	if (j.contains("data") && !j.at("data").is_null()) {
