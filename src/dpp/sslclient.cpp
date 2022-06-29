@@ -260,10 +260,6 @@ void ssl_client::connect()
 
 	if (make_new) {
 		/* Resolve hostname to IP */
-		struct hostent *host;
-		if ((host = gethostbyname(hostname.c_str())) == nullptr)
-			throw dpp::connection_exception(std::string("Couldn't resolve hostname: ") + hostname);
-
 		addrinfo hints, *addrs;
 		
 		memset(&hints, 0, sizeof(addrinfo));
@@ -278,7 +274,7 @@ void ssl_client::connect()
 		/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 		int err = 0;
 		for (struct addrinfo *addr = addrs; addr != nullptr; addr = addr->ai_next) {
-			sfd = ::socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
+			sfd = ::socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
 			if (sfd == ERROR_STATUS) {
 				err = errno;
 				continue;
