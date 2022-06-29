@@ -158,7 +158,7 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 	}
 #ifdef _WIN32
 	mode = 0;
-	int result = ioctlsocket(sockfd, FIONBIO, &mode);
+	result = ioctlsocket(sockfd, FIONBIO, &mode);
 	if (result != NO_ERROR)
 		throw dpp::connection_exception("Can't switch socket to blocking mode!");
 #else
