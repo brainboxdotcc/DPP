@@ -467,7 +467,7 @@ void ssl_client::read_loop()
 				custom_readable_ready();
 			}
 			if (SAFE_FD_ISSET(sfd, &efds) || sfd == INVALID_SOCKET) {
-				throw new dpp::connection_exception(strerror(errno));
+				throw dpp::connection_exception(strerror(errno));
 			}
 
 			/* Now check if there's data to read */
