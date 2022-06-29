@@ -69,7 +69,7 @@ namespace dpp {
 	 * 
 	 * @param hostname Hostname to resolve
 	 * @param port A port number or named service, e.g. "80"
-	 * @return addrinfo First IP address associated with the hostname DNS record
+	 * @return dns_cache_entry* First IP address associated with the hostname DNS record
 	 * @throw dpp::connection_exception On failure to resolve hostname
 	 */
 	const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::string& port);
