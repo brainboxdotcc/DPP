@@ -42,7 +42,7 @@ void cluster::delete_webhook_message(const class webhook &wh, snowflake message_
 
 
 void cluster::delete_webhook_with_token(snowflake webhook_id, const std::string &token, command_completion_event_t callback) {
-	rest_request<confirmation>(this, API_PATH "/webhooks", std::to_string(webhook_id), utility::url_encode(token), m_get, "", callback);
+	rest_request<confirmation>(this, API_PATH "/webhooks", std::to_string(webhook_id), utility::url_encode(token), m_delete, "", callback);
 }
 
 
