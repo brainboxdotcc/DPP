@@ -131,7 +131,6 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 	if (fcntl(sockfd, F_SETFL, ofcmode)) {
 		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
 	}
-#endif
 	int rc = (::connect(sockfd, addr, addrlen));
 	if (rc == -1 && errno != EWOULDBLOCK && errno != EINPROGRESS) {
 		throw dpp::connection_exception(strerror(errno));
@@ -159,14 +158,13 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 			}
 		} while (rc == -1);
 	}
-#ifndef _WIN32
 	ofcmode = fcntl(sockfd, F_GETFL, 0);
 	ofcmode &= ~O_NDELAY;
 	if (fcntl(sockfd, F_SETFL, ofcmode)) {
 		throw dpp::connection_exception("Can't switch socket to blocking mode!");
 	}
-#endif
 	return rc;
+#endif
 }
 
 ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
