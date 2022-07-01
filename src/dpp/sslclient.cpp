@@ -123,10 +123,7 @@ const int ERROR_STATUS = -1;
  */
 int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
 #ifdef _WIN32
-	u_long mode = 1;
-	int result = ioctlsocket(sockfd, FIONBIO, &mode);
-	if (result != NO_ERROR)
-		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+	return (::connect(sockfd, addr, addrlen));
 #else
 	int ofcmode;
 	ofcmode = fcntl(sockfd, F_GETFL, 0);
@@ -162,12 +159,7 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 			}
 		} while (rc == -1);
 	}
-#ifdef _WIN32
-	mode = 0;
-	result = ioctlsocket(sockfd, FIONBIO, &mode);
-	if (result != NO_ERROR)
-		throw dpp::connection_exception("Can't switch socket to blocking mode!");
-#else
+#ifndef _WIN32
 	ofcmode = fcntl(sockfd, F_GETFL, 0);
 	ofcmode &= ~O_NDELAY;
 	if (fcntl(sockfd, F_SETFL, ofcmode)) {
