@@ -594,10 +594,10 @@ To add a slash command you should use the dpp::cluster::global_command_create me
 or dpp::cluster::guild_command_create to create a local command (available only to one guild).
 
 When a user issues these commands the reply will arrive via the `on_slashcommand` event which you can hook, and take action
-when you see your commands. It is possible to reply to an interaction by using either the dpp::slashcommand_t::reply method,
+when you see your commands. It is possible to reply to an interaction by using either the dpp::interaction_create_t::reply method,
 or by manually instantiating an object of type dpp::interaction_response and attaching a dpp::message object to it.
 
-dpp::slashcommand_t::reply has two overloaded versions of the method, one of which accepts simple std::string replies, for
+dpp::interaction_create_t::reply has two overloaded versions of the method, one of which accepts simple std::string replies, for
 basic text-only messages (if your message is 'ephemeral' you must use this) and one which accepts a dpp::message for more advanced
 replies. Please note that at present, Discord only supports a small subset of message and embed features within an interaction
 response object.
