@@ -409,7 +409,6 @@ public:
 	 * Does not return reliable information for voice channels, use
 	 * dpp::channel::get_voice_members() instead for this.
 	 * @return A map of guild members keyed by user id.
-	 * @note If the guild this channel belongs to is not in the cache, the function will always return 0.
 	 */
 	std::map<snowflake, class guild_member*> get_members();
 
