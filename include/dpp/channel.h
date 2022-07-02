@@ -445,7 +445,7 @@ public:
 	bool is_nsfw() const;
 
 	/**
-	 * @brief Returns true if the permissions are to be synched with the category it is in.
+	 * @brief Returns true if the permissions are to be synced with the category it is in.
 	 * Used only and set manually when using the reorder channels method.
 	 * 
 	 * @return true if keeping permissions

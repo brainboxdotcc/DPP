@@ -612,7 +612,7 @@ int main()
 {
 	dpp::cluster bot("token");
 
-   bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
@@ -732,7 +732,7 @@ int main() {
 
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
-        bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler to look for a command called !button */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {

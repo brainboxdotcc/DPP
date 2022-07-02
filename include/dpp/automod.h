@@ -148,7 +148,7 @@ struct DPP_EXPORT automod_action : public json_interface<automod_action> {
 	snowflake channel_id;
 
 	/**
-	 * @brief Silence duration in seconds, for amod_action_timeout
+	 * @brief Silence duration in seconds (Maximum of 2419200), for amod_action_timeout
 	 * 
 	 */
 	int32_t duration_seconds;
@@ -180,7 +180,7 @@ struct DPP_EXPORT automod_action : public json_interface<automod_action> {
 };
 
 /**
- * @brief Represnets an automod rule
+ * @brief Represents an automod rule
  */
 class DPP_EXPORT automod_rule : public managed, public json_interface<automod_rule> {
 public:
