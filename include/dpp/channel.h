@@ -409,6 +409,7 @@ public:
 	 * Does not return reliable information for voice channels, use
 	 * dpp::channel::get_voice_members() instead for this.
 	 * @return A map of guild members keyed by user id.
+	 * @note If the guild this channel belongs to is not in the cache, the function will always return 0.
 	 */
 	std::map<snowflake, class guild_member*> get_members();
 
@@ -444,7 +445,7 @@ public:
 	bool is_nsfw() const;
 
 	/**
-	 * @brief Returns true if the permissions are to be synched with the category it is in.
+	 * @brief Returns true if the permissions are to be synced with the category it is in.
 	 * Used only and set manually when using the reorder channels method.
 	 * 
 	 * @return true if keeping permissions
