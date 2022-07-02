@@ -342,3 +342,26 @@ include("cmake/CPackSetup.cmake")						# Setup information for packaging and dis
 
 # CPack initialization for distribution
 include(CPack)
+
+set(INCLUDE_INSTALL_DIR include/ )
+set(LIB_INSTALL_DIR lib/)
+set(SYSCONFIG_INSTALL_DIR etc/DPP/)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(dpp.pc.in
+	${CMAKE_CURRENT_BINARY_DIR}/DPPConfig.cmake
+	INSTALL_DESTINATION ${LIB_INSTALL_DIR}/DPP/cmake
+	PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR
+)
+
+write_basic_package_version_file(
+	${CMAKE_CURRENT_BINARY_DIR}/DPPConfigVersion.cmake
+	VERSION ${DPP_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/DPPConfig.cmake
+	${CMAKE_CURRENT_BINARY_DIR}/DPPConfigVersion.cmake
+	DESTINATION ${LIB_INSTALL_DIR}/DPP/cmake
+)
