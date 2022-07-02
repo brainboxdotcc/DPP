@@ -142,4 +142,10 @@ event_decl(guild_scheduled_event_delete,GUILD_SCHEDULED_EVENT_DELETE);
 event_decl(guild_scheduled_event_user_add,GUILD_SCHEDULED_EVENT_USER_ADD);
 event_decl(guild_scheduled_event_user_remove,GUILD_SCHEDULED_EVENT_USER_REMOVE);
 
+/* Auto moderation */
+event_decl(automod_rule_create, AUTO_MODERATION_RULE_CREATE);
+event_decl(automod_rule_update, AUTO_MODERATION_RULE_UPDATE);
+event_decl(automod_rule_delete, AUTO_MODERATION_RULE_DELETE);
+event_decl(automod_rule_execute, AUTO_MODERATION_ACTION_EXECUTION);
+
 }};

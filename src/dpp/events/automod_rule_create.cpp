@@ -18,14 +18,31 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#pragma once
+#include <dpp/automod.h>
+#include <dpp/cluster.h>
+#include <dpp/stringops.h>
+#include <dpp/nlohmann/json.hpp>
 
-#if !defined(DPP_VERSION_LONG)
-#define DPP_VERSION_LONG 0x00100013
-#define DPP_VERSION_SHORT 100013
-#define DPP_VERSION_TEXT "D++ 10.0.13 (30-Jun-2022)"
+using json = nlohmann::json;
 
-#define DPP_VERSION_MAJOR ((DPP_VERSION_LONG & 0x00ff0000) >> 16)
-#define DPP_VERSION_MINOR ((DPP_VERSION_LONG & 0x0000ff00) >> 8)
-#define DPP_VERSION_PATCH (DPP_VERSION_LONG & 0x000000ff)
-#endif
+namespace dpp { namespace events {
+
+using namespace dpp;
+
+/**
+ * @brief Handle event
+ * 
+ * @param client Websocket client (current shard)
+ * @param j JSON data for the event
+ * @param raw Raw JSON string
+ */
+void automod_rule_create::handle(discord_client* client, json &j, const std::string &raw) {
+	if (!client->creator->on_automod_rule_create.empty()) {
+		json& d = j["d"];
+		automod_rule_create_t arc(client, raw);
+		arc.created = automod_rule().fill_from_json(&d);
+		client->creator->on_automod_rule_create.call(arc);
+	}
+}
+
+}};

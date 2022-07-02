@@ -31,6 +31,7 @@
 #include <dpp/invite.h>
 #include <dpp/emoji.h>
 #include <dpp/ban.h>
+#include <dpp/automod.h>
 #include <dpp/webhook.h>
 #include <dpp/presence.h>
 #include <dpp/message.h>
@@ -229,6 +230,70 @@ struct DPP_EXPORT guild_scheduled_event_delete_t : public event_dispatch_t {
 	 * @brief deleted event
 	 */
 	scheduled_event deleted;
+};
+
+/** @brief Create automod rule */
+struct DPP_EXPORT automod_rule_create_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	automod_rule_create_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief updated event
+	 */
+	automod_rule created;
+};
+
+/** @brief Update automod rule */
+struct DPP_EXPORT automod_rule_update_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	automod_rule_update_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief updated event
+	 */
+	automod_rule updated;
+};
+
+/** @brief Delete automod rule */
+struct DPP_EXPORT automod_rule_delete_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	automod_rule_delete_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief updated event
+	 */
+	automod_rule deleted;
+};
+
+/** @brief Execute/trigger automod rule */
+struct DPP_EXPORT automod_rule_execute_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on. CAN BE NULL
+	 * for log events originating from the cluster object
+	 * @param raw Raw event text as JSON
+	 */
+	automod_rule_execute_t(class discord_client* client, const std::string& raw);
+
+	snowflake		guild_id;			//!< the id of the guild in which action was executed
+	automod_action		action;				//!< the action which was executed
+	snowflake		rule_id;			//!< the id of the rule which action belongs to
+	automod_trigger_type	rule_trigger_type;		//!< the trigger type of rule which was triggered
+	snowflake		user_id;			//!< the id of the user which generated the content which triggered the rule
+	snowflake		channel_id;			//!< Optional: the id of the channel in which user content was posted
+	snowflake		message_id;			//!< Optional: the id of any user message which content belongs to
+	snowflake		alert_system_message_id;	//!< Optional: the id of any system auto moderation messages posted as a result of this action
+	std::string		content;			//!< the user generated text content
+	std::string		matched_keyword;		//!< the word or phrase configured in the rule that triggered the rule (may be empty)
+	std::string		matched_content;		//!< the substring in content that triggered the rule (may be empty)
 };
 
 

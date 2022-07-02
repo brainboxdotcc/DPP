@@ -48,6 +48,8 @@ project(libdpp VERSION ${DPP_VERSION} LANGUAGES CXX)
 check_cxx_symbol_exists(prctl "sys/prctl.h" HAVE_PRCTL)
 check_cxx_symbol_exists(pthread_setname_np "pthread.h" HAVE_PTHREAD_SETNAME_NP)
 
+add_compile_definitions(DPP_OS=${CMAKE_SYSTEM_NAME})
+
 if(WIN32 AND NOT MINGW)
 	if (NOT WINDOWS_32_BIT)
 		message("-- Building for windows with precompiled packaged dependencies")
@@ -340,4 +342,3 @@ include("cmake/CPackSetup.cmake")						# Setup information for packaging and dis
 
 # CPack initialization for distribution
 include(CPack)
-

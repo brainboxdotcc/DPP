@@ -76,7 +76,9 @@
 		"followup",
 		"gifv",
 		"ctls",
-		"ctest"
+		"ctest",
+		"automod",
+		"amod"
 	],
 	"flagWords": [
 		"hte"

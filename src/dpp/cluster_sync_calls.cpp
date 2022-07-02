@@ -124,6 +124,26 @@ message cluster::interaction_followup_get_sync(const std::string &token, snowfla
 	return dpp::sync<message>(this, &cluster::interaction_followup_get, token, message_id);
 }
 
+automod_rule_map cluster::automod_rules_get_sync(snowflake guild_id) {
+	return dpp::sync<automod_rule_map>(this, &cluster::automod_rules_get, guild_id);
+}
+
+automod_rule cluster::automod_rule_get_sync(snowflake guild_id, snowflake rule_id) {
+	return dpp::sync<automod_rule>(this, &cluster::automod_rule_get, guild_id, rule_id);
+}
+
+automod_rule cluster::automod_rule_create_sync(snowflake guild_id, const automod_rule& r) {
+	return dpp::sync<automod_rule>(this, &cluster::automod_rule_create, guild_id, r);
+}
+
+automod_rule cluster::automod_rule_edit_sync(snowflake guild_id, const automod_rule& r) {
+	return dpp::sync<automod_rule>(this, &cluster::automod_rule_edit, guild_id, r);
+}
+
+confirmation cluster::automod_rule_delete_sync(snowflake guild_id, snowflake rule_id) {
+	return dpp::sync<confirmation>(this, &cluster::automod_rule_delete, guild_id, rule_id);
+}
+
 channel cluster::channel_create_sync(const class channel &c) {
 	return dpp::sync<channel>(this, &cluster::channel_create, c);
 }

@@ -66,7 +66,7 @@ webhook& webhook::fill_from_json(nlohmann::json* j) {
 		user_id = snowflake_not_null(&user, "id");
 	}
 	name = string_not_null(j, "name");
-	avatar = string_not_null(j, "name");
+	avatar = string_not_null(j, "avatar");
 	token = string_not_null(j, "token");
 	application_id = snowflake_not_null(j, "application_id");
 

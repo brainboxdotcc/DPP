@@ -234,7 +234,7 @@ void in_thread::in_loop(uint32_t index)
 	while (!terminating) {
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
-		in_ready.wait_for(lock, std::chrono::milliseconds(100));
+		in_ready.wait_for(lock, std::chrono::seconds(1));
 		/* New request to be sent! */
 
 		if (!requests->globally_ratelimited) {
@@ -340,7 +340,7 @@ void request_queue::out_loop()
 
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
-		out_ready.wait_for(lock, std::chrono::milliseconds(50));
+		out_ready.wait_for(lock, std::chrono::seconds(1));
 		time_t now = time(nullptr);
 
 		/* A request has been completed! */

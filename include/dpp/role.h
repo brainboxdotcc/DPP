@@ -220,7 +220,7 @@ public:
 	 */
 	bool has_create_instant_invite() const;
 	/**
-	 * @brief True if has create instant invite permission
+	 * @brief True if has the kick members permission.
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the kick members permission or is administrator.
