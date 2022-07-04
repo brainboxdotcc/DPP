@@ -95,7 +95,7 @@ namespace dpp {
 		 * @param tf Format of timestamp using dpp::utility::time_format
 		 * @return std::string The formatted timestamp
 		 */
-		std::string DPP_EXPORT timestamp(time_t ts, time_format tf);
+		std::string DPP_EXPORT timestamp(time_t ts, time_format tf = tf_short_datetime);
 
 		/**
 		 * @brief Returns current date and time
