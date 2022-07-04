@@ -468,7 +468,7 @@ struct DPP_EXPORT command_resolved {
 	/**
 	 * @brief Resolved total guild member permissions in the channel, including overwrites
 	 */
-	std::map<dpp::snowflake, uint64_t> member_permissions;
+	std::map<dpp::snowflake, permission> member_permissions;
 	/**
 	 * @brief Resolved roles
 	 */
@@ -625,6 +625,7 @@ public:
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
 	snowflake message_id;					    //!< Originating message id for context menu actions
+	permission app_permissions;				    //!< Permissions of the bot in the channel/guild where this command was issued
 	message msg;						    //!< Originating message for context menu actions
 	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions
 	user usr;                                                   //!< Optional: user object for the invoking user, if invoked in a DM
@@ -814,8 +815,7 @@ public:
 	snowflake application_id;
 
 	/**
-	 * @brief Context menu type, defaults to none
-	 * 
+	 * @brief Context menu type, defaults to dpp::ctxm_chat_input
 	 */
 	slashcommand_contextmenu_type type;
 
@@ -843,6 +843,7 @@ public:
 
 	/**
 	 * @brief command permissions
+	 * @deprecated Discord discourage use of this value and instead you should use default_member_permissions.
 	 */
 	std::vector<command_permission> permissions;
 
@@ -864,8 +865,9 @@ public:
 	/**
 	 * @brief The default permissions of this command on a guild.
 	 * D++ defaults this to p_use_application_commands.
+	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 */
-	uint64_t default_member_permissions;
+	permission default_member_permissions;
 
 	/**
 	 * @brief True if this command should be allowed in a DM
@@ -912,10 +914,11 @@ public:
 	slashcommand& set_dm_permission(bool dm);
 
 	/**
-	 * @brief Set the default permissions of the slash command,
-	 * this is a permission bitmask.
+	 * @brief Set the default permissions of the slash command
 	 * 
-	 * @param defaults default permissions to set
+	 * @param defaults default permissions to set. This is a permission bitmask
+	 * @note You can set it to 0 to disable the command for everyone except admins by default
+	 *
 	 * @return slashcommand& reference to self
 	 */
 	slashcommand& set_default_permissions(uint64_t defaults);
@@ -932,7 +935,7 @@ public:
 	 * @brief Set the type of the slash command (only for context menu entries)
 	 * 
 	 * @param _type Type of context menu entry this command represents
-	 * @note If the type is dpp::slashcommand_contextmenu_type::ctxm_chat_input, the command name will be set to lowercase.
+	 * @note If the type is dpp::ctxm_chat_input, the command name will be set to lowercase.
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_type(slashcommand_contextmenu_type _type);
@@ -943,7 +946,7 @@ public:
 	 * @param n name of command
 	 * @note The maximum length of a command name is 32 UTF-8 codepoints.
 	 * If your command name is longer than this, it will be truncated.
-	 * The command name will be set to lowercase on the default dpp::slashcommand_contextmenu_type::ctxm_chat_input type.
+	 * The command name will be set to lowercase when the type is the default dpp::ctxm_chat_input.
 	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_name(const std::string &n);
@@ -971,6 +974,7 @@ public:
 	 *
 	 * @param p permission to add
 	 * @return slashcommand& reference to self for chaining of calls
+	 * @deprecated Discord discourage use of this value and instead you should use default_member_permissions.
 	 */
 	slashcommand& add_permission(const command_permission& p);
 
@@ -980,6 +984,7 @@ public:
 	 *        dpp::guild_command_edit_permissions
 	 *
 	 * @return slashcommand& reference to self for chaining of calls
+	 * @deprecated Discord discourage use of this value and instead you should use default_member_permissions.
 	 */
 	slashcommand& disable_default_permissions();
 

@@ -25,7 +25,11 @@ int main()
 {
 	std::string token(get_token());
 
-	std::cout << "Running unit tests. Guild ID: " << TEST_GUILD_ID << " Text Channel ID: " << TEST_TEXT_CHANNEL_ID << " VC ID: " << TEST_VC_ID << " User ID: " << TEST_USER_ID << " Event ID: " << TEST_EVENT_ID << "\n";
+	if (offline) {
+		std::cout << "Running offline unit tests only.\n";
+	} else {
+		std::cout << "Running offline and online unit tests. Guild ID: " << TEST_GUILD_ID << " Text Channel ID: " << TEST_TEXT_CHANNEL_ID << " VC ID: " << TEST_VC_ID << " User ID: " << TEST_USER_ID << " Event ID: " << TEST_EVENT_ID << "\n";
+	}
 
 	std::string test_to_escape = "*** _This is a test_ ***\n```cpp\n\
 int main() {\n\
@@ -95,23 +99,25 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("HOSTINFO", hci_test);
 
 	set_test("HTTPS", false);
-	dpp::multipart_content multipart = dpp::https_client::build_multipart(
-		"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
-	);
-	try {
-		dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
-			{
-				{"Content-Type", multipart.mimetype},
-				{"Authorization", "Bot " + token}
-			}
+	if (!offline) {
+		dpp::multipart_content multipart = dpp::https_client::build_multipart(
+			"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
 		);
-		std::string hdr1 = c.get_header("server");
-		std::string content1 = c.get_content();
-		set_test("HTTPS", hdr1 == "cloudflare" && c.get_status() == 200);
-	}
-	catch (const dpp::exception& e) {
-		std::cout << e.what() << "\n";
-		set_test("HTTPS", false);
+		try {
+			dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
+				{
+					{"Content-Type", multipart.mimetype},
+					{"Authorization", "Bot " + token}
+				}
+			);
+			std::string hdr1 = c.get_header("server");
+			std::string content1 = c.get_content();
+			set_test("HTTPS", hdr1 == "cloudflare" && c.get_status() == 200);
+		}
+		catch (const dpp::exception& e) {
+			std::cout << e.what() << "\n";
+			set_test("HTTPS", false);
+		}
 	}
 
 	set_test("HTTP", false);
@@ -174,6 +180,33 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", (success_double && success_int && success_int2 && success_bool && success_snowflake && success_string));
 	}
 
+	{
+		set_test("PERMISSION_CLASS", false);
+		bool success = false;
+		auto p = dpp::permission();
+		p = 16;
+		success = p == 16;
+		p |= 4;
+		success = p == 20 && success;
+		p <<= 8; // left shift
+		success = p == 5120 && success;
+		auto s = std::to_string(p);
+		success = s == "5120" && success;
+		json j;
+		j["value"] = p;
+		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
+		p.set(dpp::p_administrator, dpp::p_ban_members);
+		success = p.has(dpp::p_administrator) && success;
+		success = p.has(dpp::p_administrator) && p.has(dpp::p_ban_members) && success;
+		success = p.has(dpp::p_administrator, dpp::p_ban_members) && success;
+		success = p.has(dpp::p_administrator | dpp::p_ban_members) && success;
+
+		p.set(dpp::p_administrator);
+		success = ! p.has(dpp::p_administrator, dpp::p_ban_members) && success; // must return false because they're not both set
+		success = ! p.has(dpp::p_administrator | dpp::p_ban_members) && success;
+		set_test("PERMISSION_CLASS", success);
+	}
+
 	set_test("TIMESTRINGTOTIMESTAMP", false);
 	json tj;
 	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
@@ -196,7 +229,11 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("ICONHASH", false);
 
 		set_test("MSGCOLLECT", false);
-		message_collector collect_messages(&bot, 25);
+		if (!offline) {
+			/* Intentional leak: freed on unit test end */
+			[[maybe_unused]]
+			message_collector* collect_messages = new message_collector(&bot, 25);
+		}
 
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
@@ -318,8 +355,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		set_test("SYNC", false);
-		dpp::message m = dpp::sync<dpp::message>(&bot, &dpp::cluster::message_create, dpp::message(TEST_TEXT_CHANNEL_ID, "TEST"));
-		set_test("SYNC", m.content == "TEST");
+		if (!offline) {
+			dpp::message m = dpp::sync<dpp::message>(&bot, &dpp::cluster::message_create, dpp::message(TEST_TEXT_CHANNEL_ID, "TEST"));
+			set_test("SYNC", m.content == "TEST");
+		}
 
 		bot.on_guild_create([&](const dpp::guild_create_t & event) {
 			if (event.created->id == TEST_GUILD_ID) {
@@ -415,8 +454,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test("BOTSTART", false);
 		try {
-			bot.start(true);
-			set_test("BOTSTART", true);
+			if (!offline) {
+				bot.start(true);
+				set_test("BOTSTART", true);
+			}
 		}
 		catch (const std::exception &) {
 			set_test("BOTSTART", false);
@@ -482,19 +523,24 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("TIMERSTOP", bot.stop_timer(th));
 
 		set_test("USERCACHE", false);
-		dpp::user* u = dpp::find_user(TEST_USER_ID);
-		set_test("USERCACHE", u);
+		if (!offline) {
+			dpp::user* u = dpp::find_user(TEST_USER_ID);
+			set_test("USERCACHE", u);
+		}
 		set_test("CHANNELCACHE", false);
 		set_test("CHANNELTYPES", false);
-		dpp::channel* c = dpp::find_channel(TEST_TEXT_CHANNEL_ID);
-		dpp::channel* c2 = dpp::find_channel(TEST_VC_ID);
-		set_test("CHANNELCACHE", c && c2);
-		set_test("CHANNELTYPES", c && c->is_text_channel() && !c->is_voice_channel() && c2 && c2->is_voice_channel() && !c2->is_text_channel());
+		if (!offline) {
+			dpp::channel* c = dpp::find_channel(TEST_TEXT_CHANNEL_ID);
+			dpp::channel* c2 = dpp::find_channel(TEST_VC_ID);
+			set_test("CHANNELCACHE", c && c2);
+			set_test("CHANNELTYPES", c && c->is_text_channel() && !c->is_voice_channel() && c2 && c2->is_voice_channel() && !c2->is_text_channel());
+		}
 
 		wait_for_tests();
 
 	}
-	catch (const std::exception &) {
+	catch (const std::exception &e) {
+		std::cout << e.what() << "\n";
 		set_test("CLUSTER", false);
 	}
 

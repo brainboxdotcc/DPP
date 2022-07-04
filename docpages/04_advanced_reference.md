@@ -28,7 +28,84 @@ Guilds are what servers are known as to the API. There can be up to **2500** of 
 
 \page thread-model Thread Model
 
-\image html DPP_Architecture.svg
+\dot
+digraph "Thread Model" {
+ 	graph [ranksep=1];
+    "Discord Events" -> "Your Program"
+
+    "Your Program" [style=filled, color=yellow, shape=rect]
+    "Cluster" [style=filled, color=yellow, shape=rect]
+
+	subgraph cluster_4 {
+		style=filled;
+		color=lightgrey;
+		node [style=filled,color=lightblue]
+		"Your Program"
+		"Cluster"
+		label = "User Code";
+	}
+
+	subgraph cluster_0 {
+		style=filled;
+		color=lightgrey;
+		node [style=filled,color=lightblue]
+		"Shard 1" [style=filled, color=lightblue]
+		"Shard 2"
+		"Shard 3..."
+		label = "Shards (Each is a thread, one per 2500 discord guilds)";
+	}
+
+	subgraph cluster_1 {
+		style=filled
+		color=lightgrey
+		node [style=filled,color=lightblue]
+        "REST Requests"
+		"Request In Queue 1"
+		"Request In Queue 2"
+		"Request In Queue 3..."
+        "Request Out Queue"
+		label = "REST Requests (Each in queue, and the out queue, are threads)"
+	}
+
+	subgraph cluster_3 {
+		style=filled
+		color=lightgrey
+		node [style=filled,color=lightblue]
+        "Discord Events" [style=filled,color=lightblue]
+		"User Callback Functions"
+		label = "Events and Callbacks"
+	}
+
+    "Cluster" [shape=rect]
+    "REST Requests" [shape=rect]
+    "Request In Queue 1" [shape=rect]
+    "Request In Queue 2" [shape=rect]
+    "Request In Queue 3..." [shape=rect]
+    "Shard 1" [shape=rect]
+    "Shard 2" [shape=rect]
+    "Shard 3..." [shape=rect]
+    "Request Out Queue" [shape=rect]
+    "Discord Events" [shape=rect]
+    "User Callback Functions" [shape=rect]
+
+    "Cluster" -> "REST Requests"
+    "Shard 1" -> "Discord Events"
+    "Shard 2" -> "Discord Events"
+    "Shard 3..." -> "Discord Events"
+    "Your Program" -> "Cluster"
+    "Cluster" -> "Shard 1"
+    "Cluster" -> "Shard 2"
+    "Cluster" -> "Shard 3..."
+    "REST Requests" -> "Request In Queue 1"
+    "REST Requests" -> "Request In Queue 2"
+    "REST Requests" -> "Request In Queue 3..."
+    "Request In Queue 1" -> "Request Out Queue"
+    "Request In Queue 2" -> "Request Out Queue"
+    "Request In Queue 3..." -> "Request Out Queue"
+    "Request Out Queue" -> "User Callback Functions"
+    "User Callback Functions" -> "Your Program"
+}
+\enddot
 
 \page coding-standards Coding Style Standards
 
@@ -162,7 +239,7 @@ Before running test cases, create a test server for your test bot. You should:
 * Create at least one voice channel
 * Create at least one text channel
 
-Then, set the following variables to the appropriate values. (This uses a fake token, don't bother trying to use it.)
+Then, set the following variables to the appropriate values. (Below is a fake token, don't bother trying to use it)
 
     export DPP_UNIT_TEST_TOKEN="ODI2ZSQ4CFYyMzgxUzkzzACy.HPL5PA.9qKR4uh8po63-pjYVrPAvQQO4ln"
     export TEST_GUILD_ID="907951970017480704"
@@ -171,7 +248,9 @@ Then, set the following variables to the appropriate values. (This uses a fake t
     export TEST_USER_ID="826535422381391913"
     export TEST_EVENT_ID="909928577951203360"
 
-Then, after cloning and building DPP, run `./build/test` for unit test cases. 
+Then, after cloning and building DPP, run `cd build && ctest -VV` for unit test cases. 
+
+If you do not specify the `DPP_UNIT_TEST_TOKEN` environment variable, a subset of the tests will run which do not require discord connectivity.
 
 \page lambdas-and-locals Ownership of local variables and safely transferring into a lambda
 

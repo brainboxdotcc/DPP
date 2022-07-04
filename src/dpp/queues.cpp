@@ -78,7 +78,7 @@ void populate_result(const std::string &url, cluster* owner, http_request_comple
 	rv.ratelimit_reset_after = from_string<uint64_t>(res.get_header("x-ratelimit-reset-after"));
 	rv.ratelimit_bucket = res.get_header("x-ratelimit-bucket");
 	rv.ratelimit_global = (res.get_header("x-ratelimit-global") == "true");
-	owner->rest_ping = rv.latency;
+	owner->rest_ping = rv.latency;      
 	if (res.get_header("x-ratelimit-retry-after") != "") {
 		rv.ratelimit_retry_after = from_string<uint64_t>(res.get_header("x-ratelimit-retry-after"));
 	}
@@ -234,7 +234,7 @@ void in_thread::in_loop(uint32_t index)
 	while (!terminating) {
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
-		in_ready.wait_for(lock, std::chrono::milliseconds(100));
+		in_ready.wait_for(lock, std::chrono::seconds(1));
 		/* New request to be sent! */
 
 		if (!requests->globally_ratelimited) {
@@ -340,7 +340,7 @@ void request_queue::out_loop()
 
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
-		out_ready.wait_for(lock, std::chrono::milliseconds(50));
+		out_ready.wait_for(lock, std::chrono::seconds(1));
 		time_t now = time(nullptr);
 
 		/* A request has been completed! */

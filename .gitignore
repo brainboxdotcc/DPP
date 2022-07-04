@@ -10,3 +10,6 @@ src/build
 *.autosave
 .misspell-fixer.ignore
 core
+compile_commands.json
+tags
+.cache

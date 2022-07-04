@@ -64,8 +64,17 @@ enum intents {
 	i_message_content		= (1 << 15),
 	/// Scheduled events
 	i_guild_scheduled_events	= (1 << 16),
+	/// Auto moderation configuration
+	i_auto_moderation_configuration	= (1 << 20),
+	/// Auto moderation configuration
+	i_auto_moderation_execution	= (1 << 21),
 	/// Default D++ intents (all non-privileged intents)
-	i_default_intents		= dpp::i_guilds | dpp::i_guild_bans | dpp::i_guild_emojis | dpp::i_guild_integrations | dpp::i_guild_webhooks | dpp::i_guild_invites | dpp::i_guild_voice_states | dpp::i_guild_messages | dpp::i_guild_message_reactions | dpp::i_guild_message_typing | dpp::i_direct_messages | dpp::i_direct_message_typing | dpp::i_direct_message_reactions | dpp::i_guild_scheduled_events,
+	i_default_intents		= dpp::i_guilds | dpp::i_guild_bans | dpp::i_guild_emojis | dpp::i_guild_integrations |
+					dpp::i_guild_webhooks | dpp::i_guild_invites | dpp::i_guild_voice_states |
+					dpp::i_guild_messages | dpp::i_guild_message_reactions | dpp::i_guild_message_typing |
+					dpp::i_direct_messages | dpp::i_direct_message_typing | dpp::i_direct_message_reactions |
+					dpp::i_guild_scheduled_events | dpp::i_auto_moderation_configuration |
+					dpp::i_auto_moderation_execution, 
 	/// Privileged intents requiring ID
 	i_privileged_intents		= dpp::i_guild_members | dpp::i_guild_presences | dpp::i_message_content,
 	/// Every single intent

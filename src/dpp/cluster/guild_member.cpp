@@ -49,7 +49,11 @@ void cluster::guild_get_member(snowflake guild_id, snowflake user_id, command_co
 
 
 void cluster::guild_get_members(snowflake guild_id, uint16_t limit, snowflake after, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), fmt::format("members?limit={}&after={}", limit, after), m_get, "", [this, callback, guild_id](json &j, const http_request_completion_t& http) {
+	std::string parameters = utility::make_url_parameters({
+		{"limit", std::to_string(limit)},
+		{"after", std::to_string(after)},
+	});
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members" + parameters, m_get, "", [this, callback, guild_id](json &j, const http_request_completion_t& http) {
 		guild_member_map guild_members;
 		confirmation_callback_t e(this, confirmation(), http);
 		if (!e.is_error()) {
@@ -99,6 +103,11 @@ void cluster::guild_member_delete_role(snowflake guild_id, snowflake user_id, sn
 }
 
 
+void cluster::guild_member_remove_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback) {
+	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id) + "/roles/" + std::to_string(role_id), m_delete, "", callback);
+}
+
+
 void cluster::guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback) {
     json j;
     j["channel_id"] = channel_id;
@@ -112,7 +121,11 @@ void cluster::guild_member_move(const snowflake channel_id, const snowflake guil
 
 
 void cluster::guild_search_members(snowflake guild_id, const std::string& query, uint16_t limit, command_completion_event_t callback) {
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), fmt::format("members/search?query={}&limit={}", utility::url_encode(query), limit), m_get, "", [this, callback, guild_id] (json &j, const http_request_completion_t& http) {
+	std::string parameters = utility::make_url_parameters({
+		{"query", query},
+		{"limit", std::to_string(limit)},
+	});
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/search" + parameters, m_get, "", [this, callback, guild_id] (json &j, const http_request_completion_t& http) {
 		guild_member_map guild_members;
 		confirmation_callback_t e(this, confirmation(), http);
 		if (!e.is_error()) {

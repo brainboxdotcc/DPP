@@ -51,7 +51,7 @@ jobs:
         run: cd build && ninja 
 
       - name: Run unit tests
-        run: cd build && ./test
+        run: cd build && ctest -VV
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
           TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
@@ -82,6 +82,8 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
+          - { arch: 'amd64', os: ubuntu-latest, cpp-version: g++-11 }
+          - { arch: 'amd64', os: ubuntu-latest, cpp-version: g++-10 }
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:

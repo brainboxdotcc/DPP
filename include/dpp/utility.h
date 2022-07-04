@@ -355,7 +355,7 @@ namespace dpp {
 		 * @brief Create a bot invite
 		 * 
 		 * @param bot_id Bot ID
-		 * @param permissions Permissions of the bot to invite
+		 * @param permissions Permission bitmask of the bot to invite
 		 * @param scopes Scopes to use
 		 * @return Invite URL
 		 */

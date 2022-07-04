@@ -186,7 +186,9 @@ typedef std::variant<
 		scheduled_event,
 		scheduled_event_map,
 		event_member,
-		event_member_map
+		event_member_map,
+		automod_rule,
+		automod_rule_map
 	> confirmable_t;
 
 /**
@@ -293,7 +295,7 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
-extern DPP_EXPORT event_handle __next_handle;
+extern DPP_EXPORT event_handle _next_handle;
 
 /**
  * @brief Handles routing of an event to multiple listeners.
@@ -442,7 +444,7 @@ public:
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
 		std::unique_lock l(lock);
-		event_handle h = __next_handle++;
+		event_handle h = _next_handle++;
 		dispatch_container.emplace(h, func);
 		return h;		
 	}
@@ -825,16 +827,19 @@ public:
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type interaction_create_t&, and returns void.
+	 *
+	 * @note There are dedicated events to handle slashcommands (See dpp::cluster::on_slashcommand),
+	 * user context menus (See dpp::cluster::on_user_context_menu) and message context menus (See dpp::cluster::on_message_context_menu)
 	 */
 	event_router_t<interaction_create_t> on_interaction_create;
 
 	/**
 	 * @brief Called when a slash command is issued.
-	 * Only ctxm_chat_input types of interaction are routed to this event.
+	 * Only dpp::ctxm_chat_input types of interaction are routed to this event.
 	 * For an example of this in action please see \ref slashcommands
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type interaction_create_t&, and returns void.
+	 * The function signature for this event takes a single `const` reference of type slashcommand_t&, and returns void.
 	 */
 	event_router_t<slashcommand_t> on_slashcommand;
 	
@@ -871,19 +876,19 @@ public:
 
 	/**
 	 * @brief Called when a user right-clicks or long-presses on a message,
-	 * where a slash command is bound to the ctxm_message command type.
+	 * where a slash command is bound to the dpp::ctxm_message command type.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
+	 * The function signature for this event takes a single `const` reference of type message_context_menu_t&, and returns void.
 	 */
 	event_router_t<message_context_menu_t> on_message_context_menu;
 
 	/**
 	 * @brief Called when a user right-clicks or long-presses on a user,
-	 * where a slash command is bound to the ctxm_user command type.
+	 * where a slash command is bound to the dpp::ctxm_user command type.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
-	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
+	 * The function signature for this event takes a single `const` reference of type user_context_menu_t&, and returns void.
 	 */
 	event_router_t<user_context_menu_t> on_user_context_menu;
 
@@ -901,7 +906,7 @@ public:
 	/**
 	 * @brief Called when a guild is deleted.
 	 * A guild can be deleted via the bot being kicked, the bot leaving the guild
-	 * explicitly with dpp::guild_delete, or via the guild being unavailable due to
+	 * explicitly with dpp::cluster::guild_delete, or via the guild being unavailable due to
 	 * an outage.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -935,7 +940,7 @@ public:
 	
 	/**
 	 * @brief Called when a shard is connected and ready.
-	 * A set of on_guild_create events will follow this event.
+	 * A set of cluster::on_guild_create events will follow this event.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type ready_t&, and returns void.
@@ -1003,7 +1008,7 @@ public:
 	
 	/**
 	 * @brief Called when a set of members is received for a guild.
-	 * D++ will request these for all new guilds if needed, after the on_guild_create
+	 * D++ will request these for all new guilds if needed, after the cluster::on_guild_create
 	 * events.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1148,7 +1153,39 @@ public:
 	 */
 	event_router_t<webhooks_update_t> on_webhooks_update;
 
+	/**
+	 * @brief Called when a new automod rule is created.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_create_t&, and returns void.
+	 */
+	event_router_t<automod_rule_create_t> on_automod_rule_create;
+
+
+	/**
+	 * @brief Called when an automod rule is updated.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_update_t&, and returns void.
+	 */
+	event_router_t<automod_rule_update_t> on_automod_rule_update;
 	
+	/**
+	 * @brief Called when an automod rule is deleted.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_delete_t&, and returns void.
+	 */
+	event_router_t<automod_rule_delete_t> on_automod_rule_delete;
+
+	/**
+	 * @brief Called when an automod rule is triggered/executed.
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type automod_rule_execute_t&, and returns void.
+	 */
+	event_router_t<automod_rule_execute_t> on_automod_rule_execute;
+
 	/**
 	 * @brief Called when a new member joins a guild.
 	 *
@@ -1217,7 +1254,7 @@ public:
 	
 	/**
 	 * @brief Called when a user is updated.
-	 * This is separate to guild_member_update and includes things such as an avatar change,
+	 * This is separate to cluster::on_guild_member_update and includes things such as an avatar change,
 	 * username change, discriminator change or change in subscription status for nitro.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1231,6 +1268,7 @@ public:
 	 * Note that D++ does not cache messages. If you want to cache these objects you
 	 * should create something yourself within your bot. Caching of messages is not on
 	 * the roadmap to be supported as it consumes excessive amounts of RAM.
+	 * For an example for caching of messages, please see \ref caching-messages
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type message_create_t&, and returns void.
@@ -1291,8 +1329,8 @@ public:
 
 	
 	/**
-	 * @brief Called when a thread is created
-	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
+	 * @brief Called when a thread is created.
+	 * Note that threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_create_t&, and returns void.
@@ -1319,8 +1357,8 @@ public:
 
 	
 	/**
-	 * @brief Called when thread list is synced (upon gaining access to a channel)
-	 * Note: Threads are not cached by D++, but a list of thread IDs is accessible in a guild object
+	 * @brief Called when thread list is synced (upon gaining access to a channel).
+	 * Note that threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_list_sync_t&, and returns void.
@@ -1736,6 +1774,7 @@ public:
 	 * @param guild_id Guild ID to edit permissions of the slash commands in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_command_permissions_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @deprecated This has been disabled with updates to Permissions v2. You can use guild_command_edit_permissions instead
 	 */
 	void guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
@@ -2083,8 +2122,7 @@ public:
 	 * Modify the positions of a set of channel objects for the guild.
 	 * Requires `MANAGE_CHANNELS` permission. Fires multiple `Channel Update Gateway` events.
 	 * Only channels to be modified are required.
-	 * 
-	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 *
 	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-channel-positions
 	 * @param c Channel to change the position for
 	 * @param callback Function to call when the API call completes.
@@ -2099,13 +2137,13 @@ public:
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param c Channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
-	 * @param allow allow permissions
-	 * @param deny deny permissions
+	 * @param allow allow permissions bitmask
+	 * @param deny deny permissions bitmask
 	 * @param member true if the overwrite_id is a user id, false if it is a channel id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = utility::log_error());
+	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a channel's permissions
@@ -2114,13 +2152,13 @@ public:
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param channel_id ID of the channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
-	 * @param allow allow permissions
-	 * @param deny deny permissions
+	 * @param allow allow permissions bitmask
+	 * @param deny deny permissions bitmask
 	 * @param member true if the overwrite_id is a user id, false if it is a channel id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = utility::log_error());
+	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a channel
@@ -2418,8 +2456,24 @@ public:
 	 * @param role_id Role to remove
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @deprecated Use dpp::cluster::guild_member_remove_role instead
 	 */
 	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Remove role from guild member
+	 *
+	 * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
+	 * Fires a `Guild Member Update` Gateway event.
+	 * @see https://discord.com/developers/docs/resources/guild#remove-guild-member-role
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @param guild_id Guild ID to remove role from user on
+	 * @param user_id User ID to remove role from
+	 * @param role_id Role to remove
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_member_remove_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove (kick) a guild member
@@ -2466,19 +2520,18 @@ public:
 
 	/**
 	 * @brief Add guild ban
-	 * 
+	 *
 	 * Create a guild ban, and optionally delete previous messages sent by the banned user.
 	 * Requires the `BAN_MEMBERS` permission. Fires a `Guild Ban Add` Gateway event.
 	 * @see https://discord.com/developers/docs/resources/guild#create-guild-ban
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to add ban to
 	 * @param user_id User ID to ban
-	 * @param delete_message_days How many days of their user's messages to also delete
-	 * @param reason Reason for ban
+	 * @param delete_message_days How many days of their user's messages to also delete (0-7). Defaults to 0
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::ban object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days, const std::string &reason, command_completion_event_t callback = utility::log_error());
+	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete guild ban
@@ -2946,20 +2999,24 @@ public:
 	 * @param m Message to send
 	 * @param wait waits for server confirmation of message send before response, and returns the created message body
 	 * @param thread_id Send a message to the specified thread within a webhook's channel. The thread will automatically be unarchived
+	 * @param thread_name Name of thread to create (requires the webhook channel to be a forum channel)
 	 * @param callback Function to call when the API call completes.
+	 * @note If the webhook channel is a forum channel, you must provide either `thread_id` or `thread_name`. If `thread_id` is provided, the message will send in that thread. If `thread_name` is provided, a thread with that name will be created in the forum channel.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
+	void execute_webhook(const class webhook &wh, const struct message &m, bool wait = false, snowflake thread_id = 0, const std::string& thread_name = "", command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Get webhook message
 	 *
 	 * @see https://discord.com/developers/docs/resources/webhook#get-webhook-message
 	 * @param wh Webhook to get the original message for
+	 * @param message_id The message ID
+	 * @param thread_id ID of the thread the message is in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_webhook_message(const class webhook &wh, command_completion_event_t callback = utility::log_error());
+	void get_webhook_message(const class webhook &wh, snowflake message_id, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit webhook message
@@ -2973,10 +3030,11 @@ public:
 	 * @note the attachments array must contain all attachments that should be present after edit, including retained and new attachments provided in the request body.
 	 * @param wh Webhook to edit message for
 	 * @param m New message
+	 * @param thread_id ID of the thread the message is in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_webhook_message(const class webhook &wh, const struct message &m, command_completion_event_t callback = utility::log_error());
+	void edit_webhook_message(const class webhook &wh, const struct message &m, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete webhook message
@@ -2984,10 +3042,12 @@ public:
 	 * @see https://discord.com/developers/docs/resources/webhook#delete-webhook-message
 	 * @param wh Webhook to delete message for
 	 * @param message_id Message ID to delete
+	 * @param thread_id ID of the thread the message is in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = utility::log_error());
+	void delete_webhook_message(const class webhook &wh, snowflake message_id, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
+
 
 	/**
 	 * @brief Get a role for a guild
@@ -3526,6 +3586,55 @@ public:
 	 * On success the callback will contain a dpp::scheduled_event object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void user_set_voice_state(snowflake user_id, snowflake guild_id, snowflake channel_id, bool suppress = false, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get all auto moderation rules for a guild
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::automod_rule_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rules_get(snowflake guild_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get a single auto moderation rule
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param rule_id  Rule id to retrieve
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::automod_rule object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rule_get(snowflake guild_id, snowflake rule_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Create an auto moderation rule
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param r Auto moderation rule to create
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::automod_rule object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rule_create(snowflake guild_id, const automod_rule& r, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Edit an auto moderation rule
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param r Auto moderation rule to edit. The rule's id must be set.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::automod_rule object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rule_edit(snowflake guild_id, const automod_rule& r, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Delete an auto moderation rule
+	 * 
+	 * @param guild_id Guild id of the auto moderation rule
+	 * @param rule_id Auto moderation rule id to delete
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void automod_rule_delete(snowflake guild_id, snowflake rule_id, command_completion_event_t callback = utility::log_error());
 
 #include <dpp/cluster_sync_calls.h>
 

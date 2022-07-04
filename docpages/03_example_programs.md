@@ -161,7 +161,7 @@ int main() {
 
 ### 4. Attach to another event to receive slash commands
 
-If you want to handle a slash command, you should also attach your program to the `on_slashcommand` event (dpp::cluster::on_slashcommand) which is the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
+If you want to handle a slash command, you should also attach your program to the `on_slashcommand` event (dpp::cluster::on_slashcommand) which is basically the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -221,7 +221,7 @@ Let's break down the code in the `on_slashcommand` event so that we can discuss 
 
 This code is simply comparing the command name `event.command.get_command_name()` (dpp::interaction::get_command_name) against the value in a constant string value `"ping"`. If they match, then the `event.reply` method is called.
 
-The `event.reply` function (dpp::interaction_crete_t::reply) replies to a slash command with a message. There are many ways to call this function to send embed messages, upload files, and more, but for this simple demonstration we will just send some message text.
+The `event.reply` function (dpp::slashcommand_t::reply) replies to a slash command with a message. There are many ways to call this function to send embed messages, upload files, and more, but for this simple demonstration we will just send some message text.
 
 ### 6. Add code to start the bot!
 
@@ -259,7 +259,7 @@ int main() {
 
 ### 7. Compile and run your bot
 
-Compile your bot using `g++ -std=c++17 -o test test.cpp -ldpp` (if your .cpp file is called `test.cpp`) and run it with `./test`.
+Compile your bot using `g++ -std=c++17 -o bot bot.cpp -ldpp` (if your .cpp file is called `bot.cpp`) and run it with `./bot`.
 
 ### 8. Inviting your bot to your server
 
@@ -602,7 +602,7 @@ basic text-only messages (if your message is 'ephemeral' you must use this) and 
 replies. Please note that at present, Discord only supports a small subset of message and embed features within an interaction
 response object.
 
-\note You can also use the unified command handler, which lets you combine channel based message commands and slash commands under the same lambda with the same code like they were one and the same. Note that after April of 2022 Discord will be discouraging bots from using commands that are prefixed messages via means of a privileged message intent. It is advised that you exclusively use slash commands, or the unified handler with only a prefix of "/" going forward for any new bots you create and look to migrating existing bots to this setup.
+\note You can also use the unified command handler, which lets you combine channel based message commands and slash commands under the same lambda with the same code like they were one and the same. Note that after August of 2022 Discord will be discouraging bots from using commands that are prefixed messages via means of a privileged message intent. It is advised that you exclusively use slash commands, or the unified handler with only a prefix of "/" going forward for any new bots you create and look to migrating existing bots to this setup.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -612,9 +612,9 @@ int main()
 {
 	dpp::cluster bot("token");
 
-   bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
-	/* The interaction create event is fired when someone issues your commands */
+	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "blep") {
@@ -732,7 +732,7 @@ int main() {
 
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
-        bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler to look for a command called !button */
 	bot.on_message_create([&bot](const dpp::message_create_t & event) {
@@ -1200,14 +1200,14 @@ int main(int argc, char const *argv[])
 
 You might have seen these special messages, often sent by bots. In this section, we will show how to create an embed.
 
-To make an embed use this.
+@note Because this example utilizes message content, it requires the message content privileged intent. 
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 
 int main() {
     /* Setup the bot */
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); // Privileged intent required to receive message content
+    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
     /* Message handler to look for a command called !embed */
     bot.on_message_create([&bot](const dpp::message_create_t & event) {
@@ -1334,6 +1334,8 @@ To attach a file to a message, you can upload a local image.
 D++ has this helper function to read a file: `dpp::utility::read_file`.
 
 An example program:
+
+@note Because these examples utilizes message content, they require the message content privileged intent.
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>

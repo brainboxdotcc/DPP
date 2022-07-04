@@ -26,6 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
 #include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/permissions.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
 
@@ -68,6 +69,16 @@ enum channel_flags : uint8_t {
 	c_video_quality_720p =	0b00100000,
 	/// Lock permissions (only used when updating channel positions)
 	c_lock_permissions =	0b01000000,
+	/// Thread pinned in a forum (type 15) channel
+	c_pinned_thread =	0b10000000,
+};
+
+/**
+ * @brief The flags in discord channel's raw "flags" field. We use these for serialisation only, right now. Might be better to create a new field than to make the existing channel::flags from uint8_t to uint16_t, if discord adds more flags in future.
+ */
+enum discord_channel_flags : uint8_t {
+	/// Thread pinned in a forum (type 15) channel
+	dc_pinned_thread = 0b00000001,
 };
 
 /**
@@ -81,17 +92,31 @@ enum overwrite_type : uint8_t {
 };
 
 /**
- * @brief channel permission overwrites
+ * @brief Channel permission overwrites
  */
 struct DPP_EXPORT permission_overwrite {
-	/// Overwrite id
+	/// ID of the role or the member
 	snowflake id;
-	/// Allow mask
-	uint64_t allow;
-	/// Deny mask
-	uint64_t deny;
-	/// Overwrite type
+	/// Bitmask of allowed permissions
+	permission allow;
+	/// Bitmask of denied permissions
+	permission deny;
+	/// Type of overwrite. See dpp::overwrite_type
 	uint8_t type;
+
+	/**
+	 * @brief Construct a new permission_overwrite object
+	 */
+	permission_overwrite();
+
+	/**
+	 * @brief Construct a new permission_overwrite object
+	 * @param id ID of the role or the member to create the overwrite for
+	 * @param allow Bitmask of allowed permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param deny Bitmask of denied permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param type Type of overwrite
+	 */
+	permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type);
 };
 
 
@@ -191,7 +216,7 @@ public:
 	 * it contains the calculated permission bitmask of the user issuing the command
 	 * within this channel.
 	 */
-	uint64_t permissions;
+	permission permissions;
 
 	/** Sorting position, lower number means higher up the list */
 	uint16_t position;
@@ -342,13 +367,13 @@ public:
 	 * @brief Add a permission_overwrite to this channel object
 	 * 
 	 * @param id ID of the role or the member you want to add overwrite for
-	 * @param type type of overwrite (0 for role, 1 for member)
-	 * @param allowed_permissions bitmask of allowed permissions (refer to enum role_permissions) for this user/role in this channel
-	 * @param denied_permissions bitmask of denied permissions (refer to enum role_permissions) for this user/role in this channel
+	 * @param type type of overwrite
+	 * @param allowed_permissions bitmask of allowed permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param denied_permissions bitmask of denied permissions (refer to enum dpp::permissions) for this user/role in this channel
 	 *
 	 * @return Reference to self, so these method calls may be chained 
 	 */
-	channel& add_permission_overwrite(const snowflake id, const uint8_t type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
+	channel& add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
 
 	/**
 	 * @brief Get the mention ping for the channel
@@ -358,14 +383,25 @@ public:
 	std::string get_mention() const;
 
 	/**
-	 * @brief Get the user permissions for a user on this channel
+	 * @brief Get the user overall permissions for a member on this channel, including channel overwrites.
 	 * 
-	 * @param member The user to return permissions for
-	 * @return uint64_t Permissions bitmask made of bits in role_permissions.
-	 * Note that if the user is not on the channel or the guild is
-	 * not in the cache, the function will always return 0.
+	 * @param user The user to resolve the permissions for
+	 * @return permission Permissions bitmask made of bits in dpp::permissions.
+	 * @note Requires role cache to be enabled (it's enabled by default).
+	 *
+	 * @note The method will search for the guild member in the cache by the users id.
+	 * If the guild member is not in cache, the method will always return 0.
 	 */
-	uint64_t get_user_permissions(const class user* member) const;
+	permission get_user_permissions(const class user* user) const;
+
+	/**
+	 * @brief Get the overall user permissions for a member on this channel, including channel overwrites.
+	 *
+	 * @param member The member to resolve the permissions for
+	 * @return The permission overwrites for the member. Made of bits in dpp::permissions.
+	 * @note Requires role cache to be enabled (it's enabled by default).
+	 */
+	permission get_user_permissions(const class guild_member &member) const;
 
 	/**
 	 * @brief Return a map of members on the channel, built from the guild's
@@ -373,6 +409,7 @@ public:
 	 * Does not return reliable information for voice channels, use
 	 * dpp::channel::get_voice_members() instead for this.
 	 * @return A map of guild members keyed by user id.
+	 * @note If the guild this channel belongs to is not in the cache, the function will always return 0.
 	 */
 	std::map<snowflake, class guild_member*> get_members();
 
@@ -408,7 +445,7 @@ public:
 	bool is_nsfw() const;
 
 	/**
-	 * @brief Returns true if the permissions are to be synched with the category it is in.
+	 * @brief Returns true if the permissions are to be synced with the category it is in.
 	 * Used only and set manually when using the reorder channels method.
 	 * 
 	 * @return true if keeping permissions
@@ -493,6 +530,13 @@ public:
 	 * @return true if video quality is 720p
 	 */
 	bool is_video_720p() const;
+
+	/**
+	 * @brief Returns true if channel is a pinned thread in forum
+	 *
+	 * @return true, if channel is a pinned thread in forum
+	 */
+	bool is_pinned_thread() const;
 
 };
 

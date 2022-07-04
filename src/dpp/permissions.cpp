@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,25 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#pragma once
+#include <dpp/permissions.h>
+#include <dpp/nlohmann/json.hpp>
 
-#if !defined(DPP_VERSION_LONG)
-#define DPP_VERSION_LONG 0x00100013
-#define DPP_VERSION_SHORT 100013
-#define DPP_VERSION_TEXT "D++ 10.0.13 (30-Jun-2022)"
+namespace dpp {
 
-#define DPP_VERSION_MAJOR ((DPP_VERSION_LONG & 0x00ff0000) >> 16)
-#define DPP_VERSION_MINOR ((DPP_VERSION_LONG & 0x0000ff00) >> 8)
-#define DPP_VERSION_PATCH (DPP_VERSION_LONG & 0x000000ff)
-#endif
+permission::permission(const uint64_t &value) : value(value) {}
+
+permission::permission() : permission(0) {}
+
+permission::operator uint64_t() const {
+	return value;
+}
+
+permission::operator uint64_t &() {
+	return value;
+}
+
+permission::operator nlohmann::json() const {
+	return std::to_string(value);
+}
+
+}
