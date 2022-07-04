@@ -792,8 +792,8 @@ struct DPP_EXPORT attachment {
 	 * @param callback A callback which is called when the download completes.
 	 * @note The content of the file will be in the http_info.body parameter of the
 	 * callback parameter.
-	 * @throw dpp::exception If there is no owner associated with this attachment that
-	 * itself has an owning cluster, this method will throw a dpp::exception when called.
+	 * @throw dpp::logic_exception If there is no owner associated with this attachment that
+	 * itself has an owning cluster, this method will throw a dpp::logic_exception when called.
 	 */
 	void download(http_completion_event callback) const;
 };
