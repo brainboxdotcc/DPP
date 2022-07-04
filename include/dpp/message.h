@@ -209,10 +209,6 @@ struct DPP_EXPORT select_option : public json_interface<select_option> {
  * then insert one or more additional components into it
  * using component::add_component(), so that the parent
  * object is an action row and the child objects are buttons.
- *
- * @note At present this only works for whitelisted
- * guilds. The beta is **closed**. When this feature is
- * released, then the functionality will work correctly.
  */
 class DPP_EXPORT component : public json_interface<component> {
 public:
