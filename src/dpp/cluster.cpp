@@ -169,7 +169,6 @@ void cluster::start(bool return_after) {
 			} else {
 				throw dpp::connection_exception("Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
 			}
-			auto_shard = true;
 			numshards = g.shards;
 		}
 	}
