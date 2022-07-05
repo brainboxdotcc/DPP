@@ -728,7 +728,7 @@ void attachment::download(http_completion_event callback) const {
 	if (owner == nullptr || owner->owner == nullptr) {
 		throw dpp::logic_exception("attachment has no owning message/cluster");
 	}
-	if (callback && !this->url.empty()) {
+	if (callback && this->id && !this->url.empty()) {
 		owner->owner->request(this->url, dpp::m_get, callback);
 	}
 }
