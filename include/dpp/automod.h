@@ -70,7 +70,7 @@ enum automod_action_type : uint8_t {
  */
 enum automod_event_type : uint8_t {
 	/**
-	 * @brief Trigger on message send
+	 * @brief Trigger on message send or edit
 	 */
 	amod_message_send = 1,
 };
@@ -102,7 +102,39 @@ enum automod_trigger_type : uint8_t {
  */
 struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	/**
-	 * @brief Keywords to moderate
+	 * @brief Keywords to moderate. A keyword can be a phrase which contains multiple words. All keywords are case insensitive.
+	 * `*` can be used to customize how each keyword will be matched.
+	 *
+	 * **Examples for the `*` wildcard symbol:**
+	 *
+	 * Prefix - word must start with the keyword
+	 *
+	 * | keyword  | matches                             |
+     * |----------|-------------------------------------|
+     * | cat*     | <u><b>cat</b></u>ch, <u><b>Cat</b></u>apult, <u><b>CAt</b></u>tLE |
+     * | the mat* | <u><b>the mat</b></u>rix                      |
+     *
+     * Suffix - word must end with the keyword
+     *
+     * | keyword  | matches                  |
+     * |----------|--------------------------|
+     * | *cat     | wild<u><b>cat</b></u>, copy<u><b>Cat</b></u> |
+     * | *the mat | brea<u><b>the mat</b></u>          |
+     *
+     * Anywhere - keyword can appear anywhere in the content
+     *
+     * | keyword   | matches                     |
+     * |-----------|-----------------------------|
+     * | \*cat*     | lo<u><b>cat</b></u>ion, edu<u><b>Cat</b></u>ion |
+     * | \*the mat* | brea<u><b>the mat</b></u>ter          |
+     *
+     * Whole Word - keyword is a full word or phrase and must be surrounded by whitespace at the beginning and end
+     *
+     * | keyword | matches     |
+     * |---------|-------------|
+     * | cat     | <u><b>Cat</b></u>     |
+     * | the mat | <u><b>the mat</b></u> |
+     *
 	 */
 	std::vector<std::string> keywords;
 	/**

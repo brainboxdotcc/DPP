@@ -89,18 +89,18 @@ namespace dpp {
 		void DPP_EXPORT exec(const std::string& cmd, std::vector<std::string> parameters = {}, cmd_result_t callback = {});
 
 		/**
-		 * @brief Return a mentionable timestamp (used in a discord embed). These timestamps will display the given timestamp in the user's timezone and locale.
+		 * @brief Return a mentionable timestamp (used in a message). These timestamps will display the given timestamp in the user's timezone and locale.
 		 * 
 		 * @param ts Time stamp to convert
 		 * @param tf Format of timestamp using dpp::utility::time_format
 		 * @return std::string The formatted timestamp
 		 */
-		std::string DPP_EXPORT timestamp(time_t ts, time_format tf);
+		std::string DPP_EXPORT timestamp(time_t ts, time_format tf = tf_short_datetime);
 
 		/**
 		 * @brief Returns current date and time
 		 * 
-		 * @return std::string Current date and time
+		 * @return std::string Current date and time in "Y-m-d H:M:S" format
 		 */
 		std::string DPP_EXPORT current_date_time();
 		/**
@@ -362,19 +362,19 @@ namespace dpp {
 		std::string DPP_EXPORT bot_invite_url(const snowflake bot_id, const uint64_t permissions = 0, const std::vector<std::string>& scopes = {"bot", "applications.commands"});
 
 		/**
-		 * @brief Escapes markdown sequences in a string
+		 * @brief Escapes Discord's markdown sequences in a string
 		 * 
 		 * @param text Text to escape
 		 * @param escape_code_blocks If set to false, then code blocks are not escaped.
 		 * This means that you can still use a code block, and the text within will be left as-is.
 		 * If set to true, code blocks will also be escaped so that ` symbol may be used as a normal
 		 * character.
-		 * @return std::string escaped text
+		 * @return std::string The text with the markdown special characters escaped with a backslash
 		 */
 		std::string DPP_EXPORT markdown_escape(const std::string& text, bool escape_code_blocks = false);
 
 		/**
-		 * @brief Encodes a url parameter similar to php urlencode()
+		 * @brief Encodes a url parameter similar to [php urlencode()](https://www.php.net/manual/en/function.urlencode.php)
 		 * 
 		 * @param value String to encode
 		 * @return std::string URL encoded string
@@ -389,7 +389,7 @@ namespace dpp {
 		std::string DPP_EXPORT version();
 
 		/**
-		 * @brief Build a URL parameter string e.g. "a=b&c=d&e=f" from a map of key/value pairs.
+		 * @brief Build a URL parameter string e.g. "?a=b&c=d&e=f" from a map of key/value pairs.
 		 * Entries with empty key names or values are omitted.
 		 * 
 		 * @param parameters parameters to create a url query string for
@@ -398,7 +398,7 @@ namespace dpp {
 		std::string DPP_EXPORT make_url_parameters(const std::map<std::string, std::string>& parameters);
 
 		/**
-		 * @brief Build a URL parameter string e.g. "a=b&c=d&e=f" from a map of key/value pairs.
+		 * @brief Build a URL parameter string e.g. "?a=b&c=d&e=f" from a map of key/value pairs.
 		 * Entries with empty key names or zero values are omitted.
 		 * 
 		 * @param parameters parameters to create a url query string for

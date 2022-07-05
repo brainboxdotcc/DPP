@@ -78,7 +78,8 @@
 		"ctls",
 		"ctest",
 		"automod",
-		"amod"
+		"amod",
+		"apult"
 	],
 	"flagWords": [
 		"hte"
