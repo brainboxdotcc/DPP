@@ -1,4 +1,4 @@
-\page frequently-asked-questions Frequently Asked Questions
+# Frequently Asked Questions (FAQ)
 
 [TOC] 
 
