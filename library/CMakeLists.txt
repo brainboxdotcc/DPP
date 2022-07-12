@@ -1,16 +1,3 @@
-include(GenerateProductVersion)
-generate_product_version(
-	PRODUCT_INFO
-	NAME "${LIB_NAME}"
-	FILE_DESCRIPTION "${DESCRIPTION}"
-	ORIGINAL_FILENAME "dpp.dll"
-	COMPANY_NAME "brainboxdotcc"
-	VERSION_MAJOR "${DPP_VERSION_MAJOR}"
-	VERSION_MINOR "${DPP_VERSION_MINOR}"
-	VERSION_PATCH "${DPP_VERSION_PATCH}"
-	VERSION_REVISION "0"
-)
-
 if(MSVC)
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /Od /DEBUG /sdl /MP /DFD_SETSIZE=1024 /Zc:preprocessor")
