@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.20)
 set(PROJECT_NAME "dpp")
 
 set(LIB_NAME "dpp")
-set(PRODUCT_VERSION "10.13.0")
+set(PRODUCT_VERSION "10.0.13")
 set(DESCRIPTION "An incredibly lightweight C++ Discord library")
 project(
 	"${PROJECT_NAME}"
@@ -22,6 +22,7 @@ project(
 	HOMEPAGE_URL "https://dpp.dev/"
 	DESCRIPTION "${DESCRIPTION}"
 )
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}")
 
 if (EXISTS "${_VCPKG_INSTALLED_DIR}")
