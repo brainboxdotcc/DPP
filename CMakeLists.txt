@@ -26,4 +26,4 @@ set(LIB_NAME "${PROJECT_NAME}")
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_CONFIGURATION_TYPES "${CMAKE_BUILD_TYPE}")
 
-add_subdirectory(Library)
+add_subdirectory(library)
