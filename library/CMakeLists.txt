@@ -5,9 +5,9 @@ generate_product_version(
 	FILE_DESCRIPTION "${DESCRIPTION}"
 	ORIGINAL_FILENAME "dpp.dll"
 	COMPANY_NAME "brainboxdotcc"
-	VERSION_MAJOR "10"
-	VERSION_MINOR "13"
-	VERSION_PATCH "0"
+	VERSION_MAJOR "${DPP_VERSION_MAJOR}"
+	VERSION_MINOR "${DPP_VERSION_MINOR}"
+	VERSION_PATCH "${DPP_VERSION_PATCH}"
 	VERSION_REVISION "0"
 )
 
@@ -34,33 +34,34 @@ else()
 	endif ()
 endif()
 
-file(GLOB SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/events/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/cluster/*.cpp")
+file(GLOB THE_SOURCES "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/events/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/cluster/*.cpp")
 
 if(WIN32)
-	add_library("${LIB_NAME}" SHARED "${SOURCE_FILES}" "${PRODUCT_INFO}")
+	add_library("${LIB_NAME}" SHARED "${THE_SOURCES}" "${PRODUCT_INFO}")
 else()
-	add_library("${LIB_NAME}" STATIC "${SOURCE_FILES}")
+	add_library("${LIB_NAME}" STATIC "${THE_SOURCES}")
 	find_package(Threads REQUIRED)
 endif()
+
+add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
+
+target_compile_definitions("${LIB_NAME}" PUBLIC "DPP_BUILD")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_std_17")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_constexpr")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_auto_type")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_defaulted_functions")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_deleted_functions")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_final")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_lambdas")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_override")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_thread_local")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_variadic_templates")
+target_compile_features("${LIB_NAME}" PRIVATE "cxx_attribute_deprecated")
 
 target_include_directories(
 	"${LIB_NAME}" PRIVATE
 	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
 )
-
-add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
-target_compile_definitions("${LIB_NAME}" PUBLIC "DPP_BUILD")
-target_compile_features("${LIB_NAME}" PRIVATE cxx_std_17)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_constexpr)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_auto_type)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_defaulted_functions)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_deleted_functions)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_final)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_lambdas)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_override)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_thread_local)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_variadic_templates)
-target_compile_features("${LIB_NAME}" PRIVATE cxx_attribute_deprecated)
 
 set_target_properties(
 	"${LIB_NAME}" PROPERTIES
@@ -83,11 +84,6 @@ target_link_libraries(
 	$<$<TARGET_EXISTS:unofficial-sodium::sodium>:unofficial-sodium::sodium>
 	$<$<TARGET_EXISTS:ZLIB::ZLIB>:ZLIB::ZLIB>
 	$<$<TARGET_EXISTS:Threads::Threads>:Threads::Threads>
-)
-
-target_compile_features(
-	"${LIB_NAME}" PUBLIC
-	"cxx_std_17"
 )
 
 target_compile_options(
