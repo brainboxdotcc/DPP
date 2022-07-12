@@ -27,14 +27,6 @@
 #include <mutex>
 #include <shared_mutex>
 
-#ifdef _WIN32
-	#pragma warning(push)
-	#pragma warning(disable : 4244)
-	#pragma warning(disable : 4251)
-	#pragma warning(disable : 4996)
-	#pragma warning(disable : 4273)
-#endif
-
 namespace dpp {
 
 extern DPP_EXPORT std::unordered_map<managed*, time_t> deletion_queue;

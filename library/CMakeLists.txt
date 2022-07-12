@@ -1,26 +1,3 @@
-if(MSVC)
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /Od /DEBUG /sdl /MP /DFD_SETSIZE=1024 /Zc:preprocessor")
-	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /O2 /Oi /Oy /GL /Gy /sdl /MP /DFD_SETSIZE=1024 /Zc:preprocessor")
-	endif()
-	string(REGEX REPLACE "/W[1|2|3|4]" "/W3" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-else()
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wempty-body -Wunknown-pragmas -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread -g -Og -fPIC")
-	else()
-		if (BUILD_O3)
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wempty-body -Wunknown-pragmas -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread -O3 -fPIC")
-		else()
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wempty-body -Wunknown-pragmas -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread -Os -fPIC")
-		endif()
-	endif()
-
-	if (NOT MINGW)
-		add_link_options("-rdynamic")
-	endif ()
-endif()
-
 file(GLOB THE_SOURCES "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/events/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/cluster/*.cpp")
 
 if(WIN32)
@@ -31,8 +8,8 @@ else()
 endif()
 
 add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
-
-target_compile_definitions("${LIB_NAME}" PUBLIC "DPP_BUILD")
+target_compile_definitions("${LIB_NAME}" PRIVATE "DPP_BUILD" "$<$<PLATFORM_ID:WINDOWS>:$<$<CONFIG:DEBUG>:/std:c++17;Od;/DEBUG;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>$<$<CONFIG:RELEASE>:/std:c++17;/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
+"$<$<PLATFORM_ID:LINUX>:$<$<CONFIG:DEBUG>:-std=c++17;-Wall;-Wempty-body;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;fPIC>$<$<CONFIG:RELEASE>:-std=c++17;-Wall;-Wempty-body;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>")
 target_compile_features("${LIB_NAME}" PRIVATE "cxx_std_17")
 target_compile_features("${LIB_NAME}" PRIVATE "cxx_constexpr")
 target_compile_features("${LIB_NAME}" PRIVATE "cxx_auto_type")
