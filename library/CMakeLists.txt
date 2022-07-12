@@ -1,21 +1,3 @@
-#
-#	DiscordCoreAPI, A bot library for Discord, written in C++, and featuring explicit multithreading through the usage of custom, asynchronous C++ CoRoutines.
-#
-#	Copyright 2021, 2022 Chris M. (RealTimeChris)
-#
-#	This file is part of DiscordCoreAPI.
-#	DiscordCoreAPI is free software: you can redistribute it and/or modify it under the terms of the GNU
-#	General Public License as published by the Free Software Foundation, either version 3 of the License,
-#	or (at your option) any later version.
-#	DiscordCoreAPI is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-#	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-#	You should have received a copy of the GNU General Public License along with DiscordCoreAPI.
-#	If not, see <https://www.gnu.org/licenses/>.
-#
-# CMakeLists.txt - The CMake script for building this library.
-# May 13, 2021
-# https://discordcoreapi.com
-
 include(GenerateProductVersion)
 generate_product_version(
 	PRODUCT_INFO
@@ -52,18 +34,17 @@ else()
 	endif ()
 endif()
 
-file(GLOB modsrc "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/events/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/cluster/*.cpp")
+file(GLOB SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/events/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/cluster/*.cpp")
 
 if(WIN32)
-	add_library("${LIB_NAME}" SHARED "${modsrc}" "${PRODUCT_INFO}")
+	add_library("${LIB_NAME}" SHARED "${SOURCE_FILES}" "${PRODUCT_INFO}")
 else()
-	add_library("${LIB_NAME}" STATIC "${modsrc}")
+	add_library("${LIB_NAME}" STATIC "${SOURCE_FILES}")
 	find_package(Threads REQUIRED)
 endif()
 
 target_include_directories(
 	"${LIB_NAME}" PRIVATE
-	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
 	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/dpp>"
 	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/dpp/fmt>"
 	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/dpp/nlohmann>"
@@ -82,12 +63,6 @@ target_compile_features("${LIB_NAME}" PRIVATE cxx_override)
 target_compile_features("${LIB_NAME}" PRIVATE cxx_thread_local)
 target_compile_features("${LIB_NAME}" PRIVATE cxx_variadic_templates)
 target_compile_features("${LIB_NAME}" PRIVATE cxx_attribute_deprecated)
-
-file(GLOB HEADERS01 CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/include/dpp/*.h")
-file(GLOB HEADERS02 CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/include/dpp/fmt/*.h")
-file(GLOB HEADERS03 CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/include/dpp/nlohmann/*.hpp")
-
-set(HEADERS "${HEADERS01};${HEADERS02};${HEADERS03}")
 
 set_target_properties(
 	"${LIB_NAME}" PROPERTIES
@@ -120,8 +95,6 @@ target_compile_features(
 target_compile_options(
 	"${LIB_NAME}" PUBLIC
 	"$<$<NOT:$<PLATFORM_ID:Linux>>:/bigobj>"
-	"$<$<PLATFORM_ID:Windows>:/MP>"
-	"$<$<PLATFORM_ID:Linux>:-O3>"
 )
 
 target_link_options(
