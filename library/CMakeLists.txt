@@ -17,7 +17,7 @@ target_compile_definitions(
 
 target_compile_options(
 	"${LIB_NAME}" PRIVATE 
-	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-std=c++17;-Wall;-Wempty-body;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;fPIC>>"
+	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-std=c++17;-Wall;-Wempty-body;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
 	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-std=c++17;-Wall;-Wempty-body;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
 )
 
