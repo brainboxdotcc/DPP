@@ -45,6 +45,7 @@ endif()
 
 target_include_directories(
 	"${LIB_NAME}" PRIVATE
+	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
 	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/dpp>"
 	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/dpp/fmt>"
 	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/dpp/nlohmann>"
