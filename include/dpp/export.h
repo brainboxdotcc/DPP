@@ -28,10 +28,6 @@
 
 	#ifdef _WIN32
 		#include <dpp/win32_safe_warnings.h>
-		#pragma warning(push)
-		#pragma warning(disable : 4244)
-		#pragma warning(disable : 4251)
-		#pragma warning(disable : 4996)
 		#define DPP_EXPORT __declspec(dllexport)
 	#else
 		#define DPP_EXPORT
