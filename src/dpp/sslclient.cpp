@@ -207,7 +207,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 			timeval ts;
 			ts.tv_sec = 0;
 			ts.tv_usec = 1;
-			int r = select(static_cast<int>(iter->second.sfd), nullptr, nullptr, &efds, &ts);
+			int r = select(iter->second.sfd, nullptr, nullptr, &efds, &ts);
 			if (time(nullptr) > (iter->second.created + 60) || r < 0 || FD_ISSET(iter->second.sfd, &efds)) {
 				make_new = true;
 				/* This connection is dead, free its resources and make a new one */
@@ -261,7 +261,7 @@ void ssl_client::connect()
 		sfd = ::socket(addr->addr.ai_family, addr->addr.ai_socktype, addr->addr.ai_protocol);
 		if (sfd == ERROR_STATUS) {
 			err = errno;
-		} else if (connect_with_timeout(static_cast<int>(sfd), (sockaddr*)&addr->ai_addr, (int)addr->addr.ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
+		} else if (connect_with_timeout(sfd, (sockaddr*)&addr->ai_addr, (int)addr->addr.ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
 #ifdef _WIN32
 			if (sfd >= 0 && sfd < FD_SETSIZE) {
 				closesocket(sfd);
@@ -270,7 +270,7 @@ void ssl_client::connect()
 			err = errno;
 			shutdown(sfd, 2);
 #endif
-			::close(static_cast<int>(sfd));
+			::close(sfd);
 			sfd = ERROR_STATUS;
 		}
 
@@ -336,7 +336,7 @@ void ssl_client::write(const std::string &data)
 		obuffer += data;
 	} else {
 		if (plaintext) {
-			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), static_cast<int>(data.length()), 0) != (int)data.length()) {
+			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data.length(), 0) != (int)data.length()) {
 				throw dpp::connection_exception("write() failed");
 			}
 		} else {

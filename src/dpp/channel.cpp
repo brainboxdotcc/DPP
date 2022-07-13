@@ -120,7 +120,7 @@ channel& channel::set_bitrate(const uint16_t bitrate) {
 }
 
 channel& channel::set_flags(const uint16_t flags) {
-	this->flags = static_cast<uint8_t>(flags);
+	this->flags = flags;
 	return *this;
 }
 

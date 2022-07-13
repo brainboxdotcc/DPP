@@ -28,6 +28,9 @@
 
 	#ifdef _WIN32
 		#include <dpp/win32_safe_warnings.h>
+	#endif
+
+	#ifdef _WIN32
 		#define DPP_EXPORT __declspec(dllexport)
 	#else
 		#define DPP_EXPORT

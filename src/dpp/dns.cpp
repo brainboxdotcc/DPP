@@ -24,7 +24,6 @@
 #include <exception>
 #include <mutex>
 #include <shared_mutex>
-#include <string.h>
 #include <dpp/exception.h>
 
 namespace dpp
