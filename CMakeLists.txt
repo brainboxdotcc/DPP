@@ -48,8 +48,6 @@ project(
 	DESCRIPTION "An incredibly lightweight C++ Discord library"
 )
 
-set(LIB_NAME "dpp")
-
 if (EXISTS "${_VCPKG_ROOT_DIR}")
 	add_subdirectory(library-vcpkg)
 else()

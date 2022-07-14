@@ -1,5 +1,7 @@
 file(GLOB THE_SOURCES "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/events/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/cluster/*.cpp")
 
+set(LIB_NAME "dpp")
+
 if(WIN32)
 	add_library("${LIB_NAME}" SHARED "${THE_SOURCES}" "${PRODUCT_INFO}")
 else()
