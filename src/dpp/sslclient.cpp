@@ -269,8 +269,8 @@ void ssl_client::connect()
 #else
 			err = errno;
 			shutdown(sfd, 2);
-#endif
 			::close(sfd);
+#endif
 			sfd = ERROR_STATUS;
 		}
 
