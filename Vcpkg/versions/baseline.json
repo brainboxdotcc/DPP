@@ -1925,7 +1925,7 @@
       "port-version": 1
     },
     "discordcoreapi": {
-      "baseline": "2022-07-05",
+      "baseline": "2022-07-14",
       "port-version": 0
     },
     "discount": {
@@ -1969,7 +1969,7 @@
       "port-version": 0
     },
     "dpp": {
-      "baseline": "2022-07-12",
+      "baseline": "2022-07-14",
       "port-version": 0
     },
     "draco": {
