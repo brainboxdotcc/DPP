@@ -1,6 +1,6 @@
 file(GLOB THE_SOURCES "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/events/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/cluster/*.cpp")
 
-set(LIB_NAME "dpp")
+set(LIB_NAME "${PROJECT_NAME}")
 
 if(WIN32)
 	add_library("${LIB_NAME}" SHARED "${THE_SOURCES}" "${PRODUCT_INFO}")
@@ -10,6 +10,7 @@ else()
 endif()
 
 add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
+
 target_compile_definitions(
 	"${LIB_NAME}" PRIVATE
 	"DPP_BUILD" 
@@ -25,10 +26,7 @@ target_compile_options(
 
 target_compile_features(
 	"${LIB_NAME}" PRIVATE
-	"cxx_std_17" "cxx_constexpr" "cxx_auto_type" 
-	"cxx_defaulted_functions" "cxx_deleted_functions"
-	"cxx_final" "cxx_lambdas" "cxx_override" "cxx_thread_local"
-	"cxx_variadic_templates" "cxx_attribute_deprecated"
+	"cxx_std_17;cxx_constexpr;cxx_auto_type;cxx_defaulted_functions;cxx_deleted_functions;cxx_final;cxx_lambdas;cxx_override;cxx_thread_local;cxx_variadic_templates;cxx_attribute_deprecated"
 )
 
 target_include_directories(
