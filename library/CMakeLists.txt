@@ -7,10 +7,10 @@ if(WIN32 AND NOT MINGW)
 	if (NOT WINDOWS_32_BIT)
 		message("-- Building for windows with precompiled packaged dependencies")
 		#set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-		set(ZLIB_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib")
-		set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
-		set(OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/win32/include")
-		set(OPENSSL_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/win32/lib")
+		set(ZLIB_LIBRARIES "${CMAKE_SOURCE_DIR}/win32/lib")
+		set(ZLIB_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/win32/include")
+		set(OPENSSL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/win32/include")
+		set(OPENSSL_LIBRARIES "${CMAKE_SOURCE_DIR}/win32/lib")
 		ADD_DEFINITIONS(/bigobj)
 
 		link_libraries("${CMAKE_SOURCE_DIR}/win32/lib/libssl.lib")
@@ -103,7 +103,7 @@ else()
 	message("-- Voice support disabled by cmake option")
 endif()
 
-aux_source_directory("../src/dpp" coresrc)
+aux_source_directory("../src" coresrc)
 
 string(ASCII 27 Esc)
 
@@ -131,11 +131,11 @@ include_directories(${OPENSSL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIRS})
 
 find_package(Git QUIET)
 
-if(NOT GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+if(NOT GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
 	message(FATAL_ERROR "You are using a git version of D++ but do not have git installed. Install git (not 'gh') and try again.")
 endif()
 
-if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
+if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
 	message("-- Building ${Green}git${ColourReset} version. ${Green}Be aware git versions may be unstable!${ColourReset}")
 else()
 	message("-- Building ${Green}stable${ColourReset} version ${Green}${DPP_VERSION}${ColourReset}")
@@ -173,7 +173,7 @@ set(modules_dir "../src")
 file(GLOB subdirlist ${modules_dir}/dpp)
 
 foreach (fullmodname ${subdirlist})
-	set(modname "dpp")
+    get_filename_component(modname ${fullmodname} NAME)
     set (modsrc "")
 	
 	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp")
