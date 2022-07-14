@@ -190,6 +190,7 @@ foreach (fullmodname ${subdirlist})
 	)
 	target_include_directories(${modname} PUBLIC 
 		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/dpp>
 	)
 
 	target_precompile_headers(

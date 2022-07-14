@@ -45,7 +45,7 @@ project(
 	VERSION "${DPP_VERSION}"
 	LANGUAGES CXX
 	HOMEPAGE_URL "https://dpp.dev/"
-	DESCRIPTION "An incredibly lightweight C++ Discord library"
+	DESCRIPTION "An incredibly lightweight C++ Discord library."
 )
 
 if (EXISTS "${_VCPKG_ROOT_DIR}")
