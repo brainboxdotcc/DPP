@@ -20,6 +20,7 @@ target_compile_definitions(
 
 target_compile_options(
 	"${LIB_NAME}" PRIVATE 
+	"$<$<NOT:$<PLATFORM_ID:Linux>>:/bigobj>"
 	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-std=c++17;-Wall;-Wempty-body;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
 	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-std=c++17;-Wall;-Wempty-body;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
 )
@@ -43,6 +44,11 @@ set_target_properties(
 	CXX_STANDARD_REQUIRED ON
 )
 
+target_link_options(
+	"${LIB_NAME}" PUBLIC
+	"$<$<PLATFORM_ID:Windows>:/DEBUG>"
+)
+
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Opus CONFIG REQUIRED)
@@ -58,16 +64,6 @@ target_link_libraries(
 	$<$<TARGET_EXISTS:unofficial-sodium::sodium>:unofficial-sodium::sodium>
 	$<$<TARGET_EXISTS:ZLIB::ZLIB>:ZLIB::ZLIB>
 	$<$<TARGET_EXISTS:Threads::Threads>:Threads::Threads>
-)
-
-target_compile_options(
-	"${LIB_NAME}" PUBLIC
-	"$<$<NOT:$<PLATFORM_ID:Linux>>:/bigobj>"
-)
-
-target_link_options(
-	"${LIB_NAME}" PUBLIC
-	"$<$<PLATFORM_ID:Windows>:/DEBUG>"
 )
 
 set(CONFIG_FILE_NAME "${PROJECT_NAME}Config.cmake")
