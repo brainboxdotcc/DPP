@@ -27,7 +27,6 @@ include(CheckCXXSymbolExists)
 
 add_compile_definitions(DPP_BUILD)
 
-
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h" version_h)
 
 if(NOT version_h MATCHES "DPP_VERSION_SHORT ([0-9][0-9])([0-9][0-9])([0-9][0-9])")
