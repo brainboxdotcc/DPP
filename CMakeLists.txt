@@ -50,8 +50,7 @@ if (EXISTS "${_VCPKG_ROOT_DIR}")
 		HOMEPAGE_URL "https://dpp.dev/"
 		DESCRIPTION "An incredibly lightweight C++ Discord library."
 	)
-	add_subdirectory(library-vcpkg)
-	
+	add_subdirectory(library-vcpkg)	
 else()
 	set(PROJECT_NAME "libdpp")
 	project(
