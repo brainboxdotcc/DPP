@@ -1,13 +1,3 @@
-set(PROJECT_NAME "dpp")
-
-project(
-	"${PROJECT_NAME}"
-	VERSION "${DPP_VERSION}"
-	LANGUAGES CXX
-	HOMEPAGE_URL "https://dpp.dev/"
-	DESCRIPTION "An incredibly lightweight C++ Discord library."
-)
-
 file(GLOB THE_SOURCES "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/events/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/cluster/*.cpp")
 
 set(LIB_NAME "${PROJECT_NAME}")

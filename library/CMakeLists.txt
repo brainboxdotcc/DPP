@@ -1,13 +1,3 @@
-set(PROJECT_NAME "libdpp")
-
-project(
-	"${PROJECT_NAME}"
-	VERSION "${DPP_VERSION}"
-	LANGUAGES CXX
-	HOMEPAGE_URL "https://dpp.dev/"
-	DESCRIPTION "An incredibly lightweight C++ Discord library."
-)
-
 check_cxx_symbol_exists(prctl "sys/prctl.h" HAVE_PRCTL)
 check_cxx_symbol_exists(pthread_setname_np "pthread.h" HAVE_PTHREAD_SETNAME_NP)
 
