@@ -13,3 +13,4 @@ core
 compile_commands.json
 tags
 .cache
+out
