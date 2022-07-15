@@ -107,8 +107,8 @@ install(
 install(
 	TARGETS "${LIB_NAME}"
 	EXPORT "${EXPORTED_TARGETS_NAME}"
-	RUNTIME DESTINATION "$<$<NOT:$<PLATFORM_ID:Linux>>:$<IF:$<CONFIG:Debug>,${DEBUG_PREFIX}bin,bin>>"
-	ARCHIVE DESTINATION "$<IF:$<CONFIG:Debug>,${DEBUG_PREFIX}lib,lib>"
+	RUNTIME DESTINATION "$<$<NOT:$<PLATFORM_ID:Linux>>:bin>"
+	ARCHIVE DESTINATION "lib"
 )
 
 install(
@@ -122,7 +122,7 @@ if (WIN32)
 	install(
 		FILES 
 		"$<TARGET_PDB_FILE:${LIB_NAME}>"
-		DESTINATION "$<IF:$<CONFIG:Debug>,${DEBUG_PREFIX}bin,bin>"
+		DESTINATION "bin"
 		OPTIONAL
 	)
 endif()
