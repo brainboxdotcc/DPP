@@ -151,7 +151,7 @@ jobs:
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
-        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
+        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="${CMAKE_SOURCE_DIR}\cmake\Win32Toolchain.cmake" -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
 
       - name: Build Project
         run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}}
