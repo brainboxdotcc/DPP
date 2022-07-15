@@ -3,7 +3,7 @@ file(GLOB THE_SOURCES "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/s
 set(LIB_NAME "${PROJECT_NAME}")
 
 if(WIN32)
-	add_library("${LIB_NAME}" SHARED "${THE_SOURCES}" "${PRODUCT_INFO}")
+	add_library("${LIB_NAME}" SHARED "${THE_SOURCES}")
 else()
 	add_library("${LIB_NAME}" STATIC "${THE_SOURCES}")
 	find_package(Threads REQUIRED)
