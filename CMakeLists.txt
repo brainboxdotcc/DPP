@@ -39,16 +39,7 @@ math(EXPR DPP_VERSION_PATCH "${CMAKE_MATCH_3}")
 
 string(CONCAT DPP_VERSION "${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSION_PATCH}")
 
-set(PROJECT_NAME "libdpp")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake/")
-
-project(
-	"${PROJECT_NAME}"
-	VERSION "${DPP_VERSION}"
-	LANGUAGES CXX
-	HOMEPAGE_URL "https://dpp.dev/"
-	DESCRIPTION "An incredibly lightweight C++ Discord library."
-)
 
 if (EXISTS "${_VCPKG_ROOT_DIR}")
 	add_subdirectory(library-vcpkg)
