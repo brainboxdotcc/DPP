@@ -1,4 +1,14 @@
 message("-- Building for windows (x86) with precompiled packaged dependencies")
+
+set(PROJECT_NAME "libdpp")
+project(
+	"${PROJECT_NAME}"
+	VERSION "${DPP_VERSION}"
+	LANGUAGES CXX
+	HOMEPAGE_URL "https://dpp.dev/"
+	DESCRIPTION "An incredibly lightweight C++ Discord library."
+)
+
 #set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 set(ZLIB_LIBRARIES "${PROJECT_SOURCE_DIR}/win32/32/lib")
 set(ZLIB_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/win32/include")
