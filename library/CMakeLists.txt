@@ -76,12 +76,12 @@ if(NOT BUILD_SHARED_LIBS)
 	endif()
 endif()
 
-include("../cmake/colour.cmake")
+include("${CMAKE_SOURCE_DIR}/cmake/colour.cmake")
 
 if (BUILD_VOICE_SUPPORT)
 	if (MINGW OR NOT WIN32)
-		include("cmake/FindSodium.cmake")
-		include("cmake/FindOpus.cmake")
+		include("${CMAKE_SOURCE_DIR}/cmake/FindSodium.cmake")
+		include("${CMAKE_SOURCE_DIR}/cmake/FindOpus.cmake")
 	endif()
 
 	if(DEFINED OPUS_FOUND)
@@ -292,7 +292,7 @@ elseif(MINGW)
 	install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 endif()
 
-include("../cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
+include("${CMAKE_SOURCE_DIR}/cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
 
 # CPack initialization for distribution
 include(CPack)
