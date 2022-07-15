@@ -1,12 +1,3 @@
-set(PROJECT_NAME "libdpp")
-project(
-	"${PROJECT_NAME}"
-	VERSION "${DPP_VERSION}"
-	LANGUAGES CXX
-	HOMEPAGE_URL "https://dpp.dev/"
-	DESCRIPTION "An incredibly lightweight C++ Discord library."
-)
-
 include(GNUInstallDirs)
 set(DPP_EXPORT_NAME dpp)
 set(DPP_VERSIONED ${DPP_EXPORT_NAME}-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
