@@ -60,6 +60,11 @@ dl.note {
 	color: #8d7400;
 }
 
-.arrow {
+#nav-tree .arrow {
+	opacity: 1 !important;
 	font-size: 100%;
+}
+
+#nav-tree div.item > a:hover .arrow {
+	color: var(--page-secondary-foreground-color) !important;
 }
