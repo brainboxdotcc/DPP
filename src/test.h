@@ -35,8 +35,17 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 
 using json = nlohmann::json;
 
+enum test_type_t {
+	/* A test that does not require discord connectivity */
+	tt_offline,
+	/* A test that requires discord connectivity */
+	tt_online,
+};
+
 /* Represents a test case */
 struct test_t {
+	/* Test type */
+	test_type_t type;
 	/* Description of test */
 	std::string description;
 	/* Has been executed */
@@ -64,105 +73,118 @@ extern dpp::snowflake TEST_VC_ID;
 extern dpp::snowflake TEST_USER_ID;
 extern dpp::snowflake TEST_EVENT_ID;
 
+/* True if we skip tt_online tests */
+extern bool offline;
+
 /**
  * @brief Perform a test of a REST base API call with one parameter
  */
 #define singleparam_api_test(func_name, param, return_type, testname) \
 	set_test(testname, false); \
-	bot.func_name (param, [&](const dpp::confirmation_callback_t &cc) { \
-		if (!cc.is_error()) { \
-			return_type g = std::get<return_type>(cc.value); \
-			if (g.id == param) { \
-				set_test(testname, true); \
+	if (!offline) { \
+		bot.func_name (param, [&](const dpp::confirmation_callback_t &cc) { \
+			if (!cc.is_error()) { \
+				return_type g = std::get<return_type>(cc.value); \
+				if (g.id == param) { \
+					set_test(testname, true); \
+				} else { \
+					bot.log(dpp::ll_debug, cc.http_info.body); \
+					set_test(testname, false); \
+				} \
 			} else { \
 				bot.log(dpp::ll_debug, cc.http_info.body); \
 				set_test(testname, false); \
 			} \
-		} else { \
-			bot.log(dpp::ll_debug, cc.http_info.body); \
-			set_test(testname, false); \
-		} \
-	});
+		}); \
+	}
 
 /**
  * @brief Perform a test of a REST base API call with one parameter
  */
 #define twoparam_api_test(func_name, param1, param2, return_type, testname) \
 	set_test(testname, false); \
-	bot.func_name (param1, param2, [&](const dpp::confirmation_callback_t &cc) { \
-		if (!cc.is_error()) { \
-			return_type g = std::get<return_type>(cc.value); \
-			if (g.id > 0) { \
-				set_test(testname, true); \
+	if (!offline) { \
+		bot.func_name (param1, param2, [&](const dpp::confirmation_callback_t &cc) { \
+			if (!cc.is_error()) { \
+				return_type g = std::get<return_type>(cc.value); \
+				if (g.id > 0) { \
+					set_test(testname, true); \
+				} else { \
+					bot.log(dpp::ll_debug, cc.http_info.body); \
+					set_test(testname, false); \
+				} \
 			} else { \
 				bot.log(dpp::ll_debug, cc.http_info.body); \
 				set_test(testname, false); \
 			} \
-		} else { \
-			bot.log(dpp::ll_debug, cc.http_info.body); \
-			set_test(testname, false); \
-		} \
-	});
+		}); \
+	}
 
 /**
  * @brief Perform a test of a REST base API call with one parameter that returns a list
  */
 #define singleparam_api_test_list(func_name, param, return_type, testname) \
 	set_test(testname, false); \
-	bot.func_name (param, [&](const dpp::confirmation_callback_t &cc) { \
-		if (!cc.is_error()) { \
-			return_type g = std::get<return_type>(cc.value); \
-			if (g.size() > 0) { \
-				set_test(testname, true); \
+	if (!offline) { \
+		bot.func_name (param, [&](const dpp::confirmation_callback_t &cc) { \
+			if (!cc.is_error()) { \
+				return_type g = std::get<return_type>(cc.value); \
+				if (g.size() > 0) { \
+					set_test(testname, true); \
+				} else { \
+					set_test(testname, false); \
+					bot.log(dpp::ll_debug, cc.http_info.body); \
+				} \
 			} else { \
 				set_test(testname, false); \
 				bot.log(dpp::ll_debug, cc.http_info.body); \
 			} \
-		} else { \
-			set_test(testname, false); \
-			bot.log(dpp::ll_debug, cc.http_info.body); \
-		} \
-	});
+		}); \
+	}
 
 /**
  * @brief Perform a test of a REST base API call with one parameter that returns a list
  */
 #define multiparam_api_test_list(func_name, param, return_type, testname) \
 	set_test(testname, false); \
-	bot.func_name (param, 0, 0, 1000, [&](const dpp::confirmation_callback_t &cc) { \
-		if (!cc.is_error()) { \
-			return_type g = std::get<return_type>(cc.value); \
-			if (g.size() > 0) { \
-				set_test(testname, true); \
+	if (!offline) { \
+		bot.func_name (param, 0, 0, 1000, [&](const dpp::confirmation_callback_t &cc) { \
+			if (!cc.is_error()) { \
+				return_type g = std::get<return_type>(cc.value); \
+				if (g.size() > 0) { \
+					set_test(testname, true); \
+				} else { \
+					set_test(testname, false); \
+					bot.log(dpp::ll_debug, cc.http_info.body); \
+				} \
 			} else { \
 				set_test(testname, false); \
 				bot.log(dpp::ll_debug, cc.http_info.body); \
 			} \
-		} else { \
-			set_test(testname, false); \
-			bot.log(dpp::ll_debug, cc.http_info.body); \
-		} \
-	});
+		}); \
+	}
 
 /**
  * @brief Perform a test of a REST base API call with two parameters
  */
 #define twoparam_api_test_list(func_name, param1, param2, return_type, testname) \
 	set_test(testname, false); \
-	bot.func_name (param1, param2, [&](const dpp::confirmation_callback_t &cc) { \
-		if (!cc.is_error()) { \
-			return_type g = std::get<return_type>(cc.value); \
-			if (g.size() > 0) { \
-				set_test(testname, true); \
+	if (!offline) { \
+		bot.func_name (param1, param2, [&](const dpp::confirmation_callback_t &cc) { \
+			if (!cc.is_error()) { \
+				return_type g = std::get<return_type>(cc.value); \
+				if (g.size() > 0) { \
+					set_test(testname, true); \
+				} else { \
+					bot.log(dpp::ll_debug, cc.http_info.body); \
+					set_test(testname, false); \
+				} \
 			} else { \
 				bot.log(dpp::ll_debug, cc.http_info.body); \
 				set_test(testname, false); \
 			} \
-		} else { \
-			bot.log(dpp::ll_debug, cc.http_info.body); \
-			set_test(testname, false); \
-		} \
-	});
+		}); \
+	}
 
 
 /**
@@ -170,15 +192,17 @@ extern dpp::snowflake TEST_EVENT_ID;
  */
 #define noparam_api_test(func_name, return_type, testname) \
 	set_test(testname, false); \
-	bot.func_name ([&](const dpp::confirmation_callback_t &cc) { \
-		if (!cc.is_error()) { \
-			return_type g = std::get<return_type>(cc.value); \
-			set_test(testname, true); \
-		} else { \
-			bot.log(dpp::ll_debug, cc.http_info.body); \
-			set_test(testname, false); \
-		} \
-	});
+	if (!offline) { \
+		bot.func_name ([&](const dpp::confirmation_callback_t &cc) { \
+			if (!cc.is_error()) { \
+				return_type g = std::get<return_type>(cc.value); \
+				set_test(testname, true); \
+			} else { \
+				bot.log(dpp::ll_debug, cc.http_info.body); \
+				set_test(testname, false); \
+			} \
+		}); \
+	}
 
 /**
  * @brief Sets a test's status

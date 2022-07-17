@@ -38,6 +38,7 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
+#include <dpp/permissions.h>
 #include <dpp/role.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>

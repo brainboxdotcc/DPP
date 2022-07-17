@@ -278,6 +278,7 @@ event_ctor(button_click_t, interaction_create_t);
 event_ctor(autocomplete_t, interaction_create_t);
 event_ctor(select_click_t, interaction_create_t);
 event_ctor(form_submit_t, interaction_create_t);
+event_ctor(slashcommand_t, interaction_create_t);
 event_ctor(guild_delete_t, event_dispatch_t);
 event_ctor(channel_delete_t, event_dispatch_t);
 event_ctor(channel_update_t, event_dispatch_t);
@@ -335,5 +336,8 @@ event_ctor(guild_scheduled_event_update_t, event_dispatch_t);
 event_ctor(guild_scheduled_event_delete_t, event_dispatch_t);
 event_ctor(guild_scheduled_event_user_add_t, event_dispatch_t);
 event_ctor(guild_scheduled_event_user_remove_t, event_dispatch_t);
-
+event_ctor(automod_rule_create_t, event_dispatch_t);
+event_ctor(automod_rule_delete_t, event_dispatch_t);
+event_ctor(automod_rule_update_t, event_dispatch_t);
+event_ctor(automod_rule_execute_t, event_dispatch_t);
 };

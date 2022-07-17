@@ -18,12 +18,19 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#ifndef WIN32
+
+#ifdef _WIN32
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+#else
 	#include <unistd.h>
 	#include <arpa/inet.h>
-#else
-	/* Windows #define's min() and max(), breaking std::max(). stupid stupid stupid... */
-	#define NOMINMAX
+	#include <netinet/in.h>
+	#include <resolv.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <netinet/tcp.h>
 #endif
 #include <string_view>
 #include <iostream>
@@ -68,7 +75,42 @@ struct rtp_header {
 bool discord_voice_client::sodium_initialised = false;
 
 bool discord_voice_client::voice_payload::operator<(const voice_payload& other) const {
-	return seq > other.seq || timestamp > other.timestamp;
+	if (timestamp != other.timestamp) {
+		return timestamp > other.timestamp;
+	}
+
+	constexpr rtp_seq_t wrap_around_test_boundary = 5000;
+	if ((seq < wrap_around_test_boundary && other.seq >= wrap_around_test_boundary)
+    	    || (seq >= wrap_around_test_boundary && other.seq < wrap_around_test_boundary)) {
+    		/* Match the cases where exactly one of the sequence numbers "may have"
+		 * wrapped around.
+		 *
+		 * Examples:
+		 * 1. this->seq = 65530, other.seq = 10  // Did wrap around
+		 * 2. this->seq = 5002, other.seq = 4990 // Not wrapped around
+		 *
+		 * Add 5000 to both sequence numbers to force wrap around so they can be
+		 * compared. This should be fine to do to case 2 as well, as long as the
+		 * addend (5000) is not too large to cause one of them to wrap around.
+		 *
+		 * In practice, we should be unlikely to hit the case where
+		 *
+		 *           this->seq = 65530, other.seq = 5001
+		 *
+		 * because we shouldn't receive more than 5000 payloads in one batch, unless
+		 * the voice courier thread is super slow. Also remember that the timestamp
+		 * is compared first, and payloads this far apart shouldn't have the same
+		 * timestamp.
+		 */
+
+		/* Casts here ensure the sum wraps around and not implicitly converted to
+		 * wider types.
+		 */
+		return   static_cast<rtp_seq_t>(seq + wrap_around_test_boundary)
+		       > static_cast<rtp_seq_t>(other.seq + wrap_around_test_boundary);
+	} else {
+		return seq > other.seq;
+	}
 }
 
 #ifdef HAVE_VOICE
@@ -81,7 +123,7 @@ size_t audio_mix(discord_voice_client& client, opus_int32* pcm_mix, const opus_i
 	for (opus_int32 v = 0; v < samples * opus_channel_count; ++v) {
 		pcm_mix[v] += pcm[v];
 	}
-	max_samples = std::max(samples, max_samples);
+	max_samples = (std::max)(samples, max_samples);
 	return park_count + 1;
 }
 #endif
@@ -109,20 +151,12 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		{
 			std::unique_lock lk(shared_state.mtx);
 
-			shared_state.signal_iteration.wait(lk, [&shared_state] {
- 				return    !shared_state.parked_voice_payloads.empty()
-				       || shared_state.terminating;
- 			});
-
-			if (shared_state.terminating && shared_state.parked_voice_payloads.empty()) {
-				/* We have delivered all data to handlers. Terminate now. */
-				break;
-			}
-
 			/* mitigates vector resizing while holding the mutex */
 			flush_data.reserve(shared_state.parked_voice_payloads.size());
 
+			bool has_payload_to_deliver = false;
 			for (auto& [user_id, parking_lot] : shared_state.parked_voice_payloads) {
+				has_payload_to_deliver = has_payload_to_deliver || !parking_lot.parked_payloads.empty();
 				flush_data.push_back(flush_data_t{user_id,
 				                                  parking_lot.range.min_seq,
 				                                  std::move(parking_lot.parked_payloads),
@@ -132,6 +166,20 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 				                                  parking_lot.decoder});
 				parking_lot.range.min_seq = parking_lot.range.max_seq + 1;
 				parking_lot.range.min_timestamp = parking_lot.range.max_timestamp + 1;
+			}
+            
+			if (!has_payload_to_deliver) {
+				if (shared_state.terminating) {
+					/* We have delivered all data to handlers. Terminate now. */
+					break;
+				}
+
+				shared_state.signal_iteration.wait(lk);
+				/*
+				 * More data came or about to terminate, or just a spurious wake.
+				 * We need to collect the payloads again to determine what to do next.
+				 */
+				continue;
 			}
 		}
 
@@ -152,15 +200,13 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		int max_samples = 0;
 
 		for (auto& d : flush_data) {
+			if (!d.decoder) {
+				continue;
+			}
+			for (const auto& decoder_ctl : d.pending_decoder_ctls) {
+				decoder_ctl(*d.decoder);
+			}
 			for (rtp_seq_t seq = d.min_seq; !d.parked_payloads.empty(); ++seq) {
-				if (!d.decoder) {
-					continue;
-				}
-
-				for (const auto& decoder_ctl : d.pending_decoder_ctls) {
-					decoder_ctl(*d.decoder);
-				}
-
 				opus_int16 pcm[23040];
 				if (d.parked_payloads.top().seq != seq) {
 					/*
@@ -283,6 +329,7 @@ discord_voice_client::~discord_voice_client()
 			std::lock_guard lk(voice_courier_shared_state.mtx);
 			voice_courier_shared_state.terminating = true;
 		}
+		voice_courier_shared_state.signal_iteration.notify_one();
 		voice_courier.join();
 	}
 #endif
@@ -322,6 +369,7 @@ void discord_voice_client::run()
 
 int discord_voice_client::udp_send(const char* data, size_t length)
 {
+	sockaddr_in servaddr;
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(this->port);
@@ -712,10 +760,11 @@ void discord_voice_client::write_ready()
 	uint64_t duration = 0;
 	bool track_marker_found = false;
 	uint64_t bufsize = 0;
+	send_audio_type_t type = satype_recorded_audio; 
 	{
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (!this->paused && outbuf.size()) {
-
+			type = send_audio_type;
 			if (outbuf[0].packet.size() == 2 && ((uint16_t)(*(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
 				track_marker_found = true;
@@ -732,11 +781,14 @@ void discord_voice_client::write_ready()
 		}
 	}
 	if (duration) {
-		std::chrono::nanoseconds latency = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last_timestamp);
-		std::chrono::nanoseconds sleep_time = std::chrono::nanoseconds(duration) - latency;
-		if (sleep_time.count() > 0) {
-			std::this_thread::sleep_for(sleep_time);
+		if (type == satype_recorded_audio) {
+			std::chrono::nanoseconds latency = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last_timestamp);
+			std::chrono::nanoseconds sleep_time = std::chrono::nanoseconds(duration) - latency;
+			if (sleep_time.count() > 0) {
+				std::this_thread::sleep_for(sleep_time);
+			}
 		}
+
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (!creator->on_voice_buffer_send.empty()) {
 			voice_buffer_send_t snd(nullptr, "");
@@ -1026,6 +1078,15 @@ discord_voice_client& discord_voice_client::skip_to_next_marker() {
 discord_voice_client& discord_voice_client::send_silence(const uint64_t duration) {
 	uint8_t silence_packet[3] = { 0xf8, 0xff, 0xfe };
 	send_audio_opus(silence_packet, 3, duration);
+	return *this;
+}
+
+discord_voice_client& discord_voice_client::set_send_audio_type(send_audio_type_t type)
+{
+	{
+		std::lock_guard<std::mutex> lock(this->stream_mutex);
+		send_audio_type = type;
+	}
 	return *this;
 }
 

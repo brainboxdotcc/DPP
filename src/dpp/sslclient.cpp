@@ -58,6 +58,11 @@
 #include <unordered_map>
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
+#include <dpp/utility.h>
+#include <dpp/dns.h>
+
+/* Maximum allowed time in milliseconds for socket read/write timeouts and connect() */
+#define SOCKET_OP_TIMEOUT 5000
 
 namespace dpp {
 
@@ -102,7 +107,65 @@ thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
  * it'd go unused.
  */
 #define DPP_BUFSIZE 16 * 1024
+
+/* Represents a failed socket system call, e.g. connect() failure */
 const int ERROR_STATUS = -1;
+
+/**
+ * @brief Connect to TCP socket with a select() driven timeout
+ * 
+ * @param sockfd socket descriptor
+ * @param addr address to connect to
+ * @param addrlen address length
+ * @param timeout_ms timeout in milliseconds
+ * @return int -1 on error, 0 on succcess just like POSIX connect()
+ * @throw dpp::connection_exception on failure
+ */
+int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
+#ifdef _WIN32
+	return (::connect(sockfd, addr, addrlen));
+#else
+	int ofcmode;
+	ofcmode = fcntl(sockfd, F_GETFL, 0);
+	ofcmode |= O_NDELAY;
+	if (fcntl(sockfd, F_SETFL, ofcmode)) {
+		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+	}
+	int rc = (::connect(sockfd, addr, addrlen));
+	if (rc == -1 && errno != EWOULDBLOCK && errno != EINPROGRESS) {
+		throw dpp::connection_exception(strerror(errno));
+	} else {
+		// Set a deadline timestamp 'timeout' ms from now (needed b/c poll can be interrupted)
+		double deadline = dpp::utility::time_f() + (timeout_ms / 1000.0);
+		do {
+			rc = -1;
+			if (dpp::utility::time_f() >= deadline) {
+				throw dpp::connection_exception("Connection timed out");
+			}
+			fd_set writefds, efds;
+			FD_ZERO(&writefds);
+			FD_ZERO(&efds);
+			SAFE_FD_SET(sockfd, &writefds);
+			SAFE_FD_SET(sockfd, &efds);
+			timeval ts;
+			ts.tv_sec = 0;
+			ts.tv_usec = timeout_ms * 1000;
+			int r = select(sockfd + 1, nullptr, &writefds, &efds, &ts);
+			if (r > 0 && SAFE_FD_ISSET(sockfd, &writefds) && !SAFE_FD_ISSET(sockfd, &efds)) {
+				rc = 0;
+			} else if (r > 0 && SAFE_FD_ISSET(sockfd, &efds)) {
+				throw dpp::connection_exception(strerror(errno));
+			}
+		} while (rc == -1);
+	}
+	ofcmode = fcntl(sockfd, F_GETFL, 0);
+	ofcmode &= ~O_NDELAY;
+	if (fcntl(sockfd, F_SETFL, ofcmode)) {
+		throw dpp::connection_exception("Can't switch socket to blocking mode!");
+	}
+	return rc;
+#endif
+}
 
 ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, bool plaintext_downgrade, bool reuse) :
 	nonblocking(false),
@@ -118,11 +181,11 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	keepalive(reuse)
 {
 #ifndef WIN32
-        signal(SIGALRM, SIG_IGN);
-        signal(SIGHUP, SIG_IGN);
-        signal(SIGPIPE, SIG_IGN);
-        signal(SIGCHLD, SIG_IGN);
-        signal(SIGXFSZ, SIG_IGN);
+	signal(SIGALRM, SIG_IGN);
+	signal(SIGHUP, SIG_IGN);
+	signal(SIGPIPE, SIG_IGN);
+	signal(SIGCHLD, SIG_IGN);
+	signal(SIGXFSZ, SIG_IGN);
 #else
 	// Set up winsock.
 	WSADATA wsadata;
@@ -193,47 +256,27 @@ void ssl_client::connect()
 
 	if (make_new) {
 		/* Resolve hostname to IP */
-		struct hostent *host;
-		if ((host = gethostbyname(hostname.c_str())) == nullptr)
-			throw dpp::exception(std::string("Couldn't resolve hostname: ") + hostname);
-
-		addrinfo hints, *addrs;
-		
-		memset(&hints, 0, sizeof(addrinfo));
-		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
-
-		int status = getaddrinfo(hostname.c_str(), port.c_str(), &hints, &addrs);
-		if (status != 0)
-			throw dpp::exception(std::string("getaddrinfo error: ") + gai_strerror(status));
-
-		/* Attempt each address in turn, if there are multiple IP addresses on the hostname */
 		int err = 0;
-		for (struct addrinfo *addr = addrs; addr != nullptr; addr = addr->ai_next) {
-			sfd = ::socket(addrs->ai_family, addrs->ai_socktype, addrs->ai_protocol);
-			if (sfd == ERROR_STATUS) {
-				err = errno;
-				continue;
-			} else if (::connect(sfd, addr->ai_addr, (int)addr->ai_addrlen) == 0) {
-				break;
-			}
+		const dns_cache_entry* addr = resolve_hostname(hostname, port);
+		sfd = ::socket(addr->addr.ai_family, addr->addr.ai_socktype, addr->addr.ai_protocol);
+		if (sfd == ERROR_STATUS) {
 			err = errno;
-			shutdown(sfd, 2);
-		#ifdef _WIN32
+		} else if (connect_with_timeout(sfd, (sockaddr*)&addr->ai_addr, (int)addr->addr.ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
+#ifdef _WIN32
 			if (sfd >= 0 && sfd < FD_SETSIZE) {
 				closesocket(sfd);
 			}
-		#else
+#else
+			err = errno;
+			shutdown(sfd, 2);
 			::close(sfd);
-		#endif
+#endif
 			sfd = ERROR_STATUS;
 		}
-		freeaddrinfo(addrs);
 
 		/* Check if none of the IPs yielded a valid connection */
 		if (sfd == ERROR_STATUS) {
-			throw dpp::exception(strerror(err));
+			throw dpp::connection_exception(strerror(err));
 		}
 
 		if (!plaintext) {
@@ -245,28 +288,35 @@ void ssl_client::connect()
 				/* Create SSL context */
 				openssl_context = SSL_CTX_new(method);
 				if (openssl_context == nullptr)
-					throw dpp::exception("Failed to create SSL client context!");
+					throw dpp::connection_exception("Failed to create SSL client context!");
 
 				/* Do not allow SSL 3.0, TLS 1.0 or 1.1
 				* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
 				*/
 				if (!SSL_CTX_set_min_proto_version(openssl_context, TLS1_2_VERSION))
-					throw dpp::exception("Failed to set minimum SSL version!");
+					throw dpp::connection_exception("Failed to set minimum SSL version!");
 			}
 
 			/* Create SSL session */
 			ssl->ssl = SSL_new(openssl_context);
 			if (ssl->ssl == nullptr)
-				throw dpp::exception("SSL_new failed!");
+				throw dpp::connection_exception("SSL_new failed!");
 
 			SSL_set_fd(ssl->ssl, (int)sfd);
 
 			/* Server name identification (SNI) */
 			SSL_set_tlsext_host_name(ssl->ssl, hostname.c_str());
 
-			status = SSL_connect(ssl->ssl);
-			if (status != 1) {
-				throw dpp::exception("SSL_connect error");
+#ifndef _WIN32
+			/* On Linux, we can set socket timeouts so that SSL_connect eventually gives up */
+			timeval tv;
+			tv.tv_sec = 0;
+			tv.tv_usec = SOCKET_OP_TIMEOUT * 1000;
+			setsockopt(sfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+			setsockopt(sfd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+#endif
+			if (SSL_connect(ssl->ssl) != 1) {
+				throw dpp::connection_exception("SSL_connect error");
 			}
 
 			this->cipher = SSL_get_cipher(ssl->ssl);
@@ -287,11 +337,11 @@ void ssl_client::write(const std::string &data)
 	} else {
 		if (plaintext) {
 			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data.length(), 0) != (int)data.length()) {
-				throw dpp::exception("write() failed");
+				throw dpp::connection_exception("write() failed");
 			}
 		} else {
 			if (SSL_write(ssl->ssl, data.data(), (int)data.length()) != (int)data.length()) {
-				throw dpp::exception("SSL_write() failed");
+				throw dpp::connection_exception("SSL_write() failed");
 			}
 		}
 	}
@@ -320,13 +370,13 @@ void ssl_client::read_loop()
 	 * would cause the protocol to break.
 	 */
 	int r = 0;
-	size_t ClientToServerLength = 0, ClientToServerOffset = 0;
+	size_t client_to_server_length = 0, client_to_server_offset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
 	fd_set readfds, writefds, efds;
-	char ClientToServerBuffer[DPP_BUFSIZE], ServerToClientBuffer[DPP_BUFSIZE];
+	char client_to_server_buffer[DPP_BUFSIZE], server_to_client_buffer[DPP_BUFSIZE];
 
 	if (sfd == INVALID_SOCKET)  {
-		throw dpp::exception("Invalid file descriptor in read_loop()");
+		throw dpp::connection_exception("Invalid file descriptor in read_loop()");
 	}
 	
 	/* Make the socket nonblocking */
@@ -334,13 +384,12 @@ void ssl_client::read_loop()
 	u_long mode = 1;
 	int result = ioctlsocket(sfd, FIONBIO, &mode);
 	if (result != NO_ERROR)
-		throw dpp::exception("Can't switch socket to non-blocking mode!");
+		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
 #else
-	int ofcmode;
-	ofcmode = fcntl(sfd, F_GETFL, 0);
+	int ofcmode = fcntl(sfd, F_GETFL, 0);
 	ofcmode |= O_NDELAY;
 	if (fcntl(sfd, F_SETFL, ofcmode)) {
-		throw dpp::exception("Can't switch socket to non-blocking mode!");
+		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
 	}
 #endif
 	nonblocking = true;
@@ -370,14 +419,18 @@ void ssl_client::read_loop()
 				SAFE_FD_SET(cfd, &writefds);
 			}
 
+			if (sfd == -1) {
+				throw dpp::connection_exception("File descriptor invalidated, connection died");
+			}
+
 			/* If we're waiting for a read on the socket don't try to write to the server */
-			if (ClientToServerLength || obuffer.length() || read_blocked_on_write) {
+			if (client_to_server_length || obuffer.length() || read_blocked_on_write) {
 				SAFE_FD_SET(sfd,&writefds);
 			}
-				
+
 			timeval ts;
-			ts.tv_sec = 0;
-			ts.tv_usec = 50000;
+			ts.tv_sec = 1;
+			ts.tv_usec = 0;
 			r = select(FD_SETSIZE, &readfds, &writefds, &efds, &ts);
 			if (r == 0)
 				continue;
@@ -388,12 +441,8 @@ void ssl_client::read_loop()
 			if (custom_readable_fd && custom_readable_fd() >= 0 && SAFE_FD_ISSET(custom_readable_fd(), &readfds)) {
 				custom_readable_ready();
 			}
-			if (custom_readable_fd && custom_readable_fd() >= 0 && SAFE_FD_ISSET(custom_readable_fd(), &efds)) {
-			}
-
 			if (SAFE_FD_ISSET(sfd, &efds) || sfd == INVALID_SOCKET) {
-				this->log(dpp::ll_error, std::string("Error on SSL connection: ") +strerror(errno));
-				return;
+				throw dpp::connection_exception(strerror(errno));
 			}
 
 			/* Now check if there's data to read */
@@ -401,12 +450,12 @@ void ssl_client::read_loop()
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					r = ::recv(sfd, ServerToClientBuffer, DPP_BUFSIZE, 0);
+					r = ::recv(sfd, server_to_client_buffer, DPP_BUFSIZE, 0);
 					if (r <= 0) {
 						/* error or EOF */
 						return;
 					} else {
-						buffer.append(ServerToClientBuffer, r);
+						buffer.append(server_to_client_buffer, r);
 						if (!this->handle_buffer(buffer)) {
 							return;
 						}
@@ -417,14 +466,14 @@ void ssl_client::read_loop()
 						read_blocked_on_write = false;
 						read_blocked = false;
 						
-						r = SSL_read(ssl->ssl,ServerToClientBuffer,DPP_BUFSIZE);
+						r = SSL_read(ssl->ssl,server_to_client_buffer,DPP_BUFSIZE);
 						int e = SSL_get_error(ssl->ssl,r);
 
 						switch (e) {
 							case SSL_ERROR_NONE:
 								/* Data received, add it to the buffer */
 								if (r > 0) {
-									buffer.append(ServerToClientBuffer, r);
+									buffer.append(server_to_client_buffer, r);
 									if (!this->handle_buffer(buffer)) {
 										return;
 									}
@@ -459,37 +508,37 @@ void ssl_client::read_loop()
 			}
 
 			/* Check for input on the sendq */
-			if (obuffer.length() && ClientToServerLength == 0) {
-				memcpy(&ClientToServerBuffer, obuffer.data(), obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length());
-				ClientToServerLength = obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length();
-				obuffer = obuffer.substr(ClientToServerLength, obuffer.length());
-				ClientToServerOffset = 0;
+			if (obuffer.length() && client_to_server_length == 0) {
+				memcpy(&client_to_server_buffer, obuffer.data(), obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length());
+				client_to_server_length = obuffer.length() > DPP_BUFSIZE ? DPP_BUFSIZE : obuffer.length();
+				obuffer = obuffer.substr(client_to_server_length, obuffer.length());
+				client_to_server_offset = 0;
 			}
 
 			/* If the socket is writeable... */
-			if ((SAFE_FD_ISSET(sfd,&writefds) && ClientToServerLength) || (write_blocked_on_read && SAFE_FD_ISSET(sfd,&readfds))) {
+			if ((SAFE_FD_ISSET(sfd,&writefds) && client_to_server_length) || (write_blocked_on_read && SAFE_FD_ISSET(sfd,&readfds))) {
 				write_blocked_on_read = false;
 				/* Try to write */
 
 				if (plaintext) {
-					r = ::send(sfd, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength, 0);
+					r = ::send(sfd, client_to_server_buffer + client_to_server_offset, (int)client_to_server_length, 0);
 
 					if (r < 0) {
 						/* Write error */
 						return;
 					} else {
-						ClientToServerLength -= r;
-						ClientToServerOffset += r;
+						client_to_server_length -= r;
+						client_to_server_offset += r;
 						bytes_out += r;
 					}
 				} else {
-					r = SSL_write(ssl->ssl, ClientToServerBuffer + ClientToServerOffset, (int)ClientToServerLength);
+					r = SSL_write(ssl->ssl, client_to_server_buffer + client_to_server_offset, (int)client_to_server_length);
 					
 					switch(SSL_get_error(ssl->ssl,r)) {
 						/* We wrote something */
 						case SSL_ERROR_NONE:
-							ClientToServerLength -= r;
-							ClientToServerOffset += r;
+							client_to_server_length -= r;
+							client_to_server_offset += r;
 							bytes_out += r;
 						break;
 							

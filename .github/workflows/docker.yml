@@ -9,6 +9,7 @@ on:
 
 jobs:
   docker:
+    if: github.repository == 'brainboxdotcc/DPP'
     runs-on: ubuntu-latest
     concurrency: 
       group: docker-deployment

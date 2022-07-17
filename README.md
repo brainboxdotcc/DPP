@@ -5,6 +5,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) 
 ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) 
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
+[![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp)
 
 D++ is a lightweight and efficient library for Discord written in modern C++. It is designed to cover as much of the API specification as possible and to have a incredibly small memory footprint, even when caching large amounts of data.
 
@@ -38,19 +39,18 @@ This is a simple ping-pong example using slash commands.
 
 ```c++
 #include <dpp/dpp.h>
- 
-const std::string    BOT_TOKEN = "add your token here";
+#include <cstdlib>
  
 int main() {
-    dpp::cluster bot(BOT_TOKEN);
+    dpp::cluster bot(std::getenv("BOT_TOKEN"));
  
-    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+    bot.on_slashcommand([](auto event) {
          if (event.command.get_command_name() == "ping") {
              event.reply("Pong!");
          }
     });
  
-    bot.on_ready([&bot](const dpp::ready_t& event) {
+    bot.on_ready([&bot](auto event) {
         if (dpp::run_once<struct register_bot_commands>()) {
             bot.global_command_create(
                 dpp::slashcommand("ping", "Ping pong!", bot.me.id)

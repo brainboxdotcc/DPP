@@ -75,10 +75,16 @@
 		"clion",
 		"followup",
 		"gifv",
-		"ctls"
+		"ctls",
+		"ctest",
+		"automod",
+		"amod",
+		"apult"
 	],
 	"flagWords": [
 		"hte"
-	]
+	],
+	"allowCompoundWords": true,
+	"useCompounds": true
 }
 

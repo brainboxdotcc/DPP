@@ -46,7 +46,7 @@ namespace dpp {
 	#endif
 #endif
 
-event_handle __next_handle = 1;
+event_handle _next_handle = 1;
 
 /**
  * @brief An audit reason for each thread. These are per-thread to make the cluster
@@ -149,77 +149,94 @@ void cluster::start(bool return_after) {
 	auto block_calling_thread = [this]() {
 		std::mutex thread_mutex;
 		std::unique_lock<std::mutex> thread_lock(thread_mutex);
-
 		this->terminating.wait(thread_lock);
 	};
 
 	/* Start up all shards */
-	if (numshards == 0) {
-		gateway g;
-		try {
-			g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
+	gateway g;
+	try {
+		g = dpp::sync<gateway>(this, &cluster::get_gateway_bot);
+		log(ll_debug, fmt::format("Cluster: {} of {} session starts remaining", g.session_start_remaining, g.session_start_total));
+		if (g.session_start_remaining < g.shards) {
+			throw dpp::connection_exception("Discord indicates you cannot start enough sessions to boot this cluster! Cluster startup aborted. Try again later.");
+		}
+		if (g.session_start_max_concurrency > 1) {
+			log(ll_debug, fmt::format("Cluster: Large bot sharding; Using session concurrency: {}", g.session_start_max_concurrency));
+		}
+		if (numshards == 0) {
+			if (g.shards) {
+				log(ll_info, fmt::format("Auto Shard: Bot requires {} shard{}", g.shards, (g.shards > 1) ? "s" : ""));
+			} else {
+				throw dpp::connection_exception("Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection.");
+			}
 			numshards = g.shards;
 		}
-		catch (const dpp::rest_exception& e) {
-			if (std::string(e.what()) == "401: Unauthorized") {
-				/* Throw special form of exception for invalid token */
-				throw dpp::invalid_token_exception("Invalid bot token (401: Unauthorized when getting gateway shard count)");
-			} else {
-				/* Rethrow */
-				throw e;
-			}
-		}
-		if (g.shards) {
-			log(ll_info, fmt::format("Auto Shard: Bot requires {} shard{}", g.shards, (g.shards > 1) ? "s" : ""));
-			if (g.session_start_remaining < g.shards) {
-				log(ll_critical, fmt::format("Auto Shard: Discord indicates you cannot start any more sessions! Cluster startup aborted. Try again later."));
-			} else {
-				log(ll_debug, fmt::format("Auto Shard: {} of {} session starts remaining", g.session_start_remaining, g.session_start_total));
-				cluster::start(true);
-			}
-		} else {
-			log(ll_critical, fmt::format("Auto Shard: Cannot determine number of shards. Cluster startup aborted. Check your connection."));
-			return;
-		}
-		if (!return_after)
-			block_calling_thread();
-
-	} else {
-		start_time = time(NULL);
-
-		log(ll_debug, fmt::format("Starting with {} shards...", numshards));
-
-		for (uint32_t s = 0; s < numshards; ++s) {
-			/* Filter out shards that aren't part of the current cluster, if the bot is clustered */
-			if (s % maxclusters == cluster_id) {
-				/* Each discord_client spawns its own thread in its run() */
-				try {
-					this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
-					this->shards[s]->run();
-				}
-				catch (const std::exception &e) {
-					log(dpp::ll_critical, fmt::format("Could not start shard {}: {}", s, e.what()));
-				}
-				/* Stagger the shard startups */
-				std::this_thread::sleep_for(std::chrono::seconds(5));
-			}
-		}
-
-		/* Get all active DM channels and map them to user id -> dm id */
-		this->current_user_get_dms([this](const dpp::confirmation_callback_t& completion) {
-			dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
-			for (auto & c : dmchannels) {
-				for (auto & u : c.second.recipients) {
-					this->set_dm_channel(u, c.second.id);
-				}
-			}
-		});
-
-		log(ll_debug, "Shards started.");
-		
-		if (!return_after)
-		    block_calling_thread();
 	}
+	catch (const dpp::rest_exception& e) {
+		if (std::string(e.what()) == "401: Unauthorized") {
+			/* Throw special form of exception for invalid token */
+			throw dpp::invalid_token_exception("Invalid bot token (401: Unauthorized when getting gateway shard count)");
+		} else {
+			/* Rethrow */
+			throw e;
+		}
+	}
+
+	start_time = time(NULL);
+
+	log(ll_debug, fmt::format("Starting with {} shards...", numshards));
+
+	for (uint32_t s = 0; s < numshards; ++s) {
+		/* Filter out shards that aren't part of the current cluster, if the bot is clustered */
+		if (s % maxclusters == cluster_id) {
+			/* Each discord_client spawns its own thread in its run() */
+			try {
+				this->shards[s] = new discord_client(this, s, numshards, token, intents, compressed, ws_mode);
+				this->shards[s]->run();
+			}
+			catch (const std::exception &e) {
+				log(dpp::ll_critical, fmt::format("Could not start shard {}: {}", s, e.what()));
+			}
+			/* Stagger the shard startups, pausing every 'session_start_max_concurrency' shards for 5 seconds.
+			 * This means that for bots that don't have large bot sharding, any number % 1 is always 0,
+			 * so it will pause after every shard. For any with non-zero concurrency it'll pause 5 seconds
+			 * after every batch.
+			 */
+			if (((s + 1) % g.session_start_max_concurrency) == 0) {
+				size_t wait_time = 5;
+				if (g.session_start_max_concurrency > 1) {
+					/* If large bot sharding, be sure to give the batch of shards time to settle */
+					bool all_connected = true;
+					do {
+						all_connected = true;
+						for (auto& shard : this->shards) {
+							if (!shard.second->ready) {
+								all_connected = false;
+								std::this_thread::sleep_for(std::chrono::milliseconds(100));
+								break;
+							}
+						}
+					} while (all_connected);
+				}
+				std::this_thread::sleep_for(std::chrono::seconds(wait_time));
+			}
+		}
+	}
+
+	/* Get all active DM channels and map them to user id -> dm id */
+	this->current_user_get_dms([this](const dpp::confirmation_callback_t& completion) {
+		dpp::channel_map dmchannels = std::get<channel_map>(completion.value);
+		for (auto & c : dmchannels) {
+			for (auto & u : c.second.recipients) {
+				this->set_dm_channel(u, c.second.id);
+			}
+		}
+	});
+
+	log(ll_debug, "Shards started.");
+	
+	if (!return_after)
+		block_calling_thread();
 }
 
 snowflake cluster::get_dm_channel(snowflake user_id) {

@@ -21,9 +21,6 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#ifndef _WIN32
-#include <unistd.h>
-#endif
 #include <dpp/exception.h>
 #include <dpp/discordclient.h>
 #include <dpp/cache.h>
@@ -33,12 +30,31 @@
 #include <dpp/fmt-minimal.h>
 #include <dpp/etf.h>
 #include <zlib.h>
+#ifdef _WIN32
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <netinet/in.h>
+	#include <resolv.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <netinet/tcp.h>
+#endif
 
 #define PATH_UNCOMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json"
 #define PATH_COMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
 #define PATH_UNCOMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf"
 #define PATH_COMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf&compress=zlib-stream"
 #define DECOMP_BUFFER_SIZE	512 * 1024
+
+#define STRINGIFY(a) STRINGIFY_(a)
+#define STRINGIFY_(a) #a
+
+#ifndef DPP_OS
+#define DPP_OS unknown
+#endif
 
 namespace dpp {
 
@@ -298,9 +314,9 @@ bool discord_client::handle_frame(const std::string &buffer)
 								{ "token", this->token },
 								{ "properties",
 									{
-										{ "$os", "Linux" },
-										{ "$browser", "D++" },
-										{ "$device", "D++" }
+										{ "os", STRINGIFY(DPP_OS) },
+										{ "browser", "D++" },
+										{ "device", "D++" }
 									}
 								},
 								{ "shard", json::array({ shard_id, max_shards }) },

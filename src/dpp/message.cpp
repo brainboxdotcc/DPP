@@ -725,7 +725,7 @@ attachment::attachment(struct message* o, json *j) : attachment(o) {
 
 void attachment::download(http_completion_event callback) const {
 	/* Download attachment if there is one attached to this object */
-	if (!owner->owner) {
+	if (owner == nullptr || owner->owner == nullptr) {
 		throw dpp::logic_exception("attachment has no owning message/cluster");
 	}
 	if (callback && this->id && !this->url.empty()) {

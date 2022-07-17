@@ -35,11 +35,11 @@ void cluster::channel_delete(snowflake channel_id, command_completion_event_t ca
 	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "", m_delete, "", callback);
 }
 
-void cluster::channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback) {
+void cluster::channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member, command_completion_event_t callback) {
 	channel_edit_permissions(c.id, overwrite_id, allow, deny, member, callback);
 }
 
-void cluster::channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback) {
+void cluster::channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member, command_completion_event_t callback) {
 	json j({ {"allow", std::to_string(allow)}, {"deny", std::to_string(deny)}, {"type", member ? 1 : 0}  });
 	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "permissions/" + std::to_string(overwrite_id), m_put, j.dump(), callback);
 }
@@ -51,6 +51,12 @@ void cluster::channel_edit_positions(const std::vector<channel> &c, command_comp
 	}
 	for (auto & ch : c) {
 		json cj({ {"id", ch.id}, {"position", ch.position}  });	
+		if (ch.parent_id) {
+			cj["parent_id"] = std::to_string(ch.parent_id);
+		}
+		if (ch.flags & c_lock_permissions) {
+			cj["lock_permissions"] = true;
+		}
 		j.push_back(cj);
 	}
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(c[0].guild_id), "channels/" + std::to_string(c[0].id), m_patch, j.dump(), callback);
