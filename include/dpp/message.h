@@ -262,11 +262,11 @@ public:
 	 */
 	int32_t max_values;
 
-	/** Minimum length for text input (0-4000)
+	/** Minimum length for text input (0-6000)
 	 */
 	int32_t min_length;
 
-	/** Maximum length for text input (1-4000)
+	/** Maximum length for text input (1-6000)
 	 */
 	int32_t max_length;
 
