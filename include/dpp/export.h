@@ -42,6 +42,12 @@
 	#endif
 #endif
 
+#ifdef INCLUDE_NLOHMANN_RAW
+#define INCLUDE_NLOHMANN <nlohmann/json.hpp>
+#else
+#define INCLUDE_NLOHMANN <dpp/nlohmann/json.hpp>
+#endif
+
 #ifndef _WIN32
 	#define SOCKET int
 #else

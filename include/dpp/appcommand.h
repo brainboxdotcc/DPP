@@ -18,11 +18,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#if INCLUDE_NLOHMANN_RAW
-#define INCLUDE_NLOHMANN <nlohmann/json.hpp>
-#else
-#define INCLUDE_NLOHMANN <dpp/nlohmann/json.hpp>
-#endif
 
 #pragma once
 
