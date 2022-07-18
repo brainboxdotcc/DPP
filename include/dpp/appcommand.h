@@ -18,7 +18,14 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#if INCLUDE_NLOHMANN_RAW
+#define INCLUDE_NLOHMANN <nlohmann/json.hpp>
+#else
+#define INCLUDE_NLOHMANN <dpp/nlohmann/json.hpp>
+#endif
+
 #pragma once
+
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
@@ -27,7 +34,7 @@
 #include <dpp/role.h>
 #include <dpp/user.h>
 #include <variant>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include INCLUDE_NLOHMANN
 #include <dpp/json_interface.h>
 
 namespace dpp {
