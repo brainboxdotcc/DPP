@@ -44,7 +44,6 @@
 
 #ifdef INCLUDE_NLOHMANN_RAW
 #define INCLUDE_NLOHMANN <nlohmann/json.hpp>
-#define INCLUDE_NLOHMANN_FWD <nlohmann/json_fwd.hpp>
 #else
 #define INCLUDE_NLOHMANN <dpp/nlohmann/json.hpp>
 #define INCLUDE_NLOHMANN_FWD <dpp/nlohmann/json_fwd.hpp>
