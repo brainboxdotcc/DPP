@@ -23,7 +23,7 @@
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include INCLUDE_NLOHMANN
 #include <unordered_map>
 #include <dpp/json_interface.h>
 

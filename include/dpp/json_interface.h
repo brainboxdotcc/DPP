@@ -22,7 +22,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/exception.h>
-#include INCLUDE_NLOHMANN_FWD
+#include INCLUDE_NLOHMANN
 
 namespace dpp {
 	/**

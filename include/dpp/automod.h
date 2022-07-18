@@ -24,7 +24,7 @@
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include INCLUDE_NLOHMANN
 #include <dpp/json_interface.h>
 
 namespace dpp {

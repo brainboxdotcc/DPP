@@ -26,7 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/user.h>
 #include <dpp/permissions.h>
-#include INCLUDE_NLOHMANN_FWD
+#include INCLUDE_NLOHMANN
 #include <dpp/json_interface.h>
 
 namespace dpp {

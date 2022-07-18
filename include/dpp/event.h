@@ -21,7 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include INCLUDE_NLOHMANN
 
 #define event_decl(x,wstype) /** @brief Internal event handler for wstype websocket events. Called for each websocket message of this type. @internal */ \
 	class x : public event { public: virtual void handle(dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
