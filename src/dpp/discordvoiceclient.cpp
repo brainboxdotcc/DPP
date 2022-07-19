@@ -42,7 +42,6 @@
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt-minimal.h>
 
 #ifdef HAVE_VOICE
 	#include <sodium.h>
@@ -535,7 +534,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 				for (auto & m : d["modes"]) {
 					this->modes.push_back(m.get<std::string>());
 				}
-				log(ll_debug, fmt::format("Voice websocket established; UDP endpoint: {}:{} [ssrc={}] with {} modes", ip, port, ssrc, modes.size()));
+				log(ll_debug, "Voice websocket established; UDP endpoint: " + ip + ":" + std::to_string(port) + " [ssrc=" + std::to_string(ssrc) + "] with " + std::to_string(modes.size()) + " modes");
 
 				external_ip = discover_ip();
 
@@ -884,7 +883,7 @@ void discord_voice_client::error(uint32_t errorcode)
 	if (i != errortext.end()) {
 		error = i->second;
 	}
-	log(dpp::ll_warning, fmt::format("Voice session error: {} on channel {}: {}", errorcode, channel_id, error));
+	log(dpp::ll_warning, "Voice session error: " + std::to_string(errorcode) + " on channel " + std::to_string(channel_id) + ": " + error);
 
 	/* Errors 4004...4016 except 4014 are fatal and cause termination of the voice session */
 	if (errorcode >= 4003) {
@@ -1018,13 +1017,13 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 				int retval = opus_repacketizer_cat(repacketizer, out, ret);
 				if (retval != OPUS_OK) {
 					isOk = false;
-					log(ll_warning, fmt::format("opus_repacketizer_cat(): {}", opus_strerror(retval)));
+					log(ll_warning, "opus_repacketizer_cat(): " + std::string(opus_strerror(retval)));
 					break;
 				}
 				out += ret;
 			} else {
 				isOk = false;
-				log(ll_warning, fmt::format("opus_encode(): {}", opus_strerror(ret)));
+					log(ll_warning, "opus_encode(): " + std::string(opus_strerror(ret)));
 				break;
 			}
 		}
@@ -1033,11 +1032,11 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 			if (ret > 0) {
 				outDataSize = ret;
 			} else {
-				log(ll_warning, fmt::format("opus_repacketizer_out(): {}", opus_strerror(ret)));
+				log(ll_warning, "opus_repacketizer_out(): " + std::string(opus_strerror(ret)));
 			}
 		}
 	} else {
-		throw dpp::voice_exception(fmt::format("Invalid input data length: {}, must be n times of {}", inDataSize, mEncFrameBytes));
+		throw dpp::voice_exception("Invalid input data length: " + std::to_string(inDataSize) + ", must be n times of " + std::to_string(mEncFrameBytes));
 	}
 #else
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");

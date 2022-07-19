@@ -9,7 +9,7 @@ If you want to make your bot use spdlog, like aegis does, you can attach it to t
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <iomanip>
 #include <dpp/dpp.h>
-#include <dpp/fmt/format.h>
+#include <fmt/format.h>
 
 int main(int argc, char const *argv[])
 {

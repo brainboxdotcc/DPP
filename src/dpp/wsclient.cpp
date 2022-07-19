@@ -23,7 +23,6 @@
 #include <fstream>
 #include <dpp/wsclient.h>
 #include <dpp/utility.h>
-#include <dpp/fmt-minimal.h>
 
 namespace dpp {
 
@@ -37,7 +36,7 @@ const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
 websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath, ws_opcode opcode)
 	: ssl_client(hostname, port),
-	key(fmt::format("{:16x}", time(nullptr))),
+	key(std::to_string(time(nullptr))),
 	state(HTTP_HEADERS),
 	path(urlpath),
 	data_opcode(opcode)
@@ -49,19 +48,14 @@ void websocket_client::connect()
 	state = HTTP_HEADERS;
 	/* Send headers synchronously */
 	this->write(
-		fmt::format(
-
-			"GET {} HTTP/1.1\r\n"
-			"Host: {}\r\n"
-			"pragma: no-cache\r\n"
-			"User-Agent: DPP/0.1\r\n"
-			"Upgrade: WebSocket\r\n"
-			"Connection: Upgrade\r\n"
-			"Sec-WebSocket-Key: {}\r\n"
-			"Sec-WebSocket-Version: 13\r\n\r\n",
-
-			this->path, this->hostname, this->key
-		)
+		"GET " + this->path + " HTTP/1.1\r\n"
+		"Host: " + this->hostname + "\r\n"
+		"pragma: no-cache\r\n"
+		"User-Agent: DPP/0.1\r\n"
+		"Upgrade: WebSocket\r\n"
+		"Connection: Upgrade\r\n"
+		"Sec-WebSocket-Key: " + this->key + "\r\n"
+		"Sec-WebSocket-Version: 13\r\n\r\n"
 	);
 }
 

@@ -38,8 +38,6 @@
 #else
 	#ifdef _WIN32
 		#define DPP_EXPORT __declspec(dllimport)
-		/* This is required otherwise fmt::format requires additional file linkage to your project */
-		#define FMT_HEADER_ONLY
 	#else
 		#define DPP_EXPORT
 	#endif

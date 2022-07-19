@@ -5,7 +5,7 @@ This is how to use Subcommands within your Slash Commands for your bots.
 To make a subcomamnd within your command use this
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <dpp/fmt/format.h>
+#include <fmt/format.h>
 #include <iostream>
 
 int main() {
@@ -50,7 +50,7 @@ int main() {
 				if (cmd_data.options[0].options.size() > 0) {
 					/* Get the user option as a snowflake. */
 					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
-					event.reply(fmt::format("<@{}> has now been turned into a dog.", user)); 
+					event.reply("<@" + std::to_string(user) + "> has now been turned into a dog.")); 
 				} else {
 					/* Reply if there were no options.. */
 					event.reply("<A picture of a dog.>");
@@ -62,7 +62,7 @@ int main() {
 				if (cmd_data.options[0].options.size() > 0) {
 					/* Get the user option as a snowflake. */
 					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
-					event.reply(fmt::format("<@{}> has now been turned into a cat.", user));
+					event.reply("<@" + std::to_string(user) + "> has now been turned into acat.")); 
 				} else {
 					/* Reply if there were no options.. */
 					event.reply("<A picture of a cat.>");

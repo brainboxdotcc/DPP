@@ -818,7 +818,6 @@ EXCLUDE_PATTERNS       = */dpp/nlohmann/* \
 # exclude all test directories use the pattern */test/*
 
 EXCLUDE_SYMBOLS	= nlohmann::* \
-			fmt::* \
 			*thonk \
 			deps \
 			build \
