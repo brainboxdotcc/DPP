@@ -352,11 +352,22 @@ void discord_voice_client::thread_run()
 {
 	utility::set_thread_name(std::string("vc/") + std::to_string(server_id));
 	do {
+		bool error = false;
 		ssl_client::read_loop();
 		ssl_client::close();
 		if (!terminating) {
-			ssl_client::connect();
-			websocket_client::connect();
+			do {
+				try {
+					ssl_client::connect();
+					websocket_client::connect();
+				}
+				catch (const std::exception &e) {
+					log(dpp::ll_error, std::string("Error establishing voice websocket connection, retry in 5 seconds: ") + e.what());
+					ssl_client::close();
+					std::this_thread::sleep_for(std::chrono::seconds(5));
+					error = true;
+				}
+			} while (error && !terminating);
 		}
 	} while(!terminating);
 }

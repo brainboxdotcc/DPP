@@ -371,30 +371,31 @@ void ssl_client::read_loop()
 	 */
 	int r = 0;
 	size_t client_to_server_length = 0, client_to_server_offset = 0;
-	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
+	bool read_blocked_on_write =  false, write_blocked_on_read = false, read_blocked = false;
 	fd_set readfds, writefds, efds;
 	char client_to_server_buffer[DPP_BUFSIZE], server_to_client_buffer[DPP_BUFSIZE];
 
-	if (sfd == INVALID_SOCKET)  {
-		throw dpp::connection_exception("Invalid file descriptor in read_loop()");
-	}
-	
-	/* Make the socket nonblocking */
-#ifdef _WIN32
-	u_long mode = 1;
-	int result = ioctlsocket(sfd, FIONBIO, &mode);
-	if (result != NO_ERROR)
-		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
-#else
-	int ofcmode = fcntl(sfd, F_GETFL, 0);
-	ofcmode |= O_NDELAY;
-	if (fcntl(sfd, F_SETFL, ofcmode)) {
-		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
-	}
-#endif
-	nonblocking = true;
-
 	try {
+
+		if (sfd == INVALID_SOCKET)  {
+			throw dpp::connection_exception("Invalid file descriptor in read_loop()");
+		}
+		
+		/* Make the socket nonblocking */
+#ifdef _WIN32
+		u_long mode = 1;
+		int result = ioctlsocket(sfd, FIONBIO, &mode);
+		if (result != NO_ERROR)
+			throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+#else
+		int ofcmode = fcntl(sfd, F_GETFL, 0);
+		ofcmode |= O_NDELAY;
+		if (fcntl(sfd, F_SETFL, ofcmode)) {
+			throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+		}
+#endif
+		nonblocking = true;
+
 		/* Loop until there is a socket error */
 		while(true) {
 
