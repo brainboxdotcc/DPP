@@ -640,6 +640,12 @@ public:
 	virtual ~cluster();
 
 	/**
+	 * @brief End cluster execution without destructing it.
+	 * To restart the cluster, call cluster::start() again.
+	 */
+	void shutdown();
+
+	/**
 	 * @brief Get the rest_queue object which handles HTTPS requests to Discord
 	 * @return request_queue* pointer to request_queue object
 	 */
