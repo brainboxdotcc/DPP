@@ -92,7 +92,7 @@ int main(int argc, char const *argv[])
 	});
 
 	/* Start bot */
-	bot.start(false);
+	bot.start(dpp::st_wait);
 
 	/* Clean up */
 	mpg123_exit();

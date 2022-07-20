@@ -455,7 +455,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("BOTSTART", false);
 		try {
 			if (!offline) {
-				bot.start(true);
+				bot.start(dpp::st_return);
 				set_test("BOTSTART", true);
 			}
 		}
