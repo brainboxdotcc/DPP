@@ -22,6 +22,7 @@ jobs:
 
          - name: Construct the original portfile and version file.
            run: cd ./dpp &&
+                dir &&   
                 sudo touch ./cmake/Raw-Files/Portfile-The-First.cmake &&
                 sudo touch ./cmake/Raw-Files/Portfile-The-Second.cmake &&
                 sudo touch ./vcpkg/ports/dpp/vcpkg.json &&
