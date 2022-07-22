@@ -192,7 +192,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = p == 5120 && success;
 		auto s = std::to_string(p);
 		success = s == "5120" && success;
-		json j;
+		nlohmann::json j;
 		j["value"] = p;
 		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
 		p.set(dpp::p_administrator, dpp::p_ban_members);
@@ -208,7 +208,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	}
 
 	set_test("TIMESTRINGTOTIMESTAMP", false);
-	json tj;
+	nlohmann::json tj;
 	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
 	tj["t2"] = "2022-01-19T17:18:14+00:00";
 	uint32_t inTimestamp = 1642612694;
