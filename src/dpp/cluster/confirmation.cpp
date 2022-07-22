@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/cluster.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
 
