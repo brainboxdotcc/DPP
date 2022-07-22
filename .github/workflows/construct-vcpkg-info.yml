@@ -22,7 +22,6 @@ jobs:
 
          - name: Construct the original portfile and version file.
            run: cd ./dpp &&
-                sudo echo ${GITHUB_PATH} &&
                 sudo touch ./cmake/Raw-Files/Portfile-The-First.cmake &&
                 sudo touch ./cmake/Raw-Files/Portfile-The-Second.cmake &&
                 sudo touch ./vcpkg/ports/dpp/vcpkg.json &&
@@ -63,7 +62,7 @@ jobs:
                 sudo git add . &&
                 sudo git commit -m "Updates!"  &&
                 sudo /usr/local/share/vcpkg/vcpkg x-add-version --overwrite-version --all --skip-version-format-check &&
-                cd /home/runner/work/DPP/DPP/DPP &&
+                cd /home/runner/work/DPP/DPP/dpp &&
                 sudo cp -v -R /usr/local/share/vcpkg/ports/dpp/vcpkg.json ./vcpkg/ports/dpp/vcpkg.json &&
                 sudo cp -v -R /usr/local/share/vcpkg/versions/baseline.json ./vcpkg/versions/baseline.json &&
                 sudo cp -v -R /usr/local/share/vcpkg/versions/d-/dpp.json ./vcpkg/versions/d-/dpp.json &&
