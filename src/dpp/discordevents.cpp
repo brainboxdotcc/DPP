@@ -30,7 +30,7 @@
 #include <dpp/event.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/nlohmann/json.hpp>
 #include <time.h>
 #include <iomanip>
 #include <sstream>

@@ -22,7 +22,7 @@
 #include <dpp/exception.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
 

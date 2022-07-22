@@ -20,28 +20,31 @@
  ************************************************************************************/
 #pragma once
 
- /* Compile-time assertion check for C++17 */
- // Investigate: MSVC doesn't like this
- //static_assert(__cplusplus >= 201703L, "D++ Requires a C++17 compatible compiler. Please ensure that you have enabled C++17 in your compiler flags.");
+/* Compile-time assertion check for C++17 */
+// Investigate: MSVC doesn't like this
+//static_assert(__cplusplus >= 201703L, "D++ Requires a C++17 compatible compiler. Please ensure that you have enabled C++17 in your compiler flags.");
 
 #ifdef DPP_BUILD
 
-#ifdef _WIN32
-#include <dpp/win32_safe_warnings.h>
-#define DPP_EXPORT __declspec(dllexport)
+	#ifdef _WIN32
+		#include <dpp/win32_safe_warnings.h>
+	#endif
+
+	#ifdef _WIN32
+		#define DPP_EXPORT __declspec(dllexport)
+	#else
+		#define DPP_EXPORT
+	#endif
 #else
-#define DPP_EXPORT
-#endif
-#else
-#ifdef _WIN32
-#define DPP_EXPORT __declspec(dllimport)
-#else
-#define DPP_EXPORT
-#endif
+	#ifdef _WIN32
+		#define DPP_EXPORT __declspec(dllimport)
+	#else
+		#define DPP_EXPORT
+	#endif
 #endif
 
 #ifndef _WIN32
-#define SOCKET int
+	#define SOCKET int
 #else
-#include <WinSock2.h>
+	#include <WinSock2.h>
 #endif
