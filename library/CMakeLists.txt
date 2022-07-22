@@ -196,8 +196,8 @@ foreach (fullmodname "${subdirlist}")
 	target_precompile_headers(
 		"${modname}"
 		PRIVATE
-		"${CMAKE_SOURCE_DIR}/include/dpp/nlohmann/json.hpp"
 		"${CMAKE_SOURCE_DIR}/include/dpp/nlohmann/json_fwd.hpp"
+		"${CMAKE_SOURCE_DIR}/include/dpp/nlohmann/json.hpp"
 	)
 
 	if (WIN32 AND NOT MINGW)
