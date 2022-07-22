@@ -156,7 +156,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	{ // test dpp::command_option_choice::fill_from_json
 		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", false);
-		json j;
+		nlohmann::json j;
 		dpp::command_option_choice choice;
 		j["value"] = 54.321;
 		choice.fill_from_json(&j);
