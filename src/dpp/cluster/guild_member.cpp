@@ -18,7 +18,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/fmt-minimal.h>
 #include <dpp/restrequest.h>
 
 namespace dpp {

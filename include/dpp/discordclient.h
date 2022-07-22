@@ -38,7 +38,7 @@
 using json = nlohmann::json;
 
 #define DISCORD_API_VERSION	"10"
-#define DEFAULT_GATEWAY		"gateway.discord.gg"
+#define DEFAULT_GATEWAY		"127.0.0.1"
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
 namespace dpp {
 
