@@ -27,7 +27,7 @@
 #include <dpp/role.h>
 #include <dpp/user.h>
 #include <variant>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/json_interface.h>
 
 namespace dpp {

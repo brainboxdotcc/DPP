@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/voiceregion.h>
 #include <dpp/discordevents.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json_fwd.hpp>
 
 namespace dpp {
 

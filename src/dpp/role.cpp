@@ -24,7 +24,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/permissions.h>
 #include <dpp/stringops.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json_fwd.hpp>
 
 using json = nlohmann::json;
 

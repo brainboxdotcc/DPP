@@ -22,7 +22,7 @@
 #include <dpp/cluster.h>
 #include <dpp/guild.h>
 #include <dpp/stringops.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json_fwd.hpp>
 
 using json = nlohmann::json;
 
