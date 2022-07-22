@@ -1,14 +1,16 @@
 name: Construct vcpkg info.
+
 on:
   push:
 
 jobs:
   Build-It:
     runs-on: ubuntu-22.04
-
     steps:
          - name: Update vcpkg and install other depdendencies.
-           run: sudo apt-get install nasm &&
+           uses: actions/checkout@v3
+           run: sudo echo ${GITHUB_WORKSPACE}
+                sudo apt-get install nasm &&
                 cd /usr/local/share/vcpkg &&
                 sudo ./bootstrap-vcpkg.sh &&
                 sudo git stash &&
