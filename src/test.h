@@ -26,7 +26,7 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 #include <dpp/dpp.h>
 #include INCLUDE_NLOHMANN
 #include <iomanip>
-F
+
 #ifdef _WIN32
 #define SHARED_OBJECT "dpp.dll"
 #else

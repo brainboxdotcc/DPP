@@ -42,7 +42,6 @@
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
 #include INCLUDE_NLOHMANN
-#include <dpp/fmt-minimal.h>
 
 #ifdef HAVE_VOICE
 	#include <sodium.h>
@@ -227,7 +226,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					}
 				} else {
 					voice_receive_t& vr = *d.parked_payloads.top().vr;
-					if (int samples = opus_decode(d.decoder.get(), vr.audio_data.data(), static_cast<opus_int32>(vr.audio_data.length()), pcm, 5760, 0);
+					if (int samples = opus_decode(d.decoder.get(), vr.audio_data.data(), vr.audio_data.length(), pcm, 5760, 0);
 					    samples >= 0) {
 						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
 							samples * opus_channel_count * sizeof(opus_int16));
@@ -246,7 +245,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			/* Downsample the 32 bit samples back to 16 bit */
 			opus_int16 pcm_downsample[23040] = { 0 };
 			for (int v = 0; v < max_samples * opus_channel_count; ++v) {
-				pcm_downsample[v] = pcm_mix[v] / static_cast<opus_int16>(park_count);
+				pcm_downsample[v] = pcm_mix[v] / park_count;
 			}
 			voice_receive_t vr(nullptr, "", &client, 0, reinterpret_cast<uint8_t*>(pcm_downsample),
 				max_samples * opus_channel_count * sizeof(opus_int16));
@@ -352,11 +351,22 @@ void discord_voice_client::thread_run()
 {
 	utility::set_thread_name(std::string("vc/") + std::to_string(server_id));
 	do {
+		bool error = false;
 		ssl_client::read_loop();
 		ssl_client::close();
 		if (!terminating) {
-			ssl_client::connect();
-			websocket_client::connect();
+			do {
+				try {
+					ssl_client::connect();
+					websocket_client::connect();
+				}
+				catch (const std::exception &e) {
+					log(dpp::ll_error, std::string("Error establishing voice websocket connection, retry in 5 seconds: ") + e.what());
+					ssl_client::close();
+					std::this_thread::sleep_for(std::chrono::seconds(5));
+					error = true;
+				}
+			} while (error && !terminating);
 		}
 	} while(!terminating);
 }
@@ -524,7 +534,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 				for (auto & m : d["modes"]) {
 					this->modes.push_back(m.get<std::string>());
 				}
-				log(ll_debug, fmt::format("Voice websocket established; UDP endpoint: {}:{} [ssrc={}] with {} modes", ip, port, ssrc, modes.size()));
+				log(ll_debug, "Voice websocket established; UDP endpoint: " + ip + ":" + std::to_string(port) + " [ssrc=" + std::to_string(ssrc) + "] with " + std::to_string(modes.size()) + " modes");
 
 				external_ip = discover_ip();
 
@@ -873,7 +883,7 @@ void discord_voice_client::error(uint32_t errorcode)
 	if (i != errortext.end()) {
 		error = i->second;
 	}
-	log(dpp::ll_warning, fmt::format("Voice session error: {} on channel {}: {}", errorcode, channel_id, error));
+	log(dpp::ll_warning, "Voice session error: " + std::to_string(errorcode) + " on channel " + std::to_string(channel_id) + ": " + error);
 
 	/* Errors 4004...4016 except 4014 are fatal and cause termination of the voice session */
 	if (errorcode >= 4003) {
@@ -905,7 +915,7 @@ void discord_voice_client::set_user_gain(snowflake user_id, float factor)
 		 * factor = 10^(x / (20 * 256))
 		 * x = log_10(factor) * 20 * 256
 		 */
-		gain = static_cast<int16_t>(std::log10(factor) * 20 * 256);
+		gain = std::log10(factor) * 20 * 256;
 	}
 
 	std::lock_guard lk(voice_courier_shared_state.mtx);
@@ -1007,13 +1017,13 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 				int retval = opus_repacketizer_cat(repacketizer, out, ret);
 				if (retval != OPUS_OK) {
 					isOk = false;
-					log(ll_warning, fmt::format("opus_repacketizer_cat(): {}", opus_strerror(retval)));
+					log(ll_warning, "opus_repacketizer_cat(): " + std::string(opus_strerror(retval)));
 					break;
 				}
 				out += ret;
 			} else {
 				isOk = false;
-				log(ll_warning, fmt::format("opus_encode(): {}", opus_strerror(ret)));
+					log(ll_warning, "opus_encode(): " + std::string(opus_strerror(ret)));
 				break;
 			}
 		}
@@ -1022,11 +1032,11 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 			if (ret > 0) {
 				outDataSize = ret;
 			} else {
-				log(ll_warning, fmt::format("opus_repacketizer_out(): {}", opus_strerror(ret)));
+				log(ll_warning, "opus_repacketizer_out(): " + std::string(opus_strerror(ret)));
 			}
 		}
 	} else {
-		throw dpp::voice_exception(fmt::format("Invalid input data length: {}, must be n times of {}", inDataSize, mEncFrameBytes));
+		throw dpp::voice_exception("Invalid input data length: " + std::to_string(inDataSize) + ", must be n times of " + std::to_string(mEncFrameBytes));
 	}
 #else
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");

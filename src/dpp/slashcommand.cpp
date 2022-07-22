@@ -104,6 +104,16 @@ command_option& command_option::set_max_value(command_option_range max_v) {
 	return *this;
 }
 
+command_option& command_option::set_min_length(command_option_range min_v) {
+	min_value = min_v;
+	return *this;
+}
+
+command_option& command_option::set_max_length(command_option_range max_v) {
+	max_value = max_v;
+	return *this;
+}
+
 void to_json(json& j, const command_option& opt) {
 	j["name"] = opt.name;
 	j["description"] = opt.description;
@@ -125,18 +135,19 @@ void to_json(json& j, const command_option& opt) {
 	}
 
 	/* Check for minimum and maximum values */
-	if (opt.type == dpp::co_number || opt.type == dpp::co_integer) {
+	if (opt.type == dpp::co_number || opt.type == dpp::co_integer || opt.type == dpp::co_string) {
+		std::string key = (opt.type == dpp::co_string) ? "_length" : "_value";
 		/* Min */
 		if (std::holds_alternative<double>(opt.min_value)) {
-			j["min_value"] = std::get<double>(opt.min_value);
+			j["min" + key] = std::get<double>(opt.min_value);
 		} else if (std::holds_alternative<int64_t>(opt.min_value)) {
-			j["min_value"] = std::get<int64_t>(opt.min_value);
+			j["min" + key] = std::get<int64_t>(opt.min_value);
 		}
 		/* Max */
 		if (std::holds_alternative<double>(opt.max_value)) {
-			j["max_value"] = std::to_string(std::get<double>(opt.max_value));
+			j["max" + key] = std::to_string(std::get<double>(opt.max_value));
 		} else if (std::holds_alternative<int64_t>(opt.max_value)) {
-			j["max_value"] = std::get<int64_t>(opt.max_value);
+			j["max" + key] = std::get<int64_t>(opt.max_value);
 		}
 	}
 
@@ -342,20 +353,20 @@ command_option& command_option::set_auto_complete(bool autocomp)
 }
 
 command_option &command_option::fill_from_json(nlohmann::json *j) {
-    uint8_t i = 3; // maximum amount of nested options
-    /*
-     * Command options contains command options. Therefor the object is filled with recursion.
-     */
-    std::function<void(nlohmann::json *, command_option &)> fill = [&i, &fill](nlohmann::json *j, command_option &o) {
-        o.type = (command_option_type)int8_not_null(j, "type");
-        o.name = string_not_null(j, "name");
-        o.description = string_not_null(j, "description");
-        o.required = bool_not_null(j, "required");
-        if (j->contains("choices")) {
-            for (auto& jchoice : (*j)["choices"]) {
-                o.choices.push_back(command_option_choice().fill_from_json(&jchoice));
-            }
-        }
+	uint8_t i = 3; // maximum amount of nested options
+	/*
+	* Command options contains command options. Therefor the object is filled with recursion.
+	*/
+	std::function<void(nlohmann::json *, command_option &)> fill = [&i, &fill](nlohmann::json *j, command_option &o) {
+		o.type = (command_option_type)int8_not_null(j, "type");
+		o.name = string_not_null(j, "name");
+		o.description = string_not_null(j, "description");
+		o.required = bool_not_null(j, "required");
+		if (j->contains("choices")) {
+			for (auto& jchoice : (*j)["choices"]) {
+				o.choices.push_back(command_option_choice().fill_from_json(&jchoice));
+			}
+		}
 
 		if (j->contains("name_localizations")) {
 			for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
@@ -368,38 +379,52 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 			}
 		}
 
-        if (j->contains("options") && i > 0) {
-            i--; // prevent infinite recursion call with a counter
-            for (auto &joption : (*j)["options"]) {
-                command_option p;
-                fill(&joption, p);
-                o.options.push_back(p);
-            }
-        }
+		if (j->contains("options") && i > 0) {
+			i--; // prevent infinite recursion call with a counter
+			for (auto &joption : (*j)["options"]) {
+				command_option p;
+				fill(&joption, p);
+				o.options.push_back(p);
+			}
+		}
 
-        if (j->contains("channel_types")) {
-            for (auto& jtype : (*j)["channel_types"]) {
-                o.channel_types.push_back( (channel_type)jtype.get<int8_t>());
-            }
-        }
-        if (j->contains("min_value")) {
-            if ((*j)["min_value"].is_number_integer()) {
-                o.min_value.emplace<int64_t>(int64_not_null(j, "min_value"));
-            } else if ((*j)["min_value"].is_number()) {
-                o.min_value.emplace<double>(double_not_null(j, "min_value"));
-            }
-        }
-        if (j->contains("max_value")) {
-            if ((*j)["max_value"].is_number_integer()) {
-                o.max_value.emplace<int64_t>(int64_not_null(j, "max_value"));
-            } else if ((*j)["max_value"].is_number()) {
-                o.max_value.emplace<double>(double_not_null(j, "max_value"));
-            }
-        }
-        o.autocomplete = bool_not_null(j, "autocomplete");
-    };
+		if (j->contains("channel_types")) {
+			for (auto& jtype : (*j)["channel_types"]) {
+				o.channel_types.push_back( (channel_type)jtype.get<int8_t>());
+			}
+		}
+		if (j->contains("min_value")) {
+			if ((*j)["min_value"].is_number_integer()) {
+				o.min_value.emplace<int64_t>(int64_not_null(j, "min_value"));
+			} else if ((*j)["min_value"].is_number()) {
+				o.min_value.emplace<double>(double_not_null(j, "min_value"));
+			}
+		}
+		if (j->contains("max_value")) {
+			if ((*j)["max_value"].is_number_integer()) {
+				o.max_value.emplace<int64_t>(int64_not_null(j, "max_value"));
+			} else if ((*j)["max_value"].is_number()) {
+				o.max_value.emplace<double>(double_not_null(j, "max_value"));
+			}
+		}
+		if (j->contains("min_length")) {
+			if ((*j)["min_length"].is_number_integer()) {
+				o.min_value.emplace<int64_t>(int64_not_null(j, "min_length"));
+			} else if ((*j)["min_length"].is_number()) {
+				o.min_value.emplace<double>(double_not_null(j, "min_length"));
+			}
+		}
+		if (j->contains("max_length")) {
+			if ((*j)["max_length"].is_number_integer()) {
+				o.max_value.emplace<int64_t>(int64_not_null(j, "max_length"));
+			} else if ((*j)["max_length"].is_number()) {
+				o.max_value.emplace<double>(double_not_null(j, "max_length"));
+			}
+		}
+		o.autocomplete = bool_not_null(j, "autocomplete");
+	};
 
-    fill(j, *this);
+	fill(j, *this);
 
 	return *this;
 }

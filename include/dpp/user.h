@@ -89,7 +89,7 @@ public:
 	uint32_t flags;
 	/** Discriminator (aka tag), 4 digits usually displayed with leading zeroes.
 	 *
-	 * @note To print the discriminator with leading zeroes, use something like `fmt::format("{:04d}", discriminator)`
+	 * @note To print the discriminator with leading zeroes, use format_username()
 	 */
 	uint16_t discriminator;
 	/** Reference count of how many guilds this user is in */
