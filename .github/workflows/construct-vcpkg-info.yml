@@ -7,8 +7,10 @@ jobs:
   Build-It:
     runs-on: ubuntu-22.04
     steps:
-         - name: Update vcpkg and install other depdendencies.
+         - name: Checkout the repository.
            uses: actions/checkout@v3
+
+         - name: Update vcpkg and install other depdendencies.
            run: sudo echo ${GITHUB_WORKSPACE}
                 sudo apt-get install nasm &&
                 cd /usr/local/share/vcpkg &&
