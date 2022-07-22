@@ -12,6 +12,7 @@ dpp::interaction_create_t::reply has two overloaded versions of the method, one 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
+#include <dpp/fmt/format.h>
 
 int main()
 {
@@ -28,7 +29,7 @@ int main()
 			/* Reply to the command. There is an overloaded version of this
 			* call that accepts a dpp::message so you can send embeds.
 			*/
-			event.reply(std::string("Blep! You chose") + animal);
+			event.reply(fmt::format("Blep! You chose {}", animal));
 		}
 	});
 
@@ -51,7 +52,7 @@ int main()
 		}
 	});
 
-	bot.start(dpp::st_wait);
+	bot.start(false);
 
 	return 0;
 }

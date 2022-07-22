@@ -22,6 +22,7 @@
 #include <dpp/cluster.h>
 #include <dpp/exception.h>
 #include <dpp/stringops.h>
+#include <dpp/fmt-minimal.h>
 #include <sstream>
 
 namespace dpp {
@@ -151,7 +152,7 @@ commandhandler& commandhandler::register_commands()
 	for(auto & guild_commands : bulk_registration_list_guild) {
 		owner->guild_bulk_command_create(guild_commands.second, guild_commands.first, [guild_commands, this](const dpp::confirmation_callback_t &callback) {
 			if (callback.is_error()) {
-				this->owner->log(dpp::ll_error, "Failed to register guild slash commands for guild id '" + std::to_string(guild_commands.first) + "': " + callback.http_info.body);
+				this->owner->log(dpp::ll_error, fmt::format("Failed to register guild slash commands for guild id '{}': {}", guild_commands.first, callback.http_info.body));
 			}
 		});
 	}

@@ -22,7 +22,7 @@
 #include <dpp/cluster.h>
 #include <dpp/scheduled_event.h>
 #include <dpp/stringops.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json.hpp>
 
 using json = nlohmann::json;
 

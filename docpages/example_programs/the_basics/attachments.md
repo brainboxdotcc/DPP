@@ -32,7 +32,7 @@ int main() {
         }
     });
 
-    bot.start(dpp::st_wait);
+    bot.start(false);
     return 0;
 }
 ~~~~~~~~~~
@@ -71,7 +71,7 @@ int main() {
         }
     });
 
-    bot.start(dpp::st_wait);
+    bot.start(false);
     return 0;
 }
 ~~~~~~~~~~
@@ -106,7 +106,7 @@ int main() {
         }
     });
 
-    bot.start(dpp::st_wait);
+    bot.start(false);
     return 0;
 }
 ~~~~~~~~~~

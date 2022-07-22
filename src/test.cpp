@@ -156,7 +156,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	{ // test dpp::command_option_choice::fill_from_json
 		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", false);
-		nlohmann::json j;
+		json j;
 		dpp::command_option_choice choice;
 		j["value"] = 54.321;
 		choice.fill_from_json(&j);
@@ -192,7 +192,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = p == 5120 && success;
 		auto s = std::to_string(p);
 		success = s == "5120" && success;
-		nlohmann::json j;
+		json j;
 		j["value"] = p;
 		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
 		p.set(dpp::p_administrator, dpp::p_ban_members);
@@ -208,7 +208,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	}
 
 	set_test("TIMESTRINGTOTIMESTAMP", false);
-	nlohmann::json tj;
+	json tj;
 	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
 	tj["t2"] = "2022-01-19T17:18:14+00:00";
 	uint32_t inTimestamp = 1642612694;
@@ -421,13 +421,41 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						set_test("MSGCREATESEND", false);
 					}
 				});
+				set_test("MSGCREATEREPLY", false);
+				set_test("MSGMENTIONUSER", false);
+				event.reply("MSGCREATEREPLY", true, [&bot, ref_id = event.msg.id, author_id = event.msg.author.id] (const auto& cc) {
+					if (!cc.is_error()) {
+						dpp::message m = std::get<dpp::message>(cc.value);
+						if (m.message_reference.message_id == ref_id) {
+							bool f = false;
+							for (auto&[usr, mem] : m.mentions) {
+								if (usr.id == author_id) {
+									set_test("MSGMENTIONUSER", true);
+									f = true;
+									break;
+								}
+							}
+							if (!f) {
+								set_test("MSGMENTIONUSER", false);
+							}
+							set_test("MSGCREATEREPLY", true);
+						} else {
+							bot.log(dpp::ll_debug, cc.http_info.body);
+							set_test("MSGCREATEREPLY", false);
+						}
+						bot.message_delete(m.id, m.channel_id);
+					} else { 
+						bot.log(dpp::ll_error, cc.http_info.body);
+						set_test("MSGCREATEREPLY", false);
+					}
+				});
 			}
 		});
 
 		set_test("BOTSTART", false);
 		try {
 			if (!offline) {
-				bot.start(dpp::st_return);
+				bot.start(true);
 				set_test("BOTSTART", true);
 			}
 		}

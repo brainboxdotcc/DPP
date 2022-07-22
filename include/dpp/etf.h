@@ -34,7 +34,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
 

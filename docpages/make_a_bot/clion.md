@@ -100,7 +100,7 @@ int main() {
         }
     });
 
-    bot.start(dpp::st_wait);
+    bot.start(false);
 }
 ~~~~~~~~~~~~~~~
 

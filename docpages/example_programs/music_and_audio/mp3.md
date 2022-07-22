@@ -5,7 +5,7 @@ To stream MP3 files via D++ you need to link an additional dependency to your bo
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/fmt/format.h>
 #include <iomanip>
 #include <sstream>
@@ -92,7 +92,7 @@ int main(int argc, char const *argv[])
 	});
 
 	/* Start bot */
-	bot.start(dpp::st_wait);
+	bot.start(false);
 
 	/* Clean up */
 	mpg123_exit();

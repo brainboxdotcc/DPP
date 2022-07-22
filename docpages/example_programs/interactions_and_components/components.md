@@ -42,7 +42,7 @@ int main() {
 		event.reply("You clicked: " + event.custom_id);
 	});
 
-	bot.start(dpp::st_wait);
+	bot.start(false);
 
 	return 0;
 }

@@ -60,7 +60,7 @@ int main(int argc, char const *argv[])
 	});
 
 	/* Start bot */
-	bot.start(dpp::st_wait);
+	bot.start(false);
 	return 0;
 }
 ~~~~~~~~~~

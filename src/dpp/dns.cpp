@@ -23,8 +23,8 @@
 #include <errno.h>
 #include <exception>
 #include <mutex>
-#include <cstring>
 #include <shared_mutex>
+#include <string.h>
 #include <dpp/exception.h>
 
 namespace dpp

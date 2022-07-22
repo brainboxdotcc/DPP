@@ -180,19 +180,4 @@ template <int> int from_string(const std::string &s)
 	return std::stoi(s, 0, 10);
 }
 
-/**
- * @brief Convert any numeric value type to hex string
- * 
- * @tparam T numeric printable type
- * @param i numeric printable value
- * @return std::string hex string will be 2 times the size of the type in length, e.g.
- * a 32 bit value will be an 8 character string.
- */
-template< typename T > std::string to_hex(T i)
-{
-	std::stringstream stream;
-	stream << std::setfill('0') << std::setw(sizeof(T)*2) << std::hex << i;
-	return stream.str();
-}
-
 };

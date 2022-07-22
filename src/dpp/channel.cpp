@@ -25,7 +25,8 @@
 #include <dpp/role.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json.hpp>
+#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -119,7 +120,7 @@ channel& channel::set_bitrate(const uint16_t bitrate) {
 }
 
 channel& channel::set_flags(const uint16_t flags) {
-	this->flags = flags;
+	this->flags = static_cast<uint8_t>(flags);
 	return *this;
 }
 
@@ -437,7 +438,12 @@ std::string channel::get_icon_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->icon.to_string().empty()) {
-		return utility::cdn_host + "/channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
+		return fmt::format("{}/channel-icons/{}/{}.png{}",
+						   utility::cdn_host,
+						   this->id,
+						   this->icon.to_string(),
+						   utility::avatar_size(size)
+		);
 	} else {
 		return std::string();
 	}
