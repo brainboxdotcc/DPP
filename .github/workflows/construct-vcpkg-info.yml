@@ -75,4 +75,4 @@ jobs:
                 sudo git commit -m "Updates! [skip ci]" &&
                 sudo git config pull.rebase false &&
                 sudo git pull &&
-                sudo git push origin main
+                sudo git push origin master
