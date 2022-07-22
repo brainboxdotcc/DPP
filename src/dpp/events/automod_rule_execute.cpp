@@ -21,7 +21,7 @@
 #include <dpp/automod.h>
 #include <dpp/cluster.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include INCLUDE_NLOHMANN
 
 using json = nlohmann::json;
 

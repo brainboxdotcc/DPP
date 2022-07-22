@@ -22,7 +22,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
-#include <dpp/nlohmann/json.hpp>
+#include INCLUDE_NLOHMANN
 #include <dpp/fmt-minimal.h>
 
 namespace dpp {

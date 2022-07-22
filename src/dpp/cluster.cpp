@@ -29,7 +29,7 @@
 #include <dpp/sync.h>
 #include <chrono>
 #include <iostream>
-#include <dpp/nlohmann/json.hpp>
+#include INCLUDE_NLOHMANN
 #include <utility>
 #include <dpp/fmt-minimal.h>
 #include <algorithm>

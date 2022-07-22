@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/emoji.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include INCLUDE_NLOHMANN
 #include <dpp/exception.h>
 
 namespace dpp {

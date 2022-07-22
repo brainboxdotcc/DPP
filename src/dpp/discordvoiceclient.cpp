@@ -41,7 +41,7 @@
 #include <dpp/discordvoiceclient.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include INCLUDE_NLOHMANN
 #include <dpp/fmt-minimal.h>
 
 #ifdef HAVE_VOICE
