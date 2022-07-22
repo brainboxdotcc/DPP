@@ -1,10 +1,9 @@
 ,
-  "description": "A Discord bot library written in C++ using custom asynchronous coroutines.",
-  "homepage": "https://discordcoreapi.com",
-  "license": "AGPL-3.0-or-later",
-  "supports": "(windows & x64 & !static) | (linux & x64)",
+  "description": "D++ Extremely Lightweight C++ Discord Library.",
+  "homepage": "dpp.dev/",
+  "license": "Apache-2.0",
+  "supports": "(windows & !static) | linux",
   "dependencies": [
-    "ffmpeg",
     "libsodium",
     "nlohmann-json",
     "openssl",
@@ -19,3 +18,4 @@
     }
   ]
 }
+
