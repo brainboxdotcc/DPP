@@ -39,6 +39,7 @@ jobs:
            run: cd ./dpp &&
                 sudo mkdir /usr/local/share/vcpkg/ports/dpp/ &&
                 [ -f /usr/local/share/vcpkg/versions/d-/dpp.json ] && echo "File exists." || sudo cp -v -R ./vcpkg/versions/d-/dpp.json /usr/local/share/vcpkg/versions/d-/dpp.json  &&
+                [ -f /usr/local/share/vcpkg/ports/dpp/vcpkg.json ] && echo "File exists." || sudo cp -v -R ./vcpkg/ports/dpp/vcpkg.json /usr/local/share/vcpkg/ports/dpp/vcpkg.json  &&
                 sudo cp -v -R ./cmake/Raw-Files/Portfile-The-First.cmake /usr/local/share/vcpkg/ports/dpp/portfile.cmake &&
                 sudo /usr/local/share/vcpkg/vcpkg install dpp:x64-linux | sudo tee InstallOutput.txt || true
 
