@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/permissions.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json_fwd.hpp>
 
 namespace dpp {
 

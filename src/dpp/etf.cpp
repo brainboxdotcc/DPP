@@ -34,7 +34,7 @@
 #include <dpp/sysdep.h>
 #include <dpp/discordevents.h>
 #include <dpp/exception.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <zlib.h>
 #include <iostream>
 

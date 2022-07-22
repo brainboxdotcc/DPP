@@ -23,7 +23,7 @@
 #include <dpp/snowflake.h>
 #include <dpp/cluster.h>
 #include <dpp/invite.h>
-#include INCLUDE_NLOHMANN
+#include <dpp/nlohmann/json_fwd.hpp>
 
 namespace dpp {
 
