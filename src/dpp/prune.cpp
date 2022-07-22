@@ -21,7 +21,7 @@
 #include <dpp/prune.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include INCLUDE_NLOHMANN
 
 namespace dpp {
 
