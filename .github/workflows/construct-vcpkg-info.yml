@@ -76,18 +76,3 @@ jobs:
                 sudo git config pull.rebase false &&
                 sudo git pull &&
                 sudo git push origin main
-                
-         - name: Download, install, and run a template-bot.
-           run: sudo git clone https://github.com/RealTimeChris/Bot-Template-For-DiscordCoreAPI --depth=1 &&
-                cd Bot-Template-For-DiscordCoreAPI &&
-                sudo touch Tempcmake.txt &&
-                sudo bash -c "echo $'set(VCPKG_ROOT_DIR \"/usr/local/share/vcpkg\")' >> Tempcmake.txt" &&
-                sudo sed -i '1,2d' cmakeLists.txt &&
-                sudo bash -c "cat cmakeLists.txt >> Tempcmake.txt" &&
-                sudo bash -c "cat Tempcmake.txt > cmakeLists.txt" &&
-                sudo apt-get install -y ninja-build &&
-                sudo cmake -S . --preset Linux-Release &&
-                sudo cmake --build --preset Linux-Release &&
-                sudo cmake --install ./Build/Release &&
-                cd "Output Files/Release" &&
-                sudo ./dpp-Bot-Cpp
