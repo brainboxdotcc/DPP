@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <exception>
 #include <mutex>
+#include <cstring>
 #include <shared_mutex>
 #include <dpp/exception.h>
 
