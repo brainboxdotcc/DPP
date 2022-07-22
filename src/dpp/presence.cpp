@@ -22,7 +22,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/utility.h>
 #include <dpp/emoji.h>
-#include <dpp/nlohmann/json.hpp>
+#include INCLUDE_NLOHMANN
 
 using json = nlohmann::json;
 

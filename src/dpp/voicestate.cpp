@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/voicestate.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include INCLUDE_NLOHMANN
 
 using json = nlohmann::json;
 

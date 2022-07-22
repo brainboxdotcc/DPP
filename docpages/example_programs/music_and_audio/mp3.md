@@ -5,7 +5,7 @@ To stream MP3 files via D++ you need to link an additional dependency to your bo
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include INCLUDE_NLOHMANN_FWD
 #include <dpp/fmt/format.h>
 #include <iomanip>
 #include <sstream>
