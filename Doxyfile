@@ -788,7 +788,7 @@ RECURSIVE	      = YES
 
 EXCLUDE		= deps \
 			build \
-			include/dpp/format \
+			include/dpp/fmt \
 			include/dpp/nlohmann
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
@@ -818,7 +818,6 @@ EXCLUDE_PATTERNS       = */dpp/nlohmann/* \
 # exclude all test directories use the pattern */test/*
 
 EXCLUDE_SYMBOLS	= nlohmann::* \
-			fmt::* \
 			*thonk \
 			deps \
 			build \
