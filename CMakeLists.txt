@@ -41,7 +41,11 @@ string(CONCAT DPP_VERSION "${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSI
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake/")
 
-if (NOT EXISTS "$ENV{DONT_RUN_VCPKG}" AND EXISTS "${_VCPKG_ROOT_DIR}")
+if (DEFINED "$ENV{DONT_RUN_VCPKG}")
+	message("INFO: Explicitly disabling VCPKG as running inside the CI action.")
+endif()
+
+if (NOT DEFINED "$ENV{DONT_RUN_VCPKG}" AND EXISTS "${_VCPKG_ROOT_DIR}")
 	set(PROJECT_NAME "dpp")
 	project(
 		"${PROJECT_NAME}"
