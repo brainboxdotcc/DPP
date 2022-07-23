@@ -462,28 +462,6 @@ public:
 	}
 };
 
-/**
- * @brief Types of startup for cluster::start()
- */
-enum start_type : bool {
-	/**
-	 * @brief Wait forever on a condition variable.
-	 * The cluster will spawn threads for each shard
-	 * and start() will not return in normal operation.
-	 */
-	st_wait = false,
-
-	/**
-	 * @brief Return immediately after starting shard threads.
-	 * If you set the parameter of cluster::start() to
-	 * this value, you will have to manage the lifetime
-	 * and scope of your cluster object yourself. Taking it
-	 * out of scope or deleting its pointer will terminate
-	 * the bot.
-	 */
-	st_return = true,
-};
-
 /** @brief The cluster class represents a group of shards and a command queue for sending and
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
@@ -638,12 +616,6 @@ public:
 	 * @brief Destroy the cluster object
 	 */
 	virtual ~cluster();
-
-	/**
-	 * @brief End cluster execution without destructing it.
-	 * To restart the cluster, call cluster::start() again.
-	 */
-	void shutdown();
 
 	/**
 	 * @brief Get the rest_queue object which handles HTTPS requests to Discord

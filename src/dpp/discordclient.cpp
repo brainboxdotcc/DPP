@@ -150,36 +150,23 @@ void discord_client::thread_run()
 		ready = false;
 		message_queue.clear();
 		ssl_client::read_loop();
-		if (!terminating) {
-			ssl_client::close();
-			end_zlib();
-			setup_zlib();
-			do {
-				this->log(ll_debug, "Attempting reconnection of shard " + std::to_string(this->shard_id));
-				error = false;
-				try {
-					ssl_client::connect();
-					websocket_client::connect();
-				}
-				catch (const std::exception &e) {
-					log(dpp::ll_error, std::string("Error establishing connection, retry in 5 seconds: ") + e.what());
-					ssl_client::close();
-					std::this_thread::sleep_for(std::chrono::seconds(5));
-					error = true;
-				}
-			} while (error);
-		}
-	} while(!terminating);
-	if (this->sfd != INVALID_SOCKET) {
-		/* Send a graceful termination */
-		this->log(ll_debug, "Graceful shutdown of shard " + std::to_string(this->shard_id) + " succeeded.");
-		this->nonblocking = false;
-		this->send_close_packet();
 		ssl_client::close();
-	} else {
-		this->log(ll_debug, "Graceful shutdown of shard " + std::to_string(this->shard_id) + " not possible, socket already closed.");
-	}
-	end_zlib();
+		end_zlib();
+		setup_zlib();
+		do {
+			error = false;
+			try {
+				ssl_client::connect();
+				websocket_client::connect();
+			}
+			catch (const std::exception &e) {
+				log(dpp::ll_error, std::string("Error establishing connection, retry in 5 seconds: ") + e.what());
+				ssl_client::close();
+				std::this_thread::sleep_for(std::chrono::seconds(5));
+				error = true;
+			}
+		} while (error);
+	} while(!terminating);
 }
 
 void discord_client::run()
@@ -701,7 +688,7 @@ voiceconn& voiceconn::connect(snowflake guild_id) {
 		/* This is wrapped in a thread because instantiating discord_voice_client can initiate a blocking SSL_connect() */
 		auto t = std::thread([guild_id, this]() {
 			try {
-				this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(guild_id) + " channel " + std::to_string(this->channel_id));
+				this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(guild_id) + " channel {}" + std::to_string(this->channel_id));
 				this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname);
 				/* Note: Spawns thread! */
 				this->voiceclient->run();

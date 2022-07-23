@@ -31,9 +31,9 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-permission_overwrite::permission_overwrite() : id(0), allow(static_cast<permissions>(0)), deny(static_cast<permissions>(0)), type(0) {}
+permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0) {}
 
-permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type) : id(id), allow(static_cast<permissions>(allow)), deny(static_cast<permissions>(deny)), type(type) {}
+permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type) : id(id), allow(allow), deny(deny), type(type) {}
 
 const uint8_t CHANNEL_TYPE_MASK = 0b00001111;
 
@@ -66,7 +66,7 @@ channel::channel() :
 	guild_id(0),
 	last_message_id(0),
 	last_pin_timestamp(0),
-	permissions(static_cast<dpp::permissions>(0)),
+	permissions(0),
 	position(0),
 	bitrate(0),
 	rate_limit_per_user(0),
@@ -296,8 +296,8 @@ channel& channel::fill_from_json(json* j) {
 		for (auto & overwrite : (*j)["permission_overwrites"]) {
 			permission_overwrite po;
 			po.id = snowflake_not_null(&overwrite, "id");
-			po.allow = static_cast<dpp::permissions>(snowflake_not_null(&overwrite, "allow"));
-			po.deny = static_cast<dpp::permissions>(snowflake_not_null(&overwrite, "deny"));
+			po.allow = snowflake_not_null(&overwrite, "allow");
+			po.deny = snowflake_not_null(&overwrite, "deny");
 			po.type = int8_not_null(&overwrite, "type");
 			permission_overwrites.emplace_back(po);
 		}
@@ -376,11 +376,11 @@ std::string channel::build_json(bool with_id) const {
 
 permission channel::get_user_permissions(const user* user) const {
 	if (user == nullptr)
-		return static_cast<dpp::permissions>(0);
+		return 0;
 
 	guild* g = dpp::find_guild(guild_id);
 	if (g == nullptr)
-		return static_cast<dpp::permissions>(0);
+		return 0;
 
 	return g->permission_overwrites(g->base_permissions(user), user, this);
 }
@@ -389,7 +389,7 @@ permission channel::get_user_permissions(const guild_member &member) const {
 
 	guild* g = dpp::find_guild(guild_id);
 	if (g == nullptr)
-		return static_cast<dpp::permissions>(0);
+		return 0;
 
 	return g->permission_overwrites(member, *this);
 }

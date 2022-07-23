@@ -213,7 +213,7 @@ namespace dpp {
 			}  else if (c > 1024) {		// 1KB
 				snprintf(print_buffer, 64, "%.2fK", (c / 1024.0));
 			} else {			// Bytes
-				return std::to_string(c);
+				snprintf(print_buffer, 64, "%llu", c);
 			}
 			return print_buffer;
 		}

@@ -19,13 +19,13 @@
  *
  ************************************************************************************/
 #include <dpp/permissions.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
 
-	permission::permission(const permissions& value) : value(value) {};
+permission::permission(const uint64_t &value) : value(value) {}
 
-	permission::permission() : permission(static_cast<permissions>(0)) {};
+permission::permission() : permission(0) {}
 
 permission::operator uint64_t() const {
 	return value;

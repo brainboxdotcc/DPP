@@ -26,7 +26,7 @@ namespace dpp {
 /**
  * @brief Represents the various discord permissions
  */
-enum permissions : std::uint64_t {
+enum permissions : uint64_t {
 	p_create_instant_invite = 0x00000000001,    //!< allows creation of instant invites
 	p_kick_members = 0x00000000002,    //!< allows kicking members
 	p_ban_members = 0x00000000004,    //!< allows banning members
@@ -91,7 +91,7 @@ public:
 	 * @brief Construct a permission object
 	 * @param value A permission bitmask
 	 */
-	permission(const permissions& value);
+	permission(const uint64_t& value);
 
 	/**
  	 * @brief Construct a permission object
@@ -132,7 +132,7 @@ public:
 	 */
 	template <typename... T>
 	bool has(T... values) const {
-		return (values... & (0 | values...) == (0 | values...));
+		return (value & (0 | ... | values)) == (0 | ... | values);
 	}
 
 	/**
@@ -152,7 +152,7 @@ public:
 	template <typename... T>
 	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
 	add(T... values) {
-		value |= (0 | values...);
+		value |= (0 | ... | values);
 		return *this;
 	}
 
@@ -172,7 +172,7 @@ public:
 	template <typename... T>
 	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
 	set(T... values) {
-		value = (0 | values...);
+		value = (0 | ... | values);
 		return *this;
 	}
 
@@ -193,7 +193,7 @@ public:
 	template <typename... T>
 	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
 	remove(T... values) {
-		value &= ~(0 | values...);
+		value &= ~(0 | ... | values);
 		return *this;
 	}
 };
