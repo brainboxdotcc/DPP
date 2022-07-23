@@ -766,6 +766,24 @@ gateway get_gateway_bot_sync();
 confirmation guild_current_member_edit_sync(snowflake guild_id, const std::string &nickname);
 
 /**
+ * @brief Get the audit log for a guild
+ *
+ * @see dpp::cluster::guild_auditlog_get
+ * @see https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
+ * @param guild_id Guild to get the audit log of
+ * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
+ * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
+ * @param before Entries that preceded a specific audit log entry ID. Used for paginating
+ * @param limit Maximum number of entries (between 1-100) to return
+ * @return auditlog returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+auditlog guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit);
+
+/**
  * @brief Add guild ban
  *
  * Create a guild ban, and optionally delete previous messages sent by the banned user.
@@ -1107,9 +1125,9 @@ confirmation guild_add_member_sync(const guild_member& gm, const std::string &ac
  * @brief Edit the properties of an existing guild member
  * 
  * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update` Gateway event.
- * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
  * To remove a timeout, set the `communication_disabled_until` to a non-zero time in the past, e.g. 1.
  * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
+ * For moving and disconnecting users from voice, use dpp::cluster::guild_member_move.
  * @see dpp::cluster::guild_edit_member
  * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.

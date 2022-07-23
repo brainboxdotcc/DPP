@@ -1691,14 +1691,14 @@ public:
 	 *
 	 * @see https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
 	 * @param guild_id Guild to get the audit log of
+	 * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
+	 * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
+	 * @param before Entries that preceded a specific audit log entry ID. Used for paginating
+	 * @param limit Maximum number of entries (between 1-100) to return
 	 * @param callback Function to call when the API call completes.
-	 * @param user_id Entries from a specific user ID. Defaults to fetch any user
-	 * @param action_type Entries for a specific dpp::audit_type. Defaults to fetch any type
-	 * @param before Entries that preceded a specific audit log entry ID
-	 * @param limit Maximum number of entries (between 1-100) to return, defaults to 50
 	 * On success the callback will contain a dpp::auditlog object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_auditlog_get(snowflake guild_id, command_completion_event_t callback, snowflake user_id = 0, uint32_t action_type = 0, snowflake before = 0, uint32_t limit = 50);
+	void guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a slash command local to a guild

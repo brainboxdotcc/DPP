@@ -28,7 +28,7 @@ void cluster::guild_current_member_edit(snowflake guild_id, const std::string &n
 }
 
 
-void cluster::guild_auditlog_get(snowflake guild_id, command_completion_event_t callback, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit) {
+void cluster::guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit, command_completion_event_t callback) {
 	std::string parameters = utility::make_url_parameters({
 		{"user_id", user_id},
 		{"action_type", action_type},
