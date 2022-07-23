@@ -22,6 +22,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_VOICE_SUPPORT "Build voice support" ON)
 option(RUN_LDCONFIG "Run ldconfig after installation" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
+option(DPP_NO_VCPKG "No VCPKG" OFF)
 
 include(CheckCXXSymbolExists)
 
@@ -41,11 +42,13 @@ string(CONCAT DPP_VERSION "${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSI
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake/")
 
-if (DEFINED "$ENV{DONT_RUN_VCPKG}")
-	message("INFO: Explicitly disabling VCPKG as running inside the CI action.")
+if (DPP_NO_VCPKG)
+	message("-- INFO: Explicitly disabling VCPKG as running inside the CI action.")
+else()
+	message("-- INFO: Using VCPKG if detected")
 endif()
 
-if (NOT DEFINED "$ENV{DONT_RUN_VCPKG}" AND EXISTS "${_VCPKG_ROOT_DIR}")
+if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
 	set(PROJECT_NAME "dpp")
 	project(
 		"${PROJECT_NAME}"
