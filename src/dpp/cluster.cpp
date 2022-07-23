@@ -29,7 +29,7 @@
 #include <dpp/sync.h>
 #include <chrono>
 #include <iostream>
-#include INCLUDE_NLOHMANN
+include <dpp/nlohmann/json.hpp>
 #include <utility>
 #include <algorithm>
 

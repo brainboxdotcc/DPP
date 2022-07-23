@@ -25,7 +25,7 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 #endif
 
 #include <dpp/dpp.h>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 #include <iomanip>
 
 #ifdef _WIN32

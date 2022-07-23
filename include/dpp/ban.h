@@ -22,7 +22,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/json_interface.h>
 #include <unordered_map>
 

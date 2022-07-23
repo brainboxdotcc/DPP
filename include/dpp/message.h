@@ -27,7 +27,7 @@
 #include <dpp/guild.h>
 #include <optional>
 #include <variant>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/json_interface.h>
 
 namespace dpp {

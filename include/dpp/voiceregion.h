@@ -21,7 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <unordered_map>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/json_interface.h>
 
 namespace dpp {

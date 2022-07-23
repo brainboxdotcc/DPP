@@ -29,7 +29,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/misc-enum.h>
 #include <dpp/timer.h>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/discordclient.h>
 #include <dpp/voiceregion.h>
 #include <dpp/dtemplate.h>

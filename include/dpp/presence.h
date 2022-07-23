@@ -22,7 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/emoji.h>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 

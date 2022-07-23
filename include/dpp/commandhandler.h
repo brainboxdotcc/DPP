@@ -29,7 +29,7 @@
 #include <dpp/appcommand.h>
 #include <dpp/dispatcher.h>
 #include <dpp/utility.h>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 #include <unordered_map>
 #include <vector>
 #include <functional>

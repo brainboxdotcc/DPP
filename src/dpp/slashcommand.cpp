@@ -21,7 +21,7 @@
 #include <dpp/appcommand.h>
 #include <dpp/discordevents.h>
 #include <dpp/exception.h>
-#include INCLUDE_NLOHMANN
+include <dpp/nlohmann/json.hpp>
 #include <dpp/stringops.h>
 #include <dpp/cache.h>
 #include <iostream>

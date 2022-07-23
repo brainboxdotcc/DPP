@@ -21,7 +21,7 @@
 #pragma once
 
 #include <dpp/export.h>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
 

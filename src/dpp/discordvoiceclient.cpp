@@ -41,7 +41,7 @@
 #include <dpp/discordvoiceclient.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
-#include INCLUDE_NLOHMANN
+include <dpp/nlohmann/json.hpp>
 
 #ifdef HAVE_VOICE
 	#include <sodium.h>

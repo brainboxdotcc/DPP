@@ -21,7 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/managed.h>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/permissions.h>
 #include <dpp/guild.h>
 #include <dpp/json_interface.h>

@@ -24,7 +24,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include INCLUDE_NLOHMANN_FWD
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
