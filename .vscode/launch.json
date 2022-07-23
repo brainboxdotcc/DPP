@@ -8,7 +8,7 @@
 			"name": "(gdb) Launch",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceFolder}/build/unittest",
+			"program": "${workspaceFolder}/build/test",
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceFolder}/build",

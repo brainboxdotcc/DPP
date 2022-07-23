@@ -26,7 +26,7 @@
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
 #include <thread>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/etf.h>
 #include <zlib.h>
 #ifdef _WIN32

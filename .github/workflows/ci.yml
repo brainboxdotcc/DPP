@@ -158,7 +158,7 @@ jobs:
 
       - name: Move debug files for packaging
         if: ${{ matrix.cfg.config == 'Debug' }}
-        run: xcopy /s/q main\build\Debug main\build\Release\
+        run: xcopy main\build\library\Debug\* main\build\library\Release\ /s /q
 
       - name: Package distributable
         run: cd main/build && cpack --verbose

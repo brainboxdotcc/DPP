@@ -73,10 +73,6 @@
 		"variant": "cpp",
 		"unordered_set": "cpp",
 		"codecvt": "cpp",
-		"future": "cpp",
-		"compare": "cpp",
-		"numbers": "cpp",
-		"semaphore": "cpp",
-		"stop_token": "cpp"
+		"future": "cpp"
 	}
 }
