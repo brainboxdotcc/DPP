@@ -24,7 +24,7 @@ _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or st
 _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or structures with stl member variables
 #endif
 #include <dpp/dpp.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 #include <iomanip>
 
 #ifdef _WIN32
