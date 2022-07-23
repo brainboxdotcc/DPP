@@ -59,7 +59,7 @@ This is the main body of the example program.
  */
 
 #include <dpp/dpp.h>
-#include <dpp/fmt/format.h>
+#include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 /* We have to define this to make certain functions visible */
@@ -116,7 +116,7 @@ int main()
 				#include <stdint.h>\n\
 				#include <dpp/dpp.h>\n\
 				#include <dpp/nlohmann/json.hpp>\n\
-				#include <dpp/fmt/format.h>\n\
+				#include <fmt/format.h>\n\
 				#include \"eval.h\"\n\
 				extern \"C\" void so_exec(dpp::cluster& bot, dpp::message_create_t event) {\n\
 					" + dpp::utility::utf8substr(
@@ -131,7 +131,7 @@ int main()
 			 * This code assumes the current directory is writeable. The file will have a
 			 * unique name made from the user's id and the message id.
 			 */
-        		std::string source_filename = fmt::format("{}_{}.cpp", event.msg.author.id, event.msg.id);
+        		std::string source_filename = std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".cpp";
 			std::fstream code_file(source_filename, std::fstream::binary | std::fstream::out);
 			if (!code_file.is_open()) {
 				bot.message_create(dpp::message(event.msg.channel_id, "Unable to create source file for `eval`"));
@@ -148,8 +148,8 @@ int main()
 				"-std=c++17",
 				"-shared",	/* Build the output as a .so file */
 				"-fPIC",
-				fmt::format("-o{}_{}.so", event.msg.author.id, event.msg.id),
-				fmt::format("{}_{}.cpp", event.msg.author.id, event.msg.id),
+				std::string("-o") + std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".so",
+				std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".cpp",
 				"-ldpp",
 				"-ldl"
 			}, [event, &bot, source_filename, compile_start](const std::string &output) {
@@ -158,7 +158,8 @@ int main()
 				double compile_time = dpp::utility::time_f() - compile_start;
 
 				/* Delete our cpp file, we don't need it any more */
-				unlink(fmt::format("{}/{}_{}.cpp", getenv("PWD"), event.msg.author.id, event.msg.id).c_str());
+				std::string del_file = std::string(getenv("PWD")) + std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".cpp";
+				unlink(del_file.c_str());
 
 				/* On successful compilation g++ outputs nothing, so any output here is error output */
 				if (output.length()) {
@@ -171,7 +172,8 @@ int main()
 					 * the shared object could not be loaded. The user probably
 					 * did something odd with the symbols inside their eval.
 					 */
-					auto shared_object_handle = dlopen(fmt::format("{}/{}_{}.so", getenv("PWD"), event.msg.author.id, event.msg.id).c_str(), RTLD_NOW);
+					std::string dl = std::string(getenv("PWD")) + std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".so",
+					auto shared_object_handle = dlopen(dl.c_str(), RTLD_NOW);
 					if (!shared_object_handle) {
 						const char *dlsym_error = dlerror();
 						bot.message_create(dpp::message(event.msg.channel_id, "Shared object load error: ```\n" +
@@ -212,16 +214,18 @@ int main()
 					dlclose(shared_object_handle);
 
 					/* We are now done with the compiled code too */
-					unlink(fmt::format("{}/{}_{}.so", getenv("PWD"), event.msg.author.id, event.msg.id).c_str());
+					unlink(dl.c_str());
 
 					/* Output some statistics */
-					bot.message_create(dpp::message(event.msg.channel_id, fmt::format("Execution completed. Compile time: {0:.03f}s, execution time {1:.03f}s", compile_time, run_time)));
+					bot.message_create(dpp::message(event.msg.channel_id,
+						"Execution completed. Compile time: " + std::to_string(compile_time) +
+						"s, execution time " + std::to_string(run_time) + "s"));
 				}
 			});
 		}
 	});
 
-	bot.start(false);
+	bot.start(dpp::st_wait);
 	return 0;
 }
 ~~~~~~~~~~~~~~~~

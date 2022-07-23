@@ -26,13 +26,13 @@
 #include <climits>
 #include <dpp/httpsclient.h>
 #include <dpp/utility.h>
-#include <dpp/fmt-minimal.h>
 #include <dpp/exception.h>
+#include <dpp/stringops.h>
 
 namespace dpp {
 
 https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout)
-	: ssl_client(hostname, fmt::format("{:d}", port), plaintext_connection, false),
+	: ssl_client(hostname, std::to_string(port), plaintext_connection, false),
 	state(HTTPS_HEADERS),
 	request_type(verb),
 	path(urlpath),
@@ -56,19 +56,16 @@ void https_client::connect()
 	}
 	if (this->sfd != SOCKET_ERROR) {
 		this->write(
-			fmt::format(
-
-				"{} {} HTTP/1.1\r\n"
-				"Host: {}\r\n"
-				"pragma: no-cache\r\n"
-				"Connection: keep-alive\r\n"
-				"Content-Length: {}\r\n{}"
-				"\r\n{}",
-
-				this->request_type, this->path, this->hostname,
-				this->request_body.length(), map_headers,
-				this->request_body
-			)
+			this->request_type + " " + this->path + " HTTP/1.1\r\n"
+			"Host: " + this->hostname + "\r\n"
+			"pragma: no-cache\r\n"
+			"Connection: keep-alive\r\n"
+			"Content-Length: " +
+			std::to_string(this->request_body.length()) +
+			"\r\n" +
+			map_headers +
+			"\r\n" +
+			this->request_body
 		);
 		read_loop();
 	}
@@ -82,8 +79,11 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 			return {json, ""};
 		}
 	} else {
+		/* Note: loss of upper 32 bits on this value is INTENTIONAL */
+		uint32_t dummy1 = (uint32_t)time(nullptr) + (uint32_t)time(nullptr);
+		time_t dummy2 = time(nullptr) * time(nullptr);
 		const std::string two_cr("\r\n\r\n");
-		const std::string boundary(fmt::format("-------------{:8x}{:16x}", time(nullptr) + time(nullptr), time(nullptr) * time(nullptr)));
+		const std::string boundary("-------------" + to_hex(dummy1) + to_hex(dummy2));
 		const std::string mime_part_start("--" + boundary + "\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; ");
 		
 		std::string content("--" + boundary);
@@ -97,7 +97,7 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 		} else {
 			/* Multiple files */
 			for (size_t i = 0; i < filenames.size(); ++i) {
-				content += mime_part_start + "name=\"files[" + fmt::format("{:d}", i) + "]\"; filename=\"" + filenames[i] + "\"" + two_cr;
+				content += mime_part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"" + two_cr;
 				content += contents[i];
 				content += "\r\n";
 			}

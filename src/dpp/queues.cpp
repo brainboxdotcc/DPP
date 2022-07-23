@@ -26,7 +26,6 @@
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
 #include <dpp/httpsclient.h>
-#include <dpp/fmt-minimal.h>
 #include <dpp/stringops.h>
 #include <dpp/version.h>
 
@@ -84,13 +83,13 @@ void populate_result(const std::string &url, cluster* owner, http_request_comple
 	}
 	uint64_t rl_timer = rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after;
 	if (rv.status == 429) {
-		owner->log(ll_warning, fmt::format("Rate limited on endpoint {}, reset after {}s!", url, rl_timer));
+		owner->log(ll_warning, "Rate limited on endpoint " + url + ", reset after " + std::to_string(rl_timer) + "s!");
 	}
 	if (url != "/api/v" DISCORD_API_VERSION "/gateway/bot") {	// Squelch this particular api endpoint or it generates a warning the minute we boot a cluster
 		if (rv.ratelimit_global) {
-			owner->log(ll_warning, fmt::format("At global rate limit on endpoint {}, reset after {}s", url, rl_timer));
+			owner->log(ll_warning, "At global rate limit on endpoint " + url + ", reset after " + std::to_string(rl_timer) + "s!");
 		} else if (rv.ratelimit_remaining == 0 && rl_timer > 0) {
-			owner->log(ll_debug, fmt::format("Waiting for endpoint {} rate limit, next request in {}s", url, rl_timer));
+			owner->log(ll_debug, "Waiting for endpoint " + url + " rate limit, next request in " + std::to_string(rl_timer) + "s");
 		}
 	}
 }
@@ -167,13 +166,13 @@ http_request_completion_t http_request::run(cluster* owner) {
 		rv.latency = dpp::utility::time_f() - start;
 		if (cli.get_status() < 100) {
 			rv.error = h_connection;
-			owner->log(ll_error, fmt::format("HTTP(S) error on {} connection to {}:{}: Malformed HTTP response", hci.scheme, hci.hostname, hci.port));
+			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Malformed HTTP response");
 		} else {
 			populate_result(_url, owner, rv, cli);
 		}
 	}
 	catch (const std::exception& e) {
-		owner->log(ll_error, fmt::format("HTTP(S) error on {} connection to {}:{}: {}", hci.scheme, hci.hostname, hci.port, e.what()));
+		owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": " + std::string(e.what()));
 		rv.error = h_connection;
 	}
 
@@ -230,7 +229,7 @@ request_queue::~request_queue()
 
 void in_thread::in_loop(uint32_t index)
 {
-	utility::set_thread_name(fmt::format("http_req/{}", index));
+	utility::set_thread_name(std::string("http_req/") + std::to_string(index));
 	while (!terminating) {
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			

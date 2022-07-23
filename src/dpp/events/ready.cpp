@@ -22,7 +22,6 @@
 #include <dpp/cluster.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -42,7 +41,7 @@ std::mutex protect_the_loot;
  * @param raw Raw JSON string
  */
 void ready::handle(discord_client* client, json &j, const std::string &raw) {
-	client->log(dpp::ll_info, fmt::format("Shard id {} ({}/{}) ready!", client->shard_id, client->shard_id + 1, client->max_shards));
+	client->log(dpp::ll_info, "Shard id " + std::to_string(client->shard_id) + " (" + std::to_string(client->shard_id + 1) + "/" + std::to_string(client->max_shards) + ") ready!");
 	client->sessionid = j["d"]["session_id"];
 
 	client->ready = true;

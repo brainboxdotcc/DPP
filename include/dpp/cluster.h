@@ -462,6 +462,28 @@ public:
 	}
 };
 
+/**
+ * @brief Types of startup for cluster::start()
+ */
+enum start_type : bool {
+	/**
+	 * @brief Wait forever on a condition variable.
+	 * The cluster will spawn threads for each shard
+	 * and start() will not return in normal operation.
+	 */
+	st_wait = false,
+
+	/**
+	 * @brief Return immediately after starting shard threads.
+	 * If you set the parameter of cluster::start() to
+	 * this value, you will have to manage the lifetime
+	 * and scope of your cluster object yourself. Taking it
+	 * out of scope or deleting its pointer will terminate
+	 * the bot.
+	 */
+	st_return = true,
+};
+
 /** @brief The cluster class represents a group of shards and a command queue for sending and
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
@@ -616,6 +638,12 @@ public:
 	 * @brief Destroy the cluster object
 	 */
 	virtual ~cluster();
+
+	/**
+	 * @brief End cluster execution without destructing it.
+	 * To restart the cluster, call cluster::start() again.
+	 */
+	void shutdown();
 
 	/**
 	 * @brief Get the rest_queue object which handles HTTPS requests to Discord
@@ -2399,13 +2427,14 @@ public:
 	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Moves the guild member to a other voice channel, if member is connected to one
+	 * @brief Moves the guild member to a other voice channel, if member is connected to one.
+	 * Set the `channel_id` to `0` to disconnect the user.
 	 *
 	 * Fires a `Guild Member Update` Gateway event.
 	 * @note When moving members to channels, the API user __must__ have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
-	 * @param channel_id Id of the channel to which the user is used
+	 * @param channel_id Id of the channel to which the user is used. Set to `0` to disconnect the user
 	 * @param guild_id Guild id to which the user is connected
 	 * @param user_id User id, who should be moved
 	 * @param callback Function to call when the API call completes.
