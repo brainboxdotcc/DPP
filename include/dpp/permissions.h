@@ -27,7 +27,7 @@ namespace dpp {
 /**
  * @brief Represents the various discord permissions
  */
-enum permissions : uint64_t {
+enum permissions {
 	p_create_instant_invite = 0x00000000001,    //!< allows creation of instant invites
 	p_kick_members = 0x00000000002,    //!< allows kicking members
 	p_ban_members = 0x00000000004,    //!< allows banning members
