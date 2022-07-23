@@ -2427,13 +2427,14 @@ public:
 	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Moves the guild member to a other voice channel, if member is connected to one
+	 * @brief Moves the guild member to a other voice channel, if member is connected to one.
+	 * Set the `channel_id` to `0` to disconnect the user.
 	 *
 	 * Fires a `Guild Member Update` Gateway event.
 	 * @note When moving members to channels, the API user __must__ have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
-	 * @param channel_id Id of the channel to which the user is used
+	 * @param channel_id Id of the channel to which the user is used. Set to `0` to disconnect the user
 	 * @param guild_id Guild id to which the user is connected
 	 * @param user_id User id, who should be moved
 	 * @param callback Function to call when the API call completes.
