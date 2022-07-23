@@ -1873,7 +1873,7 @@ dtemplate template_get_sync(const std::string &code);
 /**
  * @brief Join a thread
  * @see dpp::cluster::current_user_join_thread
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread ID to join
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -1886,7 +1886,7 @@ confirmation current_user_join_thread_sync(snowflake thread_id);
 /**
  * @brief Leave a thread
  * @see dpp::cluster::current_user_leave_thread
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread ID to leave
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -1899,7 +1899,7 @@ confirmation current_user_leave_thread_sync(snowflake thread_id);
 /**
  * @brief Get active threads in a channel (Sorted by ID in descending order)
  * @see dpp::cluster::threads_get_active
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param channel_id Channel to get active threads for
  * @return thread_map returned object on completion
  * \memberof dpp::cluster
@@ -1912,7 +1912,7 @@ thread_map threads_get_active_sync(snowflake channel_id);
 /**
  * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
  * @see dpp::cluster::threads_get_joined_private_archived
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param channel_id Channel to get public archived threads for
  * @param before_id Get threads before this id
  * @param limit Number of threads to get
@@ -1927,7 +1927,7 @@ thread_map threads_get_joined_private_archived_sync(snowflake channel_id, snowfl
 /**
  * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
  * @see dpp::cluster::threads_get_private_archived
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param channel_id Channel to get public archived threads for
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
@@ -1942,7 +1942,7 @@ thread_map threads_get_private_archived_sync(snowflake channel_id,  time_t befor
 /**
  * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
  * @see dpp::cluster::threads_get_public_archived
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param channel_id Channel to get public archived threads for
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
@@ -1957,7 +1957,7 @@ thread_map threads_get_public_archived_sync(snowflake channel_id, time_t before_
 /**
  * @brief Get a thread member
  * @see dpp::cluster::thread_member_get
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread to get member for
  * @param user_id ID of the user to get
  * @return thread_member returned object on completion
@@ -1971,7 +1971,7 @@ thread_member thread_member_get_sync(const snowflake thread_id, const snowflake 
 /**
  * @brief Get members of a thread
  * @see dpp::cluster::thread_members_get
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread to get members for
  * @return thread_member_map returned object on completion
  * \memberof dpp::cluster
@@ -2005,7 +2005,7 @@ thread thread_create_sync(const std::string& thread_name, snowflake channel_id, 
  * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @see dpp::cluster::thread_create_with_message
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_name Name of the thread
  * @param channel_id Channel in which thread to create
  * @param message_id message to start thread with
@@ -2022,7 +2022,7 @@ thread thread_create_with_message_sync(const std::string& thread_name, snowflake
 /**
  * @brief Add a member to a thread
  * @see dpp::cluster::thread_member_add
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread ID to add to
  * @param user_id Member ID to add
  * @return confirmation returned object on completion
@@ -2036,7 +2036,7 @@ confirmation thread_member_add_sync(snowflake thread_id, snowflake user_id);
 /**
  * @brief Remove a member from a thread
  * @see dpp::cluster::thread_member_remove
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread ID to remove from
  * @param user_id Member ID to remove
  * @return confirmation returned object on completion
