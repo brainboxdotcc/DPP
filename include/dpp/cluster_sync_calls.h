@@ -771,13 +771,17 @@ confirmation guild_current_member_edit_sync(snowflake guild_id, const std::strin
  * @see dpp::cluster::guild_auditlog_get
  * @see https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
  * @param guild_id Guild to get the audit log of
+ * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
+ * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
+ * @param before Entries that preceded a specific audit log entry ID. Used for paginating
+ * @param limit Maximum number of entries (between 1-100) to return
  * @return auditlog returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-auditlog guild_auditlog_get_sync(snowflake guild_id);
+auditlog guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit);
 
 /**
  * @brief Add guild ban
@@ -1121,9 +1125,9 @@ confirmation guild_add_member_sync(const guild_member& gm, const std::string &ac
  * @brief Edit the properties of an existing guild member
  * 
  * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update` Gateway event.
- * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
  * To remove a timeout, set the `communication_disabled_until` to a non-zero time in the past, e.g. 1.
  * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
+ * For moving and disconnecting users from voice, use dpp::cluster::guild_member_move.
  * @see dpp::cluster::guild_edit_member
  * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
@@ -1281,14 +1285,15 @@ confirmation guild_member_delete_role_sync(snowflake guild_id, snowflake user_id
 confirmation guild_member_remove_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id);
 
 /**
- * @brief Moves the guild member to a other voice channel, if member is connected to one
+ * @brief Moves the guild member to a other voice channel, if member is connected to one.
+ * Set the `channel_id` to `0` to disconnect the user.
  *
  * Fires a `Guild Member Update` Gateway event.
  * @note When moving members to channels, the API user __must__ have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @see dpp::cluster::guild_member_move
  * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
- * @param channel_id Id of the channel to which the user is used
+ * @param channel_id Id of the channel to which the user is used. Set to `0` to disconnect the user
  * @param guild_id Guild id to which the user is connected
  * @param user_id User id, who should be moved
  * @return guild_member returned object on completion
@@ -1886,7 +1891,7 @@ dtemplate template_get_sync(const std::string &code);
 /**
  * @brief Join a thread
  * @see dpp::cluster::current_user_join_thread
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread ID to join
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -1899,7 +1904,7 @@ confirmation current_user_join_thread_sync(snowflake thread_id);
 /**
  * @brief Leave a thread
  * @see dpp::cluster::current_user_leave_thread
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread ID to leave
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -1912,7 +1917,7 @@ confirmation current_user_leave_thread_sync(snowflake thread_id);
 /**
  * @brief Get active threads in a channel (Sorted by ID in descending order)
  * @see dpp::cluster::threads_get_active
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param channel_id Channel to get active threads for
  * @return thread_map returned object on completion
  * \memberof dpp::cluster
@@ -1925,7 +1930,7 @@ thread_map threads_get_active_sync(snowflake channel_id);
 /**
  * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
  * @see dpp::cluster::threads_get_joined_private_archived
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param channel_id Channel to get public archived threads for
  * @param before_id Get threads before this id
  * @param limit Number of threads to get
@@ -1940,7 +1945,7 @@ thread_map threads_get_joined_private_archived_sync(snowflake channel_id, snowfl
 /**
  * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
  * @see dpp::cluster::threads_get_private_archived
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param channel_id Channel to get public archived threads for
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
@@ -1955,7 +1960,7 @@ thread_map threads_get_private_archived_sync(snowflake channel_id,  time_t befor
 /**
  * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
  * @see dpp::cluster::threads_get_public_archived
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param channel_id Channel to get public archived threads for
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
@@ -1970,7 +1975,7 @@ thread_map threads_get_public_archived_sync(snowflake channel_id, time_t before_
 /**
  * @brief Get a thread member
  * @see dpp::cluster::thread_member_get
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread to get member for
  * @param user_id ID of the user to get
  * @return thread_member returned object on completion
@@ -1984,7 +1989,7 @@ thread_member thread_member_get_sync(const snowflake thread_id, const snowflake 
 /**
  * @brief Get members of a thread
  * @see dpp::cluster::thread_members_get
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread to get members for
  * @return thread_member_map returned object on completion
  * \memberof dpp::cluster
@@ -2018,7 +2023,7 @@ thread thread_create_sync(const std::string& thread_name, snowflake channel_id, 
  * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @see dpp::cluster::thread_create_with_message
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_name Name of the thread
  * @param channel_id Channel in which thread to create
  * @param message_id message to start thread with
@@ -2035,7 +2040,7 @@ thread thread_create_with_message_sync(const std::string& thread_name, snowflake
 /**
  * @brief Add a member to a thread
  * @see dpp::cluster::thread_member_add
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread ID to add to
  * @param user_id Member ID to add
  * @return confirmation returned object on completion
@@ -2049,7 +2054,7 @@ confirmation thread_member_add_sync(snowflake thread_id, snowflake user_id);
 /**
  * @brief Remove a member from a thread
  * @see dpp::cluster::thread_member_remove
- * @see https://discord.com/developers/docs/topics/thread
+ * @see https://discord.com/developers/docs/topics/threads
  * @param thread_id Thread ID to remove from
  * @param user_id Member ID to remove
  * @return confirmation returned object on completion
