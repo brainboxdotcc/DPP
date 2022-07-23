@@ -1,0 +1,31 @@
+name: Close master-targeted PRs
+on:
+  pull_request:
+    branches:
+      - 'master'
+
+jobs:
+  docs:
+    name: PR Check
+    runs-on: ubuntu-20.04
+
+    concurrency: 
+      group: pr
+      cancel-in-progress: true
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+
+      - name: Checkout D++
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Close master target PRs
+        run: php buildtools/close-master-pr.php
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

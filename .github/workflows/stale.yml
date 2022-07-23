@@ -1,0 +1,13 @@
+name: 'Close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v4
+        with:
+          stale-issue-message: 'This issue has had no activity and is being marked as stale. If you still wish to continue with this issue please comment to reopen it.'
+          stale-pr-message: 'This pull request has had no activity and is being marked as stale. If you still wish to continue with this pull request please comment to reopen it.'
