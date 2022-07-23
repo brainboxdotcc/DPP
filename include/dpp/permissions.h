@@ -73,7 +73,6 @@ enum permissions : uint64_t {
 };
 
 /**
- * @brief Represents the various discord permissions
 * @brief Represents the various discord permissions
 * @deprecated Use dpp::permissions instead.
 */
