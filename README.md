@@ -117,4 +117,3 @@ For voice support you require both of:
 
 ### Included Dependencies (Packaged with the library)
 * [nlohmann::json](https://github.com/nlohmann/json)
-
