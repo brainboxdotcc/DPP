@@ -12,21 +12,21 @@ endif()
 add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
 
 target_compile_definitions(
-	"${LIB_NAME}" PRIVATE
+	"${LIB_NAME}" PUBLIC
 	"DPP_BUILD" 
 	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/std:c++17;/Od;/DEBUG;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
 	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/std:c++17;/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"	
 )
 
 target_compile_options(
-	"${LIB_NAME}" PRIVATE 
+	"${LIB_NAME}" PUBLIC
 	"$<$<NOT:$<PLATFORM_ID:Linux>>:/bigobj>"
 	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-std=c++17;-Wall;-Wempty-body;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
 	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-std=c++17;-Wall;-Wempty-body;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
 )
 
 target_compile_features(
-	"${LIB_NAME}" PRIVATE
+	"${LIB_NAME}" PUBLIC
 	"cxx_std_17" "cxx_constexpr" "cxx_auto_type" 
 	"cxx_defaulted_functions" "cxx_deleted_functions"
 	"cxx_final" "cxx_lambdas" "cxx_override" "cxx_thread_local"
