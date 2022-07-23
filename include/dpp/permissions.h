@@ -91,7 +91,7 @@ public:
 	 * @brief Construct a permission object
 	 * @param value A permission bitmask
 	 */
-	permission(const uint64_t& value);
+	permission(const permissions& value);
 
 	/**
  	 * @brief Construct a permission object
