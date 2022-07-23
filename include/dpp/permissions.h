@@ -132,7 +132,7 @@ public:
 	 */
 	template <typename... T>
 	bool has(T... values) const {
-		return (values... & (0 | ... | values...)) == (0 | ... | values...);
+		return (values... & (0 | ... | values)...)) == (0 | ... | values...);
 	}
 
 	/**
