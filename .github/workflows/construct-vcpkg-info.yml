@@ -65,7 +65,7 @@ jobs:
                 cd /usr/local/share/vcpkg &&
                 sudo ./vcpkg format-manifest ./ports/dpp/vcpkg.json &&
                 sudo git add . &&
-                sudo git commit -m "Updates!"  &&
+                sudo git commit -m "[bot] VCPKG info update"  &&
                 sudo /usr/local/share/vcpkg/vcpkg x-add-version --overwrite-version --all --skip-version-format-check &&
                 cd /home/runner/work/DPP/DPP/dpp &&
                 sudo cp -v -R /usr/local/share/vcpkg/ports/dpp/vcpkg.json ./vcpkg/ports/dpp/vcpkg.json &&
