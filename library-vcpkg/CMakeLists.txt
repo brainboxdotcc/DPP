@@ -34,6 +34,12 @@ target_compile_features(
 	"cxx_enum_forward_declarations"
 )
 
+target_precompile_headers(
+		"${LIB_NAME}" PRIVATE
+		"${CMAKE_SOURCE_DIR}/include/dpp/nlohmann/json_fwd.hpp"
+		"${CMAKE_SOURCE_DIR}/include/dpp/nlohmann/json.hpp"
+)
+
 target_include_directories(
 	"${LIB_NAME}" PRIVATE
 	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
