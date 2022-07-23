@@ -31,6 +31,7 @@ target_compile_features(
 	"cxx_defaulted_functions" "cxx_deleted_functions"
 	"cxx_final" "cxx_lambdas" "cxx_override" "cxx_thread_local"
 	"cxx_variadic_templates" "cxx_attribute_deprecated"
+	"cxx_enum_forward_declarations"
 )
 
 target_include_directories(
