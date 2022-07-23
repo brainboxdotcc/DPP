@@ -1,14 +1,15 @@
-name: Construct vcpkg info.
+name: Prepare release for VCPKG
 
 on:
   release:
+  workflow_dispatch:
 
 jobs:
   Collect-Vcpkg-Info:
     runs-on: ubuntu-20.04
     steps:
 
-         - name: Update vcpkg and install other dependencies.
+         - name: Update vcpkg and install other dependencies
            run: sudo apt-get install nasm &&
                 cd /usr/local/share/vcpkg &&
                 sudo ./bootstrap-vcpkg.sh &&
@@ -16,12 +17,12 @@ jobs:
                 sudo git pull &&
                 sudo vcpkg update
 
-         - name: Collect the repo.
+         - name: Collect the repo
            run: sudo git config --global user.email "noreply@dpp.dev" &&
                 sudo git config --global user.name "DPP VCPKG Bot" &&
                 sudo git clone https://braindigitalis:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/brainboxdotcc/dpp ./dpp --depth=1
 
-         - name: Construct the original portfile and version file.
+         - name: Construct the original portfile and version file
            run: cd ./dpp &&
                 sudo touch ./cmake/Raw-Files/Portfile-The-First.cmake &&
                 sudo touch ./cmake/Raw-Files/Portfile-The-Second.cmake &&
@@ -36,7 +37,7 @@ jobs:
                 sudo truncate -s -1 ./vcpkg/ports/dpp/vcpkg.json &&
                 sudo bash -c "cat ./cmake/Raw-Files/Bottom-Of-Version-File.txt >> ./vcpkg/ports/dpp/vcpkg.json"
 
-         - name: Attempt to install the library, to collect the SHA512 value.
+         - name: Attempt to install the library, to collect the SHA512 value
            run: cd ./dpp &&
                 sudo mkdir /usr/local/share/vcpkg/ports/dpp/ &&
                 [ -f /usr/local/share/vcpkg/versions/d-/dpp.json ] && echo "File exists." || sudo cp -v -R ./cmake/Raw-Files/dpp.json /usr/local/share/vcpkg/versions/d-/dpp.json  &&
@@ -44,7 +45,7 @@ jobs:
                 sudo cp -v -R ./cmake/Raw-Files/Portfile-The-First.cmake /usr/local/share/vcpkg/ports/dpp/portfile.cmake &&
                 sudo /usr/local/share/vcpkg/vcpkg install dpp:x64-linux | sudo tee InstallOutput.txt || true
 
-         - name:  Update the portfile and download/install the library.
+         - name:  Update the portfile and download/install the library
            run: cd ./dpp &&
                 sudo sed -i '/Actual hash/,$!d' InstallOutput.txt &&
                 sudo sed -i 's/^.....................//' InstallOutput.txt &&
