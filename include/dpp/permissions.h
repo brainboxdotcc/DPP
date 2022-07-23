@@ -152,8 +152,7 @@ public:
 	template <typename... T>
 	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
 	add(T... values) {
-		value |= (0 | ... | values...);
-		return *this;
+		return (values... & (0 | ... | values)...)) == (0 | ... | values...);
 	}
 
 	/**
@@ -172,8 +171,7 @@ public:
 	template <typename... T>
 	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
 	set(T... values) {
-		value = (0 | ... | values...);
-		return *this;
+		return (values... & (0 | ... | values)...)) == (0 | ... | values...);
 	}
 
 	/**
