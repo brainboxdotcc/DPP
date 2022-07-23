@@ -1,7 +1,7 @@
 name: Construct vcpkg info.
 
 on:
-  push:
+  release:
 
 jobs:
   Collect-Vcpkg-Info:
@@ -17,9 +17,9 @@ jobs:
                 sudo vcpkg update
 
          - name: Collect the repo.
-           run: sudo git config --global user.email "40668522+RealTimeChris@users.noreply.github.com" &&
-                sudo git config --global user.name "realtimechris" &&
-                sudo git clone https://realtimechris:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/realtimechris/dpp ./dpp --depth=1
+           run: sudo git config --global user.email "noreply@dpp.dev" &&
+                sudo git config --global user.name "DPP VCPKG Bot" &&
+                sudo git clone https://braindigitalis:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/brainboxdotcc/dpp ./dpp --depth=1
 
          - name: Construct the original portfile and version file.
            run: cd ./dpp &&
@@ -74,7 +74,7 @@ jobs:
                 sudo rm -rf ./cmake/Raw-Files/Portfile-The-First.cmake &&
                 sudo rm -rf ./cmake/Raw-Files/Portfile-The-Second.cmake &&
                 sudo git add . &&
-                sudo git commit -m "Updates! [skip ci]" &&
+                sudo git commit -m "[bot] VCPKG info update [skip ci]" &&
                 sudo git config pull.rebase false &&
                 sudo git pull &&
                 sudo git push origin master &&

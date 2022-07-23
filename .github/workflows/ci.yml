@@ -45,14 +45,18 @@ jobs:
       - name: Generate CMake
         run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
         env:
+          DONT_RUN_VCPKG: true
           CXX: ${{matrix.cfg.cpp-version}}
 
       - name: Build Project
         run: cd build && ninja 
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Run unit tests
         run: cd build && ctest -VV
         env:
+          DONT_RUN_VCPKG: true
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
           TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
           TEST_TEXT_CHANNEL_ID: ${{secrets.TEST_TEXT_CHANNEL_ID}}
@@ -62,6 +66,8 @@ jobs:
 
       - name: Package distributable
         run: cd build && cpack --verbose
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Upload Binary (DEB)
         uses: actions/upload-artifact@v2
@@ -96,10 +102,13 @@ jobs:
       - name: Generate CMake
         run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
         env:
+          DONT_RUN_VCPKG: true
           CXX: ${{matrix.cfg.cpp-version}}
 
       - name: Build Project
         run: cd build && ninja 
+        env:
+          DONT_RUN_VCPKG: true
 
   macos:
     name: macOS x64
@@ -113,9 +122,13 @@ jobs:
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Build Project
         run: cd build && ninja 
+        env:
+          DONT_RUN_VCPKG: true
 
   windows: # Windows x64 and x86 build matrix
     strategy:
@@ -148,13 +161,19 @@ jobs:
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
         run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
         run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Build Project
         run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}}
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Move debug files for packaging
         if: ${{ matrix.cfg.config == 'Debug' }}
@@ -162,6 +181,8 @@ jobs:
 
       - name: Package distributable
         run: cd main/build && cpack --verbose
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Upload Binary
         uses: actions/upload-artifact@v2
@@ -190,12 +211,18 @@ jobs:
 
       - name: Generate CMakeFiles
         run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Compile Source
         run: cd build && sudo ninja 
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Package Distributable
         run: cd build && cpack --verbose
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Upload Binaries (DEB)
         uses: actions/upload-artifact@v2
