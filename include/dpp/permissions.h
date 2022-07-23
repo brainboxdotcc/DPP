@@ -27,8 +27,8 @@
 namespace dpp {
 
 /**
-* @brief Represents the various discord permissions
-*/
+ * @brief Represents the various discord permissions
+ */
 enum permissions : uint64_t {
 	p_create_instant_invite = 0x00000000001,    //!< allows creation of instant invites
 	p_kick_members = 0x00000000002,    //!< allows kicking members
@@ -74,128 +74,128 @@ enum permissions : uint64_t {
 };
 
 /**
-* @brief Represents the various discord permissions
-* @deprecated Use dpp::permissions instead.
-*/
+ * @brief Represents the various discord permissions
+ * @deprecated Use dpp::permissions instead.
+ */
 using role_permissions = permissions;
 
 /**
-* @brief Represents a permission bitmask (refer to enum dpp::permissions) which are hold in an uint64_t
-*/
+ * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are hold in an uint64_t
+ */
 class DPP_EXPORT permission {
 protected:
 	/**
-	* @brief The permission bitmask value
-	*/
+	 * @brief The permission bitmask value
+	 */
 	uint64_t value;
 
 public:
 	/**
-	* @brief Construct a permission object
-	* @param value A permission bitmask
-	*/
+	 * @brief Construct a permission object
+	 * @param value A permission bitmask
+	 */
 	permission(const uint64_t& value);
 
 	/**
-	* @brief Construct a permission object
-	*/
+ 	 * @brief Construct a permission object
+ 	 */
 	permission();
 
 	/**
-	* @brief For acting like an integer
-	* @return The permission bitmask value
-	*/
+	 * @brief For acting like an integer
+	 * @return The permission bitmask value
+	 */
 	operator uint64_t() const;
 
 	/**
-	* @brief For acting like an integer
-	* @return A reference to the permission bitmask value
-	*/
-	operator uint64_t& ();
+	 * @brief For acting like an integer
+	 * @return A reference to the permission bitmask value
+	 */
+	operator uint64_t &();
 
 	/**
-	* @brief For building json
-	* @return The permission bitmask value as a string
-	*/
+	 * @brief For building json
+	 * @return The permission bitmask value as a string
+	 */
 	operator nlohmann::json() const;
 
 	/**
-	* @brief Check for permission flags set. It uses the Bitwise AND operator
-	* @tparam T one or more uint64_t permission bits
-	* @param values The permissions (from dpp::permissions) to check for
-	*
-	* **Example:**
-	*
-	* ```cpp
-	* bool is_mod = permission.has(dpp::p_kick_members, dpp::p_ban_members);
-	* // Returns true if the permission bitmask contains p_kick_members and p_ban_members
-	* ```
-	*
-	* @return bool True if it has all the given permissions
-	*/
+	 * @brief Check for permission flags set. It uses the Bitwise AND operator
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to check for
+	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * bool is_mod = permission.has(dpp::p_kick_members, dpp::p_ban_members);
+	 * // Returns true if the permission bitmask contains p_kick_members and p_ban_members
+	 * ```
+	 *
+	 * @return bool True if it has all the given permissions
+	 */
 	template <typename... T>
 	bool has(T... values) const {
 		return (value & (0 | ... | values)) == (0 | ... | values);
 	}
 
 	/**
-	* @brief Add a permission with the Bitwise OR operation
-	* @tparam T one or more uint64_t permission bits
-	* @param values The permissions (from dpp::permissions) to add
-	*
-	* **Example:**
-	*
-	* ```cpp
-	* permission.add(dpp::p_view_channel, dpp::p_send_messages);
-	* // Adds p_view_channel and p_send_messages to the permission bitmask
-	* ```
-	*
-	* @return permission& reference to self for chaining
-	*/
+	 * @brief Add a permission with the Bitwise OR operation
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to add
+	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * permission.add(dpp::p_view_channel, dpp::p_send_messages);
+	 * // Adds p_view_channel and p_send_messages to the permission bitmask
+	 * ```
+	 *
+	 * @return permission& reference to self for chaining
+	 */
 	template <typename... T>
 	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
-		add(T... values) {
+	add(T... values) {
 		value |= (0 | ... | values);
 		return *this;
 	}
 
 	/**
-	* @brief Assign a permission. This will reset the bitmask to the new value.
-	* @tparam T one or more uint64_t permission bits
-	* @param values The permissions (from dpp::permissions) to set
-	*
-	* **Example:**
-	*
-	* ```cpp
-	* permission.set(dpp::p_view_channel, dpp::p_send_messages);
-	* ```
-	*
-	* @return permission& reference to self for chaining
-	*/
+	 * @brief Assign a permission. This will reset the bitmask to the new value.
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to set
+	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * permission.set(dpp::p_view_channel, dpp::p_send_messages);
+	 * ```
+	 *
+	 * @return permission& reference to self for chaining
+	 */
 	template <typename... T>
 	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
-		set(T... values) {
+	set(T... values) {
 		value = (0 | ... | values);
 		return *this;
 	}
 
 	/**
-	* @brief Remove a permission with the Bitwise NOT operation
-	* @tparam T one or more uint64_t permission bits
-	* @param values The permissions (from dpp::permissions) to remove
-	*
-	* **Example:**
-	*
-	* ```cpp
-	* permission.remove(dpp::p_view_channel, dpp::p_send_messages);
-	* // Removes p_view_channel and p_send_messages permission
-	* ```
-	*
-	* @return permission& reference to self for chaining
-	*/
+	 * @brief Remove a permission with the Bitwise NOT operation
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to remove
+	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * permission.remove(dpp::p_view_channel, dpp::p_send_messages);
+	 * // Removes p_view_channel and p_send_messages permission
+	 * ```
+	 *
+	 * @return permission& reference to self for chaining
+	 */
 	template <typename... T>
 	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
-		remove(T... values) {
+	remove(T... values) {
 		value &= ~(0 | ... | values);
 		return *this;
 	}

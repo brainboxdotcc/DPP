@@ -288,6 +288,21 @@ void websocket_client::handle_ping_pong(bool ping, const std::string &payload)
 	}
 }
 
+void websocket_client::send_close_packet()
+{
+	/* This is a 16 bit value representing 1000 in hex (0x03E8), network order.
+	 * For an error/close frame, this is all we need to send, just two bytes
+	 * and the header. We do this on shutdown of a websocket for graceful close.
+	 */
+	std::string payload = "\x03\xE8";
+	unsigned char out[MAXHEADERSIZE];
+
+	size_t s = this->fill_header(out, payload.length(), OP_CLOSE);
+	std::string header((const char*)out, s);
+	ssl_client::write(header);
+	ssl_client::write(payload);
+}
+
 void websocket_client::error(uint32_t errorcode)
 {
 }
