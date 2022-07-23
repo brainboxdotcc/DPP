@@ -1692,9 +1692,13 @@ public:
 	 * @see https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
 	 * @param guild_id Guild to get the audit log of
 	 * @param callback Function to call when the API call completes.
+	 * @param user_id Entries from a specific user ID. Defaults to fetch any user
+	 * @param action_type Entries for a specific dpp::audit_type. Defaults to fetch any type
+	 * @param before Entries that preceded a specific audit log entry ID
+	 * @param limit Maximum number of entries (between 1-100) to return, defaults to 50
 	 * On success the callback will contain a dpp::auditlog object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_auditlog_get(snowflake guild_id, command_completion_event_t callback);
+	void guild_auditlog_get(snowflake guild_id, command_completion_event_t callback, snowflake user_id = 0, uint32_t action_type = 0, snowflake before = 0, uint32_t limit = 50);
 
 	/**
 	 * @brief Create a slash command local to a guild
@@ -2415,9 +2419,9 @@ public:
 	 * @brief Edit the properties of an existing guild member
 	 * 
 	 * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update` Gateway event.
-	 * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
 	 * To remove a timeout, set the `communication_disabled_until` to a non-zero time in the past, e.g. 1.
 	 * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
+	 * For moving and disconnecting users from voice, use dpp::cluster::guild_member_move.
 	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param gm Guild member to edit

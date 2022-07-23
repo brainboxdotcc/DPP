@@ -232,10 +232,6 @@ confirmation cluster::guild_current_member_edit_sync(snowflake guild_id, const s
 	return dpp::sync<confirmation>(this, &cluster::guild_current_member_edit, guild_id, nickname);
 }
 
-auditlog cluster::guild_auditlog_get_sync(snowflake guild_id) {
-	return dpp::sync<auditlog>(this, &cluster::guild_auditlog_get, guild_id);
-}
-
 confirmation cluster::guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_days) {
 	return dpp::sync<confirmation>(this, &cluster::guild_ban_add, guild_id, user_id, delete_message_days);
 }

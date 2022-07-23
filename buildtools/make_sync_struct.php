@@ -13,6 +13,7 @@ $blacklist = [
     'message_delete_own_reaction',
     'message_get_reactions',
     'channel_typing',
+	'guild_auditlog_get',
 ];
 
 /* The script cannot determine the correct return type of these methods,

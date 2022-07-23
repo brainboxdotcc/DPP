@@ -766,20 +766,6 @@ gateway get_gateway_bot_sync();
 confirmation guild_current_member_edit_sync(snowflake guild_id, const std::string &nickname);
 
 /**
- * @brief Get the audit log for a guild
- *
- * @see dpp::cluster::guild_auditlog_get
- * @see https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
- * @param guild_id Guild to get the audit log of
- * @return auditlog returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-auditlog guild_auditlog_get_sync(snowflake guild_id);
-
-/**
  * @brief Add guild ban
  *
  * Create a guild ban, and optionally delete previous messages sent by the banned user.
@@ -1281,14 +1267,15 @@ confirmation guild_member_delete_role_sync(snowflake guild_id, snowflake user_id
 confirmation guild_member_remove_role_sync(snowflake guild_id, snowflake user_id, snowflake role_id);
 
 /**
- * @brief Moves the guild member to a other voice channel, if member is connected to one
+ * @brief Moves the guild member to a other voice channel, if member is connected to one.
+ * Set the `channel_id` to `0` to disconnect the user.
  *
  * Fires a `Guild Member Update` Gateway event.
  * @note When moving members to channels, the API user __must__ have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @see dpp::cluster::guild_member_move
  * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
- * @param channel_id Id of the channel to which the user is used
+ * @param channel_id Id of the channel to which the user is used. Set to `0` to disconnect the user
  * @param guild_id Guild id to which the user is connected
  * @param user_id User id, who should be moved
  * @return guild_member returned object on completion
