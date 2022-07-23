@@ -248,8 +248,8 @@ if (DPP_BUILD_TEST)
 	target_link_libraries(unittest PUBLIC ${modname})
 	add_test(
 		NAME unittests
-		COMMAND unittest
-		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+		COMMAND library/unittest
+		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/library
 	)
 
 endif()
