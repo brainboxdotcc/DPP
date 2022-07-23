@@ -7,7 +7,7 @@
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
 [![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp)
 
-D++ is a lightweight and efficient library for Discord written in modern C++. It is designed to cover as much of the API specification as possible and to have a incredibly small memory footprint, even when caching large amounts of data.
+D++ is a lightweight and efficient library for Discord written in modern C++, covering as much of the API specification as possible with an incredibly small memory footprint even when caching large amounts of data.
 
 ### Library features:
 
@@ -66,12 +66,18 @@ You can find more examples in our [example page](https://dpp.dev/md_docpages_03_
 
 ## Supported Systems
 
-The library runs great on **Linux**. **Windows** is also supported and we offer ready made compiled DLL and LIB files for easy integration into any windows visual studio 2019 or 2022 project.
-**Mac OS X** and **FreeBSD** is also functional and stable, as is running your bot on a **Raspberry Pi** - we offer a prebuilt .deb for ARM64, ARM6 and ARM7 to save on having to wait for it to compile.
+### Linux
+The library runs ideally on **Linux**.
 
-If you are on windows, and just want to get started as quickly as possible, you should look at our [Windows Bot Template repository](https://github.com/brainboxdotcc/windows-bot-template). This repository can be cloned and will get you up and running in a matter of minutes, with a pre-built D++ in a ready to go project for Visual Studio 2019 and 2022.
+### Mac OS X and FreeBSD
+The library is well-functional and stable on **Mac OS X** and **FreeBSD** too.
+For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for ARM64, ARM6, and ARM7 so that you do not have to wait for it to compile.
 
-The library may work fine in other operating systems too, if you run a D++ bot on something not listed here please let us know!
+### Windows
+**Windows** is well-supported with ready-made compiled DLL and LIB files, please check out our [Windows Bot Template repository](https://github.com/brainboxdotcc/windows-bot-template). The Windows Bot repository can be cloned and integrated immediately into any Visual Studio 2019 and 2022 project in a matter of minutes.
+
+### Other OS
+The library should work fine on other operating systems as well, and if you run a D++ bot on something not listed here, please let us know!
 
 ## 🤝 Contributing
 
