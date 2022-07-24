@@ -89,7 +89,7 @@ std::string user::get_avatar_url(uint16_t size)  const {
 }
 
 std::string user::format_username() const {
-	return username + '#' + to_hex(discriminator);
+	return username + '#' + leading_zeroes(discriminator, 4);
 }
 
 std::string user::get_mention() const {
