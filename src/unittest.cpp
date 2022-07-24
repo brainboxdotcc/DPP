@@ -51,7 +51,9 @@ std::map<std::string, test_t> tests = {
 	{"GETPINS", {tt_online, "cluster::channel_pins_get()", false, false}},
 	{"GETEVENTS", {tt_online, "cluster::guild_events_get()", false, false}},
 	{"GETEVENT", {tt_online, "cluster::guild_event_get()", false, false}},
+	{"MSGMENTIONUSER", {tt_online, "message_create_t::reply() (mention)", false, false}},
 	{"MSGCREATESEND", {tt_online, "message_create_t::send()", false, false}},
+	{"MSGCREATEREPLY", {tt_online, "message_create_t::reply()", false, false}},
 	{"GETEVENTUSERS", {tt_online, "cluster::guild_event_users_get()", false, false}},
 	{"TIMERSTART", {tt_online, "start timer", false, false}},
 	{"TIMERSTOP", {tt_online, "stop timer", false, false}},
@@ -142,7 +144,7 @@ int test_summary() {
 
 std::vector<uint8_t> load_test_audio() {
 	std::vector<uint8_t> testaudio;
-	std::ifstream input ("../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	std::ifstream input ("../../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
 	if (input.is_open()) {
 		size_t testaudio_size = input.tellg();
 		testaudio.resize(testaudio_size);
@@ -151,7 +153,7 @@ std::vector<uint8_t> load_test_audio() {
 		input.close();
 	}
 	else {
-		std::cout << "ERROR: Can't load ../testdata/Robot.pcm\n";
+		std::cout << "ERROR: Can't load ../../testdata/Robot.pcm\n";
 		exit(1);
 	}
 	return testaudio;

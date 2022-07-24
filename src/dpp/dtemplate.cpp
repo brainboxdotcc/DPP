@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/dtemplate.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/nlohmann/json_fwd.hpp>
 
 using json = nlohmann::json;
 

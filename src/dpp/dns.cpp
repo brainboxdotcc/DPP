@@ -22,6 +22,7 @@
 #include <dpp/dns.h>
 #include <errno.h>
 #include <exception>
+#include <cstring>
 #include <mutex>
 #include <shared_mutex>
 #include <dpp/exception.h>

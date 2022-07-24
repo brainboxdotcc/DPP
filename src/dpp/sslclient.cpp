@@ -123,47 +123,53 @@ const int ERROR_STATUS = -1;
  */
 int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
 #ifdef _WIN32
+	/* Windows being windows is an ass and this doesnt work there*/
 	return (::connect(sockfd, addr, addrlen));
 #else
-	int ofcmode;
-	ofcmode = fcntl(sockfd, F_GETFL, 0);
-	ofcmode |= O_NDELAY;
-	if (fcntl(sockfd, F_SETFL, ofcmode)) {
-		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
-	}
-	int rc = (::connect(sockfd, addr, addrlen));
-	if (rc == -1 && errno != EWOULDBLOCK && errno != EINPROGRESS) {
-		throw dpp::connection_exception(strerror(errno));
-	} else {
-		// Set a deadline timestamp 'timeout' ms from now (needed b/c poll can be interrupted)
-		double deadline = dpp::utility::time_f() + (timeout_ms / 1000.0);
-		do {
-			rc = -1;
-			if (dpp::utility::time_f() >= deadline) {
-				throw dpp::connection_exception("Connection timed out");
-			}
-			fd_set writefds, efds;
-			FD_ZERO(&writefds);
-			FD_ZERO(&efds);
-			SAFE_FD_SET(sockfd, &writefds);
-			SAFE_FD_SET(sockfd, &efds);
-			timeval ts;
-			ts.tv_sec = 0;
-			ts.tv_usec = timeout_ms * 1000;
-			int r = select(sockfd + 1, nullptr, &writefds, &efds, &ts);
-			if (r > 0 && SAFE_FD_ISSET(sockfd, &writefds) && !SAFE_FD_ISSET(sockfd, &efds)) {
-				rc = 0;
-			} else if (r > 0 && SAFE_FD_ISSET(sockfd, &efds)) {
-				throw dpp::connection_exception(strerror(errno));
-			}
-		} while (rc == -1);
-	}
-	ofcmode = fcntl(sockfd, F_GETFL, 0);
-	ofcmode &= ~O_NDELAY;
-	if (fcntl(sockfd, F_SETFL, ofcmode)) {
-		throw dpp::connection_exception("Can't switch socket to blocking mode!");
-	}
-	return rc;
+	#if defined(__APPLE__) && defined(__MACH__)
+		/* Unreliable on OSX right now */
+		return (::connect(sockfd, addr, addrlen));
+	#else
+		int ofcmode;
+		ofcmode = fcntl(sockfd, F_GETFL, 0);
+		ofcmode |= O_NDELAY;
+		if (fcntl(sockfd, F_SETFL, ofcmode)) {
+			throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+		}
+		int rc = (::connect(sockfd, addr, addrlen));
+		if (rc == -1 && errno != EWOULDBLOCK && errno != EINPROGRESS) {
+			throw dpp::connection_exception(strerror(errno));
+		} else {
+			// Set a deadline timestamp 'timeout' ms from now (needed b/c poll can be interrupted)
+			double deadline = dpp::utility::time_f() + (timeout_ms / 1000.0);
+			do {
+				rc = -1;
+				if (dpp::utility::time_f() >= deadline) {
+					throw dpp::connection_exception("Connection timed out");
+				}
+				fd_set writefds, efds;
+				FD_ZERO(&writefds);
+				FD_ZERO(&efds);
+				SAFE_FD_SET(sockfd, &writefds);
+				SAFE_FD_SET(sockfd, &efds);
+				timeval ts;
+				ts.tv_sec = 0;
+				ts.tv_usec = timeout_ms * 1000;
+				int r = select(sockfd + 1, nullptr, &writefds, &efds, &ts);
+				if (r > 0 && SAFE_FD_ISSET(sockfd, &writefds) && !SAFE_FD_ISSET(sockfd, &efds)) {
+					rc = 0;
+				} else if (r > 0 && SAFE_FD_ISSET(sockfd, &efds)) {
+					throw dpp::connection_exception(strerror(errno));
+				}
+			} while (rc == -1);
+		}
+		ofcmode = fcntl(sockfd, F_GETFL, 0);
+		ofcmode &= ~O_NDELAY;
+		if (fcntl(sockfd, F_SETFL, ofcmode)) {
+			throw dpp::connection_exception("Can't switch socket to blocking mode!");
+		}
+		return rc;
+	#endif
 #endif
 }
 

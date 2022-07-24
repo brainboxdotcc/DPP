@@ -21,13 +21,13 @@ write_basic_package_version_file(${DPP_VERSION_FILE}
 
 ## Package the include headers (the trailing slash is important, otherwise
 ## the include folder will be copied, instead of it's contents)
-install(DIRECTORY include/ DESTINATION ${DPP_INSTALL_INCLUDE_DIR})
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/" DESTINATION "${DPP_INSTALL_INCLUDE_DIR}")
 
 ## Include the file which allows `find_package(libdpp)` to function.
-install(FILES cmake/libdpp-config.cmake ${DPP_VERSION_FILE} DESTINATION ${DPP_INSTALL_LIBRARY_DIR})
+install(FILES "${CMAKE_SOURCE_DIR}/cmake/libdpp-config.cmake" "${DPP_VERSION_FILE}" DESTINATION "${DPP_INSTALL_LIBRARY_DIR}")
 
 ## Export the targets to allow other projects to easily include this project
-install(EXPORT ${DPP_EXPORT_NAME} DESTINATION ${DPP_INSTALL_LIBRARY_DIR} NAMESPACE dpp::)
+install(EXPORT "${DPP_EXPORT_NAME}" DESTINATION "${DPP_INSTALL_LIBRARY_DIR}" NAMESPACE dpp::)
 
 # Prepare information for packaging into .zip, .deb, .rpm
 ## Project installation metadata
