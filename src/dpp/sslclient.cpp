@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/export.h>
-#include <errno.h>
+#include <cerrno>
 
 #ifdef _WIN32
 #include <WinSock2.h>
@@ -123,6 +123,7 @@ bool close_socket(dpp::socket sfd)
 		return ::close(sfd) == 0;
 #endif
 	}
+	return false;
 }
 
 bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
@@ -146,7 +147,6 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 #endif
 	return true;
 }
-
 
 /**
  * @brief Connect to TCP socket with a select() driven timeout

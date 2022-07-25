@@ -20,7 +20,7 @@
  ************************************************************************************/
 
 #include <dpp/dns.h>
-#include <errno.h>
+#include <cerrno>
 #include <exception>
 #include <cstring>
 #include <mutex>
