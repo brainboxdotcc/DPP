@@ -551,19 +551,10 @@ bool discord_voice_client::handle_frame(const std::string &data)
 						throw dpp::connection_exception("Can't bind() client UDP socket");
 					}
 					
-#ifdef _WIN32
-					u_long mode = 1;
-					int result = ioctlsocket(newfd, FIONBIO, &mode);
-					if (result != NO_ERROR)
-						throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
-#else
-					int ofcmode;
-					ofcmode = fcntl(newfd, F_GETFL, 0);
-					ofcmode |= O_NDELAY;
-					if (fcntl(newfd, F_SETFL, ofcmode)) {
-						throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+					if (!set_nonblocking(newfd, true)) {
+						throw dpp::connection_exception("Can't switch voice UDP socket to non-blocking mode!");
 					}
-#endif
+
 					/* Hook select() in the ssl_client to add a new file descriptor */
 					this->fd = newfd;
 					this->custom_writeable_fd = std::bind(&discord_voice_client::want_write, this);
@@ -1233,14 +1224,7 @@ std::string discord_voice_client::discover_ip() {
 			return "";
 		}
 
-		shutdown(newfd, 2);
-	#ifdef _WIN32
-		if (newfd >= 0 && newfd < FD_SETSIZE) {
-			closesocket(newfd);
-		}
-	#else
-		::close(newfd);
-	#endif
+		close_socket(newfd);
 
 		//utility::debug_dump(packet, 74);
 		return std::string((const char*)(packet + 8));
