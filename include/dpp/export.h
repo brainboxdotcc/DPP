@@ -22,10 +22,10 @@
 
 /* Compile-time check for C++17.
  * Either one of the following causes a compile time error:
- * __cpluplus not defined at all (this means we are being compiled on a C compiler)
+ * __cplusplus not defined at all (this means we are being compiled on a C compiler)
  * MSVC defined and _MSVC_LANG < 201703L (Visual Studio, but not C++17 or newer)
  * MSVC not defined and __cplusplus < 201703L (Non-visual studio, but not C++17 or newer)
- * The additional checks are required because MSVC doesnt correctly set __cplusplus to 201703L,
+ * The additional checks are required because MSVC doesn't correctly set __cplusplus to 201703L,
  * which is hugely non-standard, but apparently "it broke stuff" so they dont ever change it
  * from C++98. Ugh.
  */
