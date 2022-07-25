@@ -29,7 +29,7 @@
  * which is hugely non-standard, but apparently "it broke stuff" so they dont ever change it
  * from C++98. Ugh.
  */
-#if (!defined(__cplusplus) || (defined(MSVC) && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)) || (!defined(MSVC) && __cplusplus < 201703L))
+#if (!defined(__cplusplus) || (defined(_MSC_VER) && (!defined(_MSVC_LANG) || _MSVC_LANG < 201703L)) || (!defined(_MSC_VER) && __cplusplus < 201703L))
 	#error "D++ Requires a C++17 compatible C++ compiler. Please ensure that you have enabled C++17 in your compiler flags."
 #endif
 
