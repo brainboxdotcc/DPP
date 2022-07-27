@@ -80,7 +80,8 @@
 		"automod",
 		"amod",
 		"apult",
-		"cplusplus"
+		"cplusplus",
+		"xmake"
 	],
 	"flagWords": [
 		"hte"
