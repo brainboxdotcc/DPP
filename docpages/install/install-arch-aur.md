@@ -8,6 +8,13 @@ cd dpp
 makepkg -si
 ```
 
+or use your favorite package manager:
+
+```sh
+# example with `yay` (without root)
+yay -Sy dpp
+```
+
 This will do the following three things:
 
 - Clone the D++ AUR repository to a directory called `dpp`
