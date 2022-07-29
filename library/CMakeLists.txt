@@ -301,7 +301,9 @@ if(NOT WIN32)
 
 	include(GNUInstallDirs)
 	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	message("Installing library at ${CMAKE_INSTALL_LIBDIR}")
 	install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+	message("Installing include files at ${CMAKE_INSTALL_INCLUDEDIR}")
 	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DRUN_LDCONFIG=${RUN_LDCONFIG} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/PostInstall.cmake)")
 
 	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../dpp.pc.in" "${CMAKE_BINARY_DIR}/dpp.pc" @ONLY)
