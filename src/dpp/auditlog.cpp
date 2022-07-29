@@ -26,10 +26,6 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-auditlog::auditlog() = default;
-
-auditlog::~auditlog() = default;
-
 auditlog& auditlog::fill_from_json(nlohmann::json* j) {
 	for (auto &ai : (*j)["audit_log_entries"]) {
 		audit_entry ae;

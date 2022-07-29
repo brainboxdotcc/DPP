@@ -78,7 +78,7 @@ public:
 	/**
 	 * @brief Destroy the dtemplate object
 	 */
-	~dtemplate();
+	virtual ~dtemplate() = default;
 	
 	/** Read class values from json object
 	 * @param j A json object to read from
