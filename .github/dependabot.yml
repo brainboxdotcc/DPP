@@ -7,3 +7,7 @@ updates:
     target-branch: "dev"
     allow:
       - dependency-name: "doxygen-awesome-css"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"
