@@ -4,5 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    target-branch: "dev"
     allow:
       - dependency-name: "doxygen-awesome-css"
