@@ -30,9 +30,9 @@ $forcedReturn = [
 $header = explode("\n", file_get_contents('include/dpp/cluster.h'));
 
 /* Finite state machine state constants */
-define('STATE_SEARCH_FOR_FUNCTION', 0);
-define('STATE_IN_FUNCTION', 1);
-define('STATE_END_OF_FUNCTION', 2);
+const STATE_SEARCH_FOR_FUNCTION = 0;
+const STATE_IN_FUNCTION = 1;
+const STATE_END_OF_FUNCTION = 2;
 
 $state = STATE_SEARCH_FOR_FUNCTION;
 $currentFunction = $parameters = $returnType = '';
