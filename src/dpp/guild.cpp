@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/cache.h>
 #include <dpp/discordclient.h>
 #include <dpp/voicestate.h>
 #include <dpp/exception.h>
