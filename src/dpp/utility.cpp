@@ -504,7 +504,11 @@ namespace dpp {
 				prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name.substr(0, 15).c_str()), NULL, NULL, NULL);
 			#else
 				#if HAVE_PTHREAD_SETNAME_NP
-					pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
+					#if defined(__sun) && defined(__SVR4)
+						pthread_setname_np(name.substr(0, 15).c_str());
+					#else
+						pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
+					#endif
 				#endif
 			#endif
 		}
