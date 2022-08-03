@@ -1,5 +1,24 @@
+# Check for various C functions
 check_cxx_symbol_exists(prctl "sys/prctl.h" HAVE_PRCTL)
 check_cxx_symbol_exists(pthread_setname_np "pthread.h" HAVE_PTHREAD_SETNAME_NP)
+
+# Go into more detail here and identify the valid signature of pthread_setname_np,
+# because different systems have different forms of this function (ugh).
+if (HAVE_PTHREAD_SETNAME_NP)
+	include(CheckCXXSourceCompiles)
+	check_cxx_source_compiles("
+	#include <thread>
+	int main() {
+		pthread_setname_np(\"ThreadName\");
+		return 0;
+	}" HAVE_SINGLE_PARAMETER_SETNAME_NP)
+	check_cxx_source_compiles("
+	#include <thread>
+	int main() {
+		pthread_setname_np(pthread_self(), \"ThreadName\");
+		return 0;
+	}" HAVE_TWO_PARAMETER_SETNAME_NP)
+endif()
 
 add_compile_definitions(DPP_OS=${CMAKE_SYSTEM_NAME})
 

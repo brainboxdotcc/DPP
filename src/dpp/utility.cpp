@@ -504,11 +504,10 @@ namespace dpp {
 				prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name.substr(0, 15).c_str()), NULL, NULL, NULL);
 			#else
 				#if HAVE_PTHREAD_SETNAME_NP
-					#if defined(__APPLE__) || (defined(__sun) && defined(__SVR4))
-						/* OSX and Solaris have some weird pthread_setname_np without a thread id parameter */
+					#if HAVE_SINGLE_PARAMETER_SETNAME_NP
 						pthread_setname_np(name.substr(0, 15).c_str());
-					#else
-						/* Everywhere else takes a thread id */
+					#endif
+					#if HAVE_TWO_PARAMETER_SETNAME_NP
 						pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
 					#endif
 				#endif
