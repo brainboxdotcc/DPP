@@ -81,7 +81,8 @@ EOT;
 /* Check if we need to re-generate by comparing modification times */
 $us = file_exists('include/dpp/cluster_sync_calls.h') ? filemtime('include/dpp/cluster_sync_calls.h') : 0;
 $them = filemtime('include/dpp/cluster.h');
-if ($them <= $us) {
+$thist = filemtime('buildtools/make_sync_struct.php');
+if ($them <= $us && $thist <= $us) {
     echo "-- No change required.\n";
     exit(0);
 }
