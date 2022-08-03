@@ -283,6 +283,16 @@ struct DPP_EXPORT confirmation_callback_t {
 	 * @return error_info The details of the error message
 	 */
 	error_info get_error() const;
+
+	/**
+	 * @brief Get the stored value via std::get
+	 * @tparam T type to get
+	 * @return stored value as type T
+	 */
+	template<typename T>
+	T get() const {
+		return std::get<T>(value);
+	}
 };
 
 /**
