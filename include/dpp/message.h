@@ -1239,7 +1239,7 @@ struct DPP_EXPORT message : public managed {
 	 * @brief Construct a new message object with a channel and content
 	 *
 	 * @param channel_id The channel to send the message to
-	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
+	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
@@ -1255,7 +1255,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Construct a new message object with content
 	 *
-	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
+	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(const std::string &content, message_type type = mt_default);
@@ -1417,7 +1417,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Set the message content
 	 * 
-	 * @param c message content. It will be truncated to the maximum length of 2000 UTF-8 characters.
+	 * @param c message content. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return message& reference to self
 	 */
 	message& set_content(const std::string &c);
