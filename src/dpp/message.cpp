@@ -435,7 +435,7 @@ message& message::set_allowed_mentions(bool _parse_users, bool _parse_roles, boo
 
 message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
 	channel_id = _channel_id;
-	content = utility::utf8substr(_content, 0, 2000);
+	content = utility::utf8substr(_content, 0, 4000);
 	type = t;
 }
 
@@ -491,7 +491,7 @@ message& message::add_file(const std::string &fn, const std::string &fc) {
 
 message& message::set_content(const std::string &c)
 {
-	content = utility::utf8substr(c, 0, 2000);
+	content = utility::utf8substr(c, 0, 4000);
 	return *this;
 }
 
@@ -506,7 +506,7 @@ message& message::set_guild_id(snowflake _guild_id) {
 }
 
 message::message(const std::string &_content, message_type t) : message() {
-	content = utility::utf8substr(_content, 0, 2000);
+	content = utility::utf8substr(_content, 0, 4000);
 	type = t;
 }
 
