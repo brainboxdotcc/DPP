@@ -77,6 +77,14 @@ std::map<std::string, test_t> tests = {
 	{"CHANNELCACHE", {tt_online, "dpp::find_channel()", false, false}},
 	{"CHANNELTYPES", {tt_online, "dpp::channel type flags", false, false}},
 	{"PERMISSION_CLASS", {tt_offline, "testing dpp::permission functionality", false, false}},
+	{"USER.GET_MENTION", {tt_offline, "testing dpp::user::get_mention functionality", false, false}},
+	{"USER.FORMAT_USERNAME", {tt_offline, "testing dpp::user::format_username functionality", false, false}},
+	{"USER.GET_CREATION_TIME", {tt_offline, "testing dpp::user::get_creation_time functionality", false, false}},
+	{"UTILITY.ICONHASH", {tt_offline, "testing dpp::utility::iconhash functionality", false, false}},
+	{"UTILITY.MAKE_URL_PARAMETERS", {tt_offline, "testing dpp::utility::make_url_parameters functionality", false, false}},
+	{"UTILITY.MARKDOWN_ESCAPE", {tt_offline, "testing dpp::utility::markdown_escape functionality", false, false}},
+	{"UTILITY.TOKENIZE", {tt_offline, "testing dpp::utility::tokenize functionality", false, false}},
+	{"UTILITY.URL_ENCODE", {tt_offline, "testing dpp::utility::url_encode functionality", false, false}},
 };
 
 double start = dpp::utility::time_f();
