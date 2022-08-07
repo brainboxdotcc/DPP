@@ -14,13 +14,48 @@
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-QTH6YHBNG5"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/base16/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100&display=swap" rel="stylesheet">
 <script>
-  window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-QTH6YHBNG5');
 
-        gtag('config', 'G-QTH6YHBNG5');
+	$(function() {
+		$(".fragment").each(function(i,node) {
+			var $node = $(node);
+			$node.children(":not(.line)").remove();
+			$node.html("<pre><code class='stan'>" + $node.text().trim().replaceAll("\<", "&lt;").replaceAll("\>", "&gt;") + "</code></pre>");
+			hljs.configure({
+				languages: ['cpp','diff','cmake','bash','sh','text'],
+			});
+			hljs.highlightAll(node);
+			hljs.initLineNumbersOnLoad(node);  
+		});
+	});
 </script>
+<style>
+	.hljs-ln-code, code, code a, pre.fragment, div.fragment, div.fragment .line, div.fragment span, div.fragment .line a, div.fragment .line span {
+		font-family: 'JetBrains Mono', monospace !important;
+		font-size: 0.8rem !important;
+	}
+	.fragment {
+		padding: 0 !important;
+		margin-top: 0 !important;
+		margin-bottom: 0 !important;
+		background: none !important;
+		border: 0 !important;
+	}
+	.hljs-ln-n::before {
+		content: attr(data-line-number);
+		padding-right: 1rem !important;
+	}	
+</style>
 <div style="z-index: -9999; position: absolute; right: 0; top: 0; font-size: 0.0001rem;color:transparent;background:none">
 	<!-- For crawlability of past versions -->
 	###PREV###

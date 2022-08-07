@@ -26,7 +26,7 @@
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
 #include <thread>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/nlohmann/json.hpp>
 #include <dpp/etf.h>
 #include <zlib.h>
 #ifdef _WIN32
@@ -355,16 +355,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 			case 7:
 				log(dpp::ll_debug, "Reconnection requested, closing socket " + sessionid);
 				message_queue.clear();
-
-				shutdown(sfd, 2);
-			#ifdef _WIN32
-				if (sfd >= 0 && sfd < FD_SETSIZE) {
-					closesocket(sfd);
-				}
-			#else
-				::close(sfd);
-			#endif
-
+				close_socket(sfd);
 			break;
 			/* Heartbeat ack */
 			case 11:
@@ -501,16 +492,7 @@ void discord_client::one_second_timer()
 		if ((time(nullptr) - this->last_heartbeat_ack) > heartbeat_interval * 2) {
 			log(dpp::ll_warning, "Missed heartbeat ACK, forcing reconnection to session " + sessionid);
 			message_queue.clear();
-
-		shutdown(sfd, 2);
-		#ifdef _WIN32
-			if (sfd >= 0 && sfd < FD_SETSIZE) {
-				closesocket(sfd);
-			}
-		#else
-			::close(sfd);
-		#endif
-			
+			close_socket(sfd);
 			return;
 		}
 

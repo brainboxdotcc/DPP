@@ -1,4 +1,4 @@
-	HEAD_REF master
+    HEAD_REF master
 )
 
 vcpkg_cmake_configure(
@@ -17,7 +17,7 @@ if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
 endif()
 
 file(
-	INSTALL "${SOURCE_PATH}/LICENSE"
-	DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}"
-	RENAME copyright
+    INSTALL "${SOURCE_PATH}/LICENSE"
+    DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}"
+    RENAME copyright
 )

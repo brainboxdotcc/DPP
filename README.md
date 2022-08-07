@@ -2,6 +2,7 @@
 ## An incredibly lightweight C++ Discord library
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp) 
+![Downloads](https://dl.dpp.dev/dlcount.php?repo=brainboxdotcc/dpp)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) 
 ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) 
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
@@ -15,7 +16,7 @@ D++ is a lightweight and efficient library for Discord written in modern C++, co
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
-* Highly optimised ETF (Erlang Term Format) support for very fast websocket throughput (*no other C++ Discord library has this!*)
+* Highly optimised ETF (Erlang Term Format) support for very fast websocket throughput
 * [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
 * [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio)
 * The entire Discord API is available for use in the library

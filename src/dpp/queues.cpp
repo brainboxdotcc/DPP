@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/export.h>
 #ifdef _WIN32
 /* Central point for forcing inclusion of winsock library for all socket code */
 #include <io.h>

@@ -213,7 +213,7 @@ namespace dpp {
 			}  else if (c > 1024) {		// 1KB
 				snprintf(print_buffer, 64, "%.2fK", (c / 1024.0));
 			} else {			// Bytes
-				snprintf(print_buffer, 64, "%I64u", c);
+				return std::to_string(c);
 			}
 			return print_buffer;
 		}
@@ -504,7 +504,12 @@ namespace dpp {
 				prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name.substr(0, 15).c_str()), NULL, NULL, NULL);
 			#else
 				#if HAVE_PTHREAD_SETNAME_NP
-					pthread_setname_np(name.substr(0, 15).c_str());
+					#if HAVE_SINGLE_PARAMETER_SETNAME_NP
+						pthread_setname_np(name.substr(0, 15).c_str());
+					#endif
+					#if HAVE_TWO_PARAMETER_SETNAME_NP
+						pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
+					#endif
 				#endif
 			#endif
 		}

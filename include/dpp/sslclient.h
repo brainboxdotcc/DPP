@@ -45,6 +45,22 @@ typedef std::function<dpp::socket()> socket_callback_t;
 typedef std::function<void()> socket_notification_t;
 
 /**
+ * @brief Close a socket 
+ * 
+ * @param sfd Socket to close
+ * @return false on error, true on success
+ */
+bool close_socket(dpp::socket sfd);
+
+/**
+ * @brief Set a socket to blocking or non-blocking IO
+ *
+ * @param sockfd socket to act upon
+ * @return false on error, true on success
+ */
+bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
+
+/**
  * @brief Implements a simple non-blocking SSL stream client.
  * 
  * @note although the design is non-blocking the run() method will
