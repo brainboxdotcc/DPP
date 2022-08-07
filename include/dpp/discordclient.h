@@ -301,6 +301,7 @@ public:
 
 	/**
 	 * @brief Privileged gateway intents
+	 * @see dpp::intents
 	 */
 	uint32_t intents;
 

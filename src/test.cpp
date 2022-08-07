@@ -207,6 +207,57 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("PERMISSION_CLASS", success);
 	}
 
+	{ // some dpp::user methods
+		dpp::user user1;
+		user1.id = 189759562910400512;
+		user1.discriminator = 0001;
+		user1.username = "brain";
+
+		set_test("USER.GET_MENTION", false);
+		set_test("USER.GET_MENTION", user1.get_mention() == "<@189759562910400512>");
+
+		set_test("USER.FORMAT_USERNAME", false);
+		set_test("USER.FORMAT_USERNAME", user1.format_username() == "brain#0001");
+
+		set_test("USER.GET_CREATION_TIME", false);
+		set_test("USER.GET_CREATION_TIME", (uint64_t)user1.get_creation_time() == 1465312605);
+	}
+
+	{ // utility methods
+		set_test("UTILITY.ICONHASH", false);
+		auto iconhash1 = dpp::utility::iconhash("a_5532c6414c70765a28cf9448c117205f");
+		set_test("UTILITY.ICONHASH", iconhash1.first == 6139187225817019994 &&
+									 iconhash1.second == 2940732121894297695 &&
+									 iconhash1.to_string() == "5532c6414c70765a28cf9448c117205f"
+		);
+
+		set_test("UTILITY.MAKE_URL_PARAMETERS", false);
+		auto url_params1 = dpp::utility::make_url_parameters({
+			{"foo", 15},
+			{"bar", 7}
+		});
+		auto url_params2 = dpp::utility::make_url_parameters({
+			{"foo", "hello"},
+			{"bar", "two words"}
+		});
+		set_test("UTILITY.MAKE_URL_PARAMETERS", url_params1 == "?bar=7&foo=15" && url_params2 == "?bar=two%20words&foo=hello");
+
+		set_test("UTILITY.MARKDOWN_ESCAPE", false);
+		auto escaped = dpp::utility::markdown_escape(
+				"> this is a quote\n"
+				"**some bold text**");
+		set_test("UTILITY.MARKDOWN_ESCAPE", "\\>this is a quote\\n\\*\\*some bold text\\*\\*");
+
+		set_test("UTILITY.TOKENIZE", false);
+		auto tokens = dpp::utility::tokenize("some Whitespace seperated Text to Tokenize", " ");
+		std::vector<std::string> expected_tokens = {"some", "Whitespace", "seperated", "Text", "to", "Tokenize"};
+		set_test("UTILITY.TOKENIZE", tokens == expected_tokens);
+
+		set_test("UTILITY.URL_ENCODE", false);
+		auto url_encoded = dpp::utility::url_encode("S2-^$1Nd+U!g'8+_??o?p-bla bla");
+		set_test("UTILITY.URL_ENCODE", url_encoded == "S2-%5E%241Nd%2BU%21g%278%2B_%3F%3Fo%3Fp-bla%20bla");
+	}
+
 	set_test("TIMESTRINGTOTIMESTAMP", false);
 	json tj;
 	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
