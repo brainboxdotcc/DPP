@@ -126,13 +126,13 @@ struct DPP_EXPORT permission_overwrite {
 struct DPP_EXPORT thread_metadata {
 	/// When the thread was archived
 	time_t archive_timestamp;
-	/// The duration after a thread will archive
+	/// The duration in minutes to automatically archive the thread after recent activity.
 	uint16_t auto_archive_duration;
 	/// Whether a thread is archived
 	bool archived;
-	/// Whether a thread is locked
+	/// Whether a thread is locked. When a thread is locked, only users with `MANAGE_THREADS` can unarchive it
 	bool locked;
-	/// Whether non-moderators can add other non-moderators 
+	/// Whether non-moderators can add other non-moderators. Only for private threads
 	bool invitable;
 };
 
@@ -143,11 +143,11 @@ struct DPP_EXPORT thread_member
 {
 	/// ID of the thread member is part of
 	snowflake thread_id;
-	/// ID of the member 
+	/// ID of the member
 	snowflake user_id;
-	/// When the user joined the thread
+	/// The time when user last joined the thread
 	time_t joined;
-	/// Flags bitmap
+	/// Any user-thread settings, currently only used for notifications
 	uint32_t flags;
 
 	/**
@@ -554,7 +554,7 @@ public:
 	/** Thread metadata (threads) */
 	thread_metadata metadata;
 
-	/** Approximate count of messages in a thread (threads) */
+	/** Number of messages (not including the initial message or deleted messages) of the thread. If the thread was created before July 1, 2022, it stops counting at 50 */
 	uint8_t message_count;
 
 	/** Approximate count of members in a thread (threads) */

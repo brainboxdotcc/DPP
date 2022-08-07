@@ -40,7 +40,7 @@ int main() {
 		event.reply("You clicked " + event.custom_id + " and chose: " + event.values[0]);
 	});
 
-	bot.start(false);
+	bot.start(dpp::st_wait);
 
 	return 0;
 }

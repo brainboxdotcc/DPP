@@ -201,6 +201,12 @@ public:
 	 * @brief Fires every second from the underlying socket I/O loop, used for sending websocket pings
 	 */
 	virtual void one_second_timer();
+
+	/**
+	 * @brief Send OP_CLOSE error code 1000 to the other side of the connection.
+	 * This indicates graceful close.
+	 */
+	void send_close_packet();
 };
 
 };

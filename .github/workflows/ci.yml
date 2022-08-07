@@ -43,7 +43,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
@@ -51,7 +51,7 @@ jobs:
         run: cd build && ninja 
 
       - name: Run unit tests
-        run: cd build && ctest -VV
+        run: cd build/library && ./unittest
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
           TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
@@ -94,7 +94,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
@@ -112,10 +112,14 @@ jobs:
         run: brew install cmake ninja libsodium opus openssl
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Build Project
         run: cd build && ninja 
+        env:
+          DONT_RUN_VCPKG: true
 
   windows: # Windows x64 and x86 build matrix
     strategy:
@@ -147,21 +151,29 @@ jobs:
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
-        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
+        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Build Project
         run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}}
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Move debug files for packaging
         if: ${{ matrix.cfg.config == 'Debug' }}
-        run: xcopy /s/q main\build\Debug main\build\Release\
+        run: xcopy main\build\library\Debug\* main\build\library\Release\ /s /q
 
       - name: Package distributable
         run: cd main/build && cpack --verbose
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Upload Binary
         uses: actions/upload-artifact@v2
@@ -189,7 +201,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake ninja-build rpm
 
       - name: Generate CMakeFiles
-        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 
       - name: Compile Source
         run: cd build && sudo ninja 

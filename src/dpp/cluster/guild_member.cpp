@@ -18,7 +18,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/fmt-minimal.h>
 #include <dpp/restrequest.h>
 
 namespace dpp {
@@ -110,7 +109,12 @@ void cluster::guild_member_remove_role(snowflake guild_id, snowflake user_id, sn
 
 void cluster::guild_member_move(const snowflake channel_id, const snowflake guild_id, const snowflake user_id, command_completion_event_t callback) {
     json j;
-    j["channel_id"] = channel_id;
+    if (channel_id) {
+        j["channel_id"] = channel_id;
+    }
+    else {
+        j["channel_id"] = json::value_t::null;
+    }
 
     this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(), [this, guild_id, user_id, callback](json &j, const http_request_completion_t& http) {
 	if (callback) {

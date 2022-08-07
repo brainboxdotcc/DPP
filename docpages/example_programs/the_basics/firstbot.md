@@ -37,7 +37,7 @@ int main() {
         }
     });
 
-    bot.start(false);
+    bot.start(dpp::st_wait);
 }
 ~~~~~~~~~~~~~~~
 
@@ -196,7 +196,7 @@ The `event.reply` function (dpp::slashcommand_t::reply) replies to a slash comma
 
 ### 6. Add code to start the bot!
 
-To make the bot start, we must call the cluster::start method, e.g. in our program by using `bot.start(false)`.
+To make the bot start, we must call the cluster::start method, e.g. in our program by using `bot.start(dpp::st_wait)`.
 
 We also add a line to tell the library to output all its log information to the console, `bot.on_log(dpp::utility::cout_logger());` - if you wanted to do something more advanced, you can replace this parameter with a lambda just like all other events.
 
@@ -224,7 +224,7 @@ int main() {
         }
     });
 
-    bot.start(false);
+    bot.start(dpp::st_wait);
 }
 ~~~~~~~~~~~~~~
 

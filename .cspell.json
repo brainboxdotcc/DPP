@@ -79,7 +79,9 @@
 		"ctest",
 		"automod",
 		"amod",
-		"apult"
+		"apult",
+		"cplusplus",
+		"xmake"
 	],
 	"flagWords": [
 		"hte"

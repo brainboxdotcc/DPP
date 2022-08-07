@@ -462,6 +462,28 @@ public:
 	}
 };
 
+/**
+ * @brief Types of startup for cluster::start()
+ */
+enum start_type : bool {
+	/**
+	 * @brief Wait forever on a condition variable.
+	 * The cluster will spawn threads for each shard
+	 * and start() will not return in normal operation.
+	 */
+	st_wait = false,
+
+	/**
+	 * @brief Return immediately after starting shard threads.
+	 * If you set the parameter of cluster::start() to
+	 * this value, you will have to manage the lifetime
+	 * and scope of your cluster object yourself. Taking it
+	 * out of scope or deleting its pointer will terminate
+	 * the bot.
+	 */
+	st_return = true,
+};
+
 /** @brief The cluster class represents a group of shards and a command queue for sending and
  * receiving commands from discord via HTTP. You should usually instantiate a cluster object
  * at the very least to make use of the library.
@@ -616,6 +638,12 @@ public:
 	 * @brief Destroy the cluster object
 	 */
 	virtual ~cluster();
+
+	/**
+	 * @brief End cluster execution without destructing it.
+	 * To restart the cluster, call cluster::start() again.
+	 */
+	void shutdown();
 
 	/**
 	 * @brief Get the rest_queue object which handles HTTPS requests to Discord
@@ -1663,10 +1691,14 @@ public:
 	 *
 	 * @see https://discord.com/developers/docs/resources/audit-log#get-guild-audit-log
 	 * @param guild_id Guild to get the audit log of
+	 * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
+	 * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
+	 * @param before Entries that preceded a specific audit log entry ID. Used for paginating
+	 * @param limit Maximum number of entries (between 1-100) to return
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::auditlog object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_auditlog_get(snowflake guild_id, command_completion_event_t callback);
+	void guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a slash command local to a guild
@@ -2387,9 +2419,9 @@ public:
 	 * @brief Edit the properties of an existing guild member
 	 * 
 	 * Modify attributes of a guild member. Returns the guild_member. Fires a `Guild Member Update` Gateway event.
-	 * If the `channel_id` is set to 0, this will force the target user to be disconnected from voice.
 	 * To remove a timeout, set the `communication_disabled_until` to a non-zero time in the past, e.g. 1.
 	 * When moving members to channels, the API user must have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
+	 * For moving and disconnecting users from voice, use dpp::cluster::guild_member_move.
 	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param gm Guild member to edit
@@ -2399,13 +2431,14 @@ public:
 	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Moves the guild member to a other voice channel, if member is connected to one
+	 * @brief Moves the guild member to a other voice channel, if member is connected to one.
+	 * Set the `channel_id` to `0` to disconnect the user.
 	 *
 	 * Fires a `Guild Member Update` Gateway event.
 	 * @note When moving members to channels, the API user __must__ have permissions to both connect to the channel and have the `MOVE_MEMBERS` permission.
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-member
-	 * @param channel_id Id of the channel to which the user is used
+	 * @param channel_id Id of the channel to which the user is used. Set to `0` to disconnect the user
 	 * @param guild_id Guild id to which the user is connected
 	 * @param user_id User id, who should be moved
 	 * @param callback Function to call when the API call completes.
@@ -3242,7 +3275,7 @@ public:
 	/**
 	 * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
 	 * @param message_id message to start thread with
@@ -3255,7 +3288,7 @@ public:
 
 	/**
 	 * @brief Join a thread
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param thread_id Thread ID to join
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3264,7 +3297,7 @@ public:
 
 	/**
 	 * @brief Leave a thread
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param thread_id Thread ID to leave
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3273,7 +3306,7 @@ public:
 
 	/**
 	 * @brief Add a member to a thread
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param thread_id Thread ID to add to
 	 * @param user_id Member ID to add
 	 * @param callback Function to call when the API call completes.
@@ -3283,7 +3316,7 @@ public:
 
 	/**
 	 * @brief Remove a member from a thread
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param thread_id Thread ID to remove from
 	 * @param user_id Member ID to remove
 	 * @param callback Function to call when the API call completes.
@@ -3293,7 +3326,7 @@ public:
 
 	/**
 	 * @brief Get a thread member
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param thread_id Thread to get member for
 	 * @param user_id ID of the user to get
 	 * @param callback Function to call when the API call completes
@@ -3303,7 +3336,7 @@ public:
 
 	/**
 	 * @brief Get members of a thread
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param thread_id Thread to get members for
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3312,7 +3345,7 @@ public:
 
 	/**
 	 * @brief Get active threads in a channel (Sorted by ID in descending order)
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param channel_id Channel to get active threads for
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3321,7 +3354,7 @@ public:
 
 	/**
 	 * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
@@ -3332,7 +3365,7 @@ public:
 
 	/**
 	 * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
@@ -3344,7 +3377,7 @@ public:
 	/**
 	 * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
 
-	 * @see https://discord.com/developers/docs/topics/thread
+	 * @see https://discord.com/developers/docs/topics/threads
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_id Get threads before this id
 	 * @param limit Number of threads to get

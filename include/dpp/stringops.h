@@ -180,4 +180,33 @@ template <int> int from_string(const std::string &s)
 	return std::stoi(s, 0, 10);
 }
 
+/**
+ * @brief Convert a numeric value to hex
+ * 
+ * @tparam T numeric type
+ * @param i numeric value
+ * @return std::string value in hex, the length will be 2* the raw size of the type
+ */
+template <typename T> std::string to_hex(T i)
+{
+  std::stringstream stream;
+  stream << std::setfill('0') << std::setw(sizeof(T)*2) << std::hex << i;
+  return stream.str();
+}
+
+/**
+ * @brief Format a numeric type as a string with leading zeroes
+ * 
+ * @tparam T numeric type
+ * @param i numeric value
+ * @param width width of type including the leading zeroes
+ * @return std::string resultant string with leading zeroes
+ */
+template <typename T> std::string leading_zeroes(T i, size_t width)
+{
+  std::stringstream stream;
+  stream << std::setfill('0') << std::setw(width) << std::dec << i;
+  return stream.str();
+}
+
 };

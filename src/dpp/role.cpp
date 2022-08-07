@@ -25,7 +25,6 @@
 #include <dpp/permissions.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -365,12 +364,7 @@ std::string role::get_icon_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->icon.to_string().empty()) {
-		return fmt::format("{}/role-icons/{}/{}.png{}",
-						   utility::cdn_host,
-						   this->id,
-						   this->icon.to_string(),
-						   utility::avatar_size(size)
-		);
+		return utility::cdn_host + "/role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

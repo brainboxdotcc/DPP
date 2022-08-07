@@ -18,7 +18,8 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <errno.h>
+#include <dpp/export.h>
+#include <cerrno>
 
 #ifdef _WIN32
 #include <WinSock2.h>
@@ -111,6 +112,42 @@ thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
 /* Represents a failed socket system call, e.g. connect() failure */
 const int ERROR_STATUS = -1;
 
+bool close_socket(dpp::socket sfd)
+{
+	/* close_socket on an error socket is a non-op */
+	if (sfd != INVALID_SOCKET) {
+		shutdown(sfd, 2);
+#ifdef _WIN32
+		return closesocket(sfd) == 0;
+#else
+		return ::close(sfd) == 0;
+#endif
+	}
+	return false;
+}
+
+bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
+{
+#ifdef _WIN32
+	u_long mode = non_blocking ? 1 : 0;
+	int result = ioctlsocket(sockfd, FIONBIO, &mode);
+	if (result != NO_ERROR) {
+		return false;
+	}
+#else
+	int ofcmode = fcntl(sockfd, F_GETFL, 0);
+	if (non_blocking) {
+		ofcmode |= O_NDELAY;
+	} else {
+		ofcmode &= ~O_NDELAY;
+	}
+	if (fcntl(sockfd, F_SETFL, ofcmode)) {
+		return false;
+	}
+#endif
+	return true;
+}
+
 /**
  * @brief Connect to TCP socket with a select() driven timeout
  * 
@@ -122,25 +159,33 @@ const int ERROR_STATUS = -1;
  * @throw dpp::connection_exception on failure
  */
 int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
-#ifdef _WIN32
-	return (::connect(sockfd, addr, addrlen));
+#ifdef __APPLE__
+		/* Unreliable on OSX right now */
+		return (::connect(sockfd, addr, addrlen));
 #else
-	int ofcmode;
-	ofcmode = fcntl(sockfd, F_GETFL, 0);
-	ofcmode |= O_NDELAY;
-	if (fcntl(sockfd, F_SETFL, ofcmode)) {
+	if (!set_nonblocking(sockfd, true)) {
 		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
 	}
+#ifdef _WIN32
+	/* Windows connect returns -1 and sets its error value to 0 for successfull blocking connection -
+	 * This is equivalent to EWOULDBLOCK on POSIX
+	 */
+	int rc = WSAConnect(sockfd, addr, addrlen, nullptr, nullptr, nullptr, nullptr);
+	int err = EWOULDBLOCK;
+#else
+	/* Standard POSIX connection behaviour */
 	int rc = (::connect(sockfd, addr, addrlen));
-	if (rc == -1 && errno != EWOULDBLOCK && errno != EINPROGRESS) {
-		throw dpp::connection_exception(strerror(errno));
+	int err = errno;
+#endif
+	if (rc == -1 && err != EWOULDBLOCK && err != EINPROGRESS) {
+		throw connection_exception(strerror(errno));
 	} else {
-		// Set a deadline timestamp 'timeout' ms from now (needed b/c poll can be interrupted)
-		double deadline = dpp::utility::time_f() + (timeout_ms / 1000.0);
+		/* Set a deadline timestamp 'timeout' ms from now */
+		double deadline = utility::time_f() + (timeout_ms / 1000.0);
 		do {
 			rc = -1;
-			if (dpp::utility::time_f() >= deadline) {
-				throw dpp::connection_exception("Connection timed out");
+			if (utility::time_f() >= deadline) {
+				throw connection_exception("Connection timed out");
 			}
 			fd_set writefds, efds;
 			FD_ZERO(&writefds);
@@ -154,14 +199,12 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 			if (r > 0 && SAFE_FD_ISSET(sockfd, &writefds) && !SAFE_FD_ISSET(sockfd, &efds)) {
 				rc = 0;
 			} else if (r > 0 && SAFE_FD_ISSET(sockfd, &efds)) {
-				throw dpp::connection_exception(strerror(errno));
+				throw connection_exception(strerror(errno));
 			}
 		} while (rc == -1);
 	}
-	ofcmode = fcntl(sockfd, F_GETFL, 0);
-	ofcmode &= ~O_NDELAY;
-	if (fcntl(sockfd, F_SETFL, ofcmode)) {
-		throw dpp::connection_exception("Can't switch socket to blocking mode!");
+	if (!set_nonblocking(sockfd, false)) {
+		throw connection_exception("Can't switch socket to blocking mode!");
 	}
 	return rc;
 #endif
@@ -215,16 +258,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 					SSL_free(iter->second.ssl->ssl);
 					iter->second.ssl->ssl = nullptr;
 				}
-				if (iter->second.sfd != INVALID_SOCKET) {
-					shutdown(iter->second.sfd, 2);
-				}
-				#ifdef _WIN32
-					if (iter->second.sfd >= 0 && iter->second.sfd < FD_SETSIZE) {
-						closesocket(iter->second.sfd);
-					}
-				#else
-					::close(iter->second.sfd);
-				#endif
+				close_socket(iter->second.sfd);
 				iter->second.sfd = INVALID_SOCKET;
 				delete iter->second.ssl;
 			} else {
@@ -262,15 +296,7 @@ void ssl_client::connect()
 		if (sfd == ERROR_STATUS) {
 			err = errno;
 		} else if (connect_with_timeout(sfd, (sockaddr*)&addr->ai_addr, (int)addr->addr.ai_addrlen, SOCKET_OP_TIMEOUT) != 0) {
-#ifdef _WIN32
-			if (sfd >= 0 && sfd < FD_SETSIZE) {
-				closesocket(sfd);
-			}
-#else
-			err = errno;
-			shutdown(sfd, 2);
-			::close(sfd);
-#endif
+			close_socket(sfd);
 			sfd = ERROR_STATUS;
 		}
 
@@ -371,30 +397,22 @@ void ssl_client::read_loop()
 	 */
 	int r = 0;
 	size_t client_to_server_length = 0, client_to_server_offset = 0;
-	bool read_blocked_on_write =  false, write_blocked_on_read = false,read_blocked = false;
+	bool read_blocked_on_write =  false, write_blocked_on_read = false, read_blocked = false;
 	fd_set readfds, writefds, efds;
 	char client_to_server_buffer[DPP_BUFSIZE], server_to_client_buffer[DPP_BUFSIZE];
 
-	if (sfd == INVALID_SOCKET)  {
-		throw dpp::connection_exception("Invalid file descriptor in read_loop()");
-	}
-	
-	/* Make the socket nonblocking */
-#ifdef _WIN32
-	u_long mode = 1;
-	int result = ioctlsocket(sfd, FIONBIO, &mode);
-	if (result != NO_ERROR)
-		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
-#else
-	int ofcmode = fcntl(sfd, F_GETFL, 0);
-	ofcmode |= O_NDELAY;
-	if (fcntl(sfd, F_SETFL, ofcmode)) {
-		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
-	}
-#endif
-	nonblocking = true;
-
 	try {
+
+		if (sfd == INVALID_SOCKET)  {
+			throw dpp::connection_exception("Invalid file descriptor in read_loop()");
+		}
+		
+		/* Make the socket nonblocking */
+		if (!set_nonblocking(sfd, true)) {
+			throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+		}
+		nonblocking = true;
+
 		/* Loop until there is a socket error */
 		while(true) {
 
@@ -601,14 +619,7 @@ void ssl_client::close()
 		SSL_free(ssl->ssl);
 		ssl->ssl = nullptr;
 	}
-	shutdown(sfd, 2);
-	#ifdef _WIN32
-		if (sfd >= 0 && sfd < FD_SETSIZE) {
-			closesocket(sfd);
-		}
-	#else
-		::close(sfd);
-	#endif
+	close_socket(sfd);
 	sfd = INVALID_SOCKET;
 	obuffer.clear();
 	buffer.clear();

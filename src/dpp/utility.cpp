@@ -33,7 +33,6 @@
 #include <fstream>
 #include <streambuf>
 #include <array>
-#include <dpp/fmt/format.h>
 #include <dpp/cluster.h>
 #include <dpp/dispatcher.h>
 
@@ -109,10 +108,18 @@ namespace dpp {
 		}
 
 		std::string uptime::to_string() const {
+			char print_buffer[64];
 			if (hours == 0 && days == 0) {
-				return fmt::format("{:02d}:{:02d}", mins, secs);
+				snprintf(print_buffer, 64, "%02d:%02d", mins, secs);
+				return print_buffer;
 			} else {
-				return fmt::format("{}{:02d}:{:02d}:{:02d}", (days ? fmt::format("{} day{}, ", days, (days > 1 ? "s" : "")) : ""), hours, mins, secs);
+				char print_buffer[64];
+				std::string daystr;
+				if (days) {
+					daystr = std::to_string(days) + " day" + (days > 1 ? "s, " : ", ");
+				}
+				snprintf(print_buffer, 64, "%s%02d:%02d:%02d", daystr.c_str(), hours, mins, secs);
+				return print_buffer;
 			}
 		}
 
@@ -163,10 +170,11 @@ namespace dpp {
 		}
 
 		std::string iconhash::to_string() const {
-			if (first == 0 && second == 0)
+			if (first == 0 && second == 0) {
 				return "";
-			else
-				return fmt::format("{:016x}{:016x}", this->first, this->second);
+			} else {
+				return to_hex(this->first) + to_hex(this->second);
+			}
 		}
 
 		std::string debug_dump(uint8_t* data, size_t length) {
@@ -175,7 +183,7 @@ namespace dpp {
 			size_t extra = addr % 16;
 			if (extra != 0) {
 				addr -= extra;
-				out << fmt::format("[{:016X}] : ", addr);
+				out << to_hex(addr);
 			}
 			for (size_t n = 0; n < extra; ++n) {
 				out << "-- ";
@@ -183,11 +191,11 @@ namespace dpp {
 			std::string ascii;
 			for (uint8_t* ptr = data; ptr < data + length; ++ptr) {
 				if (((size_t)ptr % 16) == 0) {
-					out << fmt::format("    {}\n[{:016X}] : ", ascii, (size_t)ptr);
+					out << ascii << "\n[" << to_hex((size_t)ptr) << "] : ";
 					ascii.clear();
 				}
 				ascii.push_back(*ptr >= ' ' && *ptr <= '~' ? *ptr : '.');
-				out << fmt::format("{:02X} ", *ptr);
+				out << to_hex(*ptr);
 			}
 			out << "    " << ascii;
 			out << "\n";
@@ -195,17 +203,19 @@ namespace dpp {
 		}
 
 		std::string bytes(uint64_t c) {
+			char print_buffer[64] = { 0 };
 			if (c > 1099511627776) {	// 1TB
-				return fmt::format("{:.2f}T", (c / 1099511627776.0));
+				snprintf(print_buffer, 64, "%.2fT", (c / 1099511627776.0));
 			} else if (c > 1073741824) {	// 1GB
-				return fmt::format("{:.2f}G", (c / 1073741824.0));
+				snprintf(print_buffer, 64, "%.2fG", (c / 1073741824.0));
 			}  else if (c > 1048576) {	// 1MB
-				return fmt::format("{:.2f}M", (c / 1048576.0));
+				snprintf(print_buffer, 64, "%.2fM", (c / 1048576.0));
 			}  else if (c > 1024) {		// 1KB
-				return fmt::format("{:.2f}K", (c / 1024.0));
+				snprintf(print_buffer, 64, "%.2fK", (c / 1024.0));
 			} else {			// Bytes
 				return std::to_string(c);
 			}
+			return print_buffer;
 		}
 
 		uint32_t rgb(float red, float green, float blue) {
@@ -365,11 +375,14 @@ namespace dpp {
 		}
 
 		std::string bot_invite_url(const snowflake bot_id, const uint64_t permissions, const std::vector<std::string>& scopes) {
-			return fmt::format("https://discord.com/oauth2/authorize?client_id={}&permissions={}&scope={}",
-				bot_id,
-				permissions,
-				fmt::join(scopes, "+")
-			);
+			std::string scope;
+			if (scopes.size()) {
+				for (auto& s : scopes) {
+					scope += s + "+";
+				}
+				scope = scope.substr(0, scope.length() - 1);
+			}
+			return "https://discord.com/oauth2/authorize?client_id=" + std::to_string(bot_id) + "&permissions=" + std::to_string(permissions) + "&scope=" + scope;
 		}
 
 		std::function<void(const dpp::log_t&)> cout_logger() {
@@ -384,7 +397,11 @@ namespace dpp {
 			return [](const dpp::confirmation_callback_t& detail) {
 				if (detail.is_error()) {
 					if (detail.bot) {
-						detail.bot->log(dpp::ll_error, fmt::format("Error {} [{}] on API request, returned content was: {}", detail.get_error().code, detail.get_error().message, detail.http_info.body));
+						detail.bot->log(
+							dpp::ll_error, 
+							"Error " + std::to_string(detail.get_error().code) + " [" +
+							detail.get_error().message + "] on API request, returned content was: " + detail.http_info.body
+						);
 					}
 				}
 			};
@@ -487,7 +504,12 @@ namespace dpp {
 				prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name.substr(0, 15).c_str()), NULL, NULL, NULL);
 			#else
 				#if HAVE_PTHREAD_SETNAME_NP
-					pthread_setname_np(name.substr(0, 15).c_str());
+					#if HAVE_SINGLE_PARAMETER_SETNAME_NP
+						pthread_setname_np(name.substr(0, 15).c_str());
+					#endif
+					#if HAVE_TWO_PARAMETER_SETNAME_NP
+						pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
+					#endif
 				#endif
 			#endif
 		}

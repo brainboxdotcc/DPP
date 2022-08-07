@@ -77,7 +77,9 @@ enum guild_flags : uint32_t {
 	g_partnered =				0b00000000000000000000000010000000,
 	/** Community features enabled */
 	g_community =				0b00000000000000000000000100000000,
-	/** Guild has commerce features enabled */
+	/** Guild has commerce features enabled
+	 * @deprecated Removed by Discord
+	 */
 	g_commerce =				0b00000000000000000000001000000000,
 	/** Guild has news features enabled */
 	g_news =				0b00000000000000000000010000000000,
@@ -706,6 +708,7 @@ public:
 	/**
 	 * @brief Guild has access to use commerce features
 	 * @return bool has commerce features enabled
+	 * @deprecated Removed by Discord
 	 */
 	bool has_commerce() const;
 

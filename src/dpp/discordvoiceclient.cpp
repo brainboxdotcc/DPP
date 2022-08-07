@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 
+#include <dpp/export.h>
 #ifdef _WIN32
 	#include <WinSock2.h>
 	#include <WS2tcpip.h>
@@ -42,7 +43,6 @@
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt-minimal.h>
 
 #ifdef HAVE_VOICE
 	#include <sodium.h>
@@ -352,11 +352,22 @@ void discord_voice_client::thread_run()
 {
 	utility::set_thread_name(std::string("vc/") + std::to_string(server_id));
 	do {
+		bool error = false;
 		ssl_client::read_loop();
 		ssl_client::close();
 		if (!terminating) {
-			ssl_client::connect();
-			websocket_client::connect();
+			do {
+				try {
+					ssl_client::connect();
+					websocket_client::connect();
+				}
+				catch (const std::exception &e) {
+					log(dpp::ll_error, std::string("Error establishing voice websocket connection, retry in 5 seconds: ") + e.what());
+					ssl_client::close();
+					std::this_thread::sleep_for(std::chrono::seconds(5));
+					error = true;
+				}
+			} while (error && !terminating);
 		}
 	} while(!terminating);
 }
@@ -524,7 +535,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 				for (auto & m : d["modes"]) {
 					this->modes.push_back(m.get<std::string>());
 				}
-				log(ll_debug, fmt::format("Voice websocket established; UDP endpoint: {}:{} [ssrc={}] with {} modes", ip, port, ssrc, modes.size()));
+				log(ll_debug, "Voice websocket established; UDP endpoint: " + ip + ":" + std::to_string(port) + " [ssrc=" + std::to_string(ssrc) + "] with " + std::to_string(modes.size()) + " modes");
 
 				external_ip = discover_ip();
 
@@ -541,19 +552,10 @@ bool discord_voice_client::handle_frame(const std::string &data)
 						throw dpp::connection_exception("Can't bind() client UDP socket");
 					}
 					
-#ifdef _WIN32
-					u_long mode = 1;
-					int result = ioctlsocket(newfd, FIONBIO, &mode);
-					if (result != NO_ERROR)
-						throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
-#else
-					int ofcmode;
-					ofcmode = fcntl(newfd, F_GETFL, 0);
-					ofcmode |= O_NDELAY;
-					if (fcntl(newfd, F_SETFL, ofcmode)) {
-						throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+					if (!set_nonblocking(newfd, true)) {
+						throw dpp::connection_exception("Can't switch voice UDP socket to non-blocking mode!");
 					}
-#endif
+
 					/* Hook select() in the ssl_client to add a new file descriptor */
 					this->fd = newfd;
 					this->custom_writeable_fd = std::bind(&discord_voice_client::want_write, this);
@@ -873,7 +875,7 @@ void discord_voice_client::error(uint32_t errorcode)
 	if (i != errortext.end()) {
 		error = i->second;
 	}
-	log(dpp::ll_warning, fmt::format("Voice session error: {} on channel {}: {}", errorcode, channel_id, error));
+	log(dpp::ll_warning, "Voice session error: " + std::to_string(errorcode) + " on channel " + std::to_string(channel_id) + ": " + error);
 
 	/* Errors 4004...4016 except 4014 are fatal and cause termination of the voice session */
 	if (errorcode >= 4003) {
@@ -1007,13 +1009,13 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 				int retval = opus_repacketizer_cat(repacketizer, out, ret);
 				if (retval != OPUS_OK) {
 					isOk = false;
-					log(ll_warning, fmt::format("opus_repacketizer_cat(): {}", opus_strerror(retval)));
+					log(ll_warning, "opus_repacketizer_cat(): " + std::string(opus_strerror(retval)));
 					break;
 				}
 				out += ret;
 			} else {
 				isOk = false;
-				log(ll_warning, fmt::format("opus_encode(): {}", opus_strerror(ret)));
+					log(ll_warning, "opus_encode(): " + std::string(opus_strerror(ret)));
 				break;
 			}
 		}
@@ -1022,11 +1024,11 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 			if (ret > 0) {
 				outDataSize = ret;
 			} else {
-				log(ll_warning, fmt::format("opus_repacketizer_out(): {}", opus_strerror(ret)));
+				log(ll_warning, "opus_repacketizer_out(): " + std::string(opus_strerror(ret)));
 			}
 		}
 	} else {
-		throw dpp::voice_exception(fmt::format("Invalid input data length: {}, must be n times of {}", inDataSize, mEncFrameBytes));
+		throw dpp::voice_exception("Invalid input data length: " + std::to_string(inDataSize) + ", must be n times of " + std::to_string(mEncFrameBytes));
 	}
 #else
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");
@@ -1223,14 +1225,7 @@ std::string discord_voice_client::discover_ip() {
 			return "";
 		}
 
-		shutdown(newfd, 2);
-	#ifdef _WIN32
-		if (newfd >= 0 && newfd < FD_SETSIZE) {
-			closesocket(newfd);
-		}
-	#else
-		::close(newfd);
-	#endif
+		close_socket(newfd);
 
 		//utility::debug_dump(packet, 74);
 		return std::string((const char*)(packet + 8));
