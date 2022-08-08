@@ -27,8 +27,6 @@
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
-#include <dpp/cluster.h>
-#include <dpp/discordvoiceclient.h>
 #include <dpp/event.h>
 #include <queue>
 #include <thread>

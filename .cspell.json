@@ -81,7 +81,9 @@
 		"amod",
 		"apult",
 		"cplusplus",
-		"xmake"
+		"xmake",
+		"CORO",
+		"cback"
 	],
 	"flagWords": [
 		"hte"

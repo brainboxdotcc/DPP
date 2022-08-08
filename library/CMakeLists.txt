@@ -280,6 +280,14 @@ if(HAVE_PTHREAD_SETNAME_NP)
 	target_compile_definitions(dpp PRIVATE HAVE_PTHREAD_SETNAME_NP)
 endif()
 
+if(DPP_CORO)
+	message("${Yellow}Enabled experimental coroutine support${ColourReset}")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+	target_compile_definitions(dpp PUBLIC DPP_CORO)
+	execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
+					COMMAND php buildtools/make_coro_struct.php)
+endif()
+	
 if(WIN32 AND NOT MINGW)
 	if (NOT WINDOWS_32_BIT)
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../win32/bin/zlib1.dll" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}" COPYONLY)
@@ -301,7 +309,9 @@ if(NOT WIN32)
 
 	include(GNUInstallDirs)
 	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+	message("Library install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
 	install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+	message("Include files install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
 	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DRUN_LDCONFIG=${RUN_LDCONFIG} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/PostInstall.cmake)")
 
 	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../dpp.pc.in" "${CMAKE_BINARY_DIR}/dpp.pc" @ONLY)
