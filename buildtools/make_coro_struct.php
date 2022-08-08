@@ -141,7 +141,7 @@ foreach ($clustercpp as $cpp) {
             $noDefaults = $parameters;
             $parameters = !empty($fullParameters) ? $fullParameters : $parameters;
             /* $content .= "auto inline {$currentFunction}_coro($parameters);\n\n"; */
-            $content .= "auto inline {$currentFunction}_coro($noDefaults) {\n\treturn dpp::awaitable(this, [&] (auto cc) { this->$currentFunction($parameterNames cc); }); \n}\n\n";
+            $content .= "auto inline co_{$currentFunction}($noDefaults) {\n\treturn dpp::awaitable(this, [&] (auto cc) { this->$currentFunction($parameterNames cc); }); \n}\n\n";
         }
         $currentFunction = $parameters = $returnType = '';
         $state = STATE_SEARCH_FOR_FUNCTION;
