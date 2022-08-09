@@ -217,6 +217,10 @@ guild& guild::set_name(const std::string& n) {
 	return *this;
 }
 
+dpp::user* guild_member::get_user() const {
+	return dpp::find_user(user_id);
+}
+
 bool guild_member::is_deaf() const {
 	return flags & dpp::gm_deaf;
 }
