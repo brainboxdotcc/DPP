@@ -607,6 +607,7 @@ public:
 	 * @param self_mute True if the bot should mute itself
 	 * @param self_deaf True if the bot should deafen itself
 	 * @return True if the user specified is in a vc, false if they aren't
+	 * @note This is NOT a synchronous blocking call! The bot isn't instantly ready to send or listen for audio, as we have to wait for the connection to the voice server to be established! e.g. wait for dpp::cluster::on_voice_ready event, and then send the audio within that event.
 	 */
 	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false);
 
