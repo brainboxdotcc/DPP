@@ -565,7 +565,14 @@ void from_json(const nlohmann::json& j, component_interaction& bi) {
 }
 
 void from_json(const nlohmann::json& j, autocomplete_interaction& ai) {
+	ai.id = snowflake_not_null(&j, "id");
+	ai.name = string_not_null(&j, "name");
+	ai.type = (dpp::slashcommand_contextmenu_type)int8_not_null(&j, "type");
+	ai.target_id = snowflake_not_null(&j, "target_id");
 
+	if (j.contains("options") && !j.at("options").is_null()) {
+		j.at("options").get_to(ai.options);
+	}
 }
 
 void from_json(const nlohmann::json& j, interaction& i) {

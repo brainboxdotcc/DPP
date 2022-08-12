@@ -604,7 +604,7 @@ struct DPP_EXPORT component_interaction {
 /**
  * @brief An auto complete interaction
  */
-struct DPP_EXPORT autocomplete_interaction {
+struct DPP_EXPORT autocomplete_interaction : public command_interaction {
 };
 
 /**
