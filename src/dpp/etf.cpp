@@ -352,12 +352,12 @@ json etf_parser::decode_map() {
 	const uint32_t length = read_32_bits();
 	auto map = json::object();
 	for(uint32_t i = 0; i < length; ++i) {
-		const auto key = inner_parse();
-		const auto value = inner_parse();
+		auto key = inner_parse();
+		auto value = inner_parse();
 		if (key.is_number()) {
-			map[std::to_string(key.get<uint64_t>())] = value;
+			map[std::to_string(key.get<uint64_t>())] = std::move(value);
 		} else {
-			map[key.get<std::string>()] = value;
+			map[key.get<std::string>()] = std::move(value);
 		}
 	}
 	return map;
