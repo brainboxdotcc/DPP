@@ -131,7 +131,6 @@ http_request_completion_t http_request::run(cluster* owner) {
 		}
 	}
 
-
 	rv.ratelimit_limit = rv.ratelimit_remaining = rv.ratelimit_reset_after = rv.ratelimit_retry_after = 0;
 	rv.status = 0;
 	rv.latency = 0;
@@ -155,12 +154,12 @@ http_request_completion_t http_request::run(cluster* owner) {
 		}
 	}
 
-	std::map<http_method, std::string> request_verb = {
-		{m_get, "GET"},
-		{m_post, "POST"},
-		{m_put, "PUT"},
-		{m_patch, "PATCH"},
-		{m_delete, "DELETE"}
+	constexpr std::array request_verb {
+		"GET",
+		"POST",
+		"PUT",
+		"PATCH",
+		"DELETE"
 	};
 
 	multipart_content multipart;

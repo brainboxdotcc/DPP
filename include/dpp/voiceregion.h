@@ -64,7 +64,7 @@ public:
 	/**
 	 * @brief Destroy the voiceregion object
 	 */
-	~voiceregion();
+	virtual ~voiceregion() = default;
 
 	/**
 	 * @brief Fill object properties from JSON

@@ -352,12 +352,12 @@ json etf_parser::decode_map() {
 	const uint32_t length = read_32_bits();
 	auto map = json::object();
 	for(uint32_t i = 0; i < length; ++i) {
-		const auto key = inner_parse();
-		const auto value = inner_parse();
+		auto key = inner_parse();
+		auto value = inner_parse();
 		if (key.is_number()) {
-			map[std::to_string(key.get<uint64_t>())] = value;
+			map[std::to_string(key.get<uint64_t>())] = std::move(value);
 		} else {
-			map[key.get<std::string>()] = value;
+			map[key.get<std::string>()] = std::move(value);
 		}
 	}
 	return map;
@@ -472,7 +472,7 @@ json etf_parser::decode_string_as_list() {
 		throw dpp::parse_exception("String list past end of buffer");
 	}
 	for(uint16_t i = 0; i < length; ++i) {
-		array.push_back(decode_small_integer());
+		array.emplace_back(decode_small_integer());
 	}
 	return array;
 }
@@ -516,7 +516,7 @@ json etf_parser::decode_reference() {
 	reference["node"] = inner_parse();
 
 	std::vector<int32_t> ids;
-	ids.push_back(read_32_bits());
+	ids.emplace_back(read_32_bits());
 	reference["id"] = ids;
 
 	reference["creation"] = read_8_bits();
@@ -533,7 +533,7 @@ json etf_parser::decode_new_reference() {
 
 	std::vector<int32_t> ids;
 	for(uint16_t i = 0; i < len; ++i) {
-		ids.push_back(read_32_bits());
+		ids.emplace_back(read_32_bits());
 	}
 	reference["id"] = ids;
 

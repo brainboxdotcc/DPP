@@ -23,7 +23,7 @@
 #include <dpp/snowflake.h>
 #include <future>
 #include <utility>
-#include <exception>
+#include <dpp/exception.h>
 
 namespace dpp {
 

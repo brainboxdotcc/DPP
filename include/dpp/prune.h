@@ -30,6 +30,11 @@ namespace dpp {
  * @brief Defines a request to count prunable users, or start a prune operation
  */
 struct DPP_EXPORT prune : public json_interface<prune> {
+	/**
+	 * Destroy this prune object
+	 */
+	virtual ~prune() = default;
+
 	/** Number of days to include in the prune
 	 */
 	uint32_t days = 0;

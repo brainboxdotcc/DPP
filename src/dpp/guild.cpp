@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/cache.h>
 #include <dpp/discordclient.h>
 #include <dpp/voicestate.h>
 #include <dpp/exception.h>
@@ -214,6 +215,10 @@ std::string guild_member::build_json(bool with_id) const {
 guild& guild::set_name(const std::string& n) {
 	this->name = utility::validate(trim(n), 2, 100, "Guild names cannot be less than 2 characters");
 	return *this;
+}
+
+dpp::user* guild_member::get_user() const {
+	return dpp::find_user(user_id);
 }
 
 bool guild_member::is_deaf() const {

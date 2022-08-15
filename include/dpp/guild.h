@@ -20,6 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
+#include <dpp/user.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
@@ -258,6 +259,14 @@ public:
 	 * @return guild_member& reference to self
 	 */
 	guild_member& set_nickname(const std::string& nick);
+
+	/**
+	 * @brief Get the dpp::user object for this member
+	 * @return dpp::user user object. If not in cache, it returns nullptr
+	 *
+	 * 
+	 */
+	dpp::user* get_user() const;
 
 	/**
 	 * @brief Set whether the user is muted in voice channels
@@ -607,6 +616,9 @@ public:
 	 * @param self_mute True if the bot should mute itself
 	 * @param self_deaf True if the bot should deafen itself
 	 * @return True if the user specified is in a vc, false if they aren't
+	 * @note This is NOT a synchronous blocking call! The bot isn't instantly ready to send or listen for audio,
+	 * as we have to wait for the connection to the voice server to be established!
+	 * e.g. wait for dpp::cluster::on_voice_ready event, and then send the audio within that event.
 	 */
 	bool connect_member_voice(snowflake user_id, bool self_mute = false, bool self_deaf = false);
 
