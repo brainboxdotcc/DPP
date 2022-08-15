@@ -32,6 +32,7 @@
 #include <dpp/cluster.h>
 
 namespace dpp {
+
 slashcommand_map cluster::global_bulk_command_create_sync(const std::vector<slashcommand> &commands) {
 	return dpp::sync<slashcommand_map>(this, &cluster::global_bulk_command_create, commands);
 }

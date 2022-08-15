@@ -4,6 +4,7 @@ config.json
 docs
 testdata/maxpower.pcm
 testdata/onandon.pcm
+buildtools/composer.phar
 docs/doxygen_sqlite3.db
 src/build
 .vs

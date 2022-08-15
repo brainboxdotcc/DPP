@@ -71,7 +71,7 @@ if (UNIX)
 		# target for rebuild of cluster::*_sync() functions
 		execute_process(
 			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
-			COMMAND php buildtools/make_sync_struct.php
+			COMMAND php buildtools/make_struct.php "\\Dpp\\Generator\\SyncGenerator"
 		)
  		set_source_files_properties( "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/cluster_sync_calls.h" PROPERTIES GENERATED TRUE ) 
 	else()
@@ -285,7 +285,7 @@ if(DPP_CORO)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 	target_compile_definitions(dpp PUBLIC DPP_CORO)
 	execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
-					COMMAND php buildtools/make_coro_struct.php)
+					COMMAND php buildtools/make_struct.php "\\Dpp\\Generator\\CoroGenerator")
 endif()
 	
 if(WIN32 AND NOT MINGW)
