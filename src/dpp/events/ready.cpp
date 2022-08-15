@@ -21,6 +21,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/cluster.h>
 #include <dpp/stringops.h>
+#include <dpp/dns.h>
 #include <dpp/nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -43,6 +44,21 @@ std::mutex protect_the_loot;
 void ready::handle(discord_client* client, json &j, const std::string &raw) {
 	client->log(dpp::ll_info, "Shard id " + std::to_string(client->shard_id) + " (" + std::to_string(client->shard_id + 1) + "/" + std::to_string(client->max_shards) + ") ready!");
 	client->sessionid = j["d"]["session_id"];
+	/* Session-specific gateway resume url
+	 * https://discord.com/developers/docs/change-log#sessionspecific-gateway-resume-urls
+	 *
+	 * Discord give us the hostname wrapped in wss://crap/ like we're going to pass it to
+	 * some top-heavy lib. Let's strip all this out if given to us so we just have a
+	 * hostname.
+	 */
+	std::string ugly(j["d"]["resume_gateway_url"]);
+	if (ugly.substr(0, 6) == "wss://") {
+		client->resume_gateway_url = ugly.substr(6, ugly.length() - 7);
+	} else {
+		client->resume_gateway_url = ugly;
+	}
+	/* Pre-resolve it into our cache so that we aren't waiting on this when we need it later */
+	static_cast<void>(resolve_hostname(client->resume_gateway_url, "443"));
 
 	client->ready = true;
 

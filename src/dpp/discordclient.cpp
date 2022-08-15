@@ -93,7 +93,8 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	websocket_ping(0.0),
 	ready(false),
 	last_heartbeat_ack(time(nullptr)),
-	protocol(ws_proto)
+	protocol(ws_proto),
+	resume_gateway_url(DEFAULT_GATEWAY)
 {
 	zlib = new zlibcontext();
 	etf = new etf_parser();
@@ -141,6 +142,11 @@ void discord_client::end_zlib()
 	}
 }
 
+void discord_client::set_resume_hostname()
+{
+	hostname = resume_gateway_url;
+}
+
 void discord_client::thread_run()
 {
 	utility::set_thread_name(std::string("shard/") + std::to_string(shard_id));
@@ -155,9 +161,10 @@ void discord_client::thread_run()
 			end_zlib();
 			setup_zlib();
 			do {
-				this->log(ll_debug, "Attempting reconnection of shard " + std::to_string(this->shard_id));
+				this->log(ll_debug, "Attempting reconnection of shard " + std::to_string(this->shard_id) + " to wss://" + resume_gateway_url);
 				error = false;
 				try {
+					set_resume_hostname();
 					ssl_client::connect();
 					websocket_client::connect();
 				}

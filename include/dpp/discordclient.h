@@ -257,6 +257,12 @@ private:
 	 */
 	void end_zlib();
 
+	/**
+	 * @brief Update the websocket hostname with the resume url
+	 * from the last READY event
+	 */
+	void set_resume_hostname();
+
 public:
 	/**
 	 * @brief Owning cluster
@@ -349,6 +355,11 @@ public:
 	 * @brief List of voice channels we are connecting to keyed by guild id
 	 */
 	std::unordered_map<snowflake, voiceconn*> connecting_voice_channels;
+
+	/**
+	 * @brief The gateway address we reconnect to when we resume a session
+	 */
+	std::string resume_gateway_url;
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
