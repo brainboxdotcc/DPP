@@ -88,7 +88,11 @@ EOT;
      */
     public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterNames): string
     {
-        return "auto inline co_{$currentFunction}($noDefaults) {\n\treturn dpp::awaitable(this, [&] (auto cc) { this->$currentFunction($parameterNames cc); }); \n}\n\n";
+        $parameterNames = preg_replace('/^, /', '', $parameterNames);
+        if (!empty($parameterNames)) {
+            $parameterNames .= ', ';
+        }
+        return "auto inline co_{$currentFunction}($noDefaults) {\n\treturn dpp::awaitable(this, [&] (auto cc) { this->$currentFunction({$parameterNames}cc); }); \n}\n\n";
     }
 
     /**
