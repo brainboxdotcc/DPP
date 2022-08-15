@@ -1,4 +1,6 @@
     HEAD_REF master
+    PATCHES
+        make-pkgconfig-required.patch
 )
 
 vcpkg_cmake_configure(
@@ -21,3 +23,5 @@ file(
     DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}"
     RENAME copyright
 )
+
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")
