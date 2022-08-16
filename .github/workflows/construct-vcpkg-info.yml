@@ -62,7 +62,7 @@ jobs:
                 sudo cp -v -R ./cmake/Raw-Files/Portfile-The-Second.cmake /usr/local/share/vcpkg/ports/dpp/portfile.cmake &&
                 sudo cp -v -R ./cmake/Raw-Files/Portfile-The-Second.cmake ./vcpkg/ports/dpp/portfile.cmake &&
                 [ -f /usr/local/share/vcpkg/versions/d-/dpp.json ] && sudo cp -v -R /usr/local/share/vcpkg/versions/d-/dpp.json ./vcpkg/versions/d-/dpp.json || echo "File does not exist." &&
-                sudo cp -v -R ./vcpkg/* /usr/local/share/vcpkg &&
+                sudo cp -v -R ./vcpkg/ports/* /usr/local/share/vcpkg/ports/ &&
                 cd /usr/local/share/vcpkg &&
                 sudo ./vcpkg format-manifest ./ports/dpp/vcpkg.json &&
                 sudo git add . &&
