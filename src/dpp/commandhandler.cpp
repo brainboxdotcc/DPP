@@ -88,8 +88,8 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 	i.parameters = parameters;
 	commands[lowercase(command)] = i;
 	if (slash_commands_enabled) {
-		if (this->app_id == 0) {
-			if (owner->me.id == 0) {
+		if (this->app_id.empty()) {
+			if (owner->me.id.empty()) {
 				throw dpp::logic_exception("Command handler not ready (i don't know my application ID)");
 			} else {
 				this->app_id = owner->me.id;
@@ -325,7 +325,7 @@ void commandhandler::route(const struct slashcommand_t & event)
 				}
 				break;
 				case pt_role: {
-					snowflake rid = std::get<snowflake>(slash_parameter);
+					snowflake rid = std::get<uint64_t>(slash_parameter);
 					role* r = dpp::find_role(rid);
 					if (r) {
 						/* Use cache if the role is in the cache */
@@ -339,7 +339,7 @@ void commandhandler::route(const struct slashcommand_t & event)
 				}
 				break;
 				case pt_channel: {
-					snowflake cid = std::get<snowflake>(slash_parameter);
+					snowflake cid = std::get<uint64_t>(slash_parameter);
 					channel* c = dpp::find_channel(cid);
 					if (c) {
 						/* Use cache if the channel is in the cache */
@@ -353,7 +353,7 @@ void commandhandler::route(const struct slashcommand_t & event)
 				}
 				break;
 				case pt_user: {
-					snowflake uid = std::get<snowflake>(slash_parameter);
+					snowflake uid = std::get<uint64_t>(slash_parameter);
 					/* TODO: Make this used resolved, not cache */
 					user* u = dpp::find_user(uid);
 					if (u) {

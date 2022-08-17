@@ -79,7 +79,7 @@ void to_json(json& j, const command_option_choice& choice) {
 		j["value"] = std::get<int64_t>(choice.value);
 	} else if (std::holds_alternative<bool>(choice.value)) {
 		j["value"] = std::get<bool>(choice.value);
-	} else if (std::holds_alternative<snowflake>(choice.value)) {
+	} else if (std::holds_alternative<uint64_t>(choice.value)) {
 		j["value"] = std::to_string(std::get<uint64_t>(choice.value));
 	} else if (std::holds_alternative<double>(choice.value)) {
 		j["value"] = std::to_string(std::get<double>(choice.value));
@@ -302,7 +302,7 @@ command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) 
 	} else if ((*j)["value"].is_number_float()) { // is double
 		value.emplace<double>((*j)["value"]);
 	} else if ((*j)["value"].is_number_unsigned()) { // is snowflake
-		value.emplace<snowflake>((*j)["value"]);
+		value.emplace<uint64_t>((*j)["value"]);
 	} else if ((*j)["value"].is_number_integer()) { // is int64
 		value.emplace<int64_t>((*j)["value"]);
 	} else { // else string

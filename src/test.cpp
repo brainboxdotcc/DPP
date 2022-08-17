@@ -148,7 +148,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("WEBHOOK", false);
 	try {
 		dpp::webhook test_wh("https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE");
-		set_test("WEBHOOK", (test_wh.token == "ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE") && (test_wh.id == 833047646548133537));
+		set_test("WEBHOOK", (test_wh.token == "ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE") && (test_wh.id == dpp::snowflake(833047646548133537)));
 	}
 	catch (const dpp::exception&) {
 		set_test("WEBHOOK", false);
@@ -170,10 +170,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		j["value"] = true;
 		choice.fill_from_json(&j);
 		bool success_bool = std::holds_alternative<bool>(choice.value);
-		dpp::snowflake s = 845266178036516757; // example snowflake
+		dpp::snowflake s(845266178036516757); // example snowflake
 		j["value"] = s;
 		choice.fill_from_json(&j);
-		bool success_snowflake = std::holds_alternative<dpp::snowflake>(choice.value);
+		bool success_snowflake = std::holds_alternative<std::string>(choice.value) && dpp::snowflake(std::get<std::string>(choice.value)) == s;
 		j["value"] = "foobar";
 		choice.fill_from_json(&j);
 		bool success_string = std::holds_alternative<std::string>(choice.value);
@@ -520,7 +520,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		tco->foo = "bar";
 		testcache.store(tco);
 		test_cached_object_t* found_tco = testcache.find(666);
-		if (found_tco && found_tco->id == 666 && found_tco->foo == "bar") {
+		if (found_tco && found_tco->id == dpp::snowflake(666) && found_tco->foo == "bar") {
 			set_test("CUSTOMCACHE", true);
 		} else {
 			set_test("CUSTOMCACHE", false);
