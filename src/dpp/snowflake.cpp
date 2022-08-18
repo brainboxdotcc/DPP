@@ -63,6 +63,10 @@ bool snowflake::operator==(const snowflake& other) const {
 	return other.value == value;
 }
 
+bool snowflake::operator==(const uint64_t& other) const {
+	return other == value;
+}
+
 snowflake::operator nlohmann::json() const {
 	/* Discord transfers snowflakes as strings for compatibility with javascript */
 	return std::to_string(value);

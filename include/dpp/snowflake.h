@@ -115,6 +115,14 @@ public:
 	bool operator==(const snowflake& other) const;
 
 	/**
+	 * @brief Check if one snowflake value is equal to a uint64_t
+	 * 
+	 * @param other other snowflake to compare
+	 * @return True if the snowflake objects match
+	 */
+	bool operator==(const uint64_t& other) const;
+
+	/**
 	 * @brief For acting like an integer
 	 * @return A reference to the snowflake value
 	 */
