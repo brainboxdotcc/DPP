@@ -584,7 +584,7 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.guild_id = snowflake_not_null(&j, "guild_id");
 	i.app_permissions = snowflake_not_null(&j, "app_permissions");
 
-	if (j.find("message") != j.end()) {
+	if (j.contains("message") && !j.at("message").is_null()) {
 		const json& m = j["message"];
 		i.msg = message().fill_from_json((json*)&m, i.cache_policy);
 		set_snowflake_not_null(&m, "id", i.message_id);
@@ -618,7 +618,7 @@ void from_json(const nlohmann::json& j, interaction& i) {
 				g->members[i.member.user_id] = i.member;
 			}
 		}
-	} else if (j.at("user") && !j.at("user").is_null()) {
+	} else if (j.contains("user") && !j.at("user").is_null()) {
 		/* Command invoked from a DM */
 		j.at("user").get_to(i.usr);
 		i.member.user_id = i.usr.id;
@@ -633,53 +633,53 @@ void from_json(const nlohmann::json& j, interaction& i) {
 		if (data.find("resolved") != data.end()) {
 			const json& d_resolved = data["resolved"];
 			/* Users */
-			if (d_resolved.find("users") != d_resolved.end()) {
+			if (d_resolved.contains("users")) {
 				for (auto v = d_resolved["users"].begin(); v != d_resolved["users"].end(); ++v) {
 					json f = *v;
-					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					dpp::snowflake id(v.key());
 					i.resolved.users[id] = dpp::user().fill_from_json(&f);
 				}
 			}
 			/* Roles */
-			if (d_resolved.find("roles") != d_resolved.end()) {
+			if (d_resolved.contains("roles")) {
 				for (auto v = d_resolved["roles"].begin(); v != d_resolved["roles"].end(); ++v) {
 					json f = *v;
-					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					dpp::snowflake id(v.key());
 					i.resolved.roles[id] = dpp::role().fill_from_json(i.guild_id, &f);
 				}
 			}
 			/* Attachments */
-			if (d_resolved.find("attachments") != d_resolved.end()) {
+			if (d_resolved.contains("attachments")) {
 				for (auto v = d_resolved["attachments"].begin(); v != d_resolved["attachments"].end(); ++v) {
 					json f = *v;
-					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					dpp::snowflake id(v.key());
 					i.resolved.attachments.emplace(id, dpp::attachment(nullptr, &f));
 				}
 			}
 			/* Channels */
-			if (d_resolved.find("channels") != d_resolved.end()) {
+			if (d_resolved.contains("channels")) {
 				for (auto v = d_resolved["channels"].begin(); v != d_resolved["channels"].end(); ++v) {
 					json f = *v;
-					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					dpp::snowflake id(v.key());
 					i.resolved.channels[id] = dpp::channel().fill_from_json(&f);
 				}
 			}
 			/* Members */
-			if (d_resolved.find("members") != d_resolved.end()) {
+			if (d_resolved.contains("members")) {
 				for (auto v = d_resolved["members"].begin(); v != d_resolved["members"].end(); ++v) {
 					json f = *v;
-					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					dpp::snowflake id(v.key());
 					i.resolved.members[id] = dpp::guild_member().fill_from_json(&f, i.guild_id, id);
-					if (f.find("permissions") != f.end()) {
+					if (f.contains("permissions")) {
 						i.resolved.member_permissions[id] = snowflake_not_null(&f, "permissions");
 					}
 				}
 			}
 			/* Messages */
-			if (d_resolved.find("messages") != d_resolved.end()) {
+			if (d_resolved.contains("messages")) {
 				for (auto v = d_resolved["messages"].begin(); v != d_resolved["messages"].end(); ++v) {
 					json f = *v;
-					dpp::snowflake id = strtoull(v.key().c_str(), nullptr, 10);
+					dpp::snowflake id(v.key());
 					i.resolved.messages[id] = dpp::message().fill_from_json(&f);
 				}
 			}
