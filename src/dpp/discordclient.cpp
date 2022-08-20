@@ -293,8 +293,9 @@ bool discord_client::handle_frame(const std::string &buffer)
 				/* Reset session state and fall through to 10 */
 				op = 10;
 				log(dpp::ll_debug, "Failed to resume session " + sessionid + ", will reidentify");
-				this->sessionid = "";
+				this->sessionid.clear();
 				this->last_seq = 0;
+				this->resume_gateway_url = DEFAULT_GATEWAY;
 				/* No break here, falls through to state 10 to cause a reidentify */
 				[[fallthrough]];
 			case 10:
