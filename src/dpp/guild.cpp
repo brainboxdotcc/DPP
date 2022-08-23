@@ -369,7 +369,7 @@ std::string guild::build_json(bool with_id) const {
 	if (afk_channel_id) {
 		j["afk_channel_id"] = afk_channel_id;
 	}
-	if (afk_channel_id) {
+	if (afk_timeout) {
 		j["afk_timeout"] = afk_timeout;
 	}
 	if (widget_enabled()) {
