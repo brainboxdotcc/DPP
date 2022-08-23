@@ -49,8 +49,8 @@ int main() {
 				/* Checks if the subcommand has any options. */
 				if (cmd_data.options[0].options.size() > 0) {
 					/* Get the user option as a snowflake. */
-					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
-					event.reply("<@" + std::to_string(user) + "> has now been turned into a dog.")); 
+					uint64_t user = std::get<uint64_t>(cmd_data.options[0].options[0].value);
+					event.reply("<@" + std::to_string(user) + "> has now been turned into a dog."); 
 				} else {
 					/* Reply if there were no options.. */
 					event.reply("<A picture of a dog.>");
@@ -61,8 +61,8 @@ int main() {
 				/* Checks if the subcommand has any options. */
 				if (cmd_data.options[0].options.size() > 0) {
 					/* Get the user option as a snowflake. */
-					dpp::snowflake user = std::get<dpp::snowflake>(cmd_data.options[0].options[0].value);
-					event.reply("<@" + std::to_string(user) + "> has now been turned into acat.")); 
+					uint64_t user = std::get<uint64_t>(cmd_data.options[0].options[0].value);
+					event.reply("<@" + std::to_string(user) + "> has now been turned into acat."); 
 				} else {
 					/* Reply if there were no options.. */
 					event.reply("<A picture of a cat.>");
