@@ -910,5 +910,4 @@ const dpp::guild& interaction::get_guild() const {
 	return *g;
 }
 
-
 };

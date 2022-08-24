@@ -1,71 +1,71 @@
 \page subcommands Using sub-commands in slash commands
 
-This is how to use Subcommands within your Slash Commands for your bots.
+This demonstrates how to use sub-commands within slash commands. Also shown below is an example of how to get a "resolved" parameter without having to use the cache or an extra API call.
 
-To make a subcomamnd within your command use this
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <fmt/format.h>
 #include <iostream>
 
 int main() {
 
-	/* Setup the bot */
 	dpp::cluster bot("token");
-	
-        bot.on_log(dpp::utility::cout_logger());
+
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* Executes on ready. */
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-	    if (dpp::run_once<struct register_bot_commands>()) {
-	        // Define a slash command.
-	        dpp::slashcommand image("image", "Send a specific image.", bot.me.id);
-	        image.add_option(
-	    		// Create a subcommand type option.
- 	           	dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
-	    			add_option(dpp::command_option(dpp::co_user, "user", "User to make a dog off.", false))
-	    		);
-	    	image.add_option(
-	    		// Create another subcommand type option.
-	            dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
-	    			add_option(dpp::command_option(dpp::co_user, "user", "User to make a cat off.", false))
-	    		);
-	        // Create command with a callback.
-	        bot.global_command_create(image, [ & ]( const dpp::confirmation_callback_t &callback ) {
-	            if (callback.is_error()) {
-	                std::cout << callback.http_info.body <<  "\n" ;
-	            }
-	    	});
-	    }
+		if (dpp::run_once<struct register_bot_commands>()) {
+			/* Define a slash command. */
+			dpp::slashcommand image("image", "Send a specific image.", bot.me.id);
+			image.add_option(
+				/* Create a subcommand type option for "dog". */
+				dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
+				add_option(dpp::command_option(dpp::co_user, "user", "User to turn into a dog.", false))
+			);
+			image.add_option(
+				/* Create another subcommand type option for "cat". */
+				dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
+				add_option(dpp::command_option(dpp::co_user, "user", "User to turn into a cat.", false))
+			);
+			/* Create command */
+			bot.global_command_create(image);
+		}
 	});
 
 	/* Use the on_slashcommand event to look for commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
-		dpp::command_interaction cmd_data = event.command.get_command_interaction();
+		dpp::interaction interaction = event.command;
+		dpp::command_interaction cmd_data = interaction.get_command_interaction();
 		/* Check if the command is the image command. */
-		if (event.command.get_command_name() == "image") {
+		if (interaction.get_command_name() == "image") {
+			/* Get the sub command */
+			auto subcommand = cmd_data.options[0];
 			/* Check if the subcommand is "dog" */
-			if (cmd_data.options[0].name == "dog") {	
+			if (subcommand.name == "dog") {	
 				/* Checks if the subcommand has any options. */
-				if (cmd_data.options[0].options.size() > 0) {
-					/* Get the user option as a snowflake. */
-					uint64_t user = std::get<uint64_t>(cmd_data.options[0].options[0].value);
-					event.reply("<@" + std::to_string(user) + "> has now been turned into a dog."); 
+				if (!subcommand.options.empty()) {
+					/* Get the user from the parameter */
+					dpp::user user = interaction.get_resolved_user(
+						subcommand.get_option<dpp::snowflake>(0)
+					);
+					event.reply(user.get_mention() + " has now been turned into a dog."); 
 				} else {
 					/* Reply if there were no options.. */
-					event.reply("<A picture of a dog.>");
+					event.reply("No user specified");
 				}
 			}
 			/* Check if the subcommand is "cat" */
-			if (cmd_data.options[0].name == "cat") {
+			if (subcommand.name == "cat") {
 				/* Checks if the subcommand has any options. */
-				if (cmd_data.options[0].options.size() > 0) {
-					/* Get the user option as a snowflake. */
-					uint64_t user = std::get<uint64_t>(cmd_data.options[0].options[0].value);
-					event.reply("<@" + std::to_string(user) + "> has now been turned into acat."); 
+				if (!subcommand.options.empty()) {
+					/* Get the user from the parameter */
+					dpp::user user = interaction.get_resolved_user(
+						subcommand.get_option<dpp::snowflake>(0)
+					);
+					event.reply(user.get_mention() + " has now been turned into a cat."); 
 				} else {
 					/* Reply if there were no options.. */
-					event.reply("<A picture of a cat.>");
+					event.reply("No user specified");
 				}
 			}
 		}

@@ -515,6 +515,17 @@ struct DPP_EXPORT command_data_option {
 	command_value value;                       //!< Optional: the value of the pair
 	std::vector<command_data_option> options;  //!< Optional: present if this option is a group or subcommand
 	bool focused;                              //!< Optional: true if this option is the currently focused option for autocomplete
+
+	/**
+	 * @brief Get an option value by index
+	 * 
+	 * @tparam Type to get from the parameter
+	 * @param index index number of parameter
+	 * @return T returned type
+	 */
+	template <typename T> T& get_value(size_t index) {
+		return std::get<T>(options.at(index).value);
+	}
 };
 
 /**
@@ -558,6 +569,17 @@ struct DPP_EXPORT command_interaction {
 	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
 	slashcommand_contextmenu_type type;        //!< type of the command interaction
 	dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions. e.g. user id or message id whom clicked or tapped with the context menu https://discord.com/developers/docs/interactions/application-commands#user-commands
+
+	/**
+	 * @brief Get an option value by index
+	 * 
+	 * @tparam Type to get from the parameter
+	 * @param index index number of parameter
+	 * @return T returned type
+	 */
+	template <typename T> T& get_value(size_t index) {
+		return std::get<T>(options.at(index).value);
+	}
 };
 
 /**
