@@ -298,15 +298,15 @@ command_option_choice::command_option_choice(const std::string &n, command_value
 command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) {
 	name = string_not_null(j, "name");
 	if ((*j)["value"].is_boolean()) { // is bool
-		value.emplace<bool>((*j)["value"]);
+		value.emplace<bool>((*j)["value"].get<bool>());
 	} else if ((*j)["value"].is_number_float()) { // is double
-		value.emplace<double>((*j)["value"]);
+		value.emplace<double>((*j)["value"].get<double>());
 	} else if ((*j)["value"].is_number_unsigned() || ((*j)["value"].is_string() && snowflake_not_null(j, "value") != 0)) { // is snowflake (large integer, or string containing 64 bit integer)
-		value.emplace<snowflake>((*j)["value"]);
+		value.emplace<snowflake>(dpp::snowflake(snowflake_not_null(j, "value")));
 	} else if ((*j)["value"].is_number_integer()) { // is int64
-		value.emplace<int64_t>((*j)["value"]);
+		value.emplace<int64_t>((*j)["value"].get<int64_t>());
 	} else { // else string
-		value.emplace<std::string>((*j)["value"]);
+		value.emplace<std::string>((*j)["value"].get<std::string>());
 	}
 	if (j->contains("name_localizations")) {
 		for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
