@@ -111,7 +111,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 						case co_user:
 						case co_attachment:
 						case co_mentionable:
-							opt.value = snowflake_not_null(&o, "value");
+							opt.value = dpp::snowflake(snowflake_not_null(&o, "value"));
 							break;
 						case co_integer:
 							opt.value = o.at("value").get<int64_t>();
