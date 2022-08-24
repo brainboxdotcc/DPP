@@ -155,7 +155,11 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	}
 
 	{ // test dpp::command_option_choice::fill_from_json
-		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", false);
+		set_test("OPTCHOICE_DOUBLE", false);
+		set_test("OPTCHOICE_INT", false);
+		set_test("OPTCHOICE_BOOL", false);
+		set_test("OPTCHOICE_SNOWFLAKE", false);
+		set_test("OPTCHOICE_STRING", false);
 		json j;
 		dpp::command_option_choice choice;
 		j["value"] = 54.321;
@@ -173,11 +177,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		dpp::snowflake s(845266178036516757); // example snowflake
 		j["value"] = s;
 		choice.fill_from_json(&j);
-		bool success_snowflake = std::holds_alternative<std::string>(choice.value) && dpp::snowflake(std::get<std::string>(choice.value)) == s;
+		bool success_snowflake = std::holds_alternative<dpp::snowflake>(choice.value) && std::get<dpp::snowflake>(choice.value) == s;
 		j["value"] = "foobar";
 		choice.fill_from_json(&j);
 		bool success_string = std::holds_alternative<std::string>(choice.value);
-		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", (success_double && success_int && success_int2 && success_bool && success_snowflake && success_string));
+		set_test("OPTCHOICE_DOUBLE", success_double);
+		set_test("OPTCHOICE_INT", success_int && success_int2);
+		set_test("OPTCHOICE_BOOL", success_bool);
+		set_test("OPTCHOICE_SNOWFLAKE", success_snowflake);
+		set_test("OPTCHOICE_STRING", success_string);
 	}
 
 	{

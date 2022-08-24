@@ -30,7 +30,20 @@
 namespace dpp {
 
 /** @brief A container for a 64 bit unsigned value representing many things on discord.
- * Discord calls the value a 'snowflake' value.
+ * This value is known in distributed computing as a snowflak value.
+ * 
+ * Snowflakes are:
+ * 
+ * - Performant (very fast to generate at source and to compare in code)
+ * - Uncoordinated (allowing high availability across clusters, data centres etc)
+ * - Time ordered (newer snowflakes have higher IDs)
+ * - Directly Sortable (due to time ordering)
+ * - Compact (64 bit numbers, not 128 bit, or string)
+ * 
+ * An identical format of snowflake is used by Twitter, Instagram and several other platforms.
+ * 
+ * @see https://en.wikipedia.org/wiki/Snowflake_ID
+ * @see https://github.com/twitter-archive/snowflake/tree/b3f6a3c6ca8e1b6847baa6ff42bf72201e2c2231
  */
 class DPP_EXPORT snowflake final {
 	friend class std::hash<dpp::snowflake>;
@@ -142,6 +155,27 @@ public:
 	 */
 	double get_creation_time() const;
 
+	/**
+	 * @brief Get the worker id that produced this snowflake value
+	 * 
+	 * @return uint8_t worker id
+	 */
+	uint8_t get_worker_id() const;
+
+	/**
+	 * @brief Get the process id that produced this snowflake value
+	 * 
+	 * @return uint8_t process id
+	 */
+	uint8_t get_process_id() const;
+
+	/**
+	 * @brief Get the increment, which is incremented for every snowflake
+	 * created over the one millisecond resolution in the timestamp.
+	 * 
+	 * @return uint64_t millisecond increment
+	 */
+	uint16_t get_increment() const;
 };
 
 };

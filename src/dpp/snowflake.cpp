@@ -75,6 +75,18 @@ snowflake::operator nlohmann::json() const {
 double snowflake::get_creation_time() const {
 	const uint64_t first_january_2016 = 1420070400000;
 	return (double)((value >> 22) + first_january_2016) / 1000.0;
-} 
+}
+
+uint8_t snowflake::get_worker_id() const {
+	return (value & 0x3E0000) >> 17;
+}
+
+uint8_t snowflake::get_process_id() const {
+	return (value & 0x1F000) >> 12;
+}
+
+uint16_t snowflake::get_increment() const {
+	return (value & 0xFFF);
+}
 
 }

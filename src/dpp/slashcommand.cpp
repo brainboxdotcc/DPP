@@ -79,8 +79,8 @@ void to_json(json& j, const command_option_choice& choice) {
 		j["value"] = std::get<int64_t>(choice.value);
 	} else if (std::holds_alternative<bool>(choice.value)) {
 		j["value"] = std::get<bool>(choice.value);
-	} else if (std::holds_alternative<uint64_t>(choice.value)) {
-		j["value"] = std::to_string(std::get<uint64_t>(choice.value));
+	} else if (std::holds_alternative<snowflake>(choice.value)) {
+		j["value"] = std::to_string(std::get<snowflake>(choice.value));
 	} else if (std::holds_alternative<double>(choice.value)) {
 		j["value"] = std::to_string(std::get<double>(choice.value));
 	} else {
@@ -301,8 +301,8 @@ command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) 
 		value.emplace<bool>((*j)["value"]);
 	} else if ((*j)["value"].is_number_float()) { // is double
 		value.emplace<double>((*j)["value"]);
-	} else if ((*j)["value"].is_number_unsigned()) { // is snowflake
-		value.emplace<uint64_t>((*j)["value"]);
+	} else if ((*j)["value"].is_number_unsigned() || ((*j)["value"].is_string() && snowflake_not_null(j, "value") != 0)) { // is snowflake (large integer, or string containing 64 bit integer)
+		value.emplace<snowflake>((*j)["value"]);
 	} else if ((*j)["value"].is_number_integer()) { // is int64
 		value.emplace<int64_t>((*j)["value"]);
 	} else { // else string
@@ -857,5 +857,58 @@ guild_command_permissions &guild_command_permissions::fill_from_json(nlohmann::j
 
 	return *this;
 }
+
+const dpp::user& interaction::get_resolved_user(snowflake id) const {
+	return get_resolved<user, std::map<snowflake, user>>(id, resolved.users);
+}
+
+const dpp::role& interaction::get_resolved_role(snowflake id) const {
+	return get_resolved<role, std::map<snowflake, role>>(id, resolved.roles);
+}
+
+const dpp::channel& interaction::get_resolved_channel(snowflake id) const {
+	return get_resolved<channel, std::map<snowflake, channel>>(id, resolved.channels);
+}
+
+const dpp::guild_member& interaction::get_resolved_member(snowflake id) const {
+	return get_resolved<guild_member, std::map<snowflake, guild_member>>(id, resolved.members);
+}
+
+const dpp::permission& interaction::get_resolved_permission(snowflake id) const {
+	return get_resolved<permission, std::map<snowflake, permission>>(id, resolved.member_permissions);
+}
+
+const dpp::message& interaction::get_resolved_message(snowflake id) const {
+	return get_resolved<message, std::map<snowflake, message>>(id, resolved.messages);
+}
+
+const dpp::attachment& interaction::get_resolved_attachment(snowflake id) const {
+	return get_resolved<attachment, std::map<snowflake, attachment>>(id, resolved.attachments);
+}
+
+const dpp::user& interaction::get_issuing_user() const {
+	return usr;
+}
+
+const dpp::message& interaction::get_context_message() const {
+	return msg;
+}
+
+const dpp::channel& interaction::get_channel() const {
+	auto c = find_channel(channel_id);
+	if (c == nullptr) {
+		throw dpp::logic_exception("No channel for this command interaction");
+	}
+	return *c;
+}
+
+const dpp::guild& interaction::get_guild() const {
+	auto g = find_guild(guild_id);
+	if (g == nullptr) {
+		throw dpp::logic_exception("No guild for this command interaction");
+	}
+	return *g;
+}
+
 
 };
