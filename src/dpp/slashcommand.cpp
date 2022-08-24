@@ -519,9 +519,10 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 				break;
 			case co_channel:
 			case co_role:
+			case co_attachment:
 			case co_user:
 			case co_mentionable:
-				cdo.value = snowflake_not_null(&j, "value");
+				cdo.value = dpp::snowflake(snowflake_not_null(&j, "value"));
 				break;
 			case co_integer:
 				cdo.value = j.at("value").get<int64_t>();
@@ -531,9 +532,6 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 				break;
 			case co_number:
 				cdo.value = j.at("value").get<double>();
-				break;
-			case co_attachment:
-				cdo.value = snowflake_not_null(&j, "value");
 				break;
 			case co_sub_command:
 			case co_sub_command_group:
