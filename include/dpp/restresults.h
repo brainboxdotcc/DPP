@@ -260,6 +260,13 @@ struct DPP_EXPORT confirmation_callback_t {
 	/**
 	 * @brief Construct a new confirmation callback object
 	 *
+	 * @param _http The HTTP metadata from the REST call
+	 */
+	confirmation_callback_t(const http_request_completion_t& _http);
+
+	/**
+	 * @brief Construct a new confirmation callback object
+	 *
 	 * @param creator owning cluster object
 	 * @param _value The value to encapsulate in the confirmable_t
 	 * @param _http The HTTP metadata from the REST call

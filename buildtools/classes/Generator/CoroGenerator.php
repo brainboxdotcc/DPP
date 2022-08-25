@@ -116,6 +116,7 @@ EOT;
      */
     public function saveHeader(string $content): void
     {
+		content .= "auto inline co_request(const std::string &url, http_method method, const std::string &postdata = \"\", const std::string &mimetype = \"text/plain\", const std::multimap<std::string, std::string> &headers = {}) {\n\treturn dpp::awaitable(this, [&] (auto cc) { this->request(url, method, cc, mimetype, headers); }); \n}\n\n";
         file_put_contents('include/dpp/cluster_coro_calls.h', $content);
     }
 
