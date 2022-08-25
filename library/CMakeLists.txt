@@ -134,7 +134,7 @@ if(MINGW OR NOT WIN32)
 endif(MINGW OR NOT WIN32)
 
 if(APPLE)
-	if(CMAKE_APPLE_SILICON_PROCESSOR)
+	if(CMAKE_APPLE_SILICON_PROCESSOR EQUAL arm64)
 		set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl")
 	else()
 		set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl")
