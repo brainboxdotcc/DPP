@@ -750,6 +750,8 @@ struct DPP_EXPORT attachment {
 	uint32_t size;
 	/** File name of the attachment */
 	std::string filename;
+	/** Optional: Description of the attachment (max 1024 characters) */
+	std::string description;
 	/** URL which points to the attachment */
 	std::string url;
 	/** Proxied URL which points to the attachment */
