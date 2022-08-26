@@ -714,6 +714,7 @@ attachment::attachment(struct message* o, json *j) : attachment(o) {
 	this->id = snowflake_not_null(j, "id");
 	this->size = (*j)["size"];
 	this->filename = (*j)["filename"];
+	this->description = string_not_null(j, "description");
 	this->url = (*j)["url"];
 	this->proxy_url = (*j)["proxy_url"];
 	this->width = int32_not_null(j, "width");
