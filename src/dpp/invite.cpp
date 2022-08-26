@@ -1,4 +1,4 @@
-/************************************************************************************
+/************************************************************************************invi
  *
  * D++, A Lightweight C++ library for Discord
  *
@@ -29,9 +29,6 @@ namespace dpp {
 invite::invite() : expires_at(0), guild_id(0), channel_id(0), inviter_id(0), target_user_id(0), target_user_type(1), approximate_presence_count(0), approximate_member_count(0), uses(0)
 {
 }
-
-invite::~invite() = default;
-
 
 invite& invite::fill_from_json(nlohmann::json* j) {
 	code = string_not_null(j, "code");

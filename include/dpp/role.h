@@ -198,6 +198,52 @@ public:
 	role& load_image(const std::string &image_blob, const image_type type);
 
 	/**
+	 * @brief Operator less than, used for checking if a role is below another.
+	 *
+	 * @param lhs first role to compare
+	 * @param rhs second role to compare
+	 * @return true if lhs is less than rhs
+	 */
+	friend inline bool operator< (const role& lhs, const role& rhs)
+	{
+		return lhs.position < rhs.position;
+	}
+
+	/**
+	 * @brief Operator greater than, used for checking if a role is above another.
+	 *
+	 * @param lhs first role to compare
+	 * @param rhs second role to compare
+	 * @return true if lhs is greater than rhs
+	 */
+	friend inline bool operator> (const role& lhs, const role& rhs)
+	{
+		return lhs.position > rhs.position;
+	}
+
+	/**
+	 * @brief Operator equals, used for checking if a role is ranked equal to another.
+	 *
+	 * @param other role to compare
+	 * @return true if is equal to other
+	 */
+	inline bool operator== (const role& other) const
+	{
+		return this->position == other.position;
+	}
+
+	/**
+	 * @brief Operator not equals, used for checking if a role is ranked equal to another.
+	 *
+	 * @param other role to compare
+	 * @return true if is not equal to other
+	 */
+	inline bool operator!= (const role& other) const
+	{
+		return this->position != other.position;
+	}
+
+	/**
 	 * @brief True if the role is hoisted
 	 * @return bool Role appears separated from others in the member list
 	 */

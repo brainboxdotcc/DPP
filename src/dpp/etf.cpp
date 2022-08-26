@@ -268,27 +268,29 @@ const char* etf_parser::read_string(uint32_t length) {
 	return (const char*)str;
 }
 
-json etf_parser::process_atom(const char* atom, uint16_t length) {
-	if (atom == NULL) {
-		return json();
-	}
+static const char* atom_null = "null";
+static const char* atom_true = "true";
+static const char* atom_false = "false";
 
+json etf_parser::process_atom(const char* atom, uint16_t length) {
 	json j;
 
+	if (atom == NULL) {
+		return j;
+	}
+
 	if (length >= 3 && length <= 5) {
-		if (length == 3 && strncmp(atom, "nil", 3) == 0) {
+		if (length == 4 && *((uint32_t*)atom) == *((uint32_t*)atom_null)) { // "null"
 			return j;
 		}
-		else if (length == 4 && strncmp(atom, "null", 4) == 0) {
+		else if(length == 4 && *((uint32_t*)atom) == *((uint32_t*)atom_true)) { // "true"
+			return true;
+		}
+		else if (length == 3 && atom[0] == 'n' && atom[1] == 'i' && atom[2] == 'l') { // "nil"
 			return j;
 		}
-		else if(length == 4 && strncmp(atom, "true", 4) == 0) {
-			j = true;
-			return j;
-		}
-		else if (length == 5 && strncmp(atom, "false", 5) == 0) {
-			j = false;
-			return j;
+		else if (length == 5 && *((uint32_t*)atom) == *((uint32_t*)atom_false) && atom[4] == 'e') { // "fals","e"
+			return false;
 		}
 	}
 
@@ -350,14 +352,13 @@ json etf_parser::decode_nil() {
 
 json etf_parser::decode_map() {
 	const uint32_t length = read_32_bits();
-	auto map = json::object();
+	json map;
 	for(uint32_t i = 0; i < length; ++i) {
-		const auto key = inner_parse();
-		const auto value = inner_parse();
+		auto key = inner_parse();
 		if (key.is_number()) {
-			map[std::to_string(key.get<uint64_t>())] = value;
+			map.emplace(std::to_string(key.get<uint64_t>()), std::move(inner_parse()));
 		} else {
-			map[key.get<std::string>()] = value;
+			map.emplace(key.get<std::string>(), std::move(inner_parse()));
 		}
 	}
 	return map;
@@ -373,11 +374,11 @@ json etf_parser::decode_float() {
 	}
 
 	double number;
-	char nullTerimated[FLOAT_LENGTH + 1] = {0};
+	char null_terminated[FLOAT_LENGTH + 1] = {0};
 
-	memcpy(nullTerimated, floatStr, FLOAT_LENGTH);
+	memcpy(null_terminated, floatStr, FLOAT_LENGTH);
 
-	auto count = sscanf(nullTerimated, "%lf", &number);
+	auto count = sscanf(null_terminated, "%lf", &number);
 
 	if (count != 1) {
 		return json();
@@ -472,7 +473,7 @@ json etf_parser::decode_string_as_list() {
 		throw dpp::parse_exception("String list past end of buffer");
 	}
 	for(uint16_t i = 0; i < length; ++i) {
-		array.push_back(decode_small_integer());
+		array.emplace_back(decode_small_integer());
 	}
 	return array;
 }
@@ -516,7 +517,7 @@ json etf_parser::decode_reference() {
 	reference["node"] = inner_parse();
 
 	std::vector<int32_t> ids;
-	ids.push_back(read_32_bits());
+	ids.emplace_back(read_32_bits());
 	reference["id"] = ids;
 
 	reference["creation"] = read_8_bits();
@@ -533,7 +534,7 @@ json etf_parser::decode_new_reference() {
 
 	std::vector<int32_t> ids;
 	for(uint16_t i = 0; i < len; ++i) {
-		ids.push_back(read_32_bits());
+		ids.emplace_back(read_32_bits());
 	}
 	reference["id"] = ids;
 

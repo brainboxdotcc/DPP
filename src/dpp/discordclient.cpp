@@ -93,7 +93,8 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	websocket_ping(0.0),
 	ready(false),
 	last_heartbeat_ack(time(nullptr)),
-	protocol(ws_proto)
+	protocol(ws_proto),
+	resume_gateway_url(DEFAULT_GATEWAY)
 {
 	zlib = new zlibcontext();
 	etf = new etf_parser();
@@ -141,6 +142,11 @@ void discord_client::end_zlib()
 	}
 }
 
+void discord_client::set_resume_hostname()
+{
+	hostname = resume_gateway_url;
+}
+
 void discord_client::thread_run()
 {
 	utility::set_thread_name(std::string("shard/") + std::to_string(shard_id));
@@ -155,9 +161,10 @@ void discord_client::thread_run()
 			end_zlib();
 			setup_zlib();
 			do {
-				this->log(ll_debug, "Attempting reconnection of shard " + std::to_string(this->shard_id));
+				this->log(ll_debug, "Attempting reconnection of shard " + std::to_string(this->shard_id) + " to wss://" + resume_gateway_url);
 				error = false;
 				try {
+					set_resume_hostname();
 					ssl_client::connect();
 					websocket_client::connect();
 				}
@@ -286,8 +293,9 @@ bool discord_client::handle_frame(const std::string &buffer)
 				/* Reset session state and fall through to 10 */
 				op = 10;
 				log(dpp::ll_debug, "Failed to resume session " + sessionid + ", will reidentify");
-				this->sessionid = "";
+				this->sessionid.clear();
 				this->last_seq = 0;
+				this->resume_gateway_url = DEFAULT_GATEWAY;
 				/* No break here, falls through to state 10 to cause a reidentify */
 				[[fallthrough]];
 			case 10:
@@ -314,7 +322,6 @@ bool discord_client::handle_frame(const std::string &buffer)
 					/* Full connect */
 					while (time(nullptr) < creator->last_identify + 5) {
 						time_t wait = (creator->last_identify + 5) - time(nullptr);
-						log(dpp::ll_debug, "Waiting " + std::to_string(wait) +" seconds before identifying for session...");
 						std::this_thread::sleep_for(std::chrono::seconds(wait));
 					}
 					log(dpp::ll_debug, "Connecting new session...");

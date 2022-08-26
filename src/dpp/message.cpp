@@ -868,7 +868,7 @@ bool message::is_crosspost() const {
 }
 
 bool message::is_dm() const {
-	return guild_id == 0;
+	return guild_id.empty();
 }
 
 bool message::suppress_embeds() const {
@@ -903,7 +903,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->channel_id = snowflake_not_null(d, "channel_id");
 	this->guild_id = snowflake_not_null(d, "guild_id");
 	/* We didn't get a guild id. See if we can find one in the channel */
-	if (guild_id == 0 && channel_id != 0) {
+	if (guild_id.empty() && !channel_id.empty()) {
 		dpp::channel* c = dpp::find_channel(this->channel_id);
 		if (c) {
 			this->guild_id = c->guild_id;
@@ -981,7 +981,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			/* User caching on, lazy or aggressive - cache the member information */
 			auto thismember = g->members.find(uid);
 			if (thismember == g->members.end()) {
-				if (uid != 0 && author.id) {
+				if (!uid.empty() && author.id) {
 					guild_member gm;
 					gm.fill_from_json(&mi, g->id, uid);
 					g->members[author.id] = gm;

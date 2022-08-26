@@ -74,6 +74,7 @@
 		"unordered_set": "cpp",
 		"codecvt": "cpp",
 		"future": "cpp",
-		"cerrno": "cpp"
+		"cerrno": "cpp",
+		"compare": "cpp"
 	}
 }

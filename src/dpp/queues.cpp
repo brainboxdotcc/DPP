@@ -113,12 +113,23 @@ http_request_completion_t http_request::run(cluster* owner) {
 		std::size_t s_start = endpoint.find("://", 0);
 		if (s_start != std::string::npos) {
 			s_start += 3; /* "://" */
-			std::size_t s_end = endpoint.find("/", s_start + 1);
-			_host = endpoint.substr(0, s_end);
-			_url = endpoint.substr(s_end);	
+			/**
+			 * NOTE: "#" is in this list, really # is client side only.
+			 * This won't stop some moron from using it as part of an
+			 * API endpoint...
+			 */
+			std::size_t s_end = endpoint.find_first_of("/?#", s_start + 1);
+			if (s_end != std::string::npos) {
+				_host = endpoint.substr(0, s_end);
+				_url = endpoint.substr(s_end);
+			} else {
+				_host = endpoint;
+				_url.clear();
+			}
+		} else {
+			owner->log(ll_error, "Request to '" + endpoint + "' missing protocol scheme. This is not supported. Please specify http or https.");
 		}
 	}
-
 
 	rv.ratelimit_limit = rv.ratelimit_remaining = rv.ratelimit_reset_after = rv.ratelimit_retry_after = 0;
 	rv.status = 0;
@@ -143,12 +154,12 @@ http_request_completion_t http_request::run(cluster* owner) {
 		}
 	}
 
-	std::map<http_method, std::string> request_verb = {
-		{m_get, "GET"},
-		{m_post, "POST"},
-		{m_put, "PUT"},
-		{m_patch, "PATCH"},
-		{m_delete, "DELETE"}
+	constexpr std::array request_verb {
+		"GET",
+		"POST",
+		"PUT",
+		"PATCH",
+		"DELETE"
 	};
 
 	multipart_content multipart;

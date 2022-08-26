@@ -145,17 +145,27 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("TIMESTAMPTOSTRING", false);
 	set_test("TIMESTAMPTOSTRING", dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
 
+	set_test("ROLE.COMPARE", false);
+	dpp::role role_1, role_2;
+	role_1.position = 1;
+	role_2.position = 2;
+	set_test("ROLE.COMPARE", role_1 < role_2 && role_1 != role_2);
+
 	set_test("WEBHOOK", false);
 	try {
 		dpp::webhook test_wh("https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE");
-		set_test("WEBHOOK", (test_wh.token == "ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE") && (test_wh.id == 833047646548133537));
+		set_test("WEBHOOK", (test_wh.token == "ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE") && (test_wh.id == dpp::snowflake(833047646548133537)));
 	}
 	catch (const dpp::exception&) {
 		set_test("WEBHOOK", false);
 	}
 
 	{ // test dpp::command_option_choice::fill_from_json
-		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", false);
+		set_test("OPTCHOICE_DOUBLE", false);
+		set_test("OPTCHOICE_INT", false);
+		set_test("OPTCHOICE_BOOL", false);
+		set_test("OPTCHOICE_SNOWFLAKE", false);
+		set_test("OPTCHOICE_STRING", false);
 		json j;
 		dpp::command_option_choice choice;
 		j["value"] = 54.321;
@@ -170,14 +180,18 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		j["value"] = true;
 		choice.fill_from_json(&j);
 		bool success_bool = std::holds_alternative<bool>(choice.value);
-		dpp::snowflake s = 845266178036516757; // example snowflake
+		dpp::snowflake s(845266178036516757); // example snowflake
 		j["value"] = s;
 		choice.fill_from_json(&j);
-		bool success_snowflake = std::holds_alternative<dpp::snowflake>(choice.value);
+		bool success_snowflake = std::holds_alternative<dpp::snowflake>(choice.value) && std::get<dpp::snowflake>(choice.value) == s;
 		j["value"] = "foobar";
 		choice.fill_from_json(&j);
 		bool success_string = std::holds_alternative<std::string>(choice.value);
-		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", (success_double && success_int && success_int2 && success_bool && success_snowflake && success_string));
+		set_test("OPTCHOICE_DOUBLE", success_double);
+		set_test("OPTCHOICE_INT", success_int && success_int2);
+		set_test("OPTCHOICE_BOOL", success_bool);
+		set_test("OPTCHOICE_SNOWFLAKE", success_snowflake);
+		set_test("OPTCHOICE_STRING", success_string);
 	}
 
 	{
@@ -520,7 +534,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		tco->foo = "bar";
 		testcache.store(tco);
 		test_cached_object_t* found_tco = testcache.find(666);
-		if (found_tco && found_tco->id == 666 && found_tco->foo == "bar") {
+		if (found_tco && found_tco->id == dpp::snowflake(666) && found_tco->foo == "bar") {
 			set_test("CUSTOMCACHE", true);
 		} else {
 			set_test("CUSTOMCACHE", false);

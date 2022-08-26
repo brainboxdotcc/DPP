@@ -88,8 +88,8 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 	i.parameters = parameters;
 	commands[lowercase(command)] = i;
 	if (slash_commands_enabled) {
-		if (this->app_id == 0) {
-			if (owner->me.id == 0) {
+		if (this->app_id.empty()) {
+			if (owner->me.id.empty()) {
 				throw dpp::logic_exception("Command handler not ready (i don't know my application ID)");
 			} else {
 				this->app_id = owner->me.id;
