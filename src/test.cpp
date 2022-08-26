@@ -145,6 +145,12 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("TIMESTAMPTOSTRING", false);
 	set_test("TIMESTAMPTOSTRING", dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
 
+	set_test("ROLE.COMPARE", false);
+	dpp::role role_1, role_2;
+	role_1.position = 1;
+	role_2.position = 2;
+	set_test("ROLE.COMPARE", role_1 < role_2 && role_1 != role_2);
+
 	set_test("WEBHOOK", false);
 	try {
 		dpp::webhook test_wh("https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE");
