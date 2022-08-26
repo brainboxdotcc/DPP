@@ -219,6 +219,16 @@ public:
 	 */
 	virtual std::string build_json(bool with_id = false) const;
 
+        /**
+     * @brief Compares this role with another role in terms of their position in guild roles.
+     * 
+     * @param other_role The other role this role is being compared to.
+     * @return true if @param role is above @param other_role in terms of position in the guild roles.
+     * @return false 
+     */
+
+    bool operator>(role& other_role) const;
+
 	/**
 	 * @brief Get the mention/ping for the role
 	 * 

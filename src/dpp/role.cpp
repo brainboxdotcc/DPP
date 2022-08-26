@@ -110,6 +110,10 @@ std::string role::build_json(bool with_id) const {
 	return j.dump();
 }
 
+bool role::operator>(role& other_role) const {
+    return this->position != other_role.position ? this->position > other_role.position : this->id > other_role.id; 
+}
+
 std::string role::get_mention() const {
 	return "<&" + std::to_string(id) + ">";
 }
