@@ -84,10 +84,6 @@ enum automod_trigger_type : uint8_t {
 	 */
 	amod_type_keyword = 1,
 	/**
-	 * @brief Harmful/malware links
-	 */
-	amod_type_harmful_link = 2,
-	/**
 	 * @brief Spamming
 	 */
 	amod_type_spam = 3,
@@ -95,6 +91,10 @@ enum automod_trigger_type : uint8_t {
 	 * @brief Preset lists of filter words
 	 */
 	amod_type_keyword_preset = 4,
+	/**
+	 * @brief Check if content contains more mentions than allowed
+	 */
+	amod_type_mention_spam = 5,
 };
 
 /**
@@ -102,46 +102,33 @@ enum automod_trigger_type : uint8_t {
  */
 struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	/**
-	 * @brief Keywords to moderate. A keyword can be a phrase which contains multiple words. All keywords are case insensitive.
-	 * `*` can be used to customize how each keyword will be matched.
+	 * @brief Substrings which will be searched for in content.
 	 *
-	 * **Examples for the `*` wildcard symbol:**
+	 * Each keyword can be a phrase which contains multiple words. All keywords are case insensitive.
 	 *
-	 * Prefix - word must start with the keyword
+	 * Wildcard symbols (`*`) can be used to customize how each keyword will be matched.
 	 *
-	 * | keyword  | matches                             |
-     * |----------|-------------------------------------|
-     * | cat*     | <u><b>cat</b></u>ch, <u><b>Cat</b></u>apult, <u><b>CAt</b></u>tLE |
-     * | the mat* | <u><b>the mat</b></u>rix                      |
-     *
-     * Suffix - word must end with the keyword
-     *
-     * | keyword  | matches                  |
-     * |----------|--------------------------|
-     * | *cat     | wild<u><b>cat</b></u>, copy<u><b>Cat</b></u> |
-     * | *the mat | brea<u><b>the mat</b></u>          |
-     *
-     * Anywhere - keyword can appear anywhere in the content
-     *
-     * | keyword   | matches                     |
-     * |-----------|-----------------------------|
-     * | \*cat*     | lo<u><b>cat</b></u>ion, edu<u><b>Cat</b></u>ion |
-     * | \*the mat* | brea<u><b>the mat</b></u>ter          |
-     *
-     * Whole Word - keyword is a full word or phrase and must be surrounded by whitespace at the beginning and end
-     *
-     * | keyword | matches     |
-     * |---------|-------------|
-     * | cat     | <u><b>Cat</b></u>     |
-     * | the mat | <u><b>the mat</b></u> |
-     *
+	 * @see Keyword matching strategies: https://discord.com/developers/docs/resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies
 	 */
 	std::vector<std::string> keywords;
+
 	/**
 	 * @brief Preset keyword list types to moderate
 	 * @see automod_preset_type
 	 */
 	std::vector<automod_preset_type> presets;
+
+	/**
+	 * @brief Substrings which will be exempt from triggering the automod_metadata::presets trigger type.
+	 *
+	 * Each keyword can be a phrase which contains multiple words. All keywords are case insensitive.
+	 */
+	std::vector<std::string> allow_list;
+
+	/**
+	 * @brief Total number of mentions (role & user) allowed per message (Maximum of 50)
+	 */
+	uint8_t mention_total_limit;
 
 	/**
 	 * @brief Destroy the automod metadata object
