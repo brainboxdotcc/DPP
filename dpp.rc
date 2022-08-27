@@ -1,15 +1,17 @@
-1 VERSIONINFO
- FILEVERSION 10,0,16
- PRODUCTVERSION 10,0,16
- FILEFLAGSMASK 0x17L
+#include "Winver.h"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION @DPP_VERSION_MAJOR@,@DPP_VERSION_MINOR@,@DPP_VERSION_PATCH@
+ PRODUCTVERSION @DPP_VERSION_MAJOR@,@DPP_VERSION_MINOR@,@DPP_VERSION_PATCH@
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
- FILEFLAGS 0x1L
+ FILEFLAGS VS_FF_DEBUG
 #else
  FILEFLAGS 0x0L
 #endif
- FILEOS 0x4L
- FILETYPE 0x2L
- FILESUBTYPE 0x0L
+ FILEOS VOS_NT_WINDOWS32
+ FILETYPE VFT_DLL
+ FILESUBTYPE VFT2_UNKNOWN
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
@@ -17,12 +19,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Brainbox.cc"
             VALUE "FileDescription", "Dpp - The C++ Discord API Library"
-            VALUE "FileVersion", "10.0.16"
-            VALUE "InternalName", "DppD"
-            VALUE "LegalCopyright", "Copyright (C) 2021 Brainbox.cc. All rights reserved."
-            VALUE "LegalTrademarks", "Brainbox.cc"
-            VALUE "ProductName", "Dpp DLL"
-            VALUE "ProductVersion", "10.0.16"
+            VALUE "FileVersion", "@DPP_VERSION@"
+            VALUE "ProductVersion", "@DPP_VERSION@"
+            VALUE "ProductName", "DPP"
+            VALUE "InternalName", "DPP"
+            VALUE "LegalCopyright", "Copyright (C) 2021 Brainbox.cc - All rights reserved."
+            VALUE "OriginalFilename", "dpp.dll"
         END
     END
     BLOCK "VarFileInfo"
