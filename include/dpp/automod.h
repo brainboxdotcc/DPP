@@ -160,6 +160,11 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	uint8_t mention_total_limit;
 
 	/**
+	 * @brief Construct a new automod metadata object
+	 */
+	automod_metadata();
+
+	/**
 	 * @brief Destroy the automod metadata object
 	 */
 	virtual ~automod_metadata();

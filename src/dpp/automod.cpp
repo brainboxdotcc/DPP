@@ -70,6 +70,8 @@ std::string automod_action::build_json(bool with_id) const {
 	return j.dump();
 }
 
+automod_metadata::automod_metadata() : mention_total_limit(0) {}
+
 automod_metadata::~automod_metadata() = default;
 
 automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
