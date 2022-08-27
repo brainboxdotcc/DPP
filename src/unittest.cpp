@@ -89,6 +89,7 @@ std::map<std::string, test_t> tests = {
 	{"UTILITY.MARKDOWN_ESCAPE", {tt_offline, "utility::markdown_escape", false, false}},
 	{"UTILITY.TOKENIZE", {tt_offline, "utility::tokenize", false, false}},
 	{"UTILITY.URL_ENCODE", {tt_offline, "utility::url_encode", false, false}},
+	{"ROLE.COMPARE", {tt_offline, "role::operator<", false, false}},
 };
 
 double start = dpp::utility::time_f();
