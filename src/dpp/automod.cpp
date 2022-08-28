@@ -120,7 +120,7 @@ automod_rule& automod_rule::fill_from_json(nlohmann::json* j) {
 	creator_id = snowflake_not_null(j, "creator_id");
 	event_type = (automod_event_type)int8_not_null(j, "event_type");
 	trigger_type = (automod_trigger_type)int8_not_null(j, "trigger_type");
-	if (j->at("trigger_metadata")) {
+	if (j->contains("trigger_metadata")) {
 		trigger_metadata.fill_from_json(&((*j)["trigger_metadata"]));
 	}
 	enabled = bool_not_null(j, "enabled");
