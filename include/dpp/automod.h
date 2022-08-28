@@ -84,6 +84,11 @@ enum automod_trigger_type : uint8_t {
 	 */
 	amod_type_keyword = 1,
 	/**
+	 * @brief Harmful/malware links
+	 * @deprecated Removed by Discord
+	 */
+	amod_type_harmful_link = 2,
+	/**
 	 * @brief Check if content represents generic spam
 	 */
 	amod_type_spam = 3,
