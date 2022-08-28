@@ -18,10 +18,10 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "Brainbox.cc"
-            VALUE "FileDescription", "Dpp - The C++ Discord API Library"
+            VALUE "FileDescription", "D++ - The C++ Discord API Library"
             VALUE "FileVersion", "@DPP_VERSION@"
             VALUE "ProductVersion", "@DPP_VERSION@"
-            VALUE "ProductName", "DPP"
+            VALUE "ProductName", "D++ Discord Library"
             VALUE "InternalName", "DPP"
             VALUE "LegalCopyright", "Copyright (C) 2021 Brainbox.cc - All rights reserved."
             VALUE "OriginalFilename", "dpp.dll"
