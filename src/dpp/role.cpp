@@ -111,7 +111,7 @@ std::string role::build_json(bool with_id) const {
 }
 
 std::string role::get_mention() const {
-	return "<&" + std::to_string(id) + ">";
+	return "<@&" + std::to_string(id) + ">";
 }
 
 role& role::load_image(const std::string &image_blob, const image_type type) {
