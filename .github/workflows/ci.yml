@@ -195,7 +195,7 @@ jobs:
           - {name: "ARMv6", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
 
     name: ${{matrix.cfg.name}}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2
