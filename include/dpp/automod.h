@@ -80,21 +80,26 @@ enum automod_event_type : uint8_t {
  */
 enum automod_trigger_type : uint8_t {
 	/**
-	 * @brief Keyword filtering
+	 * @brief Check if content contains words from a user defined list of keywords
 	 */
 	amod_type_keyword = 1,
 	/**
 	 * @brief Harmful/malware links
+	 * @deprecated Removed by Discord
 	 */
 	amod_type_harmful_link = 2,
 	/**
-	 * @brief Spamming
+	 * @brief Check if content represents generic spam
 	 */
 	amod_type_spam = 3,
 	/**
-	 * @brief Preset lists of filter words
+	 * @brief Check if content contains words from discord pre-defined wordsets
 	 */
 	amod_type_keyword_preset = 4,
+	/**
+	 * @brief Check if content contains more mentions than allowed
+	 */
+	amod_type_mention_spam = 5,
 };
 
 /**
@@ -102,8 +107,11 @@ enum automod_trigger_type : uint8_t {
  */
 struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	/**
-	 * @brief Keywords to moderate. A keyword can be a phrase which contains multiple words. All keywords are case insensitive.
-	 * `*` can be used to customize how each keyword will be matched.
+	 * @brief @brief Substrings which will be searched for in content.
+	 *
+	 * Each keyword can be a phrase which contains multiple words. All keywords are case insensitive.
+	 *
+	 * Wildcard symbols (`*`) can be used to customize how each keyword will be matched.
 	 *
 	 * **Examples for the `*` wildcard symbol:**
 	 *
@@ -137,11 +145,29 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
      *
 	 */
 	std::vector<std::string> keywords;
+
 	/**
 	 * @brief Preset keyword list types to moderate
 	 * @see automod_preset_type
 	 */
 	std::vector<automod_preset_type> presets;
+
+	/**
+	 * @brief Substrings which will be exempt from triggering the automod_metadata::presets trigger type.
+	 *
+	 * Each keyword can be a phrase which contains multiple words. All keywords are case insensitive.
+	 */
+	std::vector<std::string> allow_list;
+
+	/**
+	 * @brief Total number of mentions (role & user) allowed per message (Maximum of 50)
+	 */
+	uint8_t mention_total_limit;
+
+	/**
+	 * @brief Construct a new automod metadata object
+	 */
+	automod_metadata();
 
 	/**
 	 * @brief Destroy the automod metadata object
@@ -175,12 +201,12 @@ struct DPP_EXPORT automod_action : public json_interface<automod_action> {
 	automod_action_type type;
 
 	/**
-	 * @brief Channel ID, for type amod_action_send_alert
+	 * @brief Channel ID, for type dpp::amod_action_send_alert
 	 */
 	snowflake channel_id;
 
 	/**
-	 * @brief Silence duration in seconds (Maximum of 2419200), for amod_action_timeout
+	 * @brief Timeout duration in seconds (Maximum of 2419200), for dpp::amod_action_timeout
 	 * 
 	 */
 	int32_t duration_seconds;
@@ -242,7 +268,6 @@ public:
 	automod_trigger_type	trigger_type;
 	/**
 	 * @brief The rule trigger metadata
-	 * 
 	 */
 	automod_metadata	trigger_metadata;
 	/**
