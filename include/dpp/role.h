@@ -119,7 +119,7 @@ public:
 	/**
 	 * @brief Set the flags
 	 * 
-	 * @param f Flags to set
+	 * @param f Flags to set from dpp::role_flags
 	 * @return role& reference to self
 	 */
 	role& set_flags(uint8_t f);
