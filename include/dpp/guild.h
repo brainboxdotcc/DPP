@@ -82,7 +82,7 @@ enum guild_flags : uint32_t {
 	 * @deprecated Removed by Discord
 	 */
 	g_commerce =				0b00000000000000000000001000000000,
-	/** Guild has news features enabled */
+	/** Guild has access to create announcement channels */
 	g_news =				0b00000000000000000000010000000000,
 	/** Guild is discoverable in discovery */
 	g_discoverable =			0b00000000000000000000100000000000,
@@ -725,8 +725,8 @@ public:
 	bool has_commerce() const;
 
 	/**
-	 * @brief Guild has access to create news channels
-	 * @return bool has news channels features enabled
+	 * @brief Guild has access to create announcement channels
+	 * @return bool has announcement channels features enabled
 	 */
 	bool has_news() const;
 

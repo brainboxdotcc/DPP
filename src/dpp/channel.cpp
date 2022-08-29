@@ -191,7 +191,7 @@ bool channel::is_stage_channel() const {
 }
 
 bool channel::is_news_channel() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_NEWS;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_ANNOUNCEMENT;
 }
 
 bool channel::is_store_channel() const {
@@ -216,7 +216,7 @@ bool channel::is_pinned_thread() const {
 }
 
 bool thread::is_news_thread() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_NEWS_THREAD;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_ANNOUNCEMENT_THREAD;
 }
 
 bool thread::is_public_thread() const {

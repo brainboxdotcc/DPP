@@ -1309,7 +1309,7 @@ struct DPP_EXPORT message : public managed {
 	bool is_crossposted() const;
 
 	/**
-	 * @brief Returns true if posted from other servers news channel via webhook
+	 * @brief Returns true if posted from other servers announcement channel via webhook
 	 * 
 	 * @return true if posted from other server
 	 */
@@ -1376,7 +1376,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Set the flags
 	 * 
-	 * @param f flags to set
+	 * @param f flags to set from dpp::message_flags
 	 * @return message& reference to self
 	 */
 	message& set_flags(uint8_t f);
