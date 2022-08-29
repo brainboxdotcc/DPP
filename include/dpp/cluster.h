@@ -407,7 +407,7 @@ public:
 	 * @param request_threads_raw The number of threads to allocate for making HTTP requests to sites outside of Discord. This defaults to 1. You can increase this at runtime via the object returned from get_raw_rest().
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
-	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = { cp_aggressive, cp_aggressive, cp_aggressive }, uint32_t request_threads = 12, uint32_t request_threads_raw = 1, std::string default_gateway = "gateway.discord.gg");
+	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = { cp_aggressive, cp_aggressive, cp_aggressive }, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
 
 	/**
 	 * @brief dpp::cluster is non-copyable
@@ -499,6 +499,13 @@ public:
 	 *
 	 */
 	std::string get_audit_reason();
+
+	/**
+	 * @brief Sets the address of the default gateway, for connecting the websockets.
+	 *
+	 * @return cluster& Reference to self for chaining.
+	 */
+	cluster& set_default_gateway(std::string& default_gateway);
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
