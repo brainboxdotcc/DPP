@@ -274,6 +274,11 @@ class DPP_EXPORT cluster {
 	friend class discord_voice_client;
 
 	/**
+	 * @brief default gateway for connecting the websocket.
+	 */
+	std::string default_gateway;
+
+	/**
 	 * @brief queue system for commands sent to Discord, and any replies
 	 */
 	request_queue* rest;
@@ -402,7 +407,7 @@ public:
 	 * @param request_threads_raw The number of threads to allocate for making HTTP requests to sites outside of Discord. This defaults to 1. You can increase this at runtime via the object returned from get_raw_rest().
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
-	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = {cp_aggressive, cp_aggressive, cp_aggressive}, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
+	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = { cp_aggressive, cp_aggressive, cp_aggressive }, uint32_t request_threads = 12, uint32_t request_threads_raw = 1, std::string default_gateway = "gateway.discord.gg");
 
 	/**
 	 * @brief dpp::cluster is non-copyable
