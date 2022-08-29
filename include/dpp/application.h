@@ -60,7 +60,9 @@ enum application_flags : uint32_t {
 	/// Has approval for message content
 	apf_gateway_message_content = (1 << 18),
 	/// Has message content, but <100 guilds
-	apf_gateway_message_content_limited = (1 << 19)
+	apf_gateway_message_content_limited = (1 << 19),
+	/// Indicates if the app has registered global application commands
+	apf_application_command_badge = (1 << 23)
 };
 
 /**

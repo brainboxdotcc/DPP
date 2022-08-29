@@ -70,6 +70,8 @@ std::string automod_action::build_json(bool with_id) const {
 	return j.dump();
 }
 
+automod_metadata::automod_metadata() : mention_total_limit(0) {}
+
 automod_metadata::~automod_metadata() = default;
 
 automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
@@ -79,6 +81,10 @@ automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
 	for (auto k : (*j)["presets"]) {
 		presets.push_back((automod_preset_type)k.get<uint32_t>());
 	}
+	for (auto k : (*j)["allow_list"]) {
+		allow_list.push_back(k);
+	}
+	mention_total_limit = int8_not_null(j, "mention_total_limit");
 	return *this;
 }
 
@@ -86,12 +92,17 @@ std::string automod_metadata::build_json(bool with_id) const {
 	json j;
 	j["keyword_filter"] = json::array();
 	j["presets"] = json::array();
+	j["allow_list"] = json::array();
 	for (auto v : keywords) {
 		j["keyword_filter"].push_back(v);
 	}
 	for (auto v : presets) {
 		j["presets"].push_back((uint32_t)v);
 	}
+	for (auto v : allow_list) {
+		j["allow_list"].push_back(v);
+	}
+	j["mention_total_limit"] = mention_total_limit;
 	return j.dump();
 
 }
@@ -109,7 +120,7 @@ automod_rule& automod_rule::fill_from_json(nlohmann::json* j) {
 	creator_id = snowflake_not_null(j, "creator_id");
 	event_type = (automod_event_type)int8_not_null(j, "event_type");
 	trigger_type = (automod_trigger_type)int8_not_null(j, "trigger_type");
-	if (j->at("trigger_metadata")) {
+	if (j->contains("trigger_metadata")) {
 		trigger_metadata.fill_from_json(&((*j)["trigger_metadata"]));
 	}
 	enabled = bool_not_null(j, "enabled");
