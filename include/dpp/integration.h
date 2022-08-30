@@ -89,17 +89,17 @@ public:
 	snowflake role_id;
 	/** User id */
 	snowflake user_id;
-	/** Expiry grace period */
+	/** The grace period (in days) before expiring subscribers */
 	uint32_t expire_grace_period;
 	/** Sync time */
 	time_t synced_at;
 	/** Subscriber count */
 	uint32_t subscriber_count;
-	/* Account id */
+	/** Account id */
 	std::string account_id;
-	/* Account name */
+	/** Account name */
 	std::string account_name;
-	/* Integration application */
+	/** The bot/OAuth2 application for discord integrations */
 	integration_app app;
 
 	/** Default constructor */

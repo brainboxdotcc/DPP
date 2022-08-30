@@ -274,6 +274,11 @@ class DPP_EXPORT cluster {
 	friend class discord_voice_client;
 
 	/**
+	 * @brief default gateway for connecting the websocket.
+	 */
+	std::string default_gateway;
+
+	/**
 	 * @brief queue system for commands sent to Discord, and any replies
 	 */
 	request_queue* rest;
@@ -402,7 +407,7 @@ public:
 	 * @param request_threads_raw The number of threads to allocate for making HTTP requests to sites outside of Discord. This defaults to 1. You can increase this at runtime via the object returned from get_raw_rest().
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
-	cluster(const std::string &token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = {cp_aggressive, cp_aggressive, cp_aggressive}, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
+	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = { cp_aggressive, cp_aggressive, cp_aggressive }, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
 
 	/**
 	 * @brief dpp::cluster is non-copyable
@@ -494,6 +499,13 @@ public:
 	 *
 	 */
 	std::string get_audit_reason();
+
+	/**
+	 * @brief Sets the address of the default gateway, for connecting the websockets.
+	 *
+	 * @return cluster& Reference to self for chaining.
+	 */
+	cluster& set_default_gateway(std::string& default_gateway);
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
@@ -2067,7 +2079,7 @@ public:
 	void channel_delete_permission(const class channel &c, snowflake overwrite_id, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Follow a news channel
+	 * @brief Follow an announcement (news) channel
 	 * @see https://discord.com/developers/docs/resources/channel#follow-news-channel
 	 * @param c Channel id to follow
 	 * @param target_channel_id Channel to subscribe the channel to
@@ -3044,7 +3056,7 @@ public:
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
 	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
-	 * @param thread_type Type of thread - GUILD_PUBLIC_THREAD, GUILD_NEWS_THREAD, GUILD_PRIVATE_THREAD
+	 * @param thread_type Type of thread - CHANNEL_PUBLIC_THREAD, CHANNEL_ANNOUNCEMENT_THREAD, CHANNEL_PRIVATE_THREAD
 	 * @param invitable whether non-moderators can add other non-moderators to a thread; only available when creating a private thread
 	 * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
 	 * @param callback Function to call when the API call completes.

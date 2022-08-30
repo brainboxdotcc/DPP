@@ -63,7 +63,7 @@ $changelog = array_intersect_key($changelog, array_unique(array_map("strtolower"
 foreach ($changelog as $change) {
 
     // Wrap anything that looks like a symbol name in backticks
-    $change = preg_replace('/([\w_\/]+\.\w+|\S+\(\)|\w+::\w+|dpp::\w+|utility::\w+|(\w+_\w+)+)/', '`$1`', $change);
+    $change = preg_replace('/([a-zA-Z][\w_\/\-]+\.\w+|\S+\(\)|\w+::\w+|dpp::\w+|utility::\w+|(\w+_\w+)+)/', '`$1`', $change);
     $change = preg_replace("/vs(\d+)/", "Visual Studio $1", $change);
     $change = preg_replace("/\bfaq\b/", "FAQ", $change);
     $change = preg_replace("/\bdiscord\b/", "Discord", $change);
@@ -73,6 +73,7 @@ foreach ($changelog as $change) {
     $change = preg_replace("/\sarm(\d+)\s/i", ' ARM$1 ', $change);
     $change = preg_replace("/\b(was|is|wo)nt\b/i", '$1n\'t', $change);
     $change = preg_replace("/\bfreebsd\b/", 'FreeBSD', $change);
+    $change = preg_replace("/``/", "`", $change);
 
     // Match keywords against categories
     $matched = false;
