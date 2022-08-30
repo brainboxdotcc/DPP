@@ -20,35 +20,29 @@
  ************************************************************************************/
 #include <dpp/export.h>
 #include <cerrno>
-
 #ifdef _WIN32
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <io.h>
-#define poll(fds, nfds, timeout) WSAPoll(fds, nfds, timeout)
-#define pollfd WSAPOLLFD
-#define POLLERRMASK 0
-#pragma comment(lib,"ws2_32")
+	/* Windows-specific sockets includes */
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+	/* Windows doesn't have standard poll(), it has WSAPoll.
+	 * It's the same thing with different symbol names.
+	 * Microsoft gotta be different.
+	 */
+	#define poll(fds, nfds, timeout) WSAPoll(fds, nfds, timeout)
+	#define pollfd WSAPOLLFD
+	/* Windows sockets library */
+	#pragma comment(lib, "ws2_32")
 #else
-#include <poll.h>
-#include <netinet/in.h>
-#include <resolv.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/tcp.h>
-#include <unistd.h>
-#define POLLERRMASK POLLERR
+	/* Anyting other than Windows (e.g. sane OSes) */
+	#include <poll.h>
+	#include <netinet/in.h>
+	#include <resolv.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <netinet/tcp.h>
+	#include <unistd.h>
 #endif
-
-#ifdef OPENSSL_SYS_WIN32
-#undef X509_NAME
-#undef X509_EXTENSIONS
-#undef X509_CERT_PAIR
-#undef PKCS7_ISSUER_AND_SERIAL
-#undef OCSP_REQUEST
-#undef OCSP_RESPONSE
-#endif
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,6 +52,15 @@
 #include <string.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+/* Windows specific OpenSSL symbol weirdness */
+#ifdef OPENSSL_SYS_WIN32
+	#undef X509_NAME
+	#undef X509_EXTENSIONS
+	#undef X509_CERT_PAIR
+	#undef PKCS7_ISSUER_AND_SERIAL
+	#undef OCSP_REQUEST
+	#undef OCSP_RESPONSE
+#endif
 #include <exception>
 #include <string>
 #include <iostream>
@@ -199,8 +202,6 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 			} else if (r != 0 || pfd.revents & POLLERR) {
 				int val;
 				socklen_t len = sizeof(val);
-				std::cout << (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &val, &len)) << "\n";
-				std::cout << "HERE " << val << " " << r << "\n";
 				throw connection_exception(strerror(errno));
 			}
 		} while (rc == -1);
@@ -357,12 +358,13 @@ void ssl_client::write(const std::string &data)
 	if (nonblocking) {
 		obuffer += data;
 	} else {
+		const int data_length = (int)data.length();
 		if (plaintext) {
-			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data.length(), 0) != (int)data.length()) {
+			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data_length, 0) != data_length) {
 				throw dpp::connection_exception("write() failed");
 			}
 		} else {
-			if (SSL_write(ssl->ssl, data.data(), (int)data.length()) != (int)data.length()) {
+			if (SSL_write(ssl->ssl, data.data(), data_length) != data_length) {
 				throw dpp::connection_exception("SSL_write() failed");
 			}
 		}
