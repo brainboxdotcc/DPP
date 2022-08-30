@@ -27,6 +27,7 @@
 #include <dpp/role.h>
 #include <dpp/user.h>
 #include <variant>
+#include <map>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/json_interface.h>
 
@@ -514,6 +515,17 @@ struct DPP_EXPORT command_data_option {
 	command_value value;                       //!< Optional: the value of the pair
 	std::vector<command_data_option> options;  //!< Optional: present if this option is a group or subcommand
 	bool focused;                              //!< Optional: true if this option is the currently focused option for autocomplete
+
+	/**
+	 * @brief Get an option value by index
+	 * 
+	 * @tparam Type to get from the parameter
+	 * @param index index number of parameter
+	 * @return T returned type
+	 */
+	template <typename T> T& get_value(size_t index) {
+		return std::get<T>(options.at(index).value);
+	}
 };
 
 /**
@@ -557,6 +569,17 @@ struct DPP_EXPORT command_interaction {
 	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
 	slashcommand_contextmenu_type type;        //!< type of the command interaction
 	dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions. e.g. user id or message id whom clicked or tapped with the context menu https://discord.com/developers/docs/interactions/application-commands#user-commands
+
+	/**
+	 * @brief Get an option value by index
+	 * 
+	 * @tparam Type to get from the parameter
+	 * @param index index number of parameter
+	 * @return T returned type
+	 */
+	template <typename T> T& get_value(size_t index) {
+		return std::get<T>(options.at(index).value);
+	}
 };
 
 /**
@@ -604,7 +627,7 @@ struct DPP_EXPORT component_interaction {
 /**
  * @brief An auto complete interaction
  */
-struct DPP_EXPORT autocomplete_interaction {
+struct DPP_EXPORT autocomplete_interaction : public command_interaction {
 };
 
 /**
@@ -634,6 +657,25 @@ void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
  * on_button_click, on_select_menu, etc.
  */
 class DPP_EXPORT interaction : public managed, public json_interface<interaction>  {
+
+	/**
+	 * @brief Get a resolved object from the resolved set
+	 * 
+	 * @tparam T type of object to retrieve
+	 * @tparam C container defintion for resolved container
+	 * @param id Snowflake ID
+	 * @param resolved_set container for the type
+	 * @return const T& retrieved type
+	 * @throws dpp::logic_exception on object not found in resolved set
+	 */
+	template<typename T, typename C> const T& get_resolved(snowflake id, const C& resolved_set) const {
+		auto i = resolved_set.find(id);
+		if (i == resolved_set.end()) {
+			throw dpp::logic_exception("ID not found in resolved properties of application command");
+		}
+		return i->second;
+	}
+
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
 	uint8_t	type;                                               //!< the type of interaction
@@ -644,7 +686,7 @@ public:
 	permission app_permissions;				    //!< Permissions of the bot in the channel/guild where this command was issued
 	message msg;						    //!< Originating message for context menu actions
 	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions
-	user usr;                                                   //!< Optional: user object for the invoking user, if invoked in a DM
+	user usr;                                                   //!< User object for the invoking user
 	std::string token;                                          //!< a continuation token for responding to the interaction
 	uint8_t version;                                            //!< read-only property, always 1
 	command_resolved resolved;				    //!< Resolved user/role etc
@@ -657,7 +699,118 @@ public:
 	 */
 	interaction();
 
+	/**
+	 * @brief Destroy the interaction object
+	 */
 	virtual ~interaction() = default;
+
+	/**
+	 * @brief Get a user associated with the slash command from the resolved list.
+	 * The resolved list contains associated structures for this command and does not
+	 * use the cache or require any extra API calls.
+	 * 
+	 * @param id User snowflake ID to find
+	 * @return const dpp::user& user
+	 * @throws dpp::logic_exception on object not found in resolved set
+	 */
+	const dpp::user& get_resolved_user(snowflake id) const;
+
+	/**
+	 * @brief Get the channel this command originated on
+	 * 
+	 * @return const dpp::channel& channel
+	 * @throws dpp::logic_error Command originated from a DM or channel not in cache
+	 */
+	const dpp::channel& get_channel() const;
+
+	/**
+	 * @brief Get the guild this command originated on
+	 * 
+	 * @return const dpp::guild& guild 
+	 * @throws dpp::logic_error Command originated from a DM or guild not in cache
+	 */
+	const dpp::guild& get_guild() const;
+
+	/**
+	 * @brief Get the user who issued this command
+	 * 
+	 * @return const dpp::user& user
+	 */
+	const dpp::user& get_issuing_user() const;
+
+	/**
+	 * @brief Get the message this action refers to if it is a context menu command
+	 * 
+	 * @return const dpp::message& context menu message
+	 */
+	const dpp::message& get_context_message() const;
+
+	/**
+	 * @brief Get a role associated with the slash command from the resolved list.
+	 * The resolved list contains associated structures for this command and does not
+	 * use the cache or require any extra API calls.
+	 * 
+	 * @param id Role snowflake ID to find
+	 * @return const dpp::role& role
+	 * @throws dpp::logic_exception on object not found in resolved set
+	 */
+	const dpp::role& get_resolved_role(snowflake id) const;
+
+	/**
+	 * @brief Get a channel associated with the slash command from the resolved list.
+	 * The resolved list contains associated structures for this command and does not
+	 * use the cache or require any extra API calls.
+	 * 
+	 * @param id Channel snowflake ID to find
+	 * @return const dpp::channel& channel
+	 * @throws dpp::logic_exception on object not found in resolved set
+	 */
+	const dpp::channel& get_resolved_channel(snowflake id) const;
+
+	/**
+	 * @brief Get a guild member associated with the slash command from the resolved list.
+	 * The resolved list contains associated structures for this command and does not
+	 * use the cache or require any extra API calls.
+	 * 
+	 * @param id User snowflake ID to find
+	 * @return const dpp::guild_member& guild member
+	 * @throws dpp::logic_exception on object not found in resolved set
+	 */
+	const dpp::guild_member& get_resolved_member(snowflake id) const;
+
+	/**
+	 * @brief Get a permission associated with the slash command from the resolved list.
+	 * The resolved list contains associated structures for this command and does not
+	 * use the cache or require any extra API calls.
+	 * 
+	 * @param id User snowflake ID to find
+	 * @return const dpp::permission& permissions for the user including overrides on
+	 * the channel where the command was issued.
+	 * @throws dpp::logic_exception on object not found in resolved set
+	 */
+	const dpp::permission& get_resolved_permission(snowflake id) const;
+
+	/**
+	 * @brief Get a message associated with the slash command from the resolved list.
+	 * The resolved list contains associated structures for this command and does not
+	 * use the cache or require any extra API calls.
+	 * 
+	 * @param id Message snowflake ID to find
+	 * @return const dpp::message& message
+	 * @throws dpp::logic_exception on object not found in resolved set
+	 */
+	const dpp::message& get_resolved_message(snowflake id) const;
+
+	/**
+	 * @brief Get an uploaded attachment associated with the slash command from the resolved list.
+	 * The resolved list contains associated structures for this command and does not
+	 * use the cache or require any extra API calls.
+	 * 
+	 * @param id Attachment snowflake ID to find
+	 * @return const dpp::attachment& file attachment
+	 * @throws dpp::logic_exception on object not found in resolved set
+	 */
+	const dpp::attachment& get_resolved_attachment(snowflake id) const;
 
 	/**
 	 * @brief Get the command interaction object

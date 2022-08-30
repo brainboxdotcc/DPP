@@ -145,17 +145,27 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("TIMESTAMPTOSTRING", false);
 	set_test("TIMESTAMPTOSTRING", dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
 
+	set_test("ROLE.COMPARE", false);
+	dpp::role role_1, role_2;
+	role_1.position = 1;
+	role_2.position = 2;
+	set_test("ROLE.COMPARE", role_1 < role_2 && role_1 != role_2);
+
 	set_test("WEBHOOK", false);
 	try {
 		dpp::webhook test_wh("https://discord.com/api/webhooks/833047646548133537/ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE");
-		set_test("WEBHOOK", (test_wh.token == "ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE") && (test_wh.id == 833047646548133537));
+		set_test("WEBHOOK", (test_wh.token == "ntCHEYYIoHSLy_GOxPx6pmM0sUoLbP101ct-WI6F-S4beAV2vaIcl_Id5loAMyQwxqhE") && (test_wh.id == dpp::snowflake(833047646548133537)));
 	}
 	catch (const dpp::exception&) {
 		set_test("WEBHOOK", false);
 	}
 
 	{ // test dpp::command_option_choice::fill_from_json
-		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", false);
+		set_test("OPTCHOICE_DOUBLE", false);
+		set_test("OPTCHOICE_INT", false);
+		set_test("OPTCHOICE_BOOL", false);
+		set_test("OPTCHOICE_SNOWFLAKE", false);
+		set_test("OPTCHOICE_STRING", false);
 		json j;
 		dpp::command_option_choice choice;
 		j["value"] = 54.321;
@@ -170,14 +180,18 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		j["value"] = true;
 		choice.fill_from_json(&j);
 		bool success_bool = std::holds_alternative<bool>(choice.value);
-		dpp::snowflake s = 845266178036516757; // example snowflake
+		dpp::snowflake s(845266178036516757); // example snowflake
 		j["value"] = s;
 		choice.fill_from_json(&j);
-		bool success_snowflake = std::holds_alternative<dpp::snowflake>(choice.value);
+		bool success_snowflake = std::holds_alternative<dpp::snowflake>(choice.value) && std::get<dpp::snowflake>(choice.value) == s;
 		j["value"] = "foobar";
 		choice.fill_from_json(&j);
 		bool success_string = std::holds_alternative<std::string>(choice.value);
-		set_test("COMMANDOPTIONCHOICEFILLFROMJSON", (success_double && success_int && success_int2 && success_bool && success_snowflake && success_string));
+		set_test("OPTCHOICE_DOUBLE", success_double);
+		set_test("OPTCHOICE_INT", success_int && success_int2);
+		set_test("OPTCHOICE_BOOL", success_bool);
+		set_test("OPTCHOICE_SNOWFLAKE", success_snowflake);
+		set_test("OPTCHOICE_STRING", success_string);
 	}
 
 	{
@@ -205,6 +219,57 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = ! p.has(dpp::p_administrator, dpp::p_ban_members) && success; // must return false because they're not both set
 		success = ! p.has(dpp::p_administrator | dpp::p_ban_members) && success;
 		set_test("PERMISSION_CLASS", success);
+	}
+
+	{ // some dpp::user methods
+		dpp::user user1;
+		user1.id = 189759562910400512;
+		user1.discriminator = 0001;
+		user1.username = "brain";
+
+		set_test("USER.GET_MENTION", false);
+		set_test("USER.GET_MENTION", user1.get_mention() == "<@189759562910400512>");
+
+		set_test("USER.FORMAT_USERNAME", false);
+		set_test("USER.FORMAT_USERNAME", user1.format_username() == "brain#0001");
+
+		set_test("USER.GET_CREATION_TIME", false);
+		set_test("USER.GET_CREATION_TIME", (uint64_t)user1.get_creation_time() == 1465312605);
+	}
+
+	{ // utility methods
+		set_test("UTILITY.ICONHASH", false);
+		auto iconhash1 = dpp::utility::iconhash("a_5532c6414c70765a28cf9448c117205f");
+		set_test("UTILITY.ICONHASH", iconhash1.first == 6139187225817019994 &&
+									 iconhash1.second == 2940732121894297695 &&
+									 iconhash1.to_string() == "5532c6414c70765a28cf9448c117205f"
+		);
+
+		set_test("UTILITY.MAKE_URL_PARAMETERS", false);
+		auto url_params1 = dpp::utility::make_url_parameters({
+			{"foo", 15},
+			{"bar", 7}
+		});
+		auto url_params2 = dpp::utility::make_url_parameters({
+			{"foo", "hello"},
+			{"bar", "two words"}
+		});
+		set_test("UTILITY.MAKE_URL_PARAMETERS", url_params1 == "?bar=7&foo=15" && url_params2 == "?bar=two%20words&foo=hello");
+
+		set_test("UTILITY.MARKDOWN_ESCAPE", false);
+		auto escaped = dpp::utility::markdown_escape(
+				"> this is a quote\n"
+				"**some bold text**");
+		set_test("UTILITY.MARKDOWN_ESCAPE", "\\>this is a quote\\n\\*\\*some bold text\\*\\*");
+
+		set_test("UTILITY.TOKENIZE", false);
+		auto tokens = dpp::utility::tokenize("some Whitespace seperated Text to Tokenize", " ");
+		std::vector<std::string> expected_tokens = {"some", "Whitespace", "seperated", "Text", "to", "Tokenize"};
+		set_test("UTILITY.TOKENIZE", tokens == expected_tokens);
+
+		set_test("UTILITY.URL_ENCODE", false);
+		auto url_encoded = dpp::utility::url_encode("S2-^$1Nd+U!g'8+_??o?p-bla bla");
+		set_test("UTILITY.URL_ENCODE", url_encoded == "S2-%5E%241Nd%2BU%21g%278%2B_%3F%3Fo%3Fp-bla%20bla");
 	}
 
 	set_test("TIMESTRINGTOTIMESTAMP", false);
@@ -469,7 +534,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		tco->foo = "bar";
 		testcache.store(tco);
 		test_cached_object_t* found_tco = testcache.find(666);
-		if (found_tco && found_tco->id == 666 && found_tco->foo == "bar") {
+		if (found_tco && found_tco->id == dpp::snowflake(666) && found_tco->foo == "bar") {
 			set_test("CUSTOMCACHE", true);
 		} else {
 			set_test("CUSTOMCACHE", false);

@@ -63,7 +63,7 @@ public:
 	/**
 	 * @brief Destroy the voicestate object
 	 */
-	~voicestate();
+	virtual ~voicestate() = default;
 
 	/**
 	 * @brief Fill voicestate object from json data

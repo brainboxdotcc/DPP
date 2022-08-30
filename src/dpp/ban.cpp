@@ -30,8 +30,6 @@ ban::ban() : user_id(0)
 {
 }
 
-ban::~ban() = default;
-
 ban& ban::fill_from_json(nlohmann::json* j) {
 	reason = string_not_null(j, "reason");
 	if (j->contains("user")) {

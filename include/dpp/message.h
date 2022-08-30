@@ -750,6 +750,8 @@ struct DPP_EXPORT attachment {
 	uint32_t size;
 	/** File name of the attachment */
 	std::string filename;
+	/** Optional: Description of the attachment (max 1024 characters) */
+	std::string description;
 	/** URL which points to the attachment */
 	std::string url;
 	/** Proxied URL which points to the attachment */
@@ -1239,7 +1241,7 @@ struct DPP_EXPORT message : public managed {
 	 * @brief Construct a new message object with a channel and content
 	 *
 	 * @param channel_id The channel to send the message to
-	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
+	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
@@ -1255,7 +1257,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Construct a new message object with content
 	 *
-	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
+	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(const std::string &content, message_type type = mt_default);
@@ -1307,7 +1309,7 @@ struct DPP_EXPORT message : public managed {
 	bool is_crossposted() const;
 
 	/**
-	 * @brief Returns true if posted from other servers news channel via webhook
+	 * @brief Returns true if posted from other servers announcement channel via webhook
 	 * 
 	 * @return true if posted from other server
 	 */
@@ -1374,7 +1376,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Set the flags
 	 * 
-	 * @param f flags to set
+	 * @param f flags to set from dpp::message_flags
 	 * @return message& reference to self
 	 */
 	message& set_flags(uint8_t f);
@@ -1417,7 +1419,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Set the message content
 	 * 
-	 * @param c message content. It will be truncated to the maximum length of 2000 UTF-8 characters.
+	 * @param c message content. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return message& reference to self
 	 */
 	message& set_content(const std::string &c);

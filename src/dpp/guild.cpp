@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/cache.h>
 #include <dpp/discordclient.h>
 #include <dpp/voicestate.h>
 #include <dpp/exception.h>
@@ -216,6 +217,10 @@ guild& guild::set_name(const std::string& n) {
 	return *this;
 }
 
+dpp::user* guild_member::get_user() const {
+	return dpp::find_user(user_id);
+}
+
 bool guild_member::is_deaf() const {
 	return flags & dpp::gm_deaf;
 }
@@ -364,7 +369,7 @@ std::string guild::build_json(bool with_id) const {
 	if (afk_channel_id) {
 		j["afk_channel_id"] = afk_channel_id;
 	}
-	if (afk_channel_id) {
+	if (afk_timeout) {
 		j["afk_timeout"] = afk_timeout;
 	}
 	if (widget_enabled()) {

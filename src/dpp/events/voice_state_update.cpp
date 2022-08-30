@@ -49,7 +49,7 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 	/* Update guild voice states */
 	dpp::guild* g = dpp::find_guild(vsu.state.guild_id);
 	if (g) {
-		if (vsu.state.channel_id == 0) {
+		if (vsu.state.channel_id.empty()) {
 			auto ve = g->voice_members.find(vsu.state.user_id);
 			if (ve != g->voice_members.end()) {
 				g->voice_members.erase(ve);	
@@ -61,7 +61,7 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 
 	if (vsu.state.user_id == client->creator->me.id)
 	{
-		if (vsu.state.channel_id == 0) {
+		if (vsu.state.channel_id.empty()) {
 			/* Instruction to disconnect from vc */
 			client->disconnect_voice_internal(vsu.state.guild_id, false);
 		} else {

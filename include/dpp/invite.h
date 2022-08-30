@@ -88,7 +88,7 @@ public:
 
 	/** Destructor
 	 */
-	~invite();
+	virtual ~invite() = default;
 
 	/** Read class values from json object
 	 * @param j A json object to read from

@@ -27,8 +27,6 @@
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
-#include <dpp/cluster.h>
-#include <dpp/discordvoiceclient.h>
 #include <dpp/event.h>
 #include <queue>
 #include <thread>
@@ -38,7 +36,6 @@
 using json = nlohmann::json;
 
 #define DISCORD_API_VERSION	"10"
-#define DEFAULT_GATEWAY		"gateway.discord.gg"
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
 namespace dpp {
 
@@ -123,10 +120,12 @@ public:
 
 	/**
 	 * @brief Create websocket object and connect it.
-	 * Needs hosname, token and session_id to be set or does nothing.
+	 * Needs hostname, token and session_id to be set or does nothing.
 	 * 
 	 * @param guild_id Guild to connect to the voice channel on
 	 * @return reference to self
+	 * @note It can spawn a thread to establish the connection, so this is NOT a synchronous blocking call!
+	 * You shouldn't call this directly. Use a wrapper function instead. e.g. dpp::guild::connect_member_voice
 	 */
 	voiceconn& connect(snowflake guild_id);
 
@@ -257,6 +256,12 @@ private:
 	 */
 	void end_zlib();
 
+	/**
+	 * @brief Update the websocket hostname with the resume url
+	 * from the last READY event
+	 */
+	void set_resume_hostname();
+
 public:
 	/**
 	 * @brief Owning cluster
@@ -301,6 +306,7 @@ public:
 
 	/**
 	 * @brief Privileged gateway intents
+	 * @see dpp::intents
 	 */
 	uint32_t intents;
 
@@ -348,6 +354,11 @@ public:
 	 * @brief List of voice channels we are connecting to keyed by guild id
 	 */
 	std::unordered_map<snowflake, voiceconn*> connecting_voice_channels;
+
+	/**
+	 * @brief The gateway address we reconnect to when we resume a session
+	 */
+	std::string resume_gateway_url;
 
 	/**
 	 * @brief Log a message to whatever log the user is using.
@@ -479,6 +490,9 @@ public:
 	 * @param self_mute True if the bot should mute itself
 	 * @param self_deaf True if the bot should deafen itself
 	 * @return reference to self
+	 * @note This is NOT a synchronous blocking call! The bot isn't instantly ready to send or listen for audio,
+	 * as we have to wait for the connection to the voice server to be established!
+	 * e.g. wait for dpp::cluster::on_voice_ready event, and then send the audio within that event.
 	 */
 	discord_client& connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute = false, bool self_deaf = false);
 
@@ -487,6 +501,7 @@ public:
 	 * 
 	 * @param guild_id The guild who's voice channel you wish to disconnect from
 	 * @return reference to self
+	 * @note This is NOT a synchronous blocking call! The bot isn't instantly disconnected.
 	 */
 	discord_client& disconnect_voice(snowflake guild_id);
 

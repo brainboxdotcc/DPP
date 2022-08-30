@@ -23,9 +23,10 @@ option(BUILD_VOICE_SUPPORT "Build voice support" ON)
 option(RUN_LDCONFIG "Run ldconfig after installation" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 option(DPP_NO_VCPKG "No VCPKG" OFF)
+option(DPP_CORO "Experimental support for C++20 coroutines" OFF)
 
 include(CheckCXXSymbolExists)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DPP_BUILD)
 
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h" version_h)
