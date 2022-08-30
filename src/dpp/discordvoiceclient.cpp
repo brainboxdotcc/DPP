@@ -556,7 +556,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 						throw dpp::connection_exception("Can't switch voice UDP socket to non-blocking mode!");
 					}
 
-					/* Hook select() in the ssl_client to add a new file descriptor */
+					/* Hook poll() in the ssl_client to add a new file descriptor */
 					this->fd = newfd;
 					this->custom_writeable_fd = std::bind(&discord_voice_client::want_write, this);
 					this->custom_readable_fd = std::bind(&discord_voice_client::want_read, this);
