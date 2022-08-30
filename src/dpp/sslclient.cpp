@@ -25,6 +25,9 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <io.h>
+#define poll(fds, nfds, timeout) WSAPoll(fds, nfds, timeout)
+#define pollfd WSAPOLLFD
+#define POLLERRMASK 0
 #pragma comment(lib,"ws2_32")
 #else
 #include <poll.h>
@@ -34,6 +37,7 @@
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
+#define POLLERRMASK POLLERR
 #endif
 
 #ifdef OPENSSL_SYS_WIN32
@@ -155,7 +159,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
  * @return int -1 on error, 0 on succcess just like POSIX connect()
  * @throw dpp::connection_exception on failure
  */
-int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
+int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
 #ifdef __APPLE__
 		/* Unreliable on OSX right now */
 		return (::connect(sockfd, addr, addrlen));
@@ -167,6 +171,8 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 	/* Windows connect returns -1 and sets its error value to 0 for successfull blocking connection -
 	 * This is equivalent to EWOULDBLOCK on POSIX
 	 */
+	ULONG non_blocking = 1;
+	ioctlsocket(sockfd, FIONBIO, &non_blocking);
 	int rc = WSAConnect(sockfd, addr, addrlen, nullptr, nullptr, nullptr, nullptr);
 	int err = EWOULDBLOCK;
 #else
@@ -184,10 +190,10 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 			if (utility::time_f() >= deadline) {
 				throw connection_exception("Connection timed out");
 			}
-			pollfd pfd;
+			pollfd pfd = { 0 };
 			pfd.fd = sockfd;
-			pfd.events = POLLOUT | POLLERR;
-			int r = poll(&pfd, 1, timeout_ms * 1000);
+			pfd.events = POLLWRNORM | POLLERRMASK;
+			int r = poll(&pfd, 1, 10);
 			if (r > 0 && pfd.revents & POLLOUT) {
 				rc = 0;
 			} else if (r != 0 || pfd.revents & POLLERR) {
@@ -233,9 +239,9 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 		auto iter = keepalives.find(identifier);
 		if (iter != keepalives.end()) {
 			/* Found a keepalive connection, check it is still connected/valid via poll() for error */
-			pollfd pfd;
+			pollfd pfd = { 0 };
 			pfd.fd = iter->second.sfd;
-			pfd.events = POLLERR;
+			pfd.events = POLLWRNORM | POLLERRMASK;
 			int r = poll(&pfd, 1, 1);
 			if (time(nullptr) > (iter->second.created + 60) || r < 0 || pfd.revents & POLLERR) {
 				make_new = true;
@@ -384,7 +390,7 @@ void ssl_client::read_loop()
 	int r = 0, sockets = 1;
 	size_t client_to_server_length = 0, client_to_server_offset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false, read_blocked = false;
-	pollfd pfd[2];
+	pollfd pfd[2] = { 0 };
 	char client_to_server_buffer[DPP_BUFSIZE], server_to_client_buffer[DPP_BUFSIZE];
 
 	try {
@@ -400,7 +406,7 @@ void ssl_client::read_loop()
 		nonblocking = true;
 
 		pfd[0].fd = sfd;
-		pfd[0].events = POLLIN | POLLOUT | POLLERR;
+		pfd[0].events = POLLRDNORM | POLLERRMASK;
 
 		/* Loop until there is a socket error */
 		while(true) {
@@ -411,19 +417,19 @@ void ssl_client::read_loop()
 			}
 
 			sockets = 1;
-			pfd[0].events = POLLIN | POLLERR;
+			pfd[0].events = POLLRDNORM | POLLERRMASK;
 			pfd[1].events = 0;
 
 			if (custom_readable_fd && custom_readable_fd() >= 0) {
 				int cfd = (int)custom_readable_fd();
 				pfd[1].fd = cfd;
-				pfd[1].events = POLLIN | POLLERR;
+				pfd[1].events = POLLRDNORM;
 				sockets = 2;
 			}
 			if (custom_writeable_fd && custom_writeable_fd() >= 0) {
 				int cfd = (int)custom_writeable_fd();
 				pfd[1].fd = cfd;
-				pfd[1].events |= POLLOUT;
+				pfd[1].events |= POLLWRNORM;
 				sockets = 2;
 			}
 
@@ -433,7 +439,7 @@ void ssl_client::read_loop()
 
 			/* If we're waiting for a read on the socket don't try to write to the server */
 			if (client_to_server_length || obuffer.length() || read_blocked_on_write) {
-				pfd[0].events |= POLLOUT;
+				pfd[0].events |= POLLWRNORM;
 			}
 
 			r = poll(pfd, sockets, 1000);
