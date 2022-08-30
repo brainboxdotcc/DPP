@@ -190,13 +190,17 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 			if (utility::time_f() >= deadline) {
 				throw connection_exception("Connection timed out");
 			}
-			pollfd pfd = { 0 };
+			pollfd pfd = {};
 			pfd.fd = sockfd;
-			pfd.events = POLLWRNORM | POLLERRMASK;
+			pfd.events = POLLOUT;
 			int r = poll(&pfd, 1, 10);
 			if (r > 0 && pfd.revents & POLLOUT) {
 				rc = 0;
 			} else if (r != 0 || pfd.revents & POLLERR) {
+				int val;
+				socklen_t len = sizeof(val);
+				std::cout << (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &val, &len)) << "\n";
+				std::cout << "HERE " << val << " " << r << "\n";
 				throw connection_exception(strerror(errno));
 			}
 		} while (rc == -1);
@@ -239,9 +243,9 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 		auto iter = keepalives.find(identifier);
 		if (iter != keepalives.end()) {
 			/* Found a keepalive connection, check it is still connected/valid via poll() for error */
-			pollfd pfd = { 0 };
+			pollfd pfd = {};
 			pfd.fd = iter->second.sfd;
-			pfd.events = POLLWRNORM | POLLERRMASK;
+			pfd.events = POLLOUT;
 			int r = poll(&pfd, 1, 1);
 			if (time(nullptr) > (iter->second.created + 60) || r < 0 || pfd.revents & POLLERR) {
 				make_new = true;
@@ -390,7 +394,7 @@ void ssl_client::read_loop()
 	int r = 0, sockets = 1;
 	size_t client_to_server_length = 0, client_to_server_offset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false, read_blocked = false;
-	pollfd pfd[2] = { 0 };
+	pollfd pfd[2] = {};
 	char client_to_server_buffer[DPP_BUFSIZE], server_to_client_buffer[DPP_BUFSIZE];
 
 	try {
@@ -406,7 +410,7 @@ void ssl_client::read_loop()
 		nonblocking = true;
 
 		pfd[0].fd = sfd;
-		pfd[0].events = POLLRDNORM | POLLERRMASK;
+		pfd[0].events = POLLIN;
 
 		/* Loop until there is a socket error */
 		while(true) {
@@ -417,19 +421,19 @@ void ssl_client::read_loop()
 			}
 
 			sockets = 1;
-			pfd[0].events = POLLRDNORM | POLLERRMASK;
+			pfd[0].events = POLLIN;
 			pfd[1].events = 0;
 
 			if (custom_readable_fd && custom_readable_fd() >= 0) {
 				int cfd = (int)custom_readable_fd();
 				pfd[1].fd = cfd;
-				pfd[1].events = POLLRDNORM;
+				pfd[1].events = POLLIN;
 				sockets = 2;
 			}
 			if (custom_writeable_fd && custom_writeable_fd() >= 0) {
 				int cfd = (int)custom_writeable_fd();
 				pfd[1].fd = cfd;
-				pfd[1].events |= POLLWRNORM;
+				pfd[1].events |= POLLOUT;
 				sockets = 2;
 			}
 
@@ -439,7 +443,7 @@ void ssl_client::read_loop()
 
 			/* If we're waiting for a read on the socket don't try to write to the server */
 			if (client_to_server_length || obuffer.length() || read_blocked_on_write) {
-				pfd[0].events |= POLLWRNORM;
+				pfd[0].events |= POLLOUT;
 			}
 
 			r = poll(pfd, sockets, 1000);
