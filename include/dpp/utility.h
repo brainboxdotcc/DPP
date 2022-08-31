@@ -382,6 +382,25 @@ namespace dpp {
 		std::string DPP_EXPORT url_encode(const std::string &value);
 
 		/**
+		 * @brief Create a mentionable slashcommand (used in a message).
+		 * @param command_id The ID of the slashcommand
+		 * @param command_name The command name
+		 * @param subcommand Optional: The subcommand name (for mentioning a subcommand)
+		 * @return std::string The formatted mention
+		 */
+		std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand = "");
+
+		/**
+		 * @brief Create a mentionable slashcommand (used in a message).
+		 * @param command_id The ID of the slashcommand
+		 * @param command_name The command name
+		 * @param subcommand_group The subcommand group name
+		 * @param subcommand The subcommand name
+		 * @return std::string The formatted mention of the slashcommand with its subcommand
+		 */
+		std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand_group, const std::string &subcommand);
+
+		/**
 		 * @brief Returns the library's version string
 		 * 
 		 * @return std::string version
