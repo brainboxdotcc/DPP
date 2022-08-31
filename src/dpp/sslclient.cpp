@@ -200,8 +200,6 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 			if (r > 0 && pfd.revents & POLLOUT) {
 				rc = 0;
 			} else if (r != 0 || pfd.revents & POLLERR) {
-				int val;
-				socklen_t len = sizeof(val);
 				throw connection_exception(strerror(errno));
 			}
 		} while (rc == -1);
