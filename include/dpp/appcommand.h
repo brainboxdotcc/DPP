@@ -585,7 +585,7 @@ struct DPP_EXPORT command_interaction {
 	 * @brief Return a ping/mention for the slash command
 	 *
 	 * @return std::string mention. e.g. `</airhorn:816437322781949972>`
-	 * @note If you want a mention for a subcommand, you can use dpp::utility::slashcommand_mention
+	 * @note If you want a mention for a subcommand or subcommand group, you can use dpp::utility::slashcommand_mention
 	 */
 	std::string get_mention() const;
 };
@@ -1169,7 +1169,7 @@ public:
 	 * @brief Return a ping/mention for the slash command
 	 *
 	 * @return std::string mention. e.g. `</airhorn:816437322781949972>`
-	 * @note If you want a mention for a subcommand, you can use dpp::utility::slashcommand_mention
+	 * @note If you want a mention for a subcommand or subcommand group, you can use dpp::utility::slashcommand_mention
 	 */
 	std::string get_mention() const;
 
