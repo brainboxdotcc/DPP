@@ -49,6 +49,11 @@ else()
 	message("-- INFO: Using VCPKG if detected")
 endif()
 
+if (WIN32 AND NOT MINGW AND BUILD_SHARED_LIBS)
+	message("-- INFO: Configuring .rc resource script")
+	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/dpp/dpp.rc.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/dpp/dpp.rc" NEWLINE_STYLE WIN32)
+endif()
+
 if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
 	set(PROJECT_NAME "dpp")
 	project(

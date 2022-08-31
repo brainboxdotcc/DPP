@@ -14,3 +14,5 @@ core
 compile_commands.json
 tags
 .cache
+src/dpp/dpp.rc
+/main
