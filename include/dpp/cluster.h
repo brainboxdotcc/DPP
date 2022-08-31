@@ -2352,11 +2352,11 @@ public:
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to add ban to
 	 * @param user_id User ID to ban
-	 * @param delete_message_days How many days of their user's messages to also delete (0-7). Defaults to 0
+	 * @param delete_message_seconds How many seconds to delete messages for, between 0 and 604800 (7 days). Defaults to 0
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days = 0, command_completion_event_t callback = utility::log_error());
+	void guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_seconds = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete guild ban
