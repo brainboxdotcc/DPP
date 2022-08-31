@@ -94,7 +94,7 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	ready(false),
 	last_heartbeat_ack(time(nullptr)),
 	protocol(ws_proto),
-	resume_gateway_url(_cluster->default_gateway)
+	resume_gateway_url(_cluster->default_gateway)	
 {
 	zlib = new zlibcontext();
 	etf = new etf_parser();

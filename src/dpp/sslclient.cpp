@@ -20,31 +20,29 @@
  ************************************************************************************/
 #include <dpp/export.h>
 #include <cerrno>
-
 #ifdef _WIN32
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <io.h>
-#pragma comment(lib,"ws2_32")
+	/* Windows-specific sockets includes */
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+	/* Windows doesn't have standard poll(), it has WSAPoll.
+	 * It's the same thing with different symbol names.
+	 * Microsoft gotta be different.
+	 */
+	#define poll(fds, nfds, timeout) WSAPoll(fds, nfds, timeout)
+	#define pollfd WSAPOLLFD
+	/* Windows sockets library */
+	#pragma comment(lib, "ws2_32")
 #else
-#include <poll.h>
-#include <netinet/in.h>
-#include <resolv.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/tcp.h>
-#include <unistd.h>
+	/* Anyting other than Windows (e.g. sane OSes) */
+	#include <poll.h>
+	#include <netinet/in.h>
+	#include <resolv.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <netinet/tcp.h>
+	#include <unistd.h>
 #endif
-
-#ifdef OPENSSL_SYS_WIN32
-#undef X509_NAME
-#undef X509_EXTENSIONS
-#undef X509_CERT_PAIR
-#undef PKCS7_ISSUER_AND_SERIAL
-#undef OCSP_REQUEST
-#undef OCSP_RESPONSE
-#endif
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,6 +52,15 @@
 #include <string.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+/* Windows specific OpenSSL symbol weirdness */
+#ifdef OPENSSL_SYS_WIN32
+	#undef X509_NAME
+	#undef X509_EXTENSIONS
+	#undef X509_CERT_PAIR
+	#undef PKCS7_ISSUER_AND_SERIAL
+	#undef OCSP_REQUEST
+	#undef OCSP_RESPONSE
+#endif
 #include <exception>
 #include <string>
 #include <iostream>
@@ -155,7 +162,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
  * @return int -1 on error, 0 on succcess just like POSIX connect()
  * @throw dpp::connection_exception on failure
  */
-int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
+int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
 #ifdef __APPLE__
 		/* Unreliable on OSX right now */
 		return (::connect(sockfd, addr, addrlen));
@@ -167,6 +174,8 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 	/* Windows connect returns -1 and sets its error value to 0 for successfull blocking connection -
 	 * This is equivalent to EWOULDBLOCK on POSIX
 	 */
+	ULONG non_blocking = 1;
+	ioctlsocket(sockfd, FIONBIO, &non_blocking);
 	int rc = WSAConnect(sockfd, addr, addrlen, nullptr, nullptr, nullptr, nullptr);
 	int err = EWOULDBLOCK;
 #else
@@ -184,13 +193,15 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 			if (utility::time_f() >= deadline) {
 				throw connection_exception("Connection timed out");
 			}
-			pollfd pfd;
+			pollfd pfd = {};
 			pfd.fd = sockfd;
-			pfd.events = POLLOUT | POLLERR;
-			int r = poll(&pfd, 1, timeout_ms * 1000);
+			pfd.events = POLLOUT;
+			int r = poll(&pfd, 1, 10);
 			if (r > 0 && pfd.revents & POLLOUT) {
 				rc = 0;
 			} else if (r != 0 || pfd.revents & POLLERR) {
+				int val;
+				socklen_t len = sizeof(val);
 				throw connection_exception(strerror(errno));
 			}
 		} while (rc == -1);
@@ -233,9 +244,9 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 		auto iter = keepalives.find(identifier);
 		if (iter != keepalives.end()) {
 			/* Found a keepalive connection, check it is still connected/valid via poll() for error */
-			pollfd pfd;
+			pollfd pfd = {};
 			pfd.fd = iter->second.sfd;
-			pfd.events = POLLERR;
+			pfd.events = POLLOUT;
 			int r = poll(&pfd, 1, 1);
 			if (time(nullptr) > (iter->second.created + 60) || r < 0 || pfd.revents & POLLERR) {
 				make_new = true;
@@ -347,12 +358,13 @@ void ssl_client::write(const std::string &data)
 	if (nonblocking) {
 		obuffer += data;
 	} else {
+		const int data_length = (int)data.length();
 		if (plaintext) {
-			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data.length(), 0) != (int)data.length()) {
+			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data_length, 0) != data_length) {
 				throw dpp::connection_exception("write() failed");
 			}
 		} else {
-			if (SSL_write(ssl->ssl, data.data(), (int)data.length()) != (int)data.length()) {
+			if (SSL_write(ssl->ssl, data.data(), data_length) != data_length) {
 				throw dpp::connection_exception("SSL_write() failed");
 			}
 		}
@@ -384,7 +396,7 @@ void ssl_client::read_loop()
 	int r = 0, sockets = 1;
 	size_t client_to_server_length = 0, client_to_server_offset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false, read_blocked = false;
-	pollfd pfd[2];
+	pollfd pfd[2] = {};
 	char client_to_server_buffer[DPP_BUFSIZE], server_to_client_buffer[DPP_BUFSIZE];
 
 	try {
@@ -400,7 +412,7 @@ void ssl_client::read_loop()
 		nonblocking = true;
 
 		pfd[0].fd = sfd;
-		pfd[0].events = POLLIN | POLLOUT | POLLERR;
+		pfd[0].events = POLLIN;
 
 		/* Loop until there is a socket error */
 		while(true) {
@@ -411,13 +423,13 @@ void ssl_client::read_loop()
 			}
 
 			sockets = 1;
-			pfd[0].events = POLLIN | POLLERR;
+			pfd[0].events = POLLIN;
 			pfd[1].events = 0;
 
 			if (custom_readable_fd && custom_readable_fd() >= 0) {
 				int cfd = (int)custom_readable_fd();
 				pfd[1].fd = cfd;
-				pfd[1].events = POLLIN | POLLERR;
+				pfd[1].events = POLLIN;
 				sockets = 2;
 			}
 			if (custom_writeable_fd && custom_writeable_fd() >= 0) {

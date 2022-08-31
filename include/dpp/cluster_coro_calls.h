@@ -481,7 +481,7 @@ auto inline co_channel_edit(const class channel &c) {
 }
 
 /**
- * @brief Follow a news channel
+ * @brief Follow an announcement (news) channel
  * @see dpp::cluster::channel_follow_news
  * @see https://discord.com/developers/docs/resources/channel#follow-news-channel
  * @param c Channel id to follow
@@ -1895,7 +1895,7 @@ auto inline co_thread_members_get(snowflake thread_id) {
  * @param thread_name Name of the thread
  * @param channel_id Channel in which thread to create
  * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
- * @param thread_type Type of thread - GUILD_PUBLIC_THREAD, GUILD_NEWS_THREAD, GUILD_PRIVATE_THREAD
+ * @param thread_type Type of thread - CHANNEL_PUBLIC_THREAD, CHANNEL_ANNOUNCEMENT_THREAD, CHANNEL_PRIVATE_THREAD
  * @param invitable whether non-moderators can add other non-moderators to a thread; only available when creating a private thread
  * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
  * @return thread returned object on completion
