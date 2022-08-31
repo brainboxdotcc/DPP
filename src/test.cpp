@@ -278,6 +278,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("UTILITY.URL_ENCODE", false);
 		auto url_encoded = dpp::utility::url_encode("S2-^$1Nd+U!g'8+_??o?p-bla bla");
 		set_test("UTILITY.URL_ENCODE", url_encoded == "S2-%5E%241Nd%2BU%21g%278%2B_%3F%3Fo%3Fp-bla%20bla");
+
+		set_test("UTILITY.SLASHCOMMAND_MENTION", false);
+		auto mention1 = dpp::utility::slashcommand_mention(123, "name");
+		auto mention2 = dpp::utility::slashcommand_mention(123, "name", "sub");
+		auto mention3 = dpp::utility::slashcommand_mention(123, "name", "group", "sub");
+		bool success = mention1 == "</name:123>" && mention2 == "</name sub:123>" && mention3 == "</name group sub:123>";
+		set_test("UTILITY.SLASHCOMMAND_MENTION", success);
 	}
 
 #ifndef _WIN32
