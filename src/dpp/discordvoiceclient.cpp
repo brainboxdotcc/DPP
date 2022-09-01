@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 
+#include <config.h>
 #include <dpp/export.h>
 #ifdef _WIN32
 	#include <WinSock2.h>

@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <config.h>
 #include <dpp/utility.h>
 #include <dpp/stringops.h>
 #include <dpp/exception.h>

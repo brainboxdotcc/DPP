@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <config.h>
 #include <string>
 #include <iostream>
 #include <fstream>

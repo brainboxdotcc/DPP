@@ -1,0 +1,4 @@
+option('voice_support', type : 'boolean', description : 'build voice support', value : true)
+option('dpp_build_test', type : 'boolean', description : 'build the test program', value : true)
+option('dpp_coro', type : 'boolean', description : 'Experimental support for C++20 coroutines', value : false)
+option('dpp_no_vcpkg', type : 'boolean', description : 'Disable VCPKG support', value : false)
