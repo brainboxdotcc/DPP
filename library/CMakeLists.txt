@@ -30,7 +30,7 @@ if(WIN32 AND NOT MINGW)
 		set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 		set(OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 		set(OPENSSL_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib")
-		ADD_DEFINITIONS(/bigobj)
+		#ADD_DEFINITIONS(/bigobj)
 
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib")
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libcrypto.lib")
@@ -195,7 +195,7 @@ foreach (fullmodname ${subdirlist})
     get_filename_component(modname ${fullmodname} NAME)
     set (modsrc "")
 	
-	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp")
+	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
 
 	if(BUILD_SHARED_LIBS)
 		add_library(${modname} SHARED ${modsrc})

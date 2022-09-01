@@ -34,6 +34,11 @@ confirmation_callback_t::confirmation_callback_t(cluster* creator, const confirm
 	}
 }
 
+confirmation_callback_t::confirmation_callback_t(const http_request_completion_t& _http)
+	: http_info(_http),  value(), bot(nullptr)
+{
+}
+
 confirmation_callback_t::confirmation_callback_t(cluster* creator) : bot(creator) {
 	http_info = {};
 	value = {};
