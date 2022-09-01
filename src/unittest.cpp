@@ -157,7 +157,7 @@ int test_summary() {
 
 std::vector<uint8_t> load_test_audio() {
 	std::vector<uint8_t> testaudio;
-	std::ifstream input ("../../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	std::ifstream input ("../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
 	if (input.is_open()) {
 		size_t testaudio_size = input.tellg();
 		testaudio.resize(testaudio_size);
