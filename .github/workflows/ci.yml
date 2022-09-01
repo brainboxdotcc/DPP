@@ -67,8 +67,8 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'amd64', os: ubuntu-latest, cpp-version: g++-11 }
-          - { arch: 'amd64', os: ubuntu-latest, cpp-version: g++-10 }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-11 }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-10 }
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:
@@ -195,7 +195,7 @@ jobs:
           - {name: "ARMv6", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
 
     name: ${{matrix.cfg.name}}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2
