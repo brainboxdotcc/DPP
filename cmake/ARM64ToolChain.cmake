@@ -2,8 +2,8 @@ SET(CMAKE_SYSTEM_NAME Linux)
 # Possibly needed tweak
 #SET(CMAKE_SYSTEM_PROCESSOR aarch64)
 
-SET(CMAKE_C_COMPILER ${COMPILER_ROOT}/aarch64-linux-gnu-gcc-8)
-SET(CMAKE_CXX_COMPILER ${COMPILER_ROOT}/aarch64-linux-gnu-g++-8)
+SET(CMAKE_C_COMPILER ${COMPILER_ROOT}/aarch64-linux-gnu-gcc-10)
+SET(CMAKE_CXX_COMPILER ${COMPILER_ROOT}/aarch64-linux-gnu-g++-10)
 
 # Below call is necessary to avoid non-RT problem.
 SET(CMAKE_LIBRARY_ARCHITECTURE aarch64-linux-gnu)
@@ -29,8 +29,8 @@ INCLUDE_DIRECTORIES(
 	/usr/include/aarch64-linux-gnu)
 
 SET(ZLIB_LIBRARY /lib/aarch64-linux-gnu/libz.so.1.2.11)
-SET(OPENSSL_CRYPTO_LIBRARY /usr/lib/aarch64-linux-gnu/libcrypto.so.1.1)
-SET(OPENSSL_SSL_LIBRARY /usr/lib/aarch64-linux-gnu/libssl.so.1.1)
+SET(OPENSSL_CRYPTO_LIBRARY /usr/lib/aarch64-linux-gnu/libcrypto.so)
+SET(OPENSSL_SSL_LIBRARY /usr/lib/aarch64-linux-gnu/libssl.so)
 
 SET(CMAKE_PREFIX_PATH ${RASPBERRY_KINETIC_PATH} ${RASPBERRY_ROOT_PATH}/usr)
 
@@ -47,6 +47,6 @@ EXECUTE_PROCESS(COMMAND sudo mv TMPFILE /etc/apt/sources.list)
 EXECUTE_PROCESS(COMMAND sudo dpkg --add-architecture arm64)
 EXECUTE_PROCESS(COMMAND sudo apt-add-repository -y ppa:canonical-kernel-team/ppa)
 EXECUTE_PROCESS(COMMAND sudo apt update)
-EXECUTE_PROCESS(COMMAND sudo apt install -y cmake ninja-build gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu libc6-dev-arm64-cross zlib1g-dev:arm64 libssl-dev:arm64 libopus-dev:arm64 libsodium-dev:arm64)
+EXECUTE_PROCESS(COMMAND sudo apt install -y cmake ninja-build gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross zlib1g-dev:arm64 libssl-dev:arm64 libopus-dev:arm64 libsodium-dev:arm64)
 EXECUTE_PROCESS(COMMAND sudo mv /usr/lib/aarch64-linux-gnu/pkgconfig/libsodium.pc /usr/lib/pkgconfig/)
 
