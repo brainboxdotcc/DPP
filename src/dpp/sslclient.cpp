@@ -409,9 +409,6 @@ void ssl_client::read_loop()
 		}
 		nonblocking = true;
 
-		pfd[0].fd = sfd;
-		pfd[0].events = POLLIN;
-
 		/* Loop until there is a socket error */
 		while(true) {
 
@@ -421,6 +418,7 @@ void ssl_client::read_loop()
 			}
 
 			sockets = 1;
+			pfd[0].fd = sfd;
 			pfd[0].events = POLLIN;
 			pfd[1].events = 0;
 
@@ -457,7 +455,7 @@ void ssl_client::read_loop()
 			if (custom_readable_fd && custom_readable_fd() >= 0 && pfd[1].revents & POLLIN) {
 				custom_readable_ready();
 			}
-			if (pfd[0].revents & POLLERR || sfd == INVALID_SOCKET) {
+			if ((pfd[0].revents & POLLERR) || (pfd[0].revents & POLLNVAL) || sfd == INVALID_SOCKET) {
 				throw dpp::connection_exception(strerror(errno));
 			}
 
