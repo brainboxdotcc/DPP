@@ -82,11 +82,11 @@ public:
 	/// Reacting user
 	user react_user;
 	/// Reacting guild
-	guild* react_guild;
+	guild* react_guild{};
 	/// Reacting guild member
 	guild_member react_member;
 	/// Reacting channel
-	channel* react_channel;
+	channel* react_channel{};
 	/// Reacted emoji
 	emoji react_emoji;
 };
