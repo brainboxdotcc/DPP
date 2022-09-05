@@ -122,8 +122,6 @@ else()
 	message("-- Voice support disabled by cmake option")
 endif()
 
-aux_source_directory("../src" coresrc)
-
 string(ASCII 27 Esc)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -262,15 +260,23 @@ target_compile_features(dpp PRIVATE cxx_attribute_deprecated)
 
 if (DPP_BUILD_TEST)
 	enable_testing(${CMAKE_CURRENT_SOURCE_DIR}/..)
-	add_executable(unittest ${coresrc})
-	target_compile_features(unittest PRIVATE cxx_std_17)
-	target_link_libraries(unittest PUBLIC ${modname})
+	file(GLOB testnamelist "${CMAKE_CURRENT_SOURCE_DIR}/../src/*")
+	foreach (fulltestname ${testnamelist})
+		get_filename_component(testname ${fulltestname} NAME)
+		if (NOT "${testname}" STREQUAL "dpp")
+			message("-- Configuring test: ${Green}${testname}${ColourReset} with source: ${modules_dir}/${testname}/*.cpp")
+			set (testsrc "")
+			file(GLOB testsrc "${modules_dir}/${testname}/*.cpp")
+			add_executable(${testname} ${testsrc})
+			target_compile_features(${testname} PRIVATE cxx_std_17)
+			target_link_libraries(${testname} PUBLIC ${modname})
+		endif()
+	endforeach()
 	add_test(
 		NAME unittests
 		COMMAND library/unittest
 		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/library
 	)
-
 endif()
 
 if(HAVE_PRCTL)

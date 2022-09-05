@@ -793,14 +793,14 @@ auditlog guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param guild_id Guild ID to add ban to
  * @param user_id User ID to ban
- * @param delete_message_days How many days of their user's messages to also delete (0-7). Defaults to 0
+ * @param delete_message_seconds How many seconds to delete messages for, between 0 and 604800 (7 days). Defaults to 0
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_days = 0);
+confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_seconds = 0);
 
 /**
  * @brief Delete guild ban

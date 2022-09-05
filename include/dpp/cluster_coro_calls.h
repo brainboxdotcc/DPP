@@ -742,12 +742,12 @@ auto inline co_guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param guild_id Guild ID to add ban to
  * @param user_id User ID to ban
- * @param delete_message_days How many days of their user's messages to also delete (0-7). Defaults to 0
+ * @param delete_message_seconds How many seconds to delete messages for, between 0 and 604800 (7 days). Defaults to 0
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  */
-auto inline co_guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_days) {
-	return dpp::awaitable(this, [&] (auto cc) { this->guild_ban_add(guild_id, user_id, delete_message_days, cc); }); 
+auto inline co_guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_seconds) {
+	return dpp::awaitable(this, [&] (auto cc) { this->guild_ban_add(guild_id, user_id, delete_message_seconds, cc); }); 
 }
 
 /**
@@ -2310,3 +2310,7 @@ auto inline co_get_webhook_with_token(snowflake webhook_id, const std::string &t
 
 
 /* End of auto-generated definitions */
+auto inline co_request(const std::string &url, http_method method, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}) {
+	return dpp::awaitable(this, [&] (auto cc) { this->request(url, method, cc, mimetype, headers); }); 
+}
+

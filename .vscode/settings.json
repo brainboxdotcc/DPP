@@ -75,6 +75,10 @@
 		"codecvt": "cpp",
 		"future": "cpp",
 		"cerrno": "cpp",
-		"compare": "cpp"
+		"compare": "cpp",
+		"coroutine": "cpp",
+		"numbers": "cpp",
+		"semaphore": "cpp",
+		"stop_token": "cpp"
 	}
 }
