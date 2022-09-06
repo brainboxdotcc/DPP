@@ -386,7 +386,7 @@ public:
 	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 * 
 	 * @param user The user to resolve the permissions for
-	 * @return The permission overwrites for the member. Made of bits in dpp::permissions.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 *
 	 * @note This is an alias for guild::permission_overwrites and searches for the guild in the cache,
@@ -401,7 +401,7 @@ public:
 	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 *
 	 * @param member The member to resolve the permissions for
-	 * @return The permission overwrites for the member. Made of bits in dpp::permissions.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 *
 	 * @note This is an alias for guild::permission_overwrites and searches for the guild in the cache,

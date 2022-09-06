@@ -586,7 +586,7 @@ public:
 	 * from channel::base_permissions
 	 * @param user The user to resolve the permissions for
 	 * @param channel Channel to compute permission overwrites for
-	 * @return The permission overwrites for the member. Made of bits in dpp::permissions.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 *
 	 * @warning The method will search for the guild member in the cache by the users id.
@@ -599,7 +599,7 @@ public:
 	 *
 	 * @param member The member to resolve the permissions for
 	 * @param channel Channel to compute permission overwrites for
-	 * @return The permission overwrites for the member. Made of bits in dpp::permissions.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 */
 	permission permission_overwrites(const guild_member &member, const channel &channel) const;
