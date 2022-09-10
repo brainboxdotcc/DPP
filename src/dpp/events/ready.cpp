@@ -59,7 +59,7 @@ void ready::handle(discord_client* client, json &j, const std::string &raw) {
 	}
 	/* Pre-resolve it into our cache so that we aren't waiting on this when we need it later */
 	static_cast<void>(resolve_hostname(client->resume_gateway_url, "443"));
-	client->log(ll_debug, "Resume URL for session " + client->sessionid + " is " + client->resume_gateway_url);
+	client->log(ll_debug, "Resume URL for session " + client->sessionid + " is " + ugly + " (host: " + client->resume_gateway_url + ")");
 
 	client->ready = true;
 
