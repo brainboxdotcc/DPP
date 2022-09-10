@@ -430,6 +430,14 @@ namespace dpp {
 			return escaped.data();
 		}
 
+		std::string slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand) {
+			return "</" + command_name + (!subcommand.empty() ? (" " + subcommand) : "") + ":" + std::to_string(command_id) + ">";
+		}
+
+		std::string slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand_group, const std::string &subcommand) {
+			return "</" + command_name + " " + subcommand_group + " " + subcommand + ":" + std::to_string(command_id) + ">";
+		}
+
 		std::string make_url_parameters(const std::map<std::string, std::string>& parameters) {
 			std::string output;
 			for(auto& [k, v] : parameters) {

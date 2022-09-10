@@ -580,6 +580,14 @@ struct DPP_EXPORT command_interaction {
 	template <typename T> T& get_value(size_t index) {
 		return std::get<T>(options.at(index).value);
 	}
+
+	/**
+	 * @brief Return a ping/mention for the slash command
+	 *
+	 * @return std::string mention. e.g. `</airhorn:816437322781949972>`
+	 * @note If you want a mention for a subcommand or subcommand group, you can use dpp::utility::slashcommand_mention
+	 */
+	std::string get_mention() const;
 };
 
 /**
@@ -1156,6 +1164,14 @@ public:
 	 * @deprecated Discord discourage use of this value and instead you should use default_member_permissions.
 	 */
 	slashcommand& disable_default_permissions();
+
+	/**
+	 * @brief Return a ping/mention for the slash command
+	 *
+	 * @return std::string mention. e.g. `</airhorn:816437322781949972>`
+	 * @note If you want a mention for a subcommand or subcommand group, you can use dpp::utility::slashcommand_mention
+	 */
+	std::string get_mention() const;
 
 	/**
 	 * @brief Fill object properties from JSON

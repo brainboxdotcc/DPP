@@ -580,26 +580,26 @@ public:
 	permission base_permissions(const guild_member &member) const;
 
 	/**
-	 * @brief Compute the permission overwrites for a member in a channel, including base permissions.
+	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 *
 	 * @param base_permissions base permissions before overwrites,
 	 * from channel::base_permissions
-	 * @param user User to resolve the permissions for
+	 * @param user The user to resolve the permissions for
 	 * @param channel Channel to compute permission overwrites for
-	 * @return permission Merged permissions bitmask of overwrites.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 *
-	 * @note The method will search for the guild member in the cache by the users id.
+	 * @warning The method will search for the guild member in the cache by the users id.
 	 * If the guild member is not in cache, the method will always return 0.
 	 */
 	permission permission_overwrites(const uint64_t base_permissions, const user* user, const channel* channel) const;
 
 	/**
-	 * @brief Compute the permission overwrites for a member in a channel, including base permissions.
+	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 *
-	 * @param member Member to resolve the permissions for
+	 * @param member The member to resolve the permissions for
 	 * @param channel Channel to compute permission overwrites for
-	 * @return permission Merged permissions bitmask of overwrites.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 */
 	permission permission_overwrites(const guild_member &member, const channel &channel) const;

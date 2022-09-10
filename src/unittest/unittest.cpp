@@ -19,6 +19,8 @@
  *
  ************************************************************************************/
 #include "test.h"
+#include <dpp/dpp.h>
+#include <dpp/nlohmann/json.hpp>
 
 /* Current list of unit tests */
 std::map<std::string, test_t> tests = {
@@ -89,6 +91,7 @@ std::map<std::string, test_t> tests = {
 	{"UTILITY.MARKDOWN_ESCAPE", {tt_offline, "utility::markdown_escape", false, false}},
 	{"UTILITY.TOKENIZE", {tt_offline, "utility::tokenize", false, false}},
 	{"UTILITY.URL_ENCODE", {tt_offline, "utility::url_encode", false, false}},
+	{"UTILITY.SLASHCOMMAND_MENTION", {tt_offline, "utility::slashcommand_mention", false, false}},
 	{"ROLE.COMPARE", {tt_offline, "role::operator<", false, false}},
 };
 

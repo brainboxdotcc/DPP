@@ -94,7 +94,7 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	ready(false),
 	last_heartbeat_ack(time(nullptr)),
 	protocol(ws_proto),
-	resume_gateway_url(_cluster->default_gateway)
+	resume_gateway_url(_cluster->default_gateway)	
 {
 	zlib = new zlibcontext();
 	etf = new etf_parser();
@@ -361,7 +361,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 			case 7:
 				log(dpp::ll_debug, "Reconnection requested, closing socket " + sessionid);
 				message_queue.clear();
-				close_socket(sfd);
+				throw dpp::connection_exception("Remote site requested reconnection");
 			break;
 			/* Heartbeat ack */
 			case 11:

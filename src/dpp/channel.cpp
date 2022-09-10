@@ -118,7 +118,7 @@ channel& channel::set_bitrate(const uint16_t bitrate) {
 	return *this;
 }
 
-channel& channel::set_flags(const uint16_t flags) {
+channel& channel::set_flags(const uint8_t flags) {
 	this->flags = flags;
 	return *this;
 }

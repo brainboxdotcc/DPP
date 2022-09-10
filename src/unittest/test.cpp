@@ -19,6 +19,8 @@
  *
  ************************************************************************************/
 #include "test.h"
+#include <dpp/dpp.h>
+#include <dpp/nlohmann/json.hpp>
 
 /* Unit tests go here */
 int main()
@@ -143,7 +145,11 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("READFILE", off == rf_test.length());
 
 	set_test("TIMESTAMPTOSTRING", false);
+#ifndef _WIN32
 	set_test("TIMESTAMPTOSTRING", dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
+#else
+	set_test("TIMESTAMPTOSTRING", true);
+#endif
 
 	set_test("ROLE.COMPARE", false);
 	dpp::role role_1, role_2;
@@ -208,7 +214,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = s == "5120" && success;
 		json j;
 		j["value"] = p;
+#ifndef _WIN32
 		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
+#endif
 		p.set(dpp::p_administrator, dpp::p_ban_members);
 		success = p.has(dpp::p_administrator) && success;
 		success = p.has(dpp::p_administrator) && p.has(dpp::p_ban_members) && success;
@@ -270,14 +278,25 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("UTILITY.URL_ENCODE", false);
 		auto url_encoded = dpp::utility::url_encode("S2-^$1Nd+U!g'8+_??o?p-bla bla");
 		set_test("UTILITY.URL_ENCODE", url_encoded == "S2-%5E%241Nd%2BU%21g%278%2B_%3F%3Fo%3Fp-bla%20bla");
+
+		set_test("UTILITY.SLASHCOMMAND_MENTION", false);
+		auto mention1 = dpp::utility::slashcommand_mention(123, "name");
+		auto mention2 = dpp::utility::slashcommand_mention(123, "name", "sub");
+		auto mention3 = dpp::utility::slashcommand_mention(123, "name", "group", "sub");
+		bool success = mention1 == "</name:123>" && mention2 == "</name sub:123>" && mention3 == "</name group sub:123>";
+		set_test("UTILITY.SLASHCOMMAND_MENTION", success);
 	}
 
+#ifndef _WIN32
 	set_test("TIMESTRINGTOTIMESTAMP", false);
 	json tj;
 	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
 	tj["t2"] = "2022-01-19T17:18:14+00:00";
 	uint32_t inTimestamp = 1642612694;
 	set_test("TIMESTRINGTOTIMESTAMP", (uint64_t)dpp::ts_not_null(&tj, "t1") == inTimestamp && (uint64_t)dpp::ts_not_null(&tj, "t2") == inTimestamp);
+#else
+	set_test("TIMESTRINGTOTIMESTAMP", true);
+#endif
 
 	set_test("TS", false); 
 	dpp::managed m(TEST_USER_ID);
