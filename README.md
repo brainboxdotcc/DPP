@@ -2,11 +2,13 @@
 ## An incredibly lightweight C++ Discord library which is now capable of being used for self-bots
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp) 
+![Downloads](https://dl.dpp.dev/dlcount.php?repo=brainboxdotcc/dpp)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) 
 ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) 
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
+[![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp)
 
-D++ is a lightweight and efficient library for Discord written in modern C++. It is designed to cover as much of the API specification as possible and to have a incredibly small memory footprint, even when caching large amounts of data.
+D++ is a lightweight and efficient library for Discord written in modern C++, covering as much of the API specification as possible with an incredibly small memory footprint even when caching large amounts of data.
 
 ### Library features:
 
@@ -14,7 +16,7 @@ D++ is a lightweight and efficient library for Discord written in modern C++. It
 * Really small memory footprint
 * Efficient caching system for guilds, channels, guild members, roles, users
 * Sharding and clustering (Many shards, one process: specify the number of shards, or let the library decide)
-* Highly optimised ETF (Erlang Term Format) support for very fast websocket throughput (*no other C++ Discord library has this!*)
+* Highly optimised ETF (Erlang Term Format) support for very fast websocket throughput
 * [Slash Commands/Interactions support](https://dpp.dev/slashcommands.html)
 * [Voice support](https://dpp.dev/soundboard.html) (sending **and** receiving audio)
 * The entire Discord API is available for use in the library
@@ -38,27 +40,26 @@ This is a simple ping-pong example using slash commands.
 
 ```c++
 #include <dpp/dpp.h>
- 
-const std::string    BOT_TOKEN = "add your token here";
+#include <cstdlib>
  
 int main() {
-    dpp::cluster bot(BOT_TOKEN);
+    dpp::cluster bot(std::getenv("BOT_TOKEN"));
  
-    bot.on_interaction_create([](const dpp::interaction_create_t& event) {
+    bot.on_slashcommand([](auto event) {
          if (event.command.get_command_name() == "ping") {
              event.reply("Pong!");
          }
     });
  
-    bot.on_ready([&bot](const dpp::ready_t& event) {
+    bot.on_ready([&bot](auto event) {
         if (dpp::run_once<struct register_bot_commands>()) {
             bot.global_command_create(
-                dpp::slashcommand("ping", "Ping pong!", bot.me.id),
+                dpp::slashcommand("ping", "Ping pong!", bot.me.id)
             );
         }
     });
  
-    bot.start(false);
+    bot.start(dpp::st_wait);
 }
 ```
 
@@ -66,12 +67,18 @@ You can find more examples in our [example page](https://dpp.dev/md_docpages_03_
 
 ## Supported Systems
 
-The library runs great on **Linux**. **Windows** is also supported and we offer ready made compiled DLL and LIB files for easy integration into any windows visual studio 2019 or 2022 project.
-**Mac OS X** and **FreeBSD** is also functional and stable, as is running your bot on a **Raspberry Pi** - we offer a prebuilt .deb for ARM64, ARM6 and ARM7 to save on having to wait for it to compile.
+### Linux
+The library runs ideally on **Linux**.
 
-If you are on windows, and just want to get started as quickly as possible, you should look at our [Windows Bot Template repository](https://github.com/brainboxdotcc/windows-bot-template). This repository can be cloned and will get you up and running in a matter of minutes, with a pre-built D++ in a ready to go project for Visual Studio 2019 and 2022.
+### Mac OS X and FreeBSD
+The library is well-functional and stable on **Mac OS X** and **FreeBSD** too.
+For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for ARM64, ARM6, and ARM7 so that you do not have to wait for it to compile.
 
-The library may work fine in other operating systems too, if you run a D++ bot on something not listed here please let us know!
+### Windows
+**Windows** is well-supported with ready-made compiled DLL and LIB files, please check out our [Windows Bot Template repository](https://github.com/brainboxdotcc/windows-bot-template). The Windows Bot repository can be cloned and integrated immediately into any Visual Studio 2019 and 2022 project in a matter of minutes.
+
+### Other OS
+The library should work fine on other operating systems as well, and if you run a D++ bot on something not listed here, please let us know!
 
 ## 🤝 Contributing
 
@@ -117,5 +124,3 @@ For voice support you require both of:
 
 ### Included Dependencies (Packaged with the library)
 * [nlohmann::json](https://github.com/nlohmann/json)
-* [fmt::format](https://github.com/fmtlib/fmt)
-

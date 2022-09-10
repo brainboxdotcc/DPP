@@ -31,6 +31,10 @@ using json = nlohmann::json;
 
 namespace dpp {
 
+permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0) {}
+
+permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type) : id(id), allow(allow), deny(deny), type(type) {}
+
 const uint8_t CHANNEL_TYPE_MASK = 0b00001111;
 
 thread_member& thread_member::fill_from_json(nlohmann::json* j) {
@@ -114,7 +118,7 @@ channel& channel::set_bitrate(const uint16_t bitrate) {
 	return *this;
 }
 
-channel& channel::set_flags(const uint16_t flags) {
+channel& channel::set_flags(const uint8_t flags) {
 	this->flags = flags;
 	return *this;
 }
@@ -134,12 +138,17 @@ channel& channel::set_nsfw(const bool is_nsfw) {
 	return *this;
 }
 
+channel& channel::set_lock_permissions(const bool is_lock_permissions) {
+	this->flags = (is_lock_permissions) ? this->flags | dpp::c_lock_permissions : this->flags & ~dpp::c_lock_permissions;
+	return *this;
+}
+
 channel& channel::set_user_limit(const uint8_t user_limit) {
 	this->user_limit = user_limit;
 	return *this;
 }
 
-channel& channel::add_permission_overwrite(const snowflake id, const uint8_t type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+channel& channel::add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
 	permission_overwrite po {id, allowed_permissions, denied_permissions, type};
 	this->permission_overwrites.push_back(po);
 	return *this;
@@ -147,6 +156,10 @@ channel& channel::add_permission_overwrite(const snowflake id, const uint8_t typ
 
 bool channel::is_nsfw() const {
 	return flags & dpp::c_nsfw;
+}
+
+bool channel::is_locked_permissions() const {
+	return flags & dpp::c_lock_permissions;
 }
 
 bool channel::is_text_channel() const {
@@ -178,7 +191,7 @@ bool channel::is_stage_channel() const {
 }
 
 bool channel::is_news_channel() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_NEWS;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_ANNOUNCEMENT;
 }
 
 bool channel::is_store_channel() const {
@@ -198,9 +211,12 @@ bool channel::is_video_720p() const {
 	return flags & dpp::c_video_quality_720p;
 }
 
+bool channel::is_pinned_thread() const {
+	return flags & dpp::c_pinned_thread;
+}
 
 bool thread::is_news_thread() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_NEWS_THREAD;
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_ANNOUNCEMENT_THREAD;
 }
 
 bool thread::is_public_thread() const {
@@ -255,6 +271,9 @@ channel& channel::fill_from_json(json* j) {
 
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type & CHANNEL_TYPE_MASK);
+
+	uint8_t dflags = int8_not_null(j, "flags");
+	this->flags |= (dflags & dpp::dc_pinned_thread) ? dpp::c_pinned_thread : 0;
 
 	uint8_t vqm = int8_not_null(j, "video_quality_mode");
 	if (vqm == 2) {
@@ -348,20 +367,31 @@ std::string channel::build_json(bool with_id) const {
 		}
 		j["nsfw"] = is_nsfw();
 	}
+	if (flags & c_lock_permissions) {
+		j["lock_permissions"] = true;
+	}
 	
 	return j.dump();
 }
 
-uint64_t channel::get_user_permissions(const user* member) const
-{
-	if (member == nullptr)
+permission channel::get_user_permissions(const user* user) const {
+	if (user == nullptr)
 		return 0;
 
 	guild* g = dpp::find_guild(guild_id);
 	if (g == nullptr)
 		return 0;
 
-	return g->permission_overwrites(g->base_permissions(member), member, this);
+	return g->permission_overwrites(g->base_permissions(user), user, this);
+}
+
+permission channel::get_user_permissions(const guild_member &member) const {
+
+	guild* g = dpp::find_guild(guild_id);
+	if (g == nullptr)
+		return 0;
+
+	return g->permission_overwrites(member, *this);
 }
 
 std::map<snowflake, guild_member*> channel::get_members() {
@@ -369,11 +399,8 @@ std::map<snowflake, guild_member*> channel::get_members() {
 	guild* g = dpp::find_guild(guild_id);
 	if (g) {
 		for (auto m = g->members.begin(); m != g->members.end(); ++m) {
-			user* u = dpp::find_user(m->second.user_id);
-			if (u) {
-				if (get_user_permissions(u) & p_view_channel) {
-					rv[m->second.user_id] = &(m->second);
-				}
+			if (g->permission_overwrites(m->second, *this) & p_view_channel) {
+				rv[m->second.user_id] = &(m->second);
 			}
 		}
 	}
@@ -410,8 +437,7 @@ std::string channel::get_icon_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->icon.to_string().empty()) {
-		// TODO implement this, endpoint for that isn't finished yet https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
-		return std::string();
+		return utility::cdn_host + "/channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

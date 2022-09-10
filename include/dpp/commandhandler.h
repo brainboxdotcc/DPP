@@ -281,7 +281,7 @@ public:
 	 * @brief Construct a new commandhandler object
 	 * 
 	 * @param o Owning cluster to attach to
-	 * @param auto_hook_events Set to true to automatically hook the on_interaction_create
+	 * @param auto_hook_events Set to true to automatically hook the on_slashcommand
 	 * and on_message events. You should not need to set this to false unless you have a specific
 	 * use case, as D++ supports multiple listeners to an event, so will allow the commandhandler
 	 * to hook to your command events without disrupting other uses for the events you may have.
@@ -349,13 +349,13 @@ public:
 	void route(const struct dpp::message_create_t& event);
 
 	/**
-	 * @brief Route a command from the on_interaction_create function.
-	 * Call this method from your on_interaction_create with the received
+	 * @brief Route a command from the on_slashcommand function.
+	 * Call this method from your on_slashcommand with the received
 	 * dpp::interaction_create_t object if you have disabled automatic registration of events.
 	 * 
 	 * @param event command interaction event to parse
 	 */
-	void route(const struct interaction_create_t & event);
+	void route(const struct slashcommand_t & event);
 
 	/**
 	 * @brief Reply to a command.

@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/export.h>
 #include <mutex>
 #include <iostream>
 #include <variant>

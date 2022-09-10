@@ -47,11 +47,6 @@ char* crossplatform_strptime(const char* s, const char* f, struct tm* tm) {
 
 namespace dpp {
 
-double managed::get_creation_time() const {
-	return (double)((this->id >> 22) + 1420070400000) / 1000.0;
-}
-
-
 std::string ts_to_string(time_t ts) {
 	std::ostringstream ss;
 	struct tm t;
@@ -336,11 +331,16 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "GUILD_APPLICATION_COMMAND_COUNTS_UPDATE", nullptr },
 	{ "APPLICATION_COMMAND_PERMISSIONS_UPDATE", nullptr },
 	{ "EMBEDDED_ACTIVITY_UPDATE", nullptr },
+	{ "GUILD_APPLICATION_COMMAND_INDEX_UPDATE", nullptr },
 	{ "GUILD_SCHEDULED_EVENT_CREATE", new dpp::events::guild_scheduled_event_create() },
 	{ "GUILD_SCHEDULED_EVENT_UPDATE", new dpp::events::guild_scheduled_event_update() },
 	{ "GUILD_SCHEDULED_EVENT_DELETE", new dpp::events::guild_scheduled_event_delete() },
 	{ "GUILD_SCHEDULED_EVENT_USER_ADD", new dpp::events::guild_scheduled_event_user_add() },
 	{ "GUILD_SCHEDULED_EVENT_USER_REMOVE", new dpp::events::guild_scheduled_event_user_remove() },
+	{ "AUTO_MODERATION_RULE_CREATE", new dpp::events::automod_rule_create() },
+	{ "AUTO_MODERATION_RULE_UPDATE", new dpp::events::automod_rule_update() },
+	{ "AUTO_MODERATION_RULE_DELETE", new dpp::events::automod_rule_delete() },
+	{ "AUTO_MODERATION_ACTION_EXECUTION", new dpp::events::automod_rule_execute() },
 };
 
 void discord_client::handle_event(const std::string &event, json &j, const std::string &raw)

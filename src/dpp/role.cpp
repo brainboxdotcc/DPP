@@ -22,9 +22,9 @@
 #include <dpp/role.h>
 #include <dpp/cache.h>
 #include <dpp/discordevents.h>
+#include <dpp/permissions.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -111,7 +111,7 @@ std::string role::build_json(bool with_id) const {
 }
 
 std::string role::get_mention() const {
-	return "<&" + std::to_string(id) + ">";
+	return "<@&" + std::to_string(id) + ">";
 }
 
 role& role::load_image(const std::string &image_blob, const image_type type) {
@@ -143,167 +143,167 @@ bool role::is_managed() const {
 }
 
 bool role::has_create_instant_invite() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_create_instant_invite));
+	return has_administrator() || permissions.has(p_create_instant_invite);
 }
 
 bool role::has_kick_members() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_kick_members));
+	return has_administrator() || permissions.has(p_kick_members);
 }
 
 bool role::has_ban_members() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_ban_members));
+	return has_administrator() || permissions.has(p_ban_members);
 }
 
 bool role::has_administrator() const {
-	return (this->permissions & p_administrator);
+	return permissions.has(p_administrator);
 }
 
 bool role::has_manage_channels() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_channels));
+	return has_administrator() || permissions.has(p_manage_channels);
 }
 
 bool role::has_manage_guild() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_guild));
+	return has_administrator() || permissions.has(p_manage_guild);
 }
 
 bool role::has_add_reactions() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_add_reactions));
+	return has_administrator() || permissions.has(p_add_reactions);
 }
 
 bool role::has_view_audit_log() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_view_audit_log));
+	return has_administrator() || permissions.has(p_view_audit_log);
 }
 
 bool role::has_priority_speaker() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_priority_speaker));
+	return has_administrator() || permissions.has(p_priority_speaker);
 }
 
 bool role::has_stream() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_stream));
+	return has_administrator() || permissions.has(p_stream);
 }
 
 bool role::has_view_channel() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_view_channel));
+	return has_administrator() || permissions.has(p_view_channel);
 }
 
 bool role::has_send_messages() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_send_messages));
+	return has_administrator() || permissions.has(p_send_messages);
 }
 
 bool role::has_send_tts_messages() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_send_tts_messages));
+	return has_administrator() || permissions.has(p_send_tts_messages);
 }
 
 bool role::has_manage_messages() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_messages));
+	return has_administrator() || permissions.has(p_manage_messages);
 }
 
 bool role::has_embed_links() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_embed_links));
+	return has_administrator() || permissions.has(p_embed_links);
 }
 
 bool role::has_attach_files() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_attach_files));
+	return has_administrator() || permissions.has(p_attach_files);
 }
 
 bool role::has_read_message_history() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_read_message_history));
+	return has_administrator() || permissions.has(p_read_message_history);
 }
 
 bool role::has_mention_everyone() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_mention_everyone));
+	return has_administrator() || permissions.has(p_mention_everyone);
 }
 
 bool role::has_use_external_emojis() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_use_external_emojis));
+	return has_administrator() || permissions.has(p_use_external_emojis);
 }
 
 bool role::has_view_guild_insights() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_view_guild_insights));
+	return has_administrator() || permissions.has(p_view_guild_insights);
 }
 
 bool role::has_connect() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_connect));
+	return has_administrator() || permissions.has(p_connect);
 }
 
 bool role::has_speak() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_speak));
+	return has_administrator() || permissions.has(p_speak);
 }
 
 bool role::has_mute_members() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_mute_members));
+	return has_administrator() || permissions.has(p_mute_members);
 }
 
 bool role::has_deafen_members() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_deafen_members));
+	return has_administrator() || permissions.has(p_deafen_members);
 }
 
 bool role::has_move_members() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_move_members));
+	return has_administrator() || permissions.has(p_move_members);
 }
 
 bool role::has_use_vad() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_use_vad));
+	return has_administrator() || permissions.has(p_use_vad);
 }
 
 bool role::has_change_nickname() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_change_nickname));
+	return has_administrator() || permissions.has(p_change_nickname);
 }
 
 bool role::has_manage_nicknames() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_nicknames));
+	return has_administrator() || permissions.has(p_manage_nicknames);
 }
 
 bool role::has_manage_roles() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_roles));
+	return has_administrator() || permissions.has(p_manage_roles);
 }
 
 bool role::has_manage_webhooks() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_webhooks));
+	return has_administrator() || permissions.has(p_manage_webhooks);
 }
 
 bool role::has_manage_emojis_and_stickers() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_emojis_and_stickers));
+	return has_administrator() || permissions.has(p_manage_emojis_and_stickers);
 }
 
 bool role::has_use_application_commands() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_use_application_commands));
+	return has_administrator() || permissions.has(p_use_application_commands);
 }
 
 bool role::has_request_to_speak() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_request_to_speak));
+	return has_administrator() || permissions.has(p_request_to_speak);
 }
 
 bool role::has_manage_threads() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_threads));
+	return has_administrator() || permissions.has(p_manage_threads);
 }
 
 bool role::has_create_public_threads() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_create_public_threads));
+	return has_administrator() || permissions.has(p_create_public_threads);
 }
 
 bool role::has_create_private_threads() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_create_private_threads));
+	return has_administrator() || permissions.has(p_create_private_threads);
 }
 
 bool role::has_use_external_stickers() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_use_external_stickers));
+	return has_administrator() || permissions.has(p_use_external_stickers);
 }
 
 bool role::has_send_messages_in_threads() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_send_messages_in_threads));
+	return has_administrator() || permissions.has(p_send_messages_in_threads);
 }
 
 bool role::has_use_embedded_activities() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_use_embedded_activities));
+	return has_administrator() || permissions.has(p_use_embedded_activities);
 }
 
 bool role::has_manage_events() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_manage_events));
+	return has_administrator() || permissions.has(p_manage_events);
 }
 
 bool role::has_moderate_members() const {
-	return ((this->permissions & p_administrator) | (this->permissions & p_moderate_members));
+	return has_administrator() || permissions.has(p_moderate_members);
 }
 
 role& role::set_name(const std::string& n) {
@@ -364,12 +364,7 @@ std::string role::get_icon_url(uint16_t size) const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->icon.to_string().empty()) {
-		return fmt::format("{}/role-icons/{}/{}.png{}",
-						   utility::cdn_host,
-						   this->id,
-						   this->icon.to_string(),
-						   utility::avatar_size(size)
-		);
+		return utility::cdn_host + "/role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

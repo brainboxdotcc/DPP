@@ -43,7 +43,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
@@ -51,7 +51,7 @@ jobs:
         run: cd build && ninja 
 
       - name: Run unit tests
-        run: cd build && ./test
+        run: cd build/library && ./unittest
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
           TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
@@ -60,21 +60,6 @@ jobs:
           TEST_USER_ID: ${{secrets.TEST_USER_ID}}
           TEST_EVENT_ID: ${{secrets.TEST_EVENT_ID}}
 
-      - name: Package distributable
-        run: cd build && cpack --verbose
-
-      - name: Upload Binary (DEB)
-        uses: actions/upload-artifact@v2
-        with:
-          name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
-          path: '${{github.workspace}}/build/*.deb'
-
-      - name: Upload Binary (RPM)
-        uses: actions/upload-artifact@v2
-        with:
-          name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
-          path: '${{github.workspace}}/build/*.rpm'
-
   linux-no-unit-tests:
     name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
     runs-on: ${{matrix.cfg.os}}
@@ -82,6 +67,8 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-11 }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-10 }
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:
@@ -92,12 +79,30 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
       - name: Build Project
         run: cd build && ninja 
+
+      - name: Package distributable
+        if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
+        run: cd build && cpack --verbose
+
+      - name: Upload Binary (DEB)
+        if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
+          path: '${{github.workspace}}/build/*.deb'
+
+      - name: Upload Binary (RPM)
+        if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
+          path: '${{github.workspace}}/build/*.rpm'
 
   macos:
     name: macOS x64
@@ -110,10 +115,14 @@ jobs:
         run: brew install cmake ninja libsodium opus openssl
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Build Project
         run: cd build && ninja 
+        env:
+          DONT_RUN_VCPKG: true
 
   windows: # Windows x64 and x86 build matrix
     strategy:
@@ -145,21 +154,29 @@ jobs:
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
-        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
+        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Build Project
         run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}}
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Move debug files for packaging
         if: ${{ matrix.cfg.config == 'Debug' }}
-        run: xcopy /s/q main\build\Debug main\build\Release\
+        run: xcopy main\build\library\Debug\* main\build\library\Release\ /s /q
 
       - name: Package distributable
         run: cd main/build && cpack --verbose
+        env:
+          DONT_RUN_VCPKG: true
 
       - name: Upload Binary
         uses: actions/upload-artifact@v2
@@ -172,13 +189,13 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          - {name: "ARM64", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake}
-          - {name: "ARMv7 HF", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv7ToolChain.cmake}
-          - {name: "Linux x86", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake}
-          - {name: "ARMv6", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
+          - {name: "ARM64", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake}
+          - {name: "ARMv7 HF", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv7ToolChain.cmake}
+          - {name: "Linux x86", os: ubuntu-22.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake}
+          - {name: "ARMv6", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
 
     name: ${{matrix.cfg.name}}
-    runs-on: ubuntu-20.04
+    runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2
@@ -187,7 +204,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake ninja-build rpm
 
       - name: Generate CMakeFiles
-        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -G Ninja ..
 
       - name: Compile Source
         run: cd build && sudo ninja 

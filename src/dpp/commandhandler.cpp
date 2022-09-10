@@ -22,7 +22,6 @@
 #include <dpp/cluster.h>
 #include <dpp/exception.h>
 #include <dpp/stringops.h>
-#include <dpp/fmt-minimal.h>
 #include <sstream>
 
 namespace dpp {
@@ -45,7 +44,7 @@ commandhandler::commandhandler(cluster* o, bool auto_hook_events, snowflake appl
 		app_id = o->me.id;
 	}
 	if (auto_hook_events) {
-		interactions = o->on_interaction_create([this](const dpp::interaction_create_t &event) {
+		interactions = o->on_slashcommand([this](const dpp::slashcommand_t &event) {
 			this->route(event);
 		});
 		messages = o->on_message_create([this](const dpp::message_create_t & event) {
@@ -67,7 +66,7 @@ commandhandler::~commandhandler()
 {
 	if (messages && interactions) {
 		owner->on_message_create.detach(messages);
-		owner->on_interaction_create.detach(interactions);
+		owner->on_slashcommand.detach(interactions);
 	}
 }
 
@@ -89,8 +88,8 @@ commandhandler& commandhandler::add_command(const std::string &command, const pa
 	i.parameters = parameters;
 	commands[lowercase(command)] = i;
 	if (slash_commands_enabled) {
-		if (this->app_id == 0) {
-			if (owner->me.id == 0) {
+		if (this->app_id.empty()) {
+			if (owner->me.id.empty()) {
 				throw dpp::logic_exception("Command handler not ready (i don't know my application ID)");
 			} else {
 				this->app_id = owner->me.id;
@@ -152,7 +151,7 @@ commandhandler& commandhandler::register_commands()
 	for(auto & guild_commands : bulk_registration_list_guild) {
 		owner->guild_bulk_command_create(guild_commands.second, guild_commands.first, [guild_commands, this](const dpp::confirmation_callback_t &callback) {
 			if (callback.is_error()) {
-				this->owner->log(dpp::ll_error, fmt::format("Failed to register guild slash commands for guild id '{}': {}", guild_commands.first, callback.http_info.body));
+				this->owner->log(dpp::ll_error, "Failed to register guild slash commands for guild id '" + std::to_string(guild_commands.first) + "': " + callback.http_info.body);
 			}
 		});
 	}
@@ -298,7 +297,7 @@ void commandhandler::route(const struct dpp::message_create_t& event)
 	}
 }
 
-void commandhandler::route(const struct interaction_create_t & event)
+void commandhandler::route(const struct slashcommand_t & event)
 {
 	/* We don't need to check for prefixes here, slash command interactions
 	 * dont have prefixes at all.

@@ -23,7 +23,6 @@
 #include <dpp/utility.h>
 #include <dpp/emoji.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -33,12 +32,7 @@ std::string activity::get_large_asset_url(uint16_t size) const {
 	// https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
 	if (!this->assets.large_image.empty() && this->application_id &&
 		this->assets.large_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
-		return fmt::format("{}/app-assets/{}/{}.png{}",
-						   utility::cdn_host,
-						   this->application_id,
-						   this->assets.large_image,
-						   utility::avatar_size(size)
-		);
+		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.large_image + ".png" + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
@@ -48,12 +42,7 @@ std::string activity::get_small_asset_url(uint16_t size) const {
 	// https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
 	if (!this->assets.small_image.empty() && this->application_id &&
 		this->assets.small_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
-		return fmt::format("{}/app-assets/{}/{}.png{}",
-						   utility::cdn_host,
-						   this->application_id,
-						   this->assets.small_image,
-						   utility::avatar_size(size)
-		);
+		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.small_image + ".png" + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

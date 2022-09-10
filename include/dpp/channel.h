@@ -26,6 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
 #include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/permissions.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
 
@@ -42,13 +43,13 @@ enum channel_type : uint8_t {
 	 */
 	GROUP_DM		= 3,
 	CHANNEL_CATEGORY	= 4,	//!< an organizational category that contains up to 50 channels
-	CHANNEL_NEWS		= 5,	//!< a channel that users can follow and crosspost into their own server
+	CHANNEL_ANNOUNCEMENT	= 5,	//!< a channel that users can follow and crosspost into their own server
 	/**
 	 * @brief a channel in which game developers can sell their game on Discord
 	 * @deprecated store channels are deprecated by Discord
 	 */
 	CHANNEL_STORE		= 6,
-	CHANNEL_NEWS_THREAD	= 10,	//!< a temporary sub-channel within a GUILD_NEWS channel
+	CHANNEL_ANNOUNCEMENT_THREAD	= 10,	//!< a temporary sub-channel within a GUILD_ANNOUNCEMENT channel
 	CHANNEL_PUBLIC_THREAD	= 11,	//!< a temporary sub-channel within a GUILD_TEXT channel
 	CHANNEL_PRIVATE_THREAD	= 12,	//!< a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
 	CHANNEL_STAGE		= 13,	//!< a "stage" channel, like a voice channel with one authorised speaker
@@ -66,6 +67,18 @@ enum channel_flags : uint8_t {
 	c_nsfw =		0b00010000,
 	/// Video quality forced to 720p
 	c_video_quality_720p =	0b00100000,
+	/// Lock permissions (only used when updating channel positions)
+	c_lock_permissions =	0b01000000,
+	/// Thread pinned in a forum (type 15) channel
+	c_pinned_thread =	0b10000000,
+};
+
+/**
+ * @brief The flags in discord channel's raw "flags" field. We use these for serialisation only, right now. Might be better to create a new field than to make the existing channel::flags from uint8_t to uint16_t, if discord adds more flags in future.
+ */
+enum discord_channel_flags : uint8_t {
+	/// Thread pinned in a forum (type 15) channel
+	dc_pinned_thread = 0b00000001,
 };
 
 /**
@@ -79,17 +92,31 @@ enum overwrite_type : uint8_t {
 };
 
 /**
- * @brief channel permission overwrites
+ * @brief Channel permission overwrites
  */
 struct DPP_EXPORT permission_overwrite {
-	/// Overwrite id
+	/// ID of the role or the member
 	snowflake id;
-	/// Allow mask
-	uint64_t allow;
-	/// Deny mask
-	uint64_t deny;
-	/// Overwrite type
+	/// Bitmask of allowed permissions
+	permission allow;
+	/// Bitmask of denied permissions
+	permission deny;
+	/// Type of overwrite. See dpp::overwrite_type
 	uint8_t type;
+
+	/**
+	 * @brief Construct a new permission_overwrite object
+	 */
+	permission_overwrite();
+
+	/**
+	 * @brief Construct a new permission_overwrite object
+	 * @param id ID of the role or the member to create the overwrite for
+	 * @param allow Bitmask of allowed permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param deny Bitmask of denied permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param type Type of overwrite
+	 */
+	permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type);
 };
 
 
@@ -99,13 +126,13 @@ struct DPP_EXPORT permission_overwrite {
 struct DPP_EXPORT thread_metadata {
 	/// When the thread was archived
 	time_t archive_timestamp;
-	/// The duration after a thread will archive
+	/// The duration in minutes to automatically archive the thread after recent activity.
 	uint16_t auto_archive_duration;
 	/// Whether a thread is archived
 	bool archived;
-	/// Whether a thread is locked
+	/// Whether a thread is locked. When a thread is locked, only users with `MANAGE_THREADS` can unarchive it
 	bool locked;
-	/// Whether non-moderators can add other non-moderators 
+	/// Whether non-moderators can add other non-moderators. Only for private threads
 	bool invitable;
 };
 
@@ -116,11 +143,11 @@ struct DPP_EXPORT thread_member
 {
 	/// ID of the thread member is part of
 	snowflake thread_id;
-	/// ID of the member 
+	/// ID of the member
 	snowflake user_id;
-	/// When the user joined the thread
+	/// The time when user last joined the thread
 	time_t joined;
-	/// Flags bitmap
+	/// Any user-thread settings, currently only used for notifications
 	uint32_t flags;
 
 	/**
@@ -189,7 +216,7 @@ public:
 	 * it contains the calculated permission bitmask of the user issuing the command
 	 * within this channel.
 	 */
-	uint64_t permissions;
+	permission permissions;
 
 	/** Sorting position, lower number means higher up the list */
 	uint16_t position;
@@ -250,15 +277,15 @@ public:
 	/**
 	 * @brief Set flags for this channel object
 	 *
-	 * @param flags Flag bitmask to set
+	 * @param flags Flag bitmask to set from dpp::channel_flags
 	 * @return Reference to self, so these method calls may be chained 
 	 */
-	channel& set_flags(const uint16_t flags);
+	channel& set_flags(const uint8_t flags);
 
 	/**
 	 * @brief Add (bitwise OR) a flag to this channel object
 	 * 	
-	 * @param flag Flag bit to set
+	 * @param flag Flag bit to add from dpp::channel_flags
 	 * @return Reference to self, so these method calls may be chained 
 	 */
 	channel& add_flag(const channel_flags flag);
@@ -266,7 +293,7 @@ public:
 	/**
 	 * @brief Remove (bitwise NOT AND) a flag from this channel object
 	 * 	
-	 * @param flag Flag bit to set
+	 * @param flag Flag bit to remove from dpp::channel_flags
 	 * @return Reference to self, so these method calls may be chained 
 	 */
 	channel& remove_flag(const channel_flags flag);
@@ -320,6 +347,15 @@ public:
 	channel& set_nsfw(const bool is_nsfw);
 
 	/**
+	 * @brief Set lock permissions property of this channel object
+	 * Used only with the reorder channels method
+	 *
+	 * @param is_lock_permissions true, if we are to inherit permissions from the category
+	 * @return Reference to self, so these method calls may be chained 
+	 */
+	channel& set_lock_permissions(const bool is_lock_permissions);
+
+	/**
 	 * @brief Set rate_limit_per_user of this channel object
 	 *
 	 * @param rate_limit_per_user rate_limit_per_user (slowmode in sec) to set
@@ -331,13 +367,13 @@ public:
 	 * @brief Add a permission_overwrite to this channel object
 	 * 
 	 * @param id ID of the role or the member you want to add overwrite for
-	 * @param type type of overwrite (0 for role, 1 for member)
-	 * @param allowed_permissions bitmask of allowed permissions (refer to enum role_permissions) for this user/role in this channel
-	 * @param denied_permissions bitmask of denied permissions (refer to enum role_permissions) for this user/role in this channel
+	 * @param type type of overwrite
+	 * @param allowed_permissions bitmask of allowed permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @param denied_permissions bitmask of denied permissions (refer to enum dpp::permissions) for this user/role in this channel
 	 *
 	 * @return Reference to self, so these method calls may be chained 
 	 */
-	channel& add_permission_overwrite(const snowflake id, const uint8_t type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
+	channel& add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
 
 	/**
 	 * @brief Get the mention ping for the channel
@@ -347,14 +383,31 @@ public:
 	std::string get_mention() const;
 
 	/**
-	 * @brief Get the user permissions for a user on this channel
+	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 * 
-	 * @param member The user to return permissions for
-	 * @return uint64_t Permissions bitmask made of bits in role_permissions.
-	 * Note that if the user is not on the channel or the guild is
-	 * not in the cache, the function will always return 0.
+	 * @param user The user to resolve the permissions for
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
+	 * @note Requires role cache to be enabled (it's enabled by default).
+	 *
+	 * @note This is an alias for guild::permission_overwrites and searches for the guild in the cache,
+	 * so consider using guild::permission_overwrites if you already have the guild object.
+	 *
+	 * @warning The method will search for the guild member in the cache by the users id.
+	 * If the guild member is not in cache, the method will always return 0.
 	 */
-	uint64_t get_user_permissions(const class user* member) const;
+	permission get_user_permissions(const class user* user) const;
+
+	/**
+	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
+	 *
+	 * @param member The member to resolve the permissions for
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
+	 * @note Requires role cache to be enabled (it's enabled by default).
+	 *
+	 * @note This is an alias for guild::permission_overwrites and searches for the guild in the cache,
+	 * so consider using guild::permission_overwrites if you already have the guild object.
+	 */
+	permission get_user_permissions(const class guild_member &member) const;
 
 	/**
 	 * @brief Return a map of members on the channel, built from the guild's
@@ -362,6 +415,7 @@ public:
 	 * Does not return reliable information for voice channels, use
 	 * dpp::channel::get_voice_members() instead for this.
 	 * @return A map of guild members keyed by user id.
+	 * @note If the guild this channel belongs to is not in the cache, the function will always return 0.
 	 */
 	std::map<snowflake, class guild_member*> get_members();
 
@@ -395,6 +449,14 @@ public:
 	 * @return true if NSFW
 	 */
 	bool is_nsfw() const;
+
+	/**
+	 * @brief Returns true if the permissions are to be synced with the category it is in.
+	 * Used only and set manually when using the reorder channels method.
+	 * 
+	 * @return true if keeping permissions
+	 */
+	bool is_locked_permissions() const;
 
 	/**
 	 * @brief Returns true if the channel is a text channel
@@ -440,9 +502,9 @@ public:
 	bool is_forum() const;
 
 	/**
-	 * @brief Returns true if the channel is a news channel
+	 * @brief Returns true if the channel is an announcement channel
 	 * 
-	 * @return true if news channel
+	 * @return true if announcement channel
 	 */
 	bool is_news_channel() const;
 
@@ -475,6 +537,13 @@ public:
 	 */
 	bool is_video_720p() const;
 
+	/**
+	 * @brief Returns true if channel is a pinned thread in forum
+	 *
+	 * @return true, if channel is a pinned thread in forum
+	 */
+	bool is_pinned_thread() const;
+
 };
 
 /** @brief A definition of a discord thread.
@@ -491,7 +560,7 @@ public:
 	/** Thread metadata (threads) */
 	thread_metadata metadata;
 
-	/** Approximate count of messages in a thread (threads) */
+	/** Number of messages (not including the initial message or deleted messages) of the thread. If the thread was created before July 1, 2022, it stops counting at 50 */
 	uint8_t message_count;
 
 	/** Approximate count of members in a thread (threads) */
@@ -503,9 +572,9 @@ public:
 	thread();
 
 	/**
-	 * @brief Returns true if the channel is a news thread
+	 * @brief Returns true if the thread is within an announcement channel
 	 *
-	 * @return true if news thread
+	 * @return true if announcement thread
 	 */
 	bool is_news_thread() const;
 

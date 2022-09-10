@@ -30,8 +30,6 @@ voicestate::voicestate() : shard(nullptr), guild_id(0), channel_id(0), user_id(0
 {
 }
 
-voicestate::~voicestate() = default;
-
 voicestate& voicestate::fill_from_json(nlohmann::json* j) {
 	guild_id = snowflake_not_null(j, "guild_id");
 	channel_id = snowflake_not_null(j, "channel_id");

@@ -72,6 +72,13 @@
 		"random": "cpp",
 		"variant": "cpp",
 		"unordered_set": "cpp",
-		"codecvt": "cpp"
+		"codecvt": "cpp",
+		"future": "cpp",
+		"cerrno": "cpp",
+		"compare": "cpp",
+		"coroutine": "cpp",
+		"numbers": "cpp",
+		"semaphore": "cpp",
+		"stop_token": "cpp"
 	}
 }

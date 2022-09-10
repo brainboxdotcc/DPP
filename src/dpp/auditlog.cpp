@@ -26,19 +26,15 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-auditlog::auditlog() = default;
-
-auditlog::~auditlog() = default;
-
 auditlog& auditlog::fill_from_json(nlohmann::json* j) {
-	for (auto & ai : (*j)["audit_log_entries"]) {
+	for (auto &ai : (*j)["audit_log_entries"]) {
 		audit_entry ae;
 		ae.id = snowflake_not_null(&ai, "id");
-		ae.event = (audit_type)int8_not_null(&ai, "action_type");
+		ae.type = (audit_type)int8_not_null(&ai, "action_type");
 		ae.user_id = snowflake_not_null(&ai, "user_id");
 		ae.target_id = snowflake_not_null(&ai, "target_id");
 		ae.reason = string_not_null(&ai, "reason");
-		if (j->contains("changes")) {
+		if (ai.contains("changes")) {
 			auto &c = ai["changes"];
 			for (auto & change : c) {
 				audit_change ac;
@@ -49,9 +45,10 @@ auditlog& auditlog::fill_from_json(nlohmann::json* j) {
 				if (change.find("old_value") != change.end()) {
 					ac.old_value = change["old_value"].dump();
 				}
+				ae.changes.push_back(ac);
 			}
 		}
-		if (j->contains("options")) {
+		if (ai.contains("options")) {
 			auto &o = ai["options"];
 			audit_extra opts;
 			opts.channel_id = snowflake_not_null(&o, "channel_id");
@@ -62,7 +59,8 @@ auditlog& auditlog::fill_from_json(nlohmann::json* j) {
 			opts.message_id = snowflake_not_null(&o, "message_id");
 			opts.role_name = string_not_null(&o, "role_name");
 			opts.type = string_not_null(&o, "type");
-			ae.options = opts;
+			opts.application_id = snowflake_not_null(&o, "application_id");
+			ae.extra = opts;
 		}
 		this->entries.emplace_back(ae);
 	}

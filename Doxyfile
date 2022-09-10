@@ -47,7 +47,7 @@ PROJECT_NUMBER	 =
 # for a project that appears at the top of each page and should give viewer a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF	  = "A Lightweight C++ library for Discord"
+PROJECT_BRIEF	  = "C++ Discord API Bot Library"
 
 # With the PROJECT_LOGO tag one can specify an logo or icon that is included in
 # the documentation. The maximum height of the logo should not exceed 55 pixels
@@ -700,14 +700,14 @@ QUIET		  = YES
 # Tip: Turn warnings on while writing the documentation.
 # The default value is: YES.
 
-WARNINGS	       = YES
+WARNINGS	       = NO
 
 # If the WARN_IF_UNDOCUMENTED tag is set to YES, then doxygen will generate
 # warnings for undocumented members. If EXTRACT_ALL is set to YES then this flag
 # will automatically be disabled.
 # The default value is: YES.
 
-WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_UNDOCUMENTED   = NO
 
 # If the WARN_IF_DOC_ERROR tag is set to YES, doxygen will generate warnings for
 # potential errors in the documentation, such as not documenting some parameters
@@ -715,7 +715,7 @@ WARN_IF_UNDOCUMENTED   = YES
 # markup commands wrongly.
 # The default value is: YES.
 
-WARN_IF_DOC_ERROR      = YES
+WARN_IF_DOC_ERROR      = NO
 
 # This WARN_NO_PARAMDOC option can be enabled to get warnings for functions that
 # are documented, but have no documentation for their parameters or return
@@ -751,7 +751,7 @@ WARN_LOGFILE	   =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT		  = docpages src include
+INPUT		  = docpages include
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -805,18 +805,8 @@ EXCLUDE_SYMLINKS       = YES
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = */json_fwd.hpp \
-			*/json.hpp \
-			*/format.cpp \
-			*/format.h \
-			*/printf.h \
-			*/os.h \
-			*/os.cpp \
-			*/color.h \
-			*/compile.h \
-			*/ostream.h \
-			*/ranges.h \
-			*/format-inl.h
+EXCLUDE_PATTERNS       = */dpp/nlohmann/* \
+			*/dpp/fmt/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -1943,7 +1933,8 @@ INCLUDE_FILE_PATTERNS  =
 
 SHOW_HEADERFILE = NO
 
-PREDEFINED = _DOXYGEN_
+PREDEFINED = _DOXYGEN_ \
+             DPP_CORO
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

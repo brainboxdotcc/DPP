@@ -22,6 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/managed.h>
 #include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/permissions.h>
 #include <dpp/guild.h>
 #include <dpp/json_interface.h>
 
@@ -33,53 +34,6 @@ enum role_flags : uint8_t {
 	r_managed =		0b00000010, //!< Managed role (introduced by a bot or application)
 	r_mentionable =		0b00000100, //!< Mentionable with a ping
 	r_premium_subscriber =	0b00001000, //!< This is set for the role given to nitro 
-};
-
-/**
- * @brief Represents the various discord permissions
- */
-enum role_permissions : uint64_t {
-	p_create_instant_invite		=	0x00000000001,	//!< allows creation of instant invites
-	p_kick_members			=	0x00000000002,	//!< allows kicking members
-	p_ban_members			=	0x00000000004,	//!< allows banning members
-	p_administrator			=	0x00000000008,	//!< allows all permissions and bypasses channel permission overwrites
-	p_manage_channels		=	0x00000000010,	//!< allows management and editing of channels
-	p_manage_guild			=	0x00000000020,	//!< allows management and editing of the guild
-	p_add_reactions			=	0x00000000040,	//!< allows for the addition of reactions to messages
-	p_view_audit_log		=	0x00000000080,	//!< allows for viewing of audit logs
-	p_priority_speaker		=	0x00000000100,	//!< allows for using priority speaker in a voice channel
-	p_stream			=	0x00000000200,	//!< allows the user to go live
-	p_view_channel			=	0x00000000400,	//!< allows guild members to view a channel, which includes reading messages in text channels and joining voice channels
-	p_send_messages			=	0x00000000800,	//!< allows for sending messages in a channel
-	p_send_tts_messages		=	0x00000001000,	//!< allows for sending of /tts messages
-	p_manage_messages		=	0x00000002000,	//!< allows for deletion of other users messages
-	p_embed_links			=	0x00000004000,	//!< links sent by users with this permission will be auto-embedded
-	p_attach_files			=	0x00000008000,	//!< allows for uploading images and files
-	p_read_message_history		=	0x00000010000,	//!< allows for reading of message history
-	p_mention_everyone		=	0x00000020000,	//!< allows for using the everyone and the here tag to notify users in a channel
-	p_use_external_emojis		=	0x00000040000,	//!< allows the usage of custom emojis from other servers
-	p_view_guild_insights		=	0x00000080000,	//!< allows for viewing guild insights
-	p_connect			=	0x00000100000,	//!< allows for joining of a voice channel
-	p_speak				=	0x00000200000,	//!< allows for speaking in a voice channel
-	p_mute_members			=	0x00000400000,	//!< allows for muting members in a voice channel
-	p_deafen_members		=	0x00000800000,	//!< allows for deafening of members in a voice channel
-	p_move_members			=	0x00001000000,	//!< allows for moving of members between voice channels
-	p_use_vad			=	0x00002000000,	//!< allows for using voice-activity-detection in a voice channel
-	p_change_nickname		=	0x00004000000,	//!< allows for modification of own nickname 
-	p_manage_nicknames		=	0x00008000000,	//!< allows for modification of other users nicknames 
-	p_manage_roles			=	0x00010000000,	//!< allows management and editing of roles 
-	p_manage_webhooks		=	0x00020000000,	//!< allows management and editing of webhooks
-	p_manage_emojis_and_stickers	=	0x00040000000,	//!< allows management and editing of emojis and stickers
-	p_use_application_commands	=	0x00080000000,	//!< allows members to use application commands, including slash commands and context menus 
-	p_request_to_speak		=	0x00100000000,	//!< allows for requesting to speak in stage channels. (Discord: This permission is under active development and may be changed or removed.)
-	p_manage_events			=	0x00200000000,	//!< allows for management (creation, updating, deleting, starting) of scheduled events
-	p_manage_threads		=	0x00400000000,	//!< allows for deleting and archiving threads, and viewing all private threads
-	p_create_public_threads		=	0x00800000000,	//!< allows for creating public and announcement threads
-	p_create_private_threads	=	0x01000000000,	//!< allows for creating private threads
-	p_use_external_stickers		=	0x02000000000,	//!< allows the usage of custom stickers from other servers
-	p_send_messages_in_threads	=	0x04000000000,	//!< allows for sending messages in threads
-	p_use_embedded_activities	=	0x08000000000,	//!< allows for using activities (applications with the EMBEDDED flag) in a voice channel
-	p_moderate_members		=	0x10000000000,	//!< allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
 };
 
 /**
@@ -109,8 +63,8 @@ public:
 	uint32_t colour;
 	/** Role position */
 	uint8_t position;
-	/** Role permissions bitmask values from dpp::role_permissions */
-	uint64_t permissions;
+	/** Role permissions bitmask values from dpp::permissions */
+	permission permissions;
 	/** Role flags from dpp::role_flags */
 	uint8_t flags;
 	/** Integration id if any (e.g. role is a bot's role created when it was invited) */
@@ -165,7 +119,7 @@ public:
 	/**
 	 * @brief Set the flags
 	 * 
-	 * @param f Flags to set
+	 * @param f Flags to set from dpp::role_flags
 	 * @return role& reference to self
 	 */
 	role& set_flags(uint8_t f);
@@ -244,6 +198,52 @@ public:
 	role& load_image(const std::string &image_blob, const image_type type);
 
 	/**
+	 * @brief Operator less than, used for checking if a role is below another.
+	 *
+	 * @param lhs first role to compare
+	 * @param rhs second role to compare
+	 * @return true if lhs is less than rhs
+	 */
+	friend inline bool operator< (const role& lhs, const role& rhs)
+	{
+		return lhs.position < rhs.position;
+	}
+
+	/**
+	 * @brief Operator greater than, used for checking if a role is above another.
+	 *
+	 * @param lhs first role to compare
+	 * @param rhs second role to compare
+	 * @return true if lhs is greater than rhs
+	 */
+	friend inline bool operator> (const role& lhs, const role& rhs)
+	{
+		return lhs.position > rhs.position;
+	}
+
+	/**
+	 * @brief Operator equals, used for checking if a role is ranked equal to another.
+	 *
+	 * @param other role to compare
+	 * @return true if is equal to other
+	 */
+	inline bool operator== (const role& other) const
+	{
+		return this->position == other.position;
+	}
+
+	/**
+	 * @brief Operator not equals, used for checking if a role is ranked equal to another.
+	 *
+	 * @param other role to compare
+	 * @return true if is not equal to other
+	 */
+	inline bool operator!= (const role& other) const
+	{
+		return this->position != other.position;
+	}
+
+	/**
 	 * @brief True if the role is hoisted
 	 * @return bool Role appears separated from others in the member list
 	 */
@@ -266,7 +266,7 @@ public:
 	 */
 	bool has_create_instant_invite() const;
 	/**
-	 * @brief True if has create instant invite permission
+	 * @brief True if has the kick members permission.
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the kick members permission or is administrator.

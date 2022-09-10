@@ -25,6 +25,7 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/user.h>
+#include <dpp/permissions.h>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/json_interface.h>
 
@@ -59,7 +60,17 @@ enum application_flags : uint32_t {
 	/// Has approval for message content
 	apf_gateway_message_content = (1 << 18),
 	/// Has message content, but <100 guilds
-	apf_gateway_message_content_limited = (1 << 19)
+	apf_gateway_message_content_limited = (1 << 19),
+	/// Indicates if the app has registered global application commands
+	apf_application_command_badge = (1 << 23)
+};
+
+/**
+ * @brief Represents the settings for the bot/application's in-app authorization link
+ */
+struct DPP_EXPORT application_install_params {
+	permission permissions;	//!< A bitmask of dpp::permissions to request for the bot role
+	std::vector<std::string> scopes;	//!< The [scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes) as strings to add the application to the server with
 };
 
 /**
@@ -99,7 +110,7 @@ public:
 	std::string		terms_of_service_url;	//!< Optional: the url of the app's terms of service
 	std::string		privacy_policy_url;	//!< Optional: the url of the app's privacy policy
 	user			owner;			//!< Optional: partial user object containing info on the owner of the application
-	std::string		summary;		//!< if this application is a game sold on Discord, this field will be the summary field for the store page of its primary sku @deprecated Removed by Discord
+	std::string		summary;		//!< if this application is a game sold on Discord, this field will be the summary field for the store page of its primary sku @deprecated Will be removed in v11
 	std::string		verify_key;		//!< the hex encoded key for verification in interactions and the GameSDK's GetTicket
 	app_team		team;			//!< if the application belongs to a team, this will be a list of the members of that team (may be empty)
 	snowflake		guild_id;		//!< Optional: if this application is a game sold on Discord, this field will be the guild to which it has been linked
@@ -107,7 +118,10 @@ public:
 	std::string		slug;			//!< Optional: if this application is a game sold on Discord, this field will be the URL slug that links to the store page
 	utility::iconhash	cover_image;		//!< Optional: the application's default rich presence invite cover image hash
 	uint32_t		flags;			//!< Optional: the application's public flags
-	
+	std::vector<std::string> tags;	//!< Up to 5 tags describing the content and functionality of the application
+	application_install_params install_params;	//!< Settings for the application's default in-app authorization link, if enabled
+	std::string custom_install_url;	//!< The application's default custom authorization link, if enabled
+
 	/** Constructor */
 	application();
 
@@ -119,6 +133,22 @@ public:
 	 * @return A reference to self
 	 */
 	application& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Get the applications cover image url if they have one, otherwise returns an empty string
+	 *
+	 * @param size The size of the cover image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized cover image is returned.
+	 * @return std::string cover image url or empty string
+	 */
+	std::string get_cover_image_url(uint16_t size = 0) const;
+
+	/**
+	 * @brief Get the applications icon url if they have one, otherwise returns an empty string
+	 *
+	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized icon is returned.
+	 * @return std::string icon url or empty string
+	 */
+	std::string get_icon_url(uint16_t size = 0) const;
 };
 
 /** A group of applications.

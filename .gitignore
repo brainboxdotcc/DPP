@@ -4,9 +4,15 @@ config.json
 docs
 testdata/maxpower.pcm
 testdata/onandon.pcm
+buildtools/composer.phar
 docs/doxygen_sqlite3.db
 src/build
 .vs
 *.autosave
 .misspell-fixer.ignore
 core
+compile_commands.json
+tags
+.cache
+src/dpp/dpp.rc
+/main

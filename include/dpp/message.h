@@ -209,10 +209,6 @@ struct DPP_EXPORT select_option : public json_interface<select_option> {
  * then insert one or more additional components into it
  * using component::add_component(), so that the parent
  * object is an action row and the child objects are buttons.
- *
- * @note At present this only works for whitelisted
- * guilds. The beta is **closed**. When this feature is
- * released, then the functionality will work correctly.
  */
 class DPP_EXPORT component : public json_interface<component> {
 public:
@@ -358,7 +354,7 @@ public:
 	 * For action rows, this field is ignored. Setting the
 	 * value will auto-set the type to dpp::cot_text.
 	 *
-	 * @param value Value text to set. It will be truncated to the maximum length of 4000 UTF-8 characters.
+	 * @param val Value text to set. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return component& Reference to self
 	 */
 	component& set_default_value(const std::string &val);
@@ -754,6 +750,8 @@ struct DPP_EXPORT attachment {
 	uint32_t size;
 	/** File name of the attachment */
 	std::string filename;
+	/** Optional: Description of the attachment (max 1024 characters) */
+	std::string description;
 	/** URL which points to the attachment */
 	std::string url;
 	/** Proxied URL which points to the attachment */
@@ -792,8 +790,8 @@ struct DPP_EXPORT attachment {
 	 * @param callback A callback which is called when the download completes.
 	 * @note The content of the file will be in the http_info.body parameter of the
 	 * callback parameter.
-	 * @throw dpp::exception If there is no owner associated with this attachment that
-	 * itself has an owning cluster, this method will throw a dpp::exception when called.
+	 * @throw dpp::logic_exception If there is no owner associated with this attachment that
+	 * itself has an owning cluster, this method will throw a dpp::logic_exception when called.
 	 */
 	void download(http_completion_event callback) const;
 };
@@ -1191,19 +1189,19 @@ struct DPP_EXPORT message : public managed {
 	 */
 	struct allowed_ref {
 		/**
-		 * @brief Set to true to parse user mentions in the text
+		 * @brief Set to true to parse user mentions in the text. Default is false
 		 */
 		bool parse_users;
 		/**
-		 * @brief Set to true to at-everyone and at-here mentions in the text
+		 * @brief Set to true to at-everyone and at-here mentions in the text. Default is false
 		 */
 		bool parse_everyone;
 		/**
-		 * @brief Set to true to parse role mentions in the text
+		 * @brief Set to true to parse role mentions in the text. Default is false
 		 */
 		bool parse_roles;
 		/**
-		 * @brief Set to true to mention the user who sent the message this one is replying to
+		 * @brief Set to true to mention the user who sent the message this one is replying to. Default is false
 		 */
 		bool replied_user;
 		/**
@@ -1243,7 +1241,7 @@ struct DPP_EXPORT message : public managed {
 	 * @brief Construct a new message object with a channel and content
 	 *
 	 * @param channel_id The channel to send the message to
-	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
+	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(snowflake channel_id, const std::string &content, message_type type = mt_default);
@@ -1259,7 +1257,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Construct a new message object with content
 	 *
-	 * @param content The content of the message. It will be truncated to the maximum length of 2000 UTF-8 characters.
+	 * @param content The content of the message. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @param type The message type to create
 	 */
 	message(const std::string &content, message_type type = mt_default);
@@ -1311,7 +1309,7 @@ struct DPP_EXPORT message : public managed {
 	bool is_crossposted() const;
 
 	/**
-	 * @brief Returns true if posted from other servers news channel via webhook
+	 * @brief Returns true if posted from other servers announcement channel via webhook
 	 * 
 	 * @return true if posted from other server
 	 */
@@ -1378,7 +1376,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Set the flags
 	 * 
-	 * @param f flags to set
+	 * @param f flags to set from dpp::message_flags
 	 * @return message& reference to self
 	 */
 	message& set_flags(uint8_t f);
@@ -1396,6 +1394,7 @@ struct DPP_EXPORT message : public managed {
 	 * 
 	 * @param fn filename
 	 * @return message& reference to self
+	 * @deprecated Use message::add_file instead
 	 */
 	message& set_filename(const std::string &fn);
 
@@ -1404,6 +1403,7 @@ struct DPP_EXPORT message : public managed {
 	 * 
 	 * @param fc raw file content contained in std::string
 	 * @return message& reference to self
+	 * @deprecated Use message::add_file instead
 	 */
 	message& set_file_content(const std::string &fc);
 
@@ -1419,7 +1419,7 @@ struct DPP_EXPORT message : public managed {
 	/**
 	 * @brief Set the message content
 	 * 
-	 * @param c message content. It will be truncated to the maximum length of 2000 UTF-8 characters.
+	 * @param c message content. It will be truncated to the maximum length of 4000 UTF-8 characters.
 	 * @return message& reference to self
 	 */
 	message& set_content(const std::string &c);

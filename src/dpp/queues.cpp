@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/export.h>
 #ifdef _WIN32
 /* Central point for forcing inclusion of winsock library for all socket code */
 #include <io.h>
@@ -26,7 +27,6 @@
 #include <dpp/queues.h>
 #include <dpp/cluster.h>
 #include <dpp/httpsclient.h>
-#include <dpp/fmt-minimal.h>
 #include <dpp/stringops.h>
 #include <dpp/version.h>
 
@@ -78,19 +78,19 @@ void populate_result(const std::string &url, cluster* owner, http_request_comple
 	rv.ratelimit_reset_after = from_string<uint64_t>(res.get_header("x-ratelimit-reset-after"));
 	rv.ratelimit_bucket = res.get_header("x-ratelimit-bucket");
 	rv.ratelimit_global = (res.get_header("x-ratelimit-global") == "true");
-	owner->rest_ping = rv.latency;
+	owner->rest_ping = rv.latency;      
 	if (res.get_header("x-ratelimit-retry-after") != "") {
 		rv.ratelimit_retry_after = from_string<uint64_t>(res.get_header("x-ratelimit-retry-after"));
 	}
 	uint64_t rl_timer = rv.ratelimit_retry_after ? rv.ratelimit_retry_after : rv.ratelimit_reset_after;
 	if (rv.status == 429) {
-		owner->log(ll_warning, fmt::format("Rate limited on endpoint {}, reset after {}s!", url, rl_timer));
+		owner->log(ll_warning, "Rate limited on endpoint " + url + ", reset after " + std::to_string(rl_timer) + "s!");
 	}
 	if (url != "/api/v" DISCORD_API_VERSION "/gateway/bot") {	// Squelch this particular api endpoint or it generates a warning the minute we boot a cluster
 		if (rv.ratelimit_global) {
-			owner->log(ll_warning, fmt::format("At global rate limit on endpoint {}, reset after {}s", url, rl_timer));
+			owner->log(ll_warning, "At global rate limit on endpoint " + url + ", reset after " + std::to_string(rl_timer) + "s!");
 		} else if (rv.ratelimit_remaining == 0 && rl_timer > 0) {
-			owner->log(ll_debug, fmt::format("Waiting for endpoint {} rate limit, next request in {}s", url, rl_timer));
+			owner->log(ll_debug, "Waiting for endpoint " + url + " rate limit, next request in " + std::to_string(rl_timer) + "s");
 		}
 	}
 }
@@ -113,12 +113,23 @@ http_request_completion_t http_request::run(cluster* owner) {
 		std::size_t s_start = endpoint.find("://", 0);
 		if (s_start != std::string::npos) {
 			s_start += 3; /* "://" */
-			std::size_t s_end = endpoint.find("/", s_start + 1);
-			_host = endpoint.substr(0, s_end);
-			_url = endpoint.substr(s_end);	
+			/**
+			 * NOTE: "#" is in this list, really # is client side only.
+			 * This won't stop some moron from using it as part of an
+			 * API endpoint...
+			 */
+			std::size_t s_end = endpoint.find_first_of("/?#", s_start + 1);
+			if (s_end != std::string::npos) {
+				_host = endpoint.substr(0, s_end);
+				_url = endpoint.substr(s_end);
+			} else {
+				_host = endpoint;
+				_url.clear();
+			}
+		} else {
+			owner->log(ll_error, "Request to '" + endpoint + "' missing protocol scheme. This is not supported. Please specify http or https.");
 		}
 	}
-
 
 	rv.ratelimit_limit = rv.ratelimit_remaining = rv.ratelimit_reset_after = rv.ratelimit_retry_after = 0;
 	rv.status = 0;
@@ -143,12 +154,12 @@ http_request_completion_t http_request::run(cluster* owner) {
 		}
 	}
 
-	std::map<http_method, std::string> request_verb = {
-		{m_get, "GET"},
-		{m_post, "POST"},
-		{m_put, "PUT"},
-		{m_patch, "PATCH"},
-		{m_delete, "DELETE"}
+	constexpr std::array request_verb {
+		"GET",
+		"POST",
+		"PUT",
+		"PATCH",
+		"DELETE"
 	};
 
 	multipart_content multipart;
@@ -167,13 +178,13 @@ http_request_completion_t http_request::run(cluster* owner) {
 		rv.latency = dpp::utility::time_f() - start;
 		if (cli.get_status() < 100) {
 			rv.error = h_connection;
-			owner->log(ll_error, fmt::format("HTTP(S) error on {} connection to {}:{}: Malformed HTTP response", hci.scheme, hci.hostname, hci.port));
+			owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": Malformed HTTP response");
 		} else {
 			populate_result(_url, owner, rv, cli);
 		}
 	}
 	catch (const std::exception& e) {
-		owner->log(ll_error, fmt::format("HTTP(S) error on {} connection to {}:{}: {}", hci.scheme, hci.hostname, hci.port, e.what()));
+		owner->log(ll_error, "HTTP(S) error on " + hci.scheme + " connection to " + hci.hostname + ":" + std::to_string(hci.port) + ": " + std::string(e.what()));
 		rv.error = h_connection;
 	}
 
@@ -230,11 +241,11 @@ request_queue::~request_queue()
 
 void in_thread::in_loop(uint32_t index)
 {
-	utility::set_thread_name(fmt::format("http_req/{}", index));
+	utility::set_thread_name(std::string("http_req/") + std::to_string(index));
 	while (!terminating) {
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
-		in_ready.wait_for(lock, std::chrono::milliseconds(100));
+		in_ready.wait_for(lock, std::chrono::seconds(1));
 		/* New request to be sent! */
 
 		if (!requests->globally_ratelimited) {
@@ -340,7 +351,7 @@ void request_queue::out_loop()
 
 		std::mutex mtx;
 		std::unique_lock<std::mutex> lock{ mtx };			
-		out_ready.wait_for(lock, std::chrono::milliseconds(50));
+		out_ready.wait_for(lock, std::chrono::seconds(1));
 		time_t now = time(nullptr);
 
 		/* A request has been completed! */

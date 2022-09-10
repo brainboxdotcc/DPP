@@ -28,7 +28,6 @@
 #include <dpp/stringops.h>
 #include <dpp/exception.h>
 #include <dpp/cluster.h>
-#include <dpp/fmt-minimal.h>
 
 using json = nlohmann::json;
 
@@ -436,7 +435,7 @@ message& message::set_allowed_mentions(bool _parse_users, bool _parse_roles, boo
 
 message::message(snowflake _channel_id, const std::string &_content, message_type t) : message() {
 	channel_id = _channel_id;
-	content = utility::utf8substr(_content, 0, 2000);
+	content = utility::utf8substr(_content, 0, 4000);
 	type = t;
 }
 
@@ -492,7 +491,7 @@ message& message::add_file(const std::string &fn, const std::string &fc) {
 
 message& message::set_content(const std::string &c)
 {
-	content = utility::utf8substr(c, 0, 2000);
+	content = utility::utf8substr(c, 0, 4000);
 	return *this;
 }
 
@@ -507,7 +506,7 @@ message& message::set_guild_id(snowflake _guild_id) {
 }
 
 message::message(const std::string &_content, message_type t) : message() {
-	content = utility::utf8substr(_content, 0, 2000);
+	content = utility::utf8substr(_content, 0, 4000);
 	type = t;
 }
 
@@ -715,6 +714,7 @@ attachment::attachment(struct message* o, json *j) : attachment(o) {
 	this->id = snowflake_not_null(j, "id");
 	this->size = (*j)["size"];
 	this->filename = (*j)["filename"];
+	this->description = string_not_null(j, "description");
 	this->url = (*j)["url"];
 	this->proxy_url = (*j)["proxy_url"];
 	this->width = int32_not_null(j, "width");
@@ -725,7 +725,7 @@ attachment::attachment(struct message* o, json *j) : attachment(o) {
 
 void attachment::download(http_completion_event callback) const {
 	/* Download attachment if there is one attached to this object */
-	if (!owner->owner) {
+	if (owner == nullptr || owner->owner == nullptr) {
 		throw dpp::logic_exception("attachment has no owning message/cluster");
 	}
 	if (callback && this->id && !this->url.empty()) {
@@ -869,7 +869,7 @@ bool message::is_crosspost() const {
 }
 
 bool message::is_dm() const {
-	return guild_id == 0;
+	return guild_id.empty();
 }
 
 bool message::suppress_embeds() const {
@@ -904,7 +904,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->channel_id = snowflake_not_null(d, "channel_id");
 	this->guild_id = snowflake_not_null(d, "guild_id");
 	/* We didn't get a guild id. See if we can find one in the channel */
-	if (guild_id == 0 && channel_id != 0) {
+	if (guild_id.empty() && !channel_id.empty()) {
 		dpp::channel* c = dpp::find_channel(this->channel_id);
 		if (c) {
 			this->guild_id = c->guild_id;
@@ -982,7 +982,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			/* User caching on, lazy or aggressive - cache the member information */
 			auto thismember = g->members.find(uid);
 			if (thismember == g->members.end()) {
-				if (uid != 0 && author.id) {
+				if (!uid.empty() && author.id) {
 					guild_member gm;
 					gm.fill_from_json(&mi, g->id, uid);
 					g->members[author.id] = gm;
@@ -1135,10 +1135,7 @@ std::string sticker::get_url(bool accept_lottie) const {
 	if (this->format_type == sticker_format::sf_lottie && !accept_lottie) {
 		return std::string();
 	} else {
-		return fmt::format("{}/stickers/{}.{}",
-						   utility::cdn_host,
-						   this->id,
-						   this->format_type == sticker_format::sf_lottie ? "json" : "png");
+		return utility::cdn_host + "/stickers/" + std::to_string(this->id) + (this->format_type == sticker_format::sf_lottie ? ".json" : ".png");
 	}
 }
 

@@ -6,11 +6,10 @@ if (count($argv) > 1 && $argv[1] == 'nodeploy') {
 }
 
 /* Sanity checks */
-system("sudo apt-get install graphviz");
-#system("sudo git clone \"https://".getenv("GITHUB_TOKEN")."@github.com/brainboxdotcc/dpp-web.git/\" /dpp-web");
+system("sudo apt-get install graphviz screen >/dev/null");
 system("echo \$GITHUB_TOKEN | gh auth login --with-token ");
 system("gh auth status");
-system("git clone https://braindigitalis:\$PERSONAL_ACCESS_TOKEN@github.com/brainboxdotcc/dpp-web.git /home/runner/dpp-web");
+system("git clone https://braindigitalis:\$PERSONAL_ACCESS_TOKEN@github.com/brainboxdotcc/dpp-web.git /home/runner/dpp-web >/dev/null");
 
 chdir("/home/runner/work/DPP/DPP");
 system("sudo cp /home/runner/dpp-web/doxygen /usr/local/bin/doxygen && sudo chmod ugo+x /usr/local/bin/doxygen");
@@ -58,9 +57,9 @@ file_put_contents("/home/runner/work/DPP/DPP/docpages/footer.html", $footer);
 echo "Generate `master` docs\n";
 
 chdir("..");
-shell_exec("/usr/local/bin/doxygen");
+shell_exec("/usr/local/bin/doxygen >/dev/null");
 chdir("docs");
-system("rsync -rv --include='*' '.' '/home/runner/dpp-web'");
+system("rsync -rv --include='*' '.' '/home/runner/dpp-web' >/dev/null");
 chdir("..");
 
 if ($nodeploy) {
@@ -71,42 +70,32 @@ if ($nodeploy) {
 chdir("/home/runner/work/DPP/DPP");
 system("rm -rf " . sys_get_temp_dir() . "/dpp-old");
 mkdir(sys_get_temp_dir() . "/dpp-old");
-chdir(sys_get_temp_dir() . "/dpp-old");
+
+/* Fire up async tasks to run instances of doxygen for each past version */
+$asyncRunners = [];
 foreach ($tags as $tag) {
 	$orig_tag = $tag;
 	$tag = preg_replace("/^v/", "", $tag);
 	if (!empty($tag)) {
-		print "Generate $orig_tag docs (https://dpp.dev/$tag/)\n";
-
-		system("git clone --recursive https://github.com/brainboxdotcc/DPP.git");
-		chdir("DPP");
-		system("git fetch --tags -a");
-		system("git checkout tags/$orig_tag");
-		system("git checkout tags/v$orig_tag");
-		/* Older versions of the docs before 9.0.7 don't have these. Force them into the tree so old versions get current styling */
-		system("cp -r /home/runner/work/DPP/DPP/docpages/images docpages");
-		system("cp -r /home/runner/work/DPP/DPP/docpages/style.css docpages/style.css");
-		system("cp -r /home/runner/work/DPP/DPP/docpages/*.html docpages/");
-		system("cp -r /home/runner/work/DPP/DPP/doxygen-awesome-css doxygen-awesome-css");
-		/* Always make sure that the version is using the latest doxygen,
-		 * but rewrite version number (project number)
-		 */
-		$doxy = file_get_contents("/home/runner/work/DPP/DPP/Doxyfile");
-		$doxy = str_replace("PROJECT_NUMBER         =", "PROJECT_NUMBER         = $tag", $doxy);
-		file_put_contents("Doxyfile", $doxy);
-		/* Rewrite selected version number so that each page has a new default selected in the drop down */
-		$hdr = file_get_contents("/home/runner/work/DPP/DPP/docpages/header.html");
-		$hdr = str_replace("option value='/$tag/'", "option selected value='/$tag/'", $hdr);
-		/* Rewrite version info in header */
-		file_put_contents("docpages/header.html", $hdr);		
-		shell_exec("/usr/local/bin/doxygen");
-		system("mkdir /home/runner/dpp-web/$tag 2>/dev/null");
-		chdir("docs");
-		system("rsync -r --include='*' '.' '/home/runner/dpp-web/".$tag."'");
-		chdir("..");
-		chdir("..");
-		system("rm -rf " . sys_get_temp_dir() . "/dpp-old/DPP");
+		$asyncRunners[$tag] = true;
+		$pid = pcntl_fork();
+		if ($pid == 0) {
+			posix_setsid();
+			pcntl_exec(PHP_BINARY, ["docpages/makedocs-gh-single.php", $tag, $orig_tag], $_ENV);
+			exit(0);
+		}
 	}
+}
+
+/* Wait for all async tasks to complete */
+while (count($asyncRunners)) {
+	foreach ($asyncRunners as $tag => $discarded) {
+		if (file_exists("/tmp/completion_$tag") && file_get_contents("/tmp/completion_$tag") == $tag) {
+			unset($asyncRunners[$tag]);
+			echo "Runner for $tag is completed.\n";
+		}
+	}
+	sleep(1);
 }
 
 /* Commit and push everything to the github pages repo */
@@ -114,5 +103,4 @@ echo "Commit and push\n";
 chdir("/home/runner/dpp-web");
 system("git add -A >/dev/null");
 system("git commit -a -m \"automatic commit\" >/dev/null");
-system("git push -f \"https://braindigitalis:\$PERSONAL_ACCESS_TOKEN@github.com/brainboxdotcc/dpp-web.git\"");
-
+system("git push -f \"https://braindigitalis:\$PERSONAL_ACCESS_TOKEN@github.com/brainboxdotcc/dpp-web.git\" >/dev/null");

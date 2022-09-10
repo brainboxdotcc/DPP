@@ -75,10 +75,20 @@
 		"clion",
 		"followup",
 		"gifv",
-		"ctls"
+		"ctls",
+		"ctest",
+		"automod",
+		"amod",
+		"apult",
+		"cplusplus",
+		"xmake",
+		"CORO",
+		"cback"
 	],
 	"flagWords": [
 		"hte"
-	]
+	],
+	"allowCompoundWords": true,
+	"useCompounds": true
 }
 

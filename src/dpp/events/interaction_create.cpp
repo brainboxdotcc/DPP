@@ -67,6 +67,10 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				ucm.set_user(i.resolved.users.begin()->second);
 				client->creator->on_user_context_menu.call(ucm);
 			}
+		} else if (cmd_data.type == ctxm_chat_input && !client->creator->on_slashcommand.empty()) {
+			dpp::slashcommand_t sc(client, raw);
+			sc.command = i;
+			client->creator->on_slashcommand.call(sc);
 		}
 		if (!client->creator->on_interaction_create.empty()) {
 			/* Standard chat input. Note that for backwards compatibility, context menu
@@ -107,7 +111,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 						case co_user:
 						case co_attachment:
 						case co_mentionable:
-							opt.value = snowflake_not_null(&o, "value");
+							opt.value = dpp::snowflake(snowflake_not_null(&o, "value"));
 							break;
 						case co_integer:
 							opt.value = o.at("value").get<int64_t>();

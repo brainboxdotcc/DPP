@@ -21,7 +21,7 @@
 #include <dpp/user.h>
 #include <dpp/discordevents.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt-minimal.h>
+#include <dpp/stringops.h>
 
 using json = nlohmann::json;
 
@@ -77,24 +77,19 @@ std::string user::get_avatar_url(uint16_t size)  const {
 	 * At some point in the future this URL *will* change!
 	 */
 	if (this->avatar.to_string().empty()) {
-		return fmt::format("{}/embed/avatars/{}.png",
-						   utility::cdn_host,
-						   this->discriminator % 5
-		);
+		return utility::cdn_host + "/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png";
 	} else {
-		return fmt::format("{}/avatars/{}/{}{}.{}{}",
-						   utility::cdn_host,
-						   this->id,
-						   (has_animated_icon() ? "a_" : ""),
-						   this->avatar.to_string(),
-						   (has_animated_icon() ? "gif" : "png"),
-						   utility::avatar_size(size)
-		);
+		return utility::cdn_host + "/avatars/" +
+			std::to_string(this->id) +
+			(has_animated_icon() ? "/a_" : "/") +
+			this->avatar.to_string() +
+			(has_animated_icon() ? ".gif" : ".png") +
+			utility::avatar_size(size);
 	}
 }
 
 std::string user::format_username() const {
-	return fmt::format("{0}#{1:04d}", username, discriminator);
+	return username + '#' + leading_zeroes(discriminator, 4);
 }
 
 std::string user::get_mention() const {
@@ -200,15 +195,13 @@ std::string user_identified::get_banner_url(uint16_t size) const {
     /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
-	if (!this->avatar.to_string().empty()) {
-		return fmt::format("{}/banners/{}/{}{}.{}{}",
-						   utility::cdn_host,
-						   this->id,
-						   (has_animated_icon() ? "a_" : ""),
-						   this->avatar.to_string(),
-						   (has_animated_icon() ? "gif" : "png"),
-						   utility::avatar_size(size)
-		);
+	if (!this->banner.to_string().empty()) {
+		return utility::cdn_host + "/banners/" +
+			std::to_string(this->id) +
+			(has_animated_icon() ? "/a_" : "/") +
+			this->banner.to_string() +
+			(has_animated_icon() ? ".gif" : ".png") +
+			utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
