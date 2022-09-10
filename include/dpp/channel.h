@@ -383,23 +383,29 @@ public:
 	std::string get_mention() const;
 
 	/**
-	 * @brief Get the user overall permissions for a member on this channel, including channel overwrites.
+	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 * 
 	 * @param user The user to resolve the permissions for
-	 * @return permission Permissions bitmask made of bits in dpp::permissions.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 *
-	 * @note The method will search for the guild member in the cache by the users id.
+	 * @note This is an alias for guild::permission_overwrites and searches for the guild in the cache,
+	 * so consider using guild::permission_overwrites if you already have the guild object.
+	 *
+	 * @warning The method will search for the guild member in the cache by the users id.
 	 * If the guild member is not in cache, the method will always return 0.
 	 */
 	permission get_user_permissions(const class user* user) const;
 
 	/**
-	 * @brief Get the overall user permissions for a member on this channel, including channel overwrites.
+	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 *
 	 * @param member The member to resolve the permissions for
-	 * @return The permission overwrites for the member. Made of bits in dpp::permissions.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
+	 *
+	 * @note This is an alias for guild::permission_overwrites and searches for the guild in the cache,
+	 * so consider using guild::permission_overwrites if you already have the guild object.
 	 */
 	permission get_user_permissions(const class guild_member &member) const;
 
