@@ -1041,7 +1041,7 @@ public:
 
 	/**
 	 * @brief The default permissions of this command on a guild.
-	 * D++ defaults this to p_use_application_commands.
+	 * D++ defaults this to dpp::p_use_application_commands.
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 */
 	permission default_member_permissions;
@@ -1093,7 +1093,7 @@ public:
 	/**
 	 * @brief Set the default permissions of the slash command
 	 * 
-	 * @param defaults default permissions to set. This is a permission bitmask
+	 * @param defaults default permissions to set. This is a permission bitmask of bits from dpp::permissions
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 *
 	 * @return slashcommand& reference to self
