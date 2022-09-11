@@ -20,30 +20,29 @@
  ************************************************************************************/
 #include <dpp/export.h>
 #include <cerrno>
-
 #ifdef _WIN32
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <io.h>
-#pragma comment(lib,"ws2_32")
+	/* Windows-specific sockets includes */
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+	/* Windows doesn't have standard poll(), it has WSAPoll.
+	 * It's the same thing with different symbol names.
+	 * Microsoft gotta be different.
+	 */
+	#define poll(fds, nfds, timeout) WSAPoll(fds, nfds, timeout)
+	#define pollfd WSAPOLLFD
+	/* Windows sockets library */
+	#pragma comment(lib, "ws2_32")
 #else
-#include <netinet/in.h>
-#include <resolv.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/tcp.h>
-#include <unistd.h>
+	/* Anyting other than Windows (e.g. sane OSes) */
+	#include <poll.h>
+	#include <netinet/in.h>
+	#include <resolv.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <netinet/tcp.h>
+	#include <unistd.h>
 #endif
-
-#ifdef OPENSSL_SYS_WIN32
-#undef X509_NAME
-#undef X509_EXTENSIONS
-#undef X509_CERT_PAIR
-#undef PKCS7_ISSUER_AND_SERIAL
-#undef OCSP_REQUEST
-#undef OCSP_RESPONSE
-#endif
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,6 +52,15 @@
 #include <string.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+/* Windows specific OpenSSL symbol weirdness */
+#ifdef OPENSSL_SYS_WIN32
+	#undef X509_NAME
+	#undef X509_EXTENSIONS
+	#undef X509_CERT_PAIR
+	#undef PKCS7_ISSUER_AND_SERIAL
+	#undef OCSP_REQUEST
+	#undef OCSP_RESPONSE
+#endif
 #include <exception>
 #include <string>
 #include <iostream>
@@ -98,10 +106,6 @@ thread_local SSL_CTX* openssl_context = nullptr;
  * @brief Keepalive sessions, per-thread
  */
 thread_local std::unordered_map<std::string, keepalive_cache_t> keepalives;
-
-/* NOTE: Upper bounds check not required: https://docs.microsoft.com/en-us/windows/win32/winsock/select-and-fd---2 */
-#define SAFE_FD_SET(a, b) { if (a >= 0) { FD_SET(a, b); }}
-#define SAFE_FD_ISSET(a, b) ((a >= 0) ? FD_ISSET(a, b) : 0)
 
 /* You'd think that we would get better performance with a bigger buffer, but SSL frames are 16k each.
  * SSL_read in non-blocking mode will only read 16k at a time. There's no point in a bigger buffer as
@@ -149,7 +153,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 }
 
 /**
- * @brief Connect to TCP socket with a select() driven timeout
+ * @brief Connect to TCP socket with a poll() driven timeout
  * 
  * @param sockfd socket descriptor
  * @param addr address to connect to
@@ -158,7 +162,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
  * @return int -1 on error, 0 on succcess just like POSIX connect()
  * @throw dpp::connection_exception on failure
  */
-int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
+int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
 #ifdef __APPLE__
 		/* Unreliable on OSX right now */
 		return (::connect(sockfd, addr, addrlen));
@@ -170,6 +174,8 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 	/* Windows connect returns -1 and sets its error value to 0 for successfull blocking connection -
 	 * This is equivalent to EWOULDBLOCK on POSIX
 	 */
+	ULONG non_blocking = 1;
+	ioctlsocket(sockfd, FIONBIO, &non_blocking);
 	int rc = WSAConnect(sockfd, addr, addrlen, nullptr, nullptr, nullptr, nullptr);
 	int err = EWOULDBLOCK;
 #else
@@ -187,18 +193,13 @@ int connect_with_timeout(int sockfd, const struct sockaddr *addr, socklen_t addr
 			if (utility::time_f() >= deadline) {
 				throw connection_exception("Connection timed out");
 			}
-			fd_set writefds, efds;
-			FD_ZERO(&writefds);
-			FD_ZERO(&efds);
-			SAFE_FD_SET(sockfd, &writefds);
-			SAFE_FD_SET(sockfd, &efds);
-			timeval ts;
-			ts.tv_sec = 0;
-			ts.tv_usec = timeout_ms * 1000;
-			int r = select(sockfd + 1, nullptr, &writefds, &efds, &ts);
-			if (r > 0 && SAFE_FD_ISSET(sockfd, &writefds) && !SAFE_FD_ISSET(sockfd, &efds)) {
+			pollfd pfd = {};
+			pfd.fd = sockfd;
+			pfd.events = POLLOUT;
+			int r = poll(&pfd, 1, 10);
+			if (r > 0 && pfd.revents & POLLOUT) {
 				rc = 0;
-			} else if (r > 0 && SAFE_FD_ISSET(sockfd, &efds)) {
+			} else if (r != 0 || pfd.revents & POLLERR) {
 				throw connection_exception(strerror(errno));
 			}
 		} while (rc == -1);
@@ -236,22 +237,16 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 		throw dpp::connection_exception("WSAStartup failure");
 	}
 #endif
-	if (FD_SETSIZE < 1024) {
-		throw dpp::connection_exception("FD_SETSIZE is less than 1024 (value is " + std::to_string(FD_SETSIZE) + "). This is an internal library error relating to your platform. Please report this on the official discord: https://discord.gg/dpp");
-	}
 	if (keepalive) {
 		std::string identifier((!plaintext ? "ssl://" : "tcp://") + hostname + ":" + port);
 		auto iter = keepalives.find(identifier);
 		if (iter != keepalives.end()) {
-			/* Found a keepalive connection, check it is still connected/valid via select for error */
-			fd_set efds;
-			FD_ZERO(&efds);
-			SAFE_FD_SET(iter->second.sfd, &efds);
-			timeval ts;
-			ts.tv_sec = 0;
-			ts.tv_usec = 1;
-			int r = select(iter->second.sfd, nullptr, nullptr, &efds, &ts);
-			if (time(nullptr) > (iter->second.created + 60) || r < 0 || FD_ISSET(iter->second.sfd, &efds)) {
+			/* Found a keepalive connection, check it is still connected/valid via poll() for error */
+			pollfd pfd = {};
+			pfd.fd = iter->second.sfd;
+			pfd.events = POLLOUT;
+			int r = poll(&pfd, 1, 1);
+			if (time(nullptr) > (iter->second.created + 60) || r < 0 || pfd.revents & POLLERR) {
 				make_new = true;
 				/* This connection is dead, free its resources and make a new one */
 				if (iter->second.ssl->ssl) {
@@ -361,12 +356,13 @@ void ssl_client::write(const std::string &data)
 	if (nonblocking) {
 		obuffer += data;
 	} else {
+		const int data_length = (int)data.length();
 		if (plaintext) {
-			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data.length(), 0) != (int)data.length()) {
+			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data_length, 0) != data_length) {
 				throw dpp::connection_exception("write() failed");
 			}
 		} else {
-			if (SSL_write(ssl->ssl, data.data(), (int)data.length()) != (int)data.length()) {
+			if (SSL_write(ssl->ssl, data.data(), data_length) != data_length) {
 				throw dpp::connection_exception("SSL_write() failed");
 			}
 		}
@@ -387,7 +383,7 @@ void ssl_client::log(dpp::loglevel severity, const std::string &msg) const
 
 void ssl_client::read_loop()
 {
-	/* The read loop is non-blocking using select(). This method
+	/* The read loop is non-blocking using poll(). This method
 	 * cannot read while it is waiting for write, or write while it is
 	 * waiting for read. This is a limitation of the openssl libraries,
 	 * as SSL is sent and received in low level ~16k frames which must
@@ -395,10 +391,10 @@ void ssl_client::read_loop()
 	 * we need another frame or receive while we are due to send a frame
 	 * would cause the protocol to break.
 	 */
-	int r = 0;
+	int r = 0, sockets = 1;
 	size_t client_to_server_length = 0, client_to_server_offset = 0;
 	bool read_blocked_on_write =  false, write_blocked_on_read = false, read_blocked = false;
-	fd_set readfds, writefds, efds;
+	pollfd pfd[2] = {};
 	char client_to_server_buffer[DPP_BUFSIZE], server_to_client_buffer[DPP_BUFSIZE];
 
 	try {
@@ -421,20 +417,22 @@ void ssl_client::read_loop()
 				last_tick = time(nullptr);
 			}
 
-			FD_ZERO(&readfds);
-			FD_ZERO(&writefds);
-			FD_ZERO(&efds);
+			sockets = 1;
+			pfd[0].fd = sfd;
+			pfd[0].events = POLLIN;
+			pfd[1].events = 0;
 
-			SAFE_FD_SET(sfd,&readfds);
-			SAFE_FD_SET(sfd,&efds);
 			if (custom_readable_fd && custom_readable_fd() >= 0) {
 				int cfd = (int)custom_readable_fd();
-				SAFE_FD_SET(cfd, &readfds);
-				SAFE_FD_SET(cfd, &efds);
+				pfd[1].fd = cfd;
+				pfd[1].events = POLLIN;
+				sockets = 2;
 			}
 			if (custom_writeable_fd && custom_writeable_fd() >= 0) {
 				int cfd = (int)custom_writeable_fd();
-				SAFE_FD_SET(cfd, &writefds);
+				pfd[1].fd = cfd;
+				pfd[1].events |= POLLOUT;
+				sockets = 2;
 			}
 
 			if (sfd == -1) {
@@ -443,28 +441,26 @@ void ssl_client::read_loop()
 
 			/* If we're waiting for a read on the socket don't try to write to the server */
 			if (client_to_server_length || obuffer.length() || read_blocked_on_write) {
-				SAFE_FD_SET(sfd,&writefds);
+				pfd[0].events |= POLLOUT;
 			}
 
-			timeval ts;
-			ts.tv_sec = 1;
-			ts.tv_usec = 0;
-			r = select(FD_SETSIZE, &readfds, &writefds, &efds, &ts);
+			r = poll(pfd, sockets, 1000);
+
 			if (r == 0)
 				continue;
 
-			if (custom_writeable_fd && custom_writeable_fd() >= 0 && SAFE_FD_ISSET(custom_writeable_fd(), &writefds)) {
+			if (custom_writeable_fd && custom_writeable_fd() >= 0 && pfd[1].revents & POLLOUT) {
 				custom_writeable_ready();
 			}
-			if (custom_readable_fd && custom_readable_fd() >= 0 && SAFE_FD_ISSET(custom_readable_fd(), &readfds)) {
+			if (custom_readable_fd && custom_readable_fd() >= 0 && pfd[1].revents & POLLIN) {
 				custom_readable_ready();
 			}
-			if (SAFE_FD_ISSET(sfd, &efds) || sfd == INVALID_SOCKET) {
+			if ((pfd[0].revents & POLLERR) || (pfd[0].revents & POLLNVAL) || sfd == INVALID_SOCKET) {
 				throw dpp::connection_exception(strerror(errno));
 			}
 
 			/* Now check if there's data to read */
-			if((SAFE_FD_ISSET(sfd,&readfds) && !write_blocked_on_read) || (read_blocked_on_write && SAFE_FD_ISSET(sfd,&writefds))) {
+			if(((pfd[0].revents & POLLIN) && !write_blocked_on_read) || (read_blocked_on_write && (pfd[0].revents & POLLOUT))) {
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
@@ -534,7 +530,7 @@ void ssl_client::read_loop()
 			}
 
 			/* If the socket is writeable... */
-			if ((SAFE_FD_ISSET(sfd,&writefds) && client_to_server_length) || (write_blocked_on_read && SAFE_FD_ISSET(sfd,&readfds))) {
+			if (((pfd[0].revents & POLLOUT) && client_to_server_length) || (write_blocked_on_read && (pfd[0].revents & POLLIN))) {
 				write_blocked_on_read = false;
 				/* Try to write */
 

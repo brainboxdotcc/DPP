@@ -69,6 +69,7 @@
 #include <dpp/once.h>
 #include <dpp/sync.h>
 #include <dpp/colors.h>
+#include <dpp/discordevents.h>
 
 namespace dpp {
 

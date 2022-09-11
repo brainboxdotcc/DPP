@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/restrequest.h>
+#include <dpp/once.h>
 
 namespace dpp {
 
@@ -41,8 +42,14 @@ void cluster::guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_t
 
 void cluster::guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t delete_message_seconds, command_completion_event_t callback) {
 	json j;
-	if (delete_message_seconds)
+	if (delete_message_seconds) {
 		j["delete_message_seconds"] = delete_message_seconds > 604800 ? 604800 : delete_message_seconds;
+		if (delete_message_seconds >= 1 && delete_message_seconds <= 7) {
+			if (dpp::run_once<struct ban_add_seconds_not_days_t>()) {
+				this->log(ll_warning, "It looks like you may have confused seconds and days in cluster::guild_ban_add - Please double check your parameters!");
+			}
+		}
+	}
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(guild_id), "bans/" + std::to_string(user_id), m_put, j.dump(), callback);
 }
 

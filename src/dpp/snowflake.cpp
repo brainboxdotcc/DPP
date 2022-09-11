@@ -78,11 +78,11 @@ double snowflake::get_creation_time() const {
 }
 
 uint8_t snowflake::get_worker_id() const {
-	return (value & 0x3E0000) >> 17;
+	return (uint8_t)((value & 0x3E0000) >> 17);
 }
 
 uint8_t snowflake::get_process_id() const {
-	return (value & 0x1F000) >> 12;
+	return (uint8_t)((value & 0x1F000) >> 12);
 }
 
 uint16_t snowflake::get_increment() const {
