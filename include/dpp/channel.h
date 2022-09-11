@@ -280,7 +280,7 @@ public:
 	 * @param flags Flag bitmask to set from dpp::channel_flags
 	 * @return Reference to self, so these method calls may be chained 
 	 */
-	channel& set_flags(const uint16_t flags);
+	channel& set_flags(const uint8_t flags);
 
 	/**
 	 * @brief Add (bitwise OR) a flag to this channel object

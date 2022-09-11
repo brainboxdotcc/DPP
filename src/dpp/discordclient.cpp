@@ -71,7 +71,7 @@ public:
 };
 
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
-       : websocket_client(DEFAULT_GATEWAY, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
+       : websocket_client(_cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
         terminating(false),
         runner(nullptr),
 	compressed(comp),
@@ -94,7 +94,7 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	ready(false),
 	last_heartbeat_ack(time(nullptr)),
 	protocol(ws_proto),
-	resume_gateway_url(DEFAULT_GATEWAY)
+	resume_gateway_url(_cluster->default_gateway)	
 {
 	zlib = new zlibcontext();
 	etf = new etf_parser();
@@ -295,7 +295,6 @@ bool discord_client::handle_frame(const std::string &buffer)
 				log(dpp::ll_debug, "Failed to resume session " + sessionid + ", will reidentify");
 				this->sessionid.clear();
 				this->last_seq = 0;
-				this->resume_gateway_url = DEFAULT_GATEWAY;
 				/* No break here, falls through to state 10 to cause a reidentify */
 				[[fallthrough]];
 			case 10:
@@ -362,7 +361,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 			case 7:
 				log(dpp::ll_debug, "Reconnection requested, closing socket " + sessionid);
 				message_queue.clear();
-				close_socket(sfd);
+				throw dpp::connection_exception("Remote site requested reconnection");
 			break;
 			/* Heartbeat ack */
 			case 11:

@@ -237,8 +237,8 @@ auditlog cluster::guild_auditlog_get_sync(snowflake guild_id, snowflake user_id,
 	return dpp::sync<auditlog>(this, &cluster::guild_auditlog_get, guild_id, user_id, action_type, before, limit);
 }
 
-confirmation cluster::guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_days) {
-	return dpp::sync<confirmation>(this, &cluster::guild_ban_add, guild_id, user_id, delete_message_days);
+confirmation cluster::guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_seconds) {
+	return dpp::sync<confirmation>(this, &cluster::guild_ban_add, guild_id, user_id, delete_message_seconds);
 }
 
 confirmation cluster::guild_ban_delete_sync(snowflake guild_id, snowflake user_id) {

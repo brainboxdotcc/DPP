@@ -60,21 +60,6 @@ jobs:
           TEST_USER_ID: ${{secrets.TEST_USER_ID}}
           TEST_EVENT_ID: ${{secrets.TEST_EVENT_ID}}
 
-      - name: Package distributable
-        run: cd build && cpack --verbose
-
-      - name: Upload Binary (DEB)
-        uses: actions/upload-artifact@v2
-        with:
-          name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
-          path: '${{github.workspace}}/build/*.deb'
-
-      - name: Upload Binary (RPM)
-        uses: actions/upload-artifact@v2
-        with:
-          name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
-          path: '${{github.workspace}}/build/*.rpm'
-
   linux-no-unit-tests:
     name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
     runs-on: ${{matrix.cfg.os}}
@@ -82,8 +67,8 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'amd64', os: ubuntu-latest, cpp-version: g++-11 }
-          - { arch: 'amd64', os: ubuntu-latest, cpp-version: g++-10 }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-11 }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-10 }
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
 
     steps:
@@ -100,6 +85,24 @@ jobs:
 
       - name: Build Project
         run: cd build && ninja 
+
+      - name: Package distributable
+        if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
+        run: cd build && cpack --verbose
+
+      - name: Upload Binary (DEB)
+        if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
+          path: '${{github.workspace}}/build/*.deb'
+
+      - name: Upload Binary (RPM)
+        if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
+          path: '${{github.workspace}}/build/*.rpm'
 
   macos:
     name: macOS x64
@@ -186,13 +189,13 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          - {name: "ARM64", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake}
-          - {name: "ARMv7 HF", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv7ToolChain.cmake}
-          - {name: "Linux x86", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake}
-          - {name: "ARMv6", cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
+          - {name: "ARM64", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake}
+          - {name: "ARMv7 HF", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv7ToolChain.cmake}
+          - {name: "Linux x86", os: ubuntu-22.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake}
+          - {name: "ARMv6", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
 
     name: ${{matrix.cfg.name}}
-    runs-on: ubuntu-20.04
+    runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Checkout D++
         uses: actions/checkout@v2

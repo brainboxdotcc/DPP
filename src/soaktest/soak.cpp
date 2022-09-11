@@ -18,14 +18,14 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#pragma once
 
-#if !defined(DPP_VERSION_LONG)
-#define DPP_VERSION_LONG 0x00100019
-#define DPP_VERSION_SHORT 100019
-#define DPP_VERSION_TEXT "D++ 10.0.19 (10-Sep-2022)"
+#include <dpp/dpp.h>
 
-#define DPP_VERSION_MAJOR ((DPP_VERSION_LONG & 0x00ff0000) >> 16)
-#define DPP_VERSION_MINOR ((DPP_VERSION_LONG & 0x0000ff00) >> 8)
-#define DPP_VERSION_PATCH (DPP_VERSION_LONG & 0x000000ff)
-#endif
+int main() {
+	char* t = getenv("DPP_UNIT_TEST_TOKEN");
+	if (t) {
+		dpp::cluster soak_test(t);
+		soak_test.on_log(dpp::utility::cout_logger());
+		soak_test.start(dpp::st_wait);
+	}
+}
