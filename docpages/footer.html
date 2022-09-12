@@ -1,15 +1,8 @@
-<script src="https://utteranc.es/client.js" repo="brainboxdotcc/dpp-comments" issue-term="pathname" theme="preferred-color-scheme" crossorigin="anonymous" async></script>
-<!-- HTML footer for doxygen 1.8.8-->
-<!-- start footer part -->
-<!--BEGIN GENERATE_TREEVIEW-->
-<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
-  <ul>
-    $navpath
-  </ul>
+<div id="nav-path" class="navpath">
+	<ul>
+		$navpath
+	</ul>
 </div>
-<!--END GENERATE_TREEVIEW-->
-<!--BEGIN !GENERATE_TREEVIEW-->
-<!--END !GENERATE_TREEVIEW-->
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-QTH6YHBNG5"></script>
@@ -38,12 +31,6 @@
 			hljs.initLineNumbersOnLoad(node);  
 		});
 		$(".fragment").parent().parent().parent().parent().removeClass('doxtable');
-		setTimeout(function() {
-			const $utterances = $(".utterances").prop('outerHTML');
-			const $doc = $("#doc-content");
-			$(".utterances").remove();
-			$doc.html($doc.html() + $utterances);
-		}, 50);
 	});
 </script>
 <style>

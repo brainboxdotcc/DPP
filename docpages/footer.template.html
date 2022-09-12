@@ -1,6 +1,3 @@
-<!-- utteranc.es -->
-<script src="https://utteranc.es/client.js" repo="brainboxdotcc/dpp-comments" issue-term="pathname" theme="preferred-color-scheme" crossorigin="anonymous" async></script>
-
 <div id="nav-path" class="navpath">
 	<ul>
 		$navpath
@@ -34,12 +31,6 @@
 			hljs.initLineNumbersOnLoad(node);  
 		});
 		$(".fragment").parent().parent().parent().parent().removeClass('doxtable');
-		setTimeout(function() {
-			const $utterances = $(".utterances").prop('outerHTML');
-			const $doc = $("#doc-content");
-			$(".utterances").remove();
-			$doc.html($doc.html() + $utterances);
-		}, 50);
 	});
 </script>
 <style>
