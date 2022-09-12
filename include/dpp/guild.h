@@ -561,7 +561,7 @@ public:
 	 * @return permission permissions bitmask
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 *
-	 * @note The method will search for the guild member in the cache by the users id.
+	 * @warning The method will search for the guild member in the cache by the users id.
 	 * If the guild member is not in cache, the method will always return 0.
 	 */
 	permission base_permissions(const class user* user) const;
@@ -583,7 +583,7 @@ public:
 	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 *
 	 * @param base_permissions base permissions before overwrites,
-	 * from channel::base_permissions
+	 * from guild::base_permissions
 	 * @param user The user to resolve the permissions for
 	 * @param channel Channel to compute permission overwrites for
 	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
