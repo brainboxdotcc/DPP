@@ -227,7 +227,7 @@ public:
 	}
 
 #ifdef DPP_CORO
-	event_handle attach(std::function<dpp::task(const T&)> func) {
+	event_handle co_attach(std::function<dpp::task(T)> func) {
 		std::unique_lock l(lock);
 		event_handle h = _next_handle++;
 		coroutine_container.emplace(h, func);
