@@ -114,8 +114,14 @@ private:
 	/**
 	 * @brief Container for event listeners (coroutines only)
 	 */
-	std::map<event_handle, std::function<void(const T)>> coroutine_container;
+	std::map<event_handle, std::function<dpp::task(T)>> coroutine_container;
+#else
+       /**
+        * @brief Dummy container to keep the struct size same
+        */
+       std::map<event_handle, std::function<void(T)>> dummy_container;
 #endif
+
 
 	/**
 	 * @brief A function to be called whenever the method is called, to check
