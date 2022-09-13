@@ -145,8 +145,7 @@ public:
 	/**
 	 * @brief Construct a new event_router_t object.
 	 */
-	event_router_t() {
-	}
+	event_router_t() = default;
 
 	/**
 	 * @brief Call all attached listeners.
