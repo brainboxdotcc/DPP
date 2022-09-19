@@ -22,12 +22,13 @@ $categories = [
     'improvement' => '♻️ Refactoring',
     'refactor' => '♻️ Refactoring',
     'refactored' => '♻️ Refactoring',
-    'deprecated' => '♻️ Refactoring',
-    'deprecate' => '♻️ Refactoring',
+    'deprecated' => '🕳 Deprecated',
+    'deprecate' => '🕳 Deprecated',
     'remove' => '♻️ Refactoring',
     'change' => '♻️ Refactoring',
     'changed' => '♻️ Refactoring',
     'test' => '🚨 Testing',
+    'tests' => '🚨 Testing',
     'testing' => '🚨 Testing',
     'ci' => '👷 Build/CI',
     'build' => '👷 Build/CI',
@@ -59,6 +60,22 @@ if ($githubstyle) {
 
 // Case insensitive removal of duplicates
 $changelog = array_intersect_key($changelog, array_unique(array_map("strtolower", $changelog)));
+
+// remove duplicates where two entries are the same but one ends with a GitHub issue link
+foreach ($changelog as $item) {
+    $raw = preg_replace('/(\s?\(#\d+\))$/', '', $item); // remove the " #(123)" from the end
+    if ($raw === $item) {
+        continue;
+    }
+
+    // if $item ends with (#123)
+    foreach ($changelog as $key => $change) {
+        if ($raw === $change) {
+            unset($changelog[$key]);
+            break;
+        }
+    }
+}
 
 foreach ($changelog as $change) {
 
