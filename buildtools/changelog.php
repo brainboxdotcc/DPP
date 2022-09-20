@@ -61,16 +61,16 @@ if ($githubstyle) {
 // Case insensitive removal of duplicates
 $changelog = array_intersect_key($changelog, array_unique(array_map("strtolower", $changelog)));
 
-// remove duplicates where two entries are the same but one ends with a GitHub issue link
+// remove duplicates where two entries are the same but one ends with a GitHub pull request link
 foreach ($changelog as $item) {
-    $raw = preg_replace('/(\s?\(#\d+\))$/', '', $item); // remove the " #(123)" from the end
-    if ($raw === $item) {
+    $entryWithoutPrLink = preg_replace('/( \(#\d+\))$/', '', $item);
+    if ($entryWithoutPrLink === $item) {
         continue;
     }
 
     // if $item ends with (#123)
     foreach ($changelog as $key => $change) {
-        if ($raw === $change) {
+        if ($entryWithoutPrLink === $change) {
             unset($changelog[$key]);
             break;
         }
