@@ -40,6 +40,7 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"NEWS", dpp::g_news },
 	{"DISCOVERABLE", dpp::g_discoverable },
 	{"FEATURABLE", dpp::g_featureable },
+	{"INVITES_DISABLED", dpp::g_invites_disabled},
 	{"ANIMATED_BANNER", dpp::g_animated_banner },
 	{"ANIMATED_ICON", dpp::g_animated_icon },
 	{"BANNER", dpp::g_banner },
@@ -257,6 +258,10 @@ bool guild::has_vanity_url() const {
 
 bool guild::has_premium_progress_bar_enabled() const {
 	return this->flags_extra & g_premium_progress_bar_enabled;
+}
+
+bool guild::has_invites_disabled() const {
+	return this->flags_extra & g_invites_disabled;
 }
 
 bool guild::has_channel_banners() const {
