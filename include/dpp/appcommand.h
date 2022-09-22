@@ -73,10 +73,13 @@ enum command_option_type : uint8_t {
 
 /**
  * @brief This type is a variant that can hold any of the potential
- * native data types represented by the enum above.
+ * native data types represented by the enum dpp::command_option_type.
  * It is used in interactions.
  * 
  * std::monostate indicates an invalid parameter value, e.g. an unfilled optional parameter.
+ * std::int64_t will be for all integer options, double for decimal numbers and dpp::snowflake for anything ID related.
+ *
+ * You can retrieve them with std::get().
  */
 typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, double> command_value;
 
