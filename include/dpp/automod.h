@@ -160,7 +160,7 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	std::vector<std::string> allow_list;
 
 	/**
-	 * @brief Total number of mentions (role & user) allowed per message (Maximum of 50)
+	 * @brief Total number of unique role and user mentions allowed per message (Maximum of 50)
 	 */
 	uint8_t mention_total_limit;
 

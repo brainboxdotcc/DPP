@@ -30,7 +30,7 @@
 namespace dpp {
 
 /** @brief A container for a 64 bit unsigned value representing many things on discord.
- * This value is known in distributed computing as a snowflak value.
+ * This value is known in distributed computing as a snowflake value.
  * 
  * Snowflakes are:
  * 
