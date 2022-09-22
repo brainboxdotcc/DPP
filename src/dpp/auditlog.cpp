@@ -51,6 +51,8 @@ auditlog& auditlog::fill_from_json(nlohmann::json* j) {
 		if (ai.contains("options")) {
 			auto &o = ai["options"];
 			audit_extra opts;
+			opts.automod_rule_name = string_not_null(&o, "auto_moderation_rule_name");
+			opts.automod_rule_trigger_type = string_not_null(&o, "auto_moderation_rule_trigger_type");
 			opts.channel_id = snowflake_not_null(&o, "channel_id");
 			opts.count = string_not_null(&o, "count");
 			opts.delete_member_days = string_not_null(&o, "delete_member_days");
