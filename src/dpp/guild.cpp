@@ -74,10 +74,8 @@ guild::guild() :
 	max_members(0),
 	shard_id(0),
 	premium_subscription_count(0),
-	max_video_channel_users(0),
 	afk_timeout(0),
-	default_message_notifications(0),
-	premium_tier(0),
+	max_video_channel_users(0),
 	verification_level(ver_none),
 	explicit_content_filter(expl_disabled),
 	mfa_level(mfa_none),
@@ -468,10 +466,10 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		}
 
 		set_snowflake_not_null(d, "afk_channel_id", this->afk_channel_id);
-		set_int8_not_null(d, "afk_timeout", this->afk_timeout);
+		set_int16_not_null(d, "afk_timeout", this->afk_timeout);
 		set_snowflake_not_null(d, "widget_channel_id", this->widget_channel_id);
 		this->verification_level = (verification_level_t)int8_not_null(d, "verification_level");
-		set_int8_not_null(d, "default_message_notifications", this->default_message_notifications);
+		this->default_message_notifications = (default_message_notification_t)int8_not_null(d, "default_message_notifications");
 		this->explicit_content_filter = (guild_explicit_content_t)int8_not_null(d, "explicit_content_filter");
 		this->mfa_level = (mfa_level_t)int8_not_null(d, "mfa_level");
 		set_snowflake_not_null(d, "application_id", this->application_id);
@@ -498,10 +496,10 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			}
 			this->banner = _banner;
 		}
-		set_int8_not_null(d, "premium_tier", this->premium_tier);
+		this->premium_tier = (guild_premium_tier_t)int8_not_null(d, "premium_tier");
 		set_int16_not_null(d, "premium_subscription_count", this->premium_subscription_count);
 		set_snowflake_not_null(d, "public_updates_channel_id", this->public_updates_channel_id);
-		set_int16_not_null(d, "max_video_channel_users", this->max_video_channel_users);
+		set_int8_not_null(d, "max_video_channel_users", this->max_video_channel_users);
 
 		set_int32_not_null(d, "max_presences", this->max_presences);
 		set_int32_not_null(d, "max_members", this->max_members);

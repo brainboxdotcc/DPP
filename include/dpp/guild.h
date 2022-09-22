@@ -385,6 +385,30 @@ enum verification_level_t : uint8_t {
 	ver_very_high =	4,
 };
 
+/**
+ * @brief Default message notification level
+ */
+enum default_message_notification_t: uint8_t {
+	/// members will receive notifications for all messages by default
+	all_messages = 0,
+	///	members will receive notifications only for messages that \@mention them by default
+	only_mentions = 1,
+};
+
+/**
+ * @brief Premium tier
+ */
+enum guild_premium_tier_t: uint8_t {
+	/// guild has not unlocked any Server Boost perks
+	none = 0,
+	/// guild has unlocked Server Boost level 1 perks
+	tier_1 = 1,
+	/// guild has unlocked Server Boost level 2 perks
+	tier_2 = 2,
+	/// guild has unlocked Server Boost level 3 perks
+	tier_3 = 3,
+};
+
 /** @brief Guild members container
  */
 typedef std::unordered_map<snowflake, guild_member> members_container;
@@ -492,17 +516,17 @@ public:
 	/** Number of boosters */
 	uint16_t premium_subscription_count;
 
-	/** Maximum users in a video channel, or 0 */
-	uint16_t max_video_channel_users;
+	/** Voice AFK timeout in seconds before moving users to AFK channel. Can be set to: 60, 300, 900, 1800, 3600 */
+	uint16_t afk_timeout;
 
-	/** Voice AFK timeout before moving users to AFK channel */
-	uint8_t afk_timeout;
+	/** Maximum users in a video channel, or 0 */
+	uint8_t max_video_channel_users;
 
 	/** Setting for how notifications are to be delivered to users */
-	uint8_t default_message_notifications;
+	default_message_notification_t default_message_notifications;
 
 	/** Boost level */
-	uint8_t premium_tier;
+	guild_premium_tier_t premium_tier;
 
 	/** Verification level of server */
 	verification_level_t verification_level;
