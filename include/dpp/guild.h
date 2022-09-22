@@ -392,9 +392,9 @@ enum verification_level_t : uint8_t {
  */
 enum default_message_notification_t: uint8_t {
 	/// members will receive notifications for all messages by default
-	all_messages = 0,
+	dmn_all = 0,
 	///	members will receive notifications only for messages that \@mention them by default
-	only_mentions = 1,
+	dmn_only_mentions = 1,
 };
 
 /**
@@ -402,13 +402,31 @@ enum default_message_notification_t: uint8_t {
  */
 enum guild_premium_tier_t: uint8_t {
 	/// guild has not unlocked any Server Boost perks
-	none = 0,
+	tier_none = 0,
 	/// guild has unlocked Server Boost level 1 perks
 	tier_1 = 1,
 	/// guild has unlocked Server Boost level 2 perks
 	tier_2 = 2,
 	/// guild has unlocked Server Boost level 3 perks
 	tier_3 = 3,
+};
+
+/**
+ * @brief Voice AFK timeout values for guild::afk_timeout
+ */
+enum guild_afk_timeout_t: uint8_t {
+	/// AFK timeout disabled
+	afk_off,
+	/// AFK timeout of 1 Minute
+	afk_60,
+	/// AFK timeout of 5 Minutes
+	afk_300,
+	/// AFK timeout of 15 Minutes
+	afk_900,
+	/// AFK timeout of 30 Minutes
+	afk_1800,
+	/// AFK timeout of 1 Hour
+	afk_3600,
 };
 
 /** @brief Guild members container
@@ -518,8 +536,8 @@ public:
 	/** Number of boosters */
 	uint16_t premium_subscription_count;
 
-	/** Voice AFK timeout in seconds before moving users to AFK channel. Can be set to: 60, 300, 900, 1800, 3600 */
-	uint16_t afk_timeout;
+	/** Voice AFK timeout before moving users to AFK channel */
+	guild_afk_timeout_t afk_timeout;
 
 	/** Maximum users in a video channel, or 0 */
 	uint8_t max_video_channel_users;
