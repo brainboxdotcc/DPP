@@ -75,10 +75,8 @@ guild::guild() :
 	max_members(0),
 	shard_id(0),
 	premium_subscription_count(0),
-	afk_timeout(afk_off),
+	afk_timeout(0),
 	max_video_channel_users(0),
-	default_message_notifications(dmn_all),
-	premium_tier(tier_none),
 	verification_level(ver_none),
 	explicit_content_filter(expl_disabled),
 	mfa_level(mfa_none),
@@ -375,17 +373,7 @@ std::string guild::build_json(bool with_id) const {
 		j["afk_channel_id"] = afk_channel_id;
 	}
 	if (afk_timeout) {
-		if (afk_timeout == afk_60) {
-			j["afk_timeout"] = 60;
-		} else if (afk_timeout == afk_300) {
-			j["afk_timeout"] = 300;
-		} else if (afk_timeout == afk_900) {
-			j["afk_timeout"] = 900;
-		} else if (afk_timeout == afk_1800) {
-			j["afk_timeout"] = 1800;
-		} else if (afk_timeout == afk_3600) {
-			j["afk_timeout"] = 3600;
-		}
+		j["afk_timeout"] = afk_timeout;
 	}
 	if (widget_enabled()) {
 		j["widget_channel_id"] = widget_channel_id;
@@ -482,20 +470,8 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			this->flags |= dpp::g_no_sticker_greeting;
 		}
 
-		if (d->contains("afk_timeout")) {
-			if ((*d)["afk_timeout"] == 60) {
-				this->afk_timeout = afk_60;
-			} else if ((*d)["afk_timeout"] == 300) {
-				this->afk_timeout = afk_300;
-			} else if ((*d)["afk_timeout"] == 900) {
-				this->afk_timeout = afk_900;
-			} else if ((*d)["afk_timeout"] == 1800) {
-				this->afk_timeout = afk_1800;
-			} else if ((*d)["afk_timeout"] == 3600) {
-				this->afk_timeout = afk_3600;
-			}
-		}
 		set_snowflake_not_null(d, "afk_channel_id", this->afk_channel_id);
+		set_int16_not_null(d, "afk_timeout", this->afk_timeout);
 		set_snowflake_not_null(d, "widget_channel_id", this->widget_channel_id);
 		this->verification_level = (verification_level_t)int8_not_null(d, "verification_level");
 		this->default_message_notifications = (default_message_notification_t)int8_not_null(d, "default_message_notifications");
