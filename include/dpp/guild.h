@@ -138,6 +138,8 @@ enum guild_flags_extra : uint8_t {
 	g_animated_banner =			0b00000010,
 	/** Guild has auto moderation */
 	g_auto_moderation =			0b00000100,
+	/** Guild has paused invites, preventing new users from joining */
+	g_invites_disabled =		0b00001000,
 };
 
 /**
@@ -874,6 +876,12 @@ public:
 	 * @return bool has progress bar enabled
 	 */
 	bool has_premium_progress_bar_enabled() const;
+
+	/**
+	 * @brief True if has paused invites, preventing new users from joining
+	 * @return bool has paused invites
+	 */
+	bool has_invites_disabled() const;
 };
 
 /** A container of guilds */
