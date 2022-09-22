@@ -39,7 +39,7 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"COMMERCE", dpp::g_commerce },
 	{"NEWS", dpp::g_news },
 	{"DISCOVERABLE", dpp::g_discoverable },
-	{"FEATUREABLE", dpp::g_featureable },
+	{"FEATURABLE", dpp::g_featureable },
 	{"ANIMATED_BANNER", dpp::g_animated_banner },
 	{"ANIMATED_ICON", dpp::g_animated_icon },
 	{"BANNER", dpp::g_banner },
