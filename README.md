@@ -72,6 +72,8 @@ The library runs ideally on **Linux**.
 
 ### Mac OS X and FreeBSD
 The library is well-functional and stable on **Mac OS X** and **FreeBSD** too.
+
+### Raspberry Pi
 For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for ARM64, ARM6, and ARM7 so that you do not have to wait for it to compile.
 
 ### Windows
