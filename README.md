@@ -1,5 +1,6 @@
-# D++
-## An incredibly lightweight C++ Discord library
+<div align="center"><img src="docpages/DPP-markdown-logo.png" alt="DPP"/>
+<h3>An incredibly lightweight C++ Discord library</h3>
+<br />
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp) 
 ![Downloads](https://dl.dpp.dev/dlcount.php)
@@ -8,7 +9,12 @@
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
 [![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp)
 
-D++ is a lightweight and efficient library for Discord written in modern C++, covering as much of the API specification as possible with an incredibly small memory footprint even when caching large amounts of data.
+</div>
+
+<hr />
+
+
+D++ is a lightweight and efficient library for **Discord** written in **modern C++**, covering as much of the API specification as possible with an **incredibly small memory footprint** even when caching large amounts of data.
 
 ### Library features:
 
@@ -30,9 +36,9 @@ This library is in use on [TriviaBot](https://triviabot.co.uk/) and [Sporks bot]
 
 ## Documentation
 
-The documentation is a work in progress, generated from the code comments and markdown using Doxygen.
+The documentation is constantly evolving and improving, generated from the code comments and markdown examples using Doxygen.
 
-#### [View D++ library documentation](https://dpp.dev/)
+#### [View the D++ library documentation](https://dpp.dev/)
 
 ### Example
 
