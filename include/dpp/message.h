@@ -958,7 +958,7 @@ enum message_flags {
 	/// this message is an Interaction Response and the bot is "thinking"
 	m_loading = 1 << 7,
 	/// this message failed to mention some roles and add their members to the thread
-	m_failed_to_mention_some_roles_in_thread = 1 << 8,
+	m_thread_mention_failed = 1 << 8,
 };
 
 /**
@@ -1364,7 +1364,7 @@ struct DPP_EXPORT message : public managed {
 	 *
 	 * @return true if this message failed to mention some roles and add their members to the thread
 	 */
-	bool is_failed_to_mention() const;
+	bool is_thread_mention_failed() const;
 
 	/**
 	 * @brief Add a component (button) to message

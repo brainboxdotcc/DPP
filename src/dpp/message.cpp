@@ -896,8 +896,8 @@ bool message::is_loading() const {
 	return flags & m_loading;
 }
 
-bool message::is_failed_to_mention() const {
-	return flags & m_failed_to_mention_some_roles_in_thread;
+bool message::is_thread_mention_failed() const {
+	return flags & m_thread_mention_failed;
 }
 
 message::~message() = default;
