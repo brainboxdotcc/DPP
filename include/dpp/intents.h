@@ -78,7 +78,9 @@ enum intents {
 	/// Privileged intents requiring ID
 	i_privileged_intents		= dpp::i_guild_members | dpp::i_guild_presences | dpp::i_message_content,
 	/// Every single intent
-	i_all_intents			= dpp::i_default_intents | dpp::i_privileged_intents
+	i_all_intents			= dpp::i_default_intents | dpp::i_privileged_intents,
+        /// Unverified bots default intents
+        i_unverified_default_intents    = dpp::i_default_intents | dpp::i_message_content
 };
 
 };
