@@ -1213,7 +1213,7 @@ struct DPP_EXPORT message : public managed {
 	/** Message type */
 	message_type type;
 
-	/** Flags */
+	/** Flags. Made of bits in dpp::message_flags */
 	uint16_t		flags;
 
 	/** whether this message is pinned */
