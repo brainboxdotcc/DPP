@@ -73,10 +73,13 @@ enum command_option_type : uint8_t {
 
 /**
  * @brief This type is a variant that can hold any of the potential
- * native data types represented by the enum above.
+ * native data types represented by the enum dpp::command_option_type.
  * It is used in interactions.
  * 
  * std::monostate indicates an invalid parameter value, e.g. an unfilled optional parameter.
+ * std::int64_t will be for all integer options, double for decimal numbers and dpp::snowflake for anything ID related.
+ *
+ * You can retrieve them with std::get().
  */
 typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, double> command_value;
 
@@ -282,14 +285,12 @@ void to_json(nlohmann::json& j, const command_option& opt);
 
 /**
  * @brief Response types when responding to an interaction within on_interaction_create.
- * Do not use ir_acknowledge or ir::channel_message, as these are deprecated in the
- * Discord API spec. They are listed in this enum for completeness.
  */
 enum interaction_response_type {
-	ir_pong = 1,					//!< ACK a Ping
+	ir_pong = 1,					//!< Acknowledge a Ping
 	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
-	ir_deferred_channel_message_with_source = 5,	//!< ACK an interaction and edit a response later, the user sees a loading state
-	ir_deferred_update_message = 6,			//!< for components, ACK an interaction and edit the original message later; the user does not see a loading state
+	ir_deferred_channel_message_with_source = 5,	//!< Acknowledge an interaction and edit a response later, the user sees a loading state
+	ir_deferred_update_message = 6,			//!< for components, acknowledge an interaction and edit the original message later; the user does not see a loading state
 	ir_update_message = 7,				//!< for components, edit the message the component was attached to
 	ir_autocomplete_reply = 8,			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
 	ir_modal_dialog = 9,				//!< A modal dialog box
@@ -1041,7 +1042,7 @@ public:
 
 	/**
 	 * @brief The default permissions of this command on a guild.
-	 * D++ defaults this to p_use_application_commands.
+	 * D++ defaults this to dpp::p_use_application_commands.
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 */
 	permission default_member_permissions;
@@ -1093,7 +1094,7 @@ public:
 	/**
 	 * @brief Set the default permissions of the slash command
 	 * 
-	 * @param defaults default permissions to set. This is a permission bitmask
+	 * @param defaults default permissions to set. This is a permission bitmask of bits from dpp::permissions
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 *
 	 * @return slashcommand& reference to self

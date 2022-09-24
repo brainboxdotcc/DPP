@@ -59,6 +59,11 @@ echo "Generate `master` docs\n";
 chdir("..");
 shell_exec("/usr/local/bin/doxygen >/dev/null");
 chdir("docs");
+/* Insert giscus inside actual doc content */
+system('perl -p -i -e \'s/(<.div><.-- contents -->)/$1<script src="https:\/\/giscus.app\/client.js" data-repo="brainboxdotcc\/dpp-comments" ' .
+	'data-repo-id="R_kgDOHOY4xg" data-category="General" data-category-id="DIC_kwDOHOY4xs4CRYtj" data-mapping="pathname" data-strict="1" ' .
+	'data-reactions-enabled="1" data-emit-metadata="1" data-input-position="top" data-theme="preferred_color_scheme" data-lang="en" ' .
+	'data-loading="lazy" crossorigin="anonymous" async><\/script>/\' *.html');
 system("rsync -rv --include='*' '.' '/home/runner/dpp-web' >/dev/null");
 chdir("..");
 

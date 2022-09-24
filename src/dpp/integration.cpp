@@ -127,6 +127,7 @@ connection& connection::fill_from_json(nlohmann::json* j) {
 	this->verified = bool_not_null(j, "verified");
 	this->friend_sync = bool_not_null(j, "friend_sync");
 	this->show_activity = bool_not_null(j, "show_activity");
+	this->two_way_link = bool_not_null(j, "two_way_link");
 	this->visible = (int32_not_null(j, "visibility") == 1);
 	if (j->contains("integrations")) {
 		integrations.reserve((*j)["integrations"].size());

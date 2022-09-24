@@ -73,7 +73,7 @@ Then open the "File" menu and click on "Reload CMake Project" to reload the CMak
 
 ### Add an example program
 
-The next step is to write the bot. Copy and paste the following [example program](https://dpp.dev/firstbot.html) in the `main.cpp` and set your bot token (see [Creating a Bot Token](https://dpp.dev/creating-a-bot-application.html)) and guild ID to the example program:
+The next step is to write the bot. Copy and paste the following [example program](https://dpp.dev/firstbot.html) in the `main.cpp` and set your bot token (see [Creating a Bot Token](https://dpp.dev/creating-a-bot-application.html)):
 
 
 ~~~~~~~~~~~~~~~{.cpp}

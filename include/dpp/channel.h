@@ -54,7 +54,7 @@ enum channel_type : uint8_t {
 	CHANNEL_PRIVATE_THREAD	= 12,	//!< a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
 	CHANNEL_STAGE		= 13,	//!< a "stage" channel, like a voice channel with one authorised speaker
 	CHANNEL_DIRECTORY	= 14,   //!< the channel in a [hub](https://support.discord.com/hc/en-us/articles/4406046651927-Discord-Student-Hubs-FAQ) containing the listed servers
-	CHANNEL_FORUM		= 15	//!< forum channel, coming soon(tm)
+	CHANNEL_FORUM		= 15	//!< forum channel that can only contain threads
 };
 
 /** @brief Our flags as stored in the object
@@ -560,7 +560,10 @@ public:
 	/** Thread metadata (threads) */
 	thread_metadata metadata;
 
-	/** Number of messages (not including the initial message or deleted messages) of the thread. If the thread was created before July 1, 2022, it stops counting at 50 */
+	/**
+	 * @brief Number of messages (not including the initial message or deleted messages) of the thread.
+	 * For threads created before July 1, 2022, the message count is inaccurate when it's greater than 50.
+	 */
 	uint8_t message_count;
 
 	/** Approximate count of members in a thread (threads) */

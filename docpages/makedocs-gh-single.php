@@ -30,6 +30,11 @@ if (!file_exists("/home/runner/dpp-web/$tag")) {
 	mkdir("/home/runner/dpp-web/$tag");
 }
 chdir("docs");
+/* Add giscus inside the actual content as postprocess */
+system('perl -p -i -e \'s/(<.div><.-- contents -->)/$1<script src="https:\/\/giscus.app\/client.js" data-repo="brainboxdotcc\/dpp-comments" ' .
+	'data-repo-id="R_kgDOHOY4xg" data-category="General" data-category-id="DIC_kwDOHOY4xs4CRYtj" data-mapping="pathname" data-strict="1" ' .
+	'data-reactions-enabled="1" data-emit-metadata="1" data-input-position="top" data-theme="preferred_color_scheme" data-lang="en" ' .
+	'data-loading="lazy" crossorigin="anonymous" async><\/script>/\' *.html');
 system("rsync -r --include='*' '.' '/home/runner/dpp-web/".$tag."' >/dev/null");
 chdir("/");
 system("rm -rf " . sys_get_temp_dir() . "/dpp-old/$tag");
