@@ -62,6 +62,7 @@ std::string forum_tag::build_json(bool with_id) const {
 	} else if (!emoji_name.empty()) {
 		j["emoji_name"] = emoji_name;
 	}
+	return j.dump();
 }
 
 const uint8_t CHANNEL_TYPE_MASK = 0b00001111;
