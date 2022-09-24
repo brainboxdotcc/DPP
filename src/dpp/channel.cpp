@@ -35,6 +35,35 @@ permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0)
 
 permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type) : id(id), allow(allow), deny(deny), type(type) {}
 
+forum_tag::forum_tag() : managed(), moderated(false), emoji_id(0) {}
+
+forum_tag::~forum_tag()
+{
+}
+
+forum_tag& forum_tag::fill_from_json(nlohmann::json *j) {
+	set_snowflake_not_null(j, "id", this->id);
+	set_string_not_null(j, "name", this->name);
+	set_bool_not_null(j, "moderated", this->moderated);
+	set_snowflake_not_null(j, "emoji_id", this->emoji_id);
+	set_string_not_null(j, "emoji_name", this->emoji_name);
+	return *this;
+}
+
+std::string forum_tag::build_json(bool with_id) const {
+	json j;
+	if (with_id && id) {
+		j["id"] = std::to_string(id);
+	}
+	j["name"] = name;
+	j["moderated"] = moderated;
+	if (emoji_id) {
+		j["emoji_id"] = emoji_id;
+	} else if (!emoji_name.empty()) {
+		j["emoji_name"] = emoji_name;
+	}
+}
+
 const uint8_t CHANNEL_TYPE_MASK = 0b00001111;
 
 thread_member& thread_member::fill_from_json(nlohmann::json* j) {
@@ -70,6 +99,8 @@ channel::channel() :
 	position(0),
 	bitrate(0),
 	rate_limit_per_user(0),
+	default_auto_archive_duration(arc_off),
+	default_sort_order(so_latest_activity),
 	flags(0),
 	user_limit(0)
 {
@@ -269,6 +300,31 @@ channel& channel::fill_from_json(json* j) {
 	this->bitrate = int16_not_null(j, "bitrate")/1024;
 	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
 
+	uint16_t arc = int16_not_null(j, "default_auto_archive_duration");
+	if (arc == 60) {
+		this->default_auto_archive_duration = arc_1_hour;
+	} else if (arc == 1440) {
+		this->default_auto_archive_duration = arc_1_day;
+	} else if (arc == 4320) {
+		this->default_auto_archive_duration = arc_3_days;
+	} else if (arc == 10080) {
+		this->default_auto_archive_duration = arc_1_week;
+	}
+
+	if (j->contains("available_tags")) {
+		available_tags = {};
+		for (auto & available_tag : (*j)["available_tags"]) {
+			this->available_tags.emplace_back(forum_tag().fill_from_json(&available_tag));
+		}
+	}
+
+	if (j->contains("default_reaction_emoji")) {
+		this->default_reaction.emoji_id = snowflake_not_null(&(*j)["default_reaction_emoji"], "emoji_id");
+		this->default_reaction.emoji_name = string_not_null(&(*j)["default_reaction_emoji"], "emoji_name");
+	}
+
+	this->default_sort_order = (default_forum_sort_order)int8_not_null(j, "default_sort_order");
+
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type & CHANNEL_TYPE_MASK);
 
@@ -330,6 +386,14 @@ std::string thread::build_json(bool with_id) const {
 	json j = json::parse(channel::build_json(with_id));
 	j["type"] = (flags & CHANNEL_TYPE_MASK);
 	j["thread_metadata"] = this->metadata;
+	if (!this->applied_tags.empty()) {
+		j["applied_tags"] = json::array();
+		for (auto &tag_id: this->applied_tags) {
+			if (tag_id) {
+				j["applied_tags"].push_back(tag_id);
+			}
+		}
+	}
 	return j.dump();
 }
 
@@ -366,6 +430,23 @@ std::string channel::build_json(bool with_id) const {
 			j["parent_id"] = std::to_string(parent_id);
 		}
 		j["nsfw"] = is_nsfw();
+	}
+	if (default_auto_archive_duration) {
+		j["default_auto_archive_duration"] = default_auto_archive_duration;
+	}
+	if (!available_tags.empty()) {
+		j["available_tags"] = json::array();
+		for (const auto &available_tag : this->available_tags) {
+			j["available_tags"].push_back(available_tag.build_json());
+		}
+	}
+	if (!default_reaction.emoji_id.empty()) {
+		j["default_reaction_emoji"]["emoji_id"] = default_reaction.emoji_id;
+	} else if (!default_reaction.emoji_name.empty()) {
+		j["default_reaction_emoji"]["emoji_name"] = default_reaction.emoji_name;
+	}
+	if (default_sort_order) {
+		j["default_sort_order"] = default_sort_order;
 	}
 	if (flags & c_lock_permissions) {
 		j["lock_permissions"] = true;

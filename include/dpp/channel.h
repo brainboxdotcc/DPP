@@ -29,6 +29,7 @@
 #include <dpp/permissions.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
+#include <variant>
 
 namespace dpp {
 
@@ -78,7 +79,19 @@ enum channel_flags : uint8_t {
  */
 enum discord_channel_flags : uint8_t {
 	/// Thread pinned in a forum (type 15) channel
-	dc_pinned_thread = 0b00000001,
+	dc_pinned_thread = 1 << 1,
+	/// whether a tag is required to be specified when creating a thread in a GUILD_FORUM channel. Tags are specified in the applied_tags field.
+	dc_require_tag =   1 << 4,
+};
+
+/**
+ * @brief Sort order types for forum channels
+ */
+enum default_forum_sort_order : uint8_t {
+	/// Sort forum posts by activity
+	so_latest_activity = 0,
+	/// Sort forum posts by creation time (from most recent to oldest)
+	so_creation_date = 1,
 };
 
 /**
@@ -137,6 +150,22 @@ struct DPP_EXPORT thread_metadata {
 };
 
 /**
+ * @brief Default duration threads will stop showing in the channel list after the specified period of inactivity
+ */
+enum default_auto_archive_duration_t : uint8_t {
+	/// Default duration disabled
+	arc_off = 0,
+	/// Default duration of 1 hour. (60 minutes)
+	arc_1_hour = 1,
+	/// Default duration of 1 day. (1440 minutes)
+	arc_1_day = 2,
+	/// Default duration of 3 days. (4320 minutes)
+	arc_3_days = 3,
+	/// Default duration of 1 week. (10080 minutes)
+	arc_1_week = 4,
+};
+
+/**
  * @brief represents membership of a user with a thread
  */
 struct DPP_EXPORT thread_member  
@@ -156,6 +185,51 @@ struct DPP_EXPORT thread_member
 	 * @return A reference to self	
 	 */
 	 thread_member& fill_from_json(nlohmann::json* j);
+};
+
+/**
+ * @brief Specifies the emoji to use as the default way to react to a forum post. Exactly one of `emoji_id` and `emoji_name` must be set.
+ */
+struct DPP_EXPORT default_reaction_emoji {
+	/// The id of a guild's custom emoji
+	snowflake emoji_id;
+	/// The unicode character of the emoji
+	std::string emoji_name;
+};
+
+/**
+ * @brief Represents a tag that is able to be applied to a thread in a forum channel
+ */
+struct DPP_EXPORT forum_tag : public managed {
+	/** the name of the tag (0-20 characters) */
+	std::string name;
+	/** whether this tag can only be added to or removed from threads by a member with the MANAGE_THREADS permission */
+	bool moderated;
+	/** the id of a guild's custom emoji */
+	snowflake emoji_id;
+	/** the unicode character of the emoji */
+	std::string emoji_name;
+
+	/** Constructor */
+	forum_tag();
+
+	/** Destructor */
+	virtual ~forum_tag();
+
+	/**
+	 * @brief Read struct values from a json object
+	 * @param j json to read values from
+	 * @return A reference to self
+	 */
+	forum_tag& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this forum_tag object
+	 *
+	 * @param with_id include the ID in the json
+	 * @return std::string JSON string
+	 */
+	std::string build_json(bool with_id = false) const;
 };
 
 /** @brief A group of thread member objects*/
@@ -184,6 +258,12 @@ public:
 
 	/** Permission overwrites to apply to base permissions */
 	std::vector<permission_overwrite> permission_overwrites;
+
+	/** the set of tags that can be used in a forum channel */
+	std::vector<forum_tag> available_tags;
+
+	/** the emoji to show in the add reaction button on a thread in a forum channel */
+	default_reaction_emoji default_reaction;
 
 	/**
 	 * @brief Channel icon (for group DMs)
@@ -226,6 +306,15 @@ public:
 
 	/** amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected*/
 	uint16_t rate_limit_per_user;
+
+	/**
+	 * @brief Default duration, copied onto newly created threads. Used by the clients, not the API.
+	 * Threads will stop showing in the channel list after the specified period of inactivity
+	 */
+	default_auto_archive_duration_t default_auto_archive_duration;
+
+	/** the default sort order type used to order posts in forum channels */
+	default_forum_sort_order default_sort_order;
 
 	/** Flags bitmap */
 	uint8_t flags;
@@ -495,9 +584,8 @@ public:
 
 	/**
 	 * @brief Returns true if the channel is a forum
-	 * @note This feature is not implemented by Discord yet and the name is subject to possible change!
 	 * 
-	 * @return true if a category
+	 * @return true if a forum
 	 */
 	bool is_forum() const;
 
@@ -568,6 +656,11 @@ public:
 
 	/** Approximate count of members in a thread (threads) */
 	uint8_t member_count;
+
+	/**
+	 * A list of dpp::forum_tag IDs that have been applied to a thread in a forum channel
+	 */
+	std::vector<snowflake> applied_tags;
 
 	/**
 	 * @brief Construct a new thread object
