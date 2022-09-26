@@ -252,9 +252,6 @@ thread& thread::fill_from_json(json* j) {
 thread::thread() : channel(), message_count(0), member_count(0) {
 }
 
-thread::~thread() {
-}
-
 channel& channel::fill_from_json(json* j) {
 	this->id = snowflake_not_null(j, "id");
 	set_snowflake_not_null(j, "guild_id", this->guild_id);

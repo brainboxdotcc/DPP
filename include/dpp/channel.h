@@ -636,7 +636,7 @@ public:
 	/**
 	 * @brief Destroy the thread object
 	 */
-	virtual ~thread();
+	virtual ~thread() = default;
 
 	/**
 	 * @brief Build json for this thread object
