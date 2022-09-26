@@ -85,10 +85,10 @@ enum discord_channel_flags : uint8_t {
 };
 
 /**
- * @brief Sort order types for forum channels
+ * @brief Types for sort posts in a forum channel
  */
-enum default_forum_sort_order : uint8_t {
-	/// Sort forum posts by activity
+enum default_forum_sort_order_t : uint8_t {
+	/// Sort forum posts by activity (default)
 	so_latest_activity = 0,
 	/// Sort forum posts by creation time (from most recent to oldest)
 	so_creation_date = 1,
@@ -259,10 +259,10 @@ public:
 	/** Permission overwrites to apply to base permissions */
 	std::vector<permission_overwrite> permission_overwrites;
 
-	/** the set of tags that can be used in a forum channel */
+	/** A set of tags that can be used in a forum channel */
 	std::vector<forum_tag> available_tags;
 
-	/** the emoji to show in the add reaction button on a thread in a forum channel */
+	/** The emoji to show in the add reaction button on a thread in a forum channel */
 	default_reaction_emoji default_reaction;
 
 	/**
@@ -307,6 +307,9 @@ public:
 	/** amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected*/
 	uint16_t rate_limit_per_user;
 
+	/** The initial `rate_limit_per_user` to set on newly created threads in a channel. This field is copied to the thread at creation time and does not live update */
+	uint16_t default_thread_rate_limit_per_user;
+
 	/**
 	 * @brief Default duration, copied onto newly created threads. Used by the clients, not the API.
 	 * Threads will stop showing in the channel list after the specified period of inactivity
@@ -314,7 +317,7 @@ public:
 	default_auto_archive_duration_t default_auto_archive_duration;
 
 	/** the default sort order type used to order posts in forum channels */
-	default_forum_sort_order default_sort_order;
+	default_forum_sort_order_t default_sort_order;
 
 	/** Flags bitmap */
 	uint8_t flags;

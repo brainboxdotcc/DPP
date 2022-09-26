@@ -100,6 +100,7 @@ channel::channel() :
 	position(0),
 	bitrate(0),
 	rate_limit_per_user(0),
+	default_thread_rate_limit_per_user(0),
 	default_auto_archive_duration(arc_off),
 	default_sort_order(so_latest_activity),
 	flags(0),
@@ -296,6 +297,7 @@ channel& channel::fill_from_json(json* j) {
 	set_snowflake_not_null(j, "last_message_id", this->last_message_id);
 	set_int8_not_null(j, "user_limit", this->user_limit);
 	set_int16_not_null(j, "rate_limit_per_user", this->rate_limit_per_user);
+	set_int16_not_null(j, "default_thread_rate_limit_per_user", this->default_thread_rate_limit_per_user);
 	set_snowflake_not_null(j, "owner_id", this->owner_id);
 	set_snowflake_not_null(j, "parent_id", this->parent_id);
 	this->bitrate = int16_not_null(j, "bitrate")/1024;
@@ -324,7 +326,7 @@ channel& channel::fill_from_json(json* j) {
 		this->default_reaction.emoji_name = string_not_null(&(*j)["default_reaction_emoji"], "emoji_name");
 	}
 
-	this->default_sort_order = (default_forum_sort_order)int8_not_null(j, "default_sort_order");
+	this->default_sort_order = (default_forum_sort_order_t)int8_not_null(j, "default_sort_order");
 
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type & CHANNEL_TYPE_MASK);
@@ -420,6 +422,9 @@ std::string channel::build_json(bool with_id) const {
 	}
 	if (rate_limit_per_user) {
 		j["rate_limit_per_user"] = rate_limit_per_user;
+	}
+	if (default_thread_rate_limit_per_user) {
+		j["default_thread_rate_limit_per_user"] = default_thread_rate_limit_per_user;
 	}
 	if (is_voice_channel()) {
 		j["user_limit"] = user_limit; 
