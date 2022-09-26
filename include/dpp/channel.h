@@ -29,6 +29,7 @@
 #include <dpp/permissions.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
+#include <variant>
 
 namespace dpp {
 
@@ -89,6 +90,16 @@ enum overwrite_type : uint8_t {
 	ot_role = 0,
 	/// Member
 	ot_member = 1
+};
+
+/**
+ * @brief types to sort posts in a forum channel
+ */
+enum sort_order_type : uint8_t {
+    /// Sort forum posts by activity
+    so_latest_activity = 0,
+    /// Sort forum posts by creation time (from most recent to oldest)
+    so_creation_date = 1
 };
 
 /**
@@ -157,6 +168,16 @@ struct DPP_EXPORT thread_member
 	 */
 	 thread_member& fill_from_json(nlohmann::json* j);
 };
+/** An object that represents a tag that is able to be applied to a thread in a GUILD_FORUM channel. */
+struct DPP_EXPORT forum_tag : public managed, public json_interface<forum_tag>
+{
+    /** the name of the tag (0-20 characters) */
+    std::string name;
+    /** contains either nothing, emoji id or emoji name */
+    std::variant<std::monostate, snowflake, std::string> emoji;
+    /** whether this tag can only be added to or removed from threads by a member with the MANAGE_THREADS permission */
+    bool moderated = false;
+};
 
 /** @brief A group of thread member objects*/
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
@@ -184,6 +205,9 @@ public:
 
 	/** Permission overwrites to apply to base permissions */
 	std::vector<permission_overwrite> permission_overwrites;
+
+	/** the set of tags that can be used in a GUILD_FORUM channel */
+	std::vector<forum_tag> available_tags;
 
 	/**
 	 * @brief Channel icon (for group DMs)
@@ -224,6 +248,8 @@ public:
 	/** the bitrate (in bits) of the voice channel */
 	uint16_t bitrate;
 
+	/** the initial rate_limit_per_user to set on newly created threads in a channel. this field is copied to the thread at creation time and does not live update*/
+	uint16_t default_thread_rate_limit_per_user;
 	/** amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected*/
 	uint16_t rate_limit_per_user;
 
@@ -232,6 +258,9 @@ public:
 	
 	/** Maximum user limit for voice channels (0-99) */
 	uint8_t user_limit;
+
+	/** the default sort order type used to order posts in GUILD_FORUM channels. Defaults to null, which indicates a preferred sort order hasn't been set by a channel admin*/
+	sort_order_type default_sort_order;
 
 	/** Constructor */
 	channel();
@@ -559,6 +588,9 @@ public:
 
 	/** Thread metadata (threads) */
 	thread_metadata metadata;
+
+	/** the IDs of the set of tags that have been applied to a thread in a GUILD_FORUM channel */
+	std::vector<snowflake> applied_tags;
 
 	/**
 	 * @brief Number of messages (not including the initial message or deleted messages) of the thread.
