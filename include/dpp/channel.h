@@ -80,7 +80,7 @@ enum channel_flags : uint8_t {
 enum discord_channel_flags : uint8_t {
 	/// Thread pinned in a forum (type 15) channel
 	dc_pinned_thread = 1 << 1,
-	/// whether a tag is required to be specified when creating a thread in a GUILD_FORUM channel. Tags are specified in the applied_tags field.
+	/// whether a tag is required to be specified when creating a thread in a forum channel. Tags are specified in the thread::applied_tags field.
 	dc_require_tag =   1 << 4,
 };
 
