@@ -153,15 +153,15 @@ struct DPP_EXPORT thread_metadata {
  * @brief Default duration threads will stop showing in the channel list after the specified period of inactivity
  */
 enum default_auto_archive_duration_t : uint8_t {
-	/// Default duration disabled
-	arc_off = 0,
-	/// Default duration of 1 hour. (60 minutes)
+	/// Default archive duration not set (default)
+	arc_unset = 0,
+	/// Default archive duration of 1 hour. (60 minutes)
 	arc_1_hour = 1,
-	/// Default duration of 1 day. (1440 minutes)
+	/// Default archive duration of 1 day. (1440 minutes)
 	arc_1_day = 2,
-	/// Default duration of 3 days. (4320 minutes)
+	/// Default archive duration of 3 days. (4320 minutes)
 	arc_3_days = 3,
-	/// Default duration of 1 week. (10080 minutes)
+	/// Default archive duration of 1 week. (10080 minutes)
 	arc_1_week = 4,
 };
 
@@ -365,6 +365,14 @@ public:
 	 * @note topic will be truncated to 1024 chars, if longer
 	 */
 	channel& set_topic(const std::string& topic);
+
+	/**
+	 * @brief Set type of this channel object
+	 *
+	 * @param type Channel type to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	channel& set_type(const channel_type& type);
 
 	/**
 	 * @brief Set flags for this channel object

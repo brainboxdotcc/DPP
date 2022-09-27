@@ -101,7 +101,7 @@ channel::channel() :
 	bitrate(0),
 	rate_limit_per_user(0),
 	default_thread_rate_limit_per_user(0),
-	default_auto_archive_duration(arc_off),
+	default_auto_archive_duration(arc_unset),
 	default_sort_order(so_latest_activity),
 	flags(0),
 	user_limit(0)
@@ -123,6 +123,12 @@ channel& channel::set_name(const std::string& name) {
 
 channel& channel::set_topic(const std::string& topic) {
 	this->topic = utility::utf8substr(topic, 0, 1024);
+	return *this;
+}
+
+channel& channel::set_type(const dpp::channel_type &type) {
+	this->flags &= ~CHANNEL_TYPE_MASK;
+	this->flags |= type;
 	return *this;
 }
 
@@ -437,13 +443,19 @@ std::string channel::build_json(bool with_id) const {
 		}
 		j["nsfw"] = is_nsfw();
 	}
-	if (default_auto_archive_duration) {
-		j["default_auto_archive_duration"] = default_auto_archive_duration;
+	if (default_auto_archive_duration == arc_1_hour) {
+		j["default_auto_archive_duration"] = 60;
+	} else if (default_auto_archive_duration == arc_1_day) {
+		j["default_auto_archive_duration"] = 1440;
+	} else if (default_auto_archive_duration == arc_3_days) {
+		j["default_auto_archive_duration"] = 4320;
+	} else if (default_auto_archive_duration == arc_1_week) {
+		j["default_auto_archive_duration"] = 10080;
 	}
 	if (!available_tags.empty()) {
 		j["available_tags"] = json::array();
 		for (const auto &available_tag : this->available_tags) {
-			j["available_tags"].push_back(available_tag.build_json());
+			j["available_tags"].push_back(json::parse(available_tag.build_json()));
 		}
 	}
 	if (!default_reaction.emoji_id.empty()) {
@@ -523,7 +535,7 @@ std::string channel::get_icon_url(uint16_t size) const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
-	if (!this->icon.to_string().empty()) {
+	if (this->id && !this->icon.to_string().empty()) {
 		return utility::cdn_host + "/channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
 	} else {
 		return std::string();
