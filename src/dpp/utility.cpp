@@ -71,7 +71,7 @@ namespace dpp {
 		std::string current_date_time() {
 #ifdef _WIN32
 			std::time_t curr_time = time(nullptr);
-			return std::ctime(&curr_time);
+			return trim(std::ctime(&curr_time));
 #else
 			auto t = std::time(nullptr);
 			struct tm timedata;
