@@ -45,7 +45,11 @@ namespace dpp {
 	#endif
 #endif
 
-event_handle _next_handle = 1;
+static event_handle _next_handle = 1;
+
+event_handle get_next_event_handle() {
+	return _next_handle++;
+}
 
 /**
  * @brief An audit reason for each thread. These are per-thread to make the cluster

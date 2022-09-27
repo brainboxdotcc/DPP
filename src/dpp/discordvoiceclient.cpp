@@ -227,7 +227,11 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					}
 				} else {
 					voice_receive_t& vr = *d.parked_payloads.top().vr;
-					if (int samples = opus_decode(d.decoder.get(), vr.audio_data.data(), vr.audio_data.length(), pcm, 5760, 0);
+					if (vr.audio_data.length() > 0x7FFFFFFF) {
+						throw dpp::length_exception("audio_data > 2GB! This should never happen!");
+					}
+					if (int samples = opus_decode(d.decoder.get(), vr.audio_data.data(),
+						static_cast<opus_int32>(vr.audio_data.length() & 0x7FFFFFFF), pcm, 5760, 0);
 					    samples >= 0) {
 						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
 							samples * opus_channel_count * sizeof(opus_int16));
@@ -246,7 +250,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			/* Downsample the 32 bit samples back to 16 bit */
 			opus_int16 pcm_downsample[23040] = { 0 };
 			for (int v = 0; v < max_samples * opus_channel_count; ++v) {
-				pcm_downsample[v] = pcm_mix[v] / park_count;
+				pcm_downsample[v] = (opus_int16)(pcm_mix[v] / park_count);
 			}
 			voice_receive_t vr(nullptr, "", &client, 0, reinterpret_cast<uint8_t*>(pcm_downsample),
 				max_samples * opus_channel_count * sizeof(opus_int16));
@@ -907,7 +911,7 @@ void discord_voice_client::set_user_gain(snowflake user_id, float factor)
 		 * factor = 10^(x / (20 * 256))
 		 * x = log_10(factor) * 20 * 256
 		 */
-		gain = std::log10(factor) * 20 * 256;
+		gain = static_cast<int16_t>(std::log10(factor) * 20.0f * 256.0f);
 	}
 
 	std::lock_guard lk(voice_courier_shared_state.mtx);

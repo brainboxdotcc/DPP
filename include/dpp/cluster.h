@@ -52,7 +52,7 @@ using  json = nlohmann::json;
 
 namespace dpp {
 
-extern DPP_EXPORT event_handle _next_handle;
+event_handle DPP_EXPORT get_next_event_handle();
 
 /**
  * @brief Handles routing of an event to multiple listeners.
@@ -221,7 +221,7 @@ public:
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
 		std::unique_lock l(lock);
-		event_handle h = _next_handle++;
+		event_handle h = dpp::get_next_event_handle();
 		dispatch_container.emplace(h, func);
 		return h;		
 	}
@@ -229,7 +229,7 @@ public:
 #ifdef DPP_CORO
 	event_handle co_attach(std::function<dpp::task(T)> func) {
 		std::unique_lock l(lock);
-		event_handle h = _next_handle++;
+		event_handle h = dpp::get_next_event_handle();
 		coroutine_container.emplace(h, func);
 		return h;		
 	}
