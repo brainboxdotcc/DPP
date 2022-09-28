@@ -328,14 +328,21 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
 
 	uint16_t arc = int16_not_null(j, "default_auto_archive_duration");
-	if (arc == 60) {
-		this->default_auto_archive_duration = arc_1_hour;
-	} else if (arc == 1440) {
-		this->default_auto_archive_duration = arc_1_day;
-	} else if (arc == 4320) {
-		this->default_auto_archive_duration = arc_3_days;
-	} else if (arc == 10080) {
-		this->default_auto_archive_duration = arc_1_week;
+	switch (arc) {
+		case 60:
+			this->default_auto_archive_duration = arc_1_hour;
+			break;
+		case 1440:
+			this->default_auto_archive_duration = arc_1_day;
+			break;
+		case 4320:
+			this->default_auto_archive_duration = arc_3_days;
+			break;
+		case 10080:
+			this->default_auto_archive_duration = arc_1_week;
+			break;
+		default:
+			break;
 	}
 
 	if (j->contains("available_tags")) {
@@ -461,14 +468,19 @@ std::string channel::build_json(bool with_id) const {
 		}
 		j["nsfw"] = is_nsfw();
 	}
-	if (default_auto_archive_duration == arc_1_hour) {
-		j["default_auto_archive_duration"] = 60;
-	} else if (default_auto_archive_duration == arc_1_day) {
-		j["default_auto_archive_duration"] = 1440;
-	} else if (default_auto_archive_duration == arc_3_days) {
-		j["default_auto_archive_duration"] = 4320;
-	} else if (default_auto_archive_duration == arc_1_week) {
-		j["default_auto_archive_duration"] = 10080;
+	switch (default_auto_archive_duration) {
+		case arc_1_hour:
+			j["default_auto_archive_duration"] = 60;
+			break;
+		case arc_1_day:
+			j["default_auto_archive_duration"] = 1440;
+			break;
+		case arc_3_days:
+			j["default_auto_archive_duration"] = 4320;
+			break;
+		case arc_1_week:
+			j["default_auto_archive_duration"] = 10080;
+			break;
 	}
 	if (!available_tags.empty()) {
 		j["available_tags"] = json::array();

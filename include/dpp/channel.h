@@ -152,7 +152,7 @@ struct DPP_EXPORT thread_metadata {
 
 /**
  * @brief Auto archive duration of threads which will stop showing in the channel list after the specified period of inactivity.
- * Defined as an enum to fit into 1 byte
+ * Defined as an enum to fit into 1 byte. Internally it'll be translated to minutes to match the API
  */
 enum auto_archive_duration_t : uint8_t {
 	/// Auto archive duration of 1 hour. (60 minutes)
@@ -308,7 +308,7 @@ public:
 
 	/**
 	 * @brief Default duration, copied onto newly created threads. Used by the clients, not the API.
-	 * Threads will stop showing in the channel list after the specified period of inactivity
+	 * Threads will stop showing in the channel list after the specified period of inactivity. Defaults to dpp::arc_1_day
 	 */
 	auto_archive_duration_t default_auto_archive_duration;
 
