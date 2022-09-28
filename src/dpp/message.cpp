@@ -451,7 +451,7 @@ message& message::add_embed(const embed& e)
 	return *this;
 }
 
-message& message::set_flags(uint16_t f)
+message& message::set_flags(uint8_t f)
 {
 	flags = f;
 	return *this;

@@ -1390,7 +1390,7 @@ struct DPP_EXPORT message : public managed {
 	 * @param f flags to set from dpp::message_flags
 	 * @return message& reference to self
 	 */
-	message& set_flags(uint16_t f);
+	message& set_flags(uint8_t f);
 
 	/**
 	 * @brief Set the message type
