@@ -3065,7 +3065,7 @@ public:
 	 * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
 	 * @param applied_tags List of IDs of forum tags (dpp::forum_tag) to apply to this thread
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::channel object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void thread_create_in_forum(const std::string& forum_name, snowflake channel_id, message& forum_message, uint16_t auto_archive_duration = 1440, uint16_t rate_limit_per_user = 0, std::vector<snowflake> applied_tags = {}, command_completion_event_t callback = utility::log_error());
 
