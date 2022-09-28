@@ -35,7 +35,7 @@ permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0)
 
 permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type) : id(id), allow(allow), deny(deny), type(type) {}
 
-forum_tag::forum_tag() : managed(), moderated(false), emoji_id(0) {}
+forum_tag::forum_tag() : managed(), moderated(false) {}
 
 forum_tag::~forum_tag()
 {
@@ -45,8 +45,13 @@ forum_tag& forum_tag::fill_from_json(nlohmann::json *j) {
 	set_snowflake_not_null(j, "id", this->id);
 	set_string_not_null(j, "name", this->name);
 	set_bool_not_null(j, "moderated", this->moderated);
-	set_snowflake_not_null(j, "emoji_id", this->emoji_id);
-	set_string_not_null(j, "emoji_name", this->emoji_name);
+	auto emoji_id = snowflake_not_null(j, "emoji_id");
+	auto emoji_name = string_not_null(j, "emoji_name");
+	if (emoji_id) {
+		this->emoji = emoji_id;
+	} else if (!emoji_name.empty()) {
+		this->emoji = emoji_name;
+	}
 	return *this;
 }
 
@@ -57,12 +62,17 @@ std::string forum_tag::build_json(bool with_id) const {
 	}
 	j["name"] = name;
 	j["moderated"] = moderated;
-	if (emoji_id) {
-		j["emoji_id"] = emoji_id;
-	} else if (!emoji_name.empty()) {
-		j["emoji_name"] = emoji_name;
+	if (std::holds_alternative<snowflake>(emoji)) {
+		j["emoji_id"] = std::get<snowflake>(emoji);
+	} else if (std::holds_alternative<std::string>(emoji)) {
+		j["emoji_name"] = std::get<std::string>(emoji);
 	}
 	return j.dump();
+}
+
+forum_tag &forum_tag::set_name(const std::string &name) {
+	this->name = utility::utf8substr(name, 0, 20);
+	return *this;
 }
 
 const uint8_t CHANNEL_TYPE_MASK = 0b00001111;
@@ -328,8 +338,13 @@ channel& channel::fill_from_json(json* j) {
 	}
 
 	if (j->contains("default_reaction_emoji")) {
-		this->default_reaction.emoji_id = snowflake_not_null(&(*j)["default_reaction_emoji"], "emoji_id");
-		this->default_reaction.emoji_name = string_not_null(&(*j)["default_reaction_emoji"], "emoji_name");
+		auto emoji_id = snowflake_not_null(&(*j)["default_reaction_emoji"], "emoji_id");
+		auto emoji_name = string_not_null(&(*j)["default_reaction_emoji"], "emoji_name");
+		if (emoji_id) {
+			this->default_reaction = emoji_id;
+		} else if (!emoji_name.empty()) {
+			this->default_reaction = emoji_name;
+		}
 	}
 
 	this->default_sort_order = (default_forum_sort_order_t)int8_not_null(j, "default_sort_order");
@@ -458,10 +473,10 @@ std::string channel::build_json(bool with_id) const {
 			j["available_tags"].push_back(json::parse(available_tag.build_json()));
 		}
 	}
-	if (!default_reaction.emoji_id.empty()) {
-		j["default_reaction_emoji"]["emoji_id"] = default_reaction.emoji_id;
-	} else if (!default_reaction.emoji_name.empty()) {
-		j["default_reaction_emoji"]["emoji_name"] = default_reaction.emoji_name;
+	if (std::holds_alternative<snowflake>(this->default_reaction)) {
+		j["default_reaction_emoji"]["emoji_id"] = std::get<snowflake>(this->default_reaction);
+	} else if (std::holds_alternative<std::string>(this->default_reaction)) {
+		j["default_reaction_emoji"]["emoji_name"] = std::get<std::string>(this->default_reaction);
 	}
 	if (default_sort_order) {
 		j["default_sort_order"] = default_sort_order;

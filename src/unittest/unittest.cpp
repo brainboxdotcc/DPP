@@ -84,6 +84,7 @@ std::map<std::string, test_t> tests = {
 	{"CHANNELTYPES", {tt_online, "channel type flags", false, false}},
 	{"FORUM_CREATION", {tt_online, "create a forum channel", false, false}},
 	{"FORUM_CHANNEL_GET", {tt_online, "retrieve the created forum channel", false, false}},
+	{"FORUM_CHANNEL_DELETE", {tt_online, "delete the created forum channel", false, false}},
 	{"PERMISSION_CLASS", {tt_offline, "permission", false, false}},
 	{"USER.GET_MENTION", {tt_offline, "user::get_mention", false, false}},
 	{"USER.FORMAT_USERNAME", {tt_offline, "user::format_username", false, false}},

@@ -188,27 +188,15 @@ struct DPP_EXPORT thread_member
 };
 
 /**
- * @brief Specifies the emoji to use as the default way to react to a forum post. Exactly one of `emoji_id` and `emoji_name` must be set.
- */
-struct DPP_EXPORT default_reaction_emoji {
-	/// The id of a guild's custom emoji
-	snowflake emoji_id;
-	/// The unicode character of the emoji
-	std::string emoji_name;
-};
-
-/**
  * @brief Represents a tag that is able to be applied to a thread in a forum channel
  */
 struct DPP_EXPORT forum_tag : public managed {
-	/** the name of the tag (0-20 characters) */
+	/** The name of the tag (0-20 characters) */
 	std::string name;
-	/** whether this tag can only be added to or removed from threads by a member with the MANAGE_THREADS permission */
+	/** The emoji of the tag. Contains either nothing, the id of a guild's custom emoji or the unicode character of the emoji */
+	std::variant<std::monostate, snowflake, std::string> emoji;
+	/** Whether this tag can only be added to or removed from threads by a member with the `MANAGE_THREADS` permission */
 	bool moderated;
-	/** the id of a guild's custom emoji */
-	snowflake emoji_id;
-	/** the unicode character of the emoji */
-	std::string emoji_name;
 
 	/** Constructor */
 	forum_tag();
@@ -230,6 +218,16 @@ struct DPP_EXPORT forum_tag : public managed {
 	 * @return std::string JSON string
 	 */
 	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set name of this forum_tag object
+	 *
+	 * @param name Name to set
+	 * @return Reference to self, so these method calls may be chained
+	 *
+	 * @note name will be truncated to 20 chars, if longer
+	 */
+	forum_tag& set_name(const std::string& name);
 };
 
 /** @brief A group of thread member objects*/
@@ -242,10 +240,10 @@ typedef std::unordered_map<snowflake, thread_member> thread_member_map;
  */ 
 class DPP_EXPORT channel : public managed, public json_interface<channel>  {
 public:
-	/** Channel name */
+	/** Channel name (1-100 characters) */
 	std::string name;
 
-	/** Channel topic */
+	/** Channel topic (0-4096 characters for forum channels, 0-1024 characters for all others) */
 	std::string topic;
 
 	/**
@@ -262,8 +260,11 @@ public:
 	/** A set of tags that can be used in a forum channel */
 	std::vector<forum_tag> available_tags;
 
-	/** The emoji to show in the add reaction button on a thread in a forum channel */
-	default_reaction_emoji default_reaction;
+	/**
+	 * @brief The emoji to show as the default reaction button on a forum post.
+	 * Contains either nothing, the id of a guild's custom emoji or the unicode character of the emoji
+	 */
+	std::variant<std::monostate, snowflake, std::string> default_reaction;
 
 	/**
 	 * @brief Channel icon (for group DMs)
@@ -275,16 +276,16 @@ public:
 	 */
 	utility::iconhash banner;
 
-	/** User ID of owner for group DMs */
+	/** User ID of the creator for group DMs or threads */
 	snowflake owner_id;
 
-	/** Parent ID (category) */
+	/** Parent ID (for guild channels: id of the parent category, for threads: id of the text channel this thread was created) */
 	snowflake parent_id;
 
 	/** Guild id of the guild that owns the channel */
 	snowflake guild_id;
 
-	/** ID of last message to be sent to the channel */
+	/** ID of last message to be sent to the channel (may not point to an existing or valid message or thread) */
 	snowflake last_message_id;
 
 	/** Timestamp of last pinned message */

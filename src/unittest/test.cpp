@@ -411,6 +411,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 			set_test("FORUM_CREATION", false);
 			set_test("FORUM_CHANNEL_GET", false);
+			set_test("FORUM_CHANNEL_DELETE", false);
 			if (!offline) {
 				dpp::channel c;
 				c.name = "test-forum-channel";
@@ -420,24 +421,23 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				c.default_sort_order = dpp::so_creation_date;
 				dpp::forum_tag t;
 				t.name = "Alpha";
-				t.emoji_name = "❌";
+				t.emoji = "❌";
 				c.available_tags = {t};
 				c.default_auto_archive_duration = dpp::arc_1_day;
-				dpp::default_reaction_emoji e;
-				e.emoji_name = "✅";
-				c.default_reaction = e;
+				c.default_reaction = "✅";
 				c.default_thread_rate_limit_per_user = 10;
 				bot.channel_create(c, [&bot](const dpp::confirmation_callback_t &event) {
 					if (!event.is_error()) {
 						set_test("FORUM_CREATION", true);
 						auto channel = std::get<dpp::channel>(event.value);
-						bot.channel_get(channel.id, [](const dpp::confirmation_callback_t &event) {
+						// retrieve the forum channel and check the values
+						bot.channel_get(channel.id, [forum_id = channel.id, &bot](const dpp::confirmation_callback_t &event) {
 							if (!event.is_error()) {
 								auto channel = std::get<dpp::channel>(event.value);
 								std::cout << "channel json\n" << event.http_info.body << std::endl;
 								bool tag = false;
 								for (auto &t : channel.available_tags) {
-									if (t.name == "Alpha" && t.emoji_name == "❌") {
+									if (t.name == "Alpha" && std::holds_alternative<std::string>(t.emoji) && std::get<std::string>(t.emoji) == "❌") {
 										tag = true;
 									}
 								}
@@ -448,6 +448,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							} else {
 								set_test("FORUM_CHANNEL_GET", false);
 							}
+							// delete the forum channel
+							bot.channel_delete(forum_id, [](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									set_test("FORUM_CHANNEL_DELETE", true);
+								} else {
+									set_test("FORUM_CHANNEL_DELETE", false);
+								}
+							});
 						});
 					} else {
 						set_test("FORUM_CREATION", false);
