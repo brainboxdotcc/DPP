@@ -111,7 +111,7 @@ channel::channel() :
 	bitrate(0),
 	rate_limit_per_user(0),
 	default_thread_rate_limit_per_user(0),
-	default_auto_archive_duration(arc_unset),
+	default_auto_archive_duration(arc_1_day),
 	default_sort_order(so_latest_activity),
 	flags(0),
 	user_limit(0)
@@ -289,6 +289,7 @@ thread& thread::fill_from_json(json* j) {
 	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");
 	metadata.auto_archive_duration = int16_not_null(&json_metadata, "auto_archive_duration");
 	metadata.locked = bool_not_null(&json_metadata, "locked");
+	metadata.invitable = bool_not_null(&json_metadata, "invitable");
 
 	/* Only certain events set this */
 	if (j->contains("member"))  {

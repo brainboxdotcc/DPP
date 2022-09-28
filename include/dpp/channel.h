@@ -137,9 +137,9 @@ struct DPP_EXPORT permission_overwrite {
  * @brief metadata for threads
  */
 struct DPP_EXPORT thread_metadata {
-	/// When the thread was archived
+	/// Timestamp when the thread's archive status was last changed, used for calculating recent activity
 	time_t archive_timestamp;
-	/// The duration in minutes to automatically archive the thread after recent activity.
+	/// The duration in minutes to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
 	uint16_t auto_archive_duration;
 	/// Whether a thread is archived
 	bool archived;
@@ -150,18 +150,17 @@ struct DPP_EXPORT thread_metadata {
 };
 
 /**
- * @brief Default duration threads will stop showing in the channel list after the specified period of inactivity
+ * @brief Auto archive duration of threads which will stop showing in the channel list after the specified period of inactivity.
+ * Defined as an enum to fit into 1 byte
  */
-enum default_auto_archive_duration_t : uint8_t {
-	/// Default archive duration not set (default)
-	arc_unset = 0,
-	/// Default archive duration of 1 hour. (60 minutes)
+enum auto_archive_duration_t : uint8_t {
+	/// Auto archive duration of 1 hour. (60 minutes)
 	arc_1_hour = 1,
-	/// Default archive duration of 1 day. (1440 minutes)
+	/// Auto archive duration of 1 day. (1440 minutes)
 	arc_1_day = 2,
-	/// Default archive duration of 3 days. (4320 minutes)
+	/// Auto archive duration of 3 days. (4320 minutes)
 	arc_3_days = 3,
-	/// Default archive duration of 1 week. (10080 minutes)
+	/// Auto archive duration of 1 week. (10080 minutes)
 	arc_1_week = 4,
 };
 
@@ -234,7 +233,7 @@ struct DPP_EXPORT forum_tag : public managed {
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
 /**
- * @brief A definition of a discord channel
+ * @brief A definition of a discord channel.
  * There are one of these for every channel type except threads. Threads are
  * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
  */ 
@@ -310,7 +309,7 @@ public:
 	 * @brief Default duration, copied onto newly created threads. Used by the clients, not the API.
 	 * Threads will stop showing in the channel list after the specified period of inactivity
 	 */
-	default_auto_archive_duration_t default_auto_archive_duration;
+	auto_archive_duration_t default_auto_archive_duration;
 
 	/** the default sort order type used to order posts in forum channels */
 	default_forum_sort_order_t default_sort_order;
