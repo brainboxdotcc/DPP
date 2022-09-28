@@ -136,7 +136,7 @@ channel& channel::set_topic(const std::string& topic) {
 	return *this;
 }
 
-channel& channel::set_type(const dpp::channel_type &type) {
+channel& channel::set_type(const channel_type &type) {
 	this->flags &= ~CHANNEL_TYPE_MASK;
 	this->flags |= type;
 	return *this;
