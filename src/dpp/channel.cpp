@@ -391,14 +391,9 @@ channel& channel::fill_from_json(json* j) {
 	}
 
 	std::string _icon = string_not_null(j, "icon");
-	std::string _banner = string_not_null(j, "banner");
 
 	if (!_icon.empty()) {
 		this->icon = _icon;
-	}
-
-	if (!_banner.empty()) {
-		this->banner = _banner;
 	}
 
 	set_string_not_null(j, "rtc_region", rtc_region);
@@ -532,18 +527,6 @@ std::map<snowflake, voicestate> channel::get_voice_members() {
 		}
 	}
 	return rv;
-}
-
-std::string channel::get_banner_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->banner.to_string().empty()) {
-		// TODO implement this, endpoint for that isn't finished yet https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
-		return std::string();
-	} else {
-		return std::string();
-	}
 }
 
 std::string channel::get_icon_url(uint16_t size) const {
