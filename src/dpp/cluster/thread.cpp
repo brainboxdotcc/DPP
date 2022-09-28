@@ -67,14 +67,14 @@ void cluster::thread_members_get(snowflake thread_id, command_completion_event_t
 	rest_request_list<thread_member>(this, API_PATH "/channels", std::to_string(thread_id), "/threads-members", m_get, "", callback);
 }
 
-void cluster::thread_create_in_forum(const std::string& forum_name, snowflake channel_id, message& forum_message, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags, command_completion_event_t callback)
+void cluster::thread_create_in_forum(const std::string& thread_name, snowflake channel_id, message& msg, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags, command_completion_event_t callback)
 {
 	json j({
-		{"name", forum_name},
+		{"name",                  thread_name},
 		{"auto_archive_duration", auto_archive_duration},
-		{"rate_limit_per_user", rate_limit_per_user},
-		{"message", json::parse(forum_message.build_json())},
-		{"applied_tags", applied_tags},
+		{"rate_limit_per_user",   rate_limit_per_user},
+		{"message",               json::parse(msg.build_json())},
+		{"applied_tags",          applied_tags},
 	});
 	this->post_rest_multipart(API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
@@ -84,7 +84,7 @@ void cluster::thread_create_in_forum(const std::string& forum_name, snowflake ch
 			}
 			callback(confirmation_callback_t(this, t, http));
 		}
-	}, forum_message.filename, forum_message.filecontent);
+	}, msg.filename, msg.filecontent);
 }
 
 void cluster::thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback)
