@@ -940,7 +940,7 @@ struct DPP_EXPORT sticker_pack : public managed, public json_interface<sticker_p
 /**
  * @brief Bitmask flags for a dpp::message
  */
-enum message_flags {
+enum message_flags : uint16_t {
 	/// this message has been published to subscribed channels (via Channel Following)
 	m_crossposted = 1 << 0,
 	/// this message originated from a message in another channel (via Channel Following)
@@ -1390,7 +1390,7 @@ struct DPP_EXPORT message : public managed {
 	 * @param f flags to set from dpp::message_flags
 	 * @return message& reference to self
 	 */
-	message& set_flags(uint8_t f);
+	message& set_flags(uint16_t f);
 
 	/**
 	 * @brief Set the message type
