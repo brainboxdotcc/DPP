@@ -25,6 +25,7 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
+#include <dpp/message.h>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/permissions.h>
 #include <dpp/json_interface.h>
@@ -646,6 +647,20 @@ public:
 	/** Thread metadata (threads) */
 	thread_metadata metadata;
 
+	/** Created message. Only filled within the cluster::thread_create_in_forum() method */
+	message msg;
+
+	/**
+	 * A list of dpp::forum_tag IDs that have been applied to a thread in a forum channel
+	 */
+	std::vector<snowflake> applied_tags;
+
+	/**
+	 * @brief Number of messages ever sent in the thread.
+	 * It's similar to thread::message_count on message creation, but will not decrement the number when a message is deleted
+	 */
+	uint32_t total_messages_sent;
+
 	/**
 	 * @brief Number of messages (not including the initial message or deleted messages) of the thread.
 	 * For threads created before July 1, 2022, the message count is inaccurate when it's greater than 50.
@@ -654,11 +669,6 @@ public:
 
 	/** Approximate count of members in a thread (threads) */
 	uint8_t member_count;
-
-	/**
-	 * A list of dpp::forum_tag IDs that have been applied to a thread in a forum channel
-	 */
-	std::vector<snowflake> applied_tags;
 
 	/**
 	 * @brief Construct a new thread object

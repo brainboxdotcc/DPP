@@ -282,6 +282,13 @@ thread& thread::fill_from_json(json* j) {
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type & CHANNEL_TYPE_MASK);
 
+	if (j->contains("applied_tags")) {
+		for (const auto &t : (*j)["applied_tags"]) {
+			this->applied_tags.push_back(t);
+		}
+	}
+
+	set_int32_not_null(j, "total_message_sent", this->total_messages_sent);
 	set_int8_not_null(j, "message_count", this->message_count);
 	set_int8_not_null(j, "member_count", this->member_count);
 	auto json_metadata = (*j)["thread_metadata"];
@@ -299,7 +306,7 @@ thread& thread::fill_from_json(json* j) {
 	return *this;
 }
 
-thread::thread() : channel(), message_count(0), member_count(0) {
+thread::thread() : channel(), total_messages_sent(0), message_count(0), member_count(0) {
 }
 
 thread::~thread() {

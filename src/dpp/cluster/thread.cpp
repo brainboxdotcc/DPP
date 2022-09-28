@@ -78,7 +78,11 @@ void cluster::thread_create_in_forum(const std::string& forum_name, snowflake ch
 	});
 	this->post_rest_multipart(API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
-			callback(confirmation_callback_t(this, channel().fill_from_json(&j), http));
+			auto t = thread().fill_from_json(&j);
+			if (j.contains("message")) {
+				t.msg = message().fill_from_json(&(j["message"]));
+			}
+			callback(confirmation_callback_t(this, t, http));
 		}
 	}, forum_message.filename, forum_message.filecontent);
 }
