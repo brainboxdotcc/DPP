@@ -29,7 +29,7 @@ jobs:
                 sudo touch ./cmake/Raw-Files/Portfile-The-Second.cmake &&
                 sudo touch ./vcpkg/ports/dpp/vcpkg.json &&
                 sudo bash -c "cat ./cmake/Raw-Files/Top-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
-                sudo git rev-parse v$(grep DPP_VERSION_TEXT ./include/dpp/version.h | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/') | sudo tee ./cmake/Raw-Files/Portfile-The-First.cmake -a &&
+                sudo git show-ref --dereference v$(grep DPP_VERSION_TEXT ./include/dpp/version.h | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/') | sed s/\\s.*//g | sudo tee ./cmake/Raw-Files/Portfile-The-First.cmake -a &&
                 sudo bash -c "cat ./cmake/Raw-Files/Middle-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
                 sudo bash -c "echo $'0' >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
                 sudo bash -c "cat ./cmake/Raw-Files/Bottom-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
