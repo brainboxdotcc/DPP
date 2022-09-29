@@ -557,6 +557,10 @@ thread_member_map cluster::thread_members_get_sync(snowflake thread_id) {
 	return dpp::sync<thread_member_map>(this, &cluster::thread_members_get, thread_id);
 }
 
+thread cluster::thread_create_in_forum_sync(const std::string& thread_name, snowflake channel_id, message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags) {
+	return dpp::sync<thread>(this, &cluster::thread_create_in_forum, thread_name, channel_id, msg, auto_archive_duration, rate_limit_per_user, applied_tags);
+}
+
 thread cluster::thread_create_sync(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user) {
 	return dpp::sync<thread>(this, &cluster::thread_create, thread_name, channel_id, auto_archive_duration, thread_type, invitable, rate_limit_per_user);
 }

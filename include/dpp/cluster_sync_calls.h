@@ -2000,6 +2000,26 @@ thread_member thread_member_get_sync(const snowflake thread_id, const snowflake 
 thread_member_map thread_members_get_sync(snowflake thread_id);
 
 /**
+ * @brief Create a thread in forum channel
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ *
+ * @see dpp::cluster::thread_create_in_forum
+ * @see https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel
+ * @param thread_name Name of the forum thread
+ * @param channel_id Forum channel in which thread to create
+ * @param msg The message to start the thread with
+ * @param auto_archive_duration Duration to automatically archive the thread after recent activity
+ * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
+ * @param applied_tags List of IDs of forum tags (dpp::forum_tag) to apply to this thread
+ * @return thread returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+thread thread_create_in_forum_sync(const std::string& thread_name, snowflake channel_id, message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {});
+
+/**
  * @brief Create a thread
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  *
