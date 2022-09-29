@@ -67,6 +67,39 @@ void cluster::thread_members_get(snowflake thread_id, command_completion_event_t
 	rest_request_list<thread_member>(this, API_PATH "/channels", std::to_string(thread_id), "/threads-members", m_get, "", callback);
 }
 
+void cluster::thread_create_in_forum(const std::string& thread_name, snowflake channel_id, message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags, command_completion_event_t callback)
+{
+	json j({
+		{"name",                  thread_name},
+		{"rate_limit_per_user",   rate_limit_per_user},
+		{"message",               json::parse(msg.build_json())},
+		{"applied_tags",          applied_tags},
+	});
+	switch (auto_archive_duration) {
+		case arc_1_hour:
+			j["auto_archive_duration"] = 60;
+			break;
+		case arc_1_day:
+			j["auto_archive_duration"] = 1440;
+			break;
+		case arc_3_days:
+			j["auto_archive_duration"] = 4320;
+			break;
+		case arc_1_week:
+			j["auto_archive_duration"] = 10080;
+			break;
+	}
+	this->post_rest_multipart(API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(), [this, callback](json &j, const http_request_completion_t& http) {
+		if (callback) {
+			auto t = thread().fill_from_json(&j);
+			if (j.contains("message")) {
+				t.msg = message().fill_from_json(&(j["message"]));
+			}
+			callback(confirmation_callback_t(this, t, http));
+		}
+	}, msg.filename, msg.filecontent);
+}
+
 void cluster::thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback)
 {
 	json j({

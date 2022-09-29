@@ -394,8 +394,8 @@ embed::~embed() = default;
 embed::embed() : timestamp(0), color(0) {
 }
 
-message::message() : managed(0), channel_id(0), guild_id(0), sent(0), edited(0), tts(false),
-	mention_everyone(false), pinned(false), webhook_id(0), flags(0), type(mt_default), owner(nullptr)
+message::message() : managed(0), channel_id(0), guild_id(0), sent(0), edited(0), webhook_id(0),
+	owner(nullptr), type(mt_default), flags(0), pinned(false), tts(false), mention_everyone(false)
 {
 	message_reference.channel_id = 0;
 	message_reference.guild_id = 0;
@@ -451,7 +451,7 @@ message& message::add_embed(const embed& e)
 	return *this;
 }
 
-message& message::set_flags(uint8_t f)
+message& message::set_flags(uint16_t f)
 {
 	flags = f;
 	return *this;
@@ -896,6 +896,10 @@ bool message::is_loading() const {
 	return flags & m_loading;
 }
 
+bool message::is_thread_mention_failed() const {
+	return flags & m_thread_mention_failed;
+}
+
 message::~message() = default;
 
 
@@ -910,7 +914,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 			this->guild_id = c->guild_id;
 		}
 	}
-	this->flags = int8_not_null(d, "flags");
+	this->flags = int16_not_null(d, "flags");
 	this->type = static_cast<message_type>(int8_not_null(d, "type"));
 	this->author = user();
 	/* May be null, if its null cache it from the partial */

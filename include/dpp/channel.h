@@ -25,10 +25,12 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
+#include <dpp/message.h>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <dpp/permissions.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
+#include <variant>
 
 namespace dpp {
 
@@ -78,7 +80,19 @@ enum channel_flags : uint8_t {
  */
 enum discord_channel_flags : uint8_t {
 	/// Thread pinned in a forum (type 15) channel
-	dc_pinned_thread = 0b00000001,
+	dc_pinned_thread = 1 << 1,
+	/// whether a tag is required to be specified when creating a thread in a forum channel. Tags are specified in the thread::applied_tags field.
+	dc_require_tag =   1 << 4,
+};
+
+/**
+ * @brief Types for sort posts in a forum channel
+ */
+enum default_forum_sort_order_t : uint8_t {
+	/// Sort forum posts by activity (default)
+	so_latest_activity = 0,
+	/// Sort forum posts by creation time (from most recent to oldest)
+	so_creation_date = 1,
 };
 
 /**
@@ -124,9 +138,9 @@ struct DPP_EXPORT permission_overwrite {
  * @brief metadata for threads
  */
 struct DPP_EXPORT thread_metadata {
-	/// When the thread was archived
+	/// Timestamp when the thread's archive status was last changed, used for calculating recent activity
 	time_t archive_timestamp;
-	/// The duration in minutes to automatically archive the thread after recent activity.
+	/// The duration in minutes to automatically archive the thread after recent activity, can be set to: 60, 1440, 4320, 10080
 	uint16_t auto_archive_duration;
 	/// Whether a thread is archived
 	bool archived;
@@ -134,6 +148,21 @@ struct DPP_EXPORT thread_metadata {
 	bool locked;
 	/// Whether non-moderators can add other non-moderators. Only for private threads
 	bool invitable;
+};
+
+/**
+ * @brief Auto archive duration of threads which will stop showing in the channel list after the specified period of inactivity.
+ * Defined as an enum to fit into 1 byte. Internally it'll be translated to minutes to match the API
+ */
+enum auto_archive_duration_t : uint8_t {
+	/// Auto archive duration of 1 hour. (60 minutes)
+	arc_1_hour = 1,
+	/// Auto archive duration of 1 day. (1440 minutes)
+	arc_1_day = 2,
+	/// Auto archive duration of 3 days. (4320 minutes)
+	arc_3_days = 3,
+	/// Auto archive duration of 1 week. (10080 minutes)
+	arc_1_week = 4,
 };
 
 /**
@@ -158,20 +187,63 @@ struct DPP_EXPORT thread_member
 	 thread_member& fill_from_json(nlohmann::json* j);
 };
 
+/**
+ * @brief Represents a tag that is able to be applied to a thread in a forum channel
+ */
+struct DPP_EXPORT forum_tag : public managed {
+	/** The name of the tag (0-20 characters) */
+	std::string name;
+	/** The emoji of the tag. Contains either nothing, the id of a guild's custom emoji or the unicode character of the emoji */
+	std::variant<std::monostate, snowflake, std::string> emoji;
+	/** Whether this tag can only be added to or removed from threads by a member with the `MANAGE_THREADS` permission */
+	bool moderated;
+
+	/** Constructor */
+	forum_tag();
+
+	/** Destructor */
+	virtual ~forum_tag();
+
+	/**
+	 * @brief Read struct values from a json object
+	 * @param j json to read values from
+	 * @return A reference to self
+	 */
+	forum_tag& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this forum_tag object
+	 *
+	 * @param with_id include the ID in the json
+	 * @return std::string JSON string
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set name of this forum_tag object
+	 *
+	 * @param name Name to set
+	 * @return Reference to self, so these method calls may be chained
+	 *
+	 * @note name will be truncated to 20 chars, if longer
+	 */
+	forum_tag& set_name(const std::string& name);
+};
+
 /** @brief A group of thread member objects*/
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
 /**
- * @brief A definition of a discord channel
+ * @brief A definition of a discord channel.
  * There are one of these for every channel type except threads. Threads are
  * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
  */ 
 class DPP_EXPORT channel : public managed, public json_interface<channel>  {
 public:
-	/** Channel name */
+	/** Channel name (1-100 characters) */
 	std::string name;
 
-	/** Channel topic */
+	/** Channel topic (0-4096 characters for forum channels, 0-1024 characters for all others) */
 	std::string topic;
 
 	/**
@@ -185,26 +257,30 @@ public:
 	/** Permission overwrites to apply to base permissions */
 	std::vector<permission_overwrite> permission_overwrites;
 
+	/** A set of tags that can be used in a forum channel */
+	std::vector<forum_tag> available_tags;
+
+	/**
+	 * @brief The emoji to show as the default reaction button on a forum post.
+	 * Contains either nothing, the id of a guild's custom emoji or the unicode character of the emoji
+	 */
+	std::variant<std::monostate, snowflake, std::string> default_reaction;
+
 	/**
 	 * @brief Channel icon (for group DMs)
 	 */
 	utility::iconhash icon;
 
-	/**
-	 * @brief Channel banner (boost level locked)
-	 */
-	utility::iconhash banner;
-
-	/** User ID of owner for group DMs */
+	/** User ID of the creator for group DMs or threads */
 	snowflake owner_id;
 
-	/** Parent ID (category) */
+	/** Parent ID (for guild channels: id of the parent category, for threads: id of the text channel this thread was created) */
 	snowflake parent_id;
 
 	/** Guild id of the guild that owns the channel */
 	snowflake guild_id;
 
-	/** ID of last message to be sent to the channel */
+	/** ID of last message to be sent to the channel (may not point to an existing or valid message or thread) */
 	snowflake last_message_id;
 
 	/** Timestamp of last pinned message */
@@ -226,6 +302,18 @@ public:
 
 	/** amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected*/
 	uint16_t rate_limit_per_user;
+
+	/** The initial `rate_limit_per_user` to set on newly created threads in a channel. This field is copied to the thread at creation time and does not live update */
+	uint16_t default_thread_rate_limit_per_user;
+
+	/**
+	 * @brief Default duration, copied onto newly created threads. Used by the clients, not the API.
+	 * Threads will stop showing in the channel list after the specified period of inactivity. Defaults to dpp::arc_1_day
+	 */
+	auto_archive_duration_t default_auto_archive_duration;
+
+	/** the default sort order type used to order posts in forum channels */
+	default_forum_sort_order_t default_sort_order;
 
 	/** Flags bitmap */
 	uint8_t flags;
@@ -273,6 +361,14 @@ public:
 	 * @note topic will be truncated to 1024 chars, if longer
 	 */
 	channel& set_topic(const std::string& topic);
+
+	/**
+	 * @brief Set type of this channel object
+	 *
+	 * @param type Channel type to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	channel& set_type(const channel_type& type);
 
 	/**
 	 * @brief Set flags for this channel object
@@ -428,14 +524,6 @@ public:
 	std::map<snowflake, voicestate> get_voice_members();
 
 	/**
-	 * @brief Get the channel's banner url if they have one, otherwise returns an empty string
-	 *
-	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized banner is returned.
-	 * @return std::string banner url or empty string
-	 */
-	std::string get_banner_url(uint16_t size = 0) const;
-
-	/**
 	 * @brief Get the channel's icon url (if its a group DM), otherwise returns an empty string
 	 *
 	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized icon is returned.
@@ -495,9 +583,8 @@ public:
 
 	/**
 	 * @brief Returns true if the channel is a forum
-	 * @note This feature is not implemented by Discord yet and the name is subject to possible change!
 	 * 
-	 * @return true if a category
+	 * @return true if a forum
 	 */
 	bool is_forum() const;
 
@@ -559,6 +646,20 @@ public:
 
 	/** Thread metadata (threads) */
 	thread_metadata metadata;
+
+	/** Created message. Only filled within the cluster::thread_create_in_forum() method */
+	message msg;
+
+	/**
+	 * A list of dpp::forum_tag IDs that have been applied to a thread in a forum channel
+	 */
+	std::vector<snowflake> applied_tags;
+
+	/**
+	 * @brief Number of messages ever sent in the thread.
+	 * It's similar to thread::message_count on message creation, but will not decrement the number when a message is deleted
+	 */
+	uint32_t total_messages_sent;
 
 	/**
 	 * @brief Number of messages (not including the initial message or deleted messages) of the thread.

@@ -35,6 +35,46 @@ permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0)
 
 permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type) : id(id), allow(allow), deny(deny), type(type) {}
 
+forum_tag::forum_tag() : managed(), moderated(false) {}
+
+forum_tag::~forum_tag()
+{
+}
+
+forum_tag& forum_tag::fill_from_json(nlohmann::json *j) {
+	set_snowflake_not_null(j, "id", this->id);
+	set_string_not_null(j, "name", this->name);
+	set_bool_not_null(j, "moderated", this->moderated);
+	auto emoji_id = snowflake_not_null(j, "emoji_id");
+	auto emoji_name = string_not_null(j, "emoji_name");
+	if (emoji_id) {
+		this->emoji = emoji_id;
+	} else if (!emoji_name.empty()) {
+		this->emoji = emoji_name;
+	}
+	return *this;
+}
+
+std::string forum_tag::build_json(bool with_id) const {
+	json j;
+	if (with_id && id) {
+		j["id"] = std::to_string(id);
+	}
+	j["name"] = name;
+	j["moderated"] = moderated;
+	if (std::holds_alternative<snowflake>(emoji)) {
+		j["emoji_id"] = std::get<snowflake>(emoji);
+	} else if (std::holds_alternative<std::string>(emoji)) {
+		j["emoji_name"] = std::get<std::string>(emoji);
+	}
+	return j.dump();
+}
+
+forum_tag &forum_tag::set_name(const std::string &name) {
+	this->name = utility::utf8substr(name, 0, 20);
+	return *this;
+}
+
 const uint8_t CHANNEL_TYPE_MASK = 0b00001111;
 
 thread_member& thread_member::fill_from_json(nlohmann::json* j) {
@@ -70,6 +110,9 @@ channel::channel() :
 	position(0),
 	bitrate(0),
 	rate_limit_per_user(0),
+	default_thread_rate_limit_per_user(0),
+	default_auto_archive_duration(arc_1_day),
+	default_sort_order(so_latest_activity),
 	flags(0),
 	user_limit(0)
 {
@@ -90,6 +133,12 @@ channel& channel::set_name(const std::string& name) {
 
 channel& channel::set_topic(const std::string& topic) {
 	this->topic = utility::utf8substr(topic, 0, 1024);
+	return *this;
+}
+
+channel& channel::set_type(const channel_type &type) {
+	this->flags &= ~CHANNEL_TYPE_MASK;
+	this->flags |= type;
 	return *this;
 }
 
@@ -233,6 +282,13 @@ thread& thread::fill_from_json(json* j) {
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type & CHANNEL_TYPE_MASK);
 
+	if (j->contains("applied_tags")) {
+		for (const auto &t : (*j)["applied_tags"]) {
+			this->applied_tags.push_back(t);
+		}
+	}
+
+	set_int32_not_null(j, "total_message_sent", this->total_messages_sent);
 	set_int8_not_null(j, "message_count", this->message_count);
 	set_int8_not_null(j, "member_count", this->member_count);
 	auto json_metadata = (*j)["thread_metadata"];
@@ -240,6 +296,7 @@ thread& thread::fill_from_json(json* j) {
 	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");
 	metadata.auto_archive_duration = int16_not_null(&json_metadata, "auto_archive_duration");
 	metadata.locked = bool_not_null(&json_metadata, "locked");
+	metadata.invitable = bool_not_null(&json_metadata, "invitable");
 
 	/* Only certain events set this */
 	if (j->contains("member"))  {
@@ -249,7 +306,7 @@ thread& thread::fill_from_json(json* j) {
 	return *this;
 }
 
-thread::thread() : channel(), message_count(0), member_count(0) {
+thread::thread() : channel(), total_messages_sent(0), message_count(0), member_count(0) {
 }
 
 thread::~thread() {
@@ -264,10 +321,48 @@ channel& channel::fill_from_json(json* j) {
 	set_snowflake_not_null(j, "last_message_id", this->last_message_id);
 	set_int8_not_null(j, "user_limit", this->user_limit);
 	set_int16_not_null(j, "rate_limit_per_user", this->rate_limit_per_user);
+	set_int16_not_null(j, "default_thread_rate_limit_per_user", this->default_thread_rate_limit_per_user);
 	set_snowflake_not_null(j, "owner_id", this->owner_id);
 	set_snowflake_not_null(j, "parent_id", this->parent_id);
 	this->bitrate = int16_not_null(j, "bitrate")/1024;
 	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
+
+	uint16_t arc = int16_not_null(j, "default_auto_archive_duration");
+	switch (arc) {
+		case 60:
+			this->default_auto_archive_duration = arc_1_hour;
+			break;
+		case 1440:
+			this->default_auto_archive_duration = arc_1_day;
+			break;
+		case 4320:
+			this->default_auto_archive_duration = arc_3_days;
+			break;
+		case 10080:
+			this->default_auto_archive_duration = arc_1_week;
+			break;
+		default:
+			break;
+	}
+
+	if (j->contains("available_tags")) {
+		available_tags = {};
+		for (auto & available_tag : (*j)["available_tags"]) {
+			this->available_tags.emplace_back(forum_tag().fill_from_json(&available_tag));
+		}
+	}
+
+	if (j->contains("default_reaction_emoji")) {
+		auto emoji_id = snowflake_not_null(&(*j)["default_reaction_emoji"], "emoji_id");
+		auto emoji_name = string_not_null(&(*j)["default_reaction_emoji"], "emoji_name");
+		if (emoji_id) {
+			this->default_reaction = emoji_id;
+		} else if (!emoji_name.empty()) {
+			this->default_reaction = emoji_name;
+		}
+	}
+
+	this->default_sort_order = (default_forum_sort_order_t)int8_not_null(j, "default_sort_order");
 
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type & CHANNEL_TYPE_MASK);
@@ -311,14 +406,9 @@ channel& channel::fill_from_json(json* j) {
 	}
 
 	std::string _icon = string_not_null(j, "icon");
-	std::string _banner = string_not_null(j, "banner");
 
 	if (!_icon.empty()) {
 		this->icon = _icon;
-	}
-
-	if (!_banner.empty()) {
-		this->banner = _banner;
 	}
 
 	set_string_not_null(j, "rtc_region", rtc_region);
@@ -330,6 +420,14 @@ std::string thread::build_json(bool with_id) const {
 	json j = json::parse(channel::build_json(with_id));
 	j["type"] = (flags & CHANNEL_TYPE_MASK);
 	j["thread_metadata"] = this->metadata;
+	if (!this->applied_tags.empty()) {
+		j["applied_tags"] = json::array();
+		for (auto &tag_id: this->applied_tags) {
+			if (tag_id) {
+				j["applied_tags"].push_back(tag_id);
+			}
+		}
+	}
 	return j.dump();
 }
 
@@ -356,6 +454,9 @@ std::string channel::build_json(bool with_id) const {
 	if (rate_limit_per_user) {
 		j["rate_limit_per_user"] = rate_limit_per_user;
 	}
+	if (default_thread_rate_limit_per_user) {
+		j["default_thread_rate_limit_per_user"] = default_thread_rate_limit_per_user;
+	}
 	if (is_voice_channel()) {
 		j["user_limit"] = user_limit; 
 		j["bitrate"] = bitrate*1024;
@@ -366,6 +467,34 @@ std::string channel::build_json(bool with_id) const {
 			j["parent_id"] = std::to_string(parent_id);
 		}
 		j["nsfw"] = is_nsfw();
+	}
+	switch (default_auto_archive_duration) {
+		case arc_1_hour:
+			j["default_auto_archive_duration"] = 60;
+			break;
+		case arc_1_day:
+			j["default_auto_archive_duration"] = 1440;
+			break;
+		case arc_3_days:
+			j["default_auto_archive_duration"] = 4320;
+			break;
+		case arc_1_week:
+			j["default_auto_archive_duration"] = 10080;
+			break;
+	}
+	if (!available_tags.empty()) {
+		j["available_tags"] = json::array();
+		for (const auto &available_tag : this->available_tags) {
+			j["available_tags"].push_back(json::parse(available_tag.build_json()));
+		}
+	}
+	if (std::holds_alternative<snowflake>(this->default_reaction)) {
+		j["default_reaction_emoji"]["emoji_id"] = std::get<snowflake>(this->default_reaction);
+	} else if (std::holds_alternative<std::string>(this->default_reaction)) {
+		j["default_reaction_emoji"]["emoji_name"] = std::get<std::string>(this->default_reaction);
+	}
+	if (default_sort_order) {
+		j["default_sort_order"] = default_sort_order;
 	}
 	if (flags & c_lock_permissions) {
 		j["lock_permissions"] = true;
@@ -420,23 +549,11 @@ std::map<snowflake, voicestate> channel::get_voice_members() {
 	return rv;
 }
 
-std::string channel::get_banner_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->banner.to_string().empty()) {
-		// TODO implement this, endpoint for that isn't finished yet https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
-		return std::string();
-	} else {
-		return std::string();
-	}
-}
-
 std::string channel::get_icon_url(uint16_t size) const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
-	if (!this->icon.to_string().empty()) {
+	if (this->id && !this->icon.to_string().empty()) {
 		return utility::cdn_host + "/channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
 	} else {
 		return std::string();

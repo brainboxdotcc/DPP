@@ -3054,6 +3054,22 @@ public:
 	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Create a thread in forum channel
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 *
+	 * @see https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel
+	 * @param thread_name Name of the forum thread
+	 * @param channel_id Forum channel in which thread to create
+	 * @param msg The message to start the thread with
+	 * @param auto_archive_duration Duration to automatically archive the thread after recent activity
+	 * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
+	 * @param applied_tags List of IDs of forum tags (dpp::forum_tag) to apply to this thread
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void thread_create_in_forum(const std::string& thread_name, snowflake channel_id, message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {}, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Create a thread
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *

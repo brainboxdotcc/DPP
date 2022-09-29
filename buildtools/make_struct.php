@@ -39,6 +39,7 @@ $forcedReturn = [
     'guild_search_members' => 'guild_member_map',
     'message_create' => 'message',
     'message_edit' => 'message',
+    'thread_create_in_forum' => 'thread',
 ];
 
 /* Get the contents of cluster.h into an array */
