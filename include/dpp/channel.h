@@ -201,6 +201,13 @@ struct DPP_EXPORT forum_tag : public managed {
 	/** Constructor */
 	forum_tag();
 
+	/**
+	 * @brief Constructor
+	 *
+	 * @param name The name of the tag. It will be truncated to the maximum length of 20 UTF-8 characters.
+	 */
+	forum_tag(const std::string& name);
+
 	/** Destructor */
 	virtual ~forum_tag();
 
@@ -368,7 +375,7 @@ public:
 	 * @param type Channel type to set
 	 * @return Reference to self, so these method calls may be chained
 	 */
-	channel& set_type(const channel_type& type);
+	channel& set_type(channel_type type);
 
 	/**
 	 * @brief Set flags for this channel object
@@ -470,6 +477,13 @@ public:
 	 * @return Reference to self, so these method calls may be chained 
 	 */
 	channel& add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
+
+	/**
+	 * @brief Get the channel type
+	 *
+	 * @return channel_type Channel type
+	 */
+	channel_type get_type() const;
 
 	/**
 	 * @brief Get the mention ping for the channel
