@@ -27,6 +27,7 @@ int main()
 {
 	std::string token(get_token());
 
+	std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: [\u001b[36mSTART\u001b[0m] ";
 	if (offline) {
 		std::cout << "Running offline unit tests only.\n";
 	} else {
@@ -434,7 +435,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						bot.channel_get(channel.id, [forum_id = channel.id, &bot](const dpp::confirmation_callback_t &event) {
 							if (!event.is_error()) {
 								auto channel = std::get<dpp::channel>(event.value);
-								std::cout << "channel json\n" << event.http_info.body << std::endl;
+								bot.log(dpp::ll_debug, event.http_info.body);
 								bool tag = false;
 								for (auto &t : channel.available_tags) {
 									if (t.name == "Alpha" && std::holds_alternative<std::string>(t.emoji) && std::get<std::string>(t.emoji) == "❌") {
@@ -463,14 +464,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					}
 				});
 			}
-			set_test("FORUM_CREATION", false);
 		});
 
 		std::mutex loglock;
 		bot.on_log([&](const dpp::log_t & event) {
 			std::lock_guard<std::mutex> locker(loglock);
 			if (event.severity > dpp::ll_trace) {
-				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: [\u001b[36m" << dpp::utility::loglevel(event.severity) << "\u001b[0m] " << event.message << "\n";
 			}
 			if (event.message == "Test log message") {
 				set_test("LOGGER", true);
