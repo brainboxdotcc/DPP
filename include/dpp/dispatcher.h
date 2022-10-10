@@ -1121,6 +1121,10 @@ struct DPP_EXPORT guild_role_delete_t : public event_dispatch_t {
 	 * @brief role being deleted
 	 */
 	role* deleted;
+	/**
+	 * @brief ID of the deleted role
+	 */
+	snowflake role_id;
 };
 
 /** @brief Channel pins update */
