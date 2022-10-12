@@ -939,7 +939,7 @@ void discord_voice_client::log(dpp::loglevel severity, const std::string &msg) c
 
 void discord_voice_client::queue_message(const std::string &j, bool to_front)
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	if (to_front) {
 		message_queue.emplace_front(j);
 	} else {
@@ -949,18 +949,18 @@ void discord_voice_client::queue_message(const std::string &j, bool to_front)
 
 void discord_voice_client::clear_queue()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	message_queue.clear();
 }
 
 size_t discord_voice_client::get_queue_size()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::shared_lock locker(queue_mutex);
 	return message_queue.size();
 }
 
 const std::vector<std::string> discord_voice_client::get_marker_metadata() {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::shared_lock locker(queue_mutex);
 	return track_meta;
 }
 
@@ -972,7 +972,7 @@ void discord_voice_client::one_second_timer()
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 	if (this->get_state() == CONNECTED) {
 		for (int x = 0; x < (time(nullptr) % 2) + 1; ++x) {
-			std::lock_guard<std::mutex> locker(queue_mutex);
+			std::unique_lock locker(queue_mutex);
 			if (!message_queue.empty()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();

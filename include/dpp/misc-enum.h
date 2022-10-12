@@ -50,9 +50,4 @@ namespace dpp {
 		ll_critical
 	};
 
-	/**
-	 * @brief A returned event handle for an event which was attached
-	 */
-	typedef size_t event_handle;
-
 };

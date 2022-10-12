@@ -442,7 +442,7 @@ void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 
 void discord_client::queue_message(const std::string &j, bool to_front)
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	if (to_front) {
 		message_queue.emplace_front(j);
 	} else {
@@ -452,14 +452,14 @@ void discord_client::queue_message(const std::string &j, bool to_front)
 
 discord_client& discord_client::clear_queue()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	message_queue.clear();
 	return *this;
 }
 
 size_t discord_client::get_queue_size()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::shared_lock locker(queue_mutex);
 	return message_queue.size();
 }
 
@@ -504,7 +504,7 @@ void discord_client::one_second_timer()
 
 		/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
-			std::lock_guard<std::mutex> locker(queue_mutex);
+			std::unique_lock locker(queue_mutex);
 			if (message_queue.size()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();
@@ -537,9 +537,9 @@ void discord_client::one_second_timer()
 uint64_t discord_client::get_guild_count() {
 	uint64_t total = 0;
 	dpp::cache<guild>* c = dpp::get_guild_cache();
-	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -552,9 +552,9 @@ uint64_t discord_client::get_guild_count() {
 uint64_t discord_client::get_member_count() {
 	uint64_t total = 0;
 	dpp::cache<guild>* c = dpp::get_guild_cache();
-	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -573,9 +573,9 @@ uint64_t discord_client::get_member_count() {
 uint64_t discord_client::get_channel_count() {
 	uint64_t total = 0;
 	dpp::cache<guild>* c = dpp::get_guild_cache();
-	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -587,7 +587,7 @@ uint64_t discord_client::get_channel_count() {
 
 discord_client& discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf) {
 #ifdef HAVE_VOICE
-	std::lock_guard<std::mutex> lock(voice_mutex);
+	std::unique_lock lock(voice_mutex);
 	if (connecting_voice_channels.find(guild_id) == connecting_voice_channels.end()) {
 		connecting_voice_channels[guild_id] = new voiceconn(this, channel_id);
 		/* Once sent, this expects two events (in any order) on the websocket:
@@ -621,7 +621,7 @@ std::string discord_client::jsonobj_to_string(const nlohmann::json& json) {
 
 void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_json) {
 #ifdef HAVE_VOICE
-	std::lock_guard<std::mutex> lock(voice_mutex);
+	std::unique_lock lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
 		log(ll_debug, "Disconnecting voice, guild: {}" + std::to_string(guild_id));
@@ -651,7 +651,7 @@ discord_client& discord_client::disconnect_voice(snowflake guild_id) {
 
 voiceconn* discord_client::get_voice(snowflake guild_id) {
 #ifdef HAVE_VOICE
-	std::lock_guard<std::mutex> lock(voice_mutex);
+	std::shared_lock lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
 		return v->second;
