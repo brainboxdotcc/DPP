@@ -47,6 +47,9 @@ typedef size_t event_handle;
  * @brief Handles handing out event handles. This exists because of windows.
  */
 struct DPP_EXPORT event_handle_allocator_t {
+private:
+	event_handle next_handle;
+public:
 	event_handle get_next_event_handle();
 };
 

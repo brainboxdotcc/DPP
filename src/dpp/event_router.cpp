@@ -24,8 +24,6 @@
 
 namespace dpp {
 
-static event_handle next_handle = 1;
-
 event_handle event_handle_allocator_t::get_next_event_handle() {
 	return next_handle++;
 }
