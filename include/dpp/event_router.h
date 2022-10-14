@@ -44,16 +44,6 @@ namespace dpp {
 typedef size_t event_handle;
 
 /**
- * @brief Handles handing out event handles. This exists because of windows.
- */
-struct DPP_EXPORT event_handle_allocator_t {
-private:
-	event_handle next_handle;
-public:
-	event_handle get_next_event_handle();
-};
-
-/**
  * @brief Handles routing of an event to multiple listeners.
  * 
  * Multiple listeners may attach to the event_router_t by means of operator(). Passing a
@@ -93,11 +83,11 @@ public:
  * 
  * @tparam T type of single parameter passed to event lambda derived from event_dispatch_t
  */
-template<class T> class DPP_EXPORT event_router_t {
+template<class T> class event_router_t {
 private:
 	friend class cluster;
 
-	event_handle_allocator_t handle_allocator;
+	event_handle next_handle = 1;
 
 	/**
 	 * @brief Thread safety mutex
@@ -227,7 +217,7 @@ public:
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
 		std::unique_lock l(lock);
-		event_handle h = handle_allocator.get_next_event_handle();
+		event_handle h = next_handle++;
 		dispatch_container.emplace(h, func);
 		return h;		
 	}
@@ -235,7 +225,7 @@ public:
 #ifdef DPP_CORO
 	event_handle co_attach(std::function<dpp::task(T)> func) {
 		std::unique_lock l(lock);
-		event_handle h = handle_allocator.get_next_event_handle();
+		event_handle h = next_handle++;
 		coroutine_container.emplace(h, func);
 		return h;		
 	}
