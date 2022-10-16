@@ -192,7 +192,7 @@ user_identified& user_identified::fill_from_json(json* j) {
 }
 
 std::string user_identified::get_banner_url(uint16_t size) const {
-    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->banner.to_string().empty()) {
