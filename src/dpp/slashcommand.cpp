@@ -616,6 +616,13 @@ void from_json(const nlohmann::json& j, interaction& i) {
 				g->members[i.member.user_id] = i.member;
 			}
 		}
+		/* store the included permissions of this member in the resolved set */
+		if (j.at("member").contains("permissions") && !j.at("member").at("permissions").is_null()) {
+			dpp::snowflake id(i.member.user_id);
+			if (id) {
+				i.resolved.member_permissions[id] = snowflake_not_null(&(j.at("member")), "permissions");
+			}
+		}
 	} else if (j.contains("user") && !j.at("user").is_null()) {
 		/* Command invoked from a DM */
 		j.at("user").get_to(i.usr);

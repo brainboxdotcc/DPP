@@ -45,12 +45,6 @@ namespace dpp {
 	#endif
 #endif
 
-static event_handle _next_handle = 1;
-
-event_handle get_next_event_handle() {
-	return _next_handle++;
-}
-
 /**
  * @brief An audit reason for each thread. These are per-thread to make the cluster
  * methods like cluster::get_audit_reason and cluster::set_audit_reason thread safe across
@@ -141,7 +135,7 @@ void cluster::start(bool return_after) {
 
 	auto block_calling_thread = [this]() {
 		std::mutex thread_mutex;
-		std::unique_lock<std::mutex> thread_lock(thread_mutex);
+		std::unique_lock thread_lock(thread_mutex);
 		this->terminating.wait(thread_lock);
 	};
 

@@ -47,7 +47,7 @@ void voice_server_update::handle(discord_client* client, json &j, const std::str
 	vsu.endpoint = string_not_null(&d, "endpoint");
 
 	{
-		std::lock_guard<std::mutex> lock(client->voice_mutex);
+		std::shared_lock lock(client->voice_mutex);
 		auto v = client->connecting_voice_channels.find(vsu.guild_id);
 		/* Check to see if there is a connection in progress for a voice channel on this guild */
 		if (v != client->connecting_voice_channels.end()) {

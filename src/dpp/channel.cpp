@@ -37,6 +37,10 @@ permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_
 
 forum_tag::forum_tag() : managed(), moderated(false) {}
 
+forum_tag::forum_tag(const std::string& name) : forum_tag() {
+	this->set_name(name);
+}
+
 forum_tag::~forum_tag()
 {
 }
@@ -136,7 +140,7 @@ channel& channel::set_topic(const std::string& topic) {
 	return *this;
 }
 
-channel& channel::set_type(const channel_type &type) {
+channel& channel::set_type(channel_type type) {
 	this->flags &= ~CHANNEL_TYPE_MASK;
 	this->flags |= type;
 	return *this;
@@ -558,6 +562,10 @@ std::string channel::get_icon_url(uint16_t size) const {
 	} else {
 		return std::string();
 	}
+}
+
+channel_type channel::get_type() const {
+	return static_cast<channel_type>(flags & CHANNEL_TYPE_MASK);
 }
 
 

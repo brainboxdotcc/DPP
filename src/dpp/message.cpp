@@ -34,7 +34,7 @@ using json = nlohmann::json;
 namespace dpp {
 
 component::component() :
-	type(static_cast<component_type>(1)), label(""), style(static_cast<component_style>(1)), custom_id(""),
+	type(cot_action_row), label(""), style(cos_primary), custom_id(""),
 	min_values(-1), max_values(-1), min_length(0), max_length(0), disabled(false), required(false)
 {
 	emoji.animated = false;
