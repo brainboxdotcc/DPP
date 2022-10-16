@@ -23,7 +23,6 @@
 #include <dpp/queues.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
-#include <dpp/channel.h>
 #include <dpp/user.h>
 #include <dpp/guild.h>
 #include <optional>
@@ -279,9 +278,9 @@ public:
 	 */
 	std::vector<select_option> options;
 
-	/** List of channel types to include in the channel select component (dpp::cot_channel_selectmenu)
+	/** List of channel types (dpp::channel_type) to include in the channel select component (dpp::cot_channel_selectmenu)
 	 */
-	std::vector<dpp::channel_type> channel_types;
+	std::vector<uint8_t> channel_types;
 
 	/** Disabled flag (for buttons)
 	 */
@@ -333,10 +332,10 @@ public:
 	/**
 	 * @brief Add a channel type to include in the channel select component (dpp::cot_channel_selectmenu)
 	 *
-	 * @param ct The channel type
+	 * @param ct The dpp::channel_type
 	 * @return component& reference to self
 	 */
-	component& add_channel_type(channel_type ct);
+	component& add_channel_type(uint8_t ct);
 
 	/**
 	 * @brief Set the type of the component. Button components

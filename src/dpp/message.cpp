@@ -107,7 +107,7 @@ component& component::add_component(const component& c)
 	return *this;
 }
 
-component& component::add_channel_type(dpp::channel_type ct) {
+component& component::add_channel_type(uint8_t ct) {
 	if (type == cot_action_row) {
 		set_type(cot_channel_selectmenu);
 	}
