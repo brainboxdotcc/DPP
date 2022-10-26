@@ -518,6 +518,14 @@ struct DPP_EXPORT command_data_option {
 	bool focused;                              //!< Optional: true if this option is the currently focused option for autocomplete
 
 	/**
+	 * @brief Check if the value variant holds std::monostate and options vector is empty (i.e. the option wasn't supplied) 
+	 * @return bool true, if value variant holds std::monostate and options vector is empty
+	 */
+	bool empty() {
+	    return std::holds_alternative<std::monostate>(value) && options.empty();
+	}
+
+	/**
 	 * @brief Get an option value by index
 	 * 
 	 * @tparam Type to get from the parameter
