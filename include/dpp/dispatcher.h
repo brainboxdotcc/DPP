@@ -698,7 +698,7 @@ struct DPP_EXPORT select_click_t : public interaction_create_t {
 	 */
 	std::vector<std::string> values;
 	/**
-	 * @brief select menu component type
+	 * @brief select menu component type (dpp::component_type)
 	 */
 	uint8_t component_type;
 };

@@ -136,7 +136,7 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 		}
 	} else if (i.type == it_component_button) {
 		dpp::component_interaction bi = std::get<component_interaction>(i.data);
-		if (bi.component_type == cotype_button) {
+		if (bi.component_type == cot_button) {
 			if (!client->creator->on_button_click.empty()) {
 				dpp::button_click_t ic(client, raw);
 				ic.command = i;
@@ -144,7 +144,9 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 				ic.component_type = bi.component_type;
 				client->creator->on_button_click.call(ic);
 			}
-		} else if (bi.component_type == cotype_select) {
+		} else if (bi.component_type == cot_selectmenu || bi.component_type == cot_user_selectmenu ||
+				   bi.component_type == cot_role_selectmenu || bi.component_type == cot_mentionable_selectmenu ||
+				   bi.component_type == cot_channel_selectmenu) {
 			if (!client->creator->on_select_click.empty()) {
 				dpp::select_click_t ic(client, raw);
 				ic.command = i;
