@@ -670,7 +670,6 @@ void from_json(const nlohmann::json& j, interaction& i) {
 					json f = *v;
 					dpp::snowflake id(v.key());
 					i.resolved.channels[id] = dpp::channel().fill_from_json(&f);
-					// TODO make sure resolved permissions is in resolved set for channel select component events
 				}
 			}
 			/* Members */
