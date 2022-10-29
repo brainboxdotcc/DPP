@@ -554,7 +554,10 @@ void from_json(const nlohmann::json& j, command_interaction& ci) {
 void from_json(const nlohmann::json& j, component_interaction& bi) {
 	bi.component_type = int8_not_null(&j, "component_type");
 	bi.custom_id = string_not_null(&j, "custom_id");
-	if (bi.component_type == cotype_select && j.find("values") != j.end()) {
+	if ((bi.component_type == cot_selectmenu || bi.component_type == cot_user_selectmenu ||
+		 bi.component_type == cot_role_selectmenu || bi.component_type == cot_mentionable_selectmenu ||
+		 bi.component_type == cot_channel_selectmenu) &&
+		j.find("values") != j.end()) {
 		/* Get values */
 		for (auto& entry : j["values"]) {
 			bi.values.push_back(entry.get<std::string>());

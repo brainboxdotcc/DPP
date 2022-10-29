@@ -40,10 +40,18 @@ enum component_type : uint8_t {
 	cot_action_row = 1,
 	/// Clickable button
 	cot_button = 2,
-	/// Select menu
+	/// Select menu for picking from defined text options
 	cot_selectmenu = 3,
 	/// Text input
 	cot_text = 4,
+	/// Select menu for users
+	cot_user_selectmenu = 5,
+	/// Select menu for roles
+	cot_role_selectmenu = 6,
+	/// Select menu for mentionables (users and roles)
+	cot_mentionable_selectmenu = 7,
+	/// Select menu for channels
+	cot_channel_selectmenu = 8,
 };
 
 /**
@@ -248,13 +256,13 @@ public:
 	 */
 	std::string placeholder;
 
-	/** Minimum number of selectable values for a select menu.
-	 * -1 to not set this
+	/** Minimum number of items that must be chosen for a select menu.
+	 * Default is -1 to not set this
 	 */
 	int32_t min_values;
 
-	/** Maximum number of selectable values for a select menu.
-	 * -1 to not set this.
+	/** Maximum number of items that can be chosen for a select menu.
+	 * Default is -1 to not set this
 	 */
 	int32_t max_values;
 
@@ -266,9 +274,13 @@ public:
 	 */
 	int32_t max_length;
 
-	/** Select options for select menus
+	/** Select options for select menus. Only required and available for select menus of type dpp::cot_selectmenu
 	 */
 	std::vector<select_option> options;
+
+	/** List of channel types (dpp::channel_type) to include in the channel select component (dpp::cot_channel_selectmenu)
+	 */
+	std::vector<uint8_t> channel_types;
 
 	/** Disabled flag (for buttons)
 	 */
@@ -316,6 +328,14 @@ public:
 	/** Destructor
 	 */
 	virtual ~component() = default;
+
+	/**
+	 * @brief Add a channel type to include in the channel select component (dpp::cot_channel_selectmenu)
+	 *
+	 * @param ct The dpp::channel_type
+	 * @return component& reference to self
+	 */
+	component& add_channel_type(uint8_t ct);
 
 	/**
 	 * @brief Set the type of the component. Button components
@@ -431,7 +451,7 @@ public:
 	/**
 	 * @brief Set the max value
 	 * 
-	 * @param max_values max value to set
+	 * @param max_values max value to set (0 - 25)
 	 * @return component& Reference to self
 	 */
 	component& set_max_values(uint32_t max_values);
@@ -439,7 +459,7 @@ public:
 	/**
 	 * @brief Set the min length of text input
 	 * 
-	 * @param min_l min value to set
+	 * @param min_l min value to set (0 - 25)
 	 * @return component& Reference to self
 	 */
 	component& set_min_length(uint32_t min_l);
