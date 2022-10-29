@@ -316,24 +316,26 @@ if(WIN32 AND NOT MINGW)
 	endif()
 endif()
 
-if(NOT WIN32)
-	# Installation
+if(DPP_INSTALL)
+	if(NOT WIN32)
+		# Installation
 
-	include(GNUInstallDirs)
-	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-	message("Library install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-	install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-	message("Include files install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
-	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DRUN_LDCONFIG=${RUN_LDCONFIG} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/PostInstall.cmake)")
+		include(GNUInstallDirs)
+		install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+		message("Library install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+		install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+		message("Include files install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
+		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DRUN_LDCONFIG=${RUN_LDCONFIG} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/PostInstall.cmake)")
 
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../dpp.pc.in" "${CMAKE_BINARY_DIR}/dpp.pc" @ONLY)
-	install(FILES "${CMAKE_BINARY_DIR}/dpp.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-elseif(MINGW)
-	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-	install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../dpp.pc.in" "${CMAKE_BINARY_DIR}/dpp.pc" @ONLY)
+		install(FILES "${CMAKE_BINARY_DIR}/dpp.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+	elseif(MINGW)
+		install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+		install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+	endif()
+
+	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
+
+	# CPack initialization for distribution
+	include(CPack)
 endif()
-
-include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
-
-# CPack initialization for distribution
-include(CPack)

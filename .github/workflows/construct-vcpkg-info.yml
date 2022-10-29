@@ -29,11 +29,10 @@ jobs:
                 sudo touch ./cmake/Raw-Files/Portfile-The-Second.cmake &&
                 sudo touch ./vcpkg/ports/dpp/vcpkg.json &&
                 sudo bash -c "cat ./cmake/Raw-Files/Top-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
-                sudo git rev-parse v$(grep DPP_VERSION_TEXT ./include/dpp/version.h | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/') | sudo tee ./cmake/Raw-Files/Portfile-The-First.cmake -a &&
+                sudo git rev-parse HEAD | sudo tee ./cmake/Raw-Files/Portfile-The-First.cmake -a &&
                 sudo bash -c "cat ./cmake/Raw-Files/Middle-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
                 sudo bash -c "echo $'0' >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
                 sudo bash -c "cat ./cmake/Raw-Files/Bottom-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
-                sudo bash -c "perl -p -i -e s/master/v$(grep DPP_VERSION_TEXT ./include/dpp/version.h | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/')/ ./cmake/Raw-Files/Portfile-The-First.cmake"
                 sudo bash -c "cat ./cmake/Raw-Files/Top-Of-Version-File.txt > ./vcpkg/ports/dpp/vcpkg.json" &&
                 echo \"$(grep DPP_VERSION_TEXT ./include/dpp/version.h | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/')\" | sudo tee ./vcpkg/ports/dpp/vcpkg.json -a &&
                 sudo truncate -s -1 ./vcpkg/ports/dpp/vcpkg.json &&

@@ -65,7 +65,7 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 			/* Instruction to disconnect from vc */
 			client->disconnect_voice_internal(vsu.state.guild_id, false);
 		} else {
-			std::lock_guard<std::mutex> lock(client->voice_mutex);
+			std::shared_lock lock(client->voice_mutex);
 			auto v = client->connecting_voice_channels.find(vsu.state.guild_id);
 			/* Check to see if we have a connection to a voice channel in progress on this guild */
 			if (v != client->connecting_voice_channels.end()) {

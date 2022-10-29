@@ -42,6 +42,7 @@
 #include <thread>
 #include <deque>
 #include <mutex>
+#include <shared_mutex>
 #include <memory>
 #include <future>
 #include <functional>
@@ -88,7 +89,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	/**
 	 * @brief Mutex for message queue
 	 */
-	std::mutex queue_mutex;
+	std::shared_mutex queue_mutex;
 
 	/**
 	 * @brief Queue of outbound messages

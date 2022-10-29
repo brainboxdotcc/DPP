@@ -27,6 +27,7 @@ int main()
 {
 	std::string token(get_token());
 
+	std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: [\u001b[36mSTART\u001b[0m] ";
 	if (offline) {
 		std::cout << "Running offline unit tests only.\n";
 	} else {
@@ -245,6 +246,21 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("USER.GET_CREATION_TIME", (uint64_t)user1.get_creation_time() == 1465312605);
 	}
 
+	{ // channel methods
+		set_test("CHANNEL.SET_TYPE", false);
+		dpp::channel c;
+		c.set_flags(dpp::c_nsfw | dpp::c_video_quality_720p);
+		c.set_type(dpp::CHANNEL_CATEGORY);
+		bool before = c.is_category() && !c.is_forum();
+		c.set_type(dpp::CHANNEL_FORUM);
+		bool after = !c.is_category() && c.is_forum();
+		set_test("CHANNEL.SET_TYPE", before && after);
+
+		set_test("CHANNEL.GET_MENTION", false);
+		c.id = 825411707521728511;
+		set_test("CHANNEL.GET_MENTION", c.get_mention() == "<#825411707521728511>");
+	}
+
 	{ // utility methods
 		set_test("UTILITY.ICONHASH", false);
 		auto iconhash1 = dpp::utility::iconhash("a_5532c6414c70765a28cf9448c117205f");
@@ -393,13 +409,68 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						});
 					}
 				});
+
+			set_test("FORUM_CREATION", false);
+			set_test("FORUM_CHANNEL_GET", false);
+			set_test("FORUM_CHANNEL_DELETE", false);
+			if (!offline) {
+				dpp::channel c;
+				c.name = "test-forum-channel";
+				c.guild_id = TEST_GUILD_ID;
+				c.set_topic("This is a forum channel");
+				c.set_flags(dpp::CHANNEL_FORUM);
+				c.default_sort_order = dpp::so_creation_date;
+				dpp::forum_tag t;
+				t.name = "Alpha";
+				t.emoji = "❌";
+				c.available_tags = {t};
+				c.default_auto_archive_duration = dpp::arc_1_day;
+				c.default_reaction = "✅";
+				c.default_thread_rate_limit_per_user = 10;
+				bot.channel_create(c, [&bot](const dpp::confirmation_callback_t &event) {
+					if (!event.is_error()) {
+						set_test("FORUM_CREATION", true);
+						auto channel = std::get<dpp::channel>(event.value);
+						// retrieve the forum channel and check the values
+						bot.channel_get(channel.id, [forum_id = channel.id, &bot](const dpp::confirmation_callback_t &event) {
+							if (!event.is_error()) {
+								auto channel = std::get<dpp::channel>(event.value);
+								bot.log(dpp::ll_debug, event.http_info.body);
+								bool tag = false;
+								for (auto &t : channel.available_tags) {
+									if (t.name == "Alpha" && std::holds_alternative<std::string>(t.emoji) && std::get<std::string>(t.emoji) == "❌") {
+										tag = true;
+									}
+								}
+								bool name = channel.name == "test-forum-channel";
+								bool sort = channel.default_sort_order == dpp::so_creation_date;
+								bool rateLimit = channel.default_thread_rate_limit_per_user == 10;
+								set_test("FORUM_CHANNEL_GET", tag && name && sort && rateLimit);
+							} else {
+								set_test("FORUM_CHANNEL_GET", false);
+							}
+							// delete the forum channel
+							bot.channel_delete(forum_id, [](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									set_test("FORUM_CHANNEL_DELETE", true);
+								} else {
+									set_test("FORUM_CHANNEL_DELETE", false);
+								}
+							});
+						});
+					} else {
+						set_test("FORUM_CREATION", false);
+						set_test("FORUM_CHANNEL_GET", false);
+					}
+				});
+			}
 		});
 
 		std::mutex loglock;
 		bot.on_log([&](const dpp::log_t & event) {
 			std::lock_guard<std::mutex> locker(loglock);
 			if (event.severity > dpp::ll_trace) {
-				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: [\u001b[36m" << dpp::utility::loglevel(event.severity) << "\u001b[0m] " << event.message << "\n";
 			}
 			if (event.message == "Test log message") {
 				set_test("LOGGER", true);

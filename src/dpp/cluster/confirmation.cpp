@@ -49,6 +49,10 @@ bool confirmation_callback_t::is_error() const {
 		/* Invalid JSON or 4xx/5xx response */
 		return true;
 	}
+	if (http_info.status == 204) {
+		/* Body is empty so we can't parse it but interaction is not an error*/
+		return false;
+	}
 	try {
 		json j = json::parse(this->http_info.body);
 		if (j.find("code") != j.end() && j.find("errors") != j.end() && j.find("message") != j.end()) {
