@@ -140,6 +140,8 @@ enum guild_flags_extra : uint8_t {
 	g_auto_moderation =			0b00000100,
 	/** Guild has paused invites, preventing new users from joining */
 	g_invites_disabled =		0b00001000,
+	/** Guild has been set as support server on the App Directory */
+	g_developer_support_server =	0b00010000,
 };
 
 /**
@@ -797,6 +799,12 @@ public:
 	 * @return bool has auto moderation features
 	 */
 	bool has_auto_moderation() const;
+
+	/**
+	 * @brief Guild has been set as a support server on the App Directory
+	 * @return bool has app directory support
+	 */
+	bool has_app_directory_support() const;
 
 	/**
 	 * @brief Guild has access to set an animated guild icon
