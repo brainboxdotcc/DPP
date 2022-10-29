@@ -18,14 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/appcommand.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
 
@@ -45,36 +40,118 @@ using namespace dpp;
 void interaction_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	dpp::interaction i;
+	/* We must set here because we cant pass it through the nlohmann from_json() */
+	i.cache_policy = client->creator->cache_policy;
 	i.fill_from_json(&d);
-	/* There are two types of interactions, component interactions and
-	 * slash command interactions. Both fire different library events
-	 * so ensure they are dispatched properly.
+	/* There are several types of interactions, component interactions,
+	 * auto complete interactions, dialog interactions and slash command
+	 * interactions. Both fire different library events so ensure they are
+	 * dispatched properly.
 	 */
 	if (i.type == it_application_command) {
-		if (client->creator->dispatch.interaction_create) {
+		/* Slash command is split again into chat input, and the two context menu types */
+		command_interaction cmd_data = i.get_command_interaction();
+		if (cmd_data.type == ctxm_message && !client->creator->on_message_context_menu.empty()) {
+			if (i.resolved.messages.size()) {
+				/* Message right-click context menu */
+				message_context_menu_t mcm(client, raw);
+				mcm.command = i;
+				mcm.set_message(i.resolved.messages.begin()->second);
+				client->creator->on_message_context_menu.call(mcm);
+			}
+		} else if (cmd_data.type == ctxm_user && !client->creator->on_user_context_menu.empty()) {
+			if (i.resolved.users.size()) {
+				/* User right-click context menu */
+				user_context_menu_t ucm(client, raw);
+				ucm.command = i;
+				ucm.set_user(i.resolved.users.begin()->second);
+				client->creator->on_user_context_menu.call(ucm);
+			}
+		} else if (cmd_data.type == ctxm_chat_input && !client->creator->on_slashcommand.empty()) {
+			dpp::slashcommand_t sc(client, raw);
+			sc.command = i;
+			client->creator->on_slashcommand.call(sc);
+		}
+		if (!client->creator->on_interaction_create.empty()) {
+			/* Standard chat input. Note that for backwards compatibility, context menu
+			 * events still find their way here. At some point in the future, receiving
+			 * ctxm_user and ctxm_message inputs to this event will be depreciated.
+			 */
 			dpp::interaction_create_t ic(client, raw);
 			ic.command = i;
-			client->creator->dispatch.interaction_create(ic);
+			client->creator->on_interaction_create.call(ic);
+		}
+	} else if (i.type == it_modal_submit) {
+		if (!client->creator->on_form_submit.empty()) {
+			dpp::form_submit_t fs(client, raw);
+			fs.custom_id = string_not_null(&(d["data"]), "custom_id");
+			fs.command = i;
+			for (auto & c : d["data"]["components"]) {
+				fs.components.push_back(dpp::component().fill_from_json(&c));
+			}
+			client->creator->on_form_submit.call(fs);
+		}
+	} else if (i.type == it_autocomplete) {
+		// "data":{"id":"903319628816728104","name":"blep","options":[{"focused":true,"name":"animal","type":3,"value":"a"}],"type":1}
+		if (!client->creator->on_autocomplete.empty()) {
+			dpp::autocomplete_t ac(client, raw);
+			ac.id = snowflake_not_null(&(d["data"]), "id");
+			ac.name = string_not_null(&(d["data"]), "name");
+			for (auto & o : d["data"]["options"]) {
+				dpp::command_option opt;
+				opt.name = string_not_null(&o, "name");
+				opt.type = (dpp::command_option_type)int8_not_null(&o, "type");
+				if (o.contains("value") && !o.at("value").is_null()) {
+					switch (opt.type) {
+						case co_boolean:
+							opt.value = o.at("value").get<bool>();
+							break;
+						case co_channel:
+						case co_role:
+						case co_user:
+						case co_attachment:
+						case co_mentionable:
+							opt.value = dpp::snowflake(snowflake_not_null(&o, "value"));
+							break;
+						case co_integer:
+							opt.value = o.at("value").get<int64_t>();
+							break;
+						case co_string:
+							opt.value = o.at("value").get<std::string>();
+							break;
+						case co_number:
+							opt.value = o.at("value").get<double>();
+							break;
+						case co_sub_command:
+						case co_sub_command_group:
+							/* Silences warning on clang, handled elsewhere */
+						break;
+					}
+				}
+				opt.focused = bool_not_null(&o, "focused");
+				ac.options.emplace_back(opt);
+			}
+			ac.command = i;
+			client->creator->on_autocomplete.call(ac);
 		}
 	} else if (i.type == it_component_button) {
 		dpp::component_interaction bi = std::get<component_interaction>(i.data);
 		if (bi.component_type == cotype_button) {
-			if (client->creator->dispatch.button_click) {
+			if (!client->creator->on_button_click.empty()) {
 				dpp::button_click_t ic(client, raw);
 				ic.command = i;
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;
-				client->creator->dispatch.button_click(ic);
+				client->creator->on_button_click.call(ic);
 			}
-		}
-		if (bi.component_type == cotype_select) {
-			if (client->creator->dispatch.select_click) {
+		} else if (bi.component_type == cotype_select) {
+			if (!client->creator->on_select_click.empty()) {
 				dpp::select_click_t ic(client, raw);
 				ic.command = i;
 				ic.custom_id = bi.custom_id;
 				ic.component_type = bi.component_type;
 				ic.values = bi.values;
-				client->creator->dispatch.select_click(ic);
+				client->creator->on_select_click.call(ic);
 			}
 		}
 	}

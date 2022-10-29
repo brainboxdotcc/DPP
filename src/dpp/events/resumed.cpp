@@ -18,17 +18,10 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 
@@ -44,15 +37,15 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void resumed::handle(discord_client* client, json &j, const std::string &raw) {
-	client->log(dpp::ll_debug, fmt::format("Successfully resumed session id {}", client->sessionid));
+	client->log(dpp::ll_debug, std::string("Successfully resumed session id ") + client->sessionid);
 
 	client->ready = true;
 
-	if (client->creator->dispatch.resumed) {
+	if (!client->creator->on_resumed.empty()) {
 		dpp::resumed_t r(client, raw);
 		r.session_id = client->sessionid;
 		r.shard_id = client->shard_id;
-		client->creator->dispatch.resumed(r);
+		client->creator->on_resumed.call(r);
 	}
 }
 

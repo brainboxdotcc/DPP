@@ -18,17 +18,12 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/guild.h>
+#include <dpp/role.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -45,32 +40,32 @@ using namespace dpp;
  */
 void guild_role_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json &d = j["d"];
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	if (g) {
 		if (client->creator->cache_policy.role_policy == dpp::cp_none) {
 			json &role = d["role"];
 			dpp::role r;
 			r.fill_from_json(g->id, &role);
-			if (client->creator->dispatch.guild_role_create) {
+			if (!client->creator->on_guild_role_create.empty()) {
 				dpp::guild_role_create_t grc(client, raw);
 				grc.creating_guild = g;
 				grc.created = &r;
-				client->creator->dispatch.guild_role_create(grc);
+				client->creator->on_guild_role_create.call(grc);
 			}
 		} else {
 			json &role = d["role"];
-			dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
+			dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
 			if (!r) {
 				r = new dpp::role();
 			}
 			r->fill_from_json(g->id, &role);
 			dpp::get_role_cache()->store(r);
 			g->roles.push_back(r->id);
-			if (client->creator->dispatch.guild_role_create) {
+			if (!client->creator->on_guild_role_create.empty()) {
 				dpp::guild_role_create_t grc(client, raw);
 				grc.creating_guild = g;
 				grc.created = r;
-				client->creator->dispatch.guild_role_create(grc);
+				client->creator->on_guild_role_create.call(grc);
 			}
 		}
 	}

@@ -18,14 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/invite.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
 
@@ -43,11 +38,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void invite_create::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.invite_create) {
+	if (!client->creator->on_invite_create.empty()) {
 		json& d = j["d"];
 		dpp::invite_create_t ci(client, raw);
 		ci.created_invite = dpp::invite().fill_from_json(&d);
-		client->creator->dispatch.invite_create(ci);
+		client->creator->on_invite_create.call(ci);
 	}
 }
 

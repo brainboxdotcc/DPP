@@ -18,17 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/message.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -44,16 +38,17 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void message_reaction_remove::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.message_reaction_remove) {
+	if (!client->creator->on_message_reaction_remove.empty()) {
 		json &d = j["d"];
 		dpp::message_reaction_remove_t mrr(client, raw);
-		mrr.reacting_guild = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
-		mrr.reacting_user = dpp::find_user(SnowflakeNotNull(&d, "user_id"));
-		mrr.reacting_channel = dpp::find_channel(SnowflakeNotNull(&d, "channel_id"));
-		mrr.message_id = SnowflakeNotNull(&d, "message_id");
-		mrr.reacting_emoji = dpp::find_emoji(SnowflakeNotNull(&(d["emoji"]), "id"));
-		if (mrr.reacting_user && mrr.reacting_channel && mrr.message_id) {
-			client->creator->dispatch.message_reaction_remove(mrr);
+		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+		mrr.reacting_guild = dpp::find_guild(guild_id);
+		mrr.reacting_user_id = snowflake_not_null(&d, "user_id");
+		mrr.reacting_channel = dpp::find_channel(snowflake_not_null(&d, "channel_id"));
+		mrr.message_id = snowflake_not_null(&d, "message_id");
+		mrr.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
+		if (mrr.reacting_channel && mrr.message_id) {
+			client->creator->on_message_reaction_remove.call(mrr);
 		}
 	}
 }

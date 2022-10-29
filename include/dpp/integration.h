@@ -20,7 +20,11 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/snowflake.h>
+#include <dpp/managed.h>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -42,7 +46,7 @@ enum integration_type {
 enum integration_flags {
 	/// Integration enabled
 	if_enabled =     0b00000001,
-	/// Integration synching
+	/// Integration syncing
 	if_syncing =     0b00000010,
 	/// Emoji integration
 	if_emoticons =   0b00000100,
@@ -55,8 +59,8 @@ enum integration_flags {
 /**
  * @brief An application that has been integrated
  */
-struct CoreExport integration_app {
-	/// Inegration id
+struct DPP_EXPORT integration_app {
+	/// Integration id
 	snowflake id;
 	/// Name
 	std::string name;
@@ -64,14 +68,16 @@ struct CoreExport integration_app {
 	std::string icon;
 	/// Description
 	std::string description;
-	/// Integration summary
+	/// Integration summary @deprecated Removed by Discord
 	std::string summary;
 	/// Pointer to bot user
-	user* bot;
+	class user* bot;
 };
 
-/** Represents an integration within a dpp::guild */
-class CoreExport integration : public managed {
+/**
+ * @brief Represents an integration on a guild, e.g. a connection to twitch.
+ */
+class DPP_EXPORT integration : public managed, public json_interface<integration> {
 public:
 	/** Integration name */
 	std::string name;
@@ -83,17 +89,17 @@ public:
 	snowflake role_id;
 	/** User id */
 	snowflake user_id;
-	/** Expiry grace period */
+	/** The grace period (in days) before expiring subscribers */
 	uint32_t expire_grace_period;
 	/** Sync time */
 	time_t synced_at;
 	/** Subscriber count */
 	uint32_t subscriber_count;
-	/* Account id */
+	/** Account id */
 	std::string account_id;
-	/* Account name */
+	/** Account name */
 	std::string account_name;
-	/* Integration application */
+	/** The bot/OAuth2 application for discord integrations */
 	integration_app app;
 
 	/** Default constructor */
@@ -109,9 +115,10 @@ public:
 	integration& fill_from_json(nlohmann::json* j);
 
 	/** Build a json string from this object.
+	 * @param with_id Add ID to output
 	 * @return JSON string of the object
 	 */
-	std::string build_json() const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/** True if emoticons are enabled */
 	bool emoticons_enabled() const;
@@ -125,8 +132,40 @@ public:
 	bool expiry_kicks_user() const;
 };
 
+/**
+ * @brief The connection object that the user has attached.
+ */
+class DPP_EXPORT connection {
+public:
+	std::string			id;		//!< id of the connection account
+	std::string			name;		//!< the username of the connection account
+	std::string			type;		//!< the service of the connection (twitch, youtube)
+	bool				revoked;	//!< Optional: whether the connection is revoked
+	std::vector<integration>	integrations;	//!< Optional: an array of partial server integrations
+	bool				verified;	//!< whether the connection is verified
+	bool				friend_sync;	//!< whether friend sync is enabled for this connection
+	bool				show_activity;	//!< whether activities related to this connection will be shown in presence updates
+	bool				two_way_link;	//!< Whether this connection has a corresponding third party OAuth2 token
+	bool				visible;	//!< visibility of this connection
+
+	/**
+	 * @brief Construct a new connection object
+	 */
+	connection();
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	connection& fill_from_json(nlohmann::json* j);
+
+};
+
 /** A group of integrations */
 typedef std::unordered_map<snowflake, integration> integration_map;
+
+/** A group of connections */
+typedef std::unordered_map<snowflake, connection> connection_map;
 
 };
 

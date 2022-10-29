@@ -18,17 +18,10 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -44,11 +37,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void presence_update::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.presence_update) {
+	if (!client->creator->on_presence_update.empty()) {
 		json& d = j["d"];
 		dpp::presence_update_t pu(client, raw);
 		pu.rich_presence = dpp::presence().fill_from_json(&d);
-		client->creator->dispatch.presence_update(pu);
+		client->creator->on_presence_update.call(pu);
 	}
 }
 

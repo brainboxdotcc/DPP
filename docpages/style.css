@@ -1,6 +1,30 @@
+html {
+	--content-maxwidth: 90% !important;
+}
+
+.memItemLeft, .memTemplItemLeft {
+	/* This was set to no wrap. Large types force scrolling right. ew. */
+	white-space: break-spaces !important;
+}
+
 img {
 	max-width: 100% !important;
 	max-height: auto;
+}
+
+object[data="DPP_Architecture.svg"] {
+	max-width: 100% !important;
+	max-height: auto;
+}
+
+select[name=vsv] {
+	background: none;
+	border: 1px solid var(--primary-dark-color);
+	color: var(--primary-dark-color);
+	border-radius: 6px;
+	padding: 5px;
+	margin-left: 1rem;
+	margin-right: 1rem;
 }
 
 #searchBoxPos1 {
@@ -33,4 +57,14 @@ table.doxtable td, table.doxtable th {
 
 dl.note {
 	background-color: #fcfcc0;
+	color: #8d7400;
+}
+
+#nav-tree .arrow {
+	opacity: 1 !important;
+	font-size: 100%;
+}
+
+#nav-tree div.item > a:hover .arrow {
+	color: var(--page-secondary-foreground-color) !important;
 }

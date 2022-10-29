@@ -18,14 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/presence.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
 
@@ -43,13 +38,13 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void message_update::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.message_update) {
+	if (!client->creator->on_message_update.empty()) {
 		json d = j["d"];
 		dpp::message_update_t msg(client, raw);
-		dpp::message m;
+		dpp::message m(client->creator);
 		m.fill_from_json(&d);
-	      	msg.updated = &m;
-		client->creator->dispatch.message_update(msg);
+	      	msg.msg = m;
+		client->creator->on_message_update.call(msg);
 	}
 
 }

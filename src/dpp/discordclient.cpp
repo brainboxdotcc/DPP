@@ -21,62 +21,94 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#ifndef _WIN32
-#include <unistd.h>
-#endif
+#include <dpp/exception.h>
 #include <dpp/discordclient.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
 #include <thread>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
+#include <dpp/etf.h>
 #include <zlib.h>
+#ifdef _WIN32
+	#include <WinSock2.h>
+	#include <WS2tcpip.h>
+	#include <io.h>
+#else
+	#include <unistd.h>
+	#include <netinet/in.h>
+	#include <resolv.h>
+	#include <netdb.h>
+	#include <sys/socket.h>
+	#include <netinet/tcp.h>
+#endif
 
-#define PATH_UNCOMPRESSED	"/?v=" DISCORD_API_VERSION "&encoding=json"
-#define PATH_COMPRESSED		"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
+#define PATH_UNCOMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json"
+#define PATH_COMPRESSED_JSON	"/?v=" DISCORD_API_VERSION "&encoding=json&compress=zlib-stream"
+#define PATH_UNCOMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf"
+#define PATH_COMPRESSED_ETF	"/?v=" DISCORD_API_VERSION "&encoding=etf&compress=zlib-stream"
 #define DECOMP_BUFFER_SIZE	512 * 1024
+
+#define STRINGIFY(a) STRINGIFY_(a)
+#define STRINGIFY_(a) #a
+
+#ifndef DPP_OS
+#define DPP_OS unknown
+#endif
 
 namespace dpp {
 
-/* This is an internal class, defined externally as just a forward declaration for an opaque pointer.
- * This is because we don't want an external dependency on zlib's headers
+/**
+ * @brief This is an opaque class containing zlib library specific structures.
+ * We define it this way so that the public facing D++ library doesn't require
+ * the zlib headers be available to build against it.
  */
 class zlibcontext {
 public:
+	/**
+	 * @brief Zlib stream struct
+	 */
 	z_stream d_stream;
 };
 
-discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp)
-       : websocket_client(DEFAULT_GATEWAY, "443", comp ? PATH_COMPRESSED : PATH_UNCOMPRESSED),
+discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
+       : websocket_client(_cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
+        terminating(false),
+        runner(nullptr),
+	compressed(comp),
+	decomp_buffer(nullptr),
+	decompressed_total(0),
+	connect_time(0),
+	ping_start(0.0),
 	creator(_cluster),
+	heartbeat_interval(0),
+	last_heartbeat(time(nullptr)),
 	shard_id(_shard_id),
 	max_shards(_max_shards),
-	token(_token),
-	last_heartbeat(time(NULL)),
-	heartbeat_interval(0),
-	reconnects(0),
-	resumes(0),
 	last_seq(0),
-	sessionid(""),
+	token(_token),
 	intents(_intents),
-	runner(nullptr),
-	compressed(comp),
-	decompressed_total(0),
-	decomp_buffer(nullptr),
+	sessionid(""),
+	resumes(0),
+	reconnects(0),
+	websocket_ping(0.0),
 	ready(false),
-	ping_start(0.0),
-	websocket_ping(0.0)
+	last_heartbeat_ack(time(nullptr)),
+	protocol(ws_proto),
+	resume_gateway_url(_cluster->default_gateway)	
 {
 	zlib = new zlibcontext();
-	Connect();
+	etf = new etf_parser();
+	this->connect();
 }
 
 discord_client::~discord_client()
 {
+	terminating = true;
 	if (runner) {
 		runner->join();
 		delete runner;
 	}
+	delete etf;
 	delete zlib;
 }
 
@@ -85,21 +117,21 @@ uint64_t discord_client::get_decompressed_bytes_in()
 	return decompressed_total;
 }
 
-void discord_client::SetupZLib()
+void discord_client::setup_zlib()
 {
 	if (compressed) {
 		zlib->d_stream.zalloc = (alloc_func)0;
 		zlib->d_stream.zfree = (free_func)0;
 		zlib->d_stream.opaque = (voidpf)0;
 		if (inflateInit(&(zlib->d_stream)) != Z_OK) {
-			throw dpp::exception("Can't initialise stream compression!");
+			throw dpp::connection_exception("Can't initialise stream compression!");
 		}
 		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
 	}
 
 }
 
-void discord_client::EndZLib()
+void discord_client::end_zlib()
 {
 	if (compressed) {
 		inflateEnd(&(zlib->d_stream));
@@ -110,40 +142,60 @@ void discord_client::EndZLib()
 	}
 }
 
-void discord_client::ThreadRun()
+void discord_client::set_resume_hostname()
 {
-	SetupZLib();
+	hostname = resume_gateway_url;
+}
+
+void discord_client::thread_run()
+{
+	utility::set_thread_name(std::string("shard/") + std::to_string(shard_id));
+	setup_zlib();
 	do {
 		bool error = false;
 		ready = false;
 		message_queue.clear();
 		ssl_client::read_loop();
+		if (!terminating) {
+			ssl_client::close();
+			end_zlib();
+			setup_zlib();
+			do {
+				this->log(ll_debug, "Attempting reconnection of shard " + std::to_string(this->shard_id) + " to wss://" + resume_gateway_url);
+				error = false;
+				try {
+					set_resume_hostname();
+					ssl_client::connect();
+					websocket_client::connect();
+				}
+				catch (const std::exception &e) {
+					log(dpp::ll_error, std::string("Error establishing connection, retry in 5 seconds: ") + e.what());
+					ssl_client::close();
+					std::this_thread::sleep_for(std::chrono::seconds(5));
+					error = true;
+				}
+			} while (error);
+		}
+	} while(!terminating);
+	if (this->sfd != INVALID_SOCKET) {
+		/* Send a graceful termination */
+		this->log(ll_debug, "Graceful shutdown of shard " + std::to_string(this->shard_id) + " succeeded.");
+		this->nonblocking = false;
+		this->send_close_packet();
 		ssl_client::close();
-		EndZLib();
-		SetupZLib();
-		do {
-			error = false;
-			try {
-				ssl_client::Connect();
-				websocket_client::Connect();
-			}
-			catch (const std::exception &e) {
-				log(dpp::ll_error, std::string("Error establishing connection, retry in 5 seconds: ") + e.what());
-				ssl_client::close();
-				std::this_thread::sleep_for(std::chrono::seconds(5));
-				error = true;
-			}
-		} while (error);
-	} while(true);
+	} else {
+		this->log(ll_debug, "Graceful shutdown of shard " + std::to_string(this->shard_id) + " not possible, socket already closed.");
+	}
+	end_zlib();
 }
 
-void discord_client::Run()
+void discord_client::run()
 {
-	this->runner = new std::thread(&discord_client::ThreadRun, this);
+	this->runner = new std::thread(&discord_client::thread_run, this);
 	this->thread_id = runner->native_handle();
 }
 
-bool discord_client::HandleFrame(const std::string &buffer)
+bool discord_client::handle_frame(const std::string &buffer)
 {
 	std::string& data = (std::string&)buffer;
 
@@ -155,7 +207,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 			/* Decompress buffer */
 			decompressed.clear();
 			zlib->d_stream.next_in = (Bytef *)buffer.c_str();
-			zlib->d_stream.avail_in = buffer.size();
+			zlib->d_stream.avail_in = (uInt)buffer.size();
 			do {
 				int have = 0;
 				zlib->d_stream.next_out = (Bytef*)decomp_buffer;
@@ -166,17 +218,17 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				{
 					case Z_NEED_DICT:
 					case Z_STREAM_ERROR:
-						this->Error(6000);
+						this->error(6000);
 						this->close();
 						return true;
 					break;
 					case Z_DATA_ERROR:
-						this->Error(6001);
+						this->error(6001);
 						this->close();
 						return true;
 					break;
 					case Z_MEM_ERROR:
-						this->Error(6002);
+						this->error(6002);
 						this->close();
 						return true;
 					break;
@@ -197,32 +249,54 @@ bool discord_client::HandleFrame(const std::string &buffer)
 	}
 
 
-	log(dpp::ll_trace, fmt::format("R: {}", data));
 	json j;
 	
-	try {
-		j = json::parse(data);
-	}
-	catch (const std::exception &e) {
-		log(dpp::ll_error, fmt::format("discord_client::HandleFrame {} [{}]", e.what(), data));
-		return true;
+	/**
+	 * This section parses the input frames from the websocket after they're decompressed.
+	 * Note that both ETF and JSON parsers return an nlohmann::json object, so that the rest
+	 * of the library or any user code does not need to be concerned with protocol differences.
+	 * Generally, ETF is faster and consumes much less memory, but provides less opportunities
+	 * to diagnose if it goes wrong.
+	 */
+	switch (protocol) {
+		case ws_json:
+			try {
+				j = json::parse(data);
+			}
+			catch (const std::exception &e) {
+				log(dpp::ll_error, "discord_client::handle_frame(JSON): " + std::string(e.what()) + " [" + data + "]");
+				return true;
+			}
+		break;
+		case ws_etf:
+			try {
+				j = etf->parse(data);
+			}
+			catch (const std::exception &e) {
+				log(dpp::ll_error, "discord_client::handle_frame(ETF): " + std::string(e.what()) + " len=" + std::to_string(data.size()) + "\n" + dpp::utility::debug_dump((uint8_t*)data.data(), data.size()));
+				return true;
+			}
+		break;
 	}
 
-	if (j.find("s") != j.end() && !j["s"].is_null()) {
-		last_seq = j["s"].get<uint64_t>();
+	auto seq = j.find("s");
+	if (seq != j.end() && !seq->is_null()) {
+		last_seq = seq->get<uint64_t>();
 	}
 
-	if (j.find("op") != j.end()) {
-		uint32_t op = j["op"];
+	auto o = j.find("op");
+	if (o != j.end() && !o->is_null()) {
+		uint32_t op = o->get<uint32_t>();
 
 		switch (op) {
 			case 9:
 				/* Reset session state and fall through to 10 */
 				op = 10;
-				log(dpp::ll_debug, fmt::format("Failed to resume session {}, will reidentify", sessionid));
-				this->sessionid = "";
+				log(dpp::ll_debug, "Failed to resume session " + sessionid + ", will reidentify");
+				this->sessionid.clear();
 				this->last_seq = 0;
 				/* No break here, falls through to state 10 to cause a reidentify */
+				[[fallthrough]];
 			case 10:
 				/* Need to check carefully for the existence of this before we try to access it! */
 				if (j.find("d") != j.end() && j["d"].find("heartbeat_interval") != j["d"].end() && !j["d"]["heartbeat_interval"].is_null()) {
@@ -231,7 +305,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 
 				if (last_seq && !sessionid.empty()) {
 					/* Resume */
-					log(dpp::ll_debug, fmt::format("Resuming session {} with seq={}", sessionid, last_seq));
+					log(dpp::ll_debug, "Resuming session " + sessionid + " with seq=" + std::to_string(last_seq));
 					json obj = {
 						{ "op", 6 },
 						{ "d", {
@@ -241,13 +315,12 @@ bool discord_client::HandleFrame(const std::string &buffer)
 							}
 						}
 					};
-					this->write(obj.dump());
+					this->write(jsonobj_to_string(obj));
 					resumes++;
 				} else {
 					/* Full connect */
-					while (time(NULL) < creator->last_identify + 5) {
-						uint32_t wait = (creator->last_identify + 5) - time(NULL);
-						log(dpp::ll_debug, fmt::format("Waiting {} seconds before identifying for session...", wait));
+					while (time(nullptr) < creator->last_identify + 5) {
+						time_t wait = (creator->last_identify + 5) - time(nullptr);
 						std::this_thread::sleep_for(std::chrono::seconds(wait));
 					}
 					log(dpp::ll_debug, "Connecting new session...");
@@ -259,9 +332,9 @@ bool discord_client::HandleFrame(const std::string &buffer)
 								{ "token", this->token },
 								{ "properties",
 									{
-										{ "$os", "Linux" },
-										{ "$browser", "D++" },
-										{ "$device", "D++" }
+										{ "os", STRINGIFY(DPP_OS) },
+										{ "browser", "D++" },
+										{ "device", "D++" }
 									}
 								},
 								{ "shard", json::array({ shard_id, max_shards }) },
@@ -273,7 +346,7 @@ bool discord_client::HandleFrame(const std::string &buffer)
 					if (this->intents) {
 						obj["d"]["intents"] = this->intents;
 					}
-					this->write(obj.dump());
+					this->write(jsonobj_to_string(obj));
 					this->connect_time = creator->last_identify = time(NULL);
 					reconnects++;
 				}
@@ -281,24 +354,14 @@ bool discord_client::HandleFrame(const std::string &buffer)
 				websocket_ping = 0;
 			break;
 			case 0: {
-				std::string event = j.find("t") != j.end() && !j["t"].is_null() ? j["t"] : "";
-
-				HandleEvent(event, j, data);
+				std::string event = j["t"];
+				handle_event(event, j, data);
 			}
 			break;
 			case 7:
-				log(dpp::ll_debug, fmt::format("Reconnection requested, closing socket {}", sessionid));
+				log(dpp::ll_debug, "Reconnection requested, closing socket " + sessionid);
 				message_queue.clear();
-
-				shutdown(sfd, 2);
-			#ifdef _WIN32
-				if (sfd >= 0 && sfd < FD_SETSIZE) {
-					closesocket(sfd);
-				}
-			#else
-				::close(sfd);
-			#endif
-
+				throw dpp::connection_exception("Remote site requested reconnection");
 			break;
 			/* Heartbeat ack */
 			case 11:
@@ -317,10 +380,10 @@ dpp::utility::uptime discord_client::get_uptime()
 
 bool discord_client::is_connected()
 {
-	return (this->GetState() == CONNECTED) && (this->ready);
+	return (this->get_state() == CONNECTED) && (this->ready);
 }
 
-void discord_client::Error(uint32_t errorcode)
+void discord_client::error(uint32_t errorcode)
 {
 	const static std::map<uint32_t, std::string> errortext = {
 		{ 1000, "Socket shutdown" },
@@ -363,44 +426,48 @@ void discord_client::Error(uint32_t errorcode)
 	if (i != errortext.end()) {
 		error = i->second;
 	}
-	log(dpp::ll_warning, fmt::format("OOF! Error from underlying websocket: {}: {}", errorcode, error));
+	log(dpp::ll_warning, "OOF! Error from underlying websocket: " + std::to_string(errorcode) + ": " + error);
 }
 
 void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 {
-	if (creator->dispatch.log) {
-		/* Pass to user if theyve hooked the event */
+	if (!creator->on_log.empty()) {
+		/* Pass to user if they've hooked the event */
 		dpp::log_t logmsg(nullptr, msg);
 		logmsg.severity = severity;
 		logmsg.message = msg;
-		creator->dispatch.log(logmsg);
+		creator->on_log.call(logmsg);
 	}
 }
 
-void discord_client::QueueMessage(const std::string &j, bool to_front)
+void discord_client::queue_message(const std::string &j, bool to_front)
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	if (to_front) {
-		message_queue.push_front(j);
+		message_queue.emplace_front(j);
 	} else {
-		message_queue.push_back(j);
+		message_queue.emplace_back(j);
 	}
 }
 
-void discord_client::ClearQueue()
+discord_client& discord_client::clear_queue()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	message_queue.clear();
+	return *this;
 }
 
-size_t discord_client::GetQueueSize()
+size_t discord_client::get_queue_size()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::shared_lock locker(queue_mutex);
 	return message_queue.size();
 }
 
 void discord_client::one_second_timer()
 {
+	if (terminating) {
+		throw dpp::exception("Shard terminating due to cluster shutdown");
+	}
 
 	websocket_client::one_second_timer();
 
@@ -412,8 +479,12 @@ void discord_client::one_second_timer()
 	auto first_iter = shards.begin();
 	if (first_iter != shards.end()) {
 		dpp::discord_client* first_shard = first_iter->second;
-		if ((time(NULL) % 60) == 0 && first_shard == this) {
-			dpp::garbage_collection();
+		if (first_shard == this) {
+			creator->tick_timers();
+
+			if ((time(NULL) % 60) == 0) {
+				dpp::garbage_collection();
+			}
 		}
 	}
 
@@ -425,24 +496,15 @@ void discord_client::one_second_timer()
 		 * Miss two ACKS, forces a reconnection.
 		 */
 		if ((time(nullptr) - this->last_heartbeat_ack) > heartbeat_interval * 2) {
-			log(dpp::ll_warning, fmt::format("Missed heartbeat ACK, forcing reconnection to session {}", sessionid));
+			log(dpp::ll_warning, "Missed heartbeat ACK, forcing reconnection to session " + sessionid);
 			message_queue.clear();
-
-		shutdown(sfd, 2);
-		#ifdef _WIN32
-			if (sfd >= 0 && sfd < FD_SETSIZE) {
-				closesocket(sfd);
-			}
-		#else
-			::close(sfd);
-		#endif
-			
+			close_socket(sfd);
 			return;
 		}
 
 		/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
-			std::lock_guard<std::mutex> locker(queue_mutex);
+			std::unique_lock locker(queue_mutex);
 			if (message_queue.size()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();
@@ -463,7 +525,9 @@ void discord_client::one_second_timer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				QueueMessage(json({{"op", 1}, {"d", last_seq}}).dump(), true);
+				queue_message(
+					jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}))
+					, true);
 				last_heartbeat = time(NULL);
 			}
 		}
@@ -472,10 +536,10 @@ void discord_client::one_second_timer()
 
 uint64_t discord_client::get_guild_count() {
 	uint64_t total = 0;
-	dpp::cache* c = dpp::get_guild_cache();
-	dpp::cache_container& gc = c->get_container();
+	dpp::cache<guild>* c = dpp::get_guild_cache();
 	/* IMPORTANT: We must lock the container to iterate it */
-	std::lock_guard<std::mutex> lock(c->get_mutex());
+	std::shared_lock l(c->get_mutex());
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -487,10 +551,10 @@ uint64_t discord_client::get_guild_count() {
 
 uint64_t discord_client::get_member_count() {
 	uint64_t total = 0;
-	dpp::cache* c = dpp::get_guild_cache();
-	dpp::cache_container& gc = c->get_container();
+	dpp::cache<guild>* c = dpp::get_guild_cache();
 	/* IMPORTANT: We must lock the container to iterate it */
-	std::lock_guard<std::mutex> lock(c->get_mutex());
+	std::shared_lock l(c->get_mutex());
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -508,10 +572,10 @@ uint64_t discord_client::get_member_count() {
 
 uint64_t discord_client::get_channel_count() {
 	uint64_t total = 0;
-	dpp::cache* c = dpp::get_guild_cache();
-	dpp::cache_container& gc = c->get_container();
+	dpp::cache<guild>* c = dpp::get_guild_cache();
 	/* IMPORTANT: We must lock the container to iterate it */
-	std::lock_guard<std::mutex> lock(c->get_mutex());
+	std::shared_lock l(c->get_mutex());
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -521,16 +585,16 @@ uint64_t discord_client::get_channel_count() {
 	return total;
 }
 
-void discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf) {
+discord_client& discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf) {
 #ifdef HAVE_VOICE
-	std::lock_guard<std::mutex> lock(voice_mutex);
+	std::unique_lock lock(voice_mutex);
 	if (connecting_voice_channels.find(guild_id) == connecting_voice_channels.end()) {
 		connecting_voice_channels[guild_id] = new voiceconn(this, channel_id);
 		/* Once sent, this expects two events (in any order) on the websocket:
 		* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
 		*/
-		log(ll_debug, fmt::format("Sending op 4 to join VC, guild {} channel {} ", guild_id, channel_id));
-		QueueMessage(json({
+		log(ll_debug, "Sending op 4 to join VC, guild " + std::to_string(guild_id) + " channel  " + std::to_string(channel_id));
+		queue_message(jsonobj_to_string(json({
 			{ "op", 4 },
 			{ "d", {
 					{ "guild_id", std::to_string(guild_id) },
@@ -539,21 +603,30 @@ void discord_client::connect_voice(snowflake guild_id, snowflake channel_id, boo
 					{ "self_deaf", self_deaf },
 				}
 			}
-		}).dump(), false);
+		})), false);
 	} else {
-		log(ll_debug, fmt::format("Requested the bot connect to voice channel {} on guild {}, but it seems we are already on this VC", channel_id, guild_id));
+		log(ll_debug, "Requested the bot connect to voice channel " + std::to_string(channel_id) + " on guild " + std::to_string(guild_id) + ", but it seems we are already on this VC");
 	}
 #endif
+	return *this;
+}
+
+std::string discord_client::jsonobj_to_string(const nlohmann::json& json) {
+	if (protocol == ws_json) {
+		return json.dump();
+	} else {
+		return etf->build(json);
+	}
 }
 
 void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_json) {
 #ifdef HAVE_VOICE
-	std::lock_guard<std::mutex> lock(voice_mutex);
+	std::unique_lock lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
-		log(ll_debug, fmt::format("Disconnecting voice, guild: {}", guild_id));
+		log(ll_debug, "Disconnecting voice, guild: {}" + std::to_string(guild_id));
 		if (emit_json) {
-			QueueMessage(json({
+			queue_message(jsonobj_to_string(json({
 				{ "op", 4 },
 				{ "d", {
 						{ "guild_id", std::to_string(guild_id) },
@@ -562,7 +635,7 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 						{ "self_deaf", false },
 					}
 				}
-			}).dump(), false);
+			})), false);
 		}
 		delete v->second;
 		v->second = nullptr;
@@ -571,13 +644,14 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 #endif
 }
 
-void discord_client::disconnect_voice(snowflake guild_id) {
+discord_client& discord_client::disconnect_voice(snowflake guild_id) {
 	disconnect_voice_internal(guild_id, true);
+	return *this;
 }
 
 voiceconn* discord_client::get_voice(snowflake guild_id) {
 #ifdef HAVE_VOICE
-	std::lock_guard<std::mutex> lock(voice_mutex);
+	std::shared_lock lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
 		return v->second;
@@ -598,35 +672,35 @@ bool voiceconn::is_active() {
 	return voiceclient != nullptr;
 }
 
-void voiceconn::disconnect() {
+voiceconn& voiceconn::disconnect() {
 	if (this->is_active()) {
-		voiceclient->terminating = true;
-		voiceclient->close();
 		delete voiceclient;
 		voiceclient = nullptr;
 	}
+	return *this;
 }
 
 voiceconn::~voiceconn() {
 	this->disconnect();
 }
 
-void voiceconn::connect(snowflake guild_id) {
+voiceconn& voiceconn::connect(snowflake guild_id) {
 	if (this->is_ready() && !this->is_active()) {
 		/* This is wrapped in a thread because instantiating discord_voice_client can initiate a blocking SSL_connect() */
 		auto t = std::thread([guild_id, this]() {
 			try {
-				this->creator->log(ll_debug, fmt::format("Connecting voice for guild {} channel {}", guild_id, this->channel_id));
+				this->creator->log(ll_debug, "Connecting voice for guild " + std::to_string(guild_id) + " channel " + std::to_string(this->channel_id));
 				this->voiceclient = new discord_voice_client(creator->creator, this->channel_id, guild_id, this->token, this->session_id, this->websocket_hostname);
 				/* Note: Spawns thread! */
-				this->voiceclient->Run();
+				this->voiceclient->run();
 			}
 			catch (std::exception &e) {
-				this->creator->log(ll_error, fmt::format("Can't connect to voice websocket (guild_id: {}, channel_id: {}): {}", guild_id, this->channel_id, e.what()));
+				this->creator->log(ll_debug, "Can't connect to voice websocket (guild_id: " + std::to_string(guild_id) + ", channel_id: " + std::to_string(this->channel_id) + ": " + std::string(e.what()));
 			}
 		});
 		t.detach();
 	}
+	return *this;
 }
 
 

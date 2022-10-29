@@ -30,24 +30,21 @@ dtemplate::dtemplate() : code(""), name(""), description(""), usage_count(0), cr
 {
 }
 
-dtemplate::~dtemplate() {
-}
-
 
 dtemplate& dtemplate::fill_from_json(nlohmann::json* j) {
-	code = StringNotNull(j, "code");
-	name = StringNotNull(j, "name");
-	description = StringNotNull(j, "description");
-	usage_count = Int32NotNull(j, "usage_count");
-	creator_id = SnowflakeNotNull(j, "creator_id");
-	created_at = TimestampNotNull(j, "created_at");
-	updated_at = TimestampNotNull(j, "updated_at");
-	source_guild_id = SnowflakeNotNull(j, "source_guild_id");
-	is_dirty = BoolNotNull(j, "is_dirty");
+	code = string_not_null(j, "code");
+	name = string_not_null(j, "name");
+	description = string_not_null(j, "description");
+	usage_count = int32_not_null(j, "usage_count");
+	creator_id = snowflake_not_null(j, "creator_id");
+	created_at = ts_not_null(j, "created_at");
+	updated_at = ts_not_null(j, "updated_at");
+	source_guild_id = snowflake_not_null(j, "source_guild_id");
+	is_dirty = bool_not_null(j, "is_dirty");
 	return *this;
 }
 
-std::string dtemplate::build_json() const {
+std::string dtemplate::build_json(bool with_id) const {
 	json j({
 		{"code", code},
 		{"name", name},

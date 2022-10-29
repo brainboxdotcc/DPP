@@ -18,14 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
+#include <dpp/cluster.h>
+#include <dpp/guild.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
@@ -46,13 +41,13 @@ using namespace dpp;
 void guild_members_chunk::handle(discord_client* client, json &j, const std::string &raw) {
 	json &d = j["d"];
 	dpp::guild_member_map um;
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	if (g) {
 		/* Store guild members */
 		if (client->creator->cache_policy.user_policy == cp_aggressive) {
 			for (auto & userrec : d["members"]) {
 				json & userspart = userrec["user"];
-				dpp::user* u = dpp::find_user(SnowflakeNotNull(&userspart, "id"));
+				dpp::user* u = dpp::find_user(snowflake_not_null(&userspart, "id"));
 				if (!u) {
 					u = new dpp::user();
 					u->fill_from_json(&userspart);
@@ -62,16 +57,17 @@ void guild_members_chunk::handle(discord_client* client, json &j, const std::str
 					dpp::guild_member gm;
 					gm.fill_from_json(&userrec, g->id, u->id);
 					g->members[u->id] = gm;
-					if (client->creator->dispatch.guild_members_chunk)
+					if (!client->creator->on_guild_members_chunk.empty()) {
 						um[u->id] = gm;
+					}
 				}
 			}
 		}
-		if (client->creator->dispatch.guild_members_chunk) {
+		if (!client->creator->on_guild_members_chunk.empty()) {
 			dpp::guild_members_chunk_t gmc(client, raw);
 			gmc.adding = g;
 			gmc.members = &um;
-			client->creator->dispatch.guild_members_chunk(gmc);
+			client->creator->on_guild_members_chunk.call(gmc);
 		}
 	}
 }

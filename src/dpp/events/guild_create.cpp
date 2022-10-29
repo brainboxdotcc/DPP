@@ -18,14 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
+#include <dpp/cluster.h>
+#include <dpp/guild.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
@@ -46,9 +41,9 @@ using namespace dpp;
 void guild_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	bool newguild = false;
-	if (SnowflakeNotNull(&d, "id") == 0)
+	if (snowflake_not_null(&d, "id") == 0)
 		return;
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "id"));
 	if (!g) {
 		g = new dpp::guild();
 		newguild = true;
@@ -61,7 +56,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			g->roles.clear();
 			g->roles.reserve(d["roles"].size());
 			for (auto & role : d["roles"]) {
-				dpp::role *r = dpp::find_role(SnowflakeNotNull(&role, "id"));
+				dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
 				if (!r) {
 					r = new dpp::role();
 				}
@@ -75,7 +70,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 		g->channels.clear();
 		g->channels.reserve(d["channels"].size());
 		for (auto & channel : d["channels"]) {
-			dpp::channel* c = dpp::find_channel(SnowflakeNotNull(&channel, "id"));
+			dpp::channel* c = dpp::find_channel(snowflake_not_null(&channel, "id"));
 			if (!c) {
 				c = new dpp::channel();
 			}
@@ -89,14 +84,14 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 		g->threads.clear();
 		g->threads.reserve(d["threads"].size());
 		for (auto & channel : d["threads"]) {
-			g->threads.push_back(SnowflakeNotNull(&channel, "id"));
+			g->threads.push_back(snowflake_not_null(&channel, "id"));
 		}
 
 		/* Store guild members */
 		if (client->creator->cache_policy.user_policy == cp_aggressive) {
 			g->members.reserve(d["members"].size());
 			for (auto & user : d["members"]) {
-				snowflake userid = SnowflakeNotNull(&(user["user"]), "id");
+				snowflake userid = snowflake_not_null(&(user["user"]), "id");
 				/* Only store ones we don't have already otherwise gm will leak */
 				if (g->members.find(userid) == g->members.end()) {
 					dpp::user* u = dpp::find_user(userid);
@@ -108,7 +103,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 						u->refcount++;
 					}
 					dpp::guild_member gm;
-					gm.fill_from_json(&(user["user"]), g->id, userid);
+					gm.fill_from_json(&user, g->id, userid);
 					g->members[userid] = gm;
 				}
 			}
@@ -118,7 +113,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			g->emojis.reserve(d["emojis"].size());
 			g->emojis = {};
 			for (auto & emoji : d["emojis"]) {
-				dpp::emoji* e = dpp::find_emoji(SnowflakeNotNull(&emoji, "id"));
+				dpp::emoji* e = dpp::find_emoji(snowflake_not_null(&emoji, "id"));
 				if (!e) {
 					e = new dpp::emoji();
 					e->fill_from_json(&emoji);
@@ -135,14 +130,69 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			if (client->intents & dpp::i_guild_presences) {
 				chunk_req["d"]["presences"] = true;
 			}
-			client->QueueMessage(chunk_req.dump());
+			client->queue_message(client->jsonobj_to_string(chunk_req));
 		}
 	}
 
-	if (client->creator->dispatch.guild_create) {
+	if (!client->creator->on_guild_create.empty()) {
 		dpp::guild_create_t gc(client, raw);
 		gc.created = g;
-		client->creator->dispatch.guild_create(gc);
+
+		/* Fill presences if there are any */
+		if (d.find("presences") != d.end()) {
+			for (auto & p : d["presences"]) {
+				try {
+					snowflake user_id = std::stoull(p["user"]["id"].get<std::string>());
+					gc.presences.emplace(user_id, presence().fill_from_json(&p));
+				}
+				catch (std::exception&) {
+					/*
+				     	 * std::invalid_argument if no conversion could be performed
+					 * std::out_of_range if the converted value would fall out of the range of
+					 * the result type or if the underlying function (std::strtoul or std::strtoull)
+					 * sets errno to ERANGE. 
+					 */
+				}
+			}
+		}
+
+		/* Fill in scheduled events, if there are any */
+		if (d.find("guild_scheduled_events") != d.end()) {
+			for (auto & p : d["guild_scheduled_events"]) {
+				scheduled_event s;
+				s.fill_from_json(&p);
+				gc.scheduled_events.emplace(s.id, s);
+			}
+		}
+
+		/* Fill in stage instances, if there are any */
+		if (d.find("stage_instances") != d.end()) {
+			for (auto & p : d["stage_instances"]) {
+				stage_instance s;
+				s.fill_from_json(&p);
+				gc.stage_instances.emplace(s.id, s);
+			}
+		}
+
+		/* Fill in threads, if there are any */
+		if (d.find("threads") != d.end()) {
+			for (auto & p : d["threads"]) {
+				dpp::thread t;
+				t.fill_from_json(&p);
+				gc.threads.emplace(t.id, t);
+			}
+		}
+
+		/* Fill in stickers, if there are any */
+		if (d.find("stickers") != d.end()) {
+			for (auto & p : d["stickers"]) {
+				sticker st;
+				st.fill_from_json(&p);
+				gc.stickers.emplace(st.id, st);
+			}
+		}
+
+		client->creator->on_guild_create.call(gc);
 	}
 }
 

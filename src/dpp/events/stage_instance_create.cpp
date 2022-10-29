@@ -1,4 +1,3 @@
-#include <dpp/discord.h>
 /************************************************************************************
  *
  * D++, A Lightweight C++ library for Discord
@@ -19,16 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/message.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -44,15 +38,11 @@ using namespace dpp;
  * @param raw Raw JSON string
  */
 void stage_instance_create::handle(discord_client* client, json &j, const std::string &raw) {
-	if (client->creator->dispatch.stage_instance_create) {
+	if (!client->creator->on_stage_instance_create.empty()) {
 		json& d = j["d"];
 		dpp::stage_instance_create_t sic(client, raw);
-		sic.id = SnowflakeNotNull(&d, "id");
-		sic.channel_id = SnowflakeNotNull(&d, "channel_id");
-		sic.guild_id = SnowflakeNotNull(&d, "channel_id");
-		sic.privacy_level = dpp::Int8NotNull(&d, "privacy_level");
-		sic.topic = StringNotNull(&d, "topic");
-		client->creator->dispatch.stage_instance_create(sic);
+		sic.created.fill_from_json(&d);
+		client->creator->on_stage_instance_create.call(sic);
 	}
 }
 

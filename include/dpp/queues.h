@@ -25,17 +25,15 @@
 #include <queue>
 #include <map>
 #include <thread>
-#include <mutex>
+#include <shared_mutex>
 #include <vector>
 #include <functional>
+#include <condition_variable>
 
 namespace dpp {
 
-/** Encodes a url parameter similar to php urlencode() */
-std::string url_encode(const std::string &value);
-
-/** Error values. Don't change the order or add extra values here,
- * as they map onto the error values of cpp-httplib
+/**
+ * @brief Error values. Most of these are currently unused in https_client.
  */
 enum http_error {
 	/// Request successful
@@ -70,40 +68,41 @@ enum http_error {
  * @brief The result of any HTTP request. Contains the headers, vital
  * rate limit figures, and returned request body.
  */
-struct CoreExport http_request_completion_t {
-	/** HTTP headers of response */
+struct DPP_EXPORT http_request_completion_t {
+	/** @brief HTTP headers of response */
 	std::map<std::string, std::string> headers;
-	/** HTTP status, e.g. 200 = OK, 404 = Not found, 429 = Rate limited */
+	/** @brief HTTP status, e.g. 200 = OK, 404 = Not found, 429 = Rate limited */
 	uint16_t status = 0;
-	/** Error status (e.g. if the request could not connect at all) */
+	/** @brief Error status (e.g. if the request could not connect at all) */
 	http_error error = h_success;
-	/** Ratelimit bucket */
+	/** @brief Ratelimit bucket */
 	std::string ratelimit_bucket;
-	/** Ratelimit limit of requests */
+	/** @brief Ratelimit limit of requests */
 	uint64_t ratelimit_limit = 0;
-	/** Ratelimit remaining requests */
+	/** @brief Ratelimit remaining requests */
 	uint64_t ratelimit_remaining = 0;
-	/** Ratelimit reset after (seconds) */
+	/** @brief Ratelimit reset after (seconds) */
 	uint64_t ratelimit_reset_after = 0;
-	/** Ratelimit retry after (seconds) */
+	/** @brief Ratelimit retry after (seconds) */
 	uint64_t ratelimit_retry_after = 0;
-	/** True if this request has caused us to be globally rate limited */
+	/** @brief True if this request has caused us to be globally rate limited */
 	bool ratelimit_global = false;
-	/** Reply body */
+	/** @brief Reply body */
 	std::string body;
-	/** Ping latency */
+	/** @brief Ping latency */
 	double latency;
 };
 
 /**
  * @brief Results of HTTP requests are called back to these std::function types.
- * @note Returned http_completion_events are called ASYNCRONOUSLY in your
+ * @note Returned http_completion_events are called ASYNCHRONOUSLY in your
  * code which means they execute in a separate thread. The completion events
  * arrive in order.
  */
 typedef std::function<void(const http_request_completion_t&)> http_completion_event;
 
-/** Various types of http method supported by the Discord API
+/** 
+ * @brief Various types of http method supported by the Discord API
  */
 enum http_method {
 	/// GET
@@ -123,72 +122,194 @@ enum http_method {
  * 
  * You should instantiate one of these objects via its constructor,
  * and pass a pointer to it into an instance of request_queue. Although you can
- * directly call the Run() method of the object and it will make a HTTP call, be
+ * directly call the run() method of the object and it will make a HTTP call, be
  * aware that if you do this, it will be a **BLOCKING call** (not asynchronous) and
  * will not respect rate limits, as both of these functions are managed by the
  * request_queue class.
  */
-class CoreExport http_request {
-	/** Completion callback */
+class DPP_EXPORT http_request {
+	/** @brief Completion callback */
 	http_completion_event complete_handler;
-	/** True if request has been made */
+	/** @brief True if request has been made */
 	bool completed;
+	/** @brief True for requests that are not going to discord (rate limits code skipped) */
+	bool non_discord;
 public:
-	/** Endpoint name e.g. /api/users */
+	/** @brief Endpoint name e.g. /api/users */
 	std::string endpoint;
-	/** Major and minor parameters */
+	/** @brief Major and minor parameters */
 	std::string parameters;
-	/** Postdata for POST and PUT */
+	/** @brief Postdata for POST and PUT */
 	std::string postdata;
-	/** HTTP method for request */
+	/** @brief HTTP method for request */
 	http_method method;
-	/** Upload file name (server side) */
-	std::string file_name;
-	/** Upload file contents (binary) */
-	std::string file_content;
+	/** @brief Audit log reason for Discord requests, if non-empty */
+	std::string reason;
+	/** @brief Upload file name (server side) */
+	std::vector<std::string> file_name;
+	/** @brief Upload file contents (binary) */
+	std::vector<std::string> file_content;
+	/** @brief Request mime type */
+	std::string mimetype;
+	/** @brief Request headers (non-discord requests only) */
+	std::multimap<std::string, std::string> req_headers;
+	/** @brief Waiting for rate limit to expire */
+	bool waiting;
 
-	/** Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
+	/**
+	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
 	 * @param _endpoint The API endpoint, e.g. /api/guilds
 	 * @param _parameters Major and minor parameters for the endpoint e.g. a user id or guild id
 	 * @param completion completion event to call when done
 	 * @param _postdata Data to send in POST and PUT requests
 	 * @param method The HTTP method to use from dpp::http_method
+	 * @param audit_reason Audit log reason to send, empty to send none
 	 * @param filename The filename (server side) of any uploaded file
 	 * @param filecontent The binary content of any uploaded file for the request
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &filename = "", const std::string &filecontent = "");
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::string &filename = "", const std::string &filecontent = "");
 
-	/** Destructor */
+	/**
+	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
+	 * @param _endpoint The API endpoint, e.g. /api/guilds
+	 * @param _parameters Major and minor parameters for the endpoint e.g. a user id or guild id
+	 * @param completion completion event to call when done
+	 * @param _postdata Data to send in POST and PUT requests
+	 * @param method The HTTP method to use from dpp::http_method
+	 * @param audit_reason Audit log reason to send, empty to send none
+	 * @param filename The filename (server side) of any uploaded file
+	 * @param filecontent The binary content of any uploaded file for the request
+	 */
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {});
+
+	/**
+	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
+	 * @param _url Raw HTTP url
+	 * @param completion completion event to call when done
+	 * @param method The HTTP method to use from dpp::http_method
+	 * @param _postdata Data to send in POST and PUT requests
+	 * @param _mimetype POST data mime type
+	 * @param _headers HTTP headers to send
+	 */
+	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {});
+
+	/**
+	 * @brief Destroy the http request object
+	 */
 	~http_request();
 
-	/** Call the completion callback, if the request is complete.
+	/**
+	 * @brief Call the completion callback, if the request is complete.
 	 * @param c callback to call
 	 */
 	void complete(const http_request_completion_t &c);
 
-	/** Execute the HTTP request and mark the request complete.
+	/**
+	 * @brief Execute the HTTP request and mark the request complete.
 	 * @param owner creating cluster
 	 */
-	http_request_completion_t Run(class cluster* owner);
+	http_request_completion_t run(class cluster* owner);
 
-	/** Returns true if the request is complete */
+	/** @brief Returns true if the request is complete */
 	bool is_completed();
 };
 
-/** A rate limit bucket. The library builds one of these for
+/**
+ * @brief A rate limit bucket. The library builds one of these for
  * each endpoint.
  */
-struct CoreExport bucket_t {
-	/** Request limit */
+struct DPP_EXPORT bucket_t {
+	/** @brief Request limit */
 	uint64_t limit;
-	/** Requests remaining */
+	/** @brief Requests remaining */
 	uint64_t remaining;
-	/** Ratelimit of this bucket resets after this many seconds */
+	/** @brief Ratelimit of this bucket resets after this many seconds */
 	uint64_t reset_after;
-	/** Ratelimit of this bucket can be retried after this many seconds */
+	/** @brief Ratelimit of this bucket can be retried after this many seconds */
 	uint64_t retry_after;
-	/** Timestamp this buckets counters were updated */
+	/** @brief Timestamp this buckets counters were updated */
 	time_t timestamp;
+};
+
+
+/**
+ * @brief Represents a thread in the thread pool handling requests to HTTP(S) servers.
+ * There are several of these, the total defined by a constant in queues.cpp, and each
+ * one will always receive requests for the same rate limit bucket based on its endpoint
+ * portion of the url. This makes rate limit handling reliable and easy to manage.
+ * Each of these also has its own mutex, so that requests are less likely to block while
+ * waiting for internal containers to be usable.
+ */
+class DPP_EXPORT in_thread {
+private:
+	/**
+	 * @brief True if ending
+	 */
+	bool terminating;
+
+	/**
+	 * @brief Request queue that owns this in_thread
+	 */
+	class request_queue* requests;
+
+	/**
+	 * @brief The cluster that owns this in_thread
+	 */
+	class cluster* creator;
+
+	/**
+	 * @brief Inbound queue mutex thread safety
+	 */
+	std::shared_mutex in_mutex;
+
+	/**
+	 * @brief Inbound queue thread
+	 */
+	std::thread* in_thr;
+
+	/**
+	 * @brief Inbound queue condition, signalled when there are requests to fulfill
+	 */
+	std::condition_variable in_ready;
+
+	/**
+	 * @brief Ratelimit bucket counters
+	 */
+	std::map<std::string, bucket_t> buckets;
+
+	/**
+	 * @brief Queue of requests to be made
+	 */
+	std::map<std::string, std::vector<http_request*>> requests_in;
+
+	/**
+	 * @brief Inbound queue thread loop
+	 * @param index Thread index
+	 */
+	void in_loop(uint32_t index);
+public:
+	/**
+	 * @brief Construct a new in thread object
+	 * 
+	 * @param owner Owning cluster
+	 * @param req_q Owning request queue
+	 * @param index Thread index number
+	 */
+	in_thread(class cluster* owner, class request_queue* req_q, uint32_t index);
+
+	/**
+	 * @brief Destroy the in thread object
+	 * This will end the thread that is owned by this object by joining it.
+	 */
+	~in_thread();
+
+	/**
+	 * @brief Post a http_request to this thread.
+	 * 
+	 * @param req http_request to post. The pointer will be freed when it has
+	 * been executed.
+	 */
+	void post_request(http_request* req);
 };
 
 /**
@@ -203,70 +324,134 @@ struct CoreExport bucket_t {
  * in their callback it won't affect when other requests are sent, and if a HTTP request
  * takes a long time due to latency, it won't hold up user processing.
  *
- * There is usually only one request_queue object in each dpp::cluster, which is used
- * internally for the various REST methods such as sending messages.
+ * There are usually two request_queue objects in each dpp::cluster, one of which is used
+ * internally for the various REST methods to Discord such as sending messages, and the other
+ * used to support user REST calls via dpp::cluster::request().
  */
-class CoreExport request_queue {
-private:
-	/** The cluster that owns this request_queue */
+class DPP_EXPORT request_queue {
+protected:
+	/**
+	 * @brief Required so in_thread can access these member variables
+	 */
+	friend class in_thread;
+
+	/**
+	 * @brief The cluster that owns this request_queue
+	 */
 	class cluster* creator;
-	/** Mutexes for thread safety */
-	std::mutex in_mutex;
-	std::mutex out_mutex;
-	/** In and out threads */
-	std::thread* in_thread;
+
+	/**
+	 * @brief Outbound queue mutex thread safety
+	 */
+	std::shared_mutex out_mutex;
+
+	/**
+	 * @brief Outbound queue thread
+	 * Note that although there are many 'in queues', which handle the HTTP requests,
+	 * there is only ever one 'out queue' which dispatches the results to the caller.
+	 * This is to simplify thread management in bots that use the library, as less mutexing
+	 * and thread safety boilerplate is required.
+	 */
 	std::thread* out_thread;
-	/** Ratelimit bucket counters */
-	std::map<std::string, bucket_t> buckets;
-	/** Queue of requests to be made */
-	std::map<std::string, std::vector<http_request*>> requests_in;
-	/** Completed requests queue */
+
+	/**
+	 * @brief Outbound queue condition, signalled when there are requests completed to call callbacks for
+	 */
+	std::condition_variable out_ready;
+
+	/**
+	 * @brief Completed requests queue
+	 */
 	std::queue<std::pair<http_request_completion_t*, http_request*>> responses_out;
-	/** Completed requests to delete */
+
+	/**
+	 * @brief A vector of inbound request threads forming a pool.
+	 * There are a set number of these defined by a constant in queues.cpp. A request is always placed
+	 * on the same element in this vector, based upon its url, so that two conditions are satisfied:
+	 * 1) Any requests for the same ratelimit bucket are handled by the same thread in the pool so that
+	 * they do not create unnecessary 429 errors,
+	 * 2) Requests for different endpoints go into different buckets, so that they may be requested in parallel
+	 * A global ratelimit event pauses all threads in the pool. These are few and far between.
+	 */
+	std::vector<in_thread*> requests_in;
+
+	/**
+	 * @brief Completed requests to delete
+	 */
 	std::multimap<time_t, std::pair<http_request_completion_t*, http_request*>> responses_to_delete;
 
-	/** Set to true if the threads should terminate */
+	/**
+	 * @brief Set to true if the threads should terminate
+	 */
 	bool terminating;
-	/** True if globally rate limited - makes the entire request thread wait */
+
+	/**
+	 * @brief True if globally rate limited - makes the entire request thread wait
+	 */
 	bool globally_ratelimited;
-	/** How many seconds we are globally rate limited for, if globally_ratelimited is true */
+
+	/**
+	 * @brief How many seconds we are globally rate limited for, if globally_ratelimited is true
+	 */
 	uint64_t globally_limited_for;
 
-	/** Ports for notifications of request completion.
-	 * Why are we using sockets here instead of std::condition_variable? Because
-	 * in the future we will want to notify across clusters of completion and state,
-	 * and we can't do this across processes with condition variables.
+	/**
+	 * @brief Number of request threads in the thread pool
 	 */
-	int in_queue_port;
-	int out_queue_port;
-	int in_queue_listen_sock;
-	int in_queue_connect_sock;
-	int out_queue_listen_sock;
-	int out_queue_connect_sock;
+	uint32_t in_thread_pool_size;
 
-	/** Thread loop functions */
-	void in_loop();
+	/**
+	 * @brief Outbound queue thread loop
+	 */
 	void out_loop();
-
-	/** Notify request thread of a new request */
-	void emit_in_queue_signal();
-
-	/** Notify completion thread of new completed request */
-	void emit_out_queue_signal();
 public:
-	/** Constructor
-	 * @param owner The creating cluster
-	 */
-	request_queue(class cluster* owner);
 
-	/** Destructor */
+	/**
+	 * @brief constructor
+	 * @param owner The creating cluster.
+	 * @param request_threads The number of http request threads to allocate to the threadpool.
+	 * By default eight threads are allocated.
+	 * Side effects: Creates threads for the queue
+	 */
+	request_queue(class cluster* owner, uint32_t request_threads = 8);
+
+	/**
+	 * @brief Add more request threads to the library at runtime.
+	 * @note You should do this at a quiet time when there are few requests happening.
+	 * This will reorganise the hashing used to place requests into the thread pool so if you do
+	 * this while the bot is busy there is a small chance of receiving "429 rate limited" errors.
+	 * @param request_threads Number of threads to add. It is not possible to scale down at runtime.
+	 * @return reference to self
+	 */
+	request_queue& add_request_threads(uint32_t request_threads);
+
+	/**
+	 * @brief Get the request thread count
+	 * @return uint32_t number of request threads that are active
+	 */
+	uint32_t get_request_thread_count() const;
+
+	/**
+	 * @brief Destroy the request queue object.
+	 * Side effects: Joins and deletes queue threads
+	 */
 	~request_queue();
 
-	/** Put a http_request into the request queue. You should ALWAYS "new" an object
+	/**
+	 * @brief Put a http_request into the request queue. You should ALWAYS "new" an object
 	 * to pass to here -- don't submit an object that's on the stack!
+	 * @note Will use a simple hash function to determine which of the 'in queues' to place
+	 * this request onto.
 	 * @param req request to add
+	 * @return reference to self
 	 */
-	void post_request(http_request *req);
+	request_queue& post_request(http_request *req);
+
+	/**
+	 * @brief Returns true if the bot is currently globally rate limited
+	 * @return true if globally rate limited
+	 */
+	bool is_globally_ratelimited() const;
 };
 
 };

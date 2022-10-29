@@ -18,14 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/discordvoiceclient.h>
+#include <dpp/guild.h>
+#include <dpp/voicestate.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
 
@@ -52,7 +49,7 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 	/* Update guild voice states */
 	dpp::guild* g = dpp::find_guild(vsu.state.guild_id);
 	if (g) {
-		if (vsu.state.channel_id == 0) {
+		if (vsu.state.channel_id.empty()) {
 			auto ve = g->voice_members.find(vsu.state.user_id);
 			if (ve != g->voice_members.end()) {
 				g->voice_members.erase(ve);	
@@ -64,11 +61,11 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 
 	if (vsu.state.user_id == client->creator->me.id)
 	{
-		if (vsu.state.channel_id == 0) {
+		if (vsu.state.channel_id.empty()) {
 			/* Instruction to disconnect from vc */
 			client->disconnect_voice_internal(vsu.state.guild_id, false);
 		} else {
-			std::lock_guard<std::mutex> lock(client->voice_mutex);
+			std::shared_lock lock(client->voice_mutex);
 			auto v = client->connecting_voice_channels.find(vsu.state.guild_id);
 			/* Check to see if we have a connection to a voice channel in progress on this guild */
 			if (v != client->connecting_voice_channels.end()) {
@@ -80,8 +77,8 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 		}
 	}
 
-	if (client->creator->dispatch.voice_state_update) {
-		client->creator->dispatch.voice_state_update(vsu);
+	if (!client->creator->on_voice_state_update.empty()) {
+		client->creator->on_voice_state_update.call(vsu);
 	}
 }
 

@@ -20,7 +20,6 @@
  ************************************************************************************/
 #include <dpp/ban.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
 #include <dpp/nlohmann/json.hpp>
 
 namespace dpp {
@@ -31,19 +30,16 @@ ban::ban() : user_id(0)
 {
 }
 
-ban::~ban() {
-}
-
 ban& ban::fill_from_json(nlohmann::json* j) {
-	reason = StringNotNull(j, "reason");
-	if (j->find("user") != j->end()) {
+	reason = string_not_null(j, "reason");
+	if (j->contains("user")) {
 		json & user = (*j)["user"];
-		user_id = SnowflakeNotNull(&user, "id");
+		user_id = snowflake_not_null(&user, "id");
 	}
 	return *this;
 }
 
-std::string ban::build_json() const {
+std::string ban::build_json(bool with_id) const {
 	/* This is an unused stub, because sending a ban is simple as a user id and a reason */
 	return "{}";
 }

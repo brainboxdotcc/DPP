@@ -20,8 +20,12 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/discord.h>
-#include <dpp/json_fwd.hpp>
+#include <dpp/snowflake.h>
+#include <dpp/misc-enum.h>
+#include <dpp/managed.h>
+#include <dpp/nlohmann/json_fwd.hpp>
+#include <unordered_map>
+#include <dpp/json_interface.h>
 
 namespace dpp {
 
@@ -36,7 +40,7 @@ enum webhook_type {
 /**
  * @brief Represents a discord webhook
  */
-class CoreExport webhook : public managed {
+class DPP_EXPORT webhook : public managed, public json_interface<webhook>  {
 public:
 	uint8_t type;   		//!< the type of the webhook
 	snowflake guild_id;     	//!< Optional: the guild id this webhook is for
@@ -54,6 +58,21 @@ public:
 	webhook();
 
 	/**
+	 * @brief Construct a new webhook object using the Webhook URL provided by Discord
+	 *
+	 * @param webhook_url a fully qualified web address of an existing webhook
+	 */
+	webhook(const std::string& webhook_url);
+
+	/**
+	 * @brief Construct a new webhook object using the webhook ID and the webhook token
+	 *
+	 * @param webhook_id id taken from a link of an existing webhook
+	 * @param webhook_token token taken from a link of an existing webhook
+	 */
+	webhook(const snowflake webhook_id, const std::string& webhook_token);
+
+	/**
 	 * @brief Destroy the webhook object
 	 */
 	~webhook();
@@ -64,7 +83,7 @@ public:
 	 * @param j JSON data
 	 * @return webhook& Reference to self
 	 */
-	webhook& fill_from_json(nlohmann::json* j);
+	 webhook& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Build JSON string from object
@@ -72,16 +91,18 @@ public:
 	 * @param with_id Include the ID of the webhook in the json
 	 * @return std::string JSON encoded object
 	 */
-	std::string build_json(bool with_id = false) const;
+	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Base64 encode image data and allocate it to image_data
 	 * 
 	 * @param image_blob Binary image data
 	 * @param type Image type
+	 * @param is_base64_encoded True if the image data is already base64 encoded
 	 * @return webhook& Reference to self
+	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
 	 */
-	webhook& load_image(const std::string &image_blob, const image_type type);
+	webhook& load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded = false);
 };
 
 /**

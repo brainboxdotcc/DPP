@@ -18,17 +18,11 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/message.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/discordevents.h>
 
 using json = nlohmann::json;
 
@@ -46,17 +40,17 @@ using namespace dpp;
  */
 void guild_stickers_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "guild_id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	if (g) {
-		if (client->creator->dispatch.stickers_update) {
+		if (!client->creator->on_guild_stickers_update.empty()) {
 			dpp::guild_stickers_update_t gsu(client, raw);
 			for (auto & sticker : d["stickers"]) {
 				dpp::sticker s;
 				s.fill_from_json(&sticker);
-				gsu.stickers.push_back(s);
+				gsu.stickers.emplace_back(s);
 			}
 			gsu.updating_guild = g;
-			client->creator->dispatch.stickers_update(gsu);
+			client->creator->on_guild_stickers_update.call(gsu);
 		}
 	}
 }

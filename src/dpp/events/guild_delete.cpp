@@ -18,14 +18,9 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
 #include <dpp/discordevents.h>
-#include <dpp/discord.h>
+#include <dpp/cluster.h>
+#include <dpp/guild.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
@@ -45,9 +40,9 @@ using namespace dpp;
  */
 void guild_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(SnowflakeNotNull(&d, "id"));
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "id"));
 	if (g) {
-		if (!BoolNotNull(&d, "unavailable")) {
+		if (!bool_not_null(&d, "unavailable")) {
 			dpp::get_guild_cache()->remove(g);
 			if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
 				for (auto & ee : g->emojis) {
@@ -87,10 +82,10 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 			g->flags |= dpp::g_unavailable;
 		}
 
-		if (client->creator->dispatch.guild_delete) {
+		if (!client->creator->on_guild_delete.empty()) {
 			dpp::guild_delete_t gd(client, raw);
 			gd.deleted = g;
-			client->creator->dispatch.guild_delete(gd);
+			client->creator->on_guild_delete.call(gd);
 		}
 	}
 }

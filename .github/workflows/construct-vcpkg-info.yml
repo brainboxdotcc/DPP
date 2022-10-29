@@ -1,0 +1,83 @@
+name: Prepare release for VCPKG
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  Collect-Vcpkg-Info:
+    runs-on: ubuntu-20.04
+    steps:
+
+         - name: Update vcpkg and install other dependencies
+           run: sudo apt-get install nasm &&
+                cd /usr/local/share/vcpkg &&
+                sudo ./bootstrap-vcpkg.sh &&
+                sudo git stash &&
+                sudo git pull &&
+                sudo vcpkg update
+
+         - name: Collect the repo
+           run: sudo git config --global user.email "noreply@dpp.dev" &&
+                sudo git config --global user.name "DPP VCPKG Bot" &&
+                sudo git clone https://braindigitalis:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/brainboxdotcc/dpp ./dpp --depth=1
+
+         - name: Construct the original portfile and version file
+           run: cd ./dpp &&
+                sudo touch ./cmake/Raw-Files/Portfile-The-First.cmake &&
+                sudo touch ./cmake/Raw-Files/Portfile-The-Second.cmake &&
+                sudo touch ./vcpkg/ports/dpp/vcpkg.json &&
+                sudo bash -c "cat ./cmake/Raw-Files/Top-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
+                sudo git rev-parse HEAD | sudo tee ./cmake/Raw-Files/Portfile-The-First.cmake -a &&
+                sudo bash -c "cat ./cmake/Raw-Files/Middle-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
+                sudo bash -c "echo $'0' >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
+                sudo bash -c "cat ./cmake/Raw-Files/Bottom-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-First.cmake" &&
+                sudo bash -c "cat ./cmake/Raw-Files/Top-Of-Version-File.txt > ./vcpkg/ports/dpp/vcpkg.json" &&
+                echo \"$(grep DPP_VERSION_TEXT ./include/dpp/version.h | perl -pe '($_)=/([0-9]+([.][0-9]+)+)/')\" | sudo tee ./vcpkg/ports/dpp/vcpkg.json -a &&
+                sudo truncate -s -1 ./vcpkg/ports/dpp/vcpkg.json &&
+                sudo bash -c "cat ./cmake/Raw-Files/Bottom-Of-Version-File.txt >> ./vcpkg/ports/dpp/vcpkg.json"
+
+         - name: Attempt to install the library, to collect the SHA512 value
+           run: cd ./dpp &&
+                sudo mkdir /usr/local/share/vcpkg/ports/dpp/ &&
+                [ -f /usr/local/share/vcpkg/ports/dpp/vcpkg.json ] && echo "File exists." || sudo cp -v -R ./vcpkg/ports/dpp/vcpkg.json /usr/local/share/vcpkg/ports/dpp/vcpkg.json  &&
+                sudo cp -v -R ./cmake/Raw-Files/Portfile-The-First.cmake /usr/local/share/vcpkg/ports/dpp/portfile.cmake &&
+                sudo /usr/local/share/vcpkg/vcpkg install dpp:x64-linux | sudo tee InstallOutput.txt || true
+
+         - name:  Update the portfile and download/install the library
+           run: cd ./dpp &&
+                sudo sed -i '/Actual hash/,$!d' InstallOutput.txt &&
+                sudo sed -i 's/^.....................//' InstallOutput.txt &&
+                sudo sed -i '2,250d' InstallOutput.txt &&
+                sudo truncate -s -3 InstallOutput.txt &&
+                sudo bash -c "cat ./cmake/Raw-Files/Top-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-Second.cmake" &&
+                sudo git rev-parse HEAD | sudo tee ./cmake/Raw-Files/Portfile-The-Second.cmake -a &&
+                sudo bash -c "cat ./cmake/Raw-Files/Middle-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-Second.cmake" &&
+                sudo bash -c "cat InstallOutput.txt >> ./cmake/Raw-Files/Portfile-The-Second.cmake" &&
+                sudo bash -c "echo $'' >> ./cmake/Raw-Files/Portfile-The-Second.cmake" &&
+                sudo bash -c "cat ./cmake/Raw-Files/Bottom-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-Second.cmake" &&
+                sudo touch ./vcpkg/ports/dpp/portfile.cmake &&
+                sudo cp -v -R ./cmake/Raw-Files/Portfile-The-Second.cmake /usr/local/share/vcpkg/ports/dpp/portfile.cmake &&
+                sudo cp -v -R ./cmake/Raw-Files/Portfile-The-Second.cmake ./vcpkg/ports/dpp/portfile.cmake &&
+                sudo cp -v -R ./vcpkg/ports/* /usr/local/share/vcpkg/ports/ &&
+                cd /usr/local/share/vcpkg &&
+                sudo ./vcpkg format-manifest ./ports/dpp/vcpkg.json &&
+                sudo git add . &&
+                sudo git commit -m "[bot] VCPKG info update"  &&
+                cat /usr/local/share/vcpkg/versions/d-/dpp.json && 
+                sudo /usr/local/share/vcpkg/vcpkg x-add-version dpp &&
+                cd /home/runner/work/DPP/DPP/dpp &&
+                sudo cp -v -R /usr/local/share/vcpkg/ports/dpp/vcpkg.json ./vcpkg/ports/dpp/vcpkg.json &&
+                sudo cp -v -R /usr/local/share/vcpkg/versions/baseline.json ./vcpkg/versions/baseline.json &&
+                sudo cp -v -R /usr/local/share/vcpkg/versions/d-/dpp.json ./vcpkg/versions/d-/dpp.json &&
+                cat ./vcpkg/versions/d-/dpp.json &&
+                sudo rm -rf InstallOutput.txt &&
+                sudo rm -rf ./cmake/Raw-Files/Portfile-The-First.cmake &&
+                sudo rm -rf ./cmake/Raw-Files/Portfile-The-Second.cmake &&
+                sudo git add . &&
+                sudo git commit -m "[bot] VCPKG info update [skip ci]" &&
+                sudo git config pull.rebase false &&
+                sudo git pull &&
+                sudo git push origin master &&
+                sudo /usr/local/share/vcpkg/vcpkg install dpp:x64-linux

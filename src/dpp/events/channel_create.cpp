@@ -18,18 +18,10 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discord.h>
-#include <dpp/event.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <dpp/discordclient.h>
-#include <dpp/discordevents.h>
-#include <dpp/discord.h>
-#include <dpp/cache.h>
+#include <dpp/channel.h>
+#include <dpp/cluster.h>
 #include <dpp/stringops.h>
 #include <dpp/nlohmann/json.hpp>
-#include <dpp/fmt/format.h>
 
 using json = nlohmann::json;
 
@@ -47,7 +39,7 @@ using namespace dpp;
 void channel_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
 	
-	dpp::channel* c = dpp::find_channel(SnowflakeNotNull(&d, "id"));
+	dpp::channel* c = dpp::find_channel(snowflake_not_null(&d, "id"));
 	if (!c) {
 		c = new dpp::channel();
 	}
@@ -55,7 +47,6 @@ void channel_create::handle(discord_client* client, json &j, const std::string &
 	dpp::get_channel_cache()->store(c);
 	if (c->recipients.size()) {
 		for (auto & u : c->recipients) {
-			client->log(dpp::ll_debug, fmt::format("Got a DM channel {} for user {}", c->id, u));
 			client->creator->set_dm_channel(u, c->id);
 		}
 	}
@@ -63,11 +54,11 @@ void channel_create::handle(discord_client* client, json &j, const std::string &
 	if (g) {
 		g->channels.push_back(c->id);
 
-		if (client->creator->dispatch.channel_create) {
+		if (!client->creator->on_channel_create.empty()) {
 			dpp::channel_create_t cc(client, raw);
 			cc.created = c;
 			cc.creating_guild = g;
-			client->creator->dispatch.channel_create(cc);
+			client->creator->on_channel_create.call(cc);
 		}
 	}
 }
