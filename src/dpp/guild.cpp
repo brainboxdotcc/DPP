@@ -307,7 +307,7 @@ bool guild::has_auto_moderation() const {
 	return this->flags_extra & g_auto_moderation;
 }
 
-bool guild::has_app_directory_support() const {
+bool guild::has_support_server() const {
 	return this->flags_extra & g_developer_support_server;
 }
 
