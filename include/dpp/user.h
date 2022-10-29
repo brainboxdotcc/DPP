@@ -74,6 +74,8 @@ enum user_flags : uint32_t {
 	u_certified_moderator =		0b00010000000000000000000,
 	/// User is a bot using HTTP interactions (shows online even when not connected to a websocket)
 	u_bot_http_interactions =	0b00100000000000000000000,
+	/// User has nitro basic
+	u_nitro_basic = 			0b01000000000000000000000,
 };
 
 /**
@@ -169,9 +171,16 @@ public:
 	 * @brief Return true if user has nitro classic.
 	 * This is mutually exclusive with nitro classic.
 	 *
-	 * @return true  if user has nitro classic
+	 * @return true if user has nitro classic
 	 */
 	bool has_nitro_classic() const;
+	/**
+	 * @brief Return true if user has nitro basic.
+	 * This is mutually exclusive with nitro basic.
+	 *
+	 * @return true if user has nitro basic
+	 */
+	bool has_nitro_basic() const;
 	/**
 	 * @brief Return true if user is a discord employee
 	 *
