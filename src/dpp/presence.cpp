@@ -179,7 +179,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 				for (auto &b : act["buttons"]) {
 					activity_button btn;
 					if (b.is_string()) { // its may be just a string (label) because normal bots cannot access the button URLs
-						btn.label = b;
+						btn.label = b.get<std::string>();;
 					} else {
 						btn.label = string_not_null(&b, "label");
 						btn.url = string_not_null(&b, "url");
