@@ -36,6 +36,7 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"VERIFIED", dpp::g_verified },
 	{"PARTNERED", dpp::g_partnered },
 	{"COMMUNITY", dpp::g_community },
+	{"DEVELOPER_SUPPORT_SERVER", dpp::g_developer_support_server },
 	{"COMMERCE", dpp::g_commerce },
 	{"NEWS", dpp::g_news },
 	{"DISCOVERABLE", dpp::g_discoverable },
@@ -304,6 +305,10 @@ bool guild::has_animated_banner() const {
 
 bool guild::has_auto_moderation() const {
 	return this->flags_extra & g_auto_moderation;
+}
+
+bool guild::has_support_server() const {
+	return this->flags_extra & g_developer_support_server;
 }
 
 bool guild::has_animated_icon() const {

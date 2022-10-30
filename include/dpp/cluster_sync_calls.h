@@ -2017,7 +2017,7 @@ thread_member_map thread_members_get_sync(snowflake thread_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-thread thread_create_in_forum_sync(const std::string& thread_name, snowflake channel_id, message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {});
+thread thread_create_in_forum_sync(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {});
 
 /**
  * @brief Create a thread

@@ -125,7 +125,7 @@ component& component::set_type(component_type ct)
 	}
 	if(type == cot_text) {
 		placeholder = dpp::utility::utf8substr(placeholder, 0, 100);
-	} else if (type == cot_selectmenu) {
+	} else if (type == cot_selectmenu || type == cot_user_selectmenu || type == cot_role_selectmenu || type == cot_mentionable_selectmenu || type == cot_channel_selectmenu) {
 		placeholder = dpp::utility::utf8substr(placeholder, 0, 150);
 	}
 	return *this;
@@ -329,9 +329,27 @@ void to_json(json& j, const component& cp) {
 	} else if (cp.type == cot_user_selectmenu || cp.type == cot_role_selectmenu || cp.type == cot_mentionable_selectmenu) {
 		j["custom_id"] = cp.custom_id;
 		j["disabled"] = cp.disabled;
+		if (!cp.placeholder.empty()) {
+			j["placeholder"] = cp.placeholder;
+		}
+		if (cp.min_values >= 0) {
+			j["min_values"] = cp.min_values;
+		}
+		if (cp.max_values >= 0) {
+			j["max_values"] = cp.max_values;
+		}
 	} else if (cp.type == cot_channel_selectmenu) {
 		j["custom_id"] = cp.custom_id;
 		j["disabled"] = cp.disabled;
+		if (!cp.placeholder.empty()) {
+			j["placeholder"] = cp.placeholder;
+		}
+		if (cp.min_values >= 0) {
+			j["min_values"] = cp.min_values;
+		}
+		if (cp.max_values >= 0) {
+			j["max_values"] = cp.max_values;
+		}
 		if (!cp.channel_types.empty()) {
 			j["channel_types"] = json::array();
 			for (auto &type : cp.channel_types) {
@@ -395,7 +413,7 @@ select_option& select_option::fill_from_json(nlohmann::json* j) {
 component& component::set_placeholder(const std::string &_placeholder) {
 	if(type == cot_text) {
 		placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
-	} else if (type == cot_selectmenu) {
+	} else if (type == cot_selectmenu || type == cot_user_selectmenu || type == cot_role_selectmenu || type == cot_mentionable_selectmenu || type == cot_channel_selectmenu) {
 		placeholder = dpp::utility::utf8substr(_placeholder, 0, 150);
 	} else {
 		placeholder = _placeholder;

@@ -67,7 +67,7 @@ void cluster::thread_members_get(snowflake thread_id, command_completion_event_t
 	rest_request_list<thread_member>(this, API_PATH "/channels", std::to_string(thread_id), "/threads-members", m_get, "", callback);
 }
 
-void cluster::thread_create_in_forum(const std::string& thread_name, snowflake channel_id, message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags, command_completion_event_t callback)
+void cluster::thread_create_in_forum(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags, command_completion_event_t callback)
 {
 	json j({
 		{"name",                  thread_name},
