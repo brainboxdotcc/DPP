@@ -43,7 +43,7 @@ std::mutex protect_the_loot;
  */
 void ready::handle(discord_client* client, json &j, const std::string &raw) {
 	client->log(dpp::ll_info, "Shard id " + std::to_string(client->shard_id) + " (" + std::to_string(client->shard_id + 1) + "/" + std::to_string(client->max_shards) + ") ready!");
-	client->sessionid = j["d"]["session_id"];
+	client->sessionid = j["d"]["session_id"].get<std::string>();
 	/* Session-specific gateway resume url
 	 * https://discord.com/developers/docs/change-log#sessionspecific-gateway-resume-urls
 	 *
