@@ -64,24 +64,26 @@ enum channel_type : uint8_t {
  * listed above as provided by Discord. If discord add another value > 15, we will have to
  * shuffle these values upwards by one bit.
  */
-enum channel_flags : uint8_t {
+enum channel_flags : uint16_t {
 	/// NSFW Gated Channel
-	c_nsfw =		0b00010000,
+	c_nsfw =		0b0000000000010000,
 	/// Video quality forced to 720p
-	c_video_quality_720p =	0b00100000,
+	c_video_quality_720p =	0b0000000000100000,
 	/// Lock permissions (only used when updating channel positions)
-	c_lock_permissions =	0b01000000,
-	/// Thread pinned in a forum (type 15) channel
-	c_pinned_thread =	0b10000000,
+	c_lock_permissions =	0b0000000001000000,
+	/// Thread is pinned to the top of its parent forum channel
+	c_pinned_thread =	0b0000000010000000,
+	/// Whether a tag is required to be specified when creating a thread in a forum channel. Tags are specified in the thread::applied_tags field.
+	c_require_tag =		0b0000000100000000,
 };
 
 /**
  * @brief The flags in discord channel's raw "flags" field. We use these for serialisation only, right now. Might be better to create a new field than to make the existing channel::flags from uint8_t to uint16_t, if discord adds more flags in future.
  */
 enum discord_channel_flags : uint8_t {
-	/// Thread pinned in a forum (type 15) channel
+	/// Thread is pinned to the top of its parent forum channel
 	dc_pinned_thread = 1 << 1,
-	/// whether a tag is required to be specified when creating a thread in a forum channel. Tags are specified in the thread::applied_tags field.
+	/// Whether a tag is required to be specified when creating a thread in a forum channel. Tags are specified in the thread::applied_tags field.
 	dc_require_tag =   1 << 4,
 };
 
@@ -322,8 +324,8 @@ public:
 	/** the default sort order type used to order posts in forum channels */
 	default_forum_sort_order_t default_sort_order;
 
-	/** Flags bitmap */
-	uint8_t flags;
+	/** Flags bitmap (dpp::channel_flags) */
+	uint16_t flags;
 	
 	/** Maximum user limit for voice channels (0-99) */
 	uint8_t user_limit;
@@ -383,7 +385,7 @@ public:
 	 * @param flags Flag bitmask to set from dpp::channel_flags
 	 * @return Reference to self, so these method calls may be chained 
 	 */
-	channel& set_flags(const uint8_t flags);
+	channel& set_flags(const uint16_t flags);
 
 	/**
 	 * @brief Add (bitwise OR) a flag to this channel object
@@ -644,6 +646,13 @@ public:
 	 * @return true, if channel is a pinned thread in forum
 	 */
 	bool is_pinned_thread() const;
+
+	/**
+	 * @brief Returns true if a tag is required to be specified when creating a thread in a forum channel
+	 *
+	 * @return true, if a tag is required to be specified when creating a thread in a forum channel
+	 */
+	bool is_tag_required() const;
 
 };
 
