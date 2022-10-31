@@ -38,7 +38,7 @@ int main(int argc, char const *argv[])
 				set_text_style(dpp::text_short)
 			);
 			/* Add another text component in the next row, as required by Discord */
-			embed.add_row();
+			modal.add_row();
 			modal.add_component(
 				dpp::component().
 				set_label("Type rammel").
