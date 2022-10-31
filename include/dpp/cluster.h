@@ -1494,14 +1494,14 @@ public:
 	 *
 	 * @see https://discord.com/developers/docs/resources/channel#get-channel-messages
 	 * @param channel_id Channel ID to retrieve messages for
+	 * @param callback Function to call when the API call completes.
 	 * @param around Messages should be retrieved around this ID if this is set to non-zero
 	 * @param before Messages before this ID should be retrieved if this is set to non-zero
 	 * @param after Messages after this ID should be retrieved if this is set to non-zero
 	 * @param limit This number of messages maximum should be returned, up to a maximum of 100.
-	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void messages_get(snowflake channel_id, snowflake around, snowflake before, snowflake after, uint64_t limit, command_completion_event_t callback);
+	void messages_get(snowflake channel_id, command_completion_event_t callback, uint64_t limit = 0, snowflake around = 0, snowflake before = 0, snowflake after = 0);
 
 	/**
 	 * @brief Send a message to a channel. The callback function is called when the message has been sent
