@@ -5,7 +5,7 @@ To install D++ on a system from .deb using dpkg (as root):
 ```
 apt install wget
 wget -O dpp.deb https://dl.dpp.dev/
-dpkg -i dpp.deb
+sudo dpkg -i dpp.deb
 ```
 
 This will do the following three things:
