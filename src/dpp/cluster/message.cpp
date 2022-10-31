@@ -147,20 +147,20 @@ void cluster::message_pin(snowflake channel_id, snowflake message_id, command_co
 }
 
 void cluster::messages_get(snowflake channel_id, command_completion_event_t callback, uint64_t limit, snowflake around, snowflake before, snowflake after) {
-    std::map<std::string, std::string> parameters;
-    if (limit) {
-        parameters["limit"] = limit;
-    }
-    if (around) {
-        parameters["around"] = around;
-    }
-    if (before) {
-        parameters["before"] = before;
-    }
-    if (after) {
-        parameters["after"] = before;
-    }
-    rest_request_list<message>(this, API_PATH "/channels", std::to_string(channel_id), "messages" + utility::make_url_parameters(parameters), m_get, "", callback);
+	std::map<std::string, std::string> parameters;
+	if (limit) {
+		parameters["limit"] = limit;
+	}
+	if (around) {
+		parameters["around"] = around;
+	}
+	if (before) {
+		parameters["before"] = before;
+	}
+	if (after) {
+		parameters["after"] = before;
+	}
+	rest_request_list<message>(this, API_PATH "/channels", std::to_string(channel_id), "messages" + utility::make_url_parameters(parameters), m_get, "", callback);
 }
 
 
