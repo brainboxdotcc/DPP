@@ -31,7 +31,7 @@ add the following line in the executable section of your meson.build file.
 change the cpp_std value in the project() to c++17
 
 your meson.build should look like this.
-~~~~~~~~~~~~~~{meson.build}
+~~~~~~~~~~~~~~
 project('discord-bot', 'cpp',
   version : '0.1',
   default_options : ['warning_level=3',
@@ -48,3 +48,10 @@ test('basic', exe)
 ~~~~~~~~~~~~~~
 
 Meson automatically generates a cpp for your project. And a test suite.
+
+## 4. Building
+
+To build a meson project run
+
+    $ meson setup builddir
+    $ meson compile -C builddir
