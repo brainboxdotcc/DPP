@@ -649,6 +649,11 @@ void discord_voice_client::read_ready()
 			return;
 		}
 
+		/* It's a "silence packet" - throw it away. */
+		if (packet.size() < 44) {
+			return;
+		}
+
 		if (uint8_t payload_type = packet[1] & 0b0111'1111;
 		    72 <= payload_type && payload_type <= 76) {
 			/*
