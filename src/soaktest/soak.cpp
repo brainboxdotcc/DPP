@@ -20,12 +20,21 @@
  ************************************************************************************/
 
 #include <dpp/dpp.h>
+#include <iostream>
 
 int main() {
 	char* t = getenv("DPP_UNIT_TEST_TOKEN");
 	if (t) {
 		dpp::cluster soak_test(t);
+		soak_test.set_websocket_protocol(dpp::ws_etf);
 		soak_test.on_log(dpp::utility::cout_logger());
-		soak_test.start(dpp::st_wait);
+		soak_test.start(dpp::st_return);
+		while (true) {
+			sleep(60);
+			dpp::discord_client* dc = soak_test.get_shard(0);
+			if (dc != nullptr) {
+				std::cout << "Websocket latency: " << std::fixed << dc->websocket_ping << " Guilds: " << dpp::get_guild_count() << " Users: " << dpp::get_user_count() << "\n";
+			}
+		}
 	}
 }
