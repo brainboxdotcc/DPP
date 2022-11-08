@@ -46,7 +46,7 @@ endif()
 # UNIX
 if(UNIX)
   # import pkg-config
-  find_package(PkgConfig QUIET)
+  find_package(PkgConfig)
   if(PKG_CONFIG_FOUND)
     pkg_check_modules(sodium_PKG QUIET libsodium)
   endif()
