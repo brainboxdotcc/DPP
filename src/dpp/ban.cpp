@@ -44,5 +44,14 @@ std::string ban::build_json(bool with_id) const {
 	return "{}";
 }
 
-};
+std::vector<ban> ban::get_bans(nlohmann::json* j) {
+	std::vector<ban> bans;
+	for (auto & b : *j) {
+		ban ban;
+		ban.fill_from_json(&b);
+		bans.push_back(ban);
+	}
+	return bans;
+}
 
+};
