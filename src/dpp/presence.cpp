@@ -199,7 +199,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 					try {
 						a.party.current_size = act["party"]["size"][0].get<int32_t>();
 						a.party.maximum_size = act["party"]["size"][1].get<int32_t>();
-					} catch (std::exception &exception) {}
+					} catch ([[maybe_unused]] std::exception &exception) {}
 				}
 			}
 			if (act.find("secrets") != act.end()) {
