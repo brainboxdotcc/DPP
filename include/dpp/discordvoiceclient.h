@@ -76,6 +76,8 @@ struct DPP_EXPORT voice_out_packet {
 
 #define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
 
+#define AUDIO_OVERLAP_SLEEP_SAMPLES 30
+
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
  */
@@ -308,6 +310,11 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	std::chrono::high_resolution_clock::time_point last_timestamp;
 
 	/**
+	 * @brief Fraction of the sleep that was not executed after the last audio packet was sent
+	 */
+	std::chrono::nanoseconds last_sleep_remainder;
+
+	/**
 	 * @brief Maps receiving ssrc to user id
 	 */
 	std::unordered_map<uint32_t, snowflake> ssrc_map;
@@ -512,6 +519,13 @@ public:
 	 * audio data because Discord does not expect to receive, say, 3 minutes'
 	 * worth of audio data in 1 second.
 	 *
+	 * There are some inaccuracies in the throttling method used by the recorded
+	 * audio mode on some systems (mainly Windows) which causes gaps and stutters
+	 * in the resulting audio stream. The overlap audio mode provides a different 
+	 * implementation that fixes the issue. This method is slightly more CPU 
+	 * intensive, and should only be used if you encounter issues with recorded audio 
+	 * on your system.
+	 * 
 	 * Use discord_voice_client::set_send_audio_type to change this value as
 	 * it ensures thread safety.
 	 */
@@ -519,6 +533,7 @@ public:
 	{
 	    satype_recorded_audio,
 	    satype_live_audio,
+		satype_overlap_audio
 	} send_audio_type = satype_recorded_audio;
 
 	/**
