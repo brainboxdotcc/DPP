@@ -172,7 +172,7 @@ int main()
 					 * the shared object could not be loaded. The user probably
 					 * did something odd with the symbols inside their eval.
 					 */
-					std::string dl = std::string(getenv("PWD")) + std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".so",
+					std::string dl = std::string(getenv("PWD")) + std::to_string(event.msg.author.id) + "_" + std::to_string(event.msg.id) + ".so";
 					auto shared_object_handle = dlopen(dl.c_str(), RTLD_NOW);
 					if (!shared_object_handle) {
 						const char *dlsym_error = dlerror();
