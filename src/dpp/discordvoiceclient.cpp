@@ -802,7 +802,7 @@ void discord_voice_client::write_ready()
 		else if (type == satype_overlap_audio) {
 			std::chrono::nanoseconds latency = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last_timestamp);
 			std::chrono::nanoseconds sleep_time = std::chrono::nanoseconds(duration) + last_sleep_remainder - latency;
-			std::chrono::nanoseconds sleep_increment = sleep_time / AUDIO_OVERLAP_SLEEP_SAMPLES;
+			std::chrono::nanoseconds sleep_increment = (std::chrono::nanoseconds(duration) - latency) / AUDIO_OVERLAP_SLEEP_SAMPLES;
 			if (sleep_time.count() > 0) {
 				uint16_t samples_count = 0;
 				std::chrono::nanoseconds overshoot_accumulator;
