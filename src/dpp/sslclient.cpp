@@ -65,6 +65,7 @@
 #include <string>
 #include <iostream>
 #include <unordered_map>
+#include <chrono>
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 #include <dpp/utility.h>
@@ -444,7 +445,10 @@ void ssl_client::read_loop()
 				pfd[0].events |= POLLOUT;
 			}
 
-			r = poll(pfd, sockets, 1000);
+			const int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+			int poll_time = 1000 - (now % 1000);
+			poll_time = poll_time > 400 ? 1000 : poll_time + poll_time / 3 + 1;
+			r = poll(pfd, sockets, now / 1000 == (int64_t)last_tick ? poll_time : 0);
 
 			if (r == 0)
 				continue;

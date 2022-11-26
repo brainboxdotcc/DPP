@@ -20,12 +20,24 @@
  ************************************************************************************/
 
 #include <dpp/dpp.h>
+#include <iostream>
+#include <thread>
+#include <chrono>
 
 int main() {
+	using namespace std::chrono_literals;
 	char* t = getenv("DPP_UNIT_TEST_TOKEN");
 	if (t) {
-		dpp::cluster soak_test(t);
+		dpp::cluster soak_test(t, dpp::i_default_intents | dpp::i_guild_members);
+		soak_test.set_websocket_protocol(dpp::ws_etf);
 		soak_test.on_log(dpp::utility::cout_logger());
-		soak_test.start(dpp::st_wait);
+		soak_test.start(dpp::st_return);
+		while (true) {
+			std::this_thread::sleep_for(60s);
+			dpp::discord_client* dc = soak_test.get_shard(0);
+			if (dc != nullptr) {
+				std::cout << "Websocket latency: " << std::fixed << dc->websocket_ping << " Guilds: " << dpp::get_guild_count() << " Users: " << dpp::get_user_count() << "\n";
+			}
+		}
 	}
 }

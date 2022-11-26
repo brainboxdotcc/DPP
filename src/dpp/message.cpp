@@ -762,10 +762,10 @@ attachment::attachment(struct message* o)
 attachment::attachment(struct message* o, json *j) : attachment(o) {
 	this->id = snowflake_not_null(j, "id");
 	this->size = (*j)["size"];
-	this->filename = (*j)["filename"];
+	this->filename = (*j)["filename"].get<std::string>();;
 	this->description = string_not_null(j, "description");
-	this->url = (*j)["url"];
-	this->proxy_url = (*j)["proxy_url"];
+	this->url = (*j)["url"].get<std::string>();;
+	this->proxy_url = (*j)["proxy_url"].get<std::string>();;
 	this->width = int32_not_null(j, "width");
 	this->height = int32_not_null(j, "height");
 	this->content_type = string_not_null(j, "content_type");

@@ -56,6 +56,8 @@ target_link_options(
 	"$<$<PLATFORM_ID:Windows>:/DEBUG>"
 )
 
+add_compile_definitions(HAVE_VOICE)
+
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Opus CONFIG REQUIRED)
