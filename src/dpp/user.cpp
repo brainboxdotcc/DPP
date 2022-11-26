@@ -249,7 +249,7 @@ void from_json(const nlohmann::json& j, user& u) {
 	u.flags |= int8_not_null(&j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
 	u.flags |= int8_not_null(&j, "premium_type") == 3 ? dpp::u_nitro_basic : 0;
 	uint32_t flags = int32_not_null(&j, "flags");
-	flags |= int32_not_null(&j, "public_flags") << 24;
+	flags |= int32_not_null(&j, "public_flags");
 	for (auto & flag : usermap) {
 		if (flags & flag.first) {
 			u.flags |= flag.second;
