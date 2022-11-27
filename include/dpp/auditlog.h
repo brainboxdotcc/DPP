@@ -134,11 +134,11 @@ enum audit_type {
 	aut_automod_rule_update		=	141,
 	/// Auto moderation rule deletion
 	aut_automod_rule_delete		=	142,
-	/// Auto moderation block message
+	/// Message was blocked by Auto Moderation
 	aut_automod_block_message	=	143,
-	/// Message was flagged by AutoMod
+	/// Message was flagged by Auto Moderation
 	aut_automod_flag_to_channel =	144,
-	/// Member was timed out by AutoMod
+	/// Member was timed out by Auto Moderation
 	aut_automod_user_communication_disabled =	145,
 };
 
