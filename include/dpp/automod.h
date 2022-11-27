@@ -107,9 +107,10 @@ enum automod_trigger_type : uint8_t {
  */
 struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	/**
-	 * @brief @brief Substrings which will be searched for in content.
+	 * @brief @brief Substrings which will be searched for in content (Maximum of 1000).
 	 *
-	 * Each keyword can be a phrase which contains multiple words. All keywords are case insensitive.
+	 * Each keyword can be a phrase which contains multiple words.
+	 * All keywords are case insensitive and can be up to 30 characters.
 	 *
 	 * Wildcard symbols (`*`) can be used to customize how each keyword will be matched.
 	 *
@@ -145,6 +146,14 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
      *
 	 */
 	std::vector<std::string> keywords;
+
+	/**
+	 * @brief Regular expression patterns which will be matched against content (Maximum of 10).
+	 *
+	 * Only Rust flavored regex is currently supported, which can be tested in online editors such as [Rustexp](https://rustexp.lpil.uk/).
+	 * Each regex pattern must be 75 characters or less.
+	 */
+	std::vector<std::string> regex_patterns;
 
 	/**
 	 * @brief Preset keyword list types to moderate

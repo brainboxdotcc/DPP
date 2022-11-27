@@ -40,7 +40,8 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 16,      dpp::u_verified_bot },
 	{ 1 << 17,      dpp::u_verified_bot_dev },
 	{ 1 << 18,      dpp::u_certified_moderator },
-	{ 1 << 19,      dpp::u_bot_http_interactions }
+	{ 1 << 19,      dpp::u_bot_http_interactions },
+	{ 1 << 22, 		dpp::u_active_developer},
 };
 
 namespace dpp {
@@ -96,6 +97,9 @@ std::string user::get_mention() const {
 	return "<@" + std::to_string(id) + ">";
 }
 
+bool user::is_active_developer() const {
+	return this->flags & u_active_developer;
+}
 
 bool user::is_bot() const {
 	 return this->flags & u_bot;
@@ -119,6 +123,10 @@ bool user::has_nitro_full() const {
 
 bool user::has_nitro_classic() const {
 	 return this->flags & u_nitro_classic;
+}
+
+bool user::has_nitro_basic() const {
+	return this->flags & u_nitro_basic;
 }
 
 bool user::is_discord_employee() const {
@@ -239,6 +247,7 @@ void from_json(const nlohmann::json& j, user& u) {
 	u.flags |= bool_not_null(&j, "verified") ? dpp::u_verified : 0;
 	u.flags |= int8_not_null(&j, "premium_type") == 1 ? dpp::u_nitro_classic : 0;
 	u.flags |= int8_not_null(&j, "premium_type") == 2 ? dpp::u_nitro_full : 0;
+	u.flags |= int8_not_null(&j, "premium_type") == 3 ? dpp::u_nitro_basic : 0;
 	uint32_t flags = int32_not_null(&j, "flags");
 	flags |= int32_not_null(&j, "public_flags");
 	for (auto & flag : usermap) {

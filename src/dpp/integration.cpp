@@ -116,7 +116,7 @@ bool integration::expiry_kicks_user() const {
 	return flags & if_expire_kick;
 }
 
-connection::connection() : id(0), revoked(false), verified(false), friend_sync(false), show_activity(false), visible(false) {
+connection::connection() : id({}), revoked(false), verified(false), friend_sync(false), show_activity(false), visible(false) {
 }
 
 connection& connection::fill_from_json(nlohmann::json* j) {

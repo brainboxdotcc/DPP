@@ -83,7 +83,8 @@
 		"cplusplus",
 		"xmake",
 		"CORO",
-		"cback"
+		"cback",
+		"mentionables"
 	],
 	"flagWords": [
 		"hte"
