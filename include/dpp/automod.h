@@ -151,7 +151,7 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	 * @brief Regular expression patterns which will be matched against content (Maximum of 10).
 	 *
 	 * Only Rust flavored regex is currently supported, which can be tested in online editors such as [Rustexp](https://rustexp.lpil.uk/).
-	 * Each regex pattern must be 75 characters or less.
+	 * Each regex pattern can be up to 260 characters.
 	 */
 	std::vector<std::string> regex_patterns;
 
@@ -162,9 +162,43 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	std::vector<automod_preset_type> presets;
 
 	/**
-	 * @brief Substrings which will be exempt from triggering the automod_metadata::presets trigger type.
+	 * @brief Substrings which should not trigger the rule.
 	 *
-	 * Each keyword can be a phrase which contains multiple words. All keywords are case insensitive.
+	 * Each keyword can be a phrase which contains multiple words.
+	 * All keywords are case insensitive and can be up to 30 characters.
+	 *
+	 * Wildcard symbols (`*`) can be used to customize how each keyword will be matched.
+	 *
+	 * **Examples for the `*` wildcard symbol:**
+	 *
+	 * Prefix - word must start with the keyword
+	 *
+	 * | keyword  | matches                             |
+     * |----------|-------------------------------------|
+     * | cat*     | <u><b>cat</b></u>ch, <u><b>Cat</b></u>apult, <u><b>CAt</b></u>tLE |
+     * | the mat* | <u><b>the mat</b></u>rix                      |
+     *
+     * Suffix - word must end with the keyword
+     *
+     * | keyword  | matches                  |
+     * |----------|--------------------------|
+     * | *cat     | wild<u><b>cat</b></u>, copy<u><b>Cat</b></u> |
+     * | *the mat | brea<u><b>the mat</b></u>          |
+     *
+     * Anywhere - keyword can appear anywhere in the content
+     *
+     * | keyword   | matches                     |
+     * |-----------|-----------------------------|
+     * | \*cat*     | lo<u><b>cat</b></u>ion, edu<u><b>Cat</b></u>ion |
+     * | \*the mat* | brea<u><b>the mat</b></u>ter          |
+     *
+     * Whole Word - keyword is a full word or phrase and must be surrounded by whitespace at the beginning and end
+     *
+     * | keyword | matches     |
+     * |---------|-------------|
+     * | cat     | <u><b>Cat</b></u>     |
+     * | the mat | <u><b>the mat</b></u> |
+     *
 	 */
 	std::vector<std::string> allow_list;
 
