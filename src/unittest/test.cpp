@@ -537,35 +537,35 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				r.permissions.add(dpp::p_move_members);
 				r.set_flags(dpp::r_mentionable);
 				r.colour = dpp::colors::moon_yellow;
-				bot.role_create(r, [r, &bot](const dpp::confirmation_callback_t &event) {
-					if (event.is_error()) {
-						return;
-					}
-					dpp::role role = std::get<dpp::role>(event.value);
-					if (role.name == r.name &&
-						role.has_move_members() &&
-						role.flags & dpp::r_mentionable &&
-						role.colour == r.colour) {
+				dpp::role createdRole;
+				try {
+					createdRole = bot.role_create_sync(r);
+					if (createdRole.name == r.name &&
+						createdRole.has_move_members() &&
+						createdRole.flags & dpp::r_mentionable &&
+						createdRole.colour == r.colour) {
 						set_test("ROLE_CREATE", true);
 					}
-					role.guild_id = TEST_GUILD_ID;
-					role.name = "Test-Role-Edited";
-					role.colour = dpp::colors::light_sea_green;
-					bot.role_edit(role, [role_id = role.id, &bot](const dpp::confirmation_callback_t &event) {
-						if (event.is_error()) {
-							return;
-						}
-						dpp::role role = std::get<dpp::role>(event.value);
-						if (role.id == role_id) {
-							set_test("ROLE_EDIT", true);
-						}
-						bot.role_delete(TEST_GUILD_ID, role_id, [](const dpp::confirmation_callback_t &event) {
-							if (!event.is_error()) {
-								set_test("ROLE_DELETE", true);
-							}
-						});
-					});
-				});
+				} catch (dpp::rest_exception &exception) {
+					set_test("ROLE_CREATE", false);
+				}
+				createdRole.guild_id = TEST_GUILD_ID;
+				createdRole.name = "Test-Role-Edited";
+				createdRole.colour = dpp::colors::light_sea_green;
+				try {
+					dpp::role edited = bot.role_edit_sync(createdRole);
+					if (createdRole.id == edited.id && edited.name == "Test-Role-Edited") {
+						set_test("ROLE_EDIT", true);
+					}
+				} catch (dpp::rest_exception &exception) {
+					set_test("ROLE_EDIT", false);
+				}
+				try {
+					bot.role_delete_sync(TEST_GUILD_ID, createdRole.id);
+					set_test("ROLE_DELETE", true);
+				} catch (dpp::rest_exception &exception) {
+					set_test("ROLE_DELETE", false);
+				}
 			}
 		});
 
