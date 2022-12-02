@@ -410,6 +410,52 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					}
 				});
 
+			set_test("USER_GET", false);
+			set_test("USER_GET_FLAGS", false);
+			if (!offline) {
+				bot.user_get(TEST_USER_ID, [](const dpp::confirmation_callback_t &event) {
+					if (!event.is_error()) {
+						auto u = std::get<dpp::user_identified>(event.value);
+						if (u.id == TEST_USER_ID) {
+							set_test("USER_GET", true);
+						} else {
+							set_test("USER_GET", false);
+						}
+						json j = json::parse(event.http_info.body);
+						uint64_t raw_flags = j["public_flags"];
+						if (j.contains("flags")) {
+							uint64_t flags = j["flags"];
+							raw_flags |= flags;
+						}
+						// testing all user flags from https://discord.com/developers/docs/resources/user#user-object-user-flags
+						if (
+								u.is_discord_employee() == 			((raw_flags & (1 << 0)) != 0) &&
+								u.is_partnered_owner() == 			((raw_flags & (1 << 1)) != 0) &&
+								u.has_hypesquad_events() == 		((raw_flags & (1 << 2)) != 0) &&
+								u.is_bughunter_1() == 				((raw_flags & (1 << 3)) != 0) &&
+								u.is_house_bravery() == 			((raw_flags & (1 << 6)) != 0) &&
+								u.is_house_brilliance() == 			((raw_flags & (1 << 7)) != 0) &&
+								u.is_house_balance() == 			((raw_flags & (1 << 8)) != 0) &&
+								u.is_early_supporter() == 			((raw_flags & (1 << 9)) != 0) &&
+								u.is_team_user() == 				((raw_flags & (1 << 10)) != 0) &&
+								u.is_bughunter_2() == 				((raw_flags & (1 << 14)) != 0) &&
+								u.is_verified_bot() == 				((raw_flags & (1 << 16)) != 0) &&
+								u.is_verified_bot_dev() == 			((raw_flags & (1 << 17)) != 0) &&
+								u.is_certified_moderator() == 		((raw_flags & (1 << 18)) != 0) &&
+								u.is_bot_http_interactions() == 	((raw_flags & (1 << 19)) != 0) &&
+								u.is_active_developer() == 			((raw_flags & (1 << 22)) != 0)
+								) {
+							set_test("USER_GET_FLAGS", true);
+						} else {
+							set_test("USER_GET_FLAGS", false);
+						}
+					} else {
+						set_test("USER_GET", false);
+						set_test("USER_GET_FLAGS", false);
+					}
+				});
+			}
+
 			set_test("FORUM_CREATION", false);
 			set_test("FORUM_CHANNEL_GET", false);
 			set_test("FORUM_CHANNEL_DELETE", false);
@@ -463,6 +509,63 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						set_test("FORUM_CHANNEL_GET", false);
 					}
 				});
+			}
+
+			set_test("MEMBER_GET", false);
+			if (!offline) {
+				bot.guild_get_member(TEST_GUILD_ID, TEST_USER_ID, [](const dpp::confirmation_callback_t &event){
+					if (!event.is_error()) {
+						dpp::guild_member m = std::get<dpp::guild_member>(event.value);
+						if (m.guild_id == TEST_GUILD_ID && m.user_id == TEST_USER_ID) {
+							set_test("MEMBER_GET", true);
+						} else {
+							set_test("MEMBER_GET", false);
+						}
+					} else {
+						set_test("MEMBER_GET", false);
+					}
+				});
+			}
+
+			set_test("ROLE_CREATE", false);
+			set_test("ROLE_EDIT", false);
+			set_test("ROLE_DELETE", false);
+			if (!offline) {
+				dpp::role r;
+				r.guild_id = TEST_GUILD_ID;
+				r.name = "Test-Role";
+				r.permissions.add(dpp::p_move_members);
+				r.set_flags(dpp::r_mentionable);
+				r.colour = dpp::colors::moon_yellow;
+				dpp::role createdRole;
+				try {
+					createdRole = bot.role_create_sync(r);
+					if (createdRole.name == r.name &&
+						createdRole.has_move_members() &&
+						createdRole.flags & dpp::r_mentionable &&
+						createdRole.colour == r.colour) {
+						set_test("ROLE_CREATE", true);
+					}
+				} catch (dpp::rest_exception &exception) {
+					set_test("ROLE_CREATE", false);
+				}
+				createdRole.guild_id = TEST_GUILD_ID;
+				createdRole.name = "Test-Role-Edited";
+				createdRole.colour = dpp::colors::light_sea_green;
+				try {
+					dpp::role edited = bot.role_edit_sync(createdRole);
+					if (createdRole.id == edited.id && edited.name == "Test-Role-Edited") {
+						set_test("ROLE_EDIT", true);
+					}
+				} catch (dpp::rest_exception &exception) {
+					set_test("ROLE_EDIT", false);
+				}
+				try {
+					bot.role_delete_sync(TEST_GUILD_ID, createdRole.id);
+					set_test("ROLE_DELETE", true);
+				} catch (dpp::rest_exception &exception) {
+					set_test("ROLE_DELETE", false);
+				}
 			}
 		});
 

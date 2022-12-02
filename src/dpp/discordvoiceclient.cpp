@@ -799,6 +799,28 @@ void discord_voice_client::write_ready()
 				std::this_thread::sleep_for(sleep_time);
 			}
 		}
+		else if (type == satype_overlap_audio) {
+			std::chrono::nanoseconds latency = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last_timestamp);
+			std::chrono::nanoseconds sleep_time = std::chrono::nanoseconds(duration) + last_sleep_remainder - latency;
+			std::chrono::nanoseconds sleep_increment = (std::chrono::nanoseconds(duration) - latency) / AUDIO_OVERLAP_SLEEP_SAMPLES;
+			if (sleep_time.count() > 0) {
+				uint16_t samples_count = 0;
+				std::chrono::nanoseconds overshoot_accumulator;
+
+				do {
+					std::chrono::high_resolution_clock::time_point start_sleep = std::chrono::high_resolution_clock::now();
+					std::this_thread::sleep_for(sleep_increment);
+					std::chrono::high_resolution_clock::time_point end_sleep = std::chrono::high_resolution_clock::now();
+
+					samples_count++;
+					overshoot_accumulator += std::chrono::duration_cast<std::chrono::nanoseconds>(end_sleep - start_sleep) - sleep_increment;
+					sleep_time -= std::chrono::duration_cast<std::chrono::nanoseconds>(end_sleep - start_sleep);
+				} while (std::chrono::nanoseconds(overshoot_accumulator.count() / samples_count) + sleep_increment < sleep_time);
+				last_sleep_remainder = sleep_time;
+			}
+			else
+				last_sleep_remainder = std::chrono::nanoseconds(0);
+		}
 
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (!creator->on_voice_buffer_send.empty()) {
