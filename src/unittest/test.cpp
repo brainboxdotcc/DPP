@@ -1063,7 +1063,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								u.is_bughunter_2() == 				((raw_flags & (1 << 14)) != 0) &&
 								u.is_verified_bot() == 				((raw_flags & (1 << 16)) != 0) &&
 								u.is_verified_bot_dev() == 			((raw_flags & (1 << 17)) != 0) &&
-								u.is_certified_moderator() == 		((raw_flags & (1 << 18)) != 0) &&
+								u.is_moderator_programs() == 		((raw_flags & (1 << 18)) != 0) &&
 								u.is_bot_http_interactions() == 	((raw_flags & (1 << 19)) != 0) &&
 								u.is_active_developer() == 			((raw_flags & (1 << 22)) != 0)
 								) {
