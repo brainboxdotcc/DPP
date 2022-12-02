@@ -285,11 +285,11 @@ public:
 	 */
 	bool is_verified_bot_dev() const;
 	/**
-	 * @brief Return true if user is a certified moderator
+	 * @brief Return true if user is a Moderator Programs Alumni
 	 *
-	 * @return true if certified moderator
+	 * @return true if Moderator Programs Alumni
 	 */
-	bool is_certified_moderator() const;
+	bool is_moderator_programs() const;
 	/**
 	 * @brief Return true if user is a bot which exclusively uses HTTP interactions.
 	 * Bots using HTTP interactions are always considered online even when not connected to a websocket.
