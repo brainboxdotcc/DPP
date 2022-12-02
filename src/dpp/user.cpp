@@ -169,7 +169,7 @@ bool user::is_verified_bot_dev() const {
 	 return this->flags & u_verified_bot_dev;
 }
 
-bool user::is_certified_moderator() const {
+bool user::is_moderator_programs() const {
 	 return this->flags & u_certified_moderator;
 }
 
