@@ -58,6 +58,10 @@ user::~user()
 {
 }
 
+std::string user::get_mention(const snowflake& id){
+    return "<@" + std::to_string(id) + ">";
+}
+
 std::string user::build_json(bool with_id) const {
 	return "";
 }

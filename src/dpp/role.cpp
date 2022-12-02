@@ -50,6 +50,10 @@ role::~role()
 	}
 }
 
+std::string role::get_mention(const snowflake& id){
+    return "<@&" + std::to_string(id) + ">";
+}
+
 role& role::fill_from_json(nlohmann::json* j)
 {
 	return fill_from_json(0, j);
