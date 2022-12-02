@@ -39,6 +39,10 @@ emoji::~emoji() {
     delete image_data;
 }
 
+std::string emoji::get_mention(const std::string &name, const snowflake &id, bool is_animated) {
+    return utility::emoji_mention(name,id,is_animated);
+}
+
 emoji& emoji::fill_from_json(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	name = string_not_null(j, "name");
@@ -109,15 +113,7 @@ std::string emoji::format() const
 }
 
 std::string emoji::get_mention() const {
-	if (id) {
-		if (is_animated()) {
-			return "<" + format() + ">";
-		} else {
-			return "<:" + format() + ">";
-		}
-	} else {
-		return ":" + format() + ":";
-	}
+	return utility::emoji_mention(name,id,is_animated());
 }
 
 

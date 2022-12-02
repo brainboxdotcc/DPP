@@ -1161,14 +1161,6 @@ public:
 	slashcommand& disable_default_permissions();
 
 	/**
-	 * @brief Return a ping/mention for the slash command
-	 *
-	 * @return std::string mention. e.g. `</airhorn:816437322781949972>`
-	 * @note If you want a mention for a subcommand or subcommand group, you can use dpp::utility::slashcommand_mention
-	 */
-	std::string get_mention() const;
-
-	/**
 	 * @brief Fill object properties from JSON
 	 *
 	 * @param j JSON to fill from

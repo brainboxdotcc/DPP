@@ -336,6 +336,13 @@ public:
 	/** Destructor */
 	virtual ~channel();
 
+    /**
+    * @brief Create a mentionable channel.
+    * @param id The ID of the channel.
+    * @return std::string The formatted mention of the channel.
+    */
+    static std::string get_mention(const snowflake& id);
+
 	/** Read class values from json object
 	 * @param j A json object to read from
 	 * @return A reference to self

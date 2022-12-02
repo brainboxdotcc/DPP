@@ -1,0 +1,72 @@
+Determining if the pthread_setname_np exist failed with the following output:
+Change Dir: /home/ilesik/Desktop/DPP/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_bf210/fast && /usr/bin/make -f CMakeFiles/cmTC_bf210.dir/build.make CMakeFiles/cmTC_bf210.dir/build
+make[1]: Entering directory '/home/ilesik/Desktop/DPP/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_bf210.dir/CheckSymbolExists.cxx.o
+/usr/bin/c++     -o CMakeFiles/cmTC_bf210.dir/CheckSymbolExists.cxx.o -c /home/ilesik/Desktop/DPP/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx
+Linking CXX executable cmTC_bf210
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bf210.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_bf210.dir/CheckSymbolExists.cxx.o  -o cmTC_bf210 
+/usr/bin/ld: CMakeFiles/cmTC_bf210.dir/CheckSymbolExists.cxx.o: in function `main':
+CheckSymbolExists.cxx:(.text+0x1f): undefined reference to `pthread_setname_np'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_bf210.dir/build.make:87: cmTC_bf210] Error 1
+make[1]: Leaving directory '/home/ilesik/Desktop/DPP/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_bf210/fast] Error 2
+
+
+File /home/ilesik/Desktop/DPP/CMakeFiles/CMakeTmp/CheckSymbolExists.cxx:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_setname_np
+  return ((int*)(&pthread_setname_np))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Performing C++ SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/ilesik/Desktop/DPP/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_a9e33/fast && /usr/bin/make -f CMakeFiles/cmTC_a9e33.dir/build.make CMakeFiles/cmTC_a9e33.dir/build
+make[1]: Entering directory '/home/ilesik/Desktop/DPP/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a9e33.dir/src.cxx.o
+/usr/bin/c++    -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_a9e33.dir/src.cxx.o -c /home/ilesik/Desktop/DPP/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_a9e33
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a9e33.dir/link.txt --verbose=1
+/usr/bin/c++   -DCMAKE_HAVE_LIBC_PTHREAD    CMakeFiles/cmTC_a9e33.dir/src.cxx.o  -o cmTC_a9e33 
+/usr/bin/ld: CMakeFiles/cmTC_a9e33.dir/src.cxx.o: in function `main':
+src.cxx:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.cxx:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.cxx:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_a9e33.dir/build.make:87: cmTC_a9e33] Error 1
+make[1]: Leaving directory '/home/ilesik/Desktop/DPP/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_a9e33/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+

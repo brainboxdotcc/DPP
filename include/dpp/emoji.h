@@ -23,6 +23,7 @@
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
+#include <dpp/utility.h>
 #include <dpp/nlohmann/json_fwd.hpp>
 #include <unordered_map>
 #include <dpp/json_interface.h>
@@ -85,6 +86,15 @@ public:
 	 * @brief Destroy the emoji object
 	 */
 	virtual ~emoji();
+
+    /**
+    * @brief Create a mentionable emoji
+    * @param name The name of the emoji.
+    * @param id The ID of the emoji.
+    * @param is_animated is emoji animated.
+    * @return std::string The formatted mention of the emoji.
+    */
+    static std::string get_mention(const std::string& name, const snowflake& id, bool is_animated = false);
 
 	/**
 	 * @brief Read class values from json object
