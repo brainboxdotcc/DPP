@@ -922,4 +922,7 @@ std::string command_interaction::get_mention() const {
 	return dpp::utility::slashcommand_mention(id, name);
 }
 
+std::string slashcommand::get_mention() const {
+	return dpp::utility::slashcommand_mention(id, name);
+}
 };

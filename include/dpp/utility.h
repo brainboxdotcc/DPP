@@ -399,35 +399,35 @@ namespace dpp {
 		 */
 		std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand_group, const std::string &subcommand);
 
-        /**
+        	/**
 		 * @brief Create a mentionable user.
 		 * @param id The ID of the user.
 		 * @return std::string The formatted mention of the user.
 		 */
-        std::string DPP_EXPORT user_mention(const snowflake& id);
+		std::string DPP_EXPORT user_mention(const snowflake& id);
 
-        /**
-        * @brief Create a mentionable channel.
-        * @param id The ID of the channel.
-        * @return std::string The formatted mention of the channel.
-        */
-        std::string DPP_EXPORT channel_mention(const snowflake& id);
+		/**
+		* @brief Create a mentionable channel.
+		* @param id The ID of the channel.
+		* @return std::string The formatted mention of the channel.
+		*/
+		std::string DPP_EXPORT channel_mention(const snowflake& id);
 
-        /**
-        * @brief Create a mentionable emoji
-        * @param name The name of the emoji.
-        * @param id The ID of the emoji.
-        * @param is_animated is emoji animated.
-        * @return std::string The formatted mention of the emoji.
-        */
-        std::string DPP_EXPORT emoji_mention(const std::string& name, const snowflake& id, bool is_animated = false);
+		/**
+		* @brief Create a mentionable emoji
+		* @param name The name of the emoji.
+		* @param id The ID of the emoji.
+		* @param is_animated is emoji animated.
+		* @return std::string The formatted mention of the emoji.
+		*/
+		std::string DPP_EXPORT emoji_mention(const std::string& name, const snowflake& id, bool is_animated = false);
 
-        /**
-        * @brief Create a mentionable role.
-        * @param id The ID of the role.
-        * @return std::string The formatted mention of the role.
-        */
-        std::string DPP_EXPORT role_mention(const snowflake& id);
+		/**
+		* @brief Create a mentionable role.
+		* @param id The ID of the role.
+		* @return std::string The formatted mention of the role.
+		*/
+		std::string DPP_EXPORT role_mention(const snowflake& id);
 
 		/**
 		 * @brief Returns the library's version string

@@ -59,7 +59,7 @@ user::~user()
 }
 
 std::string user::get_mention(const snowflake& id) {
-    return utility::user_mention(id);
+	return utility::user_mention(id);
 }
 
 std::string user::build_json(bool with_id) const {
@@ -98,7 +98,7 @@ std::string user::format_username() const {
 }
 
 std::string user::get_mention() const {
-    return utility::user_mention(id);
+	return utility::user_mention(id);
 }
 
 bool user::is_active_developer() const {

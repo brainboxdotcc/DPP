@@ -87,14 +87,14 @@ public:
 	 */
 	virtual ~emoji();
 
-    /**
-    * @brief Create a mentionable emoji
-    * @param name The name of the emoji.
-    * @param id The ID of the emoji.
-    * @param is_animated is emoji animated.
-    * @return std::string The formatted mention of the emoji.
-    */
-    static std::string get_mention(const std::string& name, const snowflake& id, bool is_animated = false);
+	/**
+	* @brief Create a mentionable emoji
+	* @param name The name of the emoji.
+	* @param id The ID of the emoji.
+	* @param is_animated is emoji animated.
+	* @return std::string The formatted mention of the emoji.
+	*/
+	static std::string get_mention(const std::string& name, const snowflake& id, bool is_animated = false);
 
 	/**
 	 * @brief Read class values from json object

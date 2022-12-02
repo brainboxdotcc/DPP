@@ -88,12 +88,12 @@ public:
 	 */
 	virtual ~role();
 
-    /**
-    * @brief Create a mentionable role.
-    * @param id The ID of the role.
-    * @return std::string The formatted mention of the role.
-    */
-    static std::string get_mention(const snowflake& id);
+	/**
+	* @brief Create a mentionable role.
+	* @param id The ID of the role.
+	* @return std::string The formatted mention of the role.
+	*/
+	static std::string get_mention(const snowflake& id);
 
 	/**
 	 * @brief Set the name of the role

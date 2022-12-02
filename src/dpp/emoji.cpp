@@ -36,11 +36,11 @@ emoji::emoji(const std::string n, const snowflake i, const uint8_t f) : managed(
 }
 
 emoji::~emoji() {
-    delete image_data;
+	delete image_data;
 }
 
 std::string emoji::get_mention(const std::string &name, const snowflake &id, bool is_animated) {
-    return utility::emoji_mention(name,id,is_animated);
+	return utility::emoji_mention(name,id,is_animated);
 }
 
 emoji& emoji::fill_from_json(nlohmann::json* j) {
