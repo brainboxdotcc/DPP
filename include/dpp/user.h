@@ -109,6 +109,13 @@ public:
 	 */
 	virtual ~user();
 
+    /**
+     * @brief Create a mentionable user.
+	 * @param id The ID of the user.
+	 * @return std::string The formatted mention of the user.
+     */
+    static std::string get_mention(const snowflake& id);
+
 	/** Fill this record from json.
 	 * @param j The json to fill this record from
 	 * @return Reference to self
