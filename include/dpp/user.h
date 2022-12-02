@@ -109,6 +109,13 @@ public:
 	 */
 	virtual ~user();
 
+    /**
+     * @brief Return a ping/mention for the user
+     * @param id the user id to make mention of
+     * @return std::string mention
+     */
+    static std::string get_mention(const snowflake& id);
+
 	/** Fill this record from json.
 	 * @param j The json to fill this record from
 	 * @return Reference to self

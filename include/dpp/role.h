@@ -88,6 +88,13 @@ public:
 	 */
 	virtual ~role();
 
+    /**
+    * @brief Return a ping/mention for the role
+    * @param id the role id to make mention of
+    * @return std::string mention
+    */
+    static std::string get_mention(const snowflake& id);
+
 	/**
 	 * @brief Set the name of the role
 	 * Maximum length: 100
