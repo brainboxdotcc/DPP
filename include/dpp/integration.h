@@ -145,6 +145,7 @@ public:
 	bool				verified;	//!< whether the connection is verified
 	bool				friend_sync;	//!< whether friend sync is enabled for this connection
 	bool				show_activity;	//!< whether activities related to this connection will be shown in presence updates
+	bool				two_way_link;	//!< Whether this connection has a corresponding third party OAuth2 token
 	bool				visible;	//!< visibility of this connection
 
 	/**

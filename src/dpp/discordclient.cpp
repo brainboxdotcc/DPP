@@ -70,6 +70,11 @@ public:
 	z_stream d_stream;
 };
 
+/**
+ * @brief Stores the most recent ping message on this shard, which we check for to monitor latency
+ */
+thread_local static std::string last_ping_message;
+
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
         terminating(false),
@@ -87,14 +92,13 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	last_seq(0),
 	token(_token),
 	intents(_intents),
-	sessionid(""),
 	resumes(0),
 	reconnects(0),
 	websocket_ping(0.0),
 	ready(false),
 	last_heartbeat_ack(time(nullptr)),
 	protocol(ws_proto),
-	resume_gateway_url(_cluster->default_gateway)
+	resume_gateway_url(_cluster->default_gateway)	
 {
 	zlib = new zlibcontext();
 	etf = new etf_parser();
@@ -361,7 +365,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 			case 7:
 				log(dpp::ll_debug, "Reconnection requested, closing socket " + sessionid);
 				message_queue.clear();
-				close_socket(sfd);
+				throw dpp::connection_exception("Remote site requested reconnection");
 			break;
 			/* Heartbeat ack */
 			case 11:
@@ -442,7 +446,7 @@ void discord_client::log(dpp::loglevel severity, const std::string &msg) const
 
 void discord_client::queue_message(const std::string &j, bool to_front)
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	if (to_front) {
 		message_queue.emplace_front(j);
 	} else {
@@ -452,14 +456,14 @@ void discord_client::queue_message(const std::string &j, bool to_front)
 
 discord_client& discord_client::clear_queue()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	message_queue.clear();
 	return *this;
 }
 
 size_t discord_client::get_queue_size()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::shared_lock locker(queue_mutex);
 	return message_queue.size();
 }
 
@@ -504,7 +508,7 @@ void discord_client::one_second_timer()
 
 		/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
-			std::lock_guard<std::mutex> locker(queue_mutex);
+			std::unique_lock locker(queue_mutex);
 			if (message_queue.size()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();
@@ -512,8 +516,9 @@ void discord_client::one_second_timer()
 				 * to find pings in our queue. The assumption is that the format of the
 				 * ping isn't going to change.
 				 */
-				if (message.find("\"op\":1}") != std::string::npos) {
+				if (!last_ping_message.empty() && message == last_ping_message) {
 					ping_start = utility::time_f();
+					last_ping_message.clear();
 				}
 				this->write(message);
 			}
@@ -525,9 +530,8 @@ void discord_client::one_second_timer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				queue_message(
-					jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}))
-					, true);
+				last_ping_message = jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}));
+				queue_message(last_ping_message, true);
 				last_heartbeat = time(NULL);
 			}
 		}
@@ -537,9 +541,9 @@ void discord_client::one_second_timer()
 uint64_t discord_client::get_guild_count() {
 	uint64_t total = 0;
 	dpp::cache<guild>* c = dpp::get_guild_cache();
-	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -552,9 +556,9 @@ uint64_t discord_client::get_guild_count() {
 uint64_t discord_client::get_member_count() {
 	uint64_t total = 0;
 	dpp::cache<guild>* c = dpp::get_guild_cache();
-	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -573,9 +577,9 @@ uint64_t discord_client::get_member_count() {
 uint64_t discord_client::get_channel_count() {
 	uint64_t total = 0;
 	dpp::cache<guild>* c = dpp::get_guild_cache();
-	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
+	std::unordered_map<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)g->second;
 		if (gp->shard_id == this->shard_id) {
@@ -587,7 +591,7 @@ uint64_t discord_client::get_channel_count() {
 
 discord_client& discord_client::connect_voice(snowflake guild_id, snowflake channel_id, bool self_mute, bool self_deaf) {
 #ifdef HAVE_VOICE
-	std::lock_guard<std::mutex> lock(voice_mutex);
+	std::unique_lock lock(voice_mutex);
 	if (connecting_voice_channels.find(guild_id) == connecting_voice_channels.end()) {
 		connecting_voice_channels[guild_id] = new voiceconn(this, channel_id);
 		/* Once sent, this expects two events (in any order) on the websocket:
@@ -621,7 +625,7 @@ std::string discord_client::jsonobj_to_string(const nlohmann::json& json) {
 
 void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_json) {
 #ifdef HAVE_VOICE
-	std::lock_guard<std::mutex> lock(voice_mutex);
+	std::unique_lock lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
 		log(ll_debug, "Disconnecting voice, guild: {}" + std::to_string(guild_id));
@@ -651,7 +655,7 @@ discord_client& discord_client::disconnect_voice(snowflake guild_id) {
 
 voiceconn* discord_client::get_voice(snowflake guild_id) {
 #ifdef HAVE_VOICE
-	std::lock_guard<std::mutex> lock(voice_mutex);
+	std::shared_lock lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
 		return v->second;

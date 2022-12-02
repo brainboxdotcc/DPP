@@ -698,7 +698,7 @@ struct DPP_EXPORT select_click_t : public interaction_create_t {
 	 */
 	std::vector<std::string> values;
 	/**
-	 * @brief select menu component type
+	 * @brief select menu component type (dpp::component_type)
 	 */
 	uint8_t component_type;
 };
@@ -1121,6 +1121,10 @@ struct DPP_EXPORT guild_role_delete_t : public event_dispatch_t {
 	 * @brief role being deleted
 	 */
 	role* deleted;
+	/**
+	 * @brief ID of the deleted role
+	 */
+	snowflake role_id;
 };
 
 /** @brief Channel pins update */

@@ -73,10 +73,13 @@ enum command_option_type : uint8_t {
 
 /**
  * @brief This type is a variant that can hold any of the potential
- * native data types represented by the enum above.
+ * native data types represented by the enum dpp::command_option_type.
  * It is used in interactions.
  * 
  * std::monostate indicates an invalid parameter value, e.g. an unfilled optional parameter.
+ * std::int64_t will be for all integer options, double for decimal numbers and dpp::snowflake for anything ID related.
+ *
+ * You can retrieve them with std::get().
  */
 typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, double> command_value;
 
@@ -282,14 +285,12 @@ void to_json(nlohmann::json& j, const command_option& opt);
 
 /**
  * @brief Response types when responding to an interaction within on_interaction_create.
- * Do not use ir_acknowledge or ir::channel_message, as these are deprecated in the
- * Discord API spec. They are listed in this enum for completeness.
  */
 enum interaction_response_type {
-	ir_pong = 1,					//!< ACK a Ping
+	ir_pong = 1,					//!< Acknowledge a Ping
 	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
-	ir_deferred_channel_message_with_source = 5,	//!< ACK an interaction and edit a response later, the user sees a loading state
-	ir_deferred_update_message = 6,			//!< for components, ACK an interaction and edit the original message later; the user does not see a loading state
+	ir_deferred_channel_message_with_source = 5,	//!< Acknowledge an interaction and edit a response later, the user sees a loading state
+	ir_deferred_update_message = 6,			//!< for components, acknowledge an interaction and edit the original message later; the user does not see a loading state
 	ir_update_message = 7,				//!< for components, edit the message the component was attached to
 	ir_autocomplete_reply = 8,			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
 	ir_modal_dialog = 9,				//!< A modal dialog box
@@ -517,6 +518,14 @@ struct DPP_EXPORT command_data_option {
 	bool focused;                              //!< Optional: true if this option is the currently focused option for autocomplete
 
 	/**
+	 * @brief Check if the value variant holds std::monostate and options vector is empty (i.e. the option wasn't supplied) 
+	 * @return bool true, if value variant holds std::monostate and options vector is empty
+	 */
+	bool empty() {
+	    return std::holds_alternative<std::monostate>(value) && options.empty();
+	}
+
+	/**
 	 * @brief Get an option value by index
 	 * 
 	 * @tparam Type to get from the parameter
@@ -543,7 +552,7 @@ void from_json(const nlohmann::json& j, command_data_option& cdo);
 enum interaction_type {
 	it_ping = 1,			//!< ping
 	it_application_command = 2,	//!< application command (slash command)
-	it_component_button = 3,	//!< button click (component interaction)
+	it_component_button = 3,	//!< button click or select menu chosen (component interaction)
 	it_autocomplete = 4,		//!< Autocomplete interaction
 	it_modal_submit = 5,		//!< Modal form submission
 };
@@ -580,6 +589,14 @@ struct DPP_EXPORT command_interaction {
 	template <typename T> T& get_value(size_t index) {
 		return std::get<T>(options.at(index).value);
 	}
+
+	/**
+	 * @brief Return a ping/mention for the slash command
+	 *
+	 * @return std::string mention. e.g. `</airhorn:816437322781949972>`
+	 * @note If you want a mention for a subcommand or subcommand group, you can use dpp::utility::slashcommand_mention
+	 */
+	std::string get_mention() const;
 };
 
 /**
@@ -593,25 +610,11 @@ struct DPP_EXPORT command_interaction {
 void from_json(const nlohmann::json& j, command_interaction& ci);
 
 /**
- * @brief Component type, either button or select
- */
-enum component_type_t {
-	/**
-	 * @brief Button
-	 */
-	cotype_button = 2,
-	/**
-	 * @brief Option select list (drop-down)
-	 */
-	cotype_select = 3
-};
-
-/**
  * @brief A button click for a button component
  */
 struct DPP_EXPORT component_interaction {
 	/**
-	 * @brief Component type
+	 * @brief Component type (dpp::component_type)
 	 */
 	uint8_t component_type;
 	/**
@@ -678,7 +681,7 @@ class DPP_EXPORT interaction : public managed, public json_interface<interaction
 
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
-	uint8_t	type;                                               //!< the type of interaction
+	uint8_t	type;                                               //!< the type of interaction (dpp::interaction_type)
 	std::variant<command_interaction, component_interaction, autocomplete_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
@@ -1033,7 +1036,7 @@ public:
 
 	/**
 	 * @brief The default permissions of this command on a guild.
-	 * D++ defaults this to p_use_application_commands.
+	 * D++ defaults this to dpp::p_use_application_commands.
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 */
 	permission default_member_permissions;
@@ -1085,7 +1088,7 @@ public:
 	/**
 	 * @brief Set the default permissions of the slash command
 	 * 
-	 * @param defaults default permissions to set. This is a permission bitmask
+	 * @param defaults default permissions to set. This is a permission bitmask of bits from dpp::permissions
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 *
 	 * @return slashcommand& reference to self
@@ -1156,6 +1159,14 @@ public:
 	 * @deprecated Discord discourage use of this value and instead you should use default_member_permissions.
 	 */
 	slashcommand& disable_default_permissions();
+
+	/**
+	 * @brief Return a ping/mention for the slash command
+	 *
+	 * @return std::string mention. e.g. `</airhorn:816437322781949972>`
+	 * @note If you want a mention for a subcommand or subcommand group, you can use dpp::utility::slashcommand_mention
+	 */
+	std::string get_mention() const;
 
 	/**
 	 * @brief Fill object properties from JSON

@@ -237,8 +237,8 @@ auditlog cluster::guild_auditlog_get_sync(snowflake guild_id, snowflake user_id,
 	return dpp::sync<auditlog>(this, &cluster::guild_auditlog_get, guild_id, user_id, action_type, before, limit);
 }
 
-confirmation cluster::guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_days) {
-	return dpp::sync<confirmation>(this, &cluster::guild_ban_add, guild_id, user_id, delete_message_days);
+confirmation cluster::guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_seconds) {
+	return dpp::sync<confirmation>(this, &cluster::guild_ban_add, guild_id, user_id, delete_message_seconds);
 }
 
 confirmation cluster::guild_ban_delete_sync(snowflake guild_id, snowflake user_id) {
@@ -555,6 +555,10 @@ thread_member cluster::thread_member_get_sync(const snowflake thread_id, const s
 
 thread_member_map cluster::thread_members_get_sync(snowflake thread_id) {
 	return dpp::sync<thread_member_map>(this, &cluster::thread_members_get, thread_id);
+}
+
+thread cluster::thread_create_in_forum_sync(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags) {
+	return dpp::sync<thread>(this, &cluster::thread_create_in_forum, thread_name, channel_id, msg, auto_archive_duration, rate_limit_per_user, applied_tags);
 }
 
 thread cluster::thread_create_sync(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user) {

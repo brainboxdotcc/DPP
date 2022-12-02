@@ -310,7 +310,7 @@ command_option_choice &command_option_choice::fill_from_json(nlohmann::json *j) 
 	}
 	if (j->contains("name_localizations")) {
 		for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
-			name_localizations[loc.key()] = loc.value();
+			name_localizations[loc.key()] = loc.value().get<std::string>();;
 		}
 	}
 
@@ -370,12 +370,12 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 
 		if (j->contains("name_localizations")) {
 			for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
-				o.name_localizations[loc.key()] = loc.value();
+				o.name_localizations[loc.key()] = loc.value().get<std::string>();;
 			}
 		}
 		if (j->contains("description_localizations")) {
 			for(auto loc = (*j)["description_localizations"].begin(); loc != (*j)["description_localizations"].end(); ++loc) {
-				o.description_localizations[loc.key()] = loc.value();
+				o.description_localizations[loc.key()] = loc.value().get<std::string>();
 			}
 		}
 
@@ -554,7 +554,10 @@ void from_json(const nlohmann::json& j, command_interaction& ci) {
 void from_json(const nlohmann::json& j, component_interaction& bi) {
 	bi.component_type = int8_not_null(&j, "component_type");
 	bi.custom_id = string_not_null(&j, "custom_id");
-	if (bi.component_type == cotype_select && j.find("values") != j.end()) {
+	if ((bi.component_type == cot_selectmenu || bi.component_type == cot_user_selectmenu ||
+		 bi.component_type == cot_role_selectmenu || bi.component_type == cot_mentionable_selectmenu ||
+		 bi.component_type == cot_channel_selectmenu) &&
+		j.find("values") != j.end()) {
 		/* Get values */
 		for (auto& entry : j["values"]) {
 			bi.values.push_back(entry.get<std::string>());
@@ -614,6 +617,13 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			guild* g = dpp::find_guild(i.guild_id);
 			if (g) {
 				g->members[i.member.user_id] = i.member;
+			}
+		}
+		/* store the included permissions of this member in the resolved set */
+		if (j.at("member").contains("permissions") && !j.at("member").at("permissions").is_null()) {
+			dpp::snowflake id(i.member.user_id);
+			if (id) {
+				i.resolved.member_permissions[id] = snowflake_not_null(&(j.at("member")), "permissions");
 			}
 		}
 	} else if (j.contains("user") && !j.at("user").is_null()) {
@@ -906,6 +916,14 @@ const dpp::guild& interaction::get_guild() const {
 		throw dpp::logic_exception("No guild for this command interaction");
 	}
 	return *g;
+}
+
+std::string command_interaction::get_mention() const {
+	return dpp::utility::slashcommand_mention(id, name);
+}
+
+std::string slashcommand::get_mention() const {
+	return dpp::utility::slashcommand_mention(id, name);
 }
 
 };

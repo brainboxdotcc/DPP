@@ -27,7 +27,7 @@ The following downloads are for the most recent version:
 * [ARM7 Linux .deb (32 bit Raspberry Pi 3, 4)](https://dl.dpp.dev/latest/linux-rpi-arm7hf)
 * [ARM64 Linux .deb (64 bit Raspberry Pi 4, Smartphones)](https://dl.dpp.dev/latest/linux-rpi-arm64)
 
-You can find further releases in other architectures and formats or the source code on the [GitHub Repository](https://github.com/brainboxdotcc/DPP/releases). For a realtime JSON format list of download all download links, click [here](https://dl.dpp.dev/json)
+You can find further releases in other architectures and formats or the source code on the [GitHub Repository](https://github.com/brainboxdotcc/DPP/releases). For a realtime JSON format list of all download links, click [here](https://dl.dpp.dev/json)
 
 ## Library features
 
@@ -45,10 +45,20 @@ You can find further releases in other architectures and formats or the source c
 
 ## Supported Operating Systems
 
-The library runs great on **Linux**. **Windows** is also supported and we offer ready made compiled DLL and LIB files for easy integration into any windows visual studio 2019/2022 project.
-**Mac OS X** and **FreeBSD** is also functional and stable, as is running your bot on a **Raspberry Pi** — we offer a prebuilt .deb for ARM64, ARMv6 and ARMv7 to save on having to wait for it to compile.
+### Linux
+The library runs ideally on **Linux**.
 
-The library may work fine in other operating systems too, if you run a D++ bot on something not listed here please let us know!
+### Mac OS X and FreeBSD
+The library is well-functional and stable on **Mac OS X** and **FreeBSD** too.
+
+### Raspberry Pi
+For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for ARM64, ARM6, and ARM7 so that you do not have to wait for it to compile.
+
+### Windows
+**Windows** is well-supported with ready-made compiled DLL and LIB files, please check out our [Windows Bot Template repository](https://github.com/brainboxdotcc/windows-bot-template). The Windows Bot repository can be cloned and integrated immediately into any Visual Studio 2019 and 2022 project in a matter of minutes.
+
+### Other OS
+The library should work fine on other operating systems as well, and if you run a D++ bot on something not listed here, please let us know!
 
 ## Getting started
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)

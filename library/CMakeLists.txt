@@ -30,7 +30,7 @@ if(WIN32 AND NOT MINGW)
 		set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 		set(OPENSSL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 		set(OPENSSL_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib")
-		ADD_DEFINITIONS(/bigobj)
+		#ADD_DEFINITIONS(/bigobj)
 
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib")
 		link_libraries("${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libcrypto.lib")
@@ -122,8 +122,6 @@ else()
 	message("-- Voice support disabled by cmake option")
 endif()
 
-aux_source_directory("../src" coresrc)
-
 string(ASCII 27 Esc)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -195,7 +193,7 @@ foreach (fullmodname ${subdirlist})
     get_filename_component(modname ${fullmodname} NAME)
     set (modsrc "")
 	
-	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp")
+	file(GLOB modsrc "${modules_dir}/dpp/*.cpp" "${modules_dir}/dpp/events/*.cpp" "${modules_dir}/dpp/cluster/*.cpp" "${modules_dir}/dpp/*.rc")
 
 	if(BUILD_SHARED_LIBS)
 		add_library(${modname} SHARED ${modsrc})
@@ -262,15 +260,23 @@ target_compile_features(dpp PRIVATE cxx_attribute_deprecated)
 
 if (DPP_BUILD_TEST)
 	enable_testing(${CMAKE_CURRENT_SOURCE_DIR}/..)
-	add_executable(unittest ${coresrc})
-	target_compile_features(unittest PRIVATE cxx_std_17)
-	target_link_libraries(unittest PUBLIC ${modname})
+	file(GLOB testnamelist "${CMAKE_CURRENT_SOURCE_DIR}/../src/*")
+	foreach (fulltestname ${testnamelist})
+		get_filename_component(testname ${fulltestname} NAME)
+		if (NOT "${testname}" STREQUAL "dpp")
+			message("-- Configuring test: ${Green}${testname}${ColourReset} with source: ${modules_dir}/${testname}/*.cpp")
+			set (testsrc "")
+			file(GLOB testsrc "${modules_dir}/${testname}/*.cpp")
+			add_executable(${testname} ${testsrc})
+			target_compile_features(${testname} PRIVATE cxx_std_17)
+			target_link_libraries(${testname} PUBLIC ${modname})
+		endif()
+	endforeach()
 	add_test(
 		NAME unittests
 		COMMAND library/unittest
 		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/library
 	)
-
 endif()
 
 if(HAVE_PRCTL)
@@ -310,24 +316,26 @@ if(WIN32 AND NOT MINGW)
 	endif()
 endif()
 
-if(NOT WIN32)
-	# Installation
+if(DPP_INSTALL)
+	if(NOT WIN32)
+		# Installation
 
-	include(GNUInstallDirs)
-	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-	message("Library install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-	install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-	message("Include files install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
-	install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DRUN_LDCONFIG=${RUN_LDCONFIG} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/PostInstall.cmake)")
+		include(GNUInstallDirs)
+		install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+		message("Library install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+		install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+		message("Include files install directory at ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
+		install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -DRUN_LDCONFIG=${RUN_LDCONFIG} -DLDCONFIG_EXECUTABLE=${LDCONFIG_EXECUTABLE} -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/PostInstall.cmake)")
 
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../dpp.pc.in" "${CMAKE_BINARY_DIR}/dpp.pc" @ONLY)
-	install(FILES "${CMAKE_BINARY_DIR}/dpp.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-elseif(MINGW)
-	install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-	install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../dpp.pc.in" "${CMAKE_BINARY_DIR}/dpp.pc" @ONLY)
+		install(FILES "${CMAKE_BINARY_DIR}/dpp.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+	elseif(MINGW)
+		install(TARGETS dpp LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+		install(DIRECTORY ../include/ DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+	endif()
+
+	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
+
+	# CPack initialization for distribution
+	include(CPack)
 endif()
-
-include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/CPackSetup.cmake")						# Setup information for packaging and distribution
-
-# CPack initialization for distribution
-include(CPack)

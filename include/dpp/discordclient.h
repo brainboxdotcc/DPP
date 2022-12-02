@@ -32,6 +32,7 @@
 #include <thread>
 #include <deque>
 #include <mutex>
+#include <shared_mutex>
 
 using json = nlohmann::json;
 
@@ -174,7 +175,7 @@ private:
 	/**
 	 * @brief Mutex for message queue
 	 */
-	std::mutex queue_mutex;
+	std::shared_mutex queue_mutex;
 
 	/**
 	 * @brief Queue of outbound messages
@@ -318,7 +319,7 @@ public:
 	/**
 	 * @brief Mutex for voice connections map
 	 */
-	std::mutex voice_mutex;
+	std::shared_mutex voice_mutex;
 
 	/**
 	 * @brief Resume count

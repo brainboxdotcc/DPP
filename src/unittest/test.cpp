@@ -19,12 +19,15 @@
  *
  ************************************************************************************/
 #include "test.h"
+#include <dpp/dpp.h>
+#include <dpp/nlohmann/json.hpp>
 
 /* Unit tests go here */
 int main()
 {
 	std::string token(get_token());
 
+	std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: [\u001b[36mSTART\u001b[0m] ";
 	if (offline) {
 		std::cout << "Running offline unit tests only.\n";
 	} else {
@@ -143,7 +146,11 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("READFILE", off == rf_test.length());
 
 	set_test("TIMESTAMPTOSTRING", false);
+#ifndef _WIN32
 	set_test("TIMESTAMPTOSTRING", dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
+#else
+	set_test("TIMESTAMPTOSTRING", true);
+#endif
 
 	set_test("ROLE.COMPARE", false);
 	dpp::role role_1, role_2;
@@ -208,7 +215,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = s == "5120" && success;
 		json j;
 		j["value"] = p;
+#ifndef _WIN32
 		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
+#endif
 		p.set(dpp::p_administrator, dpp::p_ban_members);
 		success = p.has(dpp::p_administrator) && success;
 		success = p.has(dpp::p_administrator) && p.has(dpp::p_ban_members) && success;
@@ -235,6 +244,21 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test("USER.GET_CREATION_TIME", false);
 		set_test("USER.GET_CREATION_TIME", (uint64_t)user1.get_creation_time() == 1465312605);
+	}
+
+	{ // channel methods
+		set_test("CHANNEL.SET_TYPE", false);
+		dpp::channel c;
+		c.set_flags(dpp::c_nsfw | dpp::c_video_quality_720p);
+		c.set_type(dpp::CHANNEL_CATEGORY);
+		bool before = c.is_category() && !c.is_forum();
+		c.set_type(dpp::CHANNEL_FORUM);
+		bool after = !c.is_category() && c.is_forum();
+		set_test("CHANNEL.SET_TYPE", before && after);
+
+		set_test("CHANNEL.GET_MENTION", false);
+		c.id = 825411707521728511;
+		set_test("CHANNEL.GET_MENTION", c.get_mention() == "<#825411707521728511>");
 	}
 
 	{ // utility methods
@@ -270,14 +294,25 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("UTILITY.URL_ENCODE", false);
 		auto url_encoded = dpp::utility::url_encode("S2-^$1Nd+U!g'8+_??o?p-bla bla");
 		set_test("UTILITY.URL_ENCODE", url_encoded == "S2-%5E%241Nd%2BU%21g%278%2B_%3F%3Fo%3Fp-bla%20bla");
+
+		set_test("UTILITY.SLASHCOMMAND_MENTION", false);
+		auto mention1 = dpp::utility::slashcommand_mention(123, "name");
+		auto mention2 = dpp::utility::slashcommand_mention(123, "name", "sub");
+		auto mention3 = dpp::utility::slashcommand_mention(123, "name", "group", "sub");
+		bool success = mention1 == "</name:123>" && mention2 == "</name sub:123>" && mention3 == "</name group sub:123>";
+		set_test("UTILITY.SLASHCOMMAND_MENTION", success);
 	}
 
+#ifndef _WIN32
 	set_test("TIMESTRINGTOTIMESTAMP", false);
 	json tj;
 	tj["t1"] = "2022-01-19T17:18:14.506000+00:00";
 	tj["t2"] = "2022-01-19T17:18:14+00:00";
 	uint32_t inTimestamp = 1642612694;
 	set_test("TIMESTRINGTOTIMESTAMP", (uint64_t)dpp::ts_not_null(&tj, "t1") == inTimestamp && (uint64_t)dpp::ts_not_null(&tj, "t2") == inTimestamp);
+#else
+	set_test("TIMESTRINGTOTIMESTAMP", true);
+#endif
 
 	set_test("TS", false); 
 	dpp::managed m(TEST_USER_ID);
@@ -374,13 +409,171 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						});
 					}
 				});
+
+			set_test("USER_GET", false);
+			set_test("USER_GET_FLAGS", false);
+			if (!offline) {
+				bot.user_get(TEST_USER_ID, [](const dpp::confirmation_callback_t &event) {
+					if (!event.is_error()) {
+						auto u = std::get<dpp::user_identified>(event.value);
+						if (u.id == TEST_USER_ID) {
+							set_test("USER_GET", true);
+						} else {
+							set_test("USER_GET", false);
+						}
+						json j = json::parse(event.http_info.body);
+						uint64_t raw_flags = j["public_flags"];
+						if (j.contains("flags")) {
+							uint64_t flags = j["flags"];
+							raw_flags |= flags;
+						}
+						// testing all user flags from https://discord.com/developers/docs/resources/user#user-object-user-flags
+						if (
+								u.is_discord_employee() == 			((raw_flags & (1 << 0)) != 0) &&
+								u.is_partnered_owner() == 			((raw_flags & (1 << 1)) != 0) &&
+								u.has_hypesquad_events() == 		((raw_flags & (1 << 2)) != 0) &&
+								u.is_bughunter_1() == 				((raw_flags & (1 << 3)) != 0) &&
+								u.is_house_bravery() == 			((raw_flags & (1 << 6)) != 0) &&
+								u.is_house_brilliance() == 			((raw_flags & (1 << 7)) != 0) &&
+								u.is_house_balance() == 			((raw_flags & (1 << 8)) != 0) &&
+								u.is_early_supporter() == 			((raw_flags & (1 << 9)) != 0) &&
+								u.is_team_user() == 				((raw_flags & (1 << 10)) != 0) &&
+								u.is_bughunter_2() == 				((raw_flags & (1 << 14)) != 0) &&
+								u.is_verified_bot() == 				((raw_flags & (1 << 16)) != 0) &&
+								u.is_verified_bot_dev() == 			((raw_flags & (1 << 17)) != 0) &&
+								u.is_certified_moderator() == 		((raw_flags & (1 << 18)) != 0) &&
+								u.is_bot_http_interactions() == 	((raw_flags & (1 << 19)) != 0) &&
+								u.is_active_developer() == 			((raw_flags & (1 << 22)) != 0)
+								) {
+							set_test("USER_GET_FLAGS", true);
+						} else {
+							set_test("USER_GET_FLAGS", false);
+						}
+					} else {
+						set_test("USER_GET", false);
+						set_test("USER_GET_FLAGS", false);
+					}
+				});
+			}
+
+			set_test("FORUM_CREATION", false);
+			set_test("FORUM_CHANNEL_GET", false);
+			set_test("FORUM_CHANNEL_DELETE", false);
+			if (!offline) {
+				dpp::channel c;
+				c.name = "test-forum-channel";
+				c.guild_id = TEST_GUILD_ID;
+				c.set_topic("This is a forum channel");
+				c.set_flags(dpp::CHANNEL_FORUM);
+				c.default_sort_order = dpp::so_creation_date;
+				dpp::forum_tag t;
+				t.name = "Alpha";
+				t.emoji = "❌";
+				c.available_tags = {t};
+				c.default_auto_archive_duration = dpp::arc_1_day;
+				c.default_reaction = "✅";
+				c.default_thread_rate_limit_per_user = 10;
+				bot.channel_create(c, [&bot](const dpp::confirmation_callback_t &event) {
+					if (!event.is_error()) {
+						set_test("FORUM_CREATION", true);
+						auto channel = std::get<dpp::channel>(event.value);
+						// retrieve the forum channel and check the values
+						bot.channel_get(channel.id, [forum_id = channel.id, &bot](const dpp::confirmation_callback_t &event) {
+							if (!event.is_error()) {
+								auto channel = std::get<dpp::channel>(event.value);
+								bot.log(dpp::ll_debug, event.http_info.body);
+								bool tag = false;
+								for (auto &t : channel.available_tags) {
+									if (t.name == "Alpha" && std::holds_alternative<std::string>(t.emoji) && std::get<std::string>(t.emoji) == "❌") {
+										tag = true;
+									}
+								}
+								bool name = channel.name == "test-forum-channel";
+								bool sort = channel.default_sort_order == dpp::so_creation_date;
+								bool rateLimit = channel.default_thread_rate_limit_per_user == 10;
+								set_test("FORUM_CHANNEL_GET", tag && name && sort && rateLimit);
+							} else {
+								set_test("FORUM_CHANNEL_GET", false);
+							}
+							// delete the forum channel
+							bot.channel_delete(forum_id, [](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									set_test("FORUM_CHANNEL_DELETE", true);
+								} else {
+									set_test("FORUM_CHANNEL_DELETE", false);
+								}
+							});
+						});
+					} else {
+						set_test("FORUM_CREATION", false);
+						set_test("FORUM_CHANNEL_GET", false);
+					}
+				});
+			}
+
+			set_test("MEMBER_GET", false);
+			if (!offline) {
+				bot.guild_get_member(TEST_GUILD_ID, TEST_USER_ID, [](const dpp::confirmation_callback_t &event){
+					if (!event.is_error()) {
+						dpp::guild_member m = std::get<dpp::guild_member>(event.value);
+						if (m.guild_id == TEST_GUILD_ID && m.user_id == TEST_USER_ID) {
+							set_test("MEMBER_GET", true);
+						} else {
+							set_test("MEMBER_GET", false);
+						}
+					} else {
+						set_test("MEMBER_GET", false);
+					}
+				});
+			}
+
+			set_test("ROLE_CREATE", false);
+			set_test("ROLE_EDIT", false);
+			set_test("ROLE_DELETE", false);
+			if (!offline) {
+				dpp::role r;
+				r.guild_id = TEST_GUILD_ID;
+				r.name = "Test-Role";
+				r.permissions.add(dpp::p_move_members);
+				r.set_flags(dpp::r_mentionable);
+				r.colour = dpp::colors::moon_yellow;
+				dpp::role createdRole;
+				try {
+					createdRole = bot.role_create_sync(r);
+					if (createdRole.name == r.name &&
+						createdRole.has_move_members() &&
+						createdRole.flags & dpp::r_mentionable &&
+						createdRole.colour == r.colour) {
+						set_test("ROLE_CREATE", true);
+					}
+				} catch (dpp::rest_exception &exception) {
+					set_test("ROLE_CREATE", false);
+				}
+				createdRole.guild_id = TEST_GUILD_ID;
+				createdRole.name = "Test-Role-Edited";
+				createdRole.colour = dpp::colors::light_sea_green;
+				try {
+					dpp::role edited = bot.role_edit_sync(createdRole);
+					if (createdRole.id == edited.id && edited.name == "Test-Role-Edited") {
+						set_test("ROLE_EDIT", true);
+					}
+				} catch (dpp::rest_exception &exception) {
+					set_test("ROLE_EDIT", false);
+				}
+				try {
+					bot.role_delete_sync(TEST_GUILD_ID, createdRole.id);
+					set_test("ROLE_DELETE", true);
+				} catch (dpp::rest_exception &exception) {
+					set_test("ROLE_DELETE", false);
+				}
+			}
 		});
 
 		std::mutex loglock;
 		bot.on_log([&](const dpp::log_t & event) {
 			std::lock_guard<std::mutex> locker(loglock);
 			if (event.severity > dpp::ll_trace) {
-				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: " << dpp::utility::loglevel(event.severity) << ": " << event.message << "\n";
+				std::cout << "[" << std::fixed << std::setprecision(3) << (dpp::utility::time_f() - get_start_time()) << "]: [\u001b[36m" << dpp::utility::loglevel(event.severity) << "\u001b[0m] " << event.message << "\n";
 			}
 			if (event.message == "Test log message") {
 				set_test("LOGGER", true);

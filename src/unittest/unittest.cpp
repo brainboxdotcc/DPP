@@ -19,6 +19,8 @@
  *
  ************************************************************************************/
 #include "test.h"
+#include <dpp/dpp.h>
+#include <dpp/nlohmann/json.hpp>
 
 /* Current list of unit tests */
 std::map<std::string, test_t> tests = {
@@ -80,16 +82,28 @@ std::map<std::string, test_t> tests = {
 	{"COMPARISON", {tt_offline, "manged object comparison", false, false}},
 	{"CHANNELCACHE", {tt_online, "find_channel()", false, false}},
 	{"CHANNELTYPES", {tt_online, "channel type flags", false, false}},
+	{"FORUM_CREATION", {tt_online, "create a forum channel", false, false}},
+	{"FORUM_CHANNEL_GET", {tt_online, "retrieve the created forum channel", false, false}},
+	{"FORUM_CHANNEL_DELETE", {tt_online, "delete the created forum channel", false, false}},
 	{"PERMISSION_CLASS", {tt_offline, "permission", false, false}},
+	{"USER_GET", {tt_online, "cluster::user_get", false, false}},
+	{"USER_GET_FLAGS", {tt_online, "cluster::user_get flag parsing", false, false}},
+	{"MEMBER_GET", {tt_online, "cluster::guild_get_member", false, false}},
 	{"USER.GET_MENTION", {tt_offline, "user::get_mention", false, false}},
 	{"USER.FORMAT_USERNAME", {tt_offline, "user::format_username", false, false}},
 	{"USER.GET_CREATION_TIME", {tt_offline, "user::get_creation_time", false, false}},
+	{"CHANNEL.SET_TYPE", {tt_offline, "channel::set_type", false, false}},
+	{"CHANNEL.GET_MENTION", {tt_offline, "channel::get_mention", false, false}},
 	{"UTILITY.ICONHASH", {tt_offline, "utility::iconhash", false, false}},
 	{"UTILITY.MAKE_URL_PARAMETERS", {tt_offline, "utility::make_url_parameters", false, false}},
 	{"UTILITY.MARKDOWN_ESCAPE", {tt_offline, "utility::markdown_escape", false, false}},
 	{"UTILITY.TOKENIZE", {tt_offline, "utility::tokenize", false, false}},
 	{"UTILITY.URL_ENCODE", {tt_offline, "utility::url_encode", false, false}},
+	{"UTILITY.SLASHCOMMAND_MENTION", {tt_offline, "utility::slashcommand_mention", false, false}},
 	{"ROLE.COMPARE", {tt_offline, "role::operator<", false, false}},
+	{"ROLE_CREATE", {tt_online, "cluster::role_create", false, false}},
+	{"ROLE_EDIT", {tt_online, "cluster::role_edit", false, false}},
+	{"ROLE_DELETE", {tt_online, "cluster::role_delete", false, false}},
 };
 
 double start = dpp::utility::time_f();

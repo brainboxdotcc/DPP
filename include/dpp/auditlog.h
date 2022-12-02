@@ -134,8 +134,12 @@ enum audit_type {
 	aut_automod_rule_update		=	141,
 	/// Auto moderation rule deletion
 	aut_automod_rule_delete		=	142,
-	/// Auto moderation block message
+	/// Message was blocked by Auto Moderation
 	aut_automod_block_message	=	143,
+	/// Message was flagged by Auto Moderation
+	aut_automod_flag_to_channel =	144,
+	/// Member was timed out by Auto Moderation
+	aut_automod_user_communication_disabled =	145,
 };
 
 /**
@@ -148,7 +152,7 @@ struct DPP_EXPORT audit_change {
 	std::string	old_value;
 	/**
 	 * The property name that was changed, e.g. `nick` for nickname changes
-	 * @note For dpp::audit_type::aut_appcommand_permission_update updates the key is the id of the user, channel, role, or a permission constant that was updated instead of an actual property name
+	 * @note For dpp::aut_appcommand_permission_update updates the key is the id of the user, channel, role, or a permission constant that was updated instead of an actual property name
 	 */
 	std::string	key;
 };
@@ -157,6 +161,8 @@ struct DPP_EXPORT audit_change {
  * @brief Extra information for an audit log entry
  */
 struct DPP_EXPORT audit_extra {
+	std::string automod_rule_name; //!< Name of the Auto Moderation rule that was triggered
+	std::string automod_rule_trigger_type; //!< Trigger type of the Auto Moderation rule that was triggered
 	std::string delete_member_days;	//!< number of days after which inactive members were kicked
 	std::string	members_removed;	//!< number of members removed by the prune
 	snowflake	channel_id;		//!< channel in which the entities were targeted

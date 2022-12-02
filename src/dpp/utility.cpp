@@ -71,7 +71,7 @@ namespace dpp {
 		std::string current_date_time() {
 #ifdef _WIN32
 			std::time_t curr_time = time(nullptr);
-			return std::ctime(&curr_time);
+			return trim(std::ctime(&curr_time));
 #else
 			auto t = std::time(nullptr);
 			struct tm timedata;
@@ -428,6 +428,14 @@ namespace dpp {
 			}
 			*data = 0;
 			return escaped.data();
+		}
+
+		std::string slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand) {
+			return "</" + command_name + (!subcommand.empty() ? (" " + subcommand) : "") + ":" + std::to_string(command_id) + ">";
+		}
+
+		std::string slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand_group, const std::string &subcommand) {
+			return "</" + command_name + " " + subcommand_group + " " + subcommand + ":" + std::to_string(command_id) + ">";
 		}
 
 		std::string make_url_parameters(const std::map<std::string, std::string>& parameters) {

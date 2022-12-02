@@ -29,8 +29,8 @@ INCLUDE_DIRECTORIES(
 	/usr/include/aarch64-linux-gnu)
 
 SET(ZLIB_LIBRARY /lib/aarch64-linux-gnu/libz.so.1.2.11)
-SET(OPENSSL_CRYPTO_LIBRARY /usr/lib/aarch64-linux-gnu/libcrypto.so.1.1)
-SET(OPENSSL_SSL_LIBRARY /usr/lib/aarch64-linux-gnu/libssl.so.1.1)
+SET(OPENSSL_CRYPTO_LIBRARY /usr/lib/aarch64-linux-gnu/libcrypto.so)
+SET(OPENSSL_SSL_LIBRARY /usr/lib/aarch64-linux-gnu/libssl.so)
 
 SET(CMAKE_PREFIX_PATH ${RASPBERRY_KINETIC_PATH} ${RASPBERRY_ROOT_PATH}/usr)
 

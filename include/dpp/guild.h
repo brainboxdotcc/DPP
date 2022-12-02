@@ -114,7 +114,9 @@ enum guild_flags : uint32_t {
 	g_monetization_enabled =		0b00000001000000000000000000000000,
 	/** guild has increased custom sticker slots */
 	g_more_stickers =			0b00000010000000000000000000000000,
-	/** guild has access to create private threads */
+	/** guild has access to create private threads
+	 * @deprecated Removed by Discord
+	 * */
 	g_private_threads =			0b00000100000000000000000000000000,
 	/** guild is able to set role icons */
 	g_role_icons =				0b00001000000000000000000000000000,
@@ -138,6 +140,10 @@ enum guild_flags_extra : uint8_t {
 	g_animated_banner =			0b00000010,
 	/** Guild has auto moderation */
 	g_auto_moderation =			0b00000100,
+	/** Guild has paused invites, preventing new users from joining */
+	g_invites_disabled =		0b00001000,
+	/** Guild has been set as support server of an app in the App Directory */
+	g_developer_support_server =	0b00010000,
 };
 
 /**
@@ -385,6 +391,48 @@ enum verification_level_t : uint8_t {
 	ver_very_high =	4,
 };
 
+/**
+ * @brief Default message notification level
+ */
+enum default_message_notification_t: uint8_t {
+	/// members will receive notifications for all messages by default
+	dmn_all = 0,
+	///	members will receive notifications only for messages that \@mention them by default
+	dmn_only_mentions = 1,
+};
+
+/**
+ * @brief Premium tier
+ */
+enum guild_premium_tier_t: uint8_t {
+	/// guild has not unlocked any Server Boost perks
+	tier_none = 0,
+	/// guild has unlocked Server Boost level 1 perks
+	tier_1 = 1,
+	/// guild has unlocked Server Boost level 2 perks
+	tier_2 = 2,
+	/// guild has unlocked Server Boost level 3 perks
+	tier_3 = 3,
+};
+
+/**
+ * @brief Voice AFK timeout values for guild::afk_timeout
+ */
+enum guild_afk_timeout_t: uint8_t {
+	/// AFK timeout disabled
+	afk_off,
+	/// AFK timeout of 1 Minute
+	afk_60,
+	/// AFK timeout of 5 Minutes
+	afk_300,
+	/// AFK timeout of 15 Minutes
+	afk_900,
+	/// AFK timeout of 30 Minutes
+	afk_1800,
+	/// AFK timeout of 1 Hour
+	afk_3600,
+};
+
 /** @brief Guild members container
  */
 typedef std::unordered_map<snowflake, guild_member> members_container;
@@ -492,17 +540,17 @@ public:
 	/** Number of boosters */
 	uint16_t premium_subscription_count;
 
-	/** Maximum users in a video channel, or 0 */
-	uint16_t max_video_channel_users;
-
 	/** Voice AFK timeout before moving users to AFK channel */
-	uint8_t afk_timeout;
+	guild_afk_timeout_t afk_timeout;
+
+	/** Maximum users in a video channel, or 0 */
+	uint8_t max_video_channel_users;
 
 	/** Setting for how notifications are to be delivered to users */
-	uint8_t default_message_notifications;
+	default_message_notification_t default_message_notifications;
 
 	/** Boost level */
-	uint8_t premium_tier;
+	guild_premium_tier_t premium_tier;
 
 	/** Verification level of server */
 	verification_level_t verification_level;
@@ -561,7 +609,7 @@ public:
 	 * @return permission permissions bitmask
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 *
-	 * @note The method will search for the guild member in the cache by the users id.
+	 * @warning The method will search for the guild member in the cache by the users id.
 	 * If the guild member is not in cache, the method will always return 0.
 	 */
 	permission base_permissions(const class user* user) const;
@@ -580,26 +628,26 @@ public:
 	permission base_permissions(const guild_member &member) const;
 
 	/**
-	 * @brief Compute the permission overwrites for a member in a channel, including base permissions.
+	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 *
 	 * @param base_permissions base permissions before overwrites,
-	 * from channel::base_permissions
-	 * @param user User to resolve the permissions for
+	 * from guild::base_permissions
+	 * @param user The user to resolve the permissions for
 	 * @param channel Channel to compute permission overwrites for
-	 * @return permission Merged permissions bitmask of overwrites.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 *
-	 * @note The method will search for the guild member in the cache by the users id.
+	 * @warning The method will search for the guild member in the cache by the users id.
 	 * If the guild member is not in cache, the method will always return 0.
 	 */
 	permission permission_overwrites(const uint64_t base_permissions, const user* user, const channel* channel) const;
 
 	/**
-	 * @brief Compute the permission overwrites for a member in a channel, including base permissions.
+	 * @brief Get the overall permissions for a member in this channel, including channel overwrites, role permissions and admin privileges.
 	 *
-	 * @param member Member to resolve the permissions for
+	 * @param member The member to resolve the permissions for
 	 * @param channel Channel to compute permission overwrites for
-	 * @return permission Merged permissions bitmask of overwrites.
+	 * @return permission Permission overwrites for the member. Made of bits in dpp::permissions.
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 */
 	permission permission_overwrites(const guild_member &member, const channel &channel) const;
@@ -755,6 +803,12 @@ public:
 	bool has_auto_moderation() const;
 
 	/**
+	 * @brief Guild has been set as a support server on the App Directory
+	 * @return bool has been set as a support server of an app in the app directory
+	 */
+	bool has_support_server() const;
+
+	/**
 	 * @brief Guild has access to set an animated guild icon
 	 * @return bool can have animated icon
 	 */
@@ -812,6 +866,7 @@ public:
 	/**
 	 * @brief guild has access to create private threads
 	 * @return bool has private threads
+	 * @deprecated Removed by Discord
 	 */
 	bool has_private_threads() const;
 
@@ -850,6 +905,12 @@ public:
 	 * @return bool has progress bar enabled
 	 */
 	bool has_premium_progress_bar_enabled() const;
+
+	/**
+	 * @brief True if has paused invites, preventing new users from joining
+	 * @return bool has paused invites
+	 */
+	bool has_invites_disabled() const;
 };
 
 /** A container of guilds */

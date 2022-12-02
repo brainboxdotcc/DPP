@@ -30,7 +30,7 @@
 namespace dpp {
 
 /** @brief A container for a 64 bit unsigned value representing many things on discord.
- * This value is known in distributed computing as a snowflak value.
+ * This value is known in distributed computing as a snowflake value.
  * 
  * Snowflakes are:
  * 
@@ -46,7 +46,7 @@ namespace dpp {
  * @see https://github.com/twitter-archive/snowflake/tree/b3f6a3c6ca8e1b6847baa6ff42bf72201e2c2231
  */
 class DPP_EXPORT snowflake final {
-	friend class std::hash<dpp::snowflake>;
+	friend struct std::hash<dpp::snowflake>;
 protected:
 	/**
 	 * @brief The snowflake value

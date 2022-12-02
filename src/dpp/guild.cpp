@@ -36,10 +36,12 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"VERIFIED", dpp::g_verified },
 	{"PARTNERED", dpp::g_partnered },
 	{"COMMUNITY", dpp::g_community },
+	{"DEVELOPER_SUPPORT_SERVER", dpp::g_developer_support_server },
 	{"COMMERCE", dpp::g_commerce },
 	{"NEWS", dpp::g_news },
 	{"DISCOVERABLE", dpp::g_discoverable },
-	{"FEATUREABLE", dpp::g_featureable },
+	{"FEATURABLE", dpp::g_featureable },
+	{"INVITES_DISABLED", dpp::g_invites_disabled},
 	{"ANIMATED_BANNER", dpp::g_animated_banner },
 	{"ANIMATED_ICON", dpp::g_animated_icon },
 	{"BANNER", dpp::g_banner },
@@ -48,7 +50,6 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"PREVIEW_ENABLED", dpp::g_preview_enabled },
 	{"MONETIZATION_ENABLED", dpp::g_monetization_enabled },
 	{"MORE_STICKERS", dpp::g_more_stickers },
-	{"PRIVATE_THREADS", dpp::g_private_threads },
 	{"ROLE_ICONS", dpp::g_role_icons },
 	{"SEVEN_DAY_THREAD_ARCHIVE", dpp::g_seven_day_thread_archive },
 	{"THREE_DAY_THREAD_ARCHIVE", dpp::g_three_day_thread_archive },
@@ -74,10 +75,10 @@ guild::guild() :
 	max_members(0),
 	shard_id(0),
 	premium_subscription_count(0),
+	afk_timeout(afk_off),
 	max_video_channel_users(0),
-	afk_timeout(0),
-	default_message_notifications(0),
-	premium_tier(0),
+	default_message_notifications(dmn_all),
+	premium_tier(tier_none),
 	verification_level(ver_none),
 	explicit_content_filter(expl_disabled),
 	mfa_level(mfa_none),
@@ -174,7 +175,7 @@ std::string guild_member::get_avatar_url(uint16_t size)  const {
 			std::to_string(this->user_id) +
 			(has_animated_guild_avatar() ? "/a_" : "/") +
 			this->avatar.to_string() +
-			(has_animated_guild_avatar() ? "gif" : "png") +
+			(has_animated_guild_avatar() ? ".gif" : ".png") +
 			utility::avatar_size(size);
 	} else {
 		return std::string();
@@ -261,6 +262,10 @@ bool guild::has_premium_progress_bar_enabled() const {
 	return this->flags_extra & g_premium_progress_bar_enabled;
 }
 
+bool guild::has_invites_disabled() const {
+	return this->flags_extra & g_invites_disabled;
+}
+
 bool guild::has_channel_banners() const {
 	return this->flags & g_channel_banners;
 }
@@ -299,6 +304,10 @@ bool guild::has_animated_banner() const {
 
 bool guild::has_auto_moderation() const {
 	return this->flags_extra & g_auto_moderation;
+}
+
+bool guild::has_support_server() const {
+	return this->flags_extra & g_developer_support_server;
 }
 
 bool guild::has_animated_icon() const {
@@ -370,7 +379,17 @@ std::string guild::build_json(bool with_id) const {
 		j["afk_channel_id"] = afk_channel_id;
 	}
 	if (afk_timeout) {
-		j["afk_timeout"] = afk_timeout;
+		if (afk_timeout == afk_60) {
+			j["afk_timeout"] = 60;
+		} else if (afk_timeout == afk_300) {
+			j["afk_timeout"] = 300;
+		} else if (afk_timeout == afk_900) {
+			j["afk_timeout"] = 900;
+		} else if (afk_timeout == afk_1800) {
+			j["afk_timeout"] = 1800;
+		} else if (afk_timeout == afk_3600) {
+			j["afk_timeout"] = 3600;
+		}
 	}
 	if (widget_enabled()) {
 		j["widget_channel_id"] = widget_channel_id;
@@ -467,11 +486,23 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			this->flags |= dpp::g_no_sticker_greeting;
 		}
 
+		if (d->contains("afk_timeout")) {
+			if ((*d)["afk_timeout"] == 60) {
+				this->afk_timeout = afk_60;
+			} else if ((*d)["afk_timeout"] == 300) {
+				this->afk_timeout = afk_300;
+			} else if ((*d)["afk_timeout"] == 900) {
+				this->afk_timeout = afk_900;
+			} else if ((*d)["afk_timeout"] == 1800) {
+				this->afk_timeout = afk_1800;
+			} else if ((*d)["afk_timeout"] == 3600) {
+				this->afk_timeout = afk_3600;
+			}
+		}
 		set_snowflake_not_null(d, "afk_channel_id", this->afk_channel_id);
-		set_int8_not_null(d, "afk_timeout", this->afk_timeout);
 		set_snowflake_not_null(d, "widget_channel_id", this->widget_channel_id);
 		this->verification_level = (verification_level_t)int8_not_null(d, "verification_level");
-		set_int8_not_null(d, "default_message_notifications", this->default_message_notifications);
+		this->default_message_notifications = (default_message_notification_t)int8_not_null(d, "default_message_notifications");
 		this->explicit_content_filter = (guild_explicit_content_t)int8_not_null(d, "explicit_content_filter");
 		this->mfa_level = (mfa_level_t)int8_not_null(d, "mfa_level");
 		set_snowflake_not_null(d, "application_id", this->application_id);
@@ -498,10 +529,10 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			}
 			this->banner = _banner;
 		}
-		set_int8_not_null(d, "premium_tier", this->premium_tier);
+		this->premium_tier = (guild_premium_tier_t)int8_not_null(d, "premium_tier");
 		set_int16_not_null(d, "premium_subscription_count", this->premium_subscription_count);
 		set_snowflake_not_null(d, "public_updates_channel_id", this->public_updates_channel_id);
-		set_int16_not_null(d, "max_video_channel_users", this->max_video_channel_users);
+		set_int8_not_null(d, "max_video_channel_users", this->max_video_channel_users);
 
 		set_int32_not_null(d, "max_presences", this->max_presences);
 		set_int32_not_null(d, "max_members", this->max_members);
@@ -715,7 +746,7 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 }
 
 std::string guild::get_banner_url(uint16_t size) const {
-    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->banner.to_string().empty()) {
@@ -731,7 +762,7 @@ std::string guild::get_banner_url(uint16_t size) const {
 }
 
 std::string guild::get_discovery_splash_url(uint16_t size) const {
-    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->discovery_splash.to_string().empty()) {
@@ -746,7 +777,7 @@ std::string guild::get_discovery_splash_url(uint16_t size) const {
 }
 
 std::string guild::get_icon_url(uint16_t size) const {
-    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->icon.to_string().empty()) {
@@ -754,7 +785,7 @@ std::string guild::get_icon_url(uint16_t size) const {
 			std::to_string(this->id) +
 			(has_animated_icon_hash() ? "/a_" : "/") +
 			this->icon.to_string() +
-			(has_animated_icon_hash() ? "gif" : "png") +
+			(has_animated_icon_hash() ? ".gif" : ".png") +
 			utility::avatar_size(size);
 	} else {
 		return std::string();
@@ -762,7 +793,7 @@ std::string guild::get_icon_url(uint16_t size) const {
 }
 
 std::string guild::get_splash_url(uint16_t size) const {
-    /* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
+	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
 	 */
 	if (!this->splash.to_string().empty()) {

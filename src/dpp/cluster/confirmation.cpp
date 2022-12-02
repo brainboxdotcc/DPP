@@ -34,6 +34,11 @@ confirmation_callback_t::confirmation_callback_t(cluster* creator, const confirm
 	}
 }
 
+confirmation_callback_t::confirmation_callback_t(const http_request_completion_t& _http)
+	: http_info(_http),  value(), bot(nullptr)
+{
+}
+
 confirmation_callback_t::confirmation_callback_t(cluster* creator) : bot(creator) {
 	http_info = {};
 	value = {};
@@ -43,6 +48,10 @@ bool confirmation_callback_t::is_error() const {
 	if (http_info.status >= 400) {
 		/* Invalid JSON or 4xx/5xx response */
 		return true;
+	}
+	if (http_info.status == 204) {
+		/* Body is empty so we can't parse it but interaction is not an error*/
+		return false;
 	}
 	try {
 		json j = json::parse(this->http_info.body);
@@ -76,14 +85,25 @@ error_info confirmation_callback_t::get_error() const {
 			if (obj->find("0") != obj->end()) {
 				/* An array of error messages */
 				for (auto index = obj->begin(); index != obj->end(); ++index) {
-					for (auto fields = index->begin(); fields != index->end(); ++fields) {
-						for (auto errordetails = (*fields)["_errors"].begin(); errordetails != (*fields)["_errors"].end(); ++errordetails) {
+					if (index->find("_errors") != index->end()) {
+						for (auto errordetails = (*index)["_errors"].begin(); errordetails != (*index)["_errors"].end(); ++errordetails) {
 							error_detail detail;
 							detail.code = (*errordetails)["code"].get<std::string>();
 							detail.reason = (*errordetails)["message"].get<std::string>();
-							detail.field = fields.key();
-							detail.object = obj.key();
+							detail.object.clear();
+							detail.field = obj.key();
 							e.errors.emplace_back(detail);
+						}
+					} else {
+						for (auto fields = index->begin(); fields != index->end(); ++fields) {
+							for (auto errordetails = (*fields)["_errors"].begin(); errordetails != (*fields)["_errors"].end(); ++errordetails) {
+								error_detail detail;
+								detail.code = (*errordetails)["code"].get<std::string>();
+								detail.reason = (*errordetails)["message"].get<std::string>();
+								detail.field = fields.key();
+								detail.object = obj.key();
+								e.errors.emplace_back(detail);
+							}
 						}
 					}
 				}

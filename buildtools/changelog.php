@@ -28,6 +28,7 @@ $categories = [
     'change' => '♻️ Refactoring',
     'changed' => '♻️ Refactoring',
     'test' => '🚨 Testing',
+    'tests' => '🚨 Testing',
     'testing' => '🚨 Testing',
     'ci' => '👷 Build/CI',
     'build' => '👷 Build/CI',
@@ -59,6 +60,22 @@ if ($githubstyle) {
 
 // Case insensitive removal of duplicates
 $changelog = array_intersect_key($changelog, array_unique(array_map("strtolower", $changelog)));
+
+// remove duplicates where two entries are the same but one ends with a GitHub pull request link
+foreach ($changelog as $item) {
+    $entryWithoutPrLink = preg_replace('/( \(#\d+\))$/', '', $item);
+    if ($entryWithoutPrLink === $item) {
+        continue;
+    }
+
+    // if $item ends with (#123)
+    foreach ($changelog as $key => $change) {
+        if ($entryWithoutPrLink === $change) {
+            unset($changelog[$key]);
+            break;
+        }
+    }
+}
 
 foreach ($changelog as $change) {
 

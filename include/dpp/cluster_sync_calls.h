@@ -514,7 +514,7 @@ confirmation channel_edit_positions_sync(const std::vector<channel> &c);
 channel channel_edit_sync(const class channel &c);
 
 /**
- * @brief Follow a news channel
+ * @brief Follow an announcement (news) channel
  * @see dpp::cluster::channel_follow_news
  * @see https://discord.com/developers/docs/resources/channel#follow-news-channel
  * @param c Channel id to follow
@@ -793,14 +793,14 @@ auditlog guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param guild_id Guild ID to add ban to
  * @param user_id User ID to ban
- * @param delete_message_days How many days of their user's messages to also delete (0-7). Defaults to 0
+ * @param delete_message_seconds How many seconds to delete messages for, between 0 and 604800 (7 days). Defaults to 0
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_days = 0);
+confirmation guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_seconds = 0);
 
 /**
  * @brief Delete guild ban
@@ -2000,6 +2000,26 @@ thread_member thread_member_get_sync(const snowflake thread_id, const snowflake 
 thread_member_map thread_members_get_sync(snowflake thread_id);
 
 /**
+ * @brief Create a thread in forum channel
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ *
+ * @see dpp::cluster::thread_create_in_forum
+ * @see https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel
+ * @param thread_name Name of the forum thread
+ * @param channel_id Forum channel in which thread to create
+ * @param msg The message to start the thread with
+ * @param auto_archive_duration Duration to automatically archive the thread after recent activity
+ * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
+ * @param applied_tags List of IDs of forum tags (dpp::forum_tag) to apply to this thread
+ * @return thread returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+thread thread_create_in_forum_sync(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags = {});
+
+/**
  * @brief Create a thread
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  *
@@ -2008,7 +2028,7 @@ thread_member_map thread_members_get_sync(snowflake thread_id);
  * @param thread_name Name of the thread
  * @param channel_id Channel in which thread to create
  * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
- * @param thread_type Type of thread - GUILD_PUBLIC_THREAD, GUILD_NEWS_THREAD, GUILD_PRIVATE_THREAD
+ * @param thread_type Type of thread - CHANNEL_PUBLIC_THREAD, CHANNEL_ANNOUNCEMENT_THREAD, CHANNEL_PRIVATE_THREAD
  * @param invitable whether non-moderators can add other non-moderators to a thread; only available when creating a private thread
  * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
  * @return thread returned object on completion

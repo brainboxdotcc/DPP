@@ -1,21 +1,8 @@
-<script src="https://utteranc.es/client.js"
-        repo="brainboxdotcc/dpp-comments"
-        issue-term="pathname"
-        theme="preferred-color-scheme"
-        crossorigin="anonymous"
-        async>
-</script>
-<!-- HTML footer for doxygen 1.8.8-->
-<!-- start footer part -->
-<!--BEGIN GENERATE_TREEVIEW-->
-<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
-  <ul>
-    $navpath
-  </ul>
+<div id="nav-path" class="navpath">
+	<ul>
+		$navpath
+	</ul>
 </div>
-<!--END GENERATE_TREEVIEW-->
-<!--BEGIN !GENERATE_TREEVIEW-->
-<!--END !GENERATE_TREEVIEW-->
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-QTH6YHBNG5"></script>
@@ -35,13 +22,15 @@
 		$(".fragment").each(function(i,node) {
 			var $node = $(node);
 			$node.children(":not(.line)").remove();
-			$node.html("<pre><code class='stan'>" + $node.text().trim().replaceAll("\<", "&lt;").replaceAll("\>", "&gt;") + "</code></pre>");
+			$node.html("<pre><code class='stan'>" + $node.text().trim().replaceAll("<", "&lt;").replaceAll(">", "&gt;") + "</code></pre>");
 			hljs.configure({
 				languages: ['cpp','diff','cmake','bash','sh','text'],
+				ignoreUnescapedHTML: true
 			});
 			hljs.highlightAll(node);
 			hljs.initLineNumbersOnLoad(node);  
 		});
+		$(".fragment").parent().parent().parent().parent().removeClass('doxtable');
 	});
 </script>
 <style>
@@ -59,7 +48,7 @@
 	.hljs-ln-n::before {
 		content: attr(data-line-number);
 		padding-right: 1rem !important;
-	}	
+	}
 </style>
 <div style="z-index: -9999; position: absolute; right: 0; top: 0; font-size: 0.0001rem;color:transparent;background:none">
 	<!-- For crawlability of past versions -->

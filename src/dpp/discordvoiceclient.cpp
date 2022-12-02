@@ -227,7 +227,11 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					}
 				} else {
 					voice_receive_t& vr = *d.parked_payloads.top().vr;
-					if (int samples = opus_decode(d.decoder.get(), vr.audio_data.data(), vr.audio_data.length(), pcm, 5760, 0);
+					if (vr.audio_data.length() > 0x7FFFFFFF) {
+						throw dpp::length_exception("audio_data > 2GB! This should never happen!");
+					}
+					if (int samples = opus_decode(d.decoder.get(), vr.audio_data.data(),
+						static_cast<opus_int32>(vr.audio_data.length() & 0x7FFFFFFF), pcm, 5760, 0);
 					    samples >= 0) {
 						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
 							samples * opus_channel_count * sizeof(opus_int16));
@@ -246,7 +250,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			/* Downsample the 32 bit samples back to 16 bit */
 			opus_int16 pcm_downsample[23040] = { 0 };
 			for (int v = 0; v < max_samples * opus_channel_count; ++v) {
-				pcm_downsample[v] = pcm_mix[v] / park_count;
+				pcm_downsample[v] = (opus_int16)(pcm_mix[v] / park_count);
 			}
 			voice_receive_t vr(nullptr, "", &client, 0, reinterpret_cast<uint8_t*>(pcm_downsample),
 				max_samples * opus_channel_count * sizeof(opus_int16));
@@ -556,7 +560,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 						throw dpp::connection_exception("Can't switch voice UDP socket to non-blocking mode!");
 					}
 
-					/* Hook select() in the ssl_client to add a new file descriptor */
+					/* Hook poll() in the ssl_client to add a new file descriptor */
 					this->fd = newfd;
 					this->custom_writeable_fd = std::bind(&discord_voice_client::want_write, this);
 					this->custom_readable_fd = std::bind(&discord_voice_client::want_read, this);
@@ -642,6 +646,11 @@ void discord_voice_client::read_ready()
 		constexpr size_t header_size = 12;
 		if (static_cast<size_t>(r) < header_size) {
 			/* Invalid RTP payload */
+			return;
+		}
+
+		/* It's a "silence packet" - throw it away. */
+		if (packet.size() < 44) {
 			return;
 		}
 
@@ -790,6 +799,28 @@ void discord_voice_client::write_ready()
 				std::this_thread::sleep_for(sleep_time);
 			}
 		}
+		else if (type == satype_overlap_audio) {
+			std::chrono::nanoseconds latency = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - last_timestamp);
+			std::chrono::nanoseconds sleep_time = std::chrono::nanoseconds(duration) + last_sleep_remainder - latency;
+			std::chrono::nanoseconds sleep_increment = (std::chrono::nanoseconds(duration) - latency) / AUDIO_OVERLAP_SLEEP_SAMPLES;
+			if (sleep_time.count() > 0) {
+				uint16_t samples_count = 0;
+				std::chrono::nanoseconds overshoot_accumulator;
+
+				do {
+					std::chrono::high_resolution_clock::time_point start_sleep = std::chrono::high_resolution_clock::now();
+					std::this_thread::sleep_for(sleep_increment);
+					std::chrono::high_resolution_clock::time_point end_sleep = std::chrono::high_resolution_clock::now();
+
+					samples_count++;
+					overshoot_accumulator += std::chrono::duration_cast<std::chrono::nanoseconds>(end_sleep - start_sleep) - sleep_increment;
+					sleep_time -= std::chrono::duration_cast<std::chrono::nanoseconds>(end_sleep - start_sleep);
+				} while (std::chrono::nanoseconds(overshoot_accumulator.count() / samples_count) + sleep_increment < sleep_time);
+				last_sleep_remainder = sleep_time;
+			}
+			else
+				last_sleep_remainder = std::chrono::nanoseconds(0);
+		}
 
 		last_timestamp = std::chrono::high_resolution_clock::now();
 		if (!creator->on_voice_buffer_send.empty()) {
@@ -907,7 +938,7 @@ void discord_voice_client::set_user_gain(snowflake user_id, float factor)
 		 * factor = 10^(x / (20 * 256))
 		 * x = log_10(factor) * 20 * 256
 		 */
-		gain = std::log10(factor) * 20 * 256;
+		gain = static_cast<int16_t>(std::log10(factor) * 20.0f * 256.0f);
 	}
 
 	std::lock_guard lk(voice_courier_shared_state.mtx);
@@ -935,7 +966,7 @@ void discord_voice_client::log(dpp::loglevel severity, const std::string &msg) c
 
 void discord_voice_client::queue_message(const std::string &j, bool to_front)
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	if (to_front) {
 		message_queue.emplace_front(j);
 	} else {
@@ -945,18 +976,18 @@ void discord_voice_client::queue_message(const std::string &j, bool to_front)
 
 void discord_voice_client::clear_queue()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::unique_lock locker(queue_mutex);
 	message_queue.clear();
 }
 
 size_t discord_voice_client::get_queue_size()
 {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::shared_lock locker(queue_mutex);
 	return message_queue.size();
 }
 
 const std::vector<std::string> discord_voice_client::get_marker_metadata() {
-	std::lock_guard<std::mutex> locker(queue_mutex);
+	std::shared_lock locker(queue_mutex);
 	return track_meta;
 }
 
@@ -968,7 +999,7 @@ void discord_voice_client::one_second_timer()
 	/* Rate limit outbound messages, 1 every odd second, 2 every even second */
 	if (this->get_state() == CONNECTED) {
 		for (int x = 0; x < (time(nullptr) % 2) + 1; ++x) {
-			std::lock_guard<std::mutex> locker(queue_mutex);
+			std::unique_lock locker(queue_mutex);
 			if (!message_queue.empty()) {
 				std::string message = message_queue.front();
 				message_queue.pop_front();
