@@ -306,7 +306,7 @@ public:
 	/** Sorting position, lower number means higher up the list */
 	uint16_t position;
 
-	/** the bitrate (in bits) of the voice channel */
+	/** the bitrate (in kilobits) of the voice channel */
 	uint16_t bitrate;
 
 	/** amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages or manage_channel, are unaffected*/
@@ -438,7 +438,7 @@ public:
 	/**
 	 * @brief Set bitrate of this channel object
 	 *
-	 * @param bitrate Bitrate to set
+	 * @param bitrate Bitrate to set (in kilobits)
 	 * @return Reference to self, so these method calls may be chained 
 	 */
 	channel& set_bitrate(const uint16_t bitrate);
