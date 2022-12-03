@@ -438,6 +438,34 @@ namespace dpp {
 			return "</" + command_name + " " + subcommand_group + " " + subcommand + ":" + std::to_string(command_id) + ">";
 		}
 
+		std::string user_mention(const snowflake& id) {
+		    return "<@" + std::to_string(id) + ">";
+		}
+
+		std::string channel_mention(const snowflake &id) {
+		    return "<#" + std::to_string(id) + ">";
+		}
+
+		std::string emoji_mention(const std::string &name, const snowflake &id, bool is_animated) {
+		    static auto format =  [=](){
+			return id ? ((is_animated ? "a:" : "") + name + ":" + std::to_string(id)) : name;
+		    };
+
+		    if (id) {
+			if (is_animated) {
+			    return "<" + format() + ">";
+			} else {
+			    return "<:" + format() + ">";
+			}
+		    } else {
+			return ":" + format() + ":";
+		    }
+		}
+
+		std::string role_mention(const snowflake &id) {
+		    return "<@&" + std::to_string(id) + ">";
+		}
+
 		std::string make_url_parameters(const std::map<std::string, std::string>& parameters) {
 			std::string output;
 			for(auto& [k, v] : parameters) {
@@ -521,6 +549,6 @@ namespace dpp {
 				#endif
 			#endif
 		}
-	};
+    };
 
 };
