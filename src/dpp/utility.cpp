@@ -535,7 +535,7 @@ namespace dpp {
 			return DPP_VERSION_TEXT;
 		}
 
-		void set_thread_name(const std::string& name) {
+		void set_thread_name([[maybe_unused]] const std::string& name) {
 			#ifdef HAVE_PRCTL
 				prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name.substr(0, 15).c_str()), NULL, NULL, NULL);
 			#else
