@@ -62,11 +62,11 @@ std::string user::get_mention(const snowflake& id) {
 	return utility::user_mention(id);
 }
 
-std::string user::build_json(bool with_id) const {
+std::string user::build_json([[maybe_unused]] bool with_id) const {
 	return "";
 }
 
-std::string user_identified::build_json(bool with_id) const {
+std::string user_identified::build_json([[maybe_unused]] bool with_id) const {
 	return "";
 }
 

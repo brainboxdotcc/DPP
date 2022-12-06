@@ -782,7 +782,7 @@ void attachment::download(http_completion_event callback) const {
 	}
 }
 
-std::string message::build_json(bool with_id, bool is_interaction_response) const {
+std::string message::build_json(bool with_id, [[maybe_unused]] bool is_interaction_response) const {
 	/* This is the basics. once it works, expand on it. */
 	json j({
 		{"channel_id", channel_id},

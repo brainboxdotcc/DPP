@@ -201,7 +201,7 @@ void interaction_create_t::edit_original_response(const message & m, command_com
 
 void interaction_create_t::delete_original_response(command_completion_event_t callback) const
 {
-	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_delete, "", [creator = this->from->creator, callback](json &j, const http_request_completion_t& http) {
+	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_delete, "", [creator = this->from->creator, callback]([[maybe_unused]] json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(creator, confirmation(), http));
 		}
@@ -221,28 +221,28 @@ const command_value& interaction_create_t::get_parameter(const std::string& name
 	return dummy_value;
 }
 
-const command_value& button_click_t::get_parameter(const std::string& name) const
+const command_value& button_click_t::get_parameter([[maybe_unused]] const std::string& name) const
 {
 	/* Buttons don't have parameters, so override this */
 	static command_value dummy_b_value = {};
 	return dummy_b_value;
 }
 
-const command_value& select_click_t::get_parameter(const std::string& name) const
+const command_value& select_click_t::get_parameter([[maybe_unused]] const std::string& name) const
 {
 	/* Selects don't have parameters, so override this */
 	static command_value dummy_b_value = {};
 	return dummy_b_value;
 }
 
-const command_value& form_submit_t::get_parameter(const std::string& name) const
+const command_value& form_submit_t::get_parameter([[maybe_unused]] const std::string& name) const
 {
 	/* Buttons don't have parameters, so override this */
 	static command_value dummy_b_value = {};
 	return dummy_b_value;
 }
 
-const command_value& autocomplete_t::get_parameter(const std::string& name) const
+const command_value& autocomplete_t::get_parameter([[maybe_unused]] const std::string& name) const
 {
 	/* Autocomplete don't have parameters, so override this */
 	static command_value dummy_b_value = {};

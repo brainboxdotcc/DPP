@@ -63,7 +63,7 @@ websocket_client::~websocket_client()
 {
 }
 
-bool websocket_client::handle_frame(const std::string &buffer)
+bool websocket_client::handle_frame([[maybe_unused]] const std::string &buffer)
 {
 	/* This is a stub for classes that derive the websocket client */
 	return true;
@@ -303,7 +303,7 @@ void websocket_client::send_close_packet()
 	ssl_client::write(payload);
 }
 
-void websocket_client::error(uint32_t errorcode)
+void websocket_client::error([[maybe_unused]] uint32_t errorcode)
 {
 }
 

@@ -611,6 +611,11 @@ discord_client& discord_client::connect_voice(snowflake guild_id, snowflake chan
 	} else {
 		log(ll_debug, "Requested the bot connect to voice channel " + std::to_string(channel_id) + " on guild " + std::to_string(guild_id) + ", but it seems we are already on this VC");
 	}
+#else
+	(void)guild_id;
+	(void)channel_id;
+	(void)self_mute;
+	(void)self_deaf;
 #endif
 	return *this;
 }
@@ -645,6 +650,9 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 		v->second = nullptr;
 		connecting_voice_channels.erase(v);
 	}
+#else
+	(void)guild_id;
+	(void)emit_json;
 #endif
 }
 
@@ -660,6 +668,8 @@ voiceconn* discord_client::get_voice(snowflake guild_id) {
 	if (v != connecting_voice_channels.end()) {
 		return v->second;
 	}
+#else
+	(void)guild_id;
 #endif
 	return nullptr;
 }

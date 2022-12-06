@@ -47,7 +47,7 @@ automod_action& automod_action::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string automod_action::build_json(bool with_id) const {
+std::string automod_action::build_json([[maybe_unused]] bool with_id) const {
 	json j({
 		{ "type", type }
 	});
@@ -91,7 +91,7 @@ automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string automod_metadata::build_json(bool with_id) const {
+std::string automod_metadata::build_json([[maybe_unused]] bool with_id) const {
 	json j;
 	j["keyword_filter"] = json::array();
 	j["regex_patterns"] = json::array();

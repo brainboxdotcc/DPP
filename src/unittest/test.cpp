@@ -343,7 +343,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		/* This ensures we test both protocols, as voice is json and shard is etf */
 		bot.set_websocket_protocol(dpp::ws_etf);
 
-		bot.on_form_submit([&](const dpp::form_submit_t & event) {
+		bot.on_form_submit([&]([[maybe_unused]] const dpp::form_submit_t & event) {
 		});
 
 		/* This is near impossible to test without a 'clean room' voice channel.
@@ -351,10 +351,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		 * are sending audio later, this way if the audio receive code is plain unstable
 		 * the test suite will crash and fail.
 		 */
-		bot.on_voice_receive_combined([&](auto& event) {
+		bot.on_voice_receive_combined([&]([[maybe_unused]] auto& event) {
 		});
 
-		bot.on_ready([&bot](const dpp::ready_t & event) {
+		bot.on_ready([&bot]([[maybe_unused]] const dpp::ready_t & event) {
 
 			set_test("CONNECTION", true);
 			set_test("APPCOMMAND", false);
@@ -695,7 +695,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test("TIMERSTART", false);
 		uint32_t ticks = 0;
-		dpp::timer th = bot.start_timer([&](dpp::timer timer_handle) {
+		dpp::timer th = bot.start_timer([&]([[maybe_unused]] dpp::timer timer_handle) {
 			if (ticks == 5) {
 				/* The simple test timer ticks every second.
 				 * If we get to 5 seconds, we know the timer is working.
@@ -706,13 +706,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		}, 1);
 
 		set_test("TIMEDLISTENER", false);
-		dpp::timed_listener tl(&bot, 10, bot.on_log, [&](const dpp::log_t & event) {
+		dpp::timed_listener tl(&bot, 10, bot.on_log, [&]([[maybe_unused]] const dpp::log_t & event) {
 			set_test("TIMEDLISTENER", true);
 		});
 
 		set_test("ONESHOT", false);
 		bool once = false;
-		dpp::oneshot_timer ost(&bot, 5, [&](dpp::timer timer_handle) {
+		dpp::oneshot_timer ost(&bot, 5, [&]([[maybe_unused]] dpp::timer timer_handle) {
 			if (!once) {
 				set_test("ONESHOT", true);
 			} else {

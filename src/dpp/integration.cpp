@@ -88,7 +88,7 @@ integration& integration::fill_from_json(nlohmann::json* j)
 	return *this;
 }
 
-std::string integration::build_json(bool with_id) const {
+std::string integration::build_json([[maybe_unused]] bool with_id) const {
 	return json({
 		{ "expire_behavior", (flags & if_expire_kick) ? 1 : 0 },
 		{ "expire_grace_period", expire_grace_period },

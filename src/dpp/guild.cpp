@@ -187,7 +187,7 @@ bool guild_member::has_animated_guild_avatar() const {
 	return this->flags & gm_animated_avatar;
 }
 
-std::string guild_member::build_json(bool with_id) const {
+std::string guild_member::build_json([[maybe_unused]] bool with_id) const {
 	json j;
 	if (this->communication_disabled_until > 0) {
 		if (this->communication_disabled_until > std::time(nullptr)) {
@@ -569,7 +569,7 @@ guild_widget& guild_widget::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string guild_widget::build_json(bool with_id) const {
+std::string guild_widget::build_json([[maybe_unused]] bool with_id) const {
 	return json({{"channel_id", channel_id}, {"enabled", enabled}}).dump();
 }
 

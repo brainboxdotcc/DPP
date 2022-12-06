@@ -258,6 +258,9 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			client.creator->on_voice_receive_combined.call(vr);
 		}
 	}
+#else
+	(void)client;
+	(void)shared_state;
 #endif
 }
 
@@ -956,6 +959,9 @@ void discord_voice_client::set_user_gain(snowflake user_id, float factor)
 		.pending_decoder_ctls.push_back([gain](OpusDecoder& decoder) {
 			opus_decoder_ctl(&decoder, OPUS_SET_GAIN(gain));
 		});
+#else
+	(void)user_id;
+	(void)factor;
 #endif
 }
 
@@ -1062,6 +1068,9 @@ size_t discord_voice_client::encode(uint8_t *input, size_t inDataSize, uint8_t *
 		throw dpp::voice_exception("Invalid input data length: " + std::to_string(inDataSize) + ", must be n times of " + std::to_string(mEncFrameBytes));
 	}
 #else
+	(void)input;
+	(void)inDataSize;
+	(void)output;
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 	return outDataSize;
@@ -1149,6 +1158,8 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 
 	send_audio_opus(encodedAudioData.data(), encodedAudioLength);
 #else
+	(void)audio_data;
+	(void)length;
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 	return *this;
@@ -1160,6 +1171,8 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	uint64_t duration = (samples / 48) / (timescale / 1000000);
 	send_audio_opus(opus_packet, length, duration);
 #else
+	(void)opus_packet;
+	(void)length;
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 	return *this;
@@ -1194,6 +1207,9 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 
 	speak();
 #else
+	(void)opus_packet;
+	(void)length;
+	(void)duration;
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 	return *this;

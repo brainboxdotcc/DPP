@@ -106,7 +106,7 @@ void cluster::tick_timers() {
 
 oneshot_timer::oneshot_timer(class cluster* cl, uint64_t duration, timer_callback_t callback) : owner(cl) {
 	/* Create timer */
-	th = cl->start_timer([callback, this](dpp::timer timer_handle) {
+	th = cl->start_timer([callback, this]([[maybe_unused]] dpp::timer timer_handle) {
 		callback(this->get_handle());
 		this->owner->stop_timer(this->th);
 	}, duration);

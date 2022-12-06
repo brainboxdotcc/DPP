@@ -51,7 +51,7 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string invite::build_json(bool with_id) const {
+std::string invite::build_json([[maybe_unused]] bool with_id) const {
 	json j;
 	if (max_age > 0)
 		j["max_age"] = max_age;

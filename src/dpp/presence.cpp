@@ -223,7 +223,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string presence::build_json(bool with_id) const {
+std::string presence::build_json([[maybe_unused]] bool with_id) const {
 	std::map<presence_status, std::string> status_name_mapping = {
 		{ps_online, "online"},
 		{ps_offline, "offline"},

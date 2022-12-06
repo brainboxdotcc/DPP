@@ -36,7 +36,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void logger::handle(discord_client* client, json &j, const std::string &raw) {
+void logger::handle(discord_client* client, [[maybe_unused]] json &j, const std::string &raw) {
 	if (!client->creator->on_log.empty()) {
 		dpp::log_t logmsg(client, raw);
 		logmsg.severity = (dpp::loglevel)from_string<uint32_t>(raw.substr(0, raw.find(';')));

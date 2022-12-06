@@ -54,7 +54,7 @@ namespace dpp {
 		 * @param with_id Include the ID in the JSON
 		 * @return std::string JSON string version of object
 		 */
-		virtual std::string build_json(bool with_id = false) const {
+		virtual std::string build_json([[maybe_unused]] bool with_id = false) const {
 			throw dpp::logic_exception("JSON interface doesn't implement build_json");
 		}
 	};

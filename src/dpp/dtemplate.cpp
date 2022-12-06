@@ -44,7 +44,7 @@ dtemplate& dtemplate::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string dtemplate::build_json(bool with_id) const {
+std::string dtemplate::build_json([[maybe_unused]] bool with_id) const {
 	json j({
 		{"code", code},
 		{"name", name},

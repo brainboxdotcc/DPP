@@ -82,7 +82,7 @@ bool voicestate::is_suppressed() const {
 	return flags & vs_suppress;
 }
 
-std::string voicestate::build_json(bool with_id) const {
+std::string voicestate::build_json([[maybe_unused]] bool with_id) const {
 	/* Voicestates are never sent from a bot */
 	return json({}).dump();
 }

@@ -378,7 +378,7 @@ std::string ssl_client::get_cipher() {
 	return cipher;
 }
 
-void ssl_client::log(dpp::loglevel severity, const std::string &msg) const
+void ssl_client::log([[maybe_unused]] dpp::loglevel severity, [[maybe_unused]] const std::string &msg) const
 {
 }
 
@@ -595,7 +595,7 @@ uint64_t ssl_client::get_bytes_in()
 	return bytes_in;
 }
 
-bool ssl_client::handle_buffer(std::string &buffer)
+bool ssl_client::handle_buffer([[maybe_unused]] std::string &buffer)
 {
 	return true;
 }

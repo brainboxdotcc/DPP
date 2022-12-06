@@ -80,7 +80,7 @@ public:
 				stored.push_back(*v);
 			}
 		};
-		tl = new dpp::timed_listener<event_router_t<T>, std::function<void(const T&)>>(cl, duration, event, f, [this](dpp::timer timer_handle) {
+		tl = new dpp::timed_listener<event_router_t<T>, std::function<void(const T&)>>(cl, duration, event, f, [this]([[maybe_unused]] dpp::timer timer_handle) {
 			if (!triggered) {
 				triggered = true;
 				completed(stored);

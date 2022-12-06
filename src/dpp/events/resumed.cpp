@@ -36,7 +36,7 @@ using namespace dpp;
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void resumed::handle(discord_client* client, json &j, const std::string &raw) {
+void resumed::handle(discord_client* client, [[maybe_unused]] json &j, const std::string &raw) {
 	client->log(dpp::ll_debug, std::string("Successfully resumed session id ") + client->sessionid);
 
 	client->ready = true;

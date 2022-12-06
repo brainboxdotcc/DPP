@@ -47,7 +47,7 @@ stage_instance& stage_instance::fill_from_json(const json* j) {
 	return *this;
 }
 
-std::string stage_instance::build_json(bool with_id) const {
+std::string stage_instance::build_json([[maybe_unused]] bool with_id) const {
 	json j;
 	j["topic"] = this->topic;
 	j["privacy_level"] = this->privacy_level;
