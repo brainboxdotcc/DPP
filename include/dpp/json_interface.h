@@ -44,7 +44,7 @@ namespace dpp {
 		 * @param j nlohmann::json object
 		 * @return T& Reference to self for fluent calling
 		 */
-		T& fill_from_json(nlohmann::json* j) {
+		T& fill_from_json([[maybe_unused]] nlohmann::json* j) {
 			throw dpp::logic_exception("JSON interface doesn't implement parse_from_json");
 		}
 
