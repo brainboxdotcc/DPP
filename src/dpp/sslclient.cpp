@@ -166,6 +166,7 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking)
 int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, socklen_t addrlen, unsigned int timeout_ms) {
 #ifdef __APPLE__
 		/* Unreliable on OSX right now */
+		(void)timeout_ms;
 		return (::connect(sockfd, addr, addrlen));
 #else
 	if (!set_nonblocking(sockfd, true)) {
