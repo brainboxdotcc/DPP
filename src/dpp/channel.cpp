@@ -122,12 +122,15 @@ channel::channel() :
 {
 }
 
-channel::~channel()
-{
+channel::~channel(){
+}
+
+std::string channel::get_mention(const snowflake &id) {
+	return utility::channel_mention(id);
 }
 
 std::string channel::get_mention() const {
-	return "<#" + std::to_string(id) + ">";
+	return utility::channel_mention(id);
 }
 
 channel& channel::set_name(const std::string& name) {
@@ -332,7 +335,7 @@ channel& channel::fill_from_json(json* j) {
 	set_int16_not_null(j, "default_thread_rate_limit_per_user", this->default_thread_rate_limit_per_user);
 	set_snowflake_not_null(j, "owner_id", this->owner_id);
 	set_snowflake_not_null(j, "parent_id", this->parent_id);
-	this->bitrate = int16_not_null(j, "bitrate")/1024;
+	this->bitrate = int16_not_null(j, "bitrate")/1000;
 	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
 
 	uint16_t arc = int16_not_null(j, "default_auto_archive_duration");
@@ -468,7 +471,7 @@ std::string channel::build_json(bool with_id) const {
 	}
 	if (is_voice_channel()) {
 		j["user_limit"] = user_limit; 
-		j["bitrate"] = bitrate*1024;
+		j["bitrate"] = bitrate*1000;
 	}
 	if (is_forum()) {
 		j["flags"] = (flags & dpp::c_require_tag) ? dpp::dc_require_tag : 0;
