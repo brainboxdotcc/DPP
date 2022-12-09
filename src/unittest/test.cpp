@@ -453,21 +453,21 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						}
 						// testing all user flags from https://discord.com/developers/docs/resources/user#user-object-user-flags
 						if (
-								u.is_discord_employee() == 			((raw_flags & (1 << 0)) != 0) &&
-								u.is_partnered_owner() == 			((raw_flags & (1 << 1)) != 0) &&
-								u.has_hypesquad_events() == 		((raw_flags & (1 << 2)) != 0) &&
-								u.is_bughunter_1() == 				((raw_flags & (1 << 3)) != 0) &&
-								u.is_house_bravery() == 			((raw_flags & (1 << 6)) != 0) &&
-								u.is_house_brilliance() == 			((raw_flags & (1 << 7)) != 0) &&
-								u.is_house_balance() == 			((raw_flags & (1 << 8)) != 0) &&
-								u.is_early_supporter() == 			((raw_flags & (1 << 9)) != 0) &&
-								u.is_team_user() == 				((raw_flags & (1 << 10)) != 0) &&
-								u.is_bughunter_2() == 				((raw_flags & (1 << 14)) != 0) &&
-								u.is_verified_bot() == 				((raw_flags & (1 << 16)) != 0) &&
-								u.is_verified_bot_dev() == 			((raw_flags & (1 << 17)) != 0) &&
-								u.is_certified_moderator() == 		((raw_flags & (1 << 18)) != 0) &&
-								u.is_bot_http_interactions() == 	((raw_flags & (1 << 19)) != 0) &&
-								u.is_active_developer() == 			((raw_flags & (1 << 22)) != 0)
+								u.is_discord_employee() == 			((raw_flags & dpp::u_discord_employee) != 0) &&
+								u.is_partnered_owner() == 			((raw_flags & dpp::u_partnered_owner) != 0) &&
+								u.has_hypesquad_events() == 		((raw_flags & dpp::u_hypesquad_events) != 0) &&
+								u.is_bughunter_1() == 				((raw_flags & dpp::u_bughunter_1) != 0) &&
+								u.is_house_bravery() == 			((raw_flags & dpp::u_house_bravery) != 0) &&
+								u.is_house_brilliance() == 			((raw_flags & dpp::u_house_brilliance) != 0) &&
+								u.is_house_balance() == 			((raw_flags & dpp::u_house_balance) != 0) &&
+								u.is_early_supporter() == 			((raw_flags & dpp::u_early_supporter) != 0) &&
+								u.is_team_user() == 				((raw_flags & dpp::u_team_user) != 0) &&
+								u.is_bughunter_2() == 				((raw_flags & dpp::u_bughunter_2) != 0) &&
+								u.is_verified_bot() == 				((raw_flags & dpp::u_verified_bot) != 0) &&
+								u.is_verified_bot_dev() == 			((raw_flags & dpp::u_verified_bot_dev) != 0) &&
+								u.is_certified_moderator() == 		((raw_flags & dpp::u_certified_moderator) != 0) &&
+								u.is_bot_http_interactions() == 	((raw_flags & dpp::u_bot_http_interactions) != 0) &&
+								u.is_active_developer() == 			((raw_flags & dpp::u_active_developer) != 0)
 								) {
 							set_test("USER_GET_FLAGS", true);
 						} else {
