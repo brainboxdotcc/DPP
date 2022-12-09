@@ -447,19 +447,15 @@ namespace dpp {
 		}
 
 		std::string emoji_mention(const std::string &name, const snowflake &id, bool is_animated) {
-		    static auto format =  [=](){
-			return id ? ((is_animated ? "a:" : "") + name + ":" + std::to_string(id)) : name;
-		    };
+			auto format = [=]() {
+				return id ? ((is_animated ? "a:" : ":") + name + ":" + std::to_string(id)) : name;
+			};
 
-		    if (id) {
-			if (is_animated) {
-			    return "<" + format() + ">";
+			if (id) {
+				return "<" + format() + ">";
 			} else {
-			    return "<:" + format() + ">";
+				return ":" + format() + ":";
 			}
-		    } else {
-			return ":" + format() + ":";
-		    }
 		}
 
 		std::string role_mention(const snowflake &id) {
