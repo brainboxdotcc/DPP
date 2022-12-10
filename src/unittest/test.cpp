@@ -301,6 +301,30 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		auto mention3 = dpp::utility::slashcommand_mention(123, "name", "group", "sub");
 		bool success = mention1 == "</name:123>" && mention2 == "</name sub:123>" && mention3 == "</name group sub:123>";
 		set_test("UTILITY.SLASHCOMMAND_MENTION", success);
+
+		set_test("UTILITY.CHANNEL_MENTION", false);
+		auto channel_mention = dpp::utility::channel_mention(123);
+		set_test("UTILITY.CHANNEL_MENTION", channel_mention == "<#123>");
+
+		set_test("UTILITY.USER_MENTION", false);
+		auto user_mention = dpp::utility::user_mention(123);
+		set_test("UTILITY.USER_MENTION", user_mention == "<@123>");
+
+		set_test("UTILITY.ROLE_MENTION", false);
+		auto role_mention = dpp::utility::role_mention(123);
+		set_test("UTILITY.ROLE_MENTION", role_mention == "<@&123>");
+
+		set_test("UTILITY.EMOJI_MENTION", false);
+		auto emoji_mention1 = dpp::utility::emoji_mention("role1", 123, false);
+		auto emoji_mention2 = dpp::utility::emoji_mention("role2", 234, true);
+		auto emoji_mention3 = dpp::utility::emoji_mention("white_check_mark", 0, false);
+		auto emoji_mention4 = dpp::utility::emoji_mention("white_check_mark", 0, true);
+		set_test("UTILITY.EMOJI_MENTION",
+				 emoji_mention1 == "<:role1:123>" &&
+				 emoji_mention2 == "<a:role2:234>" &&
+				 emoji_mention3 == ":white_check_mark:" &&
+				 emoji_mention4 == ":white_check_mark:"
+		);
 	}
 
 #ifndef _WIN32
