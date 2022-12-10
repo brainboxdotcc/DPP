@@ -452,6 +452,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							raw_flags |= flags;
 						}
 						// testing all user flags from https://discord.com/developers/docs/resources/user#user-object-user-flags
+						// they're manually set here because the dpp::user_flags don't match to the discord API, so we can't use them to compare with the raw flags!
 						if (
 								u.is_discord_employee() == 			((raw_flags & (1 << 0)) != 0) &&
 								u.is_partnered_owner() == 			((raw_flags & (1 << 1)) != 0) &&
