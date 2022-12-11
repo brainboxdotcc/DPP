@@ -152,15 +152,15 @@ enum guild_flags_extra : uint8_t {
  */
 enum guild_member_flags : uint8_t {
 	/** Member deafened in voice channels */
-	gm_deaf =		0b00001,
+	gm_deaf =		0b00000001,
 	/** Member muted in voice channels */
-	gm_mute =		0b00010,
+	gm_mute =		0b00000010,
 	/** Member pending verification by membership screening */
-	gm_pending =		0b00100,
+	gm_pending =		0b00000100,
 	/** Member has animated guild-specific avatar */
-	gm_animated_avatar = 	0b01000,
+	gm_animated_avatar = 	0b00001000,
 	/** gm_deaf or gm_mute has been toggled */
-	gm_voice_action = 			0b10000,
+	gm_voice_action = 		0b00010000,
 };
 
 /**
@@ -291,6 +291,15 @@ public:
 	 * @return guild_member& reference to self 
 	 */
 	guild_member& set_deaf(const bool is_deafened);
+
+	/**
+	 * @brief Set whether the user is pending verification by membership screening
+	 *
+	 * @param is_pending value to set, true if pending
+	 *
+	 * @return guild_member& reference to self
+	 */
+	guild_member& set_pending(const bool is_pending);
 
 	/**
 	 * @brief Set communication_disabled_until
