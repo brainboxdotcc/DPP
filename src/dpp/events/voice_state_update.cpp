@@ -57,6 +57,15 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 		} else {
 			g->voice_members[vsu.state.user_id] = vsu.state;
 		}
+
+		if (client->creator->cache_policy.user_policy != dpp::cp_none) {
+			if (d.contains("member")) {
+				auto& member = d["member"];
+				guild_member m;
+				m.fill_from_json(&member, g->id, vsu.state.user_id);
+				g->members[m.user_id] = m;
+			}
+		}
 	}
 
 	if (vsu.state.user_id == client->creator->me.id)
