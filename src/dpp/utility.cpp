@@ -239,14 +239,14 @@ namespace dpp {
 				value = value.substr(1,value.length()-1);
 			}
 			if (value.length() < 6){
-				throw  dpp::length_exception("Hexadecimal color is to short");
+				throw  dpp::length_exception("Hexadecimal color is to short.");
 			}
 			if (value.length() > 6){
 				value = utf8substr(value,0,6);
 			}
 			const std::regex r{R"(^[0-9a-fA-F]{6}$)"};
 			if (! std::regex_match (value,r)){
-				throw  dpp::exception("Incorrect hex color format");
+				throw  dpp::exception("Incorrect hexadecimal color format.");
 			}
 			uint32_t x;
 			std::stringstream ss;
