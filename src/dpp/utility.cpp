@@ -33,7 +33,6 @@
 #include <fstream>
 #include <streambuf>
 #include <array>
-#include <regex>
 #include <dpp/cluster.h>
 #include <dpp/dispatcher.h>
 
@@ -235,27 +234,6 @@ namespace dpp {
 			return rgb(r,g,b);
 		}
 
-		uint32_t hexadecimal(std::string value){
-			if (value[0] == '#'){
-				value = value.substr(1,value.length()-1);
-			}
-			if (value.length() < 6){
-				throw  dpp::length_exception("Hexadecimal color is to short.");
-			}
-			if (value.length() > 6){
-				value = utf8substr(value,0,6);
-			}
-			const std::regex r{R"(^[0-9a-fA-F]{6}$)"};
-			if (! std::regex_match (value,r)){
-				throw  dpp::exception("Incorrect hexadecimal color format.");
-			}
-			uint32_t x;
-			std::stringstream ss;
-			ss << std::hex << value;
-			ss >> x;
-			return x;
-		}
-        
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 			auto t = std::thread([cmd, parameters, callback]() {
 				utility::set_thread_name("async_exec");

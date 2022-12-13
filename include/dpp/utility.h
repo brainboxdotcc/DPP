@@ -295,14 +295,6 @@ namespace dpp {
 		uint32_t DPP_EXPORT cmyk(float c, float m, float y,float k);
 
 		/**
-		 * @brief Convert string to HEX for sending in embeds
-		 *
-		 * @param value code in format #[0-9a-fA-F]{6} (example: "#bedded") or [0-9a-fA-F]{6} (example: "bedded")
-		 * @return uint32_t returned integer colour value
-		 */
-		uint32_t DPP_EXPORT hexadecimal(std::string value);
-		
-		/**
 		 * @brief Output hex values of a section of memory for debugging
 		 * 
 		 * @param data The start of the data to display
