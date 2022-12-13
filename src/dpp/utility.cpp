@@ -227,7 +227,6 @@ namespace dpp {
 			return ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
 		}
 		
-		
 		uint32_t cmyk(float c, float m, float y,float k){
 			int r = (int)(255 * (1 - c) * (1 - k));
 			int g = (int)(255 * (1 - m) * (1 - k));
