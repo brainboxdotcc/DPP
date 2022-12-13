@@ -33,6 +33,7 @@
 #include <fstream>
 #include <streambuf>
 #include <array>
+#include <regex>
 #include <dpp/cluster.h>
 #include <dpp/dispatcher.h>
 
