@@ -283,6 +283,25 @@ namespace dpp {
 		 */
 		uint32_t DPP_EXPORT rgb(int red, int green, int blue);
 
+	        /**
+		 * @brief Convert ints floats CMYK for sending in embeds
+		 *
+		 * @param cyan cyan value, between 0 and 1 inclusive
+		 * @param magenta magenta value, between 0 and 1 inclusive
+		 * @param yellow yellow value, between 0 and 1 inclusive
+		 * @param key key (black) value, between 0 and 1 inclusive
+		 * @return uint32_t returned integer colour value
+		 */
+		uint32_t DPP_EXPORT cmyk(float c, float m, float y,float k);
+
+
+		/**
+		 * @brief Convert ints to HEX for sending in embeds
+		 * @param hex code in format #[0-9,a-f,A-F]{6} (#0fead1) or [0-9,a-f,A-F]{6} (0fead1)
+		 * @return uint32_t returned integer colour value
+		 */
+		uint32_t DPP_EXPORT hexadecimal(std::string value);
+		
 		/**
 		 * @brief Output hex values of a section of memory for debugging
 		 * 

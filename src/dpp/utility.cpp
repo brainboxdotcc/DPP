@@ -226,7 +226,36 @@ namespace dpp {
 		uint32_t rgb(int red, int green, int blue) {
 			return ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
 		}
+		
+		
+		uint32_t cmyk(float c, float m, float y,float k){
+			int r = (int)(255 * (1 - c) * (1 - k));
+			int g = (int)(255 * (1 - m) * (1 - k));
+			int b = (int)(255 * (1 - y) * (1 - m));
+			return rgb(r,g,b);
+		}
 
+		uint32_t hexadecimal(std::string value){
+			if (value[0] == '#'){
+				value = value.substr(1,value.length()-1);
+			}
+			if (value.length() < 6){
+				throw  dpp::length_exception("Hexadecimal color is to short");
+			}
+			if (value.length() > 6){
+				value = utf8substr(value,0,6);
+			}
+			const std::regex r{R"(^[0-9a-fA-F]{6}$)"};
+			if (! std::regex_match (value,r)){
+				throw  dpp::exception("Incorrect hex color format");
+			}
+			uint32_t x;
+			std::stringstream ss;
+			ss << std::hex << value;
+			ss >> x;
+			return x;
+		}
+        
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 			auto t = std::thread([cmd, parameters, callback]() {
 				utility::set_thread_name("async_exec");
