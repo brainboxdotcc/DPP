@@ -297,7 +297,7 @@ namespace dpp {
 		/**
 		 * @brief Convert string to HEX for sending in embeds
 		 *
-		 * @param value code in format #[0-9,a-f,A-F]{6} (#0fead1) or [0-9,a-f,A-F]{6} (0fead1)
+		 * @param value code in format #[0-9a-fA-F]{6} (example: "#bedded") or [0-9a-fA-F]{6} (example: "bedded")
 		 * @return uint32_t returned integer colour value
 		 */
 		uint32_t DPP_EXPORT hexadecimal(std::string value);
