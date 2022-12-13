@@ -284,7 +284,7 @@ namespace dpp {
 		uint32_t DPP_EXPORT rgb(int red, int green, int blue);
 
 	        /**
-		 * @brief Convert floats CMYK for sending in embeds
+		 * @brief Convert floats to CMYK for sending in embeds
 		 *
 		 * @param c cyan value, between 0 and 1 inclusive
 		 * @param m magenta value, between 0 and 1 inclusive
