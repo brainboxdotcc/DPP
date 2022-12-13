@@ -227,13 +227,17 @@ namespace dpp {
 			return ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
 		}
 		
-		uint32_t cmyk(float c, float m, float y,float k){
+		uint32_t cmyk(double c, double m, double y,double k){
 			int r = (int)(255 * (1 - c) * (1 - k));
 			int g = (int)(255 * (1 - m) * (1 - k));
 			int b = (int)(255 * (1 - y) * (1 - m));
 			return rgb(r,g,b);
 		}
-
+		
+		uint32_t cmyk(int c, int m, int y,int k){
+			return cmyk(c/255.0,m/255.0,y/255.0,k/255.0);
+		}
+		
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 			auto t = std::thread([cmd, parameters, callback]() {
 				utility::set_thread_name("async_exec");
