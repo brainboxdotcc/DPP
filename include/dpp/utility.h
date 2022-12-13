@@ -286,10 +286,10 @@ namespace dpp {
 	        /**
 		 * @brief Convert ints floats CMYK for sending in embeds
 		 *
-		 * @param cyan cyan value, between 0 and 1 inclusive
-		 * @param magenta magenta value, between 0 and 1 inclusive
-		 * @param yellow yellow value, between 0 and 1 inclusive
-		 * @param key key (black) value, between 0 and 1 inclusive
+		 * @param c cyan value, between 0 and 1 inclusive
+		 * @param m magenta value, between 0 and 1 inclusive
+		 * @param y yellow value, between 0 and 1 inclusive
+		 * @param k key (black) value, between 0 and 1 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
 		uint32_t DPP_EXPORT cmyk(float c, float m, float y,float k);
