@@ -275,7 +275,7 @@ namespace dpp {
 
 		/**
 		 * @brief Convert ints to RGB for sending in embeds
-		 * 
+		 *
 		 * @param red red value, between 0 and 255 inclusive
 		 * @param green green value, between 0 and 255 inclusive
 		 * @param blue blue value, between 0 and 255 inclusive
@@ -294,9 +294,9 @@ namespace dpp {
 		 */
 		uint32_t DPP_EXPORT cmyk(float c, float m, float y,float k);
 
-
 		/**
 		 * @brief Convert ints to HEX for sending in embeds
+		 *
 		 * @param hex code in format #[0-9,a-f,A-F]{6} (#0fead1) or [0-9,a-f,A-F]{6} (0fead1)
 		 * @return uint32_t returned integer colour value
 		 */
