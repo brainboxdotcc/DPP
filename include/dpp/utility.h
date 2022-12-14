@@ -292,7 +292,7 @@ namespace dpp {
 		 * @param k key (black) value, between 0 and 1 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
-		uint32_t DPP_EXPORT cmyk(double c, double m, double y,double k);
+		uint32_t DPP_EXPORT cmyk(double c, double m, double y, double k);
 		
 		/**
 		 * @brief Convert ints to CMYK for sending in embeds
@@ -303,7 +303,7 @@ namespace dpp {
 		 * @param k key (black) value, between 0 and 255 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
-		uint32_t DPP_EXPORT cmyk(int c, int m, int y,int k);
+		uint32_t DPP_EXPORT cmyk(int c, int m, int y, int k);
 
 		/**
 		 * @brief Output hex values of a section of memory for debugging
