@@ -292,7 +292,7 @@ namespace dpp {
 		 * @param k key (black) value, between 0 and 1 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
-		uint32_t DPP_EXPORT cmyk(double c, double m, double y, double k);
+		uint32_t DPP_EXPORT cmyk(float c, float m, float y, float k);
 		
 		/**
 		 * @brief Convert ints to CMYK for sending in embeds
