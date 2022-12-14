@@ -218,7 +218,7 @@ namespace dpp {
 			return print_buffer;
 		}
 
-		uint32_t rgb(float red, float green, float blue) {
+		uint32_t rgb(double red, double green, double blue) {
 			return (((uint32_t)(red * 255)) << 16) | (((uint32_t)(green * 255)) << 8) | ((uint32_t)(blue * 255));
 		}
 
@@ -227,7 +227,7 @@ namespace dpp {
 			return ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
 		}
 		
-		uint32_t cmyk(float c, float m, float y, float k) {
+		uint32_t cmyk(double c, double m, double y, double k) {
 			int r = (int)(255 * (1 - c) * (1 - k));
 			int g = (int)(255 * (1 - m) * (1 - k));
 			int b = (int)(255 * (1 - y) * (1 - m));
