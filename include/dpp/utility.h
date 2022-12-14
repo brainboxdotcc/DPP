@@ -264,24 +264,46 @@ namespace dpp {
 		};
 
 		/**
-		 * @brief Convert floats to RGB for sending in embeds
+		 * @brief Convert doubles to RGB for sending in embeds
 		 * 
 		 * @param red red value, between 0 and 1 inclusive
 		 * @param green green value, between 0 and 1 inclusive
 		 * @param blue blue value, between 0 and 1 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
-		uint32_t DPP_EXPORT rgb(float red, float green, float blue);
+		uint32_t DPP_EXPORT rgb(double red, double green, double blue);
 
 		/**
 		 * @brief Convert ints to RGB for sending in embeds
-		 * 
+		 *
 		 * @param red red value, between 0 and 255 inclusive
 		 * @param green green value, between 0 and 255 inclusive
 		 * @param blue blue value, between 0 and 255 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
 		uint32_t DPP_EXPORT rgb(int red, int green, int blue);
+
+	        /**
+		 * @brief Convert doubles to CMYK for sending in embeds
+		 *
+		 * @param c cyan value, between 0 and 1 inclusive
+		 * @param m magenta value, between 0 and 1 inclusive
+		 * @param y yellow value, between 0 and 1 inclusive
+		 * @param k key (black) value, between 0 and 1 inclusive
+		 * @return uint32_t returned integer colour value
+		 */
+		uint32_t DPP_EXPORT cmyk(double c, double m, double y, double k);
+		
+		/**
+		 * @brief Convert ints to CMYK for sending in embeds
+		 *
+		 * @param c cyan value, between 0 and 255 inclusive
+		 * @param m magenta value, between 0 and 255 inclusive
+		 * @param y yellow value, between 0 and 255 inclusive
+		 * @param k key (black) value, between 0 and 255 inclusive
+		 * @return uint32_t returned integer colour value
+		 */
+		uint32_t DPP_EXPORT cmyk(int c, int m, int y, int k);
 
 		/**
 		 * @brief Output hex values of a section of memory for debugging
