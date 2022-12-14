@@ -227,15 +227,15 @@ namespace dpp {
 			return ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
 		}
 		
-		uint32_t cmyk(double c, double m, double y, double k){
+		uint32_t cmyk(float c, float m, float y, float k) {
 			int r = (int)(255 * (1 - c) * (1 - k));
 			int g = (int)(255 * (1 - m) * (1 - k));
 			int b = (int)(255 * (1 - y) * (1 - m));
 			return rgb(r, g, b);
 		}
 		
-		/* NOTE: Parameters here are `int` instead of `uint32_t` or `uint8_t` to prevent ambiguity error with cmyk(double, double, double, double) */
-		uint32_t cmyk(int c, int m, int y, int k){
+		/* NOTE: Parameters here are `int` instead of `uint32_t` or `uint8_t` to prevent ambiguity error with cmyk(float, float, float, float) */
+		uint32_t cmyk(int c, int m, int y, int k) {
 			return cmyk(c / 255.0, m / 255.0, y / 255.0, k / 255.0);
 		}
 		
