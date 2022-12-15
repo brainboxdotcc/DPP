@@ -86,6 +86,9 @@ std::map<std::string, test_t> tests = {
 	{"FORUM_CHANNEL_GET", {tt_online, "retrieve the created forum channel", false, false}},
 	{"FORUM_CHANNEL_DELETE", {tt_online, "delete the created forum channel", false, false}},
 	{"PERMISSION_CLASS", {tt_offline, "permission", false, false}},
+	{"USER_GET", {tt_online, "cluster::user_get", false, false}},
+	{"USER_GET_FLAGS", {tt_online, "cluster::user_get flag parsing", false, false}},
+	{"MEMBER_GET", {tt_online, "cluster::guild_get_member", false, false}},
 	{"USER.GET_MENTION", {tt_offline, "user::get_mention", false, false}},
 	{"USER.FORMAT_USERNAME", {tt_offline, "user::format_username", false, false}},
 	{"USER.GET_CREATION_TIME", {tt_offline, "user::get_creation_time", false, false}},
@@ -97,7 +100,14 @@ std::map<std::string, test_t> tests = {
 	{"UTILITY.TOKENIZE", {tt_offline, "utility::tokenize", false, false}},
 	{"UTILITY.URL_ENCODE", {tt_offline, "utility::url_encode", false, false}},
 	{"UTILITY.SLASHCOMMAND_MENTION", {tt_offline, "utility::slashcommand_mention", false, false}},
+	{"UTILITY.CHANNEL_MENTION", {tt_offline, "utility::channel_mention", false, false}},
+	{"UTILITY.USER_MENTION", {tt_offline, "utility::user_mention", false, false}},
+	{"UTILITY.ROLE_MENTION", {tt_offline, "utility::role_mention", false, false}},
+	{"UTILITY.EMOJI_MENTION", {tt_offline, "utility::emoji_mention", false, false}},
 	{"ROLE.COMPARE", {tt_offline, "role::operator<", false, false}},
+	{"ROLE_CREATE", {tt_online, "cluster::role_create", false, false}},
+	{"ROLE_EDIT", {tt_online, "cluster::role_edit", false, false}},
+	{"ROLE_DELETE", {tt_online, "cluster::role_delete", false, false}},
 };
 
 double start = dpp::utility::time_f();

@@ -122,12 +122,15 @@ channel::channel() :
 {
 }
 
-channel::~channel()
-{
+channel::~channel(){
+}
+
+std::string channel::get_mention(const snowflake &id) {
+	return utility::channel_mention(id);
 }
 
 std::string channel::get_mention() const {
-	return "<#" + std::to_string(id) + ">";
+	return utility::channel_mention(id);
 }
 
 channel& channel::set_name(const std::string& name) {
