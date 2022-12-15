@@ -119,11 +119,6 @@ guild_member& guild_member::set_deaf(const bool is_deafened) {
 	return *this;
 }
 
-guild_member& guild_member::set_pending(const bool is_pending) {
-	this->flags = (is_pending) ? flags | gm_pending : flags & ~gm_pending;
-	return *this;
-}
-
 guild_member& guild_member::set_communication_disabled_until(const time_t disabled_timestamp) {
 	this->communication_disabled_until = disabled_timestamp;
 	return *this;
