@@ -98,6 +98,15 @@ enum default_forum_sort_order_t : uint8_t {
 };
 
 /**
+ * @brief Types of forum layout views that indicates how the threads in a forum channel will be displayed for users by default
+ */
+enum forum_layout_type : uint8_t {
+	fl_not_set = 0, //!< No default has been set for the forum channel
+	fl_list_view = 1, //!< Display posts as a list
+	fl_gallery_view = 2, //!< Display posts as a collection of tiles
+};
+
+/**
  * @brief channel permission overwrite types
  */
 enum overwrite_type : uint8_t {
@@ -387,6 +396,14 @@ public:
 	channel& set_type(channel_type type);
 
 	/**
+	 * @brief Set the default forum layout type for the forum channel
+	 *
+	 * @param layout_type The layout type
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	channel& set_default_forum_layout(forum_layout_type layout_type);
+
+	/**
 	 * @brief Set flags for this channel object
 	 *
 	 * @param flags Flag bitmask to set from dpp::channel_flags
@@ -493,6 +510,13 @@ public:
 	 * @return channel_type Channel type
 	 */
 	channel_type get_type() const;
+
+	/**
+	 * @brief Get the default forum layout type used to display posts in forum channels
+	 *
+	 * @return forum_layout_types Forum layout type
+	 */
+	forum_layout_type get_default_forum_layout() const;
 
 	/**
 	 * @brief Get the mention ping for the channel
