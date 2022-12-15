@@ -293,15 +293,6 @@ public:
 	guild_member& set_deaf(const bool is_deafened);
 
 	/**
-	 * @brief Set whether the user is pending verification by membership screening
-	 *
-	 * @param is_pending value to set, true if pending
-	 *
-	 * @return guild_member& reference to self
-	 */
-	guild_member& set_pending(const bool is_pending);
-
-	/**
 	 * @brief Set communication_disabled_until
 	 *
 	 * @param timestamp timestamp until communication is disabled
