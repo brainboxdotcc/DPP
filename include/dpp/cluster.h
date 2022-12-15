@@ -2752,6 +2752,49 @@ public:
 	void role_delete(snowflake guild_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Get the application's role connection metadata records
+	 *
+	 * @see https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records
+	 * @param application_id The application ID
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::application_role_connection_metadata object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void application_role_connection_get(snowflake application_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Update the application's role connection metadata records
+	 *
+	 * @see https://discord.com/developers/docs/resources/application-role-connection-metadata#update-application-role-connection-metadata-records
+	 * @param application_id The application ID
+	 * @param connection_metadata The application role connection metadata to update
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::application_role_connection_metadata object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @note An application can have a maximum of 5 metadata records.
+	 */
+	void application_role_connection_update(snowflake application_id, const std::vector<application_role_connection_metadata> &connection_metadata, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get user application role connection
+	 *
+	 * @see https://discord.com/developers/docs/resources/user#get-user-application-role-connection
+	 * @param application_id The application ID
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::application_role_connection object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void user_application_role_connection_get(snowflake application_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Update user application role connection
+	 *
+	 * @see https://discord.com/developers/docs/resources/user#update-user-application-role-connection
+	 * @param application_id The application ID
+	 * @param connection The application role connection to update
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::application_role_connection object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void user_application_role_connection_update(snowflake application_id, const application_role_connection &connection, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Get a user by id
 	 *
 	 * @see https://discord.com/developers/docs/resources/user#get-user

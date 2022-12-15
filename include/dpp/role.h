@@ -556,6 +556,87 @@ public:
 	members_container get_members() const;
 };
 
+/**
+ * @brief Application Role Connection Metadata Type
+ *
+ * @note Each metadata type offers a comparison operation that allows guilds to configure role requirements based on metadata values stored by the bot. Bots specify a `metadata value` for each user and guilds specify the required `guild's configured value` within the guild role settings.
+ */
+enum application_role_connection_metadata_type : uint8_t {
+	rc_integer_less_than_or_equal = 1, //!< The metadata value (integer) is less than or equal to the guild's configured value (integer)
+	rc_integer_greater_than_or_equal = 2, //!< The metadata value (integer) is greater than or equal to the guild's configured value (integer)
+	rc_integer_equal = 3, //!< The metadata value (integer) is equal to the guild's configured value (integer)
+	rc_integer_not_equal = 4, //!< The metadata value (integer) is not equal to the guild's configured value (integer)
+	rc_datetime_less_than_or_equal = 5, //!< The metadata value (ISO8601 string) is less than or equal to the guild's configured value (integer; days before current date)
+	rc_datetime_greater_than_or_equal = 6, //!< The metadata value (ISO8601 string) is greater than or equal to the guild's configured value (integer; days before current date)
+	rc_boolean_equal = 7, //!< The metadata value (integer) is equal to the guild's configured value (integer; 1)
+	rc_boolean_not_equal = 8, //!< The metadata value (integer) is not equal to the guild's configured value (integer; 1)
+};
+
+/**
+ * @brief Application Role Connection Metadata. Represents a role connection metadata for an dpp::application
+ */
+class DPP_EXPORT application_role_connection_metadata : public json_interface<application_role_connection_metadata> {
+public:
+	application_role_connection_metadata_type type; //!< Type of metadata value
+	std::string key; //!< Dictionary key for the metadata field (must be `a-z`, `0-9`, or `_` characters; max 50 characters)
+	std::string name; //!< Name of the metadata field (max 100 characters)
+	std::map<std::string, std::string> name_localizations; //!< Translations of the name
+	std::string description; //!< Description of the metadata field (max 200 characters)
+	std::map<std::string, std::string> description_localizations; //!< Translations of the description
+
+	/**
+	 * Constructor
+	 */
+	application_role_connection_metadata();
+
+	virtual ~application_role_connection_metadata() = default;
+
+	/** Fill this record from json.
+	 * @param j The json to fill this record from
+	 * @return Reference to self
+	 */
+	application_role_connection_metadata& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Convert to JSON string
+	 *
+	 * @param with_id include ID in output
+	 * @return std::string JSON output
+	 */
+	virtual std::string build_json(bool with_id = false) const;
+};
+
+/**
+ * @brief The application role connection that an application has attached to a user.
+ */
+class DPP_EXPORT application_role_connection : public json_interface<application_role_connection> {
+public:
+	std::string platform_name; //!< Optional: The vanity name of the platform a bot has connected (max 50 characters)
+	std::string platform_username; //!< Optional: The username on the platform a bot has connected (max 100 characters)
+	application_role_connection_metadata metadata; //!< Object mapping application role connection metadata keys to their string-ified value (max 100 characters) for the user on the platform a bot has connected
+
+	/**
+	 * Constructor
+	 */
+	application_role_connection();
+
+	virtual ~application_role_connection() = default;
+
+	/** Fill this record from json.
+	 * @param j The json to fill this record from
+	 * @return Reference to self
+	 */
+	application_role_connection& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Convert to JSON string
+	 *
+	 * @param with_id include ID in output
+	 * @return std::string JSON output
+	 */
+	virtual std::string build_json(bool with_id = false) const;
+};
+
 /** A group of roles */
 typedef std::unordered_map<snowflake, role> role_map;
 
