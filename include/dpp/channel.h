@@ -75,6 +75,7 @@ enum channel_flags : uint16_t {
 	c_pinned_thread =	0b0000000010000000,
 	/// Whether a tag is required to be specified when creating a thread in a forum channel. Tags are specified in the thread::applied_tags field.
 	c_require_tag =		0b0000000100000000,
+	/* Note that the 9th and 10th bit are used for the forum layout type */
 };
 
 /**

@@ -153,7 +153,7 @@ channel& channel::set_type(channel_type type) {
 channel& channel::set_default_forum_layout(forum_layout_type layout_type) {
 	this->flags &= ~DEFAULT_FORUM_LAYOUT_MASK;
 	auto type = (uint16_t)layout_type;
-	this->flags |= (type << 9);
+	this->flags |= ((type << 9) & DEFAULT_FORUM_LAYOUT_MASK);
 	return *this;
 }
 
