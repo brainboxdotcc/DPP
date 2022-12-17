@@ -44,25 +44,32 @@ namespace dpp
 		dns_cache_t::const_iterator iter;
 		time_t now = time(nullptr);
 		int error;
+		bool exists = false;
 
 		/* Thread safety scope */
 		{
 			/* Check cache for existing DNS record. This can use a shared lock. */
 			std::shared_lock dns_cache_lock(dns_cache_mutex);
 			iter = dns_cache.find(hostname);
-			if (iter != dns_cache.end() && now < iter->second->expire_timestamp) {
-				/* there is a cached entry that is still valid, return it */
-				return iter->second;
+			if (iter != dns_cache.end()) {
+				exists = true;
+				if (now < iter->second->expire_timestamp) {
+					/* there is a cached entry that is still valid, return it */
+					return iter->second;
+				}
 			}
 		}
-		if (iter != dns_cache.end()) {
+		if (exists) {
 			/* there is a cached entry, but it has expired,
 			 * delete and free it, and fall through to a new lookup.
 			 * We must use a unique lock here as we modify the cache.
 			 */
 			std::unique_lock dns_cache_lock(dns_cache_mutex);
-			delete iter->second;
-			dns_cache.erase(iter);
+			iter = dns_cache.find(hostname);
+			if (iter != dns_cache.end()) { /* re-validate iter */
+				delete iter->second;
+				dns_cache.erase(iter);
+			}
 		}
 		
 		/* The hints indicate what sort of DNS results we are interested in.

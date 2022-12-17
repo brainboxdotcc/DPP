@@ -95,13 +95,13 @@ foreach ($changelog as $change) {
     // Match keywords against categories
     $matched = false;
     foreach ($categories as $cat => $header) {
-        // Purposefully ignored
-        if (preg_match("/^Merge (branch|pull request|remote-tracking branch) /", $change) or preg_match("/version bump/i", $change)) {
+        // Purposefully ignored: comments that are one word, merge commits, and version bumps
+        if (strpos($change, ' ') === false || preg_match("/^Merge (branch|pull request|remote-tracking branch) /", $change) || preg_match("/version bump/i", $change)) {
             $matched = true;
             continue;
         }
         // Groupings
-        if ((preg_match("/^" . $cat . ":/i", $change)) or (preg_match("/^\[" . $cat . "\//i", $change)) or (preg_match("/^\[" . $cat . "\]/i", $change)) or (preg_match("/^\[" . $cat . ":/i", $change)) or (preg_match("/^" . $cat . "\//i", $change)) or (preg_match("/^" . $cat . ":/i", $change))) {
+        if ((preg_match("/^" . $cat . ":/i", $change)) || (preg_match("/^\[" . $cat . "\//i", $change)) || (preg_match("/^\[" . $cat . "\]/i", $change)) || (preg_match("/^\[" . $cat . ":/i", $change)) || (preg_match("/^" . $cat . "\//i", $change)) || (preg_match("/^" . $cat . ":/i", $change))) {
             if (!isset($catgroup[$header])) {
                 $catgroup[$header] = [];
             }
@@ -124,7 +124,7 @@ foreach ($catgroup as $cat => $list) {
     echo "\n" . ($githubstyle ? '## ' : '__**') . $cat . ($githubstyle ? '' : '**__') . "\n";
     foreach ($list as $item) {
         // Exclude bad commit messages like 'typo fix', 'test push' etc by pattern
-        if (!preg_match("/^(typo|test|fix)\s\w+$/", $item)) {
+        if (!preg_match("/^(typo|test|fix)\s\w+$/", $item) && strpos($item, ' ') !== false) {
             echo ($githubstyle ? '-' : '•') . ' ' . ucfirst(str_replace('@', '', $item)) . "\n";
         }
     }

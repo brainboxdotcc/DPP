@@ -40,7 +40,8 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 16,      dpp::u_verified_bot },
 	{ 1 << 17,      dpp::u_verified_bot_dev },
 	{ 1 << 18,      dpp::u_certified_moderator },
-	{ 1 << 19,      dpp::u_bot_http_interactions }
+	{ 1 << 19,      dpp::u_bot_http_interactions },
+	{ 1 << 22, 		dpp::u_active_developer},
 };
 
 namespace dpp {
@@ -55,6 +56,10 @@ user::user() :
 
 user::~user()
 {
+}
+
+std::string user::get_mention(const snowflake& id) {
+	return utility::user_mention(id);
 }
 
 std::string user::build_json(bool with_id) const {
@@ -93,9 +98,12 @@ std::string user::format_username() const {
 }
 
 std::string user::get_mention() const {
-	return "<@" + std::to_string(id) + ">";
+	return utility::user_mention(id);
 }
 
+bool user::is_active_developer() const {
+	return this->flags & u_active_developer;
+}
 
 bool user::is_bot() const {
 	 return this->flags & u_bot;

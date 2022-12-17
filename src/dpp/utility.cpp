@@ -218,7 +218,7 @@ namespace dpp {
 			return print_buffer;
 		}
 
-		uint32_t rgb(float red, float green, float blue) {
+		uint32_t rgb(double red, double green, double blue) {
 			return (((uint32_t)(red * 255)) << 16) | (((uint32_t)(green * 255)) << 8) | ((uint32_t)(blue * 255));
 		}
 
@@ -226,7 +226,19 @@ namespace dpp {
 		uint32_t rgb(int red, int green, int blue) {
 			return ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
 		}
-
+		
+		uint32_t cmyk(double c, double m, double y, double k) {
+			int r = (int)(255 * (1 - c) * (1 - k));
+			int g = (int)(255 * (1 - m) * (1 - k));
+			int b = (int)(255 * (1 - y) * (1 - m));
+			return rgb(r, g, b);
+		}
+		
+		/* NOTE: Parameters here are `int` instead of `uint32_t` or `uint8_t` to prevent ambiguity error with cmyk(float, float, float, float) */
+		uint32_t cmyk(int c, int m, int y, int k) {
+			return cmyk(c / 255.0, m / 255.0, y / 255.0, k / 255.0);
+		}
+		
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 			auto t = std::thread([cmd, parameters, callback]() {
 				utility::set_thread_name("async_exec");
@@ -438,6 +450,30 @@ namespace dpp {
 			return "</" + command_name + " " + subcommand_group + " " + subcommand + ":" + std::to_string(command_id) + ">";
 		}
 
+		std::string user_mention(const snowflake& id) {
+		    return "<@" + std::to_string(id) + ">";
+		}
+
+		std::string channel_mention(const snowflake &id) {
+		    return "<#" + std::to_string(id) + ">";
+		}
+
+		std::string emoji_mention(const std::string &name, const snowflake &id, bool is_animated) {
+			auto format = [=]() {
+				return id ? ((is_animated ? "a:" : ":") + name + ":" + std::to_string(id)) : name;
+			};
+
+			if (id) {
+				return "<" + format() + ">";
+			} else {
+				return ":" + format() + ":";
+			}
+		}
+
+		std::string role_mention(const snowflake &id) {
+		    return "<@&" + std::to_string(id) + ">";
+		}
+
 		std::string make_url_parameters(const std::map<std::string, std::string>& parameters) {
 			std::string output;
 			for(auto& [k, v] : parameters) {
@@ -521,6 +557,6 @@ namespace dpp {
 				#endif
 			#endif
 		}
-	};
+    };
 
 };

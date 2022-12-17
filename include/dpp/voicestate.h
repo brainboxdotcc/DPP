@@ -31,13 +31,13 @@ namespace dpp {
  * @brief Bit mask flags relating to voice states
  */
 enum voicestate_flags {
-	vs_deaf		=	0b00000001,	//!< Deafened
-	vs_mute		=	0b00000010,	//!< Muted
-	vs_self_mute	=	0b00000100,	//!< Self Muted
-	vs_self_deaf	=	0b00001000,	//!< Self Deafened
-	vs_self_stream	=	0b00010000,	//!< Self Streaming
-	vs_self_video	=	0b00100000,	//!< Self Video
-	vs_suppress	=	0b01000000	//!< Suppression
+	vs_deaf		=	0b00000001,	//!< Deafened by the server
+	vs_mute		=	0b00000010,	//!< Muted by the server
+	vs_self_mute	=	0b00000100,	//!< Locally Muted
+	vs_self_deaf	=	0b00001000,	//!< Locally deafened
+	vs_self_stream	=	0b00010000,	//!< Whether this user is streaming using "Go Live"
+	vs_self_video	=	0b00100000,	//!< Whether this user's camera is enabled
+	vs_suppress	=	0b01000000	//!< Whether this user's permission to speak is denied
 };
 
 /**
@@ -52,8 +52,8 @@ public:
 	snowflake		channel_id;        //!< the channel id this user is connected to (may be empty)
 	snowflake		user_id;           //!< the user id this voice state is for
 	std::string		session_id;        //!< the session id for this voice state
-	uint8_t			flags;             //!< Voice state flags
-	time_t			request_to_speak;  //!< Time requested to speak, or 0
+	uint8_t			flags;             //!< Voice state flags (see dpp::voicestate_flags)
+	time_t			request_to_speak;  //!< The time at which the user requested to speak, or 0
 
 	/**
 	 * @brief Construct a new voicestate object
@@ -81,10 +81,10 @@ public:
 	 */
 	virtual std::string build_json(bool with_id = false) const;
 
-	/// Return true if user is deafened
+	/// Return true if the user is deafened by the server
 	bool is_deaf() const;
 
-	/// Return true if user is muted
+	/// Return true if the user is muted by the server
 	bool is_mute() const;
 
 	/// Return true if user muted themselves
@@ -93,10 +93,10 @@ public:
 	/// Return true if user deafened themselves
 	bool is_self_deaf() const;
 
-	/// Return true if the user is streaming
+	/// Return true if the user is streaming using "Go Live"
 	bool self_stream() const;
 
-	/// Return true if the user is in video
+	/// Return true if the user's camera is enabled
 	bool self_video() const;
 
 	/// Return true if user is suppressed.

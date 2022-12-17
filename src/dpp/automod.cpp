@@ -78,6 +78,9 @@ automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
 	for (auto k : (*j)["keyword_filter"]) {
 		keywords.push_back(k);
 	}
+	for (auto k : (*j)["regex_patterns"]) {
+		regex_patterns.push_back(k);
+	}
 	for (auto k : (*j)["presets"]) {
 		presets.push_back((automod_preset_type)k.get<uint32_t>());
 	}
@@ -91,15 +94,19 @@ automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
 std::string automod_metadata::build_json(bool with_id) const {
 	json j;
 	j["keyword_filter"] = json::array();
+	j["regex_patterns"] = json::array();
 	j["presets"] = json::array();
 	j["allow_list"] = json::array();
-	for (auto v : keywords) {
+	for (auto &v : keywords) {
 		j["keyword_filter"].push_back(v);
+	}
+	for (auto &v : regex_patterns) {
+		j["regex_patterns"].push_back(v);
 	}
 	for (auto v : presets) {
 		j["presets"].push_back((uint32_t)v);
 	}
-	for (auto v : allow_list) {
+	for (auto &v : allow_list) {
 		j["allow_list"].push_back(v);
 	}
 	j["mention_total_limit"] = mention_total_limit;

@@ -76,6 +76,8 @@ enum user_flags : uint32_t {
 	u_bot_http_interactions =	0b00100000000000000000000,
 	/// User has nitro basic
 	u_nitro_basic = 			0b01000000000000000000000,
+	/// User has the active developer badge
+	u_active_developer =		0b10000000000000000000000,
 };
 
 /**
@@ -107,6 +109,13 @@ public:
 	 */
 	virtual ~user();
 
+	/**
+	* @brief Create a mentionable user.
+	 * @param id The ID of the user.
+	 * @return std::string The formatted mention of the user.
+	*/
+	static std::string get_mention(const snowflake& id);
+
 	/** Fill this record from json.
 	 * @param j The json to fill this record from
 	 * @return Reference to self
@@ -136,6 +145,12 @@ public:
 	 */
 	std::string get_mention() const;
 
+	/**
+	 * @brief Return true if user has the active Developer badge
+	 *
+	 * @return true if has active developer
+	 */
+	bool is_active_developer() const;
 	/**
 	 * @brief User is a bot
 	 *

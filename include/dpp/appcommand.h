@@ -552,7 +552,7 @@ void from_json(const nlohmann::json& j, command_data_option& cdo);
 enum interaction_type {
 	it_ping = 1,			//!< ping
 	it_application_command = 2,	//!< application command (slash command)
-	it_component_button = 3,	//!< button click (component interaction)
+	it_component_button = 3,	//!< button click or select menu chosen (component interaction)
 	it_autocomplete = 4,		//!< Autocomplete interaction
 	it_modal_submit = 5,		//!< Modal form submission
 };
@@ -610,25 +610,11 @@ struct DPP_EXPORT command_interaction {
 void from_json(const nlohmann::json& j, command_interaction& ci);
 
 /**
- * @brief Component type, either button or select
- */
-enum component_type_t {
-	/**
-	 * @brief Button
-	 */
-	cotype_button = 2,
-	/**
-	 * @brief Option select list (drop-down)
-	 */
-	cotype_select = 3
-};
-
-/**
  * @brief A button click for a button component
  */
 struct DPP_EXPORT component_interaction {
 	/**
-	 * @brief Component type
+	 * @brief Component type (dpp::component_type)
 	 */
 	uint8_t component_type;
 	/**
@@ -695,7 +681,7 @@ class DPP_EXPORT interaction : public managed, public json_interface<interaction
 
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
-	uint8_t	type;                                               //!< the type of interaction
+	uint8_t	type;                                               //!< the type of interaction (dpp::interaction_type)
 	std::variant<command_interaction, component_interaction, autocomplete_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from

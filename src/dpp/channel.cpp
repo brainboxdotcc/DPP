@@ -79,7 +79,7 @@ forum_tag &forum_tag::set_name(const std::string &name) {
 	return *this;
 }
 
-const uint8_t CHANNEL_TYPE_MASK = 0b00001111;
+const uint8_t CHANNEL_TYPE_MASK = 0b0000000000001111;
 
 thread_member& thread_member::fill_from_json(nlohmann::json* j) {
 	set_snowflake_not_null(j, "id", this->thread_id);
@@ -122,12 +122,15 @@ channel::channel() :
 {
 }
 
-channel::~channel()
-{
+channel::~channel(){
+}
+
+std::string channel::get_mention(const snowflake &id) {
+	return utility::channel_mention(id);
 }
 
 std::string channel::get_mention() const {
-	return "<#" + std::to_string(id) + ">";
+	return utility::channel_mention(id);
 }
 
 channel& channel::set_name(const std::string& name) {
@@ -171,7 +174,7 @@ channel& channel::set_bitrate(const uint16_t bitrate) {
 	return *this;
 }
 
-channel& channel::set_flags(const uint8_t flags) {
+channel& channel::set_flags(const uint16_t flags) {
 	this->flags = flags;
 	return *this;
 }
@@ -268,6 +271,10 @@ bool channel::is_pinned_thread() const {
 	return flags & dpp::c_pinned_thread;
 }
 
+bool channel::is_tag_required() const {
+	return flags & dpp::c_require_tag;
+}
+
 bool thread::is_news_thread() const {
 	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_ANNOUNCEMENT_THREAD;
 }
@@ -328,7 +335,7 @@ channel& channel::fill_from_json(json* j) {
 	set_int16_not_null(j, "default_thread_rate_limit_per_user", this->default_thread_rate_limit_per_user);
 	set_snowflake_not_null(j, "owner_id", this->owner_id);
 	set_snowflake_not_null(j, "parent_id", this->parent_id);
-	this->bitrate = int16_not_null(j, "bitrate")/1024;
+	this->bitrate = int16_not_null(j, "bitrate")/1000;
 	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
 
 	uint16_t arc = int16_not_null(j, "default_auto_archive_duration");
@@ -373,6 +380,7 @@ channel& channel::fill_from_json(json* j) {
 
 	uint8_t dflags = int8_not_null(j, "flags");
 	this->flags |= (dflags & dpp::dc_pinned_thread) ? dpp::c_pinned_thread : 0;
+	this->flags |= (dflags & dpp::dc_require_tag) ? dpp::c_require_tag : 0;
 
 	uint8_t vqm = int8_not_null(j, "video_quality_mode");
 	if (vqm == 2) {
@@ -463,7 +471,10 @@ std::string channel::build_json(bool with_id) const {
 	}
 	if (is_voice_channel()) {
 		j["user_limit"] = user_limit; 
-		j["bitrate"] = bitrate*1024;
+		j["bitrate"] = bitrate*1000;
+	}
+	if (is_forum()) {
+		j["flags"] = (flags & dpp::c_require_tag) ? dpp::dc_require_tag : 0;
 	}
 	j["type"] = (flags & CHANNEL_TYPE_MASK);
 	if (!is_dm()) {

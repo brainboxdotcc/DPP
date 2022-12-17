@@ -83,6 +83,19 @@ component& component::fill_from_json(nlohmann::json* j) {
 		} else if (!v.is_null() && v.is_string()) {
 			value = v.get<std::string>();
 		}
+	} else if (type == cot_user_selectmenu || type == cot_role_selectmenu || type == cot_mentionable_selectmenu) {
+		custom_id = string_not_null(j, "custom_id");
+		disabled = bool_not_null(j, "disabled");
+	} else if (type == cot_channel_selectmenu) {
+		custom_id = string_not_null(j, "custom_id");
+		disabled = bool_not_null(j, "disabled");
+		if (j->contains("channel_types")) {
+			for (json &ct : (*j)["channel_types"]) {
+				if (ct.is_number_integer()) {
+					channel_types.push_back(ct.get<dpp::channel_type>());
+				}
+			}
+		}
 	}
 	return *this;
 }
@@ -91,6 +104,14 @@ component& component::add_component(const component& c)
 {
 	set_type(cot_action_row);
 	components.emplace_back(c);
+	return *this;
+}
+
+component& component::add_channel_type(uint8_t ct) {
+	if (type == cot_action_row) {
+		set_type(cot_channel_selectmenu);
+	}
+	channel_types.push_back(ct);
 	return *this;
 }
 
@@ -104,7 +125,7 @@ component& component::set_type(component_type ct)
 	}
 	if(type == cot_text) {
 		placeholder = dpp::utility::utf8substr(placeholder, 0, 100);
-	} else if (type == cot_selectmenu) {
+	} else if (type == cot_selectmenu || type == cot_user_selectmenu || type == cot_role_selectmenu || type == cot_mentionable_selectmenu || type == cot_channel_selectmenu) {
 		placeholder = dpp::utility::utf8substr(placeholder, 0, 150);
 	}
 	return *this;
@@ -223,8 +244,8 @@ void to_json(json& j, const attachment& a) {
 }
 
 void to_json(json& j, const component& cp) {
+	j["type"] = cp.type;
 	if (cp.type == cot_text) {
- 		j["type"] = cp.type;
 		j["label"] = cp.label;
 		j["required"] = cp.required;
 		j["style"] = int(cp.text_style);
@@ -245,7 +266,6 @@ void to_json(json& j, const component& cp) {
 		}
 	}
 	if (cp.type == cot_button) {
-		j["type"] = cp.type;
 		j["label"] = cp.label;
 		j["style"] = int(cp.style);
 		if (cp.type == cot_button && cp.style != cos_link && !cp.custom_id.empty()) {
@@ -268,9 +288,8 @@ void to_json(json& j, const component& cp) {
 			j["emoji"]["name"] = cp.emoji.name;
 		}
 	} else if (cp.type == cot_selectmenu) {
-		j["type"] = cp.type;
 		j["custom_id"] = cp.custom_id;
-		//j["disabled"] = cp.disabled;
+		j["disabled"] = cp.disabled;
 		if (!cp.placeholder.empty()) {
 			j["placeholder"] = cp.placeholder;
 		}
@@ -306,6 +325,36 @@ void to_json(json& j, const component& cp) {
 				}
 			}
 			j["options"].push_back(o);
+		}
+	} else if (cp.type == cot_user_selectmenu || cp.type == cot_role_selectmenu || cp.type == cot_mentionable_selectmenu) {
+		j["custom_id"] = cp.custom_id;
+		j["disabled"] = cp.disabled;
+		if (!cp.placeholder.empty()) {
+			j["placeholder"] = cp.placeholder;
+		}
+		if (cp.min_values >= 0) {
+			j["min_values"] = cp.min_values;
+		}
+		if (cp.max_values >= 0) {
+			j["max_values"] = cp.max_values;
+		}
+	} else if (cp.type == cot_channel_selectmenu) {
+		j["custom_id"] = cp.custom_id;
+		j["disabled"] = cp.disabled;
+		if (!cp.placeholder.empty()) {
+			j["placeholder"] = cp.placeholder;
+		}
+		if (cp.min_values >= 0) {
+			j["min_values"] = cp.min_values;
+		}
+		if (cp.max_values >= 0) {
+			j["max_values"] = cp.max_values;
+		}
+		if (!cp.channel_types.empty()) {
+			j["channel_types"] = json::array();
+			for (auto &type : cp.channel_types) {
+				j["channel_types"].push_back(type);
+			}
 		}
 	}
 }
@@ -364,7 +413,7 @@ select_option& select_option::fill_from_json(nlohmann::json* j) {
 component& component::set_placeholder(const std::string &_placeholder) {
 	if(type == cot_text) {
 		placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
-	} else if (type == cot_selectmenu) {
+	} else if (type == cot_selectmenu || type == cot_user_selectmenu || type == cot_role_selectmenu || type == cot_mentionable_selectmenu || type == cot_channel_selectmenu) {
 		placeholder = dpp::utility::utf8substr(_placeholder, 0, 150);
 	} else {
 		placeholder = _placeholder;
@@ -713,10 +762,10 @@ attachment::attachment(struct message* o)
 attachment::attachment(struct message* o, json *j) : attachment(o) {
 	this->id = snowflake_not_null(j, "id");
 	this->size = (*j)["size"];
-	this->filename = (*j)["filename"];
+	this->filename = (*j)["filename"].get<std::string>();;
 	this->description = string_not_null(j, "description");
-	this->url = (*j)["url"];
-	this->proxy_url = (*j)["proxy_url"];
+	this->url = (*j)["url"].get<std::string>();;
+	this->proxy_url = (*j)["proxy_url"].get<std::string>();;
 	this->width = int32_not_null(j, "width");
 	this->height = int32_not_null(j, "height");
 	this->content_type = string_not_null(j, "content_type");

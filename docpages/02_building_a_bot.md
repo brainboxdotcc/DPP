@@ -9,5 +9,6 @@ Click on a link below for a guide specifically for your system:
 * \subpage build-a-discord-bot-windows-wsl "Building a discord bot in Windows using WSL (Windows Subsystem for Linux)"
 * \subpage build-a-discord-bot-linux-clion "Building a discord bot in Linux using CLion"
 * \subpage buildcmake "Building a Discord Bot using CMake/UNIX"
+* \subpage buildmeson "Building a Discord Bot using Meson"
 * \subpage building-a-cpp-discord-bot-in-repl "Creating a Discord bot in Repl.it"
 

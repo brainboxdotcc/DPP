@@ -70,6 +70,11 @@ public:
 	z_stream d_stream;
 };
 
+/**
+ * @brief Stores the most recent ping message on this shard, which we check for to monitor latency
+ */
+thread_local static std::string last_ping_message;
+
 discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t _intents, bool comp, websocket_protocol_t ws_proto)
        : websocket_client(_cluster->default_gateway, "443", comp ? (ws_proto == ws_json ? PATH_COMPRESSED_JSON : PATH_COMPRESSED_ETF) : (ws_proto == ws_json ? PATH_UNCOMPRESSED_JSON : PATH_UNCOMPRESSED_ETF)),
         terminating(false),
@@ -87,7 +92,6 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	last_seq(0),
 	token(_token),
 	intents(_intents),
-	sessionid(""),
 	resumes(0),
 	reconnects(0),
 	websocket_ping(0.0),
@@ -512,8 +516,9 @@ void discord_client::one_second_timer()
 				 * to find pings in our queue. The assumption is that the format of the
 				 * ping isn't going to change.
 				 */
-				if (message.find("\"op\":1}") != std::string::npos) {
+				if (!last_ping_message.empty() && message == last_ping_message) {
 					ping_start = utility::time_f();
+					last_ping_message.clear();
 				}
 				this->write(message);
 			}
@@ -525,9 +530,8 @@ void discord_client::one_second_timer()
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
 			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
-				queue_message(
-					jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}))
-					, true);
+				last_ping_message = jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}));
+				queue_message(last_ping_message, true);
 				last_heartbeat = time(NULL);
 			}
 		}
