@@ -174,7 +174,7 @@ struct DPP_EXPORT scheduled_event : public managed, public json_interface<schedu
 	 * @brief Set the status of the event
 	 * @param s status to set
 	 * @return scheduled_event& reference to self
-	 * @throw dpp::logic_error if status change is not valid
+	 * @throw dpp::logic_exception if status change is not valid
 	 */
 	scheduled_event& set_status(event_status s);
 
