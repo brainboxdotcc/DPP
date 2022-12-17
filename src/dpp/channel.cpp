@@ -335,7 +335,7 @@ channel& channel::fill_from_json(json* j) {
 	set_int16_not_null(j, "default_thread_rate_limit_per_user", this->default_thread_rate_limit_per_user);
 	set_snowflake_not_null(j, "owner_id", this->owner_id);
 	set_snowflake_not_null(j, "parent_id", this->parent_id);
-	this->bitrate = int16_not_null(j, "bitrate")/1000;
+	this->bitrate = int32_not_null(j, "bitrate")/1000;
 	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
 
 	uint16_t arc = int16_not_null(j, "default_auto_archive_duration");
