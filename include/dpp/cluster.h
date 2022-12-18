@@ -2757,7 +2757,7 @@ public:
 	 * @see https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records
 	 * @param application_id The application ID
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::application_role_connection_metadata object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::application_role_connection_metadata_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void application_role_connection_get(snowflake application_id, command_completion_event_t callback);
 
@@ -2768,7 +2768,7 @@ public:
 	 * @param application_id The application ID
 	 * @param connection_metadata The application role connection metadata to update
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::application_role_connection_metadata object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::application_role_connection_metadata_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 * @note An application can have a maximum of 5 metadata records.
 	 */
 	void application_role_connection_update(snowflake application_id, const std::vector<application_role_connection_metadata> &connection_metadata, command_completion_event_t callback = utility::log_error());

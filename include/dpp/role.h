@@ -640,5 +640,7 @@ public:
 /** A group of roles */
 typedef std::unordered_map<snowflake, role> role_map;
 
+typedef std::unordered_map<std::string, application_role_connection_metadata> application_role_connection_metadata_map;
+
 };
 
