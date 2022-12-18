@@ -30,7 +30,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1), default_member_permissions(p_use_application_commands), dm_permission(false) {
+slashcommand::slashcommand() : managed(), application_id(0), type(ctxm_chat_input), default_permission(true), version(1), default_member_permissions(p_use_application_commands), dm_permission(false), nsfw(false) {
 }
 
 slashcommand::slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id) : slashcommand() {
@@ -44,6 +44,11 @@ slashcommand::~slashcommand() {
 
 slashcommand& slashcommand::set_dm_permission(bool dm) {
 	dm_permission = dm;
+	return *this;
+}
+
+slashcommand& slashcommand::set_nsfw(bool is_nsfw) {
+	nsfw = is_nsfw;
 	return *this;
 }
 
@@ -62,6 +67,7 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	// default_permission = bool_not_null(j, "default_permission");
 	default_member_permissions = snowflake_not_null(j, "default_member_permissions");
 	dm_permission = bool_not_null(j, "dm_permission");
+	nsfw = bool_not_null(j, "nsfw");
 
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
 	if (j->contains("options")) {
@@ -205,6 +211,7 @@ void to_json(json& j, const slashcommand& p) {
 
 	j["default_member_permissions"] = std::to_string(p.default_member_permissions);
 	j["dm_permission"] = p.dm_permission;
+	j["nsfw"] = p.nsfw;
 
 	if (p.name_localizations.size()) {
 		j["name_localizations"] = json::object();
