@@ -722,7 +722,7 @@ public:
 	 * @brief Get the channel this command originated on
 	 * 
 	 * @return const dpp::channel& channel
-	 * @throws dpp::logic_error Command originated from a DM or channel not in cache
+	 * @throws dpp::logic_exception Command originated from a DM or channel not in cache
 	 */
 	const dpp::channel& get_channel() const;
 
@@ -730,7 +730,7 @@ public:
 	 * @brief Get the guild this command originated on
 	 * 
 	 * @return const dpp::guild& guild 
-	 * @throws dpp::logic_error Command originated from a DM or guild not in cache
+	 * @throws dpp::logic_exception Command originated from a DM or guild not in cache
 	 */
 	const dpp::guild& get_guild() const;
 
