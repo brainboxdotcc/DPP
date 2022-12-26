@@ -613,7 +613,7 @@ class DPP_EXPORT application_role_connection : public json_interface<application
 public:
 	std::string platform_name; //!< Optional: The vanity name of the platform a bot has connected (max 50 characters)
 	std::string platform_username; //!< Optional: The username on the platform a bot has connected (max 100 characters)
-	application_role_connection_metadata metadata; //!< Object mapping application role connection metadata keys to their string-ified value (max 100 characters) for the user on the platform a bot has connected
+	application_role_connection_metadata metadata; //!< Object mapping application role connection metadata keys to their stringified value (max 100 characters) for the user on the platform a bot has connected
 
 	/**
 	 * Constructor
@@ -640,7 +640,7 @@ public:
 /** A group of roles */
 typedef std::unordered_map<snowflake, role> role_map;
 
-typedef std::unordered_map<std::string, application_role_connection_metadata> application_role_connection_metadata_map;
+typedef std::vector<application_role_connection_metadata> application_role_connection_metadata_list;
 
 };
 

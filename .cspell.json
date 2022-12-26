@@ -84,7 +84,8 @@
 		"xmake",
 		"CORO",
 		"cback",
-		"mentionables"
+		"mentionables",
+		"stringified"
 	],
 	"flagWords": [
 		"hte"
