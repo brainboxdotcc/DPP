@@ -435,7 +435,9 @@ std::string application_role_connection::build_json(bool with_id) const {
 	if (!platform_username.empty()) {
 		j["platform_username"] = platform_username;
 	}
-	j["metadata"] = json::parse(metadata.build_json());
+	if (std::holds_alternative<application_role_connection_metadata>(metadata)) {
+		j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
+	}
 	return j.dump();
 }
 
