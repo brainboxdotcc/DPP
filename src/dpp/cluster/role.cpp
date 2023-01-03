@@ -50,4 +50,24 @@ void cluster::roles_get(snowflake guild_id, command_completion_event_t callback)
 	rest_request_list<role>(this, API_PATH "/guilds", std::to_string(guild_id), "roles", m_get, "", callback);
 }
 
+void cluster::application_role_connection_get(snowflake application_id, command_completion_event_t callback) {
+	rest_request_vector<application_role_connection_metadata>(this, API_PATH "/applications", std::to_string(application_id), "role-connections/metadata", m_get, "", callback);
+}
+
+void cluster::application_role_connection_update(snowflake application_id, const std::vector<application_role_connection_metadata> &connection_metadata, command_completion_event_t callback) {
+	json j = json::array();
+	for (const auto &conn_metadata : connection_metadata) {
+		j.push_back(json::parse(conn_metadata.build_json()));
+	}
+	rest_request_vector<application_role_connection_metadata>(this, API_PATH "/applications", std::to_string(application_id), "role-connections/metadata", m_put, j.dump(), callback);
+}
+
+void cluster::user_application_role_connection_get(snowflake application_id, command_completion_event_t callback) {
+	rest_request<application_role_connection>(this, API_PATH "/users/@me/applications", std::to_string(application_id), "role-connection", m_get, "", callback);
+}
+
+void cluster::user_application_role_connection_update(snowflake application_id, const application_role_connection &connection, command_completion_event_t callback) {
+	rest_request<application_role_connection>(this, API_PATH "/users/@me/applications", std::to_string(application_id), "role-connection", m_put, connection.build_json(), callback);
+}
+
 };
