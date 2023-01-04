@@ -3006,13 +3006,13 @@ public:
 	void thread_members_get(snowflake thread_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Get active threads in a channel (Sorted by ID in descending order)
+	 * @brief Get active threads in a guild (Sorted by ID in descending order)
 	 * @see https://discord.com/developers/docs/topics/threads
-	 * @param channel_id Channel to get active threads for
+	 * @param guild_id Guild to get active threads for
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void threads_get_active(snowflake channel_id, command_completion_event_t callback);
+	void threads_get_active(snowflake guild_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)

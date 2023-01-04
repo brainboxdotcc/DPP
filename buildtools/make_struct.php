@@ -28,6 +28,8 @@ $blacklist = [
     'message_delete_own_reaction',
     'message_get_reactions',
     'channel_typing',
+    'application_role_connection_get', // TODO: rest_request_vector
+    'application_role_connection_update',
 ];
 
 /* The script cannot determine the correct return type of these methods,
