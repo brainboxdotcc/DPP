@@ -1,4 +1,4 @@
-# libdpp-config.cmake - package configuration file
+# dpp-config.cmake - package configuration file
 
 ## Get current filesystem path (will a prefixed by where this package was installed)
 get_filename_component(SELF_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
