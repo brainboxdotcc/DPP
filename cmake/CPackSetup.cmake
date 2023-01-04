@@ -17,7 +17,7 @@ write_basic_package_version_file(${DPP_VERSION_FILE}
 		VERSION ${PROJECT_VERSION}
 		COMPATIBILITY SameMajorVersion)
 
-## Include the file which allows `find_package(libdpp)` to function.
+## Include the file which allows `find_package(dpp)` to function.
 install(FILES "${CMAKE_SOURCE_DIR}/cmake/dpp-config.cmake" "${DPP_VERSION_FILE}" DESTINATION "${DPP_CMAKE_DIR}")
 
 ## Export the targets to allow other projects to easily include this project
