@@ -31,8 +31,8 @@ void cluster::current_user_leave_thread(snowflake thread_id, command_completion_
 	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(thread_id), "/thread-members/@me", m_delete, "", callback);
 }
 
-void cluster::threads_get_active(snowflake channel_id, command_completion_event_t callback) {
-	rest_request_list<thread>(this, API_PATH "/channels", std::to_string(channel_id), "/threads/active", m_get, "", callback);
+void cluster::threads_get_active(snowflake guild_id, command_completion_event_t callback) {
+	rest_request_list<thread>(this, API_PATH "/guilds", std::to_string(guild_id), "/threads/active", m_get, "", callback);
 }
 
 void cluster::threads_get_joined_private_archived(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback) {

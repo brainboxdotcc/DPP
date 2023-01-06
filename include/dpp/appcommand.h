@@ -722,7 +722,7 @@ public:
 	 * @brief Get the channel this command originated on
 	 * 
 	 * @return const dpp::channel& channel
-	 * @throws dpp::logic_error Command originated from a DM or channel not in cache
+	 * @throws dpp::logic_exception Command originated from a DM or channel not in cache
 	 */
 	const dpp::channel& get_channel() const;
 
@@ -730,7 +730,7 @@ public:
 	 * @brief Get the guild this command originated on
 	 * 
 	 * @return const dpp::guild& guild 
-	 * @throws dpp::logic_error Command originated from a DM or guild not in cache
+	 * @throws dpp::logic_exception Command originated from a DM or guild not in cache
 	 */
 	const dpp::guild& get_guild() const;
 
@@ -1007,9 +1007,9 @@ public:
 	std::vector<command_option> options;
 
 	/**
-	 * @brief whether the command is enabled by default when the app is added to a guild.
+	 * @brief Whether the command is enabled by default when the app is added to a guild.
 	 * This has no effect as the default_member_permissions value is used instead.
-	 * @deprecated Discord discourage use of this value and instead you should use default_member_permissions.
+	 * @deprecated Discord discourage use of this value and instead you should use slashcommand::default_member_permissions.
 	 */
 	bool default_permission;
 
@@ -1049,6 +1049,12 @@ public:
 	bool dm_permission;
 
 	/**
+	 * @brief Indicates whether the command is [age-restricted](https://discord.com/developers/docs/interactions/application-commands#agerestricted-commands).
+	 * Defaults to false
+	 */
+	bool nsfw;
+
+	/**
 	 * @brief Construct a new slashcommand object
 	 */
 	slashcommand();
@@ -1081,9 +1087,17 @@ public:
 	 * @brief Set the dm permission for the command
 	 * 
 	 * @param dm true to allow this command in dms
-	 * @return slashcommand& reference to self
+	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_dm_permission(bool dm);
+
+	/**
+	 * @brief Set whether the command should be age-restricted or not
+	 *
+	 * @param is_nsfw true if the command should be age-restricted
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& set_nsfw(bool is_nsfw);
 
 	/**
 	 * @brief Set the default permissions of the slash command
@@ -1091,7 +1105,7 @@ public:
 	 * @param defaults default permissions to set. This is a permission bitmask of bits from dpp::permissions
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 *
-	 * @return slashcommand& reference to self
+	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_default_permissions(uint64_t defaults);
 
