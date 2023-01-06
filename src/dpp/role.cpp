@@ -374,5 +374,72 @@ std::string role::get_icon_url(uint16_t size) const {
 	}
 }
 
+application_role_connection_metadata::application_role_connection_metadata() : key(""), name(""), description("") {
+}
+
+application_role_connection_metadata &application_role_connection_metadata::fill_from_json(nlohmann::json *j) {
+	type = (application_role_connection_metadata_type)int8_not_null(j, "type");
+	key = string_not_null(j, "key");
+	name = string_not_null(j, "name");
+	if (j->contains("name_localizations")) {
+		for (auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
+			name_localizations[loc.key()] = loc.value().get<std::string>();
+		}
+	}
+	description = string_not_null(j, "description");
+	if (j->contains("description_localizations")) {
+		for(auto loc = (*j)["description_localizations"].begin(); loc != (*j)["description_localizations"].end(); ++loc) {
+			description_localizations[loc.key()] = loc.value().get<std::string>();
+		}
+	}
+	return *this;
+}
+
+std::string application_role_connection_metadata::build_json(bool with_id) const {
+	json j;
+	j["type"] = type;
+	j["key"] = key;
+	j["name"] = name;
+	if (!name_localizations.empty()) {
+		j["name_localizations"] = json::object();
+		for(auto& loc : name_localizations) {
+			j["name_localizations"][loc.first] = loc.second;
+		}
+	}
+	j["description"] = description;
+	if (!description_localizations.empty()) {
+		j["description_localizations"] = json::object();
+		for(auto& loc : description_localizations) {
+			j["description_localizations"][loc.first] = loc.second;
+		}
+	}
+	return j.dump();
+}
+
+
+application_role_connection::application_role_connection() : platform_name(""), platform_username("") {
+}
+
+application_role_connection &application_role_connection::fill_from_json(nlohmann::json *j) {
+	platform_name = string_not_null(j, "platform_name");
+	platform_username = string_not_null(j, "platform_username");
+	metadata = application_role_connection_metadata().fill_from_json(&((*j)["metadata"]));
+	return *this;
+}
+
+std::string application_role_connection::build_json(bool with_id) const {
+	json j;
+	if (!platform_name.empty()) {
+		j["platform_name"] = platform_name;
+	}
+	if (!platform_username.empty()) {
+		j["platform_username"] = platform_username;
+	}
+	if (std::holds_alternative<application_role_connection_metadata>(metadata)) {
+		j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
+	}
+	return j.dump();
+}
+
 
 };

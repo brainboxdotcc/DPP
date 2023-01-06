@@ -89,6 +89,7 @@ application& application::fill_from_json(nlohmann::json* j) {
 			this->team.members.emplace_back(tm);
 		}
 	}
+	set_string_not_null(j, "role_connections_verification_url", role_connections_verification_url);
 	return *this;
 }
 
