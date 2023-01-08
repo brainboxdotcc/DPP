@@ -2463,6 +2463,8 @@ public:
 	 * @param guild_id Guild ID to get integrations for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::integration_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 *
+	 * @note This endpoint returns a maximum of 50 integrations. If a guild has more integrations, they cannot be accessed.
 	 */
 	void guild_get_integrations(snowflake guild_id, command_completion_event_t callback);
 
