@@ -157,6 +157,11 @@ channel& channel::set_default_forum_layout(forum_layout_type layout_type) {
 	return *this;
 }
 
+channel &channel::set_default_sort_order(default_forum_sort_order_t sort_order) {
+	this->default_sort_order = sort_order;
+	return *this;
+}
+
 channel& channel::set_guild_id(const snowflake guild_id) {
 	this->guild_id = guild_id;
 	return *this;
@@ -596,6 +601,10 @@ channel_type channel::get_type() const {
 
 forum_layout_type channel::get_default_forum_layout() const {
 	return static_cast<forum_layout_type>((flags & DEFAULT_FORUM_LAYOUT_MASK) >> 9);
+}
+
+default_forum_sort_order_t channel::get_default_sort_order() const {
+	return this->default_sort_order;
 }
 
 
