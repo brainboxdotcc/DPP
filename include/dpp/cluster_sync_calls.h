@@ -1585,6 +1585,35 @@ role_map roles_edit_position_sync(snowflake guild_id, const std::vector<role> &r
 role_map roles_get_sync(snowflake guild_id);
 
 /**
+ * @brief Get user application role connection
+ *
+ * @see dpp::cluster::user_application_role_connection_get
+ * @see https://discord.com/developers/docs/resources/user#get-user-application-role-connection
+ * @param application_id The application ID
+ * @return application_role_connection returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+application_role_connection user_application_role_connection_get_sync(snowflake application_id);
+
+/**
+ * @brief Update user application role connection
+ *
+ * @see dpp::cluster::user_application_role_connection_update
+ * @see https://discord.com/developers/docs/resources/user#update-user-application-role-connection
+ * @param application_id The application ID
+ * @param connection The application role connection to update
+ * @return application_role_connection returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+application_role_connection user_application_role_connection_update_sync(snowflake application_id, const application_role_connection &connection);
+
+/**
  * @brief Get all scheduled events for a guild
  * @see dpp::cluster::guild_events_get
  * @see https://discord.com/developers/docs/resources/guild-scheduled-event#list-scheduled-events-for-guild
@@ -1915,17 +1944,17 @@ confirmation current_user_join_thread_sync(snowflake thread_id);
 confirmation current_user_leave_thread_sync(snowflake thread_id);
 
 /**
- * @brief Get active threads in a channel (Sorted by ID in descending order)
+ * @brief Get active threads in a guild (Sorted by ID in descending order)
  * @see dpp::cluster::threads_get_active
  * @see https://discord.com/developers/docs/topics/threads
- * @param channel_id Channel to get active threads for
+ * @param guild_id Guild to get active threads for
  * @return thread_map returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-thread_map threads_get_active_sync(snowflake channel_id);
+thread_map threads_get_active_sync(snowflake guild_id);
 
 /**
  * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)

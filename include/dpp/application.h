@@ -121,6 +121,7 @@ public:
 	std::vector<std::string> tags;	//!< Up to 5 tags describing the content and functionality of the application
 	application_install_params install_params;	//!< Settings for the application's default in-app authorization link, if enabled
 	std::string custom_install_url;	//!< The application's default custom authorization link, if enabled
+	std::string role_connections_verification_url; //!< The application's role connection verification entry point, which when configured will render the app as a verification method in the guild role verification configuration
 
 	/** Constructor */
 	application();
