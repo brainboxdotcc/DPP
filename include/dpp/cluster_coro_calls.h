@@ -724,12 +724,13 @@ auto inline co_guild_current_member_edit(snowflake guild_id, const std::string &
  * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
  * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
  * @param before Entries that preceded a specific audit log entry ID. Used for paginating
+ * @param after Entries that succeeded a specific audit log entry ID. Used for paginating
  * @param limit Maximum number of entries (between 1-100) to return
  * @return auditlog returned object on completion
  * \memberof dpp::cluster
  */
-auto inline co_guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit) {
-	return dpp::awaitable(this, [&] (auto cc) { this->guild_auditlog_get(guild_id, user_id, action_type, before, limit, cc); }); 
+auto inline co_guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, snowflake after, uint32_t limit) {
+	return dpp::awaitable(this, [&] (auto cc) { this->guild_auditlog_get(guild_id, user_id, action_type, before, after, limit, cc); }); 
 }
 
 /**
