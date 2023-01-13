@@ -203,6 +203,10 @@ user_identified& user_identified::fill_from_json(json* j) {
 	return *this;
 }
 
+bool user_identified::has_animated_banner() const {
+	return this->flags & u_animated_banner;
+}
+
 std::string user_identified::get_banner_url(uint16_t size) const {
 	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
 	 * At some point in the future this URL *will* change!
@@ -228,6 +232,10 @@ void from_json(const nlohmann::json& j, user_identified& u) {
 	u.verified = bool_not_null(&j, "verified");
 	if (j.find("banner") != j.end()) {
 		std::string b = string_not_null(&j, "banner");
+		if (b.length() > 2 && b.substr(0, 2) == "a_") {
+			b = b.substr(2, b.length());
+			u.flags |= u_animated_banner;
+		}
 		u.banner = b;
 	}
 }
