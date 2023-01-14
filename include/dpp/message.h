@@ -832,7 +832,8 @@ enum sticker_type : uint8_t {
 enum sticker_format : uint8_t {
 	sf_png = 1,
 	sf_apng = 2,
-	sf_lottie = 3
+	sf_lottie = 3,
+	sf_gif = 4,
 };
 
 /**
@@ -894,12 +895,11 @@ struct DPP_EXPORT sticker : public managed, public json_interface<sticker> {
 	virtual std::string build_json(bool with_id = true) const;
 
 	/**
-	 * @brief Get the sticker url
+	 * @brief Get the sticker url. `json` format is used if the format_type is lottie. Otherwise `png`.
 	 *
-	 * @param accept_lottie Whether to allow that [lottie](https://airbnb.io/lottie/#/) (json format) can be returned or not
-	 * @return std::string The sticker url or an empty string when its a lottie and accept_lottie is false
+	 * @return std::string The sticker url
 	 */
-	std::string get_url(bool accept_lottie = true) const;
+	std::string get_url() const;
 
 	/**
 	 * @brief Set the filename

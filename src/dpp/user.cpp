@@ -77,19 +77,18 @@ user_identified::user_identified() : user(), accent_color(0), verified(false) {
 user_identified::~user_identified() {
 }
 
-std::string user::get_avatar_url(uint16_t size)  const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (this->avatar.to_string().empty()) {
+std::string user::get_avatar_url(uint16_t size, const std::string &format, bool prefer_animated)  const {
+	if (this->avatar.to_string().empty() && this->discriminator) {
 		return utility::cdn_host + "/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png";
-	} else {
+	} else if (!this->avatar.to_string().empty() && this->id) {
 		return utility::cdn_host + "/avatars/" +
 			std::to_string(this->id) +
 			(has_animated_icon() ? "/a_" : "/") +
-			this->avatar.to_string() +
-			(has_animated_icon() ? ".gif" : ".png") +
+			this->avatar.to_string() + "." +
+			(has_animated_icon() && prefer_animated ? "gif" : format) +
 			utility::avatar_size(size);
+	} else {
+		return std::string();
 	}
 }
 
@@ -207,17 +206,14 @@ bool user_identified::has_animated_banner() const {
 	return this->flags & u_animated_banner;
 }
 
-std::string user_identified::get_banner_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->banner.to_string().empty()) {
+std::string user_identified::get_banner_url(uint16_t size, const std::string &format, bool prefer_animated) const {
+	if (!this->banner.to_string().empty() && this->id) {
 		return utility::cdn_host + "/banners/" +
-			std::to_string(this->id) +
-			(has_animated_icon() ? "/a_" : "/") +
-			this->banner.to_string() +
-			(has_animated_icon() ? ".gif" : ".png") +
-			utility::avatar_size(size);
+			   std::to_string(this->id) +
+			   (has_animated_banner() ? "/a_" : "/") +
+			   this->banner.to_string() + "." +
+			   (has_animated_banner() && prefer_animated ? "gif" : format) +
+			   utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

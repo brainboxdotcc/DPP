@@ -28,6 +28,13 @@
 #include <map>
 #include <functional>
 
+#ifndef MAX_CND_IMAGE_SIZE
+	#define MAX_CDN_IMAGE_SIZE 4096
+#endif
+#ifndef MIN_CDN_IMAGE_SIZE
+	#define MIN_CDN_IMAGE_SIZE 16
+#endif
+
 /**
  * @brief The main namespace for D++ functions, classes and types
  */
@@ -356,10 +363,10 @@ namespace dpp {
 		std::string DPP_EXPORT validate(const std::string& value, size_t _min, size_t _max, const std::string& exception_message);
 
 		/**
-		 * @brief Return the url parameter for an avatar size, or empty if the size is 0
+		 * @brief Return the url query parameter for an avatar size, or empty if the size is 0. Internally used to build url getters.
 		 * 
-		 * @param size size to generate url parameter for
-		 * @return std::string url parameter
+		 * @param size size to generate url parameter for. Must be any power of two between 16 and 4096 (inclusive) or it'll return an empty string.
+		 * @return std::string url query parameter e.g. `?size=120`, or an empty string
 		 */
 		std::string DPP_EXPORT avatar_size(uint32_t size);
 

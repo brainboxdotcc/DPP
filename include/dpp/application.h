@@ -136,20 +136,24 @@ public:
 	application& fill_from_json(nlohmann::json* j);
 
 	/**
-	 * @brief Get the applications cover image url if they have one, otherwise returns an empty string
+	 * @brief Get the application's cover image url if they have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the cover image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized cover image is returned.
+	 * @param size The size of the cover image in pixels. It can be any power of two between 16 and 4096.
+	 * If 0, the default sized cover image is returned.
+	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg` or `png`.
 	 * @return std::string cover image url or empty string
 	 */
-	std::string get_cover_image_url(uint16_t size = 0) const;
+	std::string get_cover_image_url(uint16_t size = 0, const std::string &format = "png") const;
 
 	/**
-	 * @brief Get the applications icon url if they have one, otherwise returns an empty string
+	 * @brief Get the application's icon url if they have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized icon is returned.
+	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096.
+	 * If 0, the default sized icon is returned.
+	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg` or `png`.
 	 * @return std::string icon url or empty string
 	 */
-	std::string get_icon_url(uint16_t size = 0) const;
+	std::string get_icon_url(uint16_t size = 0, const std::string &format = "png") const;
 };
 
 /** A group of applications.

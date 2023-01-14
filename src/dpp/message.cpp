@@ -1184,11 +1184,11 @@ std::string sticker_pack::build_json(bool with_id) const {
 	return j.dump();
 }
 
-std::string sticker::get_url(bool accept_lottie) const {
-	if (this->format_type == sticker_format::sf_lottie && !accept_lottie) {
-		return std::string();
-	} else {
+std::string sticker::get_url() const {
+	if (this->id) {
 		return utility::cdn_host + "/stickers/" + std::to_string(this->id) + (this->format_type == sticker_format::sf_lottie ? ".json" : ".png");
+	} else {
+		return std::string();
 	}
 }
 

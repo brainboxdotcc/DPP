@@ -248,14 +248,19 @@ public:
 	bool has_animated_guild_avatar() const;
 
 	/**
-	 * @brief Returns the members per guild avatar if they have one, otherwise returns an empty string
+	 * @brief Returns the member's per guild avatar url if they have one, otherwise returns an empty string.
 	 *
-	 * @note per-server avatar is a nitro only feature so it might be not set. If you need the real user avatar, use user::get_avatar_url.
+	 * @note per-server avatar is a nitro only feature so it might be not set. If you need the user avatar, use user::get_avatar_url.
 	 * 
-	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096. If not specified, the default sized avatar is returned.
+	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096.
+	 * If 0, the default sized avatar is returned.
+	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg`, `png` or `gif`.
+	 * Avoid using `gif`, consider using the `prefer_animated` parameter instead.
+	 * @param prefer_animated Whether you prefer gif format.
+	 * If true, it'll return gif format whenever the image is available as animated.
 	 * @return std::string avatar url or empty string
 	 */
-	std::string get_avatar_url(uint16_t size = 0) const;
+	std::string get_avatar_url(uint16_t size = 0, const std::string &format = "png", bool prefer_animated = true) const;
 
 	/**
 	 * @brief Set the nickname 
@@ -673,34 +678,48 @@ public:
 	/**
 	 * @brief Get the banner url of the guild if it have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized banner is returned.
+	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096.
+	 * If 0, the default sized banner is returned.
+	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg`, `png` or `gif`.
+	 * Avoid using `gif`, consider using the `prefer_animated` parameter instead.
+	 * @param prefer_animated Whether you prefer gif format.
+	 * If true, it'll return gif format whenever the image is available as animated.
 	 * @return std::string banner url or empty string
 	 */
-	std::string get_banner_url(uint16_t size = 0) const;
+	std::string get_banner_url(uint16_t size = 0, const std::string &format = "png", bool prefer_animated = true) const;
 
 	/**
 	 * @brief Get the discovery splash url of the guild if it have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the discovery splash in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized discovery splash is returned.
+	 * @param size The size of the discovery splash in pixels. It can be any power of two between 16 and 4096.
+	 * If 0, the default sized discovery splash is returned.
+	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg` or `png`.
 	 * @return std::string discovery splash url or empty string
 	 */
-	std::string get_discovery_splash_url(uint16_t size = 0) const;
+	std::string get_discovery_splash_url(uint16_t size = 0, const std::string &format = "png") const;
 
 	/**
 	 * @brief Get the icon url of the guild if it have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized icon is returned.
+	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096.
+	 * If 0, the default sized icon is returned.
+	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg`, `png` or `gif`.
+	 * Avoid using `gif`, consider using the `prefer_animated` parameter instead.
+	 * @param prefer_animated Whether you prefer gif format.
+	 * If true, it'll return gif format whenever the image is available as animated.
 	 * @return std::string icon url or empty string
 	 */
-	std::string get_icon_url(uint16_t size = 0) const;
+	std::string get_icon_url(uint16_t size = 0, const std::string &format = "png", bool prefer_animated = true) const;
 
 	/**
 	 * @brief Get the splash url of the guild if it have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the splash in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized splash is returned.
+	 * @param size The size of the splash in pixels. It can be any power of two between 16 and 4096.
+	 * If 0, the default sized splash is returned.
+	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg` or `png`.
 	 * @return std::string splash url or empty string
 	 */
-	std::string get_splash_url(uint16_t size = 0) const;
+	std::string get_splash_url(uint16_t size = 0, const std::string &format = "png") const;
 
 	/**
 	 * @brief Set the name of the guild in the object

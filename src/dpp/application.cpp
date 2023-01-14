@@ -93,17 +93,17 @@ application& application::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string application::get_cover_image_url(uint16_t size) const {
-	if (!this->cover_image.to_string().empty()) {
-		return utility::cdn_host + "/app-icons/" + std::to_string(this->id) + "/" + this->cover_image.to_string() + ".png" + utility::avatar_size(size);
+std::string application::get_cover_image_url(uint16_t size, const std::string &format) const {
+	if (!this->cover_image.to_string().empty() && this->id) {
+		return utility::cdn_host + "/app-icons/" + std::to_string(this->id) + "/" + this->cover_image.to_string() + "." + format + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
 }
 
-std::string application::get_icon_url(uint16_t size) const {
-	if (!this->icon.to_string().empty()) {
-		return utility::cdn_host + "/app-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
+std::string application::get_icon_url(uint16_t size, const std::string &format) const {
+	if (!this->icon.to_string().empty() && this->id) {
+		return utility::cdn_host + "/app-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + format + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

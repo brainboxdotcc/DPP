@@ -363,12 +363,9 @@ members_container role::get_members() const {
 	return gm;
 }
 
-std::string role::get_icon_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->icon.to_string().empty()) {
-		return utility::cdn_host + "/role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
+std::string role::get_icon_url(uint16_t size, const std::string &format) const {
+	if (!this->icon.to_string().empty() && this->id) {
+		return utility::cdn_host + "/role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + format + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

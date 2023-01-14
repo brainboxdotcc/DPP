@@ -274,18 +274,26 @@ public:
 	/**
 	 * @brief Get the assets large image url if they have one, otherwise returns an empty string. In case of prefixed image IDs (mp:{image_id}) it returns an empty string.
 	 *
-	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized image is returned.
+	 * @see https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
+	 *
+	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096.
+	 * If 0, the default sized image is returned.
+	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg` or `png`.
 	 * @return image url or empty string
 	 */
-	std::string get_large_asset_url(uint16_t size = 0) const;
+	std::string get_large_asset_url(uint16_t size = 0, const std::string &format = "png") const;
 
 	/**
 	 * @brief Get the assets small image url if they have one, otherwise returns an empty string. In case of prefixed image IDs (mp:{image_id}) it returns an empty string.
 	 *
-	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized image is returned.
+	 * @see https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
+	 *
+	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096.
+	 * If 0, the default sized image is returned.
+	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg` or `png`.
 	 * @return image url or empty string
 	 */
-	std::string get_small_asset_url(uint16_t size = 0) const;
+	std::string get_small_asset_url(uint16_t size = 0, const std::string &format = "png") const;
 
 	activity();
 
