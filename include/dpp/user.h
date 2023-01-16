@@ -135,15 +135,17 @@ public:
 	/**
 	 * @brief Get the avatar url of the user
 	 *
+	 * @note If the user doesn't have an avatar, the default user avatar url is returned which is always in `png` format!
+	 *
 	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096.
 	 * If 0, the default sized avatar is returned.
-	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg`, `png` or `gif`.
-	 * Avoid using `gif`, consider using the `prefer_animated` parameter instead.
+	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
+	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
 	 * If true, it'll return gif format whenever the image is available as animated.
-	 * @return std::string avatar url. If the user doesn't have an avatar, the default user avatar url is returned which is always in `png` format!
+	 * @return std::string avatar url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
-	std::string get_avatar_url(uint16_t size = 0, const std::string &format = "png", bool prefer_animated = true) const;
+	std::string get_avatar_url(uint16_t size = 0, const image_type format = i_png, bool prefer_animated = true) const;
 
 	/**
 	 * @brief Return a ping/mention for the user
@@ -354,13 +356,13 @@ public:
 	 *
 	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096.
 	 * If 0, the default sized banner is returned.
-	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg`, `png` or `gif`.
-	 * Avoid using `gif`, consider using the `prefer_animated` parameter instead.
+	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
+	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
 	 * If true, it'll return gif format whenever the image is available as animated.
-	 * @return std::string banner url or empty string
+	 * @return std::string banner url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
-	std::string get_banner_url(uint16_t size = 0, const std::string &format = "png", bool prefer_animated = true) const;
+	std::string get_banner_url(uint16_t size = 0, const image_type format = i_png, bool prefer_animated = true) const;
 
 };
 

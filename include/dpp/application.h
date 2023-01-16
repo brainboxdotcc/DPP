@@ -140,20 +140,20 @@ public:
 	 *
 	 * @param size The size of the cover image in pixels. It can be any power of two between 16 and 4096.
 	 * If 0, the default sized cover image is returned.
-	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg` or `png`.
-	 * @return std::string cover image url or empty string
+	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
+	 * @return std::string cover image url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
-	std::string get_cover_image_url(uint16_t size = 0, const std::string &format = "png") const;
+	std::string get_cover_image_url(uint16_t size = 0, const image_type format = i_png) const;
 
 	/**
 	 * @brief Get the application's icon url if they have one, otherwise returns an empty string
 	 *
 	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096.
 	 * If 0, the default sized icon is returned.
-	 * @param format The format to use for the avatar. The format must be one of `webp`, `jpeg`, `jpg` or `png`.
-	 * @return std::string icon url or empty string
+	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
+	 * @return std::string icon url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
-	std::string get_icon_url(uint16_t size = 0, const std::string &format = "png") const;
+	std::string get_icon_url(uint16_t size = 0, const image_type format = i_png) const;
 };
 
 /** A group of applications.

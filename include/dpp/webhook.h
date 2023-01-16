@@ -97,7 +97,7 @@ public:
 	 * @brief Base64 encode image data and allocate it to image_data
 	 * 
 	 * @param image_blob Binary image data
-	 * @param type Image type
+	 * @param type Image type. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @param is_base64_encoded True if the image data is already base64 encoded
 	 * @return webhook& Reference to self
 	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
