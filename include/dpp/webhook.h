@@ -100,7 +100,7 @@ public:
 	 * @param type Image type. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @param is_base64_encoded True if the image data is already base64 encoded
 	 * @return webhook& Reference to self
-	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
+	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
 	 */
 	webhook& load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded = false);
 };
