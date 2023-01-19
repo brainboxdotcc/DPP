@@ -1186,7 +1186,14 @@ std::string sticker_pack::build_json(bool with_id) const {
 
 std::string sticker::get_url() const {
 	if (this->id) {
-		return utility::cdn_host + "/stickers/" + std::to_string(this->id) + (this->format_type == sticker_format::sf_lottie ? ".json" : ".png");
+		static const std::map<sticker_format, std::string> extensions = {
+				{ sticker_format::sf_png, "png" },
+				{ sticker_format::sf_apng, "png" },
+				{ sticker_format::sf_lottie, "json" },
+				{ sticker_format::sf_gif, "gif" },
+		};
+
+		return utility::cdn_host + "/stickers/" + std::to_string(this->id) + "." + extensions.find(this->format_type)->second;
 	} else {
 		return std::string();
 	}

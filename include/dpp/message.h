@@ -895,7 +895,7 @@ struct DPP_EXPORT sticker : public managed, public json_interface<sticker> {
 	virtual std::string build_json(bool with_id = true) const;
 
 	/**
-	 * @brief Get the sticker url. `json` format is used if the format_type is lottie. Otherwise `png`.
+	 * @brief Get the sticker url.
 	 *
 	 * @return std::string The sticker url or an empty string, if required attributes are missing
 	 */
