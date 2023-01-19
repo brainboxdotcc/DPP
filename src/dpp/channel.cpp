@@ -603,9 +603,5 @@ forum_layout_type channel::get_default_forum_layout() const {
 	return static_cast<forum_layout_type>((flags & DEFAULT_FORUM_LAYOUT_MASK) >> 9);
 }
 
-default_forum_sort_order_t channel::get_default_sort_order() const {
-	return this->default_sort_order;
-}
-
 
 };

@@ -528,13 +528,6 @@ public:
 	forum_layout_type get_default_forum_layout() const;
 
 	/**
-	 * @brief Get the default forum sort order
-	 *
-	 * @return default_forum_sort_order_t Forum sort order type
-	 */
-	default_forum_sort_order_t get_default_sort_order() const;
-
-	/**
 	 * @brief Get the mention ping for the channel
 	 * 
 	 * @return std::string mention
