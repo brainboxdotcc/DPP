@@ -252,8 +252,8 @@ public:
 	 *
 	 * @note per-server avatar is a nitro only feature so it might be not set. If you need the user avatar, use user::get_avatar_url.
 	 * 
-	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096.
-	 * If 0, the default sized avatar is returned.
+	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized avatar is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
 	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
@@ -678,8 +678,8 @@ public:
 	/**
 	 * @brief Get the banner url of the guild if it have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096.
-	 * If 0, the default sized banner is returned.
+	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized banner is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
 	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
@@ -691,8 +691,8 @@ public:
 	/**
 	 * @brief Get the discovery splash url of the guild if it have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the discovery splash in pixels. It can be any power of two between 16 and 4096.
-	 * If 0, the default sized discovery splash is returned.
+	 * @param size The size of the discovery splash in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized discovery splash is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
 	 * @return std::string discovery splash url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
@@ -701,8 +701,8 @@ public:
 	/**
 	 * @brief Get the icon url of the guild if it have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096.
-	 * If 0, the default sized icon is returned.
+	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized icon is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
 	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
@@ -714,8 +714,8 @@ public:
 	/**
 	 * @brief Get the splash url of the guild if it have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the splash in pixels. It can be any power of two between 16 and 4096.
-	 * If 0, the default sized splash is returned.
+	 * @param size The size of the splash in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized splash is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
 	 * @return std::string splash url or an empty string, if required attributes are missing or an invalid format was passed
 	 */

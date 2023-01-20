@@ -137,8 +137,8 @@ public:
 	 *
 	 * @note If the user doesn't have an avatar, the default user avatar url is returned which is always in `png` format!
 	 *
-	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096.
-	 * If 0, the default sized avatar is returned.
+	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized avatar is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
 	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
@@ -146,6 +146,13 @@ public:
 	 * @return std::string avatar url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
 	std::string get_avatar_url(uint16_t size = 0, const image_type format = i_png, bool prefer_animated = true) const;
+
+	/**
+	 * @brief Get the default avatar url of the user. This is calculated by the discriminator.
+	 *
+	 * @return std::string avatar url or an empty string, if the discriminator is empty
+	 */
+	std::string get_default_avatar_url() const;
 
 	/**
 	 * @brief Return a ping/mention for the user
@@ -354,8 +361,8 @@ public:
 	/**
 	 * @brief Get the user identified's banner url if they have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096.
-	 * If 0, the default sized banner is returned.
+	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized banner is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
 	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.

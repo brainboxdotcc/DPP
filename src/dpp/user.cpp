@@ -89,15 +89,23 @@ std::string user::get_avatar_url(uint16_t size, const image_type format, bool pr
 		return std::string();
 	}
 
-	if (this->avatar.to_string().empty() && this->discriminator) {
-		return utility::cdn_host + "/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png";
-	} else if (!this->avatar.to_string().empty() && this->id) {
+	if (this->avatar.to_string().empty()) {
+		return get_default_avatar_url();
+	} else if (this->id) {
 		return utility::cdn_host + "/avatars/" +
 			std::to_string(this->id) +
 			(has_animated_icon() ? "/a_" : "/") +
 			this->avatar.to_string() + "." +
 			(has_animated_icon() && prefer_animated ? "gif" : extensions.find(format)->second) +
 			utility::avatar_size(size);
+	} else {
+		return std::string();
+	}
+}
+
+std::string user::get_default_avatar_url() const {
+	if (this->discriminator) {
+		return utility::cdn_host + "/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png";
 	} else {
 		return std::string();
 	}

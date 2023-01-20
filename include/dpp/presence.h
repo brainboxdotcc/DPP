@@ -276,8 +276,8 @@ public:
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
 	 *
-	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096.
-	 * If 0, the default sized image is returned.
+	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized image is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
 	 * @return std::string image url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
@@ -288,8 +288,8 @@ public:
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
 	 *
-	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096.
-	 * If 0, the default sized image is returned.
+	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized image is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
 	 * @return std::string image url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
