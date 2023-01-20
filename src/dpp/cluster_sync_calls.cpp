@@ -233,8 +233,8 @@ confirmation cluster::guild_current_member_edit_sync(snowflake guild_id, const s
 	return dpp::sync<confirmation>(this, &cluster::guild_current_member_edit, guild_id, nickname);
 }
 
-auditlog cluster::guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit) {
-	return dpp::sync<auditlog>(this, &cluster::guild_auditlog_get, guild_id, user_id, action_type, before, limit);
+auditlog cluster::guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, snowflake after, uint32_t limit) {
+	return dpp::sync<auditlog>(this, &cluster::guild_auditlog_get, guild_id, user_id, action_type, before, after, limit);
 }
 
 confirmation cluster::guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_seconds) {
