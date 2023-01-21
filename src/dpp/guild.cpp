@@ -436,7 +436,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
 		/* Clear unavailable flag if set */
 		if (this->flags & dpp::g_unavailable) {
-			this->flags -= dpp::g_unavailable;
+			this->flags &= ~dpp::g_unavailable;
 		}
 		set_string_not_null(d, "name", this->name);
 		/* Special case for guild icon to allow for animated icons.
