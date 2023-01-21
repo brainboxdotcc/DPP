@@ -1069,6 +1069,8 @@ enum message_type {
 	mt_context_menu_command 			= 23,
 	/// Auto moderation action
 	mt_auto_moderation_action			= 24,
+	/// Role subscription purchase
+	mt_role_subscription_purchase		= 25,
 };
 
 /**
