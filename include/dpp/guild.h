@@ -78,10 +78,6 @@ enum guild_flags : uint32_t {
 	g_partnered =				0b00000000000000000000000010000000,
 	/** Community features enabled */
 	g_community =				0b00000000000000000000000100000000,
-	/** Guild has commerce features enabled
-	 * @deprecated Removed by Discord
-	 */
-	g_commerce =				0b00000000000000000000001000000000,
 	/** Guild has access to create announcement channels */
 	g_news =				0b00000000000000000000010000000000,
 	/** Guild is discoverable in discovery */
@@ -114,10 +110,6 @@ enum guild_flags : uint32_t {
 	g_monetization_enabled =		0b00000001000000000000000000000000,
 	/** guild has increased custom sticker slots */
 	g_more_stickers =			0b00000010000000000000000000000000,
-	/** guild has access to create private threads
-	 * @deprecated Removed by Discord
-	 * */
-	g_private_threads =			0b00000100000000000000000000000000,
 	/** guild is able to set role icons */
 	g_role_icons =				0b00001000000000000000000000000000,
 	/** guild has access to the seven day archive time for threads */
@@ -766,13 +758,6 @@ public:
 	bool is_community() const;
 
 	/**
-	 * @brief Guild has access to use commerce features
-	 * @return bool has commerce features enabled
-	 * @deprecated Removed by Discord
-	 */
-	bool has_commerce() const;
-
-	/**
 	 * @brief Guild has access to create announcement channels
 	 * @return bool has announcement channels features enabled
 	 */
@@ -862,13 +847,6 @@ public:
 	 * @return bool has more stickers
 	 */
 	bool has_more_stickers() const;
-
-	/**
-	 * @brief guild has access to create private threads
-	 * @return bool has private threads
-	 * @deprecated Removed by Discord
-	 */
-	bool has_private_threads() const;
 
 	/**
 	 * @brief guild is able to set role icons

@@ -37,7 +37,6 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"PARTNERED", dpp::g_partnered },
 	{"COMMUNITY", dpp::g_community },
 	{"DEVELOPER_SUPPORT_SERVER", dpp::g_developer_support_server },
-	{"COMMERCE", dpp::g_commerce },
 	{"NEWS", dpp::g_news },
 	{"DISCOVERABLE", dpp::g_discoverable },
 	{"FEATURABLE", dpp::g_featureable },
@@ -282,10 +281,6 @@ bool guild::is_community() const {
 	return this->flags & g_community;
 }
 
-bool guild::has_commerce() const {
-	return this->flags & g_commerce;
-}
-
 bool guild::has_news() const {
 	return this->flags & g_news;
 }
@@ -344,10 +339,6 @@ bool guild::has_monetization_enabled() const {
 
 bool guild::has_more_stickers() const {
 	return this->flags & g_more_stickers;
-}
-
-bool guild::has_private_threads() const {
-	return this->flags & g_private_threads;
 }
 
 bool guild::has_role_icons() const {
