@@ -52,6 +52,9 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"ROLE_ICONS", dpp::g_role_icons },
 	{"TICKETED_EVENTS_ENABLED", dpp::g_ticketed_events },
 	{"AUTO_MODERATION", dpp::g_auto_moderation },
+	{"CREATOR_STORE_PAGE", dpp::g_creator_store_page_enabled },
+	{"ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE", dpp::g_role_subscriptions_available_for_purchase },
+	{"ROLE_SUBSCRIPTIONS_ENABLED", dpp::g_role_subscription_enabled },
 };
 
 namespace dpp {
@@ -278,6 +281,10 @@ bool guild::is_community() const {
 	return this->flags & g_community;
 }
 
+bool guild::has_role_subscriptions() const {
+	return this->flags & g_role_subscription_enabled;
+}
+
 bool guild::has_news() const {
 	return this->flags & g_news;
 }
@@ -300,6 +307,10 @@ bool guild::has_auto_moderation() const {
 
 bool guild::has_support_server() const {
 	return this->flags_extra & g_developer_support_server;
+}
+
+bool guild::has_role_subscriptions_available_for_purchase() const {
+	return this->flags_extra & g_role_subscriptions_available_for_purchase;
 }
 
 bool guild::has_animated_icon() const {
@@ -336,6 +347,10 @@ bool guild::has_monetization_enabled() const {
 
 bool guild::has_more_stickers() const {
 	return this->flags & g_more_stickers;
+}
+
+bool guild::has_creator_store_page() const {
+	return this->flags & g_creator_store_page_enabled;
 }
 
 bool guild::has_role_icons() const {
@@ -461,17 +476,23 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			}
 		}
 		uint8_t scf = int8_not_null(d, "system_channel_flags");
-		if (scf & 1) {
+		if (scf & (1 << 0)) {
 			this->flags |= dpp::g_no_join_notifications;
 		}
-		if (scf & 2) {
+		if (scf & (1 << 1)) {
 			this->flags |= dpp::g_no_boost_notifications;
 		}
-		if (scf & 4) {
+		if (scf & (1 << 2)) {
 			this->flags |= dpp::g_no_setup_tips;
 		}
-		if (scf & 8) {
+		if (scf & (1 << 3)) {
 			this->flags |= dpp::g_no_sticker_greeting;
+		}
+		if (scf & (1 << 4)) {
+			this->flags |= dpp::g_no_role_subscription_notifications;
+		}
+		if (scf & (1 << 5)) {
+			this->flags |= dpp::g_no_role_subscription_notification_replies;
 		}
 
 		if (d->contains("afk_timeout")) {

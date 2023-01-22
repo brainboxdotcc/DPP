@@ -78,6 +78,8 @@ enum guild_flags : uint32_t {
 	g_partnered =				0b00000000000000000000000010000000,
 	/** Community features enabled */
 	g_community =				0b00000000000000000000000100000000,
+	/** Guild has enabled role subscriptions */
+	g_role_subscription_enabled = 	0b00000000000000000000001000000000,
 	/** Guild has access to create announcement channels */
 	g_news =				0b00000000000000000000010000000000,
 	/** Guild is discoverable in discovery */
@@ -110,6 +112,8 @@ enum guild_flags : uint32_t {
 	g_monetization_enabled =		0b00000001000000000000000000000000,
 	/** guild has increased custom sticker slots */
 	g_more_stickers =			0b00000010000000000000000000000000,
+	/** Guild has enabled the role subscription promo page */
+	g_creator_store_page_enabled =	0b00000100000000000000000000000000,
 	/** guild is able to set role icons */
 	g_role_icons =				0b00001000000000000000000000000000,
 	/** guild has access to the seven day archive time for threads
@@ -142,6 +146,12 @@ enum guild_flags_extra : uint8_t {
 	g_invites_disabled =		0b00001000,
 	/** Guild has been set as support server of an app in the App Directory */
 	g_developer_support_server =	0b00010000,
+	/** Guild role subscription purchase and renewal notifications are off */
+	g_no_role_subscription_notifications = 0b00100000,
+	/** Guild role subscription sticker reply buttons are off */
+	g_no_role_subscription_notification_replies = 0b01000000,
+	/** Guild has role subscriptions that can be purchased */
+	g_role_subscriptions_available_for_purchase = 0b10000000,
 };
 
 /**
@@ -764,6 +774,12 @@ public:
 	bool is_community() const;
 
 	/**
+	 * @brief Has enabled role subscriptions
+	 * @return bool has enabled role subscriptions
+	 */
+	bool has_role_subscriptions() const;
+
+	/**
 	 * @brief Guild has access to create announcement channels
 	 * @return bool has announcement channels features enabled
 	 */
@@ -798,6 +814,12 @@ public:
 	 * @return bool has been set as a support server of an app in the app directory
 	 */
 	bool has_support_server() const;
+
+	/**
+	 * @brief Guild has role subscriptions that can be purchased
+	 * @return bool has role subscriptions that can be purchased
+	 */
+	bool has_role_subscriptions_available_for_purchase() const;
 
 	/**
 	 * @brief Guild has access to set an animated guild icon
@@ -853,6 +875,12 @@ public:
 	 * @return bool has more stickers
 	 */
 	bool has_more_stickers() const;
+
+	/**
+	 * @brief guild has enabled the role subscription promo page
+	 * @return bool has role subscription promo page enabled
+	 */
+	bool has_creator_store_page() const;
 
 	/**
 	 * @brief guild is able to set role icons
