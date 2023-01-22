@@ -92,6 +92,7 @@ std::map<std::string, test_t> tests = {
 	{"USER.GET_MENTION", {tt_offline, "user::get_mention", false, false}},
 	{"USER.FORMAT_USERNAME", {tt_offline, "user::format_username", false, false}},
 	{"USER.GET_CREATION_TIME", {tt_offline, "user::get_creation_time", false, false}},
+	{"USER.GET_AVATAR_URL", {tt_offline, "user::get_avatar_url", false, false}},
 	{"CHANNEL.SET_TYPE", {tt_offline, "channel::set_type", false, false}},
 	{"CHANNEL.GET_MENTION", {tt_offline, "channel::get_mention", false, false}},
 	{"UTILITY.ICONHASH", {tt_offline, "utility::iconhash", false, false}},

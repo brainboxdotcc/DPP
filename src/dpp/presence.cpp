@@ -28,21 +28,39 @@ using json = nlohmann::json;
 
 namespace dpp {
 
-std::string activity::get_large_asset_url(uint16_t size) const {
-	// https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
+std::string activity::get_large_asset_url(uint16_t size, const image_type format) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_jpg, "jpeg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
 	if (!this->assets.large_image.empty() && this->application_id &&
 		this->assets.large_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
-		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.large_image + ".png" + utility::avatar_size(size);
+		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.large_image + "." + extensions.find(format)->second + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
 }
 
-std::string activity::get_small_asset_url(uint16_t size) const {
-	// https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
+std::string activity::get_small_asset_url(uint16_t size, const image_type format) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_jpg, "jpeg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
 	if (!this->assets.small_image.empty() && this->application_id &&
 		this->assets.small_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
-		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.small_image + ".png" + utility::avatar_size(size);
+		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.small_image + "." + extensions.find(format)->second + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
