@@ -112,13 +112,19 @@ enum guild_flags : uint32_t {
 	g_more_stickers =			0b00000010000000000000000000000000,
 	/** guild is able to set role icons */
 	g_role_icons =				0b00001000000000000000000000000000,
-	/** guild has access to the seven day archive time for threads */
+	/** guild has access to the seven day archive time for threads
+	 * @deprecated Removed by Discord
+	 */
 	g_seven_day_thread_archive =		0b00010000000000000000000000000000,
-	/** guild has access to the three day archive time for threads */
+	/** guild has access to the three day archive time for threads
+	 * @deprecated Removed by Discord
+	 */
 	g_three_day_thread_archive =		0b00100000000000000000000000000000,
 	/** guild has enabled ticketed events */
 	g_ticketed_events =			0b01000000000000000000000000000000,
-	/** guild can have channel banners */
+	/** guild can have channel banners
+	 * @deprecated Removed by Discord
+	 */
 	g_channel_banners =			0b10000000000000000000000000000000,
 };
 
@@ -857,12 +863,14 @@ public:
 	/**
 	 * @brief guild has access to the seven day archive time for threads 
 	 * @return bool has seven day thread archive
+	 * @deprecated Removed by Discord
 	 */
 	bool has_seven_day_thread_archive() const;
 
 	/**
 	 * @brief guild has access to the three day archive time for threads
 	 * @return bool has three day thread archive
+	 * @deprecated Removed by Discord
 	 */
 	bool has_three_day_thread_archive() const;
 
@@ -875,6 +883,7 @@ public:
 	/**
 	 * @brief guild has access to channel banners feature
 	 * @return bool has channel banners
+	 * @deprecated Removed by Discord
 	 */
 	bool has_channel_banners() const;
 
