@@ -221,34 +221,6 @@ const command_value& interaction_create_t::get_parameter(const std::string& name
 	return dummy_value;
 }
 
-const command_value& button_click_t::get_parameter(const std::string& name) const
-{
-	/* Buttons don't have parameters, so override this */
-	static command_value dummy_b_value = {};
-	return dummy_b_value;
-}
-
-const command_value& select_click_t::get_parameter(const std::string& name) const
-{
-	/* Selects don't have parameters, so override this */
-	static command_value dummy_b_value = {};
-	return dummy_b_value;
-}
-
-const command_value& form_submit_t::get_parameter(const std::string& name) const
-{
-	/* Buttons don't have parameters, so override this */
-	static command_value dummy_b_value = {};
-	return dummy_b_value;
-}
-
-const command_value& autocomplete_t::get_parameter(const std::string& name) const
-{
-	/* Autocomplete don't have parameters, so override this */
-	static command_value dummy_b_value = {};
-	return dummy_b_value;
-}
-
 voice_receive_t::voice_receive_t(class discord_client* client, const std::string &raw, class discord_voice_client* vc, snowflake _user_id, uint8_t* pcm, size_t length) : event_dispatch_t(client, raw), voice_client(vc), user_id(_user_id) {
 	reassign(vc, _user_id, pcm, length);
 }

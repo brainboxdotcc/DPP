@@ -77,19 +77,37 @@ user_identified::user_identified() : user(), accent_color(0), verified(false) {
 user_identified::~user_identified() {
 }
 
-std::string user::get_avatar_url(uint16_t size)  const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
+std::string user::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_gif, "gif" },
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
 	if (this->avatar.to_string().empty()) {
-		return utility::cdn_host + "/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png";
-	} else {
+		return get_default_avatar_url();
+	} else if (this->id) {
 		return utility::cdn_host + "/avatars/" +
 			std::to_string(this->id) +
 			(has_animated_icon() ? "/a_" : "/") +
-			this->avatar.to_string() +
-			(has_animated_icon() ? ".gif" : ".png") +
+			this->avatar.to_string() + "." +
+			(has_animated_icon() && prefer_animated ? "gif" : extensions.find(format)->second) +
 			utility::avatar_size(size);
+	} else {
+		return std::string();
+	}
+}
+
+std::string user::get_default_avatar_url() const {
+	if (this->discriminator) {
+		return utility::cdn_host + "/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png";
+	} else {
+		return std::string();
 	}
 }
 
@@ -203,17 +221,29 @@ user_identified& user_identified::fill_from_json(json* j) {
 	return *this;
 }
 
-std::string user_identified::get_banner_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->banner.to_string().empty()) {
+bool user_identified::has_animated_banner() const {
+	return this->flags & u_animated_banner;
+}
+
+std::string user_identified::get_banner_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_gif, "gif" },
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
+	if (!this->banner.to_string().empty() && this->id) {
 		return utility::cdn_host + "/banners/" +
-			std::to_string(this->id) +
-			(has_animated_icon() ? "/a_" : "/") +
-			this->banner.to_string() +
-			(has_animated_icon() ? ".gif" : ".png") +
-			utility::avatar_size(size);
+			   std::to_string(this->id) +
+			   (has_animated_banner() ? "/a_" : "/") +
+			   this->banner.to_string() + "." +
+			   (has_animated_banner() && prefer_animated ? "gif" : extensions.find(format)->second) +
+			   utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
@@ -228,6 +258,10 @@ void from_json(const nlohmann::json& j, user_identified& u) {
 	u.verified = bool_not_null(&j, "verified");
 	if (j.find("banner") != j.end()) {
 		std::string b = string_not_null(&j, "banner");
+		if (b.length() > 2 && b.substr(0, 2) == "a_") {
+			b = b.substr(2, b.length());
+			u.flags |= u_animated_banner;
+		}
 		u.banner = b;
 	}
 }

@@ -162,20 +162,27 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	gm.flags |= bool_not_null(&j, "pending") ? gm_pending : 0;
 }
 
-std::string guild_member::get_avatar_url(uint16_t size)  const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->avatar.to_string().empty()) {
+std::string guild_member::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_gif, "gif" },
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
 
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
+	if (this->guild_id && this->user_id && !this->avatar.to_string().empty()) {
 		return utility::cdn_host + "/guilds/" +
-			std::to_string(this->guild_id) + 
-			"/" +
-			std::to_string(this->user_id) +
-			(has_animated_guild_avatar() ? "/a_" : "/") +
-			this->avatar.to_string() +
-			(has_animated_guild_avatar() ? ".gif" : ".png") +
-			utility::avatar_size(size);
+			   std::to_string(this->guild_id) +
+			   "/" +
+			   std::to_string(this->user_id) +
+			   (has_animated_guild_avatar() ? "/a_" : "/") +
+			   this->avatar.to_string() + "." +
+			   (has_animated_guild_avatar() && prefer_animated ? "gif" : extensions.find(format)->second) +
+			   utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
@@ -752,62 +759,93 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 	return false;
 }
 
-std::string guild::get_banner_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->banner.to_string().empty()) {
+std::string guild::get_banner_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_gif, "gif" },
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
+	if (!this->banner.to_string().empty() && this->id) {
 		return utility::cdn_host + "/banners/" +
-			std::to_string(this->id) +
-			(has_animated_banner_hash() ? "/a_" : "/") +
-			this->banner.to_string() +
-			(has_animated_banner_hash() ? ".gif" : ".png") +
-			utility::avatar_size(size);
+			   std::to_string(this->id) +
+			   (has_animated_banner_hash() ? "/a_" : "/") +
+			   this->banner.to_string() + "." +
+			   (has_animated_banner_hash() && prefer_animated ? "gif" : extensions.find(format)->second) +
+			   utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
 }
 
-std::string guild::get_discovery_splash_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->discovery_splash.to_string().empty()) {
+std::string guild::get_discovery_splash_url(uint16_t size, const image_type format) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
+	if (!this->discovery_splash.to_string().empty() && this->id) {
 		return utility::cdn_host + "/discovery-splashes/" +
-			std::to_string(this->id) + "/" +
-			this->discovery_splash.to_string() +
-			".png" +
-			utility::avatar_size(size);
+			   std::to_string(this->id) + "/" +
+			   this->discovery_splash.to_string() +
+			   "." + extensions.find(format)->second +
+			   utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
 }
 
-std::string guild::get_icon_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->icon.to_string().empty()) {
+std::string guild::get_icon_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_gif, "gif" },
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
+	if (!this->icon.to_string().empty() && this->id) {
 		return utility::cdn_host + "/icons/" +
-			std::to_string(this->id) +
-			(has_animated_icon_hash() ? "/a_" : "/") +
-			this->icon.to_string() +
-			(has_animated_icon_hash() ? ".gif" : ".png") +
-			utility::avatar_size(size);
+			   std::to_string(this->id) +
+			   (has_animated_icon_hash() ? "/a_" : "/") +
+			   this->icon.to_string() + "." +
+			   (has_animated_icon_hash() && prefer_animated ? "gif" : extensions.find(format)->second) +
+			   utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
 }
 
-std::string guild::get_splash_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->splash.to_string().empty()) {
+std::string guild::get_splash_url(uint16_t size, const image_type format) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
+	if (!this->splash.to_string().empty() && this->id) {
 		return utility::cdn_host + "/splashes/" +
-			std::to_string(this->id) + "/" + 
-			this->splash.to_string() +
-			utility::avatar_size(size);
+			   std::to_string(this->id) + "/" +
+			   this->splash.to_string() +
+			   "." + extensions.find(format)->second +
+			   utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

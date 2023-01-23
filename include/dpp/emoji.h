@@ -148,9 +148,9 @@ public:
 	 * @brief Load an image into the object as base64
 	 * 
 	 * @param image_blob Image binary data
-	 * @param type Type of image
+	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @return emoji& Reference to self
-	 * @throw dpp::exception Image content exceeds discord maximum of 256 kilobytes
+	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes
 	 */
 	emoji& load_image(const std::string &image_blob, const image_type type);
 

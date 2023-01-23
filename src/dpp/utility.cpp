@@ -369,6 +369,12 @@ namespace dpp {
 
 		std::string avatar_size(uint32_t size) {
 			if (size) {
+				if ( (size & (size - 1)) != 0 ) { // check if the size is a power of 2
+					return std::string();
+				}
+				if (size > MAX_CDN_IMAGE_SIZE || size < MIN_CDN_IMAGE_SIZE) {
+					return std::string();
+				}
 				return "?size=" + std::to_string(size);
 			}
 			return std::string();
