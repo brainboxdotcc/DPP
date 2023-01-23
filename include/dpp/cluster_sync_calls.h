@@ -774,6 +774,7 @@ confirmation guild_current_member_edit_sync(snowflake guild_id, const std::strin
  * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
  * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
  * @param before Entries that preceded a specific audit log entry ID. Used for paginating
+ * @param after Entries that succeeded a specific audit log entry ID. Used for paginating
  * @param limit Maximum number of entries (between 1-100) to return
  * @return auditlog returned object on completion
  * \memberof dpp::cluster
@@ -781,7 +782,7 @@ confirmation guild_current_member_edit_sync(snowflake guild_id, const std::strin
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-auditlog guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit);
+auditlog guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, snowflake after, uint32_t limit);
 
 /**
  * @brief Add guild ban

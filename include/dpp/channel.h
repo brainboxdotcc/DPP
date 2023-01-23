@@ -405,6 +405,14 @@ public:
 	channel& set_default_forum_layout(forum_layout_type layout_type);
 
 	/**
+	 * @brief Set the default forum sort order for the forum channel
+	 *
+	 * @param sort_order The sort order
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	channel& set_default_sort_order(default_forum_sort_order_t sort_order);
+
+	/**
 	 * @brief Set flags for this channel object
 	 *
 	 * @param flags Flag bitmask to set from dpp::channel_flags
