@@ -122,7 +122,8 @@ role& role::load_image(const std::string &image_blob, const image_type type) {
 	static const std::map<image_type, std::string> mimetypes = {
 		{ i_gif, "image/gif" },
 		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" }
+		{ i_png, "image/png" },
+		{ i_webp, "image/webp" },
 	};
 
 	/* If there's already image data defined, free the old data, to prevent a memory leak */
@@ -363,12 +364,19 @@ members_container role::get_members() const {
 	return gm;
 }
 
-std::string role::get_icon_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->icon.to_string().empty()) {
-		return utility::cdn_host + "/role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
+std::string role::get_icon_url(uint16_t size, const image_type format) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
+	if (!this->icon.to_string().empty() && this->id) {
+		return utility::cdn_host + "/role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

@@ -246,6 +246,34 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("USER.GET_CREATION_TIME", (uint64_t)user1.get_creation_time() == 1465312605);
 	}
 
+	{ // user url getter
+		dpp::user user1;
+		user1.id = 189759562910400512;
+		user1.username = "Brain";
+		user1.discriminator = 0001;
+
+		auto user2 = user1;
+		user2.avatar = "5532c6414c70765a28cf9448c117205f";
+
+		auto user3 = user2;
+		user3.flags |= dpp::u_animated_icon;
+
+		set_test("USER.GET_AVATAR_URL", false);
+		set_test("USER.GET_AVATAR_URL",
+				 dpp::user().get_avatar_url().empty() &&
+				 user1.get_avatar_url() == dpp::utility::cdn_host + "/embed/avatars/1.png" &&
+				 user2.get_avatar_url() == dpp::utility::cdn_host + "/avatars/189759562910400512/5532c6414c70765a28cf9448c117205f.png" &&
+				 user2.get_avatar_url(0, dpp::i_webp) == dpp::utility::cdn_host + "/avatars/189759562910400512/5532c6414c70765a28cf9448c117205f.webp" &&
+				 user2.get_avatar_url(0, dpp::i_jpg) == dpp::utility::cdn_host + "/avatars/189759562910400512/5532c6414c70765a28cf9448c117205f.jpg" &&
+				 user3.get_avatar_url() == dpp::utility::cdn_host + "/avatars/189759562910400512/a_5532c6414c70765a28cf9448c117205f.gif" &&
+				 user3.get_avatar_url(4096, dpp::i_gif) == dpp::utility::cdn_host + "/avatars/189759562910400512/a_5532c6414c70765a28cf9448c117205f.gif?size=4096" &&
+				 user3.get_avatar_url(512, dpp::i_webp) == dpp::utility::cdn_host + "/avatars/189759562910400512/a_5532c6414c70765a28cf9448c117205f.gif?size=512" &&
+				 user3.get_avatar_url(512, dpp::i_jpg) == dpp::utility::cdn_host + "/avatars/189759562910400512/a_5532c6414c70765a28cf9448c117205f.gif?size=512" &&
+				 user3.get_avatar_url(16, dpp::i_jpg, false) == dpp::utility::cdn_host + "/avatars/189759562910400512/a_5532c6414c70765a28cf9448c117205f.jpg?size=16" &&
+				 user3.get_avatar_url(5000) == dpp::utility::cdn_host + "/avatars/189759562910400512/a_5532c6414c70765a28cf9448c117205f.gif"
+		);
+	}
+
 	{ // channel methods
 		set_test("CHANNEL.SET_TYPE", false);
 		dpp::channel c;

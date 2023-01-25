@@ -97,7 +97,8 @@ webhook& webhook::load_image(const std::string &image_blob, const image_type typ
 	static const std::map<image_type, std::string> mimetypes = {
 		{ i_gif, "image/gif" },
 		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" }
+		{ i_png, "image/png" },
+		{ i_webp, "image/webp" },
 	};
 	if (image_blob.size() > MAX_ICON_SIZE) {
 		throw dpp::length_exception("Webhook icon file exceeds discord limit of 256 kilobytes");

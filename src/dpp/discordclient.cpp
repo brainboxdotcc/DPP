@@ -81,9 +81,11 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
         runner(nullptr),
 	compressed(comp),
 	decomp_buffer(nullptr),
+	zlib(nullptr),
 	decompressed_total(0),
 	connect_time(0),
 	ping_start(0.0),
+	etf(nullptr),
 	creator(_cluster),
 	heartbeat_interval(0),
 	last_heartbeat(time(nullptr)),
@@ -100,8 +102,16 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	protocol(ws_proto),
 	resume_gateway_url(_cluster->default_gateway)	
 {
-	zlib = new zlibcontext();
-	etf = new etf_parser();
+	try {
+		zlib = new zlibcontext();
+		etf = new etf_parser();
+	}
+	catch (std::bad_alloc&) {
+		delete zlib;
+		delete etf;
+		/* Clean up and rethrow to caller */
+		throw std::bad_alloc();
+	}
 	this->connect();
 }
 
@@ -139,10 +149,8 @@ void discord_client::end_zlib()
 {
 	if (compressed) {
 		inflateEnd(&(zlib->d_stream));
-		if (this->decomp_buffer) {
-			delete[] this->decomp_buffer;
-			this->decomp_buffer = nullptr;
-		}
+		delete[] this->decomp_buffer;
+		this->decomp_buffer = nullptr;
 	}
 }
 

@@ -1297,11 +1297,12 @@ public:
 	 * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
 	 * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
 	 * @param before Entries that preceded a specific audit log entry ID. Used for paginating
+	 * @param after Entries that succeeded a specific audit log entry ID. Used for paginating
 	 * @param limit Maximum number of entries (between 1-100) to return
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::auditlog object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit, command_completion_event_t callback);
+	void guild_auditlog_get(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, snowflake after, uint32_t limit, command_completion_event_t callback);
 
 	/**
 	 * @brief Create a slash command local to a guild
@@ -2463,6 +2464,8 @@ public:
 	 * @param guild_id Guild ID to get integrations for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::integration_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 *
+	 * @note This endpoint returns a maximum of 50 integrations. If a guild has more integrations, they cannot be accessed.
 	 */
 	void guild_get_integrations(snowflake guild_id, command_completion_event_t callback);
 
@@ -2869,10 +2872,10 @@ public:
 	 * @see https://discord.com/developers/docs/resources/user#modify-current-user
 	 * @param nickname Nickname to set
 	 * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
-	 * @param type Type of image for avatar
+	 * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::user object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
- 	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
+ 	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
 	 */
 	void current_user_edit(const std::string &nickname, const std::string& image_blob = "", const image_type type = i_png, command_completion_event_t callback = utility::log_error());
 

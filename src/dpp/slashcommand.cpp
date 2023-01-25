@@ -717,8 +717,14 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	}
 }
 
-interaction_response::interaction_response() {
-	msg = new message();
+interaction_response::interaction_response() : msg(nullptr) {
+	try {
+		msg = new message();
+	}
+	catch (std::bad_alloc&) {
+		delete msg;
+		throw std::bad_alloc();
+	}
 }
 
 interaction_response::~interaction_response() {
