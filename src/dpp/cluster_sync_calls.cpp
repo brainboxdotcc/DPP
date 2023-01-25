@@ -317,10 +317,6 @@ confirmation cluster::guild_add_member_sync(const guild_member& gm, const std::s
 	return dpp::sync<confirmation>(this, &cluster::guild_add_member, gm, access_token);
 }
 
-guild_member cluster::guild_edit_member_sync(const guild_member& gm) {
-	return dpp::sync<guild_member>(this, &cluster::guild_edit_member, gm);
-}
-
 guild_member cluster::guild_get_member_sync(snowflake guild_id, snowflake user_id) {
 	return dpp::sync<guild_member>(this, &cluster::guild_get_member, guild_id, user_id);
 }

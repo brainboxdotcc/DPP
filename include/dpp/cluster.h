@@ -2034,6 +2034,8 @@ public:
 	 */
 	void guild_edit_member(const guild_member& gm, command_completion_event_t callback = utility::log_error());
 
+	void guild_edit_member(snowflake guild_id, snowflake user_id, std::optional<const std::string> nickname = std::nullopt, std::optional<const std::vector<snowflake>> roles = std::nullopt, std::optional<time_t> communication_disabled_until = std::nullopt, std::optional<bool> mute = std::nullopt, std::optional<bool> deaf = std::nullopt, std::optional<snowflake> channel_id = std::nullopt, command_completion_event_t callback = utility::log_error());
+
 	/**
 	 * @brief Moves the guild member to a other voice channel, if member is connected to one.
 	 * Set the `channel_id` to `0` to disconnect the user.
