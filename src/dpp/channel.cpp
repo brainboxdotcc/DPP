@@ -584,12 +584,19 @@ std::map<snowflake, voicestate> channel::get_voice_members() {
 	return rv;
 }
 
-std::string channel::get_icon_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
+std::string channel::get_icon_url(uint16_t size, const image_type format) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
 	if (this->id && !this->icon.to_string().empty()) {
-		return utility::cdn_host + "/channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
+		return utility::cdn_host + "/channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

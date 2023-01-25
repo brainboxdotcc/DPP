@@ -272,7 +272,13 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 		if (plaintext) {
 			ssl = nullptr;
 		} else {
-			ssl = new openssl_connection();
+			try {
+				ssl = new openssl_connection();
+			}
+			catch (std::bad_alloc&) {
+				delete ssl;
+				throw std::bad_alloc();
+			}
 		}
 	}
 	this->connect();
