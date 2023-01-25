@@ -75,8 +75,15 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
 	/* Instantiate REST request queues */
-	rest = new request_queue(this, request_threads);
-	raw_rest = new request_queue(this, request_threads_raw);
+	try {
+		rest = new request_queue(this, request_threads);
+		raw_rest = new request_queue(this, request_threads_raw);
+	}
+	catch (std::bad_alloc&) {
+		delete rest;
+		delete raw_rest;
+		throw std::bad_alloc();
+	}
 
 	/* Add checks for missing intents, these emit a one-off warning to the log if bound without the right intents */
 	on_message_create.set_warning_callback(
