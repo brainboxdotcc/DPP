@@ -84,6 +84,11 @@ struct DPP_EXPORT voice_out_packet {
 class DPP_EXPORT discord_voice_client : public websocket_client
 {
 	/**
+	 * @brief Clean up resources
+	 */
+	void cleanup();
+
+	/**
 	 * @brief Mutex for outbound packet stream
 	 */
 	std::mutex stream_mutex;

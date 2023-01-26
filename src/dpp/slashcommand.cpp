@@ -723,7 +723,7 @@ interaction_response::interaction_response() : msg(nullptr) {
 	}
 	catch (std::bad_alloc&) {
 		delete msg;
-		throw std::bad_alloc();
+		throw;
 	}
 }
 

@@ -305,13 +305,24 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	if (!repacketizer) {
 		throw dpp::voice_exception("discord_voice_client::discord_voice_client; opus_repacketizer_create() failed");
 	}
-	this->connect();
+	try {
+		this->connect();
+	}
+	catch (std::exception&) {
+		cleanup();
+		throw;
+	}
 #else
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
 }
 
 discord_voice_client::~discord_voice_client()
+{
+	cleanup();
+}
+
+void discord_voice_client::cleanup()
 {
 	if (runner) {
 		this->terminating = true;
@@ -337,10 +348,8 @@ discord_voice_client::~discord_voice_client()
 		voice_courier.join();
 	}
 #endif
-	if (secret_key) {
-		delete[] secret_key;
-		secret_key = nullptr;
-	}
+	delete[] secret_key;
+	secret_key = nullptr;
 }
 
 bool discord_voice_client::is_ready() {
