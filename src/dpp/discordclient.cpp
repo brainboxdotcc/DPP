@@ -112,10 +112,16 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 		/* Clean up and rethrow to caller */
 		throw std::bad_alloc();
 	}
-	this->connect();
+	try {
+		this->connect();
+	}
+	catch (std::exception&) {
+		cleanup();
+		throw;
+	}
 }
 
-discord_client::~discord_client()
+void discord_client::cleanup()
 {
 	terminating = true;
 	if (runner) {
@@ -124,6 +130,11 @@ discord_client::~discord_client()
 	}
 	delete etf;
 	delete zlib;
+}
+
+discord_client::~discord_client()
+{
+	cleanup();
 }
 
 uint64_t discord_client::get_decompressed_bytes_in()

@@ -45,9 +45,7 @@ role::role() :
 
 role::~role()
 {
-	if (image_data) {
-		delete image_data;
-	}
+	delete image_data;
 }
 
 std::string role::get_mention(const snowflake& id){
