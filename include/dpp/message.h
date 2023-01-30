@@ -1071,6 +1071,10 @@ enum message_type {
 	mt_auto_moderation_action			= 24,
 	/// Role subscription purchase
 	mt_role_subscription_purchase		= 25,
+	/// Interaction premium upsell
+	mt_interaction_premium_upsell		= 26,
+	/// Guild application premium subscription
+	mt_application_premium_subscription	= 32,
 };
 
 /**
