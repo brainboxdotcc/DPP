@@ -82,7 +82,7 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	catch (std::bad_alloc&) {
 		delete rest;
 		delete raw_rest;
-		throw std::bad_alloc();
+		throw;
 	}
 
 	/* Add checks for missing intents, these emit a one-off warning to the log if bound without the right intents */
