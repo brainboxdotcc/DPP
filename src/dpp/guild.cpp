@@ -30,32 +30,31 @@
 using json = nlohmann::json;
 
 const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extra>> featuremap = {
-	{"INVITE_SPLASH", dpp::g_invite_splash },
-	{"VIP_REGIONS", dpp::g_vip_regions },
-	{"VANITY_URL", dpp::g_vanity_url },
-	{"VERIFIED", dpp::g_verified },
-	{"PARTNERED", dpp::g_partnered },
-	{"COMMUNITY", dpp::g_community },
-	{"DEVELOPER_SUPPORT_SERVER", dpp::g_developer_support_server },
-	{"COMMERCE", dpp::g_commerce },
-	{"NEWS", dpp::g_news },
-	{"DISCOVERABLE", dpp::g_discoverable },
-	{"FEATURABLE", dpp::g_featureable },
-	{"INVITES_DISABLED", dpp::g_invites_disabled},
 	{"ANIMATED_BANNER", dpp::g_animated_banner },
 	{"ANIMATED_ICON", dpp::g_animated_icon },
-	{"BANNER", dpp::g_banner },
-	{"WELCOME_SCREEN_ENABLED", dpp::g_welcome_screen_enabled },
-	{"MEMBER_VERIFICATION_GATE_ENABLED", dpp::g_member_verification_gate },
-	{"PREVIEW_ENABLED", dpp::g_preview_enabled },
-	{"MONETIZATION_ENABLED", dpp::g_monetization_enabled },
-	{"MORE_STICKERS", dpp::g_more_stickers },
-	{"ROLE_ICONS", dpp::g_role_icons },
-	{"SEVEN_DAY_THREAD_ARCHIVE", dpp::g_seven_day_thread_archive },
-	{"THREE_DAY_THREAD_ARCHIVE", dpp::g_three_day_thread_archive },
-	{"TICKETED_EVENTS_ENABLED", dpp::g_ticketed_events },
-	{"CHANNEL_BANNER", dpp::g_channel_banners },
 	{"AUTO_MODERATION", dpp::g_auto_moderation },
+	{"BANNER", dpp::g_banner },
+	{"COMMUNITY", dpp::g_community },
+	{"CREATOR_MONETIZABLE_PROVISIONAL", dpp::g_monetization_enabled },
+	{"CREATOR_STORE_PAGE", dpp::g_creator_store_page_enabled },
+	{"DEVELOPER_SUPPORT_SERVER", dpp::g_developer_support_server },
+	{"DISCOVERABLE", dpp::g_discoverable },
+	{"FEATURABLE", dpp::g_featureable },
+	{"INVITES_DISABLED", dpp::g_invites_disabled },
+	{"INVITE_SPLASH", dpp::g_invite_splash },
+	{"MEMBER_VERIFICATION_GATE_ENABLED", dpp::g_member_verification_gate },
+	{"MORE_STICKERS", dpp::g_more_stickers },
+	{"NEWS", dpp::g_news },
+	{"PARTNERED", dpp::g_partnered },
+	{"PREVIEW_ENABLED", dpp::g_preview_enabled },
+	{"ROLE_ICONS", dpp::g_role_icons },
+	{"ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE", dpp::g_role_subscriptions_available_for_purchase },
+	{"ROLE_SUBSCRIPTIONS_ENABLED", dpp::g_role_subscription_enabled },
+	{"TICKETED_EVENTS_ENABLED", dpp::g_ticketed_events },
+	{"VANITY_URL", dpp::g_vanity_url },
+	{"VERIFIED", dpp::g_verified },
+	{"VIP_REGIONS", dpp::g_vip_regions },
+	{"WELCOME_SCREEN_ENABLED", dpp::g_welcome_screen_enabled },
 };
 
 namespace dpp {
@@ -289,8 +288,8 @@ bool guild::is_community() const {
 	return this->flags & g_community;
 }
 
-bool guild::has_commerce() const {
-	return this->flags & g_commerce;
+bool guild::has_role_subscriptions() const {
+	return this->flags & g_role_subscription_enabled;
 }
 
 bool guild::has_news() const {
@@ -315,6 +314,10 @@ bool guild::has_auto_moderation() const {
 
 bool guild::has_support_server() const {
 	return this->flags_extra & g_developer_support_server;
+}
+
+bool guild::has_role_subscriptions_available_for_purchase() const {
+	return this->flags_extra & g_role_subscriptions_available_for_purchase;
 }
 
 bool guild::has_animated_icon() const {
@@ -353,8 +356,8 @@ bool guild::has_more_stickers() const {
 	return this->flags & g_more_stickers;
 }
 
-bool guild::has_private_threads() const {
-	return this->flags & g_private_threads;
+bool guild::has_creator_store_page() const {
+	return this->flags & g_creator_store_page_enabled;
 }
 
 bool guild::has_role_icons() const {
@@ -441,10 +444,8 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	 */
 	this->id = snowflake_not_null(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
-		/* Clear unavailable flag if set */
-		if (this->flags & dpp::g_unavailable) {
-			this->flags -= dpp::g_unavailable;
-		}
+		/* Clear unavailable flag */
+		this->flags &= ~dpp::g_unavailable;
 		set_string_not_null(d, "name", this->name);
 		/* Special case for guild icon to allow for animated icons.
 		 * Animated icons start with a_ on the name, so we use this to set a flag
@@ -480,17 +481,23 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			}
 		}
 		uint8_t scf = int8_not_null(d, "system_channel_flags");
-		if (scf & 1) {
+		if (scf & (1 << 0)) {
 			this->flags |= dpp::g_no_join_notifications;
 		}
-		if (scf & 2) {
+		if (scf & (1 << 1)) {
 			this->flags |= dpp::g_no_boost_notifications;
 		}
-		if (scf & 4) {
+		if (scf & (1 << 2)) {
 			this->flags |= dpp::g_no_setup_tips;
 		}
-		if (scf & 8) {
+		if (scf & (1 << 3)) {
 			this->flags |= dpp::g_no_sticker_greeting;
+		}
+		if (scf & (1 << 4)) {
+			this->flags |= dpp::g_no_role_subscription_notifications;
+		}
+		if (scf & (1 << 5)) {
+			this->flags |= dpp::g_no_role_subscription_notification_replies;
 		}
 
 		if (d->contains("afk_timeout")) {
