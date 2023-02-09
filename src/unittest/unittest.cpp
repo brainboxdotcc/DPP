@@ -109,6 +109,7 @@ std::map<std::string, test_t> tests = {
 	{"ROLE_CREATE", {tt_online, "cluster::role_create", false, false}},
 	{"ROLE_EDIT", {tt_online, "cluster::role_edit", false, false}},
 	{"ROLE_DELETE", {tt_online, "cluster::role_delete", false, false}},
+	{"JSON_PARSE_ERROR", {tt_online, "JSON parse error for post_rest", false, false}},
 };
 
 double start = dpp::utility::time_f();

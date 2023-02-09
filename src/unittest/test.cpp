@@ -20,6 +20,7 @@
  ************************************************************************************/
 #include "test.h"
 #include <dpp/dpp.h>
+#include <dpp/restrequest.h>
 #include <dpp/nlohmann/json.hpp>
 
 /* Unit tests go here */
@@ -386,6 +387,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			[[maybe_unused]]
 			message_collector* collect_messages = new message_collector(&bot, 25);
 		}
+
+		set_test("JSON_PARSE_ERROR", false);
+		dpp::rest_request<dpp::confirmation>(&bot, "/nonexistent", "address", "", dpp::m_get, "", [](const dpp::confirmation_callback_t& e) {
+			if (e.is_error() && e.get_error().code == 404) {
+				set_test("JSON_PARSE_ERROR", true);
+			} else {
+				set_test("JSON_PARSE_ERROR", false);
+			}
+		});
 
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
