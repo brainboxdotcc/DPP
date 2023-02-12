@@ -581,10 +581,10 @@ enum application_role_connection_metadata_type : uint8_t {
 class DPP_EXPORT application_role_connection_metadata : public json_interface<application_role_connection_metadata> {
 public:
 	application_role_connection_metadata_type type; //!< Type of metadata value
-	std::string key; //!< Dictionary key for the metadata field (must be `a-z`, `0-9`, or `_` characters; max 50 characters)
-	std::string name; //!< Name of the metadata field (max 100 characters)
+	std::string key; //!< Dictionary key for the metadata field (must be `a-z`, `0-9`, or `_` characters; 1-50 characters)
+	std::string name; //!< Name of the metadata field (1-100 characters)
 	std::map<std::string, std::string> name_localizations; //!< Translations of the name
-	std::string description; //!< Description of the metadata field (max 200 characters)
+	std::string description; //!< Description of the metadata field (1-200 characters)
 	std::map<std::string, std::string> description_localizations; //!< Translations of the description
 
 	/**
