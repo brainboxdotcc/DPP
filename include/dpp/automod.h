@@ -110,7 +110,7 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	 * @brief @brief Substrings which will be searched for in content (Maximum of 1000).
 	 *
 	 * Each keyword can be a phrase which contains multiple words.
-	 * All keywords are case insensitive and can be up to 30 characters.
+	 * All keywords are case insensitive and can be up to 60 characters.
 	 *
 	 * Wildcard symbols (`*`) can be used to customize how each keyword will be matched.
 	 *
@@ -165,7 +165,7 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	 * @brief Substrings which should not trigger the rule.
 	 *
 	 * Each keyword can be a phrase which contains multiple words.
-	 * All keywords are case insensitive and can be up to 30 characters.
+	 * All keywords are case insensitive and can be up to 60 characters.
 	 *
 	 * Wildcard symbols (`*`) can be used to customize how each keyword will be matched.
 	 *

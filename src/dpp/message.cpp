@@ -949,6 +949,10 @@ bool message::is_thread_mention_failed() const {
 	return flags & m_thread_mention_failed;
 }
 
+bool message::suppress_notifications() const {
+	return flags & m_suppress_notifications;
+}
+
 message::~message() = default;
 
 
