@@ -785,16 +785,22 @@ void discord_voice_client::write_ready()
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (!this->paused && outbuf.size()) {
 			type = send_audio_type;
-			if (outbuf[0].packet.size() == 2 && ((uint16_t)(*(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
-				outbuf.erase(outbuf.begin());
+                        auto begin = outbuf.begin();
+                        auto packet_data = begin->packet.data();
+                        auto packet_length = begin->packet.length();
+			if (packet_length == 2 && ((uint16_t)(*(packet_data))) == AUDIO_TRACK_MARKER) {
+				outbuf.erase(begin);
+                                begin = outbuf.begin();
+                                packet_data = begin->packet.data();
+                                packet_length = begin->packet.length();
 				track_marker_found = true;
 				if (tracks > 0)
 					tracks--;
 			}
 			if (outbuf.size()) {
-				if (this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
-					duration = outbuf[0].duration * timescale;
-					outbuf.erase(outbuf.begin());
+				if (this->udp_send(packet_data, packet_length) == (int)packet_length) {
+					duration = begin->duration * timescale;
+					outbuf.erase(begin);
 					bufsize = outbuf.size();
 				}
 			}
@@ -1181,26 +1187,23 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length, uint64_t duration) {
 #if HAVE_VOICE
 	int frameSize = (int)(48 * duration * (timescale / 1000000));
-	opus_int32 encodedAudioMaxLength = (opus_int32)length;
-	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
-	size_t encodedAudioLength = encodedAudioMaxLength;
-
-	encodedAudioLength = length;
+	std::vector<uint8_t> encodedAudioData(length);
 	encodedAudioData.reserve(length);
 	memcpy(encodedAudioData.data(), opus_packet, length);
 
 	++sequence;
 	const int nonceSize = 24;
 	rtp_header header(sequence, timestamp, (uint32_t)ssrc);
+        const size_t header_size = sizeof(header);
 
 	int8_t nonce[nonceSize];
-	std::memcpy(nonce, &header, sizeof(header));
-	std::memset(nonce + sizeof(header), 0, sizeof(nonce) - sizeof(header));
+	std::memcpy(nonce, &header, header_size);
+	std::memset(nonce + header_size, 0, sizeof(nonce) - header_size);
 
-	std::vector<uint8_t> audioDataPacket(sizeof(header) + encodedAudioLength + crypto_secretbox_MACBYTES);
-	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
+	std::vector<uint8_t> audioDataPacket(header_size + length + crypto_secretbox_MACBYTES);
+	std::memcpy(audioDataPacket.data(), &header, header_size);
 
-	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
+	crypto_secretbox_easy(audioDataPacket.data() + header_size, encodedAudioData.data(), length, (const unsigned char*)nonce, secret_key);
 
 	this->send((const char*)audioDataPacket.data(), audioDataPacket.size(), duration);
 	timestamp += frameSize;
