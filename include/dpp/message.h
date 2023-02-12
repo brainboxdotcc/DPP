@@ -979,6 +979,8 @@ enum message_flags : uint16_t {
 	m_loading = 1 << 7,
 	/// this message failed to mention some roles and add their members to the thread
 	m_thread_mention_failed = 1 << 8,
+	/// this message will not trigger push and desktop notifications
+	m_suppress_notifications = 1 << 9,
 };
 
 /**
@@ -1393,6 +1395,13 @@ struct DPP_EXPORT message : public managed {
 	 * @return true if this message failed to mention some roles and add their members to the thread
 	 */
 	bool is_thread_mention_failed() const;
+
+	/**
+	 * @brief True if the message will not trigger push and desktop notifications
+	 *
+	 * @return True if notifications suppressed
+	 */
+	bool suppress_notifications() const;
 
 	/**
 	 * @brief Add a component (button) to message
