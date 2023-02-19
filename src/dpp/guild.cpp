@@ -122,6 +122,10 @@ guild_member& guild_member::set_communication_disabled_until(const time_t disabl
 	this->communication_disabled_until = disabled_timestamp;
 	return *this;
 }
+	
+bool guild_member::operator == (dpp::guild_member const& other_member) const {
+	return this->user_id == other_member.user_id;
+}
 
 guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id) {
 	this->guild_id = g_id;
