@@ -319,7 +319,7 @@ public:
 	 * @return true if the user ids are equal, false otherwise.
 	 */
 	
-	bool operator == (dpp::user const& other_user) const;
+	bool operator == (user const& other_user) const;
 };
 
 /**
