@@ -289,8 +289,8 @@ public:
 	
 	/**
 	 * @brief Check if this member is equal to another member object.
+	 * @param other_member other member object to compare
 	 * @return true if their user ids are equal, false otherwise.
-	 *
 	 */
 	
 	bool operator == (dpp::guild_member const& other_member) const;
