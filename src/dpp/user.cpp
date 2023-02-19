@@ -211,7 +211,7 @@ bool user::has_animated_icon() const {
 	return this->flags & u_animated_icon;
 }
 	
-bool user::operator == (user const& other_user) {
+bool user::operator == (user const& other_user) const {
 	return this->id == other_user.id
 }
 
