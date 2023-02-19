@@ -1296,8 +1296,8 @@ public:
 	 * @param guild_id Guild to get the audit log of
 	 * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
 	 * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
-	 * @param before Entries that preceded a specific audit log entry ID. Used for paginating
-	 * @param after Entries that succeeded a specific audit log entry ID. Used for paginating
+	 * @param before Entries with ID less than a specific audit log entry ID. Used for paginating
+	 * @param after Entries with ID greater than a specific audit log entry ID. Used for paginating
 	 * @param limit Maximum number of entries (between 1-100) to return
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::auditlog object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().

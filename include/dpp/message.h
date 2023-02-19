@@ -1075,6 +1075,14 @@ enum message_type {
 	mt_role_subscription_purchase		= 25,
 	/// Interaction premium upsell
 	mt_interaction_premium_upsell		= 26,
+	/// Stage start
+	mt_stage_start						= 27,
+	/// Stage end
+	mt_stage_end						= 28,
+	/// Stage speaker
+	mt_stage_speaker					= 29,
+	/// Stage topic
+	mt_stage_topic						= 31,
 	/// Guild application premium subscription
 	mt_application_premium_subscription	= 32,
 };
