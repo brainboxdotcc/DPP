@@ -293,7 +293,7 @@ public:
 	 *
 	 */
 	
-	bool operator == (dpp::guild_member const& other_member);
+	bool operator == (dpp::guild_member const& other_member) const;
 
 	/**
 	 * @brief Set whether the user is muted in voice channels
