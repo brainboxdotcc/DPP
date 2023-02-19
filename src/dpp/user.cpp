@@ -210,10 +210,6 @@ bool user::is_bot_http_interactions() const {
 bool user::has_animated_icon() const {
 	return this->flags & u_animated_icon;
 }
-	
-bool user::operator == (user const& other_user) const {
-	return this->id == other_user.id
-}
 
 user& user::fill_from_json(json* j) {
 	j->get_to(*this);
