@@ -312,14 +312,6 @@ public:
 	 * @return Formatted username and discriminator
 	 */
 	std::string format_username() const;
-	
-	/**
-	 * @brief Compare two user objects.
-	 * @param other_user Other user to compare to.
-	 * @return true if the user ids are equal, false otherwise.
-	 */
-	
-	bool operator == (user const& other_user) const;
 };
 
 /**
