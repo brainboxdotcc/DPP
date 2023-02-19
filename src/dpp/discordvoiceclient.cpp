@@ -55,7 +55,9 @@
 
 namespace dpp {
 
+[[maybe_unused]]
 constexpr int32_t opus_sample_rate_hz = 48000;
+[[maybe_unused]]
 constexpr int32_t opus_channel_count = 2;
 std::string external_ip;
 
@@ -269,10 +271,8 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	ssrc(0),
 	timescale(1000000),
 	paused(false),
-#if HAVE_VOICE
 	encoder(nullptr),
 	repacketizer(nullptr),
-#endif
 	fd(INVALID_SOCKET),
 	secret_key(nullptr),
 	sequence(0),
@@ -1169,7 +1169,7 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 
 discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet, const size_t length) {
 #if HAVE_VOICE
-	int samples = opus_packet_get_nb_samples(opus_packet, (opus_int32)length, 48000);
+	int samples = opus_packet_get_nb_samples(opus_packet, (opus_int32)length, opus_sample_rate_hz);
 	uint64_t duration = (samples / 48) / (timescale / 1000000);
 	send_audio_opus(opus_packet, length, duration);
 #else
