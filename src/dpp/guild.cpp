@@ -123,7 +123,7 @@ guild_member& guild_member::set_communication_disabled_until(const time_t disabl
 	return *this;
 }
 	
-bool guild_member::operator == (dpp::guild_member const& other_member) const {
+bool guild_member::operator == (guild_member const& other_member) const {
 	return this->user_id == other_member.user_id && this->guild_id == other_member.guild_id;
 }
 
@@ -228,8 +228,8 @@ guild& guild::set_name(const std::string& n) {
 	return *this;
 }
 
-dpp::user* guild_member::get_user() const {
-	return dpp::find_user(user_id);
+user* guild_member::get_user() const {
+	return find_user(user_id);
 }
 
 bool guild_member::is_deaf() const {
