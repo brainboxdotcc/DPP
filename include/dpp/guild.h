@@ -286,6 +286,14 @@ public:
 	 * 
 	 */
 	dpp::user* get_user() const;
+	
+	/**
+	 * @brief Check if this member is equal to another member object.
+	 * @return true if their user ids are equal, false otherwise.
+	 *
+	 */
+	
+	bool operator == (dpp::guild_member const& other_member);
 
 	/**
 	 * @brief Set whether the user is muted in voice channels
