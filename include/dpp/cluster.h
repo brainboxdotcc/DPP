@@ -2798,7 +2798,7 @@ public:
 	void user_application_role_connection_update(snowflake application_id, const application_role_connection &connection, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Get a user by id
+	 * @brief Get a user by id, without using the cache
 	 *
 	 * @see https://discord.com/developers/docs/resources/user#get-user
 	 * @param user_id User ID to retrieve
@@ -2810,6 +2810,20 @@ public:
 	 * Call `dpp::find_user` instead that looks up the user in the cache rather than a REST call.
 	 */
 	void user_get(snowflake user_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get a user by id, checking in the cache first
+	 *
+	 * @see https://discord.com/developers/docs/resources/user#get-user
+	 * @param user_id User ID to retrieve
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+	 * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
+	 * @note If the user is found in the cache, special values set in `dpp::user_identified` will be undefined. This call should be used
+	 * where you want to for example resolve a user who may no longer be in the bot's guilds, for something like a ban log message.
+	 */
+	void user_get_cached(snowflake user_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get current (bot) user

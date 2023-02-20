@@ -110,6 +110,8 @@ std::map<std::string, test_t> tests = {
 	{"ROLE_EDIT", {tt_online, "cluster::role_edit", false, false}},
 	{"ROLE_DELETE", {tt_online, "cluster::role_delete", false, false}},
 	{"JSON_PARSE_ERROR", {tt_online, "JSON parse error for post_rest", false, false}},
+	{"USER_GET_CACHED_PRESENT", {tt_online, "cluster::user_get_cached_sync() with present member", false, false}},
+	{"USER_GET_CACHED_ABSENT", {tt_online, "cluster::user_get_cached_sync() with not present member", false, false}},
 };
 
 double start = dpp::utility::time_f();
@@ -167,7 +169,7 @@ int test_summary() {
 				passed++;
 			}
 		}
-		std::cout << std::left << std::setw(50) << t.second.description << " " << std::fixed << std::setw(6) << (test_skipped ? "\u001b[33mSKIPPED" : (t.second.executed && t.second.success ? "\u001b[32mPASS" : "\u001b[31mFAIL")) << std::setw(0) << "\u001b[0m\n";
+		std::cout << std::left << std::setw(60) << t.second.description << " " << std::fixed << std::setw(6) << (test_skipped ? "\u001b[33mSKIPPED" : (t.second.executed && t.second.success ? "\u001b[32mPASS" : "\u001b[31mFAIL")) << std::setw(0) << "\u001b[0m\n";
 	}
 	std::cout << "\u001b[37;1m\nExecution finished in " << std::fixed << std::setprecision(3) <<  get_time() << std::setprecision(0) << " seconds.\nFailed: " << failed << " Passed: " << passed << (skipped ? " Skipped: " : "") << (skipped ? std::to_string(skipped) : "") << " Percentage: " << std::setprecision(2) << ((float)(passed) / (float)(passed + failed) * 100.0f) << "%\u001b[0m\n";
 	return failed;

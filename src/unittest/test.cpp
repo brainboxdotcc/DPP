@@ -768,6 +768,30 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			ticks++;
 		}, 1);
 
+		set_test("USER_GET_CACHED_PRESENT", false);
+		try {
+			dpp::user_identified u = bot.user_get_cached_sync(TEST_USER_ID);
+			set_test("USER_GET_CACHED_PRESENT", (u.id == TEST_USER_ID));
+		}
+		catch (const std::exception&) {
+			set_test("USER_GET_CACHED_PRESENT", false);
+		}
+
+		set_test("USER_GET_CACHED_ABSENT", false);
+		try {
+			/* This is the snowflake ID of a discord staff member.
+			 * We assume here that staffer's discord IDs will remain constant
+			 * for long periods of time and they won't lurk in the unit test server.
+			 * If this becomes not true any more, we'll pick another well known
+			 * user ID.
+			 */
+			dpp::user_identified u = bot.user_get_cached_sync(90339695967350784);
+			set_test("USER_GET_CACHED_ABSENT", (u.id == dpp::snowflake(90339695967350784)));
+		}
+		catch (const std::exception&) {
+			set_test("USER_GET_CACHED_ABSENT", false);
+		}
+
 		set_test("TIMEDLISTENER", false);
 		dpp::timed_listener tl(&bot, 10, bot.on_log, [&](const dpp::log_t & event) {
 			set_test("TIMEDLISTENER", true);
