@@ -621,6 +621,10 @@ user_identified cluster::user_get_sync(snowflake user_id) {
 	return dpp::sync<user_identified>(this, &cluster::user_get, user_id);
 }
 
+user_identified cluster::user_get_cached_sync(snowflake user_id) {
+	return dpp::sync<user_identified>(this, &cluster::user_get_cached, user_id);
+}
+
 voiceregion_map cluster::get_voice_regions_sync() {
 	return dpp::sync<voiceregion_map>(this, &cluster::get_voice_regions);
 }

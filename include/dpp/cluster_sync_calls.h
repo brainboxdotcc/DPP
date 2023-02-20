@@ -773,8 +773,8 @@ confirmation guild_current_member_edit_sync(snowflake guild_id, const std::strin
  * @param guild_id Guild to get the audit log of
  * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
  * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
- * @param before Entries that preceded a specific audit log entry ID. Used for paginating
- * @param after Entries that succeeded a specific audit log entry ID. Used for paginating
+ * @param before Entries with ID less than a specific audit log entry ID. Used for paginating
+ * @param after Entries with ID greater than a specific audit log entry ID. Used for paginating
  * @param limit Maximum number of entries (between 1-100) to return
  * @return auditlog returned object on completion
  * \memberof dpp::cluster
@@ -965,6 +965,8 @@ guild guild_get_sync(snowflake guild_id);
  * @see https://discord.com/developers/docs/resources/guild#get-guild-integrations
  * @param guild_id Guild ID to get integrations for
  * @return integration_map returned object on completion
+ *
+ * @note This endpoint returns a maximum of 50 integrations. If a guild has more integrations, they cannot be accessed.
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2124,9 +2126,9 @@ confirmation thread_member_remove_sync(snowflake thread_id, snowflake user_id);
  * @see https://discord.com/developers/docs/resources/user#modify-current-user
  * @param nickname Nickname to set
  * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
- * @param type Type of image for avatar
+ * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
  * @return user returned object on completion
- 	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
+ 	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2257,7 +2259,7 @@ guild_map current_user_get_guilds_sync();
 confirmation current_user_leave_guild_sync(snowflake guild_id);
 
 /**
- * @brief Get a user by id
+ * @brief Get a user by id, without using the cache
  *
  * @see dpp::cluster::user_get
  * @see https://discord.com/developers/docs/resources/user#get-user
@@ -2273,6 +2275,24 @@ confirmation current_user_leave_guild_sync(snowflake guild_id);
  * Avoid direct use of this function inside an event handler.
  */
 user_identified user_get_sync(snowflake user_id);
+
+/**
+ * @brief Get a user by id, checking in the cache first
+ *
+ * @see dpp::cluster::user_get_cached
+ * @see https://discord.com/developers/docs/resources/user#get-user
+ * @param user_id User ID to retrieve
+ * @return user_identified returned object on completion
+ * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+ * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
+ * @note If the user is found in the cache, special values set in `dpp::user_identified` will be undefined. This call should be used
+ * where you want to for example resolve a user who may no longer be in the bot's guilds, for something like a ban log message.
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+user_identified user_get_cached_sync(snowflake user_id);
 
 /**
  * @brief Get all voice regions
