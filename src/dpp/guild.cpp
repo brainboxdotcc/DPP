@@ -124,7 +124,7 @@ guild_member& guild_member::set_communication_disabled_until(const time_t disabl
 }
 	
 bool guild_member::operator == (guild_member const& other_member) const {
-	if(this->user_id == other_member.user_id == 0 || this->guild_id == other_member.guild_id == 0)
+	if((this->user_id == other_member.user_id && this->user_id.empty()) || (this->guild_id == other_member.guild_id && this->guild_id.empty()))
 		return false;
 	return this->user_id == other_member.user_id && this->guild_id == other_member.guild_id;
 }
