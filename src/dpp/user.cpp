@@ -22,6 +22,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/nlohmann/json.hpp>
 #include <dpp/stringops.h>
+#include "user.h"
 
 using json = nlohmann::json;
 
@@ -91,6 +92,9 @@ std::string user_identified::build_json(bool with_id) const {
 
 user_identified::user_identified() : user(), accent_color(0), verified(false) {
 
+}
+
+user_identified::user_identified(const user& u): user(u), accent_color(0), verified(false) {
 }
 
 user_identified::~user_identified() {

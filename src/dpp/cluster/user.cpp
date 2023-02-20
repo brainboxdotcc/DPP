@@ -97,13 +97,12 @@ void cluster::user_get_cached(snowflake user_id, command_completion_event_t call
 	if (u) {
 		/* We can't simply down-cast to user_identified with dynamic_cast,
 		 * this will cause a segmentation fault. We have to re-build the more complex
-		 * user_identified from a user, by dumping out its json and re-parsing it into
-		 * the more detailed object structure.
+		 * user_identified from a user, by calling a constructor that builds it from
+		 * the user object.
 		 */
-		json j = json::parse(u->build_json(true));
 		confirmation_callback_t cb(
 			this,
-			user_identified().fill_from_json(&j),
+			user_identified(*u),
 			http_request_completion_t()
 		);
 		callback(cb);
