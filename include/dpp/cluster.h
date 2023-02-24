@@ -49,9 +49,11 @@
 #include <dpp/coro.h>
 #include <dpp/event_router.h>
 
-using  json = nlohmann::json;
+
 
 namespace dpp {
+
+using  json = nlohmann::json;
 
 /**
  * @brief Types of startup for cluster::start()
