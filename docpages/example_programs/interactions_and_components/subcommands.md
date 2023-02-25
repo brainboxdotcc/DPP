@@ -46,7 +46,7 @@ int main() {
 				if (!subcommand.options.empty()) {
 					/* Get the user from the parameter */
 					dpp::user user = interaction.get_resolved_user(
-						subcommand.get_option<dpp::snowflake>(0)
+						subcommand.get_value<dpp::snowflake>(0)
 					);
 					event.reply(user.get_mention() + " has now been turned into a dog."); 
 				} else {
@@ -60,7 +60,7 @@ int main() {
 				if (!subcommand.options.empty()) {
 					/* Get the user from the parameter */
 					dpp::user user = interaction.get_resolved_user(
-						subcommand.get_option<dpp::snowflake>(0)
+						subcommand.get_value<dpp::snowflake>(0)
 					);
 					event.reply(user.get_mention() + " has now been turned into a cat."); 
 				} else {

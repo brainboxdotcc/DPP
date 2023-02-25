@@ -92,4 +92,24 @@ void cluster::user_get(snowflake user_id, command_completion_event_t callback) {
 	rest_request<user_identified>(this, API_PATH "/users", std::to_string(user_id), "", m_get, "", callback);
 }
 
+void cluster::user_get_cached(snowflake user_id, command_completion_event_t callback) {
+	user* u = find_user(user_id);
+	if (u) {
+		/* We can't simply down-cast to user_identified with dynamic_cast,
+		 * this will cause a segmentation fault. We have to re-build the more complex
+		 * user_identified from a user, by calling a constructor that builds it from
+		 * the user object.
+		 */
+		confirmation_callback_t cb(
+			this,
+			user_identified(*u),
+			http_request_completion_t()
+		);
+		callback(cb);
+		return;
+	}
+	/* If the user isn't in the cache, make the API call */
+	rest_request<user_identified>(this, API_PATH "/users", std::to_string(user_id), "", m_get, "", callback);
+}
+
 };

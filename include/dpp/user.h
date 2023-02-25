@@ -347,6 +347,13 @@ public:
 	user_identified();
 
 	/**
+	 * @brief Construct a new user identified object from a user object
+	 * 
+	 * @param u user object
+	 */
+	user_identified(const user& u);
+
+	/**
 	 * @brief Destroy the user identified object
 	 */
 	virtual ~user_identified();

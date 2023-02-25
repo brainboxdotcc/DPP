@@ -122,6 +122,12 @@ guild_member& guild_member::set_communication_disabled_until(const time_t disabl
 	this->communication_disabled_until = disabled_timestamp;
 	return *this;
 }
+	
+bool guild_member::operator == (guild_member const& other_member) const {
+	if((this->user_id == other_member.user_id && this->user_id.empty()) || (this->guild_id == other_member.guild_id && this->guild_id.empty()))
+		return false;
+	return this->user_id == other_member.user_id && this->guild_id == other_member.guild_id;
+}
 
 guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id) {
 	this->guild_id = g_id;
@@ -224,8 +230,8 @@ guild& guild::set_name(const std::string& n) {
 	return *this;
 }
 
-dpp::user* guild_member::get_user() const {
-	return dpp::find_user(user_id);
+user* guild_member::get_user() const {
+	return find_user(user_id);
 }
 
 bool guild_member::is_deaf() const {
