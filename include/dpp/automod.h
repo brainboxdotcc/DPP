@@ -52,7 +52,8 @@ enum automod_preset_type : uint8_t {
  */
 enum automod_action_type : uint8_t {
 	/**
-	 * @brief Block the message
+	 * @brief Blocks the message and prevents it from being posted.
+	 * A custom explanation can be specified and shown to members whenever their message is blocked
 	 */
 	amod_action_block_message = 1,
 	/**
@@ -60,7 +61,8 @@ enum automod_action_type : uint8_t {
 	 */
 	amod_action_send_alert = 2,
 	/**
-	 * @brief time out the user
+	 * @brief timeout the user
+	 * @note Can only be set up for rules with trigger types of dpp::amod_type_keyword and dpp::amod_type_mention_spam
 	 */
 	amod_action_timeout = 3,
 };
@@ -244,15 +246,19 @@ struct DPP_EXPORT automod_action : public json_interface<automod_action> {
 	automod_action_type type;
 
 	/**
-	 * @brief Channel ID, for type dpp::amod_action_send_alert
+	 * @brief Channel ID to which user content should be logged, for type dpp::amod_action_send_alert
 	 */
 	snowflake channel_id;
 
 	/**
-	 * @brief Timeout duration in seconds (Maximum of 2419200), for dpp::amod_action_timeout
-	 * 
+	 * @brief Additional explanation that will be shown to members whenever their message is blocked. For type dpp::amod_action_block_message
 	 */
-	int32_t duration_seconds;
+	std::string custom_message;
+
+	/**
+	 * @brief Timeout duration in seconds (Maximum of 2419200), for dpp::amod_action_timeout
+	 */
+	uint32_t duration_seconds;
 
 	/**
 	 * @brief Construct a new automod action object

@@ -486,8 +486,10 @@ std::string channel::build_json(bool with_id) const {
 		j["default_thread_rate_limit_per_user"] = default_thread_rate_limit_per_user;
 	}
 	if (is_voice_channel()) {
-		j["user_limit"] = user_limit; 
-		j["bitrate"] = bitrate*1000;
+		j["user_limit"] = user_limit;
+		if (bitrate) {
+			j["bitrate"] = bitrate * 1000;
+		}
 	}
 	if (is_forum()) {
 		j["flags"] = (flags & dpp::c_require_tag) ? dpp::dc_require_tag : 0;
