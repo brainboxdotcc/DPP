@@ -18,35 +18,8 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/discordevents.h>
-#include <dpp/cluster.h>
-#include <dpp/stringops.h>
-#include <dpp/json.h>
-
-using json = nlohmann::json;
-
-namespace dpp { namespace events {
-
-using namespace dpp;
-
-/**
- * @brief Handle event
- * 
- * @param client Websocket client (current shard)
- * @param j JSON data for the event
- * @param raw Raw JSON string
- */
-void resumed::handle(discord_client* client, json &j, const std::string &raw) {
-	client->log(dpp::ll_debug, std::string("Successfully resumed session id ") + client->sessionid);
-
-	client->ready = true;
-
-	if (!client->creator->on_resumed.empty()) {
-		dpp::resumed_t r(client, raw);
-		r.session_id = client->sessionid;
-		r.shard_id = client->shard_id;
-		client->creator->on_resumed.call(r);
-	}
-}
-
-}};
+#ifdef DPP_USE_EXTERNAL_JSON
+	#include <nlohmann/json.hpp>
+#else
+	#include <dpp/nlohmann/json.hpp>
+#endif

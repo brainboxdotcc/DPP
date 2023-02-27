@@ -32,7 +32,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>

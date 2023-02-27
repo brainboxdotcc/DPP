@@ -27,7 +27,7 @@
 #include <variant>
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
-#include <nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <algorithm>
 #include <mutex>
 #include <shared_mutex>

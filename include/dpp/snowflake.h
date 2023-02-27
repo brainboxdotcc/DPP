@@ -20,7 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <stdint.h>
 #include <functional>
 

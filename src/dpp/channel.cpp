@@ -25,7 +25,7 @@
 #include <dpp/role.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 
 using json = nlohmann::json;
 

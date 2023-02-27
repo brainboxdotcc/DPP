@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/webhook.h>
 #include <dpp/discordevents.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/exception.h>
 
 namespace dpp {

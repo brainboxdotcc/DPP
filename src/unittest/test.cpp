@@ -21,7 +21,7 @@
 #include "test.h"
 #include <dpp/dpp.h>
 #include <dpp/restrequest.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 
 /* Unit tests go here */
 int main()

@@ -42,7 +42,7 @@
 #include <dpp/discordvoiceclient.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 
 #ifdef HAVE_VOICE
 	#include <sodium.h>

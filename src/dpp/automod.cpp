@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/automod.h>
 #include <dpp/discordevents.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 
 namespace dpp {
 

@@ -23,7 +23,7 @@
 #include <dpp/channel.h>
 #include <dpp/guild.h>
 #include <dpp/cache.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/exception.h>

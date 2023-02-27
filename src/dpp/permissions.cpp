@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/permissions.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 
 namespace dpp {
 

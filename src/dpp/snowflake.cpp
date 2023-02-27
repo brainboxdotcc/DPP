@@ -19,7 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/snowflake.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 
 namespace dpp {
 

@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/user.h>
 #include <dpp/discordevents.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/stringops.h>
 #include "user.h"
 

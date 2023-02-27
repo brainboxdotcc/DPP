@@ -23,7 +23,7 @@
 #include <dpp/guild.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
-#include <nlohmann/json.hpp>
+#include <dpp/json.h>
 
 using json = nlohmann::json;
 
