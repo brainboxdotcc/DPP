@@ -94,6 +94,6 @@ else()
 	# to source this library themselves even though DPP is using it.
 	target_include_directories(
 		"dpp" PUBLIC
-		"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/thirdparty/nlohmann-json>"
+		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/nlohmann-json>"
 	)
 endif()
