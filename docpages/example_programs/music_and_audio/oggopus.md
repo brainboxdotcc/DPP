@@ -213,46 +213,46 @@ int main(int argc, char const *argv[])
 		if (command == ".play") {
 			dpp::voiceconn* v = event.from->get_voice(event.msg.guild_id);
 			if (v && v->voiceclient && v->voiceclient->is_ready()) {
-                                // load the audio file with oggz
-                                OGGZ *track_og = oggz_open("/path/to/opus.ogg", OGGZ_READ);
+				// load the audio file with oggz
+				OGGZ *track_og = oggz_open("/path/to/opus.ogg", OGGZ_READ);
 
-                                if (track_og) {
-                                        // set read callback, this callback will be called on packets with the serialno,
-                                        // -1 means every packet will be handled with this callback
-                                        oggz_set_read_callback(
-                                            track_og, -1,
-                                            [](OGGZ *oggz, oggz_packet *packet, long serialno,
-                                               void *user_data) {
-                                                    dpp::voiceconn *voiceconn = (dpp::voiceconn *)user_data;
+				if (track_og) {
+					// set read callback, this callback will be called on packets with the serialno,
+					// -1 means every packet will be handled with this callback
+					oggz_set_read_callback(
+							track_og, -1,
+							[](OGGZ *oggz, oggz_packet *packet, long serialno,
+								void *user_data) {
+								dpp::voiceconn *voiceconn = (dpp::voiceconn *)user_data;
 
-                                                    // send the audio
-                                                    voiceconn->voiceclient->send_audio_opus(packet->op.packet,
-                                                                                       packet->op.bytes);
+								// send the audio
+								voiceconn->voiceclient->send_audio_opus(packet->op.packet,
+										packet->op.bytes);
 
-                                                    // make sure to always return 0 here, read more on oggz documentation
-                                                    return 0;
-                                            },
-                                            // this will be the value of void *user_data
-                                            (void *)v);
+								// make sure to always return 0 here, read more on oggz documentation
+								return 0;
+							},
+							// this will be the value of void *user_data
+							(void *)v);
 
-                                        // read loop
-                                        while (v && v->voiceclient && !v->voiceclient->terminating) {
-                                                // you can tweak this to whatever. Here I use BUFSIZ, defined in
-                                                // stdio.h as 8192
-                                                static const constexpr long CHUNK_READ = BUFSIZ * 2;
+					// read loop
+					while (v && v->voiceclient && !v->voiceclient->terminating) {
+						// you can tweak this to whatever. Here I use BUFSIZ, defined in
+						// stdio.h as 8192
+						static const constexpr long CHUNK_READ = BUFSIZ * 2;
 
-                                                const long read_bytes = oggz_read(track_og, CHUNK_READ);
+						const long read_bytes = oggz_read(track_og, CHUNK_READ);
 
-                                                // break on eof
-                                                if (!read_bytes)
-                                                        break;
-                                        }
-                                } else {
-                                        fprintf(stderr, "Error opening file\n");
-                                }
+						// break on eof
+						if (!read_bytes)
+							break;
+					}
+				} else {
+					fprintf(stderr, "Error opening file\n");
+				}
 
-                                // don't forget to free the memory
-                                oggz_close(track_og);
+				// don't forget to free the memory
+				oggz_close(track_og);
 			}
 		}
 	});
