@@ -29,7 +29,7 @@
 #include <dpp/appcommand.h>
 #include <dpp/dispatcher.h>
 #include <dpp/utility.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <dpp/event_router.h>
 #include <unordered_map>
 #include <vector>

@@ -22,7 +22,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <dpp/json_interface.h>
 

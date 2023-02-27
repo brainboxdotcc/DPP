@@ -210,13 +210,6 @@ foreach (fullmodname ${subdirlist})
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp>
 	)
 
-	target_precompile_headers(
-		${modname}
-		PRIVATE
-		"${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/nlohmann/json_fwd.hpp"
-		"${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/nlohmann/json.hpp"
-	)
-
 	if (WIN32 AND NOT MINGW)
 		if (NOT WINDOWS_32_BIT)
 			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib"

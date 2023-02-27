@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include "test.h"
 #include <dpp/dpp.h>
-#include <dpp/nlohmann/json.hpp>
+#include <nlohmann/json.hpp>
 
 /* Current list of unit tests */
 std::map<std::string, test_t> tests = {

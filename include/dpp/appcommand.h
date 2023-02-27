@@ -28,7 +28,7 @@
 #include <dpp/user.h>
 #include <variant>
 #include <map>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <dpp/json_interface.h>
 
 namespace dpp {

@@ -24,7 +24,7 @@
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
