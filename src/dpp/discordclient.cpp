@@ -347,7 +347,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 						std::this_thread::sleep_for(std::chrono::seconds(wait));
 					}
 					log(dpp::ll_debug, "Connecting new session...");
-						json obj = {
+					json obj = {
 						{ "op", 2 },
 						{
 							"d",
@@ -362,13 +362,11 @@ bool discord_client::handle_frame(const std::string &buffer)
 								},
 								{ "shard", json::array({ shard_id, max_shards }) },
 								{ "compress", false },
-								{ "large_threshold", 250 }
+								{ "large_threshold", 250 },
+								{ "intents", this->intents }
 							}
 						}
 					};
-					if (this->intents) {
-						obj["d"]["intents"] = this->intents;
-					}
 					this->write(jsonobj_to_string(obj));
 					this->connect_time = creator->last_identify = time(NULL);
 					reconnects++;
