@@ -47,8 +47,8 @@ jobs:
 
          - name:  Update the portfile and download/install the library
            run: cd ./dpp &&
-		grep "^Actual hash: " InstallOutput.txt | sed "s/Actual hash: //g" > InstallOutput2.txt &&
-		sudo mv InstallOutput2.txt InstallOutput.txt &&
+                grep "^Actual hash: " InstallOutput.txt | sed "s/Actual hash: //g" > InstallOutput2.txt &&
+                sudo mv InstallOutput2.txt InstallOutput.txt &&
                 sudo sed -i '/Actual hash: /,$!d' InstallOutput.txt &&
                 sudo sed -i 's/^...........//' InstallOutput.txt &&
                 sudo sed -i '2,250d' InstallOutput.txt &&
