@@ -11,7 +11,7 @@ jobs:
     steps:
 
          - name: Update vcpkg and install other dependencies
-           run: sudo apt-get install nasm &&
+           run: sudo apt-get install nasm linux-headers-$(uname -r) &&
                 cd /usr/local/share/vcpkg &&
                 sudo ./bootstrap-vcpkg.sh &&
                 sudo git stash &&
@@ -47,8 +47,10 @@ jobs:
 
          - name:  Update the portfile and download/install the library
            run: cd ./dpp &&
-                sudo sed -i '/Actual hash/,$!d' InstallOutput.txt &&
-                sudo sed -i 's/^.....................//' InstallOutput.txt &&
+		grep "^Actual hash: " InstallOutput.txt | sed "s/Actual hash: //g" > InstallOutput2.txt &&
+		sudo mv InstallOutput2.txt InstallOutput.txt &&
+                sudo sed -i '/Actual hash: /,$!d' InstallOutput.txt &&
+                sudo sed -i 's/^...........//' InstallOutput.txt &&
                 sudo sed -i '2,250d' InstallOutput.txt &&
                 sudo truncate -s -3 InstallOutput.txt &&
                 sudo bash -c "cat ./cmake/Raw-Files/Top-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-Second.cmake" &&
