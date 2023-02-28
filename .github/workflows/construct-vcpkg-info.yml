@@ -46,10 +46,7 @@ jobs:
                 sudo /usr/local/share/vcpkg/vcpkg install dpp:x64-linux | sudo tee InstallOutput.txt || true
 
          - name:  Update the portfile and download/install the library
-           run: cd ./dpp &&
-                grep "^Actual hash: " InstallOutput.txt > InstallOutput2.txt &&
-                sed "s/Actual hash: //g" InstallOutput2.txt > InstallOutput.txt &&
-                sudo truncate -s -1 InstallOutput.txt &&
+           run: cd ./dpp && grep "^Actual hash: " InstallOutput.txt > InstallOutput2.txt && sed "s/Actual hash: //g" InstallOutput2.txt > InstallOutput.txt && sudo truncate -s -1 InstallOutput.txt &&
                 sudo bash -c "cat ./cmake/Raw-Files/Top-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-Second.cmake" &&
                 sudo git rev-parse HEAD | sudo tee ./cmake/Raw-Files/Portfile-The-Second.cmake -a &&
                 sudo bash -c "cat ./cmake/Raw-Files/Middle-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-Second.cmake" &&
