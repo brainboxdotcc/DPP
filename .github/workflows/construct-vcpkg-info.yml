@@ -79,4 +79,5 @@ jobs:
                 sudo git config pull.rebase false &&
                 sudo git pull &&
                 sudo git push origin master &&
-                sudo /usr/local/share/vcpkg/vcpkg install dpp:x64-linux
+                sudo /usr/local/share/vcpkg/vcpkg install dpp:x64-linux || true &&
+                sudo cat /usr/local/share/vcpkg/buildtrees/dpp/*.log || true
