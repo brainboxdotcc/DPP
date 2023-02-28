@@ -47,8 +47,8 @@ jobs:
 
          - name:  Update the portfile and download/install the library
            run: cd ./dpp &&
-                grep "^Actual hash. " InstallOutput.txt > InstallOutput2.txt &&
-                sed "s/Actual hash. //g" InstallOutput2.txt > InstallOutput.txt &&
+                sudo grep "^Actual hash. " InstallOutput.txt > InstallOutput2.txt &&
+                sudo sed "s/Actual hash. //g" InstallOutput2.txt > InstallOutput.txt &&
                 sudo truncate -s -1 InstallOutput.txt &&
                 sudo bash -c "cat ./cmake/Raw-Files/Top-Of-Portfile.cmake >> ./cmake/Raw-Files/Portfile-The-Second.cmake" &&
                 sudo git rev-parse HEAD | sudo tee ./cmake/Raw-Files/Portfile-The-Second.cmake -a &&
