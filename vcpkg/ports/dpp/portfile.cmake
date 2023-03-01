@@ -1,7 +1,7 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO brainboxdotcc/DPP
-    REF "v"
+    REF "vff00ff00ff00ff00ff00"
     SHA512 0
 )
 
