@@ -6,7 +6,7 @@ function checkoutRepository(string $tag = "master") {
 	system('rm -rf ./dpp');
 	system('git config --global user.email "noreply@dpp.dev"');
 	system('git config --global user.name "DPP VCPKG Bot"');
-	system('git clone git@github.com:brainboxdotcc/DPP.git ./dpp --depth=1');
+	system('git clone https://'.$_ENV['GITHUB_USER'].':' . $_ENV['GITHUB_TOKEN'] . '@github.com/brainboxdotcc/DPP ./dpp --depth=1');
 	chdir(getenv("HOME") . '/dpp');
 	system('git checkout ' . $tag);
 }
