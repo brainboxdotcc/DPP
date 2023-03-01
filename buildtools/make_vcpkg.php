@@ -8,6 +8,7 @@ function checkoutRepository(string $tag = "master") {
 	system('git config --global user.name "DPP VCPKG Bot"');
 	system('git clone https://'.$_ENV['GITHUB_USER'].':' . $_ENV['GITHUB_TOKEN'] . '@github.com/brainboxdotcc/DPP ./dpp --depth=1');
 	chdir(getenv("HOME") . '/dpp');
+	system('git fetch -avt');
 	system('git checkout ' . $tag);
 }
 
@@ -135,7 +136,6 @@ function build(string $portFileContent) {
 
 echo "Starting vcpkg updater...\n";
 
-chdir(getenv("HOME") . "/work/DPP/DPP");
 $latestTag = preg_replace("/\n/", "", shell_exec("git describe --tags `git rev-list --tags --max-count=1`"));
 $version = preg_replace('/^v/', '', $latestTag);
 

@@ -32,4 +32,6 @@ jobs:
            env:
              GITHUB_USER: ${{ github.repository_owner }}
              GITHUB_TOKEN: ${{ github.token }}
-           run: cd buildtools && php make_vcpkg.php
+           run: git fetch -avt &&
+                cd buildtools &&
+                php make_vcpkg.php
