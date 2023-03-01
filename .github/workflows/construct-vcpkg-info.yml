@@ -29,9 +29,6 @@ jobs:
                 sudo vcpkg update
 
          - name: Run vcpkg release builder
-           env:
-             GITHUB_USER: ${{ github.repository_owner }}
-             GITHUB_TOKEN: ${{ github.token }}
            run: git fetch -avt &&
                 cd buildtools &&
-                php make_vcpkg.php
+                php make_vcpkg.php "${{ github.repository_owner }}" "${{ secrets.PERSONAL_ACCESS_TOKEN }}"

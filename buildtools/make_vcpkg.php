@@ -1,12 +1,12 @@
 <?php
 
 function checkoutRepository(string $tag = "master") {
-	echo "Check out repository: $tag\n";
+	echo "Check out repository: $tag (user: ". $argv[1] . " token: " . $argv[2] . ")\n";
 	chdir(getenv('HOME'));
 	system('rm -rf ./dpp');
 	system('git config --global user.email "noreply@dpp.dev"');
 	system('git config --global user.name "DPP VCPKG Bot"');
-	system('git clone https://'.$_ENV['GITHUB_USER'].':' . $_ENV['GITHUB_TOKEN'] . '@github.com/brainboxdotcc/DPP ./dpp --depth=1');
+	system('git clone https://'.$argv[1].':' . $argv[2] . '@github.com/brainboxdotcc/DPP ./dpp --depth=1');
 	chdir(getenv("HOME") . '/dpp');
 	system('git fetch -avt');
 	system('git checkout ' . $tag);
@@ -130,6 +130,9 @@ function build(string $portFileContent) {
 
 	echo "vcpkg install...\n";
 	system('sudo /usr/local/share/vcpkg/vcpkg install dpp:x64-linux');
+
+	echo "Build log:\n";
+	system("cat /usr/local/share/vcpkg/buildtrees/dpp/install-x64-linux-dbg-out.log");
 }
 
 
