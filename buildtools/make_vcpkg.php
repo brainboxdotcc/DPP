@@ -1,6 +1,8 @@
 <?php
 
 function checkoutRepository(string $tag = "master") {
+	global $argv;
+	
 	echo "Check out repository: $tag (user: ". $argv[1] . " token: " . $argv[2] . ")\n";
 	chdir(getenv('HOME'));
 	system('rm -rf ./dpp');
