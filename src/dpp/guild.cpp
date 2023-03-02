@@ -27,7 +27,7 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extra>> featuremap = {
 	{"ANIMATED_BANNER", dpp::g_animated_banner },
@@ -58,6 +58,7 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 };
 
 namespace dpp {
+using json = nlohmann::json;
 
 guild::guild() :
 	managed(),
@@ -240,6 +241,10 @@ bool guild_member::is_deaf() const {
 
 bool guild_member::is_muted() const {
 	return flags & dpp::gm_mute;
+}
+
+bool guild_member::is_bot() const {
+	return get_user()->is_bot();
 }
 
 bool guild_member::is_pending() const {
