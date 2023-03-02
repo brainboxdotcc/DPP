@@ -246,6 +246,7 @@ std::string presence::build_json(bool with_id) const {
 		{ps_online, "online"},
 		{ps_offline, "offline"},
 		{ps_idle, "idle"},
+		{ps_invisible, "invisible"},
 		{ps_dnd, "dnd"}
 	};
 	json j({
