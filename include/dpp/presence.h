@@ -69,7 +69,9 @@ enum presence_status : uint8_t {
 	/// DND
 	ps_dnd		=	2,
 	/// Idle
-	ps_idle		=	3
+	ps_idle		=	3,
+	/// Invisible (show as offline)
+	ps_invisible	=	4,
 };
 
 /**

@@ -26,9 +26,11 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 role::role() :
 	managed(),

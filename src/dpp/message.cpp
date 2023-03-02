@@ -29,9 +29,11 @@
 #include <dpp/exception.h>
 #include <dpp/cluster.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 component::component() :
 	type(cot_action_row), label(""), style(cos_primary), custom_id(""),

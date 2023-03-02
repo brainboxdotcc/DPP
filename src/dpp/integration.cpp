@@ -24,9 +24,11 @@
 #include <dpp/json.h>
 #include <dpp/cache.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 integration::integration() :
 	managed(),
