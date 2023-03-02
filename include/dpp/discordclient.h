@@ -34,11 +34,13 @@
 #include <mutex>
 #include <shared_mutex>
 
-using json = nlohmann::json;
+
 
 #define DISCORD_API_VERSION	"10"
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
 namespace dpp {
+
+using json = nlohmann::json;
 
 // Forward declarations
 class cluster;

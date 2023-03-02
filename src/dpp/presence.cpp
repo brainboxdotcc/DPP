@@ -24,9 +24,11 @@
 #include <dpp/emoji.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 std::string activity::get_large_asset_url(uint16_t size, const image_type format) const {
 	static const std::map<image_type, std::string> extensions = {

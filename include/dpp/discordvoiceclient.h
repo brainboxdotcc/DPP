@@ -48,13 +48,15 @@
 #include <functional>
 #include <chrono>
 
-using json = nlohmann::json;
+
 
 struct OpusDecoder;
 struct OpusEncoder;
 struct OpusRepacketizer;
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 // Forward declaration
 class cluster;

@@ -24,10 +24,10 @@
 #include <dpp/dns.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
 namespace dpp { namespace events {
 
+using json = nlohmann::json;
 using namespace dpp;
 
 #ifndef _DOXYGEN_

@@ -23,7 +23,9 @@
 #include <dpp/json.h>
 #include <dpp/stringops.h>
 
-using json = nlohmann::json;
+namespace dpp {
+using json = nlohmann::
+json;
 
 /* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
 std::map<uint32_t, dpp::user_flags> usermap = {
@@ -43,8 +45,6 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 19,      dpp::u_bot_http_interactions },
 	{ 1 << 22, 	dpp::u_active_developer},
 };
-
-namespace dpp {
 
 user::user() :
 	managed(),

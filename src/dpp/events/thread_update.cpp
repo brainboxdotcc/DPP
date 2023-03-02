@@ -24,11 +24,13 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp { namespace events {
-
+	
+using json = nlohmann::json;
 using namespace dpp;
+
 void thread_update::handle(discord_client* client, json& j, const std::string& raw) {
 	json& d = j["d"];
 

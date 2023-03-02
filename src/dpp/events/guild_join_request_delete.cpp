@@ -23,10 +23,10 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-using json = nlohmann::json;
 
 namespace dpp { namespace events {
 
+using json = nlohmann::json;
 using namespace dpp;
 
 /**
