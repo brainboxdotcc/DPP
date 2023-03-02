@@ -244,7 +244,10 @@ bool guild_member::is_muted() const {
 }
 
 bool guild_member::is_bot() const {
-	return get_user()->is_bot();
+	auto user = get_user();
+	if(user != nullptr)
+		return user->is_bot();
+	return false;
 }
 
 bool guild_member::is_pending() const {
