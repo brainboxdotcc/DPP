@@ -246,6 +246,14 @@ public:
 	 * @return false user has not completed membership screening
 	 */
 	bool is_pending() const;
+	
+	/**
+	 * @brief Returns true if the member is a bot.
+	 * 
+	 * @return true member is a bot.
+	 * @return false member is not a bot.
+	 */
+	bool is_bot() const;
 
 	/**
 	 * @brief Returns true if the user's per-guild custom avatar is animated
