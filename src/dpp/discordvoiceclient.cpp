@@ -1021,10 +1021,6 @@ void discord_voice_client::one_second_timer()
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 				queue_message(json({{"op", 3}, {"d", rand()}}).dump(), true);
 				last_heartbeat = time(nullptr);
-				/* If we're paused, send this to keep the UDP connection alive. */
-				if (this->paused) {
-					this->send_silence(20);
-				}
 			}
 		}
 	}
