@@ -25,11 +25,13 @@
 #include <dpp/role.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0) {}
 

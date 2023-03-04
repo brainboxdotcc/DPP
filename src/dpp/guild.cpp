@@ -25,7 +25,9 @@
 #include <dpp/guild.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
+
+namespace dpp {
 
 using json = nlohmann::json;
 
@@ -56,8 +58,6 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"VIP_REGIONS", dpp::g_vip_regions },
 	{"WELCOME_SCREEN_ENABLED", dpp::g_welcome_screen_enabled },
 };
-
-namespace dpp {
 
 guild::guild() :
 	managed(),

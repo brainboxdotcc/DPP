@@ -32,7 +32,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
@@ -48,13 +48,15 @@
 #include <functional>
 #include <chrono>
 
-using json = nlohmann::json;
+
 
 struct OpusDecoder;
 struct OpusEncoder;
 struct OpusRepacketizer;
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 // Forward declaration
 class cluster;

@@ -27,7 +27,7 @@
 #include <dpp/guild.h>
 #include <optional>
 #include <variant>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
 namespace dpp {
@@ -980,7 +980,7 @@ enum message_flags : uint16_t {
 	/// this message failed to mention some roles and add their members to the thread
 	m_thread_mention_failed = 1 << 8,
 	/// this message will not trigger push and desktop notifications
-	m_suppress_notifications = 1 << 9,
+	m_suppress_notifications = 1 << 12,
 };
 
 /**

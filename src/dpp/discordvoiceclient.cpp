@@ -42,7 +42,7 @@
 #include <dpp/discordvoiceclient.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
 #ifdef HAVE_VOICE
 	#include <sodium.h>
@@ -785,7 +785,7 @@ void discord_voice_client::write_ready()
 		std::lock_guard<std::mutex> lock(this->stream_mutex);
 		if (!this->paused && outbuf.size()) {
 			type = send_audio_type;
-			if (outbuf[0].packet.size() == 2 && ((uint16_t)(*(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
+			if (outbuf[0].packet.size() == 2 && (*((uint16_t*)(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
 				track_marker_found = true;
 				if (tracks > 0)
@@ -1021,10 +1021,6 @@ void discord_voice_client::one_second_timer()
 			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 				queue_message(json({{"op", 3}, {"d", rand()}}).dump(), true);
 				last_heartbeat = time(nullptr);
-				/* If we're paused, send this to keep the UDP connection alive. */
-				if (this->paused) {
-					this->send_silence(20);
-				}
 			}
 		}
 	}
@@ -1106,7 +1102,7 @@ uint32_t discord_voice_client::get_tracks_remaining() {
 discord_voice_client& discord_voice_client::skip_to_next_marker() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	/* Keep popping the first entry off the outbuf until the first entry is a track marker */
-	while (!outbuf.empty() && outbuf[0].packet.size() != sizeof(uint16_t) && ((uint16_t)(*(outbuf[0].packet.data()))) != AUDIO_TRACK_MARKER) {
+	while (!outbuf.empty() && outbuf[0].packet.size() != sizeof(uint16_t) && (*((uint16_t*)(outbuf[0].packet.data()))) != AUDIO_TRACK_MARKER) {
 		outbuf.erase(outbuf.begin());
 	}
 	if (outbuf.size()) {

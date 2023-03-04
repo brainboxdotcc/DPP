@@ -24,7 +24,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/event.h>
@@ -34,11 +34,13 @@
 #include <mutex>
 #include <shared_mutex>
 
-using json = nlohmann::json;
+
 
 #define DISCORD_API_VERSION	"10"
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
 namespace dpp {
+
+using json = nlohmann::json;
 
 // Forward declarations
 class cluster;
