@@ -56,7 +56,6 @@ namespace dpp {
 			cinnabar = 0xE74C3C,
 			submarine = 0x95A5A6,
 			blue_aquamarine = 0x607D8B,
-			deep_sea = 0x11806A,
 			sea_green = 0x1F8B4C,
 			endeavour = 0x206694,
 			vivid_violet = 0x71368A,
