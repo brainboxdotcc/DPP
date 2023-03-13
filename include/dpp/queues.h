@@ -70,7 +70,7 @@ enum http_error {
  */
 struct DPP_EXPORT http_request_completion_t {
 	/** @brief HTTP headers of response */
-	std::map<std::string, std::string> headers;
+	std::multimap<std::string, std::string> headers;
 	/** @brief HTTP status, e.g. 200 = OK, 404 = Not found, 429 = Rate limited */
 	uint16_t status = 0;
 	/** @brief Error status (e.g. if the request could not connect at all) */
