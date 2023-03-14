@@ -32,7 +32,25 @@ void cluster::current_user_leave_thread(snowflake thread_id, command_completion_
 }
 
 void cluster::threads_get_active(snowflake guild_id, command_completion_event_t callback) {
-	rest_request_list<thread>(this, API_PATH "/guilds", std::to_string(guild_id), "/threads/active", m_get, "", callback);
+	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/threads/active", m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
+		active_thread_map list;
+		confirmation_callback_t e(this, confirmation(), http);
+		if (!e.is_error()) {
+			if (j.contains("threads")) {
+				for (auto &curr_item: j["threads"]) {
+					list.threads[snowflake_not_null(&curr_item, "id")] = thread().fill_from_json(&curr_item);
+				}
+			}
+			if (j.contains("members")) {
+				for (auto &curr_item: j["members"]) {
+					list.thread_members[snowflake_not_null(&curr_item, "id")] = thread_member().fill_from_json(&curr_item);
+				}
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t(this, list, http));
+		}
+	});
 }
 
 void cluster::threads_get_joined_private_archived(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback) {
