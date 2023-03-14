@@ -3025,7 +3025,7 @@ public:
 	void thread_members_get(snowflake thread_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Returns all active threads in the guild, including public and private threads. Threads are ordered by their id, in descending order.
+	 * @brief Get all active threads in the guild, including public and private threads. Threads are ordered by their id, in descending order.
 	 * @see https://discord.com/developers/docs/resources/guild#list-active-guild-threads
 	 * @param guild_id Guild to get active threads for
 	 * @param callback Function to call when the API call completes
