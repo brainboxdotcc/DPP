@@ -3029,7 +3029,7 @@ public:
 	 * @see https://discord.com/developers/docs/resources/guild#list-active-guild-threads
 	 * @param guild_id Guild to get active threads for
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::active_thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::active_threads object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void threads_get_active(snowflake guild_id, command_completion_event_t callback);
 

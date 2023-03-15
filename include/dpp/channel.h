@@ -817,7 +817,7 @@ typedef std::unordered_map<snowflake, thread> thread_map;
 typedef struct {
 	thread_map threads;
 	thread_member_map thread_members;
-} active_thread_map;
+} active_threads;
 
 };
 
