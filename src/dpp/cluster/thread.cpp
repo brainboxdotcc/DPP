@@ -33,7 +33,7 @@ void cluster::current_user_leave_thread(snowflake thread_id, command_completion_
 
 void cluster::threads_get_active(snowflake guild_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "/threads/active", m_get, "", [this, callback](json &j, const http_request_completion_t& http) {
-		active_thread_map list;
+		active_threads list;
 		confirmation_callback_t e(this, confirmation(), http);
 		if (!e.is_error()) {
 			if (j.contains("threads")) {
