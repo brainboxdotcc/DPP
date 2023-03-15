@@ -110,7 +110,7 @@ if (BUILD_VOICE_SUPPORT)
 
 	if(DEFINED OPUS_FOUND)
 		message("-- Found Opus ${Green}${OPUS_LIBRARIES}${ColourReset}")
-		if(PKG_CONFIG_FOUND AND DEFINED sodium_VERSION_STRING)
+		if((WIN32 OR PKG_CONFIG_FOUND) AND DEFINED sodium_VERSION_STRING)
 			add_compile_definitions(HAVE_VOICE)
 		
 			message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
