@@ -17,6 +17,7 @@ namespace EBW{
 	struct Command {
 		std::string id;
 		std::string display;
+		std::string response;
 		std::vector<Argument> args;
 		std::unordered_map<std::string, Argument> argument_map;
 		using execute_fp = void (*)(dpp::cluster&, const dpp::slashcommand_t&, EBW::Command& command);
