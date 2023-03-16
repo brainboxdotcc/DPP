@@ -69,6 +69,46 @@ int main() {
 }
 ```
 
+This is a simple ping-pong example using slash commands with the new Everlasting Bot Wrapper.
+
+```c++
+#include <dpp/dpp.h>
+#include <cstdlib>
+#include <dpp/command.hpp>
+ 
+EBW::Command ping = {
+	  .id = "ping",
+  	.display = "Ping",
+	  .response = "Pong!",
+	  .args = {},
+	  .execute = [](dpp::cluster& bot, const dpp::slashcommand_t& event, EBW::Command& command) {
+		    std::string response = command.response;
+		  event.reply("You chose: " + response + ". You're such a counter!");
+	  }
+};
+
+std::vector<EBW::Command> registered_commands = {
+		ping
+};
+int main() {
+    dpp::cluster bot(std::getenv("BOT_TOKEN"));
+ 
+    bot.on_slashcommand([](auto event) {
+        std::string command_name = event.command.get_command_name();
+        EBW::Command& command = EBW::command_map[command_name];
+        command.execute(bot, event, command);
+    });
+ 
+    bot.on_ready([&bot](auto event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+            EBW::init_commands(bot, registered_commands);
+        }
+    });
+ 
+    bot.start(dpp::st_wait);
+}
+```
+
 You can find more examples in our [example page](https://dpp.dev/md_docpages_03_example_programs.html).
 
 ## Supported Systems
