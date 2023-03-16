@@ -80,16 +80,16 @@ EBW::Command ping = {
 	.id = "ping",
 	.display = "Ping",
 	.response = "Pong!",
-	.args = {},
-	.execute = [](dpp::cluster& bot, const dpp::slashcommand_t& event, EBW::Command& command) {
-		event.reply(command.response);
+	.execute = [](dpp::cluster& bot, const dpp::slashcommand_t& event, EBW::Evt cmd) {
+		std::string response = cmd.cmd.response;
+		event.reply(response);
 	}
 };
 
 EBW::Command greet = {
 	.id = "greet",
 	.display = "Choose a greeting!",
-	.args = {
+	.arguments = {
 		{
 			.id = "greeting",
 			.display = "Specify a greeting.",
@@ -112,10 +112,9 @@ EBW::Command greet = {
 			}
 		}
 	},
-	.execute = [](dpp::cluster& bot, const dpp::slashcommand_t& event, EBW::Command& command) {
-		std::string choice = std::get<std::string>(event.get_parameter("greeting"));
-		//do more stuff here if you want lol
-		event.reply(command.argument_map["greeting"].option_map[choice].response);
+	.execute = [](dpp::cluster& bot, const dpp::slashcommand_t& event, EBW::Evt cmd) {
+		std::string choice = cmd.arg["greeting"];
+		event.reply(cmd.cmd.argument_map["greeting"].option_map[choice].response);
 	}
 };
 
@@ -128,7 +127,7 @@ int main() {
     bot.on_slashcommand([](auto event) {
         std::string command_name = event.command.get_command_name();
         EBW::Command& command = EBW::command_map[command_name];
-        command.execute(bot, event, command);
+        EBW::Cmd(bot, event, command);
     });
  
     bot.on_ready([&bot](auto event) {
