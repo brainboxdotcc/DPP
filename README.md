@@ -77,18 +77,17 @@ This is a simple ping-pong example using slash commands with the new Everlasting
 #include <dpp/command.hpp>
  
 EBW::Command ping = {
-	  .id = "ping",
-  	.display = "Ping",
-	  .response = "Pong!",
-	  .args = {},
-	  .execute = [](dpp::cluster& bot, const dpp::slashcommand_t& event, EBW::Command& command) {
-		    std::string response = command.response;
-		  event.reply("You chose: " + response + ". You're such a counter!");
-	  }
+	.id = "ping",
+	.display = "Ping",
+	.response = "Pong!",
+	.args = {},
+	.execute = [](dpp::cluster& bot, const dpp::slashcommand_t& event, EBW::Command& command) {
+		event.reply(command.response);
+	}
 };
 
 std::vector<EBW::Command> registered_commands = {
-		ping
+	ping
 };
 int main() {
     dpp::cluster bot(std::getenv("BOT_TOKEN"));
