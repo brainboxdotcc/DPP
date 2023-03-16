@@ -70,7 +70,7 @@ int main() {
 ```
 
 This is a simple ping-pong example, along with a choice example, using slash commands with the new Everlasting Bot Wrapper.
-
+(The EBW only works in C++20 and up, so it is an optional feature)
 ```c++
 #include <dpp/dpp.h>
 #include <cstdlib>
