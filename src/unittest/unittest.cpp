@@ -73,6 +73,7 @@ std::map<std::string, test_t> tests = {
 	{"HOSTINFO", {tt_offline, "https_client::get_host_info()", false, false}},
 	{"HTTPS", {tt_online, "https_client HTTPS request", false, false}},
 	{"HTTP", {tt_offline, "https_client HTTP request", false, false}},
+	{"MULTIHEADER", {tt_offline, "multiheader cookie test", false, false}},
 	{"RUNONCE", {tt_offline, "run_once<T>", false, false}},
 	{"WEBHOOK", {tt_offline, "webhook construct from URL", false, false}},
 	{"MD_ESC_1", {tt_offline, "Markdown escaping (ignore code block contents)", false, false}},
