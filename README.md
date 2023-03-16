@@ -69,7 +69,7 @@ int main() {
 }
 ```
 
-This is a simple ping-pong example using slash commands with the new Everlasting Bot Wrapper.
+This is a simple ping-pong example, along with a choice example, using slash commands with the new Everlasting Bot Wrapper.
 
 ```c++
 #include <dpp/dpp.h>
@@ -86,8 +86,41 @@ EBW::Command ping = {
 	}
 };
 
+EBW::Command greet = {
+	.id = "greet",
+	.display = "Choose a greeting!",
+	.args = {
+		{
+			.id = "greeting",
+			.display = "Specify a greeting.",
+			.options = {
+				{
+					.id = "casual",
+					.display = "Hi!",
+					.response = "Hi, person!"
+				},
+				{
+					.id = "formal",
+					.display = "Hello!",
+					.response = "Hello there, human!"
+				},
+				{
+					.id = "query",
+					.display = "How are you?",
+					.response = "I'm doing great, how are you?"
+				}
+			}
+		}
+	},
+	.execute = [](dpp::cluster& bot, const dpp::slashcommand_t& event, EBW::Command& command) {
+		std::string choice = std::get<std::string>(event.get_parameter("greeting"));
+		//do more stuff here if you want lol
+		event.reply(command.argument_map["greeting"].option_map[choice].response);
+	}
+};
+
 std::vector<EBW::Command> registered_commands = {
-	ping
+	ping, greet
 };
 int main() {
     dpp::cluster bot(std::getenv("BOT_TOKEN"));
