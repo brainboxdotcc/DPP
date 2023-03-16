@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <dpp/dpp.h>
 
-namespace EBW{
+namespace dpp::ebw{
 	struct Option {
 		std::string id = "option id";
 		std::string display = "option display";
