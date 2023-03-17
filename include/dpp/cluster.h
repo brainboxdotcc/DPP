@@ -29,7 +29,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/misc-enum.h>
 #include <dpp/timer.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/discordclient.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/voiceregion.h>
@@ -49,9 +49,11 @@
 #include <dpp/coro.h>
 #include <dpp/event_router.h>
 
-using  json = nlohmann::json;
+
 
 namespace dpp {
+
+using  json = nlohmann::json;
 
 /**
  * @brief Types of startup for cluster::start()
@@ -1296,8 +1298,8 @@ public:
 	 * @param guild_id Guild to get the audit log of
 	 * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
 	 * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
-	 * @param before Entries that preceded a specific audit log entry ID. Used for paginating
-	 * @param after Entries that succeeded a specific audit log entry ID. Used for paginating
+	 * @param before Entries with ID less than a specific audit log entry ID. Used for paginating
+	 * @param after Entries with ID greater than a specific audit log entry ID. Used for paginating
 	 * @param limit Maximum number of entries (between 1-100) to return
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::auditlog object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2798,7 +2800,7 @@ public:
 	void user_application_role_connection_update(snowflake application_id, const application_role_connection &connection, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Get a user by id
+	 * @brief Get a user by id, without using the cache
 	 *
 	 * @see https://discord.com/developers/docs/resources/user#get-user
 	 * @param user_id User ID to retrieve
@@ -2810,6 +2812,20 @@ public:
 	 * Call `dpp::find_user` instead that looks up the user in the cache rather than a REST call.
 	 */
 	void user_get(snowflake user_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get a user by id, checking in the cache first
+	 *
+	 * @see https://discord.com/developers/docs/resources/user#get-user
+	 * @param user_id User ID to retrieve
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+	 * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
+	 * @note If the user is found in the cache, special values set in `dpp::user_identified` will be undefined. This call should be used
+	 * where you want to for example resolve a user who may no longer be in the bot's guilds, for something like a ban log message.
+	 */
+	void user_get_cached(snowflake user_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get current (bot) user

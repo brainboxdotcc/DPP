@@ -115,7 +115,7 @@ int main()
 				#include <unordered_map>\n\
 				#include <stdint.h>\n\
 				#include <dpp/dpp.h>\n\
-				#include <dpp/nlohmann/json.hpp>\n\
+				#include <nlohmann/json.hpp>\n\
 				#include <fmt/format.h>\n\
 				#include \"eval.h\"\n\
 				extern \"C\" void so_exec(dpp::cluster& bot, dpp::message_create_t event) {\n\

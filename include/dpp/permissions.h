@@ -20,7 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <cstdint>
 #include <type_traits>
 

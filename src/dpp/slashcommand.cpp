@@ -21,7 +21,7 @@
 #include <dpp/appcommand.h>
 #include <dpp/discordevents.h>
 #include <dpp/exception.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/stringops.h>
 #include <dpp/cache.h>
 #include <iostream>
@@ -717,8 +717,14 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	}
 }
 
-interaction_response::interaction_response() {
-	msg = new message();
+interaction_response::interaction_response() : msg(nullptr) {
+	try {
+		msg = new message();
+	}
+	catch (std::bad_alloc&) {
+		delete msg;
+		throw;
+	}
 }
 
 interaction_response::~interaction_response() {

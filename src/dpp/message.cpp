@@ -23,15 +23,17 @@
 #include <dpp/channel.h>
 #include <dpp/guild.h>
 #include <dpp/cache.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
 #include <dpp/exception.h>
 #include <dpp/cluster.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 component::component() :
 	type(cot_action_row), label(""), style(cos_primary), custom_id(""),

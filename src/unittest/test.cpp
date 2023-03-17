@@ -20,7 +20,9 @@
  ************************************************************************************/
 #include "test.h"
 #include <dpp/dpp.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
+#include <dpp/json.h>
+
 
 /* Unit tests go here */
 int main()
@@ -133,6 +135,19 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	catch (const dpp::exception& e) {
 		std::cout << e.what() << "\n";
 		set_test("HTTP", false);
+	}
+
+	set_test("MULTIHEADER", false);
+	try {
+		dpp::https_client c2("www.google.com", 80, "/", "GET", "", {}, true);
+		size_t count = c2.get_header_count("set-cookie");
+		size_t count_list = c2.get_header_list("set-cookie").size();
+		// Google sets a bunch of cookies when we start accessing it.
+		set_test("MULTIHEADER", c2.get_status() == 200 && count > 1 && count == count_list);
+	}
+	catch (const dpp::exception& e) {
+		std::cout << e.what() << "\n";
+		set_test("MULTIHEADER", false);
 	}
 
 	std::vector<uint8_t> testaudio = load_test_audio();
@@ -386,6 +401,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			[[maybe_unused]]
 			message_collector* collect_messages = new message_collector(&bot, 25);
 		}
+
+		set_test("JSON_PARSE_ERROR", false);
+		dpp::rest_request<dpp::confirmation>(&bot, "/nonexistent", "address", "", dpp::m_get, "", [](const dpp::confirmation_callback_t& e) {
+			if (e.is_error() && e.get_error().code == 404) {
+				set_test("JSON_PARSE_ERROR", true);
+			} else {
+				set_test("JSON_PARSE_ERROR", false);
+			}
+		});
 
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
@@ -757,6 +781,30 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 			ticks++;
 		}, 1);
+
+		set_test("USER_GET_CACHED_PRESENT", false);
+		try {
+			dpp::user_identified u = bot.user_get_cached_sync(TEST_USER_ID);
+			set_test("USER_GET_CACHED_PRESENT", (u.id == TEST_USER_ID));
+		}
+		catch (const std::exception&) {
+			set_test("USER_GET_CACHED_PRESENT", false);
+		}
+
+		set_test("USER_GET_CACHED_ABSENT", false);
+		try {
+			/* This is the snowflake ID of a discord staff member.
+			 * We assume here that staffer's discord IDs will remain constant
+			 * for long periods of time and they won't lurk in the unit test server.
+			 * If this becomes not true any more, we'll pick another well known
+			 * user ID.
+			 */
+			dpp::user_identified u = bot.user_get_cached_sync(90339695967350784);
+			set_test("USER_GET_CACHED_ABSENT", (u.id == dpp::snowflake(90339695967350784)));
+		}
+		catch (const std::exception&) {
+			set_test("USER_GET_CACHED_ABSENT", false);
+		}
 
 		set_test("TIMEDLISTENER", false);
 		dpp::timed_listener tl(&bot, 10, bot.on_log, [&](const dpp::log_t & event) {

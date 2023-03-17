@@ -23,12 +23,13 @@
 #include <dpp/guild.h>
 #include <dpp/voicestate.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp { namespace events {
-
+	
+using json = nlohmann::json;
 using namespace dpp;
 
 /**

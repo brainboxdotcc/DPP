@@ -440,7 +440,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void edit_response(const std::string & mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
-	 * @brief Set the bot to 'thinking' state
+	 * @brief Set the bot to 'thinking' state where you have up to 15 minutes to respond
 	 *
 	 * @param ephemeral True if the thinking state should be ephemeral
 	 * @param callback User function to execute when the api call completes.

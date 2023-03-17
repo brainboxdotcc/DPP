@@ -25,11 +25,13 @@
 #include <dpp/role.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0) {}
 
@@ -486,8 +488,10 @@ std::string channel::build_json(bool with_id) const {
 		j["default_thread_rate_limit_per_user"] = default_thread_rate_limit_per_user;
 	}
 	if (is_voice_channel()) {
-		j["user_limit"] = user_limit; 
-		j["bitrate"] = bitrate*1000;
+		j["user_limit"] = user_limit;
+		if (bitrate) {
+			j["bitrate"] = bitrate * 1000;
+		}
 	}
 	if (is_forum()) {
 		j["flags"] = (flags & dpp::c_require_tag) ? dpp::dc_require_tag : 0;

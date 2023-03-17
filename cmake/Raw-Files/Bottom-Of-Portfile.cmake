@@ -1,6 +1,4 @@
     HEAD_REF master
-    PATCHES
-        make-pkgconfig-required.patch
 )
 
 vcpkg_cmake_configure(

@@ -27,7 +27,7 @@
 #include <dpp/guild.h>
 #include <optional>
 #include <variant>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
 namespace dpp {
@@ -980,7 +980,7 @@ enum message_flags : uint16_t {
 	/// this message failed to mention some roles and add their members to the thread
 	m_thread_mention_failed = 1 << 8,
 	/// this message will not trigger push and desktop notifications
-	m_suppress_notifications = 1 << 9,
+	m_suppress_notifications = 1 << 12,
 };
 
 /**
@@ -1075,6 +1075,14 @@ enum message_type {
 	mt_role_subscription_purchase		= 25,
 	/// Interaction premium upsell
 	mt_interaction_premium_upsell		= 26,
+	/// Stage start
+	mt_stage_start						= 27,
+	/// Stage end
+	mt_stage_end						= 28,
+	/// Stage speaker
+	mt_stage_speaker					= 29,
+	/// Stage topic
+	mt_stage_topic						= 31,
 	/// Guild application premium subscription
 	mt_application_premium_subscription	= 32,
 };
@@ -1158,7 +1166,7 @@ struct DPP_EXPORT message : public managed {
 	std::vector<channel> mention_channels;
 	/** any attached files */
 	std::vector<attachment> attachments;
-	/** zero or more dpp::embed objects */
+	/** Up to 10 dpp::embed objects */
 	std::vector<embed> embeds;
 	/** Optional: reactions to the message */
 	std::vector<reaction> reactions;

@@ -25,6 +25,7 @@ option(DPP_INSTALL "Generate the install target" ON)
 option(DPP_BUILD_TEST "Build the test program" ON)
 option(DPP_NO_VCPKG "No VCPKG" OFF)
 option(DPP_CORO "Experimental support for C++20 coroutines" OFF)
+option(DPP_USE_EXTERNAL_JSON "Use an external installation of nlohmann::json" OFF)
 
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -75,4 +76,18 @@ else()
 		DESCRIPTION "An incredibly lightweight C++ Discord library."
 	)
 	add_subdirectory(library)
+endif()
+
+if(DPP_USE_EXTERNAL_JSON)
+	# We do nothing here, we just assume it is on the include path.
+	# nlohmann::json's cmake stuff does all kinds of weird, and is more hassle than it's worth.
+	# This functionality is here mostly for package maintainers so if you enable it you should
+	# know what you are doing.
+	message("-- Using external nlohmann::json")
+	target_compile_definitions(dpp PUBLIC DPP_USE_EXTERNAL_JSON)
+else()
+	# Add the nlohmann single include to the include path. Note that nlohmann::json is kinda
+	# fussy, this is an older version because trying to use v3.11.2 gave a bunch of parse errors
+	# that made no sense, it seems they may have changed their parsing rules somehow.
+	message("-- Using bundled nlohmann::json")
 endif()

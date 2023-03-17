@@ -20,10 +20,12 @@
  ************************************************************************************/
 #include <dpp/user.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/stringops.h>
 
-using json = nlohmann::json;
+namespace dpp {
+using json = nlohmann::
+json;
 
 /* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
 std::map<uint32_t, dpp::user_flags> usermap = {
@@ -41,10 +43,8 @@ std::map<uint32_t, dpp::user_flags> usermap = {
 	{ 1 << 17,      dpp::u_verified_bot_dev },
 	{ 1 << 18,      dpp::u_certified_moderator },
 	{ 1 << 19,      dpp::u_bot_http_interactions },
-	{ 1 << 22, 		dpp::u_active_developer},
+	{ 1 << 22, 	dpp::u_active_developer},
 };
-
-namespace dpp {
 
 user::user() :
 	managed(),
@@ -63,7 +63,26 @@ std::string user::get_mention(const snowflake& id) {
 }
 
 std::string user::build_json(bool with_id) const {
-	return "";
+	json j;
+
+	j["id"] = id;
+	j["username"] = username;
+	j["avatar"] = avatar.to_string();
+	j["discriminator"] = discriminator;
+	j["bot"] = is_bot();
+	j["system"] = is_system();
+	j["mfa_enabled"] = is_mfa_enabled();
+	j["verified"] = is_verified();
+	j["premium_type"] = (has_nitro_classic() ? 1 : (has_nitro_full() ? 2 : has_nitro_basic() ? 3 : 0));
+	uint32_t out_flags = 0;
+	for (auto & flag : usermap) {
+		if (flags & flag.second) {
+			out_flags |= flag.first;
+		}
+	}
+	j["flags"] = out_flags;
+
+	return j.dump();
 }
 
 std::string user_identified::build_json(bool with_id) const {
@@ -72,6 +91,9 @@ std::string user_identified::build_json(bool with_id) const {
 
 user_identified::user_identified() : user(), accent_color(0), verified(false) {
 
+}
+
+user_identified::user_identified(const user& u): user(u), accent_color(0), verified(false) {
 }
 
 user_identified::~user_identified() {

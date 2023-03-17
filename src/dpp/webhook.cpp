@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/webhook.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/exception.h>
 
 namespace dpp {
@@ -51,9 +51,7 @@ webhook::webhook(const snowflake webhook_id, const std::string& webhook_token) :
 }
 
 webhook::~webhook() {
-	if (image_data) {
-		delete image_data;
-	}
+	delete image_data;
 }
 
 webhook& webhook::fill_from_json(nlohmann::json* j) {

@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/ban.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
 namespace dpp {
 
