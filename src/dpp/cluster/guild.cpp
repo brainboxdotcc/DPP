@@ -46,6 +46,7 @@ void cluster::guild_ban_add(snowflake guild_id, snowflake user_id, uint32_t dele
 	if (delete_message_seconds) {
 		j["delete_message_seconds"] = delete_message_seconds > 604800 ? 604800 : delete_message_seconds;
 		if (delete_message_seconds >= 1 && delete_message_seconds <= 7) {
+			// this prints out a warning for backwards compatibility
 			if (dpp::run_once<struct ban_add_seconds_not_days_t>()) {
 				this->log(ll_warning, "It looks like you may have confused seconds and days in cluster::guild_ban_add - Please double check your parameters!");
 			}

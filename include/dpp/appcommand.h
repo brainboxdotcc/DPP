@@ -203,7 +203,7 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 *
 	 * @param o choice to add
 	 * @return command_option& returns a reference to self for chaining of calls
-	 * @throw dpp::exception command_option is an autocomplete, so choices cannot be added
+	 * @throw dpp::logic_exception command_option is an autocomplete, so choices cannot be added
 	 */
 	command_option& add_choice(const command_option_choice &o);
 
@@ -260,7 +260,7 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 * 
 	 * @param autocomp True to enable auto completion for this option
 	 * @return command_option& return a reference to self for chaining of calls
-	 * @throw dpp::exception You attempted to enable auto complete on a command_option that has choices added to it
+	 * @throw dpp::logic_exception You attempted to enable auto complete on a command_option that has choices added to it
 	 */
 	command_option& set_auto_complete(bool autocomp);
 
