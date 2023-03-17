@@ -249,7 +249,9 @@ struct DPP_EXPORT forum_tag : public managed {
 	forum_tag& set_name(const std::string& name);
 };
 
-/** @brief A group of thread member objects*/
+/**
+ * @brief A group of thread member objects. the key is the thread_id of the dpp::thread_member
+ */
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
 /**
@@ -808,6 +810,14 @@ typedef std::unordered_map<snowflake, channel> channel_map;
  * @brief A group of threads
  */
 typedef std::unordered_map<snowflake, thread> thread_map;
+
+/**
+ * @brief A group of threads and thread_members. returned from the cluster::threads_get_active method
+ */
+typedef struct {
+	thread_map threads;
+	thread_member_map thread_members;
+} active_threads;
 
 };
 

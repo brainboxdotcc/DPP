@@ -132,7 +132,7 @@ template<class T> inline void rest_request_list(dpp::cluster* c, const char* bas
  */
 template<> inline void rest_request_list<invite>(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback, const std::string& key) {
 	c->post_rest(basepath, major, minor, method, postdata, [c, callback](json &j, const http_request_completion_t& http) {
-		std::unordered_map<std::string, invite> list;
+		invite_map list;
 		confirmation_callback_t e(c, confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_item : j) {
@@ -160,7 +160,7 @@ template<> inline void rest_request_list<invite>(dpp::cluster* c, const char* ba
  */
 template<> inline void rest_request_list<voiceregion>(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback, const std::string& key) {
 	c->post_rest(basepath, major, minor, method, postdata, [c, callback](json &j, const http_request_completion_t& http) {
-		std::unordered_map<std::string, voiceregion> list;
+		voiceregion_map list;
 		confirmation_callback_t e(c, confirmation(), http);
 		if (!e.is_error()) {
 			for (auto & curr_item : j) {
@@ -174,7 +174,7 @@ template<> inline void rest_request_list<voiceregion>(dpp::cluster* c, const cha
 }
 
 /**
- * @brief Templated REST request helper to save on typing (for returned vectors)
+ * @brief Templated REST request helper to save on typing (for returned lists, specialised for objects which doesn't have ids)
  *
  * @tparam T singular type to return in lambda callback
  * @tparam T vector type to return in lambda callback
