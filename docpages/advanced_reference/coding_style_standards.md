@@ -36,6 +36,9 @@ Constants and macros should be all `UPPERCASE` with `SNAKE_CASE` to separate wor
 ## Comments
 All comments should be in `doxygen` format (similar to javadoc). Please see existing class definitions for an example. You should use doxygen style comments in a class definition inside a header file, and can use any other comment types within the .cpp file. Be liberal with comments, especially if your code makes any assumptions!
 
+## Spell checks
+To prevent typos, a GitHub-Action checks the documentation. If it fails for a word that was falsely flagged, you can add them to `.cspell.json`.
+
 ## Symbol exporting
 If you export a class which is to be accessible to users, be sure to prefix it with the `DPP_EXPORT` macro, for example:
 
