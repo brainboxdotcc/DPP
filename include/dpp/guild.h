@@ -280,10 +280,8 @@ public:
 	guild_member& set_nickname(const std::string& nick);
 
 	/**
-	 * @brief Get the dpp::user object for this member
-	 * @return dpp::user user object. If not in cache, it returns nullptr
-	 *
-	 * 
+	 * @brief Find the dpp::user object for this member. This is an alias for dpp::find_user
+	 * @return dpp::user* Pointer to the user object. If not in cache, it returns nullptr
 	 */
 	user* get_user() const;
 	

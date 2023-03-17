@@ -68,7 +68,7 @@ void populate_result(const std::string &url, cluster* owner, http_request_comple
 	rv.status = res.get_status();
 	rv.body = res.get_content();
 	for (auto &v : res.get_headers()) {
-		rv.headers[v.first] = v.second;
+		rv.headers.emplace(v.first, v.second);
 	}
 
 	/* This will be ignored for non-discord requests without rate limit headers */
@@ -78,7 +78,7 @@ void populate_result(const std::string &url, cluster* owner, http_request_comple
 	rv.ratelimit_reset_after = from_string<uint64_t>(res.get_header("x-ratelimit-reset-after"));
 	rv.ratelimit_bucket = res.get_header("x-ratelimit-bucket");
 	rv.ratelimit_global = (res.get_header("x-ratelimit-global") == "true");
-	owner->rest_ping = rv.latency;      
+	owner->rest_ping = rv.latency;
 	if (res.get_header("x-ratelimit-retry-after") != "") {
 		rv.ratelimit_retry_after = from_string<uint64_t>(res.get_header("x-ratelimit-retry-after"));
 	}

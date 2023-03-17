@@ -405,6 +405,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief Called by ssl_client when there is data to be
 	 * read. At this point we insert that data into the
 	 * input queue.
+	 * @throw dpp::voice_exception if voice support is not compiled into D++
 	 */
 	void read_ready();
 
