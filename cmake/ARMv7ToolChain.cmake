@@ -10,13 +10,13 @@ SET(CMAKE_LIBRARY_ARCHITECTURE arm-linux-gnueabihf)
 SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE armhf)
 SET(CPACK_RPM_PACKAGE_ARCHITECTURE armhf)
 
-SET(RASPBERRY_ROOT_PATH ${CMAKE_SOURCE_DIR}/arm_raspberry)
+SET(RASPBERRY_ROOT_PATH ${DPP_ROOT_PATH}/arm_raspberry)
 SET(RASPBERRY_KINETIC_PATH ${RASPBERRY_ROOT_PATH}/opt/ros/kinetic)
 
 SET(CMAKE_FIND_ROOT_PATH ${RASPBERRY_ROOT_PATH} ${CATKIN_DEVEL_PREFIX})
 
 #If you have installed cross compiler to somewhere else, please specify that path.
-SET(COMPILER_ROOT /usr/bin) 
+SET(COMPILER_ROOT /usr/bin)
 
 #Have to set this one to BOTH, to allow CMake to find rospack
 #This set of variables controls whether the CMAKE_FIND_ROOT_PATH and CMAKE_SYSROOT are used for find_xxx() operations.
@@ -41,7 +41,7 @@ SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} --sysroot=${RASPBERRY_ROOT_PAT
 
 SET(LD_LIBRARY_PATH ${RASPBERRY_KINETIC_PATH}/lib)
 
-EXECUTE_PROCESS(COMMAND printf "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main multiverse restricted universe\ndeb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ focal main multiverse restricted universe\ndeb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://security.ubuntu.com/ubuntu/ focal-security main multiverse restricted universe" 
+EXECUTE_PROCESS(COMMAND printf "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main multiverse restricted universe\ndeb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ focal main multiverse restricted universe\ndeb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal-updates main multiverse restricted universe\ndeb [arch=amd64] http://security.ubuntu.com/ubuntu/ focal-security main multiverse restricted universe"
 	OUTPUT_FILE TMPFILE)
 EXECUTE_PROCESS(COMMAND sudo mv TMPFILE /etc/apt/sources.list)
 EXECUTE_PROCESS(COMMAND sudo dpkg --add-architecture armhf)

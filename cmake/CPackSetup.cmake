@@ -17,7 +17,7 @@ if (WIN32)
 		ARCHIVE DESTINATION  ${DPP_INSTALL_LIBRARY_DIR}
 		RUNTIME DESTINATION  ${CMAKE_INSTALL_BINDIR}
 		INCLUDES DESTINATION ${DPP_INSTALL_INCLUDE_DIR})
-	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../include/" DESTINATION "${DPP_INSTALL_INCLUDE_DIR}")
+	install(DIRECTORY "${DPP_ROOT_PATH}/include/" DESTINATION "${DPP_INSTALL_INCLUDE_DIR}")
 else()
 	install(TARGETS dpp
 		EXPORT ${DPP_EXPORT_NAME}
@@ -34,7 +34,7 @@ write_basic_package_version_file(${DPP_VERSION_FILE}
 		COMPATIBILITY SameMajorVersion)
 
 ## Include the file which allows `find_package(dpp)` to function.
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/../cmake/dpp-config.cmake" "${DPP_VERSION_FILE}" DESTINATION "${DPP_CMAKE_DIR}")
+install(FILES "${DPP_ROOT_PATH}/cmake/dpp-config.cmake" "${DPP_VERSION_FILE}" DESTINATION "${DPP_CMAKE_DIR}")
 
 ## Export the targets to allow other projects to easily include this project
 install(EXPORT "${DPP_EXPORT_NAME}" DESTINATION "${DPP_CMAKE_DIR}" NAMESPACE dpp::)
