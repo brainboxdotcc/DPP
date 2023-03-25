@@ -1,8 +1,10 @@
+\page install-windows-clion-vcpkg Installing from vcpkg for CLion
+
 To add D++ to a CLion project, you need obtain the library through vcpkg and then configure your CLion project and `CMakeLists.txt`.
 
 1. Build [vcpkg](https://vcpkg.io/) on your system (skip if you already have it).
 2. Run `vcpkg install dpp:x64-windows` (replace x64-windows with whichever OS and architecture you want the library to be built for).
-3. VCPKG will install the dpp library along with the dependencies for you.
+3. vcpkg will install the library along with the dependencies for you.
 4. Now check if dpp has been installed using `vcpkg list dpp`.
     ```
     C:/vcpkg>vcpkg list dpp
@@ -31,4 +33,4 @@ To add D++ to a CLion project, you need obtain the library through vcpkg and the
     target_include_directories(main PRIVATE C:/vcpkg/installed/x64-windows/include)
     ```
    
-7. Congratulations! Now try to build a test program to see if the installation succeeded. For further help, join  the [discord server](https://discord.gg/dpp).
+7. Congratulations! Now try to build a test program to see if the installation succeeded. If you get stuck somewhere, feel free to ask us on the D++ [discord server](https://discord.gg/dpp).
