@@ -132,6 +132,7 @@ struct DPP_EXPORT confirmation {
  *
  */
 typedef std::variant<
+		active_threads,
 		application_role_connection,
 		application_role_connection_metadata_list,
 		confirmation,

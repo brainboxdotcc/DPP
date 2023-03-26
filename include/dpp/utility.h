@@ -344,7 +344,7 @@ namespace dpp {
 		 * @note Be aware this function can block! If you are regularly reading large files, consider caching them.
 		 * @param filename The path to the file to read
 		 * @return std::string The file contents
-		 * @throw dpp::exception on failure to read the entire file
+		 * @throw dpp::file_exception on failure to read the entire file
 		 */
 		std::string DPP_EXPORT read_file(const std::string& filename);
 

@@ -61,7 +61,7 @@ public:
 	 * @brief Construct a new webhook object using the Webhook URL provided by Discord
 	 *
 	 * @param webhook_url a fully qualified web address of an existing webhook
-	 * @throws dpp::logic_exception When the Webhook URL cannot be parsed
+	 * @throw logic_exception if the webhook url could not be parsed
 	 */
 	webhook(const std::string& webhook_url);
 
