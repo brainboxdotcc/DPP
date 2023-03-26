@@ -208,14 +208,11 @@ std::string guild_member::build_json(bool with_id) const {
 			j["communication_disabled_until"] = json::value_t::null;
 		}
 	}
-	if (!this->nickname.empty())
-		j["nick"] = this->nickname;
-	if (!this->roles.empty()) {
-		j["roles"] = {};
-		for (auto & role : roles) {
-			j["roles"].push_back(std::to_string(role));
-		}
-	}
+
+    j["nick"] = this->nickname;
+    j["roles"] = {};
+    for (auto & role : roles)
+        j["roles"].push_back(std::to_string(role));
 
 	if (flags & gm_voice_action) {
 		j["mute"] = is_muted();
