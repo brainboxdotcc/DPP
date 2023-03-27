@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
@@ -73,7 +73,7 @@ jobs:
 
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
@@ -109,7 +109,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install homebrew packages
         run: brew install cmake ninja libsodium opus openssl
@@ -142,7 +142,7 @@ jobs:
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: main
 
@@ -198,7 +198,7 @@ jobs:
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake ninja-build rpm
@@ -228,7 +228,7 @@ jobs:
 #   runs-on: macos-10.15
 #   name: FreeBSD (g++-10)
 #   steps:
-#   - uses: actions/checkout@v2
+#   - uses: actions/checkout@v3
 #   - name: FreeBSD Build and Package
 #     id: freebsdtest
 #     uses: vmactions/freebsd-vm@v0.1.5

@@ -23,6 +23,7 @@
 #include <dpp/restrequest.h>
 #include <dpp/json.h>
 
+
 /* Unit tests go here */
 int main()
 {
@@ -134,6 +135,19 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	catch (const dpp::exception& e) {
 		std::cout << e.what() << "\n";
 		set_test("HTTP", false);
+	}
+
+	set_test("MULTIHEADER", false);
+	try {
+		dpp::https_client c2("www.google.com", 80, "/", "GET", "", {}, true);
+		size_t count = c2.get_header_count("set-cookie");
+		size_t count_list = c2.get_header_list("set-cookie").size();
+		// Google sets a bunch of cookies when we start accessing it.
+		set_test("MULTIHEADER", c2.get_status() == 200 && count > 1 && count == count_list);
+	}
+	catch (const dpp::exception& e) {
+		std::cout << e.what() << "\n";
+		set_test("MULTIHEADER", false);
 	}
 
 	std::vector<uint8_t> testaudio = load_test_audio();
