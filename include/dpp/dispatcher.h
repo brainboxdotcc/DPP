@@ -474,17 +474,6 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void delete_original_response(command_completion_event_t callback = utility::log_error()) const;
 
 	/**
-	 * @brief Get a command line parameter
-	 *
-	 * @note Doesn't work on subcommands. If you want to get a parameter from a subcommand, you have to loop through the options by yourself.
-	 * 
-	 * @param name The command line parameter to retrieve
-	 * @return const command_value& If the command line parameter does not 
-	 * exist, an empty variant is returned.
-	 */
-	const virtual command_value& get_parameter(const std::string& name) const;
-
-	/**
 	 * @brief command interaction
 	 */
 	interaction command;
@@ -499,21 +488,30 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
  * @brief User has issued a slash command
  */
 struct DPP_EXPORT slashcommand_t : public interaction_create_t {
-public:
+
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
 	slashcommand_t(class discord_client* client, const std::string& raw);
+
+	/**
+	 * @brief Get a command line parameter
+	 *
+	 * @note Doesn't work on subcommands. If you want to get a parameter from a subcommand, you have to loop through the options by yourself.
+	 *
+	 * @param name The name of the command line parameter to retrieve the value for
+	 * @return const command_value& If the command line parameter does not
+	 * exist, an empty variant is returned.
+	 */
+	const virtual command_value& get_parameter(const std::string& name) const;
 };
 
 /**
  * @brief Click on button
  */
 struct DPP_EXPORT button_click_t : public interaction_create_t {
-private:
-	using interaction_create_t::get_parameter;
-public:
+
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -531,9 +529,7 @@ public:
 };
 
 struct DPP_EXPORT form_submit_t : public interaction_create_t {
-private:
-	using interaction_create_t::get_parameter;
-public:
+
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -554,9 +550,6 @@ public:
  * @brief Discord requests that we fill a list of auto completion choices for a command option
  */
 struct DPP_EXPORT autocomplete_t : public interaction_create_t {
-private:
-	using interaction_create_t::get_parameter;
-public:
 
 	/** Constructor
 	 * @param client The shard the event originated on
@@ -585,7 +578,7 @@ public:
  * user or message.
  */
 struct DPP_EXPORT context_menu_t : public interaction_create_t {
-public:
+
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -662,9 +655,6 @@ public:
  * @brief Click on select
  */
 struct DPP_EXPORT select_click_t : public interaction_create_t {
-private:
-	using interaction_create_t::get_parameter;
-public:
 
 	/** Constructor
 	 * @param client The shard the event originated on

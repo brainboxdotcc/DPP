@@ -219,14 +219,15 @@ void to_json(json& j, const slashcommand& p) {
 			j["name_localizations"][loc.first] = loc.second;
 		}
 	}
-	if (p.description_localizations.size()) {
-		j["description_localizations"] = json::object();
-		for(auto& loc : p.description_localizations) {
-			j["description_localizations"][loc.first] = loc.second;
-		}
-	}
 
 	if (p.type != ctxm_user && p.type != ctxm_message) {
+		if (p.description_localizations.size()) {
+			j["description_localizations"] = json::object();
+			for(auto& loc : p.description_localizations) {
+				j["description_localizations"][loc.first] = loc.second;
+			}
+		}
+
 		if (p.options.size()) {
 			j["options"] = json();
 
@@ -491,7 +492,9 @@ std::string interaction::build_json(bool with_id) const {
 
 slashcommand& slashcommand::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
 	name_localizations[language] = _name;
-	description_localizations[language] = _description;
+	if (! _description.empty()) {
+		description_localizations[language] = _description;
+	}
 	return *this;
 }
 
@@ -502,7 +505,9 @@ command_option_choice& command_option_choice::add_localization(const std::string
 
 command_option& command_option::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
 	name_localizations[language] = _name;
-	description_localizations[language] = _description;
+	if (! _description.empty()) {
+		description_localizations[language] = _description;
+	}
 	return *this;
 }
 

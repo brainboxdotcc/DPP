@@ -105,7 +105,7 @@ struct DPP_EXPORT command_option_choice : public json_interface<command_option_c
 	/**
 	 * @brief Add a localisation for this command option choice
 	 * @see https://discord.com/developers/docs/reference#locales
-	 * @param language Name of language, see the list of locales linked to above.
+	 * @param language Name of language, see the list of locales linked to above
 	 * @param _name name of command option choice in the specified language
 	 * @return command_option_choice& reference to self for fluent chaining
 	 */
@@ -181,12 +181,12 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	/**
 	 * @brief Add a localisation for this slash command option
 	 * @see https://discord.com/developers/docs/reference#locales
-	 * @param language Name of language, see the list of locales linked to above.
+	 * @param language Name of language, see the list of locales linked to above
 	 * @param _name name of slash command option in the specified language
-	 * @param _description description of slash command option in the specified language
+	 * @param _description description of slash command option in the specified language (optional)
 	 * @return command_option& reference to self for fluent chaining
 	 */
-	command_option& add_localization(const std::string& language, const std::string& _name, const std::string& _description);
+	command_option& add_localization(const std::string& language, const std::string& _name, const std::string& _description = "");
 
 	/**
 	 * @brief Construct a new command option object
@@ -211,7 +211,7 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 * @brief Set the minimum numeric value of the option. 
 	 * Only valid if the type is co_number or co_integer.
 	 * @param min_v Minimum value
-	 * @return command_option& return a reference to sef for chaining of calls
+	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_min_value(command_option_range min_v);
 
@@ -219,7 +219,7 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 * @brief Set the maximum numeric value of the option. 
 	 * Only valid if the type is co_number or co_integer.
 	 * @param max_v Maximum value
-	 * @return command_option& return a reference to sef for chaining of calls
+	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_max_value(command_option_range max_v);
 
@@ -227,7 +227,7 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 * @brief Set the minimum string length of the option. 
 	 * Only valid if the type is co_string
 	 * @param min_v Minimum value
-	 * @return command_option& return a reference to sef for chaining of calls
+	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_min_length(command_option_range min_v);
 
@@ -235,7 +235,7 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 * @brief Set the maximum string length of the option. 
 	 * Only valid if the type is co_string
 	 * @param max_v Maximum value
-	 * @return command_option& return a reference to sef for chaining of calls
+	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_max_length(command_option_range max_v);
 
@@ -528,8 +528,8 @@ struct DPP_EXPORT command_data_option {
 	/**
 	 * @brief Get an option value by index
 	 * 
-	 * @tparam Type to get from the parameter
-	 * @param index index number of parameter
+	 * @tparam T Type to get from the parameter
+	 * @param index index of the option
 	 * @return T returned type
 	 */
 	template <typename T> T& get_value(size_t index) {
@@ -582,8 +582,8 @@ struct DPP_EXPORT command_interaction {
 	/**
 	 * @brief Get an option value by index
 	 * 
-	 * @tparam Type to get from the parameter
-	 * @param index index number of parameter
+	 * @tparam T Type to get from the parameter
+	 * @param index index of the option
 	 * @return T returned type
 	 */
 	template <typename T> T& get_value(size_t index) {
@@ -1076,12 +1076,12 @@ public:
 	/**
 	 * @brief Add a localisation for this slash command
 	 * @see https://discord.com/developers/docs/reference#locales
-	 * @param language Name of language, see the list of locales linked to above.
+	 * @param language Name of language, see the list of locales linked to above
 	 * @param _name name of slash command in the specified language
-	 * @param _description description of slash command in the specified language
-	 * @return slashcommand& reference to self for fluent chaining
+	 * @param _description description of slash command in the specified language (optional)
+	 * @return slashcommand& reference to self for chaining of calls
 	 */
-	slashcommand& add_localization(const std::string& language, const std::string& _name, const std::string& _description);
+	slashcommand& add_localization(const std::string& language, const std::string& _name, const std::string& _description = "");
 
 	/**
 	 * @brief Set the dm permission for the command

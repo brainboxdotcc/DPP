@@ -208,7 +208,7 @@ void interaction_create_t::delete_original_response(command_completion_event_t c
 	});
 }
 
-const command_value& interaction_create_t::get_parameter(const std::string& name) const
+const command_value& slashcommand_t::get_parameter(const std::string& name) const
 {
 	/* Dummy STATIC return value for unknown options so we aren't returning a value off the stack */
 	static command_value dummy_value = {};

@@ -35,9 +35,14 @@ webhook::webhook() : managed(), type(w_incoming), guild_id(0), channel_id(0), us
 
 webhook::webhook(const std::string& webhook_url) : webhook()
 {
-	token = webhook_url.substr(webhook_url.find_last_of("/") + 1);
+	auto pos = webhook_url.find_last_of('/');
+	if (pos == std::string::npos) { // throw when the url doesn't contain a slash at all
+		throw dpp::logic_exception(std::string("Failed to parse webhook URL: No '/' found in the webhook url"));
+	}
 	try {
-		id = std::stoull(webhook_url.substr(strlen("https://discord.com/api/webhooks/"), webhook_url.find_last_of("/")));
+		token = webhook_url.substr(pos + 1);
+		std::string endpoint = "https://discord.com/api/webhooks/";
+		id = std::stoull(webhook_url.substr(endpoint.size(), pos));
 	}
 	catch (const std::exception& e) {
 		throw dpp::logic_exception(std::string("Failed to parse webhook URL: ") + e.what());
