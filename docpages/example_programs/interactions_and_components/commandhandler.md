@@ -18,7 +18,7 @@ int main()
 {
 	dpp::cluster bot("token");
 
-        bot.on_log(dpp::utility::cout_logger());
+    bot.on_log(dpp::utility::cout_logger());
 
 	/* Create command handler, and specify prefixes */
 	dpp::commandhandler command_handler(&bot);
@@ -48,7 +48,7 @@ int main()
 			/* Command description */
 			"A test ping command",
 
-			/* Guild id (omit for a global command) */
+			/* Guild id (omit for a guild command) */
 			819556414099554344
 		);
 
