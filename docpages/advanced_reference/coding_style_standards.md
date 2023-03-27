@@ -118,20 +118,12 @@ All types for the library should be within the `dpp` namespace. There are a coup
 
 ## Commit messages and Git
 
-All pull requests ("PRs") should be submitted against the `dev` branch in GitHub. It’s good to have descriptive commit messages, or PR titles so that other contributors can understand about your commit or the PR Created. Read [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.3/) for information on how we like to format commit messages.
+All pull requests ("PRs") should be submitted against the `dev` branch in GitHub.
+
+### Naming conventions
+
+It’s good to have descriptive commit messages, or PR titles so that other contributors can understand about your commit or the PR Created. Commits must be prefixed with a type, which consists of a noun, `feat`, `fix`, etc., followed by a colon and a space. Other commit types can be `breaking`, `docs`, `refactor`, `deprecate`, `perf`, `test`, `chore` and `misc`. Read [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.3/) for more information on how we like to format commit messages.
+
+### GitHub Actions
 
 All PRs must pass the [GitHub Actions](https://github.com/brainboxdotcc/DPP/actions) tests before being allowed to be merged. This is to ensure that no code committed into the project fails to compile on any of our officially supported platforms or architectures.
-
-### Categorizing
-
-The changelogs are generated from the commit messages and PR names. They're categorized for better overview, however you can use prefixes in your commit messages and PRs to categorize it. Some of the most common prefixes are listened below:
-
-- `breaking` for the category: **💣 Breaking Changes**
-- `feat` for the category: **✨ New Features**
-- `fix` for the category: **🐞 Bug Fixes**
-- `refactored` or `deprecated` for the category: **♻️ Refactoring**
-- `tests` for the category: **🚨 Testing**
-- `docs` for the category: **📚 Documentation**
-- `misc` for the category: **📜 Miscellaneous Changes**
-
-You can see all available categories and it's prefixes in `buildtools/changelog.php`.
