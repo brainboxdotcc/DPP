@@ -18,7 +18,7 @@ int main()
 {
 	dpp::cluster bot("token");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* Create command handler, and specify prefixes */
 	dpp::commandhandler command_handler(&bot);

@@ -134,4 +134,4 @@ The changelogs are generated from the commit messages and PR names. They're cate
 - `docs` for the category: **📚 Documentation**
 - `misc` for the category: **📜 Miscellaneous Changes**
 
-You can see all available categories and it's prefixes in `buildtools/changelos.php`.
+You can see all available categories and it's prefixes in `buildtools/changelog.php`.
