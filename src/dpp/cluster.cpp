@@ -295,7 +295,7 @@ json error_response(const std::string& message, http_request_completion_t& rv)
 	return j;
 }
 
-void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent) {
+void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent, const std::string &filemimetype) {
 	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
 	rest->post_request(new http_request(endpoint + "/" + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
 		json j;
@@ -310,10 +310,10 @@ void cluster::post_rest(const std::string &endpoint, const std::string &major_pa
 		if (callback) {
 			callback(j, rv);
 		}
-	}, postdata, method, get_audit_reason(), filename, filecontent));
+	}, postdata, method, get_audit_reason(), filename, filecontent, filemimetype));
 }
 
-void cluster::post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent) {
+void cluster::post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes) {
 	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
 	rest->post_request(new http_request(endpoint + "/" + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
 		json j;
@@ -328,7 +328,7 @@ void cluster::post_rest_multipart(const std::string &endpoint, const std::string
 		if (callback) {
 			callback(j, rv);
 		}
-	}, postdata, method, get_audit_reason(), filename, filecontent));
+	}, postdata, method, get_audit_reason(), filename, filecontent, filemimetypes));
 }
 
 

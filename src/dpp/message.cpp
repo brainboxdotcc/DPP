@@ -534,9 +534,10 @@ message& message::set_file_content(const std::string &fc)
 	return *this;
 }
 
-message& message::add_file(const std::string &fn, const std::string &fc) {
-	filecontent.push_back(fc);
+message& message::add_file(const std::string &fn, const std::string &fc, const std::string &fm) {
 	filename.push_back(fn);
+	filecontent.push_back(fc);
+	filemimetype.push_back(fm);
 	return *this;
 }
 

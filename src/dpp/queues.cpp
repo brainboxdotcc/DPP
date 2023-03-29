@@ -35,18 +35,22 @@ namespace dpp {
 static std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, " + std::to_string(DPP_VERSION_MAJOR) + "." + std::to_string(DPP_VERSION_MINOR) + "." + std::to_string(DPP_VERSION_PATCH) + ")";
 static const char* DISCORD_HOST = "https://discord.com";
 
-http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent)
+http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent, const std::string &filemimetype)
  : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false)
 {
 		if (!filename.empty())
 			file_name.push_back(filename);
 		if (!filecontent.empty())
 			file_content.push_back(filecontent);
+	if (!filemimetype.empty())
+		file_mimetypes.push_back(filemimetype);
 }
 
-http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent)
- : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), mimetype("application/json"), waiting(false)
+http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes)
+ : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(method), reason(audit_reason), file_name(filename), file_content(filecontent), file_mimetypes(filemimetypes), mimetype("application/json"), waiting(false)
 {
+	if (filecontent.size() && !filemimetypes.size())
+		std::cout << "hi" << std::endl;
 }
 
 
@@ -167,7 +171,7 @@ http_request_completion_t http_request::run(cluster* owner) {
 		multipart = { postdata, "" };
 	} else {
 
-		multipart = https_client::build_multipart(postdata, file_name, file_content);
+		multipart = https_client::build_multipart(postdata, file_name, file_content, file_mimetypes);
 		if (!multipart.mimetype.empty()) {
 			headers.emplace("Content-Type", multipart.mimetype);
 		}

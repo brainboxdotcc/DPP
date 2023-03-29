@@ -1183,6 +1183,9 @@ struct DPP_EXPORT message : public managed {
 	/** File content to upload (raw binary) */
 	std::vector<std::string>	filecontent;
 
+	/** Mime type of files to upload */
+	std::vector<std::string>	filemimetype;
+
 	/**
 	 * @brief Reference to another message, e.g. a reply
 	 */
@@ -1466,9 +1469,10 @@ struct DPP_EXPORT message : public managed {
 	 *
 	 * @param filename filename
 	 * @param filecontent raw file content contained in std::string
+	 * @param filemimetype optional mime type of the file
 	 * @return message& reference to self
 	 */
-	message& add_file(const std::string &filename, const std::string &filecontent);
+	message& add_file(const std::string &filename, const std::string &filecontent, const std::string &filemimetype = "");
 
 	/**
 	 * @brief Set the message content
