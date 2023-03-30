@@ -1,4 +1,4 @@
-file(GLOB THE_SOURCES "${CMAKE_SOURCE_DIR}/src/dpp/events/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/cluster/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/*.cpp" "${CMAKE_SOURCE_DIR}/src/dpp/*.rc")
+file(GLOB THE_SOURCES "${DPP_ROOT_PATH}/src/dpp/events/*.cpp" "${DPP_ROOT_PATH}/src/dpp/cluster/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.cpp" "${DPP_ROOT_PATH}/src/dpp/*.rc")
 
 set(LIB_NAME "${PROJECT_NAME}")
 
@@ -13,9 +13,9 @@ add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
 
 target_compile_definitions(
 	"${LIB_NAME}" PUBLIC
-	"DPP_BUILD" 
+	"DPP_BUILD"
 	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/std:c++17;/Od;/DEBUG;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
-	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/std:c++17;/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"	
+	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/std:c++17;/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
 )
 
 target_compile_options(
@@ -27,7 +27,7 @@ target_compile_options(
 
 target_compile_features(
 	"${LIB_NAME}" PUBLIC
-	"cxx_std_17" "cxx_constexpr" "cxx_auto_type" 
+	"cxx_std_17" "cxx_constexpr" "cxx_auto_type"
 	"cxx_defaulted_functions" "cxx_deleted_functions"
 	"cxx_final" "cxx_lambdas" "cxx_override" "cxx_thread_local"
 	"cxx_variadic_templates" "cxx_attribute_deprecated"
@@ -36,7 +36,7 @@ target_compile_features(
 
 target_include_directories(
 	"${LIB_NAME}" PRIVATE
-	"$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>"
+	"$<BUILD_INTERFACE:${DPP_ROOT_PATH}/include>"
 )
 
 set_target_properties(
@@ -78,7 +78,7 @@ set(DEBUG_PDB_FILE_PATH "debug/bin/dpp.pdb")
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-	"${CMAKE_SOURCE_DIR}/cmake/${CONFIG_FILE_NAME}.in"
+	"${DPP_ROOT_PATH}/cmake/${CONFIG_FILE_NAME}.in"
 	"${CMAKE_CURRENT_BINARY_DIR}/${CONFIG_FILE_NAME}"
 	INSTALL_DESTINATION "share/dpp"
 	PATH_VARS
@@ -96,7 +96,7 @@ write_basic_package_version_file(
 )
 
 install(
-	DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
+	DIRECTORY "${DPP_ROOT_PATH}/include/"
 	DESTINATION "include"
 )
 
@@ -123,7 +123,7 @@ install(
 
 if (WIN32)
 	install(
-		FILES 
+		FILES
 		"$<TARGET_PDB_FILE:${LIB_NAME}>"
 		DESTINATION "$<IF:$<CONFIG:Debug>,${DEBUG_PREFIX}bin,bin>"
 		OPTIONAL

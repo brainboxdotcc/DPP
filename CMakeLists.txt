@@ -31,7 +31,9 @@ include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_compile_definitions(DPP_BUILD)
 
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/dpp/version.h" version_h)
+set(DPP_ROOT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+file(READ "${DPP_ROOT_PATH}/include/dpp/version.h" version_h)
 
 if(NOT version_h MATCHES "DPP_VERSION_SHORT ([0-9][0-9])([0-9][0-9])([0-9][0-9])")
 	message(FATAL_ERROR "Cannot get DPP_VERSION_SHORT from version.h")
@@ -43,7 +45,7 @@ math(EXPR DPP_VERSION_PATCH "${CMAKE_MATCH_3}")
 
 string(CONCAT DPP_VERSION "${DPP_VERSION_MAJOR}.${DPP_VERSION_MINOR}.${DPP_VERSION_PATCH}")
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${DPP_ROOT_PATH}/cmake/")
 
 if (DPP_NO_VCPKG)
 	message("-- INFO: Explicitly disabling VCPKG as running inside the CI action.")
@@ -53,7 +55,7 @@ endif()
 
 if (WIN32 AND NOT MINGW AND BUILD_SHARED_LIBS)
 	message("-- INFO: Configuring .rc resource script")
-	configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/dpp/dpp.rc.in" "${CMAKE_CURRENT_SOURCE_DIR}/src/dpp/dpp.rc" NEWLINE_STYLE WIN32)
+	configure_file("${DPP_ROOT_PATH}/src/dpp/dpp.rc.in" "${DPP_ROOT_PATH}/src/dpp/dpp.rc" NEWLINE_STYLE WIN32)
 endif()
 
 if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
@@ -65,7 +67,7 @@ if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
 		HOMEPAGE_URL "https://dpp.dev/"
 		DESCRIPTION "An incredibly lightweight C++ Discord library."
 	)
-	add_subdirectory(library-vcpkg)	
+	add_subdirectory(library-vcpkg)
 else()
 	set(PROJECT_NAME "libdpp")
 	project(

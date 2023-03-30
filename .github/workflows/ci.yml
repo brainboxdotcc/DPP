@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
@@ -73,7 +73,7 @@ jobs:
 
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
@@ -92,14 +92,14 @@ jobs:
 
       - name: Upload Binary (DEB)
         if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.deb'
 
       - name: Upload Binary (RPM)
         if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.rpm'
@@ -109,7 +109,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install homebrew packages
         run: brew install cmake ninja libsodium opus openssl
@@ -142,7 +142,7 @@ jobs:
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: main
 
@@ -179,7 +179,7 @@ jobs:
           DONT_RUN_VCPKG: true
 
       - name: Upload Binary
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: "libdpp - Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
           path: '${{github.workspace}}/main/build/*.zip'
@@ -198,7 +198,7 @@ jobs:
     runs-on: ${{matrix.cfg.os}}
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake ninja-build rpm
@@ -213,13 +213,13 @@ jobs:
         run: cd build && cpack --verbose
 
       - name: Upload Binaries (DEB)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.deb"
 
       - name: Upload Binaries (RPM)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.rpm"
@@ -228,7 +228,7 @@ jobs:
 #   runs-on: macos-10.15
 #   name: FreeBSD (g++-10)
 #   steps:
-#   - uses: actions/checkout@v2
+#   - uses: actions/checkout@v3
 #   - name: FreeBSD Build and Package
 #     id: freebsdtest
 #     uses: vmactions/freebsd-vm@v0.1.5
@@ -246,7 +246,7 @@ jobs:
 #          cpack --verbose
 #
 #    - name: Upload Binaries (BZ2)
-#      uses: actions/upload-artifact@v2
+#      uses: actions/upload-artifact@v3
 #      with:
 #        name: "libdpp - FreeBSD x64"
 #        path: "${{github.workspace}}/build/*.tar.bz2"
