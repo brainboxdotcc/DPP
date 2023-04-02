@@ -196,7 +196,7 @@ void interaction_create_t::edit_original_response(const message & m, command_com
 		if (callback) {
 			callback(confirmation_callback_t(creator, message().fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 void interaction_create_t::delete_original_response(command_completion_event_t callback) const
