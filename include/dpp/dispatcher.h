@@ -498,11 +498,11 @@ struct DPP_EXPORT slashcommand_t : public interaction_create_t {
 	/**
 	 * @brief Get a command line parameter
 	 *
-	 * @param depth The name of the command line parameter to retrieve the value for
+	 * @param name The name of the command line parameter to retrieve the value for
 	 * @return const command_value& Returns the value of the first option that matches the given name.
 	 * If no matches are found, an empty variant is returned.
 	 */
-	const virtual command_value& get_parameter(const std::string& max_depth) const;
+	const virtual command_value& get_parameter(const std::string& name) const;
 };
 
 /**
