@@ -498,11 +498,9 @@ struct DPP_EXPORT slashcommand_t : public interaction_create_t {
 	/**
 	 * @brief Get a command line parameter
 	 *
-	 * @note Doesn't work on subcommands. If you want to get a parameter from a subcommand, you have to loop through the options by yourself.
-	 *
 	 * @param name The name of the command line parameter to retrieve the value for
-	 * @return const command_value& If the command line parameter does not
-	 * exist, an empty variant is returned.
+	 * @return const command_value& Returns the value of the first option that matches the given name.
+	 * If no matches are found, an empty variant is returned.
 	 */
 	const virtual command_value& get_parameter(const std::string& name) const;
 };
