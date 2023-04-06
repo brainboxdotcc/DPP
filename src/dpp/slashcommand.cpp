@@ -361,11 +361,10 @@ command_option& command_option::set_auto_complete(bool autocomp)
 }
 
 command_option &command_option::fill_from_json(nlohmann::json *j) {
-	uint8_t i = 3; // maximum amount of nested options
 	/*
 	* Command options contains command options. Therefor the object is filled with recursion.
 	*/
-	std::function<void(nlohmann::json *, command_option &)> fill = [&i, &fill](nlohmann::json *j, command_option &o) {
+	std::function<void(nlohmann::json *, command_option &, uint8_t)> fill = [&fill](nlohmann::json *j, command_option &o, uint8_t depth) {
 		o.type = (command_option_type)int8_not_null(j, "type");
 		o.name = string_not_null(j, "name");
 		o.description = string_not_null(j, "description");
@@ -387,11 +386,10 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 			}
 		}
 
-		if (j->contains("options") && i > 0) {
-			i--; // prevent infinite recursion call with a counter
+		if (j->contains("options") && depth < 3) { // maximum amount of nested options. fixed to 3 levels: subcommand group -> subcommand -> its options
 			for (auto &joption : (*j)["options"]) {
 				command_option p;
-				fill(&joption, p);
+				fill(&joption, p, depth + 1);
 				o.options.push_back(p);
 			}
 		}
@@ -432,7 +430,7 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 		o.autocomplete = bool_not_null(j, "autocomplete");
 	};
 
-	fill(j, *this);
+	fill(j, *this, 0);
 
 	return *this;
 }
