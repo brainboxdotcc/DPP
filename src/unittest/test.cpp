@@ -220,7 +220,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		cmd_data.options.push_back(subcommandgroup);
 		interaction.command.data = cmd_data;
 
-		set_test("GET_PARAMETER_WITH_SUBCOMMANDS", std::get<dpp::snowflake>(interaction.get_parameter("user")) == dpp::snowflake(189759562910400512));
+		dpp::snowflake value1 = std::get<dpp::snowflake>(interaction.get_parameter("user"));
+		set_test("GET_PARAMETER_WITH_SUBCOMMANDS", value1 == dpp::snowflake(189759562910400512));
 
 		/* Check the method without subcommands */
 		set_test("GET_PARAMETER_WITHOUT_SUBCOMMANDS", false);
@@ -237,7 +238,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		cmd_data2.options.push_back(option3);
 		interaction.command.data = cmd_data2;
 
-		set_test("GET_PARAMETER_WITHOUT_SUBCOMMANDS", std::get<int64_t>(interaction.get_parameter("number")) == int64_t(123456));
+		int64_t value2 = std::get<int64_t>(interaction.get_parameter("number"));
+		set_test("GET_PARAMETER_WITHOUT_SUBCOMMANDS", value2 == 123456);
 	}
 
 	{ // test dpp::command_option_choice::fill_from_json
