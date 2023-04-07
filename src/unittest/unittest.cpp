@@ -113,6 +113,8 @@ std::map<std::string, test_t> tests = {
 	{"JSON_PARSE_ERROR", {tt_online, "JSON parse error for post_rest", false, false}},
 	{"USER_GET_CACHED_PRESENT", {tt_online, "cluster::user_get_cached_sync() with present member", false, false}},
 	{"USER_GET_CACHED_ABSENT", {tt_online, "cluster::user_get_cached_sync() with not present member", false, false}},
+	{"GET_PARAMETER_WITH_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() with subcommands", false, false}},
+	{"GET_PARAMETER_WITHOUT_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() without subcommands", false, false}},
 };
 
 double start = dpp::utility::time_f();
