@@ -208,11 +208,11 @@ void interaction_create_t::delete_original_response(command_completion_event_t c
 	});
 }
 
-const command_value& interaction_create_t::get_parameter(const std::string& name) const
+command_value interaction_create_t::get_parameter(const std::string& name) const
 {
 	/* Dummy STATIC return value for unknown options so we aren't returning a value off the stack */
 	static command_value dummy_value = {};
-	const command_interaction ci = command.get_command_interaction();
+	auto ci = command.get_command_interaction();
 
 	for (const auto &option : ci.options) {
 		if (option.type != co_sub_command && option.type != co_sub_command_group && option.name == name) {

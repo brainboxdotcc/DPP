@@ -487,12 +487,12 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @brief Get a slashcommand parameter
 	 *
 	 * @param name The name of the command line parameter to retrieve the value for
-	 * @return const command_value& Returns the value of the first option that matches the given name.
+	 * @return command_value Returns the value of the first option that matches the given name.
 	 * If no matches are found, an empty variant is returned.
 	 *
 	 * @throw dpp::logic_exception if the interaction is not for a command
 	 */
-	const virtual command_value& get_parameter(const std::string& name) const;
+	virtual command_value get_parameter(const std::string& name) const;
 };
 
 /**

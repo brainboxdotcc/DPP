@@ -182,6 +182,66 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("WEBHOOK", false);
 	}
 
+	{ // test interaction_create_t::get_parameter
+		// create a fake interaction
+		dpp::cluster cluster("");
+		dpp::discord_client client(&cluster, 1, 1, "");
+		dpp::interaction_create_t interaction(&client, "");
+
+		/* Check the method with subcommands */
+		set_test("GET_PARAMETER_WITH_SUBCOMMANDS", false);
+
+		dpp::command_interaction cmd_data; // command
+		cmd_data.type = dpp::ctxm_chat_input;
+		cmd_data.name = "command";
+
+		dpp::command_data_option subcommandgroup; // subcommand group
+		subcommandgroup.name = "group";
+		subcommandgroup.type = dpp::co_sub_command_group;
+
+		dpp::command_data_option subcommand; // subcommand
+		subcommand.name = "add";
+		subcommand.type = dpp::co_sub_command;
+
+		dpp::command_data_option option1; // slashcommand option
+		option1.name = "user";
+		option1.type = dpp::co_user;
+		option1.value = dpp::snowflake(189759562910400512);
+
+		dpp::command_data_option option2; // slashcommand option
+		option2.name = "checked";
+		option2.type = dpp::co_boolean;
+		option2.value = true;
+
+		// add them
+		subcommand.options.push_back(option1);
+		subcommand.options.push_back(option2);
+		subcommandgroup.options.push_back(subcommand);
+		cmd_data.options.push_back(subcommandgroup);
+		interaction.command.data = cmd_data;
+
+		dpp::snowflake value1 = std::get<dpp::snowflake>(interaction.get_parameter("user"));
+		set_test("GET_PARAMETER_WITH_SUBCOMMANDS", value1 == dpp::snowflake(189759562910400512));
+
+		/* Check the method without subcommands */
+		set_test("GET_PARAMETER_WITHOUT_SUBCOMMANDS", false);
+
+		dpp::command_interaction cmd_data2; // command
+		cmd_data2.type = dpp::ctxm_chat_input;
+		cmd_data2.name = "command";
+
+		dpp::command_data_option option3; // slashcommand option
+		option3.name = "number";
+		option3.type = dpp::co_integer;
+		option3.value = int64_t(123456);
+
+		cmd_data2.options.push_back(option3);
+		interaction.command.data = cmd_data2;
+
+		int64_t value2 = std::get<int64_t>(interaction.get_parameter("number"));
+		set_test("GET_PARAMETER_WITHOUT_SUBCOMMANDS", value2 == 123456);
+	}
+
 	{ // test dpp::command_option_choice::fill_from_json
 		set_test("OPTCHOICE_DOUBLE", false);
 		set_test("OPTCHOICE_INT", false);
