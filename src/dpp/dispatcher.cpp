@@ -210,9 +210,7 @@ void interaction_create_t::delete_original_response(command_completion_event_t c
 
 command_value interaction_create_t::get_parameter(const std::string& name) const
 {
-	/* Dummy STATIC return value for unknown options so we aren't returning a value off the stack */
-	static command_value dummy_value = {};
-	auto ci = command.get_command_interaction();
+	const command_interaction ci = command.get_command_interaction();
 
 	for (const auto &option : ci.options) {
 		if (option.type != co_sub_command && option.type != co_sub_command_group && option.name == name) {
@@ -237,7 +235,7 @@ command_value interaction_create_t::get_parameter(const std::string& name) const
 			}
 		}
 	}
-	return dummy_value;
+	return {};
 }
 
 voice_receive_t::voice_receive_t(class discord_client* client, const std::string &raw, class discord_voice_client* vc, snowflake _user_id, uint8_t* pcm, size_t length) : event_dispatch_t(client, raw), voice_client(vc), user_id(_user_id) {

@@ -685,15 +685,16 @@ public:
 	std::variant<command_interaction, component_interaction, autocomplete_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
+	dpp::channel channel;										//!< Optional: The partial channel object where it was sent from
 	snowflake message_id;					    //!< Originating message id for context menu actions
 	permission app_permissions;				    //!< Permissions of the bot in the channel/guild where this command was issued
 	message msg;						    //!< Originating message for context menu actions
-	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions
+	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions. Filled when the interaction is invoked in a guild
 	user usr;                                                   //!< User object for the invoking user
 	std::string token;                                          //!< a continuation token for responding to the interaction
 	uint8_t version;                                            //!< read-only property, always 1
 	command_resolved resolved;				    //!< Resolved user/role etc
-	std::string locale;                                         //!< User's locale (language)
+	std::string locale;                                         //!< User's [locale](https://discord.com/developers/docs/reference#locales) (language)
 	std::string guild_locale;                                   //!< Guild's locale (language) - for guild interactions only
 	cache_policy_t cache_policy;                                //!< Cache policy from cluster
 
