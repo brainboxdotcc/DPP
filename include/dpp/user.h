@@ -305,7 +305,7 @@ public:
 	bool has_animated_icon() const;
 
 	/**
-	 * @brief Format a username into user#discriminator
+	 * @brief Format a username into user\#discriminator
 	 * 
 	 * For example Brain#0001
 	 * 

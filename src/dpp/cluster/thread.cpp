@@ -118,7 +118,7 @@ void cluster::thread_create_in_forum(const std::string& thread_name, snowflake c
 			}
 			callback(confirmation_callback_t(this, t, http));
 		}
-	}, msg.filename, msg.filecontent);
+	}, msg.filename, msg.filecontent, msg.filemimetype);
 }
 
 void cluster::thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback)

@@ -71,7 +71,7 @@ void https_client::connect()
 	}
 }
 
-multipart_content https_client::build_multipart(const std::string &json, const std::vector<std::string>& filenames, const std::vector<std::string>& contents) {
+multipart_content https_client::build_multipart(const std::string &json, const std::vector<std::string>& filenames, const std::vector<std::string>& contents, const std::vector<std::string>& mimetypes) {
 	if (filenames.empty() && contents.empty()) {
 		if (!json.empty()) {
 			return { json, "application/json" };
@@ -84,7 +84,9 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 		time_t dummy2 = time(nullptr) * time(nullptr);
 		const std::string two_cr("\r\n\r\n");
 		const std::string boundary("-------------" + to_hex(dummy1) + to_hex(dummy2));
-		const std::string mime_part_start("--" + boundary + "\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; ");
+		const std::string part_start("--" + boundary + "\r\nContent-Disposition: form-data; ");
+		const std::string mime_type_start("\r\nContent-Type: ");
+		const std::string default_mime_type("application/octet-stream");
 		
 		std::string content("--" + boundary);
 
@@ -92,12 +94,14 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 		content += "\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name=\"payload_json\"" + two_cr;
 		content += json + "\r\n";
 		if (filenames.size() == 1 && contents.size() == 1) {
-			content += mime_part_start + "name=\"file\"; filename=\"" + filenames[0] + "\"" + two_cr;
+			content += part_start + "name=\"file\"; filename=\"" + filenames[0] + "\"";
+			content += mime_type_start + (mimetypes.empty() || mimetypes[0].empty() ? default_mime_type : mimetypes[0]) + two_cr;
 			content += contents[0];
 		} else {
 			/* Multiple files */
 			for (size_t i = 0; i < filenames.size(); ++i) {
-				content += mime_part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"" + two_cr;
+				content += part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"";
+				content += "\r\nContent-Type: " + (mimetypes.size() < i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
 				content += contents[i];
 				content += "\r\n";
 			}

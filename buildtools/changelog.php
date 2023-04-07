@@ -22,6 +22,7 @@ $categories = [
     'improvement' => '♻️ Refactoring',
     'refactor' => '♻️ Refactoring',
     'refactored' => '♻️ Refactoring',
+    'refactoring' => '♻️ Refactoring',
     'deprecated' => '♻️ Refactoring',
     'deprecate' => '♻️ Refactoring',
     'remove' => '♻️ Refactoring',

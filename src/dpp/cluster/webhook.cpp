@@ -59,7 +59,7 @@ void cluster::edit_webhook_message(const class webhook &wh, const struct message
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 
@@ -95,7 +95,7 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 
