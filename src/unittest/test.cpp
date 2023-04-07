@@ -233,7 +233,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		dpp::command_data_option option3; // slashcommand option
 		option3.name = "number";
 		option3.type = dpp::co_integer;
-		option3.value = 123456;
+		option3.value = int64_t(123456);
 
 		cmd_data2.options.push_back(option3);
 		interaction.command.data = cmd_data2;
