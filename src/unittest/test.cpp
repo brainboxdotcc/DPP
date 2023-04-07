@@ -237,7 +237,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		cmd_data2.options.push_back(option3);
 		interaction.command.data = cmd_data2;
 
-		set_test("GET_PARAMETER_WITHOUT_SUBCOMMANDS", std::get<int64_t>(interaction.get_parameter("number")) == 123456);
+		set_test("GET_PARAMETER_WITHOUT_SUBCOMMANDS", std::get<int64_t>(interaction.get_parameter("number")) == int64_t(123456));
 	}
 
 	{ // test dpp::command_option_choice::fill_from_json
