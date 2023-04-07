@@ -595,6 +595,11 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.guild_id = snowflake_not_null(&j, "guild_id");
 	i.app_permissions = snowflake_not_null(&j, "app_permissions");
 
+	if (j.contains("channel") && !j.at("channel").is_null()) {
+		const json& c = j["channel"];
+		i.channel = channel().fill_from_json((json*)&c);
+	}
+
 	if (j.contains("message") && !j.at("message").is_null()) {
 		const json& m = j["message"];
 		i.msg = message().fill_from_json((json*)&m, i.cache_policy);
@@ -891,7 +896,7 @@ const dpp::role& interaction::get_resolved_role(snowflake id) const {
 }
 
 const dpp::channel& interaction::get_resolved_channel(snowflake id) const {
-	return get_resolved<channel, std::map<snowflake, channel>>(id, resolved.channels);
+	return get_resolved<dpp::channel, std::map<snowflake, dpp::channel>>(id, resolved.channels);
 }
 
 const dpp::guild_member& interaction::get_resolved_member(snowflake id) const {
