@@ -293,15 +293,29 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 #ifndef _WIN32
 		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
 #endif
-		p.set(dpp::p_administrator, dpp::p_ban_members);
-		success = p.has(dpp::p_administrator) && success;
-		success = p.has(dpp::p_administrator) && p.has(dpp::p_ban_members) && success;
-		success = p.has(dpp::p_administrator, dpp::p_ban_members) && success;
-		success = p.has(dpp::p_administrator | dpp::p_ban_members) && success;
+		p.set(0).add(~uint64_t{0}).remove(dpp::p_speak).set(dpp::p_administrator);
+		success = !p.has(dpp::p_administrator, dpp::p_ban_members) && success; // must return false because they're not both set
+		success = !p.has(dpp::p_administrator | dpp::p_ban_members) && success;
 
-		p.set(dpp::p_administrator);
-		success = ! p.has(dpp::p_administrator, dpp::p_ban_members) && success; // must return false because they're not both set
-		success = ! p.has(dpp::p_administrator | dpp::p_ban_members) && success;
+		constexpr auto constexpr_test = [](dpp::permission p) constexpr noexcept {
+			bool success{true};
+
+			p.set(0).add(~uint64_t{0}).remove(dpp::p_speak).set(dpp::p_connect);
+			p.set(dpp::p_administrator, dpp::p_ban_members);
+			success = p.has(dpp::p_administrator) && success;
+			success = p.has(dpp::p_administrator) && p.has(dpp::p_ban_members) && success;
+			success = p.has(dpp::p_administrator, dpp::p_ban_members) && success;
+			success = p.has(dpp::p_administrator | dpp::p_ban_members) && success;
+			success = p.add(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
+			success = !p.remove(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
+			return success;
+		};
+		constexpr auto constexpr_success = constexpr_test({~uint64_t{0}});
+
+		static_assert(constexpr_success, "dpp::permission constexpr test failed");
+		static_assert(noexcept(dpp::permission{}) && noexcept(dpp::permission(dpp::p_speak)));
+		static_assert(noexcept(p = 0) && noexcept(p = dpp::permission{}));
+
 		set_test("PERMISSION_CLASS", success);
 	}
 
