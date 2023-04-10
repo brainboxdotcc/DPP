@@ -219,14 +219,15 @@ void to_json(json& j, const slashcommand& p) {
 			j["name_localizations"][loc.first] = loc.second;
 		}
 	}
-	if (p.description_localizations.size()) {
-		j["description_localizations"] = json::object();
-		for(auto& loc : p.description_localizations) {
-			j["description_localizations"][loc.first] = loc.second;
-		}
-	}
 
 	if (p.type != ctxm_user && p.type != ctxm_message) {
+		if (p.description_localizations.size()) {
+			j["description_localizations"] = json::object();
+			for(auto& loc : p.description_localizations) {
+				j["description_localizations"][loc.first] = loc.second;
+			}
+		}
+
 		if (p.options.size()) {
 			j["options"] = json();
 
@@ -360,11 +361,10 @@ command_option& command_option::set_auto_complete(bool autocomp)
 }
 
 command_option &command_option::fill_from_json(nlohmann::json *j) {
-	uint8_t i = 3; // maximum amount of nested options
 	/*
 	* Command options contains command options. Therefor the object is filled with recursion.
 	*/
-	std::function<void(nlohmann::json *, command_option &)> fill = [&i, &fill](nlohmann::json *j, command_option &o) {
+	std::function<void(nlohmann::json *, command_option &, uint8_t)> fill = [&fill](nlohmann::json *j, command_option &o, uint8_t depth) {
 		o.type = (command_option_type)int8_not_null(j, "type");
 		o.name = string_not_null(j, "name");
 		o.description = string_not_null(j, "description");
@@ -386,11 +386,10 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 			}
 		}
 
-		if (j->contains("options") && i > 0) {
-			i--; // prevent infinite recursion call with a counter
+		if (j->contains("options") && depth < 3) { // maximum amount of nested options. fixed to 3 levels: subcommand group -> subcommand -> its options
 			for (auto &joption : (*j)["options"]) {
 				command_option p;
-				fill(&joption, p);
+				fill(&joption, p, depth + 1);
 				o.options.push_back(p);
 			}
 		}
@@ -431,7 +430,7 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 		o.autocomplete = bool_not_null(j, "autocomplete");
 	};
 
-	fill(j, *this);
+	fill(j, *this, 0);
 
 	return *this;
 }
@@ -491,7 +490,9 @@ std::string interaction::build_json(bool with_id) const {
 
 slashcommand& slashcommand::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
 	name_localizations[language] = _name;
-	description_localizations[language] = _description;
+	if (! _description.empty()) {
+		description_localizations[language] = _description;
+	}
 	return *this;
 }
 
@@ -502,7 +503,9 @@ command_option_choice& command_option_choice::add_localization(const std::string
 
 command_option& command_option::add_localization(const std::string& language, const std::string& _name, const std::string& _description) {
 	name_localizations[language] = _name;
-	description_localizations[language] = _description;
+	if (! _description.empty()) {
+		description_localizations[language] = _description;
+	}
 	return *this;
 }
 
@@ -591,6 +594,11 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	i.channel_id = snowflake_not_null(&j, "channel_id");
 	i.guild_id = snowflake_not_null(&j, "guild_id");
 	i.app_permissions = snowflake_not_null(&j, "app_permissions");
+
+	if (j.contains("channel") && !j.at("channel").is_null()) {
+		const json& c = j["channel"];
+		i.channel = channel().fill_from_json((json*)&c);
+	}
 
 	if (j.contains("message") && !j.at("message").is_null()) {
 		const json& m = j["message"];
@@ -888,7 +896,7 @@ const dpp::role& interaction::get_resolved_role(snowflake id) const {
 }
 
 const dpp::channel& interaction::get_resolved_channel(snowflake id) const {
-	return get_resolved<channel, std::map<snowflake, channel>>(id, resolved.channels);
+	return get_resolved<dpp::channel, std::map<snowflake, dpp::channel>>(id, resolved.channels);
 }
 
 const dpp::guild_member& interaction::get_resolved_member(snowflake id) const {
