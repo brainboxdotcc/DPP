@@ -661,6 +661,59 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				});
 			}
 
+			set_test("VOICE_CHANNEL_CREATE", false);
+			set_test("VOICE_CHANNEL_EDIT", false);
+			set_test("VOICE_CHANNEL_DELETE", false);
+			if (!offline) {
+				dpp::channel channel1;
+				channel1.set_type(dpp::CHANNEL_VOICE)
+					.set_guild_id(TEST_GUILD_ID)
+					.set_name("voice1")
+					.add_permission_overwrite(TEST_GUILD_ID, dpp::ot_role, 0, dpp::p_view_channel)
+					.set_user_limit(99);
+				dpp::channel createdChannel;
+				try {
+					createdChannel = bot.channel_create_sync(channel1);
+				} catch (dpp::rest_exception &exception) {
+					set_test("VOICE_CHANNEL_CREATE", false);
+				}
+				if (createdChannel.name == channel1.name &&
+						createdChannel.user_limit == 99 &&
+						createdChannel.name == "voice1") {
+					for (auto overwrite: createdChannel.permission_overwrites) {
+						if (overwrite.id == TEST_GUILD_ID && overwrite.type == dpp::ot_role && overwrite.deny == dpp::p_view_channel) {
+							set_test("VOICE_CHANNEL_CREATE", true);
+						}
+					}
+
+					// edit the voice channel
+					createdChannel.set_name("foobar2");
+					createdChannel.set_user_limit(2);
+					for (auto overwrite: createdChannel.permission_overwrites) {
+						if (overwrite.id == TEST_GUILD_ID) {
+							overwrite.deny.set(0);
+							overwrite.allow.set(dpp::p_view_channel);
+						}
+					}
+					try {
+						dpp::channel edited = bot.channel_edit_sync(createdChannel);
+						if (edited.name == "foobar2" && edited.user_limit == 2) {
+							set_test("VOICE_CHANNEL_EDIT", true);
+						}
+					} catch (dpp::rest_exception &exception) {
+						set_test("VOICE_CHANNEL_EDIT", false);
+					}
+
+					// delete the voice channel
+					try {
+						bot.channel_delete_sync(createdChannel.id);
+						set_test("VOICE_CHANNEL_DELETE", true);
+					} catch (dpp::rest_exception &exception) {
+						set_test("VOICE_CHANNEL_DELETE", false);
+					}
+				}
+			}
+
 			set_test("FORUM_CREATION", false);
 			set_test("FORUM_CHANNEL_GET", false);
 			set_test("FORUM_CHANNEL_DELETE", false);

@@ -168,13 +168,12 @@ http_request_completion_t http_request::run(cluster* owner) {
 
 	multipart_content multipart;
 	if (non_discord) {
-		multipart = { postdata, "" };
+		multipart = { postdata, mimetype };
 	} else {
-
 		multipart = https_client::build_multipart(postdata, file_name, file_content, file_mimetypes);
-		if (!multipart.mimetype.empty()) {
-			headers.emplace("Content-Type", multipart.mimetype);
-		}
+	}
+	if (!multipart.mimetype.empty()) {
+		headers.emplace("Content-Type", multipart.mimetype);
 	}
 	http_connect_info hci = https_client::get_host_info(_host);
 	try {
