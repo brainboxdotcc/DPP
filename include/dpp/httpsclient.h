@@ -248,7 +248,7 @@ public:
 	 * @param json The json content
 	 * @param filenames File names of files to send
 	 * @param contents Contents of each of the files to send
-	 * @param contents MIME types of each of the files to send
+	 * @param mimetypes MIME types of each of the files to send
 	 * @return multipart mime content and headers
 	 */
 	static multipart_content build_multipart(const std::string &json, const std::vector<std::string>& filenames = {}, const std::vector<std::string>& contents = {}, const std::vector<std::string>& mimetypes = {});

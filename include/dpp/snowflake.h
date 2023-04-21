@@ -62,7 +62,7 @@ public:
 
 	/**
 	 * @brief Construct a snowflake object
-	 * @param value A snowflake value
+	 * @param string_value A snowflake value
 	 */
 	snowflake(const std::string& string_value);
 
