@@ -565,7 +565,7 @@ public:
 	 */
 	bool has_use_soundboard() const;
 	/**
-	 * @brief True if has the use send voice messages permission.
+	 * @brief True if has the send voice messages permission.
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the send voice messages permission or is administrator.
