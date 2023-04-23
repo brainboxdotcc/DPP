@@ -73,6 +73,7 @@ enum permissions : uint64_t {
 	p_moderate_members = 0x10000000000,    //!< allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
 	p_view_creator_monetization_analytics = 0x20000000000,	//!< allows for viewing role subscription insights
 	p_use_soundboard = 0x40000000000, //!< allows for using soundboard in a voice channel
+	p_send_voice_messages = 0x0000400000000000, //!< allows sending voice messages
 };
 
 /**
