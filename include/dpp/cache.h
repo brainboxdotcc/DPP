@@ -83,10 +83,10 @@ public:
 	using value_type = T*;
 
 	/**
-	* @brief Construct a new cache object.
-	*
-	* Caches must contain classes derived from dpp::managed.
-	*/
+	 * @brief Construct a new cache object.
+	 *
+	 * Caches must contain classes derived from dpp::managed.
+	 */
 	cache() {
 		cache_map = std::make_unique<unordered_set<snowflake, T*>>();
 	}
@@ -127,7 +127,7 @@ public:
 	void remove(T* object) {
 		std::unique_lock l(cache_mutex);
 		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-		if (cache_map->contains(object->id) {
+		if (cache_map->contains(object->id)) {
 			if (object == *cache_map->find(object->id)) {
 				cache_map->erase(object->id);
 				deletion_queue[object] = time(NULL);
@@ -136,18 +136,18 @@ public:
 	}
 
 	/**
-	* @brief Find an object in the cache by id.
-	*
-	* The cache is searched for the object. All dpp::managed objects have a snowflake id
-	* (this is the only field dpp::managed actually has).
-	*
-	* @warning Do not hang onto objects returned by cache::find() indefinitely. They may be
-	* deleted at a later date if cache::remove() is called. If persistence is required,
-	* take a copy of the object after checking its pointer is non-null.
-	*
-	* @param id Object snowflake id to find
-	* @return Found object or nullptr if the object with this id does not exist.
-	*/
+	 * @brief Find an object in the cache by id.
+	 *
+	 * The cache is searched for the object. All dpp::managed objects have a snowflake id
+	 * (this is the only field dpp::managed actually has).
+	 *
+	 * @warning Do not hang onto objects returned by cache::find() indefinitely. They may be
+	 * deleted at a later date if cache::remove() is called. If persistence is required,
+	 * take a copy of the object after checking its pointer is non-null.
+	 *
+	 * @param id Object snowflake id to find
+	 * @return Found object or nullptr if the object with this id does not exist.
+	 */
 	value_type find(key_type key) {
 		std::shared_lock lock(cache_mutex);
 		if (cache_map->contains(key)) {
@@ -157,75 +157,75 @@ public:
 	}
 
 	/**
-	* @brief Return a count of the number of items in the cache.
-	*
-	* This is used by the library e.g. to count guilds, users, and roles
-	* stored within caches.
-	* get
-	* @return uint64_t count of items in the cache
-	*/
+	 * @brief Return a count of the number of items in the cache.
+	 *
+	 * This is used by the library e.g. to count guilds, users, and roles
+	 * stored within caches.
+	 * get
+	 * @return uint64_t count of items in the cache
+	 */
 	uint64_t count() {
 		std::shared_lock lock(cache_mutex);
 		return cache_map->size();
 	}
 
 	/**
-	* @brief Return the cache's locking mutex.
-	*
-	* Use this whenever you manipulate or iterate raw elements in the cache!
-	*
-	* @note If you are only reading from the cache's container, wrap this
-	* mutex in `std::shared_lock`, else wrap it in a `std::unique_lock`.
-	* Shared locks will allow for multiple readers whilst blocking writers,
-	* and unique locks will allow only one writer whilst blocking readers
-	* and writers.
-	*
-	* **Example:**
-	*
-	* ```cpp
-	* dpp::cache<guild>* c = dpp::get_guild_cache();
-	* std::unordered_map<snowflake, guild*>& gc = c->get_container();
-	* std::shared_lock l(c->get_mutex()); // MUST LOCK HERE
-	* for (auto g = gc.begin(); g != gc.end(); ++g) {
-	*     dpp::guild* gp = (dpp::guild*)g->second;
-	*     // Do something here with the guild* in 'gp'
-	* }
-	* ```
-	*
-	* @return The mutex used to protect the container
-	*/
+	 * @brief Return the cache's locking mutex.
+	 *
+	 * Use this whenever you manipulate or iterate raw elements in the cache!
+	 *
+	 * @note If you are only reading from the cache's container, wrap this
+	 * mutex in `std::shared_lock`, else wrap it in a `std::unique_lock`.
+	 * Shared locks will allow for multiple readers whilst blocking writers,
+	 * and unique locks will allow only one writer whilst blocking readers
+	 * and writers.
+	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * dpp::cache<guild>* c = dpp::get_guild_cache();
+	 * std::unordered_map<snowflake, guild*>& gc = c->get_container();
+	 * std::shared_lock l(c->get_mutex()); // MUST LOCK HERE
+	 * for (auto g = gc.begin(); g != gc.end(); ++g) {
+	 *     dpp::guild* gp = (dpp::guild*)g->second;
+	 *     // Do something here with the guild* in 'gp'
+	 * }
+	 * ```
+	 *
+	 * @return The mutex used to protect the container
+	 */
 	std::shared_mutex& get_mutex() {
 		return this->cache_mutex;
 	}
 
 	/**
-	* @brief Get the container unordered map
-	*
-	* @warning Be sure to use cache::get_mutex() correctly if you
-	* manipulate or iterate the map returned by this method! If you do
-	* not, this is not thread safe and will cause crashes!
-	*
-	* @see cache::get_mutex
-	*
-	* @return A reference to the cache's container map
-	*/
+	 * @brief Get the container unordered map
+	 *
+	 * @warning Be sure to use cache::get_mutex() correctly if you
+	 * manipulate or iterate the map returned by this method! If you do
+	 * not, this is not thread safe and will cause crashes!
+	 *
+	 * @see cache::get_mutex
+	 *
+	 * @return A reference to the cache's container map
+	 */
 	auto& get_container() {
 		return *(this->cache_map);
 	}
 
 	/**
-	* @brief "Rehash" a cache by reallocating the map and copying
-	* all elements into the new one.
-	*
-	* Over a long running timeframe, unordered maps can grow in size
-	* due to bucket allocation, this function frees that unused memory
-	* to keep the maps in control over time. If this is an issue which
-	* is apparent with your use of dpp::cache objects, you should periodically
-	* call this method.
-	*
-	* @warning May be time consuming! This function is O(n) in relation to the
-	* number of cached entries.
-	*/
+	 * @brief "Rehash" a cache by reallocating the map and copying
+	 * all elements into the new one.
+	 *
+	 * Over a long running timeframe, unordered maps can grow in size
+	 * due to bucket allocation, this function frees that unused memory
+	 * to keep the maps in control over time. If this is an issue which
+	 * is apparent with your use of dpp::cache objects, you should periodically
+	 * call this method.
+	 *
+	 * @warning May be time consuming! This function is O(n) in relation to the
+	 * number of cached entries.
+	 */
 	void rehash() {
 		std::unique_lock l(cache_mutex);
 		unordered_set<snowflake, T*>* n = new unordered_set<snowflake, T*>{};
@@ -237,22 +237,22 @@ public:
 	}
 
 	/**
-	* @brief Get "real" size in RAM of the cached objects
-	*
-	* This does not include metadata used to maintain the unordered map itself.
-	*
-	* @return size_t size of cache in bytes
-	*/
+	 * @brief Get "real" size in RAM of the cached objects
+	 *
+	 * This does not include metadata used to maintain the unordered map itself.
+	 *
+	 * @return size_t size of cache in bytes
+	 */
 	size_t bytes() {
 		std::shared_lock l(cache_mutex);
 		return sizeof(this) + (cache_map->bucket_count() * sizeof(size_t));
 	}
 
 	/**
-	* @brief Destroy the cache object
-	*
-	* @note This does not delete objects stored in the cache.
-	*/		
+	 * @brief Destroy the cache object
+	 *
+	 * @note This does not delete objects stored in the cache.
+	 */		
 	~cache() {
 		std::unique_lock l(cache_mutex);
 	};
@@ -263,8 +263,8 @@ protected:
 };
 
 	/** Run garbage collection across all caches removing deleted items
-	* that have been deleted over 60 seconds ago.
-	*/
+	 * that have been deleted over 60 seconds ago.
+	 S*/
 void DPP_EXPORT garbage_collection();
 
 #define cache_decl(type, setter, getter, counter) /** Find an object in the cache by id. @return type* Pointer to the object or nullptr when it's not found */ DPP_EXPORT class type * setter (snowflake id); DPP_EXPORT cache<class type> * getter (); /** Get the amount of cached type objects. */ DPP_EXPORT uint64_t counter ();
