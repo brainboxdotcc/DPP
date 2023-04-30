@@ -267,7 +267,7 @@ protected:
 
 	/** Run garbage collection across all caches removing deleted items
 	 * that have been deleted over 60 seconds ago.
-	 S*/
+	 */
 void DPP_EXPORT garbage_collection();
 
 #define cache_decl(type, setter, getter, counter) /** Find an object in the cache by id. @return type* Pointer to the object or nullptr when it's not found */ DPP_EXPORT class type * setter (snowflake id); DPP_EXPORT cache<class type> * getter (); /** Get the amount of cached type objects. */ DPP_EXPORT uint64_t counter ();
