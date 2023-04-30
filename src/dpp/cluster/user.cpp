@@ -100,11 +100,7 @@ void cluster::user_get_cached(snowflake user_id, command_completion_event_t call
 		 * user_identified from a user, by calling a constructor that builds it from
 		 * the user object.
 		 */
-		confirmation_callback_t cb(
-			this,
-			user_identified(*u),
-			http_request_completion_t()
-		);
+		confirmation_callback_t cb(this, user_identified(*u), http_request_completion_t());
 		callback(cb);
 		return;
 	}
