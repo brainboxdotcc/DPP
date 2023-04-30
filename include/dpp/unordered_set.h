@@ -89,6 +89,16 @@ namespace dpp {
 
 	template<typename OTy, typename KTy, typename KATy = KeyAccessor<OTy, KTy>> class memory_core {
 	public:
+		using value_type = OTy;
+		using key_type = KTy;
+		using key_accessor = KATy;
+		using reference = value_type&;
+		using const_reference = const reference;
+		using pointer = value_type*;
+		using size_type = size_t;
+		using key_hasher = fnv1a_hash<key_type>;
+		using iterator = memory_core_iterator;
+
 		class memory_core_iterator {
 		public:
 			using value_type = typename memory_core::value_type;
@@ -123,16 +133,6 @@ namespace dpp {
 			memory_core* core;
 			std::size_t index;
 		};
-
-		using value_type = OTy;
-		using key_type = KTy;
-		using key_accessor = KATy;
-		using reference = value_type&;
-		using const_reference = const reference;
-		using pointer = value_type*;
-		using size_type = size_t;
-		using key_hasher = fnv1a_hash<key_type>;
-		using iterator = memory_core_iterator;
 
 		class sentinel_holder {
 		public:
