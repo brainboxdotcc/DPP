@@ -89,7 +89,6 @@ namespace dpp {
 
 	template<typename OTy, typename KTy, typename KATy = KeyAccessor<OTy, KTy>> class memory_core {
 	public:
-
 		class memory_core_iterator {
 		public:
 			using value_type = typename memory_core::value_type;
@@ -102,7 +101,7 @@ namespace dpp {
 
 			inline memory_core_iterator& operator++() {
 				index++;
-				while (index < core->capacity && !core->data[index]) {
+				while (index < core->capacity && !core->data[index].operator bool()) {
 					index++;
 				}
 				return *this;

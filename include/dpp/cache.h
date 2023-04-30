@@ -47,12 +47,12 @@ namespace dpp {
 	*/
 	template<> struct fnv1a_hash<snowflake> {
 		uint64_t operator()(const snowflake& data) const {
-			auto new_value = data.operator size_t();
+			auto new_value = static_cast<uint64_t>(data);
 			return internalHashFunction(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
 		}
 
 		uint64_t operator()(snowflake&& data) const {
-			auto new_value = data.operator size_t();
+			auto new_value = static_cast<uint64_t>(data);
 			return internalHashFunction(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
 		}
 
@@ -77,9 +77,9 @@ namespace dpp {
 	 * designed with thread safety in mind.
 	 * @tparam T class type to store, which should be derived from dpp::managed.
 	 */
-	template<typename T, typename KTy = snowflake> class cache {
+	template<typename T> class cache {
 	public:
-		using key_type = KTy;
+		using key_type = snowflake;
 		using value_type = T*;
 
 		/**
@@ -126,8 +126,7 @@ namespace dpp {
 		 */
 		constexpr void remove(key_type key) {
 			std::unique_lock lock(cache_mutex);
-			auto existing = cache_map->find(key);
-			if (existing != cache_map->end()) {
+			if (cache_map->contains(key)) {
 				cache_map->erase(key);
 			}
 		}
@@ -147,9 +146,8 @@ namespace dpp {
 		 */
 		constexpr value_type find(key_type key) {
 			std::shared_lock lock(cache_mutex);
-			auto r = cache_map->find(key);
-			if (r != cache_map->end()) {
-				return *r;
+			if (cache_map->contains(key)) {
+				return *cache_map->find(key);
 			}
 			return nullptr;
 		}
@@ -228,7 +226,6 @@ namespace dpp {
 			std::unique_lock l(cache_mutex);
 			unordered_set<value_type, key_type>* n = new unordered_set<value_type, key_type>{};
 			n->reserve(cache_map->size());
-			T value{};
 			for (auto t = cache_map->begin(); t != cache_map->end(); ++t) {
 				n->emplace(std::move(*t));
 			}
