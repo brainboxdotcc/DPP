@@ -24,7 +24,6 @@
 #include <string>
 #include <functional>
 #include <dpp/socket.h>
-#include <cstdint>
 
 namespace dpp {
 
