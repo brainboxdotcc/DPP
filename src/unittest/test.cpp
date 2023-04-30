@@ -833,7 +833,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		} else {
 			set_test("CUSTOMCACHE", false);
 		}
-		testcache.remove(found_tco->id);
+		testcache.remove(found_tco);
 
 		noparam_api_test(current_user_get, dpp::user_identified, "CURRENTUSER");
 		singleparam_api_test(channel_get, TEST_TEXT_CHANNEL_ID, dpp::channel, "GETCHAN");

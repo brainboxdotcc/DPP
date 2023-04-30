@@ -48,7 +48,7 @@ void guild_emojis_update::handle(discord_client* client, json &j, const std::str
 			for (auto & ee : g->emojis) {
 				dpp::emoji* fe = dpp::find_emoji(ee);
 				if (fe) {
-					dpp::get_emoji_cache()->remove(fe->id);
+					dpp::get_emoji_cache()->remove(fe);
 				}
 			}
 			g->emojis.clear();

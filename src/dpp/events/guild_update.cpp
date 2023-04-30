@@ -46,7 +46,7 @@ void guild_update::handle(discord_client* client, json &j, const std::string &ra
 			if (client->creator->cache_policy.role_policy != dpp::cp_none && d.find("roles") != d.end()) {
 				for (size_t rc = 0; rc < g->roles.size(); ++rc) {
 					dpp::role* oldrole = dpp::find_role(g->roles[rc]);
-					dpp::get_role_cache()->remove(oldrole->id);
+					dpp::get_role_cache()->remove(oldrole);
 				}
 				g->roles.clear();
 				for (auto & role : d["roles"]) {

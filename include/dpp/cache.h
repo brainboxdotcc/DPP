@@ -43,8 +43,8 @@ extern DPP_EXPORT std::mutex deletion_mutex;
 class guild_member;
 
 /*
-* Specialized fnv1a_hash class for hashing the values for indexing into the set.
-*/
+ * Specialized fnv1a_hash class for hashing the values for indexing into the set.
+ */
 template<> struct fnv1a_hash<snowflake> {
 	uint64_t operator()(const snowflake& data) const {
 		auto new_value = static_cast<uint64_t>(data);
@@ -125,6 +125,9 @@ public:
 	 * @param object object to remove. Passing a nullptr will have no effect.
 	 */
 	void remove(T* object) {
+		if (!object) {
+			return;
+		}
 		std::unique_lock l(cache_mutex);
 		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
 		if (cache_map->contains(object->id)) {
