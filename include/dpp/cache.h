@@ -66,17 +66,17 @@ template<> struct fnv1a_hash<snowflake> {
 	}
 };
 
-	/**
-	* @brief A cache object maintains a cache of dpp::managed objects.
-	*
-	* This is for example users, channels or guilds. You may instantiate
-	* your own caches, to contain any type derived from dpp::managed including
-	* your own types.
-	*
-	* @note This class is critical to the operation of the library and therefore
-	* designed with thread safety in mind.
-	* @tparam T class type to store, which should be derived from dpp::managed.
-	*/
+/**
+ * @brief A cache object maintains a cache of dpp::managed objects.
+ *
+ * This is for example users, channels or guilds. You may instantiate
+ * your own caches, to contain any type derived from dpp::managed including
+ * your own types.
+ *
+ * @note This class is critical to the operation of the library and therefore
+ * designed with thread safety in mind.
+ * @tparam T class type to store, which should be derived from dpp::managed.
+ */
 template<typename T> class cache {
 public:
 	using key_type = snowflake;
@@ -92,42 +92,46 @@ public:
 	}
 
 	/**
-	* @brief Store an object in the cache. Passing a nullptr will have no effect.
-	*
-	* The object must be derived from dpp::managed and should be allocated on the heap.
-	* Generally this is done via `new`. Once stored in the cache the lifetime of the stored
-	* object is managed by the cache class unless the cache is deleted (at which point responsibility
-	* for deleting the object returns to its allocator). Objects stored are removed when the
-	* cache::remove() method is called by placing them into a garbage collection queue for deletion
-	* within the next 60 seconds, which are then deleted in bulk for efficiency and to aid thread
-	* safety.
-	*
-	* @note Adding an object to the cache with an ID which already exists replaces that entry.
-	* The previously entered cache item is inserted into the garbage collection queue for deletion
-	* similarly to if cache::remove() was called first.
-	*
-	* @param object object to store. Storing a pointer to the cache relinquishes ownership to the cache object.
-	*/
+	 * @brief Store an object in the cache. Passing a nullptr will have no effect.
+	 *
+	 * The object must be derived from dpp::managed and should be allocated on the heap.
+	 * Generally this is done via `new`. Once stored in the cache the lifetime of the stored
+	 * object is managed by the cache class unless the cache is deleted (at which point responsibility
+	 * for deleting the object returns to its allocator). Objects stored are removed when the
+	 * cache::remove() method is called by placing them into a garbage collection queue for deletion
+	 * within the next 60 seconds, which are then deleted in bulk for efficiency and to aid thread
+	 * safety.
+	 *
+	 * @note Adding an object to the cache with an ID which already exists replaces that entry.
+	 * The previously entered cache item is inserted into the garbage collection queue for deletion
+	 * similarly to if cache::remove() was called first.
+	 *
+	 * @param object object to store. Storing a pointer to the cache relinquishes ownership to the cache object.
+	 */
 	void store(value_type object) {
 		std::unique_lock lock(cache_mutex);
 		cache_map->emplace(std::forward<value_type>(object));
 	}
 
 	/**
-	* @brief Remove an object from the cache.
-	*
-	* @note The cache class takes ownership of the pointer, and calling this method will
-	* cause deletion of the object within the next 60 seconds by means of a garbage
-	* collection queue. This queue aids in efficiency by freeing memory in bulk, and
-	* assists in thread safety by ensuring that all deletions can be locked and freed
-	* at the same time.
-	*
-	* @param object object to remove. Passing a nullptr will have no effect.
-	*/
-	void remove(key_type key) {
-		std::unique_lock lock(cache_mutex);
-		if (cache_map->contains(key)) {
-			cache_map->erase(key);
+	 * @brief Remove an object from the cache.
+	 *
+	 * @note The cache class takes ownership of the pointer, and calling this method will
+	 * cause deletion of the object within the next 60 seconds by means of a garbage
+	 * collection queue. This queue aids in efficiency by freeing memory in bulk, and
+	 * assists in thread safety by ensuring that all deletions can be locked and freed
+	 * at the same time.
+	 *
+	 * @param object object to remove. Passing a nullptr will have no effect.
+	 */
+	void remove(T* object) {
+		std::unique_lock l(cache_mutex);
+		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
+		if (cache_map->contains(object->id) {
+			if (object == *cache_map->find(object->id)) {
+				cache_map->erase(object->id);
+				deletion_queue[object] = time(NULL);
+			}
 		}
 	}
 
