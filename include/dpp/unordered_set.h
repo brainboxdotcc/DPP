@@ -40,7 +40,7 @@ namespace dpp {
 		inline uint64_t internal_hash_function(const uint8_t* value, size_t count) const;
 	};
 
-	template<typename OTy, typename KTy> struct KeyAccessor {
+	template<typename OTy, typename KTy> struct key_accessor {
 		KTy& operator()(const OTy& other) {
 			return other->id;
 		}
@@ -87,7 +87,7 @@ namespace dpp {
 		}
 	};
 
-	template<typename OTy, typename KTy, typename KATy = KeyAccessor<OTy, KTy>> class memory_core {
+	template<typename OTy, typename KTy, typename KATy = key_accessor<OTy, KTy>> class memory_core {
 	public:
 		using key_type = KTy;
 		using value_type = OTy;
@@ -443,7 +443,7 @@ namespace dpp {
 		}
 	};
 
-	template<typename KTy, typename OTy, typename KATy = KeyAccessor<OTy, KTy>> class unordered_set {
+	template<typename KTy, typename OTy, typename KATy = key_accessor<OTy, KTy>> class unordered_set {
 	public:
 		using key_type = KTy;
 		using value_type = OTy;
@@ -534,7 +534,5 @@ namespace dpp {
 	protected:
 		memory_core<value_type, key_type> data{};
 	};
-
-	template<typename T> class NonUniquePtr;
 
 }// namespace DiscordCoreAPI
