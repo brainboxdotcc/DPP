@@ -29,15 +29,15 @@
 namespace dpp {
 
 	template<typename OTy = void> struct fnv1a_hash {
-		inline constexpr uint64_t operator()(const OTy& data) const;
+		inline uint64_t operator()(const OTy& data) const;
 
-		inline constexpr uint64_t operator()(OTy& data) const;
+		inline uint64_t operator()(OTy& data) const;
 
 	protected:
-		constexpr static uint64_t fnvOffsetBasis{ 14695981039346656037ull };
-		constexpr static uint64_t fnvPrime{ 1099511628211ull };
+		static constexpr uint64_t fnvOffsetBasis{ 14695981039346656037ull };
+		static constexpr uint64_t fnvPrime{ 1099511628211ull };
 
-		inline constexpr uint64_t internal_hash_function(const uint8_t* value, size_t count) const;
+		inline uint64_t internal_hash_function(const uint8_t* value, size_t count) const;
 	};
 
 	template<typename OTy, typename KTy> struct KeyAccessor {
@@ -62,11 +62,11 @@ namespace dpp {
 			using other = object_allocator<U>;
 		};
 
-		inline constexpr object_allocator() noexcept {};
+		inline object_allocator() noexcept {};
 
-		template<typename U> inline constexpr object_allocator(const object_allocator<U>&) noexcept {};
+		template<typename U> inline object_allocator(const object_allocator<U>&) noexcept {};
 
-		inline constexpr pointer allocate(size_type n) {
+		inline pointer allocate(size_type n) {
 			if (n > std::numeric_limits<size_type>::max() / sizeof(value_type)) {
 				throw std::bad_alloc();
 			}
@@ -74,15 +74,15 @@ namespace dpp {
 			return p;
 		}
 
-		inline constexpr void deallocate(pointer p, size_type n) noexcept {
+		inline void deallocate(pointer p, size_type n) noexcept {
 			operator delete[](p);
 		}
 
-		template<typename... Args> inline constexpr void construct(value_type* p, Args&&... args) noexcept {
+		template<typename... Args> inline void construct(value_type* p, Args&&... args) noexcept {
 			new (static_cast<void*>(p)) value_type(std::forward<Args>(args)...);
 		}
 
-		inline constexpr void destroy(value_type* p) noexcept {
+		inline void destroy(value_type* p) noexcept {
 			p->~value_type();
 		}
 	};
@@ -137,27 +137,27 @@ namespace dpp {
 
 		class sentinel_holder {
 		public:
-			inline constexpr sentinel_holder() noexcept = default;
+			inline sentinel_holder() noexcept = default;
 
-			inline constexpr sentinel_holder& operator=(sentinel_holder&& other) noexcept = delete;
-			inline constexpr sentinel_holder(sentinel_holder&& other) noexcept = delete;
-			inline constexpr sentinel_holder& operator=(const sentinel_holder& other) = delete;
-			inline constexpr sentinel_holder(const sentinel_holder& other) = delete;
+			inline sentinel_holder& operator=(sentinel_holder&& other) noexcept = delete;
+			inline sentinel_holder(sentinel_holder&& other) noexcept = delete;
+			inline sentinel_holder& operator=(const sentinel_holder& other) = delete;
+			inline sentinel_holder(const sentinel_holder& other) = delete;
 
-			inline constexpr operator bool() const noexcept {
+			inline operator bool() const noexcept {
 				return isItActive;
 			}
 
-			inline constexpr operator reference() noexcept {
+			inline operator reference() noexcept {
 				return object;
 			}
 
-			inline constexpr void activate(value_type&& data) noexcept {
+			inline void activate(value_type&& data) noexcept {
 				object = std::forward<value_type>(data);
 				isItActive = true;
 			}
 
-			inline constexpr value_type&& disable() noexcept {
+			inline value_type&& disable() noexcept {
 				isItActive = false;
 				return std::move(object);
 			}
@@ -169,7 +169,7 @@ namespace dpp {
 
 		using sentinel_allocator = object_allocator<sentinel_holder>;
 
-		inline constexpr memory_core(size_type capacityNew) : capacity(capacityNew), size(0), data(sentinel_allocator{}.allocate(capacityNew)) {
+		inline memory_core(size_type capacityNew) : capacity(capacityNew), size(0), data(sentinel_allocator{}.allocate(capacityNew)) {
 			for (size_t x = 0; x < capacityNew; ++x) {
 				sentinel_allocator{}.construct(&data[x]);
 			}
@@ -213,15 +213,15 @@ namespace dpp {
 			*this = other;
 		}
 
-		inline constexpr void emplace(value_type&& element) noexcept {
+		inline void emplace(value_type&& element) noexcept {
 			emplace_internal(std::forward<value_type>(element));
 		}
 
-		inline constexpr void emplace(const value_type& element) noexcept {
+		inline void emplace(const value_type& element) noexcept {
 			emplace_internal(element);
 		}
 
-		inline constexpr iterator find(key_type&& key) noexcept {
+		inline iterator find(key_type&& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
 			size_type currentIndex{};
 			while (currentIndex < capacity) {
@@ -235,7 +235,7 @@ namespace dpp {
 			return end();
 		}
 
-		inline constexpr iterator find(const key_type& key) noexcept {
+		inline iterator find(const key_type& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
 			size_type currentIndex{};
 			while (currentIndex < capacity) {
@@ -249,7 +249,7 @@ namespace dpp {
 			return end();
 		}
 
-		inline constexpr bool contains(key_type&& key) noexcept {
+		inline bool contains(key_type&& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
 			size_type currentIndex{};
 			while (currentIndex < capacity) {
@@ -263,7 +263,7 @@ namespace dpp {
 			return false;
 		}
 
-		inline constexpr bool contains(const key_type& key) noexcept {
+		inline bool contains(const key_type& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
 			size_type currentIndex{};
 			while (currentIndex < capacity) {
@@ -277,7 +277,7 @@ namespace dpp {
 			return false;
 		}
 
-		inline constexpr void erase(key_type&& key) noexcept {
+		inline void erase(key_type&& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
 			size_type currentIndex{};
 			while (currentIndex < capacity) {
@@ -294,7 +294,7 @@ namespace dpp {
 			}
 		}
 
-		inline constexpr void erase(const key_type& key) noexcept {
+		inline void erase(const key_type& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
 			size_type currentIndex{};
 			while (currentIndex < capacity) {
@@ -341,23 +341,23 @@ namespace dpp {
 			return iterator{ this, capacity };
 		}
 
-		inline constexpr size_type getSize() const noexcept {
+		inline size_type getSize() const noexcept {
 			return size;
 		}
 
-		inline constexpr bool isEmpty() const noexcept {
+		inline bool isEmpty() const noexcept {
 			return size == 0;
 		}
 
-		inline constexpr bool isFull() const noexcept {
+		inline bool isFull() const noexcept {
 			return static_cast<float>(size) >= static_cast<float>(capacity) * 0.75f;
 		}
 
-		inline constexpr void reserve(size_t newSize) noexcept {
+		inline void reserve(size_t newSize) noexcept {
 			this->resize(newSize);
 		}
 
-		inline constexpr size_t get_capacity() noexcept {
+		inline size_t get_capacity() noexcept {
 			return this->capacity;
 		}
 
@@ -373,7 +373,7 @@ namespace dpp {
 		size_type capacity{};
 		size_type size{};
 
-		inline constexpr void emplace_internal(value_type&& element, uint64_t recursionLimit = 1000) noexcept {
+		inline void emplace_internal(value_type&& element, uint64_t recursionLimit = 1000) noexcept {
 			if (isFull()) {
 				resize(round_up_to_cache_line(capacity * 4), recursionLimit);
 			}
@@ -397,7 +397,7 @@ namespace dpp {
 			}
 		}
 
-		inline constexpr void emplace_internal(const value_type& element, uint64_t recursionLimit = 1000) noexcept {
+		inline void emplace_internal(const value_type& element, uint64_t recursionLimit = 1000) noexcept {
 			if (isFull()) {
 				resize(round_up_to_cache_line(capacity * 4), recursionLimit);
 			}
@@ -422,7 +422,7 @@ namespace dpp {
 			}
 		}
 
-		inline constexpr void resize(size_type newCapacity, uint64_t recursionLimit = 1000) {
+		inline void resize(size_type newCapacity, uint64_t recursionLimit = 1000) {
 			--recursionLimit;
 			if (recursionLimit == 0) {
 				throw std::runtime_error{ "Sorry, but the max number of recursive resizes have been exceeded." };
@@ -455,79 +455,79 @@ namespace dpp {
 		using hasher = fnv1a_hash<value_type>;
 		using iterator = typename memory_core<value_type, key_type>::memory_core_iterator;
 
-		inline constexpr unordered_set() : data{ 5 } {};
+		inline unordered_set() : data{ 5 } {};
 
-		inline constexpr unordered_set& operator=(unordered_set&& other) noexcept {
+		inline unordered_set& operator=(unordered_set&& other) noexcept {
 			if (this != &other) {
 				std::swap(this->data, other.data);
 			}
 			return *this;
 		}
 
-		inline constexpr unordered_set(unordered_set&& other) noexcept {
+		inline unordered_set(unordered_set&& other) noexcept {
 			*this = std::move(other);
 		}
 
-		inline constexpr unordered_set& operator=(const unordered_set& other) noexcept {
+		inline unordered_set& operator=(const unordered_set& other) noexcept {
 			if (this != &other) {
 				this->data = other.data;
 			}
 			return *this;
 		}
 
-		inline constexpr unordered_set(const unordered_set& other) noexcept {
+		inline unordered_set(const unordered_set& other) noexcept {
 			*this = other;
 		}
 
-		inline constexpr iterator begin() noexcept {
+		inline iterator begin() noexcept {
 			return iterator(data.begin());
 		}
 
-		inline constexpr iterator end() noexcept {
+		inline iterator end() noexcept {
 			return iterator(data.end());
 		}
 
-		inline constexpr void emplace(value_type&& element) noexcept {
+		inline void emplace(value_type&& element) noexcept {
 			data.emplace(std::forward<value_type>(element));
 		}
 
-		inline constexpr void emplace(const value_type& element) noexcept {
+		inline void emplace(const value_type& element) noexcept {
 			data.emplace(element);
 		}
 
-		inline constexpr bool contains(key_type element) noexcept {
+		inline bool contains(key_type element) noexcept {
 			return data.contains(element);
 		}
 
-		inline constexpr void erase(key_type element) noexcept {
+		inline void erase(key_type element) noexcept {
 			data.erase(element);
 		}
 
-		inline constexpr iterator find(key_type&& dataToFind) noexcept {
+		inline iterator find(key_type&& dataToFind) noexcept {
 			return data.find(dataToFind);
 		}
 
-		inline constexpr iterator find(key_type dataToFind) noexcept {
+		inline iterator find(key_type dataToFind) noexcept {
 			return data.find(dataToFind);
 		}
 
-		inline constexpr reference operator[](key_type dataToFind) noexcept {
+		inline reference operator[](key_type dataToFind) noexcept {
 			return *data.find(dataToFind);
 		}
 
-		inline constexpr size_type size() const noexcept {
+		inline size_type size() const noexcept {
 			return data.getSize();
 		}
 
-		inline constexpr void reserve(size_t newSize) noexcept {
+		inline void reserve(size_t newSize) noexcept {
 			data.reserve(newSize);
 		}
 
-		inline constexpr bool empty() const noexcept {
+		inline bool empty() const noexcept {
 			return data.isEmpty();
 		}
 
-		inline constexpr size_type capacity() const noexcept {
+		inline size_type capacity() const noexcept {
 			return data.get_capacity();
 		}
 
