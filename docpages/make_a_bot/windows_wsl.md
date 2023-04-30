@@ -10,9 +10,8 @@ This Tutorial will use WSL's default distribution, **Ubuntu**! You might use oth
 4. Download the latest build for your Distro using `wget [url here]`. In this guide we will use the latest build for 64 bit Ubuntu: `wget -O libdpp.deb https://dl.dpp.dev/latest`
 5. Finally install all required deps and the library using `sudo apt-get install libopus0 && sudo apt-get install -y libopus-dev && sudo apt-get install -y libsodium-dev && sudo dpkg -i libdpp.deb && rm libdpp.deb`
 6. Congratulations, you've successfully installed all dependencies! Now comes the real fun: Setting up the environment! For this tutorial we'll use a as small as possible setup, so you might create a more advanced one for production bots.
-7. Navigate to a folder of your choice using `cd your/path/here` or create a new directory using `mkdir MyBot && cd MyBot`
+7. Navigate to a folder of your choice using `cd your/path/here` or create a new directory using `mkdir your/path/here && cd your/path/here`
 8. Now that you've a folder to work in type `> mybot.cxx` to create a file you can work in!
-9. Now you can open this file in Visual Studio Code by pressing `CTRL+SHIFT+P` and typing `Remote-WSL: New WSL Window`. This will bring up a new window. In the new window, choose `open folder` and choose the folder you've created prior. Press OK and now you have your Folder opened as a Workspace!
-10. Add code to your CXX file and compile it by running `g++ -std=c++17 *.cxx -o bot -ldpp` in the same folder as your cxx file.
+9. Simply type in `code .` to have WSL download and run visual studio code automatically
+10. Add code to your C++ file and compile it by running `g++ -std=c++17 mybot.cxx -o bot -ldpp` in the same folder as your cxx file.
 11. start your bot by typing `./bot`!
-
