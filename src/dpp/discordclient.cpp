@@ -560,7 +560,7 @@ uint64_t discord_client::get_guild_count() {
 	dpp::cache<guild>* c = dpp::get_guild_cache();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
-	unordered_set<guild*, snowflake>& gc = c->get_container();
+	unordered_set<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)*g;
 		if (gp->shard_id == this->shard_id) {
@@ -575,7 +575,7 @@ uint64_t discord_client::get_member_count() {
 	dpp::cache<guild>* c = dpp::get_guild_cache();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
-	unordered_set<guild*, snowflake>& gc = c->get_container();
+	unordered_set<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)*g;
 		if (gp->shard_id == this->shard_id) {
@@ -596,7 +596,7 @@ uint64_t discord_client::get_channel_count() {
 	dpp::cache<guild>* c = dpp::get_guild_cache();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
-	unordered_set<guild*, snowflake>& gc = c->get_container();
+	unordered_set<snowflake, guild*>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
 		dpp::guild* gp = (dpp::guild*)*g;
 		if (gp->shard_id == this->shard_id) {

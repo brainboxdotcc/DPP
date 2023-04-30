@@ -48,15 +48,15 @@ namespace dpp {
 	template<> struct fnv1a_hash<snowflake> {
 		uint64_t operator()(const snowflake& data) const {
 			auto new_value = static_cast<uint64_t>(data);
-			return internalHashFunction(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
+			return internal_hash_function(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
 		}
 
 		uint64_t operator()(snowflake&& data) const {
 			auto new_value = static_cast<uint64_t>(data);
-			return internalHashFunction(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
+			return internal_hash_function(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
 		}
 
-		size_t internalHashFunction(const uint8_t* value, size_t count) const {
+		size_t internal_hash_function(const uint8_t* value, size_t count) const {
 			auto hash = 14695981039346656037;
 			for (size_t x = 0; x < count; ++x) {
 				hash ^= value[x];
@@ -88,7 +88,7 @@ namespace dpp {
 		* Caches must contain classes derived from dpp::managed.
 		*/
 		cache() {
-			cache_map = std::make_unique<unordered_set<T*, snowflake>>();
+			cache_map = std::make_unique<unordered_set<snowflake, T*>>();
 		}
 
 		/**
@@ -224,7 +224,7 @@ namespace dpp {
 		 */
 		void rehash() {
 			std::unique_lock l(cache_mutex);
-			unordered_set<value_type, key_type>* n = new unordered_set<value_type, key_type>{};
+			unordered_set<snowflake, T*>* n = new unordered_set<snowflake, T*>{};
 			n->reserve(cache_map->size());
 			for (auto t = cache_map->begin(); t != cache_map->end(); ++t) {
 				n->emplace(std::move(*t));
@@ -254,7 +254,7 @@ namespace dpp {
 		};
 
 	protected:
-		std::unique_ptr<unordered_set<value_type,key_type>> cache_map{};
+		std::unique_ptr<unordered_set<key_type, value_type>> cache_map{};
 		std::shared_mutex cache_mutex{};
 	};
 

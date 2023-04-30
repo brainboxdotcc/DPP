@@ -37,7 +37,7 @@ namespace dpp {
 		constexpr static uint64_t fnvOffsetBasis{ 14695981039346656037ull };
 		constexpr static uint64_t fnvPrime{ 1099511628211ull };
 
-		inline constexpr uint64_t internalHashFunction(const uint8_t* value, size_t count) const;
+		inline constexpr uint64_t internal_hash_function(const uint8_t* value, size_t count) const;
 	};
 
 	template<typename OTy, typename KTy> struct KeyAccessor {
@@ -89,15 +89,14 @@ namespace dpp {
 
 	template<typename OTy, typename KTy, typename KATy = KeyAccessor<OTy, KTy>> class memory_core {
 	public:
-		using value_type = OTy;
 		using key_type = KTy;
+		using value_type = OTy;
 		using key_accessor = KATy;
 		using reference = value_type&;
 		using const_reference = const reference;
 		using pointer = value_type*;
 		using size_type = size_t;
 		using key_hasher = fnv1a_hash<key_type>;
-		using iterator = memory_core_iterator;
 
 		class memory_core_iterator {
 		public:
@@ -133,6 +132,8 @@ namespace dpp {
 			memory_core* core;
 			std::size_t index;
 		};
+
+		using iterator = memory_core_iterator;
 
 		class sentinel_holder {
 		public:
@@ -213,11 +214,11 @@ namespace dpp {
 		}
 
 		inline constexpr void emplace(value_type&& element) noexcept {
-			emplaceInternal(std::forward<value_type>(element));
+			emplace_internal(std::forward<value_type>(element));
 		}
 
 		inline constexpr void emplace(const value_type& element) noexcept {
-			emplaceInternal(element);
+			emplace_internal(element);
 		}
 
 		inline constexpr iterator find(key_type&& key) noexcept {
@@ -356,7 +357,7 @@ namespace dpp {
 			this->resize(newSize);
 		}
 
-		inline constexpr size_t getCapacity() noexcept {
+		inline constexpr size_t get_capacity() noexcept {
 			return this->capacity;
 		}
 
@@ -372,9 +373,9 @@ namespace dpp {
 		size_type capacity{};
 		size_type size{};
 
-		inline constexpr void emplaceInternal(value_type&& element, uint64_t recursionLimit = 1000) noexcept {
+		inline constexpr void emplace_internal(value_type&& element, uint64_t recursionLimit = 1000) noexcept {
 			if (isFull()) {
-				resize(roundUpToCacheLine(capacity * 4), recursionLimit);
+				resize(round_up_to_cache_line(capacity * 4), recursionLimit);
 			}
 			size_type index = key_hasher{}(key_accessor{}(element)) % capacity;
 			size_type currentIndex = index;
@@ -388,17 +389,17 @@ namespace dpp {
 				else {
 					currentIndex = (currentIndex + 1) % capacity;
 					if (currentIndex == index) {
-						resize(roundUpToCacheLine(capacity * 4), recursionLimit);
-						emplaceInternal(std::forward<value_type>(element), recursionLimit);
+						resize(round_up_to_cache_line(capacity * 4), recursionLimit);
+						emplace_internal(std::forward<value_type>(element), recursionLimit);
 						return;
 					}
 				}
 			}
 		}
 
-		inline constexpr void emplaceInternal(const value_type& element, uint64_t recursionLimit = 1000) noexcept {
+		inline constexpr void emplace_internal(const value_type& element, uint64_t recursionLimit = 1000) noexcept {
 			if (isFull()) {
-				resize(roundUpToCacheLine(capacity * 4), recursionLimit);
+				resize(round_up_to_cache_line(capacity * 4), recursionLimit);
 			}
 			size_type index = key_hasher{}(key_accessor{}(element)) % capacity;
 			size_type currentIndex = index;
@@ -413,8 +414,8 @@ namespace dpp {
 				else {
 					currentIndex = (currentIndex + 1) % capacity;
 					if (currentIndex == index) {
-						resize(roundUpToCacheLine(capacity * 4), recursionLimit);
-						emplaceInternal(std::move(newElement), recursionLimit);
+						resize(round_up_to_cache_line(capacity * 4), recursionLimit);
+						emplace_internal(std::move(newElement), recursionLimit);
 						return;
 					}
 				}
@@ -429,23 +430,23 @@ namespace dpp {
 			memory_core<value_type, key_type> newData{ newCapacity };
 			for (size_type x = 0; x < capacity; x++) {
 				if (data[x].operator bool()) {
-					newData.emplaceInternal(data[x].disable(), recursionLimit);
+					newData.emplace_internal(data[x].disable(), recursionLimit);
 				}
 			}
 			std::swap(data, newData.data);
 			std::swap(capacity, newData.capacity);
 		}
 
-		size_type roundUpToCacheLine(size_type size) {
+		size_type round_up_to_cache_line(size_type size) {
 			const size_type multiple = cacheLineSize / sizeof(void*);
 			return (size + multiple - 1) / multiple * multiple;
 		}
 	};
 
-	template<typename OTy, typename KTy, typename KATy = KeyAccessor<OTy, KTy>> class unordered_set {
+	template<typename KTy, typename OTy, typename KATy = KeyAccessor<OTy, KTy>> class unordered_set {
 	public:
-		using value_type = OTy;
 		using key_type = KTy;
+		using value_type = OTy;
 		using reference = value_type&;
 		using const_reference = const reference;
 		using pointer = value_type*;
@@ -527,7 +528,7 @@ namespace dpp {
 		}
 
 		inline constexpr size_type capacity() const noexcept {
-			return data.getCapacity();
+			return data.get_capacity();
 		}
 
 	protected:
