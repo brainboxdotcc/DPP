@@ -18,5 +18,3 @@ To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, fo
 - If you get an error that a dll is missing (e.g. `dpp.dll` or `opus.dll`) when starting your bot, then simply copy all dlls from the **bin** directory of where you extracted the DPP zip file to, into the same directory where your bot's executable is. You only need to do this once. There should be several of these dll files: `dpp.dll`, `zlib.dll`, `openssl.dll` and `libcrypto.dll` (or similarly named SSL related files), `libsodium.dll` and `opus.dll`. Note the template project does this for you, so you should never encounter this issue.
 - Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
 
-
-*Note: If you are on windows, it's highly likely that* [*WSL*](/make_a_bot/windows_wsl.md) *is a better option for you.*
