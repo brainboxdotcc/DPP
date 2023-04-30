@@ -65,7 +65,7 @@ void guild_role_delete::handle(discord_client* client, json &j, const std::strin
 				if (i != g->roles.end()) {
 					g->roles.erase(i);
 				}
-				dpp::get_role_cache()->remove(r);
+				dpp::get_role_cache()->remove(r->id);
 			}
 		}
 	}

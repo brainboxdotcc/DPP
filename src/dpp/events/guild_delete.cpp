@@ -44,12 +44,12 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "id"));
 	if (g) {
 		if (!bool_not_null(&d, "unavailable")) {
-			dpp::get_guild_cache()->remove(g);
+			dpp::get_guild_cache()->remove(g->id);
 			if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
 				for (auto & ee : g->emojis) {
 					dpp::emoji* fe = dpp::find_emoji(ee);
 					if (fe) {
-						dpp::get_emoji_cache()->remove(fe);
+						dpp::get_emoji_cache()->remove(fe->id);
 					}
 				}
 			}
@@ -57,14 +57,14 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 				for (auto & rr : g->roles) {
 					dpp::role* role = dpp::find_role(rr);
 					if (role) {
-						dpp::get_role_cache()->remove(role);
+						dpp::get_role_cache()->remove(role->id);
 					}
 				}
 			}
 			for (auto & cc : g->channels) {
 				dpp::channel* ch = dpp::find_channel(cc);
 				if (ch) {
-					dpp::get_channel_cache()->remove(ch);
+					dpp::get_channel_cache()->remove(ch->id);
 				}
 			}
 			if (client->creator->cache_policy.user_policy != dpp::cp_none) {
@@ -73,7 +73,7 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 					if (u) {
 						u->refcount--;
 						if (u->refcount < 1) {
-							dpp::get_user_cache()->remove(u);
+							dpp::get_user_cache()->remove(u->id);
 						}
 					}
 				}

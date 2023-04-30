@@ -16,3 +16,4 @@ tags
 .cache
 src/dpp/dpp.rc
 /main
+out/

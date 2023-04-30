@@ -560,9 +560,9 @@ uint64_t discord_client::get_guild_count() {
 	dpp::cache<guild>* c = dpp::get_guild_cache();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
-	std::unordered_map<snowflake, guild*>& gc = c->get_container();
+	unordered_set<guild*, snowflake>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
-		dpp::guild* gp = (dpp::guild*)g->second;
+		dpp::guild* gp = (dpp::guild*)*g;
 		if (gp->shard_id == this->shard_id) {
 			total++;
 		}
@@ -575,9 +575,9 @@ uint64_t discord_client::get_member_count() {
 	dpp::cache<guild>* c = dpp::get_guild_cache();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
-	std::unordered_map<snowflake, guild*>& gc = c->get_container();
+	unordered_set<guild*, snowflake>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
-		dpp::guild* gp = (dpp::guild*)g->second;
+		dpp::guild* gp = (dpp::guild*)*g;
 		if (gp->shard_id == this->shard_id) {
 			if (creator->cache_policy.user_policy == dpp::cp_aggressive) {
 				/* We can use actual member count if we are using full user caching */
@@ -596,9 +596,9 @@ uint64_t discord_client::get_channel_count() {
 	dpp::cache<guild>* c = dpp::get_guild_cache();
 	/* IMPORTANT: We must lock the container to iterate it */
 	std::shared_lock l(c->get_mutex());
-	std::unordered_map<snowflake, guild*>& gc = c->get_container();
+	unordered_set<guild*, snowflake>& gc = c->get_container();
 	for (auto g = gc.begin(); g != gc.end(); ++g) {
-		dpp::guild* gp = (dpp::guild*)g->second;
+		dpp::guild* gp = (dpp::guild*)*g;
 		if (gp->shard_id == this->shard_id) {
 			total += gp->channels.size();
 		}

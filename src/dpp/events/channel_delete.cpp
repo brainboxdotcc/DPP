@@ -55,7 +55,7 @@ void channel_delete::handle(discord_client* client, json &j, const std::string &
 				client->creator->on_channel_delete.call(cd);
 			}
 		}
-		dpp::get_channel_cache()->remove(c);
+		dpp::get_channel_cache()->remove(c->id);
 	}
 }
 
