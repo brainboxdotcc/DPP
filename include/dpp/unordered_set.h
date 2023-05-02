@@ -31,7 +31,7 @@ namespace dpp {
 	template<typename OTy = void> struct fnv1a_hash {
 		inline uint64_t operator()(const OTy& data) const;
 
-		inline uint64_t operator()(OTy& data) const;
+		inline uint64_t operator()(OTy&& data) const;
 
 	protected:
 		static constexpr uint64_t fnvOffsetBasis{ 14695981039346656037ull };
@@ -40,7 +40,7 @@ namespace dpp {
 		inline uint64_t internal_hash_function(const uint8_t* value, size_t count) const;
 	};
 
-	template<typename OTy, typename KTy> struct key_accessor {
+	template<typename KTy, typename OTy> struct key_accessor {
 		KTy& operator()(const OTy& other) {
 			return other->id;
 		}
@@ -87,7 +87,7 @@ namespace dpp {
 		}
 	};
 
-	template<typename OTy, typename KTy, typename KATy = key_accessor<OTy, KTy>> class memory_core {
+	template<typename KTy, typename OTy, typename KATy = key_accessor<KTy, OTy>> class memory_core {
 	public:
 		using key_type = KTy;
 		using value_type = OTy;
@@ -128,7 +128,7 @@ namespace dpp {
 				return core->data[index];
 			}
 
-		private:
+		protected:
 			memory_core* core;
 			std::size_t index;
 		};
@@ -196,7 +196,7 @@ namespace dpp {
 
 		inline memory_core& operator=(const memory_core& other) noexcept {
 			if (this != &other) {
-				memory_core<value_type, key_type> newData{ other.capacity };
+				memory_core<key_type, value_type> newData{ other.capacity };
 				for (size_t x = 0; x < other.capacity; ++x) {
 					if (other.data[x].operator bool()) {
 						newData.emplace(other.data[x].disable());
@@ -433,9 +433,9 @@ namespace dpp {
 		inline void resize(size_type newCapacity, uint64_t recursion_limit = 1000) {
 			--recursion_limit;
 			if (recursion_limit == 0) {
-				throw std::runtime_error{ "Sorry, but the max number of recursive resizes have been exceeded." };
+				throw std::runtime_error{ "Sorry, but the max number of recursive resizes has been exceeded." };
 			}
-			memory_core<value_type, key_type> newData{ newCapacity };
+			memory_core<key_type, value_type> newData{ newCapacity };
 			for (size_type x = 0; x < capacity; x++) {
 				if (data[x].operator bool()) {
 					newData.emplace_internal(data[x].disable(), recursion_limit);
@@ -451,7 +451,7 @@ namespace dpp {
 		}
 	};
 
-	template<typename KTy, typename OTy, typename KATy = key_accessor<OTy, KTy>> class unordered_set {
+	template<typename KTy, typename OTy, typename KATy = key_accessor<KTy, OTy>> class unordered_set {
 	public:
 		using key_type = KTy;
 		using value_type = OTy;
@@ -461,7 +461,7 @@ namespace dpp {
 		using key_accessor = KATy;
 		using size_type = size_t;
 		using hasher = fnv1a_hash<value_type>;
-		using iterator = typename memory_core<value_type, key_type>::memory_core_iterator;
+		using iterator = typename memory_core<key_type, value_type>::memory_core_iterator;
 
 		inline unordered_set() : data{ 5 } {};
 
@@ -472,28 +472,9 @@ namespace dpp {
 			return *this;
 		}
 
-		inline unordered_set(unordered_set&& other) noexcept {
-			*this = std::move(other);
-		}
-
-		inline unordered_set& operator=(const unordered_set& other) noexcept {
-			if (this != &other) {
-				this->data = other.data;
-			}
-			return *this;
-		}
-
-		inline unordered_set(const unordered_set& other) noexcept {
-			*this = other;
-		}
-
-		inline iterator begin() noexcept {
-			return iterator(data.begin());
-		}
-
-		inline iterator end() noexcept {
-			return iterator(data.end());
-		}
+		inline unordered_set(unordered_set&& other) noexcept = default;
+		inline unordered_set& operator=(const unordered_set& other) noexcept = default;
+		inline unordered_set(const unordered_set& other) noexcept = default;
 
 		inline void emplace(value_type&& element) noexcept {
 			data.emplace(std::forward<value_type>(element));
@@ -503,24 +484,52 @@ namespace dpp {
 			data.emplace(element);
 		}
 
-		inline bool contains(key_type element) noexcept {
+		inline bool contains(key_type&& element) noexcept {
+			return data.contains(std::forward<key_type>(element));
+		}
+
+		inline bool contains(const key_type& element) noexcept {
 			return data.contains(element);
 		}
 
-		inline void erase(key_type element) noexcept {
+		inline void erase(key_type&& element) noexcept {
+			data.erase(std::forward<key_type>(element));
+		}
+
+		inline void erase(const key_type& element) noexcept {
 			data.erase(element);
 		}
 
 		inline iterator find(key_type&& dataToFind) noexcept {
+			return data.find(std::forward<key_type>(dataToFind));
+		}
+
+		inline iterator find(const key_type& dataToFind) noexcept {
 			return data.find(dataToFind);
 		}
 
-		inline iterator find(key_type dataToFind) noexcept {
-			return data.find(dataToFind);
+		inline reference operator[](key_type&& dataToFind) noexcept {
+			return *data.find(std::forward<key_type>(dataToFind));
 		}
 
-		inline reference operator[](key_type dataToFind) noexcept {
+		inline reference operator[](const key_type& dataToFind) noexcept {
 			return *data.find(dataToFind);
+		}
+
+		inline iterator begin() const noexcept {
+			return iterator(data.begin());
+		}
+
+		inline iterator end() const noexcept {
+			return iterator(data.end());
+		}
+
+		inline iterator begin() noexcept {
+			return iterator(data.begin());
+		}
+
+		inline iterator end() noexcept {
+			return iterator(data.end());
 		}
 
 		inline size_type size() const noexcept {
@@ -540,7 +549,7 @@ namespace dpp {
 		}
 
 	protected:
-		memory_core<value_type, key_type> data{};
+		memory_core<key_type, value_type> data{};
 	};
 
 }// namespace DiscordCoreAPI
