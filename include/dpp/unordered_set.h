@@ -373,64 +373,72 @@ namespace dpp {
 		size_type capacity{};
 		size_type size{};
 
-		inline void emplace_internal(value_type&& element, uint64_t recursionLimit = 1000) noexcept {
+		inline void emplace_internal(value_type&& element, uint64_t recursion_limit = 1000) noexcept {
 			if (isFull()) {
-				resize(round_up_to_cache_line(capacity * 4), recursionLimit);
+				resize(round_up_to_cache_line(capacity * 4), recursion_limit);
 			}
 			size_type index = key_hasher{}(key_accessor{}(element)) % capacity;
 			size_type currentIndex = index;
 			bool inserted = false;
 			while (!inserted) {
-				if (!data[currentIndex].operator bool() || key_accessor{}(data[currentIndex].operator reference()) == key_accessor{}(element)) {
+				if (!data[currentIndex].operator bool()) {
 					data[currentIndex].activate(std::forward<value_type>(element));
 					size++;
+					inserted = true;
+				}
+				else if (key_accessor{}(data[currentIndex].operator reference()) == key_accessor{}(element)) {
+					data[currentIndex].activate(std::forward<value_type>(element));
 					inserted = true;
 				}
 				else {
 					currentIndex = (currentIndex + 1) % capacity;
 					if (currentIndex == index) {
-						resize(round_up_to_cache_line(capacity * 4), recursionLimit);
-						emplace_internal(std::forward<value_type>(element), recursionLimit);
+						resize(round_up_to_cache_line(capacity * 4), recursion_limit);
+						emplace_internal(std::forward<value_type>(element), recursion_limit);
 						return;
 					}
 				}
 			}
 		}
 
-		inline void emplace_internal(const value_type& element, uint64_t recursionLimit = 1000) noexcept {
+		inline void emplace_internal(const value_type& element, uint64_t recursion_limit = 1000) noexcept {
 			if (isFull()) {
-				resize(round_up_to_cache_line(capacity * 4), recursionLimit);
+				resize(round_up_to_cache_line(capacity * 4), recursion_limit);
 			}
 			size_type index = key_hasher{}(key_accessor{}(element)) % capacity;
 			size_type currentIndex = index;
 			bool inserted = false;
 			value_type newElement{ element };
 			while (!inserted) {
-				if (!data[currentIndex].operator bool() || key_accessor{}(data[currentIndex].operator reference()) == key_accessor{}(element)) {
-					data[currentIndex].activate(std::move(newElement));
+				if (!data[currentIndex].operator bool()) {
+					data[currentIndex].activate(std::forward<value_type>(element));
 					size++;
+					inserted = true;
+				}
+				else if (key_accessor{}(data[currentIndex].operator reference()) == key_accessor{}(element)) {
+					data[currentIndex].activate(std::forward<value_type>(element));
 					inserted = true;
 				}
 				else {
 					currentIndex = (currentIndex + 1) % capacity;
 					if (currentIndex == index) {
-						resize(round_up_to_cache_line(capacity * 4), recursionLimit);
-						emplace_internal(std::move(newElement), recursionLimit);
+						resize(round_up_to_cache_line(capacity * 4), recursion_limit);
+						emplace_internal(std::forward<value_type>(element), recursion_limit);
 						return;
 					}
 				}
 			}
 		}
 
-		inline void resize(size_type newCapacity, uint64_t recursionLimit = 1000) {
-			--recursionLimit;
-			if (recursionLimit == 0) {
+		inline void resize(size_type newCapacity, uint64_t recursion_limit = 1000) {
+			--recursion_limit;
+			if (recursion_limit == 0) {
 				throw std::runtime_error{ "Sorry, but the max number of recursive resizes have been exceeded." };
 			}
 			memory_core<value_type, key_type> newData{ newCapacity };
 			for (size_type x = 0; x < capacity; x++) {
 				if (data[x].operator bool()) {
-					newData.emplace_internal(data[x].disable(), recursionLimit);
+					newData.emplace_internal(data[x].disable(), recursion_limit);
 				}
 			}
 			std::swap(data, newData.data);
