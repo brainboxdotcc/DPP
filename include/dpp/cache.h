@@ -42,29 +42,6 @@ extern DPP_EXPORT std::mutex deletion_mutex;
 /** forward declaration */
 class guild_member;
 
-/*
- * Specialized fnv1a_hash class for hashing the values for indexing into the set.
- */
-template<> struct fnv1a_hash<snowflake> {
-	uint64_t operator()(const snowflake& data) const {
-		auto new_value = static_cast<uint64_t>(data);
-		return internal_hash_function(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
-	}
-
-	uint64_t operator()(snowflake&& data) const {
-		auto new_value = static_cast<uint64_t>(data);
-		return internal_hash_function(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
-	}
-
-	size_t internal_hash_function(const uint8_t* value, size_t count) const {
-		auto hash = 14695981039346656037;
-		for (size_t x = 0; x < count; ++x) {
-			hash ^= value[x];
-			hash *= 1099511628211;
-		}
-		return hash;
-	}
-};
 
 /**
  * @brief A cache object maintains a cache of dpp::managed objects.

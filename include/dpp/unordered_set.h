@@ -29,15 +29,28 @@
 namespace dpp {
 
 	template<typename OTy = void> struct fnv1a_hash {
-		inline uint64_t operator()(const OTy& data) const;
+		uint64_t operator()(const snowflake& data) const {
+			auto new_value = static_cast<OTy>(data);
+			return internal_hash_function(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
+		}
 
-		inline uint64_t operator()(OTy&& data) const;
+		uint64_t operator()(snowflake&& data) const {
+			auto new_value = static_cast<OTy>(data);
+			return internal_hash_function(reinterpret_cast<const uint8_t*>(&new_value), sizeof(new_value));
+		}
 
 	protected:
-		static constexpr uint64_t fnvOffsetBasis{ 14695981039346656037ull };
-		static constexpr uint64_t fnvPrime{ 1099511628211ull };
+		static constexpr uint64_t fnv_offset_basis{ 14695981039346656037ull };
+		static constexpr uint64_t fnv_prime{ 1099511628211ull };
 
-		inline uint64_t internal_hash_function(const uint8_t* value, size_t count) const;
+		size_t internal_hash_function(const uint8_t* value, size_t count) const {
+			auto hash = fnv_offset_basis;
+			for (size_t x = 0; x < count; ++x) {
+				hash ^= value[x];
+				hash *= fnv_prime;
+			}
+			return hash;
+		}
 	};
 
 	template<typename KTy, typename OTy> struct key_accessor {
@@ -78,8 +91,8 @@ namespace dpp {
 			operator delete[](p);
 		}
 
-		template<typename... Args> inline void construct(value_type* p, Args&&... args) noexcept {
-			new (static_cast<void*>(p)) value_type(std::forward<Args>(args)...);
+		template<typename... args> inline void construct(value_type* p, args&&... args_new) noexcept {
+			new (static_cast<void*>(p)) value_type(std::forward<args>(args_new)...);
 		}
 
 		inline void destroy(value_type* p) noexcept {
@@ -145,32 +158,32 @@ namespace dpp {
 			inline sentinel_holder(const sentinel_holder& other) = delete;
 
 			inline operator bool() const noexcept {
-				return isItActive;
+				return is_it_active;
 			}
 
 			inline operator reference() noexcept {
 				return object;
 			}
 
-			inline void activate(value_type&& data) noexcept {
-				object = std::forward<value_type>(data);
-				isItActive = true;
+			inline void activate(value_type&& value) noexcept {
+				object = std::forward<value_type>(value);
+				is_it_active = true;
 			}
 
 			inline value_type&& disable() noexcept {
-				isItActive = false;
+				is_it_active = false;
 				return std::move(object);
 			}
 
 		protected:
-			bool isItActive{ false };
+			bool is_it_active{ false };
 			value_type object{};
 		};
 
 		using sentinel_allocator = object_allocator<sentinel_holder>;
 
-		inline memory_core(size_type capacityNew) : capacity(capacityNew), size(0), data(sentinel_allocator{}.allocate(capacityNew)) {
-			for (size_t x = 0; x < capacityNew; ++x) {
+		inline memory_core(size_type new_capacity) : capacity(new_capacity), size(0), data(sentinel_allocator{}.allocate(new_capacity)) {
+			for (size_t x = 0; x < new_capacity; ++x) {
 				sentinel_allocator{}.construct(&data[x]);
 			}
 		};
@@ -190,9 +203,7 @@ namespace dpp {
 			return *this;
 		}
 
-		inline memory_core(memory_core&& other) noexcept {
-			*this = std::move(other);
-		}
+		inline memory_core(memory_core&& other) noexcept = default;
 
 		inline memory_core& operator=(const memory_core& other) noexcept {
 			if (this != &other) {
@@ -209,27 +220,25 @@ namespace dpp {
 			return *this;
 		}
 
-		inline memory_core(const memory_core& other) noexcept {
-			*this = other;
+		inline memory_core(const memory_core& other) noexcept = default;
+
+		inline void emplace(value_type&& value) noexcept {
+			emplace_internal(std::forward<value_type>(value));
 		}
 
-		inline void emplace(value_type&& element) noexcept {
-			emplace_internal(std::forward<value_type>(element));
-		}
-
-		inline void emplace(const value_type& element) noexcept {
-			emplace_internal(element);
+		inline void emplace(const value_type& value) noexcept {
+			emplace_internal(value);
 		}
 
 		inline iterator find(key_type&& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
-			size_type currentIndex{};
-			while (currentIndex < capacity) {
+			size_type current_index{};
+			while (current_index < capacity) {
 				if (data[index].operator bool() && key_accessor {}(data[index].operator reference()) == key) {
 					return iterator{ this, index };
 				}
 				index = (index + 1) % capacity;
-				++currentIndex;
+				++current_index;
 			}
 
 			return end();
@@ -237,13 +246,13 @@ namespace dpp {
 
 		inline iterator find(const key_type& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
-			size_type currentIndex{};
-			while (currentIndex < capacity) {
+			size_type current_index{};
+			while (current_index < capacity) {
 				if (data[index].operator bool() && key_accessor {}(data[index].operator reference()) == key) {
 					return iterator{ this, index };
 				}
 				index = (index + 1) % capacity;
-				++currentIndex;
+				++current_index;
 			}
 
 			return end();
@@ -251,13 +260,13 @@ namespace dpp {
 
 		inline bool contains(key_type&& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
-			size_type currentIndex{};
-			while (currentIndex < capacity) {
+			size_type current_index{};
+			while (current_index < capacity) {
 				if (data[index].operator bool() && key_accessor {}(data[index].operator reference()) == key) {
 					return true;
 				}
 				index = (index + 1) % capacity;
-				++currentIndex;
+				++current_index;
 			}
 
 			return false;
@@ -265,13 +274,13 @@ namespace dpp {
 
 		inline bool contains(const key_type& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
-			size_type currentIndex{};
-			while (currentIndex < capacity) {
+			size_type current_index{};
+			while (current_index < capacity) {
 				if (data[index].operator bool() && key_accessor {}(data[index].operator reference()) == key) {
 					return true;
 				}
 				index = (index + 1) % capacity;
-				++currentIndex;
+				++current_index;
 			}
 
 			return false;
@@ -279,8 +288,8 @@ namespace dpp {
 
 		inline void erase(key_type&& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
-			size_type currentIndex{};
-			while (currentIndex < capacity) {
+			size_type current_index{};
+			while (current_index < capacity) {
 				if (data[index].operator bool() && key_accessor {}(data[index].operator reference()) == key) {
 					data[index].disable();
 					size--;
@@ -290,14 +299,14 @@ namespace dpp {
 					return;
 				}
 				index = (index + 1) % capacity;
-				++currentIndex;
+				++current_index;
 			}
 		}
 
 		inline void erase(const key_type& key) noexcept {
 			size_type index = key_hasher{}(key) % capacity;
-			size_type currentIndex{};
-			while (currentIndex < capacity) {
+			size_type current_index{};
+			while (current_index < capacity) {
 				if (data[index].operator bool() && key_accessor {}(data[index].operator reference()) == key) {
 					data[index].disable();
 					size--;
@@ -307,7 +316,7 @@ namespace dpp {
 					return;
 				}
 				index = (index + 1) % capacity;
-				++currentIndex;
+				++current_index;
 			}
 		}
 
@@ -353,8 +362,8 @@ namespace dpp {
 			return static_cast<float>(size) >= static_cast<float>(capacity) * 0.75f;
 		}
 
-		inline void reserve(size_t newSize) noexcept {
-			this->resize(newSize);
+		inline void reserve(size_t new_size) noexcept {
+			this->resize(new_size);
 		}
 
 		inline size_t get_capacity() noexcept {
@@ -368,74 +377,74 @@ namespace dpp {
 		};
 
 	protected:
-		static constexpr size_type cacheLineSize{ 64 };
+		static constexpr size_type cache_line_size{ 64 };
 		sentinel_holder* data{};
 		size_type capacity{};
 		size_type size{};
 
-		inline void emplace_internal(value_type&& element, uint64_t recursion_limit = 1000) noexcept {
+		inline void emplace_internal(value_type&& value, uint64_t recursion_limit = 1000) noexcept {
 			if (isFull()) {
 				resize(round_up_to_cache_line(capacity * 4), recursion_limit);
 			}
-			size_type index = key_hasher{}(key_accessor{}(element)) % capacity;
-			size_type currentIndex = index;
+			size_type index = key_hasher{}(key_accessor{}(value)) % capacity;
+			size_type current_index = index;
 			bool inserted = false;
 			while (!inserted) {
-				if (!data[currentIndex].operator bool()) {
-					data[currentIndex].activate(std::forward<value_type>(element));
+				if (!data[current_index].operator bool()) {
+					data[current_index].activate(std::forward<value_type>(value));
 					size++;
 					inserted = true;
 				}
-				else if (key_accessor{}(data[currentIndex].operator reference()) == key_accessor{}(element)) {
-					data[currentIndex].activate(std::forward<value_type>(element));
+				else if (key_accessor{}(data[current_index].operator reference()) == key_accessor{}(value)) {
+					data[current_index].activate(std::forward<value_type>(value));
 					inserted = true;
 				}
 				else {
-					currentIndex = (currentIndex + 1) % capacity;
-					if (currentIndex == index) {
+					current_index = (current_index + 1) % capacity;
+					if (current_index == index) {
 						resize(round_up_to_cache_line(capacity * 4), recursion_limit);
-						emplace_internal(std::forward<value_type>(element), recursion_limit);
+						emplace_internal(std::forward<value_type>(value), recursion_limit);
 						return;
 					}
 				}
 			}
 		}
 
-		inline void emplace_internal(const value_type& element, uint64_t recursion_limit = 1000) noexcept {
+		inline void emplace_internal(const value_type& value, uint64_t recursion_limit = 1000) noexcept {
 			if (isFull()) {
 				resize(round_up_to_cache_line(capacity * 4), recursion_limit);
 			}
-			size_type index = key_hasher{}(key_accessor{}(element)) % capacity;
-			size_type currentIndex = index;
+			size_type index = key_hasher{}(key_accessor{}(value)) % capacity;
+			size_type current_index = index;
 			bool inserted = false;
-			value_type newElement{ element };
+			value_type new_element{ value };
 			while (!inserted) {
-				if (!data[currentIndex].operator bool()) {
-					data[currentIndex].activate(std::forward<value_type>(element));
+				if (!data[current_index].operator bool()) {
+					data[current_index].activate(std::forward<value_type>(new_element));
 					size++;
 					inserted = true;
 				}
-				else if (key_accessor{}(data[currentIndex].operator reference()) == key_accessor{}(element)) {
-					data[currentIndex].activate(std::forward<value_type>(element));
+				else if (key_accessor{}(data[current_index].operator reference()) == key_accessor{}(new_element)) {
+					data[current_index].activate(std::forward<value_type>(new_element));
 					inserted = true;
 				}
 				else {
-					currentIndex = (currentIndex + 1) % capacity;
-					if (currentIndex == index) {
+					current_index = (current_index + 1) % capacity;
+					if (current_index == index) {
 						resize(round_up_to_cache_line(capacity * 4), recursion_limit);
-						emplace_internal(std::forward<value_type>(element), recursion_limit);
+						emplace_internal(std::forward<value_type>(new_element), recursion_limit);
 						return;
 					}
 				}
 			}
 		}
 
-		inline void resize(size_type newCapacity, uint64_t recursion_limit = 1000) {
+		inline void resize(size_type new_capacity, uint64_t recursion_limit = 1000) {
 			--recursion_limit;
 			if (recursion_limit == 0) {
 				throw std::runtime_error{ "Sorry, but the max number of recursive resizes has been exceeded." };
 			}
-			memory_core<key_type, value_type> newData{ newCapacity };
+			memory_core<key_type, value_type> newData{ new_capacity };
 			for (size_type x = 0; x < capacity; x++) {
 				if (data[x].operator bool()) {
 					newData.emplace_internal(data[x].disable(), recursion_limit);
@@ -446,7 +455,7 @@ namespace dpp {
 		}
 
 		size_type round_up_to_cache_line(size_type size) {
-			const size_type multiple = cacheLineSize / sizeof(void*);
+			const size_type multiple = cache_line_size / sizeof(void*);
 			return (size + multiple - 1) / multiple * multiple;
 		}
 	};
@@ -476,44 +485,44 @@ namespace dpp {
 		inline unordered_set& operator=(const unordered_set& other) noexcept = default;
 		inline unordered_set(const unordered_set& other) noexcept = default;
 
-		inline void emplace(value_type&& element) noexcept {
-			data.emplace(std::forward<value_type>(element));
+		inline void emplace(value_type&& value) noexcept {
+			data.emplace(std::forward<value_type>(value));
 		}
 
-		inline void emplace(const value_type& element) noexcept {
-			data.emplace(element);
+		inline void emplace(const value_type& value) noexcept {
+			data.emplace(value);
 		}
 
-		inline bool contains(key_type&& element) noexcept {
-			return data.contains(std::forward<key_type>(element));
+		inline bool contains(key_type&& key) noexcept {
+			return data.contains(std::forward<key_type>(key));
 		}
 
-		inline bool contains(const key_type& element) noexcept {
-			return data.contains(element);
+		inline bool contains(const key_type& key) noexcept {
+			return data.contains(key);
 		}
 
-		inline void erase(key_type&& element) noexcept {
-			data.erase(std::forward<key_type>(element));
+		inline void erase(key_type&& key) noexcept {
+			data.erase(std::forward<key_type>(key));
 		}
 
-		inline void erase(const key_type& element) noexcept {
-			data.erase(element);
+		inline void erase(const key_type& key) noexcept {
+			data.erase(key);
 		}
 
-		inline iterator find(key_type&& dataToFind) noexcept {
-			return data.find(std::forward<key_type>(dataToFind));
+		inline iterator find(key_type&& key) noexcept {
+			return data.find(std::forward<key_type>(key));
 		}
 
-		inline iterator find(const key_type& dataToFind) noexcept {
-			return data.find(dataToFind);
+		inline iterator find(const key_type& key) noexcept {
+			return data.find(key);
 		}
 
-		inline reference operator[](key_type&& dataToFind) noexcept {
-			return *data.find(std::forward<key_type>(dataToFind));
+		inline reference operator[](key_type&& key) noexcept {
+			return *data.find(std::forward<key_type>(key));
 		}
 
-		inline reference operator[](const key_type& dataToFind) noexcept {
-			return *data.find(dataToFind);
+		inline reference operator[](const key_type& key) noexcept {
+			return *data.find(key);
 		}
 
 		inline iterator begin() const noexcept {
@@ -536,8 +545,8 @@ namespace dpp {
 			return data.getSize();
 		}
 
-		inline void reserve(size_t newSize) noexcept {
-			data.reserve(newSize);
+		inline void reserve(size_t new_size) noexcept {
+			data.reserve(new_size);
 		}
 
 		inline bool empty() const noexcept {
