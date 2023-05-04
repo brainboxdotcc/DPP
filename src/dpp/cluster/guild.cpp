@@ -96,7 +96,7 @@ void cluster::guild_get_bans(snowflake guild_id, snowflake before, snowflake aft
 		{"after", after},
 		{"limit", limit},
 	});
-	rest_request_list<ban>(this, API_PATH "/guilds", std::to_string(guild_id), "bans" + parameters, m_get, "", callback, "user_id");
+	rest_request_list<ban>(this, API_PATH "/guilds", std::to_string(guild_id), "bans" + parameters, m_get, "", callback);
 }
 
 

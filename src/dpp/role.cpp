@@ -311,6 +311,18 @@ bool role::has_moderate_members() const {
 	return has_administrator() || permissions.has(p_moderate_members);
 }
 
+bool role::has_view_creator_monetization_analytics() const {
+	return has_administrator() || permissions.has(p_view_creator_monetization_analytics);
+}
+
+bool role::has_use_soundboard() const {
+	return has_administrator() || permissions.has(p_use_soundboard);
+}
+
+bool role::has_send_voice_messages() const {
+	return has_administrator() || permissions.has(p_send_voice_messages);
+}
+
 role& role::set_name(const std::string& n) {
 	name = utility::validate(n, 1, 100, "Role name too short");
 	return *this;

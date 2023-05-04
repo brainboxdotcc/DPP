@@ -172,6 +172,35 @@ template<> inline void rest_request_list<voiceregion>(dpp::cluster* c, const cha
 		}
 	});
 }
+/**
+ * @brief Templated REST request helper to save on typing (for returned lists, specialised for bans)
+ *
+ * @tparam T singular type to return in lambda callback
+ * @tparam T map type to return in lambda callback
+ * @param c calling cluster
+ * @param basepath base path for API call
+ * @param major major API function
+ * @param minor minor API function
+ * @param method HTTP method
+ * @param postdata Post data or empty string
+ * @param key Key name of elements in the json list
+ * @param callback Callback lambda
+ */
+template<> inline void rest_request_list<ban>(dpp::cluster* c, const char* basepath, const std::string &major, const std::string &minor, http_method method, const std::string& postdata, command_completion_event_t callback, const std::string& key) {
+	c->post_rest(basepath, major, minor, method, postdata, [c, callback](json &j, const http_request_completion_t& http) {
+		std::unordered_map<snowflake, ban> list;
+		confirmation_callback_t e(c, confirmation(), http);
+		if (!e.is_error()) {
+			for (auto & curr_item : j) {
+				ban curr_ban = ban().fill_from_json(&curr_item);
+				list[curr_ban.user_id] = curr_ban;
+			}
+		}
+		if (callback) {
+			callback(confirmation_callback_t(c, list, http));
+		}
+	});
+}
 
 /**
  * @brief Templated REST request helper to save on typing (for returned lists, specialised for objects which doesn't have ids)

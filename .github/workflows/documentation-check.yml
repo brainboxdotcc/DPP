@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout D++
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Check docs spelling
         run: npx -y cspell lint --language-id=cpp --no-progress --no-summary --show-context --show-suggestions --relative --color docpages/*.md include/dpp/*.h

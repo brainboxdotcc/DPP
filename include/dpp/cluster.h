@@ -1169,8 +1169,9 @@ public:
 	 * @param callback Function to call when the HTTP call completes. The callback parameter will contain amongst other things, the decoded json.
 	 * @param filename Filename to post for POST requests (for uploading files)
 	 * @param filecontent File content to post for POST requests (for uploading files)
+	 * @param filemimetype File content to post for POST requests (for uploading files)
 	 */
-	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
+	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "");
 
 	/**
 	 * @brief Post a multipart REST request. Where possible use a helper method instead like message_create
@@ -1183,8 +1184,9 @@ public:
 	 * @param callback Function to call when the HTTP call completes. The callback parameter will contain amongst other things, the decoded json.
 	 * @param filename List of filenames to post for POST requests (for uploading files)
 	 * @param filecontent List of file content to post for POST requests (for uploading files)
+	 * @param filemimetypes List of mime types for each file to post for POST requests (for uploading files)
 	 */
-	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {});
+	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string>& filecontent = {}, const std::vector<std::string>& filemimetypes = {});
 
 	/**
 	 * @brief Make a HTTP(S) request. For use when wanting asynchronous access to HTTP APIs outside of Discord.
@@ -1223,7 +1225,8 @@ public:
 
 	/**
 	 * @brief Create a followup message to a slash command
-	 * 
+	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
 	 * @param token Token for the interaction webhook
 	 * @param m followup message to create
 	 * @param callback Function to call when the API call completes.
@@ -1244,8 +1247,9 @@ public:
 	void interaction_followup_edit_original(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief 
-	 * 
+	 * @brief Delete the initial interaction response
+	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
 	 * @param token Token for the interaction webhook
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1255,6 +1259,8 @@ public:
 	/**
 	 * @brief Edit followup message to a slash command
 	 * The message ID in the message you pass should be correctly set to that of a followup message you previously sent
+	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
 	 * @param token Token for the interaction webhook
 	 * @param m message to edit, the ID should be set
 	 * @param callback Function to call when the API call completes.
@@ -1264,6 +1270,8 @@ public:
 
 	/**
 	 * @brief Get the followup message to a slash command
+	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
 	 * @param token Token for the interaction webhook
 	 * @param message_id message to retrieve
 	 * @param callback Function to call when the API call completes.
@@ -2341,7 +2349,7 @@ public:
 	/**
 	 * @brief Get all emojis for a guild
 	 *
-	 * @see https://discord.com/developers/docs/resources/emoji#get-guild-emojis
+	 * @see https://discord.com/developers/docs/resources/emoji#list-guild-emojis
 	 * @param guild_id Guild ID to get emojis for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2376,7 +2384,7 @@ public:
 	 * @brief Edit a single emoji.
 	 * 
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
-	 * @see https://discord.com/developers/docs/resources/emoji#get-guild-emoji
+	 * @see https://discord.com/developers/docs/resources/emoji#modify-guild-emoji
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to edit emoji on
 	 * @param newemoji Emoji to edit

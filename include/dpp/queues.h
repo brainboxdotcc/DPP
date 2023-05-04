@@ -149,6 +149,8 @@ public:
 	std::vector<std::string> file_name;
 	/** @brief Upload file contents (binary) */
 	std::vector<std::string> file_content;
+	/** @brief Upload file mime types (application/octet-stream if unspecified) */
+	std::vector<std::string> file_mimetypes;
 	/** @brief Request mime type */
 	std::string mimetype;
 	/** @brief Request headers (non-discord requests only) */
@@ -166,8 +168,9 @@ public:
 	 * @param audit_reason Audit log reason to send, empty to send none
 	 * @param filename The filename (server side) of any uploaded file
 	 * @param filecontent The binary content of any uploaded file for the request
+	 * @param filemimetype The MIME type of any uploaded file for the request
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::string &filename = "", const std::string &filecontent = "");
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "");
 
 	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
@@ -179,8 +182,9 @@ public:
 	 * @param audit_reason Audit log reason to send, empty to send none
 	 * @param filename The filename (server side) of any uploaded file
 	 * @param filecontent The binary content of any uploaded file for the request
+	 * @param filemimetypes The MIME type of any uploaded file for the request
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {});
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {}, const std::vector<std::string> &filemimetypes = {});
 
 	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().

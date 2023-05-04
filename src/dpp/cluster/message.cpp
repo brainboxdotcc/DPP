@@ -40,7 +40,7 @@ void cluster::message_create(const message &m, command_completion_event_t callba
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 
@@ -116,7 +116,7 @@ void cluster::message_edit(const message &m, command_completion_event_t callback
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 

@@ -73,6 +73,10 @@ Where discord provide a name in PascalCase we should stick as closely to that na
 ## Don't introduce any platform-specific code
 Do not introduce platform specific (e.g. windows only) code or libc functions. If you really must use these functions safely wrap them e.g. in `#ifdef _WIN32` and provide a cross-platform alternative so that it works for everyone.
 
+## C++ version
+
+The code must work with the C++17 standard. 
+
 ## Select the right size type for numeric types
 If a value will only hold values up to 255, use `uint8_t`. If a value cannot hold over 65536, use `uint16_t`. These types can help use a lot less ram at scale.
 
@@ -114,6 +118,12 @@ All types for the library should be within the `dpp` namespace. There are a coup
 
 ## Commit messages and Git
 
-All pull requests ("PRs") should be submitted against the `dev` branch in GitHub. It’s good to have descriptive commit messages, or PR titles so that other contributors can understand about your commit or the PR Created. Read [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.3/) for information on how we like to format commit messages.
+All pull requests ("PRs") should be submitted against the `dev` branch in GitHub.
+
+### Naming conventions
+
+It’s good to have descriptive commit messages, or PR titles so that other contributors can understand about your commit or the PR Created. Commits must be prefixed with a type, which consists of a noun, `feat`, `fix`, etc., followed by a colon and a space. Other commit types can be `breaking`, `docs`, `refactor`, `deprecate`, `perf`, `test`, `chore` and `misc`. Read [conventional commits](https://www.conventionalcommits.org/en/v1.0.0-beta.3/) for more information on how we like to format commit messages.
+
+### GitHub Actions
 
 All PRs must pass the [GitHub Actions](https://github.com/brainboxdotcc/DPP/actions) tests before being allowed to be merged. This is to ensure that no code committed into the project fails to compile on any of our officially supported platforms or architectures.

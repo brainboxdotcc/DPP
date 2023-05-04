@@ -86,6 +86,16 @@ std::map<std::string, test_t> tests = {
 	{"FORUM_CREATION", {tt_online, "create a forum channel", false, false}},
 	{"FORUM_CHANNEL_GET", {tt_online, "retrieve the created forum channel", false, false}},
 	{"FORUM_CHANNEL_DELETE", {tt_online, "delete the created forum channel", false, false}},
+
+	{"GUILD_BAN_CREATE", {tt_online, "cluster::guild_ban_add ban three deleted discord accounts", false, false}},
+	{"GUILD_BAN_GET", {tt_online, "cluster::guild_get_ban getting one of the banned accounts", false, false}},
+	{"GUILD_BANS_GET", {tt_online, "cluster::guild_get_bans get bans using the after-parameter", false, false}},
+	{"GUILD_BAN_DELETE", {tt_online, "cluster::guild_ban_delete unban the banned discord accounts", false, false}},
+
+	{"VOICE_CHANNEL_CREATE", {tt_online, "creating a voice channel", false, false}},
+	{"VOICE_CHANNEL_EDIT", {tt_online, "editing the created voice channel", false, false}},
+	{"VOICE_CHANNEL_DELETE", {tt_online, "deleting the created voice channel", false, false}},
+
 	{"PERMISSION_CLASS", {tt_offline, "permission", false, false}},
 	{"USER_GET", {tt_online, "cluster::user_get", false, false}},
 	{"USER_GET_FLAGS", {tt_online, "cluster::user_get flag parsing", false, false}},
@@ -113,6 +123,8 @@ std::map<std::string, test_t> tests = {
 	{"JSON_PARSE_ERROR", {tt_online, "JSON parse error for post_rest", false, false}},
 	{"USER_GET_CACHED_PRESENT", {tt_online, "cluster::user_get_cached_sync() with present member", false, false}},
 	{"USER_GET_CACHED_ABSENT", {tt_online, "cluster::user_get_cached_sync() with not present member", false, false}},
+	{"GET_PARAMETER_WITH_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() with subcommands", false, false}},
+	{"GET_PARAMETER_WITHOUT_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() without subcommands", false, false}},
 };
 
 double start = dpp::utility::time_f();

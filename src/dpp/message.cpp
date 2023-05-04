@@ -534,9 +534,10 @@ message& message::set_file_content(const std::string &fc)
 	return *this;
 }
 
-message& message::add_file(const std::string &fn, const std::string &fc) {
-	filecontent.push_back(fc);
+message& message::add_file(const std::string &fn, const std::string &fc, const std::string &fm) {
 	filename.push_back(fn);
+	filecontent.push_back(fc);
+	filemimetype.push_back(fm);
 	return *this;
 }
 
@@ -772,6 +773,8 @@ attachment::attachment(struct message* o, json *j) : attachment(o) {
 	this->height = int32_not_null(j, "height");
 	this->content_type = string_not_null(j, "content_type");
 	this->ephemeral = bool_not_null(j, "ephemeral");
+	this->duration_secs = double_not_null(j, "duration_secs");
+	this->waveform = string_not_null(j, "waveform");
 }
 
 void attachment::download(http_completion_event callback) const {
@@ -953,6 +956,10 @@ bool message::is_thread_mention_failed() const {
 
 bool message::suppress_notifications() const {
 	return flags & m_suppress_notifications;
+}
+
+bool message::is_voice_message() const {
+	return flags & m_is_voice_message;
 }
 
 message::~message() = default;
