@@ -49,6 +49,7 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"NEWS", dpp::g_news },
 	{"PARTNERED", dpp::g_partnered },
 	{"PREVIEW_ENABLED", dpp::g_preview_enabled },
+	{"RAID_ALERTS_DISABLED", dpp::g_raid_alerts_disabled },
 	{"ROLE_ICONS", dpp::g_role_icons },
 	{"ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE", dpp::g_role_subscriptions_available_for_purchase },
 	{"ROLE_SUBSCRIPTIONS_ENABLED", dpp::g_role_subscription_enabled },
@@ -72,6 +73,7 @@ guild::guild() :
 	flags(0),
 	max_presences(0),
 	max_members(0),
+	flags_extra(0),
 	shard_id(0),
 	premium_subscription_count(0),
 	afk_timeout(afk_off),
@@ -81,8 +83,7 @@ guild::guild() :
 	verification_level(ver_none),
 	explicit_content_filter(expl_disabled),
 	mfa_level(mfa_none),
-	nsfw_level(nsfw_default),
-	flags_extra(0)
+	nsfw_level(nsfw_default)
 {
 }
 
@@ -326,6 +327,10 @@ bool guild::has_role_subscriptions_available_for_purchase() const {
 	return this->flags_extra & g_role_subscriptions_available_for_purchase;
 }
 
+bool guild::has_raid_alerts_disabled() const {
+	return this->flags_extra & g_raid_alerts_disabled;
+}
+
 bool guild::has_animated_icon() const {
 	return this->flags & g_animated_icon;
 }
@@ -425,6 +430,9 @@ std::string guild::build_json(bool with_id) const {
 	}
 	if (!description.empty()) {
 		j["description"] = description;
+	}
+	if (!safety_alerts_channel_id.empty()) {
+		j["safety_alerts_channel_id"] = safety_alerts_channel_id;
 	}
 	return j.dump();
 }
@@ -572,6 +580,8 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 				welcome_screen.welcome_channels.emplace_back(wchan);
 			}
 		}
+
+		set_snowflake_not_null(d, "safety_alerts_channel_id", this->safety_alerts_channel_id);
 		
 	} else {
 		this->flags |= dpp::g_unavailable;
