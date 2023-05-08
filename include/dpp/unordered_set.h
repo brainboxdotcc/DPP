@@ -26,6 +26,20 @@
 #undef max
 #endif
 
+#ifdef __has_cpp_attribute
+#if __has_cpp_attribute(no_unique_address)
+#ifdef _MSC_VER
+#define NO_UNIQUE_ADDRESS [[msvc::no_unique_address]]
+#else
+#define NO_UNIQUE_ADDRESS [[no_unique_address]]
+#endif
+#else
+#define NO_UNIQUE_ADDRESS 
+#endif 
+#else
+#define NO_UNIQUE_ADDRESS 
+#endif
+
 namespace dpp {
 
 	template<typename OTy = void> struct fnv1a_hash {
@@ -66,7 +80,7 @@ namespace dpp {
 	template<typename OTy> class object_allocator {
 	public:
 		using value_type = OTy;
-		using size_type = std::size_t;
+		using size_type = size_t;
 		using difference_type = std::ptrdiff_t;
 		using pointer = value_type*;
 		using propagate_on_container_move_assignment = std::true_type;
@@ -91,8 +105,8 @@ namespace dpp {
 			operator delete[](p);
 		}
 
-		template<typename... args> inline void construct(value_type* p, args&&... args_new) noexcept {
-			new (static_cast<void*>(p)) value_type(std::forward<args>(args_new)...);
+		template<typename... Args> inline void construct(value_type* p, Args&&... args) noexcept {
+			new (static_cast<void*>(p)) value_type(std::forward<Args>(args)...);
 		}
 
 		inline void destroy(value_type* p) noexcept {
@@ -118,7 +132,7 @@ namespace dpp {
 			using pointer = typename memory_core::pointer;
 			using iterator_category = std::forward_iterator_tag;
 
-			inline memory_core_iterator(memory_core* core, std::size_t index) : core(core), index(index) {
+			inline memory_core_iterator(memory_core* core, size_t index) : core(core), index(index) {
 			}
 
 			inline memory_core_iterator& operator++() {
@@ -143,7 +157,7 @@ namespace dpp {
 
 		protected:
 			memory_core* core;
-			std::size_t index;
+			size_t index;
 		};
 
 		using iterator = memory_core_iterator;
@@ -152,8 +166,8 @@ namespace dpp {
 		public:
 			inline sentinel_holder() noexcept = default;
 
-			inline sentinel_holder& operator=(sentinel_holder&& other) noexcept = delete;
-			inline sentinel_holder(sentinel_holder&& other) noexcept = delete;
+			inline sentinel_holder& operator=(sentinel_holder&& other) = delete;
+			inline sentinel_holder(sentinel_holder&& other) = delete;
 			inline sentinel_holder& operator=(const sentinel_holder& other) = delete;
 			inline sentinel_holder(const sentinel_holder& other) = delete;
 
@@ -165,8 +179,8 @@ namespace dpp {
 				return object;
 			}
 
-			inline void activate(value_type&& value) noexcept {
-				object = std::forward<value_type>(value);
+			inline void activate(value_type&& data) noexcept {
+				object = std::forward<value_type>(data);
 				is_it_active = true;
 			}
 
@@ -182,9 +196,9 @@ namespace dpp {
 
 		using sentinel_allocator = object_allocator<sentinel_holder>;
 
-		inline memory_core(size_type new_capacity) : capacity(new_capacity), size(0), data(sentinel_allocator{}.allocate(new_capacity)) {
+		inline memory_core(size_type new_capacity) : capacity(new_capacity), size(0), data(allocator.allocate(new_capacity)) {
 			for (size_t x = 0; x < new_capacity; ++x) {
-				sentinel_allocator{}.construct(&data[x]);
+				allocator.construct(&data[x]);
 			}
 		};
 
@@ -203,7 +217,9 @@ namespace dpp {
 			return *this;
 		}
 
-		inline memory_core(memory_core&& other) noexcept = default;
+		inline memory_core(memory_core&& other) noexcept {
+			*this = std::move(other);
+		}
 
 		inline memory_core& operator=(const memory_core& other) noexcept {
 			if (this != &other) {
@@ -220,7 +236,9 @@ namespace dpp {
 			return *this;
 		}
 
-		inline memory_core(const memory_core& other) noexcept = default;
+		inline memory_core(const memory_core& other) noexcept {
+			*this = other;
+		}
 
 		inline void emplace(value_type&& value) noexcept {
 			emplace_internal(std::forward<value_type>(value));
@@ -350,15 +368,15 @@ namespace dpp {
 			return iterator{ this, capacity };
 		}
 
-		inline size_type getSize() const noexcept {
+		inline size_type get_size() const noexcept {
 			return size;
 		}
 
-		inline bool isEmpty() const noexcept {
+		inline bool is_empty() const noexcept {
 			return size == 0;
 		}
 
-		inline bool isFull() const noexcept {
+		inline bool is_full() const noexcept {
 			return static_cast<float>(size) >= static_cast<float>(capacity) * 0.75f;
 		}
 
@@ -372,18 +390,18 @@ namespace dpp {
 
 		inline ~memory_core() noexcept {
 			if (data && capacity > 0) {
-				sentinel_allocator{}.deallocate(data, capacity);
+				allocator.deallocate(data, capacity);
 			}
 		};
 
 	protected:
-		static constexpr size_type cache_line_size{ 64 };
+		NO_UNIQUE_ADDRESS sentinel_allocator allocator{};
 		sentinel_holder* data{};
 		size_type capacity{};
 		size_type size{};
 
 		inline void emplace_internal(value_type&& value, uint64_t recursion_limit = 1000) noexcept {
-			if (isFull()) {
+			if (is_full()) {
 				resize(round_up_to_cache_line(capacity * 4), recursion_limit);
 			}
 			size_type index = key_hasher{}(key_accessor{}(value)) % capacity;
@@ -411,7 +429,7 @@ namespace dpp {
 		}
 
 		inline void emplace_internal(const value_type& value, uint64_t recursion_limit = 1000) noexcept {
-			if (isFull()) {
+			if (is_full()) {
 				resize(round_up_to_cache_line(capacity * 4), recursion_limit);
 			}
 			size_type index = key_hasher{}(key_accessor{}(value)) % capacity;
@@ -420,19 +438,19 @@ namespace dpp {
 			value_type new_element{ value };
 			while (!inserted) {
 				if (!data[current_index].operator bool()) {
-					data[current_index].activate(std::forward<value_type>(new_element));
+					data[current_index].activate(std::move(new_element));
 					size++;
 					inserted = true;
 				}
-				else if (key_accessor{}(data[current_index].operator reference()) == key_accessor{}(new_element)) {
-					data[current_index].activate(std::forward<value_type>(new_element));
+				else if (key_accessor{}(data[current_index].operator reference()) == key_accessor{}(value)) {
+					data[current_index].activate(std::move(new_element));
 					inserted = true;
 				}
 				else {
 					current_index = (current_index + 1) % capacity;
 					if (current_index == index) {
 						resize(round_up_to_cache_line(capacity * 4), recursion_limit);
-						emplace_internal(std::forward<value_type>(new_element), recursion_limit);
+						emplace_internal(std::forward<value_type>(value), recursion_limit);
 						return;
 					}
 				}
@@ -455,7 +473,7 @@ namespace dpp {
 		}
 
 		size_type round_up_to_cache_line(size_type size) {
-			const size_type multiple = cache_line_size / sizeof(void*);
+			const size_type multiple = 64 / sizeof(void*);
 			return (size + multiple - 1) / multiple * multiple;
 		}
 	};
@@ -469,18 +487,11 @@ namespace dpp {
 		using pointer = value_type*;
 		using key_accessor = KATy;
 		using size_type = size_t;
-		using hasher = fnv1a_hash<value_type>;
 		using iterator = typename memory_core<key_type, value_type>::memory_core_iterator;
 
 		inline unordered_set() : data{ 5 } {};
 
-		inline unordered_set& operator=(unordered_set&& other) noexcept {
-			if (this != &other) {
-				std::swap(this->data, other.data);
-			}
-			return *this;
-		}
-
+		inline unordered_set& operator=(unordered_set&& other) noexcept = default;
 		inline unordered_set(unordered_set&& other) noexcept = default;
 		inline unordered_set& operator=(const unordered_set& other) noexcept = default;
 		inline unordered_set(const unordered_set& other) noexcept = default;
@@ -542,7 +553,7 @@ namespace dpp {
 		}
 
 		inline size_type size() const noexcept {
-			return data.getSize();
+			return data.get_size();
 		}
 
 		inline void reserve(size_t new_size) noexcept {
@@ -550,7 +561,7 @@ namespace dpp {
 		}
 
 		inline bool empty() const noexcept {
-			return data.isEmpty();
+			return data.is_empty();
 		}
 
 		inline size_type capacity() const noexcept {
