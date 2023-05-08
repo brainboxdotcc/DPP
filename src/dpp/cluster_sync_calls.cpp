@@ -537,8 +537,8 @@ confirmation cluster::current_user_leave_thread_sync(snowflake thread_id) {
 	return dpp::sync<confirmation>(this, &cluster::current_user_leave_thread, thread_id);
 }
 
-thread_map cluster::threads_get_active_sync(snowflake guild_id) {
-	return dpp::sync<thread_map>(this, &cluster::threads_get_active, guild_id);
+active_threads cluster::threads_get_active_sync(snowflake guild_id) {
+	return dpp::sync<active_threads>(this, &cluster::threads_get_active, guild_id);
 }
 
 thread_map cluster::threads_get_joined_private_archived_sync(snowflake channel_id, snowflake before_id, uint16_t limit) {
@@ -615,6 +615,10 @@ confirmation cluster::current_user_leave_guild_sync(snowflake guild_id) {
 
 user_identified cluster::user_get_sync(snowflake user_id) {
 	return dpp::sync<user_identified>(this, &cluster::user_get, user_id);
+}
+
+user_identified cluster::user_get_cached_sync(snowflake user_id) {
+	return dpp::sync<user_identified>(this, &cluster::user_get_cached, user_id);
 }
 
 voiceregion_map cluster::get_voice_regions_sync() {

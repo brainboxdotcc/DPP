@@ -29,7 +29,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/misc-enum.h>
 #include <dpp/timer.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/discordclient.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/voiceregion.h>
@@ -49,9 +49,11 @@
 #include <dpp/coro.h>
 #include <dpp/event_router.h>
 
-using  json = nlohmann::json;
+
 
 namespace dpp {
+
+using  json = nlohmann::json;
 
 /**
  * @brief Types of startup for cluster::start()
@@ -1167,8 +1169,9 @@ public:
 	 * @param callback Function to call when the HTTP call completes. The callback parameter will contain amongst other things, the decoded json.
 	 * @param filename Filename to post for POST requests (for uploading files)
 	 * @param filecontent File content to post for POST requests (for uploading files)
+	 * @param filemimetype File content to post for POST requests (for uploading files)
 	 */
-	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "");
+	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "");
 
 	/**
 	 * @brief Post a multipart REST request. Where possible use a helper method instead like message_create
@@ -1181,8 +1184,9 @@ public:
 	 * @param callback Function to call when the HTTP call completes. The callback parameter will contain amongst other things, the decoded json.
 	 * @param filename List of filenames to post for POST requests (for uploading files)
 	 * @param filecontent List of file content to post for POST requests (for uploading files)
+	 * @param filemimetypes List of mime types for each file to post for POST requests (for uploading files)
 	 */
-	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {});
+	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string>& filecontent = {}, const std::vector<std::string>& filemimetypes = {});
 
 	/**
 	 * @brief Make a HTTP(S) request. For use when wanting asynchronous access to HTTP APIs outside of Discord.
@@ -1221,7 +1225,8 @@ public:
 
 	/**
 	 * @brief Create a followup message to a slash command
-	 * 
+	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
 	 * @param token Token for the interaction webhook
 	 * @param m followup message to create
 	 * @param callback Function to call when the API call completes.
@@ -1242,8 +1247,9 @@ public:
 	void interaction_followup_edit_original(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief 
-	 * 
+	 * @brief Delete the initial interaction response
+	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
 	 * @param token Token for the interaction webhook
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1253,6 +1259,8 @@ public:
 	/**
 	 * @brief Edit followup message to a slash command
 	 * The message ID in the message you pass should be correctly set to that of a followup message you previously sent
+	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
 	 * @param token Token for the interaction webhook
 	 * @param m message to edit, the ID should be set
 	 * @param callback Function to call when the API call completes.
@@ -1262,6 +1270,8 @@ public:
 
 	/**
 	 * @brief Get the followup message to a slash command
+	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
 	 * @param token Token for the interaction webhook
 	 * @param message_id message to retrieve
 	 * @param callback Function to call when the API call completes.
@@ -1296,8 +1306,8 @@ public:
 	 * @param guild_id Guild to get the audit log of
 	 * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
 	 * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
-	 * @param before Entries that preceded a specific audit log entry ID. Used for paginating
-	 * @param after Entries that succeeded a specific audit log entry ID. Used for paginating
+	 * @param before Entries with ID less than a specific audit log entry ID. Used for paginating
+	 * @param after Entries with ID greater than a specific audit log entry ID. Used for paginating
 	 * @param limit Maximum number of entries (between 1-100) to return
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::auditlog object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2341,7 +2351,7 @@ public:
 	/**
 	 * @brief Get all emojis for a guild
 	 *
-	 * @see https://discord.com/developers/docs/resources/emoji#get-guild-emojis
+	 * @see https://discord.com/developers/docs/resources/emoji#list-guild-emojis
 	 * @param guild_id Guild ID to get emojis for
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2376,7 +2386,7 @@ public:
 	 * @brief Edit a single emoji.
 	 * 
 	 * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
-	 * @see https://discord.com/developers/docs/resources/emoji#get-guild-emoji
+	 * @see https://discord.com/developers/docs/resources/emoji#modify-guild-emoji
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param guild_id Guild ID to edit emoji on
 	 * @param newemoji Emoji to edit
@@ -2800,7 +2810,7 @@ public:
 	void user_application_role_connection_update(snowflake application_id, const application_role_connection &connection, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Get a user by id
+	 * @brief Get a user by id, without using the cache
 	 *
 	 * @see https://discord.com/developers/docs/resources/user#get-user
 	 * @param user_id User ID to retrieve
@@ -2812,6 +2822,20 @@ public:
 	 * Call `dpp::find_user` instead that looks up the user in the cache rather than a REST call.
 	 */
 	void user_get(snowflake user_id, command_completion_event_t callback);
+
+	/**
+	 * @brief Get a user by id, checking in the cache first
+	 *
+	 * @see https://discord.com/developers/docs/resources/user#get-user
+	 * @param user_id User ID to retrieve
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::user_identified object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+	 * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
+	 * @note If the user is found in the cache, special values set in `dpp::user_identified` will be undefined. This call should be used
+	 * where you want to for example resolve a user who may no longer be in the bot's guilds, for something like a ban log message.
+	 */
+	void user_get_cached(snowflake user_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get current (bot) user
@@ -2927,7 +2951,7 @@ public:
 	 * @brief Create a thread
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
-	 * @see https://discord.com/developers/docs/resources/guild#create-guild-channel
+	 * @see https://discord.com/developers/docs/resources/channel#start-thread-without-message
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
 	 * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
@@ -2942,7 +2966,7 @@ public:
 	/**
 	 * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#start-thread-from-message
 	 * @param thread_name Name of the thread
 	 * @param channel_id Channel in which thread to create
 	 * @param message_id message to start thread with
@@ -2955,7 +2979,7 @@ public:
 
 	/**
 	 * @brief Join a thread
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#join-thread
 	 * @param thread_id Thread ID to join
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2964,7 +2988,7 @@ public:
 
 	/**
 	 * @brief Leave a thread
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#leave-thread
 	 * @param thread_id Thread ID to leave
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -2973,7 +2997,7 @@ public:
 
 	/**
 	 * @brief Add a member to a thread
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#add-thread-member
 	 * @param thread_id Thread ID to add to
 	 * @param user_id Member ID to add
 	 * @param callback Function to call when the API call completes.
@@ -2983,7 +3007,7 @@ public:
 
 	/**
 	 * @brief Remove a member from a thread
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#remove-thread-member
 	 * @param thread_id Thread ID to remove from
 	 * @param user_id Member ID to remove
 	 * @param callback Function to call when the API call completes.
@@ -2993,7 +3017,7 @@ public:
 
 	/**
 	 * @brief Get a thread member
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#get-thread-member
 	 * @param thread_id Thread to get member for
 	 * @param user_id ID of the user to get
 	 * @param callback Function to call when the API call completes
@@ -3003,7 +3027,7 @@ public:
 
 	/**
 	 * @brief Get members of a thread
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#list-thread-members
 	 * @param thread_id Thread to get members for
 	 * @param callback Function to call when the API call completes
 	 * On success the callback will contain a dpp::thread_member_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -3011,17 +3035,17 @@ public:
 	void thread_members_get(snowflake thread_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Get active threads in a guild (Sorted by ID in descending order)
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @brief Get all active threads in the guild, including public and private threads. Threads are ordered by their id, in descending order.
+	 * @see https://discord.com/developers/docs/resources/guild#list-active-guild-threads
 	 * @param guild_id Guild to get active threads for
 	 * @param callback Function to call when the API call completes
-	 * On success the callback will contain a dpp::thread_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::active_threads object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void threads_get_active(snowflake guild_id, command_completion_event_t callback);
 
 	/**
 	 * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#list-public-archived-threads
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
@@ -3032,7 +3056,7 @@ public:
 
 	/**
 	 * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#list-private-archived-threads
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_timestamp Get threads before this timestamp
 	 * @param limit Number of threads to get
@@ -3043,8 +3067,7 @@ public:
 
 	/**
 	 * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
-
-	 * @see https://discord.com/developers/docs/topics/threads
+	 * @see https://discord.com/developers/docs/resources/channel#list-joined-private-archived-threads
 	 * @param channel_id Channel to get public archived threads for
 	 * @param before_id Get threads before this id
 	 * @param limit Number of threads to get

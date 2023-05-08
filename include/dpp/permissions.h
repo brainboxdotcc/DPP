@@ -20,7 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <cstdint>
 #include <type_traits>
 
@@ -71,6 +71,9 @@ enum permissions : uint64_t {
 	p_send_messages_in_threads = 0x04000000000,    //!< allows for sending messages in threads
 	p_use_embedded_activities = 0x08000000000,    //!< allows for using activities (applications with the EMBEDDED flag) in a voice channel
 	p_moderate_members = 0x10000000000,    //!< allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
+	p_view_creator_monetization_analytics = 0x20000000000,	//!< allows for viewing role subscription insights
+	p_use_soundboard = 0x40000000000, //!< allows for using soundboard in a voice channel
+	p_send_voice_messages = 0x0000400000000000, //!< allows sending voice messages
 };
 
 /**

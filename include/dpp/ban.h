@@ -22,7 +22,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
 
@@ -60,7 +60,8 @@ public:
 	std::string build_json(bool with_id = false) const;
 };
 
-/** A group of bans
+/**
+ * A group of bans. The key is the user ID
  */
 typedef std::unordered_map<snowflake, ban> ban_map;
 

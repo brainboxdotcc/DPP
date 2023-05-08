@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include "test.h"
 #include <dpp/dpp.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
 /* Current list of unit tests */
 std::map<std::string, test_t> tests = {
@@ -73,6 +73,7 @@ std::map<std::string, test_t> tests = {
 	{"HOSTINFO", {tt_offline, "https_client::get_host_info()", false, false}},
 	{"HTTPS", {tt_online, "https_client HTTPS request", false, false}},
 	{"HTTP", {tt_offline, "https_client HTTP request", false, false}},
+	{"MULTIHEADER", {tt_offline, "multiheader cookie test", false, false}},
 	{"RUNONCE", {tt_offline, "run_once<T>", false, false}},
 	{"WEBHOOK", {tt_offline, "webhook construct from URL", false, false}},
 	{"MD_ESC_1", {tt_offline, "Markdown escaping (ignore code block contents)", false, false}},
@@ -85,6 +86,16 @@ std::map<std::string, test_t> tests = {
 	{"FORUM_CREATION", {tt_online, "create a forum channel", false, false}},
 	{"FORUM_CHANNEL_GET", {tt_online, "retrieve the created forum channel", false, false}},
 	{"FORUM_CHANNEL_DELETE", {tt_online, "delete the created forum channel", false, false}},
+
+	{"GUILD_BAN_CREATE", {tt_online, "cluster::guild_ban_add ban three deleted discord accounts", false, false}},
+	{"GUILD_BAN_GET", {tt_online, "cluster::guild_get_ban getting one of the banned accounts", false, false}},
+	{"GUILD_BANS_GET", {tt_online, "cluster::guild_get_bans get bans using the after-parameter", false, false}},
+	{"GUILD_BAN_DELETE", {tt_online, "cluster::guild_ban_delete unban the banned discord accounts", false, false}},
+
+	{"VOICE_CHANNEL_CREATE", {tt_online, "creating a voice channel", false, false}},
+	{"VOICE_CHANNEL_EDIT", {tt_online, "editing the created voice channel", false, false}},
+	{"VOICE_CHANNEL_DELETE", {tt_online, "deleting the created voice channel", false, false}},
+
 	{"PERMISSION_CLASS", {tt_offline, "permission", false, false}},
 	{"USER_GET", {tt_online, "cluster::user_get", false, false}},
 	{"USER_GET_FLAGS", {tt_online, "cluster::user_get flag parsing", false, false}},
@@ -109,6 +120,11 @@ std::map<std::string, test_t> tests = {
 	{"ROLE_CREATE", {tt_online, "cluster::role_create", false, false}},
 	{"ROLE_EDIT", {tt_online, "cluster::role_edit", false, false}},
 	{"ROLE_DELETE", {tt_online, "cluster::role_delete", false, false}},
+	{"JSON_PARSE_ERROR", {tt_online, "JSON parse error for post_rest", false, false}},
+	{"USER_GET_CACHED_PRESENT", {tt_online, "cluster::user_get_cached_sync() with present member", false, false}},
+	{"USER_GET_CACHED_ABSENT", {tt_online, "cluster::user_get_cached_sync() with not present member", false, false}},
+	{"GET_PARAMETER_WITH_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() with subcommands", false, false}},
+	{"GET_PARAMETER_WITHOUT_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() without subcommands", false, false}},
 };
 
 double start = dpp::utility::time_f();
@@ -166,7 +182,7 @@ int test_summary() {
 				passed++;
 			}
 		}
-		std::cout << std::left << std::setw(50) << t.second.description << " " << std::fixed << std::setw(6) << (test_skipped ? "\u001b[33mSKIPPED" : (t.second.executed && t.second.success ? "\u001b[32mPASS" : "\u001b[31mFAIL")) << std::setw(0) << "\u001b[0m\n";
+		std::cout << std::left << std::setw(60) << t.second.description << " " << std::fixed << std::setw(6) << (test_skipped ? "\u001b[33mSKIPPED" : (t.second.executed && t.second.success ? "\u001b[32mPASS" : "\u001b[31mFAIL")) << std::setw(0) << "\u001b[0m\n";
 	}
 	std::cout << "\u001b[37;1m\nExecution finished in " << std::fixed << std::setprecision(3) <<  get_time() << std::setprecision(0) << " seconds.\nFailed: " << failed << " Passed: " << passed << (skipped ? " Skipped: " : "") << (skipped ? std::to_string(skipped) : "") << " Percentage: " << std::setprecision(2) << ((float)(passed) / (float)(passed + failed) * 100.0f) << "%\u001b[0m\n";
 	return failed;

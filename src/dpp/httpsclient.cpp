@@ -71,7 +71,7 @@ void https_client::connect()
 	}
 }
 
-multipart_content https_client::build_multipart(const std::string &json, const std::vector<std::string>& filenames, const std::vector<std::string>& contents) {
+multipart_content https_client::build_multipart(const std::string &json, const std::vector<std::string>& filenames, const std::vector<std::string>& contents, const std::vector<std::string>& mimetypes) {
 	if (filenames.empty() && contents.empty()) {
 		if (!json.empty()) {
 			return { json, "application/json" };
@@ -84,7 +84,9 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 		time_t dummy2 = time(nullptr) * time(nullptr);
 		const std::string two_cr("\r\n\r\n");
 		const std::string boundary("-------------" + to_hex(dummy1) + to_hex(dummy2));
-		const std::string mime_part_start("--" + boundary + "\r\nContent-Type: application/octet-stream\r\nContent-Disposition: form-data; ");
+		const std::string part_start("--" + boundary + "\r\nContent-Disposition: form-data; ");
+		const std::string mime_type_start("\r\nContent-Type: ");
+		const std::string default_mime_type("application/octet-stream");
 		
 		std::string content("--" + boundary);
 
@@ -92,12 +94,14 @@ multipart_content https_client::build_multipart(const std::string &json, const s
 		content += "\r\nContent-Type: application/json\r\nContent-Disposition: form-data; name=\"payload_json\"" + two_cr;
 		content += json + "\r\n";
 		if (filenames.size() == 1 && contents.size() == 1) {
-			content += mime_part_start + "name=\"file\"; filename=\"" + filenames[0] + "\"" + two_cr;
+			content += part_start + "name=\"file\"; filename=\"" + filenames[0] + "\"";
+			content += mime_type_start + (mimetypes.empty() || mimetypes[0].empty() ? default_mime_type : mimetypes[0]) + two_cr;
 			content += contents[0];
 		} else {
 			/* Multiple files */
 			for (size_t i = 0; i < filenames.size(); ++i) {
-				content += mime_part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"" + two_cr;
+				content += part_start + "name=\"files[" + std::to_string(i) + "]\"; filename=\"" + filenames[i] + "\"";
+				content += "\r\nContent-Type: " + (mimetypes.size() < i || mimetypes[i].empty() ? default_mime_type : mimetypes[i]) + two_cr;
 				content += contents[i];
 				content += "\r\n";
 			}
@@ -118,7 +122,29 @@ const std::string https_client::get_header(std::string header_name) const {
 	return std::string();
 }
 
-const std::map<std::string, std::string> https_client::get_headers() const {
+size_t https_client::get_header_count(std::string header_name) const {
+	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
+		return std::tolower(c);
+	});
+	return response_headers.count(header_name);
+}
+
+const std::list<std::string> https_client::get_header_list(std::string header_name) const {
+	std::transform(header_name.begin(), header_name.end(), header_name.begin(), [](unsigned char c){
+		return std::tolower(c);
+	});
+	auto hdrs = response_headers.equal_range(header_name);
+	if (hdrs.first != response_headers.end()) {
+		std::list<std::string> data;
+		for ( auto i = hdrs.first; i != hdrs.second; ++i ) {
+			data.emplace_back(i->second);
+		}
+		return data;
+	}
+	return std::list<std::string>();
+}
+
+const std::multimap<std::string, std::string> https_client::get_headers() const {
 	return response_headers;
 }
 
@@ -159,20 +185,23 @@ bool https_client::handle_buffer(std::string &buffer)
 									std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c){
 										return std::tolower(c);
 									});
-									response_headers[key] = value;
+									response_headers.emplace(key, value);
 								}
 							}
-							if (response_headers.find("content-length") != response_headers.end()) {
-								content_length = std::stoull(response_headers["content-length"]);
+							auto it_cl = response_headers.find("content-length");
+							if ( it_cl != response_headers.end()) {
+								content_length = std::stoull(it_cl->second);
 							} else {
 								content_length = ULLONG_MAX;
 							}
-							if (response_headers["connection"] == "close") {
+							auto it_conn = response_headers.find("connection");
+							if (it_conn != response_headers.end() && it_conn->second == "close") {
 								keepalive = false;
 							}
 							chunked = false;
-							if (response_headers.find("transfer-encoding") != response_headers.end()) {
-								if (response_headers["transfer-encoding"].find("chunked") != std::string::npos) {
+							auto it_txenc = response_headers.find("transfer-encoding");
+							if (it_txenc != response_headers.end()) {
+								if (it_txenc->second.find("chunked") != std::string::npos) {
 									chunked = true;
 									chunk_size = 0;
 									chunk_receive = 0;

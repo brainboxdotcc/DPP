@@ -1,4 +1,4 @@
-\page install-windows-zip Installing from zip (Windows)
+\page install-windows-vs-zip Installing from zip (Windows) for Visual Studio
 
 To add D++ to a Visual Studio project, using **Visual Studio 2019** or **Visual Studio 2022**, follow the steps below. The steps below assume an empty project, if you are adding to an existing project simply skip steps 1 through 4, and step 13.
 

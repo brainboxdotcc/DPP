@@ -20,7 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <stdint.h>
 #include <functional>
 
@@ -62,7 +62,7 @@ public:
 
 	/**
 	 * @brief Construct a snowflake object
-	 * @param value A snowflake value
+	 * @param string_value A snowflake value
 	 */
 	snowflake(const std::string& string_value);
 

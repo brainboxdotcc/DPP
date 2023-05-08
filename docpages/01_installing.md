@@ -6,6 +6,7 @@ There are many ways to install D++, either from a package manager, or from sourc
 * \subpage install-linux-rpm
 * \subpage install-vcpkg
 * \subpage install-arch-aur
-* \subpage install-windows-zip
+* \subpage install-windows-vs-zip
+* \subpage install-windows-clion-vcpkg
 * \subpage install-xmake
 * \subpage install-from-source

@@ -24,11 +24,13 @@
 #include <dpp/discordevents.h>
 #include <dpp/permissions.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 role::role() :
 	managed(),
@@ -45,9 +47,7 @@ role::role() :
 
 role::~role()
 {
-	if (image_data) {
-		delete image_data;
-	}
+	delete image_data;
 }
 
 std::string role::get_mention(const snowflake& id){
@@ -309,6 +309,18 @@ bool role::has_manage_events() const {
 
 bool role::has_moderate_members() const {
 	return has_administrator() || permissions.has(p_moderate_members);
+}
+
+bool role::has_view_creator_monetization_analytics() const {
+	return has_administrator() || permissions.has(p_view_creator_monetization_analytics);
+}
+
+bool role::has_use_soundboard() const {
+	return has_administrator() || permissions.has(p_use_soundboard);
+}
+
+bool role::has_send_voice_messages() const {
+	return has_administrator() || permissions.has(p_send_voice_messages);
 }
 
 role& role::set_name(const std::string& n) {

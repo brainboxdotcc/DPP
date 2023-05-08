@@ -196,7 +196,7 @@ void interaction_create_t::edit_original_response(const message & m, command_com
 		if (callback) {
 			callback(confirmation_callback_t(creator, message().fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 void interaction_create_t::delete_original_response(command_completion_event_t callback) const
@@ -208,17 +208,34 @@ void interaction_create_t::delete_original_response(command_completion_event_t c
 	});
 }
 
-const command_value& interaction_create_t::get_parameter(const std::string& name) const
+command_value interaction_create_t::get_parameter(const std::string& name) const
 {
-	/* Dummy STATIC return value for unknown options so we aren't returning a value off the stack */
-	static command_value dummy_value = {};
-	const command_interaction& ci = std::get<command_interaction>(command.data);
-	for (auto i = ci.options.begin(); i != ci.options.end(); ++i) {
-		if (i->name == name) {
-			return i->value;
+	const command_interaction ci = command.get_command_interaction();
+
+	for (const auto &option : ci.options) {
+		if (option.type != co_sub_command && option.type != co_sub_command_group && option.name == name) {
+			return option.value;
 		}
 	}
-	return dummy_value;
+	/* if not found in the first level, go one level deeper */
+	for (const auto &option : ci.options) { // command
+		for (const auto &sub_option : option.options) { // subcommands
+			if (sub_option.type != co_sub_command && sub_option.type != co_sub_command_group && sub_option.name == name) {
+				return sub_option.value;
+			}
+		}
+	}
+	/* if not found in the second level, search it in the third dimension */
+	for (const auto &option : ci.options) { // command
+		for (const auto &sub_group_option : option.options) { // subcommand groups
+			for (const auto &sub_option : sub_group_option.options) { // subcommands
+				if (sub_option.type != co_sub_command && sub_option.type != co_sub_command_group && sub_option.name == name) {
+					return sub_option.value;
+				}
+			}
+		}
+	}
+	return {};
 }
 
 voice_receive_t::voice_receive_t(class discord_client* client, const std::string &raw, class discord_voice_client* vc, snowflake _user_id, uint8_t* pcm, size_t length) : event_dispatch_t(client, raw), voice_client(vc), user_id(_user_id) {

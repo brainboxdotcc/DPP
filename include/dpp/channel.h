@@ -26,7 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
 #include <dpp/message.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/permissions.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
@@ -249,7 +249,9 @@ struct DPP_EXPORT forum_tag : public managed {
 	forum_tag& set_name(const std::string& name);
 };
 
-/** @brief A group of thread member objects*/
+/**
+ * @brief A group of thread member objects. the key is the thread_id of the dpp::thread_member
+ */
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
 /**
@@ -732,7 +734,7 @@ public:
 	 */
 	uint8_t message_count;
 
-	/** Approximate count of members in a thread (threads) */
+	/** Approximate count of members in a thread (stops counting at 50) */
 	uint8_t member_count;
 
 	/**
@@ -808,6 +810,14 @@ typedef std::unordered_map<snowflake, channel> channel_map;
  * @brief A group of threads
  */
 typedef std::unordered_map<snowflake, thread> thread_map;
+
+/**
+ * @brief A group of threads and thread_members. returned from the cluster::threads_get_active method
+ */
+typedef struct {
+	thread_map threads;
+	thread_member_map thread_members;
+} active_threads;
 
 };
 

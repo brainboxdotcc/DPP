@@ -26,7 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/user.h>
 #include <dpp/permissions.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
 namespace dpp {
@@ -45,6 +45,8 @@ enum team_member_status : uint8_t {
  * @brief Flags for a bot or application
  */
 enum application_flags : uint32_t {
+	/// Indicates if an app uses the Auto Moderation API
+	apf_application_automod_rule_create_badge = (1 << 6),
 	/// Has gateway presence intent
 	apf_gateway_presence = (1 << 12),
 	/// Has gateway presence intent for <100 guilds
