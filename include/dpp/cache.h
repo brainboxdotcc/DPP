@@ -259,7 +259,7 @@ public:
  */
 void DPP_EXPORT garbage_collection();
 
-#define cache_decl(type, setter, getter, counter) DPP_EXPORT class type * setter (snowflake id); DPP_EXPORT cache<class type> * getter ();  DPP_EXPORT uint64_t counter ();
+#define cache_decl(type, setter, getter, counter) /** Find an object in the cache by id. @return type* Pointer to the object or nullptr when it's not found */ DPP_EXPORT class type * setter (snowflake id); DPP_EXPORT cache<class type> * getter (); /** Get the amount of cached type objects. */ DPP_EXPORT uint64_t counter ();
 
 /* Declare major caches */
 cache_decl(user, find_user, get_user_cache, get_user_count);

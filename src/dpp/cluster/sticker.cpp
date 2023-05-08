@@ -23,12 +23,25 @@
 
 namespace dpp {
 
+namespace {
+	std::string get_sticker_mimetype(const sticker &s) {
+		static const std::map<sticker_format, std::string> mime_types = {
+				{ sticker_format::sf_png, "image/png" },
+				{ sticker_format::sf_apng, "image/png" },
+				{ sticker_format::sf_lottie, "application/json" },
+				{ sticker_format::sf_gif, "image/gif" },
+		};
+
+		return mime_types.find(s.format_type)->second;
+	}
+}
+
 void cluster::guild_sticker_create(sticker &s, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(s.guild_id), "stickers", m_post, s.build_json(false), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, sticker().fill_from_json(&j), http));
 		}
-	}, s.filename, s.filecontent);
+	}, s.filename, s.filecontent, get_sticker_mimetype(s));
 }
 
 void cluster::guild_sticker_delete(snowflake sticker_id, snowflake guild_id, command_completion_event_t callback) {

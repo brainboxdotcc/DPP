@@ -22,7 +22,7 @@
 #include <variant>
 #include <dpp/export.h>
 #include <dpp/managed.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/permissions.h>
 #include <dpp/guild.h>
 #include <dpp/json_interface.h>
@@ -550,6 +550,27 @@ public:
 	 * @return bool True if user has the moderate users permission or is administrator.
 	 */
 	bool has_moderate_members() const;
+	/**
+	 * @brief True if has the view creator monetization analytics permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the view creator monetization analytics permission or is administrator.
+	 */
+	bool has_view_creator_monetization_analytics() const;
+	/**
+	 * @brief True if has the use soundboard permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the use soundboard permission or is administrator.
+	 */
+	bool has_use_soundboard() const;
+	/**
+	 * @brief True if has the send voice messages permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the send voice messages permission or is administrator.
+	 */
+	bool has_send_voice_messages() const;
 
 	/**
 	 * @brief Get guild members who have this role

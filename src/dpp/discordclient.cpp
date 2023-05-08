@@ -26,7 +26,7 @@
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
 #include <thread>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/etf.h>
 #include <zlib.h>
 #ifdef _WIN32
@@ -81,9 +81,11 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
         runner(nullptr),
 	compressed(comp),
 	decomp_buffer(nullptr),
+	zlib(nullptr),
 	decompressed_total(0),
 	connect_time(0),
 	ping_start(0.0),
+	etf(nullptr),
 	creator(_cluster),
 	heartbeat_interval(0),
 	last_heartbeat(time(nullptr)),
@@ -100,12 +102,26 @@ discord_client::discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint3
 	protocol(ws_proto),
 	resume_gateway_url(_cluster->default_gateway)	
 {
-	zlib = new zlibcontext();
-	etf = new etf_parser();
-	this->connect();
+	try {
+		zlib = new zlibcontext();
+		etf = new etf_parser();
+	}
+	catch (std::bad_alloc&) {
+		delete zlib;
+		delete etf;
+		/* Clean up and rethrow to caller */
+		throw std::bad_alloc();
+	}
+	try {
+		this->connect();
+	}
+	catch (std::exception&) {
+		cleanup();
+		throw;
+	}
 }
 
-discord_client::~discord_client()
+void discord_client::cleanup()
 {
 	terminating = true;
 	if (runner) {
@@ -114,6 +130,11 @@ discord_client::~discord_client()
 	}
 	delete etf;
 	delete zlib;
+}
+
+discord_client::~discord_client()
+{
+	cleanup();
 }
 
 uint64_t discord_client::get_decompressed_bytes_in()
@@ -139,10 +160,8 @@ void discord_client::end_zlib()
 {
 	if (compressed) {
 		inflateEnd(&(zlib->d_stream));
-		if (this->decomp_buffer) {
-			delete[] this->decomp_buffer;
-			this->decomp_buffer = nullptr;
-		}
+		delete[] this->decomp_buffer;
+		this->decomp_buffer = nullptr;
 	}
 }
 
@@ -328,7 +347,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 						std::this_thread::sleep_for(std::chrono::seconds(wait));
 					}
 					log(dpp::ll_debug, "Connecting new session...");
-						json obj = {
+					json obj = {
 						{ "op", 2 },
 						{
 							"d",
@@ -343,13 +362,11 @@ bool discord_client::handle_frame(const std::string &buffer)
 								},
 								{ "shard", json::array({ shard_id, max_shards }) },
 								{ "compress", false },
-								{ "large_threshold", 250 }
+								{ "large_threshold", 250 },
+								{ "intents", this->intents }
 							}
 						}
 					};
-					if (this->intents) {
-						obj["d"]["intents"] = this->intents;
-					}
 					this->write(jsonobj_to_string(obj));
 					this->connect_time = creator->last_identify = time(NULL);
 					reconnects++;

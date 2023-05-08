@@ -20,7 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
@@ -305,7 +305,7 @@ public:
 	bool has_animated_icon() const;
 
 	/**
-	 * @brief Format a username into user#discriminator
+	 * @brief Format a username into user\#discriminator
 	 * 
 	 * For example Brain#0001
 	 * 
@@ -345,6 +345,13 @@ public:
 	 * @brief Construct a new user identified object
 	 */
 	user_identified();
+
+	/**
+	 * @brief Construct a new user identified object from a user object
+	 * 
+	 * @param u user object
+	 */
+	user_identified(const user& u);
 
 	/**
 	 * @brief Destroy the user identified object

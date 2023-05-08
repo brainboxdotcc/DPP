@@ -22,7 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/emoji.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
@@ -69,7 +69,9 @@ enum presence_status : uint8_t {
 	/// DND
 	ps_dnd		=	2,
 	/// Idle
-	ps_idle		=	3
+	ps_idle		=	3,
+	/// Invisible (show as offline)
+	ps_invisible	=	4,
 };
 
 /**

@@ -132,7 +132,7 @@ void cluster::interaction_response_create(snowflake interaction_id, const std::s
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, r.msg->filename, r.msg->filecontent);
+	}, r.msg->filename, r.msg->filecontent, r.msg->filemimetype);
 }
 
 void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
@@ -140,7 +140,7 @@ void cluster::interaction_response_edit(const std::string &token, const message 
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 void cluster::interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback) {
@@ -148,7 +148,7 @@ void cluster::interaction_followup_create(const std::string &token, const messag
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 void cluster::interaction_followup_edit_original(const std::string &token, const message &m, command_completion_event_t callback) {
@@ -156,7 +156,7 @@ void cluster::interaction_followup_edit_original(const std::string &token, const
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 void cluster::interaction_followup_delete(const std::string &token, command_completion_event_t callback) {
@@ -168,7 +168,7 @@ void cluster::interaction_followup_edit(const std::string &token, const message 
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent);
+	}, m.filename, m.filecontent, m.filemimetype);
 }
 
 void cluster::interaction_followup_get(const std::string &token, snowflake message_id, command_completion_event_t callback) {

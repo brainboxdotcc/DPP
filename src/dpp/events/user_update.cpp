@@ -23,12 +23,13 @@
 #include <dpp/cache.h>
 #include <dpp/user.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp { namespace events {
-
+	
+using json = nlohmann::json;
 using namespace dpp;
 
 /**

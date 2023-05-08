@@ -22,12 +22,11 @@
 #include <dpp/cluster.h>
 #include <dpp/scheduled_event.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
-
-using json = nlohmann::json;
+#include <dpp/json.h>
 
 namespace dpp { namespace events {
 
+using json = nlohmann::json;
 using namespace dpp;
 
 

@@ -20,7 +20,9 @@
  ************************************************************************************/
 #include "test.h"
 #include <dpp/dpp.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/restrequest.h>
+#include <dpp/json.h>
+
 
 /* Unit tests go here */
 int main()
@@ -104,7 +106,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("HTTPS", false);
 	if (!offline) {
 		dpp::multipart_content multipart = dpp::https_client::build_multipart(
-			"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}
+			"{\"content\":\"test\"}", {"test.txt", "blob.blob"}, {"ABCDEFGHI", "BLOB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"}, {"text/plain", "application/octet-stream"}
 		);
 		try {
 			dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
@@ -133,6 +135,19 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	catch (const dpp::exception& e) {
 		std::cout << e.what() << "\n";
 		set_test("HTTP", false);
+	}
+
+	set_test("MULTIHEADER", false);
+	try {
+		dpp::https_client c2("www.google.com", 80, "/", "GET", "", {}, true);
+		size_t count = c2.get_header_count("set-cookie");
+		size_t count_list = c2.get_header_list("set-cookie").size();
+		// Google sets a bunch of cookies when we start accessing it.
+		set_test("MULTIHEADER", c2.get_status() == 200 && count > 1 && count == count_list);
+	}
+	catch (const dpp::exception& e) {
+		std::cout << e.what() << "\n";
+		set_test("MULTIHEADER", false);
 	}
 
 	std::vector<uint8_t> testaudio = load_test_audio();
@@ -165,6 +180,66 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	}
 	catch (const dpp::exception&) {
 		set_test("WEBHOOK", false);
+	}
+
+	{ // test interaction_create_t::get_parameter
+		// create a fake interaction
+		dpp::cluster cluster("");
+		dpp::discord_client client(&cluster, 1, 1, "");
+		dpp::interaction_create_t interaction(&client, "");
+
+		/* Check the method with subcommands */
+		set_test("GET_PARAMETER_WITH_SUBCOMMANDS", false);
+
+		dpp::command_interaction cmd_data; // command
+		cmd_data.type = dpp::ctxm_chat_input;
+		cmd_data.name = "command";
+
+		dpp::command_data_option subcommandgroup; // subcommand group
+		subcommandgroup.name = "group";
+		subcommandgroup.type = dpp::co_sub_command_group;
+
+		dpp::command_data_option subcommand; // subcommand
+		subcommand.name = "add";
+		subcommand.type = dpp::co_sub_command;
+
+		dpp::command_data_option option1; // slashcommand option
+		option1.name = "user";
+		option1.type = dpp::co_user;
+		option1.value = dpp::snowflake(189759562910400512);
+
+		dpp::command_data_option option2; // slashcommand option
+		option2.name = "checked";
+		option2.type = dpp::co_boolean;
+		option2.value = true;
+
+		// add them
+		subcommand.options.push_back(option1);
+		subcommand.options.push_back(option2);
+		subcommandgroup.options.push_back(subcommand);
+		cmd_data.options.push_back(subcommandgroup);
+		interaction.command.data = cmd_data;
+
+		dpp::snowflake value1 = std::get<dpp::snowflake>(interaction.get_parameter("user"));
+		set_test("GET_PARAMETER_WITH_SUBCOMMANDS", value1 == dpp::snowflake(189759562910400512));
+
+		/* Check the method without subcommands */
+		set_test("GET_PARAMETER_WITHOUT_SUBCOMMANDS", false);
+
+		dpp::command_interaction cmd_data2; // command
+		cmd_data2.type = dpp::ctxm_chat_input;
+		cmd_data2.name = "command";
+
+		dpp::command_data_option option3; // slashcommand option
+		option3.name = "number";
+		option3.type = dpp::co_integer;
+		option3.value = int64_t(123456);
+
+		cmd_data2.options.push_back(option3);
+		interaction.command.data = cmd_data2;
+
+		int64_t value2 = std::get<int64_t>(interaction.get_parameter("number"));
+		set_test("GET_PARAMETER_WITHOUT_SUBCOMMANDS", value2 == 123456);
 	}
 
 	{ // test dpp::command_option_choice::fill_from_json
@@ -387,6 +462,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			message_collector* collect_messages = new message_collector(&bot, 25);
 		}
 
+		set_test("JSON_PARSE_ERROR", false);
+		dpp::rest_request<dpp::confirmation>(&bot, "/nonexistent", "address", "", dpp::m_get, "", [](const dpp::confirmation_callback_t& e) {
+			if (e.is_error() && e.get_error().code == 404) {
+				set_test("JSON_PARSE_ERROR", true);
+			} else {
+				set_test("JSON_PARSE_ERROR", false);
+			}
+		});
+
 		dpp::utility::iconhash i;
 		std::string dummyval("fcffffffffffff55acaaaaaaaaaaaa66");
 		i = dummyval;
@@ -462,6 +546,74 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					}
 				});
 
+			set_test("GUILD_BAN_CREATE", false);
+			set_test("GUILD_BAN_GET", false);
+			set_test("GUILD_BANS_GET", false);
+			set_test("GUILD_BAN_DELETE", false);
+			if (!offline) {
+				// some deleted discord accounts to test the ban stuff with...
+				dpp::snowflake deadUser1(802670069523415057);
+				dpp::snowflake deadUser2(875302419335094292);
+				dpp::snowflake deadUser3(1048247361903792198);
+
+				bot.set_audit_reason("ban reason one").guild_ban_add(TEST_GUILD_ID, deadUser1, 0, [deadUser1, deadUser2, deadUser3, &bot](const dpp::confirmation_callback_t &event) {
+					if (!event.is_error()) bot.guild_ban_add(TEST_GUILD_ID, deadUser2, 0, [deadUser1, deadUser2, deadUser3, &bot](const dpp::confirmation_callback_t &event) {
+						if (!event.is_error()) bot.set_audit_reason("ban reason three").guild_ban_add(TEST_GUILD_ID, deadUser3, 0, [deadUser1, deadUser2, deadUser3, &bot](const dpp::confirmation_callback_t &event) {
+							if (event.is_error()) {
+								return;
+							}
+							set_test("GUILD_BAN_CREATE", true);
+							// when created, continue with getting and deleting
+
+							// get ban
+							bot.guild_get_ban(TEST_GUILD_ID, deadUser1, [deadUser1](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									dpp::ban ban = event.get<dpp::ban>();
+									if (ban.user_id == deadUser1 && ban.reason == "ban reason one") {
+										set_test("GUILD_BAN_GET", true);
+									}
+								}
+							});
+
+							// get multiple bans
+							bot.guild_get_bans(TEST_GUILD_ID, 0, deadUser1, 3, [deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									dpp::ban_map bans = event.get<dpp::ban_map>();
+									int successCount = 0;
+									for (auto &ban: bans) {
+										if (ban.first == ban.second.user_id) { // the key should match the ban's user_id
+											if (ban.first == deadUser2 && ban.second.reason.empty()) {
+												successCount++;
+											} else if (ban.first == deadUser3 && ban.second.reason == "ban reason three") {
+												successCount++;
+											}
+										}
+									}
+									if (successCount == 2) {
+										set_test("GUILD_BANS_GET", true);
+									}
+								}
+							});
+
+							// unban them
+							bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									bot.guild_ban_delete(TEST_GUILD_ID, deadUser2, [&bot, deadUser3](const dpp::confirmation_callback_t &event) {
+										if (!event.is_error()) {
+											bot.guild_ban_delete(TEST_GUILD_ID, deadUser3, [](const dpp::confirmation_callback_t &event) {
+												if (!event.is_error()) {
+													set_test("GUILD_BAN_DELETE", true);
+												}
+											});
+										}
+									});
+								}
+							});
+						});
+					});
+				});
+			}
+
 			set_test("USER_GET", false);
 			set_test("USER_GET_FLAGS", false);
 			if (!offline) {
@@ -507,6 +659,59 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						set_test("USER_GET_FLAGS", false);
 					}
 				});
+			}
+
+			set_test("VOICE_CHANNEL_CREATE", false);
+			set_test("VOICE_CHANNEL_EDIT", false);
+			set_test("VOICE_CHANNEL_DELETE", false);
+			if (!offline) {
+				dpp::channel channel1;
+				channel1.set_type(dpp::CHANNEL_VOICE)
+					.set_guild_id(TEST_GUILD_ID)
+					.set_name("voice1")
+					.add_permission_overwrite(TEST_GUILD_ID, dpp::ot_role, 0, dpp::p_view_channel)
+					.set_user_limit(99);
+				dpp::channel createdChannel;
+				try {
+					createdChannel = bot.channel_create_sync(channel1);
+				} catch (dpp::rest_exception &exception) {
+					set_test("VOICE_CHANNEL_CREATE", false);
+				}
+				if (createdChannel.name == channel1.name &&
+						createdChannel.user_limit == 99 &&
+						createdChannel.name == "voice1") {
+					for (auto overwrite: createdChannel.permission_overwrites) {
+						if (overwrite.id == TEST_GUILD_ID && overwrite.type == dpp::ot_role && overwrite.deny == dpp::p_view_channel) {
+							set_test("VOICE_CHANNEL_CREATE", true);
+						}
+					}
+
+					// edit the voice channel
+					createdChannel.set_name("foobar2");
+					createdChannel.set_user_limit(2);
+					for (auto overwrite: createdChannel.permission_overwrites) {
+						if (overwrite.id == TEST_GUILD_ID) {
+							overwrite.deny.set(0);
+							overwrite.allow.set(dpp::p_view_channel);
+						}
+					}
+					try {
+						dpp::channel edited = bot.channel_edit_sync(createdChannel);
+						if (edited.name == "foobar2" && edited.user_limit == 2) {
+							set_test("VOICE_CHANNEL_EDIT", true);
+						}
+					} catch (dpp::rest_exception &exception) {
+						set_test("VOICE_CHANNEL_EDIT", false);
+					}
+
+					// delete the voice channel
+					try {
+						bot.channel_delete_sync(createdChannel.id);
+						set_test("VOICE_CHANNEL_DELETE", true);
+					} catch (dpp::rest_exception &exception) {
+						set_test("VOICE_CHANNEL_DELETE", false);
+					}
+				}
 			}
 
 			set_test("FORUM_CREATION", false);
@@ -757,6 +962,30 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 			ticks++;
 		}, 1);
+
+		set_test("USER_GET_CACHED_PRESENT", false);
+		try {
+			dpp::user_identified u = bot.user_get_cached_sync(TEST_USER_ID);
+			set_test("USER_GET_CACHED_PRESENT", (u.id == TEST_USER_ID));
+		}
+		catch (const std::exception&) {
+			set_test("USER_GET_CACHED_PRESENT", false);
+		}
+
+		set_test("USER_GET_CACHED_ABSENT", false);
+		try {
+			/* This is the snowflake ID of a discord staff member.
+			 * We assume here that staffer's discord IDs will remain constant
+			 * for long periods of time and they won't lurk in the unit test server.
+			 * If this becomes not true any more, we'll pick another well known
+			 * user ID.
+			 */
+			dpp::user_identified u = bot.user_get_cached_sync(90339695967350784);
+			set_test("USER_GET_CACHED_ABSENT", (u.id == dpp::snowflake(90339695967350784)));
+		}
+		catch (const std::exception&) {
+			set_test("USER_GET_CACHED_ABSENT", false);
+		}
 
 		set_test("TIMEDLISTENER", false);
 		dpp::timed_listener tl(&bot, 10, bot.on_log, [&](const dpp::log_t & event) {

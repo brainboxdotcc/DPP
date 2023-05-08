@@ -99,12 +99,18 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/colour.cmake")
 
 if (BUILD_VOICE_SUPPORT)
 	if (MINGW OR NOT WIN32)
-		include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindSodium.cmake")
-		include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindOpus.cmake")
+		find_package(PkgConfig QUIET)
+		if(PKG_CONFIG_FOUND)
+			include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindSodium.cmake")
+		else()
+			message("-- Could not detect ${Green}libsodium${ColourReset} due to missing ${Green}pkgconfig${ColourReset}. VOICE support will be ${Red}disabled${ColourReset}")
+		endif()
+      		include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/FindOpus.cmake")
 	endif()
 
 	if(DEFINED OPUS_FOUND)
-		if(DEFINED sodium_VERSION_STRING)
+		message("-- Found Opus ${Green}${OPUS_LIBRARIES}${ColourReset}")
+		if((WIN32 OR PKG_CONFIG_FOUND) AND DEFINED sodium_VERSION_STRING)
 			add_compile_definitions(HAVE_VOICE)
 		
 			message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
@@ -164,13 +170,19 @@ endif()
 
 if(MSVC)
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /Od /DEBUG /Zi /sdl /MP /DFD_SETSIZE=1024 /Zc:preprocessor")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /Od /DEBUG /Zi /sdl /DFD_SETSIZE=1024")
 	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /O2 /Oi /Oy /GL /Gy /sdl /MP /DFD_SETSIZE=1024 /Zc:preprocessor")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /O2 /Oi /Oy /Gy /sdl /DFD_SETSIZE=1024")
+	endif()
+	if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Zc:preprocessor")
+		if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GL")
+		endif()
 	endif()
 	string(REGEX REPLACE "/W[1|2|3|4]" "/W3" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-psabi -Wempty-body -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unused-private-field -Wno-psabi -Wempty-body -Wignored-qualifiers -Wimplicit-fallthrough -Wmissing-field-initializers -Wsign-compare -Wtype-limits -Wuninitialized -Wshift-negative-value -pthread")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og")
 
 	if (NOT MINGW)
@@ -202,13 +214,6 @@ foreach (fullmodname ${subdirlist})
 	target_include_directories(${modname} PUBLIC 
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp>
-	)
-
-	target_precompile_headers(
-		${modname}
-		PRIVATE
-		"${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/nlohmann/json_fwd.hpp"
-		"${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/nlohmann/json.hpp"
 	)
 
 	if (WIN32 AND NOT MINGW)

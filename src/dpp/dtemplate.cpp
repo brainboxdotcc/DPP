@@ -20,11 +20,13 @@
  ************************************************************************************/
 #include <dpp/dtemplate.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 dtemplate::dtemplate() : code(""), name(""), description(""), usage_count(0), creator_id(0), source_guild_id(0)
 {

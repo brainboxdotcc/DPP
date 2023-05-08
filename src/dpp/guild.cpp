@@ -25,7 +25,9 @@
 #include <dpp/guild.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
+
+namespace dpp {
 
 using json = nlohmann::json;
 
@@ -56,8 +58,6 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"VIP_REGIONS", dpp::g_vip_regions },
 	{"WELCOME_SCREEN_ENABLED", dpp::g_welcome_screen_enabled },
 };
-
-namespace dpp {
 
 guild::guild() :
 	managed(),
@@ -121,6 +121,12 @@ guild_member& guild_member::set_deaf(const bool is_deafened) {
 guild_member& guild_member::set_communication_disabled_until(const time_t disabled_timestamp) {
 	this->communication_disabled_until = disabled_timestamp;
 	return *this;
+}
+	
+bool guild_member::operator == (guild_member const& other_member) const {
+	if((this->user_id == other_member.user_id && this->user_id.empty()) || (this->guild_id == other_member.guild_id && this->guild_id.empty()))
+		return false;
+	return this->user_id == other_member.user_id && this->guild_id == other_member.guild_id;
 }
 
 guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id) {
@@ -224,8 +230,8 @@ guild& guild::set_name(const std::string& n) {
 	return *this;
 }
 
-dpp::user* guild_member::get_user() const {
-	return dpp::find_user(user_id);
+user* guild_member::get_user() const {
+	return find_user(user_id);
 }
 
 bool guild_member::is_deaf() const {

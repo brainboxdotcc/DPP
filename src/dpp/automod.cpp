@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/automod.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
 namespace dpp {
 
@@ -35,6 +35,9 @@ automod_action::~automod_action() = default;
 automod_action& automod_action::fill_from_json(nlohmann::json* j) {
 	type = (automod_action_type)int8_not_null(j, "type");
 	switch (type) {
+		case amod_action_block_message:
+			custom_message = string_not_null(&((*j)["metadata"]), "custom_message");
+			break;
 		case amod_action_send_alert:
 			channel_id = snowflake_not_null(&((*j)["metadata"]), "channel_id");
 			break;
@@ -52,6 +55,12 @@ std::string automod_action::build_json(bool with_id) const {
 		{ "type", type }
 	});
 	switch (type) {
+		case amod_action_block_message:
+			if (!custom_message.empty()) {
+				j["metadata"] = json::object();
+				j["metadata"]["custom_message"] = custom_message;
+			}
+			break;
 		case amod_action_send_alert:
 			if (channel_id) {
 				j["metadata"] = json::object();

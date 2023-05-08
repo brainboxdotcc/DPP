@@ -29,7 +29,7 @@
 #include <dpp/sync.h>
 #include <chrono>
 #include <iostream>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <utility>
 #include <algorithm>
 
@@ -75,8 +75,15 @@ cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards,
 	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
 	/* Instantiate REST request queues */
-	rest = new request_queue(this, request_threads);
-	raw_rest = new request_queue(this, request_threads_raw);
+	try {
+		rest = new request_queue(this, request_threads);
+		raw_rest = new request_queue(this, request_threads_raw);
+	}
+	catch (std::bad_alloc&) {
+		delete rest;
+		delete raw_rest;
+		throw;
+	}
 
 	/* Add checks for missing intents, these emit a one-off warning to the log if bound without the right intents */
 	on_message_create.set_warning_callback(
@@ -257,44 +264,71 @@ void cluster::set_dm_channel(snowflake user_id, snowflake channel_id) {
 	dm_channels[user_id] = channel_id;
 }
 
-void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent) {
-	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	rest->post_request(new http_request(endpoint + "/" + major_parameters, parameters, [endpoint, callback, this](const http_request_completion_t& rv) {
-		json j;
-		if (rv.error == h_success && !rv.body.empty()) {
-			try {
-				j = json::parse(rv.body);
-			}
-			catch (const std::exception &e) {
-				/* TODO: Do something clever to handle malformed JSON */
-				log(ll_error, "post_rest() to " + endpoint + ": {}" + std::string(e.what()));
-				return;
-			}
-		}
-		if (callback) {
-			callback(j, rv);
-		}
-	}, postdata, method, get_audit_reason(), filename, filecontent));
+/**
+ * @brief Given an error exception from nlohmann::json, turn it into a discord-style error object
+ * that can be parsed by the get_error() function. Modifies the http request body, moving it to
+ * `.get_error().errors[0].reason` in the callback.
+ * 
+ * @param message Exception message
+ * @param rv Request completion data
+ * @return json
+ */
+json error_response(const std::string& message, http_request_completion_t& rv)
+{
+	json j({
+		{"code", rv.status},
+		{"errors", {
+			{"json", {
+				{"0", {
+					{"body", {
+						{"_errors", {{
+							{"code", "JSON_PARSE"},
+							{"message", rv.body},
+						}}}
+					}}
+				}}
+			}}
+		}},
+		{"message", message}
+	});
+	rv.body = j.dump();
+	return j;
 }
 
-void cluster::post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent) {
+void cluster::post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename, const std::string &filecontent, const std::string &filemimetype) {
 	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
-	rest->post_request(new http_request(endpoint + "/" + major_parameters, parameters, [endpoint, callback, this](const http_request_completion_t& rv) {
+	rest->post_request(new http_request(endpoint + "/" + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
 		json j;
 		if (rv.error == h_success && !rv.body.empty()) {
 			try {
 				j = json::parse(rv.body);
 			}
 			catch (const std::exception &e) {
-				/* TODO: Do something clever to handle malformed JSON */
-				log(ll_error, "post_rest_multipart() to " + endpoint + ": " + std::string(e.what()));
-				return;
+				j = error_response(e.what(), rv);
 			}
 		}
 		if (callback) {
 			callback(j, rv);
 		}
-	}, postdata, method, get_audit_reason(), filename, filecontent));
+	}, postdata, method, get_audit_reason(), filename, filecontent, filemimetype));
+}
+
+void cluster::post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes) {
+	/* NOTE: This is not a memory leak! The request_queue will free the http_request once it reaches the end of its lifecycle */
+	rest->post_request(new http_request(endpoint + "/" + major_parameters, parameters, [endpoint, callback](http_request_completion_t rv) {
+		json j;
+		if (rv.error == h_success && !rv.body.empty()) {
+			try {
+				j = json::parse(rv.body);
+			}
+			catch (const std::exception &e) {
+				j = error_response(e.what(), rv);
+			}
+		}
+		if (callback) {
+			callback(j, rv);
+		}
+	}, postdata, method, get_audit_reason(), filename, filecontent, filemimetypes));
 }
 
 

@@ -303,7 +303,9 @@ confirmation interaction_response_edit_sync(const std::string &token, const mess
 
 /**
  * @brief Create a followup message to a slash command
- * 
+ *
+ * @see dpp::cluster::interaction_followup_create
+ * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
  * @param token Token for the interaction webhook
  * @param m followup message to create
  * @return confirmation returned object on completion
@@ -331,8 +333,10 @@ confirmation interaction_followup_create_sync(const std::string &token, const me
 confirmation interaction_followup_edit_original_sync(const std::string &token, const message &m);
 
 /**
- * @brief 
- * 
+ * @brief Delete the initial interaction response
+ *
+ * @see dpp::cluster::interaction_followup_delete
+ * @see https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
  * @param token Token for the interaction webhook
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -345,6 +349,9 @@ confirmation interaction_followup_delete_sync(const std::string &token);
 /**
  * @brief Edit followup message to a slash command
  * The message ID in the message you pass should be correctly set to that of a followup message you previously sent
+ *
+ * @see dpp::cluster::interaction_followup_edit
+ * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
  * @param token Token for the interaction webhook
  * @param m message to edit, the ID should be set
  * @return confirmation returned object on completion
@@ -357,6 +364,9 @@ confirmation interaction_followup_edit_sync(const std::string &token, const mess
 
 /**
  * @brief Get the followup message to a slash command
+ *
+ * @see dpp::cluster::interaction_followup_get
+ * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
  * @param token Token for the interaction webhook
  * @param message_id message to retrieve
  * @return message returned object on completion
@@ -693,7 +703,7 @@ confirmation guild_emoji_delete_sync(snowflake guild_id, snowflake emoji_id);
  * 
  * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
  * @see dpp::cluster::guild_emoji_edit
- * @see https://discord.com/developers/docs/resources/emoji#get-guild-emoji
+ * @see https://discord.com/developers/docs/resources/emoji#modify-guild-emoji
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param guild_id Guild ID to edit emoji on
  * @param newemoji Emoji to edit
@@ -724,7 +734,7 @@ emoji guild_emoji_get_sync(snowflake guild_id, snowflake emoji_id);
  * @brief Get all emojis for a guild
  *
  * @see dpp::cluster::guild_emojis_get
- * @see https://discord.com/developers/docs/resources/emoji#get-guild-emojis
+ * @see https://discord.com/developers/docs/resources/emoji#list-guild-emojis
  * @param guild_id Guild ID to get emojis for
  * @return emoji_map returned object on completion
  * \memberof dpp::cluster
@@ -773,8 +783,8 @@ confirmation guild_current_member_edit_sync(snowflake guild_id, const std::strin
  * @param guild_id Guild to get the audit log of
  * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
  * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
- * @param before Entries that preceded a specific audit log entry ID. Used for paginating
- * @param after Entries that succeeded a specific audit log entry ID. Used for paginating
+ * @param before Entries with ID less than a specific audit log entry ID. Used for paginating
+ * @param after Entries with ID greater than a specific audit log entry ID. Used for paginating
  * @param limit Maximum number of entries (between 1-100) to return
  * @return auditlog returned object on completion
  * \memberof dpp::cluster
@@ -965,6 +975,8 @@ guild guild_get_sync(snowflake guild_id);
  * @see https://discord.com/developers/docs/resources/guild#get-guild-integrations
  * @param guild_id Guild ID to get integrations for
  * @return integration_map returned object on completion
+ *
+ * @note This endpoint returns a maximum of 50 integrations. If a guild has more integrations, they cannot be accessed.
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -1921,7 +1933,7 @@ dtemplate template_get_sync(const std::string &code);
 /**
  * @brief Join a thread
  * @see dpp::cluster::current_user_join_thread
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#join-thread
  * @param thread_id Thread ID to join
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -1934,7 +1946,7 @@ confirmation current_user_join_thread_sync(snowflake thread_id);
 /**
  * @brief Leave a thread
  * @see dpp::cluster::current_user_leave_thread
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#leave-thread
  * @param thread_id Thread ID to leave
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -1945,22 +1957,22 @@ confirmation current_user_join_thread_sync(snowflake thread_id);
 confirmation current_user_leave_thread_sync(snowflake thread_id);
 
 /**
- * @brief Get active threads in a guild (Sorted by ID in descending order)
+ * @brief Get all active threads in the guild, including public and private threads. Threads are ordered by their id, in descending order.
  * @see dpp::cluster::threads_get_active
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/guild#list-active-guild-threads
  * @param guild_id Guild to get active threads for
- * @return thread_map returned object on completion
+ * @return active_threads returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-thread_map threads_get_active_sync(snowflake guild_id);
+active_threads threads_get_active_sync(snowflake guild_id);
 
 /**
  * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
  * @see dpp::cluster::threads_get_joined_private_archived
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#list-joined-private-archived-threads
  * @param channel_id Channel to get public archived threads for
  * @param before_id Get threads before this id
  * @param limit Number of threads to get
@@ -1975,7 +1987,7 @@ thread_map threads_get_joined_private_archived_sync(snowflake channel_id, snowfl
 /**
  * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
  * @see dpp::cluster::threads_get_private_archived
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#list-private-archived-threads
  * @param channel_id Channel to get public archived threads for
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
@@ -1990,7 +2002,7 @@ thread_map threads_get_private_archived_sync(snowflake channel_id,  time_t befor
 /**
  * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
  * @see dpp::cluster::threads_get_public_archived
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#list-public-archived-threads
  * @param channel_id Channel to get public archived threads for
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
@@ -2005,7 +2017,7 @@ thread_map threads_get_public_archived_sync(snowflake channel_id, time_t before_
 /**
  * @brief Get a thread member
  * @see dpp::cluster::thread_member_get
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#get-thread-member
  * @param thread_id Thread to get member for
  * @param user_id ID of the user to get
  * @return thread_member returned object on completion
@@ -2019,7 +2031,7 @@ thread_member thread_member_get_sync(const snowflake thread_id, const snowflake 
 /**
  * @brief Get members of a thread
  * @see dpp::cluster::thread_members_get
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#list-thread-members
  * @param thread_id Thread to get members for
  * @return thread_member_map returned object on completion
  * \memberof dpp::cluster
@@ -2054,7 +2066,7 @@ thread thread_create_in_forum_sync(const std::string& thread_name, snowflake cha
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  *
  * @see dpp::cluster::thread_create
- * @see https://discord.com/developers/docs/resources/guild#create-guild-channel
+ * @see https://discord.com/developers/docs/resources/channel#start-thread-without-message
  * @param thread_name Name of the thread
  * @param channel_id Channel in which thread to create
  * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
@@ -2073,7 +2085,7 @@ thread thread_create_sync(const std::string& thread_name, snowflake channel_id, 
  * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @see dpp::cluster::thread_create_with_message
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#start-thread-from-message
  * @param thread_name Name of the thread
  * @param channel_id Channel in which thread to create
  * @param message_id message to start thread with
@@ -2090,7 +2102,7 @@ thread thread_create_with_message_sync(const std::string& thread_name, snowflake
 /**
  * @brief Add a member to a thread
  * @see dpp::cluster::thread_member_add
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#add-thread-member
  * @param thread_id Thread ID to add to
  * @param user_id Member ID to add
  * @return confirmation returned object on completion
@@ -2104,7 +2116,7 @@ confirmation thread_member_add_sync(snowflake thread_id, snowflake user_id);
 /**
  * @brief Remove a member from a thread
  * @see dpp::cluster::thread_member_remove
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#remove-thread-member
  * @param thread_id Thread ID to remove from
  * @param user_id Member ID to remove
  * @return confirmation returned object on completion
@@ -2124,9 +2136,9 @@ confirmation thread_member_remove_sync(snowflake thread_id, snowflake user_id);
  * @see https://discord.com/developers/docs/resources/user#modify-current-user
  * @param nickname Nickname to set
  * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
- * @param type Type of image for avatar
+ * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
  * @return user returned object on completion
- 	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
+ 	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
@@ -2257,7 +2269,7 @@ guild_map current_user_get_guilds_sync();
 confirmation current_user_leave_guild_sync(snowflake guild_id);
 
 /**
- * @brief Get a user by id
+ * @brief Get a user by id, without using the cache
  *
  * @see dpp::cluster::user_get
  * @see https://discord.com/developers/docs/resources/user#get-user
@@ -2273,6 +2285,24 @@ confirmation current_user_leave_guild_sync(snowflake guild_id);
  * Avoid direct use of this function inside an event handler.
  */
 user_identified user_get_sync(snowflake user_id);
+
+/**
+ * @brief Get a user by id, checking in the cache first
+ *
+ * @see dpp::cluster::user_get_cached
+ * @see https://discord.com/developers/docs/resources/user#get-user
+ * @param user_id User ID to retrieve
+ * @return user_identified returned object on completion
+ * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+ * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
+ * @note If the user is found in the cache, special values set in `dpp::user_identified` will be undefined. This call should be used
+ * where you want to for example resolve a user who may no longer be in the bot's guilds, for something like a ban log message.
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+user_identified user_get_cached_sync(snowflake user_id);
 
 /**
  * @brief Get all voice regions
