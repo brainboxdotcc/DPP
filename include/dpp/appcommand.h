@@ -164,6 +164,8 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	std::vector<channel_type> channel_types;     //!< Allowed channel types for channel snowflake id options
 	command_option_range min_value;              //!< Minimum value allowed, for co_number and co_integer types only
 	command_option_range max_value;              //!< Maximum value allowed, for co_number and co_integer types only
+	uint16_t min_length;              //!< Minimum allowed string length (0-6000), for co_string types only
+	uint16_t max_length;              //!< Maximum allowed string length (1-6000), for co_string types only
 	std::map<std::string, std::string> name_localizations; //!< Localisations of command name
 	std::map<std::string, std::string> description_localizations; //!< Localisations of command description
 
@@ -226,18 +228,18 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	/**
 	 * @brief Set the minimum string length of the option. 
 	 * Only valid if the type is co_string
-	 * @param min_v Minimum value
+	 * @param min_v Minimum value (minimum of 0, maximum of 6000)
 	 * @return command_option& returns a reference to self for chaining of calls
 	 */
-	command_option& set_min_length(command_option_range min_v);
+	command_option& set_min_length(uint16_t min_v);
 
 	/**
 	 * @brief Set the maximum string length of the option. 
 	 * Only valid if the type is co_string
-	 * @param max_v Maximum value
+	 * @param max_v Maximum value (minimum of 1, maximum of 6000)
 	 * @return command_option& returns a reference to self for chaining of calls
 	 */
-	command_option& set_max_length(command_option_range max_v);
+	command_option& set_max_length(uint16_t max_v);
 
 	/**
 	 * @brief Add a sub-command option
