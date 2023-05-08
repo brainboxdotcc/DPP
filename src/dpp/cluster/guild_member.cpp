@@ -37,36 +37,6 @@ void cluster::guild_edit_member(const guild_member& gm, command_completion_event
 	});
 }
 
-void cluster::guild_edit_member(snowflake guild_id, snowflake user_id, std::optional<const std::string> nickname, std::optional<const std::vector<snowflake>> roles, std::optional<time_t> communication_disabled_until, std::optional<bool> mute, std::optional<bool> deaf, std::optional<snowflake> channel_id, command_completion_event_t callback) {
-	json j;
-	if (nickname.has_value()) {
-		j["nick"] = nickname.value();
-	}
-	if (roles.has_value()) {
-		j["roles"] = roles.value();
-	}
-	if (communication_disabled_until.has_value()) {
-		j["communication_disabled_until"] = communication_disabled_until.value();
-	}
-	if (mute.has_value()) {
-		j["mute"] = mute.value();
-	}
-	if (deaf.has_value()) {
-		j["deaf"] = deaf.value();
-	}
-	if (channel_id.has_value()) {
-		j["channel_id"] = channel_id.value();
-	}
-	if (j.empty()) {
-		return;
-	}
-	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_patch, j.dump(), [this, callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
-		if (callback) {
-			callback(confirmation_callback_t(this, guild_member().fill_from_json(&j, guild_id, user_id), http));
-		}
-	});
-}
-
 
 void cluster::guild_get_member(snowflake guild_id, snowflake user_id, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(guild_id), "members/" + std::to_string(user_id), m_get, "", [this, callback, guild_id, user_id](json &j, const http_request_completion_t& http) {
