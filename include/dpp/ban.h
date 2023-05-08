@@ -60,7 +60,8 @@ public:
 	std::string build_json(bool with_id = false) const;
 };
 
-/** A group of bans
+/**
+ * A group of bans. The key is the user ID
  */
 typedef std::unordered_map<snowflake, ban> ban_map;
 

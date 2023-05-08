@@ -42,6 +42,8 @@ $forcedReturn = [
     'message_create' => 'message',
     'message_edit' => 'message',
     'thread_create_in_forum' => 'thread',
+    'threads_get_active' => 'active_threads',
+    'user_get_cached' => 'user_identified',
 ];
 
 /* Get the contents of cluster.h into an array */
@@ -61,8 +63,11 @@ if (!$generator->checkForChanges()) {
     exit(0);
 }
 
+$lastFunc = '<none>';
+$l = 0;
 /* Scan every line of the C++ source */
 foreach ($clustercpp as $cpp) {
+    $l++;
     /* Look for declaration of function body */
     if ($state == STATE_SEARCH_FOR_FUNCTION &&
         preg_match('/^\s*void\s+cluster::([^(]+)\s*\((.*)command_completion_event_t\s*callback\s*\)/', $cpp, $matches)) {
@@ -111,10 +116,15 @@ foreach ($clustercpp as $cpp) {
             $content .= $generator->generateHeaderDef($returnType, $currentFunction, $parameters, $noDefaults, $parameterNames);
             $cppcontent .= $generator->generateCppDef($returnType, $currentFunction, $parameters, $noDefaults, $parameterNames);
         }
+	$lastFunc = $currentFunction;
         $currentFunction = $parameters = $returnType = '';
         $state = STATE_SEARCH_FOR_FUNCTION;
     }
 }
+if ($state != STATE_SEARCH_FOR_FUNCTION) {
+    die("\n\n\nBuilding headers is broken ($l) - state machine finished in the middle of function $currentFunction (previous $lastFunc) with parameters $parameters rv $returnType state=$state\n\n\n");
+}
+
 $content .= <<<EOT
 
 /* End of auto-generated definitions */

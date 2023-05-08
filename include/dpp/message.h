@@ -784,6 +784,10 @@ struct DPP_EXPORT attachment {
 	std::string content_type;
 	/** Whether this attachment is ephemeral, if applicable */
 	bool ephemeral;
+	/** The duration of the audio file (currently for voice messages) */
+	double duration_secs;
+	/** base64 encoded bytearray representing a sampled waveform (currently for voice messages) */
+	std::string waveform;
 	/** Owning message */
 	struct message* owner;
 
@@ -981,6 +985,8 @@ enum message_flags : uint16_t {
 	m_thread_mention_failed = 1 << 8,
 	/// this message will not trigger push and desktop notifications
 	m_suppress_notifications = 1 << 12,
+	/// this message is a voice message
+	m_is_voice_message = 1 << 13,
 };
 
 /**
@@ -1413,6 +1419,13 @@ struct DPP_EXPORT message : public managed {
 	 * @return True if notifications suppressed
 	 */
 	bool suppress_notifications() const;
+
+	/**
+	 * @brief True if the message is a voice message
+	 *
+	 * @return True if voice message
+	 */
+	bool is_voice_message() const;
 
 	/**
 	 * @brief Add a component (button) to message
