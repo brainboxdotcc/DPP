@@ -142,7 +142,7 @@ automod_rule& automod_rule::fill_from_json(nlohmann::json* j) {
 	enabled = bool_not_null(j, "enabled");
 	exempt_roles.clear();
 	exempt_channels.clear();
-	for (auto k : (*j)["automod_actions"]) {
+	for (auto k : (*j)["actions"]) {
 		actions.push_back(automod_action().fill_from_json(&k));
 	}
 	for (auto k : (*j)["exempt_roles"]) {
