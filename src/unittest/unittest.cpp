@@ -125,9 +125,10 @@ std::map<std::string, test_t> tests = {
 	{"USER_GET_CACHED_ABSENT", {tt_online, "cluster::user_get_cached_sync() with not present member", false, false}},
 	{"GET_PARAMETER_WITH_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() with subcommands", false, false}},
 	{"GET_PARAMETER_WITHOUT_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() without subcommands", false, false}},
-	{"AUTOMOD_RULE_CREATE", {tt_offline, "cluster::automod_rule_create", false, false}},
-	{"AUTOMOD_RULE_GET", {tt_offline, "cluster::automod_rule_edit", false, false}},
-	{"AUTOMOD_RULE_DELETE", {tt_offline, "cluster::automod_rule_delete", false, false}},
+	{"AUTOMOD_RULE_CREATE", {tt_online, "cluster::automod_rule_create", false, false}},
+	{"AUTOMOD_RULE_GET", {tt_online, "cluster::automod_rule_get", false, false}},
+	{"AUTOMOD_RULE_GET_ALL", {tt_online, "cluster::automod_rules_get", false, false}},
+	{"AUTOMOD_RULE_DELETE", {tt_online, "cluster::automod_rule_delete", false, false}},
 };
 
 double start = dpp::utility::time_f();

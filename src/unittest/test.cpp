@@ -616,74 +616,68 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 			set_test("AUTOMOD_RULE_CREATE", false);
 			set_test("AUTOMOD_RULE_GET", false);
+			set_test("AUTOMOD_RULE_GET_ALL", false);
 			set_test("AUTOMOD_RULE_DELETE", false);
 			if (!offline) {
-				/*
-				 * NOTE: This unit test will fail forever when failed once and didn't delete them.
-				 * Because at the next run, it cannot create new ones as you can only have one of the same type per guild
-				 */
-				dpp::automod_rule rule1;
-				rule1.name = "rule1 (spam)";
-				rule1.trigger_type = dpp::amod_type_spam;
-				dpp::automod_action action1;
-				action1.type = dpp::amod_action_block_message;
-				action1.custom_message = "your message is suspected of being spam by discord and blocked!";
-				rule1.actions.push_back(action1);
-
-				dpp::automod_rule rule2;
-				rule2.name = "rule2 (keyword)";
-				rule2.trigger_type = dpp::amod_type_keyword;
+				dpp::automod_rule automodRule;
+				automodRule.name = "automod rule (keyword type)";
+				automodRule.trigger_type = dpp::amod_type_keyword;
 				dpp::automod_metadata metadata1;
 				metadata1.keywords.emplace_back("*cat*");
 				metadata1.keywords.emplace_back("train");
 				metadata1.keywords.emplace_back("*.exe");
 				metadata1.regex_patterns.emplace_back("^[^a-z]$");
 				metadata1.allow_list.emplace_back("@silent*");
-				rule2.trigger_metadata = metadata1;
-				dpp::automod_action action2;
-				action2.type = dpp::amod_action_timeout;
-				action2.duration_seconds = 6000;
-				rule2.actions.emplace_back(action2);
+				automodRule.trigger_metadata = metadata1;
+				dpp::automod_action automodAction;
+				automodAction.type = dpp::amod_action_timeout;
+				automodAction.duration_seconds = 6000;
+				automodRule.actions.emplace_back(automodAction);
 
-				bot.automod_rule_create(TEST_GUILD_ID, rule1, [&bot, rule2](const dpp::confirmation_callback_t &event) {
+				bot.automod_rules_get(TEST_GUILD_ID, [&bot, automodRule](const dpp::confirmation_callback_t &event) {
 					if (event.is_error()) {
 						return;
 					}
-					auto created1 = event.get<dpp::automod_rule>();
-					bot.automod_rule_create(TEST_GUILD_ID, rule2, [&bot, rule2, created1](const dpp::confirmation_callback_t &event) {
+					auto rules = event.get<dpp::automod_rule_map>();
+					set_test("AUTOMOD_RULE_GET_ALL", true);
+					for (const auto &rule: rules) {
+						if (rule.second.trigger_type == dpp::amod_type_keyword) {
+							// delete one automod rule of type KEYWORD before creating one to make space...
+							bot.automod_rule_delete(TEST_GUILD_ID, rule.first);
+						}
+					}
+
+					// start creating the automod rules
+					bot.automod_rule_create(TEST_GUILD_ID, automodRule, [&bot, automodRule](const dpp::confirmation_callback_t &event) {
+						if (event.is_error()) {
+							return;
+						}
+						auto created = event.get<dpp::automod_rule>();
+						if (created.name == automodRule.name) {
+							set_test("AUTOMOD_RULE_CREATE", true);
+						}
+
+						// get automod rule
+						bot.automod_rule_get(TEST_GUILD_ID, created.id, [automodRule, &bot, created](const dpp::confirmation_callback_t &event) {
 							if (event.is_error()) {
 								return;
 							}
-							auto created2 = event.get<dpp::automod_rule>();
-							if (created2.name == rule2.name) {
-								set_test("AUTOMOD_RULE_CREATE", true);
+							auto retrieved = event.get<dpp::automod_rule>();
+							if (retrieved.name == automodRule.name &&
+								retrieved.trigger_type == automodRule.trigger_type &&
+								retrieved.trigger_metadata.keywords == automodRule.trigger_metadata.keywords &&
+								retrieved.trigger_metadata.regex_patterns == automodRule.trigger_metadata.regex_patterns &&
+								retrieved.trigger_metadata.allow_list == automodRule.trigger_metadata.allow_list && retrieved.actions.size() == automodRule.actions.size()) {
+								set_test("AUTOMOD_RULE_GET", true);
 							}
 
-							// get automod rule 2
-							bot.automod_rule_get(TEST_GUILD_ID, created2.id, [rule2, &bot, created2, created1](const dpp::confirmation_callback_t &event) {
-								if (event.is_error()) {
-									return;
+							// delete the automod rule
+							bot.automod_rule_delete(TEST_GUILD_ID, retrieved.id, [](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									set_test("AUTOMOD_RULE_DELETE", true);
 								}
-								auto retrieved = event.get<dpp::automod_rule>();
-								if (retrieved.name == rule2.name &&
-									retrieved.trigger_type == rule2.trigger_type &&
-									retrieved.trigger_metadata.keywords == rule2.trigger_metadata.keywords &&
-									retrieved.trigger_metadata.regex_patterns == rule2.trigger_metadata.regex_patterns &&
-									retrieved.trigger_metadata.allow_list == rule2.trigger_metadata.allow_list) {
-									set_test("AUTOMOD_RULE_GET", true);
-								}
-
-								// delete the automod rules
-								bot.automod_rule_delete(TEST_GUILD_ID, created1.id, [&bot, created2](const dpp::confirmation_callback_t &event) {
-									if (!event.is_error()) {
-										bot.automod_rule_delete(TEST_GUILD_ID, created2.id, [](const dpp::confirmation_callback_t &event) {
-											if (!event.is_error()) {
-												set_test("AUTOMOD_RULE_DELETE", true);
-											}
-										});
-									}
-								});
 							});
+						});
 					});
 				});
 			}
