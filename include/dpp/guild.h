@@ -135,23 +135,25 @@ enum guild_flags : uint32_t {
 /**
  * @brief Additional boolean flag values for guild, as guild_flags is full
  */
-enum guild_flags_extra : uint8_t {
+enum guild_flags_extra : uint16_t {
 	/** Guild has premium progress bar enabled */
-	g_premium_progress_bar_enabled =	0b00000001,
+	g_premium_progress_bar_enabled =	0b0000000000000001,
 	/** Guild can have an animated banner (doesn't mean it actually has one though) */
-	g_animated_banner =			0b00000010,
+	g_animated_banner =			0b0000000000000010,
 	/** Guild has auto moderation */
-	g_auto_moderation =			0b00000100,
+	g_auto_moderation =			0b0000000000000100,
 	/** Guild has paused invites, preventing new users from joining */
-	g_invites_disabled =		0b00001000,
+	g_invites_disabled =		0b0000000000001000,
 	/** Guild has been set as support server of an app in the App Directory */
-	g_developer_support_server =	0b00010000,
+	g_developer_support_server =	0b0000000000010000,
 	/** Guild role subscription purchase and renewal notifications are off */
-	g_no_role_subscription_notifications = 0b00100000,
+	g_no_role_subscription_notifications = 0b0000000000100000,
 	/** Guild role subscription sticker reply buttons are off */
-	g_no_role_subscription_notification_replies = 0b01000000,
+	g_no_role_subscription_notification_replies = 0b0000000001000000,
 	/** Guild has role subscriptions that can be purchased */
-	g_role_subscriptions_available_for_purchase = 0b10000000,
+	g_role_subscriptions_available_for_purchase = 0b0000000010000000,
+	/** Guild has disabled alerts for join raids in the configured safety alerts channel */
+	g_raid_alerts_disabled = 0b0000000100000000,
 };
 
 /**
@@ -536,6 +538,9 @@ public:
 	/** Snowflake ID of widget channel, or 0 */
 	snowflake widget_channel_id;
 
+	/** The id of the channel where admins and moderators of Community guilds receive safety alerts from Discord */
+	snowflake safety_alerts_channel_id;
+
 	/** Approximate member count. May be sent as zero */
 	uint32_t member_count;
 
@@ -552,6 +557,11 @@ public:
 	 * @brief the maximum number of members for the guild
 	 */
 	uint32_t max_members;
+
+	/**
+	 * @brief Additional flags (values from dpp::guild_flags_extra)
+	 */
+	uint16_t flags_extra;
 
 	/** Shard ID of the guild */
 	uint16_t shard_id;
@@ -584,11 +594,6 @@ public:
 	 * @brief Guild NSFW level
 	 */
 	guild_nsfw_level_t nsfw_level;
-
-	/**
-	 * @brief Additional flags
-	 */
-	uint8_t flags_extra;
 
 	/** Default constructor, zeroes all values */
 	guild();
@@ -845,6 +850,12 @@ public:
 	 * @return bool has role subscriptions that can be purchased
 	 */
 	bool has_role_subscriptions_available_for_purchase() const;
+
+	/**
+	 * @brief Guild has disabled alerts for join raids in the configured safety alerts channel
+	 * @return bool dpp::g_raid_alerts_disabled flag is set
+	 */
+	bool has_raid_alerts_disabled() const;
 
 	/**
 	 * @brief Guild has access to set an animated guild icon
