@@ -20,9 +20,6 @@
  ************************************************************************************/
 #include <dpp/discordevents.h>
 #include <dpp/cluster.h>
-#include <dpp/scheduled_event.h>
-#include <dpp/stringops.h>
-#include <dpp/json.h>
 
 namespace dpp { namespace events {
 
