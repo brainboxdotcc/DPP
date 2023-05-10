@@ -398,12 +398,12 @@ int discord_voice_client::udp_send(const char* data, size_t length)
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(this->port);
 	servaddr.sin_addr.s_addr = inet_addr(this->ip.c_str());
-	return sendto(this->fd, data, (int)length, 0, (const sockaddr*)&servaddr, (int)sizeof(sockaddr_in));
+	return (int) sendto(this->fd, data, (int)length, 0, (const sockaddr*)&servaddr, (int)sizeof(sockaddr_in));
 }
 
 int discord_voice_client::udp_recv(char* data, size_t max_length)
 {
-	return recv(this->fd, data, (int)max_length, 0);
+	return (int) recv(this->fd, data, (int)max_length, 0);
 }
 
 bool discord_voice_client::handle_frame(const std::string &data)

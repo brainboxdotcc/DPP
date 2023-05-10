@@ -480,7 +480,7 @@ void ssl_client::read_loop()
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					r = ::recv(sfd, server_to_client_buffer, DPP_BUFSIZE, 0);
+					r = (int) ::recv(sfd, server_to_client_buffer, DPP_BUFSIZE, 0);
 					if (r <= 0) {
 						/* error or EOF */
 						return;
@@ -551,7 +551,7 @@ void ssl_client::read_loop()
 				/* Try to write */
 
 				if (plaintext) {
-					r = ::send(sfd, client_to_server_buffer + client_to_server_offset, (int)client_to_server_length, 0);
+					r = (int) ::send(sfd, client_to_server_buffer + client_to_server_offset, (int)client_to_server_length, 0);
 
 					if (r < 0) {
 						/* Write error */
