@@ -165,7 +165,7 @@ template <uint64_t> uint64_t from_string(const std::string &s)
  */
 template <uint32_t> uint32_t from_string(const std::string &s)
 {
-	return std::stoul(s, 0, 10);
+	return (uint32_t) std::stoul(s, 0, 10);
 }
 
 /**
