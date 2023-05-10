@@ -31,6 +31,14 @@ namespace dpp {
 
 using json = nlohmann::json;
 
+/* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
+std::map<uint16_t , dpp::guild_member_flags> membermap = {
+		{ 1 << 0,       dpp::gm_did_rejoin },
+		{ 1 << 1,       dpp::gm_completed_onboarding },
+		{ 1 << 2,       dpp::gm_bypasses_verification },
+		{ 1 << 3,       dpp::gm_started_onboarding },
+};
+
 const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extra>> featuremap = {
 	{"ANIMATED_BANNER", dpp::g_animated_banner },
 	{"ANIMATED_ICON", dpp::g_animated_icon },
@@ -154,17 +162,10 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	set_ts_not_null(&j, "communication_disabled_until", gm.communication_disabled_until);
 
 	uint16_t flags = int16_not_null(&j, "flags");
-	if (flags & 1 << 0) {
-		gm.flags |= dpp::gm_did_rejoin;
-	}
-	if (flags & 1 << 1) {
-		gm.flags |= dpp::gm_completed_onboarding;
-	}
-	if (flags & 1 << 2) {
-		gm.flags |= dpp::gm_bypasses_verification;
-	}
-	if (flags & 1 << 3) {
-		gm.flags |= dpp::gm_started_onboarding;
+	for (auto & flag : membermap) {
+		if (flags & flag.first) {
+			gm.flags |= flag.second;
+		}
 	}
 
 	gm.roles.clear();
@@ -242,9 +243,11 @@ std::string guild_member::build_json(bool with_id) const {
 		j["deaf"] = is_deaf();
 	}
 
-	uint16_t out_flags = 0;
-	if (this->flags & gm_bypasses_verification) {
-		out_flags |= 1 << 2;
+	uint32_t out_flags = 0;
+	for (auto & flag : membermap) {
+		if (flags & flag.second) {
+			out_flags |= flag.first;
+		}
 	}
 	j["flags"] = out_flags;
 
