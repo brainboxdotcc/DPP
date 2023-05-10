@@ -40,6 +40,7 @@
 #include <dpp/scheduled_event.h>
 #include <dpp/stage_instance.h>
 #include <dpp/integration.h>
+#include <dpp/auditlog.h>
 #include <functional>
 #include <variant>
 #include <exception>
@@ -1398,6 +1399,19 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
 	void reply(message&& msg, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
+};
+
+/** @brief Guild audit log entry create */
+struct DPP_EXPORT guild_audit_log_entry_create_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	guild_audit_log_entry_create_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief created audit log entry
+	 */
+	audit_entry entry;
 };
 
 /** @brief Guild ban add */
