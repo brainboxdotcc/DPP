@@ -947,6 +947,14 @@ public:
 	 */
 	event_router_t<message_create_t> on_message_create;
 
+	/**
+	 * @brief Called when a guild audit log entry is created.
+	 *
+	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type guild_audit_log_entry_create_t&, and returns void.
+	 */
+	event_router_t<guild_audit_log_entry_create_t> on_guild_audit_log_entry_create;
 	
 	/**
 	 * @brief Called when a ban is added to a guild.
