@@ -84,13 +84,14 @@ using role_permissions = permissions;
 /**
  * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are held in an uint64_t
  */
-struct DPP_EXPORT permission {
-
+class DPP_EXPORT permission {
+protected:
 	/**
 	 * @brief The permission bitmask value
 	 */
 	uint64_t value{0};
 
+public:
 	/**
 	 * @brief Default constructor, initializes permission to 0
 	 */
