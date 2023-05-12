@@ -132,6 +132,7 @@ std::map<std::string, test_t> tests = {
 	{"AUTOMOD_RULE_DELETE", {tt_online, "cluster::automod_rule_delete", false, false}},
 	{"REQUEST_GET_IMAGE", {tt_online, "using the cluster::request method to fetch an image", false, false}},
 	{"EMOJI_CREATE", {tt_online, "cluster::guild_emoji_create", false, false}},
+	{"EMOJI_GET", {tt_online, "cluster::guild_emoji_get", false, false}},
 	{"EMOJI_DELETE", {tt_online, "cluster::guild_emoji_delete", false, false}},
 };
 
