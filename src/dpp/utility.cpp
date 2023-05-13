@@ -53,6 +53,34 @@ namespace dpp {
 
 	namespace utility {
 
+		std::string cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
+			return cdn_endpoint_url_hash(allowed_formats, path_without_extension, "", format, size, prefer_animated, is_animated);
+		}
+
+		std::string cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
+
+			if (std::find(allowed_formats.begin(), allowed_formats.end(), format) == allowed_formats.end()) {
+				return std::string(); // if the given format is not allowed for this endpoint
+			}
+
+			std::string extension;
+			if (is_animated && (prefer_animated || format == i_gif)) {
+				extension = ".gif";
+			} else if (format == i_png) {
+				extension = ".png";
+			} else if (format == i_jpg) {
+				extension = ".jpg";
+			} else if (format == i_webp) {
+				extension = ".webp";
+			} else {
+				return std::string();
+			}
+
+			std::string suffix = (hash.empty() ? "" : (is_animated ? "/a_" : "/") + hash); // > In the case of endpoints that support GIFs, the hash will begin with a_ if it is available in GIF format.
+
+			return cdn_host + '/' + path_without_extension + suffix + extension + utility::avatar_size(size);
+		}
+
 		double time_f()
 		{
 			using namespace std::chrono;
