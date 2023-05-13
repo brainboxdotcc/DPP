@@ -539,12 +539,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 										bot.message_edit(dpp::message(m).set_content("test edit"), [](const dpp::confirmation_callback_t &callback) {
 											if (!callback.is_error()) {
 												set_test("MESSAGEEDIT", true);
-											} else {
-												set_test("MESSAGEEDIT", false);
 											}
 										});
-									} else {
-										set_test("MESSAGECREATE", false);
 									}
 								});
 							} else {
@@ -929,8 +925,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
+		bool message_edit_tested = false;
 		bot.on_message_update([&](const dpp::message_update_t & event) {
-			if (event.msg.author == bot.me.id && event.msg.content == "test edit") {
+			if (!message_edit_tested && event.msg.author == bot.me.id && event.msg.content == "test edit") {
+				message_edit_tested = true;
 				set_test("EDITEVENT", true);
 			}
 		});
@@ -986,6 +984,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				std::promise<void> pin_test_promise;
 				auto pin_test_future = pin_test_promise.get_future();
 				set_test("MESSAGEPIN", false);
+				set_test("MESSAGEUNPIN", false);
 				bot.message_pin(event.msg.channel_id, event.msg.id, [&bot, id = event.msg.id, &pin_test_promise](const dpp::confirmation_callback_t &callback) {
 					if (!callback.is_error()) {
 						set_test("MESSAGEPIN", true);
@@ -993,13 +992,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							if (!callback.is_error()) {
 								set_test("MESSAGEUNPIN", true);
 							}
-							else {
-								set_test("MESSAGEUNPIN", false);
-							}
 							pin_test_promise.set_value();
 						});
 					} else {
-						set_test("MESSAGEPIN", false);
 						pin_test_promise.set_value();
 					}
 				});
@@ -1026,20 +1021,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 										if (callback.status == 200 && check_mimetype(callback.headers, "image/png")) {
 											set_test("MESSAGEFILE", true);
 										}
-										else {
-											set_test("MESSAGEFILE", false);
-										}
 										file_test_promise.set_value();
 									});
 								}
 								else {
-									set_test("MESSAGEFILE", false);
 									file_test_promise.set_value();
 								}
 							});
 						}
 						else {
-							set_test("MESSAGEFILE", false);
 							file_test_promise.set_value();
 						}
 					});
@@ -1073,8 +1063,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 					if (!callback.is_error()) {
 						set_test("MESSAGEDELETE", true);
-					} else {
-						set_test("MESSAGEDELETE", false);
 					}
 				});
 				set_test("MSGCREATESEND", false);
