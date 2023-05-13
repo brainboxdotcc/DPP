@@ -33,6 +33,8 @@ std::map<std::string, test_t> tests = {
 	{"MESSAGECREATE", {tt_online, "Creation of a channel message", false, false}},
 	{"MESSAGEEDIT", {tt_online, "Editing a channel message", false, false}},
 	{"EDITEVENT", {tt_online, "Message edit event", false, false}},
+	{"MESSAGEPIN", {tt_online, "Pinning a channel message", false, false}},
+	{"MESSAGEUNPIN", {tt_online, "Unpinning a channel message", false, false}},
 	{"MESSAGEDELETE", {tt_online, "Deletion of a channel message", false, false}},
 	{"MESSAGERECEIVE", {tt_online, "Receipt of a created message", false, false}},
 	{"CACHE", {tt_online, "Test guild cache", false, false}},

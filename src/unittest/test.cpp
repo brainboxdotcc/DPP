@@ -518,7 +518,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 									if (!callback.is_error()) {
 										set_test("MESSAGECREATE", true);
 										set_test("REACT", false);
-										set_test("MESSAGEDELETE", false);
 										dpp::message m = std::get<dpp::message>(callback.value);
 										set_test("REACTEVENT", false);
 										bot.message_add_reaction(m.id, TEST_TEXT_CHANNEL_ID, "😄", [](const dpp::confirmation_callback_t &callback) {
@@ -534,14 +533,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 												set_test("MESSAGEEDIT", true);
 											} else {
 												set_test("MESSAGEEDIT", false);
-											}
-										});
-										bot.message_delete(m.id, TEST_TEXT_CHANNEL_ID, [](const dpp::confirmation_callback_t &callback) {
-
-											if (!callback.is_error()) {
-												set_test("MESSAGEDELETE", true);
-											} else {
-												set_test("MESSAGEDELETE", false);
 											}
 										});
 									} else {
@@ -984,6 +975,26 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			if (event.msg.author.id == bot.me.id && !message_tested) {
 				message_tested = true;
 				set_test("MESSAGERECEIVE", true);
+				std::promise<void> pin_test_promise;
+				auto pin_test_future = pin_test_promise.get_future();
+				set_test("MESSAGEPIN", false);
+				bot.message_pin(event.msg.channel_id, event.msg.id, [&bot, id = event.msg.id, &pin_test_promise](const dpp::confirmation_callback_t &callback) {
+					if (!callback.is_error()) {
+						set_test("MESSAGEPIN", true);
+						bot.message_unpin(TEST_TEXT_CHANNEL_ID, id, [&pin_test_promise](const dpp::confirmation_callback_t &callback) {
+							if (!callback.is_error()) {
+								set_test("MESSAGEUNPIN", true);
+							}
+							else {
+								set_test("MESSAGEUNPIN", false);
+							}
+							pin_test_promise.set_value();
+						});
+					} else {
+						set_test("MESSAGEPIN", false);
+						pin_test_promise.set_value();
+					}
+				});
 				set_test("MESSAGESGET", false);
 				bot.messages_get(event.msg.channel_id, 0, event.msg.id, 0, 5, [](const dpp::confirmation_callback_t &cc){
 					if (!cc.is_error()) {
@@ -1002,6 +1013,16 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						}
 					}  else {
 						set_test("MESSAGESGET", false);
+					}
+				});
+				pin_test_future.wait_for(std::chrono::seconds(15));
+				set_test("MESSAGEDELETE", false);
+				bot.message_delete(event.msg.id, event.msg.channel_id, [](const dpp::confirmation_callback_t &callback) {
+
+					if (!callback.is_error()) {
+						set_test("MESSAGEDELETE", true);
+					} else {
+						set_test("MESSAGEDELETE", false);
 					}
 				});
 				set_test("MSGCREATESEND", false);
