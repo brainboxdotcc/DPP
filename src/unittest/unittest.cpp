@@ -37,6 +37,7 @@ std::map<std::string, test_t> tests = {
 	{"MESSAGEUNPIN", {tt_online, "Unpinning a channel message", false, false}},
 	{"MESSAGEDELETE", {tt_online, "Deletion of a channel message", false, false}},
 	{"MESSAGERECEIVE", {tt_online, "Receipt of a created message", false, false}},
+	{"MESSAGEFILE", {tt_online, "Message attachment send and check", false, false}},
 	{"CACHE", {tt_online, "Test guild cache", false, false}},
 	{"USERCACHE", {tt_online, "Test user cache", false, false}},
 	{"VOICECONN", {tt_online, "Connect to voice channel", false, false}},
@@ -211,6 +212,23 @@ std::vector<uint8_t> load_test_audio() {
 		exit(1);
 	}
 	return testaudio;
+}
+
+std::vector<uint8_t> load_test_image() {
+	std::vector<uint8_t> testimage;
+	std::ifstream input ("../../testdata/DPP-logo.png", std::ios::in|std::ios::binary|std::ios::ate);
+	if (input.is_open()) {
+		size_t testimage_size = input.tellg();
+		testimage.resize(testimage_size);
+		input.seekg(0, std::ios::beg);
+		input.read((char*)testimage.data(), testimage_size);
+		input.close();
+	}
+	else {
+		std::cout << "ERROR: Can't load ../../testdata/DPP-logo.png\n";
+		exit(1);
+	}
+	return testimage;
 }
 
 std::string get_token() {

@@ -445,6 +445,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	dpp::managed m(TEST_USER_ID);
 	set_test("TS", ((uint64_t)m.get_creation_time()) == 1617131800);
 
+	std::vector<uint8_t> test_image = load_test_image();
+
 	set_test("PRESENCE", false);
 	set_test("CLUSTER", false);
 	try {
@@ -490,7 +492,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		bot.on_voice_receive_combined([&](auto& event) {
 		});
 
-		bot.on_ready([&bot](const dpp::ready_t & event) {
+
+		bot.on_ready([&](const dpp::ready_t & event) {
 
 			set_test("CONNECTION", true);
 			set_test("APPCOMMAND", false);
@@ -503,18 +506,23 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				.add_option(dpp::command_option(dpp::co_attachment, "file", "a file"))
 				.set_application_id(bot.me.id)
 				.add_localization("fr", "zut", "Ou est la salor dans Discord?"),
-				TEST_GUILD_ID, [&bot](const dpp::confirmation_callback_t &callback) {
+				TEST_GUILD_ID, [&](const dpp::confirmation_callback_t &callback) {
 					if (!callback.is_error()) {
 						set_test("APPCOMMAND", true);
 						set_test("DELCOMMAND", false);
 						dpp::slashcommand s = std::get<dpp::slashcommand>(callback.value);
-						bot.guild_command_delete(s.id, TEST_GUILD_ID, [&bot](const dpp::confirmation_callback_t &callback) {
+						bot.guild_command_delete(s.id, TEST_GUILD_ID, [&](const dpp::confirmation_callback_t &callback) {
 							if (!callback.is_error()) {
+								dpp::message test_message(TEST_TEXT_CHANNEL_ID, "test message");
+
 								set_test("DELCOMMAND", true);
 								set_test("MESSAGECREATE", false);
 								set_test("MESSAGEEDIT", false);
 								set_test("MESSAGERECEIVE", false);
-								bot.message_create(dpp::message(TEST_TEXT_CHANNEL_ID, "test message"), [&bot](const dpp::confirmation_callback_t &callback) {
+								test_message.add_file("no-mime", "test");
+								test_message.add_file("test.txt", "test", "text/plain");
+								test_message.add_file("test.png", std::string{test_image.begin(), test_image.end()}, "image/png");
+								bot.message_create(test_message, [&bot](const dpp::confirmation_callback_t &callback) {
 									if (!callback.is_error()) {
 										set_test("MESSAGECREATE", true);
 										set_test("REACT", false);
@@ -995,6 +1003,47 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						pin_test_promise.set_value();
 					}
 				});
+				set_test("MESSAGEFILE", false);
+				std::promise<void> file_test_promise;
+				auto file_test_future = file_test_promise.get_future();
+				if (event.msg.attachments.size() == 3)
+				{
+					constexpr auto check_mimetype = [](const auto &headers, std::string mimetype) {
+						if (auto it = headers.find("content-type"); it != headers.end()) {
+							// check that the mime type starts with what we gave : for example discord will change "text/plain" to "text/plain; charset=UTF-8"
+							return it->second.size() >= mimetype.size() && std::equal(it->second.begin(), it->second.begin() + mimetype.size(), mimetype.begin());
+						}
+						else {
+							return false;
+						}
+					};
+					event.msg.attachments[0].download([&](const dpp::http_request_completion_t &callback){
+						if (callback.status == 200 && callback.body == "test") {
+							event.msg.attachments[1].download([&](const dpp::http_request_completion_t &callback){
+								if (callback.status == 200 && check_mimetype(callback.headers, "text/plain") && callback.body == "test") {
+									event.msg.attachments[2].download([&](const dpp::http_request_completion_t &callback){
+										// do not check the contents here because discord can change compression
+										if (callback.status == 200 && check_mimetype(callback.headers, "image/png")) {
+											set_test("MESSAGEFILE", true);
+										}
+										else {
+											set_test("MESSAGEFILE", false);
+										}
+										file_test_promise.set_value();
+									});
+								}
+								else {
+									set_test("MESSAGEFILE", false);
+									file_test_promise.set_value();
+								}
+							});
+						}
+						else {
+							set_test("MESSAGEFILE", false);
+							file_test_promise.set_value();
+						}
+					});
+				}
 				set_test("MESSAGESGET", false);
 				bot.messages_get(event.msg.channel_id, 0, event.msg.id, 0, 5, [](const dpp::confirmation_callback_t &cc){
 					if (!cc.is_error()) {
@@ -1015,7 +1064,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						set_test("MESSAGESGET", false);
 					}
 				});
-				pin_test_future.wait_for(std::chrono::seconds(15));
+				// wait for tasks with the message to finish before deleting, up to 20 seconds
+				std::chrono::time_point timeout_point = std::chrono::steady_clock::now() + std::chrono::seconds(20);
+				pin_test_future.wait_until(timeout_point);
+				file_test_future.wait_until(timeout_point);
 				set_test("MESSAGEDELETE", false);
 				bot.message_delete(event.msg.id, event.msg.channel_id, [](const dpp::confirmation_callback_t &callback) {
 

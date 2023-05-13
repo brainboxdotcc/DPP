@@ -233,6 +233,13 @@ int test_summary();
 std::vector<uint8_t> load_test_audio();
 
 /**
+ * @brief Load test image for the attachment tests
+ * 
+ * @return std::vector<uint8_t> data and size for test image
+ */
+std::vector<uint8_t> load_test_image();
+
+/**
  * @brief Get the token from the environment variable DPP_UNIT_TEST_TOKEN
  * 
  * @return std::string token
