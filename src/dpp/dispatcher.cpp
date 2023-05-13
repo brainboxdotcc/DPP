@@ -299,6 +299,7 @@ event_ctor(invite_create_t, event_dispatch_t);
 event_ctor(message_update_t, event_dispatch_t);
 event_ctor(user_update_t, event_dispatch_t);
 event_ctor(message_create_t, event_dispatch_t);
+event_ctor(guild_audit_log_entry_create_t, event_dispatch_t);
 event_ctor(guild_ban_add_t, event_dispatch_t);
 event_ctor(guild_ban_remove_t, event_dispatch_t);
 event_ctor(integration_create_t, event_dispatch_t);

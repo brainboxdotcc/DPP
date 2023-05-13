@@ -148,4 +148,7 @@ event_decl(automod_rule_update, AUTO_MODERATION_RULE_UPDATE);
 event_decl(automod_rule_delete, AUTO_MODERATION_RULE_DELETE);
 event_decl(automod_rule_execute, AUTO_MODERATION_ACTION_EXECUTION);
 
+/* Audit log */
+event_decl(guild_audit_log_entry_create, GUILD_AUDIT_LOG_ENTRY_CREATE);
+
 }};
