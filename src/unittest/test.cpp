@@ -512,6 +512,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							if (!callback.is_error()) {
 								set_test("DELCOMMAND", true);
 								set_test("MESSAGECREATE", false);
+								set_test("MESSAGEEDIT", false);
 								set_test("MESSAGERECEIVE", false);
 								bot.message_create(dpp::message(TEST_TEXT_CHANNEL_ID, "test message"), [&bot](const dpp::confirmation_callback_t &callback) {
 									if (!callback.is_error()) {
@@ -525,6 +526,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 												set_test("REACT", true);
 											} else {
 												set_test("REACT", false);
+											}
+										});
+										set_test("EDITEVENT", false);
+										bot.message_edit(dpp::message(m).set_content("test edit"), [](const dpp::confirmation_callback_t &callback) {
+											if (!callback.is_error()) {
+												set_test("MESSAGEEDIT", true);
+											} else {
+												set_test("MESSAGEEDIT", false);
 											}
 										});
 										bot.message_delete(m.id, TEST_TEXT_CHANNEL_ID, [](const dpp::confirmation_callback_t &callback) {
@@ -918,6 +927,12 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		bot.on_message_reaction_add([&](const dpp::message_reaction_add_t & event) {
 			if (event.reacting_user.id == bot.me.id && event.reacting_emoji.name == "😄") {
 				set_test("REACTEVENT", true);
+			}
+		});
+
+		bot.on_message_update([&](const dpp::message_update_t & event) {
+			if (event.msg.author == bot.me.id && event.msg.content == "test edit") {
+				set_test("EDITEVENT", true);
 			}
 		});
 

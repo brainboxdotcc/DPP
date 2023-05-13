@@ -31,6 +31,8 @@ std::map<std::string, test_t> tests = {
 	{"DELCOMMAND", {tt_online, "Deletion of application command", false, false}},
 	{"LOGGER", {tt_online, "Log events", false, false}},
 	{"MESSAGECREATE", {tt_online, "Creation of a channel message", false, false}},
+	{"MESSAGEEDIT", {tt_online, "Editing a channel message", false, false}},
+	{"EDITEVENT", {tt_online, "Message edit event", false, false}},
 	{"MESSAGEDELETE", {tt_online, "Deletion of a channel message", false, false}},
 	{"MESSAGERECEIVE", {tt_online, "Receipt of a created message", false, false}},
 	{"CACHE", {tt_online, "Test guild cache", false, false}},
