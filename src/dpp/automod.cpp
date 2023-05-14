@@ -97,6 +97,7 @@ automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
 		allow_list.push_back(k);
 	}
 	mention_total_limit = int8_not_null(j, "mention_total_limit");
+	mention_raid_protection_enabled = bool_not_null(j, "mention_raid_protection_enabled");
 	return *this;
 }
 
@@ -119,6 +120,7 @@ std::string automod_metadata::build_json(bool with_id) const {
 		j["allow_list"].push_back(v);
 	}
 	j["mention_total_limit"] = mention_total_limit;
+	j["mention_raid_protection_enabled"] = mention_raid_protection_enabled;
 	return j.dump();
 
 }
@@ -142,7 +144,7 @@ automod_rule& automod_rule::fill_from_json(nlohmann::json* j) {
 	enabled = bool_not_null(j, "enabled");
 	exempt_roles.clear();
 	exempt_channels.clear();
-	for (auto k : (*j)["automod_actions"]) {
+	for (auto k : (*j)["actions"]) {
 		actions.push_back(automod_action().fill_from_json(&k));
 	}
 	for (auto k : (*j)["exempt_roles"]) {

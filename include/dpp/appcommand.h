@@ -139,7 +139,8 @@ struct DPP_EXPORT command_option_choice : public json_interface<command_option_c
 void to_json(nlohmann::json& j, const command_option_choice& choice);
 
 /**
- * @brief A minimum or maximum value for co_number and co_integer dpp::command_option types
+ * @brief A minimum or maximum value/length for dpp::co_number, dpp::co_integer and dpp::co_string types of a dpp::command_option.
+ * The `int64_t` is for the integer range or string length that can be entered. The `double` is for the decimal range that can be entered
  */
 typedef std::variant<std::monostate, int64_t, double> command_option_range;
 
@@ -162,8 +163,9 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	bool autocomplete;                           //!< True if this option supports auto completion
 	std::vector<command_option> options;         //!< Sub-commands
 	std::vector<channel_type> channel_types;     //!< Allowed channel types for channel snowflake id options
-	command_option_range min_value;              //!< Minimum value allowed, for co_number and co_integer types only
-	command_option_range max_value;              //!< Maximum value allowed, for co_number and co_integer types only
+	// Combines the `min_length` and `max_length` field by storing its value in the int64_t of the command_option_range
+	command_option_range min_value;              //!< Minimum value/length that can be entered, for dpp::co_number, dpp::co_integer and dpp::co_string types only
+	command_option_range max_value;              //!< Maximum value/length that can be entered, for dpp::co_number, dpp::co_integer and dpp::co_string types only
 	std::map<std::string, std::string> name_localizations; //!< Localisations of command name
 	std::map<std::string, std::string> description_localizations; //!< Localisations of command description
 
@@ -209,7 +211,7 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 
 	/**
 	 * @brief Set the minimum numeric value of the option. 
-	 * Only valid if the type is co_number or co_integer.
+	 * Only valid if the type is dpp::co_number or dpp::co_integer.
 	 * @param min_v Minimum value
 	 * @return command_option& returns a reference to self for chaining of calls
 	 */
@@ -217,23 +219,23 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 
 	/**
 	 * @brief Set the maximum numeric value of the option. 
-	 * Only valid if the type is co_number or co_integer.
+	 * Only valid if the type is dpp::co_number or dpp::co_integer.
 	 * @param max_v Maximum value
 	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_max_value(command_option_range max_v);
 
 	/**
-	 * @brief Set the minimum string length of the option. 
-	 * Only valid if the type is co_string
+	 * @brief Set the minimum string length of the option. Must be between 0 and 6000 (inclusive).
+	 * Only valid if the type is dpp::co_string
 	 * @param min_v Minimum value
 	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_min_length(command_option_range min_v);
 
 	/**
-	 * @brief Set the maximum string length of the option. 
-	 * Only valid if the type is co_string
+	 * @brief Set the maximum string length of the option. Must be between 1 and 6000 (inclusive).
+	 * Only valid if the type is dpp::co_string
 	 * @param max_v Maximum value
 	 * @return command_option& returns a reference to self for chaining of calls
 	 */

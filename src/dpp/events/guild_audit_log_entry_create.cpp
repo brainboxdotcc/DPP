@@ -18,13 +18,29 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#include <dpp/permissions.h>
-#include <dpp/json.h>
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
 
-namespace dpp {
+namespace dpp { namespace events {
 
-permission::operator nlohmann::json() const {
-	return std::to_string(value);
+using json = nlohmann::json;
+using namespace dpp;
+
+
+/**
+ * @brief Handle event
+ *
+ * @param client Websocket client (current shard)
+ * @param j JSON data for the event
+ * @param raw Raw JSON string
+ */
+void guild_audit_log_entry_create::handle(discord_client* client, json &j, const std::string &raw) {
+	json& d = j["d"];
+	if (!client->creator->on_guild_audit_log_entry_create.empty()) {
+		dpp::guild_audit_log_entry_create_t ec(client, raw);
+		ec.entry.fill_from_json(&d);
+		client->creator->on_guild_audit_log_entry_create.call(ec);
+	}
 }
 
-}
+}};

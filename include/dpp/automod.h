@@ -82,7 +82,7 @@ enum automod_event_type : uint8_t {
  */
 enum automod_trigger_type : uint8_t {
 	/**
-	 * @brief Check if content contains words from a user defined list of keywords
+	 * @brief Check if content contains words from a user defined list of keywords (max 6 of this type per guild)
 	 */
 	amod_type_keyword = 1,
 	/**
@@ -91,21 +91,21 @@ enum automod_trigger_type : uint8_t {
 	 */
 	amod_type_harmful_link = 2,
 	/**
-	 * @brief Check if content represents generic spam
+	 * @brief Check if content represents generic spam (max 1 of this type per guild)
 	 */
 	amod_type_spam = 3,
 	/**
-	 * @brief Check if content contains words from discord pre-defined wordsets
+	 * @brief Check if content contains words from discord pre-defined wordsets (max 1 of this type per guild)
 	 */
 	amod_type_keyword_preset = 4,
 	/**
-	 * @brief Check if content contains more mentions than allowed
+	 * @brief Check if content contains more mentions than allowed (max 1 of this type per guild)
 	 */
 	amod_type_mention_spam = 5,
 };
 
 /**
- * @brief Metadata associated with an automod action
+ * @brief Metadata associated with an automod action. Different fields are relevant based on the value of dpp::automod_rule::trigger_type.
  */
 struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	/**
@@ -164,7 +164,7 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	std::vector<automod_preset_type> presets;
 
 	/**
-	 * @brief Substrings which should not trigger the rule.
+	 * @brief Substrings which should not trigger the rule (Maximum of 100 for the trigger type dpp::amod_type_keyword, Maximum of 1000 for the trigger type dpp::amod_type_keyword_preset).
 	 *
 	 * Each keyword can be a phrase which contains multiple words.
 	 * All keywords are case insensitive and can be up to 60 characters.
@@ -208,6 +208,11 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	 * @brief Total number of unique role and user mentions allowed per message (Maximum of 50)
 	 */
 	uint8_t mention_total_limit;
+
+	/**
+	 * @brief Whether to automatically detect mention raids
+	 */
+	bool mention_raid_protection_enabled;
 
 	/**
 	 * @brief Construct a new automod metadata object
