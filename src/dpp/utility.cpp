@@ -81,6 +81,25 @@ namespace dpp {
 			return cdn_host + '/' + path_without_extension + suffix + extension + utility::avatar_size(size);
 		}
 
+		std::string cdn_endpoint_url_sticker(snowflake sticker_id, sticker_format format) {
+			if (!sticker_id) {
+				return std::string();
+			}
+
+			std::string extension;
+			if (format == sf_png || format == sf_apng) {
+				extension = ".png";
+			} else if (format == sf_lottie) {
+				extension = ".json";
+			} else if (format == sf_gif) {
+				extension = ".gif";
+			} else {
+				return std::string();
+			}
+
+			return utility::cdn_host + "/stickers/" + std::to_string(sticker_id) + extension;
+		}
+
 		double time_f()
 		{
 			using namespace std::chrono;
