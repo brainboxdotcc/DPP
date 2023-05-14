@@ -358,6 +358,20 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("UTILITY.CDN_ENDPOINT_URL_HASH", success);
 	}
 
+	{ // sticker url getter
+		set_test("STICKER.GET_URL", false);
+		dpp::sticker s;
+		s.format_type = dpp::sf_png;
+		bool success = s.get_url().empty();
+		s.id = 12345;
+		success = s.get_url() == "https://cdn.discordapp.com/stickers/12345.png" && success;
+		s.format_type = dpp::sf_gif;
+		success = s.get_url() == "https://cdn.discordapp.com/stickers/12345.gif" && success;
+		s.format_type = dpp::sf_lottie;
+		success = s.get_url() == "https://cdn.discordapp.com/stickers/12345.json" && success;
+		set_test("STICKER.GET_URL", success);
+	}
+
 	{ // user url getter
 		dpp::user user1;
 		user1.id = 189759562910400512;
