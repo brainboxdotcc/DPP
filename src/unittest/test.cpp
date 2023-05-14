@@ -349,6 +349,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		);
 	}
 
+	{ // emoji url getter
+		dpp::emoji emoji;
+		emoji.id = 825407338755653641;
+
+		set_test("EMOJI.GET_URL", false);
+		set_test("EMOJI.GET_URL", emoji.get_url() == dpp::utility::cdn_host + "/emojis/825407338755653641.png");
+	}
+
 	{ // channel methods
 		set_test("CHANNEL.SET_TYPE", false);
 		dpp::channel c;
@@ -607,6 +615,48 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 											});
 										}
 									});
+								}
+							});
+						});
+					});
+				});
+			}
+
+			set_test("REQUEST_GET_IMAGE", false);
+			if (!offline) {
+				bot.request("https://dpp.dev/DPP-Logo.png", dpp::m_get, [&bot](const dpp::http_request_completion_t &callback) {
+					if (callback.status != 200) {
+						return;
+					}
+					set_test("REQUEST_GET_IMAGE", true);
+
+					dpp::emoji emoji;
+					emoji.load_image(callback.body, dpp::i_png);
+					emoji.name = "dpp";
+
+					// emoji unit test with the requested image
+					set_test("EMOJI_CREATE", false);
+					set_test("EMOJI_GET", false);
+					set_test("EMOJI_DELETE", false);
+					bot.guild_emoji_create(TEST_GUILD_ID, emoji, [&bot](const dpp::confirmation_callback_t &event) {
+						if (event.is_error()) {
+							return;
+						}
+						set_test("EMOJI_CREATE", true);
+
+						auto created = event.get<dpp::emoji>();
+						bot.guild_emoji_get(TEST_GUILD_ID, created.id, [&bot, created](const dpp::confirmation_callback_t &event) {
+							if (event.is_error()) {
+								return;
+							}
+							auto fetched = event.get<dpp::emoji>();
+							if (created.id == fetched.id && created.name == fetched.name && created.flags == fetched.flags && created.user_id == fetched.user_id) {
+								set_test("EMOJI_GET", true);
+							}
+
+							bot.guild_emoji_delete(TEST_GUILD_ID, fetched.id, [](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									set_test("EMOJI_DELETE", true);
 								}
 							});
 						});

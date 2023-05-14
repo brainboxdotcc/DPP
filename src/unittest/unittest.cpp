@@ -116,6 +116,7 @@ std::map<std::string, test_t> tests = {
 	{"UTILITY.USER_MENTION", {tt_offline, "utility::user_mention", false, false}},
 	{"UTILITY.ROLE_MENTION", {tt_offline, "utility::role_mention", false, false}},
 	{"UTILITY.EMOJI_MENTION", {tt_offline, "utility::emoji_mention", false, false}},
+	{"EMOJI.GET_URL", {tt_offline, "emoji::get_url", false, false}},
 	{"ROLE.COMPARE", {tt_offline, "role::operator<", false, false}},
 	{"ROLE_CREATE", {tt_online, "cluster::role_create", false, false}},
 	{"ROLE_EDIT", {tt_online, "cluster::role_edit", false, false}},
@@ -129,6 +130,10 @@ std::map<std::string, test_t> tests = {
 	{"AUTOMOD_RULE_GET", {tt_online, "cluster::automod_rule_get", false, false}},
 	{"AUTOMOD_RULE_GET_ALL", {tt_online, "cluster::automod_rules_get", false, false}},
 	{"AUTOMOD_RULE_DELETE", {tt_online, "cluster::automod_rule_delete", false, false}},
+	{"REQUEST_GET_IMAGE", {tt_online, "using the cluster::request method to fetch an image", false, false}},
+	{"EMOJI_CREATE", {tt_online, "cluster::guild_emoji_create", false, false}},
+	{"EMOJI_GET", {tt_online, "cluster::guild_emoji_get", false, false}},
+	{"EMOJI_DELETE", {tt_online, "cluster::guild_emoji_delete", false, false}},
 };
 
 double start = dpp::utility::time_f();
