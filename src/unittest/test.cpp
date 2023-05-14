@@ -647,34 +647,48 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
-		bool message_tested = false;
-		bot.on_message_create([&](const dpp::message_create_t & event) {
-			if (event.msg.author.id == bot.me.id && !message_tested) {
-				message_tested = true;
-				set_test("MESSAGERECEIVE", true);
-				std::promise<void> pin_test_promise;
-				auto pin_test_future = pin_test_promise.get_future();
-				set_test("MESSAGEPIN", false);
-				set_test("MESSAGEUNPIN", false);
-				bot.message_pin(event.msg.channel_id, event.msg.id, [&bot, id = event.msg.id, &pin_test_promise](const dpp::confirmation_callback_t &callback) {
-					if (!callback.is_error()) {
-						set_test("MESSAGEPIN", true);
-						bot.message_unpin(TEST_TEXT_CHANNEL_ID, id, [&pin_test_promise](const dpp::confirmation_callback_t &callback) {
-							if (!callback.is_error()) {
-								set_test("MESSAGEUNPIN", true);
-							}
-							pin_test_promise.set_value();
-						});
-					} else {
-						pin_test_promise.set_value();
-					}
-				});
+		// this helper class contains logic for the message tests, deletes the message when all tests are done
+		class message_test_helper
+		{
+		private:
+			std::mutex mutex;
+			bool pin_tested;
+			std::array<bool, 3> files_tested;
+			std::array<bool, 3> files_success;
+			dpp::snowflake channel_id;
+			dpp::snowflake message_id;
+			dpp::cluster &bot;
+
+			void delete_message_if_done() {
+				if (files_tested == std::array{true, true, true} && pin_tested) {
+					set_test("MESSAGEDELETE", false);
+					bot.message_delete(message_id, channel_id, [](const dpp::confirmation_callback_t &callback) {
+						if (!callback.is_error()) {
+							set_test("MESSAGEDELETE", true);
+						}
+					});
+				}
+			}
+
+			void set_pin_tested() {
+				assert(!pin_tested);
+				pin_tested = true;
+				delete_message_if_done();
+			}
+
+			void set_file_tested(size_t index) {
+				assert(!files_tested[index]);
+				files_tested[index] = true;
+				if (files_tested == std::array{true, true, true}) {
+					set_test("MESSAGEFILE", files_success == std::array{true, true, true});
+				}
+				delete_message_if_done();
+			}
+
+			void test_files(const dpp::message &message) {
 				set_test("MESSAGEFILE", false);
-				std::promise<void> file_test_promise;
-				auto file_test_future = file_test_promise.get_future();
-				if (event.msg.attachments.size() == 3)
-				{
-					constexpr auto check_mimetype = [](const auto &headers, std::string mimetype) {
+				if (message.attachments.size() == 3) {
+					static constexpr auto check_mimetype = [](const auto &headers, std::string mimetype) {
 						if (auto it = headers.find("content-type"); it != headers.end()) {
 							// check that the mime type starts with what we gave : for example discord will change "text/plain" to "text/plain; charset=UTF-8"
 							return it->second.size() >= mimetype.size() && std::equal(it->second.begin(), it->second.begin() + mimetype.size(), mimetype.begin());
@@ -683,28 +697,78 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							return false;
 						}
 					};
-					event.msg.attachments[0].download([&](const dpp::http_request_completion_t &callback){
+					message.attachments[0].download([&](const dpp::http_request_completion_t &callback) {
+						std::lock_guard lock(mutex);
 						if (callback.status == 200 && callback.body == "test") {
-							event.msg.attachments[1].download([&](const dpp::http_request_completion_t &callback){
-								if (callback.status == 200 && check_mimetype(callback.headers, "text/plain") && callback.body == "test") {
-									event.msg.attachments[2].download([&](const dpp::http_request_completion_t &callback){
-										// do not check the contents here because discord can change compression
-										if (callback.status == 200 && check_mimetype(callback.headers, "image/png")) {
-											set_test("MESSAGEFILE", true);
-										}
-										file_test_promise.set_value();
-									});
-								}
-								else {
-									file_test_promise.set_value();
-								}
-							});
+							files_success[0] = true;
 						}
-						else {
-							file_test_promise.set_value();
+						set_file_tested(0);
+					});
+					message.attachments[1].download([&](const dpp::http_request_completion_t &callback) {
+						std::lock_guard lock(mutex);
+						if (callback.status == 200 && check_mimetype(callback.headers, "text/plain") && callback.body == "test") {
+							files_success[1] = true;
 						}
+						set_file_tested(1);
+					});
+					message.attachments[2].download([&](const dpp::http_request_completion_t &callback) {
+						std::lock_guard lock(mutex);
+						// do not check the contents here because discord can change compression
+						if (callback.status == 200 && check_mimetype(callback.headers, "image/png")) {
+							files_success[2] = true;
+						}
+						set_file_tested(2);
 					});
 				}
+				else {
+					set_file_tested(0);
+					set_file_tested(1);
+					set_file_tested(2);
+				}
+			}
+
+			void test_pin() {
+				set_test("MESSAGEPIN", false);
+				set_test("MESSAGEUNPIN", false);
+				bot.message_pin(channel_id, message_id, [=](const dpp::confirmation_callback_t &callback) {
+					std::lock_guard lock(mutex);
+					if (!callback.is_error()) {
+						set_test("MESSAGEPIN", true);
+						bot.message_unpin(TEST_TEXT_CHANNEL_ID, message_id, [=](const dpp::confirmation_callback_t &callback) {
+							std::lock_guard lock(mutex);
+							if (!callback.is_error()) {
+								set_test("MESSAGEUNPIN", true);
+							}
+							set_pin_tested();
+						});
+					}
+					else {
+						set_pin_tested();
+					}
+				});
+			}
+
+		public:
+			message_test_helper(dpp::cluster &_bot) : bot(_bot) {}
+
+			void run(const dpp::message &message) {
+				pin_tested = false;
+				files_tested = {false, false, false};
+				files_success = {false, false, false};
+				channel_id = message.channel_id;
+				message_id = message.id;
+				test_pin();
+				test_files(message);
+			}
+		};
+
+		message_test_helper message_helper(bot);
+		bool message_tested = false;
+		bot.on_message_create([&](const dpp::message_create_t & event) {
+			if (event.msg.author.id == bot.me.id && !message_tested) {
+				message_tested = true;
+				set_test("MESSAGERECEIVE", true);
+				message_helper.run(event.msg);
 				set_test("MESSAGESGET", false);
 				bot.messages_get(event.msg.channel_id, 0, event.msg.id, 0, 5, [](const dpp::confirmation_callback_t &cc){
 					if (!cc.is_error()) {
@@ -723,17 +787,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						}
 					}  else {
 						set_test("MESSAGESGET", false);
-					}
-				});
-				// wait for tasks with the message to finish before deleting, up to 20 seconds
-				std::chrono::time_point timeout_point = std::chrono::steady_clock::now() + std::chrono::seconds(20);
-				pin_test_future.wait_until(timeout_point);
-				file_test_future.wait_until(timeout_point);
-				set_test("MESSAGEDELETE", false);
-				bot.message_delete(event.msg.id, event.msg.channel_id, [](const dpp::confirmation_callback_t &callback) {
-
-					if (!callback.is_error()) {
-						set_test("MESSAGEDELETE", true);
 					}
 				});
 				set_test("MSGCREATESEND", false);
