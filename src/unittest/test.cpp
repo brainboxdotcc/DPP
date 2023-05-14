@@ -331,6 +331,33 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test("USER.GET_CREATION_TIME", (uint64_t)user1.get_creation_time() == 1465312605);
 	}
 
+	{ // avatar size function
+		set_test("UTILITY.AVATAR_SIZE", false);
+		bool success = false;
+		success = dpp::utility::avatar_size(0).empty();
+		success = dpp::utility::avatar_size(16) == "?size=16" && success;
+		success = dpp::utility::avatar_size(256) == "?size=256" && success;
+		success = dpp::utility::avatar_size(4096) == "?size=4096" && success;
+		success = dpp::utility::avatar_size(8192).empty() && success;
+		success = dpp::utility::avatar_size(3000).empty() && success;
+		set_test("UTILITY.AVATAR_SIZE", success);
+	}
+
+	{ // cdn endpoint url getter
+		set_test("UTILITY.CDN_ENDPOINT_URL_HASH", false);
+		bool success = false;
+		success = dpp::utility::cdn_endpoint_url_hash({ dpp::i_png }, "foobar/test", "", dpp::i_jpg, 0).empty();
+		success = dpp::utility::cdn_endpoint_url_hash({ dpp::i_png }, "foobar/test", "", dpp::i_png, 0) == "https://cdn.discordapp.com/foobar/test.png" && success;
+		success = dpp::utility::cdn_endpoint_url_hash({ dpp::i_png }, "foobar/test", "", dpp::i_png, 128) == "https://cdn.discordapp.com/foobar/test.png?size=128" && success;
+		success = dpp::utility::cdn_endpoint_url_hash({ dpp::i_png, dpp::i_gif }, "foobar/test", "12345", dpp::i_gif, 0, false, true) == "https://cdn.discordapp.com/foobar/test/a_12345.gif" && success;
+		success = dpp::utility::cdn_endpoint_url_hash({ dpp::i_png, dpp::i_gif }, "foobar/test", "12345", dpp::i_png, 0, false, true) == "https://cdn.discordapp.com/foobar/test/a_12345.png" && success;
+		success = dpp::utility::cdn_endpoint_url_hash({ dpp::i_png, dpp::i_gif }, "foobar/test", "12345", dpp::i_png, 0, false, false) == "https://cdn.discordapp.com/foobar/test/12345.png" && success;
+		success = dpp::utility::cdn_endpoint_url_hash({ dpp::i_png, dpp::i_gif }, "foobar/test", "12345", dpp::i_png, 0, true, true) == "https://cdn.discordapp.com/foobar/test/a_12345.gif" && success;
+		success = dpp::utility::cdn_endpoint_url_hash({ dpp::i_png, dpp::i_gif }, "foobar/test", "", dpp::i_png, 0, true, true) == "https://cdn.discordapp.com/foobar/test.gif" && success;
+		success = dpp::utility::cdn_endpoint_url_hash({ dpp::i_png, dpp::i_gif }, "foobar/test", "", dpp::i_gif, 0, false, false).empty() && success;
+		set_test("UTILITY.CDN_ENDPOINT_URL_HASH", success);
+	}
+
 	{ // user url getter
 		dpp::user user1;
 		user1.id = 189759562910400512;

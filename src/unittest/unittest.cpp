@@ -121,6 +121,8 @@ std::map<std::string, test_t> tests = {
 	{"UTILITY.USER_MENTION", {tt_offline, "utility::user_mention", false, false}},
 	{"UTILITY.ROLE_MENTION", {tt_offline, "utility::role_mention", false, false}},
 	{"UTILITY.EMOJI_MENTION", {tt_offline, "utility::emoji_mention", false, false}},
+	{"UTILITY.AVATAR_SIZE", {tt_offline, "utility::avatar_size", false, false}},
+	{"UTILITY.CDN_ENDPOINT_URL_HASH", {tt_offline, "utility::cdn_endpoint_url_hash", false, false}},
 	{"EMOJI.GET_URL", {tt_offline, "emoji::get_url", false, false}},
 	{"ROLE.COMPARE", {tt_offline, "role::operator<", false, false}},
 	{"ROLE_CREATE", {tt_online, "cluster::role_create", false, false}},
