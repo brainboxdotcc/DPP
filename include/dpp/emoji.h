@@ -167,6 +167,19 @@ public:
 	 * @return std::string mention
 	 */
 	std::string get_mention() const;
+
+	/**
+	 * @brief Get the custom emoji url
+	 *
+	 * @param size The size of the emoji in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized emoji is returned.
+	 * @param format The format to use for the emoji. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
+	 * Passing `i_gif` might result in an invalid url for non-animated emojis. Consider using the `prefer_animated` parameter instead.
+	 * @param prefer_animated Whether you prefer gif format.
+	 * If true, it'll return gif format whenever the emoji is available as animated.
+	 * @return std::string emoji url or an empty string, if the id is not set
+	 */
+	std::string get_url(uint16_t size = 0, const image_type format = i_png, bool prefer_animated = true) const;
 };
 
 /**
