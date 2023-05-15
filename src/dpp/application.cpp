@@ -94,36 +94,20 @@ application& application::fill_from_json(nlohmann::json* j) {
 }
 
 std::string application::get_cover_image_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->cover_image.to_string().empty() && this->id) {
-		return utility::cdn_host + "/app-icons/" + std::to_string(this->id) + "/" + this->cover_image.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "app-icons/" + std::to_string(this->id) + "/" + this->cover_image.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}
 }
 
 std::string application::get_icon_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->icon.to_string().empty() && this->id) {
-		return utility::cdn_host + "/app-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "app-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}
