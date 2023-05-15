@@ -31,6 +31,14 @@ namespace dpp {
 
 using json = nlohmann::json;
 
+/* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
+std::map<uint16_t , dpp::guild_member_flags> membermap = {
+		{ 1 << 0,       dpp::gm_did_rejoin },
+		{ 1 << 1,       dpp::gm_completed_onboarding },
+		{ 1 << 2,       dpp::gm_bypasses_verification },
+		{ 1 << 3,       dpp::gm_started_onboarding },
+};
+
 const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extra>> featuremap = {
 	{"ANIMATED_BANNER", dpp::g_animated_banner },
 	{"ANIMATED_ICON", dpp::g_animated_icon },
@@ -49,6 +57,7 @@ const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extr
 	{"NEWS", dpp::g_news },
 	{"PARTNERED", dpp::g_partnered },
 	{"PREVIEW_ENABLED", dpp::g_preview_enabled },
+	{"RAID_ALERTS_DISABLED", dpp::g_raid_alerts_disabled },
 	{"ROLE_ICONS", dpp::g_role_icons },
 	{"ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE", dpp::g_role_subscriptions_available_for_purchase },
 	{"ROLE_SUBSCRIPTIONS_ENABLED", dpp::g_role_subscription_enabled },
@@ -72,6 +81,7 @@ guild::guild() :
 	flags(0),
 	max_presences(0),
 	max_members(0),
+	flags_extra(0),
 	shard_id(0),
 	premium_subscription_count(0),
 	afk_timeout(afk_off),
@@ -81,8 +91,7 @@ guild::guild() :
 	verification_level(ver_none),
 	explicit_content_filter(expl_disabled),
 	mfa_level(mfa_none),
-	nsfw_level(nsfw_default),
-	flags_extra(0)
+	nsfw_level(nsfw_default)
 {
 }
 
@@ -103,6 +112,11 @@ std::string guild_member::get_mention() const {
 
 guild_member& guild_member::set_nickname(const std::string& nick) {
 	this->nickname = nick;
+	return *this;
+}
+
+guild_member& guild_member::set_bypasses_verification(const bool is_bypassing_verification) {
+	this->flags = (is_bypassing_verification) ? flags | gm_bypasses_verification : flags & ~gm_bypasses_verification;
 	return *this;
 }
 
@@ -146,6 +160,13 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	set_ts_not_null(&j, "joined_at", gm.joined_at);
 	set_ts_not_null(&j, "premium_since", gm.premium_since);
 	set_ts_not_null(&j, "communication_disabled_until", gm.communication_disabled_until);
+
+	uint16_t flags = int16_not_null(&j, "flags");
+	for (auto & flag : membermap) {
+		if (flags & flag.first) {
+			gm.flags |= flag.second;
+		}
+	}
 
 	gm.roles.clear();
 	if (j.contains("roles") && !j.at("roles").is_null()) {
@@ -212,15 +233,23 @@ std::string guild_member::build_json(bool with_id) const {
 		j["nick"] = this->nickname;
 	if (!this->roles.empty()) {
 		j["roles"] = {};
-		for (auto & role : roles) {
+		for (auto & role : this->roles) {
 			j["roles"].push_back(std::to_string(role));
 		}
 	}
 
-	if (flags & gm_voice_action) {
+	if (this->flags & gm_voice_action) {
 		j["mute"] = is_muted();
 		j["deaf"] = is_deaf();
 	}
+
+	uint32_t out_flags = 0;
+	for (auto & flag : membermap) {
+		if (flags & flag.second) {
+			out_flags |= flag.first;
+		}
+	}
+	j["flags"] = out_flags;
 
 	return j.dump();
 }
@@ -244,6 +273,22 @@ bool guild_member::is_muted() const {
 
 bool guild_member::is_pending() const {
 	return flags & dpp::gm_pending;
+}
+
+bool guild_member::has_rejoined() const {
+	return flags & dpp::gm_did_rejoin;
+}
+
+bool guild_member::has_completed_onboarding() const {
+	return flags & dpp::gm_completed_onboarding;
+}
+
+bool guild_member::has_started_onboarding() const {
+	return flags & dpp::gm_started_onboarding;
+}
+
+bool guild_member::has_bypasses_verification() const {
+	return flags & dpp::gm_bypasses_verification;
 }
 
 bool guild::is_large() const {
@@ -324,6 +369,10 @@ bool guild::has_support_server() const {
 
 bool guild::has_role_subscriptions_available_for_purchase() const {
 	return this->flags_extra & g_role_subscriptions_available_for_purchase;
+}
+
+bool guild::has_raid_alerts_disabled() const {
+	return this->flags_extra & g_raid_alerts_disabled;
 }
 
 bool guild::has_animated_icon() const {
@@ -425,6 +474,9 @@ std::string guild::build_json(bool with_id) const {
 	}
 	if (!description.empty()) {
 		j["description"] = description;
+	}
+	if (!safety_alerts_channel_id.empty()) {
+		j["safety_alerts_channel_id"] = safety_alerts_channel_id;
 	}
 	return j.dump();
 }
@@ -572,6 +624,8 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 				welcome_screen.welcome_channels.emplace_back(wchan);
 			}
 		}
+
+		set_snowflake_not_null(d, "safety_alerts_channel_id", this->safety_alerts_channel_id);
 		
 	} else {
 		this->flags |= dpp::g_unavailable;

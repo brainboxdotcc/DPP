@@ -177,7 +177,7 @@ struct DPP_EXPORT audit_extra {
 /**
  * @brief An individual audit log entry
  */
-struct DPP_EXPORT audit_entry {
+struct DPP_EXPORT audit_entry : public json_interface<audit_entry> {
 	snowflake			id;		//!< id of the entry
 	/**
 	 * ID of the affected entity (webhook, user, role, etc.) (may be empty)
@@ -189,6 +189,18 @@ struct DPP_EXPORT audit_entry {
 	audit_type			type;		//!< type of action that occurred
 	std::optional<audit_extra>	extra;	//!< Optional: additional info for certain action types
 	std::string			reason;		//!< Optional: the reason for the change (1-512 characters)
+
+	/** Constructor */
+	audit_entry();
+
+	/** Destructor */
+	virtual ~audit_entry() = default;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	audit_entry& fill_from_json(nlohmann::json* j);
 };
 
 /**

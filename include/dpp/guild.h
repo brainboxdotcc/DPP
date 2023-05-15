@@ -135,40 +135,50 @@ enum guild_flags : uint32_t {
 /**
  * @brief Additional boolean flag values for guild, as guild_flags is full
  */
-enum guild_flags_extra : uint8_t {
+enum guild_flags_extra : uint16_t {
 	/** Guild has premium progress bar enabled */
-	g_premium_progress_bar_enabled =	0b00000001,
+	g_premium_progress_bar_enabled =	0b0000000000000001,
 	/** Guild can have an animated banner (doesn't mean it actually has one though) */
-	g_animated_banner =			0b00000010,
+	g_animated_banner =			0b0000000000000010,
 	/** Guild has auto moderation */
-	g_auto_moderation =			0b00000100,
+	g_auto_moderation =			0b0000000000000100,
 	/** Guild has paused invites, preventing new users from joining */
-	g_invites_disabled =		0b00001000,
+	g_invites_disabled =		0b0000000000001000,
 	/** Guild has been set as support server of an app in the App Directory */
-	g_developer_support_server =	0b00010000,
+	g_developer_support_server =	0b0000000000010000,
 	/** Guild role subscription purchase and renewal notifications are off */
-	g_no_role_subscription_notifications = 0b00100000,
+	g_no_role_subscription_notifications = 0b0000000000100000,
 	/** Guild role subscription sticker reply buttons are off */
-	g_no_role_subscription_notification_replies = 0b01000000,
+	g_no_role_subscription_notification_replies = 0b0000000001000000,
 	/** Guild has role subscriptions that can be purchased */
-	g_role_subscriptions_available_for_purchase = 0b10000000,
+	g_role_subscriptions_available_for_purchase = 0b0000000010000000,
+	/** Guild has disabled alerts for join raids in the configured safety alerts channel */
+	g_raid_alerts_disabled = 0b0000000100000000,
 };
 
 /**
  * @brief Various flags that can be used to indicate the status of a guild member.
- * @note Use set_mute and set_deaf member functions and do not toggle the bits yourself.
+ * @note Use the setter functions in dpp::guild_member and do not toggle the bits yourself.
  */
-enum guild_member_flags : uint8_t {
+enum guild_member_flags : uint16_t {
 	/** Member deafened in voice channels */
-	gm_deaf =		0b00000001,
+	gm_deaf =		0b0000000000000001,
 	/** Member muted in voice channels */
-	gm_mute =		0b00000010,
+	gm_mute =		0b0000000000000010,
 	/** Member pending verification by membership screening */
-	gm_pending =		0b00000100,
+	gm_pending =		0b0000000000000100,
 	/** Member has animated guild-specific avatar */
-	gm_animated_avatar = 	0b00001000,
+	gm_animated_avatar = 	0b0000000000001000,
 	/** gm_deaf or gm_mute has been toggled */
-	gm_voice_action = 		0b00010000,
+	gm_voice_action = 		0b0000000000010000,
+	/** Member has left and rejoined the guild */
+	gm_did_rejoin = 0b0000000000100000,
+	/** Member has completed onboarding */
+	gm_completed_onboarding = 0b0000000001000000,
+	/** Member is exempt from guild verification requirements */
+	gm_bypasses_verification = 0b0000000010000000,
+	/** Member has started onboarding */
+	gm_started_onboarding = 0b0000000100000000,
 };
 
 /**
@@ -194,7 +204,7 @@ public:
 	/** Boosting since */
 	time_t premium_since;
 	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
-	uint8_t flags;
+	uint16_t flags;
 
 	/** Default constructor */
 	guild_member();
@@ -248,6 +258,38 @@ public:
 	bool is_pending() const;
 
 	/**
+	 * @brief Returns true if the user has left and rejoined the guild
+	 *
+	 * @return true user has left and rejoined the guild
+	 * @return false user has not rejoined
+	 */
+	bool has_rejoined() const;
+
+	/**
+	 * @brief Returns true if the user has completed onboarding
+	 *
+	 * @return true user has completed onboarding
+	 * @return false user has not completed onboarding
+	 */
+	bool has_completed_onboarding() const;
+
+	/**
+	 * @brief Returns true if the user has started onboarding
+	 *
+	 * @return true user has started onboarding
+	 * @return false user has not started onboarding yet
+	 */
+	bool has_started_onboarding() const;
+
+	/**
+	 * @brief Returns true if the user is exempt from guild verification requirements
+	 *
+	 * @return true user bypasses verification
+	 * @return false user doesn't bypass verification
+	 */
+	bool has_bypasses_verification() const;
+
+	/**
 	 * @brief Returns true if the user's per-guild custom avatar is animated
 	 * 
 	 * @return true user's custom avatar is animated
@@ -292,6 +334,15 @@ public:
 	 */
 	
 	bool operator == (guild_member const& other_member) const;
+
+	/**
+	 * @brief Set whether the user is exempt from guild verification requirements
+	 *
+	 * @param is_bypassing_verification value to set
+	 *
+	 * @return guild_member& reference to self
+	 */
+	guild_member& set_bypasses_verification(const bool is_bypassing_verification);
 
 	/**
 	 * @brief Set whether the user is muted in voice channels
@@ -536,6 +587,9 @@ public:
 	/** Snowflake ID of widget channel, or 0 */
 	snowflake widget_channel_id;
 
+	/** The id of the channel where admins and moderators of Community guilds receive safety alerts from Discord */
+	snowflake safety_alerts_channel_id;
+
 	/** Approximate member count. May be sent as zero */
 	uint32_t member_count;
 
@@ -552,6 +606,11 @@ public:
 	 * @brief the maximum number of members for the guild
 	 */
 	uint32_t max_members;
+
+	/**
+	 * @brief Additional flags (values from dpp::guild_flags_extra)
+	 */
+	uint16_t flags_extra;
 
 	/** Shard ID of the guild */
 	uint16_t shard_id;
@@ -584,11 +643,6 @@ public:
 	 * @brief Guild NSFW level
 	 */
 	guild_nsfw_level_t nsfw_level;
-
-	/**
-	 * @brief Additional flags
-	 */
-	uint8_t flags_extra;
 
 	/** Default constructor, zeroes all values */
 	guild();
@@ -845,6 +899,12 @@ public:
 	 * @return bool has role subscriptions that can be purchased
 	 */
 	bool has_role_subscriptions_available_for_purchase() const;
+
+	/**
+	 * @brief Guild has disabled alerts for join raids in the configured safety alerts channel
+	 * @return bool dpp::g_raid_alerts_disabled flag is set
+	 */
+	bool has_raid_alerts_disabled() const;
 
 	/**
 	 * @brief Guild has access to set an animated guild icon
