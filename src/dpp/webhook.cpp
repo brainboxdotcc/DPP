@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/webhook.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/exception.h>
 
 namespace dpp {
@@ -35,9 +35,14 @@ webhook::webhook() : managed(), type(w_incoming), guild_id(0), channel_id(0), us
 
 webhook::webhook(const std::string& webhook_url) : webhook()
 {
-	token = webhook_url.substr(webhook_url.find_last_of("/") + 1);
+	auto pos = webhook_url.find_last_of('/');
+	if (pos == std::string::npos) { // throw when the url doesn't contain a slash at all
+		throw dpp::logic_exception(std::string("Failed to parse webhook URL: No '/' found in the webhook url"));
+	}
 	try {
-		id = std::stoull(webhook_url.substr(strlen("https://discord.com/api/webhooks/"), webhook_url.find_last_of("/")));
+		token = webhook_url.substr(pos + 1);
+		std::string endpoint = "https://discord.com/api/webhooks/";
+		id = std::stoull(webhook_url.substr(endpoint.size(), pos));
 	}
 	catch (const std::exception& e) {
 		throw dpp::logic_exception(std::string("Failed to parse webhook URL: ") + e.what());
@@ -51,9 +56,7 @@ webhook::webhook(const snowflake webhook_id, const std::string& webhook_token) :
 }
 
 webhook::~webhook() {
-	if (image_data) {
-		delete image_data;
-	}
+	delete image_data;
 }
 
 webhook& webhook::fill_from_json(nlohmann::json* j) {
@@ -97,7 +100,8 @@ webhook& webhook::load_image(const std::string &image_blob, const image_type typ
 	static const std::map<image_type, std::string> mimetypes = {
 		{ i_gif, "image/gif" },
 		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" }
+		{ i_png, "image/png" },
+		{ i_webp, "image/webp" },
 	};
 	if (image_blob.size() > MAX_ICON_SIZE) {
 		throw dpp::length_exception("Webhook icon file exceeds discord limit of 256 kilobytes");

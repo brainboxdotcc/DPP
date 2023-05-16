@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/timer.h>
 #include <dpp/cluster.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
 namespace dpp {
 

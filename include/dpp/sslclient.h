@@ -24,6 +24,7 @@
 #include <string>
 #include <functional>
 #include <dpp/socket.h>
+#include <cstdint>
 
 namespace dpp {
 
@@ -69,6 +70,11 @@ bool set_nonblocking(dpp::socket sockfd, bool non_blocking);
  */
 class DPP_EXPORT ssl_client
 {
+private:
+	/**
+	 * @brief Clean up resources
+	 */
+	void cleanup();
 protected:
 	/**
 	 * @brief Input buffer received from socket

@@ -40,6 +40,7 @@
 #include <dpp/scheduled_event.h>
 #include <dpp/stage_instance.h>
 #include <dpp/integration.h>
+#include <dpp/auditlog.h>
 #include <functional>
 #include <variant>
 #include <exception>
@@ -440,7 +441,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void edit_response(const std::string & mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
-	 * @brief Set the bot to 'thinking' state
+	 * @brief Set the bot to 'thinking' state where you have up to 15 minutes to respond
 	 *
 	 * @param ephemeral True if the thinking state should be ephemeral
 	 * @param callback User function to execute when the api call completes.
@@ -474,15 +475,6 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	void delete_original_response(command_completion_event_t callback = utility::log_error()) const;
 
 	/**
-	 * @brief Get a command line parameter
-	 * 
-	 * @param name The command line parameter to retrieve
-	 * @return const command_value& If the command line parameter does not 
-	 * exist, an empty variant is returned.
-	 */
-	const virtual command_value& get_parameter(const std::string& name) const;
-
-	/**
 	 * @brief command interaction
 	 */
 	interaction command;
@@ -491,13 +483,24 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @brief Destroy this object
 	 */
 	virtual ~interaction_create_t() = default;
+
+	/**
+	 * @brief Get a slashcommand parameter
+	 *
+	 * @param name The name of the command line parameter to retrieve the value for
+	 * @return command_value Returns the value of the first option that matches the given name.
+	 * If no matches are found, an empty variant is returned.
+	 *
+	 * @throw dpp::logic_exception if the interaction is not for a command
+	 */
+	virtual command_value get_parameter(const std::string& name) const;
 };
 
 /**
  * @brief User has issued a slash command
  */
 struct DPP_EXPORT slashcommand_t : public interaction_create_t {
-public:
+
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -509,6 +512,9 @@ public:
  * @brief Click on button
  */
 struct DPP_EXPORT button_click_t : public interaction_create_t {
+private:
+	using interaction_create_t::get_parameter;
+public:
 
 	/** Constructor
 	 * @param client The shard the event originated on
@@ -516,13 +522,6 @@ struct DPP_EXPORT button_click_t : public interaction_create_t {
 	 */
 	button_click_t(class discord_client* client, const std::string& raw);
 
-	/**
-	 * @brief Get a command line parameter
-	 * 
-	 * @param name The command line parameter to retrieve
-	 * @return Always returns an empty parameter as buttons dont have parameters!
-	 */
-	const virtual command_value& get_parameter(const std::string& name) const;
 	/**
 	 * @brief button custom id
 	 */
@@ -534,19 +533,16 @@ struct DPP_EXPORT button_click_t : public interaction_create_t {
 };
 
 struct DPP_EXPORT form_submit_t : public interaction_create_t {
+private:
+	using interaction_create_t::get_parameter;
+public:
+
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
 	form_submit_t(class discord_client* client, const std::string& raw);
 
-	/**
-	 * @brief Get a command line parameter
-	 * 
-	 * @param name The command line parameter to retrieve
-	 * @return Always returns an empty parameter as buttons dont have parameters!
-	 */
-	const virtual command_value& get_parameter(const std::string& name) const;
 	/**
 	 * @brief button custom id
 	 */
@@ -561,20 +557,15 @@ struct DPP_EXPORT form_submit_t : public interaction_create_t {
  * @brief Discord requests that we fill a list of auto completion choices for a command option
  */
 struct DPP_EXPORT autocomplete_t : public interaction_create_t {
+private:
+	using interaction_create_t::get_parameter;
+public:
 
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
 	autocomplete_t(class discord_client* client, const std::string& raw);
-
-	/**
-	 * @brief Get a command line parameter
-	 * 
-	 * @param name The command line parameter to retrieve
-	 * @return Always returns an empty parameter as auto complete requests dont have parameters!
-	 */
-	const virtual command_value& get_parameter(const std::string& name) const;
 
 	/**
 	 * @brief Command ID
@@ -597,7 +588,10 @@ struct DPP_EXPORT autocomplete_t : public interaction_create_t {
  * user or message.
  */
 struct DPP_EXPORT context_menu_t : public interaction_create_t {
+private:
+	using interaction_create_t::get_parameter;
 public:
+
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
@@ -674,20 +668,15 @@ public:
  * @brief Click on select
  */
 struct DPP_EXPORT select_click_t : public interaction_create_t {
+private:
+	using interaction_create_t::get_parameter;
+public:
 
 	/** Constructor
 	 * @param client The shard the event originated on
 	 * @param raw Raw event text as JSON
 	 */
 	select_click_t(class discord_client* client, const std::string& raw);
-
-	/**
-	 * @brief Get a command line parameter
-	 * 
-	 * @param name The command line parameter to retrieve
-	 * @return Always returns an empty parameter as buttons dont have parameters!
-	 */
-	const virtual command_value& get_parameter(const std::string& name) const;
 
 	/**
 	 * @brief select menu custom id
@@ -1410,6 +1399,19 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
 	void reply(message&& msg, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
+};
+
+/** @brief Guild audit log entry create */
+struct DPP_EXPORT guild_audit_log_entry_create_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	guild_audit_log_entry_create_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief created audit log entry
+	 */
+	audit_entry entry;
 };
 
 /** @brief Guild ban add */

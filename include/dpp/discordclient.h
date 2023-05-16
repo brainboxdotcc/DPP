@@ -24,7 +24,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/wsclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/event.h>
@@ -34,11 +34,13 @@
 #include <mutex>
 #include <shared_mutex>
 
-using json = nlohmann::json;
+
 
 #define DISCORD_API_VERSION	"10"
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
 namespace dpp {
+
+using json = nlohmann::json;
 
 // Forward declarations
 class cluster;
@@ -263,6 +265,10 @@ private:
 	 */
 	void set_resume_hostname();
 
+	/**
+	 * @brief Clean up resources
+	 */
+	void cleanup();
 public:
 	/**
 	 * @brief Owning cluster
@@ -354,7 +360,7 @@ public:
 	/**
 	 * @brief List of voice channels we are connecting to keyed by guild id
 	 */
-	std::unordered_map<snowflake, voiceconn*> connecting_voice_channels;
+	std::unordered_map<snowflake, std::unique_ptr<voiceconn>> connecting_voice_channels;
 
 	/**
 	 * @brief The gateway address we reconnect to when we resume a session
@@ -449,6 +455,8 @@ public:
 	 * @param intents Privileged intents to use, a bitmask of values from dpp::intents
 	 * @param compressed True if the received data will be gzip compressed
 	 * @param ws_protocol Websocket protocol to use for the connection, JSON or ETF
+	 * 
+	 * @throws std::bad_alloc Passed up to the caller if any internal objects fail to allocate, after cleanup has completed
 	 */
 	discord_client(dpp::cluster* _cluster, uint32_t _shard_id, uint32_t _max_shards, const std::string &_token, uint32_t intents = 0, bool compressed = true, websocket_protocol_t ws_protocol = ws_json);
 

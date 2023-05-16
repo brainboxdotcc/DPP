@@ -24,12 +24,13 @@
 #include <dpp/guild.h>
 #include <dpp/voicestate.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp { namespace events {
-
+	
+using json = nlohmann::json;
 using namespace dpp;
 
 /**
@@ -56,6 +57,15 @@ void voice_state_update::handle(discord_client* client, json &j, const std::stri
 			}
 		} else {
 			g->voice_members[vsu.state.user_id] = vsu.state;
+		}
+
+		if (client->creator->cache_policy.user_policy != dpp::cp_none) {
+			if (d.contains("member")) {
+				auto& member = d["member"];
+				guild_member m;
+				m.fill_from_json(&member, g->id, vsu.state.user_id);
+				g->members[m.user_id] = m;
+			}
 		}
 	}
 

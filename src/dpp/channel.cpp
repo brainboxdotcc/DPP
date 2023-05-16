@@ -25,11 +25,13 @@
 #include <dpp/role.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0) {}
 
@@ -79,7 +81,8 @@ forum_tag &forum_tag::set_name(const std::string &name) {
 	return *this;
 }
 
-const uint8_t CHANNEL_TYPE_MASK = 0b0000000000001111;
+const uint16_t CHANNEL_TYPE_MASK = 0b0000000000001111;
+const uint16_t DEFAULT_FORUM_LAYOUT_MASK = 0b0000011000000000;
 
 thread_member& thread_member::fill_from_json(nlohmann::json* j) {
 	set_snowflake_not_null(j, "id", this->thread_id);
@@ -146,6 +149,18 @@ channel& channel::set_topic(const std::string& topic) {
 channel& channel::set_type(channel_type type) {
 	this->flags &= ~CHANNEL_TYPE_MASK;
 	this->flags |= type;
+	return *this;
+}
+
+channel& channel::set_default_forum_layout(forum_layout_type layout_type) {
+	this->flags &= ~DEFAULT_FORUM_LAYOUT_MASK;
+	auto type = (uint16_t)layout_type;
+	this->flags |= ((type << 9) & DEFAULT_FORUM_LAYOUT_MASK);
+	return *this;
+}
+
+channel &channel::set_default_sort_order(default_forum_sort_order_t sort_order) {
+	this->default_sort_order = sort_order;
 	return *this;
 }
 
@@ -335,7 +350,7 @@ channel& channel::fill_from_json(json* j) {
 	set_int16_not_null(j, "default_thread_rate_limit_per_user", this->default_thread_rate_limit_per_user);
 	set_snowflake_not_null(j, "owner_id", this->owner_id);
 	set_snowflake_not_null(j, "parent_id", this->parent_id);
-	this->bitrate = int16_not_null(j, "bitrate")/1000;
+	this->bitrate = int32_not_null(j, "bitrate")/1000;
 	this->flags |= bool_not_null(j, "nsfw") ? dpp::c_nsfw : 0;
 
 	uint16_t arc = int16_not_null(j, "default_auto_archive_duration");
@@ -377,6 +392,9 @@ channel& channel::fill_from_json(json* j) {
 
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type & CHANNEL_TYPE_MASK);
+
+	uint16_t forum_layout = int16_not_null(j, "default_forum_layout");
+	this->flags |= ((forum_layout << 9) & DEFAULT_FORUM_LAYOUT_MASK);
 
 	uint8_t dflags = int8_not_null(j, "flags");
 	this->flags |= (dflags & dpp::dc_pinned_thread) ? dpp::c_pinned_thread : 0;
@@ -470,11 +488,17 @@ std::string channel::build_json(bool with_id) const {
 		j["default_thread_rate_limit_per_user"] = default_thread_rate_limit_per_user;
 	}
 	if (is_voice_channel()) {
-		j["user_limit"] = user_limit; 
-		j["bitrate"] = bitrate*1000;
+		j["user_limit"] = user_limit;
+		if (bitrate) {
+			j["bitrate"] = bitrate * 1000;
+		}
 	}
 	if (is_forum()) {
 		j["flags"] = (flags & dpp::c_require_tag) ? dpp::dc_require_tag : 0;
+
+		if (get_default_forum_layout()) {
+			j["default_forum_layout"] = get_default_forum_layout();
+		}
 	}
 	j["type"] = (flags & CHANNEL_TYPE_MASK);
 	if (!is_dm()) {
@@ -564,12 +588,11 @@ std::map<snowflake, voicestate> channel::get_voice_members() {
 	return rv;
 }
 
-std::string channel::get_icon_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
+std::string channel::get_icon_url(uint16_t size, const image_type format) const {
 	if (this->id && !this->icon.to_string().empty()) {
-		return utility::cdn_host + "/channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}
@@ -577,6 +600,10 @@ std::string channel::get_icon_url(uint16_t size) const {
 
 channel_type channel::get_type() const {
 	return static_cast<channel_type>(flags & CHANNEL_TYPE_MASK);
+}
+
+forum_layout_type channel::get_default_forum_layout() const {
+	return static_cast<forum_layout_type>((flags & DEFAULT_FORUM_LAYOUT_MASK) >> 9);
 }
 
 

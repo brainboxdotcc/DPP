@@ -22,27 +22,31 @@
 #include <dpp/discordevents.h>
 #include <dpp/utility.h>
 #include <dpp/emoji.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
 
-std::string activity::get_large_asset_url(uint16_t size) const {
-	// https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
+using json = nlohmann::json;
+
+std::string activity::get_large_asset_url(uint16_t size, const image_type format) const {
 	if (!this->assets.large_image.empty() && this->application_id &&
 		this->assets.large_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
-		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.large_image + ".png" + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "app-assets/" + std::to_string(this->application_id) + "/" + this->assets.large_image,
+										 format, size);
 	} else {
 		return std::string();
 	}
 }
 
-std::string activity::get_small_asset_url(uint16_t size) const {
-	// https://discord.com/developers/docs/topics/gateway#activity-object-activity-asset-image
+std::string activity::get_small_asset_url(uint16_t size, const image_type format) const {
 	if (!this->assets.small_image.empty() && this->application_id &&
 		this->assets.small_image.find(':') == std::string::npos) { // make sure it's not a prefixed proxy image
-		return utility::cdn_host + "/app-assets/" + std::to_string(this->application_id) + "/" + this->assets.small_image + ".png" + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "app-assets/" + std::to_string(this->application_id) + "/" + this->assets.small_image,
+										 format, size);
 	} else {
 		return std::string();
 	}
@@ -228,6 +232,7 @@ std::string presence::build_json(bool with_id) const {
 		{ps_online, "online"},
 		{ps_offline, "offline"},
 		{ps_idle, "idle"},
+		{ps_invisible, "invisible"},
 		{ps_dnd, "dnd"}
 	};
 	json j({

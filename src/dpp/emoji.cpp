@@ -20,7 +20,7 @@
  ************************************************************************************/
 #include <dpp/emoji.h>
 #include <dpp/discordevents.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <dpp/exception.h>
 
 namespace dpp {
@@ -93,7 +93,8 @@ emoji& emoji::load_image(const std::string &image_blob, const image_type type) {
 	static const std::map<image_type, std::string> mimetypes = {
 		{ i_gif, "image/gif" },
 		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" }
+		{ i_png, "image/png" },
+		{ i_webp, "image/webp" },
 	};
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
 		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
@@ -114,6 +115,16 @@ std::string emoji::format() const
 
 std::string emoji::get_mention() const {
 	return utility::emoji_mention(name,id,is_animated());
+}
+
+std::string emoji::get_url(uint16_t size, const dpp::image_type format, bool prefer_animated) const {
+	if (this->id) {
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
+										 "emojis/" + std::to_string(this->id),
+										 format, size, prefer_animated, is_animated());
+	} else {
+		return std::string();
+	}
 }
 
 

@@ -25,40 +25,48 @@
 #include <dpp/guild.h>
 #include <dpp/discordevents.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
+
+namespace dpp {
 
 using json = nlohmann::json;
 
-const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extra>> featuremap = {
-	{"INVITE_SPLASH", dpp::g_invite_splash },
-	{"VIP_REGIONS", dpp::g_vip_regions },
-	{"VANITY_URL", dpp::g_vanity_url },
-	{"VERIFIED", dpp::g_verified },
-	{"PARTNERED", dpp::g_partnered },
-	{"COMMUNITY", dpp::g_community },
-	{"DEVELOPER_SUPPORT_SERVER", dpp::g_developer_support_server },
-	{"COMMERCE", dpp::g_commerce },
-	{"NEWS", dpp::g_news },
-	{"DISCOVERABLE", dpp::g_discoverable },
-	{"FEATURABLE", dpp::g_featureable },
-	{"INVITES_DISABLED", dpp::g_invites_disabled},
-	{"ANIMATED_BANNER", dpp::g_animated_banner },
-	{"ANIMATED_ICON", dpp::g_animated_icon },
-	{"BANNER", dpp::g_banner },
-	{"WELCOME_SCREEN_ENABLED", dpp::g_welcome_screen_enabled },
-	{"MEMBER_VERIFICATION_GATE_ENABLED", dpp::g_member_verification_gate },
-	{"PREVIEW_ENABLED", dpp::g_preview_enabled },
-	{"MONETIZATION_ENABLED", dpp::g_monetization_enabled },
-	{"MORE_STICKERS", dpp::g_more_stickers },
-	{"ROLE_ICONS", dpp::g_role_icons },
-	{"SEVEN_DAY_THREAD_ARCHIVE", dpp::g_seven_day_thread_archive },
-	{"THREE_DAY_THREAD_ARCHIVE", dpp::g_three_day_thread_archive },
-	{"TICKETED_EVENTS_ENABLED", dpp::g_ticketed_events },
-	{"CHANNEL_BANNER", dpp::g_channel_banners },
-	{"AUTO_MODERATION", dpp::g_auto_moderation },
+/* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
+std::map<uint16_t , dpp::guild_member_flags> membermap = {
+		{ 1 << 0,       dpp::gm_did_rejoin },
+		{ 1 << 1,       dpp::gm_completed_onboarding },
+		{ 1 << 2,       dpp::gm_bypasses_verification },
+		{ 1 << 3,       dpp::gm_started_onboarding },
 };
 
-namespace dpp {
+const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extra>> featuremap = {
+	{"ANIMATED_BANNER", dpp::g_animated_banner },
+	{"ANIMATED_ICON", dpp::g_animated_icon },
+	{"AUTO_MODERATION", dpp::g_auto_moderation },
+	{"BANNER", dpp::g_banner },
+	{"COMMUNITY", dpp::g_community },
+	{"CREATOR_MONETIZABLE_PROVISIONAL", dpp::g_monetization_enabled },
+	{"CREATOR_STORE_PAGE", dpp::g_creator_store_page_enabled },
+	{"DEVELOPER_SUPPORT_SERVER", dpp::g_developer_support_server },
+	{"DISCOVERABLE", dpp::g_discoverable },
+	{"FEATURABLE", dpp::g_featureable },
+	{"INVITES_DISABLED", dpp::g_invites_disabled },
+	{"INVITE_SPLASH", dpp::g_invite_splash },
+	{"MEMBER_VERIFICATION_GATE_ENABLED", dpp::g_member_verification_gate },
+	{"MORE_STICKERS", dpp::g_more_stickers },
+	{"NEWS", dpp::g_news },
+	{"PARTNERED", dpp::g_partnered },
+	{"PREVIEW_ENABLED", dpp::g_preview_enabled },
+	{"RAID_ALERTS_DISABLED", dpp::g_raid_alerts_disabled },
+	{"ROLE_ICONS", dpp::g_role_icons },
+	{"ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE", dpp::g_role_subscriptions_available_for_purchase },
+	{"ROLE_SUBSCRIPTIONS_ENABLED", dpp::g_role_subscription_enabled },
+	{"TICKETED_EVENTS_ENABLED", dpp::g_ticketed_events },
+	{"VANITY_URL", dpp::g_vanity_url },
+	{"VERIFIED", dpp::g_verified },
+	{"VIP_REGIONS", dpp::g_vip_regions },
+	{"WELCOME_SCREEN_ENABLED", dpp::g_welcome_screen_enabled },
+};
 
 guild::guild() :
 	managed(),
@@ -73,6 +81,7 @@ guild::guild() :
 	flags(0),
 	max_presences(0),
 	max_members(0),
+	flags_extra(0),
 	shard_id(0),
 	premium_subscription_count(0),
 	afk_timeout(afk_off),
@@ -82,8 +91,7 @@ guild::guild() :
 	verification_level(ver_none),
 	explicit_content_filter(expl_disabled),
 	mfa_level(mfa_none),
-	nsfw_level(nsfw_default),
-	flags_extra(0)
+	nsfw_level(nsfw_default)
 {
 }
 
@@ -107,6 +115,11 @@ guild_member& guild_member::set_nickname(const std::string& nick) {
 	return *this;
 }
 
+guild_member& guild_member::set_bypasses_verification(const bool is_bypassing_verification) {
+	this->flags = (is_bypassing_verification) ? flags | gm_bypasses_verification : flags & ~gm_bypasses_verification;
+	return *this;
+}
+
 guild_member& guild_member::set_mute(const bool is_muted) {
 	this->flags = (is_muted) ? flags | gm_mute : flags & ~gm_mute;
 	this->flags |= gm_voice_action;
@@ -122,6 +135,12 @@ guild_member& guild_member::set_deaf(const bool is_deafened) {
 guild_member& guild_member::set_communication_disabled_until(const time_t disabled_timestamp) {
 	this->communication_disabled_until = disabled_timestamp;
 	return *this;
+}
+	
+bool guild_member::operator == (guild_member const& other_member) const {
+	if((this->user_id == other_member.user_id && this->user_id.empty()) || (this->guild_id == other_member.guild_id && this->guild_id.empty()))
+		return false;
+	return this->user_id == other_member.user_id && this->guild_id == other_member.guild_id;
 }
 
 guild_member& guild_member::fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id) {
@@ -141,6 +160,13 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	set_ts_not_null(&j, "joined_at", gm.joined_at);
 	set_ts_not_null(&j, "premium_since", gm.premium_since);
 	set_ts_not_null(&j, "communication_disabled_until", gm.communication_disabled_until);
+
+	uint16_t flags = int16_not_null(&j, "flags");
+	for (auto & flag : membermap) {
+		if (flags & flag.first) {
+			gm.flags |= flag.second;
+		}
+	}
 
 	gm.roles.clear();
 	if (j.contains("roles") && !j.at("roles").is_null()) {
@@ -163,20 +189,11 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	gm.flags |= bool_not_null(&j, "pending") ? gm_pending : 0;
 }
 
-std::string guild_member::get_avatar_url(uint16_t size)  const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->avatar.to_string().empty()) {
-
-		return utility::cdn_host + "/guilds/" +
-			std::to_string(this->guild_id) + 
-			"/" +
-			std::to_string(this->user_id) +
-			(has_animated_guild_avatar() ? "/a_" : "/") +
-			this->avatar.to_string() +
-			(has_animated_guild_avatar() ? ".gif" : ".png") +
-			utility::avatar_size(size);
+std::string guild_member::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	if (this->guild_id && this->user_id && !this->avatar.to_string().empty()) {
+		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+											  "guilds/" + std::to_string(this->guild_id) + "/" + std::to_string(this->user_id), this->avatar.to_string(),
+											  format, size, prefer_animated, has_animated_guild_avatar());
 	} else {
 		return std::string();
 	}
@@ -200,15 +217,23 @@ std::string guild_member::build_json(bool with_id) const {
 		j["nick"] = this->nickname;
 	if (!this->roles.empty()) {
 		j["roles"] = {};
-		for (auto & role : roles) {
+		for (auto & role : this->roles) {
 			j["roles"].push_back(std::to_string(role));
 		}
 	}
 
-	if (flags & gm_voice_action) {
+	if (this->flags & gm_voice_action) {
 		j["mute"] = is_muted();
 		j["deaf"] = is_deaf();
 	}
+
+	uint32_t out_flags = 0;
+	for (auto & flag : membermap) {
+		if (flags & flag.second) {
+			out_flags |= flag.first;
+		}
+	}
+	j["flags"] = out_flags;
 
 	return j.dump();
 }
@@ -218,8 +243,8 @@ guild& guild::set_name(const std::string& n) {
 	return *this;
 }
 
-dpp::user* guild_member::get_user() const {
-	return dpp::find_user(user_id);
+user* guild_member::get_user() const {
+	return find_user(user_id);
 }
 
 bool guild_member::is_deaf() const {
@@ -232,6 +257,22 @@ bool guild_member::is_muted() const {
 
 bool guild_member::is_pending() const {
 	return flags & dpp::gm_pending;
+}
+
+bool guild_member::has_rejoined() const {
+	return flags & dpp::gm_did_rejoin;
+}
+
+bool guild_member::has_completed_onboarding() const {
+	return flags & dpp::gm_completed_onboarding;
+}
+
+bool guild_member::has_started_onboarding() const {
+	return flags & dpp::gm_started_onboarding;
+}
+
+bool guild_member::has_bypasses_verification() const {
+	return flags & dpp::gm_bypasses_verification;
 }
 
 bool guild::is_large() const {
@@ -282,8 +323,8 @@ bool guild::is_community() const {
 	return this->flags & g_community;
 }
 
-bool guild::has_commerce() const {
-	return this->flags & g_commerce;
+bool guild::has_role_subscriptions() const {
+	return this->flags & g_role_subscription_enabled;
 }
 
 bool guild::has_news() const {
@@ -308,6 +349,14 @@ bool guild::has_auto_moderation() const {
 
 bool guild::has_support_server() const {
 	return this->flags_extra & g_developer_support_server;
+}
+
+bool guild::has_role_subscriptions_available_for_purchase() const {
+	return this->flags_extra & g_role_subscriptions_available_for_purchase;
+}
+
+bool guild::has_raid_alerts_disabled() const {
+	return this->flags_extra & g_raid_alerts_disabled;
 }
 
 bool guild::has_animated_icon() const {
@@ -346,8 +395,8 @@ bool guild::has_more_stickers() const {
 	return this->flags & g_more_stickers;
 }
 
-bool guild::has_private_threads() const {
-	return this->flags & g_private_threads;
+bool guild::has_creator_store_page() const {
+	return this->flags & g_creator_store_page_enabled;
 }
 
 bool guild::has_role_icons() const {
@@ -410,6 +459,9 @@ std::string guild::build_json(bool with_id) const {
 	if (!description.empty()) {
 		j["description"] = description;
 	}
+	if (!safety_alerts_channel_id.empty()) {
+		j["safety_alerts_channel_id"] = safety_alerts_channel_id;
+	}
 	return j.dump();
 }
 
@@ -434,10 +486,8 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 	 */
 	this->id = snowflake_not_null(d, "id");
 	if (d->find("unavailable") == d->end() || (*d)["unavailable"].get<bool>() == false) {
-		/* Clear unavailable flag if set */
-		if (this->flags & dpp::g_unavailable) {
-			this->flags -= dpp::g_unavailable;
-		}
+		/* Clear unavailable flag */
+		this->flags &= ~dpp::g_unavailable;
 		set_string_not_null(d, "name", this->name);
 		/* Special case for guild icon to allow for animated icons.
 		 * Animated icons start with a_ on the name, so we use this to set a flag
@@ -473,17 +523,23 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 			}
 		}
 		uint8_t scf = int8_not_null(d, "system_channel_flags");
-		if (scf & 1) {
+		if (scf & (1 << 0)) {
 			this->flags |= dpp::g_no_join_notifications;
 		}
-		if (scf & 2) {
+		if (scf & (1 << 1)) {
 			this->flags |= dpp::g_no_boost_notifications;
 		}
-		if (scf & 4) {
+		if (scf & (1 << 2)) {
 			this->flags |= dpp::g_no_setup_tips;
 		}
-		if (scf & 8) {
+		if (scf & (1 << 3)) {
 			this->flags |= dpp::g_no_sticker_greeting;
+		}
+		if (scf & (1 << 4)) {
+			this->flags |= dpp::g_no_role_subscription_notifications;
+		}
+		if (scf & (1 << 5)) {
+			this->flags |= dpp::g_no_role_subscription_notification_replies;
 		}
 
 		if (d->contains("afk_timeout")) {
@@ -552,6 +608,8 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 				welcome_screen.welcome_channels.emplace_back(wchan);
 			}
 		}
+
+		set_snowflake_not_null(d, "safety_alerts_channel_id", this->safety_alerts_channel_id);
 		
 	} else {
 		this->flags |= dpp::g_unavailable;
@@ -745,62 +803,41 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 	return false;
 }
 
-std::string guild::get_banner_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->banner.to_string().empty()) {
-		return utility::cdn_host + "/banners/" +
-			std::to_string(this->id) +
-			(has_animated_banner_hash() ? "/a_" : "/") +
-			this->banner.to_string() +
-			(has_animated_banner_hash() ? ".gif" : ".png") +
-			utility::avatar_size(size);
+std::string guild::get_banner_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	if (!this->banner.to_string().empty() && this->id) {
+		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+											  "banners/" + std::to_string(this->id), this->banner.to_string(),
+											  format, size, prefer_animated, has_animated_banner_hash());
 	} else {
 		return std::string();
 	}
 }
 
-std::string guild::get_discovery_splash_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->discovery_splash.to_string().empty()) {
-		return utility::cdn_host + "/discovery-splashes/" +
-			std::to_string(this->id) + "/" +
-			this->discovery_splash.to_string() +
-			".png" +
-			utility::avatar_size(size);
+std::string guild::get_discovery_splash_url(uint16_t size, const image_type format) const {
+	if (!this->discovery_splash.to_string().empty() && this->id) {
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "discovery-splashes/" + std::to_string(this->id) + "/" + this->discovery_splash.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}
 }
 
-std::string guild::get_icon_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->icon.to_string().empty()) {
-		return utility::cdn_host + "/icons/" +
-			std::to_string(this->id) +
-			(has_animated_icon_hash() ? "/a_" : "/") +
-			this->icon.to_string() +
-			(has_animated_icon_hash() ? ".gif" : ".png") +
-			utility::avatar_size(size);
+std::string guild::get_icon_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	if (!this->icon.to_string().empty() && this->id) {
+		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+											  "icons/" + std::to_string(this->id), this->icon.to_string(),
+											  format, size, prefer_animated, has_animated_icon_hash());
 	} else {
 		return std::string();
 	}
 }
 
-std::string guild::get_splash_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->splash.to_string().empty()) {
-		return utility::cdn_host + "/splashes/" +
-			std::to_string(this->id) + "/" + 
-			this->splash.to_string() +
-			utility::avatar_size(size);
+std::string guild::get_splash_url(uint16_t size, const image_type format) const {
+	if (!this->splash.to_string().empty() && this->id) {
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
+										 "splashes/" + std::to_string(this->id) + "/" + this->splash.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}

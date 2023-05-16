@@ -29,7 +29,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/misc-enum.h>
 #include <dpp/timer.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/discordclient.h>
 #include <dpp/voiceregion.h>
 #include <dpp/dtemplate.h>
@@ -132,6 +132,9 @@ struct DPP_EXPORT confirmation {
  *
  */
 typedef std::variant<
+		active_threads,
+		application_role_connection,
+		application_role_connection_metadata_list,
 		confirmation,
 		message,
 		message_map,

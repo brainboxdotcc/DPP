@@ -22,7 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
@@ -139,7 +139,7 @@ class DPP_EXPORT connection {
 public:
 	std::string			id;		//!< id of the connection account
 	std::string			name;		//!< the username of the connection account
-	std::string			type;		//!< the service of the connection (twitch, youtube)
+	std::string			type;		//!< the service of the connection (twitch, youtube, discord, or guild_subscription)
 	bool				revoked;	//!< Optional: whether the connection is revoked
 	std::vector<integration>	integrations;	//!< Optional: an array of partial server integrations
 	bool				verified;	//!< whether the connection is verified

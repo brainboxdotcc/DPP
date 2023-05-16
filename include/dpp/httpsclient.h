@@ -22,6 +22,7 @@
 #include <dpp/export.h>
 #include <string>
 #include <map>
+#include <list>
 #include <vector>
 #include <variant>
 #include <dpp/sslclient.h>
@@ -189,7 +190,7 @@ class DPP_EXPORT https_client : public ssl_client
 	 * @brief Headers from the server's response, e.g. RateLimit
 	 * headers, cookies, etc.
 	 */
-	std::map<std::string, std::string> response_headers;
+	std::multimap<std::string, std::string> response_headers;
 
 	/**
 	 * @brief Handle input buffer
@@ -247,9 +248,10 @@ public:
 	 * @param json The json content
 	 * @param filenames File names of files to send
 	 * @param contents Contents of each of the files to send
+	 * @param mimetypes MIME types of each of the files to send
 	 * @return multipart mime content and headers
 	 */
-	static multipart_content build_multipart(const std::string &json, const std::vector<std::string>& filenames = {}, const std::vector<std::string>& contents = {});
+	static multipart_content build_multipart(const std::string &json, const std::vector<std::string>& filenames = {}, const std::vector<std::string>& contents = {}, const std::vector<std::string>& mimetypes = {});
 
 	/**
 	 * @brief Processes incoming data from the SSL socket input buffer.
@@ -272,16 +274,36 @@ public:
 	 * @brief Get a HTTP response header
 	 * 
 	 * @param header_name Header name to find, case insensitive
-	 * @return Header content or empty string if not found
+	 * @return Header content or empty string if not found.
+	 * If multiple values have the same header_name, this will return one of them.
+	 * @see get_header_count to determine if multiple are present
+	 * @see get_header_list to retrieve all entries of the same header_name
 	 */
 	const std::string get_header(std::string header_name) const;
+
+	/**
+	 * @brief Get the number of headers with the same header name
+	 *
+	 * @param header_name
+	 * @return the number of headers with this count
+	 */
+	size_t get_header_count(std::string header_name) const;
+
+
+	/**
+	 * @brief Get a set of HTTP response headers with a common name
+	 *
+	 * @param header_name
+	 * @return A list of headers with the same name, or an empty list if not found
+	 */
+	const std::list<std::string> get_header_list(std::string header_name) const;
 
 	/**
 	 * @brief Get all HTTP response headers
 	 * 
 	 * @return headers as a map
 	 */
-	const std::map<std::string, std::string> get_headers() const;
+	const std::multimap<std::string, std::string> get_headers() const;
  
 	/**
 	 * @brief Get the response content

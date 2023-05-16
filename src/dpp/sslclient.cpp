@@ -272,10 +272,22 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 		if (plaintext) {
 			ssl = nullptr;
 		} else {
-			ssl = new openssl_connection();
+			try {
+				ssl = new openssl_connection();
+			}
+			catch (std::bad_alloc&) {
+				delete ssl;
+				throw;
+			}
 		}
 	}
-	this->connect();
+	try {
+		this->connect();
+	}
+	catch (std::exception&) {
+		cleanup();
+		throw;
+	}
 }
 
 /* SSL Client constructor throws std::runtime_error if it can't connect to the host */
@@ -468,7 +480,7 @@ void ssl_client::read_loop()
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
-					r = ::recv(sfd, server_to_client_buffer, DPP_BUFSIZE, 0);
+					r = (int) ::recv(sfd, server_to_client_buffer, DPP_BUFSIZE, 0);
 					if (r <= 0) {
 						/* error or EOF */
 						return;
@@ -539,7 +551,7 @@ void ssl_client::read_loop()
 				/* Try to write */
 
 				if (plaintext) {
-					r = ::send(sfd, client_to_server_buffer + client_to_server_offset, (int)client_to_server_length, 0);
+					r = (int) ::send(sfd, client_to_server_buffer + client_to_server_offset, (int)client_to_server_length, 0);
 
 					if (r < 0) {
 						/* Write error */
@@ -625,12 +637,17 @@ void ssl_client::close()
 	buffer.clear();
 }
 
-ssl_client::~ssl_client()
+void ssl_client::cleanup()
 {
 	this->close();
 	if (!keepalive) {
 		delete ssl;
 	}
+}
+
+ssl_client::~ssl_client()
+{
+	cleanup();
 }
 
 };

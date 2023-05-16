@@ -26,7 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
 #include <dpp/message.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/permissions.h>
 #include <dpp/json_interface.h>
 #include <unordered_map>
@@ -75,6 +75,7 @@ enum channel_flags : uint16_t {
 	c_pinned_thread =	0b0000000010000000,
 	/// Whether a tag is required to be specified when creating a thread in a forum channel. Tags are specified in the thread::applied_tags field.
 	c_require_tag =		0b0000000100000000,
+	/* Note that the 9th and 10th bit are used for the forum layout type */
 };
 
 /**
@@ -95,6 +96,15 @@ enum default_forum_sort_order_t : uint8_t {
 	so_latest_activity = 0,
 	/// Sort forum posts by creation time (from most recent to oldest)
 	so_creation_date = 1,
+};
+
+/**
+ * @brief Types of forum layout views that indicates how the threads in a forum channel will be displayed for users by default
+ */
+enum forum_layout_type : uint8_t {
+	fl_not_set = 0, //!< No default has been set for the forum channel
+	fl_list_view = 1, //!< Display posts as a list
+	fl_gallery_view = 2, //!< Display posts as a collection of tiles
 };
 
 /**
@@ -239,7 +249,9 @@ struct DPP_EXPORT forum_tag : public managed {
 	forum_tag& set_name(const std::string& name);
 };
 
-/** @brief A group of thread member objects*/
+/**
+ * @brief A group of thread member objects. the key is the thread_id of the dpp::thread_member
+ */
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
 /**
@@ -387,6 +399,22 @@ public:
 	channel& set_type(channel_type type);
 
 	/**
+	 * @brief Set the default forum layout type for the forum channel
+	 *
+	 * @param layout_type The layout type
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	channel& set_default_forum_layout(forum_layout_type layout_type);
+
+	/**
+	 * @brief Set the default forum sort order for the forum channel
+	 *
+	 * @param sort_order The sort order
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	channel& set_default_sort_order(default_forum_sort_order_t sort_order);
+
+	/**
 	 * @brief Set flags for this channel object
 	 *
 	 * @param flags Flag bitmask to set from dpp::channel_flags
@@ -495,6 +523,13 @@ public:
 	channel_type get_type() const;
 
 	/**
+	 * @brief Get the default forum layout type used to display posts in forum channels
+	 *
+	 * @return forum_layout_types Forum layout type
+	 */
+	forum_layout_type get_default_forum_layout() const;
+
+	/**
 	 * @brief Get the mention ping for the channel
 	 * 
 	 * @return std::string mention
@@ -549,10 +584,12 @@ public:
 	/**
 	 * @brief Get the channel's icon url (if its a group DM), otherwise returns an empty string
 	 *
-	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized icon is returned.
-	 * @return std::string icon url or empty string
+	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized icon is returned.
+	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
+	 * @return std::string icon url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
-	std::string get_icon_url(uint16_t size = 0) const;
+	std::string get_icon_url(uint16_t size = 0, const image_type format = i_png) const;
 
 	/**
 	 * @brief Returns true if the channel is NSFW gated
@@ -697,7 +734,7 @@ public:
 	 */
 	uint8_t message_count;
 
-	/** Approximate count of members in a thread (threads) */
+	/** Approximate count of members in a thread (stops counting at 50) */
 	uint8_t member_count;
 
 	/**
@@ -773,6 +810,14 @@ typedef std::unordered_map<snowflake, channel> channel_map;
  * @brief A group of threads
  */
 typedef std::unordered_map<snowflake, thread> thread_map;
+
+/**
+ * @brief A group of threads and thread_members. returned from the cluster::threads_get_active method
+ */
+typedef struct {
+	thread_map threads;
+	thread_member_map thread_members;
+} active_threads;
 
 };
 

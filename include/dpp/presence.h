@@ -22,7 +22,7 @@
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
 #include <dpp/emoji.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
@@ -69,7 +69,9 @@ enum presence_status : uint8_t {
 	/// DND
 	ps_dnd		=	2,
 	/// Idle
-	ps_idle		=	3
+	ps_idle		=	3,
+	/// Invisible (show as offline)
+	ps_invisible	=	4,
 };
 
 /**
@@ -274,18 +276,26 @@ public:
 	/**
 	 * @brief Get the assets large image url if they have one, otherwise returns an empty string. In case of prefixed image IDs (mp:{image_id}) it returns an empty string.
 	 *
-	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized image is returned.
-	 * @return image url or empty string
+	 * @see https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
+	 *
+	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized image is returned.
+	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
+	 * @return std::string image url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
-	std::string get_large_asset_url(uint16_t size = 0) const;
+	std::string get_large_asset_url(uint16_t size = 0, const image_type format = i_png) const;
 
 	/**
 	 * @brief Get the assets small image url if they have one, otherwise returns an empty string. In case of prefixed image IDs (mp:{image_id}) it returns an empty string.
 	 *
-	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized image is returned.
-	 * @return image url or empty string
+	 * @see https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
+	 *
+	 * @param size The size of the image in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized image is returned.
+	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
+	 * @return std::string image url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
-	std::string get_small_asset_url(uint16_t size = 0) const;
+	std::string get_small_asset_url(uint16_t size = 0, const image_type format = i_png) const;
 
 	activity();
 

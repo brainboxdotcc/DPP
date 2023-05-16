@@ -2,6 +2,17 @@
 	"version": "0.2",
 	"language": "en-GB",
 	"words": [
+		"featurable",
+		"libdpp",
+		"tmdata",
+		"nardo",
+		"gainsboro",
+		"samco",
+		"donut",
+		"dimorphotheca",
+		"tyrian",
+		"aztech",
+		"pinocchio",
 		"buildcmake",
 		"cmake",
 		"vsproj",
@@ -84,7 +95,8 @@
 		"xmake",
 		"CORO",
 		"cback",
-		"mentionables"
+		"mentionables",
+		"stringified"
 	],
 	"flagWords": [
 		"hte"

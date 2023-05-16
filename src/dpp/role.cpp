@@ -24,11 +24,13 @@
 #include <dpp/discordevents.h>
 #include <dpp/permissions.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
-using json = nlohmann::json;
+
 
 namespace dpp {
+
+using json = nlohmann::json;
 
 role::role() :
 	managed(),
@@ -45,9 +47,7 @@ role::role() :
 
 role::~role()
 {
-	if (image_data) {
-		delete image_data;
-	}
+	delete image_data;
 }
 
 std::string role::get_mention(const snowflake& id){
@@ -122,7 +122,8 @@ role& role::load_image(const std::string &image_blob, const image_type type) {
 	static const std::map<image_type, std::string> mimetypes = {
 		{ i_gif, "image/gif" },
 		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" }
+		{ i_png, "image/png" },
+		{ i_webp, "image/webp" },
 	};
 
 	/* If there's already image data defined, free the old data, to prevent a memory leak */
@@ -310,6 +311,18 @@ bool role::has_moderate_members() const {
 	return has_administrator() || permissions.has(p_moderate_members);
 }
 
+bool role::has_view_creator_monetization_analytics() const {
+	return has_administrator() || permissions.has(p_view_creator_monetization_analytics);
+}
+
+bool role::has_use_soundboard() const {
+	return has_administrator() || permissions.has(p_use_soundboard);
+}
+
+bool role::has_send_voice_messages() const {
+	return has_administrator() || permissions.has(p_send_voice_messages);
+}
+
 role& role::set_name(const std::string& n) {
 	name = utility::validate(n, 1, 100, "Role name too short");
 	return *this;
@@ -363,15 +376,81 @@ members_container role::get_members() const {
 	return gm;
 }
 
-std::string role::get_icon_url(uint16_t size) const {
-	/* XXX: Discord were supposed to change their CDN over to discord.com, they haven't.
-	 * At some point in the future this URL *will* change!
-	 */
-	if (!this->icon.to_string().empty()) {
-		return utility::cdn_host + "/role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + ".png" + utility::avatar_size(size);
+std::string role::get_icon_url(uint16_t size, const image_type format) const {
+	if (!this->icon.to_string().empty() && this->id) {
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}
+}
+
+application_role_connection_metadata::application_role_connection_metadata() : key(""), name(""), description("") {
+}
+
+application_role_connection_metadata &application_role_connection_metadata::fill_from_json(nlohmann::json *j) {
+	type = (application_role_connection_metadata_type)int8_not_null(j, "type");
+	key = string_not_null(j, "key");
+	name = string_not_null(j, "name");
+	if (j->contains("name_localizations")) {
+		for (auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
+			name_localizations[loc.key()] = loc.value().get<std::string>();
+		}
+	}
+	description = string_not_null(j, "description");
+	if (j->contains("description_localizations")) {
+		for(auto loc = (*j)["description_localizations"].begin(); loc != (*j)["description_localizations"].end(); ++loc) {
+			description_localizations[loc.key()] = loc.value().get<std::string>();
+		}
+	}
+	return *this;
+}
+
+std::string application_role_connection_metadata::build_json(bool with_id) const {
+	json j;
+	j["type"] = type;
+	j["key"] = key;
+	j["name"] = name;
+	if (!name_localizations.empty()) {
+		j["name_localizations"] = json::object();
+		for(auto& loc : name_localizations) {
+			j["name_localizations"][loc.first] = loc.second;
+		}
+	}
+	j["description"] = description;
+	if (!description_localizations.empty()) {
+		j["description_localizations"] = json::object();
+		for(auto& loc : description_localizations) {
+			j["description_localizations"][loc.first] = loc.second;
+		}
+	}
+	return j.dump();
+}
+
+
+application_role_connection::application_role_connection() : platform_name(""), platform_username("") {
+}
+
+application_role_connection &application_role_connection::fill_from_json(nlohmann::json *j) {
+	platform_name = string_not_null(j, "platform_name");
+	platform_username = string_not_null(j, "platform_username");
+	metadata = application_role_connection_metadata().fill_from_json(&((*j)["metadata"]));
+	return *this;
+}
+
+std::string application_role_connection::build_json(bool with_id) const {
+	json j;
+	if (!platform_name.empty()) {
+		j["platform_name"] = platform_name;
+	}
+	if (!platform_username.empty()) {
+		j["platform_username"] = platform_username;
+	}
+	if (std::holds_alternative<application_role_connection_metadata>(metadata)) {
+		j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
+	}
+	return j.dump();
 }
 
 

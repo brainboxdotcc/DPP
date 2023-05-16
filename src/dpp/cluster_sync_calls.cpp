@@ -233,8 +233,8 @@ confirmation cluster::guild_current_member_edit_sync(snowflake guild_id, const s
 	return dpp::sync<confirmation>(this, &cluster::guild_current_member_edit, guild_id, nickname);
 }
 
-auditlog cluster::guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, uint32_t limit) {
-	return dpp::sync<auditlog>(this, &cluster::guild_auditlog_get, guild_id, user_id, action_type, before, limit);
+auditlog cluster::guild_auditlog_get_sync(snowflake guild_id, snowflake user_id, uint32_t action_type, snowflake before, snowflake after, uint32_t limit) {
+	return dpp::sync<auditlog>(this, &cluster::guild_auditlog_get, guild_id, user_id, action_type, before, after, limit);
 }
 
 confirmation cluster::guild_ban_add_sync(snowflake guild_id, snowflake user_id, uint32_t delete_message_seconds) {
@@ -433,6 +433,14 @@ role_map cluster::roles_get_sync(snowflake guild_id) {
 	return dpp::sync<role_map>(this, &cluster::roles_get, guild_id);
 }
 
+application_role_connection cluster::user_application_role_connection_get_sync(snowflake application_id) {
+	return dpp::sync<application_role_connection>(this, &cluster::user_application_role_connection_get, application_id);
+}
+
+application_role_connection cluster::user_application_role_connection_update_sync(snowflake application_id, const application_role_connection &connection) {
+	return dpp::sync<application_role_connection>(this, &cluster::user_application_role_connection_update, application_id, connection);
+}
+
 scheduled_event_map cluster::guild_events_get_sync(snowflake guild_id) {
 	return dpp::sync<scheduled_event_map>(this, &cluster::guild_events_get, guild_id);
 }
@@ -533,8 +541,8 @@ confirmation cluster::current_user_leave_thread_sync(snowflake thread_id) {
 	return dpp::sync<confirmation>(this, &cluster::current_user_leave_thread, thread_id);
 }
 
-thread_map cluster::threads_get_active_sync(snowflake channel_id) {
-	return dpp::sync<thread_map>(this, &cluster::threads_get_active, channel_id);
+active_threads cluster::threads_get_active_sync(snowflake guild_id) {
+	return dpp::sync<active_threads>(this, &cluster::threads_get_active, guild_id);
 }
 
 thread_map cluster::threads_get_joined_private_archived_sync(snowflake channel_id, snowflake before_id, uint16_t limit) {
@@ -611,6 +619,10 @@ confirmation cluster::current_user_leave_guild_sync(snowflake guild_id) {
 
 user_identified cluster::user_get_sync(snowflake user_id) {
 	return dpp::sync<user_identified>(this, &cluster::user_get, user_id);
+}
+
+user_identified cluster::user_get_cached_sync(snowflake user_id) {
+	return dpp::sync<user_identified>(this, &cluster::user_get_cached, user_id);
 }
 
 voiceregion_map cluster::get_voice_regions_sync() {

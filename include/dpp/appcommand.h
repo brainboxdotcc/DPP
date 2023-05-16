@@ -28,7 +28,7 @@
 #include <dpp/user.h>
 #include <variant>
 #include <map>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
 namespace dpp {
@@ -105,7 +105,7 @@ struct DPP_EXPORT command_option_choice : public json_interface<command_option_c
 	/**
 	 * @brief Add a localisation for this command option choice
 	 * @see https://discord.com/developers/docs/reference#locales
-	 * @param language Name of language, see the list of locales linked to above.
+	 * @param language Name of language, see the list of locales linked to above
 	 * @param _name name of command option choice in the specified language
 	 * @return command_option_choice& reference to self for fluent chaining
 	 */
@@ -139,7 +139,8 @@ struct DPP_EXPORT command_option_choice : public json_interface<command_option_c
 void to_json(nlohmann::json& j, const command_option_choice& choice);
 
 /**
- * @brief A minimum or maximum value for co_number and co_integer dpp::command_option types
+ * @brief A minimum or maximum value/length for dpp::co_number, dpp::co_integer and dpp::co_string types of a dpp::command_option.
+ * The `int64_t` is for the integer range or string length that can be entered. The `double` is for the decimal range that can be entered
  */
 typedef std::variant<std::monostate, int64_t, double> command_option_range;
 
@@ -162,8 +163,9 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	bool autocomplete;                           //!< True if this option supports auto completion
 	std::vector<command_option> options;         //!< Sub-commands
 	std::vector<channel_type> channel_types;     //!< Allowed channel types for channel snowflake id options
-	command_option_range min_value;              //!< Minimum value allowed, for co_number and co_integer types only
-	command_option_range max_value;              //!< Maximum value allowed, for co_number and co_integer types only
+	// Combines the `min_length` and `max_length` field by storing its value in the int64_t of the command_option_range
+	command_option_range min_value;              //!< Minimum value/length that can be entered, for dpp::co_number, dpp::co_integer and dpp::co_string types only
+	command_option_range max_value;              //!< Maximum value/length that can be entered, for dpp::co_number, dpp::co_integer and dpp::co_string types only
 	std::map<std::string, std::string> name_localizations; //!< Localisations of command name
 	std::map<std::string, std::string> description_localizations; //!< Localisations of command description
 
@@ -181,12 +183,12 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	/**
 	 * @brief Add a localisation for this slash command option
 	 * @see https://discord.com/developers/docs/reference#locales
-	 * @param language Name of language, see the list of locales linked to above.
+	 * @param language Name of language, see the list of locales linked to above
 	 * @param _name name of slash command option in the specified language
-	 * @param _description description of slash command option in the specified language
+	 * @param _description description of slash command option in the specified language (optional)
 	 * @return command_option& reference to self for fluent chaining
 	 */
-	command_option& add_localization(const std::string& language, const std::string& _name, const std::string& _description);
+	command_option& add_localization(const std::string& language, const std::string& _name, const std::string& _description = "");
 
 	/**
 	 * @brief Construct a new command option object
@@ -203,39 +205,39 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 *
 	 * @param o choice to add
 	 * @return command_option& returns a reference to self for chaining of calls
-	 * @throw dpp::exception command_option is an autocomplete, so choices cannot be added
+	 * @throw dpp::logic_exception command_option is an autocomplete, so choices cannot be added
 	 */
 	command_option& add_choice(const command_option_choice &o);
 
 	/**
 	 * @brief Set the minimum numeric value of the option. 
-	 * Only valid if the type is co_number or co_integer.
+	 * Only valid if the type is dpp::co_number or dpp::co_integer.
 	 * @param min_v Minimum value
-	 * @return command_option& return a reference to sef for chaining of calls
+	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_min_value(command_option_range min_v);
 
 	/**
 	 * @brief Set the maximum numeric value of the option. 
-	 * Only valid if the type is co_number or co_integer.
+	 * Only valid if the type is dpp::co_number or dpp::co_integer.
 	 * @param max_v Maximum value
-	 * @return command_option& return a reference to sef for chaining of calls
+	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_max_value(command_option_range max_v);
 
 	/**
-	 * @brief Set the minimum string length of the option. 
-	 * Only valid if the type is co_string
+	 * @brief Set the minimum string length of the option. Must be between 0 and 6000 (inclusive).
+	 * Only valid if the type is dpp::co_string
 	 * @param min_v Minimum value
-	 * @return command_option& return a reference to sef for chaining of calls
+	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_min_length(command_option_range min_v);
 
 	/**
-	 * @brief Set the maximum string length of the option. 
-	 * Only valid if the type is co_string
+	 * @brief Set the maximum string length of the option. Must be between 1 and 6000 (inclusive).
+	 * Only valid if the type is dpp::co_string
 	 * @param max_v Maximum value
-	 * @return command_option& return a reference to sef for chaining of calls
+	 * @return command_option& returns a reference to self for chaining of calls
 	 */
 	command_option& set_max_length(command_option_range max_v);
 
@@ -260,7 +262,7 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 * 
 	 * @param autocomp True to enable auto completion for this option
 	 * @return command_option& return a reference to self for chaining of calls
-	 * @throw dpp::exception You attempted to enable auto complete on a command_option that has choices added to it
+	 * @throw dpp::logic_exception You attempted to enable auto complete on a command_option that has choices added to it
 	 */
 	command_option& set_auto_complete(bool autocomp);
 
@@ -528,8 +530,8 @@ struct DPP_EXPORT command_data_option {
 	/**
 	 * @brief Get an option value by index
 	 * 
-	 * @tparam Type to get from the parameter
-	 * @param index index number of parameter
+	 * @tparam T Type to get from the parameter
+	 * @param index index of the option
 	 * @return T returned type
 	 */
 	template <typename T> T& get_value(size_t index) {
@@ -582,8 +584,8 @@ struct DPP_EXPORT command_interaction {
 	/**
 	 * @brief Get an option value by index
 	 * 
-	 * @tparam Type to get from the parameter
-	 * @param index index number of parameter
+	 * @tparam T Type to get from the parameter
+	 * @param index index of the option
 	 * @return T returned type
 	 */
 	template <typename T> T& get_value(size_t index) {
@@ -685,15 +687,16 @@ public:
 	std::variant<command_interaction, component_interaction, autocomplete_interaction> data; //!< Optional: the command data payload
 	snowflake guild_id;                                         //!< Optional: the guild it was sent from
 	snowflake channel_id;                                       //!< Optional: the channel it was sent from
+	dpp::channel channel;										//!< Optional: The partial channel object where it was sent from
 	snowflake message_id;					    //!< Originating message id for context menu actions
 	permission app_permissions;				    //!< Permissions of the bot in the channel/guild where this command was issued
 	message msg;						    //!< Originating message for context menu actions
-	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions
+	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions. Filled when the interaction is invoked in a guild
 	user usr;                                                   //!< User object for the invoking user
 	std::string token;                                          //!< a continuation token for responding to the interaction
 	uint8_t version;                                            //!< read-only property, always 1
 	command_resolved resolved;				    //!< Resolved user/role etc
-	std::string locale;                                         //!< User's locale (language)
+	std::string locale;                                         //!< User's [locale](https://discord.com/developers/docs/reference#locales) (language)
 	std::string guild_locale;                                   //!< Guild's locale (language) - for guild interactions only
 	cache_policy_t cache_policy;                                //!< Cache policy from cluster
 
@@ -722,7 +725,7 @@ public:
 	 * @brief Get the channel this command originated on
 	 * 
 	 * @return const dpp::channel& channel
-	 * @throws dpp::logic_error Command originated from a DM or channel not in cache
+	 * @throws dpp::logic_exception Command originated from a DM or channel not in cache
 	 */
 	const dpp::channel& get_channel() const;
 
@@ -730,7 +733,7 @@ public:
 	 * @brief Get the guild this command originated on
 	 * 
 	 * @return const dpp::guild& guild 
-	 * @throws dpp::logic_error Command originated from a DM or guild not in cache
+	 * @throws dpp::logic_exception Command originated from a DM or guild not in cache
 	 */
 	const dpp::guild& get_guild() const;
 
@@ -1007,9 +1010,9 @@ public:
 	std::vector<command_option> options;
 
 	/**
-	 * @brief whether the command is enabled by default when the app is added to a guild.
+	 * @brief Whether the command is enabled by default when the app is added to a guild.
 	 * This has no effect as the default_member_permissions value is used instead.
-	 * @deprecated Discord discourage use of this value and instead you should use default_member_permissions.
+	 * @deprecated Discord discourage use of this value and instead you should use slashcommand::default_member_permissions.
 	 */
 	bool default_permission;
 
@@ -1049,6 +1052,12 @@ public:
 	bool dm_permission;
 
 	/**
+	 * @brief Indicates whether the command is [age-restricted](https://discord.com/developers/docs/interactions/application-commands#agerestricted-commands).
+	 * Defaults to false
+	 */
+	bool nsfw;
+
+	/**
 	 * @brief Construct a new slashcommand object
 	 */
 	slashcommand();
@@ -1070,20 +1079,28 @@ public:
 	/**
 	 * @brief Add a localisation for this slash command
 	 * @see https://discord.com/developers/docs/reference#locales
-	 * @param language Name of language, see the list of locales linked to above.
+	 * @param language Name of language, see the list of locales linked to above
 	 * @param _name name of slash command in the specified language
-	 * @param _description description of slash command in the specified language
-	 * @return slashcommand& reference to self for fluent chaining
+	 * @param _description description of slash command in the specified language (optional)
+	 * @return slashcommand& reference to self for chaining of calls
 	 */
-	slashcommand& add_localization(const std::string& language, const std::string& _name, const std::string& _description);
+	slashcommand& add_localization(const std::string& language, const std::string& _name, const std::string& _description = "");
 
 	/**
 	 * @brief Set the dm permission for the command
 	 * 
 	 * @param dm true to allow this command in dms
-	 * @return slashcommand& reference to self
+	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_dm_permission(bool dm);
+
+	/**
+	 * @brief Set whether the command should be age-restricted or not
+	 *
+	 * @param is_nsfw true if the command should be age-restricted
+	 * @return slashcommand& reference to self for chaining of calls
+	 */
+	slashcommand& set_nsfw(bool is_nsfw);
 
 	/**
 	 * @brief Set the default permissions of the slash command
@@ -1091,7 +1108,7 @@ public:
 	 * @param defaults default permissions to set. This is a permission bitmask of bits from dpp::permissions
 	 * @note You can set it to 0 to disable the command for everyone except admins by default
 	 *
-	 * @return slashcommand& reference to self
+	 * @return slashcommand& reference to self for chaining of calls
 	 */
 	slashcommand& set_default_permissions(uint64_t defaults);
 

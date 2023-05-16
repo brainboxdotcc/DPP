@@ -24,7 +24,7 @@
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
@@ -148,9 +148,9 @@ public:
 	 * @brief Load an image into the object as base64
 	 * 
 	 * @param image_blob Image binary data
-	 * @param type Type of image
+	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @return emoji& Reference to self
-	 * @throw dpp::exception Image content exceeds discord maximum of 256 kilobytes
+	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes
 	 */
 	emoji& load_image(const std::string &image_blob, const image_type type);
 
@@ -167,6 +167,19 @@ public:
 	 * @return std::string mention
 	 */
 	std::string get_mention() const;
+
+	/**
+	 * @brief Get the custom emoji url
+	 *
+	 * @param size The size of the emoji in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized emoji is returned.
+	 * @param format The format to use for the emoji. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
+	 * When passing `i_gif`, it returns an empty string for non-animated emojis. Consider using the `prefer_animated` parameter instead.
+	 * @param prefer_animated Whether you prefer gif format.
+	 * If true, it'll return gif format whenever the emoji is available as animated.
+	 * @return std::string emoji url or an empty string, if the id is not set
+	 */
+	std::string get_url(uint16_t size = 0, const image_type format = i_png, bool prefer_animated = true) const;
 };
 
 /**

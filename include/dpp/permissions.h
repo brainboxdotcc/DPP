@@ -20,7 +20,7 @@
  ************************************************************************************/
 #pragma once
 #include <dpp/export.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <cstdint>
 #include <type_traits>
 
@@ -71,6 +71,9 @@ enum permissions : uint64_t {
 	p_send_messages_in_threads = 0x04000000000,    //!< allows for sending messages in threads
 	p_use_embedded_activities = 0x08000000000,    //!< allows for using activities (applications with the EMBEDDED flag) in a voice channel
 	p_moderate_members = 0x10000000000,    //!< allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
+	p_view_creator_monetization_analytics = 0x20000000000,	//!< allows for viewing role subscription insights
+	p_use_soundboard = 0x40000000000, //!< allows for using soundboard in a voice channel
+	p_send_voice_messages = 0x0000400000000000, //!< allows sending voice messages
 };
 
 /**
@@ -80,38 +83,42 @@ enum permissions : uint64_t {
 using role_permissions = permissions;
 
 /**
- * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are hold in an uint64_t
+ * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are held in an uint64_t
  */
 class DPP_EXPORT permission {
 protected:
 	/**
 	 * @brief The permission bitmask value
 	 */
-	uint64_t value;
+	uint64_t value{0};
 
 public:
 	/**
-	 * @brief Construct a permission object
-	 * @param value A permission bitmask
+	 * @brief Default constructor, initializes permission to 0
 	 */
-	permission(const uint64_t& value);
+	constexpr permission() = default;
 
 	/**
- 	 * @brief Construct a permission object
- 	 */
-	permission();
+	 * @brief Bitmask constructor, initializes permission to the argument
+	 * @param value The bitmask to initialize the permission to
+	 */
+	constexpr permission(uint64_t value) noexcept : value{value} {}
 
 	/**
 	 * @brief For acting like an integer
 	 * @return The permission bitmask value
 	 */
-	operator uint64_t() const;
+	constexpr operator uint64_t() const noexcept {
+		return value;
+	}
 
 	/**
 	 * @brief For acting like an integer
 	 * @return A reference to the permission bitmask value
 	 */
-	operator uint64_t &();
+	constexpr operator uint64_t &() noexcept {
+		return value;
+	}
 
 	/**
 	 * @brief For building json
@@ -134,7 +141,7 @@ public:
 	 * @return bool True if it has all the given permissions
 	 */
 	template <typename... T>
-	bool has(T... values) const {
+	constexpr bool has(T... values) const noexcept {
 		return (value & (0 | ... | values)) == (0 | ... | values);
 	}
 
@@ -153,8 +160,8 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
-	add(T... values) {
+	std::enable_if_t<(std::is_convertible_v<T, uint64_t> && ...), permission&>
+	constexpr add(T... values) noexcept {
 		value |= (0 | ... | values);
 		return *this;
 	}
@@ -173,8 +180,8 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
-	set(T... values) {
+	std::enable_if_t<(std::is_convertible_v<T, uint64_t> && ...), permission&>
+	constexpr set(T... values) noexcept {
 		value = (0 | ... | values);
 		return *this;
 	}
@@ -194,8 +201,8 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
-	remove(T... values) {
+	std::enable_if_t<(std::is_convertible_v<T, uint64_t> && ...), permission&>
+	constexpr remove(T... values) noexcept {
 		value &= ~(0 | ... | values);
 		return *this;
 	}

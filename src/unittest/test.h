@@ -24,7 +24,7 @@ _Pragma("warning( disable : 4251 )"); // 4251 warns when we export classes or st
 _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or structures with stl member variables
 #endif
 #include <dpp/dpp.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <iomanip>
 
 #ifdef _WIN32
@@ -231,6 +231,13 @@ int test_summary();
  * @return std::vector<uint8_t> data and size for test audio
  */
 std::vector<uint8_t> load_test_audio();
+
+/**
+ * @brief Load test image for the attachment tests
+ * 
+ * @return std::vector<uint8_t> data and size for test image
+ */
+std::vector<uint8_t> load_test_image();
 
 /**
  * @brief Get the token from the environment variable DPP_UNIT_TEST_TOKEN

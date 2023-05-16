@@ -23,7 +23,7 @@
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
@@ -61,6 +61,7 @@ public:
 	 * @brief Construct a new webhook object using the Webhook URL provided by Discord
 	 *
 	 * @param webhook_url a fully qualified web address of an existing webhook
+	 * @throw logic_exception if the webhook url could not be parsed
 	 */
 	webhook(const std::string& webhook_url);
 
@@ -97,10 +98,10 @@ public:
 	 * @brief Base64 encode image data and allocate it to image_data
 	 * 
 	 * @param image_blob Binary image data
-	 * @param type Image type
+	 * @param type Image type. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @param is_base64_encoded True if the image data is already base64 encoded
 	 * @return webhook& Reference to self
-	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
+	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
 	 */
 	webhook& load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded = false);
 };

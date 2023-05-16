@@ -26,7 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/user.h>
 #include <dpp/permissions.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
 
 namespace dpp {
@@ -45,6 +45,8 @@ enum team_member_status : uint8_t {
  * @brief Flags for a bot or application
  */
 enum application_flags : uint32_t {
+	/// Indicates if an app uses the Auto Moderation API
+	apf_application_automod_rule_create_badge = (1 << 6),
 	/// Has gateway presence intent
 	apf_gateway_presence = (1 << 12),
 	/// Has gateway presence intent for <100 guilds
@@ -121,6 +123,7 @@ public:
 	std::vector<std::string> tags;	//!< Up to 5 tags describing the content and functionality of the application
 	application_install_params install_params;	//!< Settings for the application's default in-app authorization link, if enabled
 	std::string custom_install_url;	//!< The application's default custom authorization link, if enabled
+	std::string role_connections_verification_url; //!< The application's role connection verification entry point, which when configured will render the app as a verification method in the guild role verification configuration
 
 	/** Constructor */
 	application();
@@ -135,20 +138,24 @@ public:
 	application& fill_from_json(nlohmann::json* j);
 
 	/**
-	 * @brief Get the applications cover image url if they have one, otherwise returns an empty string
+	 * @brief Get the application's cover image url if they have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the cover image in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized cover image is returned.
-	 * @return std::string cover image url or empty string
+	 * @param size The size of the cover image in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized cover image is returned.
+	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
+	 * @return std::string cover image url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
-	std::string get_cover_image_url(uint16_t size = 0) const;
+	std::string get_cover_image_url(uint16_t size = 0, const image_type format = i_png) const;
 
 	/**
-	 * @brief Get the applications icon url if they have one, otherwise returns an empty string
+	 * @brief Get the application's icon url if they have one, otherwise returns an empty string
 	 *
-	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096. if not specified, the default sized icon is returned.
-	 * @return std::string icon url or empty string
+	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized icon is returned.
+	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg` or `i_png`.
+	 * @return std::string icon url or an empty string, if required attributes are missing or an invalid format was passed
 	 */
-	std::string get_icon_url(uint16_t size = 0) const;
+	std::string get_icon_url(uint16_t size = 0, const image_type format = i_png) const;
 };
 
 /** A group of applications.

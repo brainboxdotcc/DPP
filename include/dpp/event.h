@@ -21,7 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/snowflake.h>
-#include <dpp/nlohmann/json_fwd.hpp>
+#include <dpp/json_fwd.h>
 
 #define event_decl(x,wstype) /** @brief Internal event handler for wstype websocket events. Called for each websocket message of this type. @internal */ \
 	class x : public event { public: virtual void handle(dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
@@ -147,5 +147,8 @@ event_decl(automod_rule_create, AUTO_MODERATION_RULE_CREATE);
 event_decl(automod_rule_update, AUTO_MODERATION_RULE_UPDATE);
 event_decl(automod_rule_delete, AUTO_MODERATION_RULE_DELETE);
 event_decl(automod_rule_execute, AUTO_MODERATION_ACTION_EXECUTION);
+
+/* Audit log */
+event_decl(guild_audit_log_entry_create, GUILD_AUDIT_LOG_ENTRY_CREATE);
 
 }};

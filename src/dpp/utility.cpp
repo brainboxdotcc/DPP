@@ -53,6 +53,53 @@ namespace dpp {
 
 	namespace utility {
 
+		std::string cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
+			return cdn_endpoint_url_hash(allowed_formats, path_without_extension, "", format, size, prefer_animated, is_animated);
+		}
+
+		std::string cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
+
+			if (std::find(allowed_formats.begin(), allowed_formats.end(), format) == allowed_formats.end()) {
+				return std::string(); // if the given format is not allowed for this endpoint
+			}
+
+			std::string extension;
+			if (is_animated && (prefer_animated || format == i_gif)) {
+				extension = ".gif";
+			} else if (format == i_png) {
+				extension = ".png";
+			} else if (format == i_jpg) {
+				extension = ".jpg";
+			} else if (format == i_webp) {
+				extension = ".webp";
+			} else {
+				return std::string();
+			}
+
+			std::string suffix = (hash.empty() ? "" : (is_animated ? "/a_" : "/") + hash); // > In the case of endpoints that support GIFs, the hash will begin with a_ if it is available in GIF format.
+
+			return cdn_host + '/' + path_without_extension + suffix + extension + utility::avatar_size(size);
+		}
+
+		std::string cdn_endpoint_url_sticker(snowflake sticker_id, sticker_format format) {
+			if (!sticker_id) {
+				return std::string();
+			}
+
+			std::string extension;
+			if (format == sf_png || format == sf_apng) {
+				extension = ".png";
+			} else if (format == sf_lottie) {
+				extension = ".json";
+			} else if (format == sf_gif) {
+				extension = ".gif";
+			} else {
+				return std::string();
+			}
+
+			return utility::cdn_host + "/stickers/" + std::to_string(sticker_id) + extension;
+		}
+
 		double time_f()
 		{
 			using namespace std::chrono;
@@ -218,7 +265,7 @@ namespace dpp {
 			return print_buffer;
 		}
 
-		uint32_t rgb(float red, float green, float blue) {
+		uint32_t rgb(double red, double green, double blue) {
 			return (((uint32_t)(red * 255)) << 16) | (((uint32_t)(green * 255)) << 8) | ((uint32_t)(blue * 255));
 		}
 
@@ -226,7 +273,19 @@ namespace dpp {
 		uint32_t rgb(int red, int green, int blue) {
 			return ((uint32_t)red << 16) | ((uint32_t)green << 8) | (uint32_t)blue;
 		}
-
+		
+		uint32_t cmyk(double c, double m, double y, double k) {
+			int r = (int)(255 * (1 - c) * (1 - k));
+			int g = (int)(255 * (1 - m) * (1 - k));
+			int b = (int)(255 * (1 - y) * (1 - m));
+			return rgb(r, g, b);
+		}
+		
+		/* NOTE: Parameters here are `int` instead of `uint32_t` or `uint8_t` to prevent ambiguity error with cmyk(float, float, float, float) */
+		uint32_t cmyk(int c, int m, int y, int k) {
+			return cmyk(c / 255.0, m / 255.0, y / 255.0, k / 255.0);
+		}
+		
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 			auto t = std::thread([cmd, parameters, callback]() {
 				utility::set_thread_name("async_exec");
@@ -357,6 +416,12 @@ namespace dpp {
 
 		std::string avatar_size(uint32_t size) {
 			if (size) {
+				if ( (size & (size - 1)) != 0 ) { // check if the size is a power of 2
+					return std::string();
+				}
+				if (size > MAX_CDN_IMAGE_SIZE || size < MIN_CDN_IMAGE_SIZE) {
+					return std::string();
+				}
 				return "?size=" + std::to_string(size);
 			}
 			return std::string();
@@ -447,19 +512,15 @@ namespace dpp {
 		}
 
 		std::string emoji_mention(const std::string &name, const snowflake &id, bool is_animated) {
-		    static auto format =  [=](){
-			return id ? ((is_animated ? "a:" : "") + name + ":" + std::to_string(id)) : name;
-		    };
+			auto format = [=]() {
+				return id ? ((is_animated ? "a:" : ":") + name + ":" + std::to_string(id)) : name;
+			};
 
-		    if (id) {
-			if (is_animated) {
-			    return "<" + format() + ">";
+			if (id) {
+				return "<" + format() + ">";
 			} else {
-			    return "<:" + format() + ">";
+				return ":" + format() + ":";
 			}
-		    } else {
-			return ":" + format() + ":";
-		    }
 		}
 
 		std::string role_mention(const snowflake &id) {

@@ -19,21 +19,9 @@
  *
  ************************************************************************************/
 #include <dpp/permissions.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 
 namespace dpp {
-
-permission::permission(const uint64_t &value) : value(value) {}
-
-permission::permission() : permission(0) {}
-
-permission::operator uint64_t() const {
-	return value;
-}
-
-permission::operator uint64_t &() {
-	return value;
-}
 
 permission::operator nlohmann::json() const {
 	return std::to_string(value);

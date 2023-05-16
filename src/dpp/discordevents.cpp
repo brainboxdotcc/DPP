@@ -30,7 +30,7 @@
 #include <dpp/event.h>
 #include <dpp/cache.h>
 #include <dpp/stringops.h>
-#include <dpp/nlohmann/json.hpp>
+#include <dpp/json.h>
 #include <time.h>
 #include <iomanip>
 #include <sstream>
@@ -341,6 +341,7 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "AUTO_MODERATION_RULE_UPDATE", new dpp::events::automod_rule_update() },
 	{ "AUTO_MODERATION_RULE_DELETE", new dpp::events::automod_rule_delete() },
 	{ "AUTO_MODERATION_ACTION_EXECUTION", new dpp::events::automod_rule_execute() },
+	{ "GUILD_AUDIT_LOG_ENTRY_CREATE", new dpp::events::guild_audit_log_entry_create() },
 };
 
 void discord_client::handle_event(const std::string &event, json &j, const std::string &raw)
