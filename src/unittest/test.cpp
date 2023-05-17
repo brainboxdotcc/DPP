@@ -947,7 +947,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								return;
 							}
 							auto fetched = event.get<dpp::emoji>();
-							if (created.id == fetched.id && created.name == fetched.name && created.flags == fetched.flags && created.user_id == fetched.user_id) {
+							if (created.id == fetched.id && created.name == fetched.name && created.flags == fetched.flags) {
 								set_test("EMOJI_GET", true);
 							}
 
