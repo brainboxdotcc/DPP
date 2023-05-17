@@ -140,7 +140,7 @@ public:
 	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096,
 	 * otherwise the default sized avatar is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
-	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
+	 * When passing `i_gif`, it returns an empty string for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
 	 * If true, it'll return gif format whenever the image is available as animated.
 	 * @return std::string avatar url or an empty string, if required attributes are missing or an invalid format was passed
@@ -371,7 +371,7 @@ public:
 	 * @param size The size of the banner in pixels. It can be any power of two between 16 and 4096,
 	 * otherwise the default sized banner is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
-	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
+	 * When passing `i_gif`, it returns an empty string for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
 	 * If true, it'll return gif format whenever the image is available as animated.
 	 * @return std::string banner url or an empty string, if required attributes are missing or an invalid format was passed

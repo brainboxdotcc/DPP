@@ -360,7 +360,7 @@ public:
 	/**
 	 * @brief List of voice channels we are connecting to keyed by guild id
 	 */
-	std::unordered_map<snowflake, voiceconn*> connecting_voice_channels;
+	std::unordered_map<snowflake, std::unique_ptr<voiceconn>> connecting_voice_channels;
 
 	/**
 	 * @brief The gateway address we reconnect to when we resume a session
