@@ -23,11 +23,8 @@
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) || defined(_WIN64)
 #include <memory_resource>
 #define ALLOCATOR(T) std::pmr::polymorphic_allocator<T>
-#elif defined(__APPLE__) 
+#elif defined(__APPLE__) || defined(__linux)
 #define ALLOCATOR(T) std::allocator<T>
-#elif defined(__linux__)
-#include <experimental/memory_resource>
-#define ALLOCATOR(T) std::pmr::polymorphic_allocator<T>
 #endif
 
 #include <shared_mutex>
@@ -93,8 +90,8 @@ namespace dpp {
 		using value_type = OTy;
 		using key_accessor = KATy;
 		using reference = value_type&;
-		using const_reference = const value_type&;
-		using pointer = OTy*;
+		using const_reference = const reference;
+		using pointer = value_type*;
 		using size_type = size_t;
 		using key_hasher = fnv1a_hash<key_type>;
 
@@ -456,8 +453,8 @@ namespace dpp {
 		using key_type = KTy;
 		using value_type = OTy;
 		using reference = value_type&;
-		using const_reference = const value_type&;
-		using pointer = OTy*;
+		using const_reference = const reference;
+		using pointer = value_type*;
 		using key_accessor = KATy;
 		using size_type = size_t;
 		using iterator = typename memory_core<key_type, value_type>::memory_core_iterator;
