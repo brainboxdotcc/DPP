@@ -20,7 +20,14 @@
  ************************************************************************************/
 #pragma once
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) || defined(_WIN64)
 #include <memory_resource>
+#elif __APPLE__
+#include <experimental/memory_resource>
+#elif __linux__
+#include <experimental/memory_resource>
+#endif
+
 #include <shared_mutex>
 
 #ifdef max
