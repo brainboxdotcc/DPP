@@ -500,9 +500,11 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("TIMESTRINGTOTIMESTAMP", true);
 #endif
 
-	set_test("TS", false); 
-	dpp::managed m(TEST_USER_ID);
-	set_test("TS", ((uint64_t)m.get_creation_time()) == 1617131800);
+	{
+		set_test("TS", false);
+		dpp::managed m(189759562910400512);
+		set_test("TS", ((uint64_t) m.get_creation_time()) == 1465312605);
+	}
 
 	std::vector<uint8_t> test_image = load_test_image();
 
