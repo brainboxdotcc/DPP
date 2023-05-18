@@ -41,6 +41,7 @@ role::role() :
 	flags(0),
 	integration_id(0),
 	bot_id(0),
+	subscription_listing_id(0),
 	image_data(nullptr)
 {
 }
@@ -82,8 +83,15 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 		if (t.find("premium_subscriber") != t.end()) {
 			this->flags |= dpp::r_premium_subscriber;
 		}
+		if (t.find("available_for_purchase") != t.end()) {
+			this->flags |= dpp::r_available_for_purchase;
+		}
+		if (t.find("guild_connections") != t.end()) {
+			this->flags |= dpp::r_guild_connections;
+		}
 		this->bot_id = snowflake_not_null(&t, "bot_id");
 		this->integration_id = snowflake_not_null(&t, "integration_id");
+		this->subscription_listing_id = snowflake_not_null(&t, "subscription_listing_id");
 	}
 	return *this;
 }
@@ -145,6 +153,18 @@ bool role::is_mentionable() const {
 
 bool role::is_managed() const {
 	return this->flags & dpp::r_managed;
+}
+
+bool role::is_premium_subscription() const {
+	return this->flags & dpp::r_premium_subscriber;
+}
+
+bool role::is_available_for_purchase() const {
+	return this->flags & dpp::r_available_for_purchase;
+}
+
+bool role::is_linked() const {
+	return this->flags & dpp::r_guild_connections;
 }
 
 bool role::has_create_instant_invite() const {
