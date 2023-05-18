@@ -111,8 +111,8 @@ std::string guild_member::get_mention() const {
 }
 
 guild_member& guild_member::set_nickname(const std::string& nick) {
-	this->nickname = nick;
-	return *this;
+    this->nickname = nick;
+    return *this;
 }
 
 guild_member& guild_member::set_bypasses_verification(const bool is_bypassing_verification) {
@@ -213,13 +213,20 @@ std::string guild_member::build_json(bool with_id) const {
 			j["communication_disabled_until"] = json::value_t::null;
 		}
 	}
-	if (!this->nickname.empty())
+	
+	if (!this->nickname.empty()) {
 		j["nick"] = this->nickname;
+	} else {
+		j["nick"] = find_user(user_id)->username;
+	}
+
 	if (!this->roles.empty()) {
 		j["roles"] = {};
 		for (auto & role : this->roles) {
 			j["roles"].push_back(std::to_string(role));
 		}
+	} else {
+		j["roles"] = {};
 	}
 
 	if (this->flags & gm_voice_action) {
