@@ -54,7 +54,8 @@ integration& integration::fill_from_json(nlohmann::json* j)
 		{ "", i_discord },
 		{ "youtube", i_youtube },
 		{ "twitch", i_twitch },
-		{ "discord", i_discord }
+		{ "discord", i_discord },
+		{ "guild_subscription", i_guild_subscription }
 	};
 	this->id = snowflake_not_null(j, "id");
 	this->name = string_not_null(j, "name");
