@@ -100,12 +100,26 @@ user_identified::~user_identified() {
 }
 
 std::string user::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_gif, "gif" },
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
 	if (this->avatar.to_string().empty()) {
 		return get_default_avatar_url();
 	} else if (this->id) {
-		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-											  "avatars/" + std::to_string(this->id), this->avatar.to_string(),
-											  format, size, prefer_animated, has_animated_icon());
+		return utility::cdn_host + "/avatars/" +
+			std::to_string(this->id) +
+			(has_animated_icon() ? "/a_" : "/") +
+			this->avatar.to_string() + "." +
+			(has_animated_icon() && prefer_animated ? "gif" : extensions.find(format)->second) +
+			utility::avatar_size(size);
 	} else {
 		return std::string();
 	}
@@ -113,9 +127,7 @@ std::string user::get_avatar_url(uint16_t size, const image_type format, bool pr
 
 std::string user::get_default_avatar_url() const {
 	if (this->discriminator) {
-		return utility::cdn_endpoint_url({ i_png },
-										 "embed/avatars/" + std::to_string(this->discriminator % 5),
-										 i_png, 0);
+		return utility::cdn_host + "/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png";
 	} else {
 		return std::string();
 	}
@@ -209,7 +221,7 @@ bool user::is_verified_bot_dev() const {
 	 return this->flags & u_verified_bot_dev;
 }
 
-bool user::is_moderator_programs() const {
+bool user::is_certified_moderator() const {
 	 return this->flags & u_certified_moderator;
 }
 
@@ -236,10 +248,24 @@ bool user_identified::has_animated_banner() const {
 }
 
 std::string user_identified::get_banner_url(uint16_t size, const image_type format, bool prefer_animated) const {
+	static const std::map<image_type, std::string> extensions = {
+			{ i_gif, "gif" },
+			{ i_jpg, "jpg" },
+			{ i_png, "png" },
+			{ i_webp, "webp" },
+	};
+
+	if (extensions.find(format) == extensions.end()) {
+		return std::string();
+	}
+
 	if (!this->banner.to_string().empty() && this->id) {
-		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-											  "banners/" + std::to_string(this->id), this->banner.to_string(),
-											  format, size, prefer_animated, has_animated_banner());
+		return utility::cdn_host + "/banners/" +
+			   std::to_string(this->id) +
+			   (has_animated_banner() ? "/a_" : "/") +
+			   this->banner.to_string() + "." +
+			   (has_animated_banner() && prefer_animated ? "gif" : extensions.find(format)->second) +
+			   utility::avatar_size(size);
 	} else {
 		return std::string();
 	}

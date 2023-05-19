@@ -31,8 +31,8 @@ void cluster::invite_delete(const std::string &invitecode, command_completion_ev
 }
 
 
-void cluster::invite_get(const std::string &invite_code, command_completion_event_t callback) {
-	rest_request<invite>(this, API_PATH "/invites", utility::url_encode(invite_code) + "?with_counts=true&with_expiration=true", "", m_get, "", callback);
+void cluster::invite_get(const std::string &invitecode, command_completion_event_t callback) {
+	rest_request<invite>(this, API_PATH "/invites", utility::url_encode(invitecode) + "?with_counts=true&with_expiration=true", "", m_get, "", callback);
 }
 
 };

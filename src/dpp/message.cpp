@@ -1198,7 +1198,18 @@ std::string sticker_pack::build_json(bool with_id) const {
 }
 
 std::string sticker::get_url() const {
-	return utility::cdn_endpoint_url_sticker(this->id, this->format_type);
+	if (this->id) {
+		static const std::map<sticker_format, std::string> extensions = {
+				{ sticker_format::sf_png, "png" },
+				{ sticker_format::sf_apng, "png" },
+				{ sticker_format::sf_lottie, "json" },
+				{ sticker_format::sf_gif, "gif" },
+		};
+
+		return utility::cdn_host + "/stickers/" + std::to_string(this->id) + "." + extensions.find(this->format_type)->second;
+	} else {
+		return std::string();
+	}
 }
 
 sticker& sticker::set_filename(const std::string &fn) {

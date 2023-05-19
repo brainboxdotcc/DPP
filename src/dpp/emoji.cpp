@@ -117,16 +117,6 @@ std::string emoji::get_mention() const {
 	return utility::emoji_mention(name,id,is_animated());
 }
 
-std::string emoji::get_url(uint16_t size, const dpp::image_type format, bool prefer_animated) const {
-	if (this->id) {
-		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
-										 "emojis/" + std::to_string(this->id),
-										 format, size, prefer_animated, is_animated());
-	} else {
-		return std::string();
-	}
-}
-
 
 };
 

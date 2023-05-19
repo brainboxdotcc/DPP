@@ -37,9 +37,7 @@ enum integration_type {
 	/// YouTube integration
 	i_youtube,
 	/// Discord integration
-	i_discord,
-	/// Subscription
-	i_guild_subscription,
+	i_discord
 };
 
 /**

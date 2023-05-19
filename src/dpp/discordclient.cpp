@@ -610,7 +610,7 @@ discord_client& discord_client::connect_voice(snowflake guild_id, snowflake chan
 #ifdef HAVE_VOICE
 	std::unique_lock lock(voice_mutex);
 	if (connecting_voice_channels.find(guild_id) == connecting_voice_channels.end()) {
-		connecting_voice_channels[guild_id] = std::make_unique<voiceconn>(this, channel_id);
+		connecting_voice_channels[guild_id] = new voiceconn(this, channel_id);
 		/* Once sent, this expects two events (in any order) on the websocket:
 		* VOICE_SERVER_UPDATE and VOICE_STATUS_UPDATE
 		*/
@@ -658,6 +658,8 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 				}
 			})), false);
 		}
+		delete v->second;
+		v->second = nullptr;
 		connecting_voice_channels.erase(v);
 	}
 #endif
@@ -673,7 +675,7 @@ voiceconn* discord_client::get_voice(snowflake guild_id) {
 	std::shared_lock lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
-		return v->second.get();
+		return v->second;
 	}
 #endif
 	return nullptr;
