@@ -133,6 +133,11 @@ void cluster::thread_create(const std::string& thread_name, snowflake channel_id
 	rest_request<thread>(this, API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(), callback);
 }
 
+void cluster::thread_edit(const thread &t, command_completion_event_t callback)
+{
+	rest_request<thread>(this, API_PATH "/channels", std::to_string(t.id), "", m_patch, t.build_json(), callback);
+}
+
 void cluster::thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback)
 {
 	json j({
