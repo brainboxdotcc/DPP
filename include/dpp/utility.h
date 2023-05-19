@@ -60,7 +60,7 @@ namespace dpp {
 		 * @param is_animated Whether the image is actually animated or not
 		 * @return std::string endpoint url or empty string
 		 */
-		std::string cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
+		std::string DPP_EXPORT cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
 
 		/**
 		 * For internal use only. Helper function to easily create discord's cdn endpoint urls
@@ -76,7 +76,7 @@ namespace dpp {
 		 * @param is_animated Whether the image is actually animated or not
 		 * @return std::string endpoint url or empty string
 		 */
-		std::string cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
+		std::string DPP_EXPORT cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
 
 		/**
 		 * For internal use only. Helper function to easily create discord's cdn endpoint urls (specialised for stickers)
@@ -85,7 +85,7 @@ namespace dpp {
 		 * @param format The format type
 		 * @return std::string endpoint url or empty string
 		 */
-		std::string cdn_endpoint_url_sticker(snowflake sticker_id, sticker_format format);
+		std::string DPP_EXPORT cdn_endpoint_url_sticker(snowflake sticker_id, sticker_format format);
 
 		/**
 		 * @brief Timestamp formats for dpp::utility::timestamp()
@@ -114,7 +114,7 @@ namespace dpp {
 		/**
 		 * @brief The base URL for CDN content such as profile pictures and guild icons.
 		 */
-		const std::string cdn_host = "https://cdn.discordapp.com"; 
+		inline const std::string cdn_host = "https://cdn.discordapp.com"; 
 
 		/**
 		 * @brief Callback for the results of a command executed via dpp::utility::exec
