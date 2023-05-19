@@ -28,7 +28,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-invite::invite() : expires_at(0), guild_id(0), channel_id(0), inviter_id(0), target_user_id(0), target_type(0), approximate_presence_count(0), approximate_member_count(0), max_age(0), max_uses(0), temporary(false), unique(false), uses(0), created_at(0)
+invite::invite() : expires_at(0), guild_id(0), channel_id(0), inviter_id(0), target_user_id(0), target_type(0), approximate_presence_count(0), approximate_member_count(0), max_age(86400), max_uses(0), temporary(false), unique(false), uses(0), created_at(0)
 {
 }
 
