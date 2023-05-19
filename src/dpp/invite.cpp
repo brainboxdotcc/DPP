@@ -36,12 +36,12 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 	code = string_not_null(j, "code");
 	expires_at = (j->contains("expires_at")) ? ts_not_null(j, "expires_at") : 0;
 	created_at = (j->contains("created_at")) ? ts_not_null(j, "created_at") : 0;
-	if (j->contains("guild")) {
+	if (j->contains("guild") && !j->at("guild").is_null()) {
 		guild_id = snowflake_not_null(&((*j)["guild"]), "id");
 	} else if (j->contains("guild_id")) { // check ID for the invite create event
 		guild_id = snowflake_not_null(j, "guild_id");
 	}
-	if (j->contains("channel")) {
+	if (j->contains("channel") && !j->at("channel").is_null()) {
 		channel_id = snowflake_not_null(&((*j)["channel"]), "id");
 	} else if (j->contains("channel_id")) { // check ID for the invite create event
 		channel_id = snowflake_not_null(j, "channel_id");
