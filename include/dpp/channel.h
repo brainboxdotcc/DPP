@@ -250,7 +250,7 @@ struct DPP_EXPORT forum_tag : public managed {
 };
 
 /**
- * @brief A group of thread member objects. the key is the thread_id of the dpp::thread_member
+ * @brief A group of thread member objects. the key is the user_id of the dpp::thread_member
  */
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
