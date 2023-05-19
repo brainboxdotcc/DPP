@@ -658,6 +658,20 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 		});
 
+		bot.on_invite_create([](const dpp::invite_create_t &event) {
+			auto &inv = event.created_invite;
+			if (!inv.code.empty() && inv.channel_id == TEST_TEXT_CHANNEL_ID && inv.guild_id == TEST_GUILD_ID && inv.created_at != 0 && inv.max_uses == 100) {
+				set_test("INVITE_CREATE_EVENT", true);
+			}
+		});
+
+		bot.on_invite_delete([](const dpp::invite_delete_t &event) {
+			auto &inv = event.deleted_invite;
+			if (!inv.code.empty() && inv.channel_id == TEST_TEXT_CHANNEL_ID && inv.guild_id == TEST_GUILD_ID) {
+				set_test("INVITE_DELETE_EVENT", true);
+			}
+		});
+
 		bot.on_voice_buffer_send([&](const dpp::voice_buffer_send_t & event) {
 			if (event.buffer_size == 0) {
 				set_test("VOICESEND", true);
@@ -958,6 +972,42 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 									set_test("EMOJI_DELETE", true);
 								}
 							});
+						});
+					});
+				});
+			}
+
+			set_test("INVITE_CREATE", false);
+			set_test("INVITE_GET", false);
+			set_test("INVITE_DELETE", false);
+			if (!offline) {
+				dpp::channel channel;
+				channel.id = TEST_TEXT_CHANNEL_ID;
+				dpp::invite invite;
+				invite.max_age = 0;
+				invite.max_uses = 100;
+				set_test("INVITE_CREATE_EVENT", false);
+				bot.channel_invite_create(channel, invite, [&bot, invite](const dpp::confirmation_callback_t &event) {
+					if (event.is_error()) return;
+
+					auto created = event.get<dpp::invite>();
+					if (!created.code.empty() && created.channel_id == TEST_TEXT_CHANNEL_ID && created.guild_id == TEST_GUILD_ID && created.inviter_id != 0) {
+						set_test("INVITE_CREATE", true);
+					}
+
+					bot.invite_get(created.code, [&bot, created](const dpp::confirmation_callback_t &event) {
+						if (event.is_error()) return;
+
+						auto retrieved = event.get<dpp::invite>();
+						if (retrieved.code == created.code && retrieved.expires_at == 0 && retrieved.guild_id == created.guild_id && retrieved.channel_id == created.channel_id && retrieved.inviter_id == created.inviter_id) {
+							set_test("INVITE_GET", true);
+						}
+
+						set_test("INVITE_DELETE_EVENT", false);
+						bot.invite_delete(retrieved.code, [](const dpp::confirmation_callback_t &event) {
+							if (!event.is_error()) {
+								set_test("INVITE_DELETE", true);
+							}
 						});
 					});
 				});

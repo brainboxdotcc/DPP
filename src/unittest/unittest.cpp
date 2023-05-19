@@ -142,6 +142,11 @@ std::map<std::string, test_t> tests = {
 	{"EMOJI_CREATE", {tt_online, "cluster::guild_emoji_create", false, false}},
 	{"EMOJI_GET", {tt_online, "cluster::guild_emoji_get", false, false}},
 	{"EMOJI_DELETE", {tt_online, "cluster::guild_emoji_delete", false, false}},
+	{"INVITE_CREATE_EVENT", {tt_online, "cluster::on_invite_create", false, false}},
+	{"INVITE_DELETE_EVENT", {tt_online, "cluster::on_invite_delete", false, false}},
+	{"INVITE_CREATE", {tt_online, "cluster::channel_invite_create", false, false}},
+	{"INVITE_GET", {tt_online, "cluster::invite_get", false, false}},
+	{"INVITE_DELETE", {tt_online, "cluster::invite_delete", false, false}},
 };
 
 double start = dpp::utility::time_f();
