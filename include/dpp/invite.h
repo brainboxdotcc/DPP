@@ -63,7 +63,7 @@ public:
 	 * @note Only returned from cluster::invite_get
 	 */
 	uint32_t approximate_member_count;
-	/** Duration (in seconds) after which the invite expires, or 0 for no expiration. Must be between 0 and 604800 (7 days). Defaults to 0
+	/** Duration (in seconds) after which the invite expires, or 0 for no expiration. Must be between 0 and 604800 (7 days). Defaults to 86400 (1 day)
 	 */
 	uint32_t max_age;
 	/** Maximum number of uses, or 0 for unlimited. Must be between 0 and 100. Defaults to 0

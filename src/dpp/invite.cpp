@@ -64,10 +64,8 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 
 std::string invite::build_json(bool with_id) const {
 	json j;
-	if (max_age > 0)
-		j["max_age"] = max_age;
-	if (max_uses > 0)
-		j["max_uses"] = max_uses;
+	j["max_age"] = max_age;
+	j["max_uses"] = max_uses;
 	if (target_user_id > 0)
 		j["target_user"] = target_user_id;
 	if (target_type > 0)
