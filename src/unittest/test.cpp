@@ -752,15 +752,21 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			void test_threads(const dpp::message &message)
 			{
 				set_test("THREAD_MESSAGE_CREATE", false);
-				//set_test("THREAD_MESSAGE_SEND", false);
 				bot.thread_create_with_message("test", message.channel_id, message.id, 60, 60, [this](const dpp::confirmation_callback_t &callback) {
 					std::lock_guard lock(mutex);
-					if (!callback.is_error()) {
-						const auto &thread = callback.get<dpp::thread>();
-
-						set_test("THREAD_MESSAGE_CREATE", true);
+					if (callback.is_error()) {
+						set_thread_tested();
 					}
-					set_thread_tested();
+					else {
+						auto thread = callback.get<dpp::thread>();
+						set_test("THREAD_MESSAGE_CREATE", true);
+						bot.channel_delete(thread.id, [this](const dpp::confirmation_callback_t &callback) {
+							if (!callback.is_error()) {
+								set_test("THREAD_DELETE", true);
+							}
+							set_thread_tested();
+						});
+					}
 				});
 			}
 
@@ -887,6 +893,72 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					}
 				});
 			}
+		});
+
+		class thread_test_helper
+		{
+		private:
+			std::mutex mutex;
+			dpp::cluster &bot;
+			bool edit_tested = false;
+			bool member_tested = false;
+			dpp::snowflake thread_id;
+
+			void delete_if_done()
+			{
+				if (edit_tested) {
+					bot.channel_delete(thread_id);
+				}
+			}
+
+			void set_edit_tested()
+			{
+				edit_tested = true;
+				delete_if_done();
+			}
+
+		public:
+			void test_edit(const dpp::thread &thread)
+			{
+				std::lock_guard lock{mutex};
+
+				if (!edit_tested) {
+					dpp::thread edit = thread;
+					set_test("THREAD_EDIT", false);
+					set_test("THREAD_UPDATE_EVENT", false);
+					edit.name = "edited";
+					edit.metadata.locked = true;
+					bot.thread_edit(edit, [this, id = edit.id](const dpp::confirmation_callback_t &callback) {
+						std::lock_guard lock(mutex);
+						if (!callback.is_error()) {
+							set_test("THREAD_EDIT", true);
+						}
+						set_edit_tested();
+					});
+				}
+			}
+
+			void run(const dpp::thread &thread)
+			{
+				thread_id = thread.id;
+				test_edit(thread);
+			}
+
+			thread_test_helper(dpp::cluster &bot_) : bot{bot_}
+			{
+			}
+		};
+
+		thread_test_helper thread_helper(bot);
+		bot.on_thread_create([&](const dpp::thread_create_t &event) {
+			if (event.created.name == "thread test") {
+				set_test("THREAD_CREATE_EVENT", true);
+				thread_helper.run(event.created);
+			}
+		});
+
+		bot.on_thread_update([&](const dpp::thread_update_t &event) {
+			set_test("THREAD_UPDATE_EVENT", true);
 		});
 
 		// set to execute from this thread (main thread) after on_ready is fired
@@ -1257,6 +1329,17 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						set_test("FORUM_CREATION", false);
 						set_test("FORUM_CHANNEL_GET", false);
 					}
+				});
+			}
+			
+			set_test("THREAD_CREATE", false);
+			if (!offline) {
+				bot.thread_create("thread test", TEST_TEXT_CHANNEL_ID, 60, dpp::channel_type::CHANNEL_PUBLIC_THREAD, true, 60, [&](const dpp::confirmation_callback_t &event) {
+					if (!event.is_error()) {
+						const auto &thread = event.get<dpp::thread>();
+						set_test("THREAD_CREATE", true);
+					}
+					// the thread tests are in the on_thread_create event handler
 				});
 			}
 
