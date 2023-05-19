@@ -710,6 +710,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		private:
 			std::mutex mutex;
 			bool pin_tested;
+			bool thread_tested;
 			std::array<bool, 3> files_tested;
 			std::array<bool, 3> files_success;
 			dpp::snowflake channel_id;
@@ -717,7 +718,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			dpp::cluster &bot;
 
 			void delete_message_if_done() {
-				if (files_tested == std::array{true, true, true} && pin_tested) {
+				if (files_tested == std::array{true, true, true} && pin_tested && thread_tested) {
 					set_test("MESSAGEDELETE", false);
 					bot.message_delete(message_id, channel_id, [](const dpp::confirmation_callback_t &callback) {
 						if (!callback.is_error()) {
@@ -733,6 +734,12 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				delete_message_if_done();
 			}
 
+			void set_thread_tested() {
+				assert(!thread_tested);
+				thread_tested = true;
+				delete_message_if_done();
+			}
+
 			void set_file_tested(size_t index) {
 				assert(!files_tested[index]);
 				files_tested[index] = true;
@@ -740,6 +747,21 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					set_test("MESSAGEFILE", files_success == std::array{true, true, true});
 				}
 				delete_message_if_done();
+			}
+
+			void test_threads(const dpp::message &message)
+			{
+				set_test("THREAD_MESSAGE_CREATE", false);
+				//set_test("THREAD_MESSAGE_SEND", false);
+				bot.thread_create_with_message("test", message.channel_id, message.id, 60, 60, [this](const dpp::confirmation_callback_t &callback) {
+					std::lock_guard lock(mutex);
+					if (!callback.is_error()) {
+						const auto &thread = callback.get<dpp::thread>();
+
+						set_test("THREAD_MESSAGE_CREATE", true);
+					}
+					set_thread_tested();
+				});
 			}
 
 			void test_files(const dpp::message &message) {
@@ -810,12 +832,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 			void run(const dpp::message &message) {
 				pin_tested = false;
+				thread_tested = false;
 				files_tested = {false, false, false};
 				files_success = {false, false, false};
 				channel_id = message.channel_id;
 				message_id = message.id;
 				test_pin();
 				test_files(message);
+				test_threads(message);
 			}
 		};
 

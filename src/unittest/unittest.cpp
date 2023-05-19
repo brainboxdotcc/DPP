@@ -96,6 +96,8 @@ std::map<std::string, test_t> tests = {
 	{"GUILD_BAN_GET", {tt_online, "cluster::guild_get_ban getting one of the banned accounts", false, false}},
 	{"GUILD_BANS_GET", {tt_online, "cluster::guild_get_bans get bans using the after-parameter", false, false}},
 	{"GUILD_BAN_DELETE", {tt_online, "cluster::guild_ban_delete unban the banned discord accounts", false, false}},
+	
+	{"THREAD_MESSAGE_CREATE", {tt_online, "cluster::thread_create_with_message", false, false}},
 
 	{"VOICE_CHANNEL_CREATE", {tt_online, "creating a voice channel", false, false}},
 	{"VOICE_CHANNEL_EDIT", {tt_online, "editing the created voice channel", false, false}},
