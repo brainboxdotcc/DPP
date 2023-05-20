@@ -31,10 +31,12 @@ namespace dpp {
 
 /** Various flags related to dpp::role */
 enum role_flags : uint8_t {
-	r_hoist =		0b00000001, //!< Hoisted role
+	r_hoist =		0b00000001, //!< Hoisted role (if the role is pinned in the user listing)
 	r_managed =		0b00000010, //!< Managed role (introduced by a bot or application)
-	r_mentionable =		0b00000100, //!< Mentionable with a ping
-	r_premium_subscriber =	0b00001000, //!< This is set for the role given to nitro 
+	r_mentionable =		0b00000100, //!< Whether this role is mentionable with a ping
+	r_premium_subscriber =	0b00001000, //!< Whether this is the guild's booster role
+	r_available_for_purchase = 0b00010000, //!< Whether the role is available for purchase
+	r_guild_connections = 0b00100000, //!< Whether the role is a guild's linked role
 };
 
 /**
@@ -72,6 +74,8 @@ public:
 	snowflake integration_id;
 	/** Bot id if any (e.g. role is a bot's role created when it was invited) */
 	snowflake bot_id;
+	/** The id of the role's subscription sku and listing */
+	snowflake subscription_listing_id;
 	/** The unicode emoji used for the role's icon, can be an empty string */
 	std::string unicode_emoji;
 	/** The role icon hash, can be an empty string */
@@ -268,6 +272,21 @@ public:
 	 * @return bool True if the role is managed (introduced for a bot or other application by Discord)
 	 */
 	bool is_managed() const;
+	/**
+	 * @brief True if the role is the guild's Booster role
+	 * @return bool whether the role is the premium subscriber, AKA "boost", role for the guild
+	 */
+	bool is_premium_subscriber() const;
+	/**
+	 * @brief True if the role is available for purchase
+	 * @return bool whether this role is available for purchase
+	 */
+	bool is_available_for_purchase() const;
+	/**
+	 * @brief True if the role is a linked role
+	 * @return bool True if the role is a linked role
+	 */
+	bool is_linked() const;
 	/**
 	 * @brief True if has create instant invite permission
 	 * @note Having the administrator permission causes this method to always return true
