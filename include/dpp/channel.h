@@ -812,12 +812,24 @@ typedef std::unordered_map<snowflake, channel> channel_map;
 typedef std::unordered_map<snowflake, thread> thread_map;
 
 /**
- * @brief A group of threads and thread_members. returned from the cluster::threads_get_active method
+ * @brief A thread alongside the bot's optional thread_member object tied to it
  */
-typedef struct {
-	thread_map threads;
-	thread_member_map thread_members;
-} active_threads;
+struct active_thread {
+	/**
+	 * @brief The thread object
+	 */
+	thread thread;
+
+	/**
+	 * @brief The bot as a thread member, only present if the bot is in the thread
+	 */
+	std::optional<thread_member> member;
+};
+
+/**
+ * @brief A map of threads alongside optionally the thread_member tied to the bot if it is in the thread. The map's key is the thread id. Returned from the cluster::threads_get_active method
+ */
+using active_threads = std::map<snowflake, active_thread>;
 
 };
 

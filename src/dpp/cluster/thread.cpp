@@ -38,12 +38,16 @@ void cluster::threads_get_active(snowflake guild_id, command_completion_event_t 
 		if (!e.is_error()) {
 			if (j.contains("threads")) {
 				for (auto &curr_item: j["threads"]) {
-					list.threads[snowflake_not_null(&curr_item, "id")] = thread().fill_from_json(&curr_item);
+					list[snowflake_not_null(&curr_item, "id")].thread.fill_from_json(&curr_item);
 				}
 			}
 			if (j.contains("members")) {
 				for (auto &curr_item: j["members"]) {
-					list.thread_members[snowflake_not_null(&curr_item, "id")] = thread_member().fill_from_json(&curr_item);
+					snowflake thread_id = snowflake_not_null(&curr_item, "id");
+					snowflake user_id = snowflake_not_null(&curr_item, "user_id");
+					if (user_id == me.id) {
+						list[thread_id].member = thread_member().fill_from_json(&curr_item);
+					}
 				}
 			}
 		}
