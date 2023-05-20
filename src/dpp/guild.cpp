@@ -231,9 +231,9 @@ std::string guild_member::build_json(bool with_id) const {
 	}
 	
 	if (!this->nickname.empty()) {
-		j["nick"] = json::value_t::null;
+		j["nick"] = this->nickname;
 	} else {
-		j["nick"] = find_user(user_id)->username;
+		j["nick"] = json::value_t::null;
 	}
 
 	if (!this->roles.empty()) {
