@@ -901,13 +901,16 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			std::mutex mutex;
 			dpp::cluster &bot;
 			bool edit_tested = false;
-			bool member_tested = false;
-			dpp::snowflake thread_id;
+			bool members_tested = false;
 
 			void delete_if_done()
 			{
-				if (edit_tested) {
-					bot.channel_delete(thread_id);
+				if (edit_tested && members_tested) {
+					bot.channel_delete(thread_id, [this](const dpp::confirmation_callback_t &callback) {
+						if (callback.is_error()) {
+							set_test("THREAD_DELETE", false);
+						}
+					});
 				}
 			}
 
@@ -917,7 +920,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				delete_if_done();
 			}
 
+			void set_members_tested()
+			{
+				members_tested = true;
+				delete_if_done();
+			}
+
 		public:
+			dpp::snowflake thread_id;
+
 			void test_edit(const dpp::thread &thread)
 			{
 				std::lock_guard lock{mutex};
@@ -938,10 +949,60 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				}
 			}
 
+            void test_members(const dpp::thread &thread)
+            {
+				std::lock_guard lock{mutex};
+				set_test("THREAD_MEMBER_ADD", false);
+				set_test("THREAD_MEMBER_GET", false);
+				set_test("THREAD_MEMBERS_GET", false);
+				set_test("THREAD_MEMBER_REMOVE", false);
+				set_test("THREAD_MEMBERS_ADD_EVENT", false);
+				set_test("THREAD_MEMBERS_REMOVE_EVENT", false);
+				if (!members_tested) {
+					bot.thread_member_add(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
+						std::lock_guard lock{mutex};
+						if (callback.is_error()) {
+							set_members_tested();
+							return;
+						}
+						set_test("THREAD_MEMBER_ADD", true);
+						bot.thread_member_get(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
+							std::lock_guard lock{mutex};
+							if (callback.is_error()) {
+								set_members_tested();
+								return;
+							}
+							set_test("THREAD_MEMBER_GET", true);
+							bot.thread_members_get(thread_id, [this](const dpp::confirmation_callback_t &callback) {
+								std::lock_guard lock{mutex};
+								if (callback.is_error()) {
+									set_members_tested();
+									return;
+								}
+								const auto &members = callback.get<dpp::thread_member_map>();
+								if (members.find(TEST_USER_ID) == members.end()) {
+									set_members_tested();
+									return;
+								}
+								set_test("THREAD_MEMBERS_GET", true);
+								bot.thread_member_remove(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
+									std::lock_guard lock{mutex};
+									if (!callback.is_error()) {
+										set_test("THREAD_MEMBER_REMOVE", true);
+									}
+									set_members_tested();
+								});
+							});
+						});
+					});
+				}
+            }
+
 			void run(const dpp::thread &thread)
 			{
 				thread_id = thread.id;
 				test_edit(thread);
+				test_members(thread);
 			}
 
 			thread_test_helper(dpp::cluster &bot_) : bot{bot_}
@@ -958,7 +1019,20 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_thread_update([&](const dpp::thread_update_t &event) {
-			set_test("THREAD_UPDATE_EVENT", true);
+			if (event.updating_guild->id == TEST_GUILD_ID && event.updated.id == thread_helper.thread_id && event.updated.name == "edited") {
+				set_test("THREAD_UPDATE_EVENT", true);
+			}
+		});
+
+		bot.on_thread_members_update([&](const dpp::thread_members_update_t &event) {
+			if (event.updating_guild->id == TEST_GUILD_ID && event.thread_id == thread_helper.thread_id) {
+				if (std::find_if(std::begin(event.added), std::end(event.added), is_owner) != std::end(event.added)) {
+					set_test("THREAD_MEMBERS_ADD_EVENT", true);
+				}
+				if (std::find_if(std::begin(event.removed_ids), std::end(event.removed_ids), is_owner) != std::end(event.removed_ids)) {
+					set_test("THREAD_MEMBERS_REMOVE_EVENT", true);
+				}
+			}
 		});
 
 		// set to execute from this thread (main thread) after on_ready is fired

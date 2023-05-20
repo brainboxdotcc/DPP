@@ -98,10 +98,16 @@ std::map<std::string, test_t> tests = {
 	{"GUILD_BAN_DELETE", {tt_online, "cluster::guild_ban_delete unban the banned discord accounts", false, false}},
 	
 	{"THREAD_CREATE", {tt_online, "cluster::thread_create", false, false}},
-	{"THREAD_CREATE_EVENT", {tt_online, "cluster::on_thread_create", false, false}},
+	{"THREAD_CREATE_EVENT", {tt_online, "cluster::on_thread_create event", false, false}},
 	{"THREAD_DELETE", {tt_online, "cluster::channel_delete with thread", false, false}},
 	{"THREAD_EDIT", {tt_online, "cluster::thread_edit", false, false}},
-	{"THREAD_UPDATE_EVENT", {tt_online, "cluster::on_thread_update", false, false}},
+	{"THREAD_UPDATE_EVENT", {tt_online, "cluster::on_thread_update event", false, false}},
+	{"THREAD_MEMBER_ADD", {tt_online, "cluster::thread_member_add", false, false}},
+	{"THREAD_MEMBER_GET", {tt_online, "cluster::thread_member_get", false, false}},
+	{"THREAD_MEMBERS_GET", {tt_online, "cluster::thread_members_get", false, false}},
+	{"THREAD_MEMBER_REMOVE", {tt_online, "cluster::thread_member_remove", false, false}},
+	{"THREAD_MEMBERS_ADD_EVENT", {tt_online, "cluster::on_thread_members_update event with member addition", false, false}},
+	{"THREAD_MEMBERS_REMOVE_EVENT", {tt_online, "cluster::on_thread_members_update event with member removal", false, false}},
 	{"THREAD_MESSAGE_CREATE", {tt_online, "cluster::thread_create_with_message", false, false}},
 
 	{"VOICE_CHANNEL_CREATE", {tt_online, "creating a voice channel", false, false}},
