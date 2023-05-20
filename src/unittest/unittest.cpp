@@ -100,6 +100,7 @@ std::map<std::string, test_t> tests = {
 	{"THREAD_CREATE", {tt_online, "cluster::thread_create", false, false}},
 	{"THREAD_CREATE_EVENT", {tt_online, "cluster::on_thread_create event", false, false}},
 	{"THREAD_DELETE", {tt_online, "cluster::channel_delete with thread", false, false}},
+	{"THREAD_DELETE_EVENT", {tt_online, "cluster::on_thread_delete event", false, false}},
 	{"THREAD_EDIT", {tt_online, "cluster::thread_edit", false, false}},
 	{"THREAD_UPDATE_EVENT", {tt_online, "cluster::on_thread_update event", false, false}},
 	{"THREAD_MEMBER_ADD", {tt_online, "cluster::thread_member_add", false, false}},

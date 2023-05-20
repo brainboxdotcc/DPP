@@ -761,9 +761,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						auto thread = callback.get<dpp::thread>();
 						set_test("THREAD_MESSAGE_CREATE", true);
 						bot.channel_delete(thread.id, [this](const dpp::confirmation_callback_t &callback) {
-							if (!callback.is_error()) {
-								set_test("THREAD_DELETE", true);
-							}
+							set_test("THREAD_DELETE", !callback.is_error());
 							set_thread_tested();
 						});
 					}
@@ -906,11 +904,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			void delete_if_done()
 			{
 				if (edit_tested && members_tested) {
-					bot.channel_delete(thread_id, [this](const dpp::confirmation_callback_t &callback) {
-						if (callback.is_error()) {
-							set_test("THREAD_DELETE", false);
-						}
-					});
+					bot.channel_delete(thread_id);
 				}
 			}
 
@@ -1027,6 +1021,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		thread_test_helper thread_helper(bot);
 		bot.on_thread_create([&](const dpp::thread_create_t &event) {
 			if (event.created.name == "thread test") {
+				set_test("THREAD_DELETE", false);
 				set_test("THREAD_CREATE_EVENT", true);
 				thread_helper.run(event.created);
 			}
@@ -1046,6 +1041,12 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				if (std::find_if(std::begin(event.removed_ids), std::end(event.removed_ids), is_owner) != std::end(event.removed_ids)) {
 					set_test("THREAD_MEMBERS_REMOVE_EVENT", true);
 				}
+			}
+		});
+
+		bot.on_thread_delete([&](const dpp::thread_delete_t &event) {
+			if (event.deleting_guild->id == TEST_GUILD_ID && event.deleted.id == thread_helper.thread_id) {
+				set_test("THREAD_DELETE_EVENT", true);
 			}
 		});
 
