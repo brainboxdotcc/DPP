@@ -25,6 +25,7 @@
 #include <dpp/stage_instance.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
+#include <dpp/user.h>
 
 namespace dpp {
 
@@ -47,8 +48,12 @@ public:
 	 */
 	snowflake channel_id;
 	/** User ID who created this invite
+	 * @deprecated Use the `inviter` field instead
 	 */
 	snowflake inviter_id;
+	/** User who created this invite
+	 */
+	user inviter;
 	/** The user ID whose stream to display for this voice channel stream invite
 	 */
 	snowflake target_user_id;

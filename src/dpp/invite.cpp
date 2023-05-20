@@ -46,7 +46,11 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 	} else if (j->contains("channel_id")) { // check ID for the invite create event
 		channel_id = snowflake_not_null(j, "channel_id");
 	}
-	inviter_id = (j->contains("inviter")) ? snowflake_not_null(&((*j)["inviter"]), "id") : 0;
+	if (j->contains("inviter")) {
+		const json& usr = (*j)["inviter"];
+		inviter = dpp::user().fill_from_json((json*)&usr);
+		inviter_id = snowflake_not_null(&usr, "id");
+	}
 	target_user_id = (j->contains("target_user")) ? snowflake_not_null(&((*j)["target_user"]), "id") : 0;
 	target_type = int8_not_null(j, "target_type");
 	approximate_presence_count = int32_not_null(j, "approximate_presence_count");
