@@ -958,6 +958,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				set_test("THREAD_MEMBER_REMOVE", false);
 				set_test("THREAD_MEMBERS_ADD_EVENT", false);
 				set_test("THREAD_MEMBERS_REMOVE_EVENT", false);
+				set_test("THREAD_GET_ACTIVE", false);
 				if (!members_tested) {
 					bot.thread_member_add(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
 						std::lock_guard lock{mutex};
@@ -980,17 +981,30 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 									return;
 								}
 								const auto &members = callback.get<dpp::thread_member_map>();
-								if (members.find(TEST_USER_ID) == members.end()) {
+								if (members.find(TEST_USER_ID) == members.end() || members.find(bot.me.id) == members.end()) {
 									set_members_tested();
 									return;
 								}
 								set_test("THREAD_MEMBERS_GET", true);
-								bot.thread_member_remove(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
+								bot.threads_get_active(TEST_GUILD_ID, [this](const dpp::confirmation_callback_t &callback) {
 									std::lock_guard lock{mutex};
 									if (!callback.is_error()) {
-										set_test("THREAD_MEMBER_REMOVE", true);
+										const auto &threads = callback.get<dpp::active_threads>();
+										if (auto thread_it = threads.find(thread_id); thread_it != threads.end()) {
+											const auto &thread = thread_it->second.thread;
+											const auto &member = thread_it->second.member;
+											if (thread.id == thread_id && member.has_value() && member->user_id == bot.me.id) {
+												set_test("THREAD_GET_ACTIVE", true);
+											}
+										}
 									}
-									set_members_tested();
+									bot.thread_member_remove(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
+										std::lock_guard lock{mutex};
+										if (!callback.is_error()) {
+											set_test("THREAD_MEMBER_REMOVE", true);
+										}
+										set_members_tested();
+									});
 								});
 							});
 						});
