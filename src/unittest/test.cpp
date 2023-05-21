@@ -1161,7 +1161,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				if (event.reacting_emoji.name == "😄") {
 					set_test("REACTEVENT", true);
 				}
-				if (event.reacting_channel->id == thread_helper.thread_id && event.reacting_emoji.name == THREAD_EMOJI) {
+				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == THREAD_EMOJI) {
 					set_test("THREAD_MESSAGE_REACT_ADD_EVENT", true);
 					thread_helper.notify_event_tested(thread_test_helper::MESSAGE_REACT);
 				}
@@ -1170,7 +1170,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		bot.on_message_reaction_remove([&](const dpp::message_reaction_remove_t & event) {
 			if (event.reacting_user_id == bot.me.id) {
-				if (event.reacting_channel->id == thread_helper.thread_id && event.reacting_emoji.name == THREAD_EMOJI) {
+				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == THREAD_EMOJI) {
 					set_test("THREAD_MESSAGE_REACT_REMOVE_EVENT", true);
 					thread_helper.notify_event_tested(thread_test_helper::MESSAGE_REMOVE_REACT);
 				}
