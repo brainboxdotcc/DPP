@@ -96,7 +96,7 @@ std::map<std::string, test_t> tests = {
 	{"GUILD_BAN_GET", {tt_online, "cluster::guild_get_ban getting one of the banned accounts", false, false}},
 	{"GUILD_BANS_GET", {tt_online, "cluster::guild_get_bans get bans using the after-parameter", false, false}},
 	{"GUILD_BAN_DELETE", {tt_online, "cluster::guild_ban_delete unban the banned discord accounts", false, false}},
-	
+
 	{"THREAD_CREATE", {tt_online, "cluster::thread_create", false, false}},
 	{"THREAD_CREATE_EVENT", {tt_online, "cluster::on_thread_create event", false, false}},
 	{"THREAD_DELETE", {tt_online, "cluster::channel_delete with thread", false, false}},
@@ -111,7 +111,7 @@ std::map<std::string, test_t> tests = {
 	{"THREAD_MEMBERS_REMOVE_EVENT", {tt_online, "cluster::on_thread_members_update event with member removal", false, false}},
 	{"THREAD_CREATE_MESSAGE", {tt_online, "cluster::thread_create_with_message", false, false}},
 	{"THREAD_GET_ACTIVE", {tt_online, "cluster::threads_get_active", false, false}},
-	
+
 	{"THREAD_MESSAGE", {tt_online, "message manipulation in thread", false, false}},
 	{"THREAD_MESSAGE_CREATE_EVENT", {tt_online, "cluster::on_message_create in thread", false, false}},
 	{"THREAD_MESSAGE_EDIT_EVENT", {tt_online, "cluster::on_message_edit in thread", false, false}},

@@ -738,6 +738,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			void test_threads(const dpp::message &message)
 			{
 				set_test("THREAD_CREATE_MESSAGE", false);
+				set_test("THREAD_DELETE", false);
+				set_test("THREAD_DELETE_EVENT", false);
 				bot.thread_create_with_message("test", message.channel_id, message.id, 60, 60, [this](const dpp::confirmation_callback_t &callback) {
 					std::lock_guard lock(mutex);
 					if (callback.is_error()) {
@@ -745,6 +747,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					}
 					else {
 						auto thread = callback.get<dpp::thread>();
+						thread_id = thread.id;
 						set_test("THREAD_CREATE_MESSAGE", true);
 						bot.channel_delete(thread.id, [this](const dpp::confirmation_callback_t &callback) {
 							set_test("THREAD_DELETE", !callback.is_error());
@@ -818,6 +821,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 
 		public:
+			dpp::snowflake thread_id;
+
 			message_test_helper(dpp::cluster &_bot) : bot(_bot) {}
 
 			void run(const dpp::message &message) {
@@ -1095,8 +1100,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		bot.on_thread_create([&](const dpp::thread_create_t &event) {
 			if (event.created.name == "thread test") {
-				set_test("THREAD_DELETE", false);
-				set_test("THREAD_DELETE_EVENT", false);
 				set_test("THREAD_CREATE_EVENT", true);
 				thread_helper.run(event.created);
 			}
@@ -1213,7 +1216,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_thread_delete([&](const dpp::thread_delete_t &event) {
-			if (event.deleting_guild->id == TEST_GUILD_ID && event.deleted.id == thread_helper.thread_id) {
+			if (event.deleting_guild->id == TEST_GUILD_ID && event.deleted.id == message_helper.thread_id) {
 				set_test("THREAD_DELETE_EVENT", true);
 			}
 		});
