@@ -1003,8 +1003,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 									if (!callback.is_error()) {
 										const auto &threads = callback.get<dpp::active_threads>();
 										if (auto thread_it = threads.find(thread_id); thread_it != threads.end()) {
-											const auto &thread = thread_it->second.thread;
-											const auto &member = thread_it->second.member;
+											const auto &thread = thread_it->second.active_thread;
+											const auto &member = thread_it->second.bot_member;
 											if (thread.id == thread_id && member.has_value() && member->user_id == bot.me.id) {
 												set_test("THREAD_GET_ACTIVE", true);
 											}
