@@ -916,7 +916,12 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	 */
 	guild_member reacting_member;
 	/**
-	 * @brief channel the reaction happened on
+	 * @brief Channel ID the reaction happened on
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief channel the reaction happened on (Optional)
+	 * @note only filled when the channel is cached
 	 */
 	channel* reacting_channel;
 	/**
@@ -962,7 +967,12 @@ struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
 	 */
 	dpp::snowflake reacting_user_id;
 	/**
-	 * @brief channel the reaction happened on
+	 * @brief Channel ID the reaction was removed in
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief channel the reaction happened on (optional)
+	 * @note only filled when the channel is cached
 	 */
 	channel* reacting_channel;
 	/**
@@ -1040,7 +1050,12 @@ struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 	 */
 	guild* reacting_guild;
 	/**
-	 * @brief channel the reaction happened on
+	 * @brief Channel ID the reactions was removed in
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief channel the reaction happened on (optional)
+	 * @note only filled when the channel is cached
 	 */
 	channel* reacting_channel;
 	/**
@@ -1149,7 +1164,12 @@ struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
 	 */
 	guild* reacting_guild;
 	/**
-	 * @brief channel the reaction happened on
+	 * @brief Channel ID the reactions was removed in
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief channel the reaction happened on (optional)
+	 * @note only filled when the channel is cached
 	 */
 	channel* reacting_channel;
 	/**
