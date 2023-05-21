@@ -314,3 +314,8 @@ inline constexpr user_project_id_t get_user_snowflake;
 inline constexpr auto is_owner = [](auto &&user) noexcept -> bool {
 	return get_user_snowflake(user) == TEST_USER_ID;
 };
+
+/**
+ * @brief Thread emoji - https://www.compart.com/en/unicode/U+1F9F5
+ */
+inline const std::string THREAD_EMOJI = "\xF0\x9F\xA7\xB5";
