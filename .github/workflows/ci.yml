@@ -17,7 +17,7 @@ on:
       - '**.cpp'
       - '**.h'
       - '**.hpp'
-1      - '**.cmake'
+      - '**.cmake'
       - '**ci.yml'
       - '**CMakeLists.txt'
 
