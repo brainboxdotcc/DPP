@@ -274,9 +274,9 @@ public:
 	bool is_managed() const;
 	/**
 	 * @brief True if the role is the guild's Booster role
-	 * @return bool True if the role is the guild's Booster role
+	 * @return bool whether the role is the premium subscriber, AKA "boost", role for the guild
 	 */
-	bool is_premium_subscription() const;
+	bool is_premium_subscriber() const;
 	/**
 	 * @brief True if the role is available for purchase
 	 * @return bool whether this role is available for purchase
