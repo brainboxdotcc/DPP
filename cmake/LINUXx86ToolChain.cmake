@@ -2,8 +2,8 @@ SET(CMAKE_SYSTEM_NAME Linux)
 # Possibly needed tweak
 #SET(CMAKE_SYSTEM_PROCESSOR i386)
 
-SET(CMAKE_C_COMPILER gcc-10)
-SET(CMAKE_CXX_COMPILER g++-10)
+SET(CMAKE_C_COMPILER gcc-11)
+SET(CMAKE_CXX_COMPILER g++-11)
 
 # Below call is necessary to avoid non-RT problem.
 SET(CMAKE_LIBRARY_ARCHITECTURE i386-linux-gnu)
