@@ -17,7 +17,7 @@ on:
       - '**.cpp'
       - '**.h'
       - '**.hpp'
-      - '**.cmake'
+1      - '**.cmake'
       - '**ci.yml'
       - '**CMakeLists.txt'
 
@@ -191,7 +191,7 @@ jobs:
         cfg:
           - {name: "ARM64", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake}
           - {name: "ARMv7 HF", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv7ToolChain.cmake}
-          - {name: "Linux x86", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake}
+          - {name: "Linux x86", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake -DBUILD_VOICE_SUPPORT=OFF}
           - {name: "ARMv6", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
 
     name: ${{matrix.cfg.name}}
