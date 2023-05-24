@@ -25,7 +25,9 @@
 #include <dpp/stage_instance.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
+#include <dpp/channel.h>
 #include <dpp/user.h>
+#include <dpp/guild.h>
 
 namespace dpp {
 
@@ -44,9 +46,15 @@ public:
 	/** Guild ID this invite is for
 	 */
 	snowflake guild_id;
+	/** The partial guild this invite is for (optional)
+	 */
+	guild destination_guild;
 	/** Channel ID this invite is for
 	 */
 	snowflake channel_id;
+	/** The partial channel this invite is for (optional)
+	 */
+	channel destination_channel;
 	/** User ID who created this invite
 	 * @deprecated Use the `inviter` field instead
 	 */

@@ -37,19 +37,22 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 	expires_at = (j->contains("expires_at")) ? ts_not_null(j, "expires_at") : 0;
 	created_at = (j->contains("created_at")) ? ts_not_null(j, "created_at") : 0;
 	if (j->contains("guild") && !j->at("guild").is_null()) {
-		guild_id = snowflake_not_null(&((*j)["guild"]), "id");
+		destination_guild = dpp::guild().fill_from_json(&((*j)["guild"]));
+		guild_id = destination_guild.id;
 	} else if (j->contains("guild_id")) { // check ID for the invite create event
 		guild_id = snowflake_not_null(j, "guild_id");
+		destination_guild.id = guild_id;
 	}
 	if (j->contains("channel") && !j->at("channel").is_null()) {
-		channel_id = snowflake_not_null(&((*j)["channel"]), "id");
+		destination_channel = dpp::channel().fill_from_json(&((*j)["channel"]));
+		channel_id = destination_channel.id;
 	} else if (j->contains("channel_id")) { // check ID for the invite create event
 		channel_id = snowflake_not_null(j, "channel_id");
+		destination_channel.id = channel_id;
 	}
-	if (j->contains("inviter")) {
-		const json& usr = (*j)["inviter"];
-		inviter = dpp::user().fill_from_json((json*)&usr);
-		inviter_id = snowflake_not_null(&usr, "id");
+	if (j->contains("inviter") && !j->at("inviter").is_null()) {
+		inviter = dpp::user().fill_from_json(&((*j)["inviter"]));
+		inviter_id = inviter.id;
 	}
 	target_user_id = (j->contains("target_user")) ? snowflake_not_null(&((*j)["target_user"]), "id") : 0;
 	target_type = int8_not_null(j, "target_type");
