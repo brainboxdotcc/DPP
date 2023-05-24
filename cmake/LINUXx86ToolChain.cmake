@@ -24,8 +24,9 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32 " CACHE INTERNAL "" FORCE)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32 " CACHE INTERNAL "" FORCE)
 
 EXECUTE_PROCESS(COMMAND sudo dpkg --add-architecture i386)
-EXECUTE_PROCESS(COMMAND sudo apt update)
-EXECUTE_PROCESS(COMMAND sudo apt install -f)
-EXECUTE_PROCESS(COMMAND sudo apt install -y g++-10 gcc-10-multilib glibc-*:i386 libc6-dev-i386 g++-10-multilib zlib1g-dev:i386 libssl-dev:i386 libopus-dev:i386 libsodium-dev:i386)
+EXECUTE_PROCESS(COMMAND sudo apt-get update)
+EXECUTE_PROCESS(COMMAND sudo apt-get install -qq -y g++-10 gcc-10-multilib glibc-*:i386 libc6-dev-i386 g++-10-multilib zlib1g-dev:i386 libssl-dev:i386 libopus-dev:i386 libsodium-dev:i386)
 EXECUTE_PROCESS(COMMAND export PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig/)
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
