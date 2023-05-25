@@ -121,6 +121,9 @@ std::map<std::string, test_t> tests = {
 	{"UTILITY.USER_MENTION", {tt_offline, "utility::user_mention", false, false}},
 	{"UTILITY.ROLE_MENTION", {tt_offline, "utility::role_mention", false, false}},
 	{"UTILITY.EMOJI_MENTION", {tt_offline, "utility::emoji_mention", false, false}},
+	{"UTILITY.AVATAR_SIZE", {tt_offline, "utility::avatar_size", false, false}},
+	{"UTILITY.CDN_ENDPOINT_URL_HASH", {tt_offline, "utility::cdn_endpoint_url_hash", false, false}},
+	{"STICKER.GET_URL", {tt_offline, "sticker::get_url aka utility::cdn_endpoint_url_sticker", false, false}},
 	{"EMOJI.GET_URL", {tt_offline, "emoji::get_url", false, false}},
 	{"ROLE.COMPARE", {tt_offline, "role::operator<", false, false}},
 	{"ROLE_CREATE", {tt_online, "cluster::role_create", false, false}},
@@ -139,6 +142,11 @@ std::map<std::string, test_t> tests = {
 	{"EMOJI_CREATE", {tt_online, "cluster::guild_emoji_create", false, false}},
 	{"EMOJI_GET", {tt_online, "cluster::guild_emoji_get", false, false}},
 	{"EMOJI_DELETE", {tt_online, "cluster::guild_emoji_delete", false, false}},
+	{"INVITE_CREATE_EVENT", {tt_online, "cluster::on_invite_create", false, false}},
+	{"INVITE_DELETE_EVENT", {tt_online, "cluster::on_invite_delete", false, false}},
+	{"INVITE_CREATE", {tt_online, "cluster::channel_invite_create", false, false}},
+	{"INVITE_GET", {tt_online, "cluster::invite_get", false, false}},
+	{"INVITE_DELETE", {tt_online, "cluster::invite_delete", false, false}},
 };
 
 double start = dpp::utility::time_f();
