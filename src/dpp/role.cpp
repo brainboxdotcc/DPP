@@ -155,7 +155,7 @@ bool role::is_managed() const {
 	return this->flags & dpp::r_managed;
 }
 
-bool role::is_premium_subscription() const {
+bool role::is_premium_subscriber() const {
 	return this->flags & dpp::r_premium_subscriber;
 }
 
