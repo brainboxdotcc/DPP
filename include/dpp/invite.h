@@ -65,7 +65,7 @@ public:
 	/** The user ID whose stream to display for this voice channel stream invite
 	 */
 	snowflake target_user_id;
-	/** Target type
+	/** Target type (STREAM=1, EMBEDDED_APPLICATION=2). Defaults to 0
 	 */
 	uint8_t target_type;
 	/** Approximate number of online users
