@@ -584,6 +584,13 @@ public:
 	 */
 	bool has_use_soundboard() const;
 	/**
+	 * @brief True if has the use external sounds permission.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the use external sounds permission or is administrator.
+	 */
+	bool has_use_external_sounds() const;
+	/**
 	 * @brief True if has the send voice messages permission.
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.

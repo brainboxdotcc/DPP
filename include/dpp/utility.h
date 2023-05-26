@@ -55,7 +55,7 @@ namespace dpp {
 		 * @param format the wished format to return. Must be one of the formats passed in `allowed_formats`, otherwise it returns an empty string
 		 * @param size the image size which will be appended as a querystring to the url.
 		 * It must be any power of two between 16 and 4096, otherwise no querystring will be appended (discord then returns the image as their default size)
-		 * @param prefer_animated Whether the user prefers gif format. If true, it'll return gif format whenever the emoji is available as animated.
+		 * @param prefer_animated Whether the user prefers gif format. If true, it'll return gif format whenever the image is available as animated.
 		 * In this case, the `format`-parameter is only used for non-animated images.
 		 * @param is_animated Whether the image is actually animated or not
 		 * @return std::string endpoint url or empty string
@@ -67,11 +67,11 @@ namespace dpp {
 		 * @see https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
 		 * @param allowed_formats A vector of supported formats for the endpoint from the discord docs
 		 * @param path_without_extension The path for the endpoint (without the extension e.g. `.png`)
-		 * @param hash The hash (optional). If passed, it will be prefixed with `a_` for animated images (`is_animated`=true)
+		 * @param hash The hash (optional). If not empty, it will be prefixed with `a_` for animated images (`is_animated`=true)
 		 * @param format the wished format to return. Must be one of the formats passed in `allowed_formats`, otherwise it returns an empty string
 		 * @param size the image size which will be appended as a querystring to the url.
 		 * It must be any power of two between 16 and 4096, otherwise no querystring will be appended (discord then returns the image as their default size)
-		 * @param prefer_animated Whether the user prefers gif format. If true, it'll return gif format whenever the emoji is available as animated.
+		 * @param prefer_animated Whether the user prefers gif format. If true, it'll return gif format whenever the image is available as animated.
 		 * In this case, the `format`-parameter is only used for non-animated images.
 		 * @param is_animated Whether the image is actually animated or not
 		 * @return std::string endpoint url or empty string
