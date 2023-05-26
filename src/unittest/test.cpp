@@ -660,7 +660,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		bot.on_invite_create([](const dpp::invite_create_t &event) {
 			auto &inv = event.created_invite;
-			if (!inv.code.empty() && inv.channel_id == TEST_TEXT_CHANNEL_ID && inv.guild_id == TEST_GUILD_ID && inv.created_at != 0 && inv.max_uses == 100) {
+			if (!inv.code.empty() && inv.destination_channel.id == TEST_TEXT_CHANNEL_ID && inv.destination_guild.id == TEST_GUILD_ID && inv.created_at != 0 && inv.max_uses == 100) {
 				set_test("INVITE_CREATE_EVENT", true);
 			}
 		});
