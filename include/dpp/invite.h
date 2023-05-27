@@ -46,13 +46,13 @@ public:
 	/** Guild ID this invite is for
 	 */
 	snowflake guild_id;
-	/** The partial guild this invite is for (optional)
+	/** The partial guild this invite is for. Filled in retrieved invites
 	 */
 	guild destination_guild;
 	/** Channel ID this invite is for
 	 */
 	snowflake channel_id;
-	/** The partial channel this invite is for (optional)
+	/** The partial channel this invite is for. Filled in retrieved invites
 	 */
 	channel destination_channel;
 	/** User ID who created this invite
