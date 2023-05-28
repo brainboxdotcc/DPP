@@ -32,6 +32,15 @@
 namespace dpp {
 
 /**
+ * @brief Invite target types for dpp::invite
+ */
+enum invite_target_t : uint8_t {
+	itt_none = 0, //!< Undefined invite target type
+	itt_stream = 1, //!< Stream target type
+	itt_embedded_application = 2, //!< Embedded Application target type
+};
+
+/**
  * @brief Represents an invite to a discord guild or channel
  */
 class DPP_EXPORT invite : public json_interface<invite> {
@@ -65,9 +74,9 @@ public:
 	/** The user ID whose stream to display for this voice channel stream invite
 	 */
 	snowflake target_user_id;
-	/** Target type (STREAM=1, EMBEDDED_APPLICATION=2). Defaults to 0
+	/** Target type for this voice channel invite
 	 */
-	uint8_t target_type;
+	invite_target_t target_type;
 	/** Approximate number of online users
 	 * @note Only returned from cluster::invite_get
 	 */
@@ -81,7 +90,7 @@ public:
 	uint32_t max_age;
 	/** Maximum number of uses, or 0 for unlimited. Must be between 0 and 100. Defaults to 0
 	 */
-	uint32_t max_uses;
+	uint8_t max_uses;
 	/** Whether this invite only grants temporary membership
 	 */
 	bool temporary;

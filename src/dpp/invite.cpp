@@ -28,7 +28,7 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-invite::invite() : expires_at(0), guild_id(0), channel_id(0), inviter_id(0), target_user_id(0), target_type(0), approximate_presence_count(0), approximate_member_count(0), max_age(86400), max_uses(0), temporary(false), unique(false), uses(0), created_at(0)
+invite::invite() : expires_at(0), guild_id(0), channel_id(0), inviter_id(0), target_user_id(0), target_type(itt_none), approximate_presence_count(0), approximate_member_count(0), max_age(86400), max_uses(0), temporary(false), unique(false), uses(0), created_at(0)
 {
 }
 
@@ -55,11 +55,11 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 		inviter_id = inviter.id;
 	}
 	target_user_id = (j->contains("target_user")) ? snowflake_not_null(&((*j)["target_user"]), "id") : 0;
-	target_type = int8_not_null(j, "target_type");
+	target_type = static_cast<invite_target_t>(int8_not_null(j, "target_type"));
 	approximate_presence_count = int32_not_null(j, "approximate_presence_count");
 	approximate_member_count = int32_not_null(j, "approximate_member_count");
 	max_age = int32_not_null(j, "max_age");
-	max_uses = int32_not_null(j, "max_uses");
+	max_uses = int8_not_null(j, "max_uses");
 	temporary = bool_not_null(j, "temporary");
 	unique = bool_not_null(j, "unique");
 	uses = (j->contains("uses")) ? int32_not_null(j, "uses") : 0;
@@ -75,7 +75,7 @@ std::string invite::build_json(bool with_id) const {
 	j["max_uses"] = max_uses;
 	if (target_user_id > 0)
 		j["target_user"] = target_user_id;
-	if (target_type > 0)
+	if (target_type != itt_none)
 		j["target_type"] = target_type;
 	if (temporary)
 		j["temporary"] = temporary;
