@@ -31,6 +31,14 @@ namespace dpp {
 
 using json = nlohmann::json;
 
+/* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
+std::map<uint16_t , dpp::guild_member_flags> membermap = {
+		{ 1 << 0,       dpp::gm_did_rejoin },
+		{ 1 << 1,       dpp::gm_completed_onboarding },
+		{ 1 << 2,       dpp::gm_bypasses_verification },
+		{ 1 << 3,       dpp::gm_started_onboarding },
+};
+
 const std::map<std::string, std::variant<dpp::guild_flags, dpp::guild_flags_extra>> featuremap = {
 	{"ANIMATED_BANNER", dpp::g_animated_banner },
 	{"ANIMATED_ICON", dpp::g_animated_icon },
@@ -107,6 +115,11 @@ guild_member& guild_member::set_nickname(const std::string& nick) {
 	return *this;
 }
 
+guild_member& guild_member::set_bypasses_verification(const bool is_bypassing_verification) {
+	this->flags = (is_bypassing_verification) ? flags | gm_bypasses_verification : flags & ~gm_bypasses_verification;
+	return *this;
+}
+
 guild_member& guild_member::set_mute(const bool is_muted) {
 	this->flags = (is_muted) ? flags | gm_mute : flags & ~gm_mute;
 	this->flags |= gm_voice_action;
@@ -148,6 +161,13 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	set_ts_not_null(&j, "premium_since", gm.premium_since);
 	set_ts_not_null(&j, "communication_disabled_until", gm.communication_disabled_until);
 
+	uint16_t flags = int16_not_null(&j, "flags");
+	for (auto & flag : membermap) {
+		if (flags & flag.first) {
+			gm.flags |= flag.second;
+		}
+	}
+
 	gm.roles.clear();
 	if (j.contains("roles") && !j.at("roles").is_null()) {
 		gm.roles.reserve(j.at("roles").size());
@@ -170,26 +190,10 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 }
 
 std::string guild_member::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_gif, "gif" },
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (this->guild_id && this->user_id && !this->avatar.to_string().empty()) {
-		return utility::cdn_host + "/guilds/" +
-			   std::to_string(this->guild_id) +
-			   "/" +
-			   std::to_string(this->user_id) +
-			   (has_animated_guild_avatar() ? "/a_" : "/") +
-			   this->avatar.to_string() + "." +
-			   (has_animated_guild_avatar() && prefer_animated ? "gif" : extensions.find(format)->second) +
-			   utility::avatar_size(size);
+		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+											  "guilds/" + std::to_string(this->guild_id) + "/" + std::to_string(this->user_id), this->avatar.to_string(),
+											  format, size, prefer_animated, has_animated_guild_avatar());
 	} else {
 		return std::string();
 	}
@@ -209,19 +213,34 @@ std::string guild_member::build_json(bool with_id) const {
 			j["communication_disabled_until"] = json::value_t::null;
 		}
 	}
-	if (!this->nickname.empty())
+	
+	if (!this->nickname.empty()) {
 		j["nick"] = this->nickname;
-	if (!this->roles.empty()) {
-		j["roles"] = {};
-		for (auto & role : roles) {
-			j["roles"].push_back(std::to_string(role));
-		}
+	} else {
+		j["nick"] = json::value_t::null;
 	}
 
-	if (flags & gm_voice_action) {
+	if (!this->roles.empty()) {
+		j["roles"] = {};
+		for (auto & role : this->roles) {
+			j["roles"].push_back(std::to_string(role));
+		}
+	} else {
+		j["roles"] = {};
+	}
+
+	if (this->flags & gm_voice_action) {
 		j["mute"] = is_muted();
 		j["deaf"] = is_deaf();
 	}
+
+	uint32_t out_flags = 0;
+	for (auto & flag : membermap) {
+		if (flags & flag.second) {
+			out_flags |= flag.first;
+		}
+	}
+	j["flags"] = out_flags;
 
 	return j.dump();
 }
@@ -245,6 +264,22 @@ bool guild_member::is_muted() const {
 
 bool guild_member::is_pending() const {
 	return flags & dpp::gm_pending;
+}
+
+bool guild_member::has_rejoined() const {
+	return flags & dpp::gm_did_rejoin;
+}
+
+bool guild_member::has_completed_onboarding() const {
+	return flags & dpp::gm_completed_onboarding;
+}
+
+bool guild_member::has_started_onboarding() const {
+	return flags & dpp::gm_started_onboarding;
+}
+
+bool guild_member::has_bypasses_verification() const {
+	return flags & dpp::gm_bypasses_verification;
 }
 
 bool guild::is_large() const {
@@ -776,92 +811,40 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 }
 
 std::string guild::get_banner_url(uint16_t size, const image_type format, bool prefer_animated) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_gif, "gif" },
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->banner.to_string().empty() && this->id) {
-		return utility::cdn_host + "/banners/" +
-			   std::to_string(this->id) +
-			   (has_animated_banner_hash() ? "/a_" : "/") +
-			   this->banner.to_string() + "." +
-			   (has_animated_banner_hash() && prefer_animated ? "gif" : extensions.find(format)->second) +
-			   utility::avatar_size(size);
+		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+											  "banners/" + std::to_string(this->id), this->banner.to_string(),
+											  format, size, prefer_animated, has_animated_banner_hash());
 	} else {
 		return std::string();
 	}
 }
 
 std::string guild::get_discovery_splash_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->discovery_splash.to_string().empty() && this->id) {
-		return utility::cdn_host + "/discovery-splashes/" +
-			   std::to_string(this->id) + "/" +
-			   this->discovery_splash.to_string() +
-			   "." + extensions.find(format)->second +
-			   utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "discovery-splashes/" + std::to_string(this->id) + "/" + this->discovery_splash.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}
 }
 
 std::string guild::get_icon_url(uint16_t size, const image_type format, bool prefer_animated) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_gif, "gif" },
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->icon.to_string().empty() && this->id) {
-		return utility::cdn_host + "/icons/" +
-			   std::to_string(this->id) +
-			   (has_animated_icon_hash() ? "/a_" : "/") +
-			   this->icon.to_string() + "." +
-			   (has_animated_icon_hash() && prefer_animated ? "gif" : extensions.find(format)->second) +
-			   utility::avatar_size(size);
+		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+											  "icons/" + std::to_string(this->id), this->icon.to_string(),
+											  format, size, prefer_animated, has_animated_icon_hash());
 	} else {
 		return std::string();
 	}
 }
 
 std::string guild::get_splash_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->splash.to_string().empty() && this->id) {
-		return utility::cdn_host + "/splashes/" +
-			   std::to_string(this->id) + "/" +
-			   this->splash.to_string() +
-			   "." + extensions.find(format)->second +
-			   utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
+										 "splashes/" + std::to_string(this->id) + "/" + this->splash.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}

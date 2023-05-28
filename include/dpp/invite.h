@@ -37,50 +37,54 @@ public:
 	 */
 	std::string code;
 	/** Readonly expiration timestamp of this invite or 0 if the invite doesn't expire
+	 * @note Only returned from cluster::invite_get
 	 */
 	time_t expires_at;
-	/** Guild for the invite
+	/** Guild ID this invite is for
 	 */
 	snowflake guild_id;
-	/** Channel id for invite 
+	/** Channel ID this invite is for
 	 */
 	snowflake channel_id;
-	/** User ID of invite creator
+	/** User ID who created this invite
 	 */
 	snowflake inviter_id;
-	/** Target user ID of invite, for invites sent via DM
+	/** The user ID whose stream to display for this voice channel stream invite
 	 */
 	snowflake target_user_id;
-	/** Target user type (generally this is always 1, "stream")
+	/** Target type
 	 */
-	uint8_t target_user_type;
+	uint8_t target_type;
 	/** Approximate number of online users
+	 * @note Only returned from cluster::invite_get
 	 */
 	uint32_t approximate_presence_count;
-	/** Approximate total users online and offline
+	/** Approximate number of total users online and offline
+	 * @note Only returned from cluster::invite_get
 	 */
 	uint32_t approximate_member_count;
-	/** Maximum age (in seconds) of invite
+	/** Duration (in seconds) after which the invite expires, or 0 for no expiration. Must be between 0 and 604800 (7 days). Defaults to 86400 (1 day)
 	 */
 	uint32_t max_age;
-	/** Maximum number of uses
+	/** Maximum number of uses, or 0 for unlimited. Must be between 0 and 100. Defaults to 0
 	 */
 	uint32_t max_uses;
-	/** True if a temporary invite which grants access for a limited time
+	/** Whether this invite only grants temporary membership
 	 */
 	bool temporary;
 	/** True if this invite should not replace or "attach to" similar invites
 	 */
 	bool unique;
 	/** How many times this invite has been used
-	 *
-	 * @note Only set when using cluster::channel_invites_get
 	 */
 	uint32_t uses;
 	/** The stage instance data if there is a public stage instance in the stage channel this invite is for
 	 * @deprecated Deprecated
 	 */
 	stage_instance stage;
+	/** Timestamp at which the invite was created
+	 */
+	time_t created_at;
 
 	/** Constructor
 	 */

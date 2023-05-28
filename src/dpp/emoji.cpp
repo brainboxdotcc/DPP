@@ -118,22 +118,10 @@ std::string emoji::get_mention() const {
 }
 
 std::string emoji::get_url(uint16_t size, const dpp::image_type format, bool prefer_animated) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_gif, "gif" },
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (this->id) {
-		return utility::cdn_host + "/emojis/" +
-			   std::to_string(this->id) + "." +
-			   (is_animated() && prefer_animated ? "gif" : extensions.find(format)->second) +
-			   utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
+										 "emojis/" + std::to_string(this->id),
+										 format, size, prefer_animated, is_animated());
 	} else {
 		return std::string();
 	}

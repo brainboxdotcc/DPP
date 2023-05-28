@@ -1886,11 +1886,11 @@ public:
 	 * @brief Get details about an invite
 	 *
 	 * @see https://discord.com/developers/docs/resources/invite#get-invite
-	 * @param invite Invite code to get information on
+	 * @param invite_code Invite code to get information on
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::invite object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void invite_get(const std::string &invite, command_completion_event_t callback);
+	void invite_get(const std::string &invite_code, command_completion_event_t callback);
 
 	/**
 	 * @brief Delete an invite

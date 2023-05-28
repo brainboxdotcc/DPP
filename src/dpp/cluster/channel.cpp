@@ -76,7 +76,7 @@ void cluster::channel_get(snowflake c, command_completion_event_t callback) {
 }
 
 void cluster::channel_invite_create(const class channel &c, const class invite &i, command_completion_event_t callback) {
-	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(c.id), "invites", m_post, i.build_json(), callback);
+	rest_request<invite>(this, API_PATH "/channels", std::to_string(c.id), "invites", m_post, i.build_json(), callback);
 }
 
 void cluster::channel_invites_get(const class channel &c, command_completion_event_t callback) {
