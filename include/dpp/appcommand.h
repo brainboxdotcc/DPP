@@ -395,7 +395,7 @@ public:
 	std::string custom_id;
 
 	/**
-	 * @brief Title of the modal form box
+	 * @brief Title of the modal form box (max 25 characters)
 	 */
 	std::string title;
 

@@ -74,6 +74,8 @@ component& component::fill_from_json(nlohmann::json* j) {
 			}
 		}
 	} else if (type == cot_text) {
+		label = string_not_null(j, "label");
+		text_style = static_cast<text_style_type>(int8_not_null(j, "style"));
 		custom_id = string_not_null(j, "custom_id");
 		type = (component_type)int8_not_null(j, "type");
 		required = bool_not_null(j, "required");
