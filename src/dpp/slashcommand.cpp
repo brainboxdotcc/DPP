@@ -771,7 +771,10 @@ interaction_modal_response& interaction_modal_response::fill_from_json(nlohmann:
 	if (d.contains("components")) {
 		components.clear();
 		for (auto& c : d["components"]) {
-			components.push_back(dpp::component().fill_from_json(&c).components);
+			auto row = dpp::component().fill_from_json(&c);
+			if (!row.components.empty()) {
+				components.push_back(row.components);
+			}
 		}
 	}
 	return *this;
