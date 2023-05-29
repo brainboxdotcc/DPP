@@ -219,9 +219,39 @@ channel& channel::set_user_limit(const uint8_t user_limit) {
 	return *this;
 }
 
-channel& channel::add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
-	permission_overwrite po {id, allowed_permissions, denied_permissions, type};
+channel& channel::add_permission_overwrite(const snowflake target, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+	for (auto &o : this->permission_overwrites) {
+		if (o.id == target && o.type == type) {
+			o.allow.remove(denied_permissions);
+			o.allow.add(allowed_permissions);
+			o.deny.remove(allowed_permissions);
+			o.deny.add(denied_permissions);
+			return *this;
+		}
+	}
+	permission_overwrite po {target, allowed_permissions, denied_permissions, type};
 	this->permission_overwrites.push_back(po);
+	return *this;
+}
+
+channel& channel::set_permission_overwrite(const snowflake target, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+	this->remove_permission_overwrite(target, type);
+	if (allowed_permissions != 0 || denied_permissions != 0) {
+		permission_overwrite po{target, allowed_permissions, denied_permissions, type};
+		this->permission_overwrites.push_back(po);
+	}
+	return *this;
+}
+
+channel& channel::remove_permission_overwrite(const dpp::snowflake target, const dpp::overwrite_type type) {
+	auto it = this->permission_overwrites.begin();
+	while (it != this->permission_overwrites.end()) {
+		if (it->id == target && it->type == type) {
+			it = this->permission_overwrites.erase(it);
+		} else {
+			it++;
+		}
+	}
 	return *this;
 }
 
