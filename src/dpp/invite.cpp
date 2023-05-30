@@ -41,14 +41,12 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 		guild_id = destination_guild.id;
 	} else if (j->contains("guild_id")) { // check ID for invite gateway events
 		guild_id = snowflake_not_null(j, "guild_id");
-		destination_guild.id = guild_id;
 	}
 	if (j->contains("channel") && !j->at("channel").is_null()) {
 		destination_channel = dpp::channel().fill_from_json(&((*j)["channel"]));
 		channel_id = destination_channel.id;
 	} else if (j->contains("channel_id")) { // check ID for invite gateway events
 		channel_id = snowflake_not_null(j, "channel_id");
-		destination_channel.id = channel_id;
 	}
 	if (j->contains("inviter") && !j->at("inviter").is_null()) {
 		inviter = dpp::user().fill_from_json(&((*j)["inviter"]));
