@@ -764,13 +764,17 @@ interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 }
 
 interaction_modal_response& interaction_modal_response::fill_from_json(nlohmann::json* j) {
-	json& d = (*j)["data"];
 	type = (interaction_response_type)int8_not_null(j, "type");
+	json& d = (*j)["data"];
 	custom_id = string_not_null(&d, "custom_id");
-	title = string_not_null(&d, "custom_id");
-	if (d.find("components") != d.end()) {
+	title = string_not_null(&d, "title");
+	if (d.contains("components")) {
+		components.clear();
 		for (auto& c : d["components"]) {
-			components[current_row].push_back(dpp::component().fill_from_json(&c));
+			auto row = dpp::component().fill_from_json(&c);
+			if (!row.components.empty()) {
+				components.push_back(row.components);
+			}
 		}
 	}
 	return *this;

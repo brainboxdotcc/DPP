@@ -991,7 +991,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					if (event.is_error()) return;
 
 					auto created = event.get<dpp::invite>();
-					if (!created.code.empty() && created.channel_id == TEST_TEXT_CHANNEL_ID && created.guild_id == TEST_GUILD_ID && created.inviter_id != 0) {
+					if (!created.code.empty() && created.channel_id == TEST_TEXT_CHANNEL_ID && created.guild_id == TEST_GUILD_ID && created.inviter.id == bot.me.id) {
 						set_test("INVITE_CREATE", true);
 					}
 
@@ -999,7 +999,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						if (event.is_error()) return;
 
 						auto retrieved = event.get<dpp::invite>();
-						if (retrieved.code == created.code && retrieved.expires_at == 0 && retrieved.guild_id == created.guild_id && retrieved.channel_id == created.channel_id && retrieved.inviter_id == created.inviter_id) {
+						if (retrieved.code == created.code && retrieved.expires_at == 0 && retrieved.guild_id == created.guild_id && retrieved.channel_id == created.channel_id && retrieved.inviter.id == created.inviter.id) {
 							set_test("INVITE_GET", true);
 						}
 

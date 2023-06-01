@@ -25,8 +25,20 @@
 #include <dpp/stage_instance.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
+#include <dpp/channel.h>
+#include <dpp/user.h>
+#include <dpp/guild.h>
 
 namespace dpp {
+
+/**
+ * @brief Invite target types for dpp::invite
+ */
+enum invite_target_t : uint8_t {
+	itt_none = 0, //!< Undefined invite target type
+	itt_stream = 1, //!< Stream target type
+	itt_embedded_application = 2, //!< Embedded Application target type
+};
 
 /**
  * @brief Represents an invite to a discord guild or channel
@@ -43,18 +55,28 @@ public:
 	/** Guild ID this invite is for
 	 */
 	snowflake guild_id;
+	/** The partial guild this invite is for. Only filled in retrieved invites
+	 */
+	guild destination_guild;
 	/** Channel ID this invite is for
 	 */
 	snowflake channel_id;
+	/** The partial channel this invite is for. Only filled in retrieved invites
+	 */
+	channel destination_channel;
 	/** User ID who created this invite
+	 * @deprecated Use the `inviter` field instead
 	 */
 	snowflake inviter_id;
+	/** User who created this invite
+	 */
+	user inviter;
 	/** The user ID whose stream to display for this voice channel stream invite
 	 */
 	snowflake target_user_id;
-	/** Target type
+	/** Target type for this voice channel invite
 	 */
-	uint8_t target_type;
+	invite_target_t target_type;
 	/** Approximate number of online users
 	 * @note Only returned from cluster::invite_get
 	 */
@@ -68,7 +90,7 @@ public:
 	uint32_t max_age;
 	/** Maximum number of uses, or 0 for unlimited. Must be between 0 and 100. Defaults to 0
 	 */
-	uint32_t max_uses;
+	uint8_t max_uses;
 	/** Whether this invite only grants temporary membership
 	 */
 	bool temporary;
