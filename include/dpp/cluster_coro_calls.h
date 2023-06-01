@@ -285,7 +285,9 @@ auto inline co_interaction_response_edit(const std::string &token, const message
 
 /**
  * @brief Create a followup message to a slash command
- * 
+ *
+ * @see dpp::cluster::interaction_followup_create
+ * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
  * @param token Token for the interaction webhook
  * @param m followup message to create
  * @return confirmation returned object on completion
@@ -311,8 +313,10 @@ auto inline co_interaction_followup_edit_original(const std::string &token, cons
 }
 
 /**
- * @brief 
- * 
+ * @brief Delete the initial interaction response
+ *
+ * @see dpp::cluster::interaction_followup_delete
+ * @see https://discord.com/developers/docs/interactions/receiving-and-responding#delete-original-interaction-response
  * @param token Token for the interaction webhook
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -324,6 +328,9 @@ auto inline co_interaction_followup_delete(const std::string &token) {
 /**
  * @brief Edit followup message to a slash command
  * The message ID in the message you pass should be correctly set to that of a followup message you previously sent
+ *
+ * @see dpp::cluster::interaction_followup_edit
+ * @see https://discord.com/developers/docs/interactions/receiving-and-responding#edit-followup-message
  * @param token Token for the interaction webhook
  * @param m message to edit, the ID should be set
  * @return confirmation returned object on completion
@@ -335,6 +342,9 @@ auto inline co_interaction_followup_edit(const std::string &token, const message
 
 /**
  * @brief Get the followup message to a slash command
+ *
+ * @see dpp::cluster::interaction_followup_get
+ * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-followup-message
  * @param token Token for the interaction webhook
  * @param message_id message to retrieve
  * @return message returned object on completion
@@ -451,6 +461,42 @@ auto inline co_channel_delete(snowflake channel_id) {
 }
 
 /**
+ * @brief Edit a channel's permissions
+ *
+ * @see dpp::cluster::channel_edit_permissions
+ * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param c Channel to set permissions for
+ * @param overwrite_id Overwrite to change (a user or role ID)
+ * @param allow allow permissions bitmask
+ * @param deny deny permissions bitmask
+ * @param member true if the overwrite_id is a user id, false if it is a channel id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member) {
+	return dpp::awaitable(this, [&] (auto cc) { this->channel_edit_permissions(c, overwrite_id, allow, deny, member, cc); }); 
+}
+
+/**
+ * @brief Edit a channel's permissions
+ *
+ * @see dpp::cluster::channel_edit_permissions
+ * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param channel_id ID of the channel to set permissions for
+ * @param overwrite_id Overwrite to change (a user or role ID)
+ * @param allow allow permissions bitmask
+ * @param deny deny permissions bitmask
+ * @param member true if the overwrite_id is a user id, false if it is a channel id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member) {
+	return dpp::awaitable(this, [&] (auto cc) { this->channel_edit_permissions(channel_id, overwrite_id, allow, deny, member, cc); }); 
+}
+
+/**
  * @brief Edit multiple channels positions
  * 
  * Modify the positions of a set of channel objects for the guild.
@@ -513,7 +559,7 @@ auto inline co_channel_get(snowflake c) {
  * @see https://discord.com/developers/docs/resources/channel#create-channel-invite
  * @param c Channel to create an invite on
  * @param i Invite to create
- * @return confirmation returned object on completion
+ * @return invite returned object on completion
  * \memberof dpp::cluster
  */
 auto inline co_channel_invite_create(const class channel &c, const class invite &i) {
@@ -531,6 +577,30 @@ auto inline co_channel_invite_create(const class channel &c, const class invite 
  */
 auto inline co_channel_invites_get(const class channel &c) {
 	return dpp::awaitable(this, [&] (auto cc) { this->channel_invites_get(c, cc); }); 
+}
+
+/**
+ * @brief Trigger channel typing indicator
+ * @see dpp::cluster::channel_typing
+ * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
+ * @param c Channel to set as typing on
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_channel_typing(const class channel &c) {
+	return dpp::awaitable(this, [&] (auto cc) { this->channel_typing(c, cc); }); 
+}
+
+/**
+ * @brief Trigger channel typing indicator
+ * @see dpp::cluster::channel_typing
+ * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
+ * @param cid Channel ID to set as typing on
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_channel_typing(snowflake cid) {
+	return dpp::awaitable(this, [&] (auto cc) { this->channel_typing(cid, cc); }); 
 }
 
 /**
@@ -648,7 +718,7 @@ auto inline co_guild_emoji_delete(snowflake guild_id, snowflake emoji_id) {
  * 
  * You must ensure that the emoji passed contained image data using the emoji::load_image() method.
  * @see dpp::cluster::guild_emoji_edit
- * @see https://discord.com/developers/docs/resources/emoji#get-guild-emoji
+ * @see https://discord.com/developers/docs/resources/emoji#modify-guild-emoji
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @param guild_id Guild ID to edit emoji on
  * @param newemoji Emoji to edit
@@ -677,7 +747,7 @@ auto inline co_guild_emoji_get(snowflake guild_id, snowflake emoji_id) {
  * @brief Get all emojis for a guild
  *
  * @see dpp::cluster::guild_emojis_get
- * @see https://discord.com/developers/docs/resources/emoji#get-guild-emojis
+ * @see https://discord.com/developers/docs/resources/emoji#list-guild-emojis
  * @param guild_id Guild ID to get emojis for
  * @return emoji_map returned object on completion
  * \memberof dpp::cluster
@@ -723,8 +793,8 @@ auto inline co_guild_current_member_edit(snowflake guild_id, const std::string &
  * @param guild_id Guild to get the audit log of
  * @param user_id Entries from a specific user ID. Set this to `0` will fetch any user
  * @param action_type Entries for a specific dpp::audit_type. Set this to `0` will fetch any type
- * @param before Entries that preceded a specific audit log entry ID. Used for paginating
- * @param after Entries that succeeded a specific audit log entry ID. Used for paginating
+ * @param before Entries with ID less than a specific audit log entry ID. Used for paginating
+ * @param after Entries with ID greater than a specific audit log entry ID. Used for paginating
  * @param limit Maximum number of entries (between 1-100) to return
  * @return auditlog returned object on completion
  * \memberof dpp::cluster
@@ -907,6 +977,8 @@ auto inline co_guild_get(snowflake guild_id) {
  * @see https://discord.com/developers/docs/resources/guild#get-guild-integrations
  * @param guild_id Guild ID to get integrations for
  * @return integration_map returned object on completion
+ *
+ * @note This endpoint returns a maximum of 50 integrations. If a guild has more integrations, they cannot be accessed.
  * \memberof dpp::cluster
  */
 auto inline co_guild_get_integrations(snowflake guild_id) {
@@ -1266,9 +1338,46 @@ auto inline co_invite_delete(const std::string &invitecode) {
 	return dpp::awaitable(this, [&] (auto cc) { this->invite_delete(invitecode, cc); }); 
 }
 
+/**
+ * @brief Get details about an invite
+ *
+ * @see dpp::cluster::invite_get
+ * @see https://discord.com/developers/docs/resources/invite#get-invite
+ * @param invite_code Invite code to get information on
+ * @return invite returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_invite_get(const std::string &invite_code) {
+	return dpp::awaitable(this, [&] (auto cc) { this->invite_get(invite_code, cc); }); 
+}
 
-auto inline co_invite_get(const std::string &invitecode) {
-	return dpp::awaitable(this, [&] (auto cc) { this->invite_get(invitecode, cc); }); 
+/**
+ * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
+ *
+ * @see dpp::cluster::message_add_reaction
+ * @see https://discord.com/developers/docs/resources/channel#create-reaction
+ * @param m Message to add a reaction to
+ * @param reaction Reaction to add. Emojis should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_add_reaction(const struct message &m, const std::string &reaction) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_add_reaction(m, reaction, cc); }); 
+}
+
+/**
+ * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
+ *
+ * @see dpp::cluster::message_add_reaction
+ * @see https://discord.com/developers/docs/topics/gateway#message-reaction-add
+ * @param message_id Message to add reactions to
+ * @param channel_id Channel to add reactions to
+ * @param reaction Reaction to add. Emojis should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_add_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_add_reaction(message_id, channel_id, reaction, cc); }); 
 }
 
 /**
@@ -1296,6 +1405,33 @@ auto inline co_message_create(const message &m) {
  */
 auto inline co_message_crosspost(snowflake message_id, snowflake channel_id) {
 	return dpp::awaitable(this, [&] (auto cc) { this->message_crosspost(message_id, channel_id, cc); }); 
+}
+
+/**
+ * @brief Delete all reactions on a message
+ *
+ * @see dpp::cluster::message_delete_all_reactions
+ * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions
+ * @param m Message to delete reactions from
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_delete_all_reactions(const struct message &m) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_delete_all_reactions(m, cc); }); 
+}
+
+/**
+ * @brief Delete all reactions on a message by id
+ *
+ * @see dpp::cluster::message_delete_all_reactions
+ * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions
+ * @param message_id Message to delete reactions from
+ * @param channel_id Channel to delete reactions from
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_delete_all_reactions(snowflake message_id, snowflake channel_id) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_delete_all_reactions(message_id, channel_id, cc); }); 
 }
 
 /**
@@ -1331,6 +1467,95 @@ auto inline co_message_delete(snowflake message_id, snowflake channel_id) {
 }
 
 /**
+ * @brief Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character.
+ *
+ * @see dpp::cluster::message_delete_own_reaction
+ * @see https://discord.com/developers/docs/resources/channel#delete-own-reaction
+ * @param m Message to delete own reaction from
+ * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_delete_own_reaction(const struct message &m, const std::string &reaction) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_delete_own_reaction(m, reaction, cc); }); 
+}
+
+/**
+ * @brief Delete own reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
+ *
+ * @see dpp::cluster::message_delete_own_reaction
+ * @see https://discord.com/developers/docs/resources/channel#delete-own-reaction
+ * @param message_id Message to delete reactions from
+ * @param channel_id Channel to delete reactions from
+ * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_delete_own_reaction(snowflake message_id, snowflake channel_id, const std::string &reaction) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_delete_own_reaction(message_id, channel_id, reaction, cc); }); 
+}
+
+/**
+ * @brief Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_delete_reaction
+ * @see https://discord.com/developers/docs/resources/channel#delete-user-reaction
+ * @param m Message to delete a user's reaction from
+ * @param user_id User ID who's reaction you want to remove
+ * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_delete_reaction(const struct message &m, snowflake user_id, const std::string &reaction) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_delete_reaction(m, user_id, reaction, cc); }); 
+}
+
+/**
+ * @brief Delete a user's reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_delete_reaction
+ * @see https://discord.com/developers/docs/resources/channel#delete-user-reaction
+ * @param message_id Message to delete reactions from
+ * @param channel_id Channel to delete reactions from
+ * @param user_id User ID who's reaction you want to remove
+ * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_delete_reaction(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_delete_reaction(message_id, channel_id, user_id, reaction, cc); }); 
+}
+
+/**
+ * @brief Delete all reactions on a message using a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_delete_reaction_emoji
+ * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
+ * @param m Message to delete reactions from
+ * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_delete_reaction_emoji(const struct message &m, const std::string &reaction) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_delete_reaction_emoji(m, reaction, cc); }); 
+}
+
+/**
+ * @brief Delete all reactions on a message using a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_delete_reaction_emoji
+ * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
+ * @param message_id Message to delete reactions from
+ * @param channel_id Channel to delete reactions from
+ * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_delete_reaction_emoji(snowflake message_id, snowflake channel_id, const std::string &reaction) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_delete_reaction_emoji(message_id, channel_id, reaction, cc); }); 
+}
+
+/**
  * @brief Edit a message on a channel. The callback function is called when the message has been edited
  *
  * @see dpp::cluster::message_edit
@@ -1355,6 +1580,41 @@ auto inline co_message_edit(const message &m) {
  */
 auto inline co_message_get(snowflake message_id, snowflake channel_id) {
 	return dpp::awaitable(this, [&] (auto cc) { this->message_get(message_id, channel_id, cc); }); 
+}
+
+/**
+ * @brief Get reactions on a message for a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_get_reactions
+ * @see https://discord.com/developers/docs/resources/channel#get-reactions
+ * @param m Message to get reactions for
+ * @param reaction Reaction should be in the form emojiname:id or a unicode character
+ * @param before Reactions before this ID should be retrieved if this is set to non-zero
+ * @param after Reactions before this ID should be retrieved if this is set to non-zero
+ * @param limit This number of reactions maximum should be returned
+ * @return user_map returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_get_reactions(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_get_reactions(m, reaction, before, after, limit, cc); }); 
+}
+
+/**
+ * @brief Get reactions on a message for a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_get_reactions
+ * @see https://discord.com/developers/docs/resources/channel#get-reactions
+ * @param message_id Message to get reactions for
+ * @param channel_id Channel to get reactions for
+ * @param reaction Reaction should be in the form emojiname:id or a unicode character
+ * @param before Reactions before this ID should be retrieved if this is set to non-zero
+ * @param after Reactions before this ID should be retrieved if this is set to non-zero
+ * @param limit This number of reactions maximum should be returned
+ * @return emoji_map returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_message_get_reactions(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit) {
+	return dpp::awaitable(this, [&] (auto cc) { this->message_get_reactions(message_id, channel_id, reaction, before, after, limit, cc); }); 
 }
 
 /**
@@ -1495,6 +1755,61 @@ auto inline co_roles_edit_position(snowflake guild_id, const std::vector<role> &
  */
 auto inline co_roles_get(snowflake guild_id) {
 	return dpp::awaitable(this, [&] (auto cc) { this->roles_get(guild_id, cc); }); 
+}
+
+/**
+ * @brief Get the application's role connection metadata records
+ *
+ * @see dpp::cluster::application_role_connection_get
+ * @see https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records
+ * @param application_id The application ID
+ * @return application_role_connection returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_application_role_connection_get(snowflake application_id) {
+	return dpp::awaitable(this, [&] (auto cc) { this->application_role_connection_get(application_id, cc); }); 
+}
+
+/**
+ * @brief Update the application's role connection metadata records
+ *
+ * @see dpp::cluster::application_role_connection_update
+ * @see https://discord.com/developers/docs/resources/application-role-connection-metadata#update-application-role-connection-metadata-records
+ * @param application_id The application ID
+ * @param connection_metadata The application role connection metadata to update
+ * @return application_role_connection returned object on completion
+ * @note An application can have a maximum of 5 metadata records.
+ * \memberof dpp::cluster
+ */
+auto inline co_application_role_connection_update(snowflake application_id, const std::vector<application_role_connection_metadata> &connection_metadata) {
+	return dpp::awaitable(this, [&] (auto cc) { this->application_role_connection_update(application_id, connection_metadata, cc); }); 
+}
+
+/**
+ * @brief Get user application role connection
+ *
+ * @see dpp::cluster::user_application_role_connection_get
+ * @see https://discord.com/developers/docs/resources/user#get-user-application-role-connection
+ * @param application_id The application ID
+ * @return application_role_connection returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_user_application_role_connection_get(snowflake application_id) {
+	return dpp::awaitable(this, [&] (auto cc) { this->user_application_role_connection_get(application_id, cc); }); 
+}
+
+/**
+ * @brief Update user application role connection
+ *
+ * @see dpp::cluster::user_application_role_connection_update
+ * @see https://discord.com/developers/docs/resources/user#update-user-application-role-connection
+ * @param application_id The application ID
+ * @param connection The application role connection to update
+ * @return application_role_connection returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_user_application_role_connection_update(snowflake application_id, const application_role_connection &connection) {
+	return dpp::awaitable(this, [&] (auto cc) { this->user_application_role_connection_update(application_id, connection, cc); }); 
 }
 
 /**
@@ -1787,7 +2102,7 @@ auto inline co_template_get(const std::string &code) {
 /**
  * @brief Join a thread
  * @see dpp::cluster::current_user_join_thread
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#join-thread
  * @param thread_id Thread ID to join
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -1799,7 +2114,7 @@ auto inline co_current_user_join_thread(snowflake thread_id) {
 /**
  * @brief Leave a thread
  * @see dpp::cluster::current_user_leave_thread
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#leave-thread
  * @param thread_id Thread ID to leave
  * @return confirmation returned object on completion
  * \memberof dpp::cluster
@@ -1809,21 +2124,21 @@ auto inline co_current_user_leave_thread(snowflake thread_id) {
 }
 
 /**
- * @brief Get active threads in a channel (Sorted by ID in descending order)
+ * @brief Get all active threads in the guild, including public and private threads. Threads are ordered by their id, in descending order.
  * @see dpp::cluster::threads_get_active
- * @see https://discord.com/developers/docs/topics/threads
- * @param channel_id Channel to get active threads for
- * @return thread_map returned object on completion
+ * @see https://discord.com/developers/docs/resources/guild#list-active-guild-threads
+ * @param guild_id Guild to get active threads for
+ * @return active_threads returned object on completion
  * \memberof dpp::cluster
  */
-auto inline co_threads_get_active(snowflake channel_id) {
-	return dpp::awaitable(this, [&] (auto cc) { this->threads_get_active(channel_id, cc); }); 
+auto inline co_threads_get_active(snowflake guild_id) {
+	return dpp::awaitable(this, [&] (auto cc) { this->threads_get_active(guild_id, cc); }); 
 }
 
 /**
  * @brief Get private archived threads in a channel which current user has joined (Sorted by ID in descending order)
  * @see dpp::cluster::threads_get_joined_private_archived
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#list-joined-private-archived-threads
  * @param channel_id Channel to get public archived threads for
  * @param before_id Get threads before this id
  * @param limit Number of threads to get
@@ -1837,7 +2152,7 @@ auto inline co_threads_get_joined_private_archived(snowflake channel_id, snowfla
 /**
  * @brief Get private archived threads in a channel (Sorted by archive_timestamp in descending order)
  * @see dpp::cluster::threads_get_private_archived
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#list-private-archived-threads
  * @param channel_id Channel to get public archived threads for
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
@@ -1851,7 +2166,7 @@ auto inline co_threads_get_private_archived(snowflake channel_id, time_t before_
 /**
  * @brief Get public archived threads in a channel (Sorted by archive_timestamp in descending order)
  * @see dpp::cluster::threads_get_public_archived
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#list-public-archived-threads
  * @param channel_id Channel to get public archived threads for
  * @param before_timestamp Get threads before this timestamp
  * @param limit Number of threads to get
@@ -1865,7 +2180,7 @@ auto inline co_threads_get_public_archived(snowflake channel_id, time_t before_t
 /**
  * @brief Get a thread member
  * @see dpp::cluster::thread_member_get
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#get-thread-member
  * @param thread_id Thread to get member for
  * @param user_id ID of the user to get
  * @return thread_member returned object on completion
@@ -1878,7 +2193,7 @@ auto inline co_thread_member_get(const snowflake thread_id, const snowflake user
 /**
  * @brief Get members of a thread
  * @see dpp::cluster::thread_members_get
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#list-thread-members
  * @param thread_id Thread to get members for
  * @return thread_member_map returned object on completion
  * \memberof dpp::cluster
@@ -1888,11 +2203,30 @@ auto inline co_thread_members_get(snowflake thread_id) {
 }
 
 /**
+ * @brief Create a thread in forum channel
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ *
+ * @see dpp::cluster::thread_create_in_forum
+ * @see https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel
+ * @param thread_name Name of the forum thread
+ * @param channel_id Forum channel in which thread to create
+ * @param msg The message to start the thread with
+ * @param auto_archive_duration Duration to automatically archive the thread after recent activity
+ * @param rate_limit_per_user amount of seconds a user has to wait before sending another message (0-21600); bots, as well as users with the permission manage_messages, manage_thread, or manage_channel, are unaffected
+ * @param applied_tags List of IDs of forum tags (dpp::forum_tag) to apply to this thread
+ * @return thread returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_thread_create_in_forum(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags) {
+	return dpp::awaitable(this, [&] (auto cc) { this->thread_create_in_forum(thread_name, channel_id, msg, auto_archive_duration, rate_limit_per_user, applied_tags, cc); }); 
+}
+
+/**
  * @brief Create a thread
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  *
  * @see dpp::cluster::thread_create
- * @see https://discord.com/developers/docs/resources/guild#create-guild-channel
+ * @see https://discord.com/developers/docs/resources/channel#start-thread-without-message
  * @param thread_name Name of the thread
  * @param channel_id Channel in which thread to create
  * @param auto_archive_duration Duration after which thread auto-archives. Can be set to - 60, 1440 (for boosted guilds can also be: 4320, 10080)
@@ -1910,7 +2244,7 @@ auto inline co_thread_create(const std::string& thread_name, snowflake channel_i
  * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @see dpp::cluster::thread_create_with_message
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#start-thread-from-message
  * @param thread_name Name of the thread
  * @param channel_id Channel in which thread to create
  * @param message_id message to start thread with
@@ -1926,7 +2260,7 @@ auto inline co_thread_create_with_message(const std::string& thread_name, snowfl
 /**
  * @brief Add a member to a thread
  * @see dpp::cluster::thread_member_add
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#add-thread-member
  * @param thread_id Thread ID to add to
  * @param user_id Member ID to add
  * @return confirmation returned object on completion
@@ -1939,7 +2273,7 @@ auto inline co_thread_member_add(snowflake thread_id, snowflake user_id) {
 /**
  * @brief Remove a member from a thread
  * @see dpp::cluster::thread_member_remove
- * @see https://discord.com/developers/docs/topics/threads
+ * @see https://discord.com/developers/docs/resources/channel#remove-thread-member
  * @param thread_id Thread ID to remove from
  * @param user_id Member ID to remove
  * @return confirmation returned object on completion
@@ -1958,9 +2292,9 @@ auto inline co_thread_member_remove(snowflake thread_id, snowflake user_id) {
  * @see https://discord.com/developers/docs/resources/user#modify-current-user
  * @param nickname Nickname to set
  * @param image_blob Avatar data to upload (NOTE: Very heavily rate limited!)
- * @param type Type of image for avatar
+ * @param type Type of image for avatar. It can be one of `i_gif`, `i_jpg` or `i_png`.
  * @return user returned object on completion
- 	 * @throw dpp::exception Image data is larger than the maximum size of 256 kilobytes
+ 	 * @throw dpp::length_exception Image data is larger than the maximum size of 256 kilobytes
  * \memberof dpp::cluster
  */
 auto inline co_current_user_edit(const std::string &nickname, const std::string& image_blob, const image_type type) {
@@ -2083,7 +2417,7 @@ auto inline co_current_user_leave_guild(snowflake guild_id) {
 }
 
 /**
- * @brief Get a user by id
+ * @brief Get a user by id, without using the cache
  *
  * @see dpp::cluster::user_get
  * @see https://discord.com/developers/docs/resources/user#get-user
@@ -2097,6 +2431,23 @@ auto inline co_current_user_leave_guild(snowflake guild_id) {
  */
 auto inline co_user_get(snowflake user_id) {
 	return dpp::awaitable(this, [&] (auto cc) { this->user_get(user_id, cc); }); 
+}
+
+/**
+ * @brief Get a user by id, checking in the cache first
+ *
+ * @see dpp::cluster::user_get_cached
+ * @see https://discord.com/developers/docs/resources/user#get-user
+ * @param user_id User ID to retrieve
+ * @return user_identified returned object on completion
+ * @note The user_identified object is a subclass of dpp::user which contains further details if you have the oauth2 identify or email scopes.
+ * If you do not have these scopes, these fields are empty. You can safely convert a user_identified to user with `dynamic_cast`.
+ * @note If the user is found in the cache, special values set in `dpp::user_identified` will be undefined. This call should be used
+ * where you want to for example resolve a user who may no longer be in the bot's guilds, for something like a ban log message.
+ * \memberof dpp::cluster
+ */
+auto inline co_user_get_cached(snowflake user_id) {
+	return dpp::awaitable(this, [&] (auto cc) { this->user_get_cached(user_id, cc); }); 
 }
 
 /**
