@@ -1038,6 +1038,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					std::lock_guard lock{mutex};
 					if (callback.is_error()) {
 						events_abort();
+						set_messages_tested();
 						return;
 					}
 					auto m = callback.get<dpp::message>();
@@ -1047,6 +1048,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						std::lock_guard lock{mutex};
 						if (callback.is_error()) {
 							events_abort();
+							set_messages_tested();
 							return;
 						}
 						events_to_test_mask |= MESSAGE_REACT;
@@ -1054,6 +1056,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							std::lock_guard lock{mutex};
 							if (callback.is_error()) {
 								events_abort();
+								set_messages_tested();
 								return;
 							}
 							events_to_test_mask |= MESSAGE_REMOVE_REACT;
@@ -1061,11 +1064,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								std::lock_guard lock{mutex};
 								if (callback.is_error()) {
 									events_abort();
+									set_messages_tested();
 									return;
 								}
 								events_to_test_mask |= MESSAGE_DELETE;
 								bot.message_delete(message_id, thread_id, [this] (const dpp::confirmation_callback_t &callback) {
 									std::lock_guard lock{mutex};
+									set_messages_tested();
 									if (callback.is_error()) {
 										events_abort();
 										return;
