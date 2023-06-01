@@ -85,15 +85,15 @@ enum component_style : uint8_t {
  */
 struct DPP_EXPORT select_option : public json_interface<select_option> {
 	/**
-	 * @brief Label for option
+	 * @brief User-facing name of the option
 	 */
 	std::string label;
 	/**
-	 * @brief Value for option
+	 * @brief Dev-defined value of the option
 	 */
 	std::string value;
 	/**
-	 * @brief Description of option
+	 * @brief Additional description of the option
 	 */
 	std::string description;
 	/**
@@ -256,12 +256,12 @@ public:
 	 */
 	std::string placeholder;
 
-	/** Minimum number of items that must be chosen for a select menu.
+	/** Minimum number of items that must be chosen for a select menu (0-25).
 	 * Default is -1 to not set this
 	 */
 	int32_t min_values;
 
-	/** Maximum number of items that can be chosen for a select menu.
+	/** Maximum number of items that can be chosen for a select menu (0-25).
 	 * Default is -1 to not set this
 	 */
 	int32_t max_values;
@@ -441,33 +441,33 @@ public:
 	component& set_placeholder(const std::string &placeholder);
 
 	/**
-	 * @brief Set the min value
+	 * @brief Set the minimum number of items that must be chosen for a select menu
 	 * 
-	 * @param min_values min value to set
+	 * @param min_values min value to set (0-25)
 	 * @return component& Reference to self
 	 */
 	component& set_min_values(uint32_t min_values);
 
 	/**
-	 * @brief Set the max value
+	 * @brief Set the maximum number of items that can be chosen for a select menu
 	 * 
-	 * @param max_values max value to set (0 - 25)
+	 * @param max_values max value to set (0-25)
 	 * @return component& Reference to self
 	 */
 	component& set_max_values(uint32_t max_values);
 
 	/**
-	 * @brief Set the min length of text input
+	 * @brief Set the minimum input length for a text input
 	 * 
-	 * @param min_l min value to set (0 - 25)
+	 * @param min_l min length to set (0-4000)
 	 * @return component& Reference to self
 	 */
 	component& set_min_length(uint32_t min_l);
 
 	/**
-	 * @brief Set the max length of text input
+	 * @brief Set the maximum input length for a text input
 	 * 
-	 * @param max_l max value to set
+	 * @param max_l max length to set (1-4000)
 	 * @return component& Reference to self
 	 */
 	component& set_max_length(uint32_t max_l);
