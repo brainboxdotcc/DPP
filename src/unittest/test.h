@@ -311,7 +311,7 @@ inline constexpr user_project_id_t get_user_snowflake;
  *
  * @return bool whether the user is the test bot owner
  */
-inline constexpr auto is_owner = [](auto &&user) noexcept -> bool {
+inline constexpr auto is_owner = [](auto &&user) noexcept {
 	return get_user_snowflake(user) == TEST_USER_ID;
 };
 
