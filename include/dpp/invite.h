@@ -116,6 +116,54 @@ public:
 	 */
 	virtual ~invite() = default;
 
+	/**
+	 * @brief Set the max age after which the invite expires
+	 *
+	 * @param max_age_ The duration in seconds, or 0 for no expiration. Must be between 0 and 604800 (7 days)
+	 * @return invite& reference to self for chaining of calls
+	 */
+	invite& set_max_age(const uint32_t max_age_);
+
+	/**
+	 * @brief Set the maximum number of uses for this invite
+	 *
+	 * @param max_uses_ Maximum number of uses, or 0 for unlimited. Must be between 0 and 100
+	 * @return invite& reference to self for chaining of calls
+	 */
+	invite& set_max_uses(const uint8_t max_uses_);
+
+	/**
+	 * @brief Set the target user id
+	 *
+	 * @param user_id The user ID whose stream to display for this voice channel stream invite
+	 * @return invite& reference to self for chaining of calls
+	 */
+	invite& set_target_user_id(const snowflake user_id);
+
+	/**
+	 * @brief Set the target type for this voice channel invite
+	 *
+	 * @param type invite_target_t Target type
+	 * @return invite& reference to self for chaining of calls
+	 */
+	invite& set_target_type(const invite_target_t type);
+
+	/**
+	 * @brief Set temporary property of this invite object
+	 *
+	 * @param is_temporary Whether this invite only grants temporary membership
+	 * @return invite& reference to self for chaining of calls
+	 */
+	invite& set_temporary(const bool is_temporary);
+
+	/**
+	 * @brief Set unique property of this invite object
+	 *
+	 * @param is_unique True if this invite should not replace or "attach to" similar invites
+	 * @return invite& reference to self for chaining of calls
+	 */
+	invite& set_unique(const bool is_unique);
+
 	/** Read class values from json object
 	 * @param j A json object to read from
 	 * @return A reference to self
