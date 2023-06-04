@@ -90,13 +90,13 @@ For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for
 ### Other OS
 The library should work fine on other operating systems as well, and if you run a D++ bot on something not listed here, please let us know!
 
-## Getting started
+## Getting Started
 
 ### Installation
 
 D++ can be easily installed using various package managers. Please refer [to our documentation](https://dpp.dev/md_docpages_01_installing.html) for installation tutorials based on your preferred package manager.
 
-### Building from source
+### Building from Source
 
 If you prefer to build the library from source, detailed instructions are available [here](https://dpp.dev/install-from-source.html).
 
