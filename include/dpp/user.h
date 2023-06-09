@@ -89,10 +89,7 @@ class DPP_EXPORT user : public managed, public json_interface<user>  {
 public:
 	/** Discord username */
 	std::string username;
-	/** Global display name
-	 * 
-	 * @note Only present for users that have migrated to the new username format.
-	 */
+	/** Global display name */
 	std::string global_name;
 	/** Avatar hash */
 	utility::iconhash avatar;
