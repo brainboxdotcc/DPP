@@ -117,6 +117,10 @@ std::string user::get_default_avatar_url() const {
 		return utility::cdn_endpoint_url({ i_png },
 										 "embed/avatars/" + std::to_string(this->discriminator % 5),
 										 i_png, 0);
+	} else if (this->id){
+		return utility::cdn_endpoint_url({ i_png },
+										 "embed/avatars/" + std::to_string((this->id >> 22) % 6),
+										 i_png, 0);
 	} else {
 		return std::string();
 	}
