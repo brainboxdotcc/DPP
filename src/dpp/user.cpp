@@ -67,6 +67,7 @@ std::string user::build_json(bool with_id) const {
 
 	j["id"] = id;
 	j["username"] = username;
+	j["global_name"] = global_name; 
 	j["avatar"] = avatar.to_string();
 	j["discriminator"] = discriminator;
 	j["bot"] = is_bot();
@@ -265,6 +266,7 @@ void from_json(const nlohmann::json& j, user_identified& u) {
 void from_json(const nlohmann::json& j, user& u) {
 	u.id = snowflake_not_null(&j, "id");
 	u.username = string_not_null(&j, "username");
+	u.global_name = string_not_null(&j, "global_name");
 
 	std::string av = string_not_null(&j, "avatar");
 	if (av.length() > 2 && av.substr(0, 2) == "a_") {
