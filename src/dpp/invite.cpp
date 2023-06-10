@@ -82,4 +82,34 @@ std::string invite::build_json(bool with_id) const {
 	return j.dump();
 }
 
+invite &invite::set_max_age(const uint32_t max_age_) {
+	this->max_age = max_age_;
+	return *this;
+}
+
+invite &invite::set_max_uses(const uint8_t max_uses_) {
+	this->max_uses = max_uses_;
+	return *this;
+}
+
+invite &invite::set_target_user_id(const snowflake user_id) {
+	this->target_user_id = user_id;
+	return *this;
+}
+
+invite &invite::set_target_type(const invite_target_t type) {
+	this->target_type = type;
+	return *this;
+}
+
+invite &invite::set_temporary(const bool is_temporary) {
+	this->temporary = is_temporary;
+	return *this;
+}
+
+invite &invite::set_unique(const bool is_unique) {
+	this->unique = is_unique;
+	return *this;
+}
+
 };
