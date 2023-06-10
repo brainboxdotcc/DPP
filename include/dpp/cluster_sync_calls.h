@@ -492,6 +492,44 @@ confirmation channel_delete_permission_sync(const class channel &c, snowflake ov
 confirmation channel_delete_sync(snowflake channel_id);
 
 /**
+ * @brief Edit a channel's permissions
+ *
+ * @see dpp::cluster::channel_edit_permissions
+ * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param c Channel to set permissions for
+ * @param overwrite_id Overwrite to change (a user or role ID)
+ * @param allow allow permissions bitmask
+ * @param deny deny permissions bitmask
+ * @param member true if the overwrite_id is a user id, false if it is a channel id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation channel_edit_permissions_sync(const class channel &c, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member);
+
+/**
+ * @brief Edit a channel's permissions
+ *
+ * @see dpp::cluster::channel_edit_permissions
+ * @see https://discord.com/developers/docs/resources/channel#edit-channel-permissions
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param channel_id ID of the channel to set permissions for
+ * @param overwrite_id Overwrite to change (a user or role ID)
+ * @param allow allow permissions bitmask
+ * @param deny deny permissions bitmask
+ * @param member true if the overwrite_id is a user id, false if it is a channel id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation channel_edit_permissions_sync(const snowflake channel_id, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member);
+
+/**
  * @brief Edit multiple channels positions
  * 
  * Modify the positions of a set of channel objects for the guild.
@@ -558,13 +596,13 @@ channel channel_get_sync(snowflake c);
  * @see https://discord.com/developers/docs/resources/channel#create-channel-invite
  * @param c Channel to create an invite on
  * @param i Invite to create
- * @return confirmation returned object on completion
+ * @return invite returned object on completion
  * \memberof dpp::cluster
  * @throw dpp::rest_exception upon failure to execute REST function
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-confirmation channel_invite_create_sync(const class channel &c, const class invite &i);
+invite channel_invite_create_sync(const class channel &c, const class invite &i);
 
 /**
  * @brief Get invites for a channel
@@ -579,6 +617,32 @@ confirmation channel_invite_create_sync(const class channel &c, const class invi
  * Avoid direct use of this function inside an event handler.
  */
 invite_map channel_invites_get_sync(const class channel &c);
+
+/**
+ * @brief Trigger channel typing indicator
+ * @see dpp::cluster::channel_typing
+ * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
+ * @param c Channel to set as typing on
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation channel_typing_sync(const class channel &c);
+
+/**
+ * @brief Trigger channel typing indicator
+ * @see dpp::cluster::channel_typing
+ * @see https://discord.com/developers/docs/resources/channel#trigger-typing-indicator
+ * @param cid Channel ID to set as typing on
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation channel_typing_sync(snowflake cid);
 
 /**
  * @brief Get all channels for a guild
@@ -1353,8 +1417,50 @@ invite_map guild_get_invites_sync(snowflake guild_id);
 
 invite invite_delete_sync(const std::string &invitecode);
 
+/**
+ * @brief Get details about an invite
+ *
+ * @see dpp::cluster::invite_get
+ * @see https://discord.com/developers/docs/resources/invite#get-invite
+ * @param invite_code Invite code to get information on
+ * @return invite returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+invite invite_get_sync(const std::string &invite_code);
 
-invite invite_get_sync(const std::string &invitecode);
+/**
+ * @brief Add a reaction to a message. The reaction string must be either an `emojiname:id` or a unicode character.
+ *
+ * @see dpp::cluster::message_add_reaction
+ * @see https://discord.com/developers/docs/resources/channel#create-reaction
+ * @param m Message to add a reaction to
+ * @param reaction Reaction to add. Emojis should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_add_reaction_sync(const struct message &m, const std::string &reaction);
+
+/**
+ * @brief Add a reaction to a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
+ *
+ * @see dpp::cluster::message_add_reaction
+ * @see https://discord.com/developers/docs/topics/gateway#message-reaction-add
+ * @param message_id Message to add reactions to
+ * @param channel_id Channel to add reactions to
+ * @param reaction Reaction to add. Emojis should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_add_reaction_sync(snowflake message_id, snowflake channel_id, const std::string &reaction);
 
 /**
  * @brief Send a message to a channel. The callback function is called when the message has been sent
@@ -1384,6 +1490,35 @@ message message_create_sync(const struct message &m);
  * Avoid direct use of this function inside an event handler.
  */
 message message_crosspost_sync(snowflake message_id, snowflake channel_id);
+
+/**
+ * @brief Delete all reactions on a message
+ *
+ * @see dpp::cluster::message_delete_all_reactions
+ * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions
+ * @param m Message to delete reactions from
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_delete_all_reactions_sync(const struct message &m);
+
+/**
+ * @brief Delete all reactions on a message by id
+ *
+ * @see dpp::cluster::message_delete_all_reactions
+ * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions
+ * @param message_id Message to delete reactions from
+ * @param channel_id Channel to delete reactions from
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_delete_all_reactions_sync(snowflake message_id, snowflake channel_id);
 
 /**
  * @brief Bulk delete messages from a channel. The callback function is called when the message has been edited
@@ -1420,6 +1555,101 @@ confirmation message_delete_bulk_sync(const std::vector<snowflake> &message_ids,
 confirmation message_delete_sync(snowflake message_id, snowflake channel_id);
 
 /**
+ * @brief Delete own reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character.
+ *
+ * @see dpp::cluster::message_delete_own_reaction
+ * @see https://discord.com/developers/docs/resources/channel#delete-own-reaction
+ * @param m Message to delete own reaction from
+ * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_delete_own_reaction_sync(const struct message &m, const std::string &reaction);
+
+/**
+ * @brief Delete own reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character.
+ *
+ * @see dpp::cluster::message_delete_own_reaction
+ * @see https://discord.com/developers/docs/resources/channel#delete-own-reaction
+ * @param message_id Message to delete reactions from
+ * @param channel_id Channel to delete reactions from
+ * @param reaction Reaction to delete. The reaction should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_delete_own_reaction_sync(snowflake message_id, snowflake channel_id, const std::string &reaction);
+
+/**
+ * @brief Delete a user's reaction from a message. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_delete_reaction
+ * @see https://discord.com/developers/docs/resources/channel#delete-user-reaction
+ * @param m Message to delete a user's reaction from
+ * @param user_id User ID who's reaction you want to remove
+ * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_delete_reaction_sync(const struct message &m, snowflake user_id, const std::string &reaction);
+
+/**
+ * @brief Delete a user's reaction from a message by id. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_delete_reaction
+ * @see https://discord.com/developers/docs/resources/channel#delete-user-reaction
+ * @param message_id Message to delete reactions from
+ * @param channel_id Channel to delete reactions from
+ * @param user_id User ID who's reaction you want to remove
+ * @param reaction Reaction to remove. Reactions should be in the form emojiname:id
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_delete_reaction_sync(snowflake message_id, snowflake channel_id, snowflake user_id, const std::string &reaction);
+
+/**
+ * @brief Delete all reactions on a message using a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_delete_reaction_emoji
+ * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
+ * @param m Message to delete reactions from
+ * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_delete_reaction_emoji_sync(const struct message &m, const std::string &reaction);
+
+/**
+ * @brief Delete all reactions on a message using a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_delete_reaction_emoji
+ * @see https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji
+ * @param message_id Message to delete reactions from
+ * @param channel_id Channel to delete reactions from
+ * @param reaction Reaction to delete, in the form emojiname:id or a unicode character
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+confirmation message_delete_reaction_emoji_sync(snowflake message_id, snowflake channel_id, const std::string &reaction);
+
+/**
  * @brief Edit a message on a channel. The callback function is called when the message has been edited
  *
  * @see dpp::cluster::message_edit
@@ -1447,6 +1677,43 @@ message message_edit_sync(const struct message &m);
  * Avoid direct use of this function inside an event handler.
  */
 message message_get_sync(snowflake message_id, snowflake channel_id);
+
+/**
+ * @brief Get reactions on a message for a particular emoji. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_get_reactions
+ * @see https://discord.com/developers/docs/resources/channel#get-reactions
+ * @param m Message to get reactions for
+ * @param reaction Reaction should be in the form emojiname:id or a unicode character
+ * @param before Reactions before this ID should be retrieved if this is set to non-zero
+ * @param after Reactions before this ID should be retrieved if this is set to non-zero
+ * @param limit This number of reactions maximum should be returned
+ * @return user_map returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+user_map message_get_reactions_sync(const struct message &m, const std::string &reaction, snowflake before, snowflake after, snowflake limit);
+
+/**
+ * @brief Get reactions on a message for a particular emoji by id. The reaction string must be either an `emojiname:id` or a unicode character
+ *
+ * @see dpp::cluster::message_get_reactions
+ * @see https://discord.com/developers/docs/resources/channel#get-reactions
+ * @param message_id Message to get reactions for
+ * @param channel_id Channel to get reactions for
+ * @param reaction Reaction should be in the form emojiname:id or a unicode character
+ * @param before Reactions before this ID should be retrieved if this is set to non-zero
+ * @param after Reactions before this ID should be retrieved if this is set to non-zero
+ * @param limit This number of reactions maximum should be returned
+ * @return emoji_map returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+emoji_map message_get_reactions_sync(snowflake message_id, snowflake channel_id, const std::string &reaction, snowflake before, snowflake after, snowflake limit);
 
 /**
  * @brief Pin a message
@@ -1596,6 +1863,36 @@ role_map roles_edit_position_sync(snowflake guild_id, const std::vector<role> &r
  * Avoid direct use of this function inside an event handler.
  */
 role_map roles_get_sync(snowflake guild_id);
+
+/**
+ * @brief Get the application's role connection metadata records
+ *
+ * @see dpp::cluster::application_role_connection_get
+ * @see https://discord.com/developers/docs/resources/application-role-connection-metadata#get-application-role-connection-metadata-records
+ * @param application_id The application ID
+ * @return application_role_connection returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+application_role_connection application_role_connection_get_sync(snowflake application_id);
+
+/**
+ * @brief Update the application's role connection metadata records
+ *
+ * @see dpp::cluster::application_role_connection_update
+ * @see https://discord.com/developers/docs/resources/application-role-connection-metadata#update-application-role-connection-metadata-records
+ * @param application_id The application ID
+ * @param connection_metadata The application role connection metadata to update
+ * @return application_role_connection returned object on completion
+ * @note An application can have a maximum of 5 metadata records.
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+application_role_connection application_role_connection_update_sync(snowflake application_id, const std::vector<application_role_connection_metadata> &connection_metadata);
 
 /**
  * @brief Get user application role connection
