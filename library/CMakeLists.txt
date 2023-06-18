@@ -230,6 +230,15 @@ foreach (fullmodname ${subdirlist})
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp>
 	)
 
+	if (DPP_USE_PCH)
+		target_precompile_headers(${modname} PRIVATE
+			"${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/cluster.h"
+			"${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/json.h"
+			"${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/utility.h"
+			"${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/restresults.h"
+		)
+	endif()
+
 	if (WIN32 AND NOT MINGW)
 		if (NOT WINDOWS_32_BIT)
 			target_link_libraries(${modname} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../win32/lib/libssl.lib"
