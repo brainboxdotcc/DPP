@@ -86,7 +86,7 @@ EOT;
     /**
      * @inheritDoc
      */
-    public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterNames): string
+    public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string
     {
         return "$returnType {$currentFunction}_sync($parameters);\n\n";
     }
@@ -94,9 +94,9 @@ EOT;
     /**
      * @inheritDoc
      */
-    public function generateCppDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterNames): string
+    public function generateCppDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string
     {
-        return "$returnType cluster::{$currentFunction}_sync($noDefaults) {\n\treturn dpp::sync<$returnType>(this, &cluster::$currentFunction$parameterNames);\n}\n\n";
+        return "$returnType cluster::{$currentFunction}_sync($noDefaults) {\n\treturn dpp::sync<$returnType>(this, static_cast<void (cluster::*)($parameterTypes". (!empty($parameterTypes) ? ", " : "") . "command_completion_event_t)>(&cluster::$currentFunction)$parameterNames);\n}\n\n";
     }
 
     /**

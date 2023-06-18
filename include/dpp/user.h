@@ -89,13 +89,16 @@ class DPP_EXPORT user : public managed, public json_interface<user>  {
 public:
 	/** Discord username */
 	std::string username;
+	/** Global display name */
+	std::string global_name;
 	/** Avatar hash */
 	utility::iconhash avatar;
 	/** Flags built from a bitmask of values in dpp::user_flags */
 	uint32_t flags;
 	/** Discriminator (aka tag), 4 digits usually displayed with leading zeroes.
 	 *
-	 * @note To print the discriminator with leading zeroes, use format_username()
+	 * @note To print the discriminator with leading zeroes, use format_username(). 
+	 * 0 for users that have migrated to the new username format.
 	 */
 	uint16_t discriminator;
 	/** Reference count of how many guilds this user is in */

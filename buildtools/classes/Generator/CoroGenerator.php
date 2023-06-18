@@ -86,7 +86,7 @@ EOT;
     /**
      * @inheritDoc
      */
-    public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterNames): string
+    public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string
     {
         $parameterNames = preg_replace('/^, /', '', $parameterNames);
         if (!empty($parameterNames)) {
@@ -98,7 +98,7 @@ EOT;
     /**
      * @inheritDoc
      */
-    public function generateCppDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterNames): string
+    public function generateCppDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string
     {
         return '';
     }

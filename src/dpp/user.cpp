@@ -67,6 +67,7 @@ std::string user::build_json(bool with_id) const {
 
 	j["id"] = id;
 	j["username"] = username;
+	j["global_name"] = global_name; 
 	j["avatar"] = avatar.to_string();
 	j["discriminator"] = discriminator;
 	j["bot"] = is_bot();
@@ -115,6 +116,10 @@ std::string user::get_default_avatar_url() const {
 	if (this->discriminator) {
 		return utility::cdn_endpoint_url({ i_png },
 										 "embed/avatars/" + std::to_string(this->discriminator % 5),
+										 i_png, 0);
+	} else if (this->id){
+		return utility::cdn_endpoint_url({ i_png },
+										 "embed/avatars/" + std::to_string((this->id >> 22) % 6),
 										 i_png, 0);
 	} else {
 		return std::string();
@@ -265,6 +270,7 @@ void from_json(const nlohmann::json& j, user_identified& u) {
 void from_json(const nlohmann::json& j, user& u) {
 	u.id = snowflake_not_null(&j, "id");
 	u.username = string_not_null(&j, "username");
+	u.global_name = string_not_null(&j, "global_name");
 
 	std::string av = string_not_null(&j, "avatar");
 	if (av.length() > 2 && av.substr(0, 2) == "a_") {
