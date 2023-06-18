@@ -2379,6 +2379,21 @@ thread thread_create_in_forum_sync(const std::string& thread_name, snowflake cha
 thread thread_create_sync(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user);
 
 /**
+ * @brief Edit a thread
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ *
+ * @see dpp::cluster::thread_edit
+ * @see https://discord.com/developers/docs/topics/threads#editing-deleting-threads
+ * @param t Thread to edit
+ * @return thread returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+thread thread_edit_sync(const thread &t);
+
+/**
  * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @see dpp::cluster::thread_create_with_message

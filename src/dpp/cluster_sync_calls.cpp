@@ -645,6 +645,10 @@ thread cluster::thread_create_sync(const std::string& thread_name, snowflake cha
 	return dpp::sync<thread>(this, static_cast<void (cluster::*)(const std::string&, snowflake, uint16_t, channel_type, bool, uint16_t, command_completion_event_t)>(&cluster::thread_create), thread_name, channel_id, auto_archive_duration, thread_type, invitable, rate_limit_per_user);
 }
 
+thread cluster::thread_edit_sync(const thread &t) {
+	return dpp::sync<thread>(this, static_cast<void (cluster::*)(const thread &, command_completion_event_t)>(&cluster::thread_edit), t);
+}
+
 thread cluster::thread_create_with_message_sync(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user) {
 	return dpp::sync<thread>(this, static_cast<void (cluster::*)(const std::string&, snowflake, snowflake, uint16_t, uint16_t, command_completion_event_t)>(&cluster::thread_create_with_message), thread_name, channel_id, message_id, auto_archive_duration, rate_limit_per_user);
 }
