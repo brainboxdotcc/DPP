@@ -47,7 +47,7 @@ set_target_properties(
 
 target_link_options(
 	"${LIB_NAME}" PUBLIC
-	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>/DEBUG>>"
+	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/DEBUG>>"
 )
 
 add_compile_definitions(HAVE_VOICE)
