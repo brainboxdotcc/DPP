@@ -44,7 +44,7 @@ Listed in alphabetical order, with terms in bold, here are the basics on...
 
 19. **Modal**: A pop up form that contains text that can be sent by a bot
 
-20. **Shards and clusters**: A cluster is the main container for an application, which contains many shards, each of which manage a subset of your workload, fortunately, D++ does this automatically 
+20. [**Shards and clusters**](https://dpp.dev/clusters-shards-guilds.html): A cluster is the main container for an application, which contains many shards, each of which manage a subset of your workload, fortunately, D++ does this automatically 
 
 21. **Snowflake**: An unsigned 64 bit integer (it can represent anything from 0 to 2^64) that is used by discord to identify basically everything, including but not limited to, **guilds**, users, messages, and much more
 
