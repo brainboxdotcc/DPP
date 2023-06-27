@@ -1,4 +1,4 @@
-\page build-a-discord-bot-windows-advanced Building a discord bot in Windows Visual Studio (avanced users only)
+\page build-a-discord-bot-windows-advanced Building a discord bot in Windows Visual Studio (advanced users only)
 
 \warning Please be aware that this article is written for **advanced users** that already have experience using C++! **Don't be ashamed** to use the [template project](https://github.com/brainboxdotcc/windows-bot-template). As this is considered advanced content, you may check out \ref build-a-discord-bot-windows-visual-studio. We don't offer any support for manual setups, please use the template if you can't get it running.
   
