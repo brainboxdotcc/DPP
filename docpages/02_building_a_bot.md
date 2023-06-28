@@ -7,7 +7,7 @@ Click on a link below for a guide specifically for your system:
 * \subpage creating-a-bot-application "Creating a Bot Token"
 * \subpage build-a-discord-bot-windows-visual-studio "Building a discord bot in Windows using Visual Studio"
 * \subpage build-a-discord-bot-windows-wsl "Building a discord bot in Windows using WSL (Windows Subsystem for Linux)"
-* \subpage build-a-discord-bot-windows-advanced "Building a discord bot in Windows Visual Studio (advanced users only)"
+* \subpage build-a-discord-bot-windows-advanced "Advanced user Windows Visual Studio guide"
 * \subpage build-a-discord-bot-linux-clion "Building a discord bot in Linux using CLion"
 * \subpage buildcmake "Building a Discord Bot using CMake/UNIX"
 * \subpage buildmeson "Building a Discord Bot using Meson"
