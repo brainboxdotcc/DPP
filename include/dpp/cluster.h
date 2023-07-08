@@ -3028,6 +3028,17 @@ public:
 	void thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Edit a thread
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 *
+	 * @see https://discord.com/developers/docs/topics/threads#editing-deleting-threads
+	 * @param t Thread to edit
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void thread_edit(const thread &t, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @see https://discord.com/developers/docs/resources/channel#start-thread-from-message
