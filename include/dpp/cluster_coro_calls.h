@@ -2241,6 +2241,20 @@ auto inline co_thread_create(const std::string& thread_name, snowflake channel_i
 }
 
 /**
+ * @brief Edit a thread
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ *
+ * @see dpp::cluster::thread_edit
+ * @see https://discord.com/developers/docs/topics/threads#editing-deleting-threads
+ * @param t Thread to edit
+ * @return thread returned object on completion
+ * \memberof dpp::cluster
+ */
+auto inline co_thread_edit(const thread &t) {
+	return dpp::awaitable(this, [&] (auto cc) { this->thread_edit(t, cc); }); 
+}
+
+/**
  * @brief Create a thread with a message (Discord: ID of a thread is same as message ID)
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  * @see dpp::cluster::thread_create_with_message

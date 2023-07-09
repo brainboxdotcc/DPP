@@ -38,12 +38,16 @@ void cluster::threads_get_active(snowflake guild_id, command_completion_event_t 
 		if (!e.is_error()) {
 			if (j.contains("threads")) {
 				for (auto &curr_item: j["threads"]) {
-					list.threads[snowflake_not_null(&curr_item, "id")] = thread().fill_from_json(&curr_item);
+					list[snowflake_not_null(&curr_item, "id")].active_thread.fill_from_json(&curr_item);
 				}
 			}
 			if (j.contains("members")) {
 				for (auto &curr_item: j["members"]) {
-					list.thread_members[snowflake_not_null(&curr_item, "id")] = thread_member().fill_from_json(&curr_item);
+					snowflake thread_id = snowflake_not_null(&curr_item, "id");
+					snowflake user_id = snowflake_not_null(&curr_item, "user_id");
+					if (user_id == me.id) {
+						list[thread_id].bot_member = thread_member().fill_from_json(&curr_item);
+					}
 				}
 			}
 		}
@@ -82,7 +86,7 @@ void cluster::thread_member_get(const snowflake thread_id, const snowflake user_
 }
 
 void cluster::thread_members_get(snowflake thread_id, command_completion_event_t callback) {
-	rest_request_list<thread_member>(this, API_PATH "/channels", std::to_string(thread_id), "/thread-members", m_get, "", callback);
+	rest_request_list<thread_member>(this, API_PATH "/channels", std::to_string(thread_id), "/thread-members", m_get, "", callback, "user_id");
 }
 
 void cluster::thread_create_in_forum(const std::string& thread_name, snowflake channel_id, const message& msg, auto_archive_duration_t auto_archive_duration, uint16_t rate_limit_per_user, std::vector<snowflake> applied_tags, command_completion_event_t callback)
@@ -131,6 +135,11 @@ void cluster::thread_create(const std::string& thread_name, snowflake channel_id
 		{"rate_limit_per_user", rate_limit_per_user}
 	});
 	rest_request<thread>(this, API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(), callback);
+}
+
+void cluster::thread_edit(const thread &t, command_completion_event_t callback)
+{
+	rest_request<thread>(this, API_PATH "/channels", std::to_string(t.id), "", m_patch, t.build_json(), callback);
 }
 
 void cluster::thread_create_with_message(const std::string& thread_name, snowflake channel_id, snowflake message_id, uint16_t auto_archive_duration, uint16_t rate_limit_per_user, command_completion_event_t callback)
