@@ -106,7 +106,7 @@ private:
 	/**
 	 * @brief Container for event listeners (coroutines only)
 	 */
-	std::map<event_handle, std::function<dpp::task(T)>> coroutine_container;
+	std::map<event_handle, std::function<dpp::task<void>(const T &)>> coroutine_container;
 #else
        /**
         * @brief Dummy container to keep the struct size same
@@ -210,7 +210,7 @@ public:
 	 * The lambda should follow the signature specified when declaring
 	 * the event object and should take exactly one parameter derived
 	 * from event_dispatch_t.
-	 * 
+	 *
 	 * @param func Function lambda to attach to event
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
@@ -219,11 +219,21 @@ public:
 		std::unique_lock l(lock);
 		event_handle h = next_handle++;
 		dispatch_container.emplace(h, func);
-		return h;		
+		return h;
 	}
 
 #ifdef DPP_CORO
-	event_handle co_attach(std::function<dpp::task(T)> func) {
+	/**
+	 * @brief Attach a coroutine task to the event, adding a listener.
+	 * The coroutine should follow the signature specified when declaring
+	 * the event object and should take exactly one parameter derived
+	 * from event_dispatch_t.
+	 *
+	 * @param func Coroutine task to attack to the event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	event_handle co_attach(std::function<dpp::task<void>(const T &)> func) {
 		std::unique_lock l(lock);
 		event_handle h = next_handle++;
 		coroutine_container.emplace(h, func);
