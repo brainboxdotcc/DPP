@@ -5469,4 +5469,4 @@ namespace dpp { namespace unicode_emoji {
 	constexpr std::string bridge_at_night("🌉");
 	constexpr std::string foggy("🌁");
 }
-}
+};

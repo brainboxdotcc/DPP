@@ -1,5 +1,7 @@
 <?php
 
+echo "-- Autogenrating include/dpp/unicode_emoji.h\n";
+
 $header = "#pragma once\n\nnamespace dpp { namespace unicode_emoji {\n";
 
 $emojis = json_decode(file_get_contents("https://raw.githubusercontent.com/ArkinSolomon/discord-emoji-converter/master/emojis.json"));

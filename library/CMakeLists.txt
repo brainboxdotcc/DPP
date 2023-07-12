@@ -77,7 +77,7 @@ if (UNIX)
 		# target for unicode_emojis.h
 		execute_process(
 			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
-			COMMAND php buildtools/emoji.php
+			COMMAND php buildtools/emojis.php
 		)
 		set_source_files_properties( "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/unicode_emojis.h" PROPERTIES GENERATED TRUE )
 	else()
