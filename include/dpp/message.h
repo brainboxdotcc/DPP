@@ -670,6 +670,12 @@ struct DPP_EXPORT embed {
 	 */
 	embed& set_color(uint32_t col);
 
+	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
+	 * @param col The colour of the embed
+	 * @return A reference to self
+	 */
+	embed& set_colour(uint32_t col);
+
 	/** Set embed timestamp. Returns the embed itself so these method calls may be "chained"
 	 * @param tstamp The timestamp to show in the footer, should be in UTC
 	 * @return A reference to self

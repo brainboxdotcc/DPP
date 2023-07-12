@@ -724,6 +724,10 @@ embed& embed::set_color(uint32_t col) {
 	return *this;
 }
 
+embed& embed::set_colour(uint32_t col) {
+	return this->set_color(col);
+}
+
 embed& embed::set_url(const std::string &u) {
 	url = u;
 	return *this;
