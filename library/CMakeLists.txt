@@ -74,6 +74,12 @@ if (UNIX)
 			COMMAND php buildtools/make_struct.php "\\Dpp\\Generator\\SyncGenerator"
 		)
  		set_source_files_properties( "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/cluster_sync_calls.h" PROPERTIES GENERATED TRUE ) 
+		# target for unicode_emojis.h
+		execute_process(
+			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
+			COMMAND php buildtools/emoji.php
+		)
+		set_source_files_properties( "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/unicode_emojis.h" PROPERTIES GENERATED TRUE )
 	else()
 		message("-- Autogeneration is not available")
  	endif()
