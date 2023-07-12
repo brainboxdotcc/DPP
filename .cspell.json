@@ -96,7 +96,8 @@
 		"CORO",
 		"cback",
 		"mentionables",
-		"stringified"
+		"stringified",
+		"disdppgloss"
 	],
 	"flagWords": [
 		"hte"
