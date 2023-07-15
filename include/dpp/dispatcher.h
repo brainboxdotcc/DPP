@@ -932,6 +932,10 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	 * @brief message id of the message reacted upon
 	 */
 	snowflake message_id;
+	/**
+	 * @brief ID of the user who authored the message which was reacted to
+	 */
+	snowflake message_author_id;
 };
 
 /** @brief Guild members chunk */

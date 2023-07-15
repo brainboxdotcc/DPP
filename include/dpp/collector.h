@@ -162,6 +162,8 @@ public:
 	channel* react_channel{};
 	/// Reacted emoji
 	emoji react_emoji;
+	/// ID of the user who authored the message which was reacted to
+	snowflake message_author_id{};
 };
 
 /**
@@ -272,6 +274,7 @@ public:
 			react.react_member = element.reacting_member;
 			react.react_channel = element.reacting_channel;
 			react.react_emoji = element.reacting_emoji;
+			react.message_author_id = element.message_author_id;
 			return &react;
 		} else {
 			return nullptr;
