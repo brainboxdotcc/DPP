@@ -18,6 +18,7 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <algorithm>
 #include <dpp/message.h>
 #include <dpp/user.h>
 #include <dpp/channel.h>
@@ -768,6 +769,7 @@ attachment::attachment(struct message* o)
 	, width(0)
 	, height(0)
 	, ephemeral(false)
+	, flags(0)
 	, owner(o)
 {
 }
@@ -785,6 +787,7 @@ attachment::attachment(struct message* o, json *j) : attachment(o) {
 	this->ephemeral = bool_not_null(j, "ephemeral");
 	this->duration_secs = double_not_null(j, "duration_secs");
 	this->waveform = string_not_null(j, "waveform");
+	this->flags = int16_not_null(j, "flags");
 }
 
 void attachment::download(http_completion_event callback) const {
@@ -795,6 +798,10 @@ void attachment::download(http_completion_event callback) const {
 	if (callback && this->id && !this->url.empty()) {
 		owner->owner->request(this->url, dpp::m_get, callback);
 	}
+}
+
+bool attachment::is_remix() const {
+	return flags & a_is_remix;
 }
 
 std::string message::build_json(bool with_id, bool is_interaction_response) const {
@@ -1115,6 +1122,15 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		message_reference.fail_if_not_exists = bool_not_null(&mr, "fail_if_not_exists");
 	}
 	return *this;
+}
+
+bool message::is_remix() const {
+	return std::any_of(
+		attachments.begin(),
+		attachments.end(),
+		[](const auto& a) -> bool {
+			return a.is_remix();
+		});
 }
 
 sticker::sticker() : managed(0), pack_id(0), type(st_standard), format_type(sf_png), available(true), guild_id(0), sort_value(0) {
