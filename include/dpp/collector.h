@@ -162,7 +162,7 @@ public:
 	channel* react_channel{};
 	/// Reacted emoji
 	emoji react_emoji;
-	/// ID of the user who authored the message which was reacted to
+	/// ID of the user who authored the message which was reacted to (Optional)
 	snowflake message_author_id{};
 };
 

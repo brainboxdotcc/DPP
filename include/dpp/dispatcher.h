@@ -933,7 +933,7 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	 */
 	snowflake message_id;
 	/**
-	 * @brief ID of the user who authored the message which was reacted to
+	 * @brief ID of the user who authored the message which was reacted to (Optional)
 	 */
 	snowflake message_author_id;
 };
