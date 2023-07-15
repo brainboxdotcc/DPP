@@ -769,7 +769,7 @@ struct DPP_EXPORT reaction {
 /**
  * @brief Bitmask flags for a dpp::attachment
  */
-enum attachment_flags : uint16_t {
+enum attachment_flags : uint8_t {
 	/// this attachment has been edited using the remix feature on mobile
 	a_is_remix = 1 << 2,
 };
@@ -803,7 +803,7 @@ struct DPP_EXPORT attachment {
 	/** base64 encoded bytearray representing a sampled waveform (currently for voice messages) */
 	std::string waveform;
 	/** Flags. Made of bits in dpp::attachment_flags */
-	uint16_t		flags;
+	uint8_t		flags;
 	/** Owning message */
 	struct message* owner;
 

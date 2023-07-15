@@ -787,7 +787,7 @@ attachment::attachment(struct message* o, json *j) : attachment(o) {
 	this->ephemeral = bool_not_null(j, "ephemeral");
 	this->duration_secs = double_not_null(j, "duration_secs");
 	this->waveform = string_not_null(j, "waveform");
-	this->flags = int16_not_null(j, "flags");
+	this->flags = int8_not_null(j, "flags");
 }
 
 void attachment::download(http_completion_event callback) const {
