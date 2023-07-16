@@ -348,6 +348,16 @@ public:
 	 */
 	bool stop_timer(timer t);
 
+#ifdef DPP_CORO
+	/**
+	 * @brief Start a one-time timer. Use the co_await keyword on its return value to suspend the coroutine until the timer ends
+	 * 
+	 * @param seconds How long to run the timer for
+	 * @return awaitable<timer> co_await-able object holding the timer_handle
+	 */
+	awaitable<timer> co_timer(uint64_t seconds);
+#endif
+
 	/**
 	 * @brief Get the dm channel for a user id
 	 *
