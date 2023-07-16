@@ -811,7 +811,7 @@ struct DPP_EXPORT attachment {
 	 * @brief Constructs a new attachment object.
 	 * @param o Owning dpp::message object
 	 */
-	attachment(struct message* o = nullptr);
+	attachment(struct message* o);
 
 	/**
 	 * @brief Constructs a new attachment object from a JSON object.
