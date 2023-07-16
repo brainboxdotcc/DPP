@@ -1124,7 +1124,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	return *this;
 }
 
-bool message::is_remix() const {
+bool message::has_remix_attachment() const {
 	return std::any_of(
 		attachments.begin(),
 		attachments.end(),

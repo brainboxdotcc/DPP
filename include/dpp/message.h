@@ -1542,11 +1542,11 @@ struct DPP_EXPORT message : public managed {
 	bool is_dm() const;
 
 	/**
-	 * @brief Returns true if any of attachments is remixed
+	 * @brief Returns true if message has remixed attachment
 	 * 
-	 * @return true if any of attachments is remixed
+	 * @return true if message has remixed attachment
 	 */
-	bool is_remix() const;
+	bool has_remix_attachment() const;
 };
 
 /** A group of messages */
