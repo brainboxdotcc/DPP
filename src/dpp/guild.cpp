@@ -102,6 +102,7 @@ guild_member::guild_member() :
 	communication_disabled_until(0),
 	joined_at(0),
 	premium_since(0),
+	permissions(0),
 	flags(0)
 {
 }
@@ -187,6 +188,7 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	gm.flags |= bool_not_null(&j, "deaf") ? gm_deaf : 0;
 	gm.flags |= bool_not_null(&j, "mute") ? gm_mute : 0;
 	gm.flags |= bool_not_null(&j, "pending") ? gm_pending : 0;
+	gm.permissions = snowflake_not_null(&j, "permissions");
 }
 
 std::string guild_member::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
