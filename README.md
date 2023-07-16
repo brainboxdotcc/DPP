@@ -7,7 +7,9 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) 
 ![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) 
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
-[![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
+[![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp)
+![vcpkg version](https://img.shields.io/vcpkg/v/dpp)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md)
 
 </div>
 
@@ -87,6 +89,20 @@ For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for
 
 ### Other OS
 The library should work fine on other operating systems as well, and if you run a D++ bot on something not listed here, please let us know!
+
+## Getting Started
+
+### Installation
+
+D++ can be easily installed using various package managers. Please refer [to our documentation](https://dpp.dev/md_docpages_01_installing.html) for installation tutorials based on your preferred package manager.
+
+### Building from Source
+
+If you prefer to build the library from source, detailed instructions are available [here](https://dpp.dev/install-from-source.html).
+
+### FAQ
+
+For frequently asked questions and their answers, please visit our [FAQ page](https://dpp.dev/md_docpages_01_frequently_asked_questions.html).
 
 ## 🤝 Contributing
 

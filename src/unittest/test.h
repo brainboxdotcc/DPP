@@ -277,3 +277,45 @@ public:
 		set_test("MSGCOLLECT", list.size() > 0);
 	}
 };
+
+/**
+ * @brief Convenience functor to get the snowflake of a certain type
+ */
+struct user_project_id_t {
+	dpp::snowflake operator()(const dpp::user &user) const noexcept {
+		return user.id;
+	}
+
+	dpp::snowflake operator()(const dpp::guild_member &user) const noexcept {
+		return user.user_id;
+	}
+
+	dpp::snowflake operator()(dpp::snowflake user) const noexcept {
+		return user;
+	}
+
+	dpp::snowflake operator()(const dpp::thread_member &user) const noexcept {
+		return user.user_id;
+	}
+};
+
+/**
+ * @brief Convenience lambda to get the user snowflake of a certain user type
+ * @see user_project_id_t
+ */
+inline constexpr user_project_id_t get_user_snowflake;
+
+/**
+ * @brief Convenience lambda to check if a certain user is the owner of the test bot, mostly meant to be passed to standard algorithms
+ * @see get_user_snowflake
+ *
+ * @return bool whether the user is the test bot owner
+ */
+inline constexpr auto is_owner = [](auto &&user) noexcept {
+	return get_user_snowflake(user) == TEST_USER_ID;
+};
+
+/**
+ * @brief Thread emoji - https://www.compart.com/en/unicode/U+1F9F5
+ */
+inline const std::string THREAD_EMOJI = "\xF0\x9F\xA7\xB5";
