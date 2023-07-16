@@ -221,7 +221,7 @@ int test_summary() {
 	std::cout << "\u001b[37;1m\n\nUNIT TEST SUMMARY\n==================\n\u001b[0m";
 	for (auto & t : tests) {
 		bool test_skipped = false;
-		if (t.second.executed == false && ((t.second.type == tt_online && offline) || (t.second.type == tt_extended && !extended))) {
+		if ((t.second.type == tt_online && offline) || (t.second.type == tt_extended && !extended)) {
 			skipped++;
 			test_skipped = true;
 		} else {
@@ -304,7 +304,7 @@ void wait_for_tests() {
 				executed++;
 			} else if (!t.second.executed && ((offline && t.second.type == tt_online) || (!extended && t.second.type == tt_extended))) {
 				executed++;
-				t.second.success = true;
+				t.second.executed = true;
 				std::cout << "[" << std::fixed << std::setprecision(3)  << get_time() << "]: " << "[\u001b[33mSKIPPED\u001b[0m] " << t.second.description << "\n";
 			}
 		}
@@ -314,5 +314,9 @@ void wait_for_tests() {
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		ticks++;
+	}
+	for (auto &t : tests) {
+		if (!t.second.executed)
+			std::cout << "[" << std::fixed << std::setprecision(3)  << get_time() << "]: " << "[\u001b[31mTIMEOUT\u001b[0m] " << t.second.description << "\n";
 	}
 }
