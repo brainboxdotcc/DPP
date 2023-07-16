@@ -107,6 +107,10 @@ awaitable<confirmation_callback_t> cluster::co_interaction_response_edit(const s
 	return {this, static_cast<void (cluster::*)(const std::string &, const message &, command_completion_event_t)>(&cluster::interaction_response_edit), token, m};
 }
 
+awaitable<confirmation_callback_t> cluster::co_interaction_response_get_original(const std::string &token) {
+	return {this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::interaction_response_get_original), token};
+}
+
 awaitable<confirmation_callback_t> cluster::co_interaction_followup_create(const std::string &token, const message &m) {
 	return {this, static_cast<void (cluster::*)(const std::string &, const message &, command_completion_event_t)>(&cluster::interaction_followup_create), token, m};
 }
@@ -125,6 +129,10 @@ awaitable<confirmation_callback_t> cluster::co_interaction_followup_edit(const s
 
 awaitable<confirmation_callback_t> cluster::co_interaction_followup_get(const std::string &token, snowflake message_id) {
 	return {this, static_cast<void (cluster::*)(const std::string &, snowflake, command_completion_event_t)>(&cluster::interaction_followup_get), token, message_id};
+}
+
+awaitable<confirmation_callback_t> cluster::co_interaction_followup_get_original(const std::string &token) {
+	return {this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::interaction_followup_get_original), token};
 }
 
 awaitable<confirmation_callback_t> cluster::co_automod_rules_get(snowflake guild_id) {

@@ -14,10 +14,10 @@
 #include <memory>
 #include <utility>
 #include <type_traits>
-#include <dpp/restresults.h>
 
 namespace dpp {
 	class cluster;
+	struct confirmation_callback_t;
 
 	/**
 	 * @brief Implementation details for internal use only.
@@ -64,7 +64,7 @@ namespace dpp {
 	 *
 	 * Can be used in conjunction with coroutine events via dpp::event_router_t::co_attach, or on its own.
 	 *
-	 * @attention This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
+	 * @warning This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub issues</a> or to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
 	 * @tparam ReturnType Return type of the coroutine. Can be void, or a complete object that supports move construction and move assignment.
 	 */
 	template <typename ReturnType>
@@ -108,20 +108,31 @@ namespace dpp {
 
 		/**
 		 * @brief Destructor.
-		 * 
+		 *
 		 * Destroys the handle if coroutine is done, otherwise detaches it from this thread.
 		 * In detached mode, the handle will destroy itself at the end of the coroutine.
 		 */
-		~task()
-		{
+		~task() {
 			if (handle) {
-				if (handle.done()) {
-					// if the coroutine is done, we can destroy it now
-					handle.destroy();
+				auto &promise = handle.promise();
+
+				if (!promise.is_sync) {
+					std::unique_lock lock{promise.mutex};
+
+					if (promise.destroy) // promise in async thread checked first and skipped clean up, we do it
+					{
+						if (promise.exception && promise.exception_handler)
+							promise.exception_handler(promise.exception);
+						lock.unlock();
+						handle.destroy();
+					}
+					else
+						handle.promise().destroy = true;
 				}
 				else {
-					// if the coroutine is still running, we tell it to destroy itself at the end
-					handle.promise().self_destruct = true;
+					if (promise.exception && promise.exception_handler)
+						promise.exception_handler(promise.exception);
+					handle.destroy();
 				}
 			}
 		}
@@ -160,14 +171,14 @@ namespace dpp {
 		 * @param caller The calling coroutine, now suspended
 		 * @return bool Whether to suspend the caller or not
 		 */
-		bool await_suspend(detail::std_coroutine::coroutine_handle<> caller) noexcept {
+		template <typename T>
+		bool await_suspend(detail::task_handle<T> caller) noexcept {
 			auto &my_promise = handle.promise();
 
-			// TODO: sync tasks
 			if (my_promise.is_sync)
 				return false;
 			my_promise.parent = caller;
-			my_promise.is_sync = false;	
+			caller.promise().is_sync = false;	
 			return true;
 		}
 
@@ -188,6 +199,18 @@ namespace dpp {
 		 */
 		bool done() const noexcept {
 			return handle.done();
+		}
+
+		/**
+		 * @brief Set the exception handling function. Called when an exception is thrown but not caught
+		 *
+		 * @warning The exception handler must not throw. If an exception that is not caught is thrown in a detached task, the program will terminate.
+		 */
+		task &on_exception(std::function<void(std::exception_ptr)> func) {
+			handle.promise().exception_handler = std::move(func);
+			if (handle.promise().exception)
+				func(handle.promise().exception);
+			return *this;
 		}
 	};
 
@@ -221,6 +244,11 @@ namespace dpp {
 		 */
 		struct task_promise_base {
 			/**
+			 * @brief Mutex for async task destruction.
+			 */
+			std::mutex mutex{};
+
+			/**
 			 * @brief Parent coroutine to return to for nested coroutines.
 			 */
 			detail::std_coroutine::coroutine_handle<> parent = nullptr;
@@ -234,13 +262,20 @@ namespace dpp {
 
 			/**
 			 * @brief Whether the coroutine has async calls or not
+			 *
+			 * Will only ever change on the calling thread while callback mutex guards the async thread
 			 */
 			bool is_sync = true;
 
 			/**
-			 * @brief Whether the promise should clean the handle up when it finishes (runs in detached mode)
+			 * @brief Whether either the task object or the promise is gone and the next one to end will clean up
 			 */
-			bool self_destruct = false;
+			bool destroy = false;
+
+			/**
+			 * @brief Function object called when an exception is thrown from a coroutine
+			 */
+			std::function<void(std::exception_ptr)> exception_handler = nullptr;
 
 			/**
 			 * @brief Function called by the standard library when the coroutine is created.
@@ -302,7 +337,7 @@ namespace dpp {
 				return {};
 			}
 		};
-		
+
 		/**
 		 * @brief Implementation of task_promise for void return type
 		 */
@@ -313,8 +348,7 @@ namespace dpp {
 			 *
 			 * Does nothing but is required by the standard library.
 			 */
-			void return_void() {
-			}
+			void return_void() {}
 
 			/**
 			 * @brief Function called by the standard library when the coroutine is created.
@@ -338,10 +372,20 @@ namespace dpp {
 		template <typename ReturnType>
 		void detail::task_chain_final_awaiter<ReturnType>::await_suspend(detail::task_handle<ReturnType> handle) noexcept {
 			task_promise<ReturnType> &promise = handle.promise();
-			std::coroutine_handle<> parent = promise.parent;
+			std_coroutine::coroutine_handle<> parent = promise.parent;
 
-			if (promise.self_destruct)
-				handle.destroy();
+			if (!promise.is_sync) {
+				std::unique_lock lock{promise.mutex};
+
+				if (promise.destroy) {
+					if (promise.exception && promise.exception_handler)
+						promise.exception_handler(promise.exception);
+					lock.unlock();
+					handle.destroy();
+				}
+				else
+					promise.destroy = true; // Send the destruction back to the task
+			}
 			if (parent)
 				parent.resume();
 		}
@@ -366,41 +410,164 @@ namespace dpp {
 	 * @remark - This object's methods, other than constructors and operators, should not be called directly. It is designed to be used with coroutine keywords such as co_await.
 	 * @remark - This object must not be co_await-ed more than once.
 	 * @remark - The coroutine may be resumed in another thread, do not rely on thread_local variables.
-	 * @warning This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
+	 * @warning This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub issues</a> or to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
 	 * @tparam ReturnType The return type of the API call. Defaults to confirmation_callback_t
 	 */
 	template <typename ReturnType = confirmation_callback_t>
 	class awaitable {
 		/**
-		 * @brief State of the awaitable and its callback.
+		 * @brief Ref-counted callback, contains the callback logic and manages the lifetime of the callback data over multiple threads.
 		 */
-		struct callback_data {
+		struct shared_callback {
 			/**
-			 * @brief Mutex to ensure the API result isn't set at the same time the coroutine is awaited and its value is checked
-			 *
-			 * @see <a href="https://en.cppreference.com/w/cpp/thread/mutex">std::mutex</a>
+			 * @brief State of the awaitable and its callback.
 			 */
-			std::mutex mutex;
+			struct callback_state {
+				enum state_t {
+					waiting,
+					done,
+					dangling
+				};
+
+				/**
+				 * @brief Mutex to ensure the API result isn't set at the same time the coroutine is awaited and its value is checked, or the awaitable is destroyed
+				 */
+				std::mutex mutex{};
+
+				/**
+				 * @brief Number of references to this callback state.
+				 */
+				int ref_count;
+
+				/**
+				 * @brief State of the awaitable and the API callback
+				 */
+				state_t state = waiting;
+
+				/**
+				 * @brief The stored result of the API call
+				 */
+				std::optional<ReturnType> result = std::nullopt;
+
+				/**
+				 * @brief Handle to the coroutine co_await-ing on this API call
+				 *
+				 * @see <a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">std::coroutine_handle</a>
+				 */
+				std::coroutine_handle<> coro_handle = nullptr;
+			};
 
 			/**
-			 * @brief The stored result of the API call
+			 * @brief Callback function.
+			 *
+			 * @param cback The result of the API call.
 			 */
-			std::optional<ReturnType> result;
+			void operator()(const ReturnType &cback) const {
+				std::unique_lock lock{get_mutex()};
+
+				if (state->state == callback_state::dangling) // Awaitable is gone - likely an exception killed it or it was never co_await-ed
+					return;
+				state->result = cback;
+				state->state = callback_state::done;
+				if (state->coro_handle) {
+					auto handle = state->coro_handle;
+					state->coro_handle = nullptr;
+					lock.unlock();
+					handle.resume();
+				}
+			}
 
 			/**
-			 * @brief Handle to the coroutine co_await-ing on this API call
-			 *
-			 * @see <a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">std::coroutine_handle</a>
+			 * @brief Main constructor, allocates a new callback_state object.
 			 */
-			std::coroutine_handle<> coro_handle = nullptr;
+			shared_callback() : state{new callback_state{.ref_count = 1}} {}
+
+			/**
+			 * @brief Copy constructor. Takes shared ownership of the callback state, increasing the reference count.
+			 */
+			shared_callback(const shared_callback &other) {
+				this->operator=(other);
+			}
+
+			/**
+			 * @brief Move constructor. Transfers ownership from another object, leaving intact the reference count. The other object releases the callback state.
+			 */
+			shared_callback(shared_callback &&other) noexcept {
+				this->operator=(std::move(other));
+			}
+
+			/**
+			 * @brief Copy assignment. Takes shared ownership of the callback state, increasing the reference count.
+			 */
+			shared_callback &operator=(const shared_callback &other) noexcept {
+				std::lock_guard lock{other.get_mutex()};
+
+				state = other.state;
+				++state->ref_count;
+				return *this;
+			}
+
+			/**
+			 * @brief Move assignment. Transfers ownership from another object, leaving intact the reference count. The other object releases the callback state.
+			 */
+			shared_callback &operator=(shared_callback &&other) noexcept {
+				std::lock_guard lock{other.get_mutex()};
+
+				state = std::exchange(other.state, nullptr);
+				return *this;
+			}
+
+			/**
+			 * @brief Function called by the awaitable when it is destroyed when it was never co_awaited, signals to the callback to abort.
+			 */
+			void set_dangling() {
+				if (!state) // moved-from object
+					return;
+				std::lock_guard lock{get_mutex()};
+
+				if (state->state == callback_state::waiting)
+					state->state = callback_state::dangling;
+			}
+
+			/**
+			 * @brief Convenience function to get the shared callback state's mutex.
+			 */
+			std::mutex &get_mutex() const {
+				return (state->mutex);
+			}
+
+			/**
+			 * @brief Convenience function to get the shared callback state's result.
+			 */
+			std::optional<ReturnType> &get_result() const {
+				return (state->result);
+			}
+
+			/**
+			 * @brief Destructor. Releases the held reference and destroys if no other references exist.
+			 */
+			~shared_callback() {
+				if (!state) // Moved-from object
+					return;
+
+				std::unique_lock lock{state->mutex};
+
+				if (state->ref_count) {
+					--(state->ref_count);
+					if (state->ref_count <= 0) {;
+						lock.unlock();
+						delete state;
+					}
+				}
+			}
+
+			callback_state *state;
 		};
 
 		/**
-		 * @brief State of the awaitable and its callback.
-		 *
-		 * We wrap it in a unique_ptr because std::mutex is not moveable, and we want to make awaitable moveable.
+		 * @brief Shared state of the awaitable and its callback, to be used across threads.
 		 */
-		std::unique_ptr<callback_data> data = nullptr;
+		shared_callback api_callback;
 
 	public:
 		/**
@@ -414,18 +581,8 @@ namespace dpp {
 #ifndef _DOXYGEN_
 		requires std::invocable<Fun, Obj, Args..., std::function<void(ReturnType)>>
 #endif
-		awaitable(Obj &&obj, Fun &&fun, Args&&... args) : data{std::make_unique<callback_data>()} {
-			std::invoke(std::forward<Fun>(fun), std::forward<Obj>(obj), std::forward<Args>(args)..., ([cb_data = data.get()](const ReturnType& cback) {
-				std::unique_lock lock{cb_data->mutex};
-
-				cb_data->result = cback;
-				if (cb_data->coro_handle) {
-					auto handle = cb_data->coro_handle;
-					cb_data->coro_handle = nullptr;
-					lock.unlock();
-					handle.resume();
-				}
-			}));
+		awaitable(Obj &&obj, Fun &&fun, Args&&... args) : api_callback{} {
+			std::invoke(std::forward<Fun>(fun), std::forward<Obj>(obj), std::forward<Args>(args)..., api_callback);
 		}
 
 		/**
@@ -438,18 +595,16 @@ namespace dpp {
 #ifndef _DOXYGEN_
 		requires std::invocable<Fun, Args..., std::function<void(ReturnType)>>
 #endif
-		awaitable(Fun &&fun, Args&&... args) : data{std::make_unique<callback_data>()} {
-			std::invoke(std::forward<Fun>(fun), std::forward<Args>(args)..., ([cb_data = data.get()](const ReturnType& cback) {
-				std::unique_lock lock{cb_data->mutex};
+		awaitable(Fun &&fun, Args&&... args) : api_callback{} {
+			std::invoke(std::forward<Fun>(fun), std::forward<Args>(args)..., api_callback);
+		}
 
-				cb_data->result = cback;
-				if (cb_data->coro_handle) {
-					auto handle = cb_data->coro_handle;
-					cb_data->coro_handle = nullptr;
-					lock.unlock();
-					handle.resume();
-				}
-			}));
+		/**
+		 * @brief Destructor. If any callback is pending it will be aborted.
+		 *
+		 */
+		~awaitable() {
+			api_callback.set_dangling();
 		}
 
 		/**
@@ -460,16 +615,12 @@ namespace dpp {
 		/**
 		 * @brief Move constructor
 		 *
-		 * NOTE: Despite being marked noexcept, this function calls std::unique_lock::lock which may throw. The implementation assumes this can never happen, hence noexcept. Report it if it does, as that would be a bug.
+		 * NOTE: Despite being marked noexcept, this function uses std::lock_guard which may throw. The implementation assumes this can never happen, hence noexcept. Report it if it does, as that would be a bug.
 		 *
 		 * @remark Using the moved-from awaitable after this function is undefined behavior.
 		 * @param other The awaitable object to move the data from.
 		 */
-		awaitable(awaitable &&other) noexcept {
-			std::unique_lock lock{other.data->mutex};
-
-			data = std::exchange(other.data, nullptr);
-		}
+		awaitable(awaitable &&other) noexcept = default;
 
 		/**
 		 * @brief Copy assignment is disabled
@@ -479,16 +630,12 @@ namespace dpp {
 		/**
 		 * @brief Move assignment operator.
 		 *
-		 * NOTE: Despite being marked noexcept, this function calls std::unique_lock::lock which may throw. The implementation assumes this can never happen, hence noexcept. Report it if it does, as that would be a bug.
+		 * NOTE: Despite being marked noexcept, this function uses std::lock_guard which may throw. The implementation assumes this can never happen, hence noexcept. Report it if it does, as that would be a bug.
 		 *
 		 * @remark Using the moved-from awaitable after this function is undefined behavior.
 		 * @param other The awaitable object to move the data from
 		 */
-		awaitable &operator=(awaitable &&other) noexcept {
-			std::unique_lock lock{other.data->mutex};
-
-			data = std::exchange(other.data, nullptr);
-		}
+		awaitable &operator=(awaitable &&other) noexcept = default;
 
 		/**
 		 * @brief First function called by the standard library when the object is co-awaited.
@@ -499,9 +646,9 @@ namespace dpp {
 		 * @return bool Whether we already have the result of the API call or not
 		 */
 		bool await_ready() noexcept {
-			std::lock_guard lock{data->mutex};
+			std::lock_guard lock{api_callback.get_mutex()};
 
-			return data->result.has_value();
+			return api_callback.get_result().has_value();
 		}
 
 		/**
@@ -513,14 +660,13 @@ namespace dpp {
 		 * @param handle The handle to the coroutine co_await-ing and being suspended
 		 */
 		template <typename T>
-		bool await_suspend(std::coroutine_handle<dpp::detail::task_promise<T>> handle)
-		{
-			std::lock_guard lock{data->mutex};
+		bool await_suspend(detail::task_handle<T> handle) {
+			std::lock_guard lock{api_callback.get_mutex()};
 
-			if (data->result.has_value())
+			if (api_callback.get_result().has_value())
 				return false; // immediately resume the coroutine as we already have the result of the api call
 			handle.promise().is_sync = false;
-			data->coro_handle = handle;
+			api_callback.state->coro_handle = handle;
 			return true; // suspend the caller, the callback will resume it
 		}
 
@@ -531,7 +677,7 @@ namespace dpp {
 		 * @return ReturnType The result of the API call.
 		 */
 		ReturnType await_resume() {
-			return std::move(*data->result);
+			return std::move(*api_callback.get_result());
 		}
 	};
 };
