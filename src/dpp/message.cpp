@@ -249,6 +249,8 @@ void to_json(json& j, const attachment& a) {
 		j["url"] = a.url;
 	}
 	j["ephemeral"] = a.ephemeral;
+	/* in future, Discord can allow bots send remixed attachment */
+	j["flags"] = a.flags;
 }
 
 void to_json(json& j, const component& cp) {
