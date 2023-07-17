@@ -160,6 +160,9 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 	set_ts_not_null(&j, "joined_at", gm.joined_at);
 	set_ts_not_null(&j, "premium_since", gm.premium_since);
 	set_ts_not_null(&j, "communication_disabled_until", gm.communication_disabled_until);
+	/* Note: The permissions of the guild member are stored in the resolved set in the interaction event to
+	 * reduce storage as they would be mostly empty anyway and only retrieved from interaction events
+	 */
 
 	uint16_t flags = int16_not_null(&j, "flags");
 	for (auto & flag : membermap) {
