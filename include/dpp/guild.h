@@ -203,8 +203,6 @@ public:
 	time_t joined_at;
 	/** Boosting since */
 	time_t premium_since;
-	/** total permissions of the member in the channel, including overwrites, returned when in the interaction object */
-	permission permissions;
 	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
 	uint16_t flags;
 
