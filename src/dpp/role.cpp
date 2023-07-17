@@ -339,6 +339,10 @@ bool role::has_use_soundboard() const {
 	return has_administrator() || permissions.has(p_use_soundboard);
 }
 
+bool role::has_use_external_sounds() const {
+	return has_administrator() || permissions.has(p_use_external_sounds);
+}
+
 bool role::has_send_voice_messages() const {
 	return has_administrator() || permissions.has(p_send_voice_messages);
 }
