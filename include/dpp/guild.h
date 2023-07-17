@@ -21,6 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/user.h>
+#include <dpp/emoji.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
@@ -1049,6 +1050,144 @@ public:
 	 *
 	 * @param with_id Add ID to output
 	 * @return std::string guild widget stringified json
+	 */
+	std::string build_json(bool with_id = false) const;
+};
+
+/**
+ * @brief The onboarding mode for the dpp::onboarding object. Defines the criteria used to satisfy Onboarding constraints that are required for enabling.
+ */
+enum onboarding_mode: uint8_t {
+	gom_default = 0, //!< Counts only Default Channels towards constraints
+	gom_advanced = 1, //!< Counts Default Channels and Questions towards constraints
+};
+
+/**
+ * @brief The various types of dpp::onboarding_prompt
+ */
+enum onboarding_prompt_type: uint8_t {
+	opt_multiple_choice = 0, //!< Multiple choice
+	opt_dropdown = 1, //!< Dropdown
+};
+
+/**
+ * @brief Various flags for dpp::onboarding_prompt
+ */
+enum onboarding_prompt_flags: uint8_t {
+	opf_single_select = 1 << 0, //!< Indicates whether users are limited to selecting one option for the prompt
+	opf_required = 1 << 1, //!< Indicates whether the prompt is required before a user completes the onboarding flow
+	opf_in_onboarding = 1 << 2, //!< Indicates whether the prompt is present in the onboarding flow. If set, the prompt will only appear in the Channels & Roles tab
+};
+
+/**
+ * @brief Represents an onboarding prompt option
+ */
+struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interface<onboarding_prompt_option> {
+	std::vector<snowflake> channel_ids; //!< IDs for channels a member is added to when the option is selected
+	std::vector<snowflake> role_ids; //!< IDs for roles assigned to a member when the option is selected
+	dpp::emoji e; //!< Emoji of the option
+	std::string title; //!< Title of the option
+	std::string description; //!< Description of the option
+
+	/**
+	 * @brief Construct a new onboarding prompt option object
+	 */
+	onboarding_prompt_option();
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt_option& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+};
+
+/**
+ * @brief Represents an onboarding prompt
+ */
+struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboarding_prompt> {
+	onboarding_prompt_type type; //!< Type of prompt (defaults to dpp::opt_multiple_choice)
+	std::vector<onboarding_prompt_option> options; //!< Options available within the prompt
+	std::string title; //!< Title of the prompt
+	uint8_t flags; //!< A set of flags built from the bitmask defined by dpp::onboarding_prompt_flags
+
+	/**
+	 * @brief Construct a new onboarding prompt object
+	 */
+	onboarding_prompt();
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Indicates whether users are limited to selecting one option for the prompt
+	 * @return bool True if the users are limited to selecting one option for the prompt
+	 */
+	bool is_single_select() const;
+
+	/**
+	 * @brief Indicates whether the prompt is required before a user completes the onboarding flow
+	 * @return bool True if the prompt is required before a user completes the onboarding flow
+	 */
+	bool is_required() const;
+
+	/**
+	 * @brief Indicates whether the prompt is present in the onboarding flow
+	 * @return bool True if the prompt is present in the onboarding flow. False if the prompt will only appear in the Channels & Roles tab
+	 */
+	bool is_in_onboarding() const;
+};
+
+/**
+ * @brief Represents a guild's onboarding flow
+ */
+struct DPP_EXPORT onboarding: public json_interface<onboarding> {
+	snowflake guild_id; //!< ID of the guild this onboarding is part of
+	std::vector<onboarding_prompt> prompts; //!< Prompts shown during onboarding and in customize community
+	std::vector<snowflake> default_channel_ids; //!< Channel IDs that members get opted into automatically
+	onboarding_mode mode; //!< Current mode of onboarding (defaults to dpp::gom_default)
+	bool enabled; //!< Whether onboarding is enabled in the guild
+
+	/**
+	 * @brief Construct a new onboarding object
+	 */
+	onboarding();
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
 	 */
 	std::string build_json(bool with_id = false) const;
 };

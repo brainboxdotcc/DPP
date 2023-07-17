@@ -865,4 +865,155 @@ guild_member find_guild_member(const snowflake guild_id, const snowflake user_id
 }
 
 
+onboarding_prompt_option::onboarding_prompt_option(): managed(0) {
+}
+
+onboarding_prompt::onboarding_prompt(): managed(0), type(opt_multiple_choice), flags(0) {
+}
+
+onboarding::onboarding(): guild_id(0), mode(gom_default), enabled(false) {
+}
+
+onboarding_prompt_option &onboarding_prompt_option::fill_from_json(nlohmann::json *j) {
+	id = snowflake_not_null(j, "id");
+	e = emoji().fill_from_json(&j->at("emoji"));
+	title = string_not_null(j, "title");
+	description = string_not_null(j, "description");
+
+	channel_ids.clear();
+	if (j->contains("channel_ids")) {
+		channel_ids.reserve(j->at("channel_ids").size());
+		for (auto &channel_id : j->at("channel_ids")) {
+			channel_ids.push_back(std::stoull(channel_id.get<std::string>()));
+		}
+	}
+	role_ids.clear();
+	if (j->contains("role_ids")) {
+		role_ids.reserve(j->at("role_ids").size());
+		for (auto &role_id : j->at("role_ids")) {
+			role_ids.push_back(std::stoull(role_id.get<std::string>()));
+		}
+	}
+	return *this;
+}
+
+std::string onboarding_prompt_option::build_json(bool with_id) const {
+	json j;
+	j["emoji"] = json::parse(e.build_json());
+	j["title"] = title;
+	if (!description.empty()) {
+		j["description"] = description;
+	}
+
+	if (!channel_ids.empty()) {
+		j["channel_ids"] = json::array();
+		for (auto &channel_id : channel_ids) {
+			j["channel_ids"].push_back(std::to_string(channel_id));
+		}
+	}
+
+	if (!role_ids.empty()) {
+		j["role_ids"] = json::array();
+		for (auto &role_id : role_ids) {
+			j["role_ids"].push_back(std::to_string(role_id));
+		}
+	}
+
+	return j.dump();
+}
+
+onboarding_prompt &onboarding_prompt::fill_from_json(nlohmann::json *j) {
+	id = snowflake_not_null(j, "id");
+	type = static_cast<onboarding_prompt_type>(int8_not_null(j, "type"));
+	title = string_not_null(j, "title");
+
+	options.clear();
+	if (j->contains("options")) {
+		for (auto &option : j->at("options")) {
+			options.push_back(onboarding_prompt_option().fill_from_json(&option));
+		}
+	}
+
+	flags |= bool_not_null(j, "single_select") ? opf_single_select : 0;
+	flags |= bool_not_null(j, "required") ? opf_required : 0;
+	flags |= bool_not_null(j, "in_onboarding") ? opf_in_onboarding : 0;
+	return *this;
+}
+
+std::string onboarding_prompt::build_json(bool with_id) const {
+	json j;
+	j["type"] = type;
+	j["title"] = title;
+
+	if (!options.empty()) {
+		j["options"] = json::array();
+		for (auto const &option : options) {
+			j["options"].push_back(json::parse(option.build_json()));
+		}
+	}
+
+	j["single_select"] = is_single_select();
+	j["required"] = is_required();
+	j["in_onboarding"] = is_in_onboarding();
+	return j.dump();
+}
+
+bool onboarding_prompt::is_single_select() const {
+	return flags & dpp::opf_single_select;
+}
+
+bool onboarding_prompt::is_required() const {
+	return flags & dpp::opf_required;
+}
+
+bool onboarding_prompt::is_in_onboarding() const {
+	return flags & dpp::opf_in_onboarding;
+}
+
+onboarding& onboarding::fill_from_json(nlohmann::json* j) {
+	guild_id = snowflake_not_null(j, "guild_id");
+	enabled = bool_not_null(j, "enabled");
+	mode = static_cast<onboarding_mode>(int8_not_null(j, "mode"));
+
+	prompts.clear();
+	if (j->contains("prompts")) {
+		for (auto &prompt : j->at("prompts")) {
+			prompts.push_back(onboarding_prompt().fill_from_json(&prompt));
+		}
+	}
+
+	default_channel_ids.clear();
+	if (j->contains("default_channel_ids")) {
+		default_channel_ids.reserve(j->at("default_channel_ids").size());
+		for (auto &default_channel_id : j->at("default_channel_ids")) {
+			default_channel_ids.push_back(std::stoull(default_channel_id.get<std::string>()));
+		}
+	}
+
+	return *this;
+}
+
+std::string onboarding::build_json(bool with_id) const {
+	json j;
+
+	if (!prompts.empty()) {
+		j["prompts"] = json::array();
+		for (auto const &prompt : prompts) {
+			j["prompts"].push_back(json::parse(prompt.build_json()));
+		}
+	}
+
+	if (!default_channel_ids.empty()) {
+		j["default_channel_ids"] = json::array();
+		for (auto &default_channel_id : default_channel_ids) {
+			j["default_channel_ids"].push_back(std::to_string(default_channel_id));
+		}
+	}
+
+	j["enabled"] = enabled;
+	j["mode"] = mode;
+	return j.dump();
+}
+
+
 };
