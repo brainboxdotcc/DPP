@@ -154,7 +154,7 @@ public:
 	 * **Example:**
 	 *
 	 * ```cpp
-	 * bool is_mod = permission.has(dpp::p_administrator, dpp::p_ban_members);
+	 * bool is_mod = permission.has_any(dpp::p_administrator, dpp::p_ban_members);
 	 * // Returns true if the permission bitmask contains p_administrator or p_ban_members
 	 * ```
 	 *
