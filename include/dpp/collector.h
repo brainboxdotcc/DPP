@@ -1,22 +1,23 @@
-/*
- * Discord erlpack - tidied up for D++, Craig Edwards 2021.
- * 
- * MessagePack system dependencies modified for erlpack.
- * 
- * Copyright (C) 2008-2010 FURUHASHI Sadayuki
+/************************************************************************************
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ * D++, A Lightweight C++ library for Discord
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ * Copyright 2021 Craig Edwards and D++ contributors
+ * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ************************************************************************************/
 #pragma once
 
 #include <dpp/export.h>
@@ -162,6 +163,8 @@ public:
 	channel* react_channel{};
 	/// Reacted emoji
 	emoji react_emoji;
+	/// ID of the user who authored the message which was reacted to (Optional)
+	snowflake message_author_id{};
 };
 
 /**
@@ -272,6 +275,7 @@ public:
 			react.react_member = element.reacting_member;
 			react.react_channel = element.reacting_channel;
 			react.react_emoji = element.reacting_emoji;
+			react.message_author_id = element.message_author_id;
 			return &react;
 		} else {
 			return nullptr;
