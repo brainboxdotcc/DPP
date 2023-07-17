@@ -93,6 +93,8 @@ public:
 	std::string global_name;
 	/** Avatar hash */
 	utility::iconhash avatar;
+	/** Avatar decoration hash */
+	utility::iconhash avatar_decoration;
 	/** Flags built from a bitmask of values in dpp::user_flags */
 	uint32_t flags;
 	/** Discriminator (aka tag), 4 digits usually displayed with leading zeroes.
@@ -156,6 +158,15 @@ public:
 	 * @return std::string avatar url or an empty string, if the discriminator is empty
 	 */
 	std::string get_default_avatar_url() const;
+
+	/**
+	 * @brief Get the avatar decoration url of the user if they have one, otherwise returns an empty string.
+	 *
+	 * @param size The size of the avatar decoration in pixels. It can be any power of two between 16 and 4096,
+	 * otherwise the default sized avatar decoration is returned.
+	 * @return std::string avatar url or an empty string
+	 */
+	std::string get_avatar_decoration_url(uint16_t size = 0) const;
 
 	/**
 	 * @brief Return a ping/mention for the user
