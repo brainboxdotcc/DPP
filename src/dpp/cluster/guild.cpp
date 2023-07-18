@@ -150,12 +150,20 @@ void cluster::guild_sync_integration(snowflake guild_id, snowflake integration_i
 }
 
 
-void cluster::guild_get_onboarding(dpp::onboarding o, dpp::command_completion_event_t callback) {
-	rest_request<onboarding>(this, API_PATH "/guilds", std::to_string(o.guild_id), "onboarding", m_get, "", callback);
+void cluster::guild_get_onboarding(snowflake guild_id, dpp::command_completion_event_t callback) {
+	rest_request<onboarding>(this, API_PATH "/guilds", std::to_string(guild_id), "onboarding", m_get, "", callback);
 }
 
 void cluster::guild_edit_onboarding(dpp::onboarding o, dpp::command_completion_event_t callback) {
 	rest_request<onboarding>(this, API_PATH "/guilds", std::to_string(o.guild_id), "onboarding", m_put, o.build_json(), callback);
+}
+
+void cluster::guild_get_welcome_screen(dpp::snowflake guild_id, dpp::command_completion_event_t callback) {
+	rest_request<guild_welcome_screen>(this, API_PATH "/guilds", std::to_string(guild_id), "onboarding", m_get, "", callback);
+}
+
+void cluster::guild_edit_welcome_screen(dpp::snowflake guild_id, dpp::guild_welcome_screen welcome_screen, dpp::command_completion_event_t callback) {
+	rest_request<guild_welcome_screen>(this, API_PATH "/guilds", std::to_string(guild_id), "onboarding", m_patch, welcome_screen.build_json(), callback);
 }
 
 

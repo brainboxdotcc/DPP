@@ -1190,6 +1190,66 @@ struct DPP_EXPORT onboarding: public json_interface<onboarding> {
 	 * @return std::string json data
 	 */
 	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set guild_id of this onboarding object
+	 *
+	 * @param guild_id Guild ID to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding& set_guild_id(const snowflake id);
+
+	/**
+	 * @brief Set the mode of this onboarding object
+	 *
+	 * @param m onboarding_mode Mode to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding& set_mode(const onboarding_mode m);
+
+	/**
+	 * @brief Set the enabling of this onboarding object
+	 *
+	 * @param is_enabled bool Whether onboarding is enabled in the guild
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding& set_enabled(const bool is_enabled);
+};
+
+/**
+ * @brief Represents a guild welcome channel used in dpp::guild_welcome_screen
+ */
+struct DPP_EXPORT guild_welcome_channel {
+	snowflake channel_id; //!< The Channel's ID
+	std::string description; //!< The description shown for the channel
+	snowflake emoji_id; //!< The emoji id, if the emoji is custom
+	std::string emoji_name; //!< The emoji name if custom, the unicode character if standard, or null if no emoji is set
+};
+
+/**
+ * @brief Represents a guild welcome screen
+ */
+struct DPP_EXPORT guild_welcome_screen : public json_interface<guild_welcome_screen> {
+	std::string description; //!< The server description shown in the welcome screen
+	std::vector<guild_welcome_channel> welcome_channels; //!< The channels shown in the welcome screen (max 5)
+
+	guild_welcome_screen();
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	guild_welcome_screen& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
 };
 
 /**

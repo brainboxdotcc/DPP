@@ -1018,5 +1018,66 @@ std::string onboarding::build_json(bool with_id) const {
 	return j.dump();
 }
 
+onboarding &onboarding::set_guild_id(const snowflake id) {
+	this->guild_id = id;
+	return *this;
+}
+
+onboarding &onboarding::set_mode(const onboarding_mode m) {
+	this->mode = m;
+	return *this;
+}
+
+onboarding &onboarding::set_enabled(const bool is_enabled) {
+	this->enabled = is_enabled;
+	return *this;
+}
+
+guild_welcome_screen::guild_welcome_screen() {
+}
+
+guild_welcome_screen &guild_welcome_screen::fill_from_json(nlohmann::json *j) {
+	description = string_not_null(j, "description");
+
+	welcome_channels.clear();
+	if (j->contains("welcome_channels")) {
+		welcome_channels.reserve(j->at("welcome_channels").size());
+		for (auto &welcome_channel : j->at("welcome_channels")) {
+			guild_welcome_channel c;
+			c.channel_id = snowflake_not_null(&welcome_channel, "channel_id");
+			c.description = string_not_null(&welcome_channel, "channel_id");
+			c.emoji_id = snowflake_not_null(&welcome_channel, "emoji_id");
+			c.emoji_name = string_not_null(&welcome_channel, "emoji_name");
+			welcome_channels.push_back(c);
+		}
+	}
+	return *this;
+}
+
+std::string guild_welcome_screen::build_json(bool with_id) const {
+	json j;
+	if (!description.empty()) {
+		j["description"] = description;
+	}
+
+	if (!welcome_channels.empty()) {
+		j["welcome_channels"] = json::array();
+		for (auto &welcome_channel : welcome_channels) {
+			json ch;
+			ch["channel_id"] = std::to_string(welcome_channel.channel_id);
+			ch["description"] = welcome_channel.description;
+			if (!welcome_channel.emoji_id.empty()) {
+				ch["emoji_id"] = std::to_string(welcome_channel.emoji_id);
+			}
+			if (!welcome_channel.emoji_name.empty()) {
+				ch["emoji_name"] = welcome_channel.emoji_name;
+			}
+			j["welcome_channels"].push_back(ch);
+		}
+	}
+
+	return j.dump();
+}
+
 
 };
