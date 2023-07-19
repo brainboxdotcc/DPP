@@ -943,7 +943,9 @@ onboarding::onboarding(): guild_id(0), mode(gom_default), enabled(false) {
 
 onboarding_prompt_option &onboarding_prompt_option::fill_from_json(nlohmann::json *j) {
 	this->id = snowflake_not_null(j, "id");
-	this->emoji = dpp::emoji().fill_from_json(&j->at("emoji"));
+	if (j->contains("emoji")) {
+		this->emoji = dpp::emoji().fill_from_json(&j->at("emoji"));
+	}
 	this->title = string_not_null(j, "title");
 	this->description = string_not_null(j, "description");
 
