@@ -208,6 +208,57 @@ void interaction_create_t::delete_original_response(command_completion_event_t c
 	});
 }
 
+
+#ifdef DPP_CORO
+awaitable<confirmation_callback_t> interaction_create_t::co_reply() const {
+	return dpp::awaitable{[this](auto &&cb) { this->reply(cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const message & m) const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->reply(t, m, cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const std::string & mt) const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->reply(t, mt, cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_reply(const message & m) const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->reply(m, cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_reply(const std::string & mt) const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->reply(mt, cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_dialog(const interaction_modal_response& mr) const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->dialog(mr, cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_edit_response(const message & m) const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->edit_response(m, cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_edit_response(const std::string & mt) const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->edit_response(mt, cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_thinking(bool ephemeral) const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->thinking(ephemeral, cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_get_original_response() const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->get_original_response(cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_edit_original_response(const message & m) const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->edit_original_response(m, cb); }};
+}
+
+awaitable<confirmation_callback_t> interaction_create_t::co_delete_original_response() const {
+	return dpp::awaitable{[&, this](auto &&cb) { this->delete_original_response(cb); }};
+}
+#endif /* DPP_CORO */
+
 command_value interaction_create_t::get_parameter(const std::string& name) const
 {
 	const command_interaction ci = command.get_command_interaction();
