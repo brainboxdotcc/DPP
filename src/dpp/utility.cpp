@@ -115,6 +115,14 @@ namespace dpp {
 #endif
 		}
 
+		bool is_coro_enabled() {
+#ifdef DPP_CORO
+			return true;
+#else
+			return false;
+#endif
+		}
+
 		std::string current_date_time() {
 #ifdef _WIN32
 			std::time_t curr_time = time(nullptr);

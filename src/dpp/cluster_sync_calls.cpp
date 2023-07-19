@@ -105,6 +105,10 @@ confirmation cluster::interaction_response_edit_sync(const std::string &token, c
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const std::string &, const message &, command_completion_event_t)>(&cluster::interaction_response_edit), token, m);
 }
 
+message cluster::interaction_response_get_original_sync(const std::string &token) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::interaction_response_get_original), token);
+}
+
 confirmation cluster::interaction_followup_create_sync(const std::string &token, const message &m) {
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const std::string &, const message &, command_completion_event_t)>(&cluster::interaction_followup_create), token, m);
 }
@@ -123,6 +127,10 @@ confirmation cluster::interaction_followup_edit_sync(const std::string &token, c
 
 message cluster::interaction_followup_get_sync(const std::string &token, snowflake message_id) {
 	return dpp::sync<message>(this, static_cast<void (cluster::*)(const std::string &, snowflake, command_completion_event_t)>(&cluster::interaction_followup_get), token, message_id);
+}
+
+message cluster::interaction_followup_get_original_sync(const std::string &token) {
+	return dpp::sync<message>(this, static_cast<void (cluster::*)(const std::string &, command_completion_event_t)>(&cluster::interaction_followup_get_original), token);
 }
 
 automod_rule_map cluster::automod_rules_get_sync(snowflake guild_id) {

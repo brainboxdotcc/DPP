@@ -127,6 +127,9 @@ std::string user::get_default_avatar_url() const {
 }
 
 std::string user::format_username() const {
+	if (!global_name.empty()) {
+		return global_name;
+	}
 	return username + '#' + leading_zeroes(discriminator, 4);
 }
 

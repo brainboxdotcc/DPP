@@ -645,7 +645,7 @@ void discord_client::disconnect_voice_internal(snowflake guild_id, bool emit_jso
 	std::unique_lock lock(voice_mutex);
 	auto v = connecting_voice_channels.find(guild_id);
 	if (v != connecting_voice_channels.end()) {
-		log(ll_debug, "Disconnecting voice, guild: {}" + std::to_string(guild_id));
+		log(ll_debug, "Disconnecting voice, guild: " + std::to_string(guild_id));
 		if (emit_json) {
 			queue_message(jsonobj_to_string(json({
 				{ "op", 4 },

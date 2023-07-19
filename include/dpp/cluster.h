@@ -348,6 +348,16 @@ public:
 	 */
 	bool stop_timer(timer t);
 
+#ifdef DPP_CORO
+	/**
+	 * @brief Start a one-time timer. Use the co_await keyword on its return value to suspend the coroutine until the timer ends
+	 * 
+	 * @param seconds How long to run the timer for
+	 * @return awaitable<timer> co_await-able object holding the timer_handle
+	 */
+	awaitable<timer> co_timer(uint64_t seconds);
+#endif
+
 	/**
 	 * @brief Get the dm channel for a user id
 	 *
@@ -1290,6 +1300,16 @@ public:
 	void interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Get the original response to a slash command
+	 *
+	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
+	 * @param token Token for the interaction webhook
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void interaction_response_get_original(const std::string &token, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Create a followup message to a slash command
 	 *
 	 * @see https://discord.com/developers/docs/interactions/receiving-and-responding#create-interaction-response
@@ -1344,6 +1364,17 @@ public:
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void interaction_followup_get(const std::string &token, snowflake message_id, command_completion_event_t callback);
+	
+	/**
+	 * @brief Get the original followup message to a slash command
+	 * This is an alias for cluster::interaction_response_get_original
+	 * @see cluster::interaction_response_get_original
+	 * 
+	 * @param token Token for the interaction webhook
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void interaction_followup_get_original(const std::string &token, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these).
