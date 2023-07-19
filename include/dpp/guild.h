@@ -438,8 +438,6 @@ struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
 	std::string description;
 	/// The channels shown in the welcome screen (max 5)
 	std::vector<welcome_channel> welcome_channels;
-	/// Whether the welcome screen should be enabled or disabled. It's empty for received welcome-screens. Only for modifying the welcome screen
-	std::optional<bool> enabled;
 
 	/**
 	 * @brief Read class values from json object
@@ -464,14 +462,6 @@ struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
 	 * @return Reference to self, so these method calls may be chained
 	 */
 	welcome_screen& set_description(const std::string& s);
-
-	/**
-	 * @brief Set whether this welcome screen should be enabled or not
-	 *
-	 * @param is_enabled bool Whether the welcome screen should be enabled or disabled
-	 * @return Reference to self, so these method calls may be chained
-	 */
-	welcome_screen& set_enabled(const bool is_enabled);
 };
 
 /**

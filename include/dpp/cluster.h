@@ -2686,10 +2686,11 @@ public:
 	 * @see https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen
 	 * @param guild_id The guild ID to edit the welcome screen for
 	 * @param welcome_screen The welcome screen
+	 * @param enabled Whether the welcome screen should be enabled or disabled
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_welcome_screen object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_edit_welcome_screen(snowflake guild_id, const struct welcome_screen& welcome_screen, command_completion_event_t callback = utility::log_error());
+	void guild_edit_welcome_screen(snowflake guild_id, const struct welcome_screen& welcome_screen, bool enabled, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Create a webhook

@@ -338,9 +338,6 @@ std::string welcome_screen::build_json(bool with_id) const {
 	if (!description.empty()) {
 		j["description"] = description;
 	}
-	if (enabled.has_value()) {
-		j["enabled"] = enabled.value();
-	}
 
 	if (!welcome_channels.empty()) {
 		j["welcome_channels"] = json::array();
@@ -354,11 +351,6 @@ std::string welcome_screen::build_json(bool with_id) const {
 
 welcome_screen &welcome_screen::set_description(const std::string &s){
 	this->description = s;
-	return *this;
-}
-
-welcome_screen &welcome_screen::set_enabled(const bool is_enabled) {
-	this->enabled = is_enabled;
 	return *this;
 }
 
