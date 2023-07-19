@@ -30,7 +30,6 @@
 #include <string>
 #include <unordered_map>
 #include <dpp/json_interface.h>
-#include <optional>
 
 namespace dpp {
 
