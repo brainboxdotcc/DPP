@@ -254,13 +254,6 @@ namespace dpp {
 		bool DPP_EXPORT has_voice();
 
 		/**
-		 * @brief Returns true if D++ was built with coroutine support
-		 * 
-		 * @return bool True if coroutines are supported 
-		 */
-		bool DPP_EXPORT is_coro_enabled();
-
-		/**
 		 * @brief Convert a byte count to display value
 		 * 
 		 * @param c number of bytes
