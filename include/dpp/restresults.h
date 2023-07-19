@@ -193,7 +193,7 @@ typedef std::variant<
 		automod_rule,
 		automod_rule_map,
 		onboarding,
-		guild_welcome_screen
+		welcome_screen
 	> confirmable_t;
 
 /**

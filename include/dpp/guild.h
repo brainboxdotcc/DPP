@@ -30,6 +30,7 @@
 #include <string>
 #include <unordered_map>
 #include <dpp/json_interface.h>
+#include <optional>
 
 namespace dpp {
 
@@ -383,26 +384,94 @@ public:
 /**
  * @brief Defines a channel on a server's welcome screen
  */
-struct welcome_channel_t {
-	/// the description shown for the channel
+struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
+	/// The description shown for the channel
 	std::string description;
-	/// the emoji name if custom, the unicode character if standard, or null if no emoji is set
+	/// The emoji name if custom, the unicode character if standard, or null if no emoji is set
 	std::string emoji_name;
-	/// the channel's id
-	snowflake channel_id = 0;
-	/// the emoji id, if the emoji is custom
-	snowflake emoji_id = 0;
+	/// The channel's id
+	snowflake channel_id;
+	/// The emoji id, if the emoji is custom
+	snowflake emoji_id;
+
+	welcome_channel();
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_channel& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the channel ID of this welcome channel object
+	 *
+	 * @param _channel_id The channel ID to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_channel& set_channel_id(const snowflake _channel_id);
+
+	/**
+	 * @brief Set the description of this welcome channel object
+	 *
+	 * @param _description The description to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_channel& set_description(const std::string& _description);
 };
 
 
 /**
  * @brief Defines a server's welcome screen
  */
-struct welcome_screen_t {
-	/// the server description shown in the welcome screen
+struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
+	/// The server description shown in the welcome screen
 	std::string description;
-	/// the channels shown in the welcome screen, up to 5
-	std::vector<welcome_channel_t> welcome_channels;
+	/// The channels shown in the welcome screen (max 5)
+	std::vector<welcome_channel> welcome_channels;
+	/// Whether the welcome screen should be enabled or disabled. It's empty for received welcome-screens. Only for modifying the welcome screen
+	std::optional<bool> enabled;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_screen& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the server description for this welcome screen object shown in the welcome screen
+	 *
+	 * @param s string The server description
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_screen& set_description(const std::string& s);
+
+	/**
+	 * @brief Set whether this welcome screen should be enabled or not
+	 *
+	 * @param is_enabled bool Whether the welcome screen should be enabled or disabled
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_screen& set_enabled(const bool is_enabled);
 };
 
 /**
@@ -553,7 +622,7 @@ public:
 
 	/** Welcome screen
 	 */
-	welcome_screen_t welcome_screen;
+	dpp::welcome_screen welcome_screen;
 
 	/** Guild icon hash */
 	utility::iconhash icon;
@@ -1058,8 +1127,8 @@ public:
  * @brief The onboarding mode for the dpp::onboarding object. Defines the criteria used to satisfy Onboarding constraints that are required for enabling.
  */
 enum onboarding_mode: uint8_t {
-	gom_default = 0, //!< Counts only Default Channels towards constraints
-	gom_advanced = 1, //!< Counts Default Channels and Questions towards constraints
+	gom_default = 	0, //!< Counts only Default Channels towards constraints
+	gom_advanced = 	1, //!< Counts Default Channels and Questions towards constraints
 };
 
 /**
@@ -1075,7 +1144,7 @@ enum onboarding_prompt_type: uint8_t {
  */
 enum onboarding_prompt_flags: uint8_t {
 	opf_single_select = 1 << 0, //!< Indicates whether users are limited to selecting one option for the prompt
-	opf_required = 1 << 1, //!< Indicates whether the prompt is required before a user completes the onboarding flow
+	opf_required =		1 << 1, //!< Indicates whether the prompt is required before a user completes the onboarding flow
 	opf_in_onboarding = 1 << 2, //!< Indicates whether the prompt is present in the onboarding flow. If set, the prompt will only appear in the Channels & Roles tab
 };
 
@@ -1085,7 +1154,7 @@ enum onboarding_prompt_flags: uint8_t {
 struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interface<onboarding_prompt_option> {
 	std::vector<snowflake> channel_ids; //!< IDs for channels a member is added to when the option is selected
 	std::vector<snowflake> role_ids; //!< IDs for roles assigned to a member when the option is selected
-	dpp::emoji e; //!< Emoji of the option
+	dpp::emoji emoji; //!< Emoji of the option
 	std::string title; //!< Title of the option
 	std::string description; //!< Description of the option
 
@@ -1109,6 +1178,30 @@ struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interfac
 	 * @return std::string json data
 	 */
 	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the emoji of this onboarding prompt option object
+	 *
+	 * @param _emoji The emoji to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt_option& set_emoji(const dpp::emoji& _emoji);
+
+	/**
+	 * @brief Set the title of this onboarding prompt option object
+	 *
+	 * @param _title The title to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt_option& set_title(const std::string& _title);
+
+	/**
+	 * @brief Set the description of this onboarding prompt option object
+	 *
+	 * @param _description The description to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt_option& set_description(const std::string& _description);
 };
 
 /**
@@ -1140,6 +1233,22 @@ struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboa
 	 * @return std::string json data
 	 */
 	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the type of this onboarding prompt object
+	 *
+	 * @param _type The prompt type to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt& set_type(const onboarding_prompt_type _type);
+
+	/**
+	 * @brief Set the title of this onboarding prompt object
+	 *
+	 * @param _title The title to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt& set_title(const std::string& _title);
 
 	/**
 	 * @brief Indicates whether users are limited to selecting one option for the prompt
@@ -1214,42 +1323,6 @@ struct DPP_EXPORT onboarding: public json_interface<onboarding> {
 	 * @return Reference to self, so these method calls may be chained
 	 */
 	onboarding& set_enabled(const bool is_enabled);
-};
-
-/**
- * @brief Represents a guild welcome channel used in dpp::guild_welcome_screen
- */
-struct DPP_EXPORT guild_welcome_channel {
-	snowflake channel_id; //!< The Channel's ID
-	std::string description; //!< The description shown for the channel
-	snowflake emoji_id; //!< The emoji id, if the emoji is custom
-	std::string emoji_name; //!< The emoji name if custom, the unicode character if standard, or null if no emoji is set
-};
-
-/**
- * @brief Represents a guild welcome screen
- */
-struct DPP_EXPORT guild_welcome_screen : public json_interface<guild_welcome_screen> {
-	std::string description; //!< The server description shown in the welcome screen
-	std::vector<guild_welcome_channel> welcome_channels; //!< The channels shown in the welcome screen (max 5)
-
-	guild_welcome_screen();
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	guild_welcome_screen& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 };
 
 /**
