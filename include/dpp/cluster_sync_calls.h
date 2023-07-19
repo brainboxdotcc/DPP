@@ -302,6 +302,20 @@ confirmation interaction_response_create_sync(snowflake interaction_id, const st
 confirmation interaction_response_edit_sync(const std::string &token, const message &m);
 
 /**
+ * @brief Get the original response to a slash command
+ *
+ * @see dpp::cluster::interaction_response_get_original
+ * @see https://discord.com/developers/docs/interactions/receiving-and-responding#get-original-interaction-response
+ * @param token Token for the interaction webhook
+ * @return message returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+message interaction_response_get_original_sync(const std::string &token);
+
+/**
  * @brief Create a followup message to a slash command
  *
  * @see dpp::cluster::interaction_followup_create
@@ -376,6 +390,21 @@ confirmation interaction_followup_edit_sync(const std::string &token, const mess
  * Avoid direct use of this function inside an event handler.
  */
 message interaction_followup_get_sync(const std::string &token, snowflake message_id);
+
+/**
+ * @brief Get the original followup message to a slash command
+ * This is an alias for cluster::interaction_response_get_original
+ * @see dpp::cluster::interaction_followup_get_original
+ * @see cluster::interaction_response_get_original
+ * 
+ * @param token Token for the interaction webhook
+ * @return message returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+message interaction_followup_get_original_sync(const std::string &token);
 
 /**
  * @brief Get all auto moderation rules for a guild
