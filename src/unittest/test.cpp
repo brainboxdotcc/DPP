@@ -23,9 +23,15 @@
 #include <dpp/restrequest.h>
 #include <dpp/json.h>
 
+namespace {
+	/**
+	 * @brief Thread emoji - https://www.compart.com/en/unicode/U+1F9F5
+	 */
+	inline const std::string THREAD_EMOJI = "\xF0\x9F\xA7\xB5";
+}
 
 /* Unit tests go here */
-int main()
+int main(int argc, char *argv[])
 {
 	std::string token(get_token());
 
@@ -33,7 +39,9 @@ int main()
 	if (offline) {
 		std::cout << "Running offline unit tests only.\n";
 	} else {
-		std::cout << "Running offline and online unit tests. Guild ID: " << TEST_GUILD_ID << " Text Channel ID: " << TEST_TEXT_CHANNEL_ID << " VC ID: " << TEST_VC_ID << " User ID: " << TEST_USER_ID << " Event ID: " << TEST_EVENT_ID << "\n";
+		if (argc > 1 && std::find_if(argv + 1, argv + argc, [](const char *a){ return (std::strcmp(a, "full") == 0); }) != argv + argc)
+			extended = true;
+		std::cout << "Running offline and " << (extended ? "extended" : "limited") << " online unit tests. Guild ID: " << TEST_GUILD_ID << " Text Channel ID: " << TEST_TEXT_CHANNEL_ID << " VC ID: " << TEST_VC_ID << " User ID: " << TEST_USER_ID << " Event ID: " << TEST_EVENT_ID << "\n";
 	}
 
 	std::string test_to_escape = "*** _This is a test_ ***\n```cpp\n\
@@ -800,6 +808,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			}
 
 			void test_pin() {
+				if (!extended) {
+					set_pin_tested();
+					return;
+				}
 				set_test("MESSAGEPIN", false);
 				set_test("MESSAGEUNPIN", false);
 				bot.message_pin(channel_id, message_id, [=](const dpp::confirmation_callback_t &callback) {
@@ -859,12 +871,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			bool members_tested = false;
 			bool messages_tested = false;
 			bool events_tested = false;
+			bool get_active_tested = false;
 			uint32_t events_tested_mask = 0;
 			uint32_t events_to_test_mask = 0;
 
 			void delete_if_done()
 			{
-				if (edit_tested && members_tested && messages_tested && events_tested) {
+				if (edit_tested && members_tested && messages_tested && events_tested && get_active_tested) {
 					bot.channel_delete(thread_id);
 				}
 			}
@@ -896,6 +909,15 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				delete_if_done();
 			}
 
+			void set_get_active_tested()
+			{
+				if (get_active_tested) {
+					return;
+				}
+				get_active_tested = true;
+				delete_if_done();
+			}
+
 			void set_messages_tested()
 			{
 				if (messages_tested) {
@@ -912,7 +934,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				}
 				events_tested_mask |= flag;
 				for (uint32_t i = 1; i < EVENT_END; i <<= 1) {
-					if ((events_tested_mask & i) != i)
+					if ((events_to_test_mask & i) && (events_tested_mask & i) != i)
 						return;
 				}
 				set_events_tested();
@@ -961,17 +983,42 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				}
 			}
 
-            void test_members(const dpp::thread &thread)
-            {
+			void test_get_active(const dpp::thread &thread)
+			{
 				std::lock_guard lock{mutex};
-				set_test("THREAD_MEMBER_ADD", false);
-				set_test("THREAD_MEMBER_GET", false);
-				set_test("THREAD_MEMBERS_GET", false);
-				set_test("THREAD_MEMBER_REMOVE", false);
-				set_test("THREAD_MEMBERS_ADD_EVENT", false);
-				set_test("THREAD_MEMBERS_REMOVE_EVENT", false);
+
 				set_test("THREAD_GET_ACTIVE", false);
+				bot.threads_get_active(TEST_GUILD_ID, [this](const dpp::confirmation_callback_t &callback) {
+					std::lock_guard lock{mutex};
+					if (!callback.is_error()) {
+						const auto &threads = callback.get<dpp::active_threads>();
+						if (auto thread_it = threads.find(thread_id); thread_it != threads.end()) {
+							const auto &thread = thread_it->second.active_thread;
+							const auto &member = thread_it->second.bot_member;
+							if (thread.id == thread_id && member.has_value() && member->user_id == bot.me.id) {
+								set_test("THREAD_GET_ACTIVE", true);
+							}
+						}
+					}
+					set_get_active_tested();
+				});
+			}
+
+			void test_members(const dpp::thread &thread)
+			{
+				std::lock_guard lock{mutex};
+
 				if (!members_tested) {
+					if (!extended) {
+						set_members_tested();
+						return;
+					}
+					set_test("THREAD_MEMBER_ADD", false);
+					set_test("THREAD_MEMBER_GET", false);
+					set_test("THREAD_MEMBERS_GET", false);
+					set_test("THREAD_MEMBER_REMOVE", false);
+					set_test("THREAD_MEMBERS_ADD_EVENT", false);
+					set_test("THREAD_MEMBERS_REMOVE_EVENT", false);
 					bot.thread_member_add(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
 						std::lock_guard lock{mutex};
 						if (callback.is_error()) {
@@ -998,34 +1045,27 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 									return;
 								}
 								set_test("THREAD_MEMBERS_GET", true);
-								bot.threads_get_active(TEST_GUILD_ID, [this](const dpp::confirmation_callback_t &callback) {
+								bot.thread_member_remove(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
 									std::lock_guard lock{mutex};
 									if (!callback.is_error()) {
-										const auto &threads = callback.get<dpp::active_threads>();
-										if (auto thread_it = threads.find(thread_id); thread_it != threads.end()) {
-											const auto &thread = thread_it->second.active_thread;
-											const auto &member = thread_it->second.bot_member;
-											if (thread.id == thread_id && member.has_value() && member->user_id == bot.me.id) {
-												set_test("THREAD_GET_ACTIVE", true);
-											}
-										}
+										set_test("THREAD_MEMBER_REMOVE", true);
 									}
-									bot.thread_member_remove(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
-										std::lock_guard lock{mutex};
-										if (!callback.is_error()) {
-											set_test("THREAD_MEMBER_REMOVE", true);
-										}
-										set_members_tested();
-									});
+									set_members_tested();
 								});
 							});
 						});
 					});
 				}
-            }
+			}
 
 			void test_messages(const dpp::thread &thread)
 			{
+				if (!extended) {
+					set_messages_tested();
+					set_events_tested();
+					return;
+				}
+
 				std::lock_guard lock{mutex};
 				set_test("THREAD_MESSAGE", false);
 				set_test("THREAD_MESSAGE_CREATE_EVENT", false);
@@ -1083,14 +1123,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				});
 			}
 
-			void confirm_message_receive()
-			{
-				std::lock_guard lock{mutex};
-			}
-
 			void run(const dpp::thread &thread)
 			{
 				thread_id = thread.id;
+				test_get_active(thread);
 				test_edit(thread);
 				test_members(thread);
 				test_messages(thread);
@@ -1357,18 +1393,25 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					}
 
 					bot.invite_get(created.code, [&bot, created](const dpp::confirmation_callback_t &event) {
-						if (event.is_error()) return;
+						if (!event.is_error()) {
+							auto retrieved = event.get<dpp::invite>();
+							if (retrieved.code == created.code && retrieved.guild_id == created.guild_id && retrieved.channel_id == created.channel_id && retrieved.inviter.id == created.inviter.id) {
+								if (retrieved.destination_guild.flags & dpp::g_community)
+									set_test("INVITE_GET", retrieved.expires_at == 0);
+								else
+									set_test("INVITE_GET", true);
 
-						auto retrieved = event.get<dpp::invite>();
-						if (retrieved.code == created.code && retrieved.expires_at == 0 && retrieved.guild_id == created.guild_id && retrieved.channel_id == created.channel_id && retrieved.inviter.id == created.inviter.id) {
-							set_test("INVITE_GET", true);
+							}
+							else {
+								set_test("INVITE_GET", false);
+							}
+						} else {
+							set_test("INVITE_GET", false);
 						}
 
 						set_test("INVITE_DELETE_EVENT", false);
-						bot.invite_delete(retrieved.code, [](const dpp::confirmation_callback_t &event) {
-							if (!event.is_error()) {
-								set_test("INVITE_DELETE", true);
-							}
+						bot.invite_delete(created.code, [](const dpp::confirmation_callback_t &event) {
+							set_test("INVITE_DELETE", !event.is_error());
 						});
 					});
 				});
