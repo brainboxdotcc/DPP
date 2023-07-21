@@ -393,7 +393,15 @@ struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
 	/// The emoji id, if the emoji is custom
 	snowflake emoji_id;
 
+	/**
+	 * @brief Construct a new welcome channel object
+	 */
 	welcome_channel();
+
+	/**
+	 * @brief Destroy the welcome channel object
+	 */
+	virtual ~welcome_channel() = default;
 
 	/**
 	 * @brief Read class values from json object
@@ -437,6 +445,16 @@ struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
 	std::string description;
 	/// The channels shown in the welcome screen (max 5)
 	std::vector<welcome_channel> welcome_channels;
+
+	/**
+	 * @brief Construct a new welcome screen object
+	 */
+	welcome_screen() = default;
+
+	/**
+	 * @brief Destroy the welcome screen object
+	 */
+	virtual ~welcome_screen() = default;
 
 	/**
 	 * @brief Read class values from json object
@@ -1153,6 +1171,11 @@ struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interfac
 	onboarding_prompt_option();
 
 	/**
+	 * @brief Destroy the onboarding prompt option object
+	 */
+	virtual ~onboarding_prompt_option() = default;
+
+	/**
 	 * @brief Read class values from json object
 	 *
 	 * @param j A json object to read from
@@ -1206,6 +1229,11 @@ struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboa
 	 * @brief Construct a new onboarding prompt object
 	 */
 	onboarding_prompt();
+
+	/**
+	 * @brief Destroy the onboarding prompt object
+	 */
+	virtual ~onboarding_prompt() = default;
 
 	/**
 	 * @brief Read class values from json object
@@ -1272,6 +1300,11 @@ struct DPP_EXPORT onboarding: public json_interface<onboarding> {
 	 * @brief Construct a new onboarding object
 	 */
 	onboarding();
+
+	/**
+	 * @brief Destroy the onboarding object
+	 */
+	virtual ~onboarding() = default;
 
 	/**
 	 * @brief Read class values from json object
