@@ -327,7 +327,7 @@ welcome_screen &welcome_screen::fill_from_json(nlohmann::json *j) {
 	if (j->contains("welcome_channels")) {
 		welcome_channels.reserve(j->at("welcome_channels").size());
 		for (auto &c : j->at("welcome_channels")) {
-			welcome_channels.push_back(welcome_channel().fill_from_json(&c));
+			welcome_channels.emplace_back(welcome_channel().fill_from_json(&c));
 		}
 	}
 	return *this;
@@ -675,12 +675,7 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		this->nsfw_level = (guild_nsfw_level_t)int8_not_null(d, "nsfw_level");
 
 		if (d->find("welcome_screen") != d->end()) {
-			json& w = (*d)["welcome_screen"];
-			set_string_not_null(&w, "description", welcome_screen.description);
-			welcome_screen.welcome_channels.reserve(w["welcome_channels"].size());
-			for (auto& wc : w["welcome_channels"]) {
-				welcome_screen.welcome_channels.emplace_back(welcome_channel().fill_from_json(&wc));
-			}
+			this->welcome_screen = dpp::welcome_screen().fill_from_json(&d->at("welcome_screen"));
 		}
 
 		set_snowflake_not_null(d, "safety_alerts_channel_id", this->safety_alerts_channel_id);
