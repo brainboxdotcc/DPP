@@ -49,7 +49,7 @@ Coroutines can make commands simpler by eliminating callbacks, which can be very
 
 In order to be a coroutine, a function has to return a special type with special functions; D++ offers `dpp::task` which is designed to work seamlessly with asynchronous calls through `dpp::awaitable`, which all the processes starting with `co_` such as `dpp::cluster::co_message_create` return. To turn a function into a coroutine, make it return `dpp::task<void>` as seen in the example in line 10.
 
-When an available is `co_await`-ed, the coroutine suspends (pauses) and returns back to its caller : in other words, the program is free to go and do other things while the data is being retrieved, D++ will resume your coroutine when it has the data you need which will be returned from the `co_await` expression.
+When an awaitable is `co_await`-ed, the coroutine suspends (pauses) and returns back to its caller : in other words, the program is free to go and do other things while the data is being retrieved, D++ will resume your coroutine when it has the data you need which will be returned from the `co_await` expression.
 
 Inside of a `dpp::task`, someone can use `co_return` in place of `return`.
 
