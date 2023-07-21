@@ -16,17 +16,20 @@ The easiest way is to use our [template project](https://github.com/brainboxdotc
 ## Does this library support Visual Studio 2022?
 Yes! The master branch comes with pre-built binaries for Visual Studio 2022 and our windows bot template has a [vs2022 branch](https://github.com/brainboxdotcc/windows-bot-template/tree/vs2022) which you can clone to get Visual Studio 2022 specific code. For the time being we support both Visual Studio 2019 and 2022. At some point in the future only 2022 may be supported as 2019 becomes outdated.
 
-## How much of the library is completed?
-All REST calls (outbound commands) are completed including all currently available interactions, and all Discord events are available. The library also has voice support.
-
-## How do I chat with the developers or get help?
-The best place to do this is on the [Discord server](https://discord.gg/dpp). You most likely won't get an answer immediately (we have lives, and need to sleep sometimes), but we will be willing to help!
-
-## How can I contribute to development?
-Just star and fork a copy of the repository, and submit a Pull Request! We won't bite! Authors of accepted pull requests get a special role on our [Discord server](https://discord.gg/dpp).
-
-## Whats the best way to learn C++?
-A simple search can find some learning tools, however not all are good. Here is a list of some (good) learning resources:
+## How do I setup D++ manually with Visual Studio 2022?
+We have a whole article covering this topic: \ref build-a-discord-bot-windows-advanced. Please be aware that we can't offer any support for manual setups. Use our [template project](https://github.com/brainboxdotcc/windows-bot-template) instead!
+  
+## How much of the library is completed?  
+All REST calls (outbound commands) are completed including all currently available interactions, and all Discord events are available. The library also has voice support.  
+  
+## How do I chat with the developers or get help?  
+The best place to do this is on the [Discord server](https://discord.gg/dpp). You most likely won't get an answer immediately (we have lives, and need to sleep sometimes), but we will be willing to help!  
+  
+## How can I contribute to development?  
+Just star and fork a copy of the repository, and submit a Pull Request! We won't bite! Authors of accepted pull requests get a special role on our [Discord server](https://discord.gg/dpp).  
+  
+## Whats the best way to learn C++?  
+A simple search can find some learning tools, however not all are good. Here is a list of some (good) learning resources:  
 
 * [CodeAcademy](https://www.codecademy.com/learn/c-plus-plus)
 * [Learn CPP](https://www.learncpp.com/)
