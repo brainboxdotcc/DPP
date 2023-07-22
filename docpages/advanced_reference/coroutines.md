@@ -115,7 +115,6 @@ int main() {
 \note This next example is fairly advanced and makes uses of many of both C++ and D++'s advanced features.
 Lastly, `dpp::task` takes its return type as a template parameter, which allows you to use tasks inside tasks and return a result from them.
 Here is an example of a command making use of that to retrieve the avatar of a specified user, or if missing, the sender :
-
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 
