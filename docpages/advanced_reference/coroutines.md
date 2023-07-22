@@ -6,8 +6,11 @@
 
 Introduced in C++20, coroutines are the solution to the impracticality of callbacks. In short, a coroutine is a function that can be paused and resumed later : they are an extremely powerful alternative to callbacks for asynchronous APIs in particular, as the function can be paused when waiting for an API response, and resumed when it is received.
 Let's revisit [attaching a downloaded file](/attach-file.html), but this time with a coroutine :
+
+
 ~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
+
 int main() {
     dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
     bot.on_log(dpp::utility::cout_logger());
@@ -33,6 +36,7 @@ int main() {
 }
 ~~~~~~~~~~~~~~~
 
+
 Coroutines can make commands simpler by eliminating callbacks, which can be very handy in the case of complex commands that rely on a lot of different data or steps. 
 
 In order to be a coroutine, a function has to return a special type with special functions; D++ offers `dpp::task` which is designed to work seamlessly with asynchronous calls through `dpp::awaitable`, which all the functions starting with `co_` such as `dpp::cluster::co_message_create` return. To turn a function into a coroutine, simply make it return `dpp::task<void>` as seen in the example at line 10.
@@ -50,8 +54,10 @@ Similarly, with reference parameters, the object they reference to might be dest
 
 Coroutines allow to write asynchronous functions almost as if they were executed synchronously, without the need for callbacks, which can save a lot of pain with keeping track of different data. Here is another example of what is made easier with coroutines : an "addemoji" command taking a file and a name as a parameter. This means downloading the emoji, submitting it to Discord, and finally replying, with some error handling along the way.
 
+
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
+
 int main() {
     dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
     bot.on_log(dpp::utility::cout_logger());
@@ -103,12 +109,16 @@ int main() {
     bot.start(dpp::st_wait);
 }
 ~~~~~~~~~~
+
+
 ### I heard you liked tasks
 \note This next example is fairly advanced and makes uses of many of both C++ and D++'s advanced features.
 Lastly, `dpp::task` takes its return type as a template parameter, which allows you to use tasks inside tasks and return a result from them.
 Here is an example of a command making use of that to retrieve the avatar of a specified user, or if missing, the sender :
+
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
+
 int main() {
     dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
     bot.on_log(dpp::utility::cout_logger());
