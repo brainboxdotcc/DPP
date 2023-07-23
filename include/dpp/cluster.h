@@ -2674,7 +2674,7 @@ public:
 	 * @see https://discord.com/developers/docs/resources/guild#get-guild-welcome-screen
 	 * @param guild_id The guild ID to get the welcome screen from
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::guild_welcome_screen object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::welcome_screen object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_get_welcome_screen(snowflake guild_id, command_completion_event_t callback);
 
@@ -2688,7 +2688,7 @@ public:
 	 * @param welcome_screen The welcome screen
 	 * @param enabled Whether the welcome screen should be enabled or disabled
 	 * @param callback Function to call when the API call completes.
-	 * On success the callback will contain a dpp::guild_welcome_screen object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * On success the callback will contain a dpp::welcome_screen object in confirmation_callback_t::value filled to match the vanity url. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void guild_edit_welcome_screen(snowflake guild_id, const struct welcome_screen& welcome_screen, bool enabled, command_completion_event_t callback = utility::log_error());
 
