@@ -12,37 +12,32 @@ something like `dpp::cluster::request()`.
 
 int main()
 {
-        dpp::cluster bot("token");
+	dpp::cluster bot("token");
 
-        bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
-        bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
-                if (event.command.type == dpp::it_application_command) {
-                        dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
-                        if (cmd_data.name == "show") {
-                                dpp::snowflake file_id = std::get<dpp::snowflake>(event.get_parameter("file"));
-                                auto iter = event.command.resolved.attachments.find(file_id);
-                                if (iter != event.command.resolved.attachments.end()) {
-                                        const dpp::attachment& att = iter->second;
-                                        event.reply(att.url);
-                                }
-                        }
-                }
-        });
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
+		dpp::command_interaction cmd_data = std::get<dpp::command_interaction>(event.command.data);
+		if (cmd_data.name == "show") {
+			dpp::snowflake file_id = std::get<dpp::snowflake>(event.get_parameter("file"));
+			dpp::attachment att = event.command.get_resolved_attachment(file_id);
+			event.reply(att.url);
+		}
+	});
 
-        bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t & event) {
 
-                if (dpp::run_once<struct register_bot_commands>()) {
-                        dpp::slashcommand newcommand("show", "Show an uploaded file", bot.me.id);
+		if (dpp::run_once<struct register_bot_commands>()) {
+			dpp::slashcommand newcommand("show", "Show an uploaded file", bot.me.id);
 
-                        newcommand.add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image"));
+			newcommand.add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image"));
 
-                        bot.global_command_create(newcommand);
-                }
-        });
+			bot.global_command_create(newcommand);
+		}
+	});
 
-        bot.start(dpp::st_wait);
+	bot.start(dpp::st_wait);
 
-        return 0;
+	return 0;
 }
 ~~~~~~~~~~~~~~~~

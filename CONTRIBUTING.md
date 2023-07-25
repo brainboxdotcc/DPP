@@ -15,6 +15,4 @@ When contributing to this repository, please do not feel intimidated! We welcome
    including indent style etc).
 7. Your PR must pass the CI actions before being allowed to be merged. Our PR actions check that the
    build will compile on various platforms before release and makes precompiled versions of the library.
-8. If you are on the discord server for the project and your PR is accepted, let a moderator know and we
-   will grant you the 'Contributors' role.
-
+8. Automated changes e.g. via grammarly or a static analysis tool will not usually be accepted into the code without proper thought out justification (by a human being, not an AI or an App) as to why the changes are required. Generally a PR should do more than fix a single spelling error for example as this just takes precious time for something which could be resolved a direct commit to the dev branch.

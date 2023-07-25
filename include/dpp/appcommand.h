@@ -474,7 +474,7 @@ public:
 };
 
 /**
- * @brief Resolved snowflake ids to users, guild members, roles and channels.
+ * @brief Resolved snowflake ids to users, guild members, roles and channels. You can use the `interaction::get_resolved_*` methods to easily get a resolved set
  */
 struct DPP_EXPORT command_resolved {
 	/**
@@ -695,7 +695,7 @@ public:
 	user usr;                                                   //!< User object for the invoking user
 	std::string token;                                          //!< a continuation token for responding to the interaction
 	uint8_t version;                                            //!< read-only property, always 1
-	command_resolved resolved;				    //!< Resolved user/role etc
+	command_resolved resolved;				    //!< Resolved data e.g. users, members, roles, channels, permissions, etc.
 	std::string locale;                                         //!< User's [locale](https://discord.com/developers/docs/reference#locales) (language)
 	std::string guild_locale;                                   //!< Guild's locale (language) - for guild interactions only
 	cache_policy_t cache_policy;                                //!< Cache policy from cluster
