@@ -158,11 +158,11 @@ public:
 			warning(event);
 		}
 		std::shared_lock l(lock);
-		std::for_each(dispatch_container.begin(), dispatch_container.end(), [&](auto &ev) {
+		for (const auto& ev : dispatch_container) {
 			if (!event.is_cancelled()) {
 				ev.second(event);
 			}
-		});
+		};
 #ifdef DPP_CORO
 		auto coro_exception_handler = [from = event.from](std::exception_ptr ptr) {
 			try {
@@ -173,13 +173,13 @@ public:
 					from->creator->log(dpp::loglevel::ll_error, std::string{"Uncaught exception in event coroutine: "} + exception.what());
 			}
 		};
-		std::for_each(coroutine_container.begin(), coroutine_container.end(), [&](auto &ev) {
+		for (const auto& ev : coroutine_container) {
 			if (!event.is_cancelled()) {
 				dpp::task<void> task = ev.second(event);
 
 				task.on_exception(coro_exception_handler);
 			}
-		});
+		};
 #endif  /* DPP_CORO */
 	};
 
