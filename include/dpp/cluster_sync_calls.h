@@ -1205,6 +1205,73 @@ confirmation guild_set_nickname_sync(snowflake guild_id, const std::string &nick
 confirmation guild_sync_integration_sync(snowflake guild_id, snowflake integration_id);
 
 /**
+ * @brief Get the guild's onboarding configuration
+ *
+ * @see dpp::cluster::guild_get_onboarding
+ * @see https://discord.com/developers/docs/resources/guild#get-guild-onboarding
+ * @param o The onboarding object
+ * @return onboarding returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+onboarding guild_get_onboarding_sync(snowflake guild_id);
+
+/**
+ * @brief Edit the guild's onboarding configuration
+ *
+ * Requires the `MANAGE_GUILD` and `MANAGE_ROLES` permissions.
+ *
+ * @note Onboarding enforces constraints when enabled. These constraints are that there must be at least 7 Default Channels and at least 5 of them must allow sending messages to the \@everyone role. The `onboarding::mode` field modifies what is considered when enforcing these constraints.
+ *
+ * @see dpp::cluster::guild_edit_onboarding
+ * @see https://discord.com/developers/docs/resources/guild#modify-guild-onboarding
+ * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+ * @param o The onboarding object
+ * @return onboarding returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+onboarding guild_edit_onboarding_sync(const struct onboarding& o);
+
+/**
+ * @brief Get the guild's welcome screen
+ *
+ * If the welcome screen is not enabled, the `MANAGE_GUILD` permission is required.
+ *
+ * @see dpp::cluster::guild_get_welcome_screen
+ * @see https://discord.com/developers/docs/resources/guild#get-guild-welcome-screen
+ * @param guild_id The guild ID to get the welcome screen from
+ * @return dpp::welcome_screen returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+dpp::welcome_screen guild_get_welcome_screen_sync(snowflake guild_id);
+
+/**
+ * @brief Edit the guild's welcome screen
+ *
+ * Requires the `MANAGE_GUILD` permission. May fire a `Guild Update` Gateway event.
+ *
+ * @see dpp::cluster::guild_edit_welcome_screen
+ * @see https://discord.com/developers/docs/resources/guild#modify-guild-welcome-screen
+ * @param guild_id The guild ID to edit the welcome screen for
+ * @param welcome_screen The welcome screen
+ * @param enabled Whether the welcome screen should be enabled or disabled
+ * @return dpp::welcome_screen returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+dpp::welcome_screen guild_edit_welcome_screen_sync(snowflake guild_id, const struct welcome_screen& welcome_screen, bool enabled);
+
+/**
  * @brief Add guild member. Needs a specific oauth2 scope, from which you get the access_token.
  * 
  * Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope.
@@ -2315,7 +2382,7 @@ thread_map threads_get_joined_private_archived_sync(snowflake channel_id, snowfl
  * @see dpp::cluster::threads_get_private_archived
  * @see https://discord.com/developers/docs/resources/channel#list-private-archived-threads
  * @param channel_id Channel to get public archived threads for
- * @param before_timestamp Get threads before this timestamp
+ * @param before_timestamp Get threads archived before this timestamp
  * @param limit Number of threads to get
  * @return thread_map returned object on completion
  * \memberof dpp::cluster
@@ -2330,7 +2397,7 @@ thread_map threads_get_private_archived_sync(snowflake channel_id,  time_t befor
  * @see dpp::cluster::threads_get_public_archived
  * @see https://discord.com/developers/docs/resources/channel#list-public-archived-threads
  * @param channel_id Channel to get public archived threads for
- * @param before_timestamp Get threads before this timestamp
+ * @param before_timestamp Get threads archived before this timestamp
  * @param limit Number of threads to get
  * @return thread_map returned object on completion
  * \memberof dpp::cluster

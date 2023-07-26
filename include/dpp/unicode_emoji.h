@@ -1,6 +1,17 @@
 #pragma once
 
-namespace dpp { namespace unicode_emoji {
+namespace dpp {
+
+/**
+ * The unicode emojis in this namespace are auto-generated from https://raw.githubusercontent.com/ArkinSolomon/discord-emoji-converter/master/emojis.json
+ *
+ * If you want to use this, you have to pull the header in separately. e.g.
+ * ```cpp
+ * #include <dpp/dpp.h>
+ * #include <dpp/unicode_emoji.h>
+ * ```
+ */
+namespace unicode_emoji {
 	constexpr const char[] _100 = "💯";
 	constexpr const char[] _1234 = "🔢";
 	constexpr const char[] soccer = "⚽";

@@ -339,6 +339,22 @@ awaitable<confirmation_callback_t> cluster::co_guild_sync_integration(snowflake 
 	return {this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_sync_integration), guild_id, integration_id};
 }
 
+awaitable<confirmation_callback_t> cluster::co_guild_get_onboarding(snowflake guild_id) {
+	return {this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_get_onboarding), guild_id};
+}
+
+awaitable<confirmation_callback_t> cluster::co_guild_edit_onboarding(const struct onboarding& o) {
+	return {this, static_cast<void (cluster::*)(const struct onboarding&, command_completion_event_t)>(&cluster::guild_edit_onboarding), o};
+}
+
+awaitable<confirmation_callback_t> cluster::co_guild_get_welcome_screen(snowflake guild_id) {
+	return {this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_get_welcome_screen), guild_id};
+}
+
+awaitable<confirmation_callback_t> cluster::co_guild_edit_welcome_screen(snowflake guild_id, const struct welcome_screen& welcome_screen, bool enabled) {
+	return {this, static_cast<void (cluster::*)(snowflake, const struct welcome_screen&, bool, command_completion_event_t)>(&cluster::guild_edit_welcome_screen), guild_id, welcome_screen, enabled};
+}
+
 awaitable<confirmation_callback_t> cluster::co_guild_add_member(const guild_member& gm, const std::string &access_token) {
 	return {this, static_cast<void (cluster::*)(const guild_member&, const std::string &, command_completion_event_t)>(&cluster::guild_add_member), gm, access_token};
 }
