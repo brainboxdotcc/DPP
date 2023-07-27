@@ -87,7 +87,7 @@ void set_snowflake_array_not_null(const json* j, const char *keyname, std::vecto
 	if (k != j->end() && !k->is_null()) {
 		v.reserve(j->at(keyname).size());
 		for (const auto &id : j->at(keyname)) {
-			v.emplace_back(std::stoull(id.get<std::string>()));
+			v.emplace_back(std::strtoull(id.get<std::string>().c_str(), nullptr, 10));
 		}
 	}
 }
