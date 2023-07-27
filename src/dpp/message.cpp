@@ -750,9 +750,11 @@ reaction::reaction() {
 reaction::reaction(json* j) {
 	count = int32_not_null(j, "count");
 	me = bool_not_null(j, "me");
-	json emoji = (*j)["emoji"];
-	emoji_id = snowflake_not_null(&emoji, "id");
-	emoji_name = string_not_null(&emoji, "name");
+	if (j->contains("emoji")) {
+		json emoji = (*j)["emoji"];
+		emoji_id = snowflake_not_null(&emoji, "id");
+		emoji_name = string_not_null(&emoji, "name");
+	}
 }
 
 attachment::attachment(struct message* o) 
