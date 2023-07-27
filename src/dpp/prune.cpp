@@ -30,11 +30,7 @@ using json = nlohmann::json;
 prune& prune::fill_from_json(nlohmann::json* j) {
 	days = int32_not_null(j, "days");
 	compute_prune_count = bool_not_null(j, "compute_prune_count");
-	if (j->contains("include_roles")) {
-		for (auto & r : (*j)["include_roles"]) {
-			include_roles.push_back(from_string<uint64_t>(r.get<std::string>()));
-		}
-	}
+	set_snowflake_array_not_null(j, "include_roles", include_roles);
 	return *this;
 }
 

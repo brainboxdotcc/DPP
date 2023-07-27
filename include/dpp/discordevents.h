@@ -22,6 +22,7 @@
 
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
+#include <dpp/json.h>
 
 namespace dpp {
 
@@ -38,6 +39,19 @@ uint64_t DPP_EXPORT snowflake_not_null(const nlohmann::json* j, const char *keyn
  * @param v Value to change
  */
 void DPP_EXPORT set_snowflake_not_null(const nlohmann::json* j, const char *keyname, uint64_t &v);
+
+void DPP_EXPORT set_snowflake_array_not_null(const nlohmann::json* j, const char *keyname, std::vector<class snowflake> &v);
+
+template<class T> inline void DPP_EXPORT set_object_array_not_null(nlohmann::json* j, const char *keyname, std::vector<T> &v) {
+	v.clear();
+	auto k = j->find(keyname);
+	if (k != j->end() && !k->is_null()) {
+		v.reserve(j->at(keyname).size());
+		for (auto &obj : j->at(keyname)) {
+			v.emplace_back(T().fill_from_json(&obj));
+		}
+	}
+}
 
 /** @brief Returns a string from a json field value, if defined, else returns an empty string.
  * @param j nlohmann::json instance to retrieve value from

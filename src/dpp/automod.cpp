@@ -142,17 +142,9 @@ automod_rule& automod_rule::fill_from_json(nlohmann::json* j) {
 		trigger_metadata.fill_from_json(&((*j)["trigger_metadata"]));
 	}
 	enabled = bool_not_null(j, "enabled");
-	exempt_roles.clear();
-	exempt_channels.clear();
-	for (auto k : (*j)["actions"]) {
-		actions.push_back(automod_action().fill_from_json(&k));
-	}
-	for (auto k : (*j)["exempt_roles"]) {
-		exempt_roles.push_back(stoull(k.get<std::string>()));
-	}
-	for (auto k : (*j)["exempt_channels"]) {
-		exempt_channels.push_back(stoull(k.get<std::string>()));
-	}
+	set_object_array_not_null<automod_action>(j, "actions", actions);
+	set_snowflake_array_not_null(j, "exempt_roles", exempt_roles);
+	set_snowflake_array_not_null(j, "exempt_channels", exempt_channels);
 	return *this;
 }
 
