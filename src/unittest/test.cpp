@@ -814,11 +814,11 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				}
 				set_test("MESSAGEPIN", false);
 				set_test("MESSAGEUNPIN", false);
-				bot.message_pin(channel_id, message_id, [=](const dpp::confirmation_callback_t &callback) {
+				bot.message_pin(channel_id, message_id, [this](const dpp::confirmation_callback_t &callback) {
 					std::lock_guard lock(mutex);
 					if (!callback.is_error()) {
 						set_test("MESSAGEPIN", true);
-						bot.message_unpin(TEST_TEXT_CHANNEL_ID, message_id, [=](const dpp::confirmation_callback_t &callback) {
+						bot.message_unpin(TEST_TEXT_CHANNEL_ID, message_id, [this](const dpp::confirmation_callback_t &callback) {
 							std::lock_guard lock(mutex);
 							if (!callback.is_error()) {
 								set_test("MESSAGEUNPIN", true);
@@ -973,7 +973,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 					set_test("THREAD_UPDATE_EVENT", false);
 					edit.name = "edited";
 					edit.metadata.locked = true;
-					bot.thread_edit(edit, [this, id = edit.id](const dpp::confirmation_callback_t &callback) {
+					bot.thread_edit(edit, [this](const dpp::confirmation_callback_t &callback) {
 						std::lock_guard lock(mutex);
 						if (!callback.is_error()) {
 							set_test("THREAD_EDIT", true);
