@@ -125,7 +125,8 @@
 		"koko",
 		"moyai",
 		"kaaba",
-		"stringified"
+		"stringified",
+		"STDCORO"
 	],
 	"flagWords": [
 		"hte"
