@@ -21,6 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/user.h>
+#include <dpp/emoji.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
@@ -382,26 +383,102 @@ public:
 /**
  * @brief Defines a channel on a server's welcome screen
  */
-struct welcome_channel_t {
-	/// the description shown for the channel
+struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
+	/// The description shown for the channel
 	std::string description;
-	/// the emoji name if custom, the unicode character if standard, or null if no emoji is set
+	/// The emoji name if custom, the unicode character if standard, or null if no emoji is set
 	std::string emoji_name;
-	/// the channel's id
-	snowflake channel_id = 0;
-	/// the emoji id, if the emoji is custom
-	snowflake emoji_id = 0;
+	/// The channel's id
+	snowflake channel_id;
+	/// The emoji id, if the emoji is custom
+	snowflake emoji_id;
+
+	/**
+	 * @brief Construct a new welcome channel object
+	 */
+	welcome_channel();
+
+	/**
+	 * @brief Destroy the welcome channel object
+	 */
+	virtual ~welcome_channel() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_channel& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the channel ID of this welcome channel object
+	 *
+	 * @param _channel_id The channel ID to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_channel& set_channel_id(const snowflake _channel_id);
+
+	/**
+	 * @brief Set the description of this welcome channel object
+	 *
+	 * @param _description The description to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_channel& set_description(const std::string& _description);
 };
 
 
 /**
  * @brief Defines a server's welcome screen
  */
-struct welcome_screen_t {
-	/// the server description shown in the welcome screen
+struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
+	/// The server description shown in the welcome screen
 	std::string description;
-	/// the channels shown in the welcome screen, up to 5
-	std::vector<welcome_channel_t> welcome_channels;
+	/// The channels shown in the welcome screen (max 5)
+	std::vector<welcome_channel> welcome_channels;
+
+	/**
+	 * @brief Construct a new welcome screen object
+	 */
+	welcome_screen() = default;
+
+	/**
+	 * @brief Destroy the welcome screen object
+	 */
+	virtual ~welcome_screen() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_screen& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the server description for this welcome screen object shown in the welcome screen
+	 *
+	 * @param s string The server description
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_screen& set_description(const std::string& s);
 };
 
 /**
@@ -552,7 +629,7 @@ public:
 
 	/** Welcome screen
 	 */
-	welcome_screen_t welcome_screen;
+	dpp::welcome_screen welcome_screen;
 
 	/** Guild icon hash */
 	utility::iconhash icon;
@@ -1051,6 +1128,223 @@ public:
 	 * @return std::string guild widget stringified json
 	 */
 	std::string build_json(bool with_id = false) const;
+};
+
+/**
+ * @brief The onboarding mode for the dpp::onboarding object. Defines the criteria used to satisfy Onboarding constraints that are required for enabling.
+ */
+enum onboarding_mode: uint8_t {
+	gom_default = 	0, //!< Counts only Default Channels towards constraints
+	gom_advanced = 	1, //!< Counts Default Channels and Questions towards constraints
+};
+
+/**
+ * @brief The various types of dpp::onboarding_prompt
+ */
+enum onboarding_prompt_type: uint8_t {
+	opt_multiple_choice = 0, //!< Multiple choice
+	opt_dropdown = 1, //!< Dropdown
+};
+
+/**
+ * @brief Various flags for dpp::onboarding_prompt
+ */
+enum onboarding_prompt_flags: uint8_t {
+	opf_single_select = 1 << 0, //!< Indicates whether users are limited to selecting one option for the prompt
+	opf_required =		1 << 1, //!< Indicates whether the prompt is required before a user completes the onboarding flow
+	opf_in_onboarding = 1 << 2, //!< Indicates whether the prompt is present in the onboarding flow. If set, the prompt will only appear in the Channels & Roles tab
+};
+
+/**
+ * @brief Represents an onboarding prompt option
+ */
+struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interface<onboarding_prompt_option> {
+	std::vector<snowflake> channel_ids; //!< IDs for channels a member is added to when the option is selected
+	std::vector<snowflake> role_ids; //!< IDs for roles assigned to a member when the option is selected
+	dpp::emoji emoji; //!< Emoji of the option
+	std::string title; //!< Title of the option
+	std::string description; //!< Description of the option
+
+	/**
+	 * @brief Construct a new onboarding prompt option object
+	 */
+	onboarding_prompt_option();
+
+	/**
+	 * @brief Destroy the onboarding prompt option object
+	 */
+	virtual ~onboarding_prompt_option() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt_option& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the emoji of this onboarding prompt option object
+	 *
+	 * @param _emoji The emoji to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt_option& set_emoji(const dpp::emoji& _emoji);
+
+	/**
+	 * @brief Set the title of this onboarding prompt option object
+	 *
+	 * @param _title The title to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt_option& set_title(const std::string& _title);
+
+	/**
+	 * @brief Set the description of this onboarding prompt option object
+	 *
+	 * @param _description The description to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt_option& set_description(const std::string& _description);
+};
+
+/**
+ * @brief Represents an onboarding prompt
+ */
+struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboarding_prompt> {
+	onboarding_prompt_type type; //!< Type of prompt (defaults to dpp::opt_multiple_choice)
+	std::vector<onboarding_prompt_option> options; //!< Options available within the prompt
+	std::string title; //!< Title of the prompt
+	uint8_t flags; //!< A set of flags built from the bitmask defined by dpp::onboarding_prompt_flags
+
+	/**
+	 * @brief Construct a new onboarding prompt object
+	 */
+	onboarding_prompt();
+
+	/**
+	 * @brief Destroy the onboarding prompt object
+	 */
+	virtual ~onboarding_prompt() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the type of this onboarding prompt object
+	 *
+	 * @param _type The prompt type to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt& set_type(const onboarding_prompt_type _type);
+
+	/**
+	 * @brief Set the title of this onboarding prompt object
+	 *
+	 * @param _title The title to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt& set_title(const std::string& _title);
+
+	/**
+	 * @brief Indicates whether users are limited to selecting one option for the prompt
+	 * @return bool True if the users are limited to selecting one option for the prompt
+	 */
+	bool is_single_select() const;
+
+	/**
+	 * @brief Indicates whether the prompt is required before a user completes the onboarding flow
+	 * @return bool True if the prompt is required before a user completes the onboarding flow
+	 */
+	bool is_required() const;
+
+	/**
+	 * @brief Indicates whether the prompt is present in the onboarding flow
+	 * @return bool True if the prompt is present in the onboarding flow. False if the prompt will only appear in the Channels & Roles tab
+	 */
+	bool is_in_onboarding() const;
+};
+
+/**
+ * @brief Represents a guild's onboarding flow
+ */
+struct DPP_EXPORT onboarding: public json_interface<onboarding> {
+	snowflake guild_id; //!< ID of the guild this onboarding is part of
+	std::vector<onboarding_prompt> prompts; //!< Prompts shown during onboarding and in customize community
+	std::vector<snowflake> default_channel_ids; //!< Channel IDs that members get opted into automatically
+	onboarding_mode mode; //!< Current mode of onboarding (defaults to dpp::gom_default)
+	bool enabled; //!< Whether onboarding is enabled in the guild
+
+	/**
+	 * @brief Construct a new onboarding object
+	 */
+	onboarding();
+
+	/**
+	 * @brief Destroy the onboarding object
+	 */
+	virtual ~onboarding() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set guild_id of this onboarding object
+	 *
+	 * @param guild_id Guild ID to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding& set_guild_id(const snowflake id);
+
+	/**
+	 * @brief Set the mode of this onboarding object
+	 *
+	 * @param m onboarding_mode Mode to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding& set_mode(const onboarding_mode m);
+
+	/**
+	 * @brief Set the enabling of this onboarding object
+	 *
+	 * @param is_enabled bool Whether onboarding is enabled in the guild
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding& set_enabled(const bool is_enabled);
 };
 
 /**

@@ -20,7 +20,7 @@ int main()
         if (dpp::run_once<struct register_bot_commands>()) {
             /* Register the command */
             bot.guild_command_create(
-		dpp::slashcommand()
+				dpp::slashcommand()
 					.set_type(dpp::ctxm_user)
                     .set_name("High Five")
                     .set_application_id(bot.me.id),

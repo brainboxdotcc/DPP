@@ -40,6 +40,8 @@ enum test_type_t {
 	tt_offline,
 	/* A test that requires discord connectivity */
 	tt_online,
+	/* A test that requires both online and full tests to be enabled */
+	tt_extended
 };
 
 /* Represents a test case */
@@ -75,6 +77,7 @@ extern dpp::snowflake TEST_EVENT_ID;
 
 /* True if we skip tt_online tests */
 extern bool offline;
+extern bool extended;
 
 /**
  * @brief Perform a test of a REST base API call with one parameter
@@ -314,8 +317,3 @@ inline constexpr user_project_id_t get_user_snowflake;
 inline constexpr auto is_owner = [](auto &&user) noexcept {
 	return get_user_snowflake(user) == TEST_USER_ID;
 };
-
-/**
- * @brief Thread emoji - https://www.compart.com/en/unicode/U+1F9F5
- */
-inline const std::string THREAD_EMOJI = "\xF0\x9F\xA7\xB5";

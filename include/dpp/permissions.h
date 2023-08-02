@@ -147,6 +147,25 @@ public:
 	}
 
 	/**
+	 * @brief Check for permission flags set. It uses the Bitwise AND operator
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to check for
+	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * bool is_mod = permission.has_any(dpp::p_administrator, dpp::p_ban_members);
+	 * // Returns true if the permission bitmask contains p_administrator or p_ban_members
+	 * ```
+	 *
+	 * @return bool True if it has any the given permissions
+	 */
+	template <typename... T>
+	constexpr bool has_any(T... values) const noexcept {
+		return (value & (0 | ... | values)) != 0;
+	}
+
+	/**
 	 * @brief Add a permission with the Bitwise OR operation
 	 * @tparam T one or more uint64_t permission bits
 	 * @param values The permissions (from dpp::permissions) to add

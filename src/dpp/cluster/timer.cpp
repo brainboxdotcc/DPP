@@ -104,6 +104,17 @@ void cluster::tick_timers() {
 	}
 }
 
+#ifdef DPP_CORO
+awaitable<timer> cluster::co_timer(uint64_t seconds) {
+	return {[this, seconds] (auto &&cb) {
+		start_timer([this, cb](dpp::timer handle) {
+			cb(handle);
+			stop_timer(handle);
+		}, seconds);
+	}};
+}
+#endif
+
 oneshot_timer::oneshot_timer(class cluster* cl, uint64_t duration, timer_callback_t callback) : owner(cl) {
 	/* Create timer */
 	th = cl->start_timer([callback, this](dpp::timer timer_handle) {

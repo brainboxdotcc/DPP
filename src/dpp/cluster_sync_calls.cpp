@@ -337,6 +337,22 @@ confirmation cluster::guild_sync_integration_sync(snowflake guild_id, snowflake 
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_sync_integration), guild_id, integration_id);
 }
 
+onboarding cluster::guild_get_onboarding_sync(snowflake guild_id) {
+	return dpp::sync<onboarding>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_get_onboarding), guild_id);
+}
+
+onboarding cluster::guild_edit_onboarding_sync(const struct onboarding& o) {
+	return dpp::sync<onboarding>(this, static_cast<void (cluster::*)(const struct onboarding&, command_completion_event_t)>(&cluster::guild_edit_onboarding), o);
+}
+
+dpp::welcome_screen cluster::guild_get_welcome_screen_sync(snowflake guild_id) {
+	return dpp::sync<dpp::welcome_screen>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_get_welcome_screen), guild_id);
+}
+
+dpp::welcome_screen cluster::guild_edit_welcome_screen_sync(snowflake guild_id, const struct welcome_screen& welcome_screen, bool enabled) {
+	return dpp::sync<dpp::welcome_screen>(this, static_cast<void (cluster::*)(snowflake, const struct welcome_screen&, bool, command_completion_event_t)>(&cluster::guild_edit_welcome_screen), guild_id, welcome_screen, enabled);
+}
+
 confirmation cluster::guild_add_member_sync(const guild_member& gm, const std::string &access_token) {
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const guild_member&, const std::string &, command_completion_event_t)>(&cluster::guild_add_member), gm, access_token);
 }
