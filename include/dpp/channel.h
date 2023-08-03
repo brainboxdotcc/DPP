@@ -250,7 +250,7 @@ struct DPP_EXPORT forum_tag : public managed {
 };
 
 /**
- * @brief A group of thread member objects. the key is the thread_id of the dpp::thread_member
+ * @brief A group of thread member objects. the key is the user_id of the dpp::thread_member
  */
 typedef std::unordered_map<snowflake, thread_member> thread_member_map;
 
@@ -504,16 +504,39 @@ public:
 	channel& set_rate_limit_per_user(const uint16_t rate_limit_per_user);
 
 	/**
-	 * @brief Add a permission_overwrite to this channel object
-	 * 
-	 * @param id ID of the role or the member you want to add overwrite for
-	 * @param type type of overwrite
-	 * @param allowed_permissions bitmask of allowed permissions (refer to enum dpp::permissions) for this user/role in this channel
-	 * @param denied_permissions bitmask of denied permissions (refer to enum dpp::permissions) for this user/role in this channel
+	 * @brief Add permission overwrites for a user or role.
+	 * If the channel already has permission overwrites for the passed target, the existing ones will be adjusted by the passed permissions
 	 *
-	 * @return Reference to self, so these method calls may be chained 
+	 * @param target ID of the role or the member you want to adjust overwrites for
+	 * @param type type of overwrite
+	 * @param allowed_permissions bitmask of dpp::permissions you want to allow for this user/role in this channel. Note: You can use the dpp::permission class
+	 * @param denied_permissions bitmask of dpp::permissions you want to deny for this user/role in this channel. Note: You can use the dpp::permission class
+	 *
+	 * @return Reference to self, so these method calls may be chained
 	 */
-	channel& add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
+	channel& add_permission_overwrite(const snowflake target, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
+	/**
+	 * @brief Set permission overwrites for a user or role on this channel object. Old permission overwrites for the target will be overwritten
+	 *
+	 * @param target ID of the role or the member you want to set overwrites for
+	 * @param type type of overwrite
+	 * @param allowed_permissions bitmask of allowed dpp::permissions for this user/role in this channel. Note: You can use the dpp::permission class
+	 * @param denied_permissions bitmask of denied dpp::permissions for this user/role in this channel. Note: You can use the dpp::permission class
+	 *
+	 * @return Reference to self, so these method calls may be chained
+	 *
+	 * @note If both `allowed_permissions` and `denied_permissions` parameters are 0, the permission overwrite for the target will be removed
+	 */
+	channel& set_permission_overwrite(const snowflake target, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions);
+	/**
+	 * @brief Remove channel specific permission overwrites of a user or role
+	 *
+	 * @param target ID of the role or the member you want to remove permission overwrites of
+	 * @param type type of overwrite
+	 *
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	channel& remove_permission_overwrite(const snowflake target, const overwrite_type type);
 
 	/**
 	 * @brief Get the channel type
@@ -812,12 +835,24 @@ typedef std::unordered_map<snowflake, channel> channel_map;
 typedef std::unordered_map<snowflake, thread> thread_map;
 
 /**
- * @brief A group of threads and thread_members. returned from the cluster::threads_get_active method
+ * @brief A thread alongside the bot's optional thread_member object tied to it
  */
-typedef struct {
-	thread_map threads;
-	thread_member_map thread_members;
-} active_threads;
+struct active_thread_info {
+	/**
+	 * @brief The thread object
+	 */
+	thread active_thread;
+
+	/**
+	 * @brief The bot as a thread member, only present if the bot is in the thread
+	 */
+	std::optional<thread_member> bot_member;
+};
+
+/**
+ * @brief A map of threads alongside optionally the thread_member tied to the bot if it is in the thread. The map's key is the thread id. Returned from the cluster::threads_get_active method
+ */
+using active_threads = std::map<snowflake, active_thread_info>;
 
 };
 

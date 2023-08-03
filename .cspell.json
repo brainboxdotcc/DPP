@@ -96,7 +96,37 @@
 		"CORO",
 		"cback",
 		"mentionables",
-		"stringified"
+		"awaiter",
+		"checkered",
+		"ramen",
+		"dango",
+		"tanabata",
+		"diya",
+		"nazar",
+		"hamsa",
+		"tada",
+		"izakaya",
+		"rofl",
+		"thumbup",
+		"mwgb",
+		"mwbb",
+		"wwgb",
+		"mwgg",
+		"wwbb",
+		"wwgg",
+		"mmgb",
+		"mmgg",
+		"womans",
+		"mans",
+		"mens",
+		"womens",
+		"mmbb",
+		"fleur",
+		"koko",
+		"moyai",
+		"kaaba",
+		"stringified",
+		"STDCORO"
 	],
 	"flagWords": [
 		"hte"
@@ -104,4 +134,3 @@
 	"allowCompoundWords": true,
 	"useCompounds": true
 }
-

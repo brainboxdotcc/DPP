@@ -40,6 +40,8 @@ enum test_type_t {
 	tt_offline,
 	/* A test that requires discord connectivity */
 	tt_online,
+	/* A test that requires both online and full tests to be enabled */
+	tt_extended
 };
 
 /* Represents a test case */
@@ -75,6 +77,7 @@ extern dpp::snowflake TEST_EVENT_ID;
 
 /* True if we skip tt_online tests */
 extern bool offline;
+extern bool extended;
 
 /**
  * @brief Perform a test of a REST base API call with one parameter
@@ -233,6 +236,13 @@ int test_summary();
 std::vector<uint8_t> load_test_audio();
 
 /**
+ * @brief Load test image for the attachment tests
+ * 
+ * @return std::vector<uint8_t> data and size for test image
+ */
+std::vector<uint8_t> load_test_image();
+
+/**
  * @brief Get the token from the environment variable DPP_UNIT_TEST_TOKEN
  * 
  * @return std::string token
@@ -269,4 +279,41 @@ public:
 	virtual void completed(const std::vector<dpp::message>& list) {
 		set_test("MSGCOLLECT", list.size() > 0);
 	}
+};
+
+/**
+ * @brief Convenience functor to get the snowflake of a certain type
+ */
+struct user_project_id_t {
+	dpp::snowflake operator()(const dpp::user &user) const noexcept {
+		return user.id;
+	}
+
+	dpp::snowflake operator()(const dpp::guild_member &user) const noexcept {
+		return user.user_id;
+	}
+
+	dpp::snowflake operator()(dpp::snowflake user) const noexcept {
+		return user;
+	}
+
+	dpp::snowflake operator()(const dpp::thread_member &user) const noexcept {
+		return user.user_id;
+	}
+};
+
+/**
+ * @brief Convenience lambda to get the user snowflake of a certain user type
+ * @see user_project_id_t
+ */
+inline constexpr user_project_id_t get_user_snowflake;
+
+/**
+ * @brief Convenience lambda to check if a certain user is the owner of the test bot, mostly meant to be passed to standard algorithms
+ * @see get_user_snowflake
+ *
+ * @return bool whether the user is the test bot owner
+ */
+inline constexpr auto is_owner = [](auto &&user) noexcept {
+	return get_user_snowflake(user) == TEST_USER_ID;
 };

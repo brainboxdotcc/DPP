@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,37 +20,26 @@
  ************************************************************************************/
 #include <dpp/discordevents.h>
 #include <dpp/cluster.h>
-#include <dpp/message.h>
-#include <dpp/stringops.h>
-#include <dpp/json.h>
-
 
 namespace dpp { namespace events {
 
 using json = nlohmann::json;
 using namespace dpp;
 
+
 /**
  * @brief Handle event
- * 
+ *
  * @param client Websocket client (current shard)
  * @param j JSON data for the event
  * @param raw Raw JSON string
  */
-void message_reaction_remove::handle(discord_client* client, json &j, const std::string &raw) {
-	if (!client->creator->on_message_reaction_remove.empty()) {
-		json &d = j["d"];
-		dpp::message_reaction_remove_t mrr(client, raw);
-		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
-		mrr.reacting_guild = dpp::find_guild(guild_id);
-		mrr.reacting_user_id = snowflake_not_null(&d, "user_id");
-		mrr.channel_id = snowflake_not_null(&d, "channel_id");
-		mrr.reacting_channel = dpp::find_channel(mrr.channel_id);
-		mrr.message_id = snowflake_not_null(&d, "message_id");
-		mrr.reacting_emoji = dpp::emoji().fill_from_json(&(d["emoji"]));
-		if (mrr.channel_id && mrr.message_id) {
-			client->creator->on_message_reaction_remove.call(mrr);
-		}
+void guild_audit_log_entry_create::handle(discord_client* client, json &j, const std::string &raw) {
+	json& d = j["d"];
+	if (!client->creator->on_guild_audit_log_entry_create.empty()) {
+		dpp::guild_audit_log_entry_create_t ec(client, raw);
+		ec.entry.fill_from_json(&d);
+		client->creator->on_guild_audit_log_entry_create.call(ec);
 	}
 }
 

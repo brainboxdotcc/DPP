@@ -141,19 +141,26 @@ void to_json(json& j, const command_option& opt) {
 	}
 
 	/* Check for minimum and maximum values */
-	if (opt.type == dpp::co_number || opt.type == dpp::co_integer || opt.type == dpp::co_string) {
-		std::string key = (opt.type == dpp::co_string) ? "_length" : "_value";
-		/* Min */
-		if (std::holds_alternative<double>(opt.min_value)) {
-			j["min" + key] = std::get<double>(opt.min_value);
-		} else if (std::holds_alternative<int64_t>(opt.min_value)) {
-			j["min" + key] = std::get<int64_t>(opt.min_value);
+	if (opt.type == dpp::co_string) {
+		if (std::holds_alternative<int64_t>(opt.min_value)) {
+			j["min_length"] = std::get<int64_t>(opt.min_value);
 		}
-		/* Max */
+		if (std::holds_alternative<int64_t>(opt.max_value)) {
+			j["max_length"] = std::get<int64_t>(opt.max_value);
+		}
+	} else if (opt.type == dpp::co_integer) {
+		if (std::holds_alternative<int64_t>(opt.min_value)) {
+			j["min_value"] = std::get<int64_t>(opt.min_value);
+		}
+		if (std::holds_alternative<int64_t>(opt.max_value)) {
+			j["max_value"] = std::get<int64_t>(opt.max_value);
+		}
+	} else if (opt.type == dpp::co_number) {
+		if (std::holds_alternative<double>(opt.min_value)) {
+			j["min_value"] = std::get<double>(opt.min_value);
+		}
 		if (std::holds_alternative<double>(opt.max_value)) {
-			j["max" + key] = std::to_string(std::get<double>(opt.max_value));
-		} else if (std::holds_alternative<int64_t>(opt.max_value)) {
-			j["max" + key] = std::get<int64_t>(opt.max_value);
+			j["max_value"] = std::get<double>(opt.max_value);
 		}
 	}
 
@@ -414,18 +421,10 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 			}
 		}
 		if (j->contains("min_length")) {
-			if ((*j)["min_length"].is_number_integer()) {
-				o.min_value.emplace<int64_t>(int64_not_null(j, "min_length"));
-			} else if ((*j)["min_length"].is_number()) {
-				o.min_value.emplace<double>(double_not_null(j, "min_length"));
-			}
+			o.min_value.emplace<int64_t>(int32_not_null(j, "min_length"));
 		}
 		if (j->contains("max_length")) {
-			if ((*j)["max_length"].is_number_integer()) {
-				o.max_value.emplace<int64_t>(int64_not_null(j, "max_length"));
-			} else if ((*j)["max_length"].is_number()) {
-				o.max_value.emplace<double>(double_not_null(j, "max_length"));
-			}
+			o.max_value.emplace<int64_t>(int32_not_null(j, "max_length"));
 		}
 		o.autocomplete = bool_not_null(j, "autocomplete");
 	};
@@ -765,13 +764,17 @@ interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 }
 
 interaction_modal_response& interaction_modal_response::fill_from_json(nlohmann::json* j) {
-	json& d = (*j)["data"];
 	type = (interaction_response_type)int8_not_null(j, "type");
+	json& d = (*j)["data"];
 	custom_id = string_not_null(&d, "custom_id");
-	title = string_not_null(&d, "custom_id");
-	if (d.find("components") != d.end()) {
+	title = string_not_null(&d, "title");
+	if (d.contains("components")) {
+		components.clear();
 		for (auto& c : d["components"]) {
-			components[current_row].push_back(dpp::component().fill_from_json(&c));
+			auto row = dpp::component().fill_from_json(&c);
+			if (!row.components.empty()) {
+				components.push_back(row.components);
+			}
 		}
 	}
 	return *this;

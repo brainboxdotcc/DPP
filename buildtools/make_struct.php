@@ -20,16 +20,6 @@ exec("cat src/dpp/cluster/*.cpp", $clustercpp);
 
 /* These methods have signatures incompatible with this script */
 $blacklist = [
-    'channel_edit_permissions',
-    'message_add_reaction',
-    'message_delete_reaction',
-    'message_delete_reaction_emoji',
-    'message_delete_all_reactions',
-    'message_delete_own_reaction',
-    'message_get_reactions',
-    'channel_typing',
-    'application_role_connection_get', // TODO: rest_request_vector
-    'application_role_connection_update',
 ];
 
 /* The script cannot determine the correct return type of these methods,
@@ -41,7 +31,19 @@ $forcedReturn = [
     'guild_search_members' => 'guild_member_map',
     'message_create' => 'message',
     'message_edit' => 'message',
+    'message_add_reaction' => 'confirmation',
+    'message_delete_reaction' => 'confirmation',
+    'message_delete_reaction_emoji' => 'confirmation',
+    'message_delete_all_reactions' => 'confirmation',
+    'message_delete_own_reaction' => 'confirmation',
+    'channel_edit_permissions' => 'confirmation',
+    'channel_typing' => 'confirmation',
+    'message_get_reactions' => 'emoji_map',
     'thread_create_in_forum' => 'thread',
+    'threads_get_active' => 'active_threads',
+    'user_get_cached' => 'user_identified',
+    'application_role_connection_get' => 'application_role_connection',
+    'application_role_connection_update' => 'application_role_connection'
 ];
 
 /* Get the contents of cluster.h into an array */
@@ -61,8 +63,11 @@ if (!$generator->checkForChanges()) {
     exit(0);
 }
 
+$lastFunc = '<none>';
+$l = 0;
 /* Scan every line of the C++ source */
 foreach ($clustercpp as $cpp) {
+    $l++;
     /* Look for declaration of function body */
     if ($state == STATE_SEARCH_FOR_FUNCTION &&
         preg_match('/^\s*void\s+cluster::([^(]+)\s*\((.*)command_completion_event_t\s*callback\s*\)/', $cpp, $matches)) {
@@ -96,25 +101,34 @@ foreach ($clustercpp as $cpp) {
         if (!in_array($currentFunction, $blacklist)) {
             $parameterList = explode(',', $parameters);
             $parameterNames = [];
+            $parameterTypes = [];
             foreach ($parameterList as $parameter) {
                 $parts = explode(' ', trim($parameter));
-                $parameterNames[] = trim(preg_replace('/[\s\*\&]+/', '', $parts[count($parts) - 1]));
+                $name = trim(preg_replace('/[\s\*\&]+/', '', $parts[count($parts) - 1]));
+                $parameterNames[] = $name;
+                $parameterTypes[] = trim(substr($parameter, 0, strlen($parameter) - strlen($name)));
             }
             $content .= getComments($generator, $currentFunction, $returnType, $parameterNames) . "\n";
             $fullParameters = getFullParameters($currentFunction, $parameterNames);
             $parameterNames = trim(join(', ', $parameterNames));
+            $parameterTypes = trim(join(', ', $parameterTypes));
             if (!empty($parameterNames)) {
                 $parameterNames = ', ' . $parameterNames;
             }
             $noDefaults = $parameters;
             $parameters = !empty($fullParameters) ? $fullParameters : $parameters;
-            $content .= $generator->generateHeaderDef($returnType, $currentFunction, $parameters, $noDefaults, $parameterNames);
-            $cppcontent .= $generator->generateCppDef($returnType, $currentFunction, $parameters, $noDefaults, $parameterNames);
+            $content .= $generator->generateHeaderDef($returnType, $currentFunction, $parameters, $noDefaults, $parameterTypes, $parameterNames);
+            $cppcontent .= $generator->generateCppDef($returnType, $currentFunction, $parameters, $noDefaults, $parameterTypes, $parameterNames);
         }
+        $lastFunc = $currentFunction;
         $currentFunction = $parameters = $returnType = '';
         $state = STATE_SEARCH_FOR_FUNCTION;
     }
 }
+if ($state != STATE_SEARCH_FOR_FUNCTION) {
+    die("\n\n\nBuilding headers is broken ($l) - state machine finished in the middle of function $currentFunction (previous $lastFunc) with parameters $parameters rv $returnType state=$state\n\n\n");
+}
+
 $content .= <<<EOT
 
 /* End of auto-generated definitions */

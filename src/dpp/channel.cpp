@@ -219,9 +219,39 @@ channel& channel::set_user_limit(const uint8_t user_limit) {
 	return *this;
 }
 
-channel& channel::add_permission_overwrite(const snowflake id, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
-	permission_overwrite po {id, allowed_permissions, denied_permissions, type};
+channel& channel::add_permission_overwrite(const snowflake target, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+	for (auto &o : this->permission_overwrites) {
+		if (o.id == target && o.type == type) {
+			o.allow.remove(denied_permissions);
+			o.allow.add(allowed_permissions);
+			o.deny.remove(allowed_permissions);
+			o.deny.add(denied_permissions);
+			return *this;
+		}
+	}
+	permission_overwrite po {target, allowed_permissions, denied_permissions, type};
 	this->permission_overwrites.push_back(po);
+	return *this;
+}
+
+channel& channel::set_permission_overwrite(const snowflake target, const overwrite_type type, const uint64_t allowed_permissions, const uint64_t denied_permissions) {
+	this->remove_permission_overwrite(target, type);
+	if (allowed_permissions != 0 || denied_permissions != 0) {
+		permission_overwrite po{target, allowed_permissions, denied_permissions, type};
+		this->permission_overwrites.push_back(po);
+	}
+	return *this;
+}
+
+channel& channel::remove_permission_overwrite(const dpp::snowflake target, const dpp::overwrite_type type) {
+	auto it = this->permission_overwrites.begin();
+	while (it != this->permission_overwrites.end()) {
+		if (it->id == target && it->type == type) {
+			it = this->permission_overwrites.erase(it);
+		} else {
+			it++;
+		}
+	}
 	return *this;
 }
 
@@ -589,18 +619,10 @@ std::map<snowflake, voicestate> channel::get_voice_members() {
 }
 
 std::string channel::get_icon_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (this->id && !this->icon.to_string().empty()) {
-		return utility::cdn_host + "/channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "channel-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}

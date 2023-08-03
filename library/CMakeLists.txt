@@ -81,6 +81,12 @@ if (UNIX)
 			COMMAND php buildtools/make_struct.php "\\Dpp\\Generator\\SyncGenerator"
 		)
  		set_source_files_properties( "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/cluster_sync_calls.h" PROPERTIES GENERATED TRUE ) 
+		# target for unicode_emojis.h
+		execute_process(
+			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
+			COMMAND php buildtools/emojis.php
+		)
+		set_source_files_properties( "${CMAKE_CURRENT_SOURCE_DIR}/../include/dpp/unicode_emojis.h" PROPERTIES GENERATED TRUE )
 	else()
 		message("-- Autogeneration is not available")
  	endif()
@@ -117,7 +123,7 @@ if (BUILD_VOICE_SUPPORT)
 
 	if(DEFINED OPUS_FOUND)
 		message("-- Found Opus ${Green}${OPUS_LIBRARIES}${ColourReset}")
-		if((WIN32 OR PKG_CONFIG_FOUND) AND DEFINED sodium_VERSION_STRING)
+		if((WIN32 OR PKG_CONFIG_FOUND) AND DEFINED sodium_VERSION_STRING AND DEFINED sodium_LIBRARY_RELEASE)
 			add_compile_definitions(HAVE_VOICE)
 		
 			message("-- Sodium ${Green}${sodium_VERSION_STRING}${ColourReset}")
@@ -176,10 +182,11 @@ if(UNIX OR MSYS)
 endif()
 
 if(MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /sdl /DFD_SETSIZE=1024")
 	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /Od /DEBUG /Zi /sdl /DFD_SETSIZE=1024")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /Od /DEBUG /Zi")
 	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /O2 /Oi /Oy /Gy /sdl /DFD_SETSIZE=1024")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /Oi /Oy /Gy")
 	endif()
 	if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /Zc:preprocessor")
@@ -293,13 +300,52 @@ if(HAVE_PTHREAD_SETNAME_NP)
 endif()
 
 if(DPP_CORO)
-	message("-- ${Yellow}Enabled experimental coroutine support${ColourReset}")
+	message("-- ${Yellow}Enabled experimental coroutine feature${ColourReset}")
 	set(CMAKE_CXX_STANDARD 20)
-	target_compile_features(dpp PRIVATE cxx_std_20)
+	target_compile_features(dpp PUBLIC cxx_std_20)
 	if(WIN32 AND NOT MINGW)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /await:strict")
 	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines")
+		if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+			if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14.0.0) # clang >= 14 has native support
+				message("-- ${Yellow}Clang < 14 - attempting to detect if using libc++ or stdc++${ColourReset}")
+				check_cxx_source_compiles("
+					#include <iostream>
+
+					int a =
+					#ifdef __GLIBCXX__
+						1;
+					#else
+						fgsfds;
+					#endif
+
+					int main(int argc, char* argv[])
+					{
+						return 0;
+					}
+					" IS_GLIBCXX)
+				if(IS_GLIBCXX)
+					if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0.0)
+						message(FATAL_ERROR "Clang with stdc++ and coroutines requires version 12.0.0 or above")
+					endif()
+					message("-- ${Yellow}Detected stdc++ - enabling mock std::experimental namespace${ColourReset}")
+					target_compile_definitions(dpp PUBLIC "STDCORO_GLIBCXX_COMPAT")
+				else()
+					message("-- ${Yellow}Detected libc++ - using <experimental/coroutine>")
+					if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0.0)
+						set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines-ts")
+					endif()
+				endif()
+				message("-- ${Yellow}Note - coroutines in clang < 14 are experimental, upgrading is recommended")
+			endif()
+		elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+			if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
+				message(FATAL_ERROR "Coroutines with g++ require version 10 or above")
+			elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0)
+				message("-- ${Yellow}Note - coroutines in g++10 are experimental, upgrading to g++11 or above is recommended")
+				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines")
+			endif()
+		endif()
 	endif()
 	target_compile_definitions(dpp PUBLIC DPP_CORO)
 	execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."

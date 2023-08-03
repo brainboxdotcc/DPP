@@ -53,6 +53,53 @@ namespace dpp {
 
 	namespace utility {
 
+		std::string cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
+			return cdn_endpoint_url_hash(allowed_formats, path_without_extension, "", format, size, prefer_animated, is_animated);
+		}
+
+		std::string cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
+
+			if (std::find(allowed_formats.begin(), allowed_formats.end(), format) == allowed_formats.end()) {
+				return std::string(); // if the given format is not allowed for this endpoint
+			}
+
+			std::string extension;
+			if (is_animated && (prefer_animated || format == i_gif)) {
+				extension = ".gif";
+			} else if (format == i_png) {
+				extension = ".png";
+			} else if (format == i_jpg) {
+				extension = ".jpg";
+			} else if (format == i_webp) {
+				extension = ".webp";
+			} else {
+				return std::string();
+			}
+
+			std::string suffix = (hash.empty() ? "" : (is_animated ? "/a_" : "/") + hash); // > In the case of endpoints that support GIFs, the hash will begin with a_ if it is available in GIF format.
+
+			return cdn_host + '/' + path_without_extension + suffix + extension + utility::avatar_size(size);
+		}
+
+		std::string cdn_endpoint_url_sticker(snowflake sticker_id, sticker_format format) {
+			if (!sticker_id) {
+				return std::string();
+			}
+
+			std::string extension;
+			if (format == sf_png || format == sf_apng) {
+				extension = ".png";
+			} else if (format == sf_lottie) {
+				extension = ".json";
+			} else if (format == sf_gif) {
+				extension = ".gif";
+			} else {
+				return std::string();
+			}
+
+			return utility::cdn_host + "/stickers/" + std::to_string(sticker_id) + extension;
+		}
+
 		double time_f()
 		{
 			using namespace std::chrono;
@@ -62,6 +109,14 @@ namespace dpp {
 
 		bool has_voice() {
 #if HAVE_VOICE
+			return true;
+#else
+			return false;
+#endif
+		}
+
+		bool is_coro_enabled() {
+#ifdef DPP_CORO
 			return true;
 #else
 			return false;

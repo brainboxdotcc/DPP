@@ -494,7 +494,7 @@ public:
 	/**
 	 * @brief The gain value for the end of the current voice iteration.
 	 */
-	float endGain;
+	float end_gain;
 
 	/**
 	 * @brief The gain value for the current voice iteration.

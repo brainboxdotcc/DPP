@@ -40,11 +40,16 @@
 #include <dpp/scheduled_event.h>
 #include <dpp/stage_instance.h>
 #include <dpp/integration.h>
+#include <dpp/auditlog.h>
 #include <functional>
 #include <variant>
 #include <exception>
 #include <algorithm>
 #include <string>
+
+#ifdef DPP_CORO
+#include <dpp/coro.h>
+#endif /* DPP_CORO */
 
 namespace dpp {
 
@@ -472,6 +477,106 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void delete_original_response(command_completion_event_t callback = utility::log_error()) const;
+
+#ifdef DPP_CORO
+	/**
+	 * @brief Acknowledge interaction without displaying a message to the user,
+	 * for use with button and select menu components.
+	 *
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_reply() const;
+
+	/**
+	 * @brief Send a reply for this interaction
+	 *
+	 * @param t Type of reply to send
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_reply(interaction_response_type t, const message & m) const;
+
+	/**
+	 * @brief Send a reply for this interaction
+	 *
+	 * @param t Type of reply to send
+	 * @param mt The string value to send, for simple text only messages
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_reply(interaction_response_type t, const std::string & mt) const;
+
+	/**
+	 * @brief Send a reply for this interaction.
+	 * Uses the default type of dpp::ir_channel_message_with_source, a simple message reply.
+	 *
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_reply(const message & m) const;
+
+	/**
+	 * @brief Send a reply for this interaction.
+	 * Uses the default type of dpp::ir_channel_message_with_source, a simple message reply.
+	 *
+	 * @param mt The string value to send, for simple text only messages
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_reply(const std::string & mt) const;
+
+	/**
+	 * @brief Reply to interaction with a dialog box
+	 *
+	 * @param mr Dialog box response to send
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_dialog(const interaction_modal_response& mr) const;
+
+	/**
+	 * @brief Edit the response for this interaction
+	 *
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_edit_response(const message & m) const;
+
+	/**
+	 * @brief Edit the response for this interaction
+	 *
+	 * @param mt The string value to send, for simple text only messages
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_edit_response(const std::string & mt) const;
+
+	/**
+	 * @brief Set the bot to 'thinking' state where you have up to 15 minutes to respond
+	 *
+	 * @param ephemeral True if the thinking state should be ephemeral
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_thinking(bool ephemeral = false) const;
+
+	/**
+	 * @brief Get original response message for this interaction
+	 *
+	 * On success the result will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_get_original_response() const;
+
+	/**
+	 * @brief Edit original response message for this interaction
+	 *
+	 * @param m Message object to send. Not all fields are supported by Discord.
+	 * On success the result will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_edit_original_response(const message & m) const;
+
+	/**
+	 * @brief Delete original response message for this interaction. This cannot be used on an ephemeral interaction response.
+	 *
+	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	dpp::awaitable<dpp::confirmation_callback_t> co_delete_original_response() const;
+#endif /* DPP_CORO */
 
 	/**
 	 * @brief command interaction
@@ -915,7 +1020,12 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	 */
 	guild_member reacting_member;
 	/**
-	 * @brief channel the reaction happened on
+	 * @brief Channel ID the reaction happened on
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief channel the reaction happened on (Optional)
+	 * @note only filled when the channel is cached
 	 */
 	channel* reacting_channel;
 	/**
@@ -926,6 +1036,10 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	 * @brief message id of the message reacted upon
 	 */
 	snowflake message_id;
+	/**
+	 * @brief ID of the user who authored the message which was reacted to (Optional)
+	 */
+	snowflake message_author_id;
 };
 
 /** @brief Guild members chunk */
@@ -961,7 +1075,12 @@ struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
 	 */
 	dpp::snowflake reacting_user_id;
 	/**
-	 * @brief channel the reaction happened on
+	 * @brief Channel ID the reaction was removed in
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief channel the reaction happened on (optional)
+	 * @note only filled when the channel is cached
 	 */
 	channel* reacting_channel;
 	/**
@@ -1039,7 +1158,12 @@ struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 	 */
 	guild* reacting_guild;
 	/**
-	 * @brief channel the reaction happened on
+	 * @brief Channel ID the reactions was removed in
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief channel the reaction happened on (optional)
+	 * @note only filled when the channel is cached
 	 */
 	channel* reacting_channel;
 	/**
@@ -1148,7 +1272,12 @@ struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
 	 */
 	guild* reacting_guild;
 	/**
-	 * @brief channel the reaction happened on
+	 * @brief Channel ID the reactions was removed in
+	 */
+	snowflake channel_id;
+	/**
+	 * @brief channel the reaction happened on (optional)
+	 * @note only filled when the channel is cached
 	 */
 	channel* reacting_channel;
 	/**
@@ -1398,6 +1527,19 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
 	void reply(message&& msg, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
+};
+
+/** @brief Guild audit log entry create */
+struct DPP_EXPORT guild_audit_log_entry_create_t : public event_dispatch_t {
+	/** Constructor
+	 * @param client The shard the event originated on
+	 * @param raw Raw event text as JSON
+	 */
+	guild_audit_log_entry_create_t(class discord_client* client, const std::string& raw);
+	/**
+	 * @brief created audit log entry
+	 */
+	audit_entry entry;
 };
 
 /** @brief Guild ban add */

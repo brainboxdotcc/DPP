@@ -32,6 +32,11 @@ namespace dpp {
 
 using json = nlohmann::json;
 
+/* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
+std::map<uint8_t, dpp::role_flags> rolemap = {
+		{ 1 << 0,       dpp::r_in_prompt },
+};
+
 role::role() :
 	managed(),
 	guild_id(0),
@@ -41,6 +46,7 @@ role::role() :
 	flags(0),
 	integration_id(0),
 	bot_id(0),
+	subscription_listing_id(0),
 	image_data(nullptr)
 {
 }
@@ -69,6 +75,14 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 	this->colour = int32_not_null(j, "color");
 	this->position = int8_not_null(j, "position");
 	this->permissions = snowflake_not_null(j, "permissions");
+
+	uint8_t f = int8_not_null(j, "flags");
+	for (auto & flag : rolemap) {
+		if (f & flag.first) {
+			this->flags |= flag.second;
+		}
+	}
+
 	this->flags |= bool_not_null(j, "hoist") ? dpp::r_hoist : 0;
 	this->flags |= bool_not_null(j, "managed") ? dpp::r_managed : 0;
 	this->flags |= bool_not_null(j, "mentionable") ? dpp::r_mentionable : 0;
@@ -82,8 +96,15 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 		if (t.find("premium_subscriber") != t.end()) {
 			this->flags |= dpp::r_premium_subscriber;
 		}
+		if (t.find("available_for_purchase") != t.end()) {
+			this->flags |= dpp::r_available_for_purchase;
+		}
+		if (t.find("guild_connections") != t.end()) {
+			this->flags |= dpp::r_guild_connections;
+		}
 		this->bot_id = snowflake_not_null(&t, "bot_id");
 		this->integration_id = snowflake_not_null(&t, "integration_id");
+		this->subscription_listing_id = snowflake_not_null(&t, "subscription_listing_id");
 	}
 	return *this;
 }
@@ -145,6 +166,22 @@ bool role::is_mentionable() const {
 
 bool role::is_managed() const {
 	return this->flags & dpp::r_managed;
+}
+
+bool role::is_premium_subscriber() const {
+	return this->flags & dpp::r_premium_subscriber;
+}
+
+bool role::is_available_for_purchase() const {
+	return this->flags & dpp::r_available_for_purchase;
+}
+
+bool role::is_linked() const {
+	return this->flags & dpp::r_guild_connections;
+}
+
+bool role::is_selectable_in_prompt() const {
+	return this->flags & dpp::r_in_prompt;
 }
 
 bool role::has_create_instant_invite() const {
@@ -319,6 +356,10 @@ bool role::has_use_soundboard() const {
 	return has_administrator() || permissions.has(p_use_soundboard);
 }
 
+bool role::has_use_external_sounds() const {
+	return has_administrator() || permissions.has(p_use_external_sounds);
+}
+
 bool role::has_send_voice_messages() const {
 	return has_administrator() || permissions.has(p_send_voice_messages);
 }
@@ -377,18 +418,10 @@ members_container role::get_members() const {
 }
 
 std::string role::get_icon_url(uint16_t size, const image_type format) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->icon.to_string().empty() && this->id) {
-		return utility::cdn_host + "/role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string() + "." + extensions.find(format)->second + utility::avatar_size(size);
+		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+										 "role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
+										 format, size);
 	} else {
 		return std::string();
 	}

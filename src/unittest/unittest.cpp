@@ -31,8 +31,11 @@ std::map<std::string, test_t> tests = {
 	{"DELCOMMAND", {tt_online, "Deletion of application command", false, false}},
 	{"LOGGER", {tt_online, "Log events", false, false}},
 	{"MESSAGECREATE", {tt_online, "Creation of a channel message", false, false}},
+	{"MESSAGEEDIT", {tt_online, "Editing a channel message", false, false}},
+	{"EDITEVENT", {tt_online, "Message edit event", false, false}},
 	{"MESSAGEDELETE", {tt_online, "Deletion of a channel message", false, false}},
 	{"MESSAGERECEIVE", {tt_online, "Receipt of a created message", false, false}},
+	{"MESSAGEFILE", {tt_online, "Message attachment send and check", false, false}},
 	{"CACHE", {tt_online, "Test guild cache", false, false}},
 	{"USERCACHE", {tt_online, "Test user cache", false, false}},
 	{"VOICECONN", {tt_online, "Connect to voice channel", false, false}},
@@ -92,6 +95,14 @@ std::map<std::string, test_t> tests = {
 	{"GUILD_BANS_GET", {tt_online, "cluster::guild_get_bans get bans using the after-parameter", false, false}},
 	{"GUILD_BAN_DELETE", {tt_online, "cluster::guild_ban_delete unban the banned discord accounts", false, false}},
 
+	{"THREAD_CREATE", {tt_online, "cluster::thread_create", false, false}},
+	{"THREAD_CREATE_EVENT", {tt_online, "cluster::on_thread_create event", false, false}},
+	{"THREAD_DELETE", {tt_online, "cluster::channel_delete with thread", false, false}},
+	{"THREAD_DELETE_EVENT", {tt_online, "cluster::on_thread_delete event", false, false}},
+	{"THREAD_EDIT", {tt_online, "cluster::thread_edit", false, false}},
+	{"THREAD_UPDATE_EVENT", {tt_online, "cluster::on_thread_update event", false, false}},
+	{"THREAD_GET_ACTIVE", {tt_online, "cluster::threads_get_active", false, false}},
+
 	{"VOICE_CHANNEL_CREATE", {tt_online, "creating a voice channel", false, false}},
 	{"VOICE_CHANNEL_EDIT", {tt_online, "editing the created voice channel", false, false}},
 	{"VOICE_CHANNEL_DELETE", {tt_online, "deleting the created voice channel", false, false}},
@@ -116,6 +127,10 @@ std::map<std::string, test_t> tests = {
 	{"UTILITY.USER_MENTION", {tt_offline, "utility::user_mention", false, false}},
 	{"UTILITY.ROLE_MENTION", {tt_offline, "utility::role_mention", false, false}},
 	{"UTILITY.EMOJI_MENTION", {tt_offline, "utility::emoji_mention", false, false}},
+	{"UTILITY.AVATAR_SIZE", {tt_offline, "utility::avatar_size", false, false}},
+	{"UTILITY.CDN_ENDPOINT_URL_HASH", {tt_offline, "utility::cdn_endpoint_url_hash", false, false}},
+	{"STICKER.GET_URL", {tt_offline, "sticker::get_url aka utility::cdn_endpoint_url_sticker", false, false}},
+	{"EMOJI.GET_URL", {tt_offline, "emoji::get_url", false, false}},
 	{"ROLE.COMPARE", {tt_offline, "role::operator<", false, false}},
 	{"ROLE_CREATE", {tt_online, "cluster::role_create", false, false}},
 	{"ROLE_EDIT", {tt_online, "cluster::role_edit", false, false}},
@@ -125,10 +140,44 @@ std::map<std::string, test_t> tests = {
 	{"USER_GET_CACHED_ABSENT", {tt_online, "cluster::user_get_cached_sync() with not present member", false, false}},
 	{"GET_PARAMETER_WITH_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() with subcommands", false, false}},
 	{"GET_PARAMETER_WITHOUT_SUBCOMMANDS", {tt_offline, "interaction_create_t::get_parameter() without subcommands", false, false}},
+	{"AUTOMOD_RULE_CREATE", {tt_online, "cluster::automod_rule_create", false, false}},
+	{"AUTOMOD_RULE_GET", {tt_online, "cluster::automod_rule_get", false, false}},
+	{"AUTOMOD_RULE_GET_ALL", {tt_online, "cluster::automod_rules_get", false, false}},
+	{"AUTOMOD_RULE_DELETE", {tt_online, "cluster::automod_rule_delete", false, false}},
+	{"REQUEST_GET_IMAGE", {tt_online, "using the cluster::request method to fetch an image", false, false}},
+	{"EMOJI_CREATE", {tt_online, "cluster::guild_emoji_create", false, false}},
+	{"EMOJI_GET", {tt_online, "cluster::guild_emoji_get", false, false}},
+	{"EMOJI_DELETE", {tt_online, "cluster::guild_emoji_delete", false, false}},
+	{"INVITE_CREATE_EVENT", {tt_online, "cluster::on_invite_create", false, false}},
+	{"INVITE_DELETE_EVENT", {tt_online, "cluster::on_invite_delete", false, false}},
+	{"INVITE_CREATE", {tt_online, "cluster::channel_invite_create", false, false}},
+	{"INVITE_GET", {tt_online, "cluster::invite_get", false, false}},
+	{"INVITE_DELETE", {tt_online, "cluster::invite_delete", false, false}},
+
+	/* Extended set -- Less important, skipped on the master branch due to rate limits and GitHub actions limitations*/
+	/* To execute, run unittests with "full" command line argument */
+	{"MESSAGEPIN", {tt_extended, "Pinning a channel message", false, false}},
+	{"MESSAGEUNPIN", {tt_extended, "Unpinning a channel message", false, false}},
+
+	{"THREAD_MEMBER_ADD", {tt_extended, "cluster::thread_member_add", false, false}},
+	{"THREAD_MEMBER_GET", {tt_extended, "cluster::thread_member_get", false, false}},
+	{"THREAD_MEMBERS_GET", {tt_extended, "cluster::thread_members_get", false, false}},
+	{"THREAD_MEMBER_REMOVE", {tt_extended, "cluster::thread_member_remove", false, false}},
+	{"THREAD_MEMBERS_ADD_EVENT", {tt_extended, "cluster::on_thread_members_update event with member addition", false, false}},
+	{"THREAD_MEMBERS_REMOVE_EVENT", {tt_extended, "cluster::on_thread_members_update event with member removal", false, false}},
+	{"THREAD_CREATE_MESSAGE", {tt_extended, "cluster::thread_create_with_message", false, false}},
+
+	{"THREAD_MESSAGE", {tt_extended, "message manipulation in thread", false, false}},
+	{"THREAD_MESSAGE_CREATE_EVENT", {tt_extended, "cluster::on_message_create in thread", false, false}},
+	{"THREAD_MESSAGE_EDIT_EVENT", {tt_extended, "cluster::on_message_edit in thread", false, false}},
+	{"THREAD_MESSAGE_DELETE_EVENT", {tt_extended, "cluster::on_message_delete in thread", false, false}},
+	{"THREAD_MESSAGE_REACT_ADD_EVENT", {tt_extended, "cluster::on_reaction_add in thread", false, false}},
+	{"THREAD_MESSAGE_REACT_REMOVE_EVENT", {tt_extended, "cluster::on_reaction_remove in thread", false, false}},
 };
 
 double start = dpp::utility::time_f();
 bool offline = false;
+bool extended = false;
 
 dpp::snowflake TEST_GUILD_ID = std::stoull(SAFE_GETENV("TEST_GUILD_ID"));
 dpp::snowflake TEST_TEXT_CHANNEL_ID = std::stoull(SAFE_GETENV("TEST_TEXT_CHANNEL_ID"));
@@ -172,7 +221,7 @@ int test_summary() {
 	std::cout << "\u001b[37;1m\n\nUNIT TEST SUMMARY\n==================\n\u001b[0m";
 	for (auto & t : tests) {
 		bool test_skipped = false;
-		if (t.second.type == tt_online && offline) {
+		if ((t.second.type == tt_online && offline) || (t.second.type == tt_extended && !extended)) {
 			skipped++;
 			test_skipped = true;
 		} else {
@@ -182,15 +231,24 @@ int test_summary() {
 				passed++;
 			}
 		}
-		std::cout << std::left << std::setw(60) << t.second.description << " " << std::fixed << std::setw(6) << (test_skipped ? "\u001b[33mSKIPPED" : (t.second.executed && t.second.success ? "\u001b[32mPASS" : "\u001b[31mFAIL")) << std::setw(0) << "\u001b[0m\n";
+		std::cout << std::left << std::setw(60) << t.second.description << " " << std::fixed << std::setw(6) << (test_skipped ? "\u001b[33mSKIPPED" : (t.second.executed && t.second.success ? "\u001b[32mPASS" : (!t.second.executed ? "\u001b[31mNOT EXECUTED" : "\u001b[31mFAIL"))) << std::setw(0) << "\u001b[0m\n";
 	}
 	std::cout << "\u001b[37;1m\nExecution finished in " << std::fixed << std::setprecision(3) <<  get_time() << std::setprecision(0) << " seconds.\nFailed: " << failed << " Passed: " << passed << (skipped ? " Skipped: " : "") << (skipped ? std::to_string(skipped) : "") << " Percentage: " << std::setprecision(2) << ((float)(passed) / (float)(passed + failed) * 100.0f) << "%\u001b[0m\n";
 	return failed;
 }
 
+namespace {
+	std::string get_testdata_dir() {
+		char *env_var = getenv("TEST_DATA_DIR");
+
+		return (env_var ? env_var : "../../testdata/");
+	}
+}
+
 std::vector<uint8_t> load_test_audio() {
 	std::vector<uint8_t> testaudio;
-	std::ifstream input ("../../testdata/Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
+	std::string dir = get_testdata_dir();
+	std::ifstream input (dir + "Robot.pcm", std::ios::in|std::ios::binary|std::ios::ate);
 	if (input.is_open()) {
 		size_t testaudio_size = input.tellg();
 		testaudio.resize(testaudio_size);
@@ -199,10 +257,28 @@ std::vector<uint8_t> load_test_audio() {
 		input.close();
 	}
 	else {
-		std::cout << "ERROR: Can't load ../../testdata/Robot.pcm\n";
+		std::cout << "ERROR: Can't load " + dir + "Robot.pcm\n";
 		exit(1);
 	}
 	return testaudio;
+}
+
+std::vector<uint8_t> load_test_image() {
+	std::vector<uint8_t> testimage;
+	std::string dir = get_testdata_dir();
+	std::ifstream input (dir + "DPP-Logo.png", std::ios::in|std::ios::binary|std::ios::ate);
+	if (input.is_open()) {
+		size_t testimage_size = input.tellg();
+		testimage.resize(testimage_size);
+		input.seekg(0, std::ios::beg);
+		input.read((char*)testimage.data(), testimage_size);
+		input.close();
+	}
+	else {
+		std::cout << "ERROR: Can't load " + dir + "DPP-Logo.png\n";
+		exit(1);
+	}
+	return testimage;
 }
 
 std::string get_token() {
@@ -226,9 +302,9 @@ void wait_for_tests() {
 		for (auto & t : tests) {
 			if (t.second.executed == true) {
 				executed++;
-			} else if (offline && t.second.type == tt_online && !t.second.executed) {
+			} else if (!t.second.executed && ((offline && t.second.type == tt_online) || (!extended && t.second.type == tt_extended))) {
 				executed++;
-				t.second.success = true;
+				t.second.executed = true;
 				std::cout << "[" << std::fixed << std::setprecision(3)  << get_time() << "]: " << "[\u001b[33mSKIPPED\u001b[0m] " << t.second.description << "\n";
 			}
 		}
@@ -238,5 +314,9 @@ void wait_for_tests() {
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 		ticks++;
+	}
+	for (auto &t : tests) {
+		if (!t.second.executed)
+			std::cout << "[" << std::fixed << std::setprecision(3)  << get_time() << "]: " << "[\u001b[31mTIMEOUT\u001b[0m] " << t.second.description << "\n";
 	}
 }

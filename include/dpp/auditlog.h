@@ -140,6 +140,10 @@ enum audit_type {
 	aut_automod_flag_to_channel =	144,
 	/// Member was timed out by Auto Moderation
 	aut_automod_user_communication_disabled =	145,
+	/// Creator monetization request was created
+	aut_creator_monetization_request_created = 150,
+	/// Creator monetization terms were accepted
+	aut_creator_monetization_terms_accepted = 151,
 };
 
 /**
@@ -177,7 +181,7 @@ struct DPP_EXPORT audit_extra {
 /**
  * @brief An individual audit log entry
  */
-struct DPP_EXPORT audit_entry {
+struct DPP_EXPORT audit_entry : public json_interface<audit_entry> {
 	snowflake			id;		//!< id of the entry
 	/**
 	 * ID of the affected entity (webhook, user, role, etc.) (may be empty)
@@ -189,6 +193,18 @@ struct DPP_EXPORT audit_entry {
 	audit_type			type;		//!< type of action that occurred
 	std::optional<audit_extra>	extra;	//!< Optional: additional info for certain action types
 	std::string			reason;		//!< Optional: the reason for the change (1-512 characters)
+
+	/** Constructor */
+	audit_entry();
+
+	/** Destructor */
+	virtual ~audit_entry() = default;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	audit_entry& fill_from_json(nlohmann::json* j);
 };
 
 /**

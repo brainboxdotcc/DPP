@@ -73,6 +73,7 @@ enum permissions : uint64_t {
 	p_moderate_members = 0x10000000000,    //!< allows for timing out users to prevent them from sending or reacting to messages in chat and threads, and from speaking in voice and stage channels
 	p_view_creator_monetization_analytics = 0x20000000000,	//!< allows for viewing role subscription insights
 	p_use_soundboard = 0x40000000000, //!< allows for using soundboard in a voice channel
+	p_use_external_sounds = 0x0000200000000000, //!< allows the usage of custom soundboard sounds from other servers
 	p_send_voice_messages = 0x0000400000000000, //!< allows sending voice messages
 };
 
@@ -83,38 +84,42 @@ enum permissions : uint64_t {
 using role_permissions = permissions;
 
 /**
- * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are hold in an uint64_t
+ * @brief Represents a permission bitmask (refer to enum dpp::permissions) which are held in an uint64_t
  */
 class DPP_EXPORT permission {
 protected:
 	/**
 	 * @brief The permission bitmask value
 	 */
-	uint64_t value;
+	uint64_t value{0};
 
 public:
 	/**
-	 * @brief Construct a permission object
-	 * @param value A permission bitmask
+	 * @brief Default constructor, initializes permission to 0
 	 */
-	permission(const uint64_t& value);
+	constexpr permission() = default;
 
 	/**
- 	 * @brief Construct a permission object
- 	 */
-	permission();
+	 * @brief Bitmask constructor, initializes permission to the argument
+	 * @param value The bitmask to initialize the permission to
+	 */
+	constexpr permission(uint64_t value) noexcept : value{value} {}
 
 	/**
 	 * @brief For acting like an integer
 	 * @return The permission bitmask value
 	 */
-	operator uint64_t() const;
+	constexpr operator uint64_t() const noexcept {
+		return value;
+	}
 
 	/**
 	 * @brief For acting like an integer
 	 * @return A reference to the permission bitmask value
 	 */
-	operator uint64_t &();
+	constexpr operator uint64_t &() noexcept {
+		return value;
+	}
 
 	/**
 	 * @brief For building json
@@ -137,8 +142,27 @@ public:
 	 * @return bool True if it has all the given permissions
 	 */
 	template <typename... T>
-	bool has(T... values) const {
+	constexpr bool has(T... values) const noexcept {
 		return (value & (0 | ... | values)) == (0 | ... | values);
+	}
+
+	/**
+	 * @brief Check for permission flags set. It uses the Bitwise AND operator
+	 * @tparam T one or more uint64_t permission bits
+	 * @param values The permissions (from dpp::permissions) to check for
+	 *
+	 * **Example:**
+	 *
+	 * ```cpp
+	 * bool is_mod = permission.has_any(dpp::p_administrator, dpp::p_ban_members);
+	 * // Returns true if the permission bitmask contains p_administrator or p_ban_members
+	 * ```
+	 *
+	 * @return bool True if it has any the given permissions
+	 */
+	template <typename... T>
+	constexpr bool has_any(T... values) const noexcept {
+		return (value & (0 | ... | values)) != 0;
 	}
 
 	/**
@@ -156,8 +180,8 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
-	add(T... values) {
+	std::enable_if_t<(std::is_convertible_v<T, uint64_t> && ...), permission&>
+	constexpr add(T... values) noexcept {
 		value |= (0 | ... | values);
 		return *this;
 	}
@@ -176,8 +200,8 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
-	set(T... values) {
+	std::enable_if_t<(std::is_convertible_v<T, uint64_t> && ...), permission&>
+	constexpr set(T... values) noexcept {
 		value = (0 | ... | values);
 		return *this;
 	}
@@ -197,8 +221,8 @@ public:
 	 * @return permission& reference to self for chaining
 	 */
 	template <typename... T>
-	typename std::enable_if<(std::is_convertible<T, uint64_t>::value && ...), permission&>::type
-	remove(T... values) {
+	std::enable_if_t<(std::is_convertible_v<T, uint64_t> && ...), permission&>
+	constexpr remove(T... values) noexcept {
 		value &= ~(0 | ... | values);
 		return *this;
 	}

@@ -21,6 +21,7 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/user.h>
+#include <dpp/emoji.h>
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
@@ -135,40 +136,50 @@ enum guild_flags : uint32_t {
 /**
  * @brief Additional boolean flag values for guild, as guild_flags is full
  */
-enum guild_flags_extra : uint8_t {
+enum guild_flags_extra : uint16_t {
 	/** Guild has premium progress bar enabled */
-	g_premium_progress_bar_enabled =	0b00000001,
+	g_premium_progress_bar_enabled =	0b0000000000000001,
 	/** Guild can have an animated banner (doesn't mean it actually has one though) */
-	g_animated_banner =			0b00000010,
+	g_animated_banner =			0b0000000000000010,
 	/** Guild has auto moderation */
-	g_auto_moderation =			0b00000100,
+	g_auto_moderation =			0b0000000000000100,
 	/** Guild has paused invites, preventing new users from joining */
-	g_invites_disabled =		0b00001000,
+	g_invites_disabled =		0b0000000000001000,
 	/** Guild has been set as support server of an app in the App Directory */
-	g_developer_support_server =	0b00010000,
+	g_developer_support_server =	0b0000000000010000,
 	/** Guild role subscription purchase and renewal notifications are off */
-	g_no_role_subscription_notifications = 0b00100000,
+	g_no_role_subscription_notifications = 0b0000000000100000,
 	/** Guild role subscription sticker reply buttons are off */
-	g_no_role_subscription_notification_replies = 0b01000000,
+	g_no_role_subscription_notification_replies = 0b0000000001000000,
 	/** Guild has role subscriptions that can be purchased */
-	g_role_subscriptions_available_for_purchase = 0b10000000,
+	g_role_subscriptions_available_for_purchase = 0b0000000010000000,
+	/** Guild has disabled alerts for join raids in the configured safety alerts channel */
+	g_raid_alerts_disabled = 0b0000000100000000,
 };
 
 /**
  * @brief Various flags that can be used to indicate the status of a guild member.
- * @note Use set_mute and set_deaf member functions and do not toggle the bits yourself.
+ * @note Use the setter functions in dpp::guild_member and do not toggle the bits yourself.
  */
-enum guild_member_flags : uint8_t {
+enum guild_member_flags : uint16_t {
 	/** Member deafened in voice channels */
-	gm_deaf =		0b00000001,
+	gm_deaf =		0b0000000000000001,
 	/** Member muted in voice channels */
-	gm_mute =		0b00000010,
+	gm_mute =		0b0000000000000010,
 	/** Member pending verification by membership screening */
-	gm_pending =		0b00000100,
+	gm_pending =		0b0000000000000100,
 	/** Member has animated guild-specific avatar */
-	gm_animated_avatar = 	0b00001000,
+	gm_animated_avatar = 	0b0000000000001000,
 	/** gm_deaf or gm_mute has been toggled */
-	gm_voice_action = 		0b00010000,
+	gm_voice_action = 		0b0000000000010000,
+	/** Member has left and rejoined the guild */
+	gm_did_rejoin = 0b0000000000100000,
+	/** Member has completed onboarding */
+	gm_completed_onboarding = 0b0000000001000000,
+	/** Member is exempt from guild verification requirements */
+	gm_bypasses_verification = 0b0000000010000000,
+	/** Member has started onboarding */
+	gm_started_onboarding = 0b0000000100000000,
 };
 
 /**
@@ -194,7 +205,7 @@ public:
 	/** Boosting since */
 	time_t premium_since;
 	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
-	uint8_t flags;
+	uint16_t flags;
 
 	/** Default constructor */
 	guild_member();
@@ -248,6 +259,38 @@ public:
 	bool is_pending() const;
 
 	/**
+	 * @brief Returns true if the user has left and rejoined the guild
+	 *
+	 * @return true user has left and rejoined the guild
+	 * @return false user has not rejoined
+	 */
+	bool has_rejoined() const;
+
+	/**
+	 * @brief Returns true if the user has completed onboarding
+	 *
+	 * @return true user has completed onboarding
+	 * @return false user has not completed onboarding
+	 */
+	bool has_completed_onboarding() const;
+
+	/**
+	 * @brief Returns true if the user has started onboarding
+	 *
+	 * @return true user has started onboarding
+	 * @return false user has not started onboarding yet
+	 */
+	bool has_started_onboarding() const;
+
+	/**
+	 * @brief Returns true if the user is exempt from guild verification requirements
+	 *
+	 * @return true user bypasses verification
+	 * @return false user doesn't bypass verification
+	 */
+	bool has_bypasses_verification() const;
+
+	/**
 	 * @brief Returns true if the user's per-guild custom avatar is animated
 	 * 
 	 * @return true user's custom avatar is animated
@@ -263,7 +306,7 @@ public:
 	 * @param size The size of the avatar in pixels. It can be any power of two between 16 and 4096,
 	 * otherwise the default sized avatar is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
-	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
+	 * When passing `i_gif`, it returns an empty string for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
 	 * If true, it'll return gif format whenever the image is available as animated.
 	 * @return std::string avatar url or an empty string, if required attributes are missing or an invalid format was passed
@@ -292,6 +335,15 @@ public:
 	 */
 	
 	bool operator == (guild_member const& other_member) const;
+
+	/**
+	 * @brief Set whether the user is exempt from guild verification requirements
+	 *
+	 * @param is_bypassing_verification value to set
+	 *
+	 * @return guild_member& reference to self
+	 */
+	guild_member& set_bypasses_verification(const bool is_bypassing_verification);
 
 	/**
 	 * @brief Set whether the user is muted in voice channels
@@ -331,26 +383,102 @@ public:
 /**
  * @brief Defines a channel on a server's welcome screen
  */
-struct welcome_channel_t {
-	/// the description shown for the channel
+struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
+	/// The description shown for the channel
 	std::string description;
-	/// the emoji name if custom, the unicode character if standard, or null if no emoji is set
+	/// The emoji name if custom, the unicode character if standard, or null if no emoji is set
 	std::string emoji_name;
-	/// the channel's id
-	snowflake channel_id = 0;
-	/// the emoji id, if the emoji is custom
-	snowflake emoji_id = 0;
+	/// The channel's id
+	snowflake channel_id;
+	/// The emoji id, if the emoji is custom
+	snowflake emoji_id;
+
+	/**
+	 * @brief Construct a new welcome channel object
+	 */
+	welcome_channel();
+
+	/**
+	 * @brief Destroy the welcome channel object
+	 */
+	virtual ~welcome_channel() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_channel& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the channel ID of this welcome channel object
+	 *
+	 * @param _channel_id The channel ID to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_channel& set_channel_id(const snowflake _channel_id);
+
+	/**
+	 * @brief Set the description of this welcome channel object
+	 *
+	 * @param _description The description to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_channel& set_description(const std::string& _description);
 };
 
 
 /**
  * @brief Defines a server's welcome screen
  */
-struct welcome_screen_t {
-	/// the server description shown in the welcome screen
+struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
+	/// The server description shown in the welcome screen
 	std::string description;
-	/// the channels shown in the welcome screen, up to 5
-	std::vector<welcome_channel_t> welcome_channels;
+	/// The channels shown in the welcome screen (max 5)
+	std::vector<welcome_channel> welcome_channels;
+
+	/**
+	 * @brief Construct a new welcome screen object
+	 */
+	welcome_screen() = default;
+
+	/**
+	 * @brief Destroy the welcome screen object
+	 */
+	virtual ~welcome_screen() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_screen& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the server description for this welcome screen object shown in the welcome screen
+	 *
+	 * @param s string The server description
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	welcome_screen& set_description(const std::string& s);
 };
 
 /**
@@ -501,7 +629,7 @@ public:
 
 	/** Welcome screen
 	 */
-	welcome_screen_t welcome_screen;
+	dpp::welcome_screen welcome_screen;
 
 	/** Guild icon hash */
 	utility::iconhash icon;
@@ -536,6 +664,9 @@ public:
 	/** Snowflake ID of widget channel, or 0 */
 	snowflake widget_channel_id;
 
+	/** The id of the channel where admins and moderators of Community guilds receive safety alerts from Discord */
+	snowflake safety_alerts_channel_id;
+
 	/** Approximate member count. May be sent as zero */
 	uint32_t member_count;
 
@@ -552,6 +683,11 @@ public:
 	 * @brief the maximum number of members for the guild
 	 */
 	uint32_t max_members;
+
+	/**
+	 * @brief Additional flags (values from dpp::guild_flags_extra)
+	 */
+	uint16_t flags_extra;
 
 	/** Shard ID of the guild */
 	uint16_t shard_id;
@@ -584,11 +720,6 @@ public:
 	 * @brief Guild NSFW level
 	 */
 	guild_nsfw_level_t nsfw_level;
-
-	/**
-	 * @brief Additional flags
-	 */
-	uint8_t flags_extra;
 
 	/** Default constructor, zeroes all values */
 	guild();
@@ -718,7 +849,7 @@ public:
 	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096,
 	 * otherwise the default sized icon is returned.
 	 * @param format The format to use for the avatar. It can be one of `i_webp`, `i_jpg`, `i_png` or `i_gif`.
-	 * Passing `i_gif` might result in an invalid url for non-animated images. Consider using the `prefer_animated` parameter instead.
+	 * When passing `i_gif`, it returns an empty string for non-animated images. Consider using the `prefer_animated` parameter instead.
 	 * @param prefer_animated Whether you prefer gif format.
 	 * If true, it'll return gif format whenever the image is available as animated.
 	 * @return std::string icon url or an empty string, if required attributes are missing or an invalid format was passed
@@ -845,6 +976,12 @@ public:
 	 * @return bool has role subscriptions that can be purchased
 	 */
 	bool has_role_subscriptions_available_for_purchase() const;
+
+	/**
+	 * @brief Guild has disabled alerts for join raids in the configured safety alerts channel
+	 * @return bool dpp::g_raid_alerts_disabled flag is set
+	 */
+	bool has_raid_alerts_disabled() const;
 
 	/**
 	 * @brief Guild has access to set an animated guild icon
@@ -991,6 +1128,223 @@ public:
 	 * @return std::string guild widget stringified json
 	 */
 	std::string build_json(bool with_id = false) const;
+};
+
+/**
+ * @brief The onboarding mode for the dpp::onboarding object. Defines the criteria used to satisfy Onboarding constraints that are required for enabling.
+ */
+enum onboarding_mode: uint8_t {
+	gom_default = 	0, //!< Counts only Default Channels towards constraints
+	gom_advanced = 	1, //!< Counts Default Channels and Questions towards constraints
+};
+
+/**
+ * @brief The various types of dpp::onboarding_prompt
+ */
+enum onboarding_prompt_type: uint8_t {
+	opt_multiple_choice = 0, //!< Multiple choice
+	opt_dropdown = 1, //!< Dropdown
+};
+
+/**
+ * @brief Various flags for dpp::onboarding_prompt
+ */
+enum onboarding_prompt_flags: uint8_t {
+	opf_single_select = 1 << 0, //!< Indicates whether users are limited to selecting one option for the prompt
+	opf_required =		1 << 1, //!< Indicates whether the prompt is required before a user completes the onboarding flow
+	opf_in_onboarding = 1 << 2, //!< Indicates whether the prompt is present in the onboarding flow. If set, the prompt will only appear in the Channels & Roles tab
+};
+
+/**
+ * @brief Represents an onboarding prompt option
+ */
+struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interface<onboarding_prompt_option> {
+	std::vector<snowflake> channel_ids; //!< IDs for channels a member is added to when the option is selected
+	std::vector<snowflake> role_ids; //!< IDs for roles assigned to a member when the option is selected
+	dpp::emoji emoji; //!< Emoji of the option
+	std::string title; //!< Title of the option
+	std::string description; //!< Description of the option
+
+	/**
+	 * @brief Construct a new onboarding prompt option object
+	 */
+	onboarding_prompt_option();
+
+	/**
+	 * @brief Destroy the onboarding prompt option object
+	 */
+	virtual ~onboarding_prompt_option() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt_option& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the emoji of this onboarding prompt option object
+	 *
+	 * @param _emoji The emoji to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt_option& set_emoji(const dpp::emoji& _emoji);
+
+	/**
+	 * @brief Set the title of this onboarding prompt option object
+	 *
+	 * @param _title The title to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt_option& set_title(const std::string& _title);
+
+	/**
+	 * @brief Set the description of this onboarding prompt option object
+	 *
+	 * @param _description The description to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt_option& set_description(const std::string& _description);
+};
+
+/**
+ * @brief Represents an onboarding prompt
+ */
+struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboarding_prompt> {
+	onboarding_prompt_type type; //!< Type of prompt (defaults to dpp::opt_multiple_choice)
+	std::vector<onboarding_prompt_option> options; //!< Options available within the prompt
+	std::string title; //!< Title of the prompt
+	uint8_t flags; //!< A set of flags built from the bitmask defined by dpp::onboarding_prompt_flags
+
+	/**
+	 * @brief Construct a new onboarding prompt object
+	 */
+	onboarding_prompt();
+
+	/**
+	 * @brief Destroy the onboarding prompt object
+	 */
+	virtual ~onboarding_prompt() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set the type of this onboarding prompt object
+	 *
+	 * @param _type The prompt type to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt& set_type(const onboarding_prompt_type _type);
+
+	/**
+	 * @brief Set the title of this onboarding prompt object
+	 *
+	 * @param _title The title to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding_prompt& set_title(const std::string& _title);
+
+	/**
+	 * @brief Indicates whether users are limited to selecting one option for the prompt
+	 * @return bool True if the users are limited to selecting one option for the prompt
+	 */
+	bool is_single_select() const;
+
+	/**
+	 * @brief Indicates whether the prompt is required before a user completes the onboarding flow
+	 * @return bool True if the prompt is required before a user completes the onboarding flow
+	 */
+	bool is_required() const;
+
+	/**
+	 * @brief Indicates whether the prompt is present in the onboarding flow
+	 * @return bool True if the prompt is present in the onboarding flow. False if the prompt will only appear in the Channels & Roles tab
+	 */
+	bool is_in_onboarding() const;
+};
+
+/**
+ * @brief Represents a guild's onboarding flow
+ */
+struct DPP_EXPORT onboarding: public json_interface<onboarding> {
+	snowflake guild_id; //!< ID of the guild this onboarding is part of
+	std::vector<onboarding_prompt> prompts; //!< Prompts shown during onboarding and in customize community
+	std::vector<snowflake> default_channel_ids; //!< Channel IDs that members get opted into automatically
+	onboarding_mode mode; //!< Current mode of onboarding (defaults to dpp::gom_default)
+	bool enabled; //!< Whether onboarding is enabled in the guild
+
+	/**
+	 * @brief Construct a new onboarding object
+	 */
+	onboarding();
+
+	/**
+	 * @brief Destroy the onboarding object
+	 */
+	virtual ~onboarding() = default;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding& fill_from_json(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	std::string build_json(bool with_id = false) const;
+
+	/**
+	 * @brief Set guild_id of this onboarding object
+	 *
+	 * @param guild_id Guild ID to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding& set_guild_id(const snowflake id);
+
+	/**
+	 * @brief Set the mode of this onboarding object
+	 *
+	 * @param m onboarding_mode Mode to set
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding& set_mode(const onboarding_mode m);
+
+	/**
+	 * @brief Set the enabling of this onboarding object
+	 *
+	 * @param is_enabled bool Whether onboarding is enabled in the guild
+	 * @return Reference to self, so these method calls may be chained
+	 */
+	onboarding& set_enabled(const bool is_enabled);
 };
 
 /**

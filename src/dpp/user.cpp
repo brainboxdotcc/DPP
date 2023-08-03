@@ -67,6 +67,7 @@ std::string user::build_json(bool with_id) const {
 
 	j["id"] = id;
 	j["username"] = username;
+	j["global_name"] = global_name; 
 	j["avatar"] = avatar.to_string();
 	j["discriminator"] = discriminator;
 	j["bot"] = is_bot();
@@ -100,26 +101,12 @@ user_identified::~user_identified() {
 }
 
 std::string user::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_gif, "gif" },
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (this->avatar.to_string().empty()) {
 		return get_default_avatar_url();
 	} else if (this->id) {
-		return utility::cdn_host + "/avatars/" +
-			std::to_string(this->id) +
-			(has_animated_icon() ? "/a_" : "/") +
-			this->avatar.to_string() + "." +
-			(has_animated_icon() && prefer_animated ? "gif" : extensions.find(format)->second) +
-			utility::avatar_size(size);
+		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+											  "avatars/" + std::to_string(this->id), this->avatar.to_string(),
+											  format, size, prefer_animated, has_animated_icon());
 	} else {
 		return std::string();
 	}
@@ -127,13 +114,22 @@ std::string user::get_avatar_url(uint16_t size, const image_type format, bool pr
 
 std::string user::get_default_avatar_url() const {
 	if (this->discriminator) {
-		return utility::cdn_host + "/embed/avatars/" + std::to_string(this->discriminator % 5) + ".png";
+		return utility::cdn_endpoint_url({ i_png },
+										 "embed/avatars/" + std::to_string(this->discriminator % 5),
+										 i_png, 0);
+	} else if (this->id){
+		return utility::cdn_endpoint_url({ i_png },
+										 "embed/avatars/" + std::to_string((this->id >> 22) % 6),
+										 i_png, 0);
 	} else {
 		return std::string();
 	}
 }
 
 std::string user::format_username() const {
+	if (!global_name.empty()) {
+		return global_name;
+	}
 	return username + '#' + leading_zeroes(discriminator, 4);
 }
 
@@ -248,24 +244,10 @@ bool user_identified::has_animated_banner() const {
 }
 
 std::string user_identified::get_banner_url(uint16_t size, const image_type format, bool prefer_animated) const {
-	static const std::map<image_type, std::string> extensions = {
-			{ i_gif, "gif" },
-			{ i_jpg, "jpg" },
-			{ i_png, "png" },
-			{ i_webp, "webp" },
-	};
-
-	if (extensions.find(format) == extensions.end()) {
-		return std::string();
-	}
-
 	if (!this->banner.to_string().empty() && this->id) {
-		return utility::cdn_host + "/banners/" +
-			   std::to_string(this->id) +
-			   (has_animated_banner() ? "/a_" : "/") +
-			   this->banner.to_string() + "." +
-			   (has_animated_banner() && prefer_animated ? "gif" : extensions.find(format)->second) +
-			   utility::avatar_size(size);
+		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+											  "banners/" + std::to_string(this->id), this->banner.to_string(),
+											  format, size, prefer_animated, has_animated_banner());
 	} else {
 		return std::string();
 	}
@@ -291,6 +273,7 @@ void from_json(const nlohmann::json& j, user_identified& u) {
 void from_json(const nlohmann::json& j, user& u) {
 	u.id = snowflake_not_null(&j, "id");
 	u.username = string_not_null(&j, "username");
+	u.global_name = string_not_null(&j, "global_name");
 
 	std::string av = string_not_null(&j, "avatar");
 	if (av.length() > 2 && av.substr(0, 2) == "a_") {

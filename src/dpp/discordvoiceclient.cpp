@@ -263,7 +263,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					    samples >= 0) {
 						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
 							samples * opus_channel_count * sizeof(opus_int16));
-						client.endGain = 1.0f / client.moving_average;
+						client.end_gain = 1.0f / client.moving_average;
 						park_count = audio_mix(client, pcm_mix, pcm, park_count, samples, max_samples);
 						client.creator->on_voice_receive.call(vr);
 					}
