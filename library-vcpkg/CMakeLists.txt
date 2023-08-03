@@ -11,9 +11,16 @@ endif()
 
 add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
 
+if(NOT DEFINED AVX_TYPE)
+	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/DetectArchitecture.cmake")
+endif()
+
 target_compile_definitions(
 	"${LIB_NAME}" PUBLIC
 	"DPP_BUILD"
+	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/std:c++17;/Od;/DEBUG;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
+	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/std:c++17;/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
+	"${AVX_TYPE}"
 )
 
 target_compile_options(
@@ -23,6 +30,7 @@ target_compile_options(
 	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/std:c++17;/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
 	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-std=c++17;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
 	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-std=c++17;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
+	"${AVX_FLAG}"
 )
 
 target_compile_features(
