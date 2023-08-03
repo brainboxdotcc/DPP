@@ -93,6 +93,16 @@ public:
 	}
 
 	/**
+	 * @brief Returns the stringified version of the snowflake value
+	 * 
+	 * @return std::string string form of snowflake value
+	 */
+	inline std::string str() const
+	{
+		return std::to_string(value);
+	}
+
+	/**
 	 * @brief Operator less than, used for maps/unordered maps
 	 * when the snowflake is a key value.
 	 * 

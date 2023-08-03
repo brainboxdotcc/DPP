@@ -125,7 +125,11 @@
 		"koko",
 		"moyai",
 		"kaaba",
-		"stringified"
+		"stringified",
+		"loadu",
+		"cvtps",
+		"neww",
+		"STDCORO"
 	],
 	"flagWords": [
 		"hte"
