@@ -169,5 +169,5 @@ typedef std::unordered_map<snowflake, integration> integration_map;
 /** A group of connections */
 typedef std::unordered_map<snowflake, connection> connection_map;
 
-};
+} // namespace dpp
 

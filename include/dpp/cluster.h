@@ -3523,4 +3523,4 @@ public:
 
 };
 
-};
+} // namespace dpp

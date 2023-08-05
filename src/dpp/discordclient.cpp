@@ -723,4 +723,4 @@ voiceconn& voiceconn::connect(snowflake guild_id) {
 }
 
 
-};
+} // namespace dpp

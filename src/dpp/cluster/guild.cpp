@@ -169,4 +169,4 @@ void cluster::guild_edit_welcome_screen(snowflake guild_id, const struct welcome
 }
 
 
-};
+} // namespace dpp

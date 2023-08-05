@@ -114,5 +114,5 @@ webhook& webhook::load_image(const std::string &image_blob, const image_type typ
 	return *this;
 }
 
-};
+} // namespace dpp
 

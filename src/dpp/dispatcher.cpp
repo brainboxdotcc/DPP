@@ -379,4 +379,4 @@ event_ctor(automod_rule_create_t, event_dispatch_t);
 event_ctor(automod_rule_delete_t, event_dispatch_t);
 event_ctor(automod_rule_update_t, event_dispatch_t);
 event_ctor(automod_rule_execute_t, event_dispatch_t);
-};
+} // namespace dpp

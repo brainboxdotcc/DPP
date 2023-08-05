@@ -419,4 +419,4 @@ bool request_queue::is_globally_ratelimited() const
 	return this->globally_ratelimited;
 }
 
-};
+} // namespace dpp

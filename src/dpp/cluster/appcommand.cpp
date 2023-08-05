@@ -183,4 +183,4 @@ void cluster::interaction_followup_get_original(const std::string &token, comman
 	rest_request<message>(this, API_PATH "/webhooks",std::to_string(me.id), utility::url_encode(token) + "/messages/@original", m_get, "", callback);
 }
 
-};
+} // namespace dpp

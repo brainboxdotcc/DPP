@@ -396,4 +396,4 @@ public:
 
 #endif
 
-}
+} // namespace dpp

@@ -209,4 +209,4 @@ public:
 	void send_close_packet();
 };
 
-};
+} // namespace dpp

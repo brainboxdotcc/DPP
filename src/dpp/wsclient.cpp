@@ -313,4 +313,4 @@ void websocket_client::close()
 	ssl_client::close();
 }
 
-};
+} // namespace dpp

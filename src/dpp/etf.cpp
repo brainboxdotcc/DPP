@@ -723,5 +723,5 @@ etf_buffer::etf_buffer(size_t initial) {
 
 etf_buffer::~etf_buffer() = default;
 
-};
+} // namespace dpp
 

@@ -89,4 +89,4 @@ uint16_t snowflake::get_increment() const {
 	return (value & 0xFFF);
 }
 
-}
+} // namespace dpp

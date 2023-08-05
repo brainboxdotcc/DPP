@@ -87,4 +87,4 @@ std::string voicestate::build_json(bool with_id) const {
 	return json({}).dump();
 }
 
-};
+} // namespace dpp

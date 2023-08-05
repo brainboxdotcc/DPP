@@ -660,4 +660,4 @@ forum_layout_type channel::get_default_forum_layout() const {
 }
 
 
-};
+} // namespace dpp

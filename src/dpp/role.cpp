@@ -495,4 +495,4 @@ std::string application_role_connection::build_json(bool with_id) const {
 }
 
 
-};
+} // namespace dpp

@@ -354,4 +354,4 @@ http_connect_info https_client::get_host_info(std::string url) {
 	return hci;
 }
 
-};
+} // namespace dpp

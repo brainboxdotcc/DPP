@@ -60,4 +60,4 @@ std::string dtemplate::build_json(bool with_id) const {
 	return j.dump();
 }
 
-};
+} // namespace dpp

@@ -862,5 +862,5 @@ struct active_thread_info {
  */
 using active_threads = std::map<snowflake, active_thread_info>;
 
-};
+} // namespace dpp
 

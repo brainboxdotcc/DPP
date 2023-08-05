@@ -197,5 +197,5 @@ public:
 	derived_exception(cache_exception, exception);
 #endif
 
-};
+} // namespace dpp
 

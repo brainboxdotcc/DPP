@@ -458,4 +458,4 @@ public:
 	bool is_globally_ratelimited() const;
 };
 
-};
+} // namespace dpp

@@ -72,7 +72,7 @@ namespace dpp {
 		*/
 		template <typename ReturnType>
 		using task_handle = detail::std_coroutine::coroutine_handle<detail::task_promise<ReturnType>>;
-	}
+	} // namespace detail
 
 	/**
 	 * @brief A coroutine task. It can be co_awaited to make nested coroutines.
@@ -404,7 +404,7 @@ namespace dpp {
 			if (parent)
 				parent.resume();
 		}
-	}
+	} // namespace detail
 
 	template <typename ReturnType>
 #ifndef _DOXYGEN_
@@ -695,7 +695,7 @@ namespace dpp {
 			return std::move(*api_callback.get_result());
 		}
 	};
-};
+} // namespace dpp
 
 /**
  * @brief Specialization of std::coroutine_traits, helps the standard library figure out a promise type from a coroutine function.

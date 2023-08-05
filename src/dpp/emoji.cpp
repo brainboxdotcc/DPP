@@ -128,5 +128,5 @@ std::string emoji::get_url(uint16_t size, const dpp::image_type format, bool pre
 }
 
 
-};
+} // namespace dpp
 

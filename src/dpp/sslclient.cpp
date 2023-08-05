@@ -650,4 +650,4 @@ ssl_client::~ssl_client()
 	cleanup();
 }
 
-};
+} // namespace dpp

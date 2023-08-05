@@ -50,4 +50,4 @@ std::string prune::build_json(bool with_prune_count) const {
 	return j.dump();
 }
 
-};
+} // namespace dpp

@@ -60,4 +60,4 @@ struct DPP_EXPORT prune : public json_interface<prune> {
 
 };
 
-};
+} // namespace dpp

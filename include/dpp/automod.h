@@ -371,4 +371,4 @@ public:
  */
 typedef std::unordered_map<snowflake, automod_rule> automod_rule_map;
 
-};
+} // namespace dpp

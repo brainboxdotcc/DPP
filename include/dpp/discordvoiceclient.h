@@ -910,5 +910,5 @@ public:
 	std::string discover_ip();
 };
 
-};
+} // namespace dpp
 

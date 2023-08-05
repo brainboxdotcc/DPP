@@ -72,5 +72,5 @@ bool voiceregion::is_vip() const {
 }
 
 
-};
+} // namespace dpp
 

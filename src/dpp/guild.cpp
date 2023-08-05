@@ -1120,4 +1120,4 @@ onboarding &onboarding::set_enabled(const bool is_enabled) {
 }
 
 
-};
+} // namespace dpp

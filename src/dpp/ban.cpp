@@ -44,5 +44,5 @@ std::string ban::build_json(bool with_id) const {
 	return "{}";
 }
 
-};
+} // namespace dpp
 

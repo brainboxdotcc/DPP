@@ -221,4 +221,4 @@ typedef std::unordered_map<snowflake, scheduled_event> scheduled_event_map;
 typedef std::unordered_map<snowflake, event_member> event_member_map;
 
 
-};
+} // namespace dpp

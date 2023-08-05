@@ -436,4 +436,4 @@ public:
 	virtual ~scheduled_event_collector() = default;
 };
 
-};
+} // namespace dpp

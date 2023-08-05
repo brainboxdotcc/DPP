@@ -639,4 +639,4 @@ public:
 	std::string build(const nlohmann::json& j);
 };
 
-};
+} // namespace dpp
