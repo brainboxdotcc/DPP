@@ -108,7 +108,7 @@ public:
 	integration();
 
 	/** Default destructor */
-	~integration();
+	~integration() = default;
 
 	/** Read class values from json object
 	 * @param j A json object to read from

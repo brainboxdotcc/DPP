@@ -39,9 +39,6 @@ slashcommand::slashcommand(const std::string &_name, const std::string &_descrip
 	set_application_id(_application_id);
 }
 
-slashcommand::~slashcommand() {
-}
-
 slashcommand& slashcommand::set_dm_permission(bool dm) {
 	dm_permission = dm;
 	return *this;

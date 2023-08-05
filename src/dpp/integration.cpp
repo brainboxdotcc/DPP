@@ -44,10 +44,6 @@ integration::integration() :
 	app.bot = nullptr;
 }
 
-integration::~integration()
-{
-}
-
 integration& integration::fill_from_json(nlohmann::json* j)
 {
 	std::map<std::string, integration_type> type_map = {

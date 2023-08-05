@@ -1074,7 +1074,7 @@ public:
 	/**
 	 * @brief Destroy the slashcommand object
 	 */
-	virtual ~slashcommand();
+	virtual ~slashcommand() = default;
 
 	/**
 	 * @brief Add a localisation for this slash command

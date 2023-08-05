@@ -215,7 +215,7 @@ struct DPP_EXPORT forum_tag : public managed {
 	forum_tag(const std::string& name);
 
 	/** Destructor */
-	virtual ~forum_tag();
+	virtual ~forum_tag() = default;
 
 	/**
 	 * @brief Read struct values from a json object
@@ -803,7 +803,7 @@ public:
 	/**
 	 * @brief Destroy the thread object
 	 */
-	virtual ~thread();
+	virtual ~thread() = default;
 
 	/**
 	 * @brief Build json for this thread object

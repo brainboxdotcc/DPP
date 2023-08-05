@@ -59,10 +59,6 @@ void websocket_client::connect()
 	);
 }
 
-websocket_client::~websocket_client()
-{
-}
-
 bool websocket_client::handle_frame(const std::string &buffer)
 {
 	/* This is a stub for classes that derive the websocket client */

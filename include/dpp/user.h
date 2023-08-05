@@ -112,7 +112,7 @@ public:
 	/**
 	 * @brief Destroy the user object
 	 */
-	virtual ~user();
+	virtual ~user() = default;
 
 	/**
 	* @brief Create a mentionable user.
@@ -359,7 +359,7 @@ public:
 	/**
 	 * @brief Destroy the user identified object
 	 */
-	virtual ~user_identified();
+	virtual ~user_identified() = default;
 
 	/**
 	 * @brief Return true if user has an animated banner

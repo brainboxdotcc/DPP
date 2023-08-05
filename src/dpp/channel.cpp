@@ -50,10 +50,6 @@ forum_tag::forum_tag(const std::string& name) : forum_tag() {
 	this->set_name(name);
 }
 
-forum_tag::~forum_tag()
-{
-}
-
 forum_tag& forum_tag::fill_from_json(nlohmann::json *j) {
 	set_snowflake_not_null(j, "id", this->id);
 	set_string_not_null(j, "name", this->name);
@@ -378,9 +374,6 @@ thread& thread::fill_from_json(json* j) {
 }
 
 thread::thread() : channel(), total_messages_sent(0), message_count(0), member_count(0) {
-}
-
-thread::~thread() {
 }
 
 channel& channel::fill_from_json(json* j) {
