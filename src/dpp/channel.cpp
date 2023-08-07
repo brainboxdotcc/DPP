@@ -33,6 +33,13 @@ namespace dpp {
 
 using json = nlohmann::json;
 
+/* A mapping of discord's flag values to our bitmap (they're different bit positions to fit other stuff in) */
+enum discord_channel_flags {
+	dc_pinned_thread = 1 << 1,
+	dc_require_tag =   1 << 4,
+	dc_hide_media_download_options = 1 << 15,
+};
+
 permission_overwrite::permission_overwrite() : id(0), allow(0), deny(0), type(0) {}
 
 permission_overwrite::permission_overwrite(snowflake id, uint64_t allow, uint64_t deny, overwrite_type type) : id(id), allow(allow), deny(deny), type(type) {}
@@ -287,6 +294,10 @@ bool channel::is_forum() const {
 	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_FORUM;
 }
 
+bool channel::is_media_channel() const {
+	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_MEDIA;
+}
+
 bool channel::is_stage_channel() const {
 	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_STAGE;
 }
@@ -318,6 +329,10 @@ bool channel::is_pinned_thread() const {
 
 bool channel::is_tag_required() const {
 	return flags & dpp::c_require_tag;
+}
+
+bool channel::is_download_options_hidden() const {
+	return flags & dpp::c_hide_media_download_options;
 }
 
 bool thread::is_news_thread() const {
@@ -427,8 +442,9 @@ channel& channel::fill_from_json(json* j) {
 	this->flags |= ((forum_layout << 9) & DEFAULT_FORUM_LAYOUT_MASK);
 
 	uint8_t dflags = int8_not_null(j, "flags");
-	this->flags |= (dflags & dpp::dc_pinned_thread) ? dpp::c_pinned_thread : 0;
-	this->flags |= (dflags & dpp::dc_require_tag) ? dpp::c_require_tag : 0;
+	this->flags |= (dflags & dc_pinned_thread) ? dpp::c_pinned_thread : 0;
+	this->flags |= (dflags & dc_require_tag) ? dpp::c_require_tag : 0;
+	this->flags |= (dflags & dc_hide_media_download_options) ? dpp::c_hide_media_download_options : 0;
 
 	uint8_t vqm = int8_not_null(j, "video_quality_mode");
 	if (vqm == 2) {
@@ -523,9 +539,16 @@ std::string channel::build_json(bool with_id) const {
 			j["bitrate"] = bitrate * 1000;
 		}
 	}
+	if (is_forum() || is_media_channel()) {
+		uint32_t _flags = (flags & dpp::c_require_tag) ? dc_require_tag : 0;
+		if (is_media_channel()) {
+			_flags |= (flags & dpp::c_hide_media_download_options) ? dc_hide_media_download_options : 0;
+		}
+		if (_flags) {
+			j["flags"] = _flags;
+		}
+	}
 	if (is_forum()) {
-		j["flags"] = (flags & dpp::c_require_tag) ? dpp::dc_require_tag : 0;
-
 		if (get_default_forum_layout()) {
 			j["default_forum_layout"] = get_default_forum_layout();
 		}
