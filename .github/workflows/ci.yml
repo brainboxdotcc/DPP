@@ -43,7 +43,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
@@ -79,7 +79,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
@@ -115,7 +115,7 @@ jobs:
         run: brew install cmake ninja libsodium opus openssl
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=T_fallback -G Ninja ..
         env:
           DONT_RUN_VCPKG: true
 
@@ -154,13 +154,13 @@ jobs:
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback ..
         env:
           DONT_RUN_VCPKG: true
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
-        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
+        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
         env:
           DONT_RUN_VCPKG: true
 
@@ -204,7 +204,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake ninja-build rpm
 
       - name: Generate CMakeFiles
-        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=T_fallback -G Ninja ..
 
       - name: Compile Source
         run: cd build && sudo ninja 
@@ -240,7 +240,7 @@ jobs:
 #         ls -lah
 #          mkdir build
 #          cd build
-#          cmake ..
+#          cmake -DAVX_TYPE=T_fallback -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
 #          make -j2
 #          make install
 #          cpack --verbose
