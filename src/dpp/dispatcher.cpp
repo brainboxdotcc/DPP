@@ -141,10 +141,8 @@ void interaction_create_t::reply(const message & m, command_completion_event_t c
 }
 
 void interaction_create_t::thinking(bool ephemeral, command_completion_event_t callback) const {
-	message msg;
-	msg.content = "*";
+	message msg{this->command.channel_id, std::string{"*"}};
 	msg.guild_id = this->command.guild_id;
-	msg.channel_id = this->command.channel_id;
 	if (ephemeral) {
 		msg.set_flags(dpp::m_ephemeral);
 	}
