@@ -12,3 +12,8 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "dev"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
