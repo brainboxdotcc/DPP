@@ -18,8 +18,13 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # v2.5.0
+        with:
+          egress-policy: audit
+
       - name: Checkout D++
-        uses: actions/checkout@v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       - name: Check docs spelling
         run: npx -y cspell lint --language-id=cpp --no-progress --no-summary --show-context --show-suggestions --relative --color docpages/*.md include/dpp/*.h
