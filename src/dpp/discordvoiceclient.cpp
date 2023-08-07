@@ -845,7 +845,7 @@ void discord_voice_client::write_ready()
 			std::chrono::nanoseconds sleep_increment = (std::chrono::nanoseconds(duration) - latency) / AUDIO_OVERLAP_SLEEP_SAMPLES;
 			if (sleep_time.count() > 0) {
 				uint16_t samples_count = 0;
-				std::chrono::nanoseconds overshoot_accumulator;
+				std::chrono::nanoseconds overshoot_accumulator{};
 
 				do {
 					std::chrono::high_resolution_clock::time_point start_sleep = std::chrono::high_resolution_clock::now();
