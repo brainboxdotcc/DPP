@@ -168,7 +168,7 @@ jobs:
           path: main
 
       - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@c26a08ba26249b81327e26f6ef381897b6a8754d # v1.0.2
+        uses: microsoft/setup-msbuild@1ff57057b5cfdc39105cd07a01d78e9b0ea0c14c # v1.3.1
 
       - name: Install chocolatey packages ${{ matrix.cfg.arch}}
         uses: seanmiddleditch/gha-setup-ninja@6263846cf3c17009dfc81604efabae16044fc074 # master
