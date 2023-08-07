@@ -67,6 +67,7 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-12 }
           - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-11 }
           - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-10 }
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
