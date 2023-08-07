@@ -10,5 +10,5 @@
 
 ## Reporting a Vulnerability
 
-To report a vulnerability please contact the development team confidentially on Discord. We will discuss via a group chat if necessary and action
-the fix. Once the fix has been put into a release version, the vulnerability will be made public.
+To report a vulnerability please contact the development team confidentially on Discord by contacting `@brain` via a DM on https://discord.gg/dpp - We will discuss via a group chat if necessary and action
+the fix. Vulnerabilties are actioned and fixed within a 30 day window. Once the fix has been put into a release version, the vulnerability will be disclosed to the public.
