@@ -67,10 +67,10 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-12 }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-11 }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-10 }
-          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-12, cmake-flags: '-DDPP_CORO=ON' }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-11, cmake-flags: '-DDPP_CORO=ON' }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-10, cmake-flags: '' }
+          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9, cmake-flags: '' }
 
     steps:
       - name: Checkout D++
@@ -80,7 +80,7 @@ jobs:
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}} ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
@@ -116,7 +116,7 @@ jobs:
         run: brew install cmake ninja libsodium opus openssl
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=T_fallback -G Ninja ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=T_fallback -G Ninja ..
         env:
           DONT_RUN_VCPKG: true
 
