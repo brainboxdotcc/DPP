@@ -56,7 +56,8 @@ enum channel_type : uint8_t {
 	CHANNEL_PRIVATE_THREAD	= 12,	//!< a temporary sub-channel within a GUILD_TEXT channel that is only viewable by those invited and those with the MANAGE_THREADS permission
 	CHANNEL_STAGE		= 13,	//!< a "stage" channel, like a voice channel with one authorised speaker
 	CHANNEL_DIRECTORY	= 14,   //!< the channel in a [hub](https://support.discord.com/hc/en-us/articles/4406046651927-Discord-Student-Hubs-FAQ) containing the listed servers
-	CHANNEL_FORUM		= 15	//!< forum channel that can only contain threads
+	CHANNEL_FORUM		= 15,	//!< forum channel that can only contain threads
+	CHANNEL_MEDIA		= 16,	//!< Media channel that can only contain threads, similar to forum channels
 };
 
 /** @brief Our flags as stored in the object
@@ -65,27 +66,20 @@ enum channel_type : uint8_t {
  * shuffle these values upwards by one bit.
  */
 enum channel_flags : uint16_t {
+	/* Note that bits 1 to 4 are used for the channel type mask */
 	/// NSFW Gated Channel
 	c_nsfw =		0b0000000000010000,
 	/// Video quality forced to 720p
 	c_video_quality_720p =	0b0000000000100000,
 	/// Lock permissions (only used when updating channel positions)
 	c_lock_permissions =	0b0000000001000000,
-	/// Thread is pinned to the top of its parent forum channel
+	/// Thread is pinned to the top of its parent forum or media channel
 	c_pinned_thread =	0b0000000010000000,
-	/// Whether a tag is required to be specified when creating a thread in a forum channel. Tags are specified in the thread::applied_tags field.
+	/// Whether a tag is required to be specified when creating a thread in a forum or a media channel. Tags are specified in the thread::applied_tags field.
 	c_require_tag =		0b0000000100000000,
 	/* Note that the 9th and 10th bit are used for the forum layout type */
-};
-
-/**
- * @brief The flags in discord channel's raw "flags" field. We use these for serialisation only, right now. Might be better to create a new field than to make the existing channel::flags from uint8_t to uint16_t, if discord adds more flags in future.
- */
-enum discord_channel_flags : uint8_t {
-	/// Thread is pinned to the top of its parent forum channel
-	dc_pinned_thread = 1 << 1,
-	/// Whether a tag is required to be specified when creating a thread in a forum channel. Tags are specified in the thread::applied_tags field.
-	dc_require_tag =   1 << 4,
+	/// When set hides the embedded media download options. Available only for media channels
+	c_hide_media_download_options = 0b0001000000000000,
 };
 
 /**
@@ -200,7 +194,7 @@ struct DPP_EXPORT thread_member
 };
 
 /**
- * @brief Represents a tag that is able to be applied to a thread in a forum channel
+ * @brief Represents a tag that is able to be applied to a thread in a forum or media channel
  */
 struct DPP_EXPORT forum_tag : public managed {
 	/** The name of the tag (0-20 characters) */
@@ -264,7 +258,7 @@ public:
 	/** Channel name (1-100 characters) */
 	std::string name;
 
-	/** Channel topic (0-4096 characters for forum channels, 0-1024 characters for all others) */
+	/** Channel topic (0-4096 characters for forum and media channels, 0-1024 characters for all others) */
 	std::string topic;
 
 	/**
@@ -278,11 +272,11 @@ public:
 	/** Permission overwrites to apply to base permissions */
 	std::vector<permission_overwrite> permission_overwrites;
 
-	/** A set of tags that can be used in a forum channel */
+	/** A set of tags that can be used in a forum or media channel */
 	std::vector<forum_tag> available_tags;
 
 	/**
-	 * @brief The emoji to show as the default reaction button on a forum post.
+	 * @brief The emoji to show as the default reaction button on a thread in a forum or media channel.
 	 * Contains either nothing, the id of a guild's custom emoji or the unicode character of the emoji
 	 */
 	std::variant<std::monostate, snowflake, std::string> default_reaction;
@@ -333,7 +327,7 @@ public:
 	 */
 	auto_archive_duration_t default_auto_archive_duration;
 
-	/** the default sort order type used to order posts in forum channels */
+	/** the default sort order type used to order posts in forum and media channels */
 	default_forum_sort_order_t default_sort_order;
 
 	/** Flags bitmap (dpp::channel_flags) */
@@ -672,6 +666,13 @@ public:
 	bool is_forum() const;
 
 	/**
+	 * @brief Returns true if the channel is a media channel
+	 *
+	 * @return true if media channel
+	 */
+	bool is_media_channel() const;
+
+	/**
 	 * @brief Returns true if the channel is an announcement channel
 	 * 
 	 * @return true if announcement channel
@@ -721,6 +722,13 @@ public:
 	 */
 	bool is_tag_required() const;
 
+	/**
+	 * @brief Returns true if embedded media download options are hidden in a media channel
+	 *
+	 * @return true, if embedded media download options are hidden in a media channel
+	 */
+	bool is_download_options_hidden() const;
+
 };
 
 /** @brief A definition of a discord thread.
@@ -741,7 +749,7 @@ public:
 	message msg;
 
 	/**
-	 * A list of dpp::forum_tag IDs that have been applied to a thread in a forum channel
+	 * A list of dpp::forum_tag IDs that have been applied to a thread in a forum or media channel
 	 */
 	std::vector<snowflake> applied_tags;
 
