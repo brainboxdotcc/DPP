@@ -69,9 +69,7 @@ audit_entry &audit_entry::fill_from_json(nlohmann::json *j) {
 }
 
 auditlog& auditlog::fill_from_json(nlohmann::json* j) {
-	for (auto &ai : (*j)["audit_log_entries"]) {
-		this->entries.emplace_back(audit_entry().fill_from_json(&ai));
-	}
+	set_object_array_not_null<audit_entry>(j, "audit_log_entries", this->entries);
 	return *this;
 }
 

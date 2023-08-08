@@ -353,11 +353,7 @@ thread& thread::fill_from_json(json* j) {
 	uint8_t type = int8_not_null(j, "type");
 	this->flags |= (type & CHANNEL_TYPE_MASK);
 
-	if (j->contains("applied_tags")) {
-		for (const auto &t : (*j)["applied_tags"]) {
-			this->applied_tags.push_back(t);
-		}
-	}
+	set_snowflake_array_not_null(j, "applied_tags", this->applied_tags);
 
 	set_int32_not_null(j, "total_message_sent", this->total_messages_sent);
 	set_int8_not_null(j, "message_count", this->message_count);
@@ -416,12 +412,7 @@ channel& channel::fill_from_json(json* j) {
 			break;
 	}
 
-	if (j->contains("available_tags")) {
-		available_tags = {};
-		for (auto & available_tag : (*j)["available_tags"]) {
-			this->available_tags.emplace_back(forum_tag().fill_from_json(&available_tag));
-		}
-	}
+	set_object_array_not_null<forum_tag>(j, "available_tags", available_tags);
 
 	if (j->contains("default_reaction_emoji")) {
 		auto emoji_id = snowflake_not_null(&(*j)["default_reaction_emoji"], "emoji_id");

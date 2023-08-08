@@ -70,12 +70,7 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	nsfw = bool_not_null(j, "nsfw");
 
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
-	if (j->contains("options")) {
-		for (auto &option: (*j)["options"]) {
-			// options is filled recursive
-			options.push_back(command_option().fill_from_json(&option));
-		}
-	}
+	set_object_array_not_null<command_option>(j, "options", options); // command_option fills recursive
 	return *this;
 }
 
@@ -376,11 +371,7 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 		o.name = string_not_null(j, "name");
 		o.description = string_not_null(j, "description");
 		o.required = bool_not_null(j, "required");
-		if (j->contains("choices")) {
-			for (auto& jchoice : (*j)["choices"]) {
-				o.choices.push_back(command_option_choice().fill_from_json(&jchoice));
-			}
-		}
+		set_object_array_not_null<command_option_choice>(j, "choices", o.choices);
 
 		if (j->contains("name_localizations")) {
 			for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
@@ -881,11 +872,7 @@ guild_command_permissions &guild_command_permissions::fill_from_json(nlohmann::j
 	id = snowflake_not_null(j, "id");
 	application_id = snowflake_not_null(j, "application_id");
 	guild_id = snowflake_not_null(j, "guild_id");
-	if (j->contains("permissions")) {
-		for (auto &p : (*j)["permissions"]) {
-			permissions.push_back(command_permission().fill_from_json(&p));
-		}
-	}
+	set_object_array_not_null<command_permission>(j, "permissions", permissions);
 
 	return *this;
 }
