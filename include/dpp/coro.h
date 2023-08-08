@@ -23,6 +23,7 @@ namespace std {
 
 #include <memory>
 #include <utility>
+#include <tuple>
 #include <type_traits>
 #include <concepts>
 #include <optional>
@@ -174,7 +175,7 @@ namespace dpp {
 		 * @return bool Whether not to suspend the caller or not
 		 */
 		bool await_ready() {
-			return handle.done();
+			return handle.promise().is_sync;
 		}
 
 		/**
@@ -192,8 +193,13 @@ namespace dpp {
 
 			if (my_promise.is_sync)
 				return false;
+
+			std::lock_guard lock{my_promise.mutex};
+
+			if (handle.done())
+				return (false);
 			my_promise.parent = caller;
-			caller.promise().is_sync = false;	
+			caller.promise().is_sync = false;
 			return true;
 		}
 
@@ -414,11 +420,119 @@ namespace dpp {
 		if (handle.promise().exception) // If we have an exception, rethrow
 			std::rethrow_exception(handle.promise().exception);
 		if constexpr (!std::is_same_v<ReturnType, void>) // If we have a return type, return it and clean up our stored value
-			return std::forward<ReturnType>(*std::exchange(handle.promise().value, std::nullopt));
+			return *std::exchange(handle.promise().value, std::nullopt);
 	}
+
+	template <typename ReturnType = confirmation_callback_t>
+	class async;
 
 	/**
 	 * @brief A co_await-able object handling an API call.
+	 *
+	 * @remark - The coroutine may be resumed in another thread, do not rely on thread_local variables.
+	 * @warning This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub issues</a> or to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
+	 * @tparam ReturnType The return type of the API call. Defaults to confirmation_callback_t
+	 */
+	template <typename ReturnType = confirmation_callback_t>
+	struct awaitable {
+		/**
+		 * @brief Alias for the request wrapped in a callable object.
+		 */
+		using request_t = std::function<void(std::function<void(ReturnType)>)>;
+
+		/**
+		 * @brief Callable object that will be responsible for the API call when co_await-ing.
+		 */
+		request_t request;
+
+		/**
+		 * @brief Construct an awaitable object from a callable. This can be used to manually wrap an async call.
+		 *
+		 * Callable should be an invokeable object, taking a parameter that is the callback to be passed to the async call.
+		 * For example : `[cluster, message](auto &&cb) { cluster->message_create(message, cb); }
+		 *
+		 * @warning This callback is to be executed <b>later</b>, on co_await. <a href="/lambdas-and-locals.html">Be mindful of reference captures</a>.
+		 */
+		awaitable(std::invocable<std::function<void(ReturnType)>> auto &&fun) : request{fun} {}
+
+		/**
+		 * @brief Copy constructor.
+		 */
+		awaitable(const awaitable&) = default;
+
+		/**
+		 * @brief Move constructor.
+		 */
+		awaitable(awaitable&&) noexcept = default;
+
+		/**
+		 * @brief Copy assignment operator.
+		 */
+		awaitable& operator=(const awaitable&) = default;
+
+		/**
+		 * @brief Move assignment operator.
+		 */
+		awaitable& operator=(awaitable&&) noexcept = default;
+
+		/**
+		 * @brief Awaitable object returned by operator co_await.
+		 *
+		 * @warning Do not use this directly, it is made to work with co_await.
+		 */
+		struct awaiter {
+			/**
+			 * @brief Reference to the callable object that will be responsible for the API call when co_await-ing.
+			 */
+			const request_t& fun;
+
+			/**
+			 * @brief Optional containing the result of the API call.
+			 */
+			std::optional<ReturnType> result = std::nullopt;
+
+			/**
+			 * @brief First function called by the standard library when this object is co_await-ed. Returns whether or not we can skip suspending the caller.
+			 *
+			 * @return false Always return false, we send the API call on suspend.
+			 */
+			bool await_ready() const noexcept {
+				return false;
+			}
+
+			/**
+			 * @brief Second function called by the standard library when this object is co_await-ed. Suspends and sends the API call.
+			 */
+			template <typename T>
+			void await_suspend(detail::std_coroutine::coroutine_handle<T> caller) noexcept(noexcept(std::invoke(fun, std::declval<std::function<void(ReturnType)>&&>()))) {
+				if constexpr (requires (T promise) {{promise.is_sync} -> std::same_as<bool&>;})
+					caller.promise().is_sync = false;
+				std::invoke(fun, [this, caller](auto &&api_result) {
+					result = api_result;
+					caller.resume();
+				});
+			}
+
+			/**
+			 * @brief Function called by the standard library when the handle is resumed. Returns the API result as an rvalue.
+			 */
+			ReturnType await_resume() {
+				return *std::exchange(result, std::nullopt);
+			}
+		};
+
+		/**
+		 * @brief Overload of co_await for this object, the caller is suspended and the API call is executed. On completion the whole co_await expression evaluates to the result of the API call as an rvalue.
+		 *
+		 * In contrast with dpp::async, it is fine to co_await this object more than once.
+		 */
+		auto operator co_await() const noexcept {
+			return awaiter{request};
+		}
+	};
+
+	/**
+	 * @brief A co_await-able object handling an API call in parallel with the caller.
 	 *
 	 * This class is the return type of the dpp::cluster::co_* methods, but it can also be created manually to wrap any async call.
 	 *
@@ -428,14 +542,14 @@ namespace dpp {
 	 * @warning This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub issues</a> or to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
 	 * @tparam ReturnType The return type of the API call. Defaults to confirmation_callback_t
 	 */
-	template <typename ReturnType = confirmation_callback_t>
-	class awaitable {
+	template <typename ReturnType>
+	class async {
 		/**
 		 * @brief Ref-counted callback, contains the callback logic and manages the lifetime of the callback data over multiple threads.
 		 */
 		struct shared_callback {
 			/**
-			 * @brief State of the awaitable and its callback.
+			 * @brief State of the async and its callback.
 			 */
 			struct callback_state {
 				enum state_t {
@@ -445,7 +559,7 @@ namespace dpp {
 				};
 
 				/**
-				 * @brief Mutex to ensure the API result isn't set at the same time the coroutine is awaited and its value is checked, or the awaitable is destroyed
+				 * @brief Mutex to ensure the API result isn't set at the same time the coroutine is awaited and its value is checked, or the async is destroyed
 				 */
 				std::mutex mutex{};
 
@@ -480,7 +594,7 @@ namespace dpp {
 			void operator()(const ReturnType &cback) const {
 				std::unique_lock lock{get_mutex()};
 
-				if (state->state == callback_state::dangling) // Awaitable is gone - likely an exception killed it or it was never co_await-ed
+				if (state->state == callback_state::dangling) // Async object is gone - likely an exception killed it or it was never co_await-ed
 					return;
 				state->result = cback;
 				state->state = callback_state::done;
@@ -533,7 +647,7 @@ namespace dpp {
 			}
 
 			/**
-			 * @brief Function called by the awaitable when it is destroyed when it was never co_awaited, signals to the callback to abort.
+			 * @brief Function called by the async when it is destroyed when it was never co_awaited, signals to the callback to abort.
 			 */
 			void set_dangling() {
 				if (!state) // moved-from object
@@ -580,13 +694,13 @@ namespace dpp {
 		};
 
 		/**
-		 * @brief Shared state of the awaitable and its callback, to be used across threads.
+		 * @brief Shared state of the async and its callback, to be used across threads.
 		 */
 		shared_callback api_callback;
 
 	public:
 		/**
-		 * @brief Construct an awaitable wrapping an object method, the call is made immediately by forwarding to <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a> and can be awaited later to retrieve the result.
+		 * @brief Construct an async object wrapping an object method, the call is made immediately by forwarding to <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a> and can be awaited later to retrieve the result.
 		 *
 		 * @param obj The object to call the method on
 		 * @param fun The method of the object to call. Its last parameter must be a callback taking a parameter of type ReturnType
@@ -596,12 +710,12 @@ namespace dpp {
 #ifndef _DOXYGEN_
 		requires std::invocable<Fun, Obj, Args..., std::function<void(ReturnType)>>
 #endif
-		awaitable(Obj &&obj, Fun &&fun, Args&&... args) : api_callback{} {
+		async(Obj &&obj, Fun &&fun, Args&&... args) : api_callback{} {
 			std::invoke(std::forward<Fun>(fun), std::forward<Obj>(obj), std::forward<Args>(args)..., api_callback);
 		}
 
 		/**
-		 * @brief Construct an awaitable wrapping an invokeable object, the call is made immediately by forwarding to <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a> and can be awaited later to retrieve the result.
+		 * @brief Construct an async object wrapping an invokeable object, the call is made immediately by forwarding to <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a> and can be awaited later to retrieve the result.
 		 *
 		 * @param fun The object to call using <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a>. Its last parameter must be a callable taking a parameter of type ReturnType
 		 * @param args Parameters to pass to the object, excluding the callback
@@ -610,47 +724,56 @@ namespace dpp {
 #ifndef _DOXYGEN_
 		requires std::invocable<Fun, Args..., std::function<void(ReturnType)>>
 #endif
-		awaitable(Fun &&fun, Args&&... args) : api_callback{} {
+		async(Fun &&fun, Args&&... args) : api_callback{} {
 			std::invoke(std::forward<Fun>(fun), std::forward<Args>(args)..., api_callback);
+		}
+
+		/**
+		 * @brief Construct an async wrapping an awaitable, the call is made immediately by forwarding to <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a> and can be awaited later to retrieve the result.
+		 *
+		 * @param callable The awaitable object whose API call to execute.
+		 */
+		async(const awaitable<ReturnType> &awaitable) : api_callback{} {
+			std::invoke(awaitable.callable, api_callback);
 		}
 
 		/**
 		 * @brief Destructor. If any callback is pending it will be aborted.
 		 *
 		 */
-		~awaitable() {
+		~async() {
 			api_callback.set_dangling();
 		}
 
 		/**
 		 * @brief Copy constructor is disabled
 		 */
-		awaitable(const awaitable &) = delete;
+		async(const async &) = delete;
 
 		/**
 		 * @brief Move constructor
 		 *
 		 * NOTE: Despite being marked noexcept, this function uses std::lock_guard which may throw. The implementation assumes this can never happen, hence noexcept. Report it if it does, as that would be a bug.
 		 *
-		 * @remark Using the moved-from awaitable after this function is undefined behavior.
-		 * @param other The awaitable object to move the data from.
+		 * @remark Using the moved-from async after this function is undefined behavior.
+		 * @param other The async object to move the data from.
 		 */
-		awaitable(awaitable &&other) noexcept = default;
+		async(async &&other) noexcept = default;
 
 		/**
 		 * @brief Copy assignment is disabled
 		 */
-		awaitable &operator=(const awaitable &) = delete;
+		async &operator=(const async &) = delete;
 
 		/**
 		 * @brief Move assignment operator.
 		 *
 		 * NOTE: Despite being marked noexcept, this function uses std::lock_guard which may throw. The implementation assumes this can never happen, hence noexcept. Report it if it does, as that would be a bug.
 		 *
-		 * @remark Using the moved-from awaitable after this function is undefined behavior.
-		 * @param other The awaitable object to move the data from
+		 * @remark Using the moved-from async after this function is undefined behavior.
+		 * @param other The async object to move the data from
 		 */
-		awaitable &operator=(awaitable &&other) noexcept = default;
+		async &operator=(async &&other) noexcept = default;
 
 		/**
 		 * @brief First function called by the standard library when the object is co-awaited.
@@ -686,12 +809,13 @@ namespace dpp {
 		}
 
 		/**
-		 * @brief Function called by the standard library when the awaitable is resumed. Its return value is what the whole co_await expression evaluates to
+		 * @brief Function called by the standard library when the async is resumed. Its return value is what the whole co_await expression evaluates to
 		 *
 		 * @remark Do not call this manually, use the co_await keyword instead.
 		 * @return ReturnType The result of the API call.
 		 */
 		ReturnType await_resume() {
+			// no locking needed here as the callback has already executed
 			return std::move(*api_callback.get_result());
 		}
 	};

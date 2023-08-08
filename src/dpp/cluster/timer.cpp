@@ -105,7 +105,7 @@ void cluster::tick_timers() {
 }
 
 #ifdef DPP_CORO
-awaitable<timer> cluster::co_timer(uint64_t seconds) {
+awaitable<timer> cluster::co_sleep(uint64_t seconds) {
 	return {[this, seconds] (auto &&cb) {
 		start_timer([this, cb](dpp::timer handle) {
 			cb(handle);

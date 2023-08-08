@@ -361,12 +361,12 @@ public:
 
 #ifdef DPP_CORO
 	/**
-	 * @brief Start a one-time timer. Use the co_await keyword on its return value to suspend the coroutine until the timer ends
-	 * 
-	 * @param seconds How long to run the timer for
-	 * @return awaitable<timer> co_await-able object holding the timer_handle
+	 * @brief Get an awaitable to wait a certain amount of seconds. Use the co_await keyword on its return value to suspend the coroutine until the timer ends
+	 *
+	 * @param seconds How long to wait for
+	 * @return awaitable<timer> Object that can be co_await-ed to suspend the function for a certain time
 	 */
-	awaitable<timer> co_timer(uint64_t seconds);
+	awaitable<timer> co_sleep(uint64_t seconds);
 #endif
 
 	/**
@@ -3252,7 +3252,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sticker_create(sticker &s, command_completion_event_t callback = utility::log_error());
+	void guild_sticker_create(const sticker &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Modify a sticker in a guild
@@ -3262,7 +3262,7 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void guild_sticker_modify(sticker &s, command_completion_event_t callback = utility::log_error());
+	void guild_sticker_modify(const sticker &s, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a sticker from a guild

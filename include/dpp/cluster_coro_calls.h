@@ -1742,7 +1742,7 @@ awaitable<confirmation_callback_t> co_stage_instance_delete(const snowflake chan
  * @return sticker returned object on completion
  * \memberof dpp::cluster
  */
-awaitable<confirmation_callback_t> co_guild_sticker_create(sticker &s);
+awaitable<confirmation_callback_t> co_guild_sticker_create(const sticker &s);
 
 /**
  * @brief Delete a sticker from a guild
@@ -1776,7 +1776,7 @@ awaitable<confirmation_callback_t> co_guild_sticker_get(snowflake id, snowflake 
  * @return sticker returned object on completion
  * \memberof dpp::cluster
  */
-awaitable<confirmation_callback_t> co_guild_sticker_modify(sticker &s);
+awaitable<confirmation_callback_t> co_guild_sticker_modify(const sticker &s);
 
 /**
  * @brief Get all guild stickers
@@ -2390,5 +2390,5 @@ awaitable<confirmation_callback_t> co_get_webhook_with_token(snowflake webhook_i
 
 
 /* End of auto-generated definitions */
-awaitable<http_request_completion_t> co_request(const std::string &url, http_method method, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {});
+awaitable<http_request_completion_t> co_request(const std::string &url, http_method method, const std::string &postdata = "", const std::string &mimetype = "text/plain", std::multimap<std::string, std::string> headers = {});
 

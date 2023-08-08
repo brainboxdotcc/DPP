@@ -47,11 +47,11 @@ int main() {
 
 Coroutines can make commands simpler by eliminating callbacks, which can be very handy in the case of complex commands that rely on a lot of different data or steps. 
 
-In order to be a coroutine, a function has to return a special type with special functions; D++ offers `dpp::task` which is designed to work seamlessly with asynchronous calls through `dpp::awaitable`, which all the functions starting with `co_` such as `dpp::cluster::co_message_create` return. To turn a function into a coroutine, simply make it return `dpp::task<void>` as seen in the example at line 10.
+In order to be a coroutine, a function has to return a special type with special functions; D++ offers `dpp::task` which is designed to work seamlessly with asynchronous calls through `dpp::awaitable`, which all the functions starting with `co_` such as `dpp::cluster::co_message_create` return. To turn a function into a coroutine, simply make it return `dpp::task<void>` as seen in the example at line 10. Inside of a `dpp::task`, someone can use `co_return` in place of `return` to return a value.
 
-When an awaitable is `co_await`-ed, the coroutine suspends (pauses) and returns back to its caller : in other words, the program is free to go and do other things while the data is being retrieved, D++ will resume your coroutine when it has the data you need which will be returned from the `co_await` expression.
+When an awaitable is `co_await`-ed, the request is sent, the coroutine suspends (pauses) and returns back to its caller : in other words, the program is free to go and do other things while the data is being retrieved, D++ will resume your coroutine when it has the data you need which will be returned from the `co_await` expression.
 
-Inside of a `dpp::task`, someone can use `co_return` in place of `return`.
+Awaitable objects can be wrapped with `dpp::async` : this will send the call immediately but not suspend the coroutine, allowing to execute several requests in parallel. The async object can then be co_awaited later when it is depended on.
 
 \attention As a rule of thumb when making dpp::task objects and in general coroutines, always prefer taking parameters by value and avoid capture : this may be confusing but a coroutine is *not* the lambda creating it, the captures are not bound to it and the code isn't ran inside the lambda. The lambda that returns a dpp::task simply returns a task object containing the code, which goes on to live on its own, separate from the lambda.
 Similarly, with reference parameters, the object they reference to might be destroyed while the coroutine is suspended and resumed in another thread, which is why you want to pass by value. See also [lambdas and locals](/lambdas-and-locals.html) except this also applies to parameters in the case of coroutines.
@@ -87,7 +87,7 @@ int main() {
                 co_return;
             }
             // Send a "<bot> is thinking..." message, to wait on later so we can edit
-            dpp::awaitable thinking = event.co_thinking(false);	
+            dpp::async thinking = event.co_thinking(false);
 
             // Download and co_await the result
             dpp::http_request_completion_t response = co_await cluster->co_request(attachment.url, dpp::m_get);
@@ -180,7 +180,7 @@ int main() {
             };
 
             // Send a "<bot> is thinking..." message, to wait on later so we can edit
-            dpp::awaitable thinking = event.co_thinking(false);
+            dpp::async thinking = event.co_thinking(false);
 
             // Call our coroutine defined above to retrieve the member requested
             std::optional<dpp::guild_member> member = co_await resolve_member(event);
