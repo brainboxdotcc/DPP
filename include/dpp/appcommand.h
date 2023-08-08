@@ -315,31 +315,22 @@ struct DPP_EXPORT interaction_response : public json_interface<interaction_respo
 	 * Should be one of ir_pong, ir_channel_message_with_source,
 	 * or ir_deferred_channel_message_with_source.
 	 */
-	interaction_response_type type;
+	interaction_response_type type{};
 
 	/**
-	 * @brief A message object. This pointer is always valid
-	 * while the containing interaction_response exists.
+	 * @brief Message tied to this response.
 	 */
-	struct message* msg;
+	message msg{};
 
 	/**
 	 * @brief Array of up to 25 autocomplete choices
 	 */
-	std::vector<command_option_choice> autocomplete_choices;
+	std::vector<command_option_choice> autocomplete_choices{};
 
 	/**
 	 * @brief Construct a new interaction response object
 	 */
-	interaction_response();
-
-	/**
-	 * @brief Construct a new interaction response object
-	 *
-	 * @param t Type of reply
-	 * @param m Message to reply with
-	 */
-	interaction_response(interaction_response_type t, const struct message& m);
+	interaction_response() = default;
 
 	/**
 	 * @brief Construct a new interaction response object
@@ -347,6 +338,22 @@ struct DPP_EXPORT interaction_response : public json_interface<interaction_respo
 	 * @param t Type of reply
 	 */
 	interaction_response(interaction_response_type t);
+
+	/**
+	 * @brief Construct a new interaction response object
+	 *
+	 * @param t Type of reply
+	 * @param m Message to reply with
+	 */
+	interaction_response(interaction_response_type t, const message& m);
+
+	/**
+	 * @brief Construct a new interaction response object
+	 *
+	 * @param t Type of reply
+	 * @param m Message to reply with
+	 */
+	interaction_response(interaction_response_type t, message&& m);
 
 	/**
 	 * @brief Fill object properties from JSON
@@ -374,7 +381,7 @@ struct DPP_EXPORT interaction_response : public json_interface<interaction_respo
 	/**
 	 * @brief Destroy the interaction response object
 	 */
-	virtual ~interaction_response();
+	virtual ~interaction_response() = default;
 
 };
 
