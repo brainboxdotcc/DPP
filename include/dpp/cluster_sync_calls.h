@@ -2435,7 +2435,7 @@ thread_member thread_member_get_sync(const snowflake thread_id, const snowflake 
 thread_member_map thread_members_get_sync(snowflake thread_id);
 
 /**
- * @brief Create a thread in forum channel
+ * @brief Create a thread in a forum or media channel
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  *
  * @see dpp::cluster::thread_create_in_forum
