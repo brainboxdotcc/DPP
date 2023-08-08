@@ -51,7 +51,7 @@ uint64_t counter () { \
  * queue. This also rehashes unordered_maps to ensure they free their memory.
  */
 void garbage_collection() {
-	time_t now = time(NULL);
+	time_t now = time(nullptr);
 	bool repeat = false;
 	{
 		std::lock_guard<std::mutex> delete_lock(deletion_mutex);

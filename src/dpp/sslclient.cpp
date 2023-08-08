@@ -216,7 +216,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	nonblocking(false),
 	sfd(INVALID_SOCKET),
 	ssl(nullptr),
-	last_tick(time(NULL)),
+	last_tick(time(nullptr)),
 	hostname(_hostname),
 	port(_port),
 	bytes_out(0),

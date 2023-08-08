@@ -261,7 +261,7 @@ bool websocket_client::parseheader(std::string &data)
 
 void websocket_client::one_second_timer()
 {
-	if (((time(NULL) % 20) == 0) && (state == CONNECTED)) {
+	if (((time(nullptr) % 20) == 0) && (state == CONNECTED)) {
 		/* For sending pings, we send with payload */
 		unsigned char out[MAXHEADERSIZE];
 		std::string payload = "keepalive";
