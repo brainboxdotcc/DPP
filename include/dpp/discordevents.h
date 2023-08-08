@@ -53,7 +53,7 @@ void DPP_EXPORT set_snowflake_array_not_null(const nlohmann::json* j, const char
  * @param keyname key name to check for the values
  * @param v Value to change
  */
-template<class T> inline void DPP_EXPORT set_object_array_not_null(nlohmann::json* j, const char *keyname, std::vector<T> &v) {
+template<class T> inline void set_object_array_not_null(nlohmann::json* j, const char *keyname, std::vector<T> &v) {
 	v.clear();
 	auto k = j->find(keyname);
 	if (k != j->end() && !k->is_null()) {
