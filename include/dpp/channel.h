@@ -202,7 +202,7 @@ struct DPP_EXPORT thread_member
 /**
  * @brief Represents a tag that is able to be applied to a thread in a forum channel
  */
-struct DPP_EXPORT forum_tag : public managed {
+struct DPP_EXPORT forum_tag : public managed, public json_interface<forum_tag> {
 	/** The name of the tag (0-20 characters) */
 	std::string name;
 	/** The emoji of the tag. Contains either nothing, the id of a guild's custom emoji or the unicode character of the emoji */
