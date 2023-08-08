@@ -47,7 +47,7 @@ jobs:
           tags: brainboxdotcc/dpp
       - # copy multiplatform image from dockerhub to ghcr
         name: Push Image to multiple registries
-        uses: akhilerm/tag-push-action@f973043dc002b8e5a772c53e79441e6e1861e874 # v2.0.0
+        uses: akhilerm/tag-push-action@85bf542f43f5f2060ef76262a67ee3607cb6db37 # v2.1.0
         with:
           src: docker.io/brainboxdotcc/dpp:latest
           dst: |
