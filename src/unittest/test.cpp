@@ -28,7 +28,7 @@ namespace {
 	 * @brief Thread emoji - https://www.compart.com/en/unicode/U+1F9F5
 	 */
 	inline const std::string THREAD_EMOJI = "\xF0\x9F\xA7\xB5";
-}
+} // namespace
 
 /* Unit tests go here */
 int main(int argc, char *argv[])

@@ -21,6 +21,8 @@
 #include <dpp/channel.h>
 #include <dpp/restrequest.h>
 
+#include <utility>
+
 namespace dpp {
 
 void cluster::channel_create(const class channel &c, command_completion_event_t callback) {
@@ -96,4 +98,4 @@ void cluster::channels_get(snowflake guild_id, command_completion_event_t callba
 	rest_request_list<channel>(this, API_PATH "/guilds", std::to_string(guild_id), "channels", m_get, "", callback);
 }
 
-};
+} // namespace dpp

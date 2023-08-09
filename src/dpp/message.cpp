@@ -1210,4 +1210,4 @@ sticker& sticker::set_file_content(const std::string &fc) {
 }
 
 
-};
+} // namespace dpp

@@ -233,6 +233,16 @@ public:
 	cluster(const cluster&&) = delete;
 
 	/**
+	 * @brief dpp::cluster is non-copyable
+	 */
+        cluster& operator=(const cluster&) = delete;
+
+	/**
+	 * @brief dpp::cluster is non-moveable
+	 */
+        cluster& operator=(const cluster&&) = delete;
+
+	/**
 	 * @brief Destroy the cluster object
 	 */
 	virtual ~cluster();
@@ -3523,4 +3533,4 @@ public:
 
 };
 
-};
+} // namespace dpp

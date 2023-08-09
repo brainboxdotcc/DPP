@@ -735,10 +735,10 @@ namespace dpp {
 			snow = 0xFFFAFA,
 			milk_white = 0xFEFCFF,
 			half_white = 0xFFFEFA;
-	};
+	} // namespace colors
 
 	/**
      * @brief predefined color constants, same as colors
     */
 	namespace colours = colors;
-};
+} // namespace dpp

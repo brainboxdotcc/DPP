@@ -108,7 +108,7 @@ public:
 	integration();
 
 	/** Default destructor */
-	~integration();
+	~integration() = default;
 
 	/** Read class values from json object
 	 * @param j A json object to read from
@@ -169,5 +169,5 @@ typedef std::unordered_map<snowflake, integration> integration_map;
 /** A group of connections */
 typedef std::unordered_map<snowflake, connection> connection_map;
 
-};
+} // namespace dpp
 

@@ -240,7 +240,7 @@ public:
 	/**
 	 * @brief Destroy the https client object
 	 */
-        virtual ~https_client();
+        virtual ~https_client() = default;
 
 	/**
 	 * @brief Build a multipart content from a set of files and some json
@@ -335,4 +335,4 @@ public:
 
 };
 
-};
+} // namespace dpp

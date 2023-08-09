@@ -148,9 +148,6 @@ const std::multimap<std::string, std::string> https_client::get_headers() const 
 	return response_headers;
 }
 
-https_client::~https_client() {
-}
-
 bool https_client::handle_buffer(std::string &buffer)
 {
 	bool state_changed = false;
@@ -354,4 +351,4 @@ http_connect_info https_client::get_host_info(std::string url) {
 	return hci;
 }
 
-};
+} // namespace dpp

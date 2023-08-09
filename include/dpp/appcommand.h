@@ -1074,7 +1074,7 @@ public:
 	/**
 	 * @brief Destroy the slashcommand object
 	 */
-	virtual ~slashcommand();
+	virtual ~slashcommand() = default;
 
 	/**
 	 * @brief Add a localisation for this slash command
@@ -1222,4 +1222,4 @@ typedef std::unordered_map<snowflake, slashcommand> slashcommand_map;
  */
 typedef std::unordered_map<snowflake, guild_command_permissions> guild_command_permissions_map;
 
-};
+} // namespace dpp

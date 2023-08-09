@@ -540,5 +540,5 @@ namespace dpp {
 		 */
 		void DPP_EXPORT set_thread_name(const std::string& name);
 
-	};
-};
+	} // namespace utility
+} // namespace dpp

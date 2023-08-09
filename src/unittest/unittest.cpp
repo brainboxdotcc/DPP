@@ -243,7 +243,7 @@ namespace {
 
 		return (env_var ? env_var : "../../testdata/");
 	}
-}
+} // namespace
 
 std::vector<uint8_t> load_test_audio() {
 	std::vector<uint8_t> testaudio;

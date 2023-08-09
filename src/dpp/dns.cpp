@@ -105,4 +105,4 @@ namespace dpp
 			return cache_entry;
 		}
 	}
-};
+} // namespace dpp

@@ -51,7 +51,7 @@ uint64_t counter () { \
  * queue. This also rehashes unordered_maps to ensure they free their memory.
  */
 void garbage_collection() {
-	time_t now = time(NULL);
+	time_t now = time(nullptr);
 	bool repeat = false;
 	{
 		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
@@ -84,4 +84,4 @@ cache_helper(role, role_cache, find_role, get_role_cache, get_role_count);
 cache_helper(guild, guild_cache, find_guild, get_guild_cache, get_guild_count);
 cache_helper(emoji, emoji_cache, find_emoji, get_emoji_cache, get_emoji_count);
 
-};
+} // namespace dpp

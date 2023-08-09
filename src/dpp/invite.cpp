@@ -112,4 +112,4 @@ invite &invite::set_unique(const bool is_unique) {
 	return *this;
 }
 
-};
+} // namespace dpp

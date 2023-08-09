@@ -160,4 +160,4 @@ void cluster::thread_member_remove(snowflake thread_id, snowflake user_id, comma
 	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(thread_id), "/thread-members/" + std::to_string(user_id), m_delete, "", callback);
 }
 
-};
+} // namespace dpp

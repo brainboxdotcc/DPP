@@ -52,4 +52,4 @@ namespace dpp {
 		ll_critical
 	};
 
-};
+} // namespace dpp

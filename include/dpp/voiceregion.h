@@ -116,4 +116,4 @@ public:
  */
 typedef std::unordered_map<std::string, voiceregion> voiceregion_map;
 
-};
+} // namespace dpp

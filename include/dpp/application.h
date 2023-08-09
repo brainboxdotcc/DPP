@@ -165,4 +165,4 @@ public:
  */
 typedef std::unordered_map<snowflake, application> application_map;
 
-};
+} // namespace dpp

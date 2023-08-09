@@ -618,6 +618,6 @@ namespace dpp {
 				#endif
 			#endif
 		}
-    };
+    } // namespace utility
 
-};
+} // namespace dpp

@@ -108,7 +108,7 @@ public:
 		} else if (object != existing->second) {
 			/* Flag old pointer for deletion and replace */
 			std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-			deletion_queue[existing->second] = time(NULL);
+			deletion_queue[existing->second] = time(nullptr);
 			(*cache_map)[object->id] = object;
 		}
 	}
@@ -133,7 +133,7 @@ public:
 		auto existing = cache_map->find(object->id);
 		if (existing != cache_map->end()) {
 			cache_map->erase(existing);
-			deletion_queue[object] = time(NULL);
+			deletion_queue[object] = time(nullptr);
 		}
 	}
 
@@ -268,5 +268,5 @@ cache_decl(role, find_role, get_role_cache, get_role_count);
 cache_decl(channel, find_channel, get_channel_cache, get_channel_count);
 cache_decl(emoji, find_emoji, get_emoji_cache, get_emoji_count);
 
-};
+} // namespace dpp
 

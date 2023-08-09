@@ -60,4 +60,4 @@ void cluster::template_get(const std::string &code, command_completion_event_t c
 	rest_request<dtemplate>(this, API_PATH "/guilds", "templates", code, m_get, "", callback);
 }
 
-};
+} // namespace dpp

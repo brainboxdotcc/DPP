@@ -163,7 +163,7 @@ public:
 	/**
 	 * @brief Destroy the websocket client object
 	 */
-        virtual ~websocket_client();
+        virtual ~websocket_client() = default;
 
 	/**
 	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.
@@ -209,4 +209,4 @@ public:
 	void send_close_packet();
 };
 
-};
+} // namespace dpp

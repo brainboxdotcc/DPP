@@ -37,4 +37,4 @@ double managed::get_creation_time() const {
 	return this->id.get_creation_time();
 }
 
-};
+} // namespace dpp

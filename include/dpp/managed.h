@@ -73,4 +73,4 @@ namespace dpp {
 		bool operator!=(const managed& other) const noexcept;
 	};
 
-};
+} // namespace dpp

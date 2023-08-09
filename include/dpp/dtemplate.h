@@ -100,4 +100,4 @@ public:
 typedef std::unordered_map<snowflake, dtemplate> dtemplate_map;
 
 
-};
+} // namespace dpp

@@ -83,4 +83,4 @@ struct DPP_EXPORT stage_instance : public managed, public json_interface<stage_i
 /** A group of stage instances */
 typedef std::unordered_map<snowflake, stage_instance> stage_instance_map;
 
-};
+} // namespace dpp

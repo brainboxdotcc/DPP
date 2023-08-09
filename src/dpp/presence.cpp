@@ -282,4 +282,4 @@ presence_status presence::status() const {
 	return (presence_status)((flags >> PF_SHIFT_MAIN) & PF_STATUS_MASK);
 }
 
-};
+} // namespace dpp

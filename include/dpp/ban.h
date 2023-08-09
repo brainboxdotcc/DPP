@@ -65,4 +65,4 @@ public:
  */
 typedef std::unordered_map<snowflake, ban> ban_map;
 
-};
+} // namespace dpp

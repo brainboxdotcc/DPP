@@ -788,7 +788,7 @@ awaitable<confirmation_callback_t> cluster::co_get_webhook_with_token(snowflake 
 }
 
 
-};
+} // namespace dpp
 
 /* End of auto-generated definitions */
 dpp::awaitable<dpp::http_request_completion_t> dpp::cluster::co_request(const std::string &url, http_method method, const std::string &postdata, const std::string &mimetype, const std::multimap<std::string, std::string> &headers) {

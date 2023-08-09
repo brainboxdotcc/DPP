@@ -298,7 +298,7 @@ void in_thread::in_loop(uint32_t index)
 					newbucket.remaining = rv.ratelimit_remaining;
 					newbucket.reset_after = rv.ratelimit_reset_after;
 					newbucket.retry_after = rv.ratelimit_retry_after;
-					newbucket.timestamp = time(NULL);
+					newbucket.timestamp = time(nullptr);
 					requests->globally_ratelimited = rv.ratelimit_global;
 					if (requests->globally_ratelimited) {
 						requests->globally_limited_for = (newbucket.retry_after ? newbucket.retry_after : newbucket.reset_after);
@@ -419,4 +419,4 @@ bool request_queue::is_globally_ratelimited() const
 	return this->globally_ratelimited;
 }
 
-};
+} // namespace dpp
