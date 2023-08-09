@@ -132,7 +132,7 @@ void cluster::interaction_response_create(snowflake interaction_id, const std::s
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, r.msg->filename, r.msg->filecontent, r.msg->filemimetype);
+	}, r.msg.filename, r.msg.filecontent, r.msg.filemimetype);
 }
 
 void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
