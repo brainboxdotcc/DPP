@@ -32,19 +32,19 @@ Listed in alphabetical order, with terms in bold, here are the basics on...
 
 13. **Embeds**: A widget attached to a message, which can contain multiple fields of texts, an image, and much more information 
 
-14. **Ephemeral**: A direct message to a user in a public channel, eventually disappears, it is mainly used to give information to a user 
+14. **Ephemeral**: A message only visible to the user being replied to
 
 15. **Event**: Something that a Discord bot can respond to, such as a message being sent, a **button** being clicked, or an option being selected, among others.
 
 16. **Guild**: What the Discord API (and most libraries for it) call a server
 
-17. **Intents**: Similar to a guild, a name for permissions of a bot
+17. **Intents**: The right for a bot to receive certain data from the Discord API 
 
 18. **Interaction**: Something that can be responded to, and it is the main part of an **event** that will be accessed in an application 
 
 19. **Modal**: A pop up form that contains text that can be sent by a bot
 
-20. [**Shards and clusters**](https://dpp.dev/clusters-shards-guilds.html): A cluster is the main container for an application, which contains many shards, each of which manage a subset of your workload, fortunately, D++ does this automatically 
+20. [**Shards and clusters**](\ref clusters-shards-guilds): A cluster is the main container for an application, which contains many shards, each of which manage a subset of your workload, fortunately, D++ does this automatically 
 
 21. **Snowflake**: An unsigned 64 bit integer (it can represent anything from 0 to 2^64) that is used by discord to identify basically everything, including but not limited to, **guilds**, users, messages, and much more
 
