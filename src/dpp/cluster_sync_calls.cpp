@@ -786,6 +786,6 @@ webhook cluster::get_webhook_with_token_sync(snowflake webhook_id, const std::st
 }
 
 
-} // namespace dpp
+};
 
 /* End of auto-generated definitions */
