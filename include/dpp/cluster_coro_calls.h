@@ -1979,7 +1979,7 @@ awaitable<confirmation_callback_t> co_thread_member_get(const snowflake thread_i
 awaitable<confirmation_callback_t> co_thread_members_get(snowflake thread_id);
 
 /**
- * @brief Create a thread in forum channel
+ * @brief Create a thread in a forum or media channel
  * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
  *
  * @see dpp::cluster::thread_create_in_forum

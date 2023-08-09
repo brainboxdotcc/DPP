@@ -228,4 +228,4 @@ public:
 	}
 };
 
-}
+} // namespace dpp

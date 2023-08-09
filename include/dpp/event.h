@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -151,4 +152,5 @@ event_decl(automod_rule_execute, AUTO_MODERATION_ACTION_EXECUTION);
 /* Audit log */
 event_decl(guild_audit_log_entry_create, GUILD_AUDIT_LOG_ENTRY_CREATE);
 
-}};
+} // namespace events
+} // namespace dpp

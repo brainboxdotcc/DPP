@@ -43,4 +43,4 @@ namespace dpp {
 		return !std::exchange(called, true);
 	};
 
-};
+} // namespace dpp

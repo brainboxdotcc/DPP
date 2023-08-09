@@ -182,4 +182,4 @@ std::string scheduled_event::build_json(bool with_id) const {
 	return j.dump();
 }
 
-};
+} // namespace dpp

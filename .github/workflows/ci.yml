@@ -36,14 +36,19 @@ jobs:
           - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-8 }
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # v2.5.0
+        with:
+          egress-policy: audit
+
       - name: Checkout D++
-        uses: actions/checkout@v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
@@ -67,19 +72,25 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-11 }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-10 }
-          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9 }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-12, cmake-flags: '-DDPP_CORO=ON' }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-11, cmake-flags: '-DDPP_CORO=ON' }
+          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-10, cmake-flags: '' }
+          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9, cmake-flags: '' }
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # v2.5.0
+        with:
+          egress-policy: audit
+
       - name: Checkout D++
-        uses: actions/checkout@v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}} ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
@@ -92,14 +103,14 @@ jobs:
 
       - name: Upload Binary (DEB)
         if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.deb'
 
       - name: Upload Binary (RPM)
         if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.arch}}"
           path: '${{github.workspace}}/build/*.rpm'
@@ -108,14 +119,19 @@ jobs:
     name: macOS x64
     runs-on: macos-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # v2.5.0
+        with:
+          egress-policy: audit
+
       - name: Checkout D++
-        uses: actions/checkout@v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       - name: Install homebrew packages
         run: brew install cmake ninja libsodium opus openssl
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=T_fallback -G Ninja ..
         env:
           DONT_RUN_VCPKG: true
 
@@ -141,26 +157,31 @@ jobs:
     name: "Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
     runs-on: ${{matrix.cfg.os}}
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # v2.5.0
+        with:
+          egress-policy: audit
+
       - name: Checkout D++
-        uses: actions/checkout@v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
         with:
           path: main
 
       - name: Add MSBuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@1ff57057b5cfdc39105cd07a01d78e9b0ea0c14c # v1.3.1
 
       - name: Install chocolatey packages ${{ matrix.cfg.arch}}
-        uses: seanmiddleditch/gha-setup-ninja@master
+        uses: seanmiddleditch/gha-setup-ninja@6263846cf3c17009dfc81604efabae16044fc074 # master
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
-        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON ..
+        run: mkdir main/build && cd main/build && cmake -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback ..
         env:
           DONT_RUN_VCPKG: true
 
       - name: Generate CMake (x86)
         if: ${{ matrix.cfg.arch == 'x86' }}
-        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
+        run: mkdir main/build && cd main/build && cmake -DCMAKE_TOOLCHAIN_FILE="cmake\Win32Toolchain.cmake" -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -G "Visual Studio ${{matrix.cfg.vsv}} ${{matrix.cfg.vs}}" -A Win32 -T host=x86 ..
         env:
           DONT_RUN_VCPKG: true
 
@@ -179,7 +200,7 @@ jobs:
           DONT_RUN_VCPKG: true
 
       - name: Upload Binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: "libdpp - Windows ${{matrix.cfg.name}}-${{matrix.cfg.config}}-vs${{matrix.cfg.vs}}"
           path: '${{github.workspace}}/main/build/*.zip'
@@ -197,14 +218,19 @@ jobs:
     name: ${{matrix.cfg.name}}
     runs-on: ${{matrix.cfg.os}}
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # v2.5.0
+        with:
+          egress-policy: audit
+
       - name: Checkout D++
-        uses: actions/checkout@v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
       - name: Install Packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake ninja-build rpm
 
       - name: Generate CMakeFiles
-        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=T_fallback -G Ninja ..
 
       - name: Compile Source
         run: cd build && sudo ninja 
@@ -213,13 +239,13 @@ jobs:
         run: cd build && cpack --verbose
 
       - name: Upload Binaries (DEB)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: "libdpp - Debian Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.deb"
 
       - name: Upload Binaries (RPM)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.rpm"
@@ -228,7 +254,7 @@ jobs:
 #   runs-on: macos-10.15
 #   name: FreeBSD (g++-10)
 #   steps:
-#   - uses: actions/checkout@v3
+#   - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 #   - name: FreeBSD Build and Package
 #     id: freebsdtest
 #     uses: vmactions/freebsd-vm@v0.1.5
@@ -240,13 +266,13 @@ jobs:
 #         ls -lah
 #          mkdir build
 #          cd build
-#          cmake ..
+#          cmake -DAVX_TYPE=T_fallback -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
 #          make -j2
 #          make install
 #          cpack --verbose
 #
 #    - name: Upload Binaries (BZ2)
-#      uses: actions/upload-artifact@v3
+#      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
 #      with:
 #        name: "libdpp - FreeBSD x64"
 #        path: "${{github.workspace}}/build/*.tar.bz2"

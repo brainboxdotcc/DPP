@@ -132,7 +132,7 @@ void cluster::interaction_response_create(snowflake interaction_id, const std::s
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, r.msg->filename, r.msg->filecontent, r.msg->filemimetype);
+	}, r.msg.filename, r.msg.filecontent, r.msg.filemimetype);
 }
 
 void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
@@ -183,4 +183,4 @@ void cluster::interaction_followup_get_original(const std::string &token, comman
 	rest_request<message>(this, API_PATH "/webhooks",std::to_string(me.id), utility::url_encode(token) + "/messages/@original", m_get, "", callback);
 }
 
-};
+} // namespace dpp

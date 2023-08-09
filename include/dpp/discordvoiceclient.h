@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -37,6 +38,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/discordevents.h>
+#include <dpp/isa_detection.h>
 #include <dpp/socket.h>
 #include <queue>
 #include <thread>
@@ -57,6 +59,23 @@ struct OpusRepacketizer;
 namespace dpp {
 
 using json = nlohmann::json;
+
+/*
+* @brief For holding a moving average of the number of current voice users, for applying a smooth gain ramp.
+*/
+struct DPP_EXPORT moving_averager {
+	moving_averager() = default;
+
+	moving_averager(uint64_t collection_count_new);
+
+	moving_averager operator+=(int64_t value);
+
+	operator float();
+
+protected:
+	std::deque<int64_t> values{};
+	uint64_t collectionCount{};
+};
 
 // Forward declaration
 class cluster;
@@ -474,6 +493,21 @@ public:
 	bool terminating;
 
 	/**
+	 * @brief The gain value for the end of the current voice iteration.
+	 */
+	float end_gain;
+
+	/**
+	 * @brief The gain value for the current voice iteration.
+	 */
+	float current_gain;
+
+	/**
+	 * @brief The amount to increment each successive sample for, for the current voice iteration.
+	 */
+	float increment;
+
+	/**
 	 * @brief Heartbeat interval for sending heartbeat keepalive
 	 */
 	uint32_t heartbeat_interval;
@@ -502,6 +536,11 @@ public:
 	 * @brief Server ID
 	 */
 	snowflake server_id;
+
+	/**
+	 * @brief Moving averager.
+	 */
+	moving_averager moving_average;
 
 	/**
 	 * @brief Channel ID
@@ -872,5 +911,5 @@ public:
 	std::string discover_ip();
 };
 
-};
+} // namespace dpp
 

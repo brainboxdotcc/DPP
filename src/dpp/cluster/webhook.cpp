@@ -126,4 +126,4 @@ void cluster::get_webhook_with_token(snowflake webhook_id, const std::string &to
 	rest_request<webhook>(this, API_PATH "/webhooks", std::to_string(webhook_id), utility::url_encode(token), m_get, "", callback);
 }
 
-};
+} // namespace dpp

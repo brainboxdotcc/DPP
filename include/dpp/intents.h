@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -83,4 +84,4 @@ enum intents {
         i_unverified_default_intents    = dpp::i_default_intents | dpp::i_message_content
 };
 
-};
+} // namespace dpp

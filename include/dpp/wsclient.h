@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -163,7 +164,7 @@ public:
 	/**
 	 * @brief Destroy the websocket client object
 	 */
-        virtual ~websocket_client();
+        virtual ~websocket_client() = default;
 
 	/**
 	 * @brief Write to websocket. Encapsulates data in frames if the status is CONNECTED.
@@ -209,4 +210,4 @@ public:
 	void send_close_packet();
 };
 
-};
+} // namespace dpp

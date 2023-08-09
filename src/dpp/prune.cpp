@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -30,11 +31,7 @@ using json = nlohmann::json;
 prune& prune::fill_from_json(nlohmann::json* j) {
 	days = int32_not_null(j, "days");
 	compute_prune_count = bool_not_null(j, "compute_prune_count");
-	if (j->contains("include_roles")) {
-		for (auto & r : (*j)["include_roles"]) {
-			include_roles.push_back(from_string<uint64_t>(r.get<std::string>()));
-		}
-	}
+	set_snowflake_array_not_null(j, "include_roles", include_roles);
 	return *this;
 }
 
@@ -50,4 +47,4 @@ std::string prune::build_json(bool with_prune_count) const {
 	return j.dump();
 }
 
-};
+} // namespace dpp

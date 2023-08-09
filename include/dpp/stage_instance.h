@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -83,4 +84,4 @@ struct DPP_EXPORT stage_instance : public managed, public json_interface<stage_i
 /** A group of stage instances */
 typedef std::unordered_map<snowflake, stage_instance> stage_instance_map;
 
-};
+} // namespace dpp

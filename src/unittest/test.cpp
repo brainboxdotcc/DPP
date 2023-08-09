@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -28,7 +29,7 @@ namespace {
 	 * @brief Thread emoji - https://www.compart.com/en/unicode/U+1F9F5
 	 */
 	inline const std::string THREAD_EMOJI = "\xF0\x9F\xA7\xB5";
-}
+} // namespace
 
 /* Unit tests go here */
 int main(int argc, char *argv[])

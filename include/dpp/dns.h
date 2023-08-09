@@ -73,4 +73,4 @@ namespace dpp {
 	 * @throw dpp::connection_exception On failure to resolve hostname
 	 */
 	const dns_cache_entry* resolve_hostname(const std::string& hostname, const std::string& port);
-};
+} // namespace dpp

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -699,5 +700,5 @@ typedef std::unordered_map<snowflake, role> role_map;
 /** A group of application_role_connection_metadata objects */
 typedef std::vector<application_role_connection_metadata> application_role_connection_metadata_list;
 
-};
+} // namespace dpp
 

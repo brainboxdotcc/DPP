@@ -70,4 +70,4 @@ void cluster::user_application_role_connection_update(snowflake application_id, 
 	rest_request<application_role_connection>(this, API_PATH "/users/@me/applications", std::to_string(application_id), "role-connection", m_put, connection.build_json(), callback);
 }
 
-};
+} // namespace dpp

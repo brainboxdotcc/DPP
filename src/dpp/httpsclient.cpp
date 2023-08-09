@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -146,9 +147,6 @@ const std::list<std::string> https_client::get_header_list(std::string header_na
 
 const std::multimap<std::string, std::string> https_client::get_headers() const {
 	return response_headers;
-}
-
-https_client::~https_client() {
 }
 
 bool https_client::handle_buffer(std::string &buffer)
@@ -354,4 +352,4 @@ http_connect_info https_client::get_host_info(std::string url) {
 	return hci;
 }
 
-};
+} // namespace dpp
