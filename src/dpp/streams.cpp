@@ -67,6 +67,7 @@ base_stream operator<<(const std::string& msg) {
 }
 base_stream operator<<(const int& n) {
 	this->send();
+	this->msg = message();
 	return (*this);
 }
 base_stream operator<<(const embed& e) {
