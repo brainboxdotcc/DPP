@@ -94,10 +94,9 @@ function add_change(string $change, string $category, string $scope = null) {
             $catgroup[$category][$scope] = [];
         }
         $catgroup[$category][$scope][] = $change;
+        return;
     }
-    else {
-        $catgroup[$category][] = $change;
-    }
+    $catgroup[$category][] = $change;
 }
 
 foreach ($changelog as $change) {
