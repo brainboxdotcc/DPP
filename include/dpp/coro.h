@@ -1,3 +1,24 @@
+/************************************************************************************
+ *
+ * D++, A Lightweight C++ library for Discord
+ *
+ * Copyright 2022 Craig Edwards and D++ contributors
+ * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ ************************************************************************************/
+
 #ifdef DPP_CORO
 #pragma once
 
@@ -188,7 +209,7 @@ namespace dpp {
 		 * @return bool Whether to suspend the caller or not
 		 */
 		template <typename T>
-		bool await_suspend(detail::task_handle<T> caller) noexcept {
+		bool await_suspend(detail::std_coroutine::coroutine_handle<T> caller) {
 			auto &my_promise = handle.promise();
 
 			if (my_promise.is_sync)
@@ -198,8 +219,9 @@ namespace dpp {
 
 			if (handle.done())
 				return (false);
+			if constexpr (requires (T t) { t.is_sync = false; })
+				caller.promise().is_sync = false;
 			my_promise.parent = caller;
-			caller.promise().is_sync = false;
 			return true;
 		}
 
@@ -421,6 +443,85 @@ namespace dpp {
 			std::rethrow_exception(handle.promise().exception);
 		if constexpr (!std::is_same_v<ReturnType, void>) // If we have a return type, return it and clean up our stored value
 			return *std::exchange(handle.promise().value, std::nullopt);
+	}
+
+	/**
+	 * @brief Extremely light coroutine object designed to send off a coroutine to execute on its own.
+	 *
+	 * This object is extremely light, and is the preferred way to use coroutines if you do not need to co_await the result.
+	 * 
+	 * @warning It cannot be co_awaited, which means the second it co_awaits something, the program jumps back to the calling function, which continues executing.
+	 * At this point, if the function returns, every object declared in the function including its parameters are destroyed, which causes dangling references.
+	 * This is exactly the same problem as references in lambdas : https://dpp.dev/lambdas-and-locals.html.
+	 * For this reason, `co_await` will error if any parameters are passed by reference.
+	 * If you must pass a reference, pass it as a pointer or with std::ref, but you must fully understand the reason behind this warning, and what to avoid.
+	 * If you prefer a safer type, use `coroutine` for synchronous execution, or `task` for parallel tasks, and co_await them.
+	 */
+	class job {};
+
+	namespace detail {
+		/**
+		 * @brief Coroutine promise type for a job
+		 */
+		template <bool has_reference_params>
+		struct job_promise {
+			/*
+			* @brief Function called when the job is done.
+			*
+			* @return Do not suspend at the end, destroying the handle immediately
+			*/
+			std_coroutine::suspend_never final_suspend() const noexcept {
+				return {};
+			}
+
+			/*
+			* @brief Function called when the job is started.
+			*
+			* @return Do not suspend at the start, starting the job immediately
+			*/
+			std_coroutine::suspend_never initial_suspend() const noexcept {
+				return {};
+			}
+
+			/**
+			 * @brief Function called to get the job object
+			 *
+			 * @return job
+			 */
+			dpp::job get_return_object() const noexcept {
+				return {};
+			}
+
+			/**
+			 * @brief Function called when an exception is thrown and not caught.
+			 *
+			 * @throw Immediately rethrows the exception to the caller / resumer
+			 */
+			void unhandled_exception() const noexcept(false) {
+				throw;
+			}
+
+			/**
+			 * @brief Function called when the job returns. Does nothing.
+			 */
+			void return_void() const noexcept {}
+
+			template <typename T>
+			T await_transform(T &&expr) const noexcept {
+				/**
+				 * `job` is extremely efficient as a coroutine but this comes with drawbacks :
+				 * It cannot be co_awaited, which means the second it co_awaits something, the program jumps back to the calling function, which continues executing.
+				 * At this point, if the function returns, every object declared in the function including its parameters are destroyed, which causes dangling references.
+				 * This is exactly the same problem as references in lambdas : https://dpp.dev/lambdas-and-locals.html.
+				 *
+				 * If you must pass a reference, pass it as a pointer or with std::ref, but you must fully understand the reason behind this warning, and what to avoid.
+				 * If you prefer a safer type, use `coroutine` for synchronous execution, or `task` for parallel tasks, and co_await them.
+				 */
+				static_assert(!has_reference_params, "co_await is disabled in dpp::job when taking parameters by reference. read comment above this line for more info");
+
+				return std::forward<T>(expr);
+			}
+		};
 	}
 
 	template <typename ReturnType = confirmation_callback_t>
@@ -734,7 +835,7 @@ namespace dpp {
 		 * @param callable The awaitable object whose API call to execute.
 		 */
 		async(const awaitable<ReturnType> &awaitable) : api_callback{} {
-			std::invoke(awaitable.callable, api_callback);
+			std::invoke(awaitable.request, api_callback);
 		}
 
 		/**
@@ -798,13 +899,14 @@ namespace dpp {
 		 * @param handle The handle to the coroutine co_await-ing and being suspended
 		 */
 		template <typename T>
-		bool await_suspend(detail::task_handle<T> handle) {
+		bool await_suspend(detail::std_coroutine::coroutine_handle<T> caller) {
 			std::lock_guard lock{api_callback.get_mutex()};
 
 			if (api_callback.get_result().has_value())
 				return false; // immediately resume the coroutine as we already have the result of the api call
-			handle.promise().is_sync = false;
-			api_callback.state->coro_handle = handle;
+			if constexpr (requires (T t) { t.is_sync = false; })
+				caller.promise().is_sync = false;
+			api_callback.state->coro_handle = caller;
 			return true; // suspend the caller, the callback will resume it
 		}
 
@@ -827,6 +929,20 @@ namespace dpp {
 template<typename T, typename... Args>
 struct dpp::detail::std_coroutine::coroutine_traits<dpp::task<T>, Args...> {
 	using promise_type = dpp::detail::task_promise<T>;
+};
+
+/**
+ * @brief Specialization of std::coroutine_traits, helps the standard library figure out a promise type from a coroutine function.
+ */
+template<typename T, typename... Args>
+struct dpp::detail::std_coroutine::coroutine_traits<dpp::job, T, Args...> {
+	/**
+	 * @brief Promise type for this coroutine signature.
+	 *
+	 * When the coroutine is created from a lambda, that lambda is passed as a first parameter.
+	 * Not ideal but we'll allow any callable that takes the rest of the arguments passed
+	 */
+	using promise_type = dpp::detail::job_promise<(std::is_reference_v<Args> || ... || (std::is_reference_v<T> && !std::is_invocable_v<T, Args...>))>;
 };
 
 #endif

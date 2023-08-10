@@ -108,7 +108,7 @@ private:
 	 *
 	 * Note: keep a listener's parameter as a value type, the event passed can die while a coroutine is suspended
 	 */
-	std::map<event_handle, std::function<dpp::task<void>(const T&)>> coroutine_container;
+	std::map<event_handle, std::function<dpp::job(const T&)>> coroutine_container;
 #else
 #ifndef _DOXYGEN_
 	/**
@@ -164,27 +164,10 @@ public:
 			}
 		};
 #ifdef DPP_CORO
-		if (!coroutine_container.empty()) {
-			[](const event_router_t<T> *me, T event) -> dpp::task<void> {
-				std::vector<dpp::task<void>> coroutines;
-				auto *cluster = event.from ? event.from->creator : nullptr;
-
-				coroutines.reserve(me->coroutine_container.size());
-				for (const auto& [_, listener] : me->coroutine_container) {
-					if (event.is_cancelled())
-						break;
-					coroutines.emplace_back(listener(event));
-				}
-				for (auto &coro : coroutines) {
-					try {
-						co_await coro;
-					}
-					catch (const std::exception &e) {
-						if (cluster)
-							cluster->log(dpp::loglevel::ll_error, std::string{"Uncaught exception in event coroutine: "} + e.what());
-					}
-				}
-			}(this, event);
+		for (const auto& [_, listener] : coroutine_container) {
+			if (!event.is_cancelled()) {
+				listener(event);
+			}
 		}
 #endif  /* DPP_CORO */
 	};
@@ -254,11 +237,12 @@ public:
 	 * the event object and should take exactly one parameter derived
 	 * from event_dispatch_t.
 	 *
-	 * @param func Coroutine task to attack to the event
+	 * @param func Coroutine task to attack to the event. <b>It MUST take the event by value.</b>
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
 	 */
-	event_handle co_attach(std::function<dpp::task<void>(const T&)> func) {
+	event_handle co_attach(std::function<job(T)> func) {
+		//                                       ^ If this errors here - your event handler must take its parameter by VALUE
 		std::unique_lock l(lock);
 		event_handle h = next_handle++;
 		coroutine_container.emplace(h, func);
