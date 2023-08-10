@@ -24,7 +24,7 @@
 #include <dpp/user.h>
 #include <dpp/channel.h>
 #include <dpp/cluster.h>
-#include <pair>
+#include <utility>
 
 
 namespace dpp {

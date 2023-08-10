@@ -25,7 +25,7 @@
 #include <dpp/channel.h>
 #include <dpp/cluster.h>
 #include <dpp/streams.h>
-#include <pair>
+#include <utility>
 
 namespace dpp {
 channel_stream::channel_stream(cluster& bot, channel out_channel) {
