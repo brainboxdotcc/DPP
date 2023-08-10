@@ -46,7 +46,7 @@ Listed in alphabetical order, with terms in bold, here are the basics on...
 
 20. **[Shards and clusters](\ref clusters-shards-guilds)**: A cluster is the main container for an application which contains many shards, each of which manage a subset of your workload, fortunately, D++ does this automatically. 
 
-21. **Snowflake**: An unsigned 64 bit integer (it can represent anything from $0$ to $2^{64}-1$) that is used by discord to identify basically everything, including but not limited to, **guilds**, users, messages, and much more.
+21. **Snowflake**: An unsigned 64 bit integer (it can represent anything from \f$0\f$ to \f$2^{64}-1\f$) that is used by discord to identify basically everything, including but not limited to, **guilds**, users, messages, and much more.
 
 22. **Subcommands**: A command which is derived from a different command, such as a bot that allows a person to get statistics for discord might have a `stats guild` command and a `stats global` command, both of which are **subcommands** of `stats`.
 
