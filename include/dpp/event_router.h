@@ -32,7 +32,7 @@
 #include <mutex>
 #include <shared_mutex>
 #include <cstring>
-#include <dpp/coro.h>
+#include <dpp/coro/job.h>
 
 using  json = nlohmann::json;
 
@@ -242,7 +242,6 @@ public:
 	 * detach the listener from the event later if necessary.
 	 */
 	event_handle co_attach(std::function<job(T)> func) {
-		//                                       ^ If this errors here - your event handler must take its parameter by VALUE
 		std::unique_lock l(lock);
 		event_handle h = next_handle++;
 		coroutine_container.emplace(h, func);

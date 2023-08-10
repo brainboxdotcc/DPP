@@ -46,10 +46,8 @@
 #include <shared_mutex>
 #include <cstring>
 #include <dpp/restresults.h>
-#include <dpp/coro.h>
 #include <dpp/event_router.h>
-
-
+#include <dpp/coro/awaitable.h>
 
 namespace dpp {
 
