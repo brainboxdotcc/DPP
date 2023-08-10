@@ -20,10 +20,7 @@
  *
  ************************************************************************************/
 
-#include <dpp/export.h>
-#include <dpp/user.h>
-#include <dpp/channel.h>
-#include <dpp/cluster.h>
+
 #include <dpp/streams.h>
 #include <utility>
 
