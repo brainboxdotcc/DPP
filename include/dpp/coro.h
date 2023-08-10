@@ -23,6 +23,7 @@
 #pragma once
 
 #include "coro/async.h"
+#include "coro/coroutine.h"
 #include "coro/job.h"
 #include "coro/task.h"
 

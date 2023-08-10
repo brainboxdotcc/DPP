@@ -30,9 +30,9 @@
 namespace dpp {
 
 /**
- * @brief Extremely light coroutine object designed to send off a coroutine to execute on its own.
+ * @brief Extremely light coroutine object designed to send off a coroutine to execute on its own. It can be attached to an event router using dpp::event_router_t::co_attach.
  *
- * This object is extremely light, and is the recommended way to use coroutines if you do not need to co_await the result.
+ * This object stores no state and is the recommended way to use coroutines if you do not need to co_await the result.
  *
  * @warning It cannot be co_awaited, which means the second it co_awaits something, the program jumps back to the calling function, which continues executing.
  * At this point, if the function returns, every object declared in the function including its parameters are destroyed, which causes dangling references.
@@ -82,7 +82,7 @@ struct job_promise {
 	 *
 	 * @throw Immediately rethrows the exception to the caller / resumer
 	 */
-	void unhandled_exception() const noexcept(false) {
+	void unhandled_exception() const {
 		throw;
 	}
 

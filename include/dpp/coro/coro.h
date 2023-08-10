@@ -78,6 +78,9 @@ requires std::is_same_v<void, R> || (!std::is_reference_v<R> && std::is_move_con
 #endif
 class task;
 
+template <typename R = void>
+class coroutine;
+
 struct job;
 
 } // namespace dpp
