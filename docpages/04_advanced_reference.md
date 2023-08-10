@@ -6,3 +6,6 @@
 * \subpage unit-tests "Unit Tests"
 * \subpage lambdas-and-locals "Ownership of local variables and safely transferring into a lambda"
 * \subpage coroutines "Advanced commands with coroutines"
+* \subpage governance "Project Governance"
+* \subpage roadmap "Development Roadmap"
+* \subpage security "Security"
