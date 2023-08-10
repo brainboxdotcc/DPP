@@ -644,5 +644,10 @@ forum_layout_type channel::get_default_forum_layout() const {
 	return static_cast<forum_layout_type>((flags & DEFAULT_FORUM_LAYOUT_MASK) >> 9);
 }
 
+channel_stream channel::stream(cluster& bot) {
+	return channel_stream(bot,this->id);
+}
+
+
 
 } // namespace dpp

@@ -30,8 +30,11 @@
 #include <dpp/json_fwd.h>
 #include <dpp/permissions.h>
 #include <dpp/json_interface.h>
+#include <dpp/streams.h>
 #include <unordered_map>
+
 #include <variant>
+#include <string>
 
 namespace dpp {
 
@@ -343,6 +346,12 @@ public:
 	/** Destructor */
 	virtual ~channel();
 
+	/**
+	 * @brief Returns a simple way to send messages
+	 * @param bot The bot that will send the message
+	 * @return The stream object used to send messages
+	 */
+	channel_stream stream(cluster& bot);
 	/**
 	* @brief Create a mentionable channel.
 	* @param id The ID of the channel.
@@ -862,6 +871,9 @@ struct active_thread_info {
  * @brief A map of threads alongside optionally the thread_member tied to the bot if it is in the thread. The map's key is the thread id. Returned from the cluster::threads_get_active method
  */
 using active_threads = std::map<snowflake, active_thread_info>;
+/**
+ * @brief A stream wrapper to send messages
+ */ 
 
 } // namespace dpp
 

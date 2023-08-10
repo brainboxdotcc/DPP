@@ -293,4 +293,10 @@ void from_json(const nlohmann::json& j, user& u) {
 	}
 }
 
+dm_stream user::stream(cluster& bot) {
+	return dm_stream(bot,*this);
+}
+
+
+
 } // namespace dpp
