@@ -19,6 +19,8 @@
  *
  ************************************************************************************/
 #include <dpp/user.h>
+#include <dpp/cluster.h>
+#include <dpp/streams.h>
 #include <dpp/discordevents.h>
 #include <dpp/json.h>
 #include <dpp/stringops.h>
@@ -292,11 +294,11 @@ void from_json(const nlohmann::json& j, user& u) {
 		}
 	}
 }
-/*
+
 dm_stream user::stream(cluster& bot) {
 	return dm_stream(bot,*this);
 }
-*/
+
 
 
 } // namespace dpp

@@ -28,7 +28,10 @@
 
 
 namespace dpp {
-
+/**
+ * @brief Return end of message
+ * @return 0
+*/
 int end_msg();
 /**
  * @brief Simple parent for streams

@@ -20,6 +20,7 @@
  *
  ************************************************************************************/
 #include <dpp/channel.h>
+#include <dpp/streams.h>
 #include <dpp/cache.h>
 #include <dpp/guild.h>
 #include <dpp/user.h>

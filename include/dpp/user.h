@@ -24,11 +24,10 @@
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/utility.h>
-
 #include <dpp/json_interface.h>
-
 namespace dpp {
-
+class cluster; //TODO Find a way to remove this forward declaration
+class dm_stream; //Forward declaration
 /**
  * @brief Various bitmask flags used to represent information about a dpp::user
  */
@@ -109,7 +108,7 @@ public:
 	 * @param bot The bot that will send the message
 	 * @return The stream object used to send messages
 	 */
-	//dm_stream stream(cluster& bot);
+	dm_stream stream(cluster& bot);
 	/**
 	 * @brief Construct a new user object
 	 */

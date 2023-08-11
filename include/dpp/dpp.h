@@ -33,7 +33,7 @@
 #include <map>
 
 #include <functional>
-#include <dpp/streams.h>
+
 #include <dpp/exception.h>
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
@@ -65,6 +65,7 @@
 #include <dpp/discordclient.h>
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
+#include <dpp/streams.h>
 #include <dpp/cache.h>
 #include <dpp/httpsclient.h>
 #include <dpp/queues.h>
