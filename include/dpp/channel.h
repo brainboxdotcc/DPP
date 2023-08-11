@@ -351,7 +351,7 @@ public:
 	 * @param bot The bot that will send the message
 	 * @return The stream object used to send messages
 	 */
-	//channel_stream stream(cluster& bot);
+	channel_stream stream(cluster& bot);
 	/**
 	* @brief Create a mentionable channel.
 	* @param id The ID of the channel.
