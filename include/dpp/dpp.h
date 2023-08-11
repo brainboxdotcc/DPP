@@ -31,7 +31,9 @@
 #include <string>
 #include <vector>
 #include <map>
+
 #include <functional>
+#include <dpp/streams.h>
 #include <dpp/exception.h>
 #include <dpp/snowflake.h>
 #include <dpp/misc-enum.h>
@@ -73,3 +75,4 @@
 #include <dpp/discordevents.h>
 #include <dpp/timed_listener.h>
 #include <dpp/collector.h>
+

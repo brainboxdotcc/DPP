@@ -29,7 +29,7 @@
 
 namespace dpp {
 
-int end_msg() { return 0; }
+int end_msg();
 /**
  * @brief Simple parent for streams
  * 
@@ -67,9 +67,9 @@ class DPP_EXPORT base_stream {
          * @param f Pair of filename and filecontent to add
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(const std::pair<std::string> &f);
-        virtual void send(command_completion_event_t callback);
-        virtual message send_sync();
+        base_stream& operator<<(const std::pair<std::string,std::string> &f);
+        virtual void send(command_completion_event_t callback = utility::log_error()) {};
+        virtual message send_sync() { return message(); };
         message msg = message();
         
 };
@@ -84,14 +84,14 @@ class DPP_EXPORT dm_stream : public base_stream {
 		 * @param bot Cluster that will send messages
 		 * @param out_channel User to whom messages will be sent
 		 */
-		channel_stream(cluster& bot, user out_user); 
+		dm_stream(cluster& bot, user out_user); 
 		/**
 		 * @brief Constructer
 		 * 
 		 * @param bot Cluster that will send messages
 		 * @param out_channel_id User id to whom messages will be sent
 		 */
-		channel_stream(cluster& bot, snowflake out_user_id);
+		dm_stream(cluster& bot, snowflake out_user_id);
 		/**
 		 * @brief Send message with stream
 		 * @param callback Function to call when the API call completes. On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -107,7 +107,7 @@ class DPP_EXPORT dm_stream : public base_stream {
 		message send_sync() override;
 		
 	private:	
-		cluster& bot; /**< Cluster which sends messages */
+		cluster* bot; /**< Cluster which sends messages */
 		snowflake out_user_id; /**< User id to which messages are sent */
 
 };
@@ -147,7 +147,7 @@ class DPP_EXPORT channel_stream : public base_stream {
 		message send_sync() override;
 		
 	private:	
-		cluster& bot; /**< Cluster which sends messages */
+		cluster* bot; /**< Cluster which sends messages */
 		snowflake out_channel_id; /**< Channel id in which messages are sent */
 
 };
