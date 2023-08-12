@@ -210,4 +210,3 @@ int main()
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 \note For demonstration purposes, and small bots, this code is OK, but in the real world once your bot gets big, it's not recommended to create slash commands in the `on_ready` event even when it's inside `dpp::run_once` as, if you re-run your bot multiple times or start multiple clusters, you will quickly get rate-limited! You could, for example, add a commandline parameter to your bot (`argc`, `argv`) so that if you want the bot to register commands it must be launched with a specific command line argument.
-
