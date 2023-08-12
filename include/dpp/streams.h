@@ -71,8 +71,8 @@ class DPP_EXPORT base_stream {
          * @return This stream, for purposes of chaining
          */
         base_stream& operator<<(const std::pair<std::string,std::string> &f);
-        virtual void send(command_completion_event_t callback = utility::log_error()) {};
-        virtual message send_sync() { return message(); };
+        virtual void send(command_completion_event_t callback = utility::log_error()) = 0;
+        virtual message send_sync() = 0;
         message msg = message();
         
 };
