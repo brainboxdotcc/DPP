@@ -10,7 +10,7 @@ D++ as an on_button_click event. To make use of this, use code as in this exampl
 
 int main() {
 
-	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	dpp::cluster bot("token");
 
 	bot.on_log(dpp::utility::cout_logger());
 
