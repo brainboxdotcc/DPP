@@ -16,12 +16,18 @@ This covers your standard Curly Braces (commonly known as squiggly brackets), an
 Curly Braces should be on the same line as the keyword, for example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-if (a == b) {
-	c();
+void foo() {
+    if (a == b) {
+        c();
+    }
+
+    while(true) {
+        // ...
+    }
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This applies to Functions, `While` statements, `If` statments, lambdas, anything that uses Curly Braces!
+This applies to functions, `while` statements, `if` statments, lambdas, nearly anything that uses curly braces with statements!
 
 ### Lists
 
