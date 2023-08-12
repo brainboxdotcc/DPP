@@ -66,6 +66,7 @@ The library should work fine on other operating systems as well, and if you run 
 * [Frequently Asked Questions](/md_docpages_01_frequently_asked_questions.html)
 * [Installing D++](/md_docpages_01_installing.html)
 * [Example Programs](/md_docpages_03_example_programs.html)
+* [Commonly used terms](/md_docpages_disdppgloss.html)
 
 ## Architecture
 * \ref clusters-shards-guilds
