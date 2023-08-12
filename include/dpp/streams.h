@@ -48,7 +48,7 @@ class DPP_EXPORT base_stream {
         base_stream& operator<<(const std::string& msg);
         /**
          * @brief Finish and send message in stream
-         * @param n Number (currently irrelavent which)
+         * @param n Number (currently irrelevant)
          * @return This stream, for purposes of chaining
          */
         base_stream& operator<<(const int& n);
