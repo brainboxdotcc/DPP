@@ -77,8 +77,8 @@ void base_stream::add_component(const component& c) {
 		if (this->n_buttons >= 5) this->add_row();
 	} else {
 		if (this->n_buttons > 0) this->add_row();
-		this->add_row();
 		this->current_action_row = component().add_component(c);
+		this->add_row();
 	}
 }
 		
@@ -111,7 +111,7 @@ base_stream& base_stream::operator<<(const embed& e) {
 	return (*this);
 }
 base_stream& base_stream::operator<<(const component& c) {
-	this->add_row();
+	this->add_component(c);
 	return (*this);
 }
 

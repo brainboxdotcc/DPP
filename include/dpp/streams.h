@@ -131,14 +131,14 @@ class DPP_EXPORT base_stream {
 class DPP_EXPORT dm_stream : public base_stream {
 	public:
 		/**
-		 * @brief Constructer
+		 * @brief Constructor
 		 * 
 		 * @param bot Cluster that will send messages
 		 * @param out_channel User to whom messages will be sent
 		 */
 		dm_stream(cluster& bot_, const user& out_user); 
 		/**
-		 * @brief Constructer
+		 * @brief Constructor
 		 * 
 		 * @param bot Cluster that will send messages
 		 * @param out_channel_id User id to whom messages will be sent
@@ -169,14 +169,14 @@ class DPP_EXPORT dm_stream : public base_stream {
 class DPP_EXPORT channel_stream : public base_stream {
 	public:
 		/**
-		 * @brief Constructer
+		 * @brief Constructor
 		 * 
 		 * @param bot Cluster that will send messages
 		 * @param out_channel Channel where messages will be sent
 		 */
 		channel_stream(cluster& bot_, const channel& out_channel); 
 		/**
-		 * @brief Constructer
+		 * @brief Constructor
 		 * 
 		 * @param bot Cluster that will send messages
 		 * @param out_channel_id Channel id where messages will be sent
