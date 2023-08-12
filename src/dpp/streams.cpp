@@ -64,13 +64,45 @@ message dm_stream::send_sync() {
 	return this->bot->direct_message_create_sync(out_user_id,this->msg);
 }
 
+void base_stream::add_component(const component& c) {
+	if (this->n_rows >= 5) throw dpp::length_exception("Message already contains five action rows");
+	component_type c_t = c.type;
+	if (c_t == cot_action_row) {
+		if (this->n_buttons > 0) this->add_row();
+		this->current_action_row = c;
+		this->add_row();
+	} else if (c_t == cot_button) {
+		this->current_action_row.add_component(c);
+		this->n_buttons++;
+		if (this->n_buttons >= 5) this->add_row();
+	} else {
+		if (this->n_buttons > 0) this->add_row();
+		this->add_row();
+		this->current_action_row = component().add_component(c);
+	}
+}
+		
+
+void base_stream::add_row() {		
+	this->n_buttons = 0;
+	this->msg.add_component(this->current_action_row);
+	this->current_action_row = component();
+	this->n_rows++;
+}
+
 base_stream& base_stream::operator<<(const std::string& msg) {
 	this->msg.set_content(this->msg.content + msg);
 	return (*this);
 }
 base_stream& base_stream::operator<<(end_msg_t) {
+	if (this->n_buttons > 0) this->add_row();
 	this->send();
 	this->msg = message();
+	return (*this);
+}
+
+base_stream& base_stream::operator<<(end_row_t) {
+	this->add_row();
 	return (*this);
 }
 
@@ -78,9 +110,8 @@ base_stream& base_stream::operator<<(const embed& e) {
 	this->msg.add_embed(e);
 	return (*this);
 }
-
 base_stream& base_stream::operator<<(const component& c) {
-	this->msg.add_component(c);
+	this->add_row();
 	return (*this);
 }
 

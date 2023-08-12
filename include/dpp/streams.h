@@ -55,13 +55,13 @@ struct file_info {
  * 
  * @return end_msg_t Simple end message object
  */
-end_msg_t eng_msg();
+end_msg_t end_msg();
 /**
  * @brief End a row in stream
  * 
  * @return end_row_t Simple end row object
  */
-end_row_t eng_row(); //NOTE NOT USED YET, WILL BE USED IN NEXT COMMIT
+end_row_t end_row(); 
 /**
  * @brief Simple parent for streams
  * 
@@ -80,6 +80,11 @@ class DPP_EXPORT base_stream {
          * @return This stream, for purposes of chaining
          */
         base_stream& operator<<(end_msg_t);
+		/**
+         * @brief Finish and add row to message, argument indicates end of row
+         * @return This stream, for purposes of chaining
+         */
+        base_stream& operator<<(end_row_t);
         //TODO Make action rows work with this
         /**
          * @brief Build message in stream
@@ -101,7 +106,23 @@ class DPP_EXPORT base_stream {
         base_stream& operator<<(const file_info &f);
         virtual void send(command_completion_event_t callback = utility::log_error()) = 0;
         virtual message send_sync() = 0;
-        message msg = message();
+	protected:
+		/**
+		 * @brief Add row to message
+		 * 
+		 */
+		void add_row();
+		/**
+		 * @brief Add component to current row
+		 * 
+		 * @param c Current row
+		 */
+		void add_component(const component& c);
+		message msg = message(); /*!< Message being built*/
+	private:
+		int n_buttons = 0; /*!< Number of buttons in current action row*/
+		int n_rows = 0; /*!< Number of action rows in current message*/
+		component current_action_row = component(); /*!< Action row currently being built*/
         
 };
 /**
