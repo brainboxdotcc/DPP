@@ -33,13 +33,13 @@ namespace dpp {
  * @brief Structure to act as special end of message
  * 
  */
-struct end_msg_t {};
+struct send_msg_t {};
 
 /**
  * @brief Structure to act as special end of message
  * 
  */
-struct end_row_t {};
+struct add_row_t {};
 
 /**
  * @brief Simple wrapper for file info
@@ -53,15 +53,15 @@ struct file_info {
 /**
  * @brief End and send a message in stream
  * 
- * @return end_msg_t Simple end message object
+ * @return send_msg_t Simple send message object
  */
-end_msg_t end_msg();
+send_msg_t send_msg();
 /**
  * @brief End a row in stream
  * 
- * @return end_row_t Simple end row object
+ * @return add_row_t Simple add row object
  */
-end_row_t end_row(); 
+add_row_t add_row(); 
 /**
  * @brief Simple parent for streams
  * 
@@ -79,12 +79,12 @@ class DPP_EXPORT base_stream {
          * @brief Finish and send message in stream, argument indicates end of message 
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(end_msg_t);
+        base_stream& operator<<(send_msg_t);
 		/**
          * @brief Finish and add row to message, argument indicates end of row
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(end_row_t);
+        base_stream& operator<<(add_row_t);
         //TODO Make action rows work with this
         /**
          * @brief Build message in stream

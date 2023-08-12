@@ -26,11 +26,11 @@
 
 namespace dpp {
 
-end_msg_t end_msg() { 
+send_msg_t send_msg() { 
 	return {}; 
 }
 
-end_row_t end_row() { 
+add_row_t add_row() { 
 	return {}; 
 }
 
@@ -94,14 +94,14 @@ base_stream& base_stream::operator<<(const std::string& msg) {
 	this->msg.set_content(this->msg.content + msg);
 	return (*this);
 }
-base_stream& base_stream::operator<<(end_msg_t) {
+base_stream& base_stream::operator<<(send_msg_t) {
 	if (this->n_buttons > 0) this->add_row();
 	this->send();
 	this->msg = message();
 	return (*this);
 }
 
-base_stream& base_stream::operator<<(end_row_t) {
+base_stream& base_stream::operator<<(add_row_t) {
 	this->add_row();
 	return (*this);
 }
