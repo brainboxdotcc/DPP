@@ -338,7 +338,6 @@ public:
 	 * @param msg The log message to output
 	 */
 	void log(dpp::loglevel severity, const std::string &msg) const;
-
 	
 	/**
 	 * @brief Start a timer. Every `frequency` seconds, the callback is called.
