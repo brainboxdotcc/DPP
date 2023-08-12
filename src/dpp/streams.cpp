@@ -34,37 +34,39 @@ add_row_t add_row() {
 	return {}; 
 }
 
-
+base_stream& base_stream::operator<<(const message &msg) {
+	this->send(msg);
+	return (*this);
+}
 
 channel_stream::channel_stream(cluster& bot_, const channel& out_channel) : bot(&bot_), out_channel_id(out_channel.id) {}
 
 channel_stream::channel_stream(cluster& bot_, snowflake out_channel_id_) : bot(&bot_), out_channel_id(out_channel_id_) {}
 
-void channel_stream::send(command_completion_event_t callback) {
-	this->msg.set_channel_id(this->out_channel_id); //Make sure message is sent to the right channel
-	this->bot->message_create(this->msg,callback);
+void channel_stream::send(message msg, command_completion_event_t callback) {
+	msg.set_channel_id(this->out_channel_id); //Make sure message is sent to the right channel
+	this->bot->message_create(msg,callback);
 }
 
-message channel_stream::send_sync() {
-	this->msg.set_channel_id(this->out_channel_id);
-	return this->bot->message_create_sync(this->msg);
+message channel_stream::send_sync(message msg) {
+	msg.set_channel_id(this->out_channel_id);
+	return this->bot->message_create_sync(msg);
 }
 
 dm_stream::dm_stream(cluster& bot_, const user& out_user) : bot(&bot_), out_user_id(out_user.id) {}
 
 dm_stream::dm_stream(cluster& bot_, snowflake out_user_id_) : bot(&bot_), out_user_id(out_user_id_) {}
 
-void dm_stream::send(command_completion_event_t callback) {
+void dm_stream::send(message msg, command_completion_event_t callback) {
 	
-	this->bot->direct_message_create(this->out_user_id,this->msg,callback);
+	this->bot->direct_message_create(this->out_user_id,msg,callback);
 }
 
-message dm_stream::send_sync() {
-	
-	return this->bot->direct_message_create_sync(out_user_id,this->msg);
+message dm_stream::send_sync(message msg) {
+	return this->bot->direct_message_create_sync(out_user_id,msg);
 }
 
-void base_stream::add_component(const component& c) {
+void message_builder::add_component(const component& c) {
 	if (this->n_rows >= 5) throw dpp::length_exception("Message already contains five action rows");
 	component_type c_t = c.type;
 	if (c_t == cot_action_row) {
@@ -83,40 +85,38 @@ void base_stream::add_component(const component& c) {
 }
 		
 
-void base_stream::add_row() {		
+void message_builder::add_row() {		
 	this->n_buttons = 0;
 	this->msg.add_component(this->current_action_row);
 	this->current_action_row = component();
 	this->n_rows++;
 }
 
-base_stream& base_stream::operator<<(const std::string& msg) {
+message_builder& message_builder::operator<<(const std::string& msg) {
 	this->msg.set_content(this->msg.content + msg);
 	return (*this);
 }
-base_stream& base_stream::operator<<(send_msg_t) {
+message message_builder::operator<<(send_msg_t) {
 	if (this->n_buttons > 0) this->add_row();
-	this->send();
-	this->msg = message();
-	return (*this);
+	return this->msg;
 }
 
-base_stream& base_stream::operator<<(add_row_t) {
+message_builder& message_builder::operator<<(add_row_t) {
 	this->add_row();
 	return (*this);
 }
 
-base_stream& base_stream::operator<<(const embed& e) {
+message_builder& message_builder::operator<<(const embed& e) {
 	this->msg.add_embed(e);
 	return (*this);
 }
-base_stream& base_stream::operator<<(const component& c) {
+message_builder& message_builder::operator<<(const component& c) {
 	this->add_component(c);
 	return (*this);
 }
 
 
-base_stream& base_stream::operator<<(const file_info &f) {
+message_builder& message_builder::operator<<(const file_info &f) {
     this->msg.add_file(f.file_name,f.file_content,f.mime_type);
     return (*this);
 }

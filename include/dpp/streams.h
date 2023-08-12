@@ -66,46 +66,43 @@ add_row_t add_row();
  * @brief Simple parent for streams
  * 
  */
-
-class DPP_EXPORT base_stream {
+class DPP_EXPORT message_builder {
     public:
         /**
          * @brief Build message in stream
          * @param msg Text to add
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(const std::string& msg);
+        message_builder& operator<<(const std::string& msg);
         /**
          * @brief Finish and send message in stream, argument indicates end of message 
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(send_msg_t);
+        message operator<<(send_msg_t);
 		/**
          * @brief Finish and add row to message, argument indicates end of row
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(add_row_t);
+        message_builder& operator<<(add_row_t);
         //TODO Make action rows work with this
         /**
          * @brief Build message in stream
          * @param c Component to add
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(const component &c);
+        message_builder& operator<<(const component &c);
         /**
          * @brief Build message in stream
          * @param e Embed to add
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(const embed &e);
+        message_builder& operator<<(const embed &e);
         /**
          * @brief Build message in stream
          * @param f Pair of filename and filecontent to add
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(const file_info &f);
-        virtual void send(command_completion_event_t callback = utility::log_error()) = 0;
-        virtual message send_sync() = 0;
+        message_builder& operator<<(const file_info &f);
 	protected:
 		/**
 		 * @brief Add row to message
@@ -123,6 +120,19 @@ class DPP_EXPORT base_stream {
 		int n_buttons = 0; /*!< Number of buttons in current action row*/
 		int n_rows = 0; /*!< Number of action rows in current message*/
 		component current_action_row = component(); /*!< Action row currently being built*/
+        
+};
+class DPP_EXPORT base_stream {
+    public:
+       
+        /**
+         * @brief Put message in stream
+         * @param msg Message to add
+         * @return This stream, for purposes of chaining
+         */
+        base_stream& operator<<(const message &msg);
+        virtual void send(message msg, command_completion_event_t callback = utility::log_error()) = 0;
+        virtual message send_sync(message msg) = 0;
         
 };
 /**
@@ -149,14 +159,14 @@ class DPP_EXPORT dm_stream : public base_stream {
 		 * @param callback Function to call when the API call completes. On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 		 */
 	
-		void send(command_completion_event_t callback = utility::log_error()) override;
+		void send(message msg, command_completion_event_t callback = utility::log_error()) override;
 		/**
 		 * @brief Send message synchronously
 		 * @return Message sent
 		 * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  		 * Avoid direct use of this function inside an event handler.
 		 */
-		message send_sync() override;
+		message send_sync(message msg) override;
 		
 	private:	
 		cluster* bot; /**< Cluster which sends messages */
@@ -188,7 +198,7 @@ class DPP_EXPORT channel_stream : public base_stream {
 		 * @param callback Function to call when the API call completes. On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 		 */
 	
-		void send(command_completion_event_t callback = utility::log_error()) override;
+		void send(message msg, command_completion_event_t callback = utility::log_error()) override;
 		/**
 		 * @brief Send message synchronously
 		 * @param msg Message to send
@@ -196,7 +206,7 @@ class DPP_EXPORT channel_stream : public base_stream {
 		 * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  		 * Avoid direct use of this function inside an event handler.
 		 */
-		message send_sync() override;
+		message send_sync(message msg) override;
 		
 	private:	
 		cluster* bot; /**< Cluster which sends messages */
