@@ -20,7 +20,7 @@ int main() {
 		if (event.command.get_command_name == "button") {
 
 			/* Create a message */
-			dpp::message msg(event.command.channel_id, "this text has buttons");
+			dpp::message msg(event.command.channel_id, "this text has a button");
 			
 			/* Add an action row, and then a button within the action row. */
 			msg.add_component(

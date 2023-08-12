@@ -4,7 +4,9 @@ Context menus are application commands that appear on the context menu (right cl
 
 \image html context_menu_user_command.png
 
-The following example shows how to create and handle **user context menus**.
+\note This example sets the command as the type dpp::ctxm_user which can only be used by right clicking on a user. To make it appear on a message, you'll want to switch the type to dpp::ctxm_message.
+
+The following example shows how to create and handle **user context menus** for message context menus, read the notice above.
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -30,9 +32,9 @@ int main()
     });
 
     /* Use the on_user_context_menu event to look for user context menu actions */
-    bot.on_user_context_menu([&](const dpp::user_context_menu_t &event) {
+    bot.on_user_context_menu([&](const dpp::user_context_menu_t& event) {
          /* check if the context menu name is High Five */
-         if (event.command.get_command_name() == "High Five") {
+         if (event.command.get_command_name() == "high five") {
              dpp::user user = event.get_user(); // the user who the command has been issued on
              dpp::user author = event.command.get_issuing_user(); // the user who clicked on the context menu
              event.reply(author.get_mention() + " slapped " + user.get_mention());
