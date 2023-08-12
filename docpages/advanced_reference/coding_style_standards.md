@@ -10,8 +10,10 @@ Enums and their values should be `snake_case` as with class, function and method
 
 
 ## Curly Braces, Brackets etc
+This covers your standard Curly Braces (commonly known as squiggly brackets), and Lists.
 
-Open curly braces on the same line as the keyword, for example:
+### Curly Braces
+Curly Braces should be on the same line as the keyword, for example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 if (a == b) {
@@ -19,7 +21,11 @@ if (a == b) {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use a space after the comma in parameter lists, and after opening brackets and before closing brackets except when calling a function, e.g.:
+This applies to Functions, `While` statements, `If` statments, lambdas, anything that uses Curly Braces!
+
+### Lists
+
+Lists should have a space after the comma in parameter lists, and after opening brackets and before closing brackets except when calling a function, for example:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 std::vector<std::string> clowns = { "pennywise", "bobo" };
