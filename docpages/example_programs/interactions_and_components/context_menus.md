@@ -18,14 +18,14 @@ int main()
 
     bot.on_ready([&bot](const dpp::ready_t &event) {
         if (dpp::run_once<struct register_bot_commands>()) {
+
+            /* Create the command */
+            dpp::slashcommand command("High Five", "Send a High Five!", bot.me.id);
+                
+            command.set_type(dpp::ctxm_user);
+
             /* Register the command */
-            bot.guild_command_create(
-				dpp::slashcommand()
-					.set_type(dpp::ctxm_user)
-                    .set_name("High Five")
-                    .set_application_id(bot.me.id),
-                857692897221033129 // you need to put your guild-id in here
-            );
+            bot.guild_command_create(command, guild_id);
         }
     });
 
