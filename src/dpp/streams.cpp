@@ -29,8 +29,11 @@
 
 namespace dpp {
 
-int end_msg() { return 0; }
-channel_stream::channel_stream(cluster& bot, channel out_channel) {
+int end_msg() 
+{ 
+	return 0; 
+}
+channel_stream::channel_stream(cluster& bot, const channel& out_channel) {
 	this->bot = &bot;
 	this->out_channel_id = out_channel.id;
 }
@@ -50,7 +53,7 @@ message channel_stream::send_sync() {
 
 
 
-dm_stream::dm_stream(cluster& bot, user out_user) {
+dm_stream::dm_stream(cluster& bot, const user& out_user) {
 	this->bot = &bot;
 	this->out_user_id = out_user.id;
 }

@@ -47,8 +47,8 @@ class DPP_EXPORT base_stream {
          */
         base_stream& operator<<(const std::string& msg);
         /**
-         * @brief Send message in stream
-         * @param n Number
+         * @brief Finish and send message in stream
+         * @param n Number (currently irrelavent which)
          * @return This stream, for purposes of chaining
          */
         base_stream& operator<<(const int& n);
@@ -87,7 +87,7 @@ class DPP_EXPORT dm_stream : public base_stream {
 		 * @param bot Cluster that will send messages
 		 * @param out_channel User to whom messages will be sent
 		 */
-		dm_stream(cluster& bot, user out_user); 
+		dm_stream(cluster& bot, const user& out_user); 
 		/**
 		 * @brief Constructer
 		 * 
@@ -125,7 +125,7 @@ class DPP_EXPORT channel_stream : public base_stream {
 		 * @param bot Cluster that will send messages
 		 * @param out_channel Channel where messages will be sent
 		 */
-		channel_stream(cluster& bot, channel out_channel); 
+		channel_stream(cluster& bot, const channel& out_channel); 
 		/**
 		 * @brief Constructer
 		 * 
