@@ -34,6 +34,8 @@ end_row_t end_row() {
 	return {}; 
 }
 
+
+
 channel_stream::channel_stream(cluster& bot_, const channel& out_channel) : bot(&bot_), out_channel_id(out_channel.id) {}
 
 channel_stream::channel_stream(cluster& bot_, snowflake out_channel_id_) : bot(&bot_), out_channel_id(out_channel_id_) {}
@@ -83,8 +85,8 @@ base_stream& base_stream::operator<<(const component& c) {
 }
 
 
-base_stream& base_stream::operator<<(const std::pair<std::string,std::string> &f) {
-    this->msg.add_file(f.first,f.second);
+base_stream& base_stream::operator<<(const file_info &f) {
+    this->msg.add_file(f.file_name,f.file_content,f.mime_type);
     return (*this);
 }
 

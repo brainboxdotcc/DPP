@@ -42,6 +42,15 @@ struct end_msg_t {};
 struct end_row_t {};
 
 /**
+ * @brief Simple wrapper for file info
+ * 
+ */
+struct file_info {
+	std::string file_name;
+	std::string file_content;
+	std::string mime_type;
+};
+/**
  * @brief End and send a message in stream
  * 
  * @return end_msg_t Simple end message object
@@ -89,7 +98,7 @@ class DPP_EXPORT base_stream {
          * @param f Pair of filename and filecontent to add
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(const std::pair<std::string,std::string> &f);
+        base_stream& operator<<(const file_info &f);
         virtual void send(command_completion_event_t callback = utility::log_error()) = 0;
         virtual message send_sync() = 0;
         message msg = message();
