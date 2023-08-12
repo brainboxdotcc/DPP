@@ -26,7 +26,7 @@
 #include <dpp/utility.h>
 #include <dpp/json_interface.h>
 namespace dpp {
-class cluster; //TODO Find a way to remove this forward declaration
+class cluster; //Forward declaration
 class dm_stream; //Forward declaration
 /**
  * @brief Various bitmask flags used to represent information about a dpp::user

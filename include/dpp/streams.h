@@ -28,11 +28,31 @@
 
 
 namespace dpp {
+
 /**
- * @brief Return end of message
- * @return 0
-*/
-int end_msg();
+ * @brief Structure to act as special end of message
+ * 
+ */
+struct end_msg_t {};
+
+/**
+ * @brief Structure to act as special end of message
+ * 
+ */
+struct end_row_t {};
+
+/**
+ * @brief End and send a message in stream
+ * 
+ * @return end_msg_t Simple end message object
+ */
+end_msg_t eng_msg();
+/**
+ * @brief End a row in stream
+ * 
+ * @return end_row_t Simple end row object
+ */
+end_row_t eng_row(); //NOTE NOT USED YET, WILL BE USED IN NEXT COMMIT
 /**
  * @brief Simple parent for streams
  * 
@@ -47,11 +67,10 @@ class DPP_EXPORT base_stream {
          */
         base_stream& operator<<(const std::string& msg);
         /**
-         * @brief Finish and send message in stream
-         * @param n Number (currently irrelevant)
+         * @brief Finish and send message in stream, argument indicates end of message 
          * @return This stream, for purposes of chaining
          */
-        base_stream& operator<<(const int& n);
+        base_stream& operator<<(end_msg_t);
         //TODO Make action rows work with this
         /**
          * @brief Build message in stream
@@ -87,14 +106,14 @@ class DPP_EXPORT dm_stream : public base_stream {
 		 * @param bot Cluster that will send messages
 		 * @param out_channel User to whom messages will be sent
 		 */
-		dm_stream(cluster& bot, const user& out_user); 
+		dm_stream(cluster& bot_, const user& out_user); 
 		/**
 		 * @brief Constructer
 		 * 
 		 * @param bot Cluster that will send messages
 		 * @param out_channel_id User id to whom messages will be sent
 		 */
-		dm_stream(cluster& bot, snowflake out_user_id);
+		dm_stream(cluster& bot_, snowflake out_user_id_);
 		/**
 		 * @brief Send message with stream
 		 * @param callback Function to call when the API call completes. On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -125,14 +144,14 @@ class DPP_EXPORT channel_stream : public base_stream {
 		 * @param bot Cluster that will send messages
 		 * @param out_channel Channel where messages will be sent
 		 */
-		channel_stream(cluster& bot, const channel& out_channel); 
+		channel_stream(cluster& bot_, const channel& out_channel); 
 		/**
 		 * @brief Constructer
 		 * 
 		 * @param bot Cluster that will send messages
 		 * @param out_channel_id Channel id where messages will be sent
 		 */
-		channel_stream(cluster& bot, snowflake out_channel_id);
+		channel_stream(cluster& bot_, snowflake out_channel_id_);
 		/**
 		 * @brief Send message with stream
 		 * @param msg Message to send

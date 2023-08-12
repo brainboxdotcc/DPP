@@ -870,9 +870,7 @@ struct active_thread_info {
  * @brief A map of threads alongside optionally the thread_member tied to the bot if it is in the thread. The map's key is the thread id. Returned from the cluster::threads_get_active method
  */
 using active_threads = std::map<snowflake, active_thread_info>;
-/**
- * @brief A stream wrapper to send messages
- */ 
+
 
 } // namespace dpp
 
