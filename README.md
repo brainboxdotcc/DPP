@@ -4,8 +4,7 @@
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp) 
 ![Downloads](https://dl.dpp.dev/dlcount.php)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) 
-![Lines of code](https://img.shields.io/tokei/lines/github/brainboxdotcc/DPP) [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7726/badge)](https://bestpractices.coreinfrastructure.org/projects/7726) 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/39b054c38bba411d9b25b39524016c9e)](https://www.codacy.com/gh/brainboxdotcc/DPP/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=brainboxdotcc/DPP&amp;utm_campaign=Badge_Grade) [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7726/badge)](https://bestpractices.coreinfrastructure.org/projects/7726) 
 [![D++ CI](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml/badge.svg)](https://github.com/brainboxdotcc/DPP/actions/workflows/ci.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/brainboxdotcc/DPP/badge)](https://securityscorecards.dev/viewer/?uri=github.com/brainboxdotcc/DPP)
 [![AUR version](https://img.shields.io/aur/version/dpp)](https://aur.archlinux.org/packages/dpp)
