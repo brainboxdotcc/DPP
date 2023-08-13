@@ -12,20 +12,15 @@ int main(int argc, char const *argv[])
 {
 	dpp::cluster bot("token");
 
-        bot.on_log(dpp::utility::cout_logger());
+    bot.on_log(dpp::utility::cout_logger());
 
-	bot.on_ready([&](const dpp::ready_t & event) {
-	    if (dpp::run_once<struct register_bot_commands>()) {
-			/* Create a slash command and register it as a global command */
-		    bot.global_command_create(dpp::slashcommand("dialog", "Make a modal dialog box", bot.me.id));
-		}
-	});
-
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 		/* Check for our /dialog command */
 		if (event.command.get_command_name() == "dialog") {
+
 			/* Instantiate an interaction_modal_response object */
 			dpp::interaction_modal_response modal("my_modal", "Please enter stuff");
+
 			/* Add a text component */
 			modal.add_component(
 				dpp::component().
@@ -37,6 +32,7 @@ int main(int argc, char const *argv[])
 				set_max_length(50).
 				set_text_style(dpp::text_short)
 			);
+
 			/* Add another text component in the next row, as required by Discord */
 			modal.add_row();
 			modal.add_component(
@@ -49,6 +45,7 @@ int main(int argc, char const *argv[])
 				set_max_length(2000).
 				set_text_style(dpp::text_paragraph)
 			);
+
 			/* Trigger the dialog box. All dialog boxes are ephemeral */
 			event.dialog(modal);
 		}
@@ -56,17 +53,28 @@ int main(int argc, char const *argv[])
 
 	/* This event handles form submission for the modal dialog we create above */
 	bot.on_form_submit([&](const dpp::form_submit_t & event) {
+		
 		/* For this simple example we know the first element of the first row ([0][0]) is value type string.
 		 * In the real world it may not be safe to make such assumptions!
 		 */
 		std::string v = std::get<std::string>(event.components[0].components[0].value);
+
 		dpp::message m;
 		m.set_content("You entered: " + v).set_flags(dpp::m_ephemeral);
+
 		/* Emit a reply. Form submission is still an interaction and must generate some form of reply! */
 		event.reply(m);
 	});
 
+	bot.on_ready([&](const dpp::ready_t & event) {
+	    if (dpp::run_once<struct register_bot_commands>()) {
+			/* Create a slash command and register it as a global command */
+		    bot.global_command_create(dpp::slashcommand("dialog", "Make a modal dialog box", bot.me.id));
+		}
+	});
+
 	/* Start bot */
+
 	bot.start(dpp::st_wait);
 	return 0;
 }
