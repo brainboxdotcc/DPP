@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -368,7 +369,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 						}
 					};
 					this->write(jsonobj_to_string(obj));
-					this->connect_time = creator->last_identify = time(NULL);
+					this->connect_time = creator->last_identify = time(nullptr);
 					reconnects++;
 				}
 				this->last_heartbeat_ack = time(nullptr);
@@ -396,7 +397,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 
 dpp::utility::uptime discord_client::get_uptime()
 {
-	return dpp::utility::uptime(time(NULL) - connect_time);
+	return dpp::utility::uptime(time(nullptr) - connect_time);
 }
 
 bool discord_client::is_connected()
@@ -503,7 +504,7 @@ void discord_client::one_second_timer()
 		if (first_shard == this) {
 			creator->tick_timers();
 
-			if ((time(NULL) % 60) == 0) {
+			if ((time(nullptr) % 60) == 0) {
 				dpp::garbage_collection();
 			}
 		}
@@ -524,7 +525,7 @@ void discord_client::one_second_timer()
 		}
 
 		/* Rate limit outbound messages, 1 every odd second, 2 every even second */
-		for (int x = 0; x < (time(NULL) % 2) + 1; ++x) {
+		for (int x = 0; x < (time(nullptr) % 2) + 1; ++x) {
 			std::unique_lock locker(queue_mutex);
 			if (message_queue.size()) {
 				std::string message = message_queue.front();
@@ -546,10 +547,10 @@ void discord_client::one_second_timer()
 		 */
 		if (this->heartbeat_interval && this->last_seq) {
 			/* Check if we're due to emit a heartbeat */
-			if (time(NULL) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
+			if (time(nullptr) > last_heartbeat + ((heartbeat_interval / 1000.0) * 0.75)) {
 				last_ping_message = jsonobj_to_string(json({{"op", 1}, {"d", last_seq}}));
 				queue_message(last_ping_message, true);
-				last_heartbeat = time(NULL);
+				last_heartbeat = time(nullptr);
 			}
 		}
 	}
@@ -723,4 +724,4 @@ voiceconn& voiceconn::connect(snowflake guild_id) {
 }
 
 
-};
+} // namespace dpp

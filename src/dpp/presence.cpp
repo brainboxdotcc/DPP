@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -282,4 +283,4 @@ presence_status presence::status() const {
 	return (presence_status)((flags >> PF_SHIFT_MAIN) & PF_STATUS_MASK);
 }
 
-};
+} // namespace dpp

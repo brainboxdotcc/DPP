@@ -81,6 +81,17 @@ void set_snowflake_not_null(const json* j, const char *keyname, uint64_t &v) {
 	}
 }
 
+void set_snowflake_array_not_null(const json* j, const char *keyname, std::vector<class snowflake> &v) {
+	v.clear();
+	auto k = j->find(keyname);
+	if (k != j->end() && !k->is_null()) {
+		v.reserve(j->at(keyname).size());
+		for (const auto &id : j->at(keyname)) {
+			v.emplace_back(std::strtoull(id.get<std::string>().c_str(), nullptr, 10));
+		}
+	}
+}
+
 
 std::string string_not_null(const json* j, const char *keyname) {
 	/* Returns empty string if the value is not a string, or is null or not defined */
@@ -360,4 +371,4 @@ void discord_client::handle_event(const std::string &event, json &j, const std::
 	}
 }
 
-};
+} // namespace dpp

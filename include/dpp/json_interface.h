@@ -58,4 +58,4 @@ namespace dpp {
 			throw dpp::logic_exception("JSON interface doesn't implement build_json");
 		}
 	};
-};
+} // namespace dpp

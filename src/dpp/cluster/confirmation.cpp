@@ -127,4 +127,4 @@ error_info confirmation_callback_t::get_error() const {
 	return error_info();
 }
 
-};
+} // namespace dpp

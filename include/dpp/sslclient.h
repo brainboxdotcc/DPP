@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -255,4 +256,4 @@ public:
 	virtual void log(dpp::loglevel severity, const std::string &msg) const;
 };
 
-};
+} // namespace dpp

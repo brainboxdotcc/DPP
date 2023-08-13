@@ -77,4 +77,4 @@ namespace dpp {
         return _f.get();
     }
 
-};
+} // namespace dpp

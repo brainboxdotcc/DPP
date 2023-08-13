@@ -39,9 +39,6 @@ slashcommand::slashcommand(const std::string &_name, const std::string &_descrip
 	set_application_id(_application_id);
 }
 
-slashcommand::~slashcommand() {
-}
-
 slashcommand& slashcommand::set_dm_permission(bool dm) {
 	dm_permission = dm;
 	return *this;
@@ -70,12 +67,7 @@ slashcommand& slashcommand::fill_from_json(nlohmann::json* j) {
 	nsfw = bool_not_null(j, "nsfw");
 
 	type = (slashcommand_contextmenu_type)int8_not_null(j, "type");
-	if (j->contains("options")) {
-		for (auto &option: (*j)["options"]) {
-			// options is filled recursive
-			options.push_back(command_option().fill_from_json(&option));
-		}
-	}
+	set_object_array_not_null<command_option>(j, "options", options); // command_option fills recursive
 	return *this;
 }
 
@@ -376,11 +368,7 @@ command_option &command_option::fill_from_json(nlohmann::json *j) {
 		o.name = string_not_null(j, "name");
 		o.description = string_not_null(j, "description");
 		o.required = bool_not_null(j, "required");
-		if (j->contains("choices")) {
-			for (auto& jchoice : (*j)["choices"]) {
-				o.choices.push_back(command_option_choice().fill_from_json(&jchoice));
-			}
-		}
+		set_object_array_not_null<command_option_choice>(j, "choices", o.choices);
 
 		if (j->contains("name_localizations")) {
 			for(auto loc = (*j)["name_localizations"].begin(); loc != (*j)["name_localizations"].end(); ++loc) {
@@ -724,20 +712,6 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	}
 }
 
-interaction_response::interaction_response() : msg(nullptr) {
-	try {
-		msg = new message();
-	}
-	catch (std::bad_alloc&) {
-		delete msg;
-		throw;
-	}
-}
-
-interaction_response::~interaction_response() {
-	delete msg;
-}
-
 interaction_response& interaction_response::add_autocomplete_choice(const command_option_choice& achoice) {
 	if (autocomplete_choices.size() < AUTOCOMPLETE_MAX_CHOICES) {
 		this->autocomplete_choices.emplace_back(achoice);
@@ -746,10 +720,9 @@ interaction_response& interaction_response::add_autocomplete_choice(const comman
 }
 
 
-interaction_response::interaction_response(interaction_response_type t, const struct message& m) : interaction_response() {
-	type = t;
-	*msg = m;
-}
+interaction_response::interaction_response(interaction_response_type t, const message& m) : type{t}, msg{m} {}
+
+interaction_response::interaction_response(interaction_response_type t, message&& m) : type{t}, msg{m} {}
 
 interaction_response::interaction_response(interaction_response_type t) : interaction_response() {
 	type = t;
@@ -758,7 +731,7 @@ interaction_response::interaction_response(interaction_response_type t) : intera
 interaction_response& interaction_response::fill_from_json(nlohmann::json* j) {
 	type = (interaction_response_type)int8_not_null(j, "type");
 	if (j->contains("data")) {
-		msg->fill_from_json(&((*j)["data"]));
+		msg.fill_from_json(&((*j)["data"]));
 	}
 	return *this;
 }
@@ -784,7 +757,7 @@ std::string interaction_response::build_json(bool with_id) const {
 	json j;
 	j["type"] = this->type;
 	if (this->autocomplete_choices.empty()) {
-		json msg_json = json::parse(msg->build_json(false, true));
+		json msg_json = json::parse(msg.build_json(false, true));
 		auto cid = msg_json.find("channel_id");
 		if (cid != msg_json.end()) {
 			msg_json.erase(cid);
@@ -881,11 +854,7 @@ guild_command_permissions &guild_command_permissions::fill_from_json(nlohmann::j
 	id = snowflake_not_null(j, "id");
 	application_id = snowflake_not_null(j, "application_id");
 	guild_id = snowflake_not_null(j, "guild_id");
-	if (j->contains("permissions")) {
-		for (auto &p : (*j)["permissions"]) {
-			permissions.push_back(command_permission().fill_from_json(&p));
-		}
-	}
+	set_object_array_not_null<command_permission>(j, "permissions", permissions);
 
 	return *this;
 }
@@ -949,4 +918,4 @@ std::string command_interaction::get_mention() const {
 std::string slashcommand::get_mention() const {
 	return dpp::utility::slashcommand_mention(id, name);
 }
-};
+} // namespace dpp

@@ -20,6 +20,10 @@ if (HAVE_PTHREAD_SETNAME_NP)
 	}" HAVE_TWO_PARAMETER_SETNAME_NP)
 endif()
 
+if(NOT DEFINED AVX_TYPE)
+	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/DetectArchitecture.cmake")
+endif()
+
 add_compile_definitions(DPP_OS=${CMAKE_SYSTEM_NAME})
 
 if(WIN32 AND NOT MINGW)
@@ -49,11 +53,14 @@ if(WIN32 AND NOT MINGW)
 
 		include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../win32/include")
 
+		add_compile_options("/bigobj")
 		add_compile_definitions(OPENSSL_SYS_WIN32)
 		add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
 		add_compile_definitions(WIN32_LEAN_AND_MEAN)
 		add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 		add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
+		add_compile_definitions("${AVX_TYPE}")
+		add_compile_options("${AVX_FLAG}")
 
 	endif()
 endif()
@@ -293,17 +300,51 @@ if(HAVE_PTHREAD_SETNAME_NP)
 endif()
 
 if(DPP_CORO)
-	message("-- ${Yellow}Enabled experimental coroutine support${ColourReset}")
+	message("-- ${Yellow}Enabled experimental coroutine feature${ColourReset}")
 	set(CMAKE_CXX_STANDARD 20)
 	target_compile_features(dpp PUBLIC cxx_std_20)
 	if(WIN32 AND NOT MINGW)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /await:strict")
 	else()
 		if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-			target_link_libraries(dpp PUBLIC "c++abi")
-		else()
-			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines")
+			if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14.0.0) # clang >= 14 has native support
+				message("-- ${Yellow}Clang < 14 - attempting to detect if using libc++ or stdc++${ColourReset}")
+				check_cxx_source_compiles("
+					#include <iostream>
+
+					int a =
+					#ifdef __GLIBCXX__
+						1;
+					#else
+						fgsfds;
+					#endif
+
+					int main(int argc, char* argv[])
+					{
+						return 0;
+					}
+					" IS_GLIBCXX)
+				if(IS_GLIBCXX)
+					if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 12.0.0)
+						message(FATAL_ERROR "Clang with stdc++ and coroutines requires version 12.0.0 or above")
+					endif()
+					message("-- ${Yellow}Detected stdc++ - enabling mock std::experimental namespace${ColourReset}")
+					target_compile_definitions(dpp PUBLIC "STDCORO_GLIBCXX_COMPAT")
+				else()
+					message("-- ${Yellow}Detected libc++ - using <experimental/coroutine>")
+					if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0.0)
+						set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines-ts")
+					endif()
+				endif()
+				message("-- ${Yellow}Note - coroutines in clang < 14 are experimental, upgrading is recommended")
+			endif()
+		elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+			if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
+				message(FATAL_ERROR "Coroutines with g++ require version 10 or above")
+			elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0)
+				message("-- ${Yellow}Note - coroutines in g++10 are experimental, upgrading to g++11 or above is recommended")
+				set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines")
+			endif()
 		endif()
 	endif()
 	target_compile_definitions(dpp PUBLIC DPP_CORO)

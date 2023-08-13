@@ -389,4 +389,4 @@ public:
 
 };
 
-};
+} // namespace dpp

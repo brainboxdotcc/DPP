@@ -54,10 +54,6 @@ user::user() :
 {
 }
 
-user::~user()
-{
-}
-
 std::string user::get_mention(const snowflake& id) {
 	return utility::user_mention(id);
 }
@@ -95,9 +91,6 @@ user_identified::user_identified() : user(), accent_color(0), verified(false) {
 }
 
 user_identified::user_identified(const user& u): user(u), accent_color(0), verified(false) {
-}
-
-user_identified::~user_identified() {
 }
 
 std::string user::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
@@ -300,4 +293,4 @@ void from_json(const nlohmann::json& j, user& u) {
 	}
 }
 
-};
+} // namespace dpp

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -57,10 +58,6 @@ void websocket_client::connect()
 		"Sec-WebSocket-Key: " + this->key + "\r\n"
 		"Sec-WebSocket-Version: 13\r\n\r\n"
 	);
-}
-
-websocket_client::~websocket_client()
-{
 }
 
 bool websocket_client::handle_frame(const std::string &buffer)
@@ -265,7 +262,7 @@ bool websocket_client::parseheader(std::string &data)
 
 void websocket_client::one_second_timer()
 {
-	if (((time(NULL) % 20) == 0) && (state == CONNECTED)) {
+	if (((time(nullptr) % 20) == 0) && (state == CONNECTED)) {
 		/* For sending pings, we send with payload */
 		unsigned char out[MAXHEADERSIZE];
 		std::string payload = "keepalive";
@@ -313,4 +310,4 @@ void websocket_client::close()
 	ssl_client::close();
 }
 
-};
+} // namespace dpp

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -141,10 +142,8 @@ void interaction_create_t::reply(const message & m, command_completion_event_t c
 }
 
 void interaction_create_t::thinking(bool ephemeral, command_completion_event_t callback) const {
-	message msg;
-	msg.content = "*";
+	message msg{this->command.channel_id, std::string{"*"}};
 	msg.guild_id = this->command.guild_id;
-	msg.channel_id = this->command.channel_id;
 	if (ephemeral) {
 		msg.set_flags(dpp::m_ephemeral);
 	}
@@ -381,4 +380,4 @@ event_ctor(automod_rule_create_t, event_dispatch_t);
 event_ctor(automod_rule_delete_t, event_dispatch_t);
 event_ctor(automod_rule_update_t, event_dispatch_t);
 event_ctor(automod_rule_execute_t, event_dispatch_t);
-};
+} // namespace dpp

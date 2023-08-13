@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -141,7 +142,7 @@ namespace utility {
 	 * @return A lambda for attaching to an API callback
 	 */
 	std::function<void(const dpp::confirmation_callback_t& detail)> DPP_EXPORT log_error();
-};
+} // namespace utility
 
 /** @brief Add user to scheduled event */
 struct DPP_EXPORT guild_scheduled_event_user_add_t : public event_dispatch_t {
@@ -1905,5 +1906,5 @@ struct DPP_EXPORT voice_client_disconnect_t : public event_dispatch_t {
 	snowflake user_id;
 };
 
-};
+} // namespace dpp
 

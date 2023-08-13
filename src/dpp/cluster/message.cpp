@@ -166,4 +166,4 @@ void cluster::channel_pins_get(snowflake channel_id, command_completion_event_t 
 	rest_request_list<message>(this, API_PATH "/channels", std::to_string(channel_id), "pins", m_get, "", callback);
 }
 
-};
+} // namespace dpp

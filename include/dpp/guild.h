@@ -1371,4 +1371,4 @@ typedef std::unordered_map<snowflake, guild_member> guild_member_map;
  */
 guild_member DPP_EXPORT find_guild_member(const snowflake guild_id, const snowflake user_id);
 
-};
+} // namespace dpp

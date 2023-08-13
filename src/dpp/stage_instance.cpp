@@ -56,4 +56,4 @@ std::string stage_instance::build_json(bool with_id) const {
 	return j.dump();
 }
 
-};
+} // namespace dpp

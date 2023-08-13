@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -42,10 +43,6 @@ integration::integration() :
 {
 	app.id = 0;
 	app.bot = nullptr;
-}
-
-integration::~integration()
-{
 }
 
 integration& integration::fill_from_json(nlohmann::json* j)
@@ -132,14 +129,9 @@ connection& connection::fill_from_json(nlohmann::json* j) {
 	this->show_activity = bool_not_null(j, "show_activity");
 	this->two_way_link = bool_not_null(j, "two_way_link");
 	this->visible = (int32_not_null(j, "visibility") == 1);
-	if (j->contains("integrations")) {
-		integrations.reserve((*j)["integrations"].size());
-		for (auto & i : (*j)["integrations"]) {
-			integrations.emplace_back(integration().fill_from_json(&i));
-		}
-	}
+	set_object_array_not_null<integration>(j, "integrations", integrations);
 	return *this;
 }
 
 
-};
+} // namespace dpp

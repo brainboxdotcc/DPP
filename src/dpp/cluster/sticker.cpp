@@ -34,7 +34,7 @@ namespace {
 
 		return mime_types.find(s.format_type)->second;
 	}
-}
+} // namespace
 
 void cluster::guild_sticker_create(sticker &s, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(s.guild_id), "stickers", m_post, s.build_json(false), [this, callback](json &j, const http_request_completion_t& http) {
@@ -68,4 +68,4 @@ void cluster::sticker_packs_get(command_completion_event_t callback) {
 	rest_request_list<sticker_pack>(this, API_PATH "/sticker-packs", "", "", m_get, "", callback);
 }
 
-};
+} // namespace dpp

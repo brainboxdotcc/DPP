@@ -1046,7 +1046,7 @@ namespace embed_type {
 	 * @brief Auto moderation filter
 	 */
 	const std::string emt_automod = "auto_moderation_message";
-};
+} // namespace embed_type
 
 /**
  * @brief Message types for dpp::message::type
@@ -1558,4 +1558,4 @@ typedef std::unordered_map<snowflake, sticker> sticker_map;
 /** A group of sticker packs */
 typedef std::unordered_map<snowflake, sticker_pack> sticker_pack_map;
 
-};
+} // namespace dpp

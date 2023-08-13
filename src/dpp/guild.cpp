@@ -171,13 +171,7 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 		}
 	}
 
-	gm.roles.clear();
-	if (j.contains("roles") && !j.at("roles").is_null()) {
-		gm.roles.reserve(j.at("roles").size());
-		for (auto& role : j.at("roles")) {
-			gm.roles.push_back(std::stoull(role.get<std::string>()));
-		}
-	}
+	set_snowflake_array_not_null(&j, "roles", gm.roles);
 
 	if (j.contains("avatar") && !j.at("avatar").is_null()) {
 		std::string av = string_not_null(&j, "avatar");
@@ -323,13 +317,7 @@ welcome_channel &welcome_channel::set_description(const std::string &_descriptio
 welcome_screen &welcome_screen::fill_from_json(nlohmann::json *j) {
 	description = string_not_null(j, "description");
 
-	welcome_channels.clear();
-	if (j->contains("welcome_channels")) {
-		welcome_channels.reserve(j->at("welcome_channels").size());
-		for (auto &c : j->at("welcome_channels")) {
-			welcome_channels.emplace_back(welcome_channel().fill_from_json(&c));
-		}
-	}
+	set_object_array_not_null<welcome_channel>(j, "welcome_channels", welcome_channels);
 	return *this;
 }
 
@@ -944,20 +932,8 @@ onboarding_prompt_option &onboarding_prompt_option::fill_from_json(nlohmann::jso
 	this->title = string_not_null(j, "title");
 	this->description = string_not_null(j, "description");
 
-	channel_ids.clear();
-	if (j->contains("channel_ids")) {
-		channel_ids.reserve(j->at("channel_ids").size());
-		for (auto &channel_id : j->at("channel_ids")) {
-			channel_ids.push_back(std::stoull(channel_id.get<std::string>()));
-		}
-	}
-	role_ids.clear();
-	if (j->contains("role_ids")) {
-		role_ids.reserve(j->at("role_ids").size());
-		for (auto &role_id : j->at("role_ids")) {
-			role_ids.push_back(std::stoull(role_id.get<std::string>()));
-		}
-	}
+	set_snowflake_array_not_null(j, "channel_ids", channel_ids);
+	set_snowflake_array_not_null(j, "role_ids", role_ids);
 	return *this;
 }
 
@@ -1006,12 +982,7 @@ onboarding_prompt &onboarding_prompt::fill_from_json(nlohmann::json *j) {
 	type = static_cast<onboarding_prompt_type>(int8_not_null(j, "type"));
 	title = string_not_null(j, "title");
 
-	options.clear();
-	if (j->contains("options")) {
-		for (auto &option : j->at("options")) {
-			options.push_back(onboarding_prompt_option().fill_from_json(&option));
-		}
-	}
+	set_object_array_not_null<onboarding_prompt_option>(j, "options", options);
 
 	flags |= bool_not_null(j, "single_select") ? opf_single_select : 0;
 	flags |= bool_not_null(j, "required") ? opf_required : 0;
@@ -1064,20 +1035,8 @@ onboarding& onboarding::fill_from_json(nlohmann::json* j) {
 	enabled = bool_not_null(j, "enabled");
 	mode = static_cast<onboarding_mode>(int8_not_null(j, "mode"));
 
-	prompts.clear();
-	if (j->contains("prompts")) {
-		for (auto &prompt : j->at("prompts")) {
-			prompts.push_back(onboarding_prompt().fill_from_json(&prompt));
-		}
-	}
-
-	default_channel_ids.clear();
-	if (j->contains("default_channel_ids")) {
-		default_channel_ids.reserve(j->at("default_channel_ids").size());
-		for (auto &default_channel_id : j->at("default_channel_ids")) {
-			default_channel_ids.push_back(std::stoull(default_channel_id.get<std::string>()));
-		}
-	}
+	set_object_array_not_null<onboarding_prompt>(j, "prompts", prompts);
+	set_snowflake_array_not_null(j, "default_channel_ids", default_channel_ids);
 
 	return *this;
 }
@@ -1120,4 +1079,4 @@ onboarding &onboarding::set_enabled(const bool is_enabled) {
 }
 
 
-};
+} // namespace dpp
