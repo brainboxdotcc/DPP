@@ -42,6 +42,7 @@ int main()
 			/* Add a parameter option. */
 			newcommand.add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image"));
 
+			/* Register the command */
 			bot.global_command_create(newcommand);
 		}
 	});
