@@ -1183,12 +1183,11 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 	}
 
 	opus_int32 encodedAudioMaxLength = (opus_int32)length;
-	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
 	size_t encodedAudioLength = encodedAudioMaxLength;
 
-	encodedAudioLength = this->encode((uint8_t*)audio_data, length, encodedAudioData.data(), encodedAudioLength);
+	encodedAudioLength = this->encode((uint8_t*)audio_data, length, (uint8_t*)audio_data, encodedAudioLength);
 
-	send_audio_opus(encodedAudioData.data(), encodedAudioLength);
+	send_audio_opus((uint8_t*)audio_data, encodedAudioLength);
 #else
 	throw dpp::voice_exception("Voice support not enabled in this build of D++");
 #endif
@@ -1210,12 +1209,10 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 #if HAVE_VOICE
 	int frameSize = (int)(48 * duration * (timescale / 1000000));
 	opus_int32 encodedAudioMaxLength = (opus_int32)length;
-	std::vector<uint8_t> encodedAudioData(encodedAudioMaxLength);
 	size_t encodedAudioLength = encodedAudioMaxLength;
 
 	encodedAudioLength = length;
-	encodedAudioData.reserve(length);
-	memcpy(encodedAudioData.data(), opus_packet, length);
+
 
 	++sequence;
 	const int nonceSize = 24;
@@ -1228,7 +1225,7 @@ discord_voice_client& discord_voice_client::send_audio_opus(uint8_t* opus_packet
 	std::vector<uint8_t> audioDataPacket(sizeof(header) + encodedAudioLength + crypto_secretbox_MACBYTES);
 	std::memcpy(audioDataPacket.data(), &header, sizeof(header));
 
-	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), encodedAudioData.data(), encodedAudioLength, (const unsigned char*)nonce, secret_key);
+	crypto_secretbox_easy(audioDataPacket.data() + sizeof(header), opus_packet, encodedAudioLength, (const unsigned char*)nonce, secret_key);
 
 	this->send((const char*)audioDataPacket.data(), audioDataPacket.size(), duration);
 	timestamp += frameSize;
