@@ -46,6 +46,12 @@ struct job {};
 
 namespace detail {
 
+template <typename... Args>
+inline constexpr bool coroutine_has_ref_params_v = (std::is_reference_v<Args> || ... || false);
+
+template <typename T, typename... Args>
+inline constexpr bool coroutine_has_ref_params_v<T, Args...> = (std::is_reference_v<Args> || ... || (std::is_reference_v<T> && !std::is_invocable_v<T, Args...>));
+
 #ifdef DPP_CORO_TEST
 	struct job_promise_base{};
 #endif
@@ -53,7 +59,7 @@ namespace detail {
 /**
  * @brief Coroutine promise type for a job
  */
-template <bool has_reference_params>
+template <typename... Args>
 struct job_promise {
 
 #ifdef DPP_CORO_TEST
@@ -118,7 +124,7 @@ struct job_promise {
 		 * If you must pass a reference, pass it as a pointer or with std::ref, but you must fully understand the reason behind this warning, and what to avoid.
 		 * If you prefer a safer type, use `coroutine` for synchronous execution, or `task` for parallel tasks, and co_await them.
 		 */
-		static_assert(!has_reference_params, "co_await is disabled in dpp::job when taking parameters by reference. read comment above this line for more info");
+		static_assert(!coroutine_has_ref_params_v<Args...>, "co_await is disabled in dpp::job when taking parameters by reference. read comment above this line for more info");
 
 		return std::forward<T>(expr);
 	}
@@ -128,26 +134,18 @@ struct job_promise {
 
 } // namespace dpp
 
-template <>
-struct dpp::detail::std_coroutine::coroutine_traits<dpp::job> {
-	/**
-	 * @brief Promise type for this coroutine signature.
-	 */
-	using promise_type = dpp::detail::job_promise<false>;
-};
-
 /**
  * @brief Specialization of std::coroutine_traits, helps the standard library figure out a promise type from a coroutine function.
  */
-template<typename T, typename... Args>
-struct dpp::detail::std_coroutine::coroutine_traits<dpp::job, T, Args...> {
+template<typename... Args>
+struct dpp::detail::std_coroutine::coroutine_traits<dpp::job, Args...> {
 	/**
 	 * @brief Promise type for this coroutine signature.
 	 *
 	 * When the coroutine is created from a lambda, that lambda is passed as a first parameter.
 	 * Not ideal but we'll allow any callable that takes the rest of the arguments passed
 	 */
-	using promise_type = dpp::detail::job_promise<(std::is_reference_v<Args> || ... || (std::is_reference_v<T> && !std::is_invocable_v<T, Args...>))>;
+	using promise_type = dpp::detail::job_promise<Args...>;
 };
 
 #endif /* DPP_CORO */
