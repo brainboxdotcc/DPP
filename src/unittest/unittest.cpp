@@ -83,6 +83,7 @@ std::map<std::string, test_t> tests = {
 	{"MD_ESC_1", {tt_offline, "Markdown escaping (ignore code block contents)", false, false}},
 	{"MD_ESC_2", {tt_offline, "Markdown escaping (escape code block contents)", false, false}},
 	{"URLENC", {tt_offline, "URL encoding", false, false}},
+	{"BASE64ENC", {tt_offline, "Base64 encoding", false, false}},
 	{"SYNC", {tt_online, "sync<T>()", false, false}},
 	{"COMPARISON", {tt_offline, "manged object comparison", false, false}},
 	{"CHANNELCACHE", {tt_online, "find_channel()", false, false}},
