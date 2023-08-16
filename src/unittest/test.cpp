@@ -89,6 +89,17 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test("URLENC", false);
 	set_test("URLENC", dpp::utility::url_encode("ABC123_+\\|$*/AAA[]😄") == "ABC123_%2B%5C%7C%24%2A%2FAAA%5B%5D%F0%9F%98%84");
 
+	set_test("BASE64ENC", false);
+	set_test("BASE64ENC",
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("a"), 1) == "YQ==" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("bc"), 2) == "YmM=" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("def"), 3) == "ZGVm" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("ghij"), 4) == "Z2hpag==" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("klmno"), 5) == "a2xtbm8=" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("pqrstu"), 6) == "cHFyc3R1" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("vwxyz12"), 7) == "dnd4eXoxMg=="
+	);
+
 	dpp::http_connect_info hci;
 	set_test("HOSTINFO", false);
 
@@ -1651,7 +1662,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			if (!offline) {
 				bot.thread_create("thread test", TEST_TEXT_CHANNEL_ID, 60, dpp::channel_type::CHANNEL_PUBLIC_THREAD, true, 60, [&](const dpp::confirmation_callback_t &event) {
 					if (!event.is_error()) {
-						const auto &thread = event.get<dpp::thread>();
+						[[maybe_unused]] const auto &thread = event.get<dpp::thread>();
 						set_test("THREAD_CREATE", true);
 					}
 					// the thread tests are in the on_thread_create event handler

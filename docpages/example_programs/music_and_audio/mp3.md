@@ -63,31 +63,54 @@ int main(int argc, char const *argv[])
 	mpg123_delete(mh);
 
 	/* Setup the bot */
-	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	dpp::cluster bot("token");
 
-        bot.on_log(dpp::utility::cout_logger());
+    bot.on_log(dpp::utility::cout_logger());
 
-	/* Use the on_message_create event to look for commands */
-	bot.on_message_create([&bot, &pcmdata](const dpp::message_create_t & event) {
-		std::stringstream ss(event.msg.content);
-		std::string command;
-		ss >> command;
+	/* The event is fired when someone issues your commands */
+	bot.on_slashcommand([&bot, &pcmdata](const dpp::slashcommand_t& event) {
 
-		/* Tell the bot to join the discord voice channel the user is on. Syntax: .join */
-		if (command == ".join") {
-			dpp::guild * g = dpp::find_guild(event.msg.guild_id);
-			if (!g->connect_member_voice(event.msg.author.id)) {
-				bot.message_create(dpp::message(event.msg.channel_id, "You don't seem to be on a voice channel! :("));
+		/* Check which command they ran */
+		if (event.command.get_command_name() == "join") {
+
+			/* Get the guild */
+			dpp::guild* g = dpp::find_guild(event.command.guild_id);
+
+			/* Attempt to connect to a voice channel, returns false if we fail to connect. */
+			if (!g->connect_member_voice(event.command.get_issuing_user().id)) {
+				event.reply("You don't seem to be in a voice channel!");
+				return;
 			}
+			
+			/* Tell the user we joined their channel. */
+			event.reply("Joined your channel!");
+		} else if (event.command.get_command_name() == "mp3") {
+
+			/* Get the voice channel the bot is in, in this current guild. */
+			dpp::voiceconn* v = event.from->get_voice(event.channel.guild_id);
+
+			/* If the voice channel was invalid, or there is an issue with it, then tell the user. */
+			if (!v || !v->voiceclient || !v->voiceclient->is_ready()) {
+				event.reply("There was an issue with getting the voice channel. Make sure I'm in a voice channel!");
+				return;
+			}
+
+			/* Stream the already decoded MP3 file. This passes the PCM data to the library to be encoded to OPUS */
+			v->voiceclient->send_audio_raw((uint16_t*)pcmdata.data(), pcmdata.size());
+
+			event.reply("Played the mp3 file.");
 		}
+	});
 
-		/* Tell the bot to play the mp3 file. Syntax: .mp3 */
-		if (command == ".mp3") {
-			dpp::voiceconn* v = event.from->get_voice(event.msg.guild_id);
-			if (v && v->voiceclient && v->voiceclient->is_ready()) {
-				/* Stream the already decoded MP3 file. This passes the PCM data to the library to be encoded to OPUS */
-				v->voiceclient->send_audio_raw((uint16_t*)pcmdata.data(), pcmdata.size());
-			}
+	bot.on_ready([&bot](const dpp::ready_t & event) {
+		if (dpp::run_once<struct register_bot_commands>()) {
+
+			/* Create a new command. */
+			dpp::slashcommand joincommand("join", "Joins your voice channel.", bot.me.id);
+
+			dpp::slashcommand mp3command("mp3", "Plays an mp3 file.", bot.me.id);
+
+			bot.global_bulk_command_create({joincommand, mp3command});
 		}
 	});
 

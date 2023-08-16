@@ -210,28 +210,38 @@ void set_bool_not_null(const json* j, const char *keyname, bool &v) {
 
 std::string base64_encode(unsigned char const* buf, unsigned int buffer_length) {
 	/* Quick and dirty base64 encode */
-	static const char to_base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-	size_t ret_size = buffer_length + 2;
-
-	ret_size = 4 * ret_size / 3;
-
+	static constexpr std::string_view to_base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+	static constexpr auto push = [](std::string &dst, unsigned char b0, unsigned char b1, unsigned char b2) {
+		dst.push_back(to_base64[ ((b0 & 0xfc) >> 2) ]);
+		dst.push_back(to_base64[ ((b0 & 0x03) << 4) + ((b1 & 0xf0) >> 4) ]);
+		dst.push_back(to_base64[ ((b1 & 0x0f) << 2) + ((b2 & 0xc0) >> 6) ]);
+		dst.push_back(to_base64[ ((b2 & 0x3f)) ]);
+	};
+	size_t ret_size = 4 * ((buffer_length + 2) / 3); // ceil(4*size/3)
+	size_t i = 0;
 	std::string ret;
+
 	ret.reserve(ret_size);
 
-	for (unsigned int i=0; i<ret_size/4; ++i)
-	{
-		size_t index = i*3;
-		unsigned char b3[3];
-		b3[0] = buf[index+0];
-		b3[1] = buf[index+1];
-		b3[2] = buf[index+2];
-
-		ret.push_back(to_base64[ ((b3[0] & 0xfc) >> 2) ]);
-		ret.push_back(to_base64[ ((b3[0] & 0x03) << 4) + ((b3[1] & 0xf0) >> 4) ]);
-		ret.push_back(to_base64[ ((b3[1] & 0x0f) << 2) + ((b3[2] & 0xc0) >> 6) ]);
-		ret.push_back(to_base64[ ((b3[2] & 0x3f)) ]);
+	if (buffer_length > 2) { //    vvvvv avoid unsigned overflow
+		while (i < buffer_length - 2) {
+			push(ret, buf[i], buf[i + 1], buf[i + 2]);
+			i += 3;
+		}
 	}
-
+	size_t left = buffer_length - i;
+	if (left >= 1) { // handle non-multiple of 3s, pad the end with =
+		ret.push_back(to_base64[ ((buf[i] & 0xfc) >> 2) ]);
+		if (left >= 2) {
+			ret.push_back(to_base64[ ((buf[i] & 0x03) << 4) + ((buf[i + 1] & 0xf0) >> 4) ]);
+			ret.push_back(to_base64[ ((buf[i + 1] & 0x0f) << 2) ]);
+			ret.push_back('=');
+		}
+		else {
+			ret.push_back(to_base64[ ((buf[i] & 0x03) << 4) ]);
+			ret += "==";
+		}
+	}
 	return ret;
 }
 
