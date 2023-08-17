@@ -119,6 +119,9 @@ request_queue* cluster::get_raw_rest() {
 }
 
 cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
+	if (start_time > 0) {
+		throw dpp::logic_exception("Cannot change websocket protocol on a started cluster!");
+	}
 	ws_mode = mode;
 	return *this;
 }
