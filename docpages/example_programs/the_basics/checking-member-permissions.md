@@ -2,7 +2,7 @@
 
 The easiest way to check member permissions are either the dpp::channel::get_user_permissions or dpp::guild::permission_overwrites method. Both do the same under the hood.
 
-Of course most people do just iterate over the roles of a member to check they for a permission.
+Of course most people do just iterate over the roles of a member to check for a permission.
 But there's also a helper method for that. dpp::guild::base_permissions gets a member's permission taking into account the server owner and role permissions.
 
 ## Permissions in Interaction events
