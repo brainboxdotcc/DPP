@@ -47,7 +47,7 @@ bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 });
 ```
 
-\note When using default permissions you don't necessarily need to check the issuing user for certain permissions in the interaction event as Discord handles all that for you. But if you'd sleep better...
+\note When using default permissions you don't necessarily need to check the issuing user for any permissions in the interaction event as Discord handles all that for you. But if you'd sleep better...
 
 ### From Parameters
 
@@ -61,7 +61,7 @@ Get the user ID from the parameters and pass it to the `get_resolved_permission`
 bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 	dpp::snowflake user_id = std::get<dpp::snowflake>(event.get_parameter("user"));
 	dpp::permission perms = event.command.get_resolved_permission(user_id);
-	if (! perms.has(dpp::p_administrator)) {
+	if (perms.has(dpp::p_administrator)) {
 		event.reply("You can't ban Admins!");
 		return;
 	}
