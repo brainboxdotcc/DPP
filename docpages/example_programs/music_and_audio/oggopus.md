@@ -188,7 +188,7 @@ You can compile this example using the following command
 
 	c++ /path/to/source.cc -ldpp -lopus -lopusfile -logg -I/usr/include/opus
 
-## Using `liboggz`
+## Using liboggz
 
 You can use `liboggz` to stream an Ogg Opus file to discord voice channel.
 `liboggz` provides higher level abstraction and useful APIs. Some API `liboggz` provide includes seeking and timestamp interpretation.
