@@ -316,6 +316,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		p.set(0).add(~uint64_t{0}).remove(dpp::p_speak).set(dpp::p_administrator);
 		success = !p.has(dpp::p_administrator, dpp::p_ban_members) && success; // must return false because they're not both set
 		success = !p.has(dpp::p_administrator | dpp::p_ban_members) && success;
+		success = p.can(dpp::p_ban_members) && success;
+		success = p.can(dpp::p_speak) && success;
 
 		constexpr auto permission_test = [](dpp::permission p) constexpr noexcept {
 			bool success{true};
@@ -328,6 +330,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			success = p.has(dpp::p_administrator | dpp::p_ban_members) && success;
 			success = p.add(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
 			success = !p.remove(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
+			p.remove(dpp::p_administrator);
+			success = p.can(dpp::p_ban_members) && success;
+			success = !p.can(dpp::p_speak, dpp::p_ban_members) && success;
+			success = p.can_any(dpp::p_speak, dpp::p_ban_members) && success;
 			return success;
 		};
 		constexpr auto constexpr_success = permission_test({~uint64_t{0}}); // test in constant evaluated
