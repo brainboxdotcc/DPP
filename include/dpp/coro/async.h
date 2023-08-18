@@ -28,115 +28,125 @@
 #include <utility>
 #include <type_traits>
 #include <functional>
+#include <atomic>
+#include <cstddef>
 
 namespace dpp {
 
-struct confirmation_callback_t;
+namespace detail {
 
 /**
- * @brief A co_await-able object handling an API call in parallel with the caller.
+ * @brief Empty struct used for overload resolution.
+ */
+struct empty_tag_t{};
+
+/**
+ * @brief Represents the step an std::async is at.
+ */
+enum class async_state_t {
+	sent, /* Request was sent but not co_await-ed. handle is nullptr, result_storage is not constructed */
+	waiting, /* Request was co_await-ed. handle is valid, result_storage is not constructed */
+	done, /* Request was completed. handle is unknown, result_storage is valid */
+	dangling /* Request was never co_await-ed. */
+};
+
+/**
+	* @brief State of the async and its callback.
+	*
+	* Defined outside of dpp::async because this seems to work better with Intellisense.
+	*/
+template <typename R>
+struct async_callback_data {
+	/**
+		* @brief Number of references to this callback state.
+		*/
+	std::atomic<int> ref_count{1};
+
+	/**
+		* @brief State of the awaitable and the API callback
+		*/
+	std::atomic<detail::async_state_t> state = detail::async_state_t::sent;
+
+	/**
+		* @brief The stored result of the API call, stored as an array of bytes to directly construct in place
+		*/
+	alignas(R) std::array<std::byte, sizeof(R)> result_storage;
+
+	/**
+		* @brief Handle to the coroutine co_await-ing on this API call
+		*
+		* @see <a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">std::coroutine_handle</a>
+		*/
+	std_coroutine::coroutine_handle<> coro_handle = nullptr;
+
+	/**
+	 * @brief Convenience function to construct the result in the storage and initialize its lifetime
+	 *
+	 * @warning This is only a convenience function, ONLY CALL THIS IN THE CALLBACK, before setting state to done.
+	 */
+	template <typename... Ts>
+	void construct_result(Ts&&... ts) {
+		// Standard-compliant type punning yay
+		std::construct_at<R>(reinterpret_cast<R *>(result_storage.data()), std::forward<Ts>(ts)...);
+	}
+
+	/**
+	 * @brief Destructor.
+	 *
+	 * Also destroys the result if present.
+	 */
+	~async_callback_data() {
+		if (state.load() == detail::async_state_t::done) {
+			std::destroy_at<R>(reinterpret_cast<R *>(result_storage.data()));
+		}
+	}
+};
+
+/**
+ * @brief Base class of dpp::async<R>. This class should not be used directly by a user, use dpp::async<R> instead.
  *
- * This class is the return type of the dpp::cluster::co_* methods, but it can also be created manually to wrap any async call.
- *
- * @remark - This object's methods, other than constructors and operators, should not be called directly. It is designed to be used with coroutine keywords such as co_await.
- * @remark - This object must not be co_await-ed more than once.
- * @remark - The coroutine may be resumed in another thread, do not rely on thread_local variables.
- * @warning This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub issues</a> or to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
- * @tparam R The return type of the API call. Defaults to confirmation_callback_t
+ * @note This class contains all the functions used internally by co_await. It is intentionally opaque and a private base of dpp::async<R> so a user cannot call await_suspend and await_resume directly.
  */
 template <typename R>
-class async {
+class async_base {
 	/**
 	 * @brief Ref-counted callback, contains the callback logic and manages the lifetime of the callback data over multiple threads.
 	 */
 	struct shared_callback {
 		/**
-		 * @brief State of the async and its callback.
+		 * @brief Self-managed ref-counted pointer to the state data
 		 */
-		struct callback_state {
-			enum state_t {
-				waiting,
-				done,
-				dangling
-			};
-
-			/**
-			 * @brief Mutex to ensure the API result isn't set at the same time the coroutine is awaited and its value is checked, or the async is destroyed
-			 */
-			std::mutex mutex{};
-
-			/**
-			 * @brief Number of references to this callback state.
-			 */
-			int ref_count;
-
-			/**
-			 * @brief State of the awaitable and the API callback
-			 */
-			state_t state = waiting;
-
-			/**
-			 * @brief The stored result of the API call
-			 */
-			std::optional<R> result = std::nullopt;
-
-			/**
-			 * @brief Handle to the coroutine co_await-ing on this API call
-			 *
-			 * @see <a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">std::coroutine_handle</a>
-			 */
-			detail::std_coroutine::coroutine_handle<> coro_handle = nullptr;
-		};
-
-		callback_state *state;
+		detail::async_callback_data<R> *state = new detail::async_callback_data<R>;
 
 		/**
 		 * @brief Callback function.
 		 *
+		 * Constructs the callback data, and if the coroutine was awaiting, resume it
 		 * @param cback The result of the API call.
+		 * @tparam V Forwarding reference convertible to R
 		 */
-		void operator()(const R &cback) const {
-			std::unique_lock lock{get_mutex()};
-
-			if (state->state == callback_state::dangling) // Async object is gone - likely an exception killed it or it was never co_await-ed
-				return;
-			state->result = cback;
-			state->state = callback_state::done;
-			if (state->coro_handle) {
-				auto handle = state->coro_handle;
-				state->coro_handle = nullptr;
-				lock.unlock();
-				handle.resume();
+		template <std::convertible_to<R> V>
+		void operator()(V &&cback) const {
+			state->construct_result(std::forward<V>(cback));
+			if (auto previous_state = state->state.exchange(detail::async_state_t::done); previous_state == detail::async_state_t::waiting) {
+				state->coro_handle.resume();
 			}
 		}
 
 		/**
 		 * @brief Main constructor, allocates a new callback_state object.
 		 */
-		shared_callback() : state{new callback_state{.ref_count = 1}} {}
+		shared_callback() = default;
 
 		/**
-		 * @brief Destructor. Releases the held reference and destroys if no other references exist.
+		 * @brief Empty constructor, holds no state.
 		 */
-		~shared_callback() {
-			if (!state) // Moved-from object
-				return;
-
-			std::unique_lock lock{state->mutex};
-
-			if (state->ref_count) {
-				--(state->ref_count);
-				if (state->ref_count <= 0) {;
-					lock.unlock();
-					delete state;
-				}
-			}
-		}
+		explicit shared_callback(detail::empty_tag_t) noexcept : state{nullptr} {}
 
 		/**
 		 * @brief Copy constructor. Takes shared ownership of the callback state, increasing the reference count.
 		 */
-		shared_callback(const shared_callback &other) {
+		shared_callback(const shared_callback &other) noexcept {
 			this->operator=(other);
 		}
 
@@ -148,11 +158,22 @@ class async {
 		}
 
 		/**
+		 * @brief Destructor. Releases the held reference and destroys if no other references exist.
+		 */
+		~shared_callback() {
+			if (!state) // Moved-from object
+				return;
+
+			auto count = state->ref_count.fetch_sub(1);
+			if (count == 0) {
+				delete state;
+			}
+		}
+
+		/**
 		 * @brief Copy assignment. Takes shared ownership of the callback state, increasing the reference count.
 		 */
 		shared_callback &operator=(const shared_callback &other) noexcept {
-			std::lock_guard lock{other.get_mutex()};
-
 			state = other.state;
 			++state->ref_count;
 			return *this;
@@ -162,8 +183,6 @@ class async {
 		 * @brief Move assignment. Transfers ownership from another object, leaving intact the reference count. The other object releases the callback state.
 		 */
 		shared_callback &operator=(shared_callback &&other) noexcept {
-			std::lock_guard lock{other.get_mutex()};
-
 			state = std::exchange(other.state, nullptr);
 			return *this;
 		}
@@ -171,34 +190,41 @@ class async {
 		/**
 		 * @brief Function called by the async when it is destroyed when it was never co_awaited, signals to the callback to abort.
 		 */
-		void set_dangling() {
+		void set_dangling() noexcept {
 			if (!state) // moved-from object
 				return;
-			std::lock_guard lock{get_mutex()};
-
-			if (state->state == callback_state::waiting)
-				state->state = callback_state::dangling;
+			state->state.store(detail::async_state_t::dangling);
 		}
 
-		/**
-		 * @brief Convenience function to get the shared callback state's mutex.
-		 */
-		std::mutex &get_mutex() const {
-			return (state->mutex);
+		bool done(std::memory_order order = std::memory_order_seq_cst) const noexcept {
+			return (state->state.load(order) == detail::async_state_t::done);
 		}
 
 		/**
 		 * @brief Convenience function to get the shared callback state's result.
+		 *
+		 * @warning It is UB to call this on a callback whose state is anything else but async_state_t::done.
 		 */
-		std::optional<R> &get_result() const {
-			return (state->result);
+		R &get_result() noexcept {
+			assert(state && done());
+			return (*reinterpret_cast<R *>(state->result_storage.data()));
+		}
+
+		/**
+		 * @brief Convenience function to get the shared callback state's result.
+		 *
+		 * @warning It is UB to call this on a callback whose state is anything else but async_state_t::done.
+		 */
+		const R &get_result() const noexcept {
+			assert(state && done());
+			return (*reinterpret_cast<R *>(state->result_storage.data()));
 		}
 	};
 
 	/**
 	 * @brief Shared state of the async and its callback, to be used across threads.
 	 */
-	shared_callback api_callback;
+	shared_callback api_callback{nullptr};
 
 public:
 	/**
@@ -212,7 +238,7 @@ public:
 #ifndef _DOXYGEN_
 	requires std::invocable<Fun, Obj, Args..., std::function<void(R)>>
 #endif
-	async(Obj &&obj, Fun &&fun, Args&&... args) : api_callback{} {
+	explicit async_base(Obj &&obj, Fun &&fun, Args&&... args) : api_callback{} {
 		std::invoke(std::forward<Fun>(fun), std::forward<Obj>(obj), std::forward<Args>(args)..., api_callback);
 	}
 
@@ -226,30 +252,26 @@ public:
 #ifndef _DOXYGEN_
 	requires std::invocable<Fun, Args..., std::function<void(R)>>
 #endif
-	async(Fun &&fun, Args&&... args) : api_callback{} {
+	explicit async_base(Fun &&fun, Args&&... args) : api_callback{} {
 		std::invoke(std::forward<Fun>(fun), std::forward<Args>(args)..., api_callback);
 	}
 
 	/**
-	 * @brief Construct an async wrapping an awaitable, the call is made immediately by forwarding to <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a> and can be awaited later to retrieve the result.
-	 *
-	 * @param callable The awaitable object whose API call to execute.
+	 * @brief Construct an empty async. Using `co_await` on an empty async is undefined behavior.
 	 */
-	async(const awaitable<R> &awaitable) : api_callback{} {
-		std::invoke(awaitable.request, api_callback);
-	}
+	async_base() noexcept : api_callback{detail::empty_tag_t{}} {}
 
 	/**
 	 * @brief Destructor. If any callback is pending it will be aborted.
 	 */
-	~async() {
+	~async_base() {
 		api_callback.set_dangling();
 	}
 
 	/**
 	 * @brief Copy constructor is disabled
 	 */
-	async(const async &) = delete;
+	async_base(const async_base &) = delete;
 
 	/**
 	 * @brief Move constructor
@@ -259,12 +281,12 @@ public:
 	 * @remark Using the moved-from async after this function is undefined behavior.
 	 * @param other The async object to move the data from.
 	 */
-	async(async &&other) noexcept = default;
+	async_base(async_base &&other) noexcept = default;
 
 	/**
 	 * @brief Copy assignment is disabled
 	 */
-	async &operator=(const async &) = delete;
+	async_base &operator=(const async_base &) = delete;
 
 	/**
 	 * @brief Move assignment operator.
@@ -274,7 +296,7 @@ public:
 	 * @remark Using the moved-from async after this function is undefined behavior.
 	 * @param other The async object to move the data from
 	 */
-	async &operator=(async &&other) noexcept = default;
+	async_base &operator=(async_base &&other) noexcept = default;
 
 	/**
 	 * @brief First function called by the standard library when the object is co-awaited.
@@ -284,10 +306,8 @@ public:
 	 * @remark Do not call this manually, use the co_await keyword instead.
 	 * @return bool Whether we already have the result of the API call or not
 	 */
-	bool await_ready() noexcept {
-		std::lock_guard lock{api_callback.get_mutex()};
-
-		return api_callback.get_result().has_value();
+	bool await_ready() const noexcept {
+		return api_callback.done();
 	}
 
 	/**
@@ -298,27 +318,119 @@ public:
 	 * @remark Do not call this manually, use the co_await keyword instead.
 	 * @param handle The handle to the coroutine co_await-ing and being suspended
 	 */
-	template <typename T>
-	bool await_suspend(detail::std_coroutine::coroutine_handle<T> caller) {
-		std::lock_guard lock{api_callback.get_mutex()};
-
-		if (api_callback.get_result().has_value())
-			return false; // immediately resume the coroutine as we already have the result of the api call
-		if constexpr (requires (T t) { t.is_sync = false; })
-			caller.promise().is_sync = false;
+	bool await_suspend(detail::std_coroutine::coroutine_handle<> caller) noexcept {
+		auto sent = detail::async_state_t::sent;
 		api_callback.state->coro_handle = caller;
-		return true; // suspend the caller, the callback will resume it
+		return api_callback.state->state.compare_exchange_strong(sent, detail::async_state_t::waiting); // true (suspend) if `sent` was replaced with `waiting` -- false (resume) if the value was not `sent` (`done` is the only other option)
 	}
 
 	/**
 	 * @brief Function called by the standard library when the async is resumed. Its return value is what the whole co_await expression evaluates to
 	 *
 	 * @remark Do not call this manually, use the co_await keyword instead.
-	 * @return R The result of the API call.
+	 * @return R& The result of the API call as an lvalue reference.
 	 */
-	R await_resume() {
-		// no locking needed here as the callback has already executed
-		return std::move(*api_callback.get_result());
+	R& await_resume() & noexcept {
+		return api_callback.get_result();
+	}
+
+
+	/**
+	 * @brief Function called by the standard library when the async is resumed. Its return value is what the whole co_await expression evaluates to
+	 *
+	 * @remark Do not call this manually, use the co_await keyword instead.
+	 * @return const R& The result of the API call as a const lvalue reference.
+	 */
+	const R& await_resume() const& noexcept {
+		return api_callback.get_result();
+	}
+
+	/**
+	 * @brief Function called by the standard library when the async is resumed. Its return value is what the whole co_await expression evaluates to
+	 *
+	 * @remark Do not call this manually, use the co_await keyword instead.
+	 * @return R&& The result of the API call as an rvalue reference.
+	 */
+	R&& await_resume() && noexcept {
+		return std::move(api_callback.get_result());
+	}
+};
+
+} // namespace detail
+
+struct confirmation_callback_t;
+
+/**
+ * @brief A co_await-able object handling an API call in parallel with the caller.
+ *
+ * This class is the return type of the dpp::cluster::co_* methods, but it can also be created manually to wrap any async call.
+ *
+ * @remark - The coroutine may be resumed in another thread, do not rely on thread_local variables.
+ * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub issues</a> or to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
+ * @tparam R The return type of the API call. Defaults to confirmation_callback_t
+ */
+template <typename R>
+class async : private detail::async_base<R> {
+	/**
+	 * @brief Base class has friend access for CRTP downcast
+	 */
+	friend class detail::async_base<R>;
+
+public:
+	using detail::async_base<R>::async_base; // use async_base's constructors. unfortunately on clang this doesn't include the templated ones so we have to delegate below
+	using detail::async_base<R>::operator=; // use async_base's assignment operator
+	using detail::async_base<R>::await_ready; // expose await_ready as public
+
+	/**
+	 * @brief Construct an async object wrapping an object method, the call is made immediately by forwarding to <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a> and can be awaited later to retrieve the result.
+	 *
+	 * @param obj The object to call the method on
+	 * @param fun The method of the object to call. Its last parameter must be a callback taking a parameter of type R
+	 * @param args Parameters to pass to the method, excluding the callback
+	 */
+	template <typename Obj, typename Fun, typename... Args>
+#ifndef _DOXYGEN_
+	requires std::invocable<Fun, Obj, Args..., std::function<void(R)>>
+#endif
+	explicit async(Obj &&obj, Fun &&fun, Args&&... args) : detail::async_base<R>{std::forward<Obj>(obj), std::forward<Fun>(fun), std::forward<Args>(args)...} {}
+
+	/**
+	 * @brief Construct an async object wrapping an invokeable object, the call is made immediately by forwarding to <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a> and can be awaited later to retrieve the result.
+	 *
+	 * @param fun The object to call using <a href="https://en.cppreference.com/w/cpp/utility/functional/invoke">std::invoke</a>. Its last parameter must be a callable taking a parameter of type R
+	 * @param args Parameters to pass to the object, excluding the callback
+	 */
+	template <typename Fun, typename... Args>
+#ifndef _DOXYGEN_
+	requires std::invocable<Fun, Args..., std::function<void(R)>>
+#endif
+	explicit async(Fun &&fun, Args&&... args) : detail::async_base<R>{std::forward<Fun>(fun), std::forward<Args>(args)...} {}
+
+	/**
+	 * @brief Suspend the caller until the request completes.
+	 *
+	 * @return R& On resumption, this expression evaluates to the result object of type R, as a reference.
+	 */
+	auto& operator co_await() & noexcept {
+		return static_cast<detail::async_base<R>&>(*this);
+	}
+
+	/**
+	 * @brief Suspend the caller until the request completes.
+	 *
+	 * @return const R& On resumption, this expression evaluates to the result object of type R, as a const reference.
+	 */
+	const auto& operator co_await() const & noexcept {
+		return static_cast<detail::async_base<R> const&>(*this);
+	}
+
+	/**
+	 * @brief Suspend the caller until the request completes.
+	 *
+	 * @return R&& On resumption, this expression evaluates to the result object of type R, as an rvalue reference.
+	 */
+	auto&& operator co_await() && noexcept {
+		return static_cast<detail::async_base<R>&&>(*this);
 	}
 };
 

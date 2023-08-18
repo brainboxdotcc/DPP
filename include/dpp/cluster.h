@@ -39,7 +39,7 @@
 #include <dpp/queues.h>
 #include <dpp/cache.h>
 #include <dpp/intents.h>
-#include <dpp/discordevents.h> 
+#include <dpp/discordevents.h>
 #include <dpp/sync.h>
 #include <algorithm>
 #include <iostream>
@@ -47,7 +47,7 @@
 #include <cstring>
 #include <dpp/restresults.h>
 #include <dpp/event_router.h>
-#include <dpp/coro/awaitable.h>
+#include <dpp/coro/async.h>
 
 namespace dpp {
 
@@ -362,9 +362,9 @@ public:
 	 * @brief Get an awaitable to wait a certain amount of seconds. Use the co_await keyword on its return value to suspend the coroutine until the timer ends
 	 *
 	 * @param seconds How long to wait for
-	 * @return awaitable<timer> Object that can be co_await-ed to suspend the function for a certain time
+	 * @return async<timer> Object that can be co_await-ed to suspend the function for a certain time
 	 */
-	awaitable<timer> co_sleep(uint64_t seconds);
+	[[nodiscard]] async<timer> co_sleep(uint64_t seconds);
 #endif
 
 	/**
