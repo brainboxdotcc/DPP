@@ -25,6 +25,7 @@ then # As it doesn't, create the build directory.
 	mkdir build
 	cd build
 	cmake .. # Begin the CMake initialisation.
+	cd ..
 fi
 
 # Commence build.
