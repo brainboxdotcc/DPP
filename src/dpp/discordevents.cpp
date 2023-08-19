@@ -26,6 +26,7 @@
 #include <fstream>
 #include <time.h>
 #include <stdlib.h>
+#include <dpp/discordevents.h>
 #include <dpp/discordclient.h>
 #include <dpp/event.h>
 #include <dpp/cache.h>
