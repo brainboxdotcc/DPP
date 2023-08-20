@@ -233,6 +233,16 @@ public:
 	cluster(const cluster&&) = delete;
 
 	/**
+	 * @brief dpp::cluster is non-copyable
+	 */
+        cluster& operator=(const cluster&) = delete;
+
+	/**
+	 * @brief dpp::cluster is non-moveable
+	 */
+        cluster& operator=(const cluster&&) = delete;
+
+	/**
 	 * @brief Destroy the cluster object
 	 */
 	virtual ~cluster();
@@ -263,6 +273,7 @@ public:
 	 * 
 	 * @param mode websocket protocol to use, either ws_json or ws_etf.
 	 * @return cluster& Reference to self for chaining.
+	 * @throw dpp::logic_exception If called after the cluster is started (this is not supported)
 	 */
 	cluster& set_websocket_protocol(websocket_protocol_t mode);
 
@@ -3078,7 +3089,7 @@ public:
 	void current_user_leave_guild(snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Create a thread in forum channel
+	 * @brief Create a thread in a forum or media channel
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 *
 	 * @see https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel
@@ -3523,4 +3534,4 @@ public:
 
 };
 
-};
+} // namespace dpp

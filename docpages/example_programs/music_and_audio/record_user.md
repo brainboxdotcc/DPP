@@ -20,36 +20,37 @@ int main(int argc, char const *argv[])
 	/* Replace with the user's id you wish to record */
 	dpp::snowflake user_id = 407877550216314882;
 
-	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	/* Setup the bot */
+	dpp::cluster bot("token");
 
 	FILE *fd;
 	fd = fopen("./me.pcm", "wb");
 
-        bot.on_log(dpp::utility::cout_logger());
+    bot.on_log(dpp::utility::cout_logger());
 
-	/* Use the on_message_create event to look for commands */
-	bot.on_message_create([&bot, &fd](const dpp::message_create_t & event) {
+	/* The event is fired when someone issues your commands */
+	bot.on_slashcommand([&bot, &fd](const dpp::slashcommand_t& event) {
 
-		std::stringstream ss(event.msg.content);
-		std::string command;
+		/* Check which command they ran */
+		if (event.command.get_command_name() == "record") {
 
-		ss >> command;
+			/* Get the guild */
+			dpp::guild* g = dpp::find_guild(event.command.guild_id);
 
-		/* Tell the bot to record */
-		if (command == ".record") {
-			dpp::guild * g = dpp::find_guild(event.msg.guild_id);
-			if (!g->connect_member_voice(event.msg.author.id)) {
-				bot.message_create(dpp::message(
-					event.msg.channel_id, 
-					"You don't seem to be on a voice channel! :("
-				));
+			/* Attempt to connect to a voice channel, returns false if we fail to connect. */
+			if (!g->connect_member_voice(event.command.get_issuing_user().id)) {
+				event.reply("You don't seem to be in a voice channel!");
+				return;
 			}
-		}
+			
+			/* Tell the user we joined their channel. */
+			event.reply("Joined your channel, now recording!");
+		} else if (event.command.get_command_name() == "stop") {
 
-		/* Tell the bot to stop recording */
-		if (command == ".stop") {
-			event.from->disconnect_voice(event.msg.guild_id);
+			event.from->disconnect_voice(event.command.guild_id);
 			fclose(fd);
+
+			event.reply("Stopped recording.");
 		}
 	});
 
@@ -59,8 +60,21 @@ int main(int argc, char const *argv[])
 		}
 	});
 
+	bot.on_ready([&bot](const dpp::ready_t & event) {
+		if (dpp::run_once<struct register_bot_commands>()) {
+
+			/* Create a new command. */
+			dpp::slashcommand recordcommand("record", "Joins your voice channel and records you.", bot.me.id);
+
+			dpp::slashcommand stopcommand("stop", "Stops recording you.", bot.me.id);
+
+			bot.global_bulk_command_create({recordcommand, stopcommand});
+		}
+	});
+
 	/* Start bot */
 	bot.start(dpp::st_wait);
+
 	return 0;
 }
 ~~~~~~~~~~

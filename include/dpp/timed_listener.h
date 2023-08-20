@@ -92,4 +92,4 @@ public:
 	}
 };
 
-};
+} // namespace dpp

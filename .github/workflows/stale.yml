@@ -7,7 +7,12 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v4
+      - name: Harden Runner
+        uses: step-security/harden-runner@cba0d00b1fc9a034e1e642ea0f1103c282990604 # v2.5.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/stale@1160a2240286f5da8ec72b1c0816ce2481aabf84 # v8.0.0
         with:
           stale-issue-message: 'This issue has had no activity and is being marked as stale. If you still wish to continue with this issue please comment to reopen it.'
           stale-pr-message: 'This pull request has had no activity and is being marked as stale. If you still wish to continue with this pull request please comment to reopen it.'

@@ -42,4 +42,4 @@ void cluster::guild_emojis_get(snowflake guild_id, command_completion_event_t ca
 	rest_request_list<emoji>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis", m_get, "", callback);
 }
 
-};
+} // namespace dpp

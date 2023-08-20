@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -499,7 +500,7 @@ namespace dpp {
 		* @param is_animated is emoji animated.
 		* @return std::string The formatted mention of the emoji.
 		*/
-		std::string DPP_EXPORT emoji_mention(const std::string& name, const snowflake& id, bool is_animated = false);
+		std::string DPP_EXPORT emoji_mention(std::string_view name, snowflake id, bool is_animated = false);
 
 		/**
 		* @brief Create a mentionable role.
@@ -507,6 +508,68 @@ namespace dpp {
 		* @return std::string The formatted mention of the role.
 		*/
 		std::string DPP_EXPORT role_mention(const snowflake& id);
+
+#ifdef _DOXYGEN_
+		/**
+		 * @brief Get the mime type for an image type.
+		 * @param type Image type
+		 * @return std::string The mime type for this image type
+		 */
+		std::string DPP_EXPORT mime_type(image_type type);
+
+		/**
+		 * @brief Get the mime type for a sticker format.
+		 * @param format Sticker format
+		 * @return std::string The mime type for this sticker format
+		 */
+		std::string DPP_EXPORT mime_type(sticker_format format);
+
+		/**
+		 * @brief Get the file extension for an image type.
+		 * @param type Image type
+		 * @return std::string The file extension (e.g. ".png") for this image type
+		 */
+		std::string DPP_EXPORT file_extension(image_type type);
+
+		/**
+		 * @brief Get the file extension for a sticker format.
+		 * @param format Sticker format
+		 * @return std::string The file extension (e.g. ".png") for this sticker format
+		 */
+		std::string DPP_EXPORT file_extension(sticker_format format);
+#else
+		/**
+		 * @brief Get the mime type for an image type.
+		 * @param type Image type
+		 * @return std::string The mime type for this image type
+		 */
+		template <typename T>
+		extern std::enable_if_t<std::is_same_v<T, image_type>, std::string> DPP_EXPORT mime_type(T type);
+
+		/**
+		 * @brief Get the mime type for a sticker format.
+		 * @param format Sticker format
+		 * @return std::string The mime type for this sticker format
+		 */
+		template <typename T>
+		extern std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> DPP_EXPORT mime_type(T format);
+
+		/**
+		 * @brief Get the file extension for an image type.
+		 * @param type Image type
+		 * @return std::string The file extension (e.g. ".png") for this image type
+		 */
+		template <typename T>
+		extern std::enable_if_t<std::is_same_v<T, image_type>, std::string> DPP_EXPORT file_extension(T type);
+
+		/**
+		 * @brief Get the file extension for a sticker format.
+		 * @param format Sticker format
+		 * @return std::string The file extension (e.g. ".png") for this sticker format
+		 */
+		template <typename T>
+		extern std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> DPP_EXPORT file_extension(T format);
+#endif
 
 		/**
 		 * @brief Returns the library's version string
@@ -540,5 +603,5 @@ namespace dpp {
 		 */
 		void DPP_EXPORT set_thread_name(const std::string& name);
 
-	};
-};
+	} // namespace utility
+} // namespace dpp

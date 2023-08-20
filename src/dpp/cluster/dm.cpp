@@ -63,4 +63,4 @@ void cluster::gdm_remove(snowflake channel_id, snowflake user_id, command_comple
 	rest_request<confirmation>(this, API_PATH "/channels", std::to_string(channel_id), "recipients/" + std::to_string(user_id), m_delete, "", callback);
 }
 
-};
+} // namespace dpp

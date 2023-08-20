@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -27,19 +28,9 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-emoji::emoji() : managed(), user_id(0), flags(0), image_data(nullptr)
-{
-}
+emoji::emoji(const std::string_view n, const snowflake i, const uint8_t f) : managed(i), name(n), flags(f) {}
 
-emoji::emoji(const std::string n, const snowflake i, const uint8_t f) : managed(i), name(n), user_id(0), flags(f), image_data(nullptr)
-{	
-}
-
-emoji::~emoji() {
-	delete image_data;
-}
-
-std::string emoji::get_mention(const std::string &name, const snowflake &id, bool is_animated) {
+std::string emoji::get_mention(std::string_view name, snowflake id, bool is_animated) {
 	return utility::emoji_mention(name,id,is_animated);
 }
 
@@ -67,8 +58,8 @@ std::string emoji::build_json(bool with_id) const {
 		j["id"] = std::to_string(id);
 	}
 	j["name"] = name;
-	if (image_data) {
-		j["image"] = *image_data;
+	if (!image_data.empty()) {
+		j["image"] = image_data;
 	}
 	return j.dump();
 }
@@ -89,21 +80,12 @@ bool emoji::is_available() const {
 	return flags & e_available;
 }
 
-emoji& emoji::load_image(const std::string &image_blob, const image_type type) {
-	static const std::map<image_type, std::string> mimetypes = {
-		{ i_gif, "image/gif" },
-		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" },
-		{ i_webp, "image/webp" },
-	};
+emoji& emoji::load_image(std::string_view image_blob, const image_type type) {
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
 		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
 	}
 
-	/* If there's already image data defined, free the old data, to prevent a memory leak */
-	delete image_data;
-
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length()));
+	image_data = "data:" + utility::mime_type(type) + ";base64," + base64_encode(reinterpret_cast<unsigned char const*>(image_blob.data()), static_cast<unsigned int>(image_blob.length()));
 
 	return *this;
 }
@@ -128,5 +110,5 @@ std::string emoji::get_url(uint16_t size, const dpp::image_type format, bool pre
 }
 
 
-};
+} // namespace dpp
 

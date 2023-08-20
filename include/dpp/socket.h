@@ -13,7 +13,7 @@ namespace dpp
 	 * This is used to ensure parity between windows and unix-like systems.
 	 */
 	typedef SOCKET socket;
-}
+} // namespace dpp
 
 #ifndef SOCKET_ERROR
 /**

@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -54,6 +55,30 @@
 #endif
 
 namespace dpp {
+moving_averager::moving_averager(uint64_t collection_count_new) {
+	collectionCount = collection_count_new;
+}
+
+moving_averager moving_averager::operator+=(int64_t value) {
+	values.emplace_front(value);
+	if (values.size() >= collectionCount) {
+		values.pop_back();
+	}
+	return *this;
+}
+
+moving_averager::operator float() {
+	float returnData{};
+	if (values.size() > 0) {
+		for (auto& value : values) {
+			returnData += static_cast<float>(value);
+		}
+		return returnData / static_cast<float>(values.size());
+	}
+	else {
+		return 0.0f;
+	}
+}
 
 [[maybe_unused]]
 constexpr int32_t opus_sample_rate_hz = 48000;
@@ -122,9 +147,10 @@ size_t audio_mix(discord_voice_client& client, opus_int32* pcm_mix, const opus_i
 		return 0;
 	}
 	/* We must upsample the data to 32 bits wide, otherwise we could overflow */
-	for (opus_int32 v = 0; v < samples * opus_channel_count; ++v) {
-		pcm_mix[v] += pcm[v];
+	for (opus_int32 v = 0; v < samples * opus_channel_count / 16; ++v) {
+		audio_mixer::combine_samples(pcm_mix, pcm);
 	}
+	client.moving_average += park_count;
 	max_samples = (std::max)(samples, max_samples);
 	return park_count + 1;
 }
@@ -200,6 +226,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 		opus_int32 pcm_mix[23040] = { 0 };
 		size_t park_count = 0;
 		int max_samples = 0;
+		int samples = 0;
 
 		for (auto& d : flush_data) {
 			if (!d.decoder) {
@@ -232,12 +259,12 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 					if (vr.audio_data.length() > 0x7FFFFFFF) {
 						throw dpp::length_exception("audio_data > 2GB! This should never happen!");
 					}
-					if (int samples = opus_decode(d.decoder.get(), vr.audio_data.data(),
+					if (samples = opus_decode(d.decoder.get(), vr.audio_data.data(),
 						static_cast<opus_int32>(vr.audio_data.length() & 0x7FFFFFFF), pcm, 5760, 0);
 					    samples >= 0) {
 						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
 							samples * opus_channel_count * sizeof(opus_int16));
-
+						client.end_gain = 1.0f / client.moving_average;
 						park_count = audio_mix(client, pcm_mix, pcm, park_count, samples, max_samples);
 						client.creator->on_voice_receive.call(vr);
 					}
@@ -249,11 +276,16 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 
 		/* If combined receive is bound, dispatch it */
 		if (park_count) {
+			
 			/* Downsample the 32 bit samples back to 16 bit */
 			opus_int16 pcm_downsample[23040] = { 0 };
-			for (int v = 0; v < max_samples * opus_channel_count; ++v) {
-				pcm_downsample[v] = (opus_int16)(pcm_mix[v] / park_count);
+			client.increment = (client.end_gain - client.current_gain) / static_cast<float>(samples);
+			for (int64_t x = 0; x < samples / audio_mixer::byte_blocks_per_register; ++x) {
+				audio_mixer::collect_single_register(pcm_mix + (x * audio_mixer::byte_blocks_per_register),
+					pcm_downsample + (x * audio_mixer::byte_blocks_per_register), client.current_gain, client.increment);
+				client.current_gain += client.increment * static_cast<float>(audio_mixer::byte_blocks_per_register);
 			}
+
 			voice_receive_t vr(nullptr, "", &client, 0, reinterpret_cast<uint8_t*>(pcm_downsample),
 				max_samples * opus_channel_count * sizeof(opus_int16));
 
@@ -814,7 +846,7 @@ void discord_voice_client::write_ready()
 			std::chrono::nanoseconds sleep_increment = (std::chrono::nanoseconds(duration) - latency) / AUDIO_OVERLAP_SLEEP_SAMPLES;
 			if (sleep_time.count() > 0) {
 				uint16_t samples_count = 0;
-				std::chrono::nanoseconds overshoot_accumulator;
+				std::chrono::nanoseconds overshoot_accumulator{};
 
 				do {
 					std::chrono::high_resolution_clock::time_point start_sleep = std::chrono::high_resolution_clock::now();
@@ -1275,4 +1307,4 @@ std::string discord_voice_client::discover_ip() {
 
 
 
-};
+} // namespace dpp

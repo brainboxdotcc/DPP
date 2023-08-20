@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -28,7 +29,7 @@ namespace {
 	 * @brief Thread emoji - https://www.compart.com/en/unicode/U+1F9F5
 	 */
 	inline const std::string THREAD_EMOJI = "\xF0\x9F\xA7\xB5";
-}
+} // namespace
 
 /* Unit tests go here */
 int main(int argc, char *argv[])
@@ -87,6 +88,17 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	set_test("URLENC", false);
 	set_test("URLENC", dpp::utility::url_encode("ABC123_+\\|$*/AAA[]😄") == "ABC123_%2B%5C%7C%24%2A%2FAAA%5B%5D%F0%9F%98%84");
+
+	set_test("BASE64ENC", false);
+	set_test("BASE64ENC",
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("a"), 1) == "YQ==" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("bc"), 2) == "YmM=" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("def"), 3) == "ZGVm" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("ghij"), 4) == "Z2hpag==" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("klmno"), 5) == "a2xtbm8=" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("pqrstu"), 6) == "cHFyc3R1" &&
+		dpp::base64_encode(reinterpret_cast<unsigned char const*>("vwxyz12"), 7) == "dnd4eXoxMg=="
+	);
 
 	dpp::http_connect_info hci;
 	set_test("HOSTINFO", false);
@@ -304,6 +316,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		p.set(0).add(~uint64_t{0}).remove(dpp::p_speak).set(dpp::p_administrator);
 		success = !p.has(dpp::p_administrator, dpp::p_ban_members) && success; // must return false because they're not both set
 		success = !p.has(dpp::p_administrator | dpp::p_ban_members) && success;
+		success = p.can(dpp::p_ban_members) && success;
+		success = p.can(dpp::p_speak) && success;
 
 		constexpr auto permission_test = [](dpp::permission p) constexpr noexcept {
 			bool success{true};
@@ -316,6 +330,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			success = p.has(dpp::p_administrator | dpp::p_ban_members) && success;
 			success = p.add(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
 			success = !p.remove(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
+			p.remove(dpp::p_administrator);
+			success = p.can(dpp::p_ban_members) && success;
+			success = !p.can(dpp::p_speak, dpp::p_ban_members) && success;
+			success = p.can_any(dpp::p_speak, dpp::p_ban_members) && success;
 			return success;
 		};
 		constexpr auto constexpr_success = permission_test({~uint64_t{0}}); // test in constant evaluated
@@ -1644,7 +1662,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			if (!offline) {
 				bot.thread_create("thread test", TEST_TEXT_CHANNEL_ID, 60, dpp::channel_type::CHANNEL_PUBLIC_THREAD, true, 60, [&](const dpp::confirmation_callback_t &event) {
 					if (!event.is_error()) {
-						const auto &thread = event.get<dpp::thread>();
+						[[maybe_unused]] const auto &thread = event.get<dpp::thread>();
 						set_test("THREAD_CREATE", true);
 					}
 					// the thread tests are in the on_thread_create event handler

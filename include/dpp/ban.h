@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -65,4 +66,4 @@ public:
  */
 typedef std::unordered_map<snowflake, ban> ban_map;
 
-};
+} // namespace dpp

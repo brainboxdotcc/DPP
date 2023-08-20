@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -93,6 +94,16 @@ public:
 	}
 
 	/**
+	 * @brief Returns the stringified version of the snowflake value
+	 * 
+	 * @return std::string string form of snowflake value
+	 */
+	inline std::string str() const
+	{
+		return std::to_string(value);
+	}
+
+	/**
 	 * @brief Operator less than, used for maps/unordered maps
 	 * when the snowflake is a key value.
 	 * 
@@ -178,7 +189,7 @@ public:
 	uint16_t get_increment() const;
 };
 
-};
+} // namespace dpp
 
 template<>
 struct std::hash<dpp::snowflake>

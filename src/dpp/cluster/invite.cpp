@@ -35,4 +35,4 @@ void cluster::invite_get(const std::string &invite_code, command_completion_even
 	rest_request<invite>(this, API_PATH "/invites", utility::url_encode(invite_code) + "?with_counts=true&with_expiration=true", "", m_get, "", callback);
 }
 
-};
+} // namespace dpp

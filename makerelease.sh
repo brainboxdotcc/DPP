@@ -94,3 +94,5 @@ echo "Cleaning up..."
 cd ..
 rm -rf temp
 
+./sign.sh v$NEWVER
+

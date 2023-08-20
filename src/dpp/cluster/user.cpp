@@ -108,4 +108,4 @@ void cluster::user_get_cached(snowflake user_id, command_completion_event_t call
 	rest_request<user_identified>(this, API_PATH "/users", std::to_string(user_id), "", m_get, "", callback);
 }
 
-};
+} // namespace dpp

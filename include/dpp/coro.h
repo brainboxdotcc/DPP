@@ -1,11 +1,21 @@
 #ifdef DPP_CORO
 #pragma once
 
-#if !(defined( _MSC_VER ) || defined( _CONSOLE ) || defined( __GNUC__ )) // if libc++
-#  define EXPERIMENTAL_COROUTINE
+#if (defined(_LIBCPP_VERSION) and !defined(__cpp_impl_coroutine)) // if libc++ experimental implementation (LLVM < 14)
+#  define STDCORO_EXPERIMENTAL_HEADER
+#  define STDCORO_EXPERIMENTAL_NAMESPACE
 #endif
 
-#ifdef EXPERIMENTAL_COROUTINE
+#ifdef STDCORO_GLIBCXX_COMPAT
+#  define __cpp_impl_coroutine 1
+namespace std {
+	namespace experimental {
+		using namespace std;
+	}
+}
+#endif
+
+#ifdef STDCORO_EXPERIMENTAL_HEADER
 #  include <experimental/coroutine>
 #else
 #  include <coroutine>
@@ -14,6 +24,11 @@
 #include <memory>
 #include <utility>
 #include <type_traits>
+#include <concepts>
+#include <optional>
+#include <functional>
+#include <mutex>
+#include <exception>
 
 namespace dpp {
 	class cluster;
@@ -33,7 +48,7 @@ namespace dpp {
 		 */
 		namespace std_coroutine {}
 #else
-#  ifdef EXPERIMENTAL_COROUTINE
+#  ifdef STDCORO_EXPERIMENTAL_NAMESPACE
 		namespace std_coroutine = std::experimental;
 #  else
 		namespace std_coroutine = std;
@@ -57,7 +72,7 @@ namespace dpp {
 		*/
 		template <typename ReturnType>
 		using task_handle = detail::std_coroutine::coroutine_handle<detail::task_promise<ReturnType>>;
-	}
+	} // namespace detail
 
 	/**
 	 * @brief A coroutine task. It can be co_awaited to make nested coroutines.
@@ -282,7 +297,7 @@ namespace dpp {
 			 *
 			 * @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Don't suspend, the coroutine starts immediately.
 			 */
-			std::suspend_never initial_suspend() noexcept {
+			std_coroutine::suspend_never initial_suspend() noexcept {
 				return {};
 			}
 
@@ -389,7 +404,7 @@ namespace dpp {
 			if (parent)
 				parent.resume();
 		}
-	}
+	} // namespace detail
 
 	template <typename ReturnType>
 #ifndef _DOXYGEN_
@@ -454,7 +469,7 @@ namespace dpp {
 				 *
 				 * @see <a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">std::coroutine_handle</a>
 				 */
-				std::coroutine_handle<> coro_handle = nullptr;
+				detail::std_coroutine::coroutine_handle<> coro_handle = nullptr;
 			};
 
 			/**
@@ -680,7 +695,7 @@ namespace dpp {
 			return std::move(*api_callback.get_result());
 		}
 	};
-};
+} // namespace dpp
 
 /**
  * @brief Specialization of std::coroutine_traits, helps the standard library figure out a promise type from a coroutine function.

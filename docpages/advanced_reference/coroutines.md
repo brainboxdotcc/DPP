@@ -1,6 +1,6 @@
 \page coroutines Advanced commands with coroutines
 
-\warning D++ Coroutines are a very new feature and are currently only supported by D++ on g++ 13.1 and MSVC 19.37, and the CMake option DPP_CORO must be enabled. They are experimental and may have bugs or even crashes, pease report any to [GitHub Issues](https://github.com/brainboxdotcc/DPP/issues) or to our [Discord Server](https://discord.gg/dpp).
+\warning D++ Coroutines are a very new feature and are currently only supported by D++ on g++ 13.1 and MSVC 19.37, and the CMake option DPP_CORO must be enabled. They are experimental and may have bugs or even crashes, please report any to [GitHub Issues](https://github.com/brainboxdotcc/DPP/issues) or to our [Discord Server](https://discord.gg/dpp).
 
 ### What is a coroutine?
 
@@ -131,7 +131,7 @@ int main() {
 
 ### I heard you liked tasks
 
-\note This next example is fairly advanced and makes uses of many of both C++ and D++'s advanced features.
+\note This next example is fairly advanced and makes use of many of both C++ and D++'s advanced features.
 
 Lastly, `dpp::task` takes its return type as a template parameter, which allows you to use tasks inside tasks and return a result from them.
 

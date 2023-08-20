@@ -146,4 +146,4 @@ void cluster::guild_search_members(snowflake guild_id, const std::string& query,
 	});
 }
 
-};
+} // namespace dpp

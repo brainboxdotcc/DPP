@@ -23,6 +23,7 @@
 #include <dpp/exception.h>
 #include <dpp/stringops.h>
 #include <sstream>
+#include <utility>
 
 namespace dpp {
 
@@ -83,7 +84,7 @@ commandhandler& commandhandler::add_prefix(const std::string &prefix)
 commandhandler& commandhandler::add_command(const std::string &command, const parameter_registration_t &parameters, command_handler handler, const std::string &description, snowflake guild_id)
 {
 	command_info_t i;
-	i.func = handler;
+	i.func = std::move(handler);
 	i.guild_id = guild_id;
 	i.parameters = parameters;
 	commands[lowercase(command)] = i;
@@ -436,4 +437,4 @@ void commandhandler::thonk(command_source source, command_completion_event_t cal
 	thinking(source, callback);
 }
 
-};
+} // namespace dpp

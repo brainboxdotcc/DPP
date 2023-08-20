@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -54,38 +55,66 @@ public:
 	/**
 	 * @brief Emoji name
 	 */
-	std::string name;
+	std::string name{};
 	/**
 	 * @brief User id who uploaded the emoji
 	 */
-	snowflake user_id;
+	snowflake user_id{0};
 	/**
 	 * @brief Flags for the emoji from dpp::emoji_flags
 	 */
-	uint8_t flags;
+	uint8_t flags{0};
 	/**
 	 * @brief Image data for the emoji if uploading
 	 */
-	std::string* image_data;
-	
+	std::string image_data{};
+
 	/**
 	 * @brief Construct a new emoji object
 	 */
-	emoji();
+	emoji() = default;
 
 	/**
 	 * @brief Construct a new emoji object with name, ID and flags
-	 * 
-	 * @param n The emoji's name
-	 * @param i ID, if it has one (unicode does not)
-	 * @param f Emoji flags (emoji_flags)
+	 *
+	 * @param name The emoji's name
+	 * @param id ID, if it has one (unicode does not)
+	 * @param flags Emoji flags (emoji_flags)
 	 */
-	emoji(const std::string n, const snowflake i = 0, const uint8_t f = 0);
+	emoji(const std::string_view name, const snowflake id = 0, const uint8_t flags = 0);
+
+	/**
+	 * @brief Copy constructor, copies another emoji's data
+	 *
+	 * @param rhs Emoji to copy
+	 */
+	emoji(const emoji &rhs) = default;
+
+	/**
+	 * @brief Move constructor, moves another emoji's data to this
+	 *
+	 * @param rhs Emoji to move from
+	 */
+	emoji(emoji &&rhs) noexcept = default;
 
 	/**
 	 * @brief Destroy the emoji object
 	 */
-	virtual ~emoji();
+	~emoji() override = default;
+
+	/**
+	 * @brief Copy assignment operator, copies another emoji's data
+	 *
+	 * @param rhs Emoji to copy
+	 */
+	emoji &operator=(const emoji &rhs) = default;
+
+	/**
+	 * @brief Move constructor, moves another emoji's data to this
+	 *
+	 * @param rhs Emoji to move from
+	 */
+	emoji &operator=(emoji &&rhs) noexcept = default;
 
 	/**
 	* @brief Create a mentionable emoji
@@ -94,11 +123,11 @@ public:
 	* @param is_animated is emoji animated.
 	* @return std::string The formatted mention of the emoji.
 	*/
-	static std::string get_mention(const std::string& name, const snowflake& id, bool is_animated = false);
+	static std::string get_mention(std::string_view name, snowflake id, bool is_animated = false);
 
 	/**
 	 * @brief Read class values from json object
-	 * 
+	 *
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
@@ -106,15 +135,15 @@ public:
 
 	/**
 	 * @brief Build the json for this object
-	 * 
+	 *
 	 * @param with_id include the id in the JSON
 	 * @return std::string json data
 	 */
-	std::string build_json(bool with_id = false) const;
+	std::string build_json(bool with_id = false) const override;
 
 	/**
 	 * @brief Emoji requires colons
-	 * 
+	 *
 	 * @return true Requires colons
 	 * @return false Does not require colons
 	 */
@@ -122,7 +151,7 @@ public:
 
 	/**
 	 * @brief Emoji is managed
-	 * 
+	 *
 	 * @return true Is managed
 	 * @return false Is not managed
 	 */
@@ -138,7 +167,7 @@ public:
 
 	/**
 	 * @brief Is available
-	 * 
+	 *
 	 * @return true Is available
 	 * @return false Is unavailable
 	 */
@@ -146,17 +175,17 @@ public:
 
 	/**
 	 * @brief Load an image into the object as base64
-	 * 
+	 *
 	 * @param image_blob Image binary data
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @return emoji& Reference to self
 	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes
 	 */
-	emoji& load_image(const std::string &image_blob, const image_type type);
+	emoji& load_image(std::string_view image_blob, const image_type type);
 
 	/**
 	 * @brief Format to name if unicode, name:id if has id or a:name:id if animated
-	 * 
+	 *
 	 * @return Formatted name for reactions
 	 */
 	std::string format() const;
@@ -187,4 +216,4 @@ public:
  */
 typedef std::unordered_map<snowflake, emoji> emoji_map;
 
-};
+} // namespace dpp

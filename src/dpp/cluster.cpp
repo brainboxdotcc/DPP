@@ -71,7 +71,7 @@ template<typename T> std::function<void(const T&)> make_intent_warning(cluster* 
 }
 
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy, uint32_t request_threads, uint32_t request_threads_raw)
-	: default_gateway("gateway.discord.gg"), rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(NULL) - 5), intents(_intents),
+	: default_gateway("gateway.discord.gg"), rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(nullptr) - 5), intents(_intents),
 	numshards(_shards), cluster_id(_cluster_id), maxclusters(_maxclusters), rest_ping(0.0), cache_policy(policy), ws_mode(ws_json)
 {
 	/* Instantiate REST request queues */
@@ -119,6 +119,9 @@ request_queue* cluster::get_raw_rest() {
 }
 
 cluster& cluster::set_websocket_protocol(websocket_protocol_t mode) {
+	if (start_time > 0) {
+		throw dpp::logic_exception("Cannot change websocket protocol on a started cluster!");
+	}
 	ws_mode = mode;
 	return *this;
 }
@@ -135,7 +138,7 @@ void cluster::log(dpp::loglevel severity, const std::string &msg) const {
 
 dpp::utility::uptime cluster::uptime()
 {
-	return dpp::utility::uptime(time(NULL) - start_time);
+	return dpp::utility::uptime(time(nullptr) - start_time);
 }
 
 void cluster::start(bool return_after) {
@@ -176,7 +179,7 @@ void cluster::start(bool return_after) {
 		}
 	}
 
-	start_time = time(NULL);
+	start_time = time(nullptr);
 
 	log(ll_debug, "Starting with " + std::to_string(numshards) + " shards...");
 

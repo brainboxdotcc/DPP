@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -82,6 +83,7 @@ std::map<std::string, test_t> tests = {
 	{"MD_ESC_1", {tt_offline, "Markdown escaping (ignore code block contents)", false, false}},
 	{"MD_ESC_2", {tt_offline, "Markdown escaping (escape code block contents)", false, false}},
 	{"URLENC", {tt_offline, "URL encoding", false, false}},
+	{"BASE64ENC", {tt_offline, "Base64 encoding", false, false}},
 	{"SYNC", {tt_online, "sync<T>()", false, false}},
 	{"COMPARISON", {tt_offline, "manged object comparison", false, false}},
 	{"CHANNELCACHE", {tt_online, "find_channel()", false, false}},
@@ -243,7 +245,7 @@ namespace {
 
 		return (env_var ? env_var : "../../testdata/");
 	}
-}
+} // namespace
 
 std::vector<uint8_t> load_test_audio() {
 	std::vector<uint8_t> testaudio;

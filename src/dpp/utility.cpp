@@ -2,6 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright 2021 Craig Edwards and D++ contributors 
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
@@ -35,6 +36,7 @@
 #include <array>
 #include <dpp/cluster.h>
 #include <dpp/dispatcher.h>
+#include <dpp/message.h>
 
 #ifdef _WIN32
 	#include <stdio.h>
@@ -86,25 +88,16 @@ namespace dpp {
 				return std::string();
 			}
 
-			std::string extension;
-			if (format == sf_png || format == sf_apng) {
-				extension = ".png";
-			} else if (format == sf_lottie) {
-				extension = ".json";
-			} else if (format == sf_gif) {
-				extension = ".gif";
-			} else {
-				return std::string();
-			}
+			std::string extension = file_extension(format);
 
-			return utility::cdn_host + "/stickers/" + std::to_string(sticker_id) + extension;
+			return extension.empty() ? std::string{} : (utility::cdn_host + "/stickers/" + std::to_string(sticker_id) + extension);
 		}
 
 		double time_f()
 		{
 			using namespace std::chrono;
 			auto tp = system_clock::now() + 0ns;
-			return tp.time_since_epoch().count() / 1000000000.0;
+			return static_cast<double>(tp.time_since_epoch().count()) / 1000000000.0;
 		}
 
 		bool has_voice() {
@@ -519,21 +512,126 @@ namespace dpp {
 		    return "<#" + std::to_string(id) + ">";
 		}
 
-		std::string emoji_mention(const std::string &name, const snowflake &id, bool is_animated) {
-			auto format = [=]() {
-				return id ? ((is_animated ? "a:" : ":") + name + ":" + std::to_string(id)) : name;
-			};
-
+		std::string emoji_mention(std::string_view name, snowflake id, bool is_animated) {
 			if (id) {
-				return "<" + format() + ">";
+				std::string s{};
+
+				s += '<';
+				s += (is_animated ? "a:" : ":");
+				s += name;
+				s += ':';
+				s += id.str();
+				s += '>';
+				return s;
 			} else {
-				return ":" + format() + ":";
+				return ":" + std::string{name} + ":";
 			}
 		}
 
 		std::string role_mention(const snowflake &id) {
 		    return "<@&" + std::to_string(id) + ">";
 		}
+
+		template <typename T>
+		std::enable_if_t<std::is_same_v<T, image_type>, std::string> mime_type(T type) {
+			static constexpr auto get_image_mime = [](image_type t) constexpr noexcept {
+				using namespace std::string_view_literals;
+
+				switch (t) {
+					case i_png:
+						return "image/png"sv;
+
+					case i_jpg:
+						return "image/jpeg"sv;
+
+					case i_gif:
+						return "image/gif"sv;
+
+					case i_webp:
+						return "image/webp"sv;
+				}
+				return std::string_view{}; // unknown
+			};
+
+			return std::string{get_image_mime(type)};
+		}
+
+		// Explicit instantiation, shoves it into the DLL
+		template std::string mime_type<image_type>(image_type t);
+
+		template <typename T>
+		std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> mime_type(T format) {
+			static constexpr auto get_sticker_mime = [](sticker_format f) constexpr noexcept {
+				using namespace std::string_view_literals;
+
+				switch (f) {
+					case sf_png:
+						return "image/png"sv;
+
+					case sf_apng:
+						return "image/apng"sv;
+
+					case sf_lottie:
+						return "application/json"sv;
+
+					case sf_gif:
+						return "image/gif"sv;
+				}
+				return std::string_view{}; // unknown
+			};
+			return std::string{get_sticker_mime(format)};
+		}
+
+		template std::string mime_type<sticker_format>(sticker_format t);
+
+		template <typename T>
+		std::enable_if_t<std::is_same_v<T, image_type>, std::string> file_extension(T type) {
+			static constexpr auto get_image_ext = [](image_type t) constexpr noexcept {
+				using namespace std::string_view_literals;
+
+				switch (t) {
+					case i_png:
+						return ".png"sv;
+
+					case i_jpg:
+						return ".jpg"sv;
+
+					case i_gif:
+						return ".gif"sv;
+
+					case i_webp:
+						return ".webp"sv;
+				}
+				return std::string_view{}; // unknown
+			};
+
+			return std::string{get_image_ext(type)};
+		}
+
+		template std::string file_extension<image_type>(image_type t);
+
+		template <typename T>
+		std::enable_if_t<std::is_same_v<T, sticker_format>, std::string> file_extension(T format) {
+			static constexpr auto get_sticker_ext = [](sticker_format f) constexpr noexcept {
+				using namespace std::string_view_literals;
+
+				switch (f) {
+					case sf_png:
+					case sf_apng:
+						return ".png"sv;
+
+					case sf_lottie:
+						return ".json"sv;
+
+					case sf_gif:
+						return ".gif"sv;
+				}
+				return std::string_view{}; // unknown
+			};
+			return std::string{get_sticker_ext(format)};
+		}
+
+		template std::string file_extension<sticker_format>(sticker_format t);
 
 		std::string make_url_parameters(const std::map<std::string, std::string>& parameters) {
 			std::string output;
@@ -618,6 +716,6 @@ namespace dpp {
 				#endif
 			#endif
 		}
-    };
+    } // namespace utility
 
-};
+} // namespace dpp
