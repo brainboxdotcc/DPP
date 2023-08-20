@@ -1,9 +1,20 @@
 \page checking-member-permissions Checking permissions
 
-The easiest way to check member permissions are either the dpp::channel::get_user_permissions or dpp::guild::permission_overwrites method. Both do the same under the hood.
-
 Of course most people do just iterate over the roles of a member to check for a permission.
-But there's also a helper method for that. dpp::guild::base_permissions gets a member's permission taking into account the server owner and role permissions.
+But there's a helper method for that: dpp::guild::base_permissions gets a member's permission taking into account the server owner and role permissions.
+
+For total member permissions including channel overwrites use either the dpp::channel::get_user_permissions or dpp::guild::permission_overwrites method. Both do the same under the hood.
+
+They all return a dpp::permission class, which is a wrapper around a permission bitmask containing bits of the dpp::permissions enum.
+
+Demonstration:
+
+```cpp
+dpp::channel* c = dpp::find_channel(some_channel_id);
+if (c && c->get_user_permissions(member).can(dpp::p_send_messages)) {
+    //...
+}
+```
 
 ## Permissions in Interaction events
 
@@ -67,8 +78,6 @@ bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 	}
 });
 ```
-
-By the way, the dpp::permission class is a wrapper around a permission bitmask containing bits of the dpp::permissions enum.
 
 ### The Bot's permissions
 
