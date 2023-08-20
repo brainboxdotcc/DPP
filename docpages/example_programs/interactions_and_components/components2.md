@@ -5,8 +5,6 @@ This example demonstrates adding multiple buttons, receiving button clicks and s
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 
-using json = nlohmann::json;
-
 int main() {
 
 	dpp::cluster bot("token");

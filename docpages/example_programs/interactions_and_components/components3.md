@@ -5,8 +5,6 @@ This example demonstrates creating a select menu, receiving select menu clicks a
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 
-using json = nlohmann::json;
-
 int main() {
 
 	dpp::cluster bot("token");
