@@ -5,8 +5,6 @@ This example demonstrates adding multiple buttons, receiving button clicks and s
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 
-using json = nlohmann::json;
-
 int main() {
 
 	dpp::cluster bot("token");
@@ -15,6 +13,7 @@ int main() {
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+		
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "math") {
 
