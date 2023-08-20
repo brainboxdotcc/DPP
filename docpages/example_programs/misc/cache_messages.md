@@ -36,7 +36,7 @@ int main() {
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
-		if (event.command.get_command_name == "get") {
+		if (event.command.get_command_name() == "get") {
 
 			dpp::message* find_msg = message_cache.find(std::get<std::string>(event.get_parameter("message_id")));
 

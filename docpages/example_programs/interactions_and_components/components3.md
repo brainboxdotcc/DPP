@@ -15,8 +15,9 @@ int main() {
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+		
 		/* Check which command they ran */
-		if (event.command.get_command_name == "select") {
+		if (event.command.get_command_name() == "select") {
 
 			/* Create a message */
 			dpp::message msg(event.command.channel_id, "This text has a select menu!");
