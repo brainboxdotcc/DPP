@@ -9,3 +9,4 @@
 * \subpage governance "Project Governance"
 * \subpage roadmap "Development Roadmap"
 * \subpage security "Security"
+* \subpage automating-with-jenkins "Automating your bot with Jenkins"
