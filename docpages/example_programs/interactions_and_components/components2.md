@@ -16,7 +16,7 @@ int main() {
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
-		if (event.command.get_command_name == "math") {
+		if (event.command.get_command_name() == "math") {
 
 			/* Create a message */
 			dpp::message msg(event.command.channel_id, "What is 5+5?");
