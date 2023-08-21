@@ -94,14 +94,14 @@ A bot may be made of one or more clusters. Each cluster maintains a queue of com
 
 int main()
 {
-	/* This is a cluster */
-	dpp::cluster bot("Token goes here");
+    /* This is a cluster */
+    dpp::cluster bot("Token goes here");
 }
 ```
 
 ## Shards
 
-A cluster contains zero or more shards. Each shard maintains a persistent websocket connection to Discord via a websocket, which receives all events the bot is made aware of, e.g. messages, channel edits, etc. Requests to the API on the other hand go out to Discord as separate HTTP requests.
+A cluster contains zero or more shards. Each shard maintains a persistent websocket connection to Discord, which receives all events the bot is made aware of, e.g. messages, channel edits, etc. Requests to the API, on the other hand, go out to Discord as separate HTTP requests.
 
 Small bots will require only one shard and this is the default when you instantiate a cluster. The library will automatically determine and create the correct number of shards needed, if you do not configure it by hand. If you do want to specify a number of shards, you can specify this when creating a cluster:
 
@@ -110,15 +110,16 @@ Small bots will require only one shard and this is the default when you instanti
 
 int main()
 {
-	/* This is a cluster */
-	int total_shards = 10;
-	dpp::cluster bot("Token goes here", dpp::i_default_intents, total_shards);
+    /* This is a cluster */
+    int total_shards = 10;
+    dpp::cluster bot("Token goes here", dpp::i_default_intents, total_shards);
 }
 ```
 
 Remember that if there are multiple clusters, the number of shards you request will be split equally across these clusters!
 
 @note To spawn multiple clusters, you can specify this as the 4th and 5th parameter of the dpp::cluster constructor. You must do this, if you want this functionality. The library will not create additional clusters for you, as what you require is dependent upon your system specifications. It is your responsibility to somehow get the cluster id and total clusters into the process, e.g. via a command line argument. An example of this is shown below based on the cluster setup code of **TriviaBot**:
+
 ```cpp
 #include <dpp/dpp.h>
 #include <iostream>
@@ -128,43 +129,43 @@ Remember that if there are multiple clusters, the number of shards you request w
 
 int main(int argc, char** argv)
 {
-	int total_shards = 64;
-	int index;
-	char arg;
-	bool clusters_defined = false;
-	uint32_t clusterid = 0;
-	uint32_t maxclusters = 1;
+    int total_shards = 64;
+    int index;
+    char arg;
+    bool clusters_defined = false;
+    uint32_t clusterid = 0;
+    uint32_t maxclusters = 1;
 
-	/* Parse command line parameters using getopt() */
-	struct option longopts[] =
-	{
-		{ "clusterid",   required_argument,  NULL,  'c' },
-		{ "maxclusters", required_argument,  NULL,  'm' },
-		{ 0, 0, 0, 0 }
-	};
-	opterr = 0;
-	while ((arg = getopt_long_only(argc, argv, "", longopts, &index)) != -1) {
-		switch (arg) {
-			case 'c':
-				clusterid = std::stoul(optarg);
-				clusters_defined = true;
-			break;
-			case 'm':
-				maxclusters = std::stoul(optarg);
-			break;
-			default:
-				std::cerr << "Unknown parameter '" << argv[optind - 1] << "'\n";
-				exit(1);
-			break;
-		}
-	}
+    /* Parse command line parameters using getopt() */
+    struct option longopts[] =
+    {
+        { "clusterid",   required_argument,  NULL,  'c' },
+        { "maxclusters", required_argument,  NULL,  'm' },
+        { 0, 0, 0, 0 }
+    };
+    opterr = 0;
+    while ((arg = getopt_long_only(argc, argv, "", longopts, &index)) != -1) {
+        switch (arg) {
+            case 'c':
+                clusterid = std::stoul(optarg);
+                clusters_defined = true;
+            break;
+            case 'm':
+                maxclusters = std::stoul(optarg);
+            break;
+            default:
+                std::cerr << "Unknown parameter '" << argv[optind - 1] << "'\n";
+                exit(1);
+            break;
+        }
+    }
 
-	if (clusters_defined && maxclusters == 0) {
-		std::cerr << "ERROR: You have defined a cluster id with -clusterid but no cluster count with -maxclusters.\n";
-		exit(2);
-	}
+    if (clusters_defined && maxclusters == 0) {
+        std::cerr << "ERROR: You have defined a cluster id with -clusterid but no cluster count with -maxclusters.\n";
+        exit(2);
+    }
 
-	dpp::cluster bot("Token goes here", dpp::default_intents, total_shards, clusterid, maxclusters);
+    dpp::cluster bot("Token goes here", dpp::default_intents, total_shards, clusterid, maxclusters);
 }
 ```
 
@@ -172,7 +173,6 @@ int main(int argc, char** argv)
 
 Discord restricts how many shards you can connect to at any one time to one per five seconds, unless your bot is in at least 150,000 guilds. Once you reach 150,000 guilds, Discord allow your bot to connect to more guilds concurrently, and your number of shards must divide cleanly into this value. By default, at 150,000 guilds this concurrency value is 16 meaning D++ will attempt to connect 16 shards in parallel, then wait for all these to connect and then connect another 16, until all shards are connected. In practice, this means a large bot with many shards (read: hundreds!) will connect significantly faster after a full restart. **You do not need to manually configure large bot sharding and connection concurrency, the D++ library will handle this for you if you are able to use it**.
 
-
 ## Guilds
 
-Guilds are what servers are known as to the Discord API. There can be up to **2500** of these per shard. Once you reach 2500 guilds on your bot, Discord force your bot to shard, the D++ library will automatically create additional shards to accomodate if not explicitly configured with a larger number. Discord *does not restrict sharding* to bots on 2500 guilds or above. You can shard at any size of bot, although it would be a waste of resources to do so unless it is required. 
+Guilds are what servers are known as to the Discord API. There can be up to **2500** of these per shard. Once you reach 2500 guilds on your bot, Discord forces your bot to shard, the D++ library will automatically create additional shards to accommodate if not explicitly configured with a larger number. Discord *does not restrict sharding* to bots on 2500 guilds or above. You can shard at any size of bot, although it would be a waste of resources to do so unless it is required. 

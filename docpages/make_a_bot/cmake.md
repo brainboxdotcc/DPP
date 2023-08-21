@@ -1,12 +1,12 @@
 \page buildcmake Building a Discord Bot using CMake/UNIX
 
 ## 1. Toolchain
+
 Before compiling, you will need to install `cmake` on your system.
 To be sure that `cmake` is installed, you can type the following command:
 
     $ cmake --version
     cmake version 3.20.4
-
 
 ## 2. Create a CMake project
 
@@ -18,14 +18,13 @@ In an empty directory, create the following files and directories:
             |-- main.cpp
         |-- CMakeLists.txt
 
-
 In the `libs/` directory, clone D++ with: `git clone https://github.com/brainboxdotcc/DPP.git`
 
 ## 3. Configure CMake
 
 Here is an example CMake configuration, adapt it according to your needs:
 
-~~~~~~~~~~~~~~{.cmake}
+```{.cmake}
 # minimum CMake version required
 cmake_minimum_required(VERSION 3.15)
 # Project name, version and description
@@ -58,7 +57,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
-~~~~~~~~~~~~~~
+```
 
 Your project directory should look like this:
 
@@ -69,6 +68,4 @@ Your project directory should look like this:
             |-- main.cpp
         |-- CMakeLists.txt
 
-
 **Have fun!**
-

@@ -18,7 +18,6 @@ We'll use the following file structure as a _skeleton project you can build upon
             |-- main.cpp
         |-- CMakeLists.txt
 
-
 Create the directories in your project and move the by CLion generated _hello-world main.cpp_ in the `src/` directory.
 
 In the `libs/` directory, clone D++ with: `git clone https://github.com/brainboxdotcc/DPP.git`. You can also clone [spdlog](https://github.com/gabime/spdlog) into it if you need a logger.
@@ -31,7 +30,7 @@ Your project directory should look like this:
 
 Paste this CMake configuration in the `CMakeLists.txt` and adapt it according to your needs:
 
-~~~~~~~~~~~~~~{.cmake}
+```{.cmake}
 # minimum CMake version required
 cmake_minimum_required(VERSION 3.15)
 # Project name, version and description
@@ -65,7 +64,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17 # or 20 if you want something more recent
     CXX_STANDARD_REQUIRED ON
 )
-~~~~~~~~~~~~~~
+```
 
 Then open the "File" menu and click on "Reload CMake Project" to reload the CMake configuration.
 
@@ -75,8 +74,7 @@ Then open the "File" menu and click on "Reload CMake Project" to reload the CMak
 
 The next step is to write the bot. Copy and paste the following [example program](https://dpp.dev/firstbot.html) in the `main.cpp` and set your bot token (see [Creating a Bot Token](https://dpp.dev/creating-a-bot-application.html)):
 
-
-~~~~~~~~~~~~~~~{.cpp}
+```{.cpp}
 #include <dpp/dpp.h>
 
 const std::string    BOT_TOKEN    = "add your token here";
@@ -102,8 +100,7 @@ int main() {
 
     bot.start(dpp::st_wait);
 }
-~~~~~~~~~~~~~~~
-
+```
 
 Hit the green "Run" button in the top-right to run the bot.
 
@@ -112,4 +109,3 @@ Hit the green "Run" button in the top-right to run the bot.
 ## Troubleshooting
 
 - Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
-

@@ -1,6 +1,6 @@
 # Example Programs
 
-There are example programs here for all skill levels demonstrating a great many features of the bot. New examples are added frequently, please check regularly for new content.
+There are example programs here for all skill levels demonstrating a great many features of the bot. 
 
 * \subpage the-basics
 * \subpage interactions-and-components

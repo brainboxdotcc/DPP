@@ -11,4 +11,3 @@ Click on a link below for a guide specifically for your system:
 * \subpage buildcmake "Building a Discord Bot using CMake/UNIX"
 * \subpage buildmeson "Building a Discord Bot using Meson"
 * \subpage building-a-cpp-discord-bot-in-repl "Creating a Discord bot in Repl.it"
-

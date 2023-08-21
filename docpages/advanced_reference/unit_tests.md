@@ -25,4 +25,3 @@ Then, set the following variables to the appropriate values. (Below is a fake to
 Then, after cloning and building DPP, run `cd build && ctest -VV` for unit test cases. 
 
 If you do not specify the `DPP_UNIT_TEST_TOKEN` environment variable, a subset of the tests will run which do not require discord connectivity.
-

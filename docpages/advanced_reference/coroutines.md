@@ -4,12 +4,11 @@
 
 ### What is a coroutine?
 
-Introduced in C++20, coroutines are the solution to the impracticality of callbacks. In short, a coroutine is a function that can be paused and resumed later : they are an extremely powerful alternative to callbacks for asynchronous APIs in particular, as the function can be paused when waiting for an API response, and resumed when it is received.
+Introduced in C++20, coroutines are the solution to the impracticality of callbacks. In short, a coroutine is a function that can be paused and resumed later: they are an extremely powerful alternative to callbacks, for asynchronous APIs in particular, as the function can be paused when waiting for an API response, and resumed when it is received.
 
-Let's revisit [attaching a downloaded file](/attach-file.html), but this time with a coroutine :
+Let's revisit [attaching a downloaded file](/attach-file.html), but this time with a coroutine:
 
-
-~~~~~~~~~~~~~~~{.cpp}
+```{.cpp}
 #include <dpp/dpp.h>
 
 int main() {
@@ -20,7 +19,7 @@ int main() {
     /* Message handler to look for a command called !file */
     /* Make note of passing the event by value, this is important (explained below) */
     bot.on_message_create.co_attach([](dpp::message_create_t event) -> dpp::task<void> {
-		dpp::cluster *cluster = event.from->creator;
+        dpp::cluster *cluster = event.from->creator;
 
         if (event.msg.content == "!file") {
             // request an image and co_await the response
@@ -42,27 +41,26 @@ int main() {
     bot.start(dpp::st_wait);
     return 0;
 }
-~~~~~~~~~~~~~~~
-
+```
 
 Coroutines can make commands simpler by eliminating callbacks, which can be very handy in the case of complex commands that rely on a lot of different data or steps. 
 
 In order to be a coroutine, a function has to return a special type with special functions; D++ offers `dpp::task` which is designed to work seamlessly with asynchronous calls through `dpp::awaitable`, which all the functions starting with `co_` such as `dpp::cluster::co_message_create` return. To turn a function into a coroutine, simply make it return `dpp::task<void>` as seen in the example at line 10.
 
-When an awaitable is `co_await`-ed, the coroutine suspends (pauses) and returns back to its caller : in other words, the program is free to go and do other things while the data is being retrieved, D++ will resume your coroutine when it has the data you need which will be returned from the `co_await` expression.
+When an awaitable is `co_await`-ed, the coroutine suspends (pauses) and returns back to its caller: in other words, the program is free to go and do other things while the data is being retrieved, D++ will resume your coroutine when it has the data you need which will be returned from the `co_await` expression.
 
 Inside of a `dpp::task`, someone can use `co_return` in place of `return`.
 
-\attention As a rule of thumb when making dpp::task objects and in general coroutines, always prefer taking parameters by value and avoid capture : this may be confusing but a coroutine is *not* the lambda creating it, the captures are not bound to it and the code isn't ran inside the lambda. The lambda that returns a dpp::task simply returns a task object containing the code, which goes on to live on its own, separate from the lambda.
-Similarly, with reference parameters, the object they reference to might be destroyed while the coroutine is suspended and resumed in another thread, which is why you want to pass by value. See also [lambdas and locals](/lambdas-and-locals.html) except this also applies to parameters in the case of coroutines.
+\attention As a rule of thumb when making `dpp::task` objects, and in general for coroutines, always prefer taking parameters by value and avoid captures: this may be confusing but a coroutine is *not* the lambda creating it, the captures are not bound to it and the code isn't run inside the lambda. The lambda that returns a `dpp::task` object containing the code, which goes on to live on its own, separate from the lambda.
+Similarly, with reference parameters, the object they reference to might be destroyed while the coroutine is suspended and resumed in another thread, which is why you want to pass by value. See also [lambdas and locals](/lambdas-and-locals.html), except this also applies to parameters in the case of coroutines.
 
 ### Several steps in one
 
 \note The next example assumes you are already familiar with how to use [slash commands](/firstbot.html), [parameters](/slashcommands.html), and [sending files through a command](/discord-application-command-file-upload.html).
 
-Coroutines allow to write asynchronous functions almost as if they were executed synchronously, without the need for callbacks, which can save a lot of pain with keeping track of different data. Here is another example of what is made easier with coroutines : an "addemoji" command taking a file and a name as a parameter. This means downloading the emoji, submitting it to Discord, and finally replying, with some error handling along the way.
+Coroutines allows creation of asynchronous functions almost as if they were executed synchronously, without the need for callbacks, which can save a lot of pain with keeping track of different data. Here is another example of what is made easier with coroutines: an "addemoji" command taking a file and a name as parameters. This means downloading the emoji, submitting it to Discord, and finally replying, with some error handling along the way.
 
-~~~~~~~~~~{.cpp}
+```{.cpp}
 #include <dpp/dpp.h>
 
 int main() {
@@ -87,7 +85,7 @@ int main() {
                 co_return;
             }
             // Send a "<bot> is thinking..." message, to wait on later so we can edit
-            dpp::awaitable thinking = event.co_thinking(false);	
+            dpp::awaitable thinking = event.co_thinking(false);    
 
             // Download and co_await the result
             dpp::http_request_completion_t response = co_await cluster->co_request(attachment.url, dpp::m_get);
@@ -127,7 +125,7 @@ int main() {
 
     bot.start(dpp::st_wait);
 }
-~~~~~~~~~~
+```
 
 ### I heard you liked tasks
 
@@ -135,9 +133,9 @@ int main() {
 
 Lastly, `dpp::task` takes its return type as a template parameter, which allows you to use tasks inside tasks and return a result from them.
 
-Here is an example of a command making use of that to retrieve the avatar of a specified user, or if missing, the sender :
+Here is an example of a command making use of that to retrieve the avatar of a specified user, or if missing, the sender:
 
-~~~~~~~~~~{.cpp}
+```{.cpp}
 #include <dpp/dpp.h>
 
 int main() {
@@ -225,4 +223,4 @@ int main() {
 
     bot.start(dpp::st_wait);
 }
-~~~~~~~~~~
+```
