@@ -13,12 +13,12 @@ In the example below we will use it to collect all reactions on a message.
 class react_collector : public dpp::reaction_collector {
 public:
 	/* Collector will run for 20 seconds */
-	react_collector(dpp::cluster* cl, snowflake id) : dpp::message_collector(cl, 20, id) { }
+	react_collector(dpp::cluster* cl, snowflake id) : dpp::reaction_collector(cl, 20, id) { }
 
-	/* On completion just output number of collected reactions to as a message. */
-	virtual void completed(const std::vector<dpp::collected_reaction>& list) {
+	/* Override the "completed" event and then output the number of collected reactions as a message. */
+	virtual void completed(const std::vector<dpp::collected_reaction>& list) override {
 		if (list.size()) {
-			owner->message_create(dpp::message(list[0].channel_id, "I collected " + std::to_string(list.size()) + " reactions!"));
+			owner->message_create(dpp::message(list[0].react_channel->id, "I collected " + std::to_string(list.size()) + " reactions!"));
 		} else {
 			owner->message_create(dpp::message("... I got nothin'."));
 		}
@@ -33,10 +33,10 @@ int main() {
 	/* Pointer to reaction collector */
 	react_collector* r = nullptr;
 
-        bot.on_log(dpp::utility::cout_logger());
+    bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler */
-	bot.on_message_create([&](const dpp::message_create_t &event) {
+	bot.on_message_create([&](const dpp::message_create_t& event) {
 
 		/* If someone sends a message that has the text 'collect reactions!' start a reaction collector */
 		if (event.msg.content == "collect reactions!" && r == nullptr) {
