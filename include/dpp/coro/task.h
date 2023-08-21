@@ -68,8 +68,9 @@ template <typename R>
 using task_handle = detail::std_coroutine::coroutine_handle<detail::task_promise<R>>;
 
 /**
- * @brief Base class of dpp::task<R>. This class should not be used directly by a user, use dpp::task<R> instead.
+ * @brief Base class of dpp::task<R>.
  *
+ * @warning This class should not be used directly by a user, use dpp::task<R> instead.
  * @note This class contains all the functions used internally by co_await. It is intentionally opaque and a private base of dpp::task<R> so a user cannot call await_suspend and await_resume directly.
  */
 template <typename R>
@@ -244,8 +245,9 @@ requires (!std::is_reference_v<R>)
 #endif
 class task : private detail::task_base<R> {
 	/**
-	 * @brief Private base class containing common logic between task<R> and task<void>. It also serves to prevent await_suspend and await_resume from being used directly.
+	 * @brief Internal use only base class containing common logic between task<R> and task<void>. It also serves to prevent await_suspend and await_resume from being used directly.
 	 *
+	 * @warning For internal use only, do not use.
 	 * @see operator co_await()
 	 */
 	friend class detail::task_base<R>;
@@ -290,11 +292,71 @@ class task : private detail::task_base<R> {
 	}
 
 public:
+#ifdef _DOXYGEN_ // :)
+	/**
+	 * @brief Default constructor, creates a task not bound to a coroutine.
+	 */
+	task() = default;
+
+	/**
+	 * @brief Copy constructor is disabled
+	 */
+	task(const task &) = delete;
+
+	/**
+	 * @brief Move constructor, grabs another task's coroutine handle
+	 *
+	 * @param other Task to move the handle from
+	 */
+	task(task &&other) noexcept;
+
+	/**
+	 * @brief Destructor.
+	 *
+	 * Destroys the handle.
+	 * @warning The coroutine must be finished before this is called, otherwise it runs the risk of being resumed after it is destroyed, resuming in use-after-free undefined behavior.
+	 */
+	~task();
+
+	/**
+	 * @brief Copy assignment is disabled
+	 */
+	task &operator=(const task &) = delete;
+
+	/**
+	 * @brief Move assignment, grabs another task's coroutine handle
+	 *
+	 * @param other Task to move the handle from
+	 */
+	task &operator=(task &&other) noexcept;
+
+	/**
+	 * @brief Function to check if the task has finished its execution entirely
+	 *
+	 * @return bool Whether the task is finished.
+	 */
+	[[nodiscard]] bool done() const noexcept;
+
+	/**
+	 * @brief Cancel the task, it will stop the next time it uses co_await. On co_await-ing this task, throws dpp::task_cancelled_exception.
+	 */
+	dpp::task<R>& cancel() & noexcept;
+
+	/**
+	 * @brief Check whether or not a call to co_await will suspend the caller.
+	 *
+	 * This function is called by the standard library as a first step when using co_await. If it returns true then the caller is not suspended.
+	 * @throws logic_exception if the task is empty.
+	 * @return bool Whether not to suspend the caller or not
+	 */
+	bool await_ready() const;
+#else
 	using detail::task_base<R>::task_base; // use task_base's constructors
 	using detail::task_base<R>::operator=; // use task_base's assignment operators
 	using detail::task_base<R>::done; // expose done() as public
 	using detail::task_base<R>::cancel; // expose cancel() as public
 	using detail::task_base<R>::await_ready; // expose await_ready as public
+#endif
 
 	/**
 	 * @brief Suspend the current coroutine until the task completes.
@@ -327,6 +389,7 @@ public:
 	}
 };
 
+#ifndef _DOXYGEN_ // don't generate this on doxygen because `using` doesn't work and 2 copies of coroutine_base's docs is enough
 /**
  * @brief A coroutine task. It starts immediately on construction and can be co_await-ed, making it perfect for parallel coroutines returning a value.
  *
@@ -386,6 +449,7 @@ public:
 		return static_cast<detail::task_base<void>&&>(*this);
 	}
 };
+#endif /* _DOXYGEN_ */
 
 namespace detail {
 	/**
@@ -622,10 +686,12 @@ std_coroutine::coroutine_handle<> detail::task_chain_final_awaiter<R>::await_sus
 
 } // namespace detail
 
+#ifndef _DOXYGEN_
 inline void task<void>::await_resume_impl() const {
 	if (handle.promise().exception)
 		std::rethrow_exception(handle.promise().exception);
 }
+#endif /* _DOXYGEN_ */
 
 } // namespace dpp
 

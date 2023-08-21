@@ -44,8 +44,9 @@ template <typename R>
 using coroutine_handle = std_coroutine::coroutine_handle<coroutine_promise<R>>;
 
 /**
- * @brief Base class of dpp::coroutine<R>. This class should not be used directly by a user, use dpp::coroutine<R> instead.
+ * @brief Base class of dpp::coroutine<R>.
  *
+ * @warn This class should not be used directly by a user, use dpp::coroutine<R> instead.
  * @note This class contains all the functions used internally by co_await. It is intentionally opaque and a private base of dpp::coroutine<R> so a user cannot call await_suspend and await_resume directly.
  */
 template <typename R>
@@ -181,7 +182,10 @@ public:
 template <typename R>
 class coroutine : private detail::coroutine_base<R> {
 	/**
-	 * @brief Base class has friend access for CRTP downcast
+	 * @brief Internal use only base class containing common logic between coroutine<R> and coroutine<void>. It also serves to prevent await_suspend and await_resume from being used directly.
+	 *
+	 * @warning For internal use only, do not use.
+	 * @see operator co_await()
 	 */
 	friend class detail::coroutine_base<R>;
 
@@ -207,9 +211,54 @@ class coroutine : private detail::coroutine_base<R> {
 	}
 
 public:
+#ifdef _DOXYGEN_ // :))))
+	/**
+	 * @brief Default constructor, creates an empty coroutine.
+	 */
+	coroutine() = default;
+
+	/**
+	 * @brief Copy constructor is disabled
+	 */
+	coroutine(const coroutine &) = delete;
+
+	/**
+	 * @brief Move constructor, grabs another coroutine's handle
+	 *
+	 * @param other Coroutine to move the handle from
+	 */
+	coroutine(coroutine &&other) noexcept;
+
+	/**
+	 * @brief Destructor, destroys the handle.
+	 */
+	~coroutine();
+
+	/**
+	 * @brief Copy assignment is disabled
+	 */
+	coroutine &operator=(const coroutine &) = delete;
+
+	/**
+	 * @brief Move assignment, grabs another coroutine's handle
+	 *
+	 * @param other Coroutine to move the handle from
+	 */
+	coroutine &operator=(coroutine &&other) noexcept;
+
+	/**
+	 * @brief First function called by the standard library when the coroutine is co_await-ed.
+	 *
+	 * @remark Do not call this manually, use the co_await keyword instead.
+	 * @throws invalid_operation_exception if the coroutine is empty or finished.
+	 * @return bool Whether the coroutine is done
+	 */
+	bool await_ready() const;
+#else
 	using detail::coroutine_base<R>::coroutine_base; // use coroutine_base's constructors
 	using detail::coroutine_base<R>::operator=; // use coroutine_base's assignment operators
 	using detail::coroutine_base<R>::await_ready; // expose await_ready as public
+#endif
 
 	/**
 	 * @brief Suspend the caller until the coroutine completes.
@@ -242,6 +291,7 @@ public:
 	}
 };
 
+#ifndef _DOXYGEN_ // don't generate this on doxygen because `using` doesn't work and 2 copies of coroutine_base's docs is enough
 /**
  * @brief Base type for a coroutine, starts on co_await.
  *
@@ -293,6 +343,7 @@ public:
 		return static_cast<detail::coroutine_base<void>&&>(*this);
 	}
 };
+#endif /* _DOXYGEN_ */
 
 namespace detail {
 	template <typename R>
@@ -493,10 +544,12 @@ namespace detail {
 
 } // namespace detail
 
+#ifndef _DOXYGEN_
 inline void coroutine<void>::await_resume_impl() const {
 	if (handle.promise().exception)
 		std::rethrow_exception(handle.promise().exception);
 }
+#endif /* _DOXYGEN_ */
 
 } // namespace dpp
 

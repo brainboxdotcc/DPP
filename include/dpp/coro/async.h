@@ -103,8 +103,9 @@ struct async_callback_data {
 };
 
 /**
- * @brief Base class of dpp::async<R>. This class should not be used directly by a user, use dpp::async<R> instead.
+ * @brief Base class of dpp::async<R>.
  *
+ * @warning This class should not be used directly by a user, use dpp::async<R> instead.
  * @note This class contains all the functions used internally by co_await. It is intentionally opaque and a private base of dpp::async<R> so a user cannot call await_suspend and await_resume directly.
  */
 template <typename R>
@@ -299,11 +300,8 @@ public:
 	async_base &operator=(async_base &&other) noexcept = default;
 
 	/**
-	 * @brief First function called by the standard library when the object is co-awaited.
+	 * @brief Check whether or not co_await-ing this would suspend the caller, i.e. if we have the result or not
 	 *
-	 * Returns whether we already have the result of the API call and don't need to suspend the caller.
-	 *
-	 * @remark Do not call this manually, use the co_await keyword instead.
 	 * @return bool Whether we already have the result of the API call or not
 	 */
 	bool await_ready() const noexcept {
@@ -316,7 +314,7 @@ public:
 	 * Checks again for the presence of the result, if absent, signals to suspend and keep track of the calling coroutine for the callback to resume.
 	 *
 	 * @remark Do not call this manually, use the co_await keyword instead.
-	 * @param handle The handle to the coroutine co_await-ing and being suspended
+	 * @param caller The handle to the coroutine co_await-ing and being suspended
 	 */
 	bool await_suspend(detail::std_coroutine::coroutine_handle<> caller) noexcept {
 		auto sent = detail::async_state_t::sent;
@@ -372,7 +370,10 @@ struct confirmation_callback_t;
 template <typename R>
 class async : private detail::async_base<R> {
 	/**
-	 * @brief Base class has friend access for CRTP downcast
+	 * @brief Internal use only base class. It serves to prevent await_suspend and await_resume from being used directly.
+	 *
+	 * @warning For internal use only, do not use.
+	 * @see operator co_await()
 	 */
 	friend class detail::async_base<R>;
 
@@ -405,6 +406,55 @@ public:
 	requires std::invocable<Fun, Args..., std::function<void(R)>>
 #endif
 	explicit async(Fun &&fun, Args&&... args) : detail::async_base<R>{std::forward<Fun>(fun), std::forward<Args>(args)...} {}
+
+#ifdef _DOXYGEN_ // :)
+	/**
+	 * @brief Construct an empty async. Using `co_await` on an empty async is undefined behavior.
+	 */
+	async() noexcept;
+
+	/**
+	 * @brief Destructor. If any callback is pending it will be aborted.
+	 */
+	~async();
+
+	/**
+	 * @brief Copy constructor is disabled
+	 */
+	async(const async &);
+
+	/**
+	 * @brief Move constructor
+	 *
+	 * NOTE: Despite being marked noexcept, this function uses std::lock_guard which may throw. The implementation assumes this can never happen, hence noexcept. Report it if it does, as that would be a bug.
+	 *
+	 * @remark Using the moved-from async after this function is undefined behavior.
+	 * @param other The async object to move the data from.
+	 */
+	async(async &&other) noexcept = default;
+
+	/**
+	 * @brief Copy assignment is disabled
+	 */
+	async &operator=(const async &) = delete;
+
+	/**
+	 * @brief Move assignment operator.
+	 *
+	 * NOTE: Despite being marked noexcept, this function uses std::lock_guard which may throw. The implementation assumes this can never happen, hence noexcept. Report it if it does, as that would be a bug.
+	 *
+	 * @remark Using the moved-from async after this function is undefined behavior.
+	 * @param other The async object to move the data from
+	 */
+	async &operator=(async &&other) noexcept = default;
+
+	/**
+	 * @brief Check whether or not co_await-ing this would suspend the caller, i.e. if we have the result or not
+	 *
+	 * @return bool Whether we already have the result of the API call or not
+	 */
+	bool await_ready() const noexcept;
+#endif
 
 	/**
 	 * @brief Suspend the caller until the request completes.
