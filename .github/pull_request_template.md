@@ -5,4 +5,4 @@
 - [ ] I have ensured that I did not break any existing API calls.
 - [ ] My code follows the [coding style guide](https://dpp.dev/coding-standards.html) (if you are not sure, match the code style of existing files including indent style etc).
 - [ ] I have not built my pull request using AI, a static analysis tool or similar without any human oversight. Where I have generated this pull request using a tool, I have justified why this is needed.
-- [ ] I agree to the terms of the [DCO (Developer Certificate of Origin)]((https://dpp.dev/coding-standards.html))
+
