@@ -1,8 +1,6 @@
 \page embed-message Sending Embeds
 
-You might have seen these special messages, often sent by bots. In this section, we will show how to create an embed.
-
-@note Because this example utilizes message content, it requires the message content privileged intent. 
+If you've been in a server and used a bot or even seen a message from a bot, you might have seen a special messages, often sent by these bots. These are called embeds! In this section, we will show how to create an embed and reply to a user, using our newly created embed!
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -11,11 +9,12 @@ int main() {
     /* Setup the bot */
     dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
-    /* Message handler to look for a command called !embed */
-    bot.on_message_create([&bot](const dpp::message_create_t & event) {
-        if (event.msg.content == "!embed") {
+    /* The event is fired when someone issues your commands */
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+		/* Check which command they ran */
+		if (event.command.get_command_name == "embed") {
 
-            /* create the embed */
+            /* Create an embed */
             dpp::embed embed = dpp::embed().
                 set_color(dpp::colors::sti_blue).
                 set_title("Some name").
@@ -41,8 +40,19 @@ int main() {
                 set_footer(dpp::embed_footer().set_text("Some footer text here").set_icon("https://dpp.dev/DPP-Logo.png")).
                 set_timestamp(time(0));
 
-            /* reply with the created embed */
-            bot.message_create(dpp::message(event.msg.channel_id, embed).set_reference(event.msg.id));
+			/* Create a message with the content as our new embed. */
+			dpp::message msg(event.command.channel_id, embed);
+
+			/* Reply to the user with the message, containing our embed. */
+			event.reply(msg);
+		}
+	});
+
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+
+            /* Create and register a command when the bot is ready */
+            bot.global_command_create(dpp::slashcommand("embed", "Send a test embed!", bot.me.id));
         }
     });
 

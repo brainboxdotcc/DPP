@@ -273,6 +273,7 @@ public:
 	 * 
 	 * @param mode websocket protocol to use, either ws_json or ws_etf.
 	 * @return cluster& Reference to self for chaining.
+	 * @throw dpp::logic_exception If called after the cluster is started (this is not supported)
 	 */
 	cluster& set_websocket_protocol(websocket_protocol_t mode);
 

@@ -14,43 +14,55 @@ exercise to the reader. For further reading please see the documentation of dpp:
 
 int main() {
 	/* Create bot */
-	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content); /* Because we're handling messages, we need to use the "i_message_content" intent! */
 
 	/* Create a cache to contain types of dpp::message */
 	dpp::cache<dpp::message> message_cache;
 
-        bot.on_log(dpp::utility::cout_logger());
+    bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler */
 	bot.on_message_create([&](const dpp::message_create_t &event) {
-
 		/* Make a permanent pointer using new, for each message to be cached */
 		dpp::message* m = new dpp::message();
+
 		/* Store the message into the pointer by copying it */
 		*m = event.msg;
+
 		/* Store the new pointer to the cache using the store() method */
 		message_cache.store(m);
+	});
 
-		/* Simple ghetto command handler. In the real world, use slashcommand or commandhandler here. */
-		std::stringstream ss(event.msg.content);
-		std::string cmd;
-		dpp::snowflake msg_id;
-		ss >> cmd;
+	/* The event is fired when someone issues your commands */
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+		/* Check which command they ran */
+		if (event.command.get_command_name() == "get") {
 
-		/* Look for our command */
-		if (cmd == "!get") {
-			ss >> msg_id;
-			/* Search our cache for a cached message */
-			dpp::message* find_msg = message_cache.find(msg_id);
-			if (find_msg != nullptr) {
-				/* Found a cached message, echo it out */
-				bot.message_create(dpp::message(event.msg.channel_id, "This message had the following content: " + find_msg->content));
-			} else {
-				/* Nothing like that here. Have you checked under the carpet? */
-				bot.message_create(dpp::message(event.msg.channel_id, "There is no message cached with this ID"));
+			dpp::message* find_msg = message_cache.find(std::get<std::string>(event.get_parameter("message_id")));
+
+			/* If find_msg is null, tell the user and return. */
+			if (!find_msg) {
+				event.reply("There is no message cached with this ID");
+				return;
 			}
+
+			event.reply("This message had the following content: " + find_msg->content);
 		}
 	});
+
+	bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
+
+			/* Create a new command. */
+			dpp::slashcommand newcommand("get", "Get the contents of a message that was cached via an id", bot.me.id);
+
+			/* Add a parameter option. */
+			newcommand.add_option(dpp::command_option(dpp::co_string, "message_id", "The ID of the message you want to find", true));
+
+            /* Register the command */
+            bot.global_command_create(newcommand);
+        }
+    });
 
 	/* Start bot */
 	bot.start(dpp::st_wait);
