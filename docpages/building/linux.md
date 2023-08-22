@@ -9,7 +9,7 @@
     
 Replace the number after `-j` with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
-## 2. Install to `/usr/local/include` and `/usr/local/lib`
+## 2. Install to /usr/local/include and /usr/local/lib
 
     cd build; sudo make install
 

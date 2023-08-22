@@ -1,6 +1,6 @@
 \page install-linux-deb Installing from a .deb file (Debian, Ubuntu, Derivatives)
 
-To install D++ on a system from `.deb` using dpkg (as root):
+To install D++ on a system from `.deb` using `dpkg` (as root):
 
 ```
 apt install wget
