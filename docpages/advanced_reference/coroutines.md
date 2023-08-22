@@ -175,8 +175,6 @@ int main() {
 }
 ```
 
-\warning D++ Coroutines are a very new feature and are currently only supported by D++ on g++ 13.1 and MSVC 19.37, and the CMake option DPP_CORO must be enabled. They are experimental and may have bugs or even crashes, please report any to [GitHub Issues](https://github.com/brainboxdotcc/DPP/issues) or to our [Discord Server](https://discord.gg/dpp).
-
 ### What is a coroutine?
 
 Introduced in C++20, coroutines are the solution to the impracticality of callbacks. In short, a coroutine is a function that can be paused and resumed later: they are an extremely powerful alternative to callbacks, for asynchronous APIs in particular, as the function can be paused when waiting for an API response, and resumed when it is received.
