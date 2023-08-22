@@ -10,5 +10,5 @@ gh release download "$1"
 sleep 2
 rm -fv *.asc
 find . -type f -exec gpg --armor --detach-sign {} \;
-gh release upload "$1" * --clobber
+gh release upload "$1" ./* --clobber
 
