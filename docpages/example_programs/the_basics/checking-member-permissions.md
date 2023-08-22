@@ -5,7 +5,7 @@ But there's a helper method for that: dpp::guild::base_permissions gets a member
 
 For total member permissions including channel overwrites use either the dpp::channel::get_user_permissions or dpp::guild::permission_overwrites method. Both do the same under the hood.
 
-They all return a dpp::permission class, which is a wrapper around a permission bitmask containing bits of the dpp::permission enum.
+They all return a dpp::permission class, which is a wrapper around a permission bitmask containing bits of the dpp::permissions enum.
 
 Demonstration:
 
