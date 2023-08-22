@@ -101,7 +101,7 @@ int main()
 
 ## Shards
 
-A cluster contains zero or more shards. Each shard maintains a persistent websocket connection to Discord via a websocket, which receives all events the bot is made aware of, e.g. messages, channel edits, etc. Requests to the API on the other hand go out to Discord as separate HTTP requests.
+A cluster contains zero or more shards. Each shard maintains a persistent connection to Discord via a websocket, which receives all events the bot is made aware of, e.g. messages, channel edits, etc. Requests to the API on the other hand go out to Discord as separate HTTP requests.
 
 Small bots will require only one shard and this is the default when you instantiate a cluster. The library will automatically determine and create the correct number of shards needed, if you do not configure it by hand. If you do want to specify a number of shards, you can specify this when creating a cluster:
 
@@ -118,7 +118,7 @@ int main()
 
 Remember that if there are multiple clusters, the number of shards you request will be split equally across these clusters!
 
-@note To spawn multiple clusters, you can specify this as the 4th and 5th parameter of the dpp::cluster constructor. You must do this, if you want this functionality. The library will not create additional clusters for you, as what you require is dependent upon your system specifications. It is your responsibility to somehow get the cluster id and total clusters into the process, e.g. via a command line argument. An example of this is shown below based on the cluster setup code of **TriviaBot**:
+@note To spawn multiple clusters, you can specify this as the 4th and 5th parameter of the `dpp::cluster` constructor. You must do this, if you want this functionality. The library will not create additional clusters for you, as what you require is dependent upon your system specifications. It is your responsibility to somehow get the cluster id and total clusters into the process, e.g. via a command line argument. An example of this is shown below based on the cluster setup code of **TriviaBot**:
 ```cpp
 #include <dpp/dpp.h>
 #include <iostream>
@@ -175,4 +175,4 @@ Discord restricts how many shards you can connect to at any one time to one per 
 
 ## Guilds
 
-Guilds are what servers are known as to the Discord API. There can be up to **2500** of these per shard. Once you reach 2500 guilds on your bot, Discord force your bot to shard, the D++ library will automatically create additional shards to accomodate if not explicitly configured with a larger number. Discord *does not restrict sharding* to bots on 2500 guilds or above. You can shard at any size of bot, although it would be a waste of resources to do so unless it is required. 
+Guilds are what servers are known as to the Discord API. There can be up to **2500** of these per shard. Once you reach 2500 guilds on your bot, Discord force your bot to shard, the D++ library will automatically create additional shards to accommodate if not explicitly configured with a larger number. Discord *does not restrict sharding* to bots on 2500 guilds or above. You can shard at any size of bot, although it would be a waste of resources to do so unless it is required. 

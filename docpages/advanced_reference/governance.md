@@ -16,4 +16,4 @@ For most decisions, these are discussed in our `#library-development` channel on
 
 ## Contingency
 
-*In the case of any unforseen disaster such as death of the project leader, control over domain (the only part of the project which has a direct cost attached) would pass to his next of kin who would arrange for transfer to a pre-arranged trusted third party who would adminisrate the domain going forward. Everything else relating to D++ is hosted on GitHub and would continue as normal.*
+*In the case of any unforeseen disaster such as death of the project leader, control over domain (the only part of the project which has a direct cost attached) would pass to his next of kin who would arrange for transfer to a pre-arranged trusted third party who would administrate the domain going forward. Everything else relating to D++ is hosted on GitHub and would continue as normal.*

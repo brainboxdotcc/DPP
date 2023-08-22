@@ -4,9 +4,9 @@
 
 ### What is a coroutine?
 
-Introduced in C++20, coroutines are the solution to the impracticality of callbacks. In short, a coroutine is a function that can be paused and resumed later : they are an extremely powerful alternative to callbacks for asynchronous APIs in particular, as the function can be paused when waiting for an API response, and resumed when it is received.
+Introduced in C++20, coroutines are the solution to the impracticality of callbacks. In short, a coroutine is a function that can be paused and resumed later. They are an extremely powerful alternative to callbacks for asynchronous APIs in particular, as the function can be paused when waiting for an API response, and resumed when it is received.
 
-Let's revisit [attaching a downloaded file](/attach-file.html), but this time with a coroutine :
+Let's revisit [attaching a downloaded file](/attach-file.html), but this time with a coroutine:
 
 
 ~~~~~~~~~~~~~~~{.cpp}
@@ -49,15 +49,15 @@ Coroutines can make commands simpler by eliminating callbacks, which can be very
 
 In order to be a coroutine, a function has to return a special type with special functions; D++ offers `dpp::job`, `dpp::task<R>`, and `dpp::coroutine<R>`, which are designed to work seamlessly with asynchronous calls through `dpp::async`, which all the functions starting with `co_` such as `dpp::cluster::co_message_create` return. Event routers can have a `dpp::job` attached to them, as this object allows to create coroutines that can execute on their own, asynchronously. More on that and the difference between it and the other two types later. To turn a function into a coroutine, simply make it return `dpp::job` as seen in the example at line 10, then use `co_await` on awaitable types or `co_return`. The moment the execution encounters one of these two keywords, the function is transformed into a coroutine.
 
-When using a co_* function such as `co_message_create`, the request is sent immediately and the returned `dpp::async` can be `co_await`-ed, at which point the coroutine suspends (pauses) and returns back to its caller : in other words, the program is free to go and do other things while the data is being retrieved and D++ will resume your coroutine when it has the data you need, which will be returned from the `co_await` expression.
+When using a `co_`* function such as `co_message_create`, the request is sent immediately and the returned `dpp::async` can be `co_await`-ed, at which point the coroutine suspends (pauses) and returns back to its caller; in other words, the program is free to go and do other things while the data is being retrieved and D++ will resume your coroutine when it has the data you need, which will be returned from the `co_await` expression.
 
-\attention You may hear that coroutines are "writing async code as if it was sync", while this is sort of correct, it may limit your understandings and especially of the dangers of coroutines. I find **they are best thought of as a shortcut for a state machine**. If you've ever written one, you know what this means : think of the lambda as *its constructor*, in which captures are variable parameters. Think of the parameters passed to your lambda as data members in your state machine. References are kept as references, and by the time the state machine is resumed, the reference may be dangling : [this is not good](/lambdas-and-locals.html)! As a rule of thumb when making coroutines, **always prefer taking parameters by value and avoid lambda capture**. 
+\attention You may hear that coroutines are "writing async code as if it was sync", while this is sort of correct, it may limit your understanding and especially that of the dangers of coroutines. I find **they are best thought of as a shortcut for a state machine**. If you've ever written one, you know what this means. Think of the lambda as *its constructor*, in which captures are variable parameters. Think of the parameters passed to your lambda as data members in your state machine. References are kept as references, and by the time the state machine is resumed, the reference may be dangling : [this is not good](/lambdas-and-locals.html)! As a rule of thumb when making coroutines, **always prefer taking parameters by value and avoid lambda capture**. 
 
 ### Several steps in one
 
 \note The next example assumes you are already familiar with how to use [slash commands](/firstbot.html), [parameters](/slashcommands.html), and [sending files through a command](/discord-application-command-file-upload.html).
 
-Here is another example of what is made easier with coroutines : an "addemoji" command taking a file and a name as a parameter. This means downloading the emoji, submitting it to Discord, and finally replying, with some error handling along the way. Normally we would have to use callbacks and some sort of object keeping track of our state, but with coroutines, it becomes much simpler :
+Here is another example of what is made easier with coroutines, an "addemoji" command taking a file and a name as a parameter. This means downloading the emoji, submitting it to Discord, and finally replying, with some error handling along the way. Normally we would have to use callbacks and some sort of object keeping track of our state, but with coroutines, it becomes much simpler:
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -130,9 +130,9 @@ int main() {
 
 \note This next example is fairly advanced and makes use of many of both C++ and D++'s advanced features.
 
-Earlier we mentioned two other types of coroutines provided by dpp : `dpp::coroutine<R>` and `dpp::task<R>`. They both take their return type as a template parameter, which may be void. Both `dpp::job` and `dpp::task<R>` start on the constructor for asynchronous execution, however only the latter can be co_await-ed, this allows you to retrieve its return value. If a `dpp::task<R>` is destroyed before it ends, it is cancelled and will stop when it is resumed from the next `co_await`. `dpp::coroutine<R>` also has a return value and can be co_await-ed, however it only starts when co_await-ing, meaning it is executed synchronously.
+Earlier we mentioned two other types of coroutines provided by dpp: `dpp::coroutine<R>` and `dpp::task<R>`. They both take their return type as a template parameter, which may be void. Both `dpp::job` and `dpp::task<R>` start on the constructor for asynchronous execution, however only the latter can be `co_await`-ed, this allows you to retrieve its return value. If a `dpp::task<R>` is destroyed before it ends, it is cancelled and will stop when it is resumed from the next `co_await`. `dpp::coroutine<R>` also has a return value and can be `co_await`-ed, however it only starts when `co_await`-ing, meaning it is executed synchronously.
 
-Here is an example of a command making use of `dpp::task<R>` to retrieve the avatar of a specified user, or if missing, the sender :
+Here is an example of a command making use of `dpp::task<R>` to retrieve the avatar of a specified user, or if missing, the sender:
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>

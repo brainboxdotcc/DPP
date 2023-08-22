@@ -3,8 +3,8 @@
 To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, follow the steps below to create a *working skeleton project you can build upon*.
 
 1. Make sure you have Visual Studio 2019 or 2022. Community, Professional or Enterprise work fine. These instructions are not for Visual Studio Code. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/). Note that older versions of Visual Studio will not work as they do not support enough of the C++17 standard.
-2. Clone the [template project](https://github.com/brainboxdotcc/windows-bot-template/). Be sure to clone the entire project and not just copy and paste the cpp file.
-3. Double click on the MyBot.sln file in the folder you just cloned
+2. Clone the [template project](https://github.com/brainboxdotcc/windows-bot-template/). Be sure to clone the entire project and not just copy and paste the `.cpp` file.
+3. Double click on the `MyBot.sln` file in the folder you just cloned
    \image html vsproj_1.png
 4. Add your bot token (see \ref creating-a-bot-application) and guild ID to the example program 
    \image html vsproj_2.png
