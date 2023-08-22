@@ -1,11 +1,11 @@
 \page checking-member-permissions Checking permissions
 
 Of course most people do just iterate over the roles of a member to check for a permission.
-But there's a helper method for that: `dpp::guild::base_permissions` gets a member's permission taking into account the server owner and role permissions.
+But there's a helper method for that: dpp::guild::base_permissions gets a member's permission taking into account the server owner and role permissions.
 
-For total member permissions including channel overwrites use either the `dpp::channel::get_user_permissions` or `dpp::guild::permission_overwrites` method. Both do the same under the hood.
+For total member permissions including channel overwrites use either the dpp::channel::get_user_permissions or dpp::guild::permission_overwrites method. Both do the same under the hood.
 
-They all return a `dpp::permission` class, which is a wrapper around a permission bitmask containing bits of the `dpp::permission`'s enum.
+They all return a dpp::permission class, which is a wrapper around a permission bitmask containing bits of the dpp::permission enum.
 
 Demonstration:
 
@@ -21,7 +21,7 @@ if (c && c->get_user_permissions(member).can(dpp::p_send_messages)) {
 ### Default Command Permissions
 
 Discord's intended way to manage permissions for commands is through default member permissions.
-You set them using `dpp::slashcommand::set_default_permissions` when creating or updating a command to set the default permissions a user must have to use it.
+You set them using dpp::slashcommand::set_default_permissions when creating or updating a command to set the default permissions a user must have to use it.
 However, Server-Admins can then overwrite these permissions by their own restrictions.
 
 The corresponding code to create a command with default permissions would look something like this:
@@ -39,7 +39,7 @@ bot.global_command_create(command);
 
 ### Checking permissions on your own
 
-If you want to check permissions on your own, the easiest way to check if a member has certain permissions in interaction events is by using the `dpp::interaction::get_resolved_permission` function.
+If you want to check permissions on your own, the easiest way to check if a member has certain permissions in interaction events is by using the dpp::interaction::get_resolved_permission function.
 The resolved list contains associated structures for the command and does not use the cache or require any extra API calls.
 Note that the permissions in the resolved set are pre-calculated by discord and taking into account channel overwrites, roles and admin privileges.
 So no need to loop through roles or stuff like that.
@@ -82,7 +82,7 @@ bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 ### The Bot's permissions
 
 You also might want to check if the bot itself has the ban permission before processing the command further.
-You can access the bot's permissions in the `dpp::interaction::app_permissions` field.
+You can access the bot's permissions in the dpp::interaction::app_permissions field.
 
 ```cpp
 bot.on_interaction_create([](const dpp::interaction_create_t& event) {

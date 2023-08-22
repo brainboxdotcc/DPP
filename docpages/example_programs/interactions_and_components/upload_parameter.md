@@ -5,7 +5,7 @@ You must first get the file_id via `std::get`, and then you can find the attachm
 section, `event.command.resolved`.
 
 The file is uploaded to Discord's CDN so if you need it locally you should fetch the `.url` value, e.g. by using
-something like `dpp::cluster::request()`.
+something like dpp::cluster::request().
 
 ~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>

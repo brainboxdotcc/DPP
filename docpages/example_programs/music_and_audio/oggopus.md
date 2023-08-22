@@ -191,7 +191,7 @@ You can compile this example using the following command
 ## Using liboggz
 
 You can use `liboggz` to stream an Ogg Opus file to discord voice channel.
-`liboggz` provides higher level abstraction and useful APIs. Some APIs `liboggz` provide includes seeking and timestamp interpretation.
+`liboggz` provides higher level abstraction and useful APIs. Some features `liboggz` provides include: seeking and timestamp interpretation.
 Read more on the [documentation](https://www.xiph.org/oggz/doc/).
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}

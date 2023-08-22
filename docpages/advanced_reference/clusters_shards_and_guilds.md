@@ -118,7 +118,7 @@ int main()
 
 Remember that if there are multiple clusters, the number of shards you request will be split equally across these clusters!
 
-@note To spawn multiple clusters, you can specify this as the 4th and 5th parameter of the `dpp::cluster` constructor. You must do this, if you want this functionality. The library will not create additional clusters for you, as what you require is dependent upon your system specifications. It is your responsibility to somehow get the cluster id and total clusters into the process, e.g. via a command line argument. An example of this is shown below based on the cluster setup code of **TriviaBot**:
+@note To spawn multiple clusters, you can specify this as the 4th and 5th parameter of the dpp::cluster constructor. You must do this, if you want this functionality. The library will not create additional clusters for you, as what you require is dependent upon your system specifications. It is your responsibility to somehow get the cluster id and total clusters into the process, e.g. via a command line argument. An example of this is shown below based on the cluster setup code of **TriviaBot**:
 ```cpp
 #include <dpp/dpp.h>
 #include <iostream>
