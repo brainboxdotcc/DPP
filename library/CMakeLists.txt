@@ -271,27 +271,6 @@ target_compile_features(dpp PRIVATE cxx_thread_local)
 target_compile_features(dpp PRIVATE cxx_variadic_templates)
 target_compile_features(dpp PRIVATE cxx_attribute_deprecated)
 
-if (DPP_BUILD_TEST)
-	enable_testing(${CMAKE_CURRENT_SOURCE_DIR}/..)
-	file(GLOB testnamelist "${CMAKE_CURRENT_SOURCE_DIR}/../src/*")
-	foreach (fulltestname ${testnamelist})
-		get_filename_component(testname ${fulltestname} NAME)
-		if (NOT "${testname}" STREQUAL "dpp")
-			message("-- Configuring test: ${Green}${testname}${ColourReset} with source: ${modules_dir}/${testname}/*.cpp")
-			set (testsrc "")
-			file(GLOB testsrc "${modules_dir}/${testname}/*.cpp")
-			add_executable(${testname} ${testsrc})
-			target_compile_features(${testname} PRIVATE cxx_std_17)
-			target_link_libraries(${testname} PUBLIC ${modname})
-		endif()
-	endforeach()
-	add_test(
-		NAME unittests
-		COMMAND library/unittest
-		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/library
-	)
-endif()
-
 if(HAVE_PRCTL)
 	target_compile_definitions(dpp PRIVATE HAVE_PRCTL)
 endif()
@@ -350,6 +329,34 @@ if(DPP_CORO)
 	target_compile_definitions(dpp PUBLIC DPP_CORO)
 	execute_process(WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.."
 					COMMAND php buildtools/make_struct.php "\\Dpp\\Generator\\CoroGenerator")
+endif()
+
+if (DPP_BUILD_TEST)
+	enable_testing(${CMAKE_CURRENT_SOURCE_DIR}/..)
+	file(GLOB testnamelist "${CMAKE_CURRENT_SOURCE_DIR}/../src/*")
+	foreach (fulltestname ${testnamelist})
+		get_filename_component(testname ${fulltestname} NAME)
+		if (NOT "${testname}" STREQUAL "dpp")
+			message("-- Configuring test: ${Green}${testname}${ColourReset} with source: ${modules_dir}/${testname}/*.cpp")
+			set (testsrc "")
+			file(GLOB testsrc "${modules_dir}/${testname}/*.cpp")
+			add_executable(${testname} ${testsrc})
+			if (DPP_CORO)
+				target_compile_features(${testname} PRIVATE cxx_std_20)
+			else()
+				target_compile_features(${testname} PRIVATE cxx_std_17)
+			endif()
+			if (MSVC)
+				target_compile_options(${testname} PRIVATE /utf-8)
+			endif()
+			target_link_libraries(${testname} PUBLIC ${modname})
+		endif()
+	endforeach()
+	add_test(
+		NAME unittests
+		COMMAND library/unittest
+		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/library
+	)
 endif()
 	
 if(WIN32 AND NOT MINGW)

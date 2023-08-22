@@ -209,52 +209,52 @@ void interaction_create_t::delete_original_response(command_completion_event_t c
 
 
 #ifdef DPP_CORO
-awaitable<confirmation_callback_t> interaction_create_t::co_reply() const {
-	return dpp::awaitable{[this](auto &&cb) { this->reply(cb); }};
+async<confirmation_callback_t> interaction_create_t::co_reply() const {
+	return dpp::async{[this] <typename T> (T&& cb) { this->reply(std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const message & m) const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->reply(t, m, cb); }};
+async<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const message & m) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(t, m, std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const std::string & mt) const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->reply(t, mt, cb); }};
+async<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const std::string & mt) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(t, mt, std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_reply(const message & m) const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->reply(m, cb); }};
+async<confirmation_callback_t> interaction_create_t::co_reply(const message & m) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(m, std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_reply(const std::string & mt) const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->reply(mt, cb); }};
+async<confirmation_callback_t> interaction_create_t::co_reply(const std::string & mt) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(mt, std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_dialog(const interaction_modal_response& mr) const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->dialog(mr, cb); }};
+async<confirmation_callback_t> interaction_create_t::co_dialog(const interaction_modal_response& mr) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->dialog(mr, std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_edit_response(const message & m) const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->edit_response(m, cb); }};
+async<confirmation_callback_t> interaction_create_t::co_edit_response(const message & m) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->edit_response(m, std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_edit_response(const std::string & mt) const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->edit_response(mt, cb); }};
+async<confirmation_callback_t> interaction_create_t::co_edit_response(const std::string & mt) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->edit_response(mt, std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_thinking(bool ephemeral) const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->thinking(ephemeral, cb); }};
+async<confirmation_callback_t> interaction_create_t::co_thinking(bool ephemeral) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->thinking(ephemeral, std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_get_original_response() const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->get_original_response(cb); }};
+async<confirmation_callback_t> interaction_create_t::co_get_original_response() const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->get_original_response(std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_edit_original_response(const message & m) const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->edit_original_response(m, cb); }};
+async<confirmation_callback_t> interaction_create_t::co_edit_original_response(const message & m) const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->edit_original_response(m, std::forward<T>(cb)); }};
 }
 
-awaitable<confirmation_callback_t> interaction_create_t::co_delete_original_response() const {
-	return dpp::awaitable{[&, this](auto &&cb) { this->delete_original_response(cb); }};
+async<confirmation_callback_t> interaction_create_t::co_delete_original_response() const {
+	return dpp::async{[&, this] <typename T> (T&& cb) { this->delete_original_response(std::forward<T>(cb)); }};
 }
 #endif /* DPP_CORO */
 

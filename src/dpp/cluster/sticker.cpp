@@ -23,7 +23,7 @@
 
 namespace dpp {
 
-void cluster::guild_sticker_create(sticker &s, command_completion_event_t callback) {
+void cluster::guild_sticker_create(const sticker &s, command_completion_event_t callback) {
 	this->post_rest(API_PATH "/guilds", std::to_string(s.guild_id), "stickers", m_post, s.build_json(false), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, sticker().fill_from_json(&j), http));
@@ -39,7 +39,7 @@ void cluster::guild_sticker_get(snowflake id, snowflake guild_id, command_comple
 	rest_request<sticker>(this, API_PATH "/guilds", std::to_string(guild_id), "stickers/" + std::to_string(id), m_get, "", callback);
 }
 
-void cluster::guild_sticker_modify(sticker &s, command_completion_event_t callback) {
+void cluster::guild_sticker_modify(const sticker &s, command_completion_event_t callback) {
 	rest_request<sticker>(this, API_PATH "/guilds", std::to_string(s.guild_id), "stickers/" + std::to_string(s.id), m_patch, s.build_json(true), callback);
 }
 

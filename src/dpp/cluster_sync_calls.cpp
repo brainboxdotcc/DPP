@@ -573,8 +573,8 @@ confirmation cluster::stage_instance_delete_sync(const snowflake channel_id) {
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const snowflake, command_completion_event_t)>(&cluster::stage_instance_delete), channel_id);
 }
 
-sticker cluster::guild_sticker_create_sync(sticker &s) {
-	return dpp::sync<sticker>(this, static_cast<void (cluster::*)(sticker &, command_completion_event_t)>(&cluster::guild_sticker_create), s);
+sticker cluster::guild_sticker_create_sync(const sticker &s) {
+	return dpp::sync<sticker>(this, static_cast<void (cluster::*)(const sticker &, command_completion_event_t)>(&cluster::guild_sticker_create), s);
 }
 
 confirmation cluster::guild_sticker_delete_sync(snowflake sticker_id, snowflake guild_id) {
@@ -585,8 +585,8 @@ sticker cluster::guild_sticker_get_sync(snowflake id, snowflake guild_id) {
 	return dpp::sync<sticker>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_sticker_get), id, guild_id);
 }
 
-sticker cluster::guild_sticker_modify_sync(sticker &s) {
-	return dpp::sync<sticker>(this, static_cast<void (cluster::*)(sticker &, command_completion_event_t)>(&cluster::guild_sticker_modify), s);
+sticker cluster::guild_sticker_modify_sync(const sticker &s) {
+	return dpp::sync<sticker>(this, static_cast<void (cluster::*)(const sticker &, command_completion_event_t)>(&cluster::guild_sticker_modify), s);
 }
 
 sticker_map cluster::guild_stickers_get_sync(snowflake guild_id) {

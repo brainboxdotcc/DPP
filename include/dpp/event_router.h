@@ -32,7 +32,7 @@
 #include <mutex>
 #include <shared_mutex>
 #include <cstring>
-#include <dpp/coro.h>
+#include <dpp/coro/job.h>
 
 using  json = nlohmann::json;
 
@@ -108,7 +108,7 @@ private:
 	 *
 	 * Note: keep a listener's parameter as a value type, the event passed can die while a coroutine is suspended
 	 */
-	std::map<event_handle, std::function<dpp::task<void>(T)>> coroutine_container;
+	std::map<event_handle, std::function<dpp::job(const T&)>> coroutine_container;
 #else
 #ifndef _DOXYGEN_
 	/**
@@ -164,22 +164,11 @@ public:
 			}
 		};
 #ifdef DPP_CORO
-		auto coro_exception_handler = [from = event.from](std::exception_ptr ptr) {
-			try {
-				std::rethrow_exception(ptr);
-			}
-			catch (const std::exception &exception) {
-				if (from && from->creator)
-					from->creator->log(dpp::loglevel::ll_error, std::string{"Uncaught exception in event coroutine: "} + exception.what());
-			}
-		};
 		for (const auto& [_, listener] : coroutine_container) {
 			if (!event.is_cancelled()) {
-				dpp::task<void> task = listener(event);
-
-				task.on_exception(coro_exception_handler);
+				listener(event);
 			}
-		};
+		}
 #endif  /* DPP_CORO */
 	};
 
@@ -248,11 +237,11 @@ public:
 	 * the event object and should take exactly one parameter derived
 	 * from event_dispatch_t.
 	 *
-	 * @param func Coroutine task to attack to the event
+	 * @param func Coroutine task to attack to the event. <b>It MUST take the event by value.</b>
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
 	 */
-	event_handle co_attach(std::function<dpp::task<void>(T)> func) {
+	event_handle co_attach(std::function<job(T)> func) {
 		std::unique_lock l(lock);
 		event_handle h = next_handle++;
 		coroutine_container.emplace(h, func);
