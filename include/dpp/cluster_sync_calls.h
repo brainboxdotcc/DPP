@@ -2135,7 +2135,7 @@ confirmation stage_instance_delete_sync(const snowflake channel_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-sticker guild_sticker_create_sync(sticker &s);
+sticker guild_sticker_create_sync(const sticker &s);
 
 /**
  * @brief Delete a sticker from a guild
@@ -2178,7 +2178,7 @@ sticker guild_sticker_get_sync(snowflake id, snowflake guild_id);
  * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
  * Avoid direct use of this function inside an event handler.
  */
-sticker guild_sticker_modify_sync(sticker &s);
+sticker guild_sticker_modify_sync(const sticker &s);
 
 /**
  * @brief Get all guild stickers
