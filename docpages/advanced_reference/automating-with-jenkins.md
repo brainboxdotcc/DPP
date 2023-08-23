@@ -54,7 +54,7 @@ Running the builds is the same as any other time, but we'll still cover it! Howe
 
 First, you need to get into the jenkins user. If you're like me and don't have the Jenkins user password, you can login with your normal login (that has sudo perms) and do `sudo su - jenkins`. Once logged in, you'll be in `/var/lib/jenkins/`. From here, you'll want to do `cd workspace/DiscordBot/` (make sure to replace "DiscordBot" with your bot's name. Remember, you can tab-complete this) and then `cd build`. Now, you can simply do `./DiscordBot`!
 
-If you are going to be running the bot at the same time as builds, I would heavily advise that you copy the bot (if it's not statically linked, then copy the entire build directory) to a different location. This is so you can pick and choose when the bot gets updated (and even means you can run experimental builds as opposed to stable builds) but also means you avoid any risk of the bot crashing during build (as jenkins will be overwriting your executable).
+\warning If you are going to be running the bot at the same time as builds, I would heavily advise that you copy the bot (if it's not statically linked, then copy the entire build directory) to a different location. This is so you can pick and choose when the bot gets updated (and even means you can run experimental builds as opposed to stable builds) but also means you avoid any risk of the bot crashing during build (as jenkins will be overwriting your executable and libraries).
 
 Once you're happy with everything, then you're good to go! Enjoy your automated builds!
 
