@@ -7,7 +7,7 @@
     cmake -B ./build
     cmake --build ./build -j8
     
-Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
+Replace the number after `-j` with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
 ## 2. Install to /usr/local/include and /usr/local/lib
 
@@ -23,7 +23,7 @@ Then once the build is complete, run `make install` to install to the location y
 
 ## 4. Using the library
 
-Once installed to the /usr/local directory, you can make use of the library in standalone programs simply by including it and linking to it:
+Once installed to the `/usr/local` directory, you can make use of the library in standalone programs simply by including it and linking to it:
 
     g++ -std=c++17 mydppbot.cpp -o dppbot -ldpp
 

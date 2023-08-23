@@ -111,7 +111,7 @@ int main() {
 ### 3. Attach to an event
 
 To have a bot that does something, you should attach to some events. Let's start by attaching to the `on_ready` event (dpp::cluster::on_ready) which will notify your program when the bot is connected. In this event, we will register a slash
-command called 'ping'. Note that we must wrap our registration of the command in a template called `dpp::run_once` which prevents it from being re-run
+command called 'ping'. Note that we must wrap our registration of the command in a template called dpp::run_once which prevents it from being re-run
 every time your bot does a full reconnection (e.g. if the connection fails).
 
 ~~~~~~~~~~~~~~~~{.cpp}
@@ -196,7 +196,7 @@ The `event.reply` function (dpp::slashcommand_t::reply) replies to a slash comma
 
 ### 6. Add code to start the bot!
 
-To make the bot start, we must call the cluster::start method, e.g. in our program by using `bot.start(dpp::st_wait)`.
+To make the bot start, we must call the dpp::cluster::start method, e.g. in our program by using `bot.start(dpp::st_wait)`.
 
 We also add a line to tell the library to output all its log information to the console, `bot.on_log(dpp::utility::cout_logger());` - if you wanted to do something more advanced, you can replace this parameter with a lambda just like all other events.
 

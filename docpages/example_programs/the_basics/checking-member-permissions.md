@@ -64,7 +64,7 @@ bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 
 The resolved set also contains the permissions of members from command parameters.
 
-For example let's say you want to prohibit people from banning server admins with your ban command.
+For example, let's say you want to prohibit people from banning server admins with your ban command.
 
 Get the user ID from the parameters and pass it to the `get_resolved_permission` method:
 

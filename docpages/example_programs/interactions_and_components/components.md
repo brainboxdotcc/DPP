@@ -1,7 +1,7 @@
 \page components Using button components
 
 Discord's newest features support sending buttons alongside messages, which when clicked by the user trigger an interaction which is routed by
-D++ as an on_button_click event. To make use of this, use code as in this example.
+D++ as an `on_button_click` event. To make use of this, use this code as in this example.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>

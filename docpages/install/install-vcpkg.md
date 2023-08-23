@@ -12,7 +12,7 @@ To install D++ on a system from VCPKG:
 c:\vcpkg>vcpkg list dpp
 dpp:x64-windows                                    10.0.15          D++ Extremely Lightweight C++ Discord Library.
 ```
-- You may now use the library within a `cmake` based project by adding instructions such as these to your `CmakeLists.txt`:
+- You may now use the library within a `CMake` based project by adding instructions such as these to your `CMakeLists.txt`:
 ```cmake
     find_package(dpp CONFIG REQUIRED)
     target_link_libraries(your_target_name PRIVATE dpp::dpp)

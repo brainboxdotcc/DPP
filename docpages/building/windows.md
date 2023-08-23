@@ -1,6 +1,6 @@
 \page buildwindows Building on Windows
 
-To build on windows follow these steps *exactly*. The build process depends on specific libraries being installed on your system in specific locations.
+To build on Windows follow these steps *exactly*. The build process depends on specific libraries being installed on your system in specific locations.
 
 ## Wait a minute! Read this first!
 
@@ -20,10 +20,10 @@ To build on windows follow these steps *exactly*. The build process depends on s
 
 ## Troubleshooting
 
-* If you do not have an option to open the CMakeLists.txt, ensure that you have installed the C++ development portions of visual studio (not just web development portions) with at least the default options.
+* If you do not have an option to open the CMakeLists.txt, ensure that you have installed the C++ development portions of Visual Studio (not just web development portions) with at least the default options.
 * If the project does not build, please ask for help on the [official discord server](https://discord.gg/dpp).
 
 ## After compiling
 
-After compilation you can directly reference the compiled project in your own CMakeLists.txt as a library or use the lib/dll/headers as you wish. Note that `openssl` and `zlib` will also be an indirect dependency of your program (as `DLL` files) and should be copied alongside `dpp.dll`.
+After compilation you can directly reference the compiled project in your own CMakeLists.txt as a library or use the `lib/dll/headers` as you wish. Note that `openssl` and `zlib` will also be an indirect dependency of your program (as `DLL` files) and should be copied alongside `dpp.dll`.
 

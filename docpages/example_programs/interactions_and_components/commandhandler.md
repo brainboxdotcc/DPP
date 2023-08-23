@@ -7,7 +7,7 @@ route both the /ping (global slash command) and .ping (prefixed channel message 
 
 \note	This example automatically hooks the dpp::cluster::on_message_create and dpp::cluster::on_slashcommand events. This can be overridden if needed to allow you to still make use of these functions for your own code, if you need to do this please see the constructor documentation for dpp::commandhandler.
 
-Note that because the dpp::commandhandler::add_command method accepts a std::function as the command handler, you may point a command handler
+Note that because the dpp::commandhandler::add_command method accepts a `std::function` as the command handler, you may point a command handler
 at a simple lambda (as shown in this example), a function pointer, or an instantiated class method of an object. This is extremely flexible
 and allows you to decide how and where commands should be routed, either to an object oriented system or to a lambda based system.
 

@@ -15,7 +15,7 @@ For voice support, additional dependencies are required
     cmake -B ./build
     cmake --build ./build -j8
     
-Replace the number after -j with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
+Replace the number after `-j` with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
 ## 4. Install globally
 
@@ -29,7 +29,7 @@ If you want to install the library, its dependencies and header files to a diffe
 
 Then once the build is complete, run `make install` to install to the location you specified.
 
-## 7. Using the library
+## 6. Using the library
 
 Once installed, you can make use of the library in standalone programs simply by including it and linking to it:
 
