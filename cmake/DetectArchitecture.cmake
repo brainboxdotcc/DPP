@@ -27,13 +27,13 @@ endfunction()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(INSTRUCTION_SETS
         "T_AVX?/arch:AVX?auto result = _mm_testz_ps(__m128{}, __m128{})"
-        "T_AVX2?/arch:AVX2?auto result = _mm256_extract_epi64(__m256i{}, 0)"
+        "T_AVX2?/arch:AVX2?auto result = _mm256_add_epi32(__m256i{}, __m256i{})"
         "T_AVX512?/arch:AVX512?auto result = _mm512_add_ps(__m512i{}, __m512i{}).auto result2 = _mm512_cmplt_epu8_mask(__m512i{}, __m512i{})"
     )
 else()
     set(INSTRUCTION_SETS
         "T_AVX?-mavx.-mpclmul.-mbmi?auto result = _mm_testz_ps(__m128{}, __m128{})"
-        "T_AVX2?-mavx2.-mavx.-mpclmul.-mbmi?auto result = _mm256_extract_epi64(__m256i{}, 0)"
+        "T_AVX2?-mavx2.-mavx.-mpclmul.-mbmi?auto result = _mm256_add_epi32(__m256i{}, __m256i{})"
         "T_AVX512?-mavx512bw.-mavx512f.-mavx2.-mavx.-mpclmul.-mbmi?auto result = _mm512_add_ps(__m512i{}, __m512i{}).auto result2 = _mm512_cmplt_epu8_mask(__m512i{}, __m512i{})"
     )
 endif()

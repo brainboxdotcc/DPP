@@ -26,6 +26,7 @@ option(DPP_BUILD_TEST "Build the test program" ON)
 option(DPP_NO_VCPKG "No VCPKG" OFF)
 option(DPP_CORO "Experimental support for C++20 coroutines" OFF)
 option(DPP_USE_EXTERNAL_JSON "Use an external installation of nlohmann::json" OFF)
+option(DPP_USE_PCH "Use precompiled headers to speed up compilation" OFF)
 
 include(CheckCXXSymbolExists)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

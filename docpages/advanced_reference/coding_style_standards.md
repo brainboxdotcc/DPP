@@ -27,7 +27,7 @@ void foo() {
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This applies to functions, `while` statements, `if` statments, lambdas, nearly anything that uses curly braces with statements!
+This applies to functions, `while` statements, `if` statements, lambdas, nearly anything that uses curly braces with statements!
 
 ### Lists
 

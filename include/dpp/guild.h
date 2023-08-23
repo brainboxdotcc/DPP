@@ -756,7 +756,7 @@ public:
 	 *   - Guild roles including \@everyone
 	 *
 	 * @param user User to get permissions for
-	 * @return permission permissions bitmask
+	 * @return permission permissions bitmask. If the member has administrator privileges, the bitmask returns with all flags set
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 *
 	 * @warning The method will search for the guild member in the cache by the users id.
@@ -772,7 +772,7 @@ public:
 	 *   - Guild roles including \@everyone
 	 *
 	 * @param member member to get permissions for
-	 * @return permission permissions bitmask
+	 * @return permission permissions bitmask. If the member has administrator privileges, the bitmask returns with all flags set
 	 * @note Requires role cache to be enabled (it's enabled by default).
 	 */
 	permission base_permissions(const guild_member &member) const;

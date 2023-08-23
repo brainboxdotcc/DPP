@@ -20,22 +20,22 @@ run the command
 
 ## 3. Configuring your Meson project
 
-add the following line after the project() line in your meson.build file.
+add the following line after the `project()` line in your `meson.build` file.
 
     dpp = dependency('dpp')
 
-add the following line in the executable section of your meson.build file.
+add the following line in the executable section of your `meson.build` file.
 
     dependencies: [dpp]
 
-change the cpp_std value in the project() to c++17
+change the `cpp_std` value in the `project()` to `c++17`
 
 your meson.build should look like this.
 ~~~~~~~~~~~~~~
 project('discord-bot', 'cpp',
   version : '0.1',
   default_options : ['warning_level=3',
-                     'cpp_std=c++14'])
+                     'cpp_std=c++17'])
 
 dpp = dependency('dpp')
 

@@ -7,3 +7,4 @@ This section lists examples that do not fit neatly into any of the categories ab
 * \subpage caching-messages "Caching messages"
 * \subpage collecting-reactions "Collecting Reactions"
 * \subpage cpp-eval-command-discord "Making an eval command in C++"
+* \subpage checking-member-permissions "Checking permissions"
