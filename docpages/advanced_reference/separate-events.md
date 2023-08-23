@@ -1,6 +1,6 @@
 \page separate-events Separating events into new classes
 
-Now, if you're someone that loves file organisation (or you hate how cluttered your `main.cpp` has become) then you may be interested in moving events into separate classes outside of the `main.cpp` file. This is a great way to improve readability and can be helpful in many cases! For example, you can have two classes on the same event, except one could be reading messages for spam and one could be reading messages for bad words!
+If you're someone that loves file organisation (or you hate how cluttered your `main.cpp` has become) then you may be interested in moving events into separate classes outside of the `main.cpp` file. This is a great way to improve readability and can be helpful in many cases! For example, you can have two classes on the same event, except one could be reading messages for spam and one could be reading messages for bad words!
 
 In this tutorial, we'll be taking the [Listening to messages](/detecting-messages.html) example and moving the `on_message_create` event into a different class.
 
