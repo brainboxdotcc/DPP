@@ -1086,6 +1086,15 @@ public:
 	slashcommand(const std::string &_name, const std::string &_description, const dpp::snowflake _application_id);
 
 	/**
+	 * @brief Construct a new slashcommand object
+	 *
+	 * @param _name Command name
+	 * @param _type Context menu type
+	 * @param _application_id Application id (usually the bot's user id)
+	 */
+	slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id);
+
+	/**
 	 * @brief Destroy the slashcommand object
 	 */
 	virtual ~slashcommand() = default;
