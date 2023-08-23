@@ -6,7 +6,7 @@ In this tutorial, we'll be taking the [Listening to messages](/detecting-message
 
 To get started, you can create a folder called `listeners` inside `src` (where your `main.cpp` is) if you'd like to put it there! We'll be doing exactly that so, if you'd like to stick along with the tutorial, get creating that folder!
 
-Now, you can create a new header file in this folder! You don't need the cpp file as you can still write code in the header so, if your IDE creates a `.cpp` file, feel free to delete it! For this tutorial, we'll be naming this file `message_listener`!
+Now, you can create a new header and cpp file in this folder! For this tutorial, we'll be naming both these files `message_listener`!
 
 If you're using CMake, you'll need to add this to your `CMakeLists.txt`. Some IDEs automatically do this but it's always worth double-checking!
 
@@ -14,7 +14,7 @@ Once that's done, it should look similar to this (this screenshot has more files
 
 \image html file_example_listeners.png
 
-Now, let's go ahead and write some code in this `message_listener.h`.
+First, we need to define the function that will be called when the event fires. We do this in the `message_listener.h`, like so:
 
 ~~~~~~~~~~{.cpp}
 #pragma once
@@ -26,17 +26,25 @@ class message_listener {
 public:
 
     /* Create a static function that can be called anywhere. */
-    static void on_message_create(const dpp::message_create_t& event) {
-
-        /* See if the message contains the phrase we want to check for.
-         * If there's at least a single match, we reply and say it's not allowed.
-         */
-        if (event.msg.content.find("bad word") != std::string::npos) {
-            event.reply("That is not allowed here. Please, mind your language!", true);
-        }
-    }
+    static void on_message_create(const dpp::message_create_t& event);
 
 };
+~~~~~~~~~~
+
+Then we need to add our code for what should happen when this event fires. We do this in the `message_listener.cpp`, like so:
+
+~~~~~~~~~~{.cpp}
+#include "message_listener.h"
+
+void message_listener::on_message_create(const dpp::message_create_t &event) {
+    /* See if the message contains the phrase we want to check for.
+     * If there's at least a single match, we reply and say it's not allowed.
+     */
+    if (event.msg.content.find("bad word") != std::string::npos) {
+        event.reply("That is not allowed here. Please, mind your language!", true);
+    }
+}
+
 ~~~~~~~~~~
 
 Now, you'll have a nice area where you can easily see the code, without scrolling through all of your `main.cpp` file just to get to this event!
