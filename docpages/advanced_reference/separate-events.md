@@ -2,7 +2,7 @@
 
 Now, if you're someone that loves file organisation (or you hate how cluttered your `main.cpp` has become) then you may be interested in moving events into separate classes outside of the `main.cpp` file. This is a great way to improve readability and can be helpful in many cases! For example, you can have two classes on the same event, except one could be reading messages for spam and one could be reading messages for bad words!
 
-In this tutorial, we'll be taking the ["Listening to messages"](/detecting-messages.md) example and moving the `on_message_create` event into a different class.
+In this tutorial, we'll be taking the [Listening to messages](/detecting-messages.html) example and moving the `on_message_create` event into a different class.
 
 To get started, you can create a folder called `listeners` inside `src` (where your `main.cpp` is) if you'd like to put it there! We'll be doing exactly that so, if you'd like to stick along with the tutorial, get creating that folder!
 
