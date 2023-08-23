@@ -10,8 +10,6 @@ When a user issues these commands the reply will arrive via the `on_slashcommand
 
 dpp::interaction_create_t::reply has two overloaded versions of the method, one of which accepts simple `std::string` replies, for basic text-only messages (if your message is 'ephemeral' you must use this) and one which accepts a dpp::message for more advanced replies. Please note that at present, Discord only supports a small subset of message and embed features within an interaction response object.
 
-\note You can also use the unified command handler, which lets you combine channel based message commands and slash commands under the same lambda with the same code like they were one and the same. Note that after August of 2022 Discord will be discouraging bots from using commands that are prefixed messages via means of a privileged message intent. It is advised that you exclusively use slash commands, or the unified handler with only a prefix of "/" going forward for any new bots you create and look to migrating existing bots to this setup.
-
 This first example goes over creating a single command globally.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
