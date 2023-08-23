@@ -8,3 +8,4 @@ This section lists examples that do not fit neatly into any of the categories ab
 * \subpage collecting-reactions "Collecting Reactions"
 * \subpage cpp-eval-command-discord "Making an eval command in C++"
 * \subpage checking-member-permissions "Checking permissions"
+* \subpage user-only-messages.md "Hidden replies (Only you can see this replies)"
