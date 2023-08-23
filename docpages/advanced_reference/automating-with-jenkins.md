@@ -4,11 +4,11 @@
 
 ### Getting started
 
-First of all, you'll want to create your project. For this, we'll use a Freestyle project as we're just going to be calling some bash commands to tell CMake to build. We'll be calling this "DiscordBot" but you can name is whatever you want (I would advise against non-ascii characters).
+First of all, you'll want to create your project. For this, we'll use a "Freestyle project" as we're just going to be calling some bash commands to tell CMake to build. We'll be calling this "DiscordBot" but you can name it whatever you want (I would advise against non-ascii characters).
 
 \image html jenkinsproject.png
 
-From here, just hit `Ok` and you've created your Jenkins project, Well done! From here you can add a description, change the security policy (if your jenkins is public) and whatnot.
+From here, just hit `Ok` and now you've created your Jenkins project, Well done! From here you can add a description, change the security policy (if your jenkins is public), really whatever your heart desires.
 
 ### Automating the building process.
 
@@ -32,7 +32,9 @@ fi
 cmake --build build/
 ~~~~~~~~~~
 
-This script will build your project for you and also setup CMake if you've deleted the build directory. You can change this to a build parameter if you want, meaning you can hit `Build with Parameters` and state what you'd like to do.
+\note This script does not make use of multiple threads. If you know how to do this and you would like to use threads, then feel free to. However, I would be careful not to use all your threads as Jenkins may dislike this.
+
+This script will build your project for you and also setup CMake if you've deleted the build directory, allowing you to easily refresh CMake. You can change this to a build parameter if you want, meaning you can hit `Build with Parameters` and state what you'd like to do (This would require the script to be changed so only do that if you know what you're doing)!
 
 \image html shelljenkins.png
 
@@ -50,9 +52,11 @@ Making sure you have your project files in the workspace directory (you can see 
 
 Running the builds is the same as any other time, but we'll still cover it! However, we won't cover running it in background and whatnot, that part is completely down to you.
 
-First, you need to get into the jenkins user. If you're like me and don't have the Jenkins user password, you can login with your normal login (that has sudo perms) and do `sudo su - jenkins`. Once logged in, you'll be in `/var/lib/jenkins/`. From here, you'll want to do `cd workspace/DiscordBot` (make sure to replace "DiscordBot" with your bot's name. Remember, you can tab-complete this) and then `cd build`. Now, you can simply do `./DiscordBot`!
+First, you need to get into the jenkins user. If you're like me and don't have the Jenkins user password, you can login with your normal login (that has sudo perms) and do `sudo su - jenkins`. Once logged in, you'll be in `/var/lib/jenkins/`. From here, you'll want to do `cd workspace/DiscordBot/` (make sure to replace "DiscordBot" with your bot's name. Remember, you can tab-complete this) and then `cd build`. Now, you can simply do `./DiscordBot`!
 
-That's it! Enjoy your automated builds!
+\warning If you are going to be running the bot at the same time as builds, I would heavily advise that you copy the bot (if it's not statically linked, then copy the entire build directory) to a different location. This is so you can pick and choose when the bot gets updated (and even means you can run experimental builds as opposed to stable builds) but also means you avoid any risk of the bot crashing during build (as jenkins will be overwriting your executable and libraries).
+
+Once you're happy with everything, then you're good to go! Enjoy your automated builds!
 
 ### Possible permission issues
 
