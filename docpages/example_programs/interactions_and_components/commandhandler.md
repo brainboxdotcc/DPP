@@ -1,7 +1,6 @@
 \page commandhandler Using a command handler object
 
-If you have many commands in your bot, and want to handle commands from multiple sources (for example modern slash commands, and more regular
-prefixed channel messages) you should consider instantiating a dpp::commandhandler object. This object can be used to automatically route
+If you have many commands in your bot, and want to handle commands from multiple sources, you should consider instantiating a dpp::commandhandler object. This object can be used to automatically route
 commands and their parameters to functions in your program. A simple example of using this object to route commands is shown below, and will
 route both the /ping (global slash command) and .ping (prefixed channel message command) to a lambda where a reply can be generated.
 
@@ -11,7 +10,7 @@ Note that because the dpp::commandhandler::add_command method accepts a `std::fu
 at a simple lambda (as shown in this example), a function pointer, or an instantiated class method of an object. This is extremely flexible
 and allows you to decide how and where commands should be routed, either to an object oriented system or to a lambda based system.
 
-\warning As of August 30th, 2022, you are advised to only be using slash commands, not messages for commands. To prevent the command handler from handling commands with messages, you should only use the "/" prefix. If you wish to still use messages for commands, this tutorial will still cover it but, again, it is discouraged by Discord.
+\warning As of August 23rd, 2023, you are advised to only be using slash commands, not messages for commands. To prevent the command handler from handling commands with messages, you should only use the "/" prefix. If you wish to still use messages for commands, this tutorial will still cover it but, again, it is discouraged by Discord.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
