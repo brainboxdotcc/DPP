@@ -10,7 +10,7 @@ Note that because the dpp::commandhandler::add_command method accepts a `std::fu
 at a simple lambda (as shown in this example), a function pointer, or an instantiated class method of an object. This is extremely flexible
 and allows you to decide how and where commands should be routed, either to an object oriented system or to a lambda based system.
 
-\warning As of [August 30th, 2022](https://support-dev.discord.com/hc/en-us/articles/6025578854295-Why-We-Moved-to-Slash-Commands), you are advised to only be using slash commands, not messages for commands. To prevent the command handler from handling commands with messages, you should only use the "/" prefix. If you wish to still use messages for commands, this tutorial will still cover it but, again, it is discouraged by Discord.
+\warning dpp::commandhandler is deprecated (view the page to find out more). We do not support this feature anymore and strongly advise you to use [slashcommands](/slashcommands.html) instead. We also do not encourage you to use anything other than the slash command prefix if you are going to proceed with this method (more information at [Listening to messages](/detecting-messages.html)).
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
