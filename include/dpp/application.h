@@ -76,6 +76,13 @@ struct DPP_EXPORT application_install_params {
 	std::vector<std::string> scopes;	//!< The [scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes) as strings to add the application to the server with
 };
 
+enum team_member_role_t : uint8_t {
+	tmr_owner,
+	tmr_admin,
+	tmr_developer,
+	tmr_readonly,
+};
+
 /**
  * @brief Represents a team member on a team who maintain a bot/application
  */
@@ -85,6 +92,7 @@ public:
 	std::string		permissions;		//!< will always be [""]
 	snowflake		team_id;		//!< the id of the parent team of which they are a member
 	user			member_user;		//!< the avatar, discriminator, id, and username of the user
+	team_member_role_t	member_role;		//!< the role of the user
 };
 
 /**
