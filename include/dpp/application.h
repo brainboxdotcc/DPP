@@ -76,11 +76,17 @@ struct DPP_EXPORT application_install_params {
 	std::vector<std::string> scopes;	//!< The [scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes) as strings to add the application to the server with
 };
 
+/**
+ * @brief Team member role types for application team members.
+ * 
+ * These are hard coded to string forms by discord. If further types are added,
+ * this enum will be extended to support them.
+ */
 enum team_member_role_t : uint8_t {
-	tmr_owner,
-	tmr_admin,
-	tmr_developer,
-	tmr_readonly,
+	tmr_owner,	//!< Team owner
+	tmr_admin,	//!< Team admin
+	tmr_developer,	//!< Developer
+	tmr_readonly,	//!< Read-Only
 };
 
 /**
