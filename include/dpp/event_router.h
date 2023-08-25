@@ -93,6 +93,7 @@ private:
 	 * @brief Thread safety mutex
 	 */
 	mutable std::shared_mutex lock;
+
 	/**
 	 * @brief Container of event listeners keyed by handle,
 	 * as handles are handed out sequentially they will always
@@ -100,24 +101,6 @@ private:
 	 * as std::map is an ordered container.
 	 */
 	std::map<event_handle, std::function<void(const T&)>> dispatch_container;
-
-
-#ifdef DPP_CORO
-	/**
-	 * @brief Container for event listeners (coroutines only)
-	 *
-	 * Note: keep a listener's parameter as a value type, the event passed can die while a coroutine is suspended
-	 */
-	std::map<event_handle, std::function<dpp::job(const T&)>> coroutine_container;
-#else
-#ifndef _DOXYGEN_
-	/**
-	 * @brief Dummy container to keep the struct size same
-	 */
-	std::map<event_handle, std::function<void(T)>> dummy_container;
-#endif /* _DOXYGEN_ */
-#endif /* DPP_CORO */
-
 
 	/**
 	 * @brief A function to be called whenever the method is called, to check
@@ -163,13 +146,6 @@ public:
 				listener(event);
 			}
 		};
-#ifdef DPP_CORO
-		for (const auto& [_, listener] : coroutine_container) {
-			if (!event.is_cancelled()) {
-				listener(event);
-			}
-		}
-#endif  /* DPP_CORO */
 	};
 
 	/**
@@ -181,11 +157,7 @@ public:
 	 */
 	bool empty() const {
 		std::shared_lock l(lock);
-#ifdef DPP_CORO
-		return dispatch_container.empty() && coroutine_container.empty();
-#else
 		return dispatch_container.empty();
-#endif /* DPP_CORO */
 	}
 
 	/**
@@ -199,69 +171,112 @@ public:
 		return !empty();
 	}
 
+#ifdef _DOXYGEN_
 	/**
-	 * @brief Attach a lambda to the event, adding a listener.
-	 * The lambda should follow the signature specified when declaring
-	 * the event object and should take exactly one parameter derived
-	 * from event_dispatch_t.
-	 * 
-	 * @param func Function lambda to attach to event
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T &)` or
+	 * `dpp::job(T)` (the latter requires DPP_CORO to be defined),
+	 * where T is the event type for this event router.
+	 *
+	 * This has the exact same behavior as using attach.
+	 *
+	 * @see attach
+	 * @param fun Callable to attach to event
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
 	 */
-	event_handle operator()(std::function<void(const T&)> func) {
-		return this->attach(func);
+	template <typename F>
+	event_handle operator()(F&& fun);
+
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T &)` or
+	 * `dpp::job(T)` (the latter requires DPP_CORO to be defined),
+	 * where T is the event type for this event router.
+	 *
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	event_handle attach(F&& fun);
+#else /* not _DOXYGEN_ */
+#  ifdef DPP_CORO
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T &)` or
+	 * `dpp::job(T)`, where T is the event type for this event router.
+	 *
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	requires (utility::callable_returns<F, dpp::job, const T&> || utility::callable_returns<F, void, const T&>)
+	event_handle operator()(F&& fun) {
+		return this->attach(std::forward<F>(fun));
 	}
 
 	/**
-	 * @brief Attach a lambda to the event, adding a listener.
-	 * The lambda should follow the signature specified when declaring
-	 * the event object and should take exactly one parameter derived
-	 * from event_dispatch_t.
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T &)` or
+	 * `dpp::job(T)`, where T is the event type for this event router.
 	 *
-	 * @param func Function lambda to attach to event
+	 * @param fun Callable to attach to event
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
 	 */
-	event_handle attach(std::function<void(const T&)> func) {
+	template <typename F>
+	requires (utility::callable_returns<F, dpp::job, const T&> || utility::callable_returns<F, void, const T&>)
+	event_handle attach(F&& fun) {
 		std::unique_lock l(lock);
 		event_handle h = next_handle++;
-		dispatch_container.emplace(h, func);
+		dispatch_container.emplace(h, std::forward<F>(fun));
 		return h;
+	}
+#  else
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should be of the form `void(const T &)`
+	 * where T is the event type for this event router.
+	 *
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	std::enable_if_t<utility::callable_returns_v<F, void, const T&>, event_handle> operator()(F&& fun) {
+		return this->attach(std::forward<F>(fun));
 	}
 
-#ifdef DPP_CORO
 	/**
-	 * @brief Attach a coroutine task to the event, adding a listener.
-	 * The coroutine should follow the signature specified when declaring
-	 * the event object and should take exactly one parameter derived
-	 * from event_dispatch_t.
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should be of the form `void(const T &)`
+	 * where T is the event type for this event router.
 	 *
-	 * @param func Coroutine task to attack to the event. <b>It MUST take the event by value.</b>
+	 * @param fun Callable to attach to event
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
 	 */
-	event_handle co_attach(std::function<job(T)> func) {
+	template <typename F>
+	std::enable_if_t<utility::callable_returns_v<F, void, const T&>, event_handle> attach(F&& fun) {
 		std::unique_lock l(lock);
 		event_handle h = next_handle++;
-		coroutine_container.emplace(h, func);
+		dispatch_container.emplace(h, std::forward<F>(fun));
 		return h;
 	}
-#endif /* DPP_CORO */
+#  endif /* DPP_CORO */
+#endif /* _DOXYGEN_ */
 	/**
 	 * @brief Detach a listener from the event using a previously obtained ID.
-	 * 
+	 *
 	 * @param handle An ID obtained from event_router_t::operator()
 	 * @return true The event was successfully detached
 	 * @return false The ID is invalid (possibly already detached, or does not exist)
 	 */
 	bool detach(const event_handle& handle) {
 		std::unique_lock l(lock);
-#ifdef DPP_CORO
-		return this->dispatch_container.erase(handle) || this->coroutine_container.erase(handle);
-#else
 		return this->dispatch_container.erase(handle);
-#endif /* DPP_CORO */
 	}
 };
 
