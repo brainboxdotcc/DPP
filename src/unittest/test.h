@@ -174,6 +174,7 @@ DPP_TEST(USER_GET_CREATION_TIME, "user::get_creation_time", tf_offline);
 DPP_TEST(USER_GET_AVATAR_URL, "user::get_avatar_url", tf_offline);
 DPP_TEST(CHANNEL_SET_TYPE, "channel::set_type", tf_offline);
 DPP_TEST(CHANNEL_GET_MENTION, "channel::get_mention", tf_offline);
+DPP_TEST(UTILITY_GUILD_NAVIGATION, "utility::guild_navigation", tf_offline);
 DPP_TEST(UTILITY_ICONHASH, "utility::iconhash", tf_offline);
 DPP_TEST(UTILITY_MAKE_URL_PARAMETERS, "utility::make_url_parameters", tf_offline);
 DPP_TEST(UTILITY_MARKDOWN_ESCAPE, "utility::markdown_escape", tf_offline);

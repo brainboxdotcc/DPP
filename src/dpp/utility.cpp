@@ -415,6 +415,24 @@ namespace dpp {
 			return "<t:" + std::to_string(ts) + ":" + format + ">";
 		}
 
+		std::string guild_navigation(const snowflake guild_id, guild_navigation_type gnt) {
+			std::string type;
+			switch (gnt) {
+				case gnt_customize:
+					type = "customize";
+					break;
+				case gnt_browse:
+					type = "browse";
+					break;
+				case gnt_guide:
+					type = "guide";
+					break;
+				default:
+					return "";
+			}
+			return "<" + std::to_string(guild_id) + ":" + type + ">";
+		}
+
 		std::string avatar_size(uint32_t size) {
 			if (size) {
 				if ( (size & (size - 1)) != 0 ) { // check if the size is a power of 2
