@@ -6,7 +6,7 @@
 
 Introduced in C++20, coroutines are the solution to the impracticality of callbacks. In short, a coroutine is a function that can be paused and resumed later. They are an extremely powerful alternative to callbacks for asynchronous APIs in particular, as the function can be paused when waiting for an API response, and resumed when it is received.
 
-Let's revisit [attaching a downloaded file](/attach-file.html), but this time with a coroutine:
+Let's revisit \ref attach-file "attaching a downloaded file", but this time with a coroutine:
 
 
 ~~~~~~~~~~~~~~~{.cpp}
@@ -51,11 +51,11 @@ In order to be a coroutine, a function has to return a special type with special
 
 When using a `co_*` function such as `co_message_create`, the request is sent immediately and the returned dpp::async can be `co_await`-ed, at which point the coroutine suspends (pauses) and returns back to its caller; in other words, the program is free to go and do other things while the data is being retrieved and D++ will resume your coroutine when it has the data you need, which will be returned from the `co_await` expression.
 
-\attention You may hear that coroutines are "writing async code as if it was sync", while this is sort of correct, it may limit your understanding and especially the dangers of coroutines. I find **they are best thought of as a shortcut for a state machine**. If you've ever written one, you know what this means. Think of the lambda as *its constructor*, in which captures are variable parameters. Think of the parameters passed to your lambda as data members in your state machine. References are kept as references, and by the time the state machine is resumed, the reference may be dangling : [this is not good](/lambdas-and-locals.html)! As a rule of thumb when making coroutines, **always prefer taking parameters by value and avoid lambda capture**. 
+\attention You may hear that coroutines are "writing async code as if it was sync", while this is sort of correct, it may limit your understanding and especially the dangers of coroutines. I find **they are best thought of as a shortcut for a state machine**. If you've ever written one, you know what this means. Think of the lambda as *its constructor*, in which captures are variable parameters. Think of the parameters passed to your lambda as data members in your state machine. References are kept as references, and by the time the state machine is resumed, the reference may be dangling : \ref lambdas-and-locals "this is not good"! As a rule of thumb when making coroutines, **always prefer taking parameters by value and avoid lambda capture**. 
 
 ### Several steps in one
 
-\note The next example assumes you are already familiar with how to use [slash commands](/firstbot.html), [parameters](/slashcommands.html), and [sending files through a command](/discord-application-command-file-upload.html).
+\note The next example assumes you are already familiar with how to use \ref firstbot "slash commands", \ref slashcommands "parameters", and \ref discord-application-command-file-upload "sending files through a command".
 
 Here is another example of what is made easier with coroutines, an "addemoji" command taking a file and a name as a parameter. This means downloading the emoji, submitting it to Discord, and finally replying, with some error handling along the way. Normally we would have to use callbacks and some sort of object keeping track of our state, but with coroutines, it becomes much simpler:
 
