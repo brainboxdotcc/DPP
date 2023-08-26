@@ -4,6 +4,7 @@ The example programs listed here demonstrate lots of things to do with interacti
 
 * \subpage slashcommands "Using Slash Commands and Interactions"
 * \subpage subcommands "Slash command sub-commands"
+* \subpage user-only-messages "Ephemeral replies ('Only you can see this' replies)"
 * \subpage components "Using button components"
 * \subpage components2 "Advanced button components"
 * \subpage components3 "Using select menu components"
