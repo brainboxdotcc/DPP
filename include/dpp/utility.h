@@ -114,9 +114,6 @@ namespace dpp {
 
 		/**
 		 * @brief Guild navigation types for dpp::utility::guild_navigation()
-		 *
-		 * @note These values are the actual string values specified by the Discord API
-		 * and should not be changed unless the Discord API changes the specification!
 		 */
 		enum guild_navigation_type {
 			/// _Customize_ tab with the server's dpp::onboarding_prompt
