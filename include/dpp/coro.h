@@ -19,8 +19,8 @@
  *
  ************************************************************************************/
 
-#ifdef DPP_CORO
 #pragma once
+#ifdef DPP_CORO
 
 #include "coro/async.h"
 #include "coro/coroutine.h"

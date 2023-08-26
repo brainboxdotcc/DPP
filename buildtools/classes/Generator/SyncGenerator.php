@@ -88,7 +88,7 @@ EOT;
      */
     public function generateHeaderDef(string $returnType, string $currentFunction, string $parameters, string $noDefaults, string $parameterTypes, string $parameterNames): string
     {
-        return "$returnType {$currentFunction}_sync($parameters);\n\n";
+        return "DPP_DEPRECATED_WITH_CORO $returnType {$currentFunction}_sync($parameters);\n\n";
     }
 
     /**
