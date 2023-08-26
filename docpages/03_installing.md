@@ -1,4 +1,4 @@
-# Installing D++
+\page installing Installing D++
 
 There are many ways to install D++, either from a package manager, or from source. Please choose your desired option from the list below:
 
