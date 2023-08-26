@@ -39,6 +39,12 @@ slashcommand::slashcommand(const std::string &_name, const std::string &_descrip
 	set_application_id(_application_id);
 }
 
+slashcommand::slashcommand(const std::string &_name, const slashcommand_contextmenu_type _type, const dpp::snowflake _application_id): slashcommand() {
+	set_name(_name);
+	set_type(_type);
+	set_application_id(_application_id);
+}
+
 slashcommand& slashcommand::set_dm_permission(bool dm) {
 	dm_permission = dm;
 	return *this;

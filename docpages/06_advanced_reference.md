@@ -10,3 +10,4 @@
 * \subpage roadmap "Development Roadmap"
 * \subpage security "Security"
 * \subpage automating-with-jenkins "Automating your bot with Jenkins"
+* \subpage separate-events "Separating events into new classes"
