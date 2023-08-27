@@ -740,14 +740,22 @@ struct DPP_EXPORT embed {
  * @brief Represents a reaction to a dpp::message
  */
 struct DPP_EXPORT reaction {
-	/** Number of times this reaction has been added */
+	/** Total number of times this emoji has been used to react (including super reacts) */
 	uint32_t count;
-	/** Reaction was from the bot's id */
-	bool me;
+	/** Count of super reactions */
+	uint32_t count_burst;
+	/** Count of normal reactions */
+	uint32_t count_normal;
 	/** ID of emoji for reaction */
 	snowflake emoji_id;
 	/** Name of emoji, if applicable */
 	std::string emoji_name;
+	/** Whether your bot reacted using this emoji */
+	bool me;
+	/** Whether your bot super-reacted using this emoji */
+	bool me_burst;
+	/** HEX colors used for super reaction. Stored as integers */
+	std::vector<uint32_t> burst_colors;
 
 	/**
 	 * @brief Constructs a new reaction object.
