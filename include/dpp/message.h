@@ -855,7 +855,7 @@ struct DPP_EXPORT attachment {
  * @brief Represents the type of a sticker
  */
 enum sticker_type : uint8_t {
-	/// Nitro pack sticker
+	/// An official sticker in a pack
 	st_standard = 1,
 	/// Guild sticker
 	st_guild = 2

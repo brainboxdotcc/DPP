@@ -444,6 +444,12 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	}
 
 	{ // utility methods
+		set_test(UTILITY_GUILD_NAVIGATION, false);
+		auto gn1 = dpp::utility::guild_navigation(123, dpp::utility::gnt_customize);
+		auto gn2 = dpp::utility::guild_navigation(1234, dpp::utility::gnt_browse);
+		auto gn3 = dpp::utility::guild_navigation(12345, dpp::utility::gnt_guide);
+		set_test(UTILITY_GUILD_NAVIGATION, gn1 == "<123:customize>" && gn2 == "<1234:browse>" && gn3 == "<12345:guide>");
+
 		set_test(UTILITY_ICONHASH, false);
 		auto iconhash1 = dpp::utility::iconhash("a_5532c6414c70765a28cf9448c117205f");
 		set_test(UTILITY_ICONHASH, iconhash1.first == 6139187225817019994 &&
