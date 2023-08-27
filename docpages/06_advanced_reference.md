@@ -1,4 +1,4 @@
-# Advanced Reference
+\page advanced-reference Advanced Reference
 
 * \subpage clusters-shards-guilds "Clusters, Shards and Guilds"
 * \subpage thread-model "Thread Model"

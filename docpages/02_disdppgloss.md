@@ -1,4 +1,4 @@
-## A Glossary of Common Discord Terms
+\page glossary-of-common-discord-terms A Glossary of Common Discord Terms
 
 This is a list of terms that you should know if you want to use D++ (or any other discord library). These terms are not D++ specific, and are commonly used throughout most of the Discord developer community. This list, with a few exceptions, ***is discord specific***, that is to say that this is not a explanation of commonly used C++ terms, it is for people who are not familiar with the terminology of the discord API and libraries themselves.
 
