@@ -36,7 +36,7 @@ Want to help? Drop me a line or send a PR.
 
 This library is in use on [TriviaBot](https://triviabot.co.uk/) and [Sporks bot](https://sporks.gg) and many other bots!
 
-## Documentation
+## 📚 Documentation
 
 The documentation is constantly evolving and improving, generated from the code comments and markdown examples using Doxygen.
 
@@ -73,7 +73,7 @@ int main() {
 
 You can find more examples in our [example page](https://dpp.dev/md_docpages_03_example_programs.html).
 
-## Supported Systems
+## 💻 Supported Systems
 
 ### Linux
 The library runs ideally on **Linux**.
@@ -90,7 +90,7 @@ For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for
 ### Other OS
 The library should work fine on other operating systems as well, and if you run a D++ bot on something not listed here, please let us know!
 
-## Getting Started
+## 🔰 Getting Started
 
 ### Installation
 
@@ -118,11 +118,11 @@ Make a humorous reference to brains in your nickname to get access to a secret b
 
 [![Discord](https://img.shields.io/discord/825407338755653642?style=flat)](https://discord.gg/dpp)
 
-## Show your support
+## 💕 Show your support
 
 We love people's support in growing and improving. Be sure to leave a ⭐️ if you like the project and also be sure to contribute, if you're interested!
 
-## Dependencies
+## 📂 Dependencies
 
 ### Build requirements
 * [cmake](https://cmake.org/) (version 3.13+)
