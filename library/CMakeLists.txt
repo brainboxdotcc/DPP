@@ -22,9 +22,11 @@ endif()
 
 add_compile_definitions(DPP_OS=${CMAKE_SYSTEM_NAME})
 
-if(NOT DEFINED AVX_TYPE)
+if(${AVX_TYPE} STREQUAL "OFF")
 	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/DetectArchitecture.cmake")
 	add_compile_options("${AVX_FLAG}")
+else()
+	message("-- AVX type overridden by configuration: ${AVX_TYPE}")
 endif()
 
 add_compile_definitions("${AVX_TYPE}")
