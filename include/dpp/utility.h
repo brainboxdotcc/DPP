@@ -28,6 +28,7 @@
 #include <unordered_map>
 #include <map>
 #include <functional>
+#include <cstddef>
 
 #ifndef MAX_CND_IMAGE_SIZE
 	#define MAX_CDN_IMAGE_SIZE 4096
@@ -659,6 +660,17 @@ namespace dpp {
 		template <typename F, typename R, typename... Args>
 		inline constexpr bool callable_returns_v = std::is_convertible_v<std::invoke_result_t<F, Args...>, R>;
 #endif
+
+		/**
+		 * @brief Utility struct that has the same size and alignment as another but does nothing. Useful for ABI compatibility.
+		 *
+		 * @tparam T Type to mimic
+		 */
+		template <typename T>
+		struct alignas(T) dummy {
+			/** @brief Array of bytes with a size mimicking T */
+			std::array<std::byte, sizeof(T)> data;
+		};
 
 	} // namespace utility
 } // namespace dpp

@@ -47,10 +47,13 @@ struct job {};
 namespace detail {
 
 template <typename... Args>
-inline constexpr bool coroutine_has_ref_params_v = (std::is_reference_v<Args> || ... || false);
+inline constexpr bool coroutine_has_no_ref_params_v = false;
+
+template <>
+inline constexpr bool coroutine_has_no_ref_params_v<> = true;
 
 template <typename T, typename... Args>
-inline constexpr bool coroutine_has_ref_params_v<T, Args...> = (std::is_reference_v<Args> || ... || (std::is_reference_v<T> && !std::is_invocable_v<T, Args...>));
+inline constexpr bool coroutine_has_no_ref_params_v<T, Args...> = (std::is_invocable_v<T, Args...> || !std::is_reference_v<T>) && (!std::is_reference_v<Args> && ... && true);
 
 #ifdef DPP_CORO_TEST
 	struct job_promise_base{};
@@ -124,7 +127,7 @@ struct job_promise {
 		 * If you must pass a reference, pass it as a pointer or with std::ref, but you must fully understand the reason behind this warning, and what to avoid.
 		 * If you prefer a safer type, use `coroutine` for synchronous execution, or `task` for parallel tasks, and co_await them.
 		 */
-		static_assert(!coroutine_has_ref_params_v<Args...>, "co_await is disabled in dpp::job when taking parameters by reference. read comment above this line for more info");
+		static_assert(coroutine_has_no_ref_params_v<Args...>, "co_await is disabled in dpp::job when taking parameters by reference. read comment above this line for more info");
 
 		return std::forward<T>(expr);
 	}
