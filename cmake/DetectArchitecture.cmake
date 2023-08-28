@@ -26,16 +26,16 @@ endfunction()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(INSTRUCTION_SETS
-        "T_AVX?/arch:AVX?auto result = _mm_testz_ps(__m128{}, __m128{})"
-        "T_AVX2?/arch:AVX2?auto result = _mm256_add_epi32(__m256i{}, __m256i{})"
-        "T_AVX512?/arch:AVX512?auto result = _mm512_add_ps(__m512i{}, __m512i{}).auto result2 = _mm512_cmplt_epu8_mask(__m512i{}, __m512i{})"
+        "T_AVX?/arch:AVX?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
+        "T_AVX2?/arch:AVX2?__m256i value{}#auto result = _mm256_extract_epi32(value, 0)"
+        "T_AVX512?/arch:AVX512?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
     )
 else()
     set(INSTRUCTION_SETS
-        "T_AVX?-mavx.-mpclmul.-mbmi?auto result = _mm_testz_ps(__m128{}, __m128{})"
-        "T_AVX2?-mavx2.-mavx.-mpclmul.-mbmi?auto result = _mm256_add_epi32(__m256i{}, __m256i{})"
-        "T_AVX512?-mavx512bw.-mavx512f.-mavx2.-mavx.-mpclmul.-mbmi?auto result = _mm512_add_ps(__m512i{}, __m512i{}).auto result2 = _mm512_cmplt_epu8_mask(__m512i{}, __m512i{})"
-    )
+        "T_AVX?-mavx?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
+        "T_AVX2?-mavx2?__m256i value{}#auto result = _mm256_extract_epi32(value, 0)"
+        "T_AVX512?-mavx512f?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
+)
 endif()
 
 set(CMAKE_REQUIRED_FLAGS_SAVE "${CMAKE_REQUIRED_FLAGS}")
