@@ -20,11 +20,14 @@ if (HAVE_PTHREAD_SETNAME_NP)
 	}" HAVE_TWO_PARAMETER_SETNAME_NP)
 endif()
 
+add_compile_definitions(DPP_OS=${CMAKE_SYSTEM_NAME})
+
 if(NOT DEFINED AVX_TYPE)
 	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/DetectArchitecture.cmake")
+	add_compile_options("${AVX_FLAG}")
 endif()
 
-add_compile_definitions(DPP_OS=${CMAKE_SYSTEM_NAME})
+add_compile_definitions("${AVX_TYPE}")
 
 if(WIN32 AND NOT MINGW)
 	if (NOT WINDOWS_32_BIT)
@@ -59,8 +62,6 @@ if(WIN32 AND NOT MINGW)
 		add_compile_definitions(WIN32_LEAN_AND_MEAN)
 		add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 		add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
-		add_compile_definitions("${AVX_TYPE}")
-		add_compile_options("${AVX_FLAG}")
 
 	endif()
 endif()
