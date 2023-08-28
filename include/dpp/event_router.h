@@ -408,7 +408,7 @@ public:
 	 * }
 	 * ```
 	 *
-	 * This can be combined with `dpp::when_any` and other awaitables, for example `dpp::cluster::co_sleep` to create expiring buttons.
+	 * This can be combined with dpp::when_any and other awaitables, for example dpp::cluster::co_sleep to create expiring buttons.
 	 *
 	 * @warning On resumption the awaiter will be given <b>a reference</b> to the event.
 	 * This means that variable may become dangling at the next co_await, be careful and save it in a variable
@@ -440,7 +440,7 @@ public:
 	 * }
 	 * ```
 	 *
-	 * This can be combined with `dpp::when_any` and other awaitables, for example `dpp::cluster::co_sleep` to create expiring buttons.
+	 * This can be combined with dpp::when_any and other awaitables, for example dpp::cluster::co_sleep to create expiring buttons.
 	 *
 	 * @warning On resumption the awaiter will be given <b>a reference</b> to the event.
 	 * This means that variable may become dangling at the next co_await, be careful and save it in a variable

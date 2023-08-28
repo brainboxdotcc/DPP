@@ -1,63 +1,12 @@
-\page coroutines Advanced commands with coroutines
+\page coro-simple-commands Making simple commands
 
-\warning D++ Coroutines are a very new feature and are currently only supported by D++ on g++ 11, clang/LLVM 14, and MSVC 19.37 or above. Additionally, D++ must be built with the CMake option DPP_CORO, and your program must both define the macro DPP_CORO and use C++20 or above. The feature is experimental and may have bugs or even crashes, please report any to [GitHub Issues](https://github.com/brainboxdotcc/DPP/issues) or to our [Discord Server](https://discord.gg/dpp).
-
-### What is a coroutine?
-
-Introduced in C++20, coroutines are the solution to the impracticality of callbacks. In short, a coroutine is a function that can be paused and resumed later. They are an extremely powerful alternative to callbacks for asynchronous APIs in particular, as the function can be paused when waiting for an API response, and resumed when it is received.
-
-Let's revisit \ref attach-file "attaching a downloaded file", but this time with a coroutine:
-
-
-~~~~~~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-int main() {
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
-
-    bot.on_log(dpp::utility::cout_logger());
-
-    /* Message handler to look for a command called !file */
-    /* Make note of passing the event by value, this is important (explained below) */
-    bot.on_message_create([](dpp::message_create_t event) -> dpp::job {
-		dpp::cluster *cluster = event.from->creator;
-
-        if (event.msg.content == "!file") {
-            // request an image and co_await the response
-            dpp::http_request_completion_t result = co_await cluster->co_request("https://dpp.dev/DPP-Logo.png", dpp::m_get);
-
-            // create a message
-            dpp::message msg(event.msg.channel_id, "This is my new attachment:");
-
-            // attach the image on success
-            if (result.status == 200) {
-                msg.add_file("logo.png", result.body);
-            }
-
-            // send the message
-            cluster->message_create(msg);
-        }
-    });
-
-    bot.start(dpp::st_wait);
-    return 0;
-}
-~~~~~~~~~~~~~~~
-
-
-Coroutines can make commands simpler by eliminating callbacks, which can be very handy in the case of complex commands that rely on a lot of different data or steps.
-
-In order to be a coroutine, a function has to return a special type with special functions; D++ offers dpp::job, dpp::task, and dpp::coroutine, which are designed to work seamlessly with asynchronous calls through dpp::async, which all the functions starting with `co_` such as dpp::cluster::co_message_create return. Event routers can have a dpp::job attached to them, as this object allows to create coroutines that can execute on their own, asynchronously. More on that and the difference between it and the other two types later. To turn a function into a coroutine, simply make it return dpp::job as seen in the example at line 10, then use `co_await` on awaitable types or `co_return`. The moment the execution encounters one of these two keywords, the function is transformed into a coroutine. Coroutines that use dpp::job can be used for event handlers, they can be attached to an event router just the same way as regular event handlers.
-
-When using a `co_*` function such as `co_message_create`, the request is sent immediately and the returned dpp::async can be `co_await`-ed, at which point the coroutine suspends (pauses) and returns back to its caller; in other words, the program is free to go and do other things while the data is being retrieved and D++ will resume your coroutine when it has the data you need, which will be returned from the `co_await` expression.
-
-\attention You may hear that coroutines are "writing async code as if it was sync", while this is sort of correct, it may limit your understanding and especially the dangers of coroutines. I find **they are best thought of as a shortcut for a state machine**, if you've ever written one, you know what this means. Think of the lambda as *its constructor*, in which captures are variable parameters. Think of the parameters passed to your lambda as data members in your state machine. When you `co_await` something, the state machine's function exits, the program goes back to the caller, at this point the calling function may return. References are kept as references in the state machine, which means by the time the state machine is resumed, the reference may be dangling : \ref lambdas-and-locals "this is not good"! As a rule of thumb when making coroutines, **always prefer taking parameters by value and avoid lambda capture**. Another way to think of them is just like callbacks but keeping the current scope intact. In fact this is exactly what it is, the co_* functions call the normal API calls, with a callback that resumes the coroutine, *in the callback thread*. This means you cannot rely on thread_local variables and need to keep in mind concurrency issues with global states, as your coroutine will be resumed in another thread than the one it started on.
+\include{doc} coro_warn.dox
 
 ### Several steps in one
 
 \note The next example assumes you are already familiar with how to use \ref firstbot "slash commands", \ref slashcommands "parameters", and \ref discord-application-command-file-upload "sending files through a command".
 
-Here is another example of what is made easier with coroutines, an "addemoji" command taking a file and a name as a parameter. This means downloading the emoji, submitting it to Discord, and finally replying, with some error handling along the way. Normally we would have to use callbacks and some sort of object keeping track of our state, but with coroutines, it becomes much simpler:
+With coroutines, it becomes a lot easier to do several asynchronous requests for one task. As an example an "addemoji" command taking a file and a name as a parameter. This means downloading the emoji, submitting it to Discord, and finally replying, with some error handling along the way. Normally we would have to use callbacks and some sort of object keeping track of our state, but with coroutines, the function can simply pause and be resumed when we receive the response to our request :
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -92,8 +41,7 @@ int main() {
             if (response.status != 200) { // Page didn't send the image
                 co_await thinking; // Wait for the thinking response to arrive so we can edit
                 event.edit_response("Error: could not download the attachment");
-            }
-            else {
+            } else {
                 // Load the image data in a dpp::emoji
                 dpp::emoji emoji(emoji_name);
                 emoji.load_image(response.body, dpp::image_type::i_png);
@@ -193,8 +141,7 @@ int main() {
             if (avatar_url.empty()) { // Member does not have a custom avatar for this server, get their user avatar
                 dpp::confirmation_callback_t confirmation = co_await event.from->creator->co_user_get_cached(member->user_id);
 
-                if (confirmation.is_error())
-                {
+                if (confirmation.is_error()) {
                     // Wait for the thinking response to arrive to make sure we can edit
                     co_await thinking;
                     event.edit_original_response(dpp::message{"User not found!"});
