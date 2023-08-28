@@ -580,7 +580,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		 * are sending audio later, this way if the audio receive code is plain unstable
 		 * the test suite will crash and fail.
 		 */
-		bot.on_voice_receive_combined([&](auto& event) {
+		bot.on_voice_receive_combined([&](const auto& event) {
 		});
 
 		std::promise<void> ready_promise;

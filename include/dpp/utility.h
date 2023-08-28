@@ -624,5 +624,41 @@ namespace dpp {
 		 */
 		void DPP_EXPORT set_thread_name(const std::string& name);
 
+#ifdef __cpp_concepts // if c++20
+		/**
+		 * @brief Concept satisfied if a callable F can be called using the arguments Args, and that its return value is convertible to R.
+		 *
+		 * @tparam F Callable object
+		 * @tparam R Return type to check for convertibility to
+		 * @tparam Args... Arguments to use to resolve the overload
+		 * @return Whether the expression `F(Args...)` is convertible to R
+		 */
+		template <typename F, typename R, typename... Args>
+		concept callable_returns = std::convertible_to<std::invoke_result_t<F, Args...>, R>;
+
+		/**
+		 * @brief Type trait to check if a callable F can be called using the arguments Args, and that its return value is convertible to R.
+		 *
+		 * @deprecated In C++20 mode, prefer using the concept `callable_returns`.
+		 * @tparam F Callable object
+		 * @tparam R Return type to check for convertibility to
+		 * @tparam Args... Arguments to use to resolve the overload
+		 * @return Whether the expression `F(Args...)` is convertible to R
+		 */
+		template <typename F, typename R, typename... Args>
+		inline constexpr bool callable_returns_v = callable_returns<F, R, Args...>;
+#else
+		/**
+		 * @brief Type trait to check if a callable F can be called using the arguments Args, and that its return value is convertible to R.
+		 *
+		 * @tparam F Callable object
+		 * @tparam R Return type to check for convertibility to
+		 * @tparam Args... Arguments to use to resolve the overload
+		 * @return Whether the expression `F(Args...)` is convertible to R
+		 */
+		template <typename F, typename R, typename... Args>
+		inline constexpr bool callable_returns_v = std::is_convertible_v<std::invoke_result_t<F, Args...>, R>;
+#endif
+
 	} // namespace utility
 } // namespace dpp
