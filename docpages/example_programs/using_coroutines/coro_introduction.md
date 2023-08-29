@@ -5,38 +5,38 @@ Introduced in C++20, coroutines are the solution to the impracticality of callba
 Let's revisit \ref attach-file "attaching a downloaded file", but this time with a coroutine:
 
 
-~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 
 int main() {
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
-    /* Message handler to look for a command called !file */
-    /* Make note of passing the event by value, this is important (explained below) */
-    bot.on_message_create([](dpp::message_create_t event) -> dpp::job {
+	/* Message handler to look for a command called !file */
+	/* Make note of passing the event by value, this is important (explained below) */
+	bot.on_message_create([](dpp::message_create_t event) -> dpp::job {
 		dpp::cluster *cluster = event.from->creator;
 
-        if (event.msg.content == "!file") {
-            // request an image and co_await the response
-            dpp::http_request_completion_t result = co_await cluster->co_request("https://dpp.dev/DPP-Logo.png", dpp::m_get);
+		if (event.msg.content == "!file") {
+			// request an image and co_await the response
+			dpp::http_request_completion_t result = co_await cluster->co_request("https://dpp.dev/DPP-Logo.png", dpp::m_get);
 
-            // create a message
-            dpp::message msg(event.msg.channel_id, "This is my new attachment:");
+			// create a message
+			dpp::message msg(event.msg.channel_id, "This is my new attachment:");
 
-            // attach the image on success
-            if (result.status == 200) {
-                msg.add_file("logo.png", result.body);
-            }
+			// attach the image on success
+			if (result.status == 200) {
+				msg.add_file("logo.png", result.body);
+			}
 
-            // send the message
-            cluster->message_create(msg);
-        }
-    });
+			// send the message
+			cluster->message_create(msg);
+		}
+	});
 
-    bot.start(dpp::st_wait);
-    return 0;
+	bot.start(dpp::st_wait);
+	return 0;
 }
 ~~~~~~~~~~~~~~~
 
@@ -49,6 +49,6 @@ When using a `co_*` function such as `co_message_create`, the request is sent im
 
 \warning As a rule of thumb when making coroutines, **always prefer taking parameters by value and avoid lambda capture**! See below for an explanation.
 
-You may hear that coroutines are "writing async code as if it was sync", while this is sort of correct, it may limit your understanding and especially the dangers of coroutines. I find **they are best thought of as a shortcut for a state machine**, if you've ever written one, you know what this means. Think of the lambda as *its constructor*, in which captures are variable parameters. Think of the parameters passed to your lambda as data members in your state machine. When you `co_await` something, the state machine's function exits, the program goes back to the caller, at this point the calling function may return. References are kept as references in the state machine, which means by the time the state machine is resumed, the reference may be dangling : \ref lambdas-and-locals "this is not good"!
+You may hear that coroutines are "writing async code as if it was sync", while this is sort of correct, it may limit your understanding and especially the dangers of coroutines. I find **they are best thought of as a shortcut for a state machine**, if you've ever written one, you know what this means. Think of the lambda as *its constructor*, in which captures are variable parameters. Think of the parameters passed to your lambda as data members in your state machine. When you `co_await` something, the state machine's function exits, the program goes back to the caller, at this point the calling function may return. References are kept as references in the state machine, which means by the time the state machine is resumed, the reference may be dangling: \ref lambdas-and-locals "this is not good"!
 
 Another way to think of them is just like callbacks but keeping the current scope intact. In fact this is exactly what it is, the co_* functions call the normal API calls, with a callback that resumes the coroutine, *in the callback thread*. This means you cannot rely on thread_local variables and need to keep in mind concurrency issues with global states, as your coroutine will be resumed in another thread than the one it started on.

@@ -12,65 +12,65 @@ With coroutines, it becomes a lot easier to do several asynchronous requests for
 #include <dpp/dpp.h>
 
 int main() {
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
-    bot.on_slashcommand([](dpp::slashcommand_t event) -> dpp::job {
-        if (event.command.get_command_name() == "addemoji") {
-            dpp::cluster *cluster = event.from->creator;
-            // Retrieve parameter values
-            dpp::snowflake file_id = std::get<dpp::snowflake>(event.get_parameter("file"));
-            std::string emoji_name = std::get<std::string>(event.get_parameter("name"));
+	bot.on_slashcommand([](dpp::slashcommand_t event) -> dpp::job {
+		if (event.command.get_command_name() == "addemoji") {
+			dpp::cluster *cluster = event.from->creator;
+			// Retrieve parameter values
+			dpp::snowflake file_id = std::get<dpp::snowflake>(event.get_parameter("file"));
+			std::string emoji_name = std::get<std::string>(event.get_parameter("name"));
 
-            // Get the attachment from the resolved list
-            const dpp::attachment &attachment = event.command.get_resolved_attachment(file_id);
+			// Get the attachment from the resolved list
+			const dpp::attachment &attachment = event.command.get_resolved_attachment(file_id);
 
-            // For simplicity for this example we only support PNG
-            if (attachment.content_type != "image/png") {
-                // While event.co_reply is available, we can just use event.reply, as we will exit the command anyway and don't need to wait on the result
-                event.reply("Error: type " + attachment.content_type + " not supported");
-                co_return;
-            }
-            // Send a "<bot> is thinking..." message, to wait on later so we can edit
-            dpp::async thinking = event.co_thinking(false);
+			// For simplicity for this example we only support PNG
+			if (attachment.content_type != "image/png") {
+				// While event.co_reply is available, we can just use event.reply, as we will exit the command anyway and don't need to wait on the result
+				event.reply("Error: type " + attachment.content_type + " not supported");
+				co_return;
+			}
+			// Send a "<bot> is thinking..." message, to wait on later so we can edit
+			dpp::async thinking = event.co_thinking(false);
 
-            // Download and co_await the result
-            dpp::http_request_completion_t response = co_await cluster->co_request(attachment.url, dpp::m_get);
+			// Download and co_await the result
+			dpp::http_request_completion_t response = co_await cluster->co_request(attachment.url, dpp::m_get);
 
-            if (response.status != 200) { // Page didn't send the image
-                co_await thinking; // Wait for the thinking response to arrive so we can edit
-                event.edit_response("Error: could not download the attachment");
-            } else {
-                // Load the image data in a dpp::emoji
-                dpp::emoji emoji(emoji_name);
-                emoji.load_image(response.body, dpp::image_type::i_png);
+			if (response.status != 200) { // Page didn't send the image
+				co_await thinking; // Wait for the thinking response to arrive so we can edit
+				event.edit_response("Error: could not download the attachment");
+			} else {
+				// Load the image data in a dpp::emoji
+				dpp::emoji emoji(emoji_name);
+				emoji.load_image(response.body, dpp::image_type::i_png);
 
-                // Create the emoji and co_await the response
-                dpp::confirmation_callback_t confirmation = co_await cluster->co_guild_emoji_create(event.command.guild_id, emoji);
+				// Create the emoji and co_await the response
+				dpp::confirmation_callback_t confirmation = co_await cluster->co_guild_emoji_create(event.command.guild_id, emoji);
 
-                co_await thinking; // Wait for the thinking response to arrive so we can edit
-                if (confirmation.is_error())
-                    event.edit_response("Error: could not add emoji: " + confirmation.get_error().message);
-                else // Success
-                    event.edit_response("Successfully added " + confirmation.get<dpp::emoji>().get_mention()); // Show the new emoji
-            }
-        }
-    });
+				co_await thinking; // Wait for the thinking response to arrive so we can edit
+				if (confirmation.is_error())
+					event.edit_response("Error: could not add emoji: " + confirmation.get_error().message);
+				else // Success
+					event.edit_response("Successfully added " + confirmation.get<dpp::emoji>().get_mention()); // Show the new emoji
+			}
+		}
+	});
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-            dpp::slashcommand command("addemoji", "Add an emoji", bot.me.id);
+	bot.on_ready([&bot](const dpp::ready_t & event) {
+		if (dpp::run_once<struct register_bot_commands>()) {
+			dpp::slashcommand command("addemoji", "Add an emoji", bot.me.id);
 
-            // Add file and name as required parameters
-            command.add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image", true));
-            command.add_option(dpp::command_option(dpp::co_string, "name", "Name of the emoji to add", true));
+			// Add file and name as required parameters
+			command.add_option(dpp::command_option(dpp::co_attachment, "file", "Select an image", true));
+			command.add_option(dpp::command_option(dpp::co_string, "name", "Name of the emoji to add", true));
 
-            bot.global_command_create(command);
-        }
-    });
+			bot.global_command_create(command);
+		}
+	});
 
-    bot.start(dpp::st_wait);
+	bot.start(dpp::st_wait);
 }
 ~~~~~~~~~~
 
@@ -82,91 +82,91 @@ Earlier we mentioned two other types of coroutines provided by dpp: dpp::corouti
 
 Here is an example of a command making use of dpp::task to retrieve the avatar of a specified user, or if missing, the sender:
 
-~~~~~~~~~~{.cpp}
+~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 
 int main() {
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
-    bot.on_slashcommand([](dpp::slashcommand_t event) -> dpp::job {
-        if (event.command.get_command_name() == "avatar") {
-            // Make a nested coroutine to fetch the guild member requested, that returns it as an optional
-            constexpr auto resolve_member = [](const dpp::slashcommand_t &event) -> dpp::task<std::optional<dpp::guild_member>> {
-                const dpp::command_value &user_param = event.get_parameter("user");
-                dpp::snowflake user_id;
+	bot.on_slashcommand([](dpp::slashcommand_t event) -> dpp::job {
+		if (event.command.get_command_name() == "avatar") {
+			// Make a nested coroutine to fetch the guild member requested, that returns it as an optional
+			constexpr auto resolve_member = [](const dpp::slashcommand_t &event) -> dpp::task<std::optional<dpp::guild_member>> {
+				const dpp::command_value &user_param = event.get_parameter("user");
+				dpp::snowflake user_id;
 
-                if (std::holds_alternative<std::monostate>(user_param))
-                    user_id = event.command.usr.id; // Parameter is empty so user is sender
-                else if (std::holds_alternative<dpp::snowflake>(user_param))
-                    user_id = std::get<dpp::snowflake>(user_param); // Parameter has a user
+				if (std::holds_alternative<std::monostate>(user_param))
+					user_id = event.command.usr.id; // Parameter is empty so user is sender
+				else if (std::holds_alternative<dpp::snowflake>(user_param))
+					user_id = std::get<dpp::snowflake>(user_param); // Parameter has a user
 
-                // If we have the guild member in the command's resolved data, return it
-                const auto &member_map = event.command.resolved.members;
-                if (auto member = member_map.find(user_id); member != member_map.end())
-                    co_return member->second;
+				// If we have the guild member in the command's resolved data, return it
+				const auto &member_map = event.command.resolved.members;
+				if (auto member = member_map.find(user_id); member != member_map.end())
+					co_return member->second;
 
-                // Try looking in guild cache
-                dpp::guild *guild = dpp::find_guild(event.command.guild_id);
-                if (guild) {
-                    // Look in guild's member cache
-                    if (auto member = guild->members.find(user_id); member != guild->members.end()) {
-                        co_return member->second;
-                    }
-                }
+				// Try looking in guild cache
+				dpp::guild *guild = dpp::find_guild(event.command.guild_id);
+				if (guild) {
+					// Look in guild's member cache
+					if (auto member = guild->members.find(user_id); member != guild->members.end()) {
+						co_return member->second;
+					}
+				}
 
-                // Finally if everything else failed, request API
-                dpp::confirmation_callback_t confirmation = co_await event.from->creator->co_guild_get_member(event.command.guild_id, user_id);
-                if (confirmation.is_error())
-                    co_return std::nullopt; // Member not found, return empty
-                else
-                    co_return confirmation.get<dpp::guild_member>();
-            };
+				// Finally if everything else failed, request API
+				dpp::confirmation_callback_t confirmation = co_await event.from->creator->co_guild_get_member(event.command.guild_id, user_id);
+				if (confirmation.is_error())
+					co_return std::nullopt; // Member not found, return empty
+				else
+					co_return confirmation.get<dpp::guild_member>();
+			};
 
-            // Send a "<bot> is thinking..." message, to wait on later so we can edit
-            dpp::async thinking = event.co_thinking(false);
+			// Send a "<bot> is thinking..." message, to wait on later so we can edit
+			dpp::async thinking = event.co_thinking(false);
 
-            // Call our coroutine defined above to retrieve the member requested
-            std::optional<dpp::guild_member> member = co_await resolve_member(event);
+			// Call our coroutine defined above to retrieve the member requested
+			std::optional<dpp::guild_member> member = co_await resolve_member(event);
 
-            if (!member.has_value()) {
-                // Wait for the thinking response to arrive to make sure we can edit
-                co_await thinking;
-                event.edit_original_response(dpp::message{"User not found in this server!"});
-                co_return;
-            }
+			if (!member.has_value()) {
+				// Wait for the thinking response to arrive to make sure we can edit
+				co_await thinking;
+				event.edit_original_response(dpp::message{"User not found in this server!"});
+				co_return;
+			}
 
-            std::string avatar_url = member->get_avatar_url(512);
-            if (avatar_url.empty()) { // Member does not have a custom avatar for this server, get their user avatar
-                dpp::confirmation_callback_t confirmation = co_await event.from->creator->co_user_get_cached(member->user_id);
+			std::string avatar_url = member->get_avatar_url(512);
+			if (avatar_url.empty()) { // Member does not have a custom avatar for this server, get their user avatar
+				dpp::confirmation_callback_t confirmation = co_await event.from->creator->co_user_get_cached(member->user_id);
 
-                if (confirmation.is_error()) {
-                    // Wait for the thinking response to arrive to make sure we can edit
-                    co_await thinking;
-                    event.edit_original_response(dpp::message{"User not found!"});
-                    co_return;
-                }
-                avatar_url = confirmation.get<dpp::user_identified>().get_avatar_url(512);
-            }
+				if (confirmation.is_error()) {
+					// Wait for the thinking response to arrive to make sure we can edit
+					co_await thinking;
+					event.edit_original_response(dpp::message{"User not found!"});
+					co_return;
+				}
+				avatar_url = confirmation.get<dpp::user_identified>().get_avatar_url(512);
+			}
 
-            // Wait for the thinking response to arrive to make sure we can edit
-            co_await thinking;
-            event.edit_original_response(dpp::message{avatar_url});
-        }
-    });
+			// Wait for the thinking response to arrive to make sure we can edit
+			co_await thinking;
+			event.edit_original_response(dpp::message{avatar_url});
+		}
+	});
 
 
-    bot.on_ready([&bot](const dpp::ready_t & event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-            dpp::slashcommand command("avatar", "Get your or another user's avatar image", bot.me.id);
+	bot.on_ready([&bot](const dpp::ready_t & event) {
+		if (dpp::run_once<struct register_bot_commands>()) {
+			dpp::slashcommand command("avatar", "Get your or another user's avatar image", bot.me.id);
 
-            command.add_option(dpp::command_option(dpp::co_user, "user", "User to fetch the avatar from"));
+			command.add_option(dpp::command_option(dpp::co_user, "user", "User to fetch the avatar from"));
 
-            bot.global_command_create(command);
-        }
-    });
+			bot.global_command_create(command);
+		}
+	});
 
-    bot.start(dpp::st_wait);
+	bot.start(dpp::st_wait);
 }
 ~~~~~~~~~~

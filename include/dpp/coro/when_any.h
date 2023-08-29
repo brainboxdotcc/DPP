@@ -119,8 +119,8 @@ concept void_result = std::same_as<T, empty>;
 
 /**
  * @brief Experimental class to co_await on a bunch of awaitable objects, resuming when the first one completes.
- * On completion, returns a `result` object that contains the index of the awaitable that finished first.
- * A user can call `get<N>()` on the result object to get the result, similar to std::variant.
+ * On completion, returns a @ref result object that contains the index of the awaitable that finished first.
+ * A user can call @ref result::index() and @ref result::get<N>() on the result object to get the result, similar to std::variant.
  *
  * @see when_any::result
  * @tparam Args... Type of each awaitable to await on
@@ -188,16 +188,13 @@ class when_any {
 	 * @brief Spawn a dpp::job handling the Nth argument.
 	 *
 	 * @tparam N Index of the argument to handle
+	 * @return dpp::job Job handling the Nth argument
 	 */
 	template <size_t N>
 	static dpp::job make_job(std::shared_ptr<state_t> shared_state) {
 		/**
-			* Try co_await. Catch dpp::task_cancelled_exception, set cancelled bitmask, resume and rethrow if all tasks were cancelled.
 			* Any exceptions from the awaitable's await_suspend should be thrown to the caller (the coroutine creating the when_any object)
-			*
 			* If the co_await passes, and it is the first one to complete, try construct the result, catch any exceptions to rethrow at resumption, and resume.
-			*
-			* The structure of this function isn't ideal, but this is the best I've found do deal with concurrency and scope.
 			*/
 		if constexpr (!std::same_as<result_t<N>, detail::when_any::empty>) {
 			decltype(auto) result = co_await std::get<N>(shared_state->awaitables);
@@ -245,7 +242,7 @@ class when_any {
 
 public:
 	/**
-	 * @brief Object returned by `operator co_await` on resumption. Can be moved but not copied.
+	 * @brief Object returned by \ref operator co_await() on resumption. Can be moved but not copied.
 	 */
 	class result {
 		friend class when_any<Args...>;
@@ -285,8 +282,8 @@ public:
 		 * @brief Retrieve the non-void result of an awaitable.
 		 *
 		 * @tparam N Index of the result to retrieve. Must correspond to index().
-		 * @throw Throws any exception triggered at construction, or std::bad_variant_access if N does not correspond to index()
-		 * @return result_t<N>& Result of the awaitable
+		 * @throw ??? Throws any exception triggered at construction, or std::bad_variant_access if N does not correspond to index()
+		 * @return Result of the awaitable as a reference.
 		 */
 		template <size_t N>
 #ifndef _DOXYGEN_
@@ -302,8 +299,8 @@ public:
 		 * @brief Retrieve the non-void result of an awaitable.
 		 *
 		 * @tparam N Index of the result to retrieve. Must correspond to index().
-		 * @throw Throws any exception triggered at construction, or std::bad_variant_access if N does not correspond to index()
-		 * @return const result_t<N>& Result of the awaitable
+		 * @throw ??? Throws any exception triggered at construction, or std::bad_variant_access if N does not correspond to index()
+		 * @return Result of the awaitable as a cpnst reference.
 		 */
 		template <size_t N>
 #ifndef _DOXYGEN_
@@ -319,8 +316,8 @@ public:
 		 * @brief Retrieve the non-void result of an awaitable.
 		 *
 		 * @tparam N Index of the result to retrieve. Must correspond to index().
-		 * @throw Throws any exception triggered at construction, or std::bad_variant_access if N does not correspond to index()
-		 * @return result_t<N>&& Result of the awaitable
+		 * @throw ??? Throws any exception triggered at construction, or std::bad_variant_access if N does not correspond to index()
+		 * @return Result of the awaitable as an rvalue reference.
 		 */
 		template <size_t N>
 #ifndef _DOXYGEN_
@@ -343,14 +340,16 @@ public:
 
 		/**
 		 * @brief Checks whether the return of the first awaitable triggered an exception, that is, a call to get() will rethrow.
+		 *
+		 * @return Whether or not the result is an exception
 		 */
-		bool is_exception() const noexcept {
+		[[nodiscard]] bool is_exception() const noexcept {
 			return shared_state->result.index() == 0;
 		}
 	};
 
 	/**
-	 * @brief Object returned by `operator co_await()`. Meant to be used by the standard library, not by a user.
+	 * @brief Object returned by \ref operator co_await(). Meant to be used by the standard library, not by a user.
 	 *
 	 * @see result
 	 */
@@ -358,12 +357,20 @@ public:
 		/** @brief Pointer to the when_any object */
 		when_any *self;
 
-		/** @brief First function called by the standard library when using co_await. Returns true if we don't need to suspend */
-		bool await_ready() const noexcept {
-			return self->is_ready();
+		/**
+		 * @brief First function called by the standard library when using co_await.
+		 *
+		 * @return bool Whether the result is ready
+		 */
+		[[nodiscard]] bool await_ready() const noexcept {
+			return self->await_ready();
 		}
 
-		/** @brief Second function called by the standard library when using co_await. Returns false if we want to resume immediately */
+		/**
+		 * @brief Second function called by the standard library when using co_await.
+		 *
+		 * @return bool Returns false if we want to resume immediately.
+		 */
 		bool await_suspend(detail::std_coroutine::coroutine_handle<> caller) noexcept {
 			auto sent = detail::when_any::await_state::started;
 			self->my_state->handle = caller;
@@ -386,8 +393,8 @@ public:
 	/**
 	 * @brief Constructor from awaitable objects. Each awaitable is executed immediately and the when_any object can then be co_await-ed later.
 	 *
-	 * @throw Any exception thrown by the start of each awaitable will propagate to the caller.
-	 * @param args... Arguments to construct each awaitable from. The when_any object will construct an awaitable for each, it is recommended to pass rvalues or std::move.
+	 * @throw ??? Any exception thrown by the start of each awaitable will propagate to the caller.
+	 * @param args Arguments to construct each awaitable from. The when_any object will construct an awaitable for each, it is recommended to pass rvalues or std::move.
 	 */
 	template <typename... Args_>
 #ifndef _DOXYGEN_
@@ -401,10 +408,10 @@ public:
 	when_any(const when_any &) = delete;
 
 	/** @brief Move constructor. */
-	when_any(when_any &&) = default;
+	when_any(when_any &&) noexcept = default;
 
 	/**
-	 * @brief On destruction the when_any will try to call `cancel()` on each of its awaitable if they have such a method.
+	 * @brief On destruction the when_any will try to call @ref dpp::task::cancel() cancel() on each of its awaitable if they have such a method.
 	 *
 	 * @note If you are looking to use a custom type with when_any and want it to cancel on its destruction,
 	 * make sure it has a cancel() method, which will trigger an await_resume() throwing a dpp::task_cancelled_exception.
@@ -427,18 +434,19 @@ public:
 		}(this, std::index_sequence_for<Args...>());
 	}
 
-	/** This object is not copyable. */
+	/** @brief This object is not copyable. */
 	when_any &operator=(const when_any &) = delete;
 
-	/** Move assignment operator. */
-	when_any &operator=(when_any &&) = default;
+	/** @brief Move assignment operator. */
+	when_any &operator=(when_any &&) noexcept = default;
 
 	/**
 	 * @brief Check whether a call to co_await would suspend.
 	 *
 	 * @note This can change from false to true at any point, but not the other way around.
+	 * @return bool Whether co_await would suspend
 	 */
-	bool is_ready() const noexcept {
+	[[nodiscard]] bool await_ready() const noexcept {
 		return my_state->owner_state == detail::when_any::await_state::done;
 	}
 
@@ -446,10 +454,10 @@ public:
 	 * @brief Suspend the caller until any of the awaitables completes.
 	 *
 	 * @see result
-	 * @throw On resumption, throws any exception caused by the construction of the result.
+	 * @throw ??? On resumption, throws any exception caused by the construction of the result.
 	 * @return result On resumption, this object returns an object that allows to retrieve the index and result of the awaitable.
 	 */
-	awaiter operator co_await() noexcept {
+	[[nodiscard]] awaiter operator co_await() noexcept {
 		return {this};
 	}
 };
