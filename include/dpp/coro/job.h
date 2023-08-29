@@ -36,7 +36,7 @@ namespace dpp {
  * This object stores no state and is the recommended way to use coroutines if you do not need to co_await the result.
  *
  * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs.
- * Please report any to @link https://github.com/brainboxdotcc/DPP/issues GitHub issues@endlink or to the @link https://discord.gg/dpp D++ Discord server@endlink.
+ * Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub Issues</a> or to our <a href="https://discord.gg/dpp">Discord Server</a>.
  * @warning - It cannot be co_awaited, which means the second it co_awaits something, the program jumps back to the calling function, which continues executing.
  * At this point, if the function returns, every object declared in the function including its parameters are destroyed, which causes @ref lambdas-and-locals "dangling references".
  * For this reason, `co_await` will error if any parameters are passed by reference.
@@ -81,7 +81,7 @@ struct promise {
 	/*
 	* @brief Function called when the job is done.
 	*
-	* @return @link https://en.cppreference.com/w/cpp/coroutine/suspend_never std::suspend_never@endlink Do not suspend at the end, destroying the handle immediately
+	* @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Do not suspend at the end, destroying the handle immediately
 	*/
 	std_coroutine::suspend_never final_suspend() const noexcept {
 		return {};
@@ -90,7 +90,7 @@ struct promise {
 	/*
 	* @brief Function called when the job is started.
 	*
-	* @return @link https://en.cppreference.com/w/cpp/coroutine/suspend_never std::suspend_never@endlink Do not suspend at the start, starting the job immediately
+	* @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Do not suspend at the start, starting the job immediately
 	*/
 	std_coroutine::suspend_never initial_suspend() const noexcept {
 		return {};

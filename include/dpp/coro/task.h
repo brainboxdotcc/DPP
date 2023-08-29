@@ -70,7 +70,7 @@ template <typename R>
 struct final_awaiter;
 
 /**
- * @brief Alias for @link https://en.cppreference.com/w/cpp/coroutine/coroutine_handle std::coroutine_handle @endlink for a @ref dpp::task "task"'s @ref promise_t.
+ * @brief Alias for <a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle"std::coroutine_handle</a> for a @ref dpp::task "task"'s @ref promise_t.
  *
  * @tparam R Return type of the task
  */
@@ -255,7 +255,7 @@ public:
  * @brief A coroutine task. It starts immediately on construction and can be co_await-ed, making it perfect for parallel coroutines returning a value.
  *
  * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs.
- * Please report any to @link https://github.com/brainboxdotcc/DPP/issues GitHub issues@endlink or to the @link https://discord.gg/dpp D++ Discord server@endlink.
+ * Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub Issues</a> or to our <a href="https://discord.gg/dpp">Discord Server</a>.
  * @tparam R Return type of the task. Cannot be a reference but can be void.
  */
 template <typename R>
@@ -525,7 +525,7 @@ struct promise_base {
 	/**
 	 * @brief Exception ptr if any was thrown during the coroutine
 	 *
-	 * @see @link https://en.cppreference.com/w/cpp/error/exception_ptr std::exception_ptr@endlink
+	 * @see <a href="https://en.cppreference.com/w/cpp/error/exception_ptr>std::exception_ptr</a>
 	 */
 	std::exception_ptr exception = nullptr;
 
@@ -542,7 +542,7 @@ struct promise_base {
 	/**
 	 * @brief Function called by the standard library when the coroutine is created.
 	 *
-	 * @return @link https://en.cppreference.com/w/cpp/coroutine/suspend_never std::suspend_never@endlink Don't suspend, the coroutine starts immediately.
+	 * @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Don't suspend, the coroutine starts immediately.
 	 */
 	[[nodiscard]] std_coroutine::suspend_never initial_suspend() const noexcept {
 		return {};
