@@ -403,7 +403,7 @@ namespace detail::coroutine {
 		/**
 		 * @brief Function called by the standard library when the coroutine start
 		 *
-		 * @return @return @link https://en.cppreference.com/w/cpp/coroutine/suspend_always std::suspend_always@endlink Always suspend at the start, for a lazy start
+		 * @return @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_always">std::suspend_always</a> Always suspend at the start, for a lazy start
 		 */
 		[[nodiscard]] std_coroutine::suspend_always initial_suspend() const noexcept {
 			return {};
@@ -524,7 +524,7 @@ namespace detail::coroutine {
 		/**
 		 * @brief Function called by the standard library when the coroutine start
 		 *
-		 * @return @return @link https://en.cppreference.com/w/cpp/coroutine/suspend_always std::suspend_always@endlink Always suspend at the start, for a lazy start
+		 * @return @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_always">std::suspend_always</a> Always suspend at the start, for a lazy start
 		 */
 		[[nodiscard]] std_coroutine::suspend_always initial_suspend() const noexcept {
 			return {};
