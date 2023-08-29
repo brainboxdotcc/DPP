@@ -104,6 +104,10 @@ If you prefer to build the library from source, detailed instructions are availa
 
 For frequently asked questions and their answers, please visit our [FAQ page](https://dpp.dev/md_docpages_01_frequently_asked_questions.html).
 
+### Nightly Builds
+
+If you prefer to use Nightly Builds (This is only if you know what you are doing!) then you can use either our [master nightly builds](https://nightly.link/brainboxdotcc/DPP/workflows/ci/master) or our [dev nightly builds](https://nightly.link/brainboxdotcc/DPP/workflows/ci/dev).
+
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome. After cloning and setting up project locally, you can just submit 
