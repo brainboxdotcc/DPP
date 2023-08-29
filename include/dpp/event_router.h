@@ -462,8 +462,10 @@ public:
 	 * @retval false if there are some listeners
 	 */
 	[[nodiscard]] bool empty() const {
-		std::shared_lock l(mutex);
-		return dispatch_container.empty();
+		std::shared_lock lock(mutex);
+		std::shared_lock coro_lock{coro_mutex};
+
+		return dispatch_container.empty() && coro_awaiters.empty();
 	}
 
 	/**

@@ -8,7 +8,7 @@
 
 With coroutines, it becomes a lot easier to do several asynchronous requests for one task. As an example an "addemoji" command taking a file and a name as a parameter. This means downloading the emoji, submitting it to Discord, and finally replying, with some error handling along the way. Normally we would have to use callbacks and some sort of object keeping track of our state, but with coroutines, the function can simply pause and be resumed when we receive the response to our request :
 
-~~~~~~~~~~{.cpp}
+~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 
 int main() {
