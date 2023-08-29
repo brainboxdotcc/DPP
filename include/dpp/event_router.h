@@ -624,8 +624,9 @@ template <typename T>
 const T &awaitable<T>::await_resume() {
 	handle = nullptr;
 	predicate = nullptr;
-	if (state.exchange(awaiter_state::none, std::memory_order_relaxed) == awaiter_state::cancelling)
+	if (state.exchange(awaiter_state::none, std::memory_order_relaxed) == awaiter_state::cancelling) {
 		throw dpp::task_cancelled_exception{"event_router::awaitable was cancelled"};
+	}
 	return *std::exchange(event, nullptr);
 }
 

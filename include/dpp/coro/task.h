@@ -131,10 +131,12 @@ public:
 			promise_t<R> &promise = handle.promise();
 			state_t previous_state = promise.state.exchange(state_t::dangling);
 
-			if (previous_state == state_t::done)
+			if (previous_state == state_t::done) {
 				handle.destroy();
-			else
+			}
+			else {
 				cancel();
+			}
 		}
 	}
 
@@ -161,8 +163,9 @@ public:
 	 * @return bool Whether not to suspend the caller or not
 	 */
 	[[nodiscard]] bool await_ready() const {
-		if (!handle)
+		if (!handle) {
 			throw dpp::logic_exception{"cannot co_await an empty task"};
+		}
 		return handle.promise().state.load() == state_t::done;
 	}
 
@@ -181,8 +184,9 @@ public:
 
 		my_promise.parent = caller;
 		// Replace `sent` state with `awaited` ; if that fails, the only logical option is the state was `done`, in which case return false to resume
-		if (!handle.promise().state.compare_exchange_strong(previous_state, state_t::awaited) && previous_state == state_t::done)
+		if (!handle.promise().state.compare_exchange_strong(previous_state, state_t::awaited) && previous_state == state_t::done) {
 			return false;
+		}
 		return true;
 	}
 
@@ -275,8 +279,9 @@ class task : private detail::task::task_base<R> {
 	 */
 	R& await_resume_impl() & {
 		detail::task::promise_t<R> &promise = this->handle.promise();
-		if (promise.exception)
+		if (promise.exception) {
 			std::rethrow_exception(promise.exception);
+		}
 		return *reinterpret_cast<R *>(promise.result_storage.data());
 	}
 
@@ -288,8 +293,9 @@ class task : private detail::task::task_base<R> {
 	 */
 	const R& await_resume_impl() const & {
 		detail::task::promise_t<R> &promise = this->handle.promise();
-		if (promise.exception)
+		if (promise.exception) {
 			std::rethrow_exception(promise.exception);
+		}
 		return *reinterpret_cast<R *>(promise.result_storage.data());
 	}
 
@@ -301,8 +307,9 @@ class task : private detail::task::task_base<R> {
 	 */
 	R&& await_resume_impl() && {
 		detail::task::promise_t<R> &promise = this->handle.promise();
-		if (promise.exception)
+		if (promise.exception) {
 			std::rethrow_exception(promise.exception);
+		}
 		return *reinterpret_cast<R *>(promise.result_storage.data());
 	}
 
@@ -548,8 +555,9 @@ struct promise_base {
 	 */
 	void unhandled_exception() {
 		exception = std::current_exception();
-		if ((state.load() == task::state_t::dangling) && !cancelled)
+		if ((state.load() == task::state_t::dangling) && !cancelled) {
 			throw;
+		}
 	}
 
 	/**
@@ -582,8 +590,9 @@ struct promise_base {
 		 * @throw dpp::task_cancelled_exception If the task was cancelled
 		 */
 		decltype(auto) await_resume() {
-			if (promise.cancelled.load())
+			if (promise.cancelled.load()) {
 				throw dpp::task_cancelled_exception{"task was cancelled"};
+			}
 			return awaitable.await_resume();
 		}
 	};
@@ -611,8 +620,9 @@ struct promise_t : promise_base {
 	 * @brief Destructor. Destroys the value if it was constructed.
 	 */
 	~promise_t() {
-		if (state.load() == state_t::done && !exception)
+		if (state.load() == state_t::done && !exception) {
 			std::destroy_at(reinterpret_cast<R *>(result_storage.data()));
+		}
 	}
 
 	/**
@@ -731,8 +741,9 @@ std_coroutine::coroutine_handle<> final_awaiter<R>::await_suspend(handle_t<R> ha
 
 #ifndef _DOXYGEN_
 inline void task<void>::await_resume_impl() const {
-	if (handle.promise().exception)
+	if (handle.promise().exception) {
 		std::rethrow_exception(handle.promise().exception);
+	}
 }
 #endif /* _DOXYGEN_ */
 

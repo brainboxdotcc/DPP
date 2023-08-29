@@ -199,31 +199,35 @@ class when_any {
 		if constexpr (!std::same_as<result_t<N>, detail::when_any::empty>) {
 			decltype(auto) result = co_await std::get<N>(shared_state->awaitables);
 
-			if (auto s = shared_state->owner_state.load(std::memory_order_relaxed); s == detail::when_any::await_state::dangling || s == detail::when_any::await_state::done)
+			if (auto s = shared_state->owner_state.load(std::memory_order_relaxed); s == detail::when_any::await_state::dangling || s == detail::when_any::await_state::done) {
 				co_return;
+			}
 
 			using result_t = decltype(result);
 
 			/* Try construct, prefer move if possible, store any exception to rethrow */
 			try	{
-				if constexpr (std::is_lvalue_reference_v<result_t> && !std::is_const_v<result_t> && std::is_move_constructible_v<std::remove_cvref_t<result_t>>)
+				if constexpr (std::is_lvalue_reference_v<result_t> && !std::is_const_v<result_t> && std::is_move_constructible_v<std::remove_cvref_t<result_t>>) {
 					shared_state->result.template emplace<N + 1>(std::move(result));
-				else
+				} else {
 					shared_state->result.template emplace<N + 1>(result);
+				}
 			} catch (...) {
 				shared_state->result.template emplace<0>(std::current_exception());
 			}
 		} else {
 			co_await std::get<N>(shared_state->awaitables);
 
-			if (auto s = shared_state->owner_state.load(std::memory_order_relaxed); s == detail::when_any::await_state::dangling || s == detail::when_any::await_state::done)
+			if (auto s = shared_state->owner_state.load(std::memory_order_relaxed); s == detail::when_any::await_state::dangling || s == detail::when_any::await_state::done) {
 				co_return;
+			}
 
 			shared_state->result.template emplace<N + 1>();
 		}
 
-		if (shared_state->owner_state.exchange(detail::when_any::await_state::done) != detail::when_any::await_state::waiting)
+		if (shared_state->owner_state.exchange(detail::when_any::await_state::done) != detail::when_any::await_state::waiting) {
 			co_return;
+		}
 
 		if (auto handle = shared_state->handle; handle) {
 			shared_state->index_finished = N;
@@ -290,8 +294,9 @@ public:
 		requires (!detail::when_any::void_result<result_t<N>>)
 #endif
 		result_t<N>& get() & {
-			if (is_exception())
+			if (is_exception()) {
 				std::rethrow_exception(std::get<0>(shared_state->result));
+			}
 			return std::get<N + 1>(shared_state->result);
 		}
 
@@ -307,8 +312,9 @@ public:
 		requires (!detail::when_any::void_result<result_t<N>>)
 #endif
 		const result_t<N>& get() const& {
-			if (is_exception())
+			if (is_exception()) {
 				std::rethrow_exception(std::get<0>(shared_state->result));
+			}
 			return std::get<N + 1>(shared_state->result);
 		}
 
@@ -324,8 +330,9 @@ public:
 		requires (!detail::when_any::void_result<result_t<N>>)
 #endif
 		result_t<N>&& get() && {
-			if (is_exception())
+			if (is_exception()) {
 				std::rethrow_exception(std::get<0>(shared_state->result));
+			}
 			return std::get<N + 1>(shared_state->result);
 		}
 

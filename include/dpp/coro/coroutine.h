@@ -92,8 +92,9 @@ public:
 	 * @brief Destructor, destroys the handle.
 	 */
 	~coroutine_base() {
-		if (handle)
+		if (handle) {
 			handle.destroy();
+		}
 	}
 
 	/**
@@ -119,8 +120,9 @@ public:
 	 * @return bool Whether the coroutine is done
 	 */
 	[[nodiscard]] bool await_ready() const {
-		if (!handle)
+		if (!handle) {
 			throw dpp::logic_exception("cannot co_await an empty coroutine");
+		}
 		return handle.done();
 	}
 
@@ -195,22 +197,25 @@ class coroutine : private detail::coroutine::coroutine_base<R> {
 
 	[[nodiscard]] R& await_resume_impl() & {
 		detail::coroutine::promise_t<R> &promise = this->handle.promise();
-		if (promise.exception)
+		if (promise.exception) {
 			std::rethrow_exception(promise.exception);
+		}
 		return *promise.result;
 	}
 
 	[[nodiscard]] const R& await_resume_impl() const & {
 		detail::coroutine::promise_t<R> &promise = this->handle.promise();
-		if (promise.exception)
+		if (promise.exception) {
 			std::rethrow_exception(promise.exception);
+		}
 		return *promise.result;
 	}
 
 	[[nodiscard]] R&& await_resume_impl() && {
 		detail::coroutine::promise_t<R> &promise = this->handle.promise();
-		if (promise.exception)
+		if (promise.exception) {
 			std::rethrow_exception(promise.exception);
+		}
 		return *std::move(promise.result);
 	}
 
@@ -550,8 +555,9 @@ namespace detail::coroutine {
 
 #ifndef _DOXYGEN_
 inline void coroutine<void>::await_resume_impl() const {
-	if (handle.promise().exception)
+	if (handle.promise().exception) {
 		std::rethrow_exception(handle.promise().exception);
+	}
 }
 #endif /* _DOXYGEN_ */
 

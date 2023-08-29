@@ -46,4 +46,4 @@ int main() {
 
 Any awaitable can be used with when_any, even dpp::task, dpp::coroutine, dpp::async. When the when_any object is destroyed, any of its awaitables with a cancel() method (for example \ref dpp::task::cancel "dpp::task") will have it called. With this you can easily make commands that ask for input in several steps, or maybe a timed text game, the possibilities are endless! Note that if the first awaitable completes with an exception, result.get will throw it.
 
-\note When_any will try to construct awaitable objects from the parameter you pass it, which it will own. In practice this means you can only pass it \link https://www.learncpp.com/cpp-tutorial/value-categories-lvalues-and-rvalues/ temporary objects (rvalues) \endlink as most of the coroutine-related objects in D++ are move-only.
+\note when_any will try to construct awaitable objects from the parameter you pass it, which it will own. In practice this means you can only pass it <a href="https://www.learncpp.com/cpp-tutorial/value-categories-lvalues-and-rvalues/">temporary objects (rvalues)</a> as most of the coroutine-related objects in D++ are move-only.

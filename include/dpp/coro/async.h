@@ -164,8 +164,9 @@ class async_base {
 		 * @brief Destructor. Releases the held reference and destroys if no other references exist.
 		 */
 		~shared_callback() {
-			if (!state) // Moved-from object
+			if (!state) { // Moved-from object
 				return;
+			}
 
 			auto count = state->ref_count.fetch_sub(1);
 			if (count == 0) {
@@ -194,8 +195,9 @@ class async_base {
 		 * @brief Function called by the async when it is destroyed when it was never co_awaited, signals to the callback to abort.
 		 */
 		void set_dangling() noexcept {
-			if (!state) // moved-from object
+			if (!state) { // moved-from object
 				return;
+			}
 			state->state.store(state_t::dangling);
 		}
 

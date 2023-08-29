@@ -50,10 +50,11 @@ int main() {
 				dpp::confirmation_callback_t confirmation = co_await cluster->co_guild_emoji_create(event.command.guild_id, emoji);
 
 				co_await thinking; // Wait for the thinking response to arrive so we can edit
-				if (confirmation.is_error())
+				if (confirmation.is_error()) {
 					event.edit_response("Error: could not add emoji: " + confirmation.get_error().message);
-				else // Success
+				} else { // Success
 					event.edit_response("Successfully added " + confirmation.get<dpp::emoji>().get_mention()); // Show the new emoji
+                }
 			}
 		}
 	});
