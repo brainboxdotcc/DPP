@@ -117,7 +117,7 @@ concept void_result = std::same_as<T, empty>;
 
 } // namespace detail
 
-/**
+/** @class when_any when_any.h coro/when_any.h
  * @brief Experimental class to co_await on a bunch of awaitable objects, resuming when the first one completes.
  * On completion, returns a @ref result object that contains the index of the awaitable that finished first.
  * A user can call @ref result::index() and @ref result::get<N>() on the result object to get the result, similar to std::variant.

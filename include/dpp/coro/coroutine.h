@@ -178,7 +178,7 @@ public:
 
 } // namespace detail
 
-/**
+/** @class coroutine coroutine.h coro/coroutine.h
  * @brief Base type for a coroutine, starts on co_await.
  *
  * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs.

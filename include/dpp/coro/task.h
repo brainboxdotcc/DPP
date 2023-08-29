@@ -251,7 +251,7 @@ public:
 
 } // namespace detail
 
-/**
+/** @class task task.h coro/task.h
  * @brief A coroutine task. It starts immediately on construction and can be co_await-ed, making it perfect for parallel coroutines returning a value.
  *
  * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs.

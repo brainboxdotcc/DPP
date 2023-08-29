@@ -105,10 +105,10 @@ struct async_callback_data {
 };
 
 /**
- * @brief Base class of dpp::async<R>.
+ * @brief Base class of dpp::async.
  *
- * @warning This class should not be used directly by a user, use dpp::async<R> instead.
- * @note This class contains all the functions used internally by co_await. It is intentionally opaque and a private base of dpp::async<R> so a user cannot call await_suspend and await_resume directly.
+ * @warning This class should not be used directly by a user, use dpp::async instead.
+ * @note This class contains all the functions used internally by co_await. It is intentionally opaque and a private base of dpp::async so a user cannot call await_suspend and await_resume directly.
  */
 template <typename R>
 class async_base {
@@ -364,7 +364,7 @@ public:
 
 struct confirmation_callback_t;
 
-/**
+/** @class async async.h coro/async.h
  * @brief A co_await-able object handling an API call in parallel with the caller.
  *
  * This class is the return type of the dpp::cluster::co_* methods, but it can also be created manually to wrap any async call.

@@ -29,9 +29,9 @@
 
 namespace dpp {
 
-/**
+/** @class job job.h coro/job.h
  * @brief Extremely light coroutine object designed to send off a coroutine to execute on its own.
- * Can be used in conjunction with coroutine events via @ref dpp::event_router_t::operator() "event routers", or on its own.
+ * Can be used in conjunction with coroutine events via @ref dpp::event_router_t::operator()(F&&) "event routers", or on its own.
  *
  * This object stores no state and is the recommended way to use coroutines if you do not need to co_await the result.
  *
