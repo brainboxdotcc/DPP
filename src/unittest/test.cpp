@@ -21,15 +21,9 @@
  ************************************************************************************/
 #include "test.h"
 #include <dpp/dpp.h>
+#include <dpp/unicode_emoji.h>
 #include <dpp/restrequest.h>
 #include <dpp/json.h>
-
-namespace {
-	/**
-	 * @brief Thread emoji - https://www.compart.com/en/unicode/U+1F9F5
-	 */
-	inline const std::string THREAD_EMOJI = "\xF0\x9F\xA7\xB5";
-} // namespace
 
 /* Unit tests go here */
 int main(int argc, char *argv[])
@@ -1114,7 +1108,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							return;
 						}
 						events_to_test_mask |= MESSAGE_REACT;
-						bot.message_add_reaction(message_id, thread_id, THREAD_EMOJI, [this, message_id](const dpp::confirmation_callback_t &callback) {
+						bot.message_add_reaction(message_id, thread_id, dpp::unicode_emoji::thread, [this, message_id](const dpp::confirmation_callback_t &callback) {
 							std::lock_guard lock{mutex};
 							if (callback.is_error()) {
 								events_abort();
@@ -1122,7 +1116,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								return;
 							}
 							events_to_test_mask |= MESSAGE_REMOVE_REACT;
-							bot.message_delete_reaction(message_id, thread_id, bot.me.id, THREAD_EMOJI, [this, message_id](const dpp::confirmation_callback_t &callback) {
+							bot.message_delete_reaction(message_id, thread_id, bot.me.id, dpp::unicode_emoji::thread, [this, message_id](const dpp::confirmation_callback_t &callback) {
 								std::lock_guard lock{mutex};
 								if (callback.is_error()) {
 									events_abort();
@@ -1224,7 +1218,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				if (event.reacting_emoji.name == "😄") {
 					set_test(REACTEVENT, true);
 				}
-				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == THREAD_EMOJI) {
+				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == dpp::unicode_emoji::thread) {
 					set_test(THREAD_MESSAGE_REACT_ADD_EVENT, true);
 					thread_helper.notify_event_tested(thread_test_helper::MESSAGE_REACT);
 				}
@@ -1233,7 +1227,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		bot.on_message_reaction_remove([&](const dpp::message_reaction_remove_t & event) {
 			if (event.reacting_user_id == bot.me.id) {
-				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == THREAD_EMOJI) {
+				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == dpp::unicode_emoji::thread) {
 					set_test(THREAD_MESSAGE_REACT_REMOVE_EVENT, true);
 					thread_helper.notify_event_tested(thread_test_helper::MESSAGE_REMOVE_REACT);
 				}
