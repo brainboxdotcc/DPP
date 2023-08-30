@@ -132,7 +132,8 @@
 		"loadu",
 		"cvtps",
 		"neww",
-		"STDCORO"
+		"STDCORO",
+		"NOMINMAX"
 	],
 	"flagWords": [
 		"hte"

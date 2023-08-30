@@ -19,28 +19,28 @@ function(check_instruction_set INSTRUCTION_SET_NAME INSTRUCTION_SET_FLAG INSTRUC
         set(AVX_FLAG "${INSTRUCTION_SET_FLAG}" PARENT_SCOPE)
         set(AVX_NAME "${INSTRUCTION_SET_NAME}" PARENT_SCOPE)
     else()
-        message(STATUS "Instruction set ${INSTRUCTION_SET_NAME} not supported. Falling back to the previous instruction set.")
         return()
     endif()
 endfunction()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(INSTRUCTION_SETS
-        "T_AVX?/arch:AVX?auto result = _mm_testz_ps(__m128{}, __m128{})"
-        "T_AVX2?/arch:AVX2?auto result = _mm256_add_epi32(__m256i{}, __m256i{})"
-        "T_AVX512?/arch:AVX512?auto result = _mm512_add_ps(__m512i{}, __m512i{}).auto result2 = _mm512_cmplt_epu8_mask(__m512i{}, __m512i{})"
+        "T_AVX?/arch:AVX?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
+        "T_AVX2?/arch:AVX2?__m256i value{}#auto result = _mm256_extract_epi32(value, 0)"
+        "T_AVX512?/arch:AVX512?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
     )
 else()
     set(INSTRUCTION_SETS
-        "T_AVX?-mavx.-mpclmul.-mbmi?auto result = _mm_testz_ps(__m128{}, __m128{})"
-        "T_AVX2?-mavx2.-mavx.-mpclmul.-mbmi?auto result = _mm256_add_epi32(__m256i{}, __m256i{})"
-        "T_AVX512?-mavx512bw.-mavx512f.-mavx2.-mavx.-mpclmul.-mbmi?auto result = _mm512_add_ps(__m512i{}, __m512i{}).auto result2 = _mm512_cmplt_epu8_mask(__m512i{}, __m512i{})"
-    )
+        "T_AVX?-mavx?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
+        "T_AVX2?-mavx2?__m256i value{}#auto result = _mm256_extract_epi32(value, 0)"
+        "T_AVX512?-mavx512f?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
+)
 endif()
 
 set(CMAKE_REQUIRED_FLAGS_SAVE "${CMAKE_REQUIRED_FLAGS}")
 
 set(AVX_NAME "T_Fallback")
+if ((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64"))
 
 foreach(INSTRUCTION_SET IN LISTS INSTRUCTION_SETS)
     string(REPLACE "?" ";" CURRENT_LIST "${INSTRUCTION_SET}")
@@ -48,9 +48,13 @@ foreach(INSTRUCTION_SET IN LISTS INSTRUCTION_SETS)
     list(GET CURRENT_LIST 1 INSTRUCTION_SET_FLAG)
     string(REPLACE "." ";" INSTRUCTION_SET_FLAG "${INSTRUCTION_SET_FLAG}")
     list(GET CURRENT_LIST 2 INSTRUCTION_SET_INTRINSIC)
-    string(REPLACE "." ";" INSTRUCTION_SET_INTRINSIC "${INSTRUCTION_SET_INTRINSIC}")
+    string(REPLACE "#" ";" INSTRUCTION_SET_INTRINSIC "${INSTRUCTION_SET_INTRINSIC}")
     check_instruction_set("${INSTRUCTION_SET_NAME}" "${INSTRUCTION_SET_FLAG}" "${INSTRUCTION_SET_INTRINSIC}")
 endforeach()
 
-message(STATUS "Detected CPU Architecture: ${AVX_NAME}")
-set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAVE}")
+	string(REPLACE "T_" "" AVX_DISPLAY ${AVX_NAME})
+	message(STATUS "Detected ${CMAKE_SYSTEM_PROCESSOR} SSE type: ${AVX_DISPLAY}")
+	set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAVE}")
+else()
+	message(STATUS "SSE not supported by architecture ${CMAKE_SYSTEM_PROCESSOR}")
+endif()

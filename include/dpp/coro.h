@@ -26,5 +26,6 @@
 #include "coro/coroutine.h"
 #include "coro/job.h"
 #include "coro/task.h"
+#include "coro/when_any.h"
 
 #endif /* DPP_CORO */

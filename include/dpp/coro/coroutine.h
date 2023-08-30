@@ -467,7 +467,7 @@ namespace detail {
 
 		/**
 		 * @brief Second function called by the standard library when reaching the end of a coroutine.
-		 * 
+		 *
 		 * @return std::coroutine_handle<> Coroutine handle to resume, this is either the parent if present or std::noop_coroutine()
 		 */
 		std_coroutine::coroutine_handle<> await_suspend(std_coroutine::coroutine_handle<coroutine_promise<R>> handle) const noexcept {

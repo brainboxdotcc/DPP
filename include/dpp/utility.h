@@ -28,6 +28,7 @@
 #include <unordered_map>
 #include <map>
 #include <functional>
+#include <cstddef>
 
 #ifndef MAX_CND_IMAGE_SIZE
 	#define MAX_CDN_IMAGE_SIZE 4096
@@ -113,6 +114,18 @@ namespace dpp {
 		};
 
 		/**
+		 * @brief Guild navigation types for dpp::utility::guild_navigation()
+		 */
+		enum guild_navigation_type {
+			/// _Customize_ tab with the server's dpp::onboarding_prompt
+			gnt_customize,
+			/// _Browse Channels_ tab
+			gnt_browse,
+			/// Server Guide
+			gnt_guide,
+		};
+
+		/**
 		 * @brief The base URL for CDN content such as profile pictures and guild icons.
 		 */
 		inline const std::string cdn_host = "https://cdn.discordapp.com"; 
@@ -146,6 +159,15 @@ namespace dpp {
 		 * @return std::string The formatted timestamp
 		 */
 		std::string DPP_EXPORT timestamp(time_t ts, time_format tf = tf_short_datetime);
+
+		/**
+		 * @brief Create a mentionable guild navigation (used in a message).
+		 *
+		 * @param guild_id The guild ID
+		 * @param gnt Guild navigation type using dpp::utility::guild_navigation_type
+		 * @return std::string The formatted timestamp
+		 */
+		std::string DPP_EXPORT guild_navigation(const snowflake guild_id, guild_navigation_type gnt);
 
 		/**
 		 * @brief Returns current date and time
@@ -479,7 +501,7 @@ namespace dpp {
 		 */
 		std::string DPP_EXPORT slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand_group, const std::string &subcommand);
 
-        	/**
+		/**
 		 * @brief Create a mentionable user.
 		 * @param id The ID of the user.
 		 * @return std::string The formatted mention of the user.
@@ -602,6 +624,53 @@ namespace dpp {
 		 * @param name New name to set
 		 */
 		void DPP_EXPORT set_thread_name(const std::string& name);
+
+#ifdef __cpp_concepts // if c++20
+		/**
+		 * @brief Concept satisfied if a callable F can be called using the arguments Args, and that its return value is convertible to R.
+		 *
+		 * @tparam F Callable object
+		 * @tparam R Return type to check for convertibility to
+		 * @tparam Args... Arguments to use to resolve the overload
+		 * @return Whether the expression `F(Args...)` is convertible to R
+		 */
+		template <typename F, typename R, typename... Args>
+		concept callable_returns = std::convertible_to<std::invoke_result_t<F, Args...>, R>;
+
+		/**
+		 * @brief Type trait to check if a callable F can be called using the arguments Args, and that its return value is convertible to R.
+		 *
+		 * @deprecated In C++20 mode, prefer using the concept `callable_returns`.
+		 * @tparam F Callable object
+		 * @tparam R Return type to check for convertibility to
+		 * @tparam Args... Arguments to use to resolve the overload
+		 * @return Whether the expression `F(Args...)` is convertible to R
+		 */
+		template <typename F, typename R, typename... Args>
+		inline constexpr bool callable_returns_v = callable_returns<F, R, Args...>;
+#else
+		/**
+		 * @brief Type trait to check if a callable F can be called using the arguments Args, and that its return value is convertible to R.
+		 *
+		 * @tparam F Callable object
+		 * @tparam R Return type to check for convertibility to
+		 * @tparam Args... Arguments to use to resolve the overload
+		 * @return Whether the expression `F(Args...)` is convertible to R
+		 */
+		template <typename F, typename R, typename... Args>
+		inline constexpr bool callable_returns_v = std::is_convertible_v<std::invoke_result_t<F, Args...>, R>;
+#endif
+
+		/**
+		 * @brief Utility struct that has the same size and alignment as another but does nothing. Useful for ABI compatibility.
+		 *
+		 * @tparam T Type to mimic
+		 */
+		template <typename T>
+		struct alignas(T) dummy {
+			/** @brief Array of bytes with a size mimicking T */
+			std::array<std::byte, sizeof(T)> data;
+		};
 
 	} // namespace utility
 } // namespace dpp

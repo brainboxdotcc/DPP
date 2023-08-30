@@ -2207,7 +2207,7 @@ sticker_map guild_stickers_get_sync(snowflake guild_id);
 sticker nitro_sticker_get_sync(snowflake id);
 
 /**
- * @brief Get sticker packs
+ * @brief Get a list of available sticker packs
  * @see dpp::cluster::sticker_packs_get
  * @see https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs
  * @return sticker_pack_map returned object on completion

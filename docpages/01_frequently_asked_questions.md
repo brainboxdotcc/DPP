@@ -1,4 +1,4 @@
-# Frequently Asked Questions (FAQ)
+\page frequently-asked-questions Frequently Asked Questions (FAQ)
 
 [TOC] 
 
@@ -99,8 +99,8 @@ Depending on which Raspberry Pi version you have, you will need to download a di
 ## Are other ARM devices supported?
 Yes! We have confirmed that the D++ deb file will successfully install and operate on various forms of cellphone or non-pi ARM devices. If you get it working on any other devices please let us know and we can build a compatibility chart.
 
-## Can I run a D++ bot in repl.it?
-Yes! You can indeed run your bot in a repl.it container. [You can find a ready to go demo repl here](https://replit.com/@braindigitalis/dpp-demo-bot). We also have a [guide showing how to do this](https://dpp.dev/building-a-cpp-discord-bot-in-repl.html).
+## Can I run a D++ bot in Replit?
+Yes! You can indeed run your bot in a replit.com container. [You can find a ready to go demo repl here](https://replit.com/@braindigitalis/dpp-demo-bot). We also have a \ref building-a-cpp-discord-bot-in-repl "guide showing how to do this".
 
 ## Why do the "get" functions like "messages_get" return void rather than what I'm after?
 All the functions that obtain data directly from Discord (as opposed to the cache) perform HTTPS requests and may have to wait, either for the request itself or for their turn in a queue to respect rate limits. As such, it does not make sense that they should return a value, as this would mean they block execution of your event. Instead, each has a lambda, a function handler which receives the result of the request, which you can then read from within that function to get the data you are interested in. Note that this result will arrive on a different thread to the one which made the request. If you instead want the function to return a value, use the methods ending with `_sync` that will block until they have a response. Note that these forms of call will throw an exception on failure.
