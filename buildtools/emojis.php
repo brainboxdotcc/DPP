@@ -29,6 +29,11 @@ if ($emojis) {
         if (preg_match("/^\d+/", $name)) {
             $name = "_" . $name;
         }
+	$name = str_replace("-", "minus", $name);
+	$name = str_replace("+", "plus", $name);
+	if ($name == "new") {
+		$name = "_new";
+	}
         $header .= "	constexpr const char " .$name . "[] = \"$code\";\n";
     }
     $header .= "}\n};\n";
