@@ -5,6 +5,7 @@ There are example programs here for all skill levels demonstrating a great many 
 * \subpage the-basics
 * \subpage interactions-and-components
 * \subpage music-and-audio
+* \subpage using-coroutines
 * \subpage misc
 
 Is the example you are looking for missing from these sections? Pop over to our [discord server](https://discord.com/dpp) and let us know what you need... Or, even better, if you know how to do something and want to contribute an example of your own, just submit a PR!

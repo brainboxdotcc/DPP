@@ -34,14 +34,16 @@ namespace dpp {
 
 namespace detail {
 
+namespace coroutine {
+
 	template <typename R>
-struct coroutine_promise;
+struct promise_t;
 
 template <typename R>
 /**
-	* @brief Alias for the coroutine_handle of a coroutine.
+	* @brief Alias for the handle_t of a coroutine.
 	*/
-using coroutine_handle = std_coroutine::coroutine_handle<coroutine_promise<R>>;
+using handle_t = std_coroutine::coroutine_handle<promise_t<R>>;
 
 /**
  * @brief Base class of dpp::coroutine<R>.
@@ -55,18 +57,18 @@ protected:
 	/**
 	 * @brief Promise has friend access for the constructor
 	 */
-	friend struct detail::coroutine_promise<R>;
+	friend struct promise_t<R>;
 
 	/**
 	 * @brief Coroutine handle.
 	 */
-	detail::coroutine_handle<R> handle{nullptr};
+	detail::coroutine::handle_t<R> handle{nullptr};
 
 private:
 	/**
 	 * @brief Construct from a handle. Internal use only.
 	 */
-	coroutine_base(detail::coroutine_handle<R> h) : handle{h} {}
+	coroutine_base(detail::coroutine::handle_t<R> h) : handle{h} {}
 
 public:
 	/**
@@ -90,8 +92,9 @@ public:
 	 * @brief Destructor, destroys the handle.
 	 */
 	~coroutine_base() {
-		if (handle)
+		if (handle) {
 			handle.destroy();
+		}
 	}
 
 	/**
@@ -116,9 +119,10 @@ public:
 	 * @throws invalid_operation_exception if the coroutine is empty or finished.
 	 * @return bool Whether the coroutine is done
 	 */
-	bool await_ready() const {
-		if (!handle)
+	[[nodiscard]] bool await_ready() const {
+		if (!handle) {
 			throw dpp::logic_exception("cannot co_await an empty coroutine");
+		}
 		return handle.done();
 	}
 
@@ -131,7 +135,7 @@ public:
 	 * @param caller The calling coroutine, now suspended
 	 */
 	template <typename T>
-	detail::coroutine_handle<R> await_suspend(detail::std_coroutine::coroutine_handle<T> caller) noexcept {
+	[[nodiscard]] handle_t<R> await_suspend(detail::std_coroutine::coroutine_handle<T> caller) noexcept {
 		handle.promise().parent = caller;
 		return handle;
 	}
@@ -144,7 +148,7 @@ public:
 	 * @return R The result of the coroutine. It is given to the caller as a result to `co_await`
 	 */
 	decltype(auto) await_resume() & {
-		return static_cast<coroutine<R> &>(*this).await_resume_impl();
+		return static_cast<dpp::coroutine<R> &>(*this).await_resume_impl();
 	}
 
 	/**
@@ -154,8 +158,8 @@ public:
 	 * @throw Throws any exception thrown or uncaught by the coroutine
 	 * @return R The result of the coroutine. It is given to the caller as a result to `co_await`
 	 */
-	decltype(auto) await_resume() const & {
-		return static_cast<coroutine<R> const&>(*this).await_resume_impl();
+	[[nodiscard]] decltype(auto) await_resume() const & {
+		return static_cast<dpp::coroutine<R> const&>(*this).await_resume_impl();
 	}
 
 	/**
@@ -165,48 +169,54 @@ public:
 	 * @throw Throws any exception thrown or uncaught by the coroutine
 	 * @return R The result of the coroutine. It is given to the caller as a result to `co_await`
 	 */
-	decltype(auto) await_resume() && {
-		return static_cast<coroutine<R> &&>(*this).await_resume_impl();
+	[[nodiscard]] decltype(auto) await_resume() && {
+		return static_cast<dpp::coroutine<R> &&>(*this).await_resume_impl();
 	}
 };
 
+} // namespace coroutine
+
 } // namespace detail
 
-/**
+/** @class coroutine coroutine.h coro/coroutine.h
  * @brief Base type for a coroutine, starts on co_await.
  *
- * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub issues</a> or to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
+ * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs.
+ * Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub Issues</a> or to our <a href="https://discord.gg/dpp">Discord Server</a>.
  * @warning - Using co_await on this object more than once is undefined behavior.
  * @tparam R Return type of the coroutine. Can be void, or a complete object that supports move construction and move assignment.
  */
 template <typename R>
-class coroutine : private detail::coroutine_base<R> {
+class coroutine : private detail::coroutine::coroutine_base<R> {
 	/**
 	 * @brief Internal use only base class containing common logic between coroutine<R> and coroutine<void>. It also serves to prevent await_suspend and await_resume from being used directly.
 	 *
 	 * @warning For internal use only, do not use.
 	 * @see operator co_await()
 	 */
-	friend class detail::coroutine_base<R>;
+	friend class detail::coroutine::coroutine_base<R>;
 
-	R& await_resume_impl() & {
-		detail::coroutine_promise<R> &promise = this->handle.promise();
-		if (promise.exception)
+	[[nodiscard]] R& await_resume_impl() & {
+		detail::coroutine::promise_t<R> &promise = this->handle.promise();
+		if (promise.exception) {
 			std::rethrow_exception(promise.exception);
+		}
 		return *promise.result;
 	}
 
-	const R& await_resume_impl() const & {
-		detail::coroutine_promise<R> &promise = this->handle.promise();
-		if (promise.exception)
+	[[nodiscard]] const R& await_resume_impl() const & {
+		detail::coroutine::promise_t<R> &promise = this->handle.promise();
+		if (promise.exception) {
 			std::rethrow_exception(promise.exception);
+		}
 		return *promise.result;
 	}
 
-	R&& await_resume_impl() && {
-		detail::coroutine_promise<R> &promise = this->handle.promise();
-		if (promise.exception)
+	[[nodiscard]] R&& await_resume_impl() && {
+		detail::coroutine::promise_t<R> &promise = this->handle.promise();
+		if (promise.exception) {
 			std::rethrow_exception(promise.exception);
+		}
 		return *std::move(promise.result);
 	}
 
@@ -253,41 +263,41 @@ public:
 	 * @throws invalid_operation_exception if the coroutine is empty or finished.
 	 * @return bool Whether the coroutine is done
 	 */
-	bool await_ready() const;
+	[[nodiscard]] bool await_ready() const;
 #else
-	using detail::coroutine_base<R>::coroutine_base; // use coroutine_base's constructors
-	using detail::coroutine_base<R>::operator=; // use coroutine_base's assignment operators
-	using detail::coroutine_base<R>::await_ready; // expose await_ready as public
+	using detail::coroutine::coroutine_base<R>::coroutine_base; // use coroutine_base's constructors
+	using detail::coroutine::coroutine_base<R>::operator=; // use coroutine_base's assignment operators
+	using detail::coroutine::coroutine_base<R>::await_ready; // expose await_ready as public
 #endif
 
 	/**
 	 * @brief Suspend the caller until the coroutine completes.
 	 *
 	 * @throw On resumption, any exception thrown by the coroutine is propagated to the caller.
-	 * @return R& On resumption, this expression evaluates to the result object of type R, as a reference.
+	 * @return On resumption, this expression evaluates to the result object of type R, as a reference.
 	 */
-	auto& operator co_await() & noexcept {
-		return static_cast<detail::coroutine_base<R>&>(*this);
+	[[nodiscard]] auto& operator co_await() & noexcept {
+		return static_cast<detail::coroutine::coroutine_base<R>&>(*this);
 	}
 
 	/**
 	 * @brief Suspend the caller until the coroutine completes.
 	 *
 	 * @throw On resumption, any exception thrown by the coroutine is propagated to the caller.
-	 * @return const R& On resumption, this expression evaluates to the result object of type R, as a const reference.
+	 * @return On resumption, this expression evaluates to the result object of type R, as a const reference.
 	 */
-	const auto& operator co_await() const & noexcept {
-		return static_cast<detail::coroutine_base<R> const&>(*this);
+	[[nodiscard]] const auto& operator co_await() const & noexcept {
+		return static_cast<detail::coroutine::coroutine_base<R> const&>(*this);
 	}
 
 	/**
 	 * @brief Suspend the caller until the coroutine completes.
 	 *
 	 * @throw On resumption, any exception thrown by the coroutine is propagated to the caller.
-	 * @return R&& On resumption, this expression evaluates to the result object of type R, as an rvalue reference.
+	 * @return On resumption, this expression evaluates to the result object of type R, as an rvalue reference.
 	 */
-	auto&& operator co_await() && noexcept {
-		return static_cast<detail::coroutine_base<R>&&>(*this);
+	[[nodiscard]] auto&& operator co_await() && noexcept {
+		return static_cast<detail::coroutine::coroutine_base<R>&&>(*this);
 	}
 };
 
@@ -300,64 +310,64 @@ public:
  * @tparam R Return type of the coroutine. Can be void, or a complete object that supports move construction and move assignment.
  */
 template <>
-class coroutine<void> : private detail::coroutine_base<void> {
+class coroutine<void> : private detail::coroutine::coroutine_base<void> {
 	/**
 	 * @brief Base class has friend access for CRTP downcast
 	 */
-	friend class detail::coroutine_base<void>;
+	friend class detail::coroutine::coroutine_base<void>;
 
 	void await_resume_impl() const;
 
 public:
-	using detail::coroutine_base<void>::coroutine_base; // use coroutine_base's constructors
-	using detail::coroutine_base<void>::operator=; // use coroutine_base's assignment operators
-	using detail::coroutine_base<void>::await_ready; // expose await_ready as public
+	using detail::coroutine::coroutine_base<void>::coroutine_base; // use coroutine_base's constructors
+	using detail::coroutine::coroutine_base<void>::operator=; // use coroutine_base's assignment operators
+	using detail::coroutine::coroutine_base<void>::await_ready; // expose await_ready as public
 
 	/**
 	 * @brief Suspend the current coroutine until the coroutine completes.
 	 *
 	 * @throw On resumption, any exception thrown by the coroutine is propagated to the caller.
-	 * @return R& On resumption, this expression evaluates to the result object of type R, as a reference.
+	 * @return On resumption, this expression evaluates to the result object of type R, as a reference.
 	 */
-	auto& operator co_await() & noexcept {
-		return static_cast<detail::coroutine_base<void>&>(*this);
+	[[nodiscard]] auto& operator co_await() & noexcept {
+		return static_cast<detail::coroutine::coroutine_base<void>&>(*this);
 	}
 
 	/**
 	 * @brief Suspend the current coroutine until the coroutine completes.
 	 *
 	 * @throw On resumption, any exception thrown by the coroutine is propagated to the caller.
-	 * @return const R& On resumption, this expression evaluates to the result object of type R, as a const reference.
+	 * @return On resumption, this expression evaluates to the result object of type R, as a const reference.
 	 */
-	const auto& operator co_await() const & noexcept {
-		return static_cast<detail::coroutine_base<void> const &>(*this);
+	[[nodiscard]] const auto& operator co_await() const & noexcept {
+		return static_cast<detail::coroutine::coroutine_base<void> const &>(*this);
 	}
 
 	/**
 	 * @brief Suspend the current coroutine until the coroutine completes.
 	 *
 	 * @throw On resumption, any exception thrown by the coroutine is propagated to the caller.
-	 * @return R&& On resumption, this expression evaluates to the result object of type R, as an rvalue reference.
+	 * @return On resumption, this expression evaluates to the result object of type R, as an rvalue reference.
 	 */
-	auto&& operator co_await() && noexcept {
-		return static_cast<detail::coroutine_base<void>&&>(*this);
+	[[nodiscard]] auto&& operator co_await() && noexcept {
+		return static_cast<detail::coroutine::coroutine_base<void>&&>(*this);
 	}
 };
 #endif /* _DOXYGEN_ */
 
-namespace detail {
+namespace detail::coroutine {
 	template <typename R>
-	struct coroutine_final_awaiter;
+	struct final_awaiter;
 
 #ifdef DPP_CORO_TEST
-	struct coroutine_promise_base{};
+	struct promise_t_base{};
 #endif
 
 	/**
 	 * @brief Promise type for coroutine.
 	 */
 	template <typename R>
-	struct coroutine_promise {
+	struct promise_t {
 		/**
 		 * @brief Handle of the coroutine co_await-ing this coroutine.
 		 */
@@ -374,28 +384,28 @@ namespace detail {
 		std::exception_ptr exception{nullptr};
 
 #ifdef DPP_CORO_TEST
-		coroutine_promise() {
-			++coro_alloc_count<coroutine_promise_base>;
+		promise_t() {
+			++coro_alloc_count<promise_t_base>;
 		}
 
-		~coroutine_promise() {
-			--coro_alloc_count<coroutine_promise_base>;
+		~promise_t() {
+			--coro_alloc_count<promise_t_base>;
 		}
 #endif
 
 		/**
 		 * @brief Function called by the standard library when reaching the end of a coroutine
 		 *
-		 * @return coroutine_final_awaiter<R> Resumes any coroutine co_await-ing on this
+		 * @return final_awaiter<R> Resumes any coroutine co_await-ing on this
 		 */
-		coroutine_final_awaiter<R> final_suspend() const noexcept;
+		[[nodiscard]] final_awaiter<R> final_suspend() const noexcept;
 
 		/**
 		 * @brief Function called by the standard library when the coroutine start
 		 *
-		 * @return suspend_always Always suspend at the start, for a lazy start
+		 * @return @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_always">std::suspend_always</a> Always suspend at the start, for a lazy start
 		 */
-		std_coroutine::suspend_always initial_suspend() const noexcept {
+		[[nodiscard]] std_coroutine::suspend_always initial_suspend() const noexcept {
 			return {};
 		}
 
@@ -446,8 +456,8 @@ namespace detail {
 		/**
 		 * @brief Function called to get the coroutine object
 		 */
-		coroutine<R> get_return_object() {
-			return coroutine<R>{coroutine_handle<R>::from_promise(*this)};
+		dpp::coroutine<R> get_return_object() {
+			return dpp::coroutine<R>{handle_t<R>::from_promise(*this)};
 		}
 	};
 
@@ -455,22 +465,22 @@ namespace detail {
 	 * @brief Struct returned by a coroutine's final_suspend, resumes the continuation
 	 */
 	template <typename R>
-	struct coroutine_final_awaiter {
+	struct final_awaiter {
 		/**
 		 * @brief First function called by the standard library when reaching the end of a coroutine
 		 *
 		 * @return false Always return false, we need to suspend to resume the parent
 		 */
-		bool await_ready() const noexcept {
+		[[nodiscard]] bool await_ready() const noexcept {
 			return false;
 		}
 
 		/**
 		 * @brief Second function called by the standard library when reaching the end of a coroutine.
 		 *
-		 * @return std::coroutine_handle<> Coroutine handle to resume, this is either the parent if present or std::noop_coroutine()
+		 * @return std::handle_t<> Coroutine handle to resume, this is either the parent if present or std::noop_coroutine()
 		 */
-		std_coroutine::coroutine_handle<> await_suspend(std_coroutine::coroutine_handle<coroutine_promise<R>> handle) const noexcept {
+		[[nodiscard]] std_coroutine::coroutine_handle<> await_suspend(std_coroutine::coroutine_handle<promise_t<R>> handle) const noexcept {
 			auto parent = handle.promise().parent;
 
 			return parent ? parent : std_coroutine::noop_coroutine();
@@ -483,7 +493,7 @@ namespace detail {
 	};
 
 	template <typename R>
-	coroutine_final_awaiter<R> coroutine_promise<R>::final_suspend() const noexcept {
+	final_awaiter<R> promise_t<R>::final_suspend() const noexcept {
 		return {};
 	}
 
@@ -491,7 +501,7 @@ namespace detail {
 	 * @brief Struct returned by a coroutine's final_suspend, resumes the continuation
 	 */
 	template <>
-	struct coroutine_promise<void> {
+	struct promise_t<void> {
 		/**
 		 * @brief Handle of the coroutine co_await-ing this coroutine.
 		 */
@@ -505,18 +515,18 @@ namespace detail {
 		/**
 		 * @brief Function called by the standard library when reaching the end of a coroutine
 		 *
-		 * @return coroutine_final_awaiter<R> Resumes any coroutine co_await-ing on this
+		 * @return final_awaiter<R> Resumes any coroutine co_await-ing on this
 		 */
-		coroutine_final_awaiter<void> final_suspend() const noexcept {
+		[[nodiscard]] final_awaiter<void> final_suspend() const noexcept {
 			return {};
 		}
 
 		/**
 		 * @brief Function called by the standard library when the coroutine start
 		 *
-		 * @return suspend_always Always suspend at the start, for a lazy start
+		 * @return @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_always">std::suspend_always</a> Always suspend at the start, for a lazy start
 		 */
-		std_coroutine::suspend_always initial_suspend() const noexcept {
+		[[nodiscard]] std_coroutine::suspend_always initial_suspend() const noexcept {
 			return {};
 		}
 
@@ -537,8 +547,8 @@ namespace detail {
 		/**
 		 * @brief Function called to get the coroutine object
 		 */
-		coroutine<void> get_return_object() {
-			return coroutine<void>{coroutine_handle<void>::from_promise(*this)};
+		[[nodiscard]] dpp::coroutine<void> get_return_object() {
+			return dpp::coroutine<void>{handle_t<void>::from_promise(*this)};
 		}
 	};
 
@@ -546,8 +556,9 @@ namespace detail {
 
 #ifndef _DOXYGEN_
 inline void coroutine<void>::await_resume_impl() const {
-	if (handle.promise().exception)
+	if (handle.promise().exception) {
 		std::rethrow_exception(handle.promise().exception);
+	}
 }
 #endif /* _DOXYGEN_ */
 
@@ -558,7 +569,7 @@ inline void coroutine<void>::await_resume_impl() const {
  */
 template<typename R, typename... Args>
 struct dpp::detail::std_coroutine::coroutine_traits<dpp::coroutine<R>, Args...> {
-	using promise_type = dpp::detail::coroutine_promise<R>;
+	using promise_type = dpp::detail::coroutine::promise_t<R>;
 };
 
 #endif /* DPP_CORO */
