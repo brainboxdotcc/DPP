@@ -421,10 +421,10 @@ public:
 #endif
 	auto when(Predicate&& pred)
 #ifndef _DOXYGEN_
-		noexcept(noexcept(std::function<bool(const T&)>{pred}))
+		noexcept(noexcept(std::function<bool(const T&)>{std::declval<Predicate>()}))
 #endif
 	{
-		return detail::event_router::awaitable<T>{this, pred};
+		return detail::event_router::awaitable<T>{this, std::forward<Predicate>(pred)};
 	}
 
 	/**

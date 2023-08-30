@@ -425,6 +425,9 @@ public:
 	 * This object will swallow the exception and return cleanly. Any other exception will be thrown back to the resumer.
 	 */
 	~when_any() {
+		if (!my_state)
+			return;
+
 		my_state->owner_state = detail::when_any::await_state::dangling;
 
 		[]<size_t... Ns>(when_any *self, std::index_sequence<Ns...>) constexpr {
