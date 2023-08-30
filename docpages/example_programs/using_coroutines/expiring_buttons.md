@@ -29,7 +29,7 @@ int main() {
 			// Note!! Due to a bug in g++11 and g++12, id must be captured as a reference above or the compiler will destroy it twice. This is fixed in g++13
 			if (result.index() == 0) { // Awaitable #0 completed first, that is the button click event
 				// Acknowledge the click and edit the original response, removing the button
-				dpp::button_click_t &click_event = result.get<0>();
+				const dpp::button_click_t &click_event = result.get<0>();
 				click_event.reply();
 				event.edit_original_response(dpp::message{"You clicked the button with the id " + click_event.custom_id});
 			} else { // Here index() is 1, the timer expired
