@@ -75,6 +75,7 @@ enum permissions : uint64_t {
 	p_use_soundboard = 0x40000000000, //!< allows for using soundboard in a voice channel
 	p_use_external_sounds = 0x0000200000000000, //!< allows the usage of custom soundboard sounds from other servers
 	p_send_voice_messages = 0x0000400000000000, //!< allows sending voice messages
+	p_use_clyde_ai = 0x0000800000000000, //!< allows use of Clyde AI
 };
 
 /**
