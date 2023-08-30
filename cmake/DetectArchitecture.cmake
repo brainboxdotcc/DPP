@@ -39,7 +39,7 @@ endif()
 
 set(CMAKE_REQUIRED_FLAGS_SAVE "${CMAKE_REQUIRED_FLAGS}")
 
-set(AVX_NAME "T_Fallback")
+set(AVX_NAME "T_fallback")
 if ((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64"))
 
 foreach(INSTRUCTION_SET IN LISTS INSTRUCTION_SETS)
@@ -56,5 +56,5 @@ endforeach()
 	message(STATUS "Detected ${CMAKE_SYSTEM_PROCESSOR} SSE type: ${AVX_DISPLAY}")
 	set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAVE}")
 else()
-	message(STATUS "SSE not supported by architecture ${CMAKE_SYSTEM_PROCESSOR}")
+	message(STATUS "SSE not supported by architecture ${CMAKE_SYSTEM_PROCESSOR} ${AVX_NAME}")
 endif()
