@@ -8,7 +8,7 @@ In the last example we've explored how to \ref awaiting-events "await events" us
 #include <dpp/dpp.h>
 
 int main() {
-	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	dpp::cluster bot{"token"};
 
 	bot.on_log(dpp::utility::cout_logger());
 
@@ -26,16 +26,15 @@ int main() {
 				event.from->creator->on_button_click.when([&id](const dpp::button_click_t &b) { return b.custom_id == id; }), // Button clicked
 				event.from->creator->co_sleep(5) // Or sleep 5 seconds
 			};
-            // Note!! Due to a bug in g++11 and g++12, id must be captured as a reference above or the compiler will destroy it twice. This is fixed in g++13
+			// Note!! Due to a bug in g++11 and g++12, id must be captured as a reference above or the compiler will destroy it twice. This is fixed in g++13
 			if (result.index() == 0) { // Awaitable #0 completed first, that is the button click event
-                // Acknowledge the click with an empty message and edit the original response, removing the button
-				auto &click_event = result.get<0>();
-				click_event.reply(dpp::ir_deferred_update_message, dpp::message{});
+				// Acknowledge the click and edit the original response, removing the button
+				dpp::button_click_t &click_event = result.get<0>();
+				click_event.reply();
 				event.edit_original_response(dpp::message{"You clicked the button with the id " + click_event.custom_id});
-			}
-			else { // Here index() is 1, the timer expired
+			} else { // Here index() is 1, the timer expired
 				event.edit_original_response(dpp::message{"I haven't got all day!"});
-            }
+			}
 		}
 	});
 
