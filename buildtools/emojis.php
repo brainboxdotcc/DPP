@@ -29,7 +29,7 @@ if ($emojis) {
         if (preg_match("/^\d+/", $name)) {
             $name = "_" . $name;
         }
-        $header .= "	constexpr const char[] " .$name . " = \"$code\";\n";
+        $header .= "	constexpr const char " .$name . "[] = \"$code\";\n";
     }
     $header .= "}\n};\n";
     file_put_contents("include/dpp/unicode_emoji.h", $header);
