@@ -1,10 +1,10 @@
 \page collecting-reactions Collecting Reactions
 
-D++ comes with many useful helper classes, but amongst these is something called dpp::collector. Collector is a template which can be specialised to automatically collect objects of a pre-determined type from events for a specific interval of time. Once this time period is up, or the class is otherwise signalled, a method is called with the complete set of collected objects.
+D++ comes with many useful helper classes, but amongst these is something called dpp::collector. Collector is a template which can be specialised to automatically collect objects of a predetermined type from events for a specific interval of time. Once this time period is up, or the class is otherwise signalled, a method is called with the complete set of collected objects.
 
 In the example below we will use it to collect all reactions on a message.
 
-~~~~~~~~~~{.cpp}
+~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 
 /* To create a collector we must derive from dpp::collector. As dpp::collector is a complicated template,
@@ -13,7 +13,7 @@ In the example below we will use it to collect all reactions on a message.
 class react_collector : public dpp::reaction_collector {
 public:
 	/* Collector will run for 20 seconds */
-	react_collector(dpp::cluster* cl, snowflake id) : dpp::reaction_collector(cl, 20, id) { }
+	react_collector(dpp::cluster* cl, snowflake id) : dpp::reaction_collector(cl, 20, id) {}
 
 	/* Override the "completed" event and then output the number of collected reactions as a message. */
 	virtual void completed(const std::vector<dpp::collected_reaction>& list) override {
@@ -25,7 +25,6 @@ public:
 	}
 };
 
-
 int main() {
 	/* Create bot */
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
@@ -33,23 +32,19 @@ int main() {
 	/* Pointer to reaction collector */
 	react_collector* r = nullptr;
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler */
 	bot.on_message_create([&](const dpp::message_create_t& event) {
-
 		/* If someone sends a message that has the text 'collect reactions!' start a reaction collector */
 		if (event.msg.content == "collect reactions!" && r == nullptr) {
 			/* Create a new reaction collector to collect reactions */
 			r = new react_collector(&bot, event.msg.id);
 		}
-
 	});
 
 	/* Start bot */
 	bot.start(dpp::st_wait);
-
 	return 0;
 }
 ~~~~~~~~~~
-

@@ -2,7 +2,7 @@
 
 ## What is D++ (DPP)?
 
-D++ is a lightweight and simple library for Discord written in modern C++. It is designed to cover as much of the API specification as possible and to have a incredibly small memory footprint, even when caching large amounts of data.
+D++ is a lightweight and simple library for Discord written in modern C++. It is designed to cover as much of the API specification as possible and to have an incredibly small memory footprint, even when caching large amounts of data.
 
 It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contributed to by a dedicated team of developers.
 
@@ -15,21 +15,21 @@ It is created by the developer of [TriviaBot](https://triviabot.co.uk) and contr
 The following downloads are for the most recent version:
 
 * [Source Code](https://github.com/brainboxdotcc/DPP)
-* [x64 Linux .deb (64 bit Debian, Ubuntu etc)](https://dl.dpp.dev/latest)
-* [x86 Linux .deb (32 bit Debian, Ubuntu etc)](https://dl.dpp.dev/latest/linux-i386)
-* [x64 Linux .rpm (64 bit Redhat, CentOS etc)](https://dl.dpp.dev/latest/linux-x64/rpm)
-* [x86 Linux .rpm (32 bit Redhat, CentOS etc)](https://dl.dpp.dev/latest/linux-i386/rpm)
-* [x64 Windows (64 bit vs2019 release build)](https://dl.dpp.dev/latest/win64-release-vs2019)
-* [x64 Windows (64 bit vs2022 release build)](https://dl.dpp.dev/latest/win64-release-vs2022)
-* [x64 Windows (64 bit vs2019 debug build)](https://dl.dpp.dev/latest/win64-debug-vs2019)
-* [x64 Windows (64 bit vs2022 debug build)](https://dl.dpp.dev/latest/win64-debug-vs2022)
+* [x64 Linux .deb (64 bit Debian, Ubuntu etc.)](https://dl.dpp.dev/latest)
+* [x86 Linux .deb (32 bit Debian, Ubuntu etc.)](https://dl.dpp.dev/latest/linux-i386)
+* [x64 Linux .rpm (64 bit RedHat, CentOS etc.)](https://dl.dpp.dev/latest/linux-x64/rpm)
+* [x86 Linux .rpm (32 bit RedHat, CentOS etc.)](https://dl.dpp.dev/latest/linux-i386/rpm)
+* [x64 Windows (64 bit VS2019 release build)](https://dl.dpp.dev/latest/win64-release-vs2019)
+* [x64 Windows (64 bit VS2022 release build)](https://dl.dpp.dev/latest/win64-release-vs2022)
+* [x64 Windows (64 bit VS2019 debug build)](https://dl.dpp.dev/latest/win64-debug-vs2019)
+* [x64 Windows (64 bit VS2022 debug build)](https://dl.dpp.dev/latest/win64-debug-vs2022)
 * [ARM6 Linux .deb (32 bit Raspberry Pi 1, 2)](https://dl.dpp.dev/latest/linux-rpi-arm6)
 * [ARM7 Linux .deb (32 bit Raspberry Pi 3, 4)](https://dl.dpp.dev/latest/linux-rpi-arm7hf)
 * [ARM64 Linux .deb (64 bit Raspberry Pi 4, Smartphones)](https://dl.dpp.dev/latest/linux-rpi-arm64)
 
-You can find further releases in other architectures and formats or the source code on the [GitHub Repository](https://github.com/brainboxdotcc/DPP/releases). For a realtime JSON format list of all download links, click [here](https://dl.dpp.dev/json)
+You can find further releases in other architectures and formats or the source code on the [GitHub Repository](https://github.com/brainboxdotcc/DPP/releases). For a realtime JSON format list of all download links, click [here](https://dl.dpp.dev/json). For a nightly build, follow this [link](https://nightly.link/brainboxdotcc/DPP/workflows/ci/master).
 
-## Library features
+## Library Features
 
 * Support for Discord API v10
 * Really small memory footprint
@@ -46,33 +46,40 @@ You can find further releases in other architectures and formats or the source c
 ## Supported Operating Systems
 
 ### Linux
+
 The library runs ideally on **Linux**.
 
-### Mac OS X and FreeBSD
-The library is well-functional and stable on **Mac OS X** and **FreeBSD** too.
+### macOS and FreeBSD
+
+The library is well-functional and stable on **macOS** and **FreeBSD** too.
 
 ### Raspberry Pi
+
 For running your bot on a **Raspberry Pi**, we offer a prebuilt .deb package for ARM64, ARM6, and ARM7 so that you do not have to wait for it to compile.
 
 ### Windows
+
 **Windows** is well-supported with ready-made compiled DLL and LIB files, please check out our [Windows Bot Template repository](https://github.com/brainboxdotcc/windows-bot-template). The Windows Bot repository can be cloned and integrated immediately into any Visual Studio 2019 and 2022 project in a matter of minutes.
 
 ### Other OS
+
 The library should work fine on other operating systems as well, and if you run a D++ bot on something not listed here, please let us know!
 
 ## Getting started
+
 * [GitHub Repository](https://github.com/brainboxdotcc/DPP)
 * [Discord Server](https://discord.gg/dpp)
 * \ref frequently-asked-questions "Frequently Asked Questions"
 * \ref installing "Installing D++"
 * \ref example-programs "Example Programs"
-* \ref glossary-of-common-discord-terms "Commonly used terms"
+* \ref glossary-of-common-discord-terms "Commonly Used Terms"
 
 ## Architecture
+
 * \ref clusters-shards-guilds
 * \ref thread-model
 
 ## Learning Resources
-* [C++ for JavaScript Developers](https://pawelgrzybek.com/cpp-for-javascript-developers/)
-* [C++ In Four Hours](https://www.youtube.com/watch?v=vLnPwxZdW4Y&vl=en)
 
+* [C++ for JavaScript Developers](https://pawelgrzybek.com/cpp-for-javascript-developers/)
+* [C++ in Four Hours](https://www.youtube.com/watch?v=vLnPwxZdW4Y&vl=en)

@@ -1,28 +1,23 @@
-\page components Using button components
+\page components Using Button Components
 
-Discord's newest features support sending buttons alongside messages, which when clicked by the user trigger an interaction which is routed by
-D++ as an `on_button_click` event. To make use of this, use this code as in this example.
+Discord's newest features support sending buttons alongside messages, which when clicked by the user trigger an interaction which is routed by D++ as an `on_button_click` event. To make use of this, use this code as in this example.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 #include <iostream>
 #include <dpp/message.h>
 
 int main() {
-
 	dpp::cluster bot("token");
-
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
-		
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "button") {
-
 			/* Create a message */
 			dpp::message msg(event.command.channel_id, "this text has a button");
-			
+
 			/* Add an action row, and then a button within the action row. */
 			msg.add_component(
 				dpp::component().add_component(
@@ -51,15 +46,13 @@ int main() {
 	});
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-
-            /* Create and register a command when the bot is ready */
-            bot.global_command_create(dpp::slashcommand("button", "Send a message with a button!", bot.me.id));
-        }
-    });
+		if (dpp::run_once<struct register_bot_commands>()) {
+			/* Create and register a command when the bot is ready */
+			bot.global_command_create(dpp::slashcommand("button", "Send a message with a button!", bot.me.id));
+		}
+	});
 
 	bot.start(dpp::st_wait);
-
 	return 0;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,4 +60,3 @@ int main() {
 When the feature is functioning, the code below will produce buttons on the reply message like in the image below:
 
 \image html button.png
-

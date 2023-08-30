@@ -1,7 +1,6 @@
-\page checking-member-permissions Checking permissions
+\page checking-member-permissions Checking Permissions
 
-Of course most people do just iterate over the roles of a member to check for a permission.
-But there's a helper method for that: dpp::guild::base_permissions gets a member's permission taking into account the server owner and role permissions.
+Of course most people do just iterate over the roles of a member to check for a permission. But there's a helper method for that: dpp::guild::base_permissions gets a member's permission taking into account the server owner and role permissions.
 
 For total member permissions including channel overwrites use either the dpp::channel::get_user_permissions or dpp::guild::permission_overwrites method. Both do the same under the hood.
 
@@ -12,17 +11,15 @@ Demonstration:
 ```cpp
 dpp::channel* c = dpp::find_channel(some_channel_id);
 if (c && c->get_user_permissions(member).can(dpp::p_send_messages)) {
-    //...
+	// ...
 }
 ```
 
-## Permissions in Interaction events
+## Permissions in Interaction Events
 
 ### Default Command Permissions
 
-Discord's intended way to manage permissions for commands is through default member permissions.
-You set them using dpp::slashcommand::set_default_permissions when creating or updating a command to set the default permissions a user must have to use it.
-However, Server-Admins can then overwrite these permissions by their own restrictions.
+Discord's intended way to manage permissions for commands is through default member permissions. You set them using dpp::slashcommand::set_default_permissions when creating or updating a command to set the default permissions a user must have to use it. However, server administrators can then overwrite these permissions by their own restrictions.
 
 The corresponding code to create a command with default permissions would look something like this:
 
@@ -37,12 +34,9 @@ command.add_option(dpp::command_option(dpp::co_string, "reason", "The reason for
 bot.global_command_create(command);
 ```
 
-### Checking permissions on your own
+### Checking Permissions on Your Own
 
-If you want to check permissions on your own, the easiest way to check if a member has certain permissions in interaction events is by using the dpp::interaction::get_resolved_permission function.
-The resolved list contains associated structures for the command and does not use the cache or require any extra API calls.
-Note that the permissions in the resolved set are pre-calculated by discord and taking into account channel overwrites, roles and admin privileges.
-So no need to loop through roles or stuff like that.
+If you want to check permissions on your own, the easiest way to check if a member has certain permissions in interaction events is by using the dpp::interaction::get_resolved_permission function. The resolved list contains associated structures for the command and does not use the cache or require any extra API calls. Note that the permissions in the resolved set are pre-calculated by Discord and taking into account channel overwrites, roles and admin privileges. So no need to loop through roles or stuff like that.
 
 Let's imagine the following scenario:
 
@@ -51,7 +45,7 @@ You have a ban command and want to make sure the issuer has the ban permission.
 ```cpp
 bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 	dpp::permission perms = event.command.get_resolved_permission(event.command.usr.id);
-	if (! perms.can(dpp::p_ban_members)) {
+	if (!perms.can(dpp::p_ban_members)) {
 		event.reply("You don't have the required permissions to ban someone!");
 		return;
 	}
@@ -79,14 +73,13 @@ bot.on_interaction_create([](const dpp::interaction_create_t& event) {
 });
 ```
 
-### The Bot's permissions
+### The Bot's Permissions
 
-You also might want to check if the bot itself has the ban permission before processing the command further.
-You can access the bot's permissions in the dpp::interaction::app_permissions field.
+You also might want to check if the bot itself has the ban permission before processing the command further. You can access the bot's permissions in the dpp::interaction::app_permissions field.
 
 ```cpp
 bot.on_interaction_create([](const dpp::interaction_create_t& event) {
-	if (! event.command.app_permissions.can(dpp::p_ban_members)) {
+	if (!event.command.app_permissions.can(dpp::p_ban_members)) {
 		event.reply("The bot doesn't have the required permission to ban anyone!");
 		return;
 	}

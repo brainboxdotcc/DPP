@@ -1,4 +1,4 @@
-\page lambdas-and-locals Ownership of local variables and safely transferring into a lambda
+\page lambdas-and-locals Ownership of Local Variables and Safely Transferring into a Lambda
 
 If you are reading this page, you have likely been sent here by someone helping you diagnose why your bot is crashing or why seemingly invalid values are being passed into lambdas within your program that uses D++.
 
@@ -10,7 +10,7 @@ To explain this situation and how it causes issues I'd like you to imagine the a
 
 Now imagine the following code scenario. We will describe this code scenario as the magic trick above, in the steps below:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 bot.on_message_create([&bot](const dpp::message_create_t & event) {
 	int myvar = 0;
 	bot.message_create(dpp::message(event.msg.channel_id, "foobar"), [&](const auto & cc) {
@@ -25,17 +25,17 @@ In this scenario, the outer event, `on_message_create` is your tablecloth. The l
 * Your code executes `bot.message_create()` inside this outer lambda
 * D++ inserts your request to send a message into its queue, in another thread. The inner lambda, where you might later set `myvar = 42` is safely copied into the queue for later calling.
 * The tablecloth is whipped away... in other words, `bot.on_message_create` ends, and all local variables including `myvar` become invalid
-* At a later time (usually 80ms through to anything up to 4 seconds depending on rate limits!) the message is sent, and your inner lambda which was saved at the earlier step is called.
-* Your inner lambda attempts to set `myvar` to 42... but `myvar` no longer exists, as the outer lambda has been destroyed....
+* At a later time (usually 80 ms through to anything up to 4 seconds depending on rate limits!) the message is sent, and your inner lambda which was saved at the earlier step is called.
+* Your inner lambda attempts to set `myvar` to 42... but `myvar` no longer exists, as the outer lambda has been destroyed...
 * The table wobbles... the cutlery shakes... and...
 * Best case scenario: you access invalid RAM no longer owned by your program by trying to write to `myvar`, and [your bot outright crashes horribly](https://www.youtube.com/watch?v=sm8qb2kP-fQ)!
-* Worse case scenario: you silently corrupt ram and end up spending days trying to track down a bug that subtly breaks your bot...
+* Worse case scenario: you silently corrupt RAM and end up spending days trying to track down a bug that subtly breaks your bot...
 
 The situation I am trying to describe here is one of object and variable ownership. When you call a lambda, **always assume that every non-global reference outside of that lambda will be invalid when the lambda is called**! For any non-global variable always take a **copy** of the variable (not reference, or pointer). Global variables or those declared directly in `main()` are safe to pass as references.
 
 For example, if we were to fix the broken code above, we could rewrite it like this:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 bot.on_message_create([&bot](const dpp::message_create_t & event) {
 	int myvar = 0;
 	bot.message_create(dpp::message(event.msg.channel_id, "foobar"), [myvar](const auto & cc) {
@@ -45,7 +45,7 @@ bot.on_message_create([&bot](const dpp::message_create_t & event) {
 });
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Note, however that when you set `myvar` within the inner lambda, this does **not effect** the value of the var outside it. Lambdas should be considered self-contained silos, and as they execute in other threads should not be relied upon to set anything that exists **outside of that lambda**.
+Note, however that when you set `myvar` within the inner lambda, this does **not effect** the value of the `myvar` outside it. Lambdas should be considered self-contained silos, and as they execute in other threads should not be relied upon to set anything that exists **outside of that lambda**.
 
 \warning Always avoid just using `[&]` in a lambda to access all in the scope above. It is unlikely that half of this scope will still even be valid by the time you get a look at it!
 

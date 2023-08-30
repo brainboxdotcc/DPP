@@ -1,15 +1,13 @@
-\page subcommands Using sub-commands in slash commands
+\page subcommands Using Sub-Commands in Slash Commands
 
 This demonstrates how to use sub-commands within slash commands. Also shown below is an example of how to get a "resolved" parameter without having to use the cache or an extra API call.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 #include <iostream>
 
 int main() {
-
 	dpp::cluster bot("token");
-
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* Executes on ready. */
@@ -41,14 +39,14 @@ int main() {
 			/* Get the sub command */
 			auto subcommand = cmd_data.options[0];
 			/* Check if the subcommand is "dog" */
-			if (subcommand.name == "dog") {	
+			if (subcommand.name == "dog") {
 				/* Checks if the subcommand has any options. */
 				if (!subcommand.options.empty()) {
 					/* Get the user from the parameter */
 					dpp::user user = interaction.get_resolved_user(
 						subcommand.get_value<dpp::snowflake>(0)
 					);
-					event.reply(user.get_mention() + " has now been turned into a dog."); 
+					event.reply(user.get_mention() + " has now been turned into a dog.");
 				} else {
 					/* Reply if there were no options.. */
 					event.reply("No user specified");
@@ -62,7 +60,7 @@ int main() {
 					dpp::user user = interaction.get_resolved_user(
 						subcommand.get_value<dpp::snowflake>(0)
 					);
-					event.reply(user.get_mention() + " has now been turned into a cat."); 
+					event.reply(user.get_mention() + " has now been turned into a cat.");
 				} else {
 					/* Reply if there were no options.. */
 					event.reply("No user specified");
@@ -72,7 +70,6 @@ int main() {
 	});
 
 	bot.start(dpp::st_wait);
-	
 	return 0;
-} 
+}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

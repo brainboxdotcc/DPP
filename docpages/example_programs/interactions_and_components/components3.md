@@ -1,25 +1,21 @@
-\page components3 Using select menu components
+\page components3 Using Select Menu Components
 
-This example demonstrates creating a select menu, receiving select menu clicks and sending a response message.
+This example demonstrates creating a select menu, receiving select menu clicks, and sending a response message.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 
 int main() {
-
 	dpp::cluster bot("token");
-
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
-		
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "select") {
-
 			/* Create a message */
 			dpp::message msg(event.command.channel_id, "This text has a select menu!");
-			
+
 			/* Add an action row, and a select menu within the action row. */
 			msg.add_component(
 				dpp::component().add_component(
@@ -36,7 +32,7 @@ int main() {
 			event.reply(msg);
 		}
 	});
-	
+
 	/* When a user clicks your select menu , the on_select_click event will fire,
 	 * containing the custom_id you defined in your select menu.
 	 */
@@ -48,15 +44,13 @@ int main() {
 	});
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-
-            /* Create and register a command when the bot is ready */
-            bot.global_command_create(dpp::slashcommand("select", "Select something at random!", bot.me.id));
-        }
-    });
+		if (dpp::run_once<struct register_bot_commands>()) {
+			/* Create and register a command when the bot is ready */
+			bot.global_command_create(dpp::slashcommand("select", "Select something at random!", bot.me.id));
+		}
+	});
 
 	bot.start(dpp::st_wait);
-
 	return 0;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

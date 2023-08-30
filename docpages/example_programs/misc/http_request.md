@@ -1,13 +1,12 @@
-\page making_a_http_request Making arbitrary HTTP requests using D++
+\page making_a_http_request Making Arbitrary HTTP Requests Using D++
 
 If you wish to make arbitrary HTTP(S) requests to websites and APIs, e.g. to update statistics on bot lists, you can use code similar to the code below. You may pass any arbitrary POST data:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 
 int main() {
 	dpp::cluster bot("TOKEN GOES HERE");
-
 	bot.on_log(dpp::utility::cout_logger());
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {
@@ -23,11 +22,12 @@ int main() {
 			mypostdata,
 			"application/json",
 			{
-				{"Authorization", "Bearer tokengoeshere"}
+				{"Authorization", "Bearer token goes here"}
 			}
 		);
 	});
 
 	bot.start(dpp::st_wait);
+	return 0;
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

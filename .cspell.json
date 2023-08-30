@@ -133,7 +133,8 @@
 		"cvtps",
 		"neww",
 		"STDCORO",
-		"NOMINMAX"
+		"NOMINMAX",
+		"Codecademy"
 	],
 	"flagWords": [
 		"hte"

@@ -1,27 +1,23 @@
-\page discord-application-command-file-upload Using file parameters for application commands (slash commands)
+\page discord-application-command-file-upload Using File Parameters for Application Commands (Slash Commands)
 
 The program below demonstrates how to use the 'file' type parameter to an application command (slash command).
-You must first get the file_id via `std::get`, and then you can find the attachment details in the 'resolved'
+You must first get the `file_id` via `std::get`, and then you can find the attachment details in the 'resolved'
 section, `event.command.resolved`.
 
 The file is uploaded to Discord's CDN so if you need it locally you should fetch the `.url` value, e.g. by using
 something like dpp::cluster::request().
 
-~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 
-int main()
-{
+int main() {
 	dpp::cluster bot("token");
-
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
-
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "show") {
-
 			/* Get the file id from the parameter attachment. */
 			dpp::snowflake file_id = std::get<dpp::snowflake>(event.get_parameter("file"));
 
@@ -35,7 +31,6 @@ int main()
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-
 			/* Create a new command. */
 			dpp::slashcommand newcommand("show", "Show an uploaded file", bot.me.id);
 
@@ -48,7 +43,6 @@ int main()
 	});
 
 	bot.start(dpp::st_wait);
-
 	return 0;
 }
 ~~~~~~~~~~~~~~~~

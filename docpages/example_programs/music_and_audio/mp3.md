@@ -1,15 +1,13 @@
-\page stream-mp3-discord-bot Streaming MP3 files
+\page stream-mp3-discord-bot Streaming MP3 Files
 
 To stream MP3 files via D++ you need to link an additional dependency to your bot, namely `libmpg123`. It is relatively simple when linking this library to your bot to then decode audio to PCM and send it to the dpp::discord_voice_client::send_audio_raw function as shown below:
 
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 #include <nlohmann/json.hpp>
 #include <fmt/format.h>
 #include <iomanip>
 #include <sstream>
-
 #include <vector>
 #include <fstream>
 #include <iostream>
@@ -19,12 +17,11 @@ To stream MP3 files via D++ you need to link an additional dependency to your bo
 /* For an example we will hardcode a path to some awesome music here */
 #define MUSIC_FILE "/media/music/Rick Astley/Whenever You Need Somebody/Never Gonna Give You Up.mp3"
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
 	/* This will hold the decoded MP3.
-	* The D++ library expects PCM format, which are raw sound
-	* data, 2 channel stereo, 16 bit signed 48000Hz.
-	*/
+	 * The D++ library expects PCM format, which are raw sound
+	 * data, 2 channel stereo, 16 bit signed 48000 Hz.
+	 */
 	std::vector<uint8_t> pcmdata;
 
 	mpg123_init();
@@ -39,10 +36,10 @@ int main(int argc, char const *argv[])
 	mpg123_handle *mh = mpg123_new(NULL, &err);
 	mpg123_param(mh, MPG123_FORCE_RATE, 48000, 48000.0);
 
-	/* Decode entire file into a vector. You could do this on the fly, but if you do that
-	* you may get timing issues if your CPU is busy at the time and you are streaming to
-	* a lot of channels/guilds.
-	*/
+	/* Decode the entire file into a vector. You could do this on the fly, but if you do that
+	 * you may get timing issues if your CPU is busy at the time and you are streaming to
+	 * a lot of channels/guilds.
+	 */
 	buffer_size = mpg123_outblock(mh);
 	buffer = new unsigned char[buffer_size];
 
@@ -65,7 +62,7 @@ int main(int argc, char const *argv[])
 	/* Setup the bot */
 	dpp::cluster bot("token");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot, &pcmdata](const dpp::slashcommand_t& event) {
@@ -81,7 +78,7 @@ int main(int argc, char const *argv[])
 				event.reply("You don't seem to be in a voice channel!");
 				return;
 			}
-			
+
 			/* Tell the user we joined their channel. */
 			event.reply("Joined your channel!");
 		} else if (event.command.get_command_name() == "mp3") {
@@ -126,5 +123,6 @@ int main(int argc, char const *argv[])
 
 To compile this program you must remember to specify `libmpg123` alongside `libdpp` in the build command, for example:
 
-` g++ -std=c++17 -o musictest musictest.cpp -lmpg123 -ldpp`
-
+```bash
+g++ -std=c++17 -o musictest musictest.cpp -lmpg123 -ldpp
+```

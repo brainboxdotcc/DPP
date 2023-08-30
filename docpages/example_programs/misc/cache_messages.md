@@ -4,11 +4,9 @@ By default D++ does not cache messages. The example program below demonstrates h
 
 This can be adjusted to cache any type derived from dpp::managed including types you define yourself.
 
-@note This example will cache and hold onto messages forever! In a real world situation this would be bad. If you do use this,
-you should use the dpp::cache::remove() method periodically to remove stale items. This is left out of this example as a learning
-exercise to the reader. For further reading please see the documentation of dpp::cache
+\note This example will cache and hold onto messages forever! In a real world situation this would be bad. If you do use this, you should use the dpp::cache::remove() method periodically to remove stale items. This is left out of this example as a learning exercise to the reader. For further reading please see the documentation of dpp::cache.
 
-~~~~~~~~~~{.cpp}
+~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 #include <sstream>
 
@@ -19,7 +17,7 @@ int main() {
 	/* Create a cache to contain types of dpp::message */
 	dpp::cache<dpp::message> message_cache;
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler */
 	bot.on_message_create([&](const dpp::message_create_t &event) {
@@ -37,7 +35,6 @@ int main() {
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "get") {
-
 			dpp::message* find_msg = message_cache.find(std::get<std::string>(event.get_parameter("message_id")));
 
 			/* If find_msg is null, tell the user and return. */
@@ -51,23 +48,19 @@ int main() {
 	});
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-
+		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a new command. */
 			dpp::slashcommand newcommand("get", "Get the contents of a message that was cached via an id", bot.me.id);
 
 			/* Add a parameter option. */
 			newcommand.add_option(dpp::command_option(dpp::co_string, "message_id", "The ID of the message you want to find", true));
 
-            /* Register the command */
-            bot.global_command_create(newcommand);
-        }
-    });
+			/* Register the command */
+			bot.global_command_create(newcommand);
+		}
+	});
 
-	/* Start bot */
 	bot.start(dpp::st_wait);
-
 	return 0;
 }
 ~~~~~~~~~~
-
