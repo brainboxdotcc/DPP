@@ -24,24 +24,24 @@ int main() {
 
 			auto result = co_await dpp::when_any{ // Whichever completes first...
 				event.from->creator->on_button_click.when([&id](const dpp::button_click_t &b) { return b.custom_id == id; }), // Button clicked
-				event.from->creator->co_sleep(10) // Or sleep 10 seconds
+				event.from->creator->co_sleep(5) // Or sleep 5 seconds
 			};
             // Note!! Due to a bug in g++11 and g++12, id must be captured as a reference above or the compiler will destroy it twice. This is fixed in g++13
 			if (result.index() == 0) { // Awaitable #0 completed first, that is the button click event
                 // Acknowledge the click with an empty message and edit the original response, removing the button
 				auto &click_event = result.get<0>();
-                click_event.reply(dpp::ir_deferred_update_message, dpp::message{});
-				event.edit_original_response(m.set_content("You clicked the button with the id " + click_event.custom_id));
-            }
+				click_event.reply(dpp::ir_deferred_update_message, dpp::message{});
+				event.edit_original_response(dpp::message{"You clicked the button with the id " + click_event.custom_id});
+			}
 			else { // Here index() is 1, the timer expired
-				event.edit_original_response(dpp::message{"I haven't got all day..."});
+				event.edit_original_response(dpp::message{"I haven't got all day!"});
             }
 		}
 	});
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-			dpp::slashcommand command("test", "Test awaiting for an event", bot.me.id);
+			dpp::slashcommand command{"test", "Test awaiting for an event", bot.me.id};
 
 			bot.global_command_create(command);
 		}
