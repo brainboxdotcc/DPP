@@ -9,7 +9,7 @@ One of the most anticipated features of C++20 is the addition of coroutines: in 
 * \subpage awaiting-events
 * \subpage expiring-buttons
 
-Currently you will need to build D++ \ref install-from-source "from source" and use the option `-DDPP_CORO=on` in your CMake command.
+Coroutines are currently disabled by default; to use them you will need to build D++ \ref install-from-source "from source" and use the option `-DDPP_CORO=on` in your CMake command.
 Your application also needs to enable C++20 and define DPP_CORO, by using:
 - `-std=c++20 -DDPP_CORO` in your build command if building manually, or
 - if using CMake, add `target_compile_definitions(my_program PUBLIC DPP_CORO)` and `target_compile_features(my_program PUBLIC cxx_std_20)`.

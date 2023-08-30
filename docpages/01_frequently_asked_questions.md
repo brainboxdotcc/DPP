@@ -68,7 +68,7 @@ D++ only supports Discord API v10, the latest version. D++ major version numbers
 Yes! D++ supports Discord threads. You can create, edit and delete threads and also attach events watching for messages within threads.
 
 ## Does D++ require C++20 support?
-No, the library only requires C++17. We do have optional features that use C++20 such as \ref using-coroutines "coroutines".
+No, the library only requires C++17. We have some optional features such as \ref using-coroutines "coroutines" that do require C++20, but they are disabled by default.
 
 ## When I start my bot i get an error: "error while loading shared libraries: libdpp.so: cannot open shared object file: No such file or directory"
 To fix this issue, run `ldconfig`: `sudo ldconfig` as root. Log out if your SSH session and log back in, and the bot should be able to find the library.
