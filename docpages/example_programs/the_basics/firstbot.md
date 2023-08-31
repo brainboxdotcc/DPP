@@ -7,7 +7,7 @@ The two programs can be seen side by side below:
 <table>
 <tr>
 <th>D++</th>
-<th>Discord.js</td>
+<th>Discord.js</th>
 </tr>
 <tr>
 <td>
@@ -132,7 +132,7 @@ int main() {
 
 ### 4. Attach to another event to receive slash commands
 
-If you want to handle a slash command, you should also attach your program to the `on_slashcommand` event (dpp::cluster::on_slashcommand) which is basically the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
+If you want to handle a slash command, you should also attach your program to the `on_slashcommand` event (dpp::cluster::on_slashcommand) which is basically the same as the Discord.js `interactionCreate` event. Let's add this to the program before the `on_ready` event:
 
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
