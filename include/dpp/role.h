@@ -604,6 +604,13 @@ public:
 	 * @return bool True if user has the send voice messages permission or is administrator.
 	 */
 	bool has_send_voice_messages() const;
+	/**
+	 * @brief True if has permission to use clyde AI.
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has the clyde AI permission or is administrator.
+	 */
+	bool has_use_clyde_ai() const;
 
 	/**
 	 * @brief Get guild members who have this role
