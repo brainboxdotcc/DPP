@@ -10,7 +10,7 @@ D++ makes it possible to await events: simple use `co_await` on any of the event
 #include <dpp/dpp.h>
 
 int main() {
-	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	dpp::cluster bot{"token"};
 
 	bot.on_log(dpp::utility::cout_logger());
 
@@ -30,8 +30,8 @@ int main() {
 					return b.custom_id == id;
 				}
 			);
-			// Acknowledge the click with an empty message and edit the original response, removing the button
-            click_event.reply(dpp::ir_deferred_update_message, dpp::message{});
+			// Acknowledge the click and edit the original response, removing the button
+			click_event.reply();
 			event.edit_original_response(dpp::message{"You clicked the button!"});
 		}
 	});

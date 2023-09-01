@@ -68,7 +68,7 @@ D++ only supports Discord API v10, the latest version. D++ major version numbers
 Yes! D++ supports Discord threads. You can create, edit and delete threads and also attach events watching for messages within threads.
 
 ## Does D++ require C++20 support?
-No, at the current time we do not use any C++20 features. Some C++17 features are used, which are available in all recent compilers.
+No, the library only requires C++17. We have some optional features such as \ref using-coroutines "coroutines" that do require C++20, but they are disabled by default.
 
 ## When I start my bot i get an error: "error while loading shared libraries: libdpp.so: cannot open shared object file: No such file or directory"
 To fix this issue, run `ldconfig`: `sudo ldconfig` as root. Log out if your SSH session and log back in, and the bot should be able to find the library.
@@ -103,7 +103,7 @@ Yes! We have confirmed that the D++ deb file will successfully install and opera
 Yes! You can indeed run your bot in a replit.com container. [You can find a ready to go demo repl here](https://replit.com/@braindigitalis/dpp-demo-bot). We also have a \ref building-a-cpp-discord-bot-in-repl "guide showing how to do this".
 
 ## Why do the "get" functions like "messages_get" return void rather than what I'm after?
-All the functions that obtain data directly from Discord (as opposed to the cache) perform HTTPS requests and may have to wait, either for the request itself or for their turn in a queue to respect rate limits. As such, it does not make sense that they should return a value, as this would mean they block execution of your event. Instead, each has a lambda, a function handler which receives the result of the request, which you can then read from within that function to get the data you are interested in. Note that this result will arrive on a different thread to the one which made the request. If you instead want the function to return a value, use the methods ending with `_sync` that will block until they have a response. Note that these forms of call will throw an exception on failure.
+All the functions that obtain data directly from Discord (as opposed to the cache) perform HTTPS requests and may have to wait, either for the request itself or for their turn in a queue to respect rate limits. As such, it does not make sense that they should return a value, as this would mean they block execution of your event. Instead, each has a lambda, a function handler which receives the result of the request, which you can then read from within that function to get the data you are interested in. Note that this result will arrive on a different thread to the one which made the request. If you instead want the function to return a value, you can enable \ref using-coroutines "coroutines" and use for example `co_await cluster->co_message_get(...)` to retrieve the result in your function.
 
 ## Can i use a user token with this library (as opposed to a bot token)?
 No. This feature is not supported as it is against the Discord Terms Of Service, and therefore we have no plans to ever support it. You should not automate any user token. Some libraries used to support this but it is a legacy feature of those libraries (where still available) dating back to before Discord offered an official public API. Please be aware that if Discord ever catch you automating a user token (or making a user client that uses a bot token) they can and do ban people for this.
