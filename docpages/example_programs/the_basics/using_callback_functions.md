@@ -6,7 +6,7 @@ When you create or get an object from Discord, you send the request to its API a
 #include <dpp/dpp.h>
 
 int main() {
-    dpp::cluster bot("Token Was Here, dpp::i_default_intents | dpp::i_message_content);
+    dpp::cluster bot("Token Was Here", dpp::i_default_intents | dpp::i_message_content);
     /* the second argument is a bitmask of intents - i_message_content is needed to get messages */
 
     bot.on_log(dpp::utility::cout_logger());
