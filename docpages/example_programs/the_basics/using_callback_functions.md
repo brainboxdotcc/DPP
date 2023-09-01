@@ -26,7 +26,7 @@ int main() {
                 }
 
                 auto messages = callback.get<dpp::message_map>();
-                /* std::get <dpp::message_map>(callback.value) would give the same result */
+                /* std::get<dpp::message_map>(callback.value) would give the same result */
                 
                 std::string contents;
                 for (const auto& x : messages) { /* here we iterate through the dpp::message_map we got from callback... */
@@ -35,14 +35,12 @@ int main() {
 
                 event.reply(contents); /* we will see all those messages we got, united as one! */
             });
-        }
-        else if (event.command.get_command_name() == "channel-create") {
+        } else if (event.command.get_command_name() == "channel-create") {
 
             /* create a text channel */
             dpp::channel channel = dpp::channel()
                 .set_name("test")
                 .set_guild_id(event.command.guild_id);
-            /* by default, the channel we are creating is a text one without a parent (category) */
 
             bot.channel_create(channel, [&bot, event](const dpp::confirmation_callback_t& callback) -> void {
                 if (callback.is_error()) { /* catching an error to log it */
@@ -57,8 +55,7 @@ int main() {
                 /* note that channel types are represented as numbers */
                 event.reply(message);
             });
-        }
-        else if (event.command.get_command_name() == "msg-error") {
+        } else if (event.command.get_command_name() == "msg-error") {
             bot.message_get(0, 0, [event](const dpp::confirmation_callback_t& callback) -> void {
                 /* the error will occur since there is no message with ID '0' that is in a channel with ID '0' (I'm not explaining why) */
                 if (callback.is_error()) {
