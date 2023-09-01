@@ -34,7 +34,6 @@ int main() {
                 event.reply(contents); /* we will see all those messages we got, united as one! */
             });
         } else if (event.command.get_command_name() == "channel-create") {
-
             /* create a text channel */
             dpp::channel channel = dpp::channel()
                 .set_name("test")
@@ -62,7 +61,7 @@ int main() {
                 }
 
                 /* we won't be able to get here because of the return; statement */
-                auto message = callback.get <dpp::message>();
+                auto message = callback.get<dpp::message>();
                 event.reply(message);
             });
         }
