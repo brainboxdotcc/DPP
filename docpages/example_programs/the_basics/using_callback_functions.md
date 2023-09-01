@@ -5,10 +5,8 @@ When you create or get an object from Discord, you send the request to its API a
 ~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
 
-const std::string BOT_TOKEN = "Token Was Here";
-
 int main() {
-    dpp::cluster bot(BOT_TOKEN, dpp::i_default_intents | dpp::i_message_content);
+    dpp::cluster bot("Token Was Here, dpp::i_default_intents | dpp::i_message_content);
     /* the second argument is a bitmask of intents - i_message_content is needed to get messages */
 
     bot.on_log(dpp::utility::cout_logger());
@@ -77,13 +75,13 @@ int main() {
             msgs_get.add_option(
                 dpp::command_option(dpp::co_integer, "quantity", "Quantity of messages to get. Max - 100.")
                 .set_max_value(100)
-                .set_min_value(0)
+                .set_min_value(1)
             );
 
             dpp::slashcommand channel_create("channel-create", "Create a channel", bot.me.id);
             dpp::slashcommand msg_error("msg-error", "Get an error instead of message :)", bot.me.id);
 
-            bot.global_bulk_command_create( {msgs_get, channel_create, msg_error} );
+            bot.global_bulk_command_create({ msgs_get, channel_create, msg_error });
         }
     });
 
