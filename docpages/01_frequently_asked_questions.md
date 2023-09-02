@@ -11,7 +11,7 @@ In production on TriviaBot, the bot takes approximately 2gb of ram to run 18 sep
 For a very small bot, you can get the memory usage as low as **6 megabytes** on a Raspberry Pi.
 
 ## How do I use this library in Windows?
-The easiest way is to use our [template project](https://github.com/brainboxdotcc/windows-bot-template). If you are unable to do this, download the precompiled latest release from our GitHub releases, and take the dlls, `.lib` file, and header files (`bin`, `lib` and `include` directories), placing them in a easily accessible place on your computer. Go into Visual Studio project settings in a new project, and point the project directories (notably the library directories and and include directories) at the correct locations. Add the `include` folder you extracted to your include directories, and add `dpp.lib` to your library directories. Ensure the project is set to C++17 standard in the settings. You should then be able to compile example programs within that project. When you run the program you have compiled you must ensure that all the dll files from the `bin` directory exist in the same directory as your executable.
+The easiest way is to use our [template project](https://github.com/brainboxdotcc/windows-bot-template). If you are unable to do this, download the precompiled latest release from our GitHub releases, and take the dlls, `.lib` file, and header files (`bin`, `lib` and `include` directories), placing them in an easily accessible place on your computer. Go into Visual Studio project settings in a new project, and point the project directories (notably the library directories and include directories) at the correct locations. Add the `include` folder you extracted to your include directories, and add `dpp.lib` to your library directories. Ensure the project is set to C++17 standard in the settings. You should then be able to compile example programs within that project. When you run the program you have compiled you must ensure that all the dll files from the `bin` directory exist in the same directory as your executable.
 
 ## Does this library support Visual Studio 2022?
 Yes! The master branch comes with pre-built binaries for Visual Studio 2022 and our Windows bot template has a [vs2022 branch](https://github.com/brainboxdotcc/windows-bot-template/tree/vs2022) which you can clone to get Visual Studio 2022 specific code. For the time being we support both Visual Studio 2019 and 2022. At some point in the future only 2022 may be supported as 2019 becomes outdated.
@@ -25,7 +25,7 @@ The best place to do this is on the [Discord server](https://discord.gg/dpp). Yo
 ## How can I contribute to development?
 Just star and fork a copy of the repository, and submit a Pull Request! We won't bite! Authors of accepted pull requests get a special role on our [Discord server](https://discord.gg/dpp).
 
-## Whats the best way to learn C++?
+## What's the best way to learn C++?
 A simple search can find some learning tools, however not all are good. Here is a list of some (good) learning resources:
 
 * [CodeAcademy](https://www.codecademy.com/learn/c-plus-plus)
@@ -38,7 +38,7 @@ If you don't understand something then feel free to ask in the [Discord server](
 NO! Definitely not! We have tried to keep things as simple as possible. We only use language features where they make sense, not just because they exist. Take a look at the example program (`test.cpp` and you'll see just how simple it is to get up and running quickly). We use a small subset of C++17 and C++14 features.
 
 ## Why is D++ also called DPP
-DPP is short for *D Plus Plus* (D++), a play on the Discord and C++ names. You'll see the library referred to as `dpp` within source code as `d++` is not a valid symbol so we couldn't exactly use that as our namespace name.
+DPP is short for *D Plus Plus* (D++), a play on the Discord and C++ names. You'll see the library referred to as `dpp` within source code as `d++` is not a valid symbol, so we couldn't exactly use that as our namespace name.
 
 ## Is D++ a single header library?
 No, D++ is a classically designed library which installs itself to your library directory/system directory as a shared object or dll. You must link to its `.lib` file and include its header files to make use of it. We have no plans for a single-header build.
@@ -59,7 +59,7 @@ Yes! This library supports voice and will automatically enable voice if your sys
 Yes! D++ supports sharding and also clustering (grouping of shards into one process) to ensure it is scalable for small and large bots alike.
 
 ## How do I contribute to the documentation and website?
-The documentation and website are built using Doxygen. To contribute to site pages, submit a Pull Request to the main repository. The site pages can be found within the `docpages` directory. Details of classes, variables, namespaces etc are auto generated from Doxygen comments within the library source code in the `include` and `src` folders.
+The documentation and website are built using Doxygen. To contribute to site pages, submit a Pull Request to the main repository. The site pages can be found within the `docpages` directory. Details of classes, variables, namespaces etc. are auto generated from Doxygen comments within the library source code in the `include` and `src` folders.
 
 ## What version of the Discord API does this library support?
 D++ only supports Discord API v10, the latest version. D++ major version numbers match the supported Discord API version.
@@ -70,10 +70,10 @@ Yes! D++ supports Discord threads. You can create, edit and delete threads and a
 ## Does D++ require C++20 support?
 No, the library only requires C++17. We have some optional features such as \ref using-coroutines "coroutines" that do require C++20, but they are disabled by default.
 
-## When I start my bot i get an error: "error while loading shared libraries: libdpp.so: cannot open shared object file: No such file or directory"
+## When I start my bot I get an error: "error while loading shared libraries: libdpp.so: cannot open shared object file: No such file or directory"
 To fix this issue, run `ldconfig`: `sudo ldconfig` as root. Log out if your SSH session and log back in, and the bot should be able to find the library.
 
-## When compiling with voice support, i get an error: "No rule to make target 'sodium_LIBRARY_DEBUG-NOTFOUND', needed by 'libdpp.so'. Stop."
+## When compiling with voice support, I get an error: "No rule to make target 'sodium_LIBRARY_DEBUG-NOTFOUND', needed by 'libdpp.so'. Stop."
 The libsodium package requires pkg-config, but does not check for it when installed. Install it as root, e.g. `sudo apt install pkg-config`. Rerun cmake, and rebuild the library.
 
 ## When I try to instantiate a dpp::cluster in windows, a std::bad_alloc exception is thrown
@@ -82,7 +82,7 @@ If this happens, ensure you are using the correct precompiled build of the libra
 ## Does this library build/run on Raspberry Pi?
 Yes! This project will build and run on Raspberry Pi and is very much suited to this kind of system. It may take some time (read: hours) to compile the project on your Raspberry Pi unless you build it using a cross compiler. We offer pre-built `.deb` files for arm6, arm7 and arm64, you should use these where possible to avoid having to compile it by hand, or you can use a cross-compiler to build it on your PC then transfer the compiled binaries across.
 
-## There are so many versions! Which deb file do i need for my Raspberry Pi?
+## There are so many versions! Which deb file do I need for my Raspberry Pi?
 Depending on which Raspberry Pi version you have, you will need to download a different release binary:
 <table>
 <tr>
@@ -97,7 +97,7 @@ Depending on which Raspberry Pi version you have, you will need to download a di
 </table>
 
 ## Are other ARM devices supported?
-Yes! We have confirmed that the D++ deb file will successfully install and operate on various forms of cellphone or non-pi ARM devices. If you get it working on any other devices please let us know and we can build a compatibility chart.
+Yes! We have confirmed that the D++ deb file will successfully install and operate on various forms of cellphone or non-pi ARM devices. If you get it working on any other devices please let us know, and we can build a compatibility chart.
 
 ## Can I run a D++ bot in Replit?
 Yes! You can indeed run your bot in a replit.com container. [You can find a ready to go demo repl here](https://replit.com/@braindigitalis/dpp-demo-bot). We also have a \ref building-a-cpp-discord-bot-in-repl "guide showing how to do this".
@@ -105,5 +105,5 @@ Yes! You can indeed run your bot in a replit.com container. [You can find a read
 ## Why do the "get" functions like "messages_get" return void rather than what I'm after?
 All the functions that obtain data directly from Discord (as opposed to the cache) perform HTTPS requests and may have to wait, either for the request itself or for their turn in a queue to respect rate limits. As such, it does not make sense that they should return a value, as this would mean they block execution of your event. Instead, each has a lambda, a function handler which receives the result of the request, which you can then read from within that function to get the data you are interested in. Note that this result will arrive on a different thread to the one which made the request. If you instead want the function to return a value, you can enable \ref using-coroutines "coroutines" and use for example `co_await cluster->co_message_get(...)` to retrieve the result in your function.
 
-## Can i use a user token with this library (as opposed to a bot token)?
-No. This feature is not supported as it is against the Discord Terms Of Service, and therefore we have no plans to ever support it. You should not automate any user token. Some libraries used to support this but it is a legacy feature of those libraries (where still available) dating back to before Discord offered an official public API. Please be aware that if Discord ever catch you automating a user token (or making a user client that uses a bot token) they can and do ban people for this.
+## Can I use a user token with this library (as opposed to a bot token)?
+No. This feature is not supported as it is against the Discord Terms Of Service, and therefore we have no plans to ever support it. You should not automate any user token. Some libraries used to support this, but it is a legacy feature of those libraries (where still available) dating back to before Discord offered an official public API. Please be aware that if Discord ever catch you automating a user token (or making a user client that uses a bot token) they can and do ban people for this.
