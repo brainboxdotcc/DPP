@@ -10,17 +10,17 @@ Sometimes it's simply not enough to ping someone in a server with a message, and
 int main()
 {
     /* Create the bot */
-	dpp::cluster bot("token");
+    dpp::cluster bot("token");
 
-	bot.on_log(dpp::utility::cout_logger());
+    bot.on_log(dpp::utility::cout_logger());
 
     /* The event is fired when someone issues your commands */
-	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
+    bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
 
-		/* Check which command they ran */
-		if (event.command.get_command_name() == "pm") {
+        /* Check which command they ran */
+        if (event.command.get_command_name() == "pm") {
 
-			/* If there was no input, we want to only send a message to the command author. */
+            /* If there was no input, we want to only send a message to the command author. */
             if(event.get_parameter("user").index() == 0) {
 
                 /* Send a message to the command author. */
@@ -49,10 +49,10 @@ int main()
                     return;
                 }
 
-                event.reply(dpp::message("I've sent a message to that user.").set_flags(dpp::m_ephemeral));
+            event.reply(dpp::message("I've sent a message to that user.").set_flags(dpp::m_ephemeral));
             });
-		}
-	});
+        }
+    });
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {
 	    if (dpp::run_once<struct register_bot_commands>()) {
