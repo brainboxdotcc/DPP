@@ -24,7 +24,7 @@ int main()
             if(event.get_parameter("user").index() == 0) {
 
                 /* Send a message to the command author. */
-                bot.direct_message_create(event.command.get_issuing_user().id, dpp::message("Here's a private message!"), [event](const dpp::confirmation_callback_t& callback){
+                bot.direct_message_create(event.command.get_issuing_user().id, dpp::message("Here's a private message!"), [event](const dpp::confirmation_callback_t& callback) {
                     if(callback.is_error()) {
                         event.reply(dpp::message("I couldn't send a message to you.").set_flags(dpp::m_ephemeral));
                         return;
@@ -43,13 +43,13 @@ int main()
             auto user = std::get<dpp::snowflake>(event.get_parameter("user"));
 
             /* Send a message the user the author mentioned, instead of the command author. */
-            bot.direct_message_create(user, dpp::message("Here's a private message!"), [event](const dpp::confirmation_callback_t& callback){
+            bot.direct_message_create(user, dpp::message("Here's a private message!"), [event](const dpp::confirmation_callback_t& callback) {
                 if(callback.is_error()) {
                     event.reply(dpp::message("I couldn't send a message to that user. Please check that is a valid user!").set_flags(dpp::m_ephemeral));
                     return;
                 }
 
-            event.reply(dpp::message("I've sent a message to that user.").set_flags(dpp::m_ephemeral));
+                event.reply(dpp::message("I've sent a message to that user.").set_flags(dpp::m_ephemeral));
             });
         }
     });
@@ -63,9 +63,9 @@ int main()
             /* Add the option for a user mention that isn't required */
             command.add_option(dpp::command_option(dpp::co_mentionable, "user", "The user to message", false));
 
-		    /* Register the command */
-		    bot.global_command_create(command);
-		}
+            /* Register the command */
+            bot.global_command_create(command);
+        }
 	});
 
 	bot.start(dpp::st_wait);
