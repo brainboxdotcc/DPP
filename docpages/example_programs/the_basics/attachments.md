@@ -62,7 +62,7 @@ int main() {
     /* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
-		if (event.command.get_command_name == "file") {
+		if (event.command.get_command_name() == "file") {
 
             /* Request the image from the URL specified and capture the event in a lambda. */
             bot.request("https://dpp.dev/DPP-Logo.png", dpp::m_get, [event](const dpp::http_request_completion_t & httpRequestCompletion) {
@@ -110,7 +110,7 @@ int main() {
     /* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
-		if (event.command.get_command_name == "file") {
+		if (event.command.get_command_name() == "file") {
 
             /* Create a message. */
             dpp::message msg(event.msg.channel_id, "");
