@@ -67,9 +67,9 @@ int main()
         }
     });
 
-	bot.start(dpp::st_wait);
+    bot.start(dpp::st_wait);
 
-	return 0;
+    return 0;
 }
 ~~~~~~~~~~
 
