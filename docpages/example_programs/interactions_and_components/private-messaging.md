@@ -21,11 +21,11 @@ int main()
         if (event.command.get_command_name() == "pm") {
 
             /* If there was no input, we want to only send a message to the command author. */
-            if(event.get_parameter("user").index() == 0) {
+            if (event.get_parameter("user").index() == 0) {
 
                 /* Send a message to the command author. */
                 bot.direct_message_create(event.command.get_issuing_user().id, dpp::message("Here's a private message!"), [event](const dpp::confirmation_callback_t& callback) {
-                    if(callback.is_error()) {
+                    if (callback.is_error()) {
                         event.reply(dpp::message("I couldn't send a message to you.").set_flags(dpp::m_ephemeral));
                         return;
                     }
@@ -44,7 +44,7 @@ int main()
 
             /* Send a message the user the author mentioned, instead of the command author. */
             bot.direct_message_create(user, dpp::message("Here's a private message!"), [event](const dpp::confirmation_callback_t& callback) {
-                if(callback.is_error()) {
+                if (callback.is_error()) {
                     event.reply(dpp::message("I couldn't send a message to that user. Please check that is a valid user!").set_flags(dpp::m_ephemeral));
                     return;
                 }
