@@ -1,6 +1,6 @@
 \page private-messaging Sending private messages
 
-Sometimes it's simply not enough to ping someone in a server with a message, and we get that. That's why you can private message people! This tutorial will cover how to make a command that will either message the author of the command or message a specified user! This is done with a command option! So, let's get into it!
+Sometimes it's simply not enough to ping someone in a server with a message, and we get that. That's why you can private message people! This tutorial will cover how to make a command that will either message the author of the command or message a specified user!
 
 \note This tutorial makes use of callbacks. For more information about that, visit \ref callback-functions "Using Callback Functions".
 
@@ -39,7 +39,7 @@ int main()
                     } else {
                         event.reply(dpp::message("I couldn't send a message to that user. Please check that is a valid user!").set_flags(dpp::m_ephemeral));
                     }
-                    
+
                     return;
                 }
 
@@ -53,8 +53,8 @@ int main()
         }
     });
 
-	bot.on_ready([&bot](const dpp::ready_t& event) {
-	    if (dpp::run_once<struct register_bot_commands>()) {
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+        if (dpp::run_once<struct register_bot_commands>()) {
 
             /* Register the command */
             dpp::slashcommand command("pm", "Send a private message.", bot.me.id);
@@ -65,7 +65,7 @@ int main()
             /* Register the command */
             bot.global_command_create(command);
         }
-	});
+    });
 
 	bot.start(dpp::st_wait);
 
