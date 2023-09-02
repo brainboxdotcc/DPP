@@ -20,36 +20,35 @@ int main()
         /* Check which command they ran */
         if (event.command.get_command_name() == "pm") {
 
-            /* If there was no input, we want to only send a message to the command author. */
+            dpp::snowflake user;
+
+            /* If there was no specified user, we set the "user" variable to the command author (issuing user). */
             if (event.get_parameter("user").index() == 0) {
-
-                /* Send a message to the command author. */
-                bot.direct_message_create(event.command.get_issuing_user().id, dpp::message("Here's a private message!"), [event](const dpp::confirmation_callback_t& callback) {
-                    if (callback.is_error()) {
-                        event.reply(dpp::message("I couldn't send a message to you.").set_flags(dpp::m_ephemeral));
-                        return;
-                    }
-
-                    event.reply(dpp::message("I've sent you a private message.").set_flags(dpp::m_ephemeral));
-                });
-
-                /* Because we've sent the message, let's stop the function now. */
-                return;
+                user = event.command.get_issuing_user().id;
+            } else { /* Otherwise, we set it to the specified user! */
+                user = std::get<dpp::snowflake>(event.get_parameter("user"));
             }
 
-            /* Here, we can assume that there was a user inputted, so we can just retrieve that data! */
-
-            /* Get the user specified by the command author. */
-            auto user = std::get<dpp::snowflake>(event.get_parameter("user"));
-
-            /* Send a message the user the author mentioned, instead of the command author. */
-            bot.direct_message_create(user, dpp::message("Here's a private message!"), [event](const dpp::confirmation_callback_t& callback) {
+            /* Send a message to the user set above. */
+            bot.direct_message_create(user, dpp::message("Here's a private message!"), [event, user](const dpp::confirmation_callback_t& callback){
+                /* If the callback errors, we want to send a message telling the author that something went wrong. */
                 if (callback.is_error()) {
-                    event.reply(dpp::message("I couldn't send a message to that user. Please check that is a valid user!").set_flags(dpp::m_ephemeral));
+                    /* Here, we want the error message to be different if the user we're trying to send a message to is the command author. */
+                    if (user == event.command.get_issuing_user().id) {
+                        event.reply(dpp::message("I couldn't send you a message.").set_flags(dpp::m_ephemeral));
+                    } else {
+                        event.reply(dpp::message("I couldn't send a message to that user. Please check that is a valid user!").set_flags(dpp::m_ephemeral));
+                    }
+                    
                     return;
                 }
 
-                event.reply(dpp::message("I've sent a message to that user.").set_flags(dpp::m_ephemeral));
+                /* We do the same here, so the message is different if it's to the command author or if it's to a specified user. */
+                if (user == event.command.get_issuing_user().id) {
+                    event.reply(dpp::message("I've sent you a private message.").set_flags(dpp::m_ephemeral));
+                } else {
+                    event.reply(dpp::message("I've sent a message to that user.").set_flags(dpp::m_ephemeral));
+                }
             });
         }
     });
