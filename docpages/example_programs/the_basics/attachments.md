@@ -19,7 +19,7 @@ int main() {
     /* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
-		if (event.command.get_command_name == "file") {
+		if (event.command.get_command_name() == "file") {
 
             dpp::message msg(event.msg.channel_id, "Hey there, I've got a new file!");
 
