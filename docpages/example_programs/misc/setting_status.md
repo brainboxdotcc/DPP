@@ -44,21 +44,16 @@ int main()
     bot.on_log(dpp::utility::cout_logger());
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
-        /* We don't need the run_once here as we're not registering commands! */
+        /* We put our status updating inside "run_once" so that multiple shards don't try do this as "set_presence" updates all the shards. */
+        if (dpp::run_once<struct register_bot_commands>()) {
+            /* We update the presence now as the timer will do the first execution after the x amount of seconds we specify */
+            bot.set_presence(dpp::presence(dpp::presence_status::ps_online, dpp::activity_type::at_game, "with " + std::to_string(dpp::get_guild_cache()->count()) + " guilds!"));
 
-        std::thread status_thread([&bot]() {
-            /* We want to infinitely loop here, so we always update the status */
-            while (true) {
-                /* Update the presence to the amount of servers the bot is in */
+            /* Create a timer that runs every 120 seconds, that sets the status */
+            bot.start_timer([&bot](const dpp::timer& timer) {
                 bot.set_presence(dpp::presence(dpp::presence_status::ps_online, dpp::activity_type::at_game, "with " + std::to_string(dpp::get_guild_cache()->count()) + " guilds!"));
-
-                /* Tell the thread to sleep for 120 seconds, meaning we're not updating the presence too often. */
-                std::this_thread::sleep_for(std::chrono::seconds(120));
-            }
-        });
-
-        /* This makes the thread completely separate, so it's not reliant on the main thread (meaning you can still do anything else you want whilst this happens) */
-        status_thread.detach();
+            }, 120);
+        }
     });
 
     bot.start(dpp::st_wait);
