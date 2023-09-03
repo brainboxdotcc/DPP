@@ -52,7 +52,7 @@ int main()
                 /* Update the presence to the amount of servers the bot is in */
                 bot.set_presence(dpp::presence(dpp::presence_status::ps_online, dpp::activity_type::at_game, "with " + std::to_string(dpp::get_guild_cache()->count()) + " guilds!"));
 
-                /* Tell the thread to sleep for 120 seconds, this is so we don't ask for the guilds too often meaning we avoid being rate-limited */
+                /* Tell the thread to sleep for 120 seconds, meaning we're not updating the presence too often. */
                 std::this_thread::sleep_for(std::chrono::seconds(120));
             }
         });
