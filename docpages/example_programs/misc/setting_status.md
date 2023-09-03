@@ -8,9 +8,9 @@ A bot status is pretty cool, and it'd be cooler if you knew how to do it! This t
 int main()
 {
     /* Create the bot */
-	dpp::cluster bot("token");
+    dpp::cluster bot("token");
 
-	bot.on_log(dpp::utility::cout_logger());
+    bot.on_log(dpp::utility::cout_logger());
 
     bot.on_ready([&bot](const dpp::ready_t& event) {
         /* We don't need the run_once here as we're not registering commands! */
@@ -19,9 +19,9 @@ int main()
         bot.set_presence(dpp::presence(dpp::presence_status::ps_online, dpp::activity_type::at_game, "games!"));
     });
 
-	bot.start(dpp::st_wait);
+    bot.start(dpp::st_wait);
 
-	return 0;
+    return 0;
 }
 ~~~~~~~~~~
 
