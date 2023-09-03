@@ -21,7 +21,7 @@ int main() {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "file") {
 
-            dpp::message msg(event.msg.channel_id, "Hey there, I've got a new file!");
+            dpp::message msg(event.command.channel_id, "Hey there, I've got a new file!");
 
             /* attach the file to the message */
             msg.add_file("foobar.txt", dpp::utility::read_file("path_to_your_file.txt"));
@@ -113,7 +113,7 @@ int main() {
 		if (event.command.get_command_name() == "file") {
 
             /* Create a message. */
-            dpp::message msg(event.msg.channel_id, "");
+            dpp::message msg(event.command.channel_id, "");
 
             /* Attach the image to the message we just created. */
             msg.add_file("image.jpg", dpp::utility::read_file("path_to_your_image.jpg"));
