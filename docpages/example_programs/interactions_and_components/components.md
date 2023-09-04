@@ -5,8 +5,7 @@ D++ as an `on_button_click` event. To make use of this, use this code as in this
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
-#include <iostream>
-#include <dpp/message.h>
+#include <dpp/unicode_emoji.h>
 
 int main() {
 
@@ -29,7 +28,7 @@ int main() {
 					dpp::component().
 					set_label("Click me!").
 					set_type(dpp::cot_button).
-					set_emoji(u8"😄").
+					set_emoji(dpp::unicode_emoji::smile).
 					set_style(dpp::cos_danger).
 					set_id("myid")
 				)

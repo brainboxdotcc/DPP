@@ -42,6 +42,7 @@ int main() {
             bot.channel_create(channel, [&bot, event](const dpp::confirmation_callback_t& callback) -> void {
                 if (callback.is_error()) { /* catching an error to log it */
                     bot.log(dpp::loglevel::ll_error, callback.get_error().message);
+                    return;
                 }
 
                 auto channel = callback.get<dpp::channel>();
@@ -73,8 +74,8 @@ int main() {
 
             msgs_get.add_option(
                 dpp::command_option(dpp::co_integer, "quantity", "Quantity of messages to get. Max - 100.")
-                .set_max_value(100)
-                .set_min_value(1)
+                .set_max_value(100ll)
+                .set_min_value(1ll)
             );
 
             dpp::slashcommand channel_create("channel-create", "Create a channel", bot.me.id);
