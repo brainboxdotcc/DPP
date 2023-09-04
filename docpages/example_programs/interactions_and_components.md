@@ -14,3 +14,4 @@ The example programs listed here demonstrate lots of things to do with interacti
 * \subpage commandhandler "Unified message/slash command handler"
 * \subpage application-command-autocomplete "Slash command auto completion"
 * \subpage discord-application-command-file-upload "Using file parameters in slash commands"
+* \subpage private-messaging
