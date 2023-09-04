@@ -4,6 +4,7 @@ This example demonstrates creating a select menu, receiving select menu clicks a
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
+#include <dpp/unicode_emoji.h>
 
 int main() {
 
@@ -26,8 +27,8 @@ int main() {
 					dpp::component().
 					set_type(dpp::cot_selectmenu).
 					set_placeholder("Pick something").
-					add_select_option(dpp::select_option("label1","value1","description1").set_emoji(u8"😄")).
-					add_select_option(dpp::select_option("label2","value2","description2").set_emoji(u8"🙂")).
+					add_select_option(dpp::select_option("label1","value1","description1").set_emoji(dpp::unicode_emoji::smile)).
+					add_select_option(dpp::select_option("label2","value2","description2").set_emoji(dpp::unicode_emoji::slight_smile)).
 					set_id("myselectid")
 				)
 			);
