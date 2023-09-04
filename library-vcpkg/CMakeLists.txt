@@ -18,8 +18,6 @@ endif()
 target_compile_definitions(
 	"${LIB_NAME}" PUBLIC
 	"DPP_BUILD"
-	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/std:c++17;/Od;/DEBUG;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
-	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/std:c++17;/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
 )
 
 add_compile_definitions(OPENSSL_SYS_WIN32)
