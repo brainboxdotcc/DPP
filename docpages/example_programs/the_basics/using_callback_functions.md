@@ -72,8 +72,8 @@ int main() {
         if (dpp::run_once <struct register_global_commands>()) {
             dpp::slashcommand msgs_get("msgs-get", "Get messages", bot.me.id);
 
-            const int64_t min_val{1};
-            const int64_t max_val{100};
+            constexpr int64_t min_val{1};
+            constexpr int64_t max_val{100};
 
             msgs_get.add_option(
                 dpp::command_option(dpp::co_integer, "quantity", "Quantity of messages to get. Max - 100.")
