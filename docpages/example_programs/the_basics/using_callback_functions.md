@@ -72,10 +72,13 @@ int main() {
         if (dpp::run_once <struct register_global_commands>()) {
             dpp::slashcommand msgs_get("msgs-get", "Get messages", bot.me.id);
 
+            const int64_t min_val{1};
+            const int64_t max_val{100};
+
             msgs_get.add_option(
                 dpp::command_option(dpp::co_integer, "quantity", "Quantity of messages to get. Max - 100.")
-                .set_max_value(100ll)
-                .set_min_value(1ll)
+                .set_min_value(min_val)
+                .set_max_value(max_val)
             );
 
             dpp::slashcommand channel_create("channel-create", "Create a channel", bot.me.id);
