@@ -56,9 +56,10 @@ struct OpusRepacketizer;
 
 namespace dpp {
 
-inline constexpr uint16_t AUDIO_TRACK_MARKER = 0xFFFF;
+// !TODO: change these to constexpr and rename every occurence across the codebase
+#define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
 
-inline constexpr int AUDIO_OVERLAP_SLEEP_SAMPLES = 30;
+#define AUDIO_OVERLAP_SLEEP_SAMPLES 30
 
 inline constexpr size_t send_audio_raw_max_length = 11520;
 
@@ -696,8 +697,7 @@ public:
 	 * @param length The length of the audio data. The length should
 	 * be a multiple of 4 (2x 16 bit stereo channels) with a maximum
 	 * length of `send_audio_raw_max_length`, which is a complete opus
-	 * frame at highest quality. `dpp::voice_exception` will be thrown
-	 * if length is less than 4 or not divisible by 4.
+	 * frame at highest quality.
 	 *
 	 * Generally when you're streaming and you know there will be
 	 * more packet to come you should always provide packet data with
