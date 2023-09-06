@@ -50,13 +50,17 @@
 #include <functional>
 #include <chrono>
 
-#define SEND_AUDIO_RAW_MAX_LENGTH 11520
-
 struct OpusDecoder;
 struct OpusEncoder;
 struct OpusRepacketizer;
 
 namespace dpp {
+
+inline constexpr uint16_t AUDIO_TRACK_MARKER = 0xFFFF;
+
+inline constexpr int AUDIO_OVERLAP_SLEEP_SAMPLES = 30;
+
+inline constexpr size_t SEND_AUDIO_RAW_MAX_LENGTH = 11520;
 
 using json = nlohmann::json;
 
@@ -94,10 +98,6 @@ struct DPP_EXPORT voice_out_packet {
 	 */
 	uint64_t duration;
 };
-
-#define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
-
-#define AUDIO_OVERLAP_SLEEP_SAMPLES 30
 
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
