@@ -696,9 +696,8 @@ public:
 	 * @param length The length of the audio data. The length should
 	 * be a multiple of 4 (2x 16 bit stereo channels) with a maximum
 	 * length of `SEND_AUDIO_RAW_MAX_LENGTH`, which is a complete opus
-	 * frame at highest quality. Packet with length less than 4 will be
-	 * dropped and `dpp::voice_exception` will be thrown if length is
-	 * not divisible by 4.
+	 * frame at highest quality. `dpp::voice_exception` will be thrown
+	 * if length is less than 4 or not divisible by 4.
 	 *
 	 * Generally when you're streaming and you know there will be
 	 * more packet to come you should always provide packet data with
