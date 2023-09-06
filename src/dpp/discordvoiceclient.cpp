@@ -1174,11 +1174,11 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 		throw dpp::voice_exception("Raw audio packet size should be divisible by 4");
 	}
 
-	if (length > SEND_AUDIO_RAW_MAX_LENGTH) {
+	if (length > send_audio_raw_max_length) {
 		std::string s_audio_data((const char*)audio_data, length);
 
-		while (s_audio_data.length() > SEND_AUDIO_RAW_MAX_LENGTH) {
-			std::string packet(s_audio_data.substr(0, SEND_AUDIO_RAW_MAX_LENGTH));
+		while (s_audio_data.length() > send_audio_raw_max_length) {
+			std::string packet(s_audio_data.substr(0, send_audio_raw_max_length));
 			const auto packet_size = (long long)packet.size();
 
 			s_audio_data.erase(s_audio_data.begin(), s_audio_data.begin() + packet_size);
@@ -1189,9 +1189,9 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 		return *this;
 	}
 
-	if (length < SEND_AUDIO_RAW_MAX_LENGTH) {
+	if (length < send_audio_raw_max_length) {
 		std::string packet((const char*)audio_data, length);
-		packet.resize(SEND_AUDIO_RAW_MAX_LENGTH, 0);
+		packet.resize(send_audio_raw_max_length, 0);
 
 		return send_audio_raw((uint16_t*)packet.data(), packet.size());
 	}

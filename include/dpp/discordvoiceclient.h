@@ -60,7 +60,7 @@ inline constexpr uint16_t AUDIO_TRACK_MARKER = 0xFFFF;
 
 inline constexpr int AUDIO_OVERLAP_SLEEP_SAMPLES = 30;
 
-inline constexpr size_t SEND_AUDIO_RAW_MAX_LENGTH = 11520;
+inline constexpr size_t send_audio_raw_max_length = 11520;
 
 using json = nlohmann::json;
 
@@ -676,7 +676,7 @@ public:
 	/**
 	 * @brief Send raw audio to the voice channel.
 	 * 
-	 * You should send an audio packet of `SEND_AUDIO_RAW_MAX_LENGTH` (11520) bytes.
+	 * You should send an audio packet of `send_audio_raw_max_length` (11520) bytes.
 	 * Note that this function can be costly as it has to opus encode
 	 * the PCM audio on the fly, and also encrypt it with libsodium.
 	 * 
@@ -695,15 +695,15 @@ public:
 	 * 
 	 * @param length The length of the audio data. The length should
 	 * be a multiple of 4 (2x 16 bit stereo channels) with a maximum
-	 * length of `SEND_AUDIO_RAW_MAX_LENGTH`, which is a complete opus
+	 * length of `send_audio_raw_max_length`, which is a complete opus
 	 * frame at highest quality. `dpp::voice_exception` will be thrown
 	 * if length is less than 4 or not divisible by 4.
 	 *
 	 * Generally when you're streaming and you know there will be
 	 * more packet to come you should always provide packet data with
-	 * length of `SEND_AUDIO_RAW_MAX_LENGTH`.
+	 * length of `send_audio_raw_max_length`.
 	 * Silence packet will be appended if length is less than
-	 * `SEND_AUDIO_RAW_MAX_LENGTH` as discord expects to receive such
+	 * `send_audio_raw_max_length` as discord expects to receive such
 	 * specific packet size. This can cause gaps in your stream resulting
 	 * in distorted audio if you have more packet to send later on.
 	 * 
