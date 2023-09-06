@@ -1166,20 +1166,35 @@ discord_voice_client& discord_voice_client::set_send_audio_type(send_audio_type_
 
 discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t length)  {
 #if HAVE_VOICE
-	const size_t max_frame_bytes = 11520;
+	static const size_t max_frame_bytes = SEND_AUDIO_RAW_MAX_LENGTH;
+
+	if (length < 4) {
+		return *this;
+	}
+
+	if ((length % 4) != 0) {
+		throw dpp::voice_exception("Raw audio packet size should be left with zero remainder when divided by 4");
+	}
+
 	if (length > max_frame_bytes) {
 		std::string s_audio_data((const char*)audio_data, length);
 		while (s_audio_data.length() > max_frame_bytes) {
 			std::string packet(s_audio_data.substr(0, max_frame_bytes));
-			s_audio_data.erase(s_audio_data.begin(), s_audio_data.begin() + max_frame_bytes);
-			if (packet.size() < max_frame_bytes) {
-				packet.resize(max_frame_bytes, 0);
-			}
-			send_audio_raw((uint16_t*)packet.data(), max_frame_bytes);
+			const auto packet_size = (long long)packet.size();
+
+			s_audio_data.erase(s_audio_data.begin(), s_audio_data.begin() + packet_size);
+
+			send_audio_raw((uint16_t*)packet.data(), packet_size);
 		}
 
 		return *this;
+	}
 
+	if (length < max_frame_bytes) {
+		std::string packet((const char*)audio_data, length);
+		packet.resize(max_frame_bytes, 0);
+
+		return send_audio_raw((uint16_t*)packet.data(), packet.size());
 	}
 
 	opus_int32 encodedAudioMaxLength = (opus_int32)length;

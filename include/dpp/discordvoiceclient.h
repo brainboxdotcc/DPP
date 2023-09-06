@@ -50,7 +50,7 @@
 #include <functional>
 #include <chrono>
 
-
+#define SEND_AUDIO_RAW_MAX_LENGTH 11520
 
 struct OpusDecoder;
 struct OpusEncoder;
@@ -676,7 +676,7 @@ public:
 	/**
 	 * @brief Send raw audio to the voice channel.
 	 * 
-	 * You should send an audio packet of 11520 bytes.
+	 * You should send an audio packet of `SEND_AUDIO_RAW_MAX_LENGTH` (11520) bytes.
 	 * Note that this function can be costly as it has to opus encode
 	 * the PCM audio on the fly, and also encrypt it with libsodium.
 	 * 
@@ -695,8 +695,18 @@ public:
 	 * 
 	 * @param length The length of the audio data. The length should
 	 * be a multiple of 4 (2x 16 bit stereo channels) with a maximum
-	 * length of 11520, which is a complete opus frame at highest
-	 * quality.
+	 * length of `SEND_AUDIO_RAW_MAX_LENGTH`, which is a complete opus
+	 * frame at highest quality. Packet with length less than 4 will be
+	 * dropped and `dpp::voice_exception` will be thrown if length is
+	 * not divisible by 4.
+	 *
+	 * Generally when you're streaming and you know there will be
+	 * more packet to come you should always provide packet data with
+	 * length of `SEND_AUDIO_RAW_MAX_LENGTH`.
+	 * Silence packet will be appended if length is less than
+	 * `SEND_AUDIO_RAW_MAX_LENGTH` as discord expects to receive such
+	 * specific packet size. This can cause gaps in your stream resulting
+	 * in distorted audio if you have more packet to send later on.
 	 * 
 	 * @return discord_voice_client& Reference to self
 	 * 
