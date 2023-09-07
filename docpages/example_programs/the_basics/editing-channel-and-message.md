@@ -1,6 +1,8 @@
-\page editing-objects Editing Channel and Message
+\page editing-channel-and-message Editing Channel and Message
 
-Sometimes we need to update an object, such as message or channel. At first, it might seem confusing, but it's actually really simple! It's done with \ref callback-functions callbacks. You just need to use an object with identical properties you don't need to update.
+Sometimes we need to update an object, such as message or channel. At first, it might seem confusing, but it's actually really simple! You just need to use an object with identical properties you don't need to update.
+
+\note This example uses callback functions. To see more information about them, visit \ref callback-functions
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
@@ -76,7 +78,7 @@ int main() {
     bot.start(dpp::st_wait);
     return 0;
 }
-~~~~~~~~~~{.cpp}
+~~~~~~~~~~
 
 Before editing:
 
