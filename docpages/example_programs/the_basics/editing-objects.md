@@ -6,7 +6,7 @@ Sometimes we need to update an object, such as message or channel. At first, it 
 #include <dpp/dpp.h>
 
 int main() {
-    dpp::cluster bot("MTE0MzIyOTY4MTE3MzI4MjkwNg.GkLrhp.ITK349pINwuU0gY1s_3DGJ5duFYvGPXRWYzlRM", dpp::i_default_intents | dpp::i_message_content);
+    dpp::cluster bot("Token", dpp::i_default_intents | dpp::i_message_content);
     /* the second argument is a bitmask of intents - i_message_content is needed to get messages */
 
     bot.on_log(dpp::utility::cout_logger());
