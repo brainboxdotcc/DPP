@@ -6,23 +6,23 @@ Sometimes we need to update an object, such as message or channel. At first, it 
 #include <dpp/dpp.h>
 
 int main() {
-    dpp::cluster bot("Token is right here", dpp::i_default_intents | dpp::i_message_content);
+    dpp::cluster bot("MTE0MzIyOTY4MTE3MzI4MjkwNg.GkLrhp.ITK349pINwuU0gY1s_3DGJ5duFYvGPXRWYzlRM", dpp::i_default_intents | dpp::i_message_content);
     /* the second argument is a bitmask of intents - i_message_content is needed to get messages */
 
     bot.on_log(dpp::utility::cout_logger());
 
     /* The event is fired when someone issues your commands */
-    bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) -> void {
+    bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
         if (event.command.get_command_name() == "msg-send") {
             event.reply("That's a message");
         } else if (event.command.get_command_name() == "msg-edit") {
-            std::string content = std::get<std::string>(event.get_parameter("content"));
+            auto content = std::get<std::string>(event.get_parameter("content"));
 
             /* get message to edit it after */
             dpp::snowflake msg_id = std::get<std::string>(event.get_parameter("msg-id"));
             /* here string will automatically be converted to snowflake */
 
-            bot.message_get(msg_id, event.command.channel_id, [&bot, content, event](const dpp::confirmation_callback_t& callback) -> void {
+            bot.message_get(msg_id, event.command.channel_id, [&bot, content, event](const dpp::confirmation_callback_t& callback) {
                 if (callback.is_error()) {
                     event.reply("error");
                     return;
@@ -39,7 +39,7 @@ int main() {
 
             /* get the channel to edit it after */
             auto channel_id = std::get<dpp::snowflake>(event.get_parameter("channel"));
-            bot.channel_get(channel_id, [&bot, name, event](const dpp::confirmation_callback_t& callback) -> void {
+            bot.channel_get(channel_id, [&bot, name, event](const dpp::confirmation_callback_t& callback) {
                 if (callback.is_error()) {
                     event.reply("error");
                     return;
@@ -54,34 +54,29 @@ int main() {
         }
     });
 
-    bot.on_ready([&bot](const dpp::ready_t& event) -> void {
+    bot.on_ready([&bot](const dpp::ready_t& event) {
+
         if (dpp::run_once <struct register_global_commands>()) {
-            dpp::slashcommand msg_edit("msg-edit", "edit-msg", bot.me.id);
+            dpp::slashcommand msg_edit("msg-edit", "Edit a message sent by the bot", bot.me.id);
 
-            msg_edit.add_option(
-                dpp::command_option(dpp::co_string, "msg-id", "id of msg", true) /* true for required option */
-            ).add_option(
-                dpp::command_option(dpp::co_string, "content", "new content for msg", true) /* same here */
-            );
+            msg_edit.add_option(dpp::command_option(dpp::co_string, "msg-id", "ID of the message to edit", true)); /* true for required option */
+            msg_edit.add_option(dpp::command_option(dpp::co_string, "content", "New content for the message", true)); /* same here */
 
-            dpp::slashcommand channel_edit("channel-edit", "edit a channel", bot.me.id);
+            dpp::slashcommand channel_edit("channel-edit", "Edit the name of channel specified", bot.me.id);
 
-            channel_edit.add_option(
-                dpp::command_option(dpp::co_channel, "channel", "channel to edit", true)
-            ).add_option(
-                dpp::command_option(dpp::co_string, "name", "new name for channel", true)
-            );
+            channel_edit.add_option(dpp::command_option(dpp::co_channel, "channel", "Channel to edit", true));
+            channel_edit.add_option(dpp::command_option(dpp::co_string, "name", "New name for the channel", true));
 
-            dpp::slashcommand msg_send("msg-send", "send-msg", bot.me.id);
+            dpp::slashcommand msg_send("msg-send", "Send my message", bot.me.id);
 
             bot.global_bulk_command_create({ msg_edit, channel_edit, msg_send });
         }
     });
- 
+
     bot.start(dpp::st_wait);
     return 0;
 }
-~~~~~~~~~~
+~~~~~~~~~~{.cpp}
 
 Before editing:
 
