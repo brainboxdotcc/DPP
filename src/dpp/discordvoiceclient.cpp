@@ -1179,7 +1179,7 @@ discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data,
 
 		while (s_audio_data.length() > send_audio_raw_max_length) {
 			std::string packet(s_audio_data.substr(0, send_audio_raw_max_length));
-			const auto packet_size = (long long)packet.size();
+			const auto packet_size = static_cast<ptrdiff_t>(packet.size());
 
 			s_audio_data.erase(s_audio_data.begin(), s_audio_data.begin() + packet_size);
 
