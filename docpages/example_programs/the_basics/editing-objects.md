@@ -1,6 +1,6 @@
-\page editing-objects Editing Objects (like messages)
+\page editing-objects Editing Channel and Message
 
-Sometimes we need to update an object, such as message or channel. At first, it might seem confusing, but it's actually really simple! It's done with [callbacks](https://dpp.dev/callback-functions.html). You just need to use an object with identical properties you don't need to update.
+Sometimes we need to update an object, such as message or channel. At first, it might seem confusing, but it's actually really simple! It's done with \ref callback-functions callbacks. You just need to use an object with identical properties you don't need to update.
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
