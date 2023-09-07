@@ -1,8 +1,8 @@
 \page editing-plural Editing Plural
 
-Sometimes we need to update an object, such as message or channel. At first, it might seem confusing, but it's actually really simple! You just need to use an object with identical properties you don't need to update.
+Sometimes we need to update an object, such as message or channel. At first, it might seem confusing, but it's actually really simple! You just need to use an object with identical properties you don't need to update. NOTE: your bot can't edit messages sent by others.
 
-\note This example uses callback functions. To see more information about them, visit \ref callback-functions
+\note This example uses callback functions. To see more information about them, visit \ref callback-functions.
 
 ~~~~~~~~~~{.cpp}
 #include <dpp/dpp.h>
