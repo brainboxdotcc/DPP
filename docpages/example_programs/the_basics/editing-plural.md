@@ -1,4 +1,4 @@
-\page editing-channel-and-message Editing Channel and Message
+\page editing-plural Editing Plural
 
 Sometimes we need to update an object, such as message or channel. At first, it might seem confusing, but it's actually really simple! You just need to use an object with identical properties you don't need to update.
 
@@ -18,10 +18,10 @@ int main() {
         if (event.command.get_command_name() == "msg-send") {
             event.reply("That's a message");
         } else if (event.command.get_command_name() == "msg-edit") {
-            auto content = std::get<std::string>(event.get_parameter("content"));
+            const auto content = std::get<std::string>(event.get_parameter("content"));
 
             /* get message to edit it after */
-            dpp::snowflake msg_id = std::get<std::string>(event.get_parameter("msg-id"));
+            const dpp::snowflake msg_id = std::get<std::string>(event.get_parameter("msg-id"));
             /* here string will automatically be converted to snowflake */
 
             bot.message_get(msg_id, event.command.channel_id, [&bot, content, event](const dpp::confirmation_callback_t& callback) {
@@ -37,10 +37,10 @@ int main() {
                 event.reply("Message content is now `" + content + "`.");
             });
         } else if (event.command.get_command_name() == "channel-edit") {
-            auto name = std::get<std::string>(event.get_parameter("name"));
+            const auto name = std::get<std::string>(event.get_parameter("name"));
 
             /* get the channel to edit it after */
-            auto channel_id = std::get<dpp::snowflake>(event.get_parameter("channel"));
+            const auto channel_id = std::get<dpp::snowflake>(event.get_parameter("channel"));
             bot.channel_get(channel_id, [&bot, name, event](const dpp::confirmation_callback_t& callback) {
                 if (callback.is_error()) {
                     event.reply("error");
