@@ -1,4 +1,4 @@
-\page editing-plural Editing Plural
+\page editing-channels-and-messages Editing Channels and Messages
 
 Sometimes we need to update an object, such as message or channel. At first, it might seem confusing, but it's actually really simple! You just need to use an object with identical properties you don't need to update. NOTE: your bot can't edit messages sent by others.
 
