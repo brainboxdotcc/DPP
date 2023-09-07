@@ -7,3 +7,4 @@ These example programs are great to get started with simple things in the D++ li
 * \subpage attach-file "Attaching a file"
 * \subpage webhooks "Webhooks"
 * \subpage callback-functions "Using Callback Functions"
+* \subpage editing-objects "Editing Objects (like messages)"
