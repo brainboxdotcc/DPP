@@ -56,7 +56,7 @@ struct OpusRepacketizer;
 
 namespace dpp {
 
-// !TODO: change these to constexpr and rename every occurence across the codebase
+// !TODO: change these to constexpr and rename every occurrence across the codebase
 #define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
 
 #define AUDIO_OVERLAP_SLEEP_SAMPLES 30
