@@ -50,13 +50,18 @@
 #include <functional>
 #include <chrono>
 
-
-
 struct OpusDecoder;
 struct OpusEncoder;
 struct OpusRepacketizer;
 
 namespace dpp {
+
+// !TODO: change these to constexpr and rename every occurrence across the codebase
+#define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
+
+#define AUDIO_OVERLAP_SLEEP_SAMPLES 30
+
+inline constexpr size_t send_audio_raw_max_length = 11520;
 
 using json = nlohmann::json;
 
@@ -94,10 +99,6 @@ struct DPP_EXPORT voice_out_packet {
 	 */
 	uint64_t duration;
 };
-
-#define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
-
-#define AUDIO_OVERLAP_SLEEP_SAMPLES 30
 
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
@@ -676,7 +677,7 @@ public:
 	/**
 	 * @brief Send raw audio to the voice channel.
 	 * 
-	 * You should send an audio packet of 11520 bytes.
+	 * You should send an audio packet of `send_audio_raw_max_length` (11520) bytes.
 	 * Note that this function can be costly as it has to opus encode
 	 * the PCM audio on the fly, and also encrypt it with libsodium.
 	 * 
@@ -695,8 +696,16 @@ public:
 	 * 
 	 * @param length The length of the audio data. The length should
 	 * be a multiple of 4 (2x 16 bit stereo channels) with a maximum
-	 * length of 11520, which is a complete opus frame at highest
-	 * quality.
+	 * length of `send_audio_raw_max_length`, which is a complete opus
+	 * frame at highest quality.
+	 *
+	 * Generally when you're streaming and you know there will be
+	 * more packet to come you should always provide packet data with
+	 * length of `send_audio_raw_max_length`.
+	 * Silence packet will be appended if length is less than
+	 * `send_audio_raw_max_length` as discord expects to receive such
+	 * specific packet size. This can cause gaps in your stream resulting
+	 * in distorted audio if you have more packet to send later on.
 	 * 
 	 * @return discord_voice_client& Reference to self
 	 * 

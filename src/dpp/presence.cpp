@@ -72,7 +72,16 @@ presence::presence() : user_id(0), guild_id(0), flags(0)
 
 presence::presence(presence_status status, activity_type type, const std::string& activity_description) {
 	dpp::activity a;
+
+	/* Even if type is custom, a name is still required.
+	 * We'll just set the name as this activity_description as it won't be used if custom either way. */
 	a.name = activity_description;
+
+	/* If the type is custom, set the state as "activity_description" */
+	if(type == activity_type::at_custom) {
+	    	a.state = activity_description;
+	}
+
 	a.type = type;
 	activities.clear();
 	activities.emplace_back(a);
@@ -254,7 +263,12 @@ std::string presence::build_json(bool with_id) const {
 				{ "type", i.type }
 			});
 			if (!i.url.empty()) j2["url"] = i.url;
-			if (!i.state.empty()) j2["details"] = i.state; // bot activity is details, not state
+
+			if(i.type == activity_type::at_custom) {
+			    	if (!i.state.empty()) j2["state"] = i.state; /* When type is custom, bot needs to use "state" */
+			} else {
+			    	if (!i.state.empty()) j2["details"] = i.state; /* Otherwise, the bot needs to use "details" */
+			}
 
 			j["d"]["activities"].push_back(j2);
 		}
