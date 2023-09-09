@@ -2,7 +2,7 @@
 
 This tutorial teaches you how to create a lightweight environment for D++ development using **WSL** and **Visual Studio Code**
 
-\note This Tutorial will use WSL's default distribution, **Ubuntu**! You can use other distros if you wish, but keep in mind the setup process might be different! If you're aiming for production, we recommend you continue your path of becoming the master of all Discord bots \ref buildcmake "by visiting this page", otherwise keep following this guide!
+\note **This Tutorial will use WSL's default distribution, Ubuntu**! You can use other distros if you wish, **but keep in mind the setup process might be different!** If you're aiming for production, we recommend you continue your path of becoming the master of all Discord bots \ref buildcmake "by visiting this page", otherwise keep following this guide!
 
 1. Make sure you have installed your WSL 2 environment properly using [this guide to setup up WSL](https://docs.microsoft.com/en-us/windows/wsl/install) and [this guide to connect to Visual Studio Code](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-vscode).
 2. Now open PowerShell as Administrator and type `wsl` to start up your subsystem. You may also type `ubuntu` into your search bar and open it that way.
