@@ -79,7 +79,7 @@ presence::presence(presence_status status, activity_type type, const std::string
 
 	/* If the type is custom, set the state as "activity_description" */
 	if(type == activity_type::at_custom) {
-	    a.state = activity_description;
+	    	a.state = activity_description;
 	}
 
 	a.type = type;
@@ -265,9 +265,9 @@ std::string presence::build_json(bool with_id) const {
 			if (!i.url.empty()) j2["url"] = i.url;
 
 			if(i.type == activity_type::at_custom) {
-			    if (!i.state.empty()) j2["state"] = i.state; /* When type is custom, bot needs to use "state" */
+			    	if (!i.state.empty()) j2["state"] = i.state; /* When type is custom, bot needs to use "state" */
 			} else {
-			    if (!i.state.empty()) j2["details"] = i.state; /* Otherwise, the bot needs to use "details" */
+			    	if (!i.state.empty()) j2["details"] = i.state; /* Otherwise, the bot needs to use "details" */
 			}
 
 			j["d"]["activities"].push_back(j2);
