@@ -10,6 +10,7 @@ docs/doxygen_sqlite3.db
 build
 buildtools/composer.phar
 src/build
+cmake-build-debug
 
 # tests
 test
