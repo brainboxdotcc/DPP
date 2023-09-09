@@ -21,7 +21,7 @@ int main()
 		if (event.command.get_command_name() == "create-thread") {
 			/* Here we create a thread in the current channel. It will expire after 60 minutes of inactivity. We'll also allow other mods to join, and we won't add a slowdown timer. */
 			bot.thread_create("Cool thread!", event.command.channel_id, 60, dpp::channel_type::CHANNEL_PUBLIC_THREAD, true, 0, [event](const dpp::confirmation_callback_t& callback) {
-				if(callback.is_error()) {
+				if (callback.is_error()) {
 					event.reply("Failed to create a thread!");
 					return;
 				}
@@ -66,7 +66,7 @@ int main()
 		if (event.command.get_command_name() == "message-thread") {
 			/* Get all active threads in a guild. */
 			bot.threads_get_active(event.command.guild_id, [&bot, event](const dpp::confirmation_callback_t& callback) {
-				if(callback.is_error()) {
+				if (callback.is_error()) {
 					event.reply("Failed to get threads!");
 					return;
 				}
@@ -79,14 +79,14 @@ int main()
 				/* Loop through the threads, getting each value in the map. Then we get the first value and then break off.
 				* The reason we're getting only the first value is because, for this example, we'll just assume you've only got a single active thread (the one created by the bot)
 				*/
-				for(const auto& _thread : threads) {
+				for (const auto& _thread : threads) {
 					thread_id = _thread.first;
 					break;
 				}
 				
 				/* Send a message in the first thread we find. */
 				bot.message_create(dpp::message(thread_id, "Hey, I'm first to message in a cool thread!"), [event](const dpp::confirmation_callback_t& callback2) {
-					if(callback2.is_error()) {
+					if (callback2.is_error()) {
 						event.reply("Failed to send a message in a thread.");
 						return;
 					}
