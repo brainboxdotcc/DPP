@@ -54,7 +54,7 @@ evaluate_clown(clowns[0], evilness(2.5, factor));
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Dot (.) Notation
-When using the dot notation repeatedly (For example, creating an embed.), you should begin start each `.function()` on a new line, as such:
+When using the dot notation repeatedly (For example, creating an embed.), you should start each `.function()` on a new line, as such:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 stuff{}
