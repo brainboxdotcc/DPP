@@ -53,6 +53,15 @@ std::vector<std::string> clowns = { "pennywise", "bobo" };
 evaluate_clown(clowns[0], evilness(2.5, factor));
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+## Dot (.) Notation
+When using the dot notation repeatedly (For example, creating an embed.), you should begin start each `.function()` on a new line, as such:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
+stuff{}
+    .add_stuff()
+    .add_stuff();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ## Indentation
 
 Indentation should always be tab characters. It is up to you how wide you set tab characters in your editor for your personal tastes. All code blocks delimited within curly braces should be indented neatly and uniformly.
