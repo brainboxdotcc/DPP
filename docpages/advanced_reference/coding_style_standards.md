@@ -122,7 +122,7 @@ Do not introduce platform specific (e.g. Windows only) code or libc functions. I
 
 ## C++ Version
 
-The code must work with the C++17 standard.
+The code must work with the C++17 standard, unless, for an optional feature that can be enabled and that uses a more recent standard (e.g. Coroutines).
 
 ## Select the Right Size Type for Numeric Types
 
