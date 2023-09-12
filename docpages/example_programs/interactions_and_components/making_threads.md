@@ -1,6 +1,6 @@
 \page making_threads Creating and talking in a thread
 
-A new feature added to Discord recently is `Threads`, these allow you to break off a message into a different "channel", without creating a whole new channel.
+A new feature added to Discord recently is `Threads`, these allow you to break off a message into a different "channel", without creating a whole new channel. There are also other types of "thread channels", one example being a `forums channel`. This type of channel only contains threads, meaning you can't send messages in it so if you want to make one of them, be careful about trying to send a message in it!
 
 In this tutorial, we'll be going through how to create a thread and how to talk in a thread.
 
@@ -10,13 +10,13 @@ First, let's go through creating a thread.
 
 int main()
 {
-    /* Create the bot */
-    dpp::cluster bot("token");
+/	* Create the bot */
+	dpp::cluster bot("token");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
-    /* The event is fired when the bot detects a message in any server and any channel it has access to. */
-    bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
+	/* The event is fired when the bot detects a message in any server and any channel it has access to. */
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "create-thread") {
 			/* Here we create a thread in the current channel. It will expire after 60 minutes of inactivity. We'll also allow other mods to join, and we won't add a slowdown timer. */
@@ -29,18 +29,18 @@ int main()
 				event.reply("Created a thread for you!");
 			});
 		}
-    });
-    
-    bot.on_ready([&bot](const dpp::ready_t& event) {
+	});
+
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create and register the command */
 			bot.global_command_create(dpp::slashcommand("create-thread", "Create a thread!", bot.me.id));
 		}
-    });
+	});
 
-    bot.start(dpp::st_wait);
+	bot.start(dpp::st_wait);
 
-    return 0;
+	return 0;
 }
 ~~~~~~~~~~
 
@@ -55,13 +55,13 @@ Now, let's cover talking in that thread from a channel. It's worth noting that w
 
 int main()
 {
-    /* Create the bot */
-    dpp::cluster bot("token");
+	/* Create the bot */
+	dpp::cluster bot("token");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
-    /* The event is fired when the bot detects a message in any server and any channel it has access to. */
-    bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
+	/* The event is fired when the bot detects a message in any server and any channel it has access to. */
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "message-thread") {
 			/* Get all active threads in a guild. */
@@ -95,18 +95,18 @@ int main()
 				});
 			});
 		}
-    });
-    
-    bot.on_ready([&bot](const dpp::ready_t& event) {
+	});
+
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create and register the command */
 			bot.global_command_create(dpp::slashcommand("message-thread", "Message a thread!", bot.me.id));
 		}
-    });
+	});
 
-    bot.start(dpp::st_wait);
+	bot.start(dpp::st_wait);
 
-    return 0;
+	return 0;
 }
 ~~~~~~~~~~
 
