@@ -10,7 +10,7 @@ First, let's go through creating a thread.
 
 int main()
 {
-/	* Create the bot */
+	/* Create the bot */
 	dpp::cluster bot("token");
 
 	bot.on_log(dpp::utility::cout_logger());
