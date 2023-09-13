@@ -12,41 +12,13 @@ The two programs can be seen side by side below:
 <tr>
 <td>
 
-
-~~~~~~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-const std::string    BOT_TOKEN    = "add your token here";
-
-int main() {
-    dpp::cluster bot(BOT_TOKEN);
-
-    bot.on_log(dpp::utility::cout_logger());
-
-    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
-         if (event.command.get_command_name() == "ping") {
-            event.reply("Pong!");
-        }
-    });
-
-    bot.on_ready([&bot](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-            bot.global_command_create(
-                dpp::slashcommand("ping", "Ping pong!", bot.me.id)
-            );
-        }
-    });
-
-    bot.start(dpp::st_wait);
-}
-~~~~~~~~~~~~~~~
-
+\include{cpp} firstbot.cpp
 
 </td>
 <td>
 
 
-~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~{.js}
 let Discord = require('discord.js');
 
 
@@ -85,12 +57,7 @@ Let's break this program down step by step:
 
 Make sure to include the header file for the D++ library with the instruction \#include `<dpp/dpp.h>`!
 
-~~~~~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-int main() {
-}
-~~~~~~~~~~~~~~
+\include{cpp} firstbot1.cpp
 
 ### 2. Create an instance of dpp::cluster
 
@@ -98,15 +65,7 @@ To make use of the library you must create a dpp::cluster object. This object is
 
 You can instantiate this class as shown below. Remember to put your bot token in the constant!
 
-~~~~~~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-const std::string    BOT_TOKEN    = "add your token here";
-
-int main() {
-    dpp::cluster bot(BOT_TOKEN);
-}
-~~~~~~~~~~~~~~~
+\include{cpp} firstbot2.cpp
 
 ### 3. Attach to an event
 
@@ -114,71 +73,19 @@ To have a bot that does something, you should attach to some events. Let's start
 command called 'ping'. Note that we must wrap our registration of the command in a template called dpp::run_once which prevents it from being re-run
 every time your bot does a full reconnection (e.g. if the connection fails).
 
-~~~~~~~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-const std::string    BOT_TOKEN    = "add your token here";
-
-int main() {
-    dpp::cluster bot(BOT_TOKEN);
-
-    bot.on_ready([&bot](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
-        }
-    });
-}
-~~~~~~~~~~~~~~~~
+\include{cpp} firstbot3.cpp
 
 ### 4. Attach to another event to receive slash commands
 
 If you want to handle a slash command, you should also attach your program to the `on_slashcommand` event (dpp::cluster::on_slashcommand) which is basically the same as the Discord.js `interactionCreate` event. Lets add this to the program before the `on_ready` event:
 
-~~~~~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-const std::string    BOT_TOKEN    = "add your token here";
-
-int main() {
-    dpp::cluster bot(BOT_TOKEN);
-
-    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
-    });
-
-    bot.on_ready([&bot](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
-        }
-    });
-}
-~~~~~~~~~~~~~~
+\include{cpp} firstbot4.cpp
 
 ### 5 . Add some content to the events
 
 Attaching to an event is a good start, but to make a bot you should actually put some program code into the interaction event. We will add some code to the `on_slashcommand` to look for our slash command '/ping' and reply with `Pong!`:
 
-~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-const std::string    BOT_TOKEN    = "add your token here";
-
-int main() {
-    dpp::cluster bot(BOT_TOKEN);
-
-    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
-         if (event.command.get_command_name() == "ping") {
-            event.reply("Pong!");
-        }
-    });
-
-    bot.on_ready([&bot](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
-        }
-    });
-
-}
-~~~~~~~~~~~~~~~~~~~~~~~
+\include{cpp} firstbot5.cpp
 
 Let's break down the code in the `on_slashcommand` event so that we can discuss what it is doing:
 
@@ -202,31 +109,7 @@ We also add a line to tell the library to output all its log information to the 
 
 The parameter which we set to false indicates if the function should return once all shards are created. Passing `false` here tells the program you do not need to do anything once `bot.start` is called.
 
-~~~~~~~~~~~~~~{.cpp}
-#include <dpp/dpp.h>
-
-const std::string    BOT_TOKEN    = "add your token here";
-
-int main() {
-    dpp::cluster bot(BOT_TOKEN);
-
-    bot.on_log(dpp::utility::cout_logger());
-
-    bot.on_slashcommand([](const dpp::slashcommand_t& event) {
-         if (event.command.get_command_name() == "ping") {
-            event.reply("Pong!");
-        }
-    });
-
-    bot.on_ready([&bot](const dpp::ready_t& event) {
-        if (dpp::run_once<struct register_bot_commands>()) {
-            bot.global_command_create(dpp::slashcommand("ping", "Ping pong!", bot.me.id));
-        }
-    });
-
-    bot.start(dpp::st_wait);
-}
-~~~~~~~~~~~~~~
+\include{cpp} firstbot6.cpp
 
 ### 7. Compile and run your bot
 
