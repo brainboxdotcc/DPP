@@ -826,8 +826,8 @@ void discord_voice_client::write_ready()
 			if (outbuf.size()) {
 				if (this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
 					duration = outbuf[0].duration * timescale;
+					bufsize = outbuf[0].packet.length();
 					outbuf.erase(outbuf.begin());
-					bufsize = outbuf.size();
 				}
 			}
 		}
