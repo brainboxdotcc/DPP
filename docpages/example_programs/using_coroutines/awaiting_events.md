@@ -6,7 +6,7 @@ D++ makes it possible to await events: simple use `co_await` on any of the event
 
 \note When the event router resumes your coroutine, it will give you __a reference to the event object__. This will likely mean it will be destroyed after your next co_await, make sure to save it in a local variable if you need it for longer.
 
-\example{cpp} coro_awaiting_events.cpp
+\include{cpp} coro_awaiting_events.cpp
 
 Note that there is a problem with that! If the user never clicks your button, or if the message gets deleted, your coroutine will be stuck waiting... And waiting... Forever until your bot shuts down, occupying a space in memory. This is where the \ref expiring-buttons "next example" comes into play as a solution, with a button that expires with time.
 

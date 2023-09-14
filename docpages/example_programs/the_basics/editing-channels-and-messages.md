@@ -4,7 +4,7 @@ Sometimes we need to update an object, such as message or channel. At first, it 
 
 \note This example uses callback functions. To see more information about them, visit \ref callback-functions.
 
-\example{cpp} editing_messages.cpp
+\include{cpp} editing_messages.cpp
 
 Before editing:
 
