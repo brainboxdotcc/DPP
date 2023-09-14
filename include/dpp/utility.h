@@ -531,6 +531,40 @@ namespace dpp {
 		*/
 		std::string DPP_EXPORT role_mention(const snowflake& id);
 
+		/**
+		* @brief Create a URL for message.
+		* @param guild_id The ID of the guild where message is written.
+		* @param channel_id The ID of the channel where message is written.
+		* @param message_id The ID of the message.
+		* @return std::string The URL to message.
+		*/
+		std::string DPP_EXPORT message_url(const snowflake& guild_id, const snowflake& channel_id, const snowflake& message_id);
+
+		/**
+		* @brief Create a URL for message.
+		* @param guild_id The ID of the guild where channel is located.
+		* @param channel_id The ID of the channel.
+		* @return std::string The URL to message.
+		*/
+		std::string DPP_EXPORT channel_url(const snowflake& guild_id, const snowflake& channel_id);
+
+		/**
+		* @brief Create a URL for message.
+		* @param guild_id The ID of the guild where thread is located.
+		* @param thread_id The ID of the thread.
+		* @return std::string The URL to message.
+		*/
+		std::string DPP_EXPORT thread_url(const snowflake& guild_id, const snowflake& thread_id);
+		
+		/**
+		* @brief Create a URL for message.
+		* @param user_id The ID of the guild where thread is located.
+		* @return std::string The URL to message.
+		*/
+		std::string DPP_EXPORT user_url(const snowflake& user_id);
+
+
+
 #ifdef _DOXYGEN_
 		/**
 		 * @brief Get the mime type for an image type.

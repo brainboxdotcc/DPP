@@ -637,7 +637,7 @@ std::string channel::get_icon_url(uint16_t size, const image_type format) const 
 }
 
 std::string channel::get_url() const{
-	return "https://discord.com/channels/" + std::to_string(guild_id) + "/" + std::to_string(id);
+	return utility::channel_url(guild_id, id);
 }
 
 channel_type channel::get_type() const {

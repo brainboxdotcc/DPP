@@ -550,6 +550,22 @@ namespace dpp {
 		    return "<@&" + std::to_string(id) + ">";
 		}
 
+		std::string message_url(const snowflake& guild_id, const snowflake& channel_id, const snowflake& message_id){
+			return "https://discord.com/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id) + "/" + std::to_string(message_id);
+		}
+
+		std::string channel_url(const snowflake& guild_id, const snowflake& channel_id){
+			return "https://discord.com/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id);
+		}
+
+		std::string thread_url(const snowflake& guild_id, const snowflake& thread_id){
+			return channel_url(guild_id, thread_id);
+		};
+
+		std::string user_url(const snowflake& user_id){
+			return "https://discord.com/users/" + std::to_string(user_id);
+		};
+
 		template <typename T>
 		std::enable_if_t<std::is_same_v<T, image_type>, std::string> mime_type(T type) {
 			static constexpr auto get_image_mime = [](image_type t) constexpr noexcept {

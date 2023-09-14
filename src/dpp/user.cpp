@@ -131,7 +131,7 @@ std::string user::get_mention() const {
 }
 
 std::string user::get_url() const{
-	return "https://discord.com/users/" + std::to_string(id);
+	return utility::user_url(id);
 }
 
 bool user::is_active_developer() const {
