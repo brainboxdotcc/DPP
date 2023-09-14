@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     
 jobs:
-  docs:
+  test_docs_examples:
     name: Test build examples
     runs-on: ubuntu-22.04
 
@@ -29,7 +29,7 @@ jobs:
           submodules: recursive
   
       - name: Install apt packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt-get update && sudo apt-get install g++-12 libsodium-dev libopus-dev zlib1g-dev libmpg123-dev liboggz-dev
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt-get update && sudo apt-get install -y g++-12 libsodium-dev libopus-dev zlib1g-dev libmpg123-dev liboggz-dev cmake libfmt-dev
   
       - name: Generate CMake
         run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DDPP_CORO=ON -DCMAKE_BUILD_TYPE=Debug ..
