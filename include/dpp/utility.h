@@ -131,6 +131,11 @@ namespace dpp {
 		inline const std::string cdn_host = "https://cdn.discordapp.com"; 
 
 		/**
+		 * @brief The base URL for message/user/channel links.
+		 */
+		inline const std::string url_host = "https://discord.com"; 
+
+		/**
 		 * @brief Callback for the results of a command executed via dpp::utility::exec
 		 */
 		typedef std::function<void(const std::string& output)> cmd_result_t;

@@ -551,11 +551,11 @@ namespace dpp {
 		}
 
 		std::string message_url(const snowflake& guild_id, const snowflake& channel_id, const snowflake& message_id){
-			return "https://discord.com/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id) + "/" + std::to_string(message_id);
+			return url_host + "/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id) + "/" + std::to_string(message_id);
 		}
 
 		std::string channel_url(const snowflake& guild_id, const snowflake& channel_id){
-			return "https://discord.com/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id);
+			return url_host + "/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id);
 		}
 
 		std::string thread_url(const snowflake& guild_id, const snowflake& thread_id){
@@ -563,7 +563,7 @@ namespace dpp {
 		};
 
 		std::string user_url(const snowflake& user_id){
-			return "https://discord.com/users/" + std::to_string(user_id);
+			return url_host + "/users/" + std::to_string(user_id);
 		};
 
 		template <typename T>

@@ -343,6 +343,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(USER_GET_CREATION_TIME, false);
 		set_test(USER_GET_CREATION_TIME, (uint64_t)user1.get_creation_time() == 1465312605);
+
+		set_test(USER_GET_URL, false);
+		set_test(USER_GET_URL, user1.get_url() == dpp::utility::url_host + "/users/189759562910400512");
 	}
 
 	{ // avatar size function
@@ -422,6 +425,16 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(EMOJI_GET_URL, emoji.get_url() == dpp::utility::cdn_host + "/emojis/825407338755653641.png");
 	}
 
+	{ // message methods
+		dpp::message m;
+		m.guild_id = 825407338755653642;
+		m.channel_id = 956230231277072415;
+		m.id = 1151617986541666386;
+
+		set_test(MESSAGE_GET_URL, false);
+		set_test(MESSAGE_GET_URL, m.get_url() == dpp::utility::url_host + "/channels/825407338755653642/956230231277072415/1151617986541666386");
+	}
+
 	{ // channel methods
 		set_test(CHANNEL_SET_TYPE, false);
 		dpp::channel c;
@@ -435,6 +448,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(CHANNEL_GET_MENTION, false);
 		c.id = 825411707521728511;
 		set_test(CHANNEL_GET_MENTION, c.get_mention() == "<#825411707521728511>");
+
+		set_test(CHANNEL_GET_URL, false);
+		c.guild_id = 825407338755653642;
+		set_test(CHANNEL_GET_URL, c.get_url() == dpp::utility::url_host + "/channels/825407338755653642/825411707521728511");
 	}
 
 	{ // utility methods
@@ -507,6 +524,22 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 emoji_mention3 == ":white_check_mark:" &&
 				 emoji_mention4 == ":white_check_mark:"
 		);
+
+		set_test(UTILITY_USER_URL, false);
+		auto user_url = dpp::utility::user_url(123);
+		set_test(UTILITY_USER_URL, user_url == dpp::utility::url_host + "/users/123");
+
+		set_test(UTILITY_MESSAGE_URL, false);
+		auto message_url = dpp::utility::message_url(1,2,3);
+		set_test(UTILITY_MESSAGE_URL, message_url == dpp::utility::url_host+ "/channels/1/2/3");
+
+		set_test(UTILITY_CHANNEL_URL, false);
+		auto channel_url = dpp::utility::thread_url(1,2);
+		set_test(UTILITY_CHANNEL_URL, channel_url == dpp::utility::url_host+ "/channels/1/2");
+
+		set_test(UTILITY_THREAD_URL, false);
+		auto thread_url = dpp::utility::thread_url(1,2);
+		set_test(UTILITY_THREAD_URL, thread_url == dpp::utility::url_host+ "/channels/1/2");
 	}
 
 #ifndef _WIN32
