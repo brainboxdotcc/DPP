@@ -51,14 +51,14 @@ int main(int argc, char const *argv[])
 		counter += buffer_size;
 		totalBytes += done;
 	}
-	delete buffer;
+	delete[] buffer;
 	mpg123_close(mh);
 	mpg123_delete(mh);
 
 	/* Setup the bot */
 	dpp::cluster bot("token");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot, &pcmdata](const dpp::slashcommand_t& event) {

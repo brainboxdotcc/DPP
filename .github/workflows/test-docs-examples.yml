@@ -37,7 +37,7 @@ jobs:
           CXX: g++-12
   
       - name: Build Project
-        run: cd build && make -j2 && sudo make install
+        run: cd build && make -j32 && sudo make install
   
       - name: Test compile examples
         run: cd docpages/example_code && mkdir build && cd build && cmake .. && make -j2
