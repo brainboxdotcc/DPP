@@ -44,7 +44,7 @@ namespace dpp {
 		 * @param j nlohmann::json object
 		 * @return T& Reference to self for fluent calling
 		 */
-		T& fill_from_json(nlohmann::json* j) {
+		T& fill_from_json([[maybe_unused]] nlohmann::json* j) {
 			throw dpp::logic_exception("JSON interface doesn't implement parse_from_json");
 		}
 
@@ -54,7 +54,7 @@ namespace dpp {
 		 * @param with_id Include the ID in the JSON
 		 * @return std::string JSON string version of object
 		 */
-		virtual std::string build_json(bool with_id = false) const {
+		virtual std::string build_json([[maybe_unused]] bool with_id = false) const {
 			throw dpp::logic_exception("JSON interface doesn't implement build_json");
 		}
 	};
