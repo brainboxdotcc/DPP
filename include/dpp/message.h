@@ -1555,6 +1555,13 @@ struct DPP_EXPORT message : public managed {
 	 * @return true if message has remixed attachment
 	 */
 	bool has_remix_attachment() const;
+
+	/**
+	 * @brief Returns URL to message 
+	 * 
+	 * @return string of URL to message
+	 */
+	std::string get_url() const;
 };
 
 /** A group of messages */
