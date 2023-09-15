@@ -186,7 +186,7 @@ jobs:
           DONT_RUN_VCPKG: true
 
       - name: Build Project
-        run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}}
+        run: cmake --build main/build --target dpp --config ${{matrix.cfg.config}} --parallel 2
         env:
           DONT_RUN_VCPKG: true
 
