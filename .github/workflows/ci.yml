@@ -236,7 +236,7 @@ jobs:
         run: cd build && sudo make -j2
 
       - name: Package Distributable
-        run: cd build && cpack --verbose
+        run: cd build && cpack --verbose || cat /home/runner/work/DPP/DPP/build/_CPack_Packages/Linux/DEB/PreinstallOutput.log
 
       - name: Upload Binaries (DEB)
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
