@@ -45,15 +45,15 @@ jobs:
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Install apt packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
       - name: Build Project
-        run: cd build && ninja 
+        run: cd build && make -j2
 
       - name: Run unit tests
         run: cd build/library && ./unittest
@@ -87,15 +87,15 @@ jobs:
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Install apt packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} ninja-build libsodium-dev libopus-dev zlib1g-dev rpm
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -G Ninja -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}} ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DAVX_TYPE=T_fallback -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}} ..
         env:
           CXX: ${{matrix.cfg.cpp-version}}
 
       - name: Build Project
-        run: cd build && ninja 
+        run: cd build && make -j2
 
       - name: Package distributable
         if: ${{ matrix.cfg.cpp-version == 'g++-10' }}
@@ -128,15 +128,15 @@ jobs:
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Install homebrew packages
-        run: brew install cmake ninja libsodium opus openssl
+        run: brew install cmake make libsodium opus openssl
 
       - name: Generate CMake
-        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=T_fallback -G Ninja ..
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=T_fallback ..
         env:
           DONT_RUN_VCPKG: true
 
       - name: Build Project
-        run: cd build && ninja 
+        run: cd build && make -j2
         env:
           DONT_RUN_VCPKG: true
 
@@ -227,13 +227,13 @@ jobs:
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
       - name: Install Packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake ninja-build rpm
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake rpm
 
       - name: Generate CMakeFiles
-        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=T_fallback -G Ninja ..
+        run: mkdir build && cd build && sudo cmake ${{matrix.cfg.cmake-options}} -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DAVX_TYPE=T_fallback ..
 
       - name: Compile Source
-        run: cd build && sudo ninja 
+        run: cd build && sudo make -j2
 
       - name: Package Distributable
         run: cd build && cpack --verbose
@@ -260,7 +260,7 @@ jobs:
 #     uses: vmactions/freebsd-vm@v0.1.5
 #     with:
 #        usesh: true
-#       prepare: pkg install -y openssl-devel gcc gmake ninja cmake git
+#       prepare: pkg install -y openssl-devel gcc gmake cmake git
 #       run: |
 #         pwd
 #         ls -lah
