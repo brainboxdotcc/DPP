@@ -551,10 +551,16 @@ namespace dpp {
 		}
 
 		std::string message_url(const snowflake& guild_id, const snowflake& channel_id, const snowflake& message_id){
+			if (guild_id == snowflake(0) || channel_id == snowflake(0) || message_id == snowflake(0)) {
+				return "";
+			}
 			return url_host + "/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id) + "/" + std::to_string(message_id);
 		}
 
 		std::string channel_url(const snowflake& guild_id, const snowflake& channel_id){
+			if (guild_id == snowflake(0) || channel_id == snowflake(0)) {
+				return "";
+			}
 			return url_host + "/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id);
 		}
 
@@ -563,6 +569,9 @@ namespace dpp {
 		};
 
 		std::string user_url(const snowflake& user_id){
+			if (user_id == snowflake(0)) {
+				return "";
+			}
 			return url_host + "/users/" + std::to_string(user_id);
 		};
 
