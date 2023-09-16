@@ -38,7 +38,6 @@
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/discordevents.h>
-#include <dpp/isa_detection.h>
 #include <dpp/socket.h>
 #include <queue>
 #include <thread>
