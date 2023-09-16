@@ -165,6 +165,13 @@ public:
 	std::string get_mention() const;
 
 	/**
+	 * @brief Returns URL to user 
+	 * 
+	 * @return string of URL to user
+	 */
+	std::string get_url() const;
+
+	/**
 	 * @brief Return true if user has the active Developer badge
 	 *
 	 * @return true if has active developer

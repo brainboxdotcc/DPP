@@ -130,6 +130,10 @@ std::string user::get_mention() const {
 	return utility::user_mention(id);
 }
 
+std::string user::get_url() const{
+	return utility::user_url(id);
+}
+
 bool user::is_active_developer() const {
 	return this->flags & u_active_developer;
 }

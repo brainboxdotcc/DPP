@@ -790,7 +790,8 @@ EXCLUDE		= deps \
 			build \
 			include/dpp/format \
 			include/dpp/nlohmann \
-			docpages/include
+			docpages/include \
+			docpages/example_code
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -830,7 +831,8 @@ EXCLUDE_SYMBOLS	= nlohmann::* \
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH	   =docpages/include
+EXAMPLE_PATH		=	docpages/include \
+				docpages/example_code
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and

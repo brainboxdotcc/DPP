@@ -131,6 +131,11 @@ namespace dpp {
 		inline const std::string cdn_host = "https://cdn.discordapp.com"; 
 
 		/**
+		 * @brief The base URL for message/user/channel links.
+		 */
+		inline const std::string url_host = "https://discord.com"; 
+
+		/**
 		 * @brief Callback for the results of a command executed via dpp::utility::exec
 		 */
 		typedef std::function<void(const std::string& output)> cmd_result_t;
@@ -530,6 +535,40 @@ namespace dpp {
 		* @return std::string The formatted mention of the role.
 		*/
 		std::string DPP_EXPORT role_mention(const snowflake& id);
+
+		/**
+		* @brief Create a URL for message.
+		* @param guild_id The ID of the guild where message is written.
+		* @param channel_id The ID of the channel where message is written.
+		* @param message_id The ID of the message.
+		* @return std::string The URL to message or empty string if any of ids is 0.
+		*/
+		std::string DPP_EXPORT message_url(const snowflake& guild_id, const snowflake& channel_id, const snowflake& message_id);
+
+		/**
+		* @brief Create a URL for message.
+		* @param guild_id The ID of the guild where channel is located.
+		* @param channel_id The ID of the channel.
+		* @return std::string The URL to message or empty string if any of ids is 0.
+		*/
+		std::string DPP_EXPORT channel_url(const snowflake& guild_id, const snowflake& channel_id);
+
+		/**
+		* @brief Create a URL for message.
+		* @param guild_id The ID of the guild where thread is located.
+		* @param thread_id The ID of the thread.
+		* @return std::string The URL to message or empty string if any of ids is 0.
+		*/
+		std::string DPP_EXPORT thread_url(const snowflake& guild_id, const snowflake& thread_id);
+		
+		/**
+		* @brief Create a URL for message.
+		* @param user_id The ID of the guild where thread is located.
+		* @return std::string The URL to message or empty string if id is 0.
+		*/
+		std::string DPP_EXPORT user_url(const snowflake& user_id);
+
+
 
 #ifdef _DOXYGEN_
 		/**
