@@ -1126,6 +1126,10 @@ bool message::has_remix_attachment() const {
 		});
 }
 
+std::string message::get_url() const {
+	return utility::message_url(guild_id, channel_id, id);
+}
+
 sticker::sticker() : managed(0), pack_id(0), type(st_standard), format_type(sf_png), available(true), guild_id(0), sort_value(0) {
 }
 
