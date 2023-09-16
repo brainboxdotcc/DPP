@@ -40,6 +40,8 @@ endif()
 set(CMAKE_REQUIRED_FLAGS_SAVE "${CMAKE_REQUIRED_FLAGS}")
 
 set(AVX_NAME "T_fallback")
+
+# This is only supported on x86/x64, it is completely skipped and forced to T_fallback anywhere else
 if ((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64"))
 
 	foreach(INSTRUCTION_SET IN LISTS INSTRUCTION_SETS)

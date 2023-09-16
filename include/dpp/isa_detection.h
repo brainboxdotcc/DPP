@@ -22,6 +22,11 @@
 
 #if defined _MSC_VER || defined __GNUC__ || defined __clang__
 
+	/* Sanity check for cases of broken detection */
+	#if !defined(__i386__) && !defined(__x86_64__)
+		#define T_fallback 1
+	#endif
+
 	#ifndef T_fallback
 		#include <immintrin.h>
 
@@ -40,21 +45,21 @@
 		*/
 		inline int32_t extract_int32_from_avx(const avx_int& value, int64_t index) {
 			switch (index) {
-			case 0: {
-				return _mm_extract_epi32(value, 0);
-			}
-			case 1: {
-				return _mm_extract_epi32(value, 1);
-			}
-			case 2: {
-				return _mm_extract_epi32(value, 2);
-			}
-			case 3: {
-				return _mm_extract_epi32(value, 3);
-			}
-			default: {
-				return _mm_extract_epi32(value, 0);
-			}
+				case 0: {
+					return _mm_extract_epi32(value, 0);
+				}
+				case 1: {
+					return _mm_extract_epi32(value, 1);
+				}
+				case 2: {
+					return _mm_extract_epi32(value, 2);
+				}
+				case 3: {
+					return _mm_extract_epi32(value, 3);
+				}
+				default: {
+					return _mm_extract_epi32(value, 0);
+				}
 			}
 		}
 
@@ -66,33 +71,33 @@
 		*/
 		inline int32_t extract_int32_from_avx2(const avx_2_int& value, int64_t index) {
 			switch (index) {
-			case 0: {
-				return _mm256_extract_epi32(value, 0);
-			}
-			case 1: {
-				return _mm256_extract_epi32(value, 1);
-			}
-			case 2: {
-				return _mm256_extract_epi32(value, 2);
-			}
-			case 3: {
-				return _mm256_extract_epi32(value, 3);
-			}
-			case 4: {
-				return _mm256_extract_epi32(value, 4);
-			}
-			case 5: {
-				return _mm256_extract_epi32(value, 5);
-			}
-			case 6: {
-				return _mm256_extract_epi32(value, 6);
-			}
-			case 7: {
-				return _mm256_extract_epi32(value, 7);
-			}
-			default: {
-				return _mm256_extract_epi32(value, 0);
-			}
+				case 0: {
+					return _mm256_extract_epi32(value, 0);
+				}
+				case 1: {
+					return _mm256_extract_epi32(value, 1);
+				}
+				case 2: {
+					return _mm256_extract_epi32(value, 2);
+				}
+				case 3: {
+					return _mm256_extract_epi32(value, 3);
+				}
+				case 4: {
+					return _mm256_extract_epi32(value, 4);
+				}
+				case 5: {
+					return _mm256_extract_epi32(value, 5);
+				}
+				case 6: {
+					return _mm256_extract_epi32(value, 6);
+				}
+				case 7: {
+					return _mm256_extract_epi32(value, 7);
+				}
+				default: {
+					return _mm256_extract_epi32(value, 0);
+				}
 			}
 		}
 
