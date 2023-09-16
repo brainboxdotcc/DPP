@@ -8,7 +8,7 @@ int main()
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* Use the on_user_context_menu event to look for user context menu actions */
-	bot.on_user_context_menu([&](const dpp::user_context_menu_t& event) {
+	bot.on_user_context_menu([](const dpp::user_context_menu_t& event) {
 
 		 /* check if the context menu name is High Five */
 		 if (event.command.get_command_name() == "high five") {

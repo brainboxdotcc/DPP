@@ -45,10 +45,10 @@ int main(int argc, char const *argv[])
 	});
 
 	/* This event handles form submission for the modal dialog we create above */
-	bot.on_form_submit([&](const dpp::form_submit_t & event) {
+	bot.on_form_submit([](const dpp::form_submit_t & event) {
 		
-		/* For this simple example we know the first element of the first row ([0][0]) is value type string.
-		 * In the real world it may not be safe to make such assumptions!
+		/* For this simple example, we know the first element of the first row ([0][0]) is value type string.
+		 * In the real world, it may not be safe to make such assumptions!
 		 */
 		std::string v = std::get<std::string>(event.components[0].components[0].value);
 
@@ -59,7 +59,7 @@ int main(int argc, char const *argv[])
 		event.reply(m);
 	});
 
-	bot.on_ready([&](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t & event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create a slash command and register it as a global command */
 			bot.global_command_create(dpp::slashcommand("dialog", "Make a modal dialog box", bot.me.id));
