@@ -11,7 +11,7 @@ int main() {
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* Message handler */
-	bot.on_message_create([&](const dpp::message_create_t &event) {
+	bot.on_message_create([&message_cache](const dpp::message_create_t &event) {
 		/* Make a permanent pointer using new, for each message to be cached */
 		dpp::message* m = new dpp::message();
 
