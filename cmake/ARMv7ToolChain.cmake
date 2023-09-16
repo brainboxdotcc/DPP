@@ -46,6 +46,6 @@ EXECUTE_PROCESS(COMMAND printf "deb [arch=amd64] http://archive.ubuntu.com/ubunt
 EXECUTE_PROCESS(COMMAND sudo mv TMPFILE /etc/apt/sources.list)
 EXECUTE_PROCESS(COMMAND sudo dpkg --add-architecture armhf)
 EXECUTE_PROCESS(COMMAND sudo apt update)
-EXECUTE_PROCESS(COMMAND sudo apt install -y cmake ninja-build gcc-8-arm-linux-gnueabihf g++-8-arm-linux-gnueabihf zlib1g-dev:armhf libssl-dev:armhf libopus-dev:armhf libsodium-dev:armhf)
+EXECUTE_PROCESS(COMMAND sudo apt install -y cmake gcc-8-arm-linux-gnueabihf g++-8-arm-linux-gnueabihf zlib1g-dev:armhf libssl-dev:armhf libopus-dev:armhf libsodium-dev:armhf)
 EXECUTE_PROCESS(COMMAND sudo mv /usr/lib/arm-linux-gnueabihf/pkgconfig/libsodium.pc /usr/lib/pkgconfig/)
 
