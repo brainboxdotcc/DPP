@@ -23,7 +23,7 @@
 #if defined _MSC_VER || defined __GNUC__ || defined __clang__
 
 	/* Sanity check for cases of broken detection */
-	#if !defined(__i386__) && !defined(__x86_64__)
+	#if !defined(__i386__) && !defined(__x86_64__) && !defined(T_fallback)
 		#define T_fallback 1
 	#endif
 
