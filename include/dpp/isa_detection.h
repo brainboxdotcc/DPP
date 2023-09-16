@@ -33,8 +33,8 @@
 		using avx_int = __m128i;
 
 		/*
-		* @brief Extracts a 32-bit integer from a 128it AVX2 register.
-		* @param value The AVX2 register containing packed 16-bit integers.
+		* @brief Extracts a 32-bit integer from a 128-bit AVX register.
+		* @param value The AVX register containing packed 32-bit integers.
 		* @param index The index of the 32-bit integer to extract (0-3).
 		* @return The extracted 32-bit integer.
 		*/
@@ -98,7 +98,7 @@
 
 		/*
 		* @brief Extracts a 32-bit integer from a 512-bit AVX-512 register.
-		* @param value The AVX-512 register containing packed 16-bit integers.
+		* @param value The AVX-512 register containing packed 32-bit integers.
 		* @param index The index of the 32-bit integer to extract (0-15).
 		* @return The extracted 32-bit integer.
 		*/
@@ -122,22 +122,21 @@ namespace dpp {
 #ifdef T_AVX512
 
 	/**
-	 * @brief A class for audio mixing operations using AVX2 instructions.
+	 * @brief A class for audio mixing operations using AVX512 instructions.
 	 */
 	class audio_mixer {
 	public:
 		/*
-		* @brief The number of 32-bit values per CPU register.
-		*/
+		 * @brief The number of 32-bit values per CPU register.
+		 */
 		inline static constexpr int32_t byte_blocks_per_register{ 16 };
 
 		/*
-		* @brief Stores values from a 512-bit AVX vector to a storage location.
-		* @tparam avx_type The 512-bit AVX vector type.
-		* @tparam value_type The target value type for storage.
-		* @param values_to_store The 512-bit AVX vector containing values to store.
-		* @param storage_location Pointer to the storage location.
-		*/
+		 * @brief Stores values from a 512-bit AVX512 vector to a storage location.
+		 * @tparam value_type The target value type for storage.
+		 * @param values_to_store The 512-bit AVX512 vector containing values to store.
+		 * @param storage_location Pointer to the storage location.
+		 */
 		template<typename value_type> inline static void store_values(const avx_512_int& values_to_store, value_type* storage_location) {
 			for (int64_t x = 0; x < byte_blocks_per_register; ++x) {
 				storage_location[x] = static_cast<value_type>(extract_int32_from_avx512(values_to_store, x));
@@ -145,23 +144,22 @@ namespace dpp {
 		}
 
 		/**
-		 * @brief Specialization for gathering non-float values into an AVX register.
-		 * @tparam avx_type The AVX type to be used (AVX, AVX2, etc.).
+		 * @brief Specialization for gathering non-float values into an AVX512 register.
 		 * @tparam value_type The type of values being gathered.
 		 * @tparam Indices Parameter pack of indices for gathering values.
-		 * @return An AVX register containing gathered values.
+		 * @return An AVX512 register containing gathered values.
 		 */
 		template<typename value_type> inline static avx_512_float gather_values(value_type* values) {
-			float newArray[byte_blocks_per_register]{};
+			float new_array[byte_blocks_per_register]{};
 			for (size_t x = 0; x < byte_blocks_per_register; ++x) {
-				newArray[x] = static_cast<float>(values[x]);
+				new_array[x] = static_cast<float>(values[x]);
 			}
-			return _mm512_loadu_ps(newArray);
+			return _mm512_loadu_ps(new_array);
 		}
 
 		/**
 		 * @brief Collect a single register worth of data from data_in, apply gain and increment, and store the result in data_out.
-		 *        This version uses AVX2 instructions.
+		 *        This version uses AVX512 instructions.
 		 *
 		 * @param data_in Pointer to the input array of int32_t values.
 		 * @param data_out Pointer to the output array of int16_t values.
@@ -183,11 +181,10 @@ namespace dpp {
 
 		/**
 		 * @brief Combine a register worth of elements from decoded_data and store the result in up_sampled_vector.
-		 *        This version uses AVX instructions.
+		 *        This version uses AVX512 instructions.
 		 *
 		 * @param up_sampled_vector Pointer to the array of int32_t values.
 		 * @param decoded_data Pointer to the array of int16_t values.
-		 * @param x Index to select a specific set of elements to combine.
 		 */
 		inline static void combine_samples(int32_t* up_sampled_vector, const int16_t* decoded_data) {
 			auto newValues{ _mm512_cvtps_epi32(_mm512_add_ps(gather_values(up_sampled_vector), gather_values(decoded_data))) };
@@ -203,17 +200,16 @@ namespace dpp {
 	class audio_mixer {
 	public:
 		/*
-		* @brief The number of 32-bit values per CPU register.
-		*/
+		 * @brief The number of 32-bit values per CPU register.
+		 */
 		inline static constexpr int32_t byte_blocks_per_register{ 8 };
 
 		/*
-		* @brief Stores values from a 256-bit AVX vector to a storage location.
-		* @tparam avx_type The 256-bit AVX vector type.
-		* @tparam value_type The target value type for storage.
-		* @param values_to_store The 256-bit AVX vector containing values to store.
-		* @param storage_location Pointer to the storage location.
-		*/
+		 * @brief Stores values from a 256-bit AVX2 vector to a storage location.
+		 * @tparam value_type The target value type for storage.
+		 * @param values_to_store The 256-bit AVX2 vector containing values to store.
+		 * @param storage_location Pointer to the storage location.
+		 */
 		template<typename value_type> inline static void store_values(const avx_2_int& values_to_store, value_type* storage_location) {
 			for (int64_t x = 0; x < byte_blocks_per_register; ++x) {
 				storage_location[x] = static_cast<value_type>(extract_int32_from_avx2(values_to_store, x));
@@ -221,18 +217,17 @@ namespace dpp {
 		}
 
 		/**
-		 * @brief Specialization for gathering non-float values into an AVX register.
-		 * @tparam avx_type The AVX type to be used (AVX, AVX2, etc.).
+		 * @brief Specialization for gathering non-float values into an AVX2 register.
 		 * @tparam value_type The type of values being gathered.
 		 * @tparam Indices Parameter pack of indices for gathering values.
-		 * @return An AVX register containing gathered values.
+		 * @return An AVX2 register containing gathered values.
 		 */
 		template<typename value_type> inline static avx_2_float gather_values(value_type* values) {
-			float newArray[byte_blocks_per_register]{};
+			float new_array[byte_blocks_per_register]{};
 			for (size_t x = 0; x < byte_blocks_per_register; ++x) {
-				newArray[x] = static_cast<float>(values[x]);
+				new_array[x] = static_cast<float>(values[x]);
 			}
-			return _mm256_loadu_ps(newArray);
+			return _mm256_loadu_ps(new_array);
 		}
 
 		/**
@@ -259,7 +254,7 @@ namespace dpp {
 
 		/**
 		 * @brief Combine a register worth of elements from decoded_data and store the result in up_sampled_vector.
-		 *        This version uses AVX instructions.
+		 *        This version uses AVX2 instructions.
 		 *
 		 * @param up_sampled_vector Pointer to the array of int32_t values.
 		 * @param decoded_data Pointer to the array of int16_t values.
@@ -274,22 +269,21 @@ namespace dpp {
 #elif T_AVX
 
 	/**
-	 * @brief A class for audio mixing operations using AVX2 instructions.
+	 * @brief A class for audio mixing operations using AVX instructions.
 	 */
 	class audio_mixer {
 	public:
 		/*
-		* @brief The number of 32-bit values per CPU register.
-		*/
+		 * @brief The number of 32-bit values per CPU register.
+		 */
 		inline static constexpr int32_t byte_blocks_per_register{ 4 };
 
 		/*
-		* @brief Stores values from a 128-bit AVX vector to a storage location.
-		* @tparam avx_type The 128-bit AVX vector type.
-		* @tparam value_type The target value type for storage.
-		* @param values_to_store The 128-bit AVX vector containing values to store.
-		* @param storage_location Pointer to the storage location.
-		*/
+		 * @brief Stores values from a 128-bit AVX vector to a storage location.
+		 * @tparam value_type The target value type for storage.
+		 * @param values_to_store The 128-bit AVX vector containing values to store.
+		 * @param storage_location Pointer to the storage location.
+		 */
 		template<typename value_type> inline static void store_values(const avx_int& values_to_store, value_type* storage_location) {
 			for (int64_t x = 0; x < byte_blocks_per_register; ++x) {
 				storage_location[x] = static_cast<value_type>(extract_int32_from_avx(values_to_store, x));
@@ -298,22 +292,21 @@ namespace dpp {
 
 		/**
 		 * @brief Specialization for gathering non-float values into an AVX register.
-		 * @tparam avx_type The AVX type to be used (AVX, AVX2, etc.).
 		 * @tparam value_type The type of values being gathered.
 		 * @tparam Indices Parameter pack of indices for gathering values.
 		 * @return An AVX register containing gathered values.
 		 */
 		template<typename value_type> inline static avx_float gather_values(value_type* values) {
-			float newArray[byte_blocks_per_register]{};
+			float new_array[byte_blocks_per_register]{};
 			for (size_t x = 0; x < byte_blocks_per_register; ++x) {
-				newArray[x] = static_cast<float>(values[x]);
+				new_array[x] = static_cast<float>(values[x]);
 			}
-			return _mm_loadu_ps(newArray);
+			return _mm_loadu_ps(new_array);
 		}
 
 		/**
 		 * @brief Collect a single register worth of data from data_in, apply gain and increment, and store the result in data_out.
-		 *        This version uses AVX2 instructions.
+		 *        This version uses AVX instructions.
 		 *
 		 * @param data_in Pointer to the input array of int32_t values.
 		 * @param data_out Pointer to the output array of int16_t values.
@@ -337,7 +330,6 @@ namespace dpp {
 		 *
 		 * @param up_sampled_vector Pointer to the array of int32_t values.
 		 * @param decoded_data Pointer to the array of int16_t values.
-		 * @param x Index to select a specific set of elements to combine.
 		 */
 		inline static void combine_samples(int32_t* up_sampled_vector, const int16_t* decoded_data) {
 			auto newValues{ _mm_cvtps_epi32(_mm_add_ps(gather_values(up_sampled_vector), gather_values(decoded_data))) };
@@ -348,7 +340,7 @@ namespace dpp {
 #else 
 
 	/**
-	 * @brief A class for audio mixing operations using AVX instructions.
+	 * @brief A class for audio mixing operations using x64 instructions.
 	 */
 	class audio_mixer {
 	public:
@@ -383,7 +375,7 @@ namespace dpp {
 
 		/**
 		 * @brief Combine a register worth of elements from decoded_data and store the result in up_sampled_vector.
-		 *        This version uses  instructions.
+		 *        This version uses x64 instructions.
 		 *
 		 * @param up_sampled_vector Pointer to the array of int32_t values.
 		 * @param decoded_data Pointer to the array of int16_t values.

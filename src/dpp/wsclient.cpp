@@ -27,13 +27,13 @@
 
 namespace dpp {
 
-const unsigned char WS_MASKBIT = (1u << 7u);
-const unsigned char WS_FINBIT = (1u << 7u);
-const unsigned char WS_PAYLOAD_LENGTH_MAGIC_LARGE = 126;
-const unsigned char WS_PAYLOAD_LENGTH_MAGIC_HUGE = 127;
-const size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
-const size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
-const size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
+constexpr unsigned char WS_MASKBIT = (1u << 7u);
+constexpr unsigned char WS_FINBIT = (1u << 7u);
+constexpr unsigned char WS_PAYLOAD_LENGTH_MAGIC_LARGE = 126;
+constexpr unsigned char WS_PAYLOAD_LENGTH_MAGIC_HUGE = 127;
+constexpr size_t WS_MAX_PAYLOAD_LENGTH_SMALL = 125;
+constexpr size_t WS_MAX_PAYLOAD_LENGTH_LARGE = 65535;
+constexpr size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
 websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath, ws_opcode opcode)
 	: ssl_client(hostname, port),

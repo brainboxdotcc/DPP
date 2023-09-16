@@ -93,8 +93,6 @@ DPP_TEST(MESSAGERECEIVE, "Receipt of a created message", tf_online);
 DPP_TEST(MESSAGEFILE, "Message attachment send and check", tf_online);
 DPP_TEST(CACHE, "Test guild cache", tf_online);
 DPP_TEST(USERCACHE, "Test user cache", tf_online);
-DPP_TEST(VOICECONN, "Connect to voice channel", tf_online);
-DPP_TEST(VOICESEND, "Send audio to voice channel", tf_online);
 DPP_TEST(REACT, "React to a message", tf_online);
 DPP_TEST(REACTEVENT, "Reaction event", tf_online);
 DPP_TEST(GUILDCREATE, "Receive guild create event", tf_online);
@@ -221,6 +219,8 @@ DPP_TEST(INVITE_DELETE, "cluster::invite_delete", tf_online);
 
 /* Extended set -- Less important, skipped on the master branch due to rate limits and GitHub actions limitations*/
 /* To execute, run unittests with "full" command line argument */
+DPP_TEST(VOICECONN, "Connect to voice channel", tf_online | tf_extended);
+DPP_TEST(VOICESEND, "Send audio to voice channel", tf_online | tf_extended); // udp unreliable on gitbub
 DPP_TEST(MESSAGEPIN, "Pinning a channel message", tf_online | tf_extended);
 DPP_TEST(MESSAGEUNPIN, "Unpinning a channel message", tf_online | tf_extended);
 
