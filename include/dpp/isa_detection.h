@@ -155,11 +155,11 @@ namespace dpp {
 		 * @return An AVX512 register containing gathered values.
 		 */
 		template<typename value_type> inline static avx_512_float gather_values(value_type* values) {
-			float new_array[byte_blocks_per_register]{};
+			alignas(64) float new_array[byte_blocks_per_register]{};
 			for (size_t x = 0; x < byte_blocks_per_register; ++x) {
 				new_array[x] = static_cast<float>(values[x]);
 			}
-			return _mm512_loadu_ps(new_array);
+			return _mm512_load_ps(new_array);
 		}
 
 		/**
@@ -177,9 +177,13 @@ namespace dpp {
 					_mm512_mul_ps(_mm512_set1_ps(increment),
 						_mm512_set_ps(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f)))) };
 
-			current_samples_new = _mm512_mask_blend_ps(_mm512_cmp_ps_mask(current_samples_new, _mm512_set1_ps(0.0f), _CMP_GE_OQ),
-				_mm512_max_ps(current_samples_new, _mm512_set1_ps(static_cast<float>(std::numeric_limits<int16_t>::min()))),
-				_mm512_min_ps(current_samples_new, _mm512_set1_ps(static_cast<float>(std::numeric_limits<int16_t>::max()))));
+			__m512 lower_limit = _mm512_set1_ps(static_cast<float>(std::numeric_limits<opus_int16>::min()));
+			__m512 upper_limit = _mm512_set1_ps(static_cast<float>(std::numeric_limits<opus_int16>::max()));
+
+			__mmask16 mask_ge = _mm512_cmp_ps_mask(current_samples_new, _mm512_set1_ps(0.0f), _CMP_GE_OQ);
+
+			current_samples_new = _mm512_mask_max_ps(current_samples_new, mask_ge, current_samples_new, lower_limit);
+			current_samples_new = _mm512_mask_min_ps(current_samples_new, ~mask_ge, current_samples_new, upper_limit);
 
 			store_values(_mm512_cvtps_epi32(current_samples_new), data_out);
 		}
@@ -228,11 +232,11 @@ namespace dpp {
 		 * @return An AVX2 register containing gathered values.
 		 */
 		template<typename value_type> inline static avx_2_float gather_values(value_type* values) {
-			float new_array[byte_blocks_per_register]{};
+			alignas(32) float new_array[byte_blocks_per_register]{};
 			for (size_t x = 0; x < byte_blocks_per_register; ++x) {
 				new_array[x] = static_cast<float>(values[x]);
 			}
-			return _mm256_loadu_ps(new_array);
+			return _mm256_load_ps(new_array);
 		}
 
 		/**
@@ -302,11 +306,11 @@ namespace dpp {
 		 * @return An AVX register containing gathered values.
 		 */
 		template<typename value_type> inline static avx_float gather_values(value_type* values) {
-			float new_array[byte_blocks_per_register]{};
+			alignas(16) float new_array[byte_blocks_per_register]{};
 			for (size_t x = 0; x < byte_blocks_per_register; ++x) {
 				new_array[x] = static_cast<float>(values[x]);
 			}
-			return _mm_loadu_ps(new_array);
+			return _mm_load_ps(new_array);
 		}
 
 		/**
@@ -365,8 +369,8 @@ namespace dpp {
 		 */
 		inline static void collect_single_register(int32_t* data_in, int16_t* data_out, float current_gain, float increment) {
 			for (uint64_t x = 0; x < byte_blocks_per_register; ++x) {
-				auto increment_neww = increment * x;
-				auto current_gain_new = current_gain + increment_neww;
+				auto increment_new = increment * x;
+				auto current_gain_new = current_gain + increment_new;
 				auto current_sample_new = data_in[x] * current_gain_new;
 				if (current_sample_new >= std::numeric_limits<int16_t>::max()) {
 					current_sample_new = std::numeric_limits<int16_t>::max();
