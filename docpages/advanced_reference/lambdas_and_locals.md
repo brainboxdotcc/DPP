@@ -4,7 +4,7 @@ If you are reading this page, you have likely been sent here by someone helping 
 
 It is important to remember that when you put a lambda callback onto a function in D++, that this lambda will execute at some point in the **future**. As with all things in the future and as 80s Sci-Fi movies will tell you, when you reach the future, things may well have changed!
 
-\image html delorean-time-travel.gif
+\image html delorean_time_travel.gif
 
 To explain this situation and how it causes issues, I'd like you to imagine the age-old magic trick, where a magician sets a fine table full of cutlery, pots, pans and wine. He indicates to the audience that this is authentic, then with a whip of his wrist, he whips the tablecloth away, leaving the cutlery and other tableware in place (if he is any good as a magician!)
 

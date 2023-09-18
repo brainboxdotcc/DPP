@@ -25,7 +25,7 @@ In the `libs/` directory, clone D++ with: `git clone https://github.com/brainbox
 
 Your project directory should look like this:
 
-\image html build-clion-project-structure.png
+\image html build_clion_project_structure.png
 
 ### Configure CMake file
 
@@ -69,7 +69,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 Then open the "File" menu and click on "Reload CMake Project" to reload the CMake configuration.
 
-\image html build-clion-reload-cmake-project.png
+\image html build_clion_reload_cmake_project.png
 
 ### Add an example program
 
