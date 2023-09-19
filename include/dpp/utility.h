@@ -90,6 +90,28 @@ namespace dpp {
 		std::string DPP_EXPORT cdn_endpoint_url_sticker(snowflake sticker_id, sticker_format format);
 
 		/**
+		 * @brief Supported AVX instruction set type for audio mixing
+		 */
+		enum avx_type_t : uint8_t {
+			/**
+			 * @brief No AVX Support
+			 */
+			avx_none,
+			/**
+			 * @brief AVX support
+			 */
+			avx_1,
+			/**
+			 * @brief AVX2 support
+			 */
+			avx_2,
+			/**
+			 * @brief AVX512 support
+			 */
+			avx_512,
+		};
+
+		/**
 		 * @brief Timestamp formats for dpp::utility::timestamp()
 		 * 
 		 * @note These values are the actual character values specified by the Discord API
@@ -280,6 +302,14 @@ namespace dpp {
 		 * @return bool True if voice support is compiled in (libsodium/libopus) 
 		 */
 		bool DPP_EXPORT has_voice();
+
+		/**
+		 * @brief Returns an enum value indicating which AVX instruction
+		 * set is used for mixing received voice data, if any
+		 * 
+		 * @return avx_type_t AVX type
+		 */
+		avx_type_t DPP_EXPORT voice_avx();
 
 		/**
 		 * @brief Returns true if D++ was built with coroutine support

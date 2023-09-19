@@ -17,7 +17,6 @@ function(check_instruction_set INSTRUCTION_SET_NAME INSTRUCTION_SET_FLAG INSTRUC
     if(${INSTRUCTION_SET_NAME})
         set(AVX_TYPE "${INSTRUCTION_SET_NAME}" PARENT_SCOPE)
         set(AVX_FLAG "${INSTRUCTION_SET_FLAG}" PARENT_SCOPE)
-        set(AVX_NAME "${INSTRUCTION_SET_NAME}" PARENT_SCOPE)
     else()
         return()
     endif()
@@ -25,21 +24,23 @@ endfunction()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set(INSTRUCTION_SETS
-        "T_AVX?/arch:AVX?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
-        "T_AVX2?/arch:AVX2?__m256i value{}#auto result = _mm256_extract_epi32(value, 0)"
-        "T_AVX512?/arch:AVX512?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
+        "AVX1?/arch:AVX?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
+        "AVX2?/arch:AVX2?__m256i value{}#auto result = _mm256_extract_epi32(value, 0)"
+        "AVX512?/arch:AVX512?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
     )
 else()
     set(INSTRUCTION_SETS
-        "T_AVX?-mavx?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
-        "T_AVX2?-mavx2?__m256i value{}#auto result = _mm256_extract_epi32(value, 0)"
-        "T_AVX512?-mavx512f?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
+        "AVX1?-mavx?__m128i value{}#auto result = _mm_extract_epi32(value, 0)"
+        "AVX2?-mavx2?__m256i value{}#auto result = _mm256_extract_epi32(value, 0)"
+        "AVX512?-mavx512f?int32_t result[16]#const _mm512i& value{}#_mm512_store_si512(result, value)"
 )
 endif()
 
 set(CMAKE_REQUIRED_FLAGS_SAVE "${CMAKE_REQUIRED_FLAGS}")
 
-set(AVX_NAME "T_fallback")
+set(AVX_TYPE "AVX0")
+set(AVX_TYPE "AVX0" PARENT_SCOPE)
+set(AVX_FLAGS "" PARENT_SCOPE)
 
 # This is only supported on x86/x64, it is completely skipped and forced to T_fallback anywhere else
 if ((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "i386") OR (${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64"))
@@ -54,11 +55,14 @@ if ((${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64") OR (${CMAKE_SYSTEM_PROCESSOR} M
 		check_instruction_set("${INSTRUCTION_SET_NAME}" "${INSTRUCTION_SET_FLAG}" "${INSTRUCTION_SET_INTRINSIC}")
 	endforeach()
 
-	string(REPLACE "T_" "" AVX_DISPLAY ${AVX_NAME})
-	message(STATUS "Detected ${CMAKE_SYSTEM_PROCESSOR} SSE type: ${AVX_DISPLAY}")
+	message(STATUS "Detected ${CMAKE_SYSTEM_PROCESSOR} AVX type: ${AVX_TYPE} (FLAGS: ${AVX_FLAG})")
+	set(AVX_TYPE ${AVX_TYPE})
+	set(AVX_TYPE ${AVX_TYPE} PARENT_SCOPE)
+	set(AVX_FLAG ${AVX_FLAG} PARENT_SCOPE)
 	set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS_SAVE}")
 else()
-	message(STATUS "SSE not supported by architecture ${CMAKE_SYSTEM_PROCESSOR} ${AVX_NAME}")
-	set(AVX_NAME "T_fallback")
-	set(AVX_TYPE "T_fallback")
+	message(STATUS "AVX not supported by architecture ${CMAKE_SYSTEM_PROCESSOR} ${AVX_TYPE}")
+	set(AVX_TYPE "AVX0")
+	set(AVX_FLAG "" PARENT_SCOPE)
+	set(AVX_TYPE "AVX0" PARENT_SCOPE)
 endif()
