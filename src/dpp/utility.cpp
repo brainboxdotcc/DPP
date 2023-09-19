@@ -108,6 +108,19 @@ namespace dpp {
 #endif
 		}
 
+		avx_type_t voice_avx() {
+#if AVX_TYPE == 512
+			return avx_512;
+#elif AVX_TYPE == 2
+			return avx_2;
+#elif AVX_TYPE == 1
+			return avx_1;
+#else
+			return avx_none;
+#endif
+
+		}
+
 		bool is_coro_enabled() {
 #ifdef DPP_CORO
 			return true;

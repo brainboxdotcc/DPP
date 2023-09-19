@@ -11,9 +11,15 @@ endif()
 
 add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
 
-if(NOT DEFINED AVX_TYPE)
+if(${AVX_TYPE} STREQUAL "OFF")
 	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/DetectArchitecture.cmake")
+	message("--- AVX type: ${AVX_TYPE}")
+else()
+	message("-- AVX type overridden by configuration: ${AVX_TYPE}")
 endif()
+STRING(REPLACE "AVX" "" AVX_TYPE ${AVX_TYPE})
+add_compile_definitions(AVX_TYPE=${AVX_TYPE})
+add_compile_options(${AVX_FLAG})
 
 target_compile_definitions(
 	"${LIB_NAME}" PUBLIC
