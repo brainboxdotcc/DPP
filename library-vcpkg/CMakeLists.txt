@@ -47,8 +47,9 @@ target_compile_features(
 )
 
 target_include_directories(
-	"${LIB_NAME}" PRIVATE
+	"${LIB_NAME}" PUBLIC
 	"$<BUILD_INTERFACE:${DPP_ROOT_PATH}/include>"
+	"$<INSTALL_INTERFACE:include>"
 )
 
 set_target_properties(
