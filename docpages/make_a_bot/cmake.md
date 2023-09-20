@@ -37,7 +37,7 @@ Once that's done, your project directory should look like this:
 
 ## 3. Configure CMake
 
-You'll need to modify the `CMakeLists.txt` to tell CMake what it's looking for and other information.
+You'll need to modify the `CMakeLists.txt` to tell CMake what it's looking for, and other information.
 
 Here is an example CMake configuration, you can adapt it according to your needs:
 
