@@ -685,13 +685,13 @@ public:
 	 * ready to send and know its length it is advisable to call this
 	 * method multiple times to enqueue the entire stream audio so that
 	 * it is all encoded at once (unless you have set use_opus to false).
-	 * Constantly calling this from the dpp::on_voice_buffer_send callback
-	 * can and will eat a TON of cpu!
+	 * **Constantly calling this from dpp::cluster::on_voice_buffer_send
+	 * can, and will, eat a TON of cpu!**
 	 * 
 	 * @param audio_data Raw PCM audio data. Channels are interleaved,
 	 * with each channel's amplitude being a 16 bit value.
 	 * 
-	 * The audio data should be 48000Hz signed 16 bit audio.
+	 * @warning **The audio data needs to be 48000Hz signed 16 bit audio, otherwise, the audio will come through incorrectly!**
 	 * 
 	 * @param length The length of the audio data. The length should
 	 * be a multiple of 4 (2x 16 bit stereo channels) with a maximum
