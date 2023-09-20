@@ -13,7 +13,6 @@ add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
 
 if(${AVX_TYPE} STREQUAL "OFF")
 	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/DetectArchitecture.cmake")
-	message("--- AVX type: ${AVX_TYPE}")
 else()
 	message("-- AVX type overridden by configuration: ${AVX_TYPE}")
 endif()
@@ -26,12 +25,13 @@ target_compile_definitions(
 	"DPP_BUILD"
 )
 
-add_compile_definitions(OPENSSL_SYS_WIN32)
-add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
-add_compile_definitions(WIN32_LEAN_AND_MEAN)
-add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
-add_compile_definitions(T_fallback)
+if(WIN32)
+	add_compile_definitions(OPENSSL_SYS_WIN32)
+	add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
+	add_compile_definitions(WIN32_LEAN_AND_MEAN)
+	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+	add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
+endif()
 
 target_compile_options(
 	"${LIB_NAME}" PUBLIC
