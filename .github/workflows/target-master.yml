@@ -1,36 +1,15 @@
 name: Close master-targeted PRs
 on:
-  pull_request:
+  pull_request_target:
+    types: [opened]
     branches:
       - 'master'
 
 jobs:
-  docs:
-    name: PR Check
-    runs-on: ubuntu-20.04
-
-    concurrency: 
-      group: pr
-      cancel-in-progress: true
-
+  run:
+    runs-on: ubuntu-latest
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
-        with:
-          egress-policy: audit
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@72ae4ccbe57f82bbe08411e84e2130bd4ba1c10f # v2
-        with:
-          php-version: '8.0'
-
-      - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
-        with:
-          submodules: recursive
-
-      - name: Close master target PRs
-        run: php buildtools/close-master-pr.php
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: superbrothers/close-pull-request@9c18513d320d7b2c7185fb93396d0c664d5d8448 # v3.1.2
+      with:
+        comment: "Thank you for your contribution, but PRs must be raised against the `dev` branch. Please log your issue against the `dev` branch not `master`. You can also retarget this pull request, then reopen it."
 
