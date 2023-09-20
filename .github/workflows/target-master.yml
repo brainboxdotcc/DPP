@@ -9,7 +9,13 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-    - uses: superbrothers/close-pull-request@9c18513d320d7b2c7185fb93396d0c664d5d8448 # v3.1.2
-      with:
-        comment: "Thank you for your contribution, but PRs must be raised against the `dev` branch. Please log your issue against the `dev` branch not `master`. You can also retarget this pull request, then reopen it."
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          egress-policy: audit
+
+      - name: Close PRs
+        uses: superbrothers/close-pull-request@9c18513d320d7b2c7185fb93396d0c664d5d8448 # v3.1.2
+        with:
+          comment: "Thank you for your contribution, but PRs must be raised against the `dev` branch. Please log your issue against the `dev` branch not `master`. You can also retarget this pull request, then reopen it."
 
