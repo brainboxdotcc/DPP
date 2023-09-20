@@ -23,92 +23,22 @@
 #if defined _MSC_VER || defined __GNUC__ || defined __clang__
 
 #include <immintrin.h>
-
-#ifdef max
-	#undef max
-#endif
-#ifdef min
-	#undef min
-#endif
+#include <numeric>
 
 namespace dpp {
 
 	using avx_2_float = __m256;
-	using avx_2_int = __m256i;
-
-	/*
- 	 * @brief Extracts a 32-bit integer from a 256-bit AVX2 register.
-	 * @param value The AVX2 register containing packed 32-bit integers.
-	 * @param index The index of the 32bit integer to extract (0-7).
-	 * @return The extracted 32-bit integer.
-	 */
-	inline int32_t extract_int32_from_avx2(const avx_2_int& value, int64_t index) {
-		switch (index) {
-			case 0: {
-				return _mm256_extract_epi32(value, 0);
-			}
-			case 1: {
-				return _mm256_extract_epi32(value, 1);
-			}
-			case 2: {
-				return _mm256_extract_epi32(value, 2);
-			}
-			case 3: {
-				return _mm256_extract_epi32(value, 3);
-			}
-			case 4: {
-				return _mm256_extract_epi32(value, 4);
-			}
-			case 5: {
-				return _mm256_extract_epi32(value, 5);
-			}
-			case 6: {
-				return _mm256_extract_epi32(value, 6);
-			}
-			case 7: {
-				return _mm256_extract_epi32(value, 7);
-			}
-			default: {
-				return _mm256_extract_epi32(value, 0);
-			}
-		}
-	}
 
 	/**
 	 * @brief A class for audio mixing operations using AVX2 instructions.
 	 */
 	class audio_mixer {
 	public:
-		/*
+
+		/**
 		 * @brief The number of 32-bit values per CPU register.
 		 */
 		inline static constexpr int32_t byte_blocks_per_register{ 8 };
-
-		/*
-		 * @brief Stores values from a 256-bit AVX2 vector to a storage location.
-		 * @tparam value_type The target value type for storage.
-		 * @param values_to_store The 256-bit AVX2 vector containing values to store.
-		 * @param storage_location Pointer to the storage location.
-		 */
-		template<typename value_type> inline static void store_values(const avx_2_int& values_to_store, value_type* storage_location) {
-			for (int64_t x = 0; x < byte_blocks_per_register; ++x) {
-				storage_location[x] = static_cast<value_type>(extract_int32_from_avx2(values_to_store, x));
-			}
-		}
-
-		/**
-		 * @brief Specialization for gathering non-float values into an AVX2 register.
-		 * @tparam value_type The type of values being gathered.
-		 * @tparam Indices Parameter pack of indices for gathering values.
-		 * @return An AVX2 register containing gathered values.
-		 */
-		template<typename value_type> inline static avx_2_float gather_values(value_type* values) {
-			alignas(32) float new_array[byte_blocks_per_register]{};
-			for (size_t x = 0; x < byte_blocks_per_register; ++x) {
-				new_array[x] = static_cast<float>(values[x]);
-			}
-			return _mm256_load_ps(new_array);
-		}
 
 		/**
 		 * @brief Collect a single register worth of data from data_in, apply gain and increment, and store the result in data_out.
@@ -129,7 +59,7 @@ namespace dpp {
 					_mm256_min_ps(current_samples_new, _mm256_set1_ps(static_cast<float>(std::numeric_limits<int16_t>::max()))),
 					_mm256_cmp_ps(current_samples_new, _mm256_set1_ps(0.0f), _CMP_GE_OQ));
 
-			store_values(_mm256_cvtps_epi32(current_samples_new), data_out);
+			store_values(current_samples_new, data_out);
 		}
 
 		/**
@@ -141,8 +71,48 @@ namespace dpp {
 		 * @param x Index to select a specific set of elements to combine.
 		 */
 		inline static void combine_samples(int32_t* up_sampled_vector, const int16_t* decoded_data) {
-			auto newValues{ _mm256_cvtps_epi32(_mm256_add_ps(gather_values(up_sampled_vector), gather_values(decoded_data))) };
+			auto newValues{ _mm256_add_ps(gather_values(up_sampled_vector), gather_values(decoded_data)) };
 			store_values(newValues, up_sampled_vector);
+		}
+
+	protected:
+
+		/**
+		 * @brief Stores values from a 256-bit AVX2 vector to a storage location.
+		 * @tparam value_type The target value type for storage.
+		 * @param values_to_store The 256-bit AVX2 vector containing values to store.
+		 * @param storage_location Pointer to the storage location.
+		 */
+		template<typename value_type> inline static void store_values(const avx_2_float& values_to_store, value_type* storage_location) {
+			for (int64_t x = 0; x < byte_blocks_per_register; ++x) {
+				storage_location[x] = static_cast<value_type>(extract_float_from_avx_2(values_to_store, x));
+			}
+		}
+
+		/**
+		 * @brief Specialization for gathering non-float values into an AVX2 register.
+		 * @tparam value_type The type of values being gathered.
+		 * @tparam Indices Parameter pack of indices for gathering values.
+		 * @return An AVX2 register containing gathered values.
+		 */
+		template<typename value_type> inline static avx_2_float gather_values(value_type* values) {
+			alignas(32) float new_array[byte_blocks_per_register]{};
+			for (uint64_t x = 0; x < byte_blocks_per_register; ++x) {
+				new_array[x] = static_cast<float>(values[x]);
+			}
+			return _mm256_load_ps(new_array);
+		}
+
+		/**
+		 * @brief Extracts a 32-bit integer from a 256-bit AVX2 register.
+		 * @param value The AVX2 register containing packed 32-bit integers.
+		 * @param index The index of the 32-bit integer to extract (0-7).
+		 * @return The extracted 32-bit integer.
+		 */
+		inline static float extract_float_from_avx_2(const avx_2_float& value, int64_t index) {
+			alignas(32) float new_array[byte_blocks_per_register]{};
+			_mm256_store_ps(new_array, value);
+			return new_array[index];
 		}
 	};
 
