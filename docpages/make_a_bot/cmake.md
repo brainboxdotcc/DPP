@@ -76,11 +76,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 ## 4. Build the bot.
 
-Now that we have all our CMake config setup and the D++ library downloaded, we can go ahead and get CMake ready to build. You'll want to go inside the `build/` directory and do `cmake ..`. Once that's completed, you'll want to head back to your up-most folder (where all the folders are for your bot).
+Now that we have our CMakeLists.txt setup and the D++ library downloaded, we can go ahead and get CMake ready to build (As long as you've added code to your `main.cpp` file inside `src/`!). You'll want to go inside the `build/` directory and do `cmake ..`. Once that's completed, you'll want to head back to your up-most folder (where all the folders are for your bot).
 
 Now, you can do `cmake --build build/ -j4` (replace -j4 with however many threads you want to use) and let your bot build!
 
 Once that's complete, you can head into `build/` and run your bot by doing `./discord-bot`!
 
 **Have fun!**
-
