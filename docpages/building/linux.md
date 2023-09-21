@@ -120,14 +120,13 @@ digraph "Example Directory" {
     libs -> "DPP";
     
     src -> "main.cpp";
-    src -> "main.h";
     src -> "more code...";
 }
 \enddot
 
 ## 3. Download DPP from GitHub
 
-Head into your `libs` folder and clone DPP with: `git clone https://github.com/brainboxdotcc/DPP`. Once that's complete, you're good to come out of that directory.
+Head into your `libs` folder and clone D++ with: `git clone https://github.com/brainboxdotcc/DPP`. Once that's complete, you're good to come out of that directory.
 
 ## 4. Configure CMake
 
@@ -172,7 +171,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 With our `CMakeLists.txt` setup, D++ downloaded, and code inside your `main.cpp`, we'll want to get CMake prepared. Head into your `build` directory and do `cmake ..`, This shouldn't take too long.
 
-When that's complete, come out of that directory and do `cmake --build build/ -j4` (replace -j4 with however many threads you want to use). This will start compiling your bot and placing the executable in the `build` directory!
+When that's complete, come out of that directory and do `cmake --build build/ -j4` (replace `-j4` with however many threads you want to use). This will start compiling your bot and placing the executable in the `build` directory!
 
 After that has finished, you can head into `build/` and run your bot by doing `./discord-bot`! If everything went well, you should see your bot come online!
 
