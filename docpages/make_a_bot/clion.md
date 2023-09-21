@@ -4,7 +4,7 @@
 
 ### Add an example program
 
-Open up CLion and go inside your `main.cpp` file. If you have code there, then you're one step ahead! If not, copy and paste the following \ref firstbot "example program" in the `main.cpp` and set your bot token (see \ref creating-a-bot-application). Here's how your `main.cpp` file should look:
+Open up CLion, open the folder for your bot, and then open your `main.cpp` file. If you have code there, then you're one step ahead! If not, copy and paste the following \ref firstbot "example program" in the `main.cpp` and set your bot token (see \ref creating-a-bot-application). Here's how your `main.cpp` file should look:
 
 \include{cpp} firstbot.cpp
 
@@ -12,6 +12,4 @@ Now, you can go ahead and hit the green "Run" button in the top-right to run the
 
 **Congratulations, you've successfully set up a bot!**
 
-## Troubleshooting
-
-- Stuck? You can find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
+Are you stuck? Come find us on the [official discord server](https://discord.gg/dpp) - ask away! We don't bite!
