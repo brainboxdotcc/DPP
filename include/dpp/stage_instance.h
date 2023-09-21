@@ -43,7 +43,7 @@ enum stage_privacy_level : uint8_t {
  * @brief A stage instance.
  * Stage instances are like a conference facility, with moderators/speakers and listeners.
  */
-struct DPP_EXPORT stage_instance : public managed, public json_interface<stage_instance>  {
+struct DPP_EXPORT stage_instance : public managed<stage_instance>, public json_interface<stage_instance>  {
 	/// The guild id of the associated Stage channel
 	snowflake guild_id;
 	/// The id of the associated Stage channel
@@ -54,6 +54,8 @@ struct DPP_EXPORT stage_instance : public managed, public json_interface<stage_i
 	stage_privacy_level privacy_level;
 	/// Whether or not Stage Discovery is disabled
 	bool discoverable_disabled;
+	/** Unique identifier */
+	snowflake id;
 
 	/**
 	 * @brief Create a stage_instance object

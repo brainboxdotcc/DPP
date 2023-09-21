@@ -26,26 +26,25 @@
 
 namespace dpp {
 
+	class managed_base {};
+
 	/** @brief The managed class is the base class for various types that can
 	 * be stored in a cache that are identified by a dpp::snowflake id.
 	 */
-	class DPP_EXPORT managed {
+	template<typename derived_type> class managed : public managed_base {
 	public:
-		/**
-		 * @brief Unique ID of object set by Discord.
-		 * This value contains a timestamp, worker ID, internal server ID, and an incrementing value.
-		 * Only the timestamp is relevant to us as useful metadata.
-		 */
-		snowflake id;
+		/*
+		* @brief Default constructor.
+		*/
+		inline managed() noexcept = default;
+
 		/**
 		 * @brief Constructor, initialises ID
 		 * @param nid ID to set
 		 */
-		managed(const snowflake nid = 0);
-		/**
-		 * @brief Destroy the managed object
-		 */
-		virtual ~managed() = default;
+		inline managed(const snowflake nid) {
+			static_cast<derived_type*>(this)->id = nid;
+		}
 
 		/**
 		 * @brief Get the creation time of this object according to Discord.
@@ -53,7 +52,9 @@ namespace dpp {
 		 * @return double creation time inferred from the snowflake ID.
 		 * The minimum possible value is the first second of 2015.
 		 */
-		double get_creation_time() const;
+		inline double get_creation_time() const {
+			return static_cast<const derived_type*>(this)->id.get_creation_time();
+		}
 
 		/**
 		 * @brief Comparison operator for comparing two managed objects by id
@@ -62,7 +63,9 @@ namespace dpp {
 		 * @return true objects are the same id
 		 * @return false objects are not the same id
 		 */
-		bool operator==(const managed& other) const noexcept;
+		inline bool operator==(const managed& other) const noexcept {
+			return static_cast<const derived_type*>(this)->id == static_cast<const derived_type*>(&other)->id;
+		}
 
 		/**
 		 * @brief Comparison operator for comparing two managed objects by id
@@ -71,7 +74,9 @@ namespace dpp {
 		 * @return true objects are not the same id
 		 * @return false objects are the same id
 		 */
-		bool operator!=(const managed& other) const noexcept;
+		inline bool operator!=(const managed& other) const noexcept {
+			return static_cast<const derived_type*>(this)->id != static_cast<const derived_type*>(&other)->id;
+		}
 	};
 
 } // namespace dpp

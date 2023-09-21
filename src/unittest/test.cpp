@@ -628,8 +628,8 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	{
 		set_test(TS, false);
-		dpp::managed m(189759562910400512);
-		set_test(TS, ((uint64_t) m.get_creation_time()) == 1465312605);
+		dpp::managed<test_cached_object_t> m(189759562910400512);
+		set_test(TS, ((uint64_t)m.get_creation_time()) == 1465312605);
 	}
 
 	{

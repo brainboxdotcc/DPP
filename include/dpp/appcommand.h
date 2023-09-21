@@ -675,7 +675,7 @@ void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
  * into the events on_form_submit, on_slashcommand, on_user_context_menu,
  * on_button_click, on_select_menu, etc.
  */
-class DPP_EXPORT interaction : public managed, public json_interface<interaction>  {
+class DPP_EXPORT interaction : public managed<interaction>, public json_interface<interaction>  {
 
 	/**
 	 * @brief Get a resolved object from the resolved set
@@ -705,6 +705,7 @@ public:
 	snowflake message_id;					    //!< Originating message id for context menu actions
 	permission app_permissions;				    //!< Permissions of the bot in the channel/guild where this command was issued
 	message msg;						    //!< Originating message for context menu actions
+	snowflake id;							//! Unique identifier.
 	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions. Filled when the interaction is invoked in a guild
 	user usr;                                                   //!< User object for the invoking user
 	std::string token;                                          //!< a continuation token for responding to the interaction
@@ -996,12 +997,15 @@ void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
  */
-class DPP_EXPORT slashcommand : public managed, public json_interface<slashcommand>  {
+class DPP_EXPORT slashcommand : public managed<slashcommand>, public json_interface<slashcommand>  {
 public:
 	/**
 	 * @brief Application id (usually matches your bots id)
 	 */
 	snowflake application_id;
+
+	/** Unique identifier */
+	snowflake id;
 
 	/**
 	 * @brief Context menu type, defaults to dpp::ctxm_chat_input

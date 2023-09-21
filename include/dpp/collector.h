@@ -151,8 +151,10 @@ public:
  * @brief Represents a reaction.
  * Can be filled for use in a collector
  */
-class collected_reaction : public managed {
+class collected_reaction : public managed<collected_reaction> {
 public:
+	/// Unique identifier.
+	snowflake id;
 	/// Reacting user
 	user react_user;
 	/// Reacting guild

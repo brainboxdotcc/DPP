@@ -250,10 +250,11 @@ DPP_TEST(CORO_MUMBO_JUMBO, "coro: online mumbo jumbo in event handler", tf_onlin
 void coro_offline_tests();
 void coro_online_tests(dpp::cluster *bot);
 
-class test_cached_object_t : public dpp::managed {
+class test_cached_object_t : public dpp::managed<test_cached_object_t> {
 public:
-	test_cached_object_t(dpp::snowflake _id) : dpp::managed(_id) { };
+	test_cached_object_t(dpp::snowflake _id) : dpp::managed<test_cached_object_t>(_id) { };
 	virtual ~test_cached_object_t() = default;
+	dpp::snowflake id;
 	std::string foo;
 };
 

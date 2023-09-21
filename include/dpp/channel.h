@@ -197,13 +197,15 @@ struct DPP_EXPORT thread_member
 /**
  * @brief Represents a tag that is able to be applied to a thread in a forum or media channel
  */
-struct DPP_EXPORT forum_tag : public managed, public json_interface<forum_tag> {
+struct DPP_EXPORT forum_tag : public managed<forum_tag>, public json_interface<forum_tag> {
 	/** The name of the tag (0-20 characters) */
 	std::string name;
 	/** The emoji of the tag. Contains either nothing, the id of a guild's custom emoji or the unicode character of the emoji */
 	std::variant<std::monostate, snowflake, std::string> emoji;
 	/** Whether this tag can only be added to or removed from threads by a member with the `MANAGE_THREADS` permission */
 	bool moderated;
+	/** id of the channel the message was sent in */
+	snowflake id;
 
 	/** Constructor */
 	forum_tag();
@@ -254,10 +256,13 @@ typedef std::unordered_map<snowflake, thread_member> thread_member_map;
  * There are one of these for every channel type except threads. Threads are
  * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
  */ 
-class DPP_EXPORT channel : public managed, public json_interface<channel>  {
+class DPP_EXPORT channel : public managed<channel>, public json_interface<channel>  {
 public:
 	/** Channel name (1-100 characters) */
 	std::string name;
+
+	/** Unique identifier */
+	snowflake id;
 
 	/** Channel topic (0-4096 characters for forum and media channels, 0-1024 characters for all others) */
 	std::string topic;

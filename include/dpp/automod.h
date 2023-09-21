@@ -295,7 +295,7 @@ struct DPP_EXPORT automod_action : public json_interface<automod_action> {
 /**
  * @brief Represents an automod rule
  */
-class DPP_EXPORT automod_rule : public managed, public json_interface<automod_rule> {
+class DPP_EXPORT automod_rule : public managed<automod_rule>, public json_interface<automod_rule> {
 public:
 	/**
 	 * @brief the id of this rule

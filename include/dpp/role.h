@@ -49,7 +49,7 @@ enum role_flags : uint8_t {
  * ID as the guild's ID. This is the base permission set applied to all users where no other role or override
  * applies, and is the starting value of the bit mask looped through to calculate channel permissions.
  */
-class DPP_EXPORT role : public managed, public json_interface<role>  {
+class DPP_EXPORT role : public managed<role>, public json_interface<role>  {
 public:
 	/**
 	 * @brief Role name
@@ -60,6 +60,10 @@ public:
 	 * @brief Guild ID
 	 */
 	snowflake guild_id;
+
+	/** Unique identifier */
+	snowflake id;
+
 	/**
 	 * @brief Role colour.
 	 * A colour of 0 means no colour. If you want a black role,

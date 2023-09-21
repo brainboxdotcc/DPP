@@ -29,8 +29,7 @@
 #include <shared_mutex>
 
 namespace dpp {
-
-extern DPP_EXPORT std::unordered_map<managed*, time_t> deletion_queue;
+extern DPP_EXPORT std::unordered_map<managed_base*, time_t> deletion_queue;
 extern DPP_EXPORT std::mutex deletion_mutex;
 
 /** forward declaration */

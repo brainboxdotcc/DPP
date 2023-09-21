@@ -587,7 +587,7 @@ typedef std::unordered_map<snowflake, guild_member> members_container;
 /**
  * @brief Represents a guild on Discord (AKA a server)
  */
-class DPP_EXPORT guild : public managed, public json_interface<guild>  {
+class DPP_EXPORT guild : public managed<guild>, public json_interface<guild>  {
 public:
 	/** Guild name */
 	std::string name;
@@ -608,6 +608,9 @@ public:
 
 	/** List of channels on this server */
 	std::vector<snowflake> channels;
+
+	/** Unique identifier */
+	snowflake id{};
 
 	/** List of threads on this server */
 	std::vector<snowflake> threads;
@@ -1158,12 +1161,14 @@ enum onboarding_prompt_flags: uint8_t {
 /**
  * @brief Represents an onboarding prompt option
  */
-struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interface<onboarding_prompt_option> {
+struct DPP_EXPORT onboarding_prompt_option: public managed<onboarding_prompt_option>, public json_interface<onboarding_prompt_option> {
 	std::vector<snowflake> channel_ids; //!< IDs for channels a member is added to when the option is selected
 	std::vector<snowflake> role_ids; //!< IDs for roles assigned to a member when the option is selected
 	dpp::emoji emoji; //!< Emoji of the option
 	std::string title; //!< Title of the option
 	std::string description; //!< Description of the option
+	/** Unique identifier */
+	snowflake id;
 
 	/**
 	 * @brief Construct a new onboarding prompt option object
@@ -1219,11 +1224,13 @@ struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interfac
 /**
  * @brief Represents an onboarding prompt
  */
-struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboarding_prompt> {
+struct DPP_EXPORT onboarding_prompt: public managed<onboarding_prompt>, public json_interface<onboarding_prompt> {
 	onboarding_prompt_type type; //!< Type of prompt (defaults to dpp::opt_multiple_choice)
 	std::vector<onboarding_prompt_option> options; //!< Options available within the prompt
 	std::string title; //!< Title of the prompt
 	uint8_t flags; //!< A set of flags built from the bitmask defined by dpp::onboarding_prompt_flags
+	/** Unique identifier */
+	snowflake id;
 
 	/**
 	 * @brief Construct a new onboarding prompt object

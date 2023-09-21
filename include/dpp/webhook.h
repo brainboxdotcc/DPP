@@ -41,7 +41,7 @@ enum webhook_type {
 /**
  * @brief Represents a discord webhook
  */
-class DPP_EXPORT webhook : public managed, public json_interface<webhook>  {
+class DPP_EXPORT webhook : public managed<webhook>, public json_interface<webhook>  {
 public:
 	uint8_t type;   		//!< the type of the webhook
 	snowflake guild_id;     	//!< Optional: the guild id this webhook is for
@@ -52,6 +52,8 @@ public:
 	std::string token;		//!< Optional: the secure token of the webhook (returned for Incoming Webhooks)
 	snowflake application_id;	//!< the bot/OAuth2 application that created this webhook (may be empty)
 	std::string* image_data;	//!< base64 encoded image data if uploading a new image
+	/** Unique identifier */
+	snowflake id;
 
 	/**
 	 * @brief Construct a new webhook object

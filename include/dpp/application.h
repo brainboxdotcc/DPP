@@ -116,7 +116,7 @@ public:
 /**
  * @brief The application class represents details of a bot application
  */
-class DPP_EXPORT application : public managed, public json_interface<application>  {
+class DPP_EXPORT application : public managed<application>, public json_interface<application>  {
 public:
 	std::string		name;			//!< the name of the app
 	utility::iconhash	icon;			//!< the icon hash of the app (may be empty)
@@ -139,6 +139,7 @@ public:
 	application_install_params install_params;	//!< Settings for the application's default in-app authorization link, if enabled
 	std::string custom_install_url;	//!< The application's default custom authorization link, if enabled
 	std::string role_connections_verification_url; //!< The application's role connection verification entry point, which when configured will render the app as a verification method in the guild role verification configuration
+	snowflake id;
 
 	/** Constructor */
 	application();

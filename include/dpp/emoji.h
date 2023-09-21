@@ -50,12 +50,16 @@ enum emoji_flags : uint8_t {
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class DPP_EXPORT emoji : public managed, public json_interface<emoji>  {
+class DPP_EXPORT emoji : public managed<emoji>, public json_interface<emoji>  {
 public:
 	/**
 	 * @brief Emoji name
 	 */
 	std::string name{};
+	/**
+	 * @brief Unique identifier.
+	 */
+	snowflake id{};
 	/**
 	 * @brief User id who uploaded the emoji
 	 */
@@ -100,7 +104,7 @@ public:
 	/**
 	 * @brief Destroy the emoji object
 	 */
-	~emoji() override = default;
+	~emoji() = default;
 
 	/**
 	 * @brief Copy assignment operator, copies another emoji's data

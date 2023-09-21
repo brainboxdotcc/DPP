@@ -85,7 +85,7 @@ enum user_flags : uint32_t {
 /**
  * @brief Represents a user on discord. May or may not be a member of a dpp::guild.
  */
-class DPP_EXPORT user : public managed, public json_interface<user>  {
+class DPP_EXPORT user : public managed<user>, public json_interface<user>  {
 public:
 	/** Discord username */
 	std::string username;
@@ -93,6 +93,8 @@ public:
 	std::string global_name;
 	/** Avatar hash */
 	utility::iconhash avatar;
+	/** Unique identifier */
+	snowflake id;
 	/** Avatar decoration hash */
 	utility::iconhash avatar_decoration;
 	/** Flags built from a bitmask of values in dpp::user_flags */
