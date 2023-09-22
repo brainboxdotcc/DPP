@@ -21,20 +21,116 @@
  ************************************************************************************/
 
 #pragma once
-#include <dpp/export.h>
 #include <dpp/snowflake.h>
+#include <dpp/exception.h>
+#include <dpp/channel.h>
 #include <dpp/managed.h>
 #include <unordered_map>
+#include <dpp/export.h>
+#include <dpp/emoji.h>
+#include <dpp/guild.h>
+#include <dpp/user.h>
+#include <dpp/role.h>
+#include <typeindex>
 #include <mutex>
-#include <shared_mutex>
 
 namespace dpp {
 
+class cache_registry;
+
+extern DPP_EXPORT std::unordered_map<std::type_index, cache_registry*> regs;
 extern DPP_EXPORT std::unordered_map<managed*, time_t> deletion_queue;
 extern DPP_EXPORT std::mutex deletion_mutex;
 
+template<typename T> class cache;
+
+/**
+ * @brief The `cache_registry` class defines an abstract base class for cache objects.
+ *
+ * It provides a mechanism for registering, managing, and performing garbage collection
+ * on cache objects. Cache objects must inherit from this class and implement the
+ * required functions.
+ */
+class cache_registry {
+public:
+	/**
+	 * @brief Pure virtual function for performing garbage collection.
+	 */
+	virtual void garbage_collection() = 0;
+
+	/**
+	 * @brief Pure virtual function to get the type index for a cache.
+	 * @return Type index representing the cache's type.
+	 */
+	virtual std::type_index get_type_index() const = 0;
+
+	/**
+	 * @brief Static method to register a cache object.
+	 * @param registry A pointer to the cache_registry object to register.
+	 */
+	static void register_cache(cache_registry* registry) {
+		auto type_index = registry->get_type_index();
+		if (registries().find(type_index) != registries().end()) {
+			throw cache_exception{ "Sorry, but there was already a cache by that type that has been registered." };
+		}
+		registries()[registry->get_type_index()] = registry;
+	}
+
+	/**
+	 * @brief Static method to call garbageCollection for all registered caches.
+	 * This method invokes garbage collection on all registered cache objects.
+	 */
+	static void call_garbage_collection() {
+		for (auto& [key, value] : registries()) {
+			value->garbage_collection();
+		}
+	}
+
+	/**
+	 * @brief Static method to retrieve a cache object by type.
+	 *
+	 * @tparam T The type of the cache to retrieve.
+	 * @return A pointer to the cache object of type T if found, or nullptr if not found.
+	 */
+	template <typename T>
+	static cache<T>* get_cache() {
+		std::type_index typeIndex(typeid(T));
+		for (auto& [key,value]: registries()) {
+			if (value->get_type_index() == typeIndex) {
+				return static_cast<cache<T>*>(value);
+			}
+		}
+		// If cache of type T not found, create and register a new one, then return it.
+		register_cache(new cache<T>{});
+		return get_cache<T>();
+	}
+
+private:
+	/**
+	 * @brief Static vector to store registered cache objects.
+	 * This vector holds pointers to all registered cache objects.
+	 */
+	static std::unordered_map<std::type_index, cache_registry*>& registries() {
+		return regs;
+	}
+};
+
 /** forward declaration */
 class guild_member;
+class channel;
+class guild;
+class emoji;
+class user;
+class role;
+
+#define cache_decl(type, setter, getter, counter) /** Find an object in the cache by id. @return type* Pointer to the object or nullptr when it's not found */ DPP_EXPORT class type * setter (snowflake id); DPP_EXPORT cache<class type> * getter (); /** Get the amount of cached type objects. */ DPP_EXPORT uint64_t counter ();
+
+/* Declare major caches */
+cache_decl(user, find_user, get_user_cache, get_user_count);
+cache_decl(guild, find_guild, get_guild_cache, get_guild_count);
+cache_decl(role, find_role, get_role_cache, get_role_count);
+cache_decl(channel, find_channel, get_channel_cache, get_channel_count);
+cache_decl(emoji, find_emoji, get_emoji_cache, get_emoji_count);
 
 /**
  * @brief A cache object maintains a cache of dpp::managed objects.
@@ -47,7 +143,7 @@ class guild_member;
  * designed with thread safety in mind.
  * @tparam T class type to store, which should be derived from dpp::managed.
  */
-template<class T> class cache {
+template<class T> class cache : public cache_registry {
 private:
 	/**
 	 * @brief Mutex to protect the cache
@@ -62,12 +158,18 @@ private:
 	std::unordered_map<snowflake, T*>* cache_map;
 public:
 
+	// Implement the get_type_index function
+	std::type_index get_type_index() const override {
+		return std::type_index(typeid(T));
+	}
+
 	/**
 	 * @brief Construct a new cache object.
 	 * 
 	 * Caches must contain classes derived from dpp::managed.
 	 */
 	cache() {
+		cache_registry::register_cache(this);
 		cache_map = new std::unordered_map<snowflake, T*>;
 	}
 
@@ -241,6 +343,50 @@ public:
 		cache_map = n;
 	}
 
+	/** Run garbage collection across all caches removing deleted items
+	 * that have been deleted over 60 seconds ago.
+	 */
+	/* Because other threads and systems may run for a short while after an event is received, we don't immediately
+	 * delete pointers when objects are replaced. We put them into a queue, and periodically delete pointers in the
+	 * queue. This also rehashes unordered_maps to ensure they free their memory.
+     */
+	inline void garbage_collection() {
+		time_t now = time(nullptr);
+		bool repeat = false;
+		{
+			std::lock_guard<std::mutex> delete_lock(deletion_mutex);
+			do {
+				repeat = false;
+				for (auto g = deletion_queue.begin(); g != deletion_queue.end(); ++g) {
+					if (now > g->second + 60) {
+						delete static_cast<const T*>(g->first);
+						deletion_queue.erase(g);
+						repeat = true;
+						break;
+					}
+				}
+			} while (repeat);
+			if (deletion_queue.size() == 0) {
+				deletion_queue = {};
+			}
+		}
+		if constexpr (std::is_same_v<emoji, T>) { 
+			dpp::get_emoji_cache()->rehash();
+		}
+		else if constexpr (std::is_same_v<role, T>) {
+			dpp::get_role_cache()->rehash();
+		}
+		else if constexpr (std::is_same_v<channel, T>) {
+			dpp::get_channel_cache()->rehash();
+		}
+		else if constexpr (std::is_same_v<guild, T>) {
+			dpp::get_guild_cache()->rehash();
+		}
+		else if constexpr (std::is_same_v<user, T>) {
+			dpp::get_user_cache()->rehash();
+		}
+	}
+
 	/**
 	 * @brief Get "real" size in RAM of the cached objects
 	 * 
@@ -255,19 +401,6 @@ public:
 
 };
 
-/** Run garbage collection across all caches removing deleted items
- * that have been deleted over 60 seconds ago.
- */
-void DPP_EXPORT garbage_collection();
-
-#define cache_decl(type, setter, getter, counter) /** Find an object in the cache by id. @return type* Pointer to the object or nullptr when it's not found */ DPP_EXPORT class type * setter (snowflake id); DPP_EXPORT cache<class type> * getter (); /** Get the amount of cached type objects. */ DPP_EXPORT uint64_t counter ();
-
-/* Declare major caches */
-cache_decl(user, find_user, get_user_cache, get_user_count);
-cache_decl(guild, find_guild, get_guild_cache, get_guild_count);
-cache_decl(role, find_role, get_role_cache, get_role_count);
-cache_decl(channel, find_channel, get_channel_cache, get_channel_count);
-cache_decl(emoji, find_emoji, get_emoji_cache, get_emoji_count);
 
 } // namespace dpp
 

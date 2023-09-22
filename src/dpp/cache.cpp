@@ -28,56 +28,20 @@
 
 namespace dpp {
 
+std::unordered_map<std::type_index, cache_registry*> regs;
 std::unordered_map<managed*, time_t> deletion_queue;
 std::mutex deletion_mutex;
 
 #define cache_helper(type, cache_name, setter, getter, counter) \
-cache<type>* cache_name = nullptr; \
 type * setter (snowflake id) { \
-		return cache_name ? ( type * ) cache_name ->find(id) : nullptr; \
+		return ( type * ) cache_registry::get_cache<type>()->find(id); \
 } \
 cache<type>* getter () { \
-	if (! cache_name ) { \
-		cache_name = new cache<type>(); \
-	} \
-	return cache_name ; \
+	return cache_registry::get_cache<type>(); \
 } \
 uint64_t counter () { \
-	return ( cache_name ? cache_name ->count() : 0 ); \
+	return cache_registry::get_cache<type>()->count() ; \
 }
-
-
-/* Because other threads and systems may run for a short while after an event is received, we don't immediately
- * delete pointers when objects are replaced. We put them into a queue, and periodically delete pointers in the
- * queue. This also rehashes unordered_maps to ensure they free their memory.
- */
-void garbage_collection() {
-	time_t now = time(nullptr);
-	bool repeat = false;
-	{
-		std::lock_guard<std::mutex> delete_lock(deletion_mutex);
-		do {
-			repeat = false;
-			for (auto g = deletion_queue.begin(); g != deletion_queue.end(); ++g) {
-				if (now > g->second + 60) {
-					delete g->first;
-					deletion_queue.erase(g);
-					repeat = true;
-					break;
-				}
-			}
-		} while (repeat);
-		if (deletion_queue.size() == 0) {
-			deletion_queue = {};
-		}
-	}
-	dpp::get_user_cache()->rehash();
-	dpp::get_channel_cache()->rehash();
-	dpp::get_guild_cache()->rehash();
-	dpp::get_role_cache()->rehash();
-	dpp::get_emoji_cache()->rehash();
-}
-
 
 cache_helper(user, user_cache, find_user, get_user_cache, get_user_count);
 cache_helper(channel, channel_cache, find_channel, get_channel_cache, get_channel_count);

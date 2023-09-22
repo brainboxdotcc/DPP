@@ -505,7 +505,7 @@ void discord_client::one_second_timer()
 			creator->tick_timers();
 
 			if ((time(nullptr) % 60) == 0) {
-				dpp::garbage_collection();
+				cache_registry::call_garbage_collection();
 			}
 		}
 	}

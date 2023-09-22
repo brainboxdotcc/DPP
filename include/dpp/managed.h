@@ -42,10 +42,6 @@ namespace dpp {
 		 * @param nid ID to set
 		 */
 		managed(const snowflake nid = 0);
-		/**
-		 * @brief Destroy the managed object
-		 */
-		virtual ~managed() = default;
 
 		/**
 		 * @brief Get the creation time of this object according to Discord.
@@ -72,6 +68,12 @@ namespace dpp {
 		 * @return false objects are the same id
 		 */
 		bool operator!=(const managed& other) const noexcept;
+
+	protected:
+		/**
+		 * @brief Destroy the managed object
+		 */
+		~managed() = default;
 	};
 
 } // namespace dpp

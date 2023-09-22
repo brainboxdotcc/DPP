@@ -100,7 +100,7 @@ public:
 	/**
 	 * @brief Destroy the emoji object
 	 */
-	~emoji() override = default;
+	~emoji() = default;
 
 	/**
 	 * @brief Copy assignment operator, copies another emoji's data

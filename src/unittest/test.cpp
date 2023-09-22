@@ -628,8 +628,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	{
 		set_test(TS, false);
-		dpp::managed m(189759562910400512);
-		set_test(TS, ((uint64_t) m.get_creation_time()) == 1465312605);
+		dpp::user m{}; 
+		m.id = 189759562910400512;
+		set_test(TS, ((uint64_t)m.get_creation_time()) == 1465312605);
 	}
 
 	{
@@ -1349,7 +1350,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		bool message_edit_tested = false;
 		bot.on_message_update([&](const dpp::message_update_t &event) {
-			if (event.msg.author == bot.me.id) {
+			if (event.msg.author.id == bot.me.id) {
 				if (event.msg.content == "test edit" && !message_edit_tested) {
 					message_edit_tested = true;
 					set_test(EDITEVENT, true);
