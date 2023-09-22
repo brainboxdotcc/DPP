@@ -18,9 +18,16 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#ifndef _XOPEN_SOURCE
-	#define _XOPEN_SOURCE
+
+/* OpenBSD errors when xopen_source is defined.
+ * We want to make sure that OpenBSD does not define it.
+ */
+#if !defined(__OpenBSD__)
+	#ifndef _XOPEN_SOURCE
+		#define _XOPEN_SOURCE
+	#endif
 #endif
+
 #include <string>
 #include <iostream>
 #include <fstream>
