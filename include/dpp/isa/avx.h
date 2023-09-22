@@ -97,7 +97,7 @@ namespace dpp {
 			for (uint64_t x = 0; x < byte_blocks_per_register; ++x) {
 				new_array[x] = static_cast<float>(values[x]);
 			}
-			return _mm256_load_ps(new_array);
+			return _mm_load_ps(new_array);
 		}
 
 		/**
