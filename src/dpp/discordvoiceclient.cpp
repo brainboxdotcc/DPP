@@ -406,9 +406,14 @@ void discord_voice_client::thread_run()
 		ssl_client::read_loop();
 		ssl_client::close();
 
-		/* This will prevent us from looping too much, meaning error codes do not cause an infinite loop. */
 		time_t current_time = time(nullptr);
-		if(current_time - time_since_loop >= 5000) {
+		/* Here, we check if it's been longer than 3 seconds since the previous loop, 
+		 * this gives us time to see if it's an actual disconnect, or an error.
+		 * This will prevent us from looping too much, meaning error codes do not cause an infinite loop.
+		 */
+		log(dpp::ll_debug, "current time: " + std::string(current_time));
+		log(dpp::ll_debug, "time_since_loop: " + std::string(time_since_loop));
+		if(current_time - time_since_loop >= 3000) {
 			times_looped = 0;
 		}
 		/* This does mean we'll always have times_looped at a minimum of 1, this is intended. */
