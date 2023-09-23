@@ -397,11 +397,31 @@ bool discord_voice_client::is_playing() {
 void discord_voice_client::thread_run()
 {
 	utility::set_thread_name(std::string("vc/") + std::to_string(server_id));
+
+	int times_looped;
+	time_t time_since_loop;
+
 	do {
 		bool error = false;
 		ssl_client::read_loop();
 		ssl_client::close();
+
+		/* This will prevent us from looping too much, meaning error codes do not cause an infinite loop. */
+		time_t current_time = time(nullptr);
+		if(current_time - time_since_loop >= 5000) {
+			times_looped = 0;
+		}
+		/* This does mean we'll always have times_looped at a minimum of 1, this is intended. */
+		times_looped += 1;
+		/* If we've looped 5 or more times, abort the loop. */
+		if(times_looped >= 5) {
+			log(dpp::ll_warning, "Reached max loops whilst attempting to read from the websocket. Aborting websocket.");
+			break;
+		}
+		time_since_loop = current_time;
+
 		if (!terminating) {
+			log(dpp::ll_debug, "Attempting to reconnect the websocket...");
 			do {
 				try {
 					ssl_client::connect();

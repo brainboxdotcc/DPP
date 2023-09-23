@@ -67,6 +67,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <chrono>
+#include <regex>
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 #include <dpp/utility.h>
@@ -504,6 +505,14 @@ void ssl_client::read_loop()
 							case SSL_ERROR_NONE:
 								/* Data received, add it to the buffer */
 								if (r > 0) {
+									std::string data(server_to_client_buffer, r);
+									std::smatch matches;
+
+									if(std::regex_search(data, matches, std::regex(R"(^(HTTP\/1\.1 .+))"))) {
+										if(matches.str(1).find("204") == std::string::npos && matches.str(1).find("101") == std::string::npos && matches.str(1).find("200") == std::string::npos)
+											log(ll_warning, "Received unhandled code: " + matches.str(1));
+									}
+
 									buffer.append(server_to_client_buffer, r);
 									if (!this->handle_buffer(buffer)) {
 										return;

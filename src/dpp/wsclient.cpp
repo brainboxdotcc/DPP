@@ -52,7 +52,7 @@ void websocket_client::connect()
 		"GET " + this->path + " HTTP/1.1\r\n"
 		"Host: " + this->hostname + "\r\n"
 		"pragma: no-cache\r\n"
-		"User-Agent: DPP/0.1\r\n"
+		"User-Agent: " + "DiscordBot (https://github.com/brainboxdotcc/DPP, 16.0.38)" + "\r\n"
 		"Upgrade: WebSocket\r\n"
 		"Connection: Upgrade\r\n"
 		"Sec-WebSocket-Key: " + this->key + "\r\n"
