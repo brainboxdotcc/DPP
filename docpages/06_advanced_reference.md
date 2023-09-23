@@ -2,6 +2,7 @@
 
 * \subpage clusters-shards-guilds "Clusters, Shards and Guilds"
 * \subpage thread-model "Thread Model"
+* \subpage voice-model
 * \subpage coding-standards
 * \subpage unit-tests "Unit Tests"
 * \subpage lambdas-and-locals "Ownership of local variables and safely transferring into a lambda"
