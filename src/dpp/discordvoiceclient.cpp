@@ -398,7 +398,7 @@ void discord_voice_client::thread_run()
 {
 	utility::set_thread_name(std::string("vc/") + std::to_string(server_id));
 
-	int times_looped;
+	size_t times_looped;
 	time_t time_since_loop;
 
 	do {
