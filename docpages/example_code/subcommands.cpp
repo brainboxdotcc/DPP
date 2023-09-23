@@ -14,13 +14,13 @@ int main() {
 			dpp::slashcommand image("image", "Send a specific image.", bot.me.id);
 			image.add_option(
 				/* Create a subcommand type option for "dog". */
-				dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.").
-				add_option(dpp::command_option(dpp::co_user, "user", "User to turn into a dog.", false))
+				dpp::command_option(dpp::co_sub_command, "dog", "Send a picture of a dog.")
+					.add_option(dpp::command_option(dpp::co_user, "user", "User to turn into a dog.", false))
 			);
 			image.add_option(
 				/* Create another subcommand type option for "cat". */
-				dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.").
-				add_option(dpp::command_option(dpp::co_user, "user", "User to turn into a cat.", false))
+				dpp::command_option(dpp::co_sub_command, "cat", "Send a picture of a cat.")
+					.add_option(dpp::command_option(dpp::co_user, "user", "User to turn into a cat.", false))
 			);
 			/* Create command */
 			bot.global_command_create(image);
