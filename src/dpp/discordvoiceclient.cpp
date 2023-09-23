@@ -398,8 +398,8 @@ void discord_voice_client::thread_run()
 {
 	utility::set_thread_name(std::string("vc/") + std::to_string(server_id));
 
-	size_t times_looped;
-	time_t time_since_loop;
+	size_t times_looped = 0;
+	time_t last_loop_time = time(nullptr);
 
 	do {
 		bool error = false;
@@ -411,7 +411,7 @@ void discord_voice_client::thread_run()
 		 * this gives us time to see if it's an actual disconnect, or an error.
 		 * This will prevent us from looping too much, meaning error codes do not cause an infinite loop.
 		 */
-		if(current_time - time_since_loop >= 3) {
+		if(current_time - last_loop_time >= 3) {
 			times_looped = 0;
 		}
 		/* This does mean we'll always have times_looped at a minimum of 1, this is intended. */
@@ -421,7 +421,7 @@ void discord_voice_client::thread_run()
 			log(dpp::ll_warning, "Reached max loops whilst attempting to read from the websocket. Aborting websocket.");
 			break;
 		}
-		time_since_loop = current_time;
+		last_loop_time = current_time;
 
 		if (!terminating) {
 			log(dpp::ll_debug, "Attempting to reconnect the websocket...");
