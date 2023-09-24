@@ -613,6 +613,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 dpp::utility::thread_url(1,0) == "" &&
 				 dpp::utility::thread_url(0,0) == "" 
 		);
+
+		set_test(UTILITY_HEX_TO_STR, false);
+		set_test(UTILITY_HEX_TO_STR,
+				dpp::utility::hex_to_str(0x10) == "10" &&
+				dpp::utility::hex_to_str(0x00) == "0" &&
+				dpp::utility::hex_to_str(0x26) == "26" &&
+				dpp::utility::hex_to_str(0x02) == "2");
 	}
 
 #ifndef _WIN32

@@ -741,5 +741,7 @@ namespace dpp {
 			std::array<std::byte, sizeof(T)> data;
 		};
 
+		std::string hex_to_str(long h);
+
 	} // namespace utility
 } // namespace dpp

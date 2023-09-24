@@ -29,7 +29,6 @@
 #include <thread>
 #include <functional>
 #include <chrono>
-#include <ctime>
 #include <algorithm>
 #include <fstream>
 #include <streambuf>
@@ -771,6 +770,12 @@ namespace dpp {
 					#endif
 				#endif
 			#endif
+		}
+
+		std::string hex_to_str(long h) {
+			std::stringstream s;
+			s << std::hex << h;
+			return s.str();
 		}
     } // namespace utility
 
