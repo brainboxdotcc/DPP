@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <charconv>
 
 namespace dpp {
 /**
@@ -189,10 +190,9 @@ template <int> int from_string(const std::string &s)
  */
 template <typename T> std::string to_hex(T i)
 {
-	std::stringstream stream;
-	stream.imbue(std::locale::classic());
-	stream << std::setfill('0') << std::setw(sizeof(T)*2) << std::hex << i;
-	return stream.str();
+	char str[26] = { 0 };
+	std::to_chars(std::begin(str), std::end(str), i, 16);
+	return std::string{str};
 }
 
 /**
