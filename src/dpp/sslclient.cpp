@@ -505,12 +505,18 @@ void ssl_client::read_loop()
 								/* Data received, add it to the buffer */
 								if (r > 0) {
 									const std::string data(server_to_client_buffer, r);
-									const std::vector<std::string>& data_lines = utility::tokenize(data);
+									const std::vector<std::string> data_lines = utility::tokenize(data);
 									const std::string& http_reponse(data_lines[0]);
 
-									/* Does the first line begin with a http code and does it not contain either 204, 101 or 200? */
-									if(http_reponse.rfind("HTTP/1.1", 0) != std::string::npos && http_reponse.find("204") == std::string::npos && http_reponse.find("101") == std::string::npos && http_reponse.find("200") == std::string::npos) {
-										log(ll_warning, "Received unhandled code: " + http_reponse);
+									/* Does the first line begin with a http code? */
+									if(http_reponse.rfind("HTTP/1.1", 0) != std::string::npos) {
+										/* Now let's split the first line by every space, meaning we can check the actual HTTP code. */
+										const std::vector<std::string> line_split_by_space = utility::tokenize(data_lines[0], " ");
+										const std::string& http_code(line_split_by_space[1]);
+
+										/* Does the http code not contain either 204, 101 or 200? If it doesn't, log it. */
+										if(http_code.find("204") == std::string::npos && http_code.find("101") == std::string::npos && http_code.find("200") == std::string::npos)
+											log(ll_warning, "Received unhandled code: " + http_reponse);
 									}
 
 									buffer.append(server_to_client_buffer, r);
