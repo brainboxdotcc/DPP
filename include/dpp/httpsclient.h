@@ -26,7 +26,6 @@
 #include <list>
 #include <vector>
 #include <variant>
-#include <string>
 #include <dpp/sslclient.h>
 #include <dpp/version.h>
 #include <dpp/utility.h>
@@ -35,9 +34,9 @@
 namespace dpp {
 
 static inline const std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, "
-                                                + std::to_string(from_string<uint64_t>(std::to_string(DPP_VERSION_MAJOR), std::hex)) + "."
-                                                + std::to_string(from_string<uint64_t>(std::to_string(DPP_VERSION_MINOR), std::hex)) + "."
-                                                + std::to_string(from_string<uint64_t>(std::to_string(DPP_VERSION_PATCH), std::hex)) + ")";
+                                                + to_hex(DPP_VERSION_MAJOR) + "."
+                                                + to_hex(DPP_VERSION_MINOR) + "."
+                                                + to_hex(DPP_VERSION_PATCH) + ")";
 
 static inline constexpr const char* DISCORD_HOST = "https://discord.com";
 
