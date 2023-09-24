@@ -28,7 +28,6 @@
 #include <variant>
 #include <dpp/sslclient.h>
 #include <dpp/version.h>
-#include <dpp/utility.h>
 #include <dpp/stringops.h>
 
 namespace dpp {
