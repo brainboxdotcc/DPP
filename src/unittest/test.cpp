@@ -169,16 +169,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test(READFILE, false);
 	std::string rf_test = dpp::utility::read_file(SHARED_OBJECT);
 	FILE* fp = fopen(SHARED_OBJECT, "rb");
-	if (!fp) {
-		std::cout << "READFILE: Failed to open file: " << SHARED_OBJECT << "\n";
-		set_test(READFILE, false);
-	}
-	else {
-		fseek(fp, 0, SEEK_END);
-		size_t off = (size_t)ftell(fp);
-		fclose(fp);
-		set_test(READFILE, off == rf_test.length());
-	}
+	fseek(fp, 0, SEEK_END);
+	size_t off = (size_t)ftell(fp);
+	fclose(fp);
+	set_test(READFILE, off == rf_test.length());
 
 	set_test(TIMESTAMPTOSTRING, false);
 	set_test(TIMESTAMPTOSTRING, dpp::ts_to_string(1642611864) == "2022-01-19T17:04:24Z");
