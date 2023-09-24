@@ -169,8 +169,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	set_test(READFILE, false);
 	std::string rf_test = dpp::utility::read_file(SHARED_OBJECT);
 	FILE* fp = fopen(SHARED_OBJECT, "rb");
-	if (!fp)
+	if (!fp) {
+		std::cout << "READFILE: Failed to open file: " << SHARED_OBJECT << "\n";
 		set_test(READFILE, false);
+	}
 	else {
 		fseek(fp, 0, SEEK_END);
 		size_t off = (size_t)ftell(fp);
