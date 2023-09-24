@@ -27,9 +27,17 @@
 #include <vector>
 #include <variant>
 #include <dpp/sslclient.h>
+#include <dpp/version.h>
+#include <dpp/utility.h>
 
 namespace dpp {
 
+static inline const std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, "
+                                                + utility::hex_to_str(DPP_VERSION_MAJOR) + "."
+                                                + utility::hex_to_str(DPP_VERSION_MINOR) + "."
+                                                + utility::hex_to_str(DPP_VERSION_PATCH) + ")";
+
+static inline constexpr const char* DISCORD_HOST = "https://discord.com";
 
 /**
  * @brief HTTP connection status
