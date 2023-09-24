@@ -67,7 +67,6 @@
 #include <iostream>
 #include <unordered_map>
 #include <chrono>
-#include <regex>
 #include <dpp/sslclient.h>
 #include <dpp/exception.h>
 #include <dpp/utility.h>
@@ -505,12 +504,13 @@ void ssl_client::read_loop()
 							case SSL_ERROR_NONE:
 								/* Data received, add it to the buffer */
 								if (r > 0) {
-									std::string data(server_to_client_buffer, r);
-									std::smatch matches;
+									const std::string data(server_to_client_buffer, r);
+									const std::vector<std::string>& data_lines = utility::tokenize(data);
+									const std::string& http_reponse(data_lines[0]);
 
-									if(std::regex_search(data, matches, std::regex(R"(^(HTTP\/1\.1 .+))"))) {
-										if(matches.str(1).find("204") == std::string::npos && matches.str(1).find("101") == std::string::npos && matches.str(1).find("200") == std::string::npos)
-											log(ll_warning, "Received unhandled code: " + matches.str(1));
+									/* Does the first line begin with a http code and does it not contain either 204, 101 or 200? */
+									if(http_reponse.rfind("HTTP/1.1", 0) != std::string::npos && http_reponse.find("204") == std::string::npos && http_reponse.find("101") == std::string::npos && http_reponse.find("200") == std::string::npos) {
+										log(ll_warning, "Received unhandled code: " + http_reponse);
 									}
 
 									buffer.append(server_to_client_buffer, r);
