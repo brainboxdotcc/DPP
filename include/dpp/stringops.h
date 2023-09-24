@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <charconv>
 
 namespace dpp {
 /**
@@ -40,9 +41,9 @@ namespace dpp {
  */
 template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>& s)
 {
-    std::basic_string<T> s2 = s;
-    std::transform(s2.begin(), s2.end(), s2.begin(), tolower);
-    return s2;
+	std::basic_string<T> s2 = s;
+	std::transform(s2.begin(), s2.end(), s2.begin(), tolower);
+	return s2;
 }
 
 /**
@@ -54,9 +55,9 @@ template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>&
  */
 template <typename T> std::basic_string<T> uppercase(const std::basic_string<T>& s)
 {
-    std::basic_string<T> s2 = s;
-    std::transform(s2.begin(), s2.end(), s2.begin(), toupper);
-    return s2;
+	std::basic_string<T> s2 = s;
+	std::transform(s2.begin(), s2.end(), s2.begin(), toupper);
+	return s2;
 }
 
 /**
@@ -185,14 +186,19 @@ template <int> int from_string(const std::string &s)
  * 
  * @tparam T numeric type
  * @param i numeric value
+ * @param leading_zeroes set to false if you don't want the leading zeroes in the output
  * @return std::string value in hex, the length will be 2* the raw size of the type
  */
-template <typename T> std::string to_hex(T i)
+template <typename T> std::string to_hex(T i, bool leading_zeroes = true)
 {
-  std::stringstream stream;
-	stream.imbue(std::locale::classic());
-  stream << std::setfill('0') << std::setw(sizeof(T)*2) << std::hex << i;
-  return stream.str();
+	char str[26] = { 0 };
+	size_t size = sizeof(T) * 2;
+	std::to_chars(std::begin(str), std::end(str), i, 16);
+	std::string out{str};
+	if (leading_zeroes && out.length() < size) {
+		out.insert(out.begin(), size - out.length(), '0');
+	}
+	return out;
 }
 
 /**
@@ -205,10 +211,10 @@ template <typename T> std::string to_hex(T i)
  */
 template <typename T> std::string leading_zeroes(T i, size_t width)
 {
-  std::stringstream stream;
+	std::stringstream stream;
 	stream.imbue(std::locale::classic());
-  stream << std::setfill('0') << std::setw((int)width) << std::dec << i;
-  return stream.str();
+	stream << std::setfill('0') << std::setw((int)width) << std::dec << i;
+	return stream.str();
 }
 
 } // namespace dpp

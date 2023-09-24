@@ -93,8 +93,6 @@ DPP_TEST(MESSAGERECEIVE, "Receipt of a created message", tf_online);
 DPP_TEST(MESSAGEFILE, "Message attachment send and check", tf_online);
 DPP_TEST(CACHE, "Test guild cache", tf_online);
 DPP_TEST(USERCACHE, "Test user cache", tf_online);
-DPP_TEST(VOICECONN, "Connect to voice channel", tf_online);
-DPP_TEST(VOICESEND, "Send audio to voice channel", tf_online);
 DPP_TEST(REACT, "React to a message", tf_online);
 DPP_TEST(REACTEVENT, "Reaction event", tf_online);
 DPP_TEST(GUILDCREATE, "Receive guild create event", tf_online);
@@ -169,11 +167,15 @@ DPP_TEST(USER_GET, "cluster::user_get", tf_online);
 DPP_TEST(USER_GET_FLAGS, "cluster::user_get flag parsing", tf_online);
 DPP_TEST(MEMBER_GET, "cluster::guild_get_member", tf_online);
 DPP_TEST(USER_GET_MENTION, "user::get_mention", tf_offline);
+DPP_TEST(USER_GET_URL, "user::get_url", tf_offline);
 DPP_TEST(USER_FORMAT_USERNAME, "user::format_username", tf_offline);
 DPP_TEST(USER_GET_CREATION_TIME, "user::get_creation_time", tf_offline);
 DPP_TEST(USER_GET_AVATAR_URL, "user::get_avatar_url", tf_offline);
 DPP_TEST(CHANNEL_SET_TYPE, "channel::set_type", tf_offline);
 DPP_TEST(CHANNEL_GET_MENTION, "channel::get_mention", tf_offline);
+DPP_TEST(CHANNEL_GET_URL, "channel::get_url", tf_offline);
+DPP_TEST(MESSAGE_GET_URL,"message::get_url",tf_offline);
+DPP_TEST(UTILITY_GUILD_NAVIGATION, "utility::guild_navigation", tf_offline);
 DPP_TEST(UTILITY_ICONHASH, "utility::iconhash", tf_offline);
 DPP_TEST(UTILITY_MAKE_URL_PARAMETERS, "utility::make_url_parameters", tf_offline);
 DPP_TEST(UTILITY_MARKDOWN_ESCAPE, "utility::markdown_escape", tf_offline);
@@ -184,6 +186,10 @@ DPP_TEST(UTILITY_CHANNEL_MENTION, "utility::channel_mention", tf_offline);
 DPP_TEST(UTILITY_USER_MENTION, "utility::user_mention", tf_offline);
 DPP_TEST(UTILITY_ROLE_MENTION, "utility::role_mention", tf_offline);
 DPP_TEST(UTILITY_EMOJI_MENTION, "utility::emoji_mention", tf_offline);
+DPP_TEST(UTILITY_USER_URL, "utility::user_url", tf_offline);
+DPP_TEST(UTILITY_MESSAGE_URL, "utility::message_url", tf_offline);
+DPP_TEST(UTILITY_CHANNEL_URL, "utility::channel_url", tf_offline);
+DPP_TEST(UTILITY_THREAD_URL, "utility::thread_url", tf_offline);
 DPP_TEST(UTILITY_AVATAR_SIZE, "utility::avatar_size", tf_offline);
 DPP_TEST(UTILITY_CDN_ENDPOINT_URL_HASH, "utility::cdn_endpoint_url_hash", tf_offline);
 DPP_TEST(STICKER_GET_URL, "sticker::get_url aka utility::cdn_endpoint_url_sticker", tf_offline);
@@ -213,6 +219,8 @@ DPP_TEST(INVITE_DELETE, "cluster::invite_delete", tf_online);
 
 /* Extended set -- Less important, skipped on the master branch due to rate limits and GitHub actions limitations*/
 /* To execute, run unittests with "full" command line argument */
+DPP_TEST(VOICECONN, "Connect to voice channel", tf_online | tf_extended);
+DPP_TEST(VOICESEND, "Send audio to voice channel", tf_online | tf_extended); // udp unreliable on gitbub
 DPP_TEST(MESSAGEPIN, "Pinning a channel message", tf_online | tf_extended);
 DPP_TEST(MESSAGEUNPIN, "Unpinning a channel message", tf_online | tf_extended);
 

@@ -64,7 +64,7 @@ if (count($argv) > 2 && $argv[1] == '--discord') {
 $errors = [];
 
 // Magic sauce
-exec("git log --format=\"%s\" $(git log --no-walk --tags | head -n1 | cut -d ' ' -f 2)..HEAD | grep -v '^Merge '", $changelog);
+exec("git log --oneline --format=\"%s\" $(git log --no-walk --tags | head -n1 | cut -d ' ' -f 2)..HEAD | grep -v '^Merge '", $changelog);
 
 // Case insensitive removal of duplicates
 $changelog = array_intersect_key($changelog, array_unique(array_map("strtolower", $changelog)));
@@ -193,7 +193,7 @@ foreach ($changelog as $change) {
 if ($githubstyle) {
     echo "The changelog is listed below:\n\nRelease Changelog\n===========\n";
 } else {
-    echo "The changelog is listed below:\n\n__**Release Changelog**__\n";
+    echo "The changelog is listed below:\n\n## Release Changelog\n";
 }
 
 function print_change(string $change) {
@@ -208,7 +208,7 @@ function print_change(string $change) {
 // Output tidy formatting
 foreach ($catgroup as $cat => $list) {
     if (!empty($list)) {
-        echo "\n" . ($githubstyle ? '## ' : '__**') . $cat . ($githubstyle ? '' : '**__') . "\n";
+        echo "\n" . ($githubstyle ? '## ' : '### ') . $cat . "\n";
         foreach ($list as $key => $item) {
             if (is_array($item)) {
                 foreach ($item as $change) {
@@ -230,6 +230,13 @@ if (!$githubstyle) {
     echo "\n";
 }
 
-foreach ($errors as $err) {
-    trigger_error($err, E_USER_WARNING);
-}
+/*
+ * Disabled as it generates pages and pages of stack traces, making it
+ * extremely difficult to copy and paste the error log when running this
+ * on the command line for sending discord announcement changelogs.
+ *
+ * foreach ($errors as $err) {
+ *     trigger_error($err, E_USER_WARNING);
+ * }
+ *
+ */

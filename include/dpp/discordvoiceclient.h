@@ -38,7 +38,6 @@
 #include <dpp/dispatcher.h>
 #include <dpp/cluster.h>
 #include <dpp/discordevents.h>
-#include <dpp/isa_detection.h>
 #include <dpp/socket.h>
 #include <queue>
 #include <thread>
@@ -50,13 +49,20 @@
 #include <functional>
 #include <chrono>
 
-
-
 struct OpusDecoder;
 struct OpusEncoder;
 struct OpusRepacketizer;
 
 namespace dpp {
+
+class audio_mixer;
+
+// !TODO: change these to constexpr and rename every occurrence across the codebase
+#define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
+
+#define AUDIO_OVERLAP_SLEEP_SAMPLES 30
+
+inline constexpr size_t send_audio_raw_max_length = 11520;
 
 using json = nlohmann::json;
 
@@ -94,10 +100,6 @@ struct DPP_EXPORT voice_out_packet {
 	 */
 	uint64_t duration;
 };
-
-#define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
-
-#define AUDIO_OVERLAP_SLEEP_SAMPLES 30
 
 /** @brief Implements a discord voice connection.
  * Each discord_voice_client connects to one voice channel and derives from a websocket client.
@@ -138,6 +140,11 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief Last connect time of voice session
 	 */
 	time_t connect_time;
+
+	/*
+	* @brief For mixing outgoing voice data.
+	*/
+	std::unique_ptr<audio_mixer> mixer;
 
 	/**
 	 * @brief IP of UDP/RTP endpoint
@@ -676,7 +683,7 @@ public:
 	/**
 	 * @brief Send raw audio to the voice channel.
 	 * 
-	 * You should send an audio packet of 11520 bytes.
+	 * You should send an audio packet of `send_audio_raw_max_length` (11520) bytes.
 	 * Note that this function can be costly as it has to opus encode
 	 * the PCM audio on the fly, and also encrypt it with libsodium.
 	 * 
@@ -685,18 +692,26 @@ public:
 	 * ready to send and know its length it is advisable to call this
 	 * method multiple times to enqueue the entire stream audio so that
 	 * it is all encoded at once (unless you have set use_opus to false).
-	 * Constantly calling this from the dpp::on_voice_buffer_send callback
-	 * can and will eat a TON of cpu!
+	 * **Constantly calling this from dpp::cluster::on_voice_buffer_send
+	 * can, and will, eat a TON of cpu!**
 	 * 
 	 * @param audio_data Raw PCM audio data. Channels are interleaved,
 	 * with each channel's amplitude being a 16 bit value.
 	 * 
-	 * The audio data should be 48000Hz signed 16 bit audio.
+	 * @warning **The audio data needs to be 48000Hz signed 16 bit audio, otherwise, the audio will come through incorrectly!**
 	 * 
 	 * @param length The length of the audio data. The length should
 	 * be a multiple of 4 (2x 16 bit stereo channels) with a maximum
-	 * length of 11520, which is a complete opus frame at highest
-	 * quality.
+	 * length of `send_audio_raw_max_length`, which is a complete opus
+	 * frame at highest quality.
+	 *
+	 * Generally when you're streaming and you know there will be
+	 * more packet to come you should always provide packet data with
+	 * length of `send_audio_raw_max_length`.
+	 * Silence packet will be appended if length is less than
+	 * `send_audio_raw_max_length` as discord expects to receive such
+	 * specific packet size. This can cause gaps in your stream resulting
+	 * in distorted audio if you have more packet to send later on.
 	 * 
 	 * @return discord_voice_client& Reference to self
 	 * 

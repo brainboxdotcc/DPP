@@ -33,9 +33,7 @@ The important flags in this command-line are:
   * `mydppbot.cpp` - Your source code
  * `dppbot` - The name of the executable to make
 
-Of course, this is just a proof of concept — you should really use a more robust build system like GNU `make` or [`cmake`](@ref buildcmake).
-
-If you are having trouble setting up CMake, you can try [our template bot](https://github.com/brainboxdotcc/templatebot).
+\include{doc} install_prebuilt_footer.dox
 
 **Have fun!**
 

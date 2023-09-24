@@ -119,6 +119,16 @@ std::string user::get_default_avatar_url() const {
 	}
 }
 
+std::string user::get_avatar_decoration_url(uint16_t size) const {
+	if (this->id) {
+		return utility::cdn_endpoint_url_hash({ i_png },
+											  "avatar-decorations/" + std::to_string(this->id), this->avatar_decoration.to_string(),
+											  i_png, size);
+	} else {
+		return std::string();
+	}
+}
+
 std::string user::format_username() const {
 	if (!global_name.empty()) {
 		return global_name;
@@ -128,6 +138,10 @@ std::string user::format_username() const {
 
 std::string user::get_mention() const {
 	return utility::user_mention(id);
+}
+
+std::string user::get_url() const{
+	return utility::user_url(id);
 }
 
 bool user::is_active_developer() const {
@@ -274,6 +288,8 @@ void from_json(const nlohmann::json& j, user& u) {
 		u.flags |= u_animated_icon;
 	}
 	u.avatar = av;
+
+	u.avatar_decoration = string_not_null(&j, "avatar_decoration");
 
 	u.discriminator = (uint16_t)snowflake_not_null(&j, "discriminator");
 

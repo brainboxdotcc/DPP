@@ -62,5 +62,7 @@
 #ifndef _WIN32
 	#define SOCKET int
 #else
+	#define NOMINMAX
+
 	#include <WinSock2.h>
 #endif

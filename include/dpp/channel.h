@@ -610,6 +610,13 @@ public:
 	std::string get_icon_url(uint16_t size = 0, const image_type format = i_png) const;
 
 	/**
+	 * @brief Returns string of URL to channel
+	 * 
+	 * @return string of URL to channel
+	 */
+	std::string get_url() const;
+
+	/**
 	 * @brief Returns true if the channel is NSFW gated
 	 * 
 	 * @return true if NSFW

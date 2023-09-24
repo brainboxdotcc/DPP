@@ -11,22 +11,32 @@ endif()
 
 add_library("${PROJECT_NAME}::${LIB_NAME}" ALIAS "${LIB_NAME}")
 
-if(NOT DEFINED AVX_TYPE)
+if(${AVX_TYPE} STREQUAL "OFF")
 	include("${CMAKE_CURRENT_SOURCE_DIR}/../cmake/DetectArchitecture.cmake")
+else()
+	message("-- AVX type overridden by configuration: ${AVX_TYPE}")
 endif()
+STRING(REPLACE "AVX" "" AVX_TYPE ${AVX_TYPE})
+add_compile_definitions(AVX_TYPE=${AVX_TYPE})
+add_compile_options(${AVX_FLAG})
 
 target_compile_definitions(
 	"${LIB_NAME}" PUBLIC
 	"DPP_BUILD"
-	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/std:c++17;/Od;/DEBUG;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
-	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/std:c++17;/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
-	"${AVX_TYPE}"
 )
+
+if(WIN32)
+	add_compile_definitions(OPENSSL_SYS_WIN32)
+	add_compile_definitions(_WINSOCK_DEPRECATED_NO_WARNINGS)
+	add_compile_definitions(WIN32_LEAN_AND_MEAN)
+	add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+	add_compile_definitions(_CRT_NONSTDC_NO_DEPRECATE)
+endif()
 
 target_compile_options(
 	"${LIB_NAME}" PUBLIC
 	"$<$<PLATFORM_ID:Windows>:/bigobj>"
- 	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/std:c++17;/Od;/DEBUG;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
+ 	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Debug>:/sdl;/std:c++17;/Od;/DEBUG;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
 	"$<$<PLATFORM_ID:Windows>:$<$<CONFIG:Release>:/std:c++17;/O2;/Oi;/Oy;/GL;/Gy;/sdl;/MP;/DFD_SETSIZE=1024;/Zc:preprocessor>>"
 	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Debug>:-std=c++17;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-g;-Og;-fPIC>>"
 	"$<$<PLATFORM_ID:Linux>:$<$<CONFIG:Release>:-std=c++17;-Wall;-Wempty-body;-Wno-psabi;-Wunknown-pragmas;-Wignored-qualifiers;-Wimplicit-fallthrough;-Wmissing-field-initializers;-Wsign-compare;-Wtype-limits;-Wuninitialized;-Wshift-negative-value;-pthread;-O3;-fPIC>>"
@@ -43,8 +53,9 @@ target_compile_features(
 )
 
 target_include_directories(
-	"${LIB_NAME}" PRIVATE
+	"${LIB_NAME}" PUBLIC
 	"$<BUILD_INTERFACE:${DPP_ROOT_PATH}/include>"
+	"$<INSTALL_INTERFACE:include>"
 )
 
 set_target_properties(

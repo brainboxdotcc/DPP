@@ -1,18 +1,32 @@
-test
-build
-config.json
+# IDEs
+.vs
+.idea
+
+# doxygen generated files
 docs
+docs/doxygen_sqlite3.db
+
+# build files
+build
+buildtools/composer.phar
+src/build
+cmake-build-debug
+docpages/example_code/build
+
+# tests
+test
 testdata/maxpower.pcm
 testdata/onandon.pcm
-buildtools/composer.phar
-docs/doxygen_sqlite3.db
-src/build
-.vs
-*.autosave
-.misspell-fixer.ignore
-core
-compile_commands.json
-tags
-.cache
-src/dpp/dpp.rc
+
+# general folders
 /main
+tags
+core
+*.autosave
+.cache
+
+# general files
+config.json
+.misspell-fixer.ignore
+compile_commands.json
+src/dpp/dpp.rc

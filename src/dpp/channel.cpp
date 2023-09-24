@@ -636,6 +636,10 @@ std::string channel::get_icon_url(uint16_t size, const image_type format) const 
 	}
 }
 
+std::string channel::get_url() const{
+	return utility::channel_url(guild_id, id);
+}
+
 channel_type channel::get_type() const {
 	return static_cast<channel_type>(flags & CHANNEL_TYPE_MASK);
 }

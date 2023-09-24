@@ -73,7 +73,7 @@ public:
 		/* Attach event */
 		listener_handle = ev(listener);
 		/* Create timer */
-		th = cl->start_timer([this](dpp::timer timer_handle) {
+		th = cl->start_timer([this]([[maybe_unused]] dpp::timer timer_handle) {
 			/* Timer has finished, detach it from event.
 			 * Only allowed to tick once.
 			 */

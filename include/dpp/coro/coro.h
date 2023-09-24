@@ -112,6 +112,7 @@ requires (!has_co_await_member<T> && !has_free_co_await<T>)
 decltype(auto) co_await_resolve(T&& expr) noexcept {
 	return static_cast<T&&>(expr);
 }
+
 #else
 /**
  * @brief Concept to check if a type has a useable `operator co_await()` member
@@ -144,6 +145,12 @@ bool has_await_members;
  */
 decltype(auto) co_await_resolve(auto&& expr) {}
 #endif
+
+/**
+ * @brief Convenience alias for the result of a certain awaitable's await_resume.
+ */
+template <typename T>
+using awaitable_result = decltype(co_await_resolve(std::declval<T>()).await_resume());
 
 } // namespace detail
 

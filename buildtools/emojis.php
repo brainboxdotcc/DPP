@@ -1,5 +1,7 @@
 <?php
 
+ini_set("default_charset", "UTF-8");
+
 echo "-- Autogenrating include/dpp/unicode_emoji.h\n";
 
 $url = "https://raw.githubusercontent.com/ArkinSolomon/discord-emoji-converter/master/emojis.json";
@@ -29,7 +31,13 @@ if ($emojis) {
         if (preg_match("/^\d+/", $name)) {
             $name = "_" . $name;
         }
-        $header .= "	constexpr const char[] " .$name . " = \"$code\";\n";
+	$name = str_replace("-", "minus", $name);
+	$name = str_replace("+", "plus", $name);
+	$name = str_replace("ñ", "n", $name);
+	if ($name == "new") {
+		$name = "_new";
+	}
+        $header .= "	inline constexpr const char " .$name . "[] = \"$code\";\n";
     }
     $header .= "}\n};\n";
     file_put_contents("include/dpp/unicode_emoji.h", $header);

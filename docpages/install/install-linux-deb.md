@@ -19,3 +19,5 @@ You will now be able to use D++ by including its library on the command line:
 ```
 g++ mybot.cpp -o mybot -ldpp
 ```
+
+\include{doc} install_prebuilt_footer.dox

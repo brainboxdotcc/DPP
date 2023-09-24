@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <cmath>
 #include <dpp/exception.h>
+#include <dpp/isa_detection.h>
 #include <dpp/discordvoiceclient.h>
 #include <dpp/cache.h>
 #include <dpp/cluster.h>
@@ -141,14 +142,17 @@ bool discord_voice_client::voice_payload::operator<(const voice_payload& other) 
 }
 
 #ifdef HAVE_VOICE
-size_t audio_mix(discord_voice_client& client, opus_int32* pcm_mix, const opus_int16* pcm, size_t park_count, int samples, int& max_samples) {
+size_t audio_mix(discord_voice_client& client, audio_mixer& mixer, opus_int32* pcm_mix, const opus_int16* pcm, size_t park_count, int samples, int& max_samples) {
 	/* Mix the combined stream if combined audio is bound */
 	if (client.creator->on_voice_receive_combined.empty()) {
 		return 0;
 	}
+
 	/* We must upsample the data to 32 bits wide, otherwise we could overflow */
-	for (opus_int32 v = 0; v < samples * opus_channel_count / 16; ++v) {
-		audio_mixer::combine_samples(pcm_mix, pcm);
+	for (opus_int32 v = 0; v < (samples * opus_channel_count) / mixer.byte_blocks_per_register; ++v) {
+		mixer.combine_samples(pcm_mix, pcm);
+		pcm += mixer.byte_blocks_per_register;
+		pcm_mix += mixer.byte_blocks_per_register;
 	}
 	client.moving_average += park_count;
 	max_samples = (std::max)(samples, max_samples);
@@ -251,7 +255,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						voice_receive_t vr(nullptr, "", &client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
 							samples * opus_channel_count * sizeof(opus_int16));
 
-						park_count = audio_mix(client, pcm_mix, pcm, park_count, samples, max_samples);
+						park_count = audio_mix(client, *client.mixer, pcm_mix, pcm, park_count, samples, max_samples);
 						client.creator->on_voice_receive.call(vr);
 					}
 				} else {
@@ -265,7 +269,7 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 						vr.reassign(&client, d.user_id, reinterpret_cast<uint8_t*>(pcm),
 							samples * opus_channel_count * sizeof(opus_int16));
 						client.end_gain = 1.0f / client.moving_average;
-						park_count = audio_mix(client, pcm_mix, pcm, park_count, samples, max_samples);
+						park_count = audio_mix(client, *client.mixer, pcm_mix, pcm, park_count, samples, max_samples);
 						client.creator->on_voice_receive.call(vr);
 					}
 
@@ -279,11 +283,14 @@ void discord_voice_client::voice_courier_loop(discord_voice_client& client, cour
 			
 			/* Downsample the 32 bit samples back to 16 bit */
 			opus_int16 pcm_downsample[23040] = { 0 };
+			opus_int16* pcm_downsample_ptr = pcm_downsample;
+			opus_int32* pcm_mix_ptr = pcm_mix;
 			client.increment = (client.end_gain - client.current_gain) / static_cast<float>(samples);
-			for (int64_t x = 0; x < samples / audio_mixer::byte_blocks_per_register; ++x) {
-				audio_mixer::collect_single_register(pcm_mix + (x * audio_mixer::byte_blocks_per_register),
-					pcm_downsample + (x * audio_mixer::byte_blocks_per_register), client.current_gain, client.increment);
-				client.current_gain += client.increment * static_cast<float>(audio_mixer::byte_blocks_per_register);
+			for (int64_t x = 0; x < (samples * opus_channel_count) / client.mixer->byte_blocks_per_register; ++x) {
+				client.mixer->collect_single_register(pcm_mix_ptr, pcm_downsample_ptr, client.current_gain, client.increment);
+				client.current_gain += client.increment * static_cast<float>(client.mixer->byte_blocks_per_register);
+				pcm_mix_ptr += client.mixer->byte_blocks_per_register;
+				pcm_downsample_ptr += client.mixer->byte_blocks_per_register;
 			}
 
 			voice_receive_t vr(nullptr, "", &client, 0, reinterpret_cast<uint8_t*>(pcm_downsample),
@@ -300,6 +307,7 @@ discord_voice_client::discord_voice_client(dpp::cluster* _cluster, snowflake _ch
 	runner(nullptr),
 	connect_time(0),
 	port(0),
+	mixer(std::make_unique<audio_mixer>()),
 	ssrc(0),
 	timescale(1000000),
 	paused(false),
@@ -826,8 +834,8 @@ void discord_voice_client::write_ready()
 			if (outbuf.size()) {
 				if (this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
 					duration = outbuf[0].duration * timescale;
+					bufsize = outbuf[0].packet.length();
 					outbuf.erase(outbuf.begin());
-					bufsize = outbuf.size();
 				}
 			}
 		}
@@ -1166,20 +1174,34 @@ discord_voice_client& discord_voice_client::set_send_audio_type(send_audio_type_
 
 discord_voice_client& discord_voice_client::send_audio_raw(uint16_t* audio_data, const size_t length)  {
 #if HAVE_VOICE
-	const size_t max_frame_bytes = 11520;
-	if (length > max_frame_bytes) {
+	if (length < 4) {
+		throw dpp::voice_exception("Raw audio packet size can't be less than 4");
+	}
+
+	if ((length % 4) != 0) {
+		throw dpp::voice_exception("Raw audio packet size should be divisible by 4");
+	}
+
+	if (length > send_audio_raw_max_length) {
 		std::string s_audio_data((const char*)audio_data, length);
-		while (s_audio_data.length() > max_frame_bytes) {
-			std::string packet(s_audio_data.substr(0, max_frame_bytes));
-			s_audio_data.erase(s_audio_data.begin(), s_audio_data.begin() + max_frame_bytes);
-			if (packet.size() < max_frame_bytes) {
-				packet.resize(max_frame_bytes, 0);
-			}
-			send_audio_raw((uint16_t*)packet.data(), max_frame_bytes);
+
+		while (s_audio_data.length() > send_audio_raw_max_length) {
+			std::string packet(s_audio_data.substr(0, send_audio_raw_max_length));
+			const auto packet_size = static_cast<ptrdiff_t>(packet.size());
+
+			s_audio_data.erase(s_audio_data.begin(), s_audio_data.begin() + packet_size);
+
+			send_audio_raw((uint16_t*)packet.data(), packet_size);
 		}
 
 		return *this;
+	}
 
+	if (length < send_audio_raw_max_length) {
+		std::string packet((const char*)audio_data, length);
+		packet.resize(send_audio_raw_max_length, 0);
+
+		return send_audio_raw((uint16_t*)packet.data(), packet.size());
 	}
 
 	opus_int32 encodedAudioMaxLength = (opus_int32)length;

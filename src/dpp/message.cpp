@@ -743,17 +743,38 @@ embed_footer& embed_footer::set_proxy(const std::string& p){
 
 reaction::reaction() {
 	count = 0;
+	count_burst = 0;
+	count_normal = 0;
 	me = false;
+	me_burst = false;
 	emoji_id = 0;
 }
 
 reaction::reaction(json* j) {
 	count = int32_not_null(j, "count");
+	if (j->contains("count_details")) {
+		json details = (*j)["count_details"];
+		count_burst = int32_not_null(&details, "burst");
+		count_normal = int32_not_null(&details, "normal");
+	}
 	me = bool_not_null(j, "me");
+	me_burst = bool_not_null(j, "me_burst");
 	if (j->contains("emoji")) {
 		json emoji = (*j)["emoji"];
 		emoji_id = snowflake_not_null(&emoji, "id");
 		emoji_name = string_not_null(&emoji, "name");
+	}
+	if (j->contains("burst_colors") && !j->at("burst_colors").is_null()) {
+		/* for some silly reason discord send the hex code as strings with a preceded hashtag. Sadly it's up to us to parse this crap */
+		for (std::string hex_string : j->at("burst_colors")) {
+			if (!hex_string.empty()) {
+				if (hex_string.substr(0, 1) == "#") {
+					hex_string = hex_string.substr(1); // remove the #
+				}
+				// convert the hex string to base 10 integer and append it
+				burst_colors.push_back(std::stoul(hex_string, nullptr, 16));
+			}
+		}
 	}
 }
 
@@ -1103,6 +1124,10 @@ bool message::has_remix_attachment() const {
 		[](const auto& a) -> bool {
 			return a.is_remix();
 		});
+}
+
+std::string message::get_url() const {
+	return utility::message_url(guild_id, channel_id, id);
 }
 
 sticker::sticker() : managed(0), pack_id(0), type(st_standard), format_type(sf_png), available(true), guild_id(0), sort_value(0) {

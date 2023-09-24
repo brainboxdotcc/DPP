@@ -108,6 +108,19 @@ namespace dpp {
 #endif
 		}
 
+		avx_type_t voice_avx() {
+#if AVX_TYPE == 512
+			return avx_512;
+#elif AVX_TYPE == 2
+			return avx_2;
+#elif AVX_TYPE == 1
+			return avx_1;
+#else
+			return avx_none;
+#endif
+
+		}
+
 		bool is_coro_enabled() {
 #ifdef DPP_CORO
 			return true;
@@ -415,6 +428,24 @@ namespace dpp {
 			return "<t:" + std::to_string(ts) + ":" + format + ">";
 		}
 
+		std::string guild_navigation(const snowflake guild_id, guild_navigation_type gnt) {
+			std::string type;
+			switch (gnt) {
+				case gnt_customize:
+					type = "customize";
+					break;
+				case gnt_browse:
+					type = "browse";
+					break;
+				case gnt_guide:
+					type = "guide";
+					break;
+				default:
+					return "";
+			}
+			return "<" + std::to_string(guild_id) + ":" + type + ">";
+		}
+
 		std::string avatar_size(uint32_t size) {
 			if (size) {
 				if ( (size & (size - 1)) != 0 ) { // check if the size is a power of 2
@@ -531,6 +562,31 @@ namespace dpp {
 		std::string role_mention(const snowflake &id) {
 		    return "<@&" + std::to_string(id) + ">";
 		}
+
+		std::string message_url(const snowflake& guild_id, const snowflake& channel_id, const snowflake& message_id){
+			if (guild_id.empty() || channel_id.empty() || message_id.empty()) {
+				return "";
+			}
+			return url_host + "/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id) + "/" + std::to_string(message_id);
+		}
+
+		std::string channel_url(const snowflake& guild_id, const snowflake& channel_id){
+			if (guild_id.empty() || channel_id.empty()) {
+				return "";
+			}
+			return url_host + "/channels/" + std::to_string(guild_id) + "/" + std::to_string(channel_id);
+		}
+
+		std::string thread_url(const snowflake& guild_id, const snowflake& thread_id){
+			return channel_url(guild_id, thread_id);
+		};
+
+		std::string user_url(const snowflake& user_id){
+			if (user_id.empty()) {
+				return "";
+			}
+			return url_host + "/users/" + std::to_string(user_id);
+		};
 
 		template <typename T>
 		std::enable_if_t<std::is_same_v<T, image_type>, std::string> mime_type(T type) {

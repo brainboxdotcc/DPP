@@ -3302,7 +3302,7 @@ public:
 	void guild_stickers_get(snowflake guild_id, command_completion_event_t callback);
 
 	/**
-	 * @brief Get sticker packs
+	 * @brief Get a list of available sticker packs
 	 * @see https://discord.com/developers/docs/resources/sticker#list-nitro-sticker-packs
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::sticker_pack_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().

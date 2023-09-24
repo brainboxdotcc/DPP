@@ -29,15 +29,16 @@
 
 namespace dpp {
 
-/**
- * @brief Extremely light coroutine object designed to send off a coroutine to execute on its own. It can be attached to an event router using dpp::event_router_t::co_attach.
+/** @class job job.h coro/job.h
+ * @brief Extremely light coroutine object designed to send off a coroutine to execute on its own.
+ * Can be used in conjunction with coroutine events via @ref dpp::event_router_t::operator()(F&&) "event routers", or on its own.
  *
  * This object stores no state and is the recommended way to use coroutines if you do not need to co_await the result.
  *
- * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs. Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub issues</a> or to the <a href="https://discord.gg/dpp">D++ Discord server</a>.
+ * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs.
+ * Please report any to <a href="https://github.com/brainboxdotcc/DPP/issues">GitHub Issues</a> or to our <a href="https://discord.gg/dpp">Discord Server</a>.
  * @warning - It cannot be co_awaited, which means the second it co_awaits something, the program jumps back to the calling function, which continues executing.
- * At this point, if the function returns, every object declared in the function including its parameters are destroyed, which causes dangling references.
- * This is exactly the same problem as references in lambdas : https://dpp.dev/lambdas-and-locals.html.
+ * At this point, if the function returns, every object declared in the function including its parameters are destroyed, which causes @ref lambdas-and-locals "dangling references".
  * For this reason, `co_await` will error if any parameters are passed by reference.
  * If you must pass a reference, pass it as a pointer or with std::ref, but you must fully understand the reason behind this warning, and what to avoid.
  * If you prefer a safer type, use `coroutine` for synchronous execution, or `task` for parallel tasks, and co_await them.
@@ -46,28 +47,33 @@ struct job {};
 
 namespace detail {
 
+namespace job {
+
 template <typename... Args>
-inline constexpr bool coroutine_has_ref_params_v = (std::is_reference_v<Args> || ... || false);
+inline constexpr bool coroutine_has_no_ref_params_v = false;
+
+template <>
+inline constexpr bool coroutine_has_no_ref_params_v<> = true;
 
 template <typename T, typename... Args>
-inline constexpr bool coroutine_has_ref_params_v<T, Args...> = (std::is_reference_v<Args> || ... || (std::is_reference_v<T> && !std::is_invocable_v<T, Args...>));
+inline constexpr bool coroutine_has_no_ref_params_v<T, Args...> = (std::is_invocable_v<T, Args...> || !std::is_reference_v<T>) && (!std::is_reference_v<Args> && ... && true);
 
 #ifdef DPP_CORO_TEST
-	struct job_promise_base{};
+	struct promise{};
 #endif
 
 /**
  * @brief Coroutine promise type for a job
  */
 template <typename... Args>
-struct job_promise {
+struct promise {
 
 #ifdef DPP_CORO_TEST
-	job_promise() {
+	promise() {
 		++coro_alloc_count<job_promise_base>;
 	}
 
-	~job_promise() {
+	~promise() {
 		--coro_alloc_count<job_promise_base>;
 	}
 #endif
@@ -75,7 +81,7 @@ struct job_promise {
 	/*
 	* @brief Function called when the job is done.
 	*
-	* @return Do not suspend at the end, destroying the handle immediately
+	* @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Do not suspend at the end, destroying the handle immediately
 	*/
 	std_coroutine::suspend_never final_suspend() const noexcept {
 		return {};
@@ -84,7 +90,7 @@ struct job_promise {
 	/*
 	* @brief Function called when the job is started.
 	*
-	* @return Do not suspend at the start, starting the job immediately
+	* @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Do not suspend at the start, starting the job immediately
 	*/
 	std_coroutine::suspend_never initial_suspend() const noexcept {
 		return {};
@@ -113,6 +119,9 @@ struct job_promise {
 	 */
 	void return_void() const noexcept {}
 
+	/**
+	 * @brief Function that will wrap every co_await inside of the job.
+	 */
 	template <typename T>
 	T await_transform(T &&expr) const noexcept {
 		/**
@@ -124,11 +133,13 @@ struct job_promise {
 		 * If you must pass a reference, pass it as a pointer or with std::ref, but you must fully understand the reason behind this warning, and what to avoid.
 		 * If you prefer a safer type, use `coroutine` for synchronous execution, or `task` for parallel tasks, and co_await them.
 		 */
-		static_assert(!coroutine_has_ref_params_v<Args...>, "co_await is disabled in dpp::job when taking parameters by reference. read comment above this line for more info");
+		static_assert(coroutine_has_no_ref_params_v<Args...>, "co_await is disabled in dpp::job when taking parameters by reference. read comment above this line for more info");
 
 		return std::forward<T>(expr);
 	}
 };
+
+} // namespace job
 
 } // namespace detail
 
@@ -145,7 +156,7 @@ struct dpp::detail::std_coroutine::coroutine_traits<dpp::job, Args...> {
 	 * When the coroutine is created from a lambda, that lambda is passed as a first parameter.
 	 * Not ideal but we'll allow any callable that takes the rest of the arguments passed
 	 */
-	using promise_type = dpp::detail::job_promise<Args...>;
+	using promise_type = dpp::detail::job::promise<Args...>;
 };
 
 #endif /* DPP_CORO */

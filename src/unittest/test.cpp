@@ -21,15 +21,9 @@
  ************************************************************************************/
 #include "test.h"
 #include <dpp/dpp.h>
+#include <dpp/unicode_emoji.h>
 #include <dpp/restrequest.h>
 #include <dpp/json.h>
-
-namespace {
-	/**
-	 * @brief Thread emoji - https://www.compart.com/en/unicode/U+1F9F5
-	 */
-	inline const std::string THREAD_EMOJI = "\xF0\x9F\xA7\xB5";
-} // namespace
 
 /* Unit tests go here */
 int main(int argc, char *argv[])
@@ -349,6 +343,14 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		set_test(USER_GET_CREATION_TIME, false);
 		set_test(USER_GET_CREATION_TIME, (uint64_t)user1.get_creation_time() == 1465312605);
+
+		set_test(USER_GET_URL, false);
+
+		dpp::user user2;
+		set_test(USER_GET_URL,
+				 user1.get_url() == dpp::utility::url_host + "/users/189759562910400512" &&
+				 user2.get_url() == ""
+		);
 	}
 
 	{ // avatar size function
@@ -428,6 +430,48 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(EMOJI_GET_URL, emoji.get_url() == dpp::utility::cdn_host + "/emojis/825407338755653641.png");
 	}
 
+	{ // message methods
+		dpp::message m;
+		m.guild_id = 825407338755653642;
+		m.channel_id = 956230231277072415;
+		m.id = 1151617986541666386;
+
+		dpp::message m2;
+		m2.guild_id = 825407338755653642;
+		m2.channel_id = 956230231277072415;
+
+		dpp::message m3;
+		m3.guild_id = 825407338755653642;
+		m3.id = 1151617986541666386;
+
+		dpp::message m4;
+		m4.channel_id = 956230231277072415;
+		m4.id = 1151617986541666386;
+
+		dpp::message m5;
+		m5.guild_id = 825407338755653642;
+
+		dpp::message m6;
+		m6.channel_id = 956230231277072415;
+
+		dpp::message m7;
+		m7.id = 1151617986541666386;
+
+		dpp::message m8;
+
+		set_test(MESSAGE_GET_URL, false);
+		set_test(MESSAGE_GET_URL,
+				 m.get_url() == dpp::utility::url_host + "/channels/825407338755653642/956230231277072415/1151617986541666386" &&
+				 m2.get_url() == "" &&
+				 m3.get_url() == "" &&
+				 m4.get_url() == "" &&
+				 m5.get_url() == "" &&
+				 m6.get_url() == "" &&
+				 m7.get_url() == "" &&
+				 m8.get_url() == "" 
+		);
+	}
+
 	{ // channel methods
 		set_test(CHANNEL_SET_TYPE, false);
 		dpp::channel c;
@@ -441,9 +485,33 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(CHANNEL_GET_MENTION, false);
 		c.id = 825411707521728511;
 		set_test(CHANNEL_GET_MENTION, c.get_mention() == "<#825411707521728511>");
+
+		set_test(CHANNEL_GET_URL, false);
+		c.guild_id = 825407338755653642;
+
+		dpp::channel c2;
+		c2.id = 825411707521728511;
+
+		dpp::channel c3;
+		c3.guild_id = 825407338755653642;
+
+		dpp::channel c4;
+
+		set_test(CHANNEL_GET_URL,
+				 c.get_url() == dpp::utility::url_host + "/channels/825407338755653642/825411707521728511" &&
+				 c2.get_url() == "" &&
+				 c3.get_url() == "" &&
+				 c4.get_url() == ""
+		);
 	}
 
 	{ // utility methods
+		set_test(UTILITY_GUILD_NAVIGATION, false);
+		auto gn1 = dpp::utility::guild_navigation(123, dpp::utility::gnt_customize);
+		auto gn2 = dpp::utility::guild_navigation(1234, dpp::utility::gnt_browse);
+		auto gn3 = dpp::utility::guild_navigation(12345, dpp::utility::gnt_guide);
+		set_test(UTILITY_GUILD_NAVIGATION, gn1 == "<123:customize>" && gn2 == "<1234:browse>" && gn3 == "<12345:guide>");
+
 		set_test(UTILITY_ICONHASH, false);
 		auto iconhash1 = dpp::utility::iconhash("a_5532c6414c70765a28cf9448c117205f");
 		set_test(UTILITY_ICONHASH, iconhash1.first == 6139187225817019994 &&
@@ -506,6 +574,44 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 emoji_mention2 == "<a:role2:234>" &&
 				 emoji_mention3 == ":white_check_mark:" &&
 				 emoji_mention4 == ":white_check_mark:"
+		);
+
+		set_test(UTILITY_USER_URL, false);
+		auto user_url = dpp::utility::user_url(123);
+		set_test(UTILITY_USER_URL, 
+				 user_url == dpp::utility::url_host + "/users/123" && 
+				 dpp::utility::user_url(0) == ""
+		);
+
+		set_test(UTILITY_MESSAGE_URL, false);
+		auto message_url = dpp::utility::message_url(1,2,3);
+		set_test(UTILITY_MESSAGE_URL,
+				 message_url == dpp::utility::url_host+ "/channels/1/2/3" && 
+				 dpp::utility::message_url(0,2,3) == "" &&
+				 dpp::utility::message_url(1,0,3) == "" && 
+				 dpp::utility::message_url(1,2,0) == "" &&
+				 dpp::utility::message_url(0,0,3) == "" &&
+				 dpp::utility::message_url(0,2,0) == "" &&
+				 dpp::utility::message_url(1,0,0) == "" &&
+				 dpp::utility::message_url(0,0,0) == "" 
+		);
+
+		set_test(UTILITY_CHANNEL_URL, false);
+		auto channel_url = dpp::utility::channel_url(1,2);
+		set_test(UTILITY_CHANNEL_URL, 
+				 channel_url == dpp::utility::url_host+ "/channels/1/2" &&
+				 dpp::utility::channel_url(0,2) == "" &&
+				 dpp::utility::channel_url(1,0) == "" &&
+				 dpp::utility::channel_url(0,0) == "" 
+		);
+
+		set_test(UTILITY_THREAD_URL, false);
+		auto thread_url = dpp::utility::thread_url(1,2);
+		set_test(UTILITY_THREAD_URL,
+				 thread_url == dpp::utility::url_host+ "/channels/1/2" &&
+				 dpp::utility::thread_url(0,2) == "" &&
+				 dpp::utility::thread_url(1,0) == "" &&
+				 dpp::utility::thread_url(0,0) == "" 
 		);
 	}
 
@@ -574,7 +680,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		 * are sending audio later, this way if the audio receive code is plain unstable
 		 * the test suite will crash and fail.
 		 */
-		bot.on_voice_receive_combined([&](auto& event) {
+		bot.on_voice_receive_combined([&](const auto& event) {
 		});
 
 		std::promise<void> ready_promise;
@@ -1108,7 +1214,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 							return;
 						}
 						events_to_test_mask |= MESSAGE_REACT;
-						bot.message_add_reaction(message_id, thread_id, THREAD_EMOJI, [this, message_id](const dpp::confirmation_callback_t &callback) {
+						bot.message_add_reaction(message_id, thread_id, dpp::unicode_emoji::thread, [this, message_id](const dpp::confirmation_callback_t &callback) {
 							std::lock_guard lock{mutex};
 							if (callback.is_error()) {
 								events_abort();
@@ -1116,7 +1222,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								return;
 							}
 							events_to_test_mask |= MESSAGE_REMOVE_REACT;
-							bot.message_delete_reaction(message_id, thread_id, bot.me.id, THREAD_EMOJI, [this, message_id](const dpp::confirmation_callback_t &callback) {
+							bot.message_delete_reaction(message_id, thread_id, bot.me.id, dpp::unicode_emoji::thread, [this, message_id](const dpp::confirmation_callback_t &callback) {
 								std::lock_guard lock{mutex};
 								if (callback.is_error()) {
 									events_abort();
@@ -1218,7 +1324,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				if (event.reacting_emoji.name == "😄") {
 					set_test(REACTEVENT, true);
 				}
-				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == THREAD_EMOJI) {
+				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == dpp::unicode_emoji::thread) {
 					set_test(THREAD_MESSAGE_REACT_ADD_EVENT, true);
 					thread_helper.notify_event_tested(thread_test_helper::MESSAGE_REACT);
 				}
@@ -1227,7 +1333,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 		bot.on_message_reaction_remove([&](const dpp::message_reaction_remove_t & event) {
 			if (event.reacting_user_id == bot.me.id) {
-				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == THREAD_EMOJI) {
+				if (event.channel_id == thread_helper.thread_id && event.reacting_emoji.name == dpp::unicode_emoji::thread) {
 					set_test(THREAD_MESSAGE_REACT_REMOVE_EVENT, true);
 					thread_helper.notify_event_tested(thread_test_helper::MESSAGE_REMOVE_REACT);
 				}

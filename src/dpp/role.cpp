@@ -365,6 +365,10 @@ bool role::has_send_voice_messages() const {
 	return has_administrator() || permissions.has(p_send_voice_messages);
 }
 
+bool role::has_use_clyde_ai() const {
+	return has_administrator() || permissions.has(p_use_clyde_ai);
+}
+
 role& role::set_name(const std::string& n) {
 	name = utility::validate(n, 1, 100, "Role name too short");
 	return *this;
