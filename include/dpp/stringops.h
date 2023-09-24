@@ -40,9 +40,9 @@ namespace dpp {
  */
 template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>& s)
 {
-    std::basic_string<T> s2 = s;
-    std::transform(s2.begin(), s2.end(), s2.begin(), tolower);
-    return s2;
+	std::basic_string<T> s2 = s;
+	std::transform(s2.begin(), s2.end(), s2.begin(), tolower);
+	return s2;
 }
 
 /**
@@ -54,9 +54,9 @@ template <typename T> std::basic_string<T> lowercase(const std::basic_string<T>&
  */
 template <typename T> std::basic_string<T> uppercase(const std::basic_string<T>& s)
 {
-    std::basic_string<T> s2 = s;
-    std::transform(s2.begin(), s2.end(), s2.begin(), toupper);
-    return s2;
+	std::basic_string<T> s2 = s;
+	std::transform(s2.begin(), s2.end(), s2.begin(), toupper);
+	return s2;
 }
 
 /**
@@ -189,10 +189,10 @@ template <int> int from_string(const std::string &s)
  */
 template <typename T> std::string to_hex(T i)
 {
-  std::stringstream stream;
+	std::stringstream stream;
 	stream.imbue(std::locale::classic());
-  stream << std::setfill('0') << std::setw(sizeof(T)*2) << std::hex << i;
-  return stream.str();
+	stream << std::setfill('0') << std::setw(sizeof(T)*2) << std::hex << i;
+	return stream.str();
 }
 
 /**
@@ -205,10 +205,10 @@ template <typename T> std::string to_hex(T i)
  */
 template <typename T> std::string leading_zeroes(T i, size_t width)
 {
-  std::stringstream stream;
+	std::stringstream stream;
 	stream.imbue(std::locale::classic());
-  stream << std::setfill('0') << std::setw((int)width) << std::dec << i;
-  return stream.str();
+	stream << std::setfill('0') << std::setw((int)width) << std::dec << i;
+	return stream.str();
 }
 
 } // namespace dpp
