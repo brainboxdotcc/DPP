@@ -49,7 +49,7 @@ namespace dpp {
 		 * @param current_gain The gain to be applied to the elements.
 		 * @param increment The increment value to be added to each element.
 		 */
-		inline static void collect_single_register(int32_t* data_in, int16_t* data_out, float current_gain, float increment) {
+		inline void collect_single_register(int32_t* data_in, int16_t* data_out, float current_gain, float increment) {
 			avx_512_float current_samples_new{ _mm512_mul_ps(gather_values(data_in),
 				_mm512_add_ps(_mm512_set1_ps(current_gain),
 					_mm512_mul_ps(_mm512_set1_ps(increment),
@@ -73,12 +73,13 @@ namespace dpp {
 		 * @param up_sampled_vector Pointer to the array of int32_t values.
 		 * @param decoded_data Pointer to the array of int16_t values.
 		 */
-		inline static void combine_samples(int32_t* up_sampled_vector, const int16_t* decoded_data) {
+		inline void combine_samples(int32_t* up_sampled_vector, const int16_t* decoded_data) {
 			auto newValues{ _mm512_add_ps(gather_values(up_sampled_vector), gather_values(decoded_data)) };
 			store_values(newValues, up_sampled_vector);
 		}
 
 	protected:
+		alignas(64) float values[byte_blocks_per_register]{};///< Array for storing the values to be loaded/stored.
 
 		/**
 		 * @brief Stores values from a 512-bit AVX512 vector to a storage location.
@@ -87,8 +88,9 @@ namespace dpp {
 		 * @param storage_location Pointer to the storage location.
 		 */
 		template<typename value_type> inline static void store_values(const avx_512_float& values_to_store, value_type* storage_location) {
+			_mm256_store_ps(values, values_to_store);
 			for (int64_t x = 0; x < byte_blocks_per_register; ++x) {
-				storage_location[x] = static_cast<value_type>(extract_float_from_avx_512(values_to_store, x));
+				storage_location[x] = static_cast<value_type>(values[x]);
 			}
 		}
 
@@ -98,24 +100,11 @@ namespace dpp {
 		 * @tparam Indices Parameter pack of indices for gathering values.
 		 * @return An AVX512 register containing gathered values.
 		 */
-		template<typename value_type> inline static avx_512_float gather_values(value_type* values) {
-			alignas(64) float new_array[byte_blocks_per_register]{};
+		template<typename value_type> inline avx_512_float gather_values(value_type* values_new) {
 			for (uint64_t x = 0; x < byte_blocks_per_register; ++x) {
-				new_array[x] = static_cast<float>(values[x]);
+				values[x] = static_cast<float>(values_new[x]);
 			}
-			return _mm512_load_ps(new_array);
-		}
-
-		/**
-		 * @brief Extracts a 32-bit integer from a 512-bit AVX512 register.
-		 * @param value The AVX512 register containing packed 32-bit integers.
-		 * @param index The index of the 32-bit integer to extract (0-15).
-		 * @return The extracted 32-bit integer.
-		 */
-		inline static float extract_float_from_avx_512(const avx_512_float& value, int64_t index) {
-			alignas(64) float new_array[byte_blocks_per_register]{};
-			_mm512_store_ps(new_array, value);
-			return new_array[index];
+			return _mm512_load_ps(values);
 		}
 	};
 

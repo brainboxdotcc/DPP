@@ -55,6 +55,8 @@ struct OpusRepacketizer;
 
 namespace dpp {
 
+class audio_mixer;
+
 // !TODO: change these to constexpr and rename every occurrence across the codebase
 #define AUDIO_TRACK_MARKER (uint16_t)0xFFFF
 
@@ -138,6 +140,11 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief Last connect time of voice session
 	 */
 	time_t connect_time;
+
+	/*
+	* @brief For mixing outgoing voice data.
+	*/
+	std::unique_ptr<audio_mixer> mixer;
 
 	/**
 	 * @brief IP of UDP/RTP endpoint
