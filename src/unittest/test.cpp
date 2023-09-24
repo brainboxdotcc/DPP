@@ -619,7 +619,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				 dpp::utility::thread_url(1,0) == "" &&
 				 dpp::utility::thread_url(0,0) == "" 
 		);
-
 	}
 
 #ifndef _WIN32
