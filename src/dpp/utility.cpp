@@ -772,11 +772,6 @@ namespace dpp {
 			#endif
 		}
 
-		std::string hex_to_str(long h) {
-			std::stringstream s;
-			s << std::hex << h;
-			return s.str();
-		}
     } // namespace utility
 
 } // namespace dpp
