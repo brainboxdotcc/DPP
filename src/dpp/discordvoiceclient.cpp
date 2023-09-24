@@ -415,7 +415,7 @@ void discord_voice_client::thread_run()
 			times_looped = 0;
 		}
 		/* This does mean we'll always have times_looped at a minimum of 1, this is intended. */
-		times_looped += 1;
+		times_looped++;
 		/* If we've looped 5 or more times, abort the loop. */
 		if(times_looped >= 5) {
 			log(dpp::ll_warning, "Reached max loops whilst attempting to read from the websocket. Aborting websocket.");

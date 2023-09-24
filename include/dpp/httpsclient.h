@@ -33,9 +33,9 @@
 namespace dpp {
 
 static inline const std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, "
-                                                + to_hex(DPP_VERSION_MAJOR) + "."
-                                                + to_hex(DPP_VERSION_MINOR) + "."
-                                                + to_hex(DPP_VERSION_PATCH) + ")";
+                                                + to_hex(DPP_VERSION_MAJOR, false) + "."
+                                                + to_hex(DPP_VERSION_MINOR, false) + "."
+                                                + to_hex(DPP_VERSION_PATCH, false) + ")";
 
 static inline constexpr const char* DISCORD_HOST = "https://discord.com";
 
