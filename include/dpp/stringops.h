@@ -186,15 +186,16 @@ template <int> int from_string(const std::string &s)
  * 
  * @tparam T numeric type
  * @param i numeric value
+ * @param leading_zeroes set to false if you don't want the leading zeroes in the output
  * @return std::string value in hex, the length will be 2* the raw size of the type
  */
-template <typename T> std::string to_hex(T i)
+template <typename T> std::string to_hex(T i, bool leading_zeroes = true)
 {
 	char str[26] = { 0 };
 	size_t size = sizeof(T) * 2;
 	std::to_chars(std::begin(str), std::end(str), i, 16);
 	std::string out{str};
-	if (out.length() < size) {
+	if (leading_zeroes && out.length() < size) {
 		out.insert(out.begin(), size - out.length(), '0');
 	}
 	return out;
