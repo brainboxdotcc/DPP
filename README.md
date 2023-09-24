@@ -134,7 +134,7 @@ We love people's support in growing and improving. Be sure to leave a ⭐️ if 
 
 ### Supported compilers
 * [g++](https://gcc.gnu.org) (version 8 or higher)
-* [clang](https://clang.llvm.org/)
+* [clang](https://clang.llvm.org/) (version 6 or higher)
 * AppleClang (12.0 or higher)
 * Microsoft Visual Studio 2019 or 2022 (16.x/17.x)
 * [mingw-w64](https://www.mingw-w64.org/) (gcc version 8 or higher)
