@@ -29,7 +29,6 @@
 #include <thread>
 #include <functional>
 #include <chrono>
-#include <ctime>
 #include <algorithm>
 #include <fstream>
 #include <streambuf>

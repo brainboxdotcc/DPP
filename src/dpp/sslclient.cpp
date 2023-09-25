@@ -504,6 +504,27 @@ void ssl_client::read_loop()
 							case SSL_ERROR_NONE:
 								/* Data received, add it to the buffer */
 								if (r > 0) {
+									const std::string data(server_to_client_buffer, r);
+									/* Split the data into an array for every line. */
+									const std::vector<std::string> data_lines = utility::tokenize(data);
+									/* Get the first line as we always know that's the HTTP response. */
+									const std::string http_reponse(data_lines[0]);
+
+									/* Does the first line begin with a http code? */
+									if(http_reponse.rfind("HTTP/1.1", 0) != std::string::npos) {
+										/* Now let's split the first line by every space, meaning we can check the actual HTTP code. */
+										const std::vector<std::string> line_split_by_space = utility::tokenize(data_lines[0], " ");
+
+										/* We need to make sure there's at least 3 elements in line_split_by_space. */
+										if(line_split_by_space.size() >= 3) {
+											const int http_code = std::stoi(line_split_by_space[1]);
+
+											/* If the http_code isn't 204, 101, or 200, log it. */
+											if(http_code != 204 && http_code != 101 && http_code != 200)
+												log(ll_warning, "Received unhandled code: " + http_reponse);
+										}
+									}
+
 									buffer.append(server_to_client_buffer, r);
 									if (!this->handle_buffer(buffer)) {
 										return;

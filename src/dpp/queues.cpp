@@ -29,12 +29,8 @@
 #include <dpp/cluster.h>
 #include <dpp/httpsclient.h>
 #include <dpp/stringops.h>
-#include <dpp/version.h>
 
 namespace dpp {
-
-static std::string http_version = "DiscordBot (https://github.com/brainboxdotcc/DPP, " + std::to_string(DPP_VERSION_MAJOR) + "." + std::to_string(DPP_VERSION_MINOR) + "." + std::to_string(DPP_VERSION_PATCH) + ")";
-static const char* DISCORD_HOST = "https://discord.com";
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent, const std::string &filemimetype)
  : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false)
