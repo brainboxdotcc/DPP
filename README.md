@@ -78,7 +78,7 @@ You can find more examples in our [example page](https://dpp.dev/md_docpages_03_
 ### Linux
 The library runs ideally on **Linux**.
 
-### Mac OS X and FreeBSD
+### Mac OS X and FreeBSD and OpenBSD
 The library is well-functional and stable on **Mac OS X** and **FreeBSD** and **OpenBSD** too.
 
 ### Raspberry Pi
