@@ -55,39 +55,39 @@ void etf_parser::buffer_write(etf_buffer *pk, const char *bytes, size_t l) {
 	pk->length += l;
 }
 
- void etf_parser::append_version(etf_buffer *b) {
+void etf_parser::append_version(etf_buffer *b) {
 	static unsigned char buf[1] = {FORMAT_VERSION};
 	buffer_write(b, (const char *)buf, 1);
 }
 
- void etf_parser::append_nil(etf_buffer *b) {
+void etf_parser::append_nil(etf_buffer *b) {
 	static unsigned char buf[5] = {ett_atom_small, 3, 'n', 'i', 'l'};
 	buffer_write(b, (const char *)buf, 5);
 }
 
- void etf_parser::append_false(etf_buffer *b) {
+void etf_parser::append_false(etf_buffer *b) {
 	static unsigned char buf[7] = {ett_atom_small, 5, 'f', 'a', 'l', 's', 'e'};
 	buffer_write(b, (const char *)buf, 7);
 }
 
- void etf_parser::append_true(etf_buffer *b) {
+void etf_parser::append_true(etf_buffer *b) {
 	static unsigned char buf[6] = {ett_atom_small, 4, 't', 'r', 'u', 'e'};
 	buffer_write(b, (const char *)buf, 6);
 }
 
- void etf_parser::append_small_integer(etf_buffer *b, unsigned char d) {
+void etf_parser::append_small_integer(etf_buffer *b, unsigned char d) {
 	unsigned char buf[2] = {ett_smallint, d};
 	buffer_write(b, (const char *)buf, 2);
 }
 
- void etf_parser::append_integer(etf_buffer *b, int32_t d) {
+void etf_parser::append_integer(etf_buffer *b, int32_t d) {
 	unsigned char buf[5];
 	buf[0] = ett_integer;
 	store_32_bits(buf + 1, d);
 	buffer_write(b, (const char *)buf, 5);
 }
 
- void etf_parser::append_unsigned_long_long(etf_buffer *b, unsigned long long d) {
+void etf_parser::append_unsigned_long_long(etf_buffer *b, unsigned long long d) {
 	unsigned char buf[1 + 2 + sizeof(unsigned long long)];
 	buf[0] = ett_bigint_small;
 
@@ -103,7 +103,7 @@ void etf_parser::buffer_write(etf_buffer *pk, const char *bytes, size_t l) {
 	buffer_write(b, (const char *)buf, 1 + 2 + bytes_enc);
 }
 
- void etf_parser::append_long_long(etf_buffer *b, long long d) {
+void etf_parser::append_long_long(etf_buffer *b, long long d) {
 	unsigned char buf[1 + 2 + sizeof(unsigned long long)];
 	buf[0] = ett_bigint_small;
 	buf[2] = d < 0 ? 1 : 0;
@@ -118,16 +118,16 @@ void etf_parser::buffer_write(etf_buffer *pk, const char *bytes, size_t l) {
 	buffer_write(b, (const char *)buf, 1 + 2 + bytes_enc);
 }
 
- void etf_parser::append_double(etf_buffer *b, double f) {
+void etf_parser::append_double(etf_buffer *b, double f) {
 	unsigned char buf[1 + 8] = {0};
+	uint64_t val_64_out{0};
 	buf[0] = ett_new_float;
-	type_punner p;
-	p.df = f;
-	store_64_bits(buf + 1, p.ui64);
+	memcpy(&val_64_out, &f, sizeof(double));
+	store_64_bits(buf + 1, val_64_out);
 	buffer_write(b, (const char *)buf, 1 + 8);
 }
 
- void etf_parser::append_atom(etf_buffer *b, const char *bytes, size_t size) {
+void etf_parser::append_atom(etf_buffer *b, const char *bytes, size_t size) {
 	if (size < 255) {
 		unsigned char buf[2] = {ett_atom_small, (unsigned char)size};
 		buffer_write(b, (const char *)buf, 2);
@@ -146,7 +146,7 @@ void etf_parser::buffer_write(etf_buffer *pk, const char *bytes, size_t l) {
 	}
 }
 
- void etf_parser::append_atom_utf8(etf_buffer *b, const char *bytes, size_t size) {
+void etf_parser::append_atom_utf8(etf_buffer *b, const char *bytes, size_t size) {
 	if (size < 255) {
 		unsigned char buf[2] = {ett_atom_utf8_small, (unsigned char)size};
 		buffer_write(b, (const char *)buf, 2);
@@ -174,7 +174,7 @@ void etf_parser::append_binary(etf_buffer *b, const char *bytes, size_t size) {
 	buffer_write(b, (const char *)bytes, size);
 }
 
- void etf_parser::append_string(etf_buffer *b, const char *bytes, size_t size) {
+void etf_parser::append_string(etf_buffer *b, const char *bytes, size_t size) {
 	unsigned char buf[3];
 	buf[0] = ett_string;
 
@@ -183,7 +183,7 @@ void etf_parser::append_binary(etf_buffer *b, const char *bytes, size_t size) {
 	buffer_write(b, (const char *)bytes, size);
 }
 
- void etf_parser::append_tuple_header(etf_buffer *b, size_t size) {
+void etf_parser::append_tuple_header(etf_buffer *b, size_t size) {
 	if (size < 256) {
 		unsigned char buf[2];
 		buf[0] = ett_small_tuple;
@@ -197,19 +197,19 @@ void etf_parser::append_binary(etf_buffer *b, const char *bytes, size_t size) {
 	}
 }
 
- void etf_parser::append_nil_ext(etf_buffer *b) {
+void etf_parser::append_nil_ext(etf_buffer *b) {
 	static unsigned char buf[1] = {ett_nil};
 	buffer_write(b, (const char *)buf, 1);
 }
 
- void etf_parser::append_list_header(etf_buffer *b, size_t size) {
+void etf_parser::append_list_header(etf_buffer *b, size_t size) {
 	unsigned char buf[5];
 	buf[0] = ett_list;
 	store_32_bits(buf + 1, size);
 	buffer_write(b, (const char *)buf, 5);
 }
 
- void etf_parser::append_map_header(etf_buffer *b, size_t size) {
+void etf_parser::append_map_header(etf_buffer *b, size_t size) {
 	unsigned char buf[5];
 	buf[0] = ett_map;
 	store_32_bits(buf + 1, size);
