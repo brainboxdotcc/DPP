@@ -104,22 +104,6 @@ enum etf_token_type : uint8_t {
 };
 
 /**
- * @brief A horrible structure used within the ETF parser to convert uint64_t to double and back.
- * This is horrible, but it is the official way erlang term format does this, so we can't really
- * mess with it much.
- */
-union type_punner {
-	/**
-	 * @brief binary integer value
-	 */
-	uint64_t ui64;
-	/**
-	 * @brief double floating point value
-	 */
-	double df;
-};
-
-/**
  * @brief Represents a buffer of bytes being encoded into ETF
  */
 struct DPP_EXPORT etf_buffer {
