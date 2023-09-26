@@ -269,10 +269,6 @@ const char* etf_parser::read_string(uint32_t length) {
 	return (const char*)str;
 }
 
-static const char* atom_null = "null";
-static const char* atom_true = "true";
-static const char* atom_false = "false";
-
 json etf_parser::process_atom(const char* atom, uint16_t length) {
 	json j;
 
@@ -280,17 +276,26 @@ json etf_parser::process_atom(const char* atom, uint16_t length) {
 		return j;
 	}
 
+	/**
+	 * WARNING: PERFORMANCE HOTSPOT
+	 * Valgrind cachegrind identified this as a performance hotspot in DPP when using ETF. This gets called a LOT,
+	 * and the difference here between comparing the simple constant types here where the lengths are known in this
+	 * way, compared to using memcpy or strncpy four times, is absolutely huge (factors of ten). Considering this
+	 * can be called hundreds of times a second on a busy bot, the performance of this function should not be
+	 * underestimated. Think carefully before 'tidying' this function further!
+	 * 
+	 */
 	if (length >= 3 && length <= 5) {
-		if (length == 4 && *((uint32_t*)atom) == *((uint32_t*)atom_null)) { // "null"
+		if (length == 4 && atom[0] == 'n' && atom[1] == 'u' && atom[2] == 'l' && atom[3] == 'l') { // "null"
 			return j;
 		}
-		else if(length == 4 && *((uint32_t*)atom) == *((uint32_t*)atom_true)) { // "true"
+		else if (length == 4 && atom[0] == 't' && atom[1] == 'r' && atom[2] == 'u' && atom[3] == 'e') { // "true"
 			return true;
 		}
 		else if (length == 3 && atom[0] == 'n' && atom[1] == 'i' && atom[2] == 'l') { // "nil"
 			return j;
 		}
-		else if (length == 5 && *((uint32_t*)atom) == *((uint32_t*)atom_false) && atom[4] == 'e') { // "fals","e"
+		else if (length == 5 && atom[0] == 'f' && atom[1] == 'a' && atom[2] == 'l' && atom[3] == 's' && atom[4] == 'e') { // "fals","e"
 			return false;
 		}
 	}
