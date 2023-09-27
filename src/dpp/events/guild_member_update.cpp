@@ -40,26 +40,29 @@ using namespace dpp;
  */
 void guild_member_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(from_string<uint64_t>(d["guild_id"].get<std::string>()));
+	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+	dpp::guild* g = dpp::find_guild(guild_id);
 	if (client->creator->cache_policy.user_policy == dpp::cp_none) {
 		dpp::user u;
 		u.fill_from_json(&(d["user"]));
-		if (g && !client->creator->on_guild_member_update.empty()) {
-			dpp::guild_member_update_t gmu(client, raw);
-			gmu.updating_guild = g;
+		dpp::guild_member_update_t gmu(client, raw);
+		gmu.updating_guild = g;
+		if (!client->creator->on_guild_member_update.empty()) {
 			guild_member m;
-			auto& user = d;//d["user"]; // d contains roles and other member stuff already
-			m.fill_from_json(&user, g->id, u.id);
+			auto& user = d; // d contains roles and other member stuff already
+			m.fill_from_json(&user, guild_id, u.id);
 			gmu.updated = m;
-			client->creator->on_guild_member_update.call(gmu);
 		}
+		client->creator->on_guild_member_update.call(gmu);
 	} else {
 		dpp::user* u = dpp::find_user(from_string<uint64_t>(d["user"]["id"].get<std::string>()));
-		if (g && u) {
+		if (u) {
 			auto& user = d;//d["user"]; // d contains roles and other member stuff already
 			guild_member m;
-			m.fill_from_json(&user, g->id, u->id);
-			g->members[u->id] = m;
+			m.fill_from_json(&user, guild_id, u->id);
+			if (g) {
+				g->members[u->id] = m;
+			}
 
 			if (!client->creator->on_guild_member_update.empty()) {
 				dpp::guild_member_update_t gmu(client, raw);

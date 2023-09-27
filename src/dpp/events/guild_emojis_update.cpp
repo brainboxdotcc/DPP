@@ -43,15 +43,16 @@ using namespace dpp;
  */
 void guild_emojis_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-	if (g) {
-		if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
-			for (auto & ee : g->emojis) {
-				dpp::emoji* fe = dpp::find_emoji(ee);
-				if (fe) {
-					dpp::get_emoji_cache()->remove(fe);
-				}
+	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+	dpp::guild* g = dpp::find_guild(guild_id);
+	if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
+		for (auto & ee : g->emojis) {
+			dpp::emoji* fe = dpp::find_emoji(ee);
+			if (fe) {
+				dpp::get_emoji_cache()->remove(fe);
 			}
+		}
+		if (g) {
 			g->emojis.clear();
 			for (auto & emoji : d["emojis"]) {
 				dpp::emoji* e = dpp::find_emoji(snowflake_not_null(&emoji, "id"));
@@ -63,12 +64,12 @@ void guild_emojis_update::handle(discord_client* client, json &j, const std::str
 				g->emojis.push_back(e->id);
 			}
 		}
-		if (!client->creator->on_guild_emojis_update.empty()) {
-			dpp::guild_emojis_update_t geu(client, raw);
-			geu.emojis = g->emojis;
-			geu.updating_guild = g;
-			client->creator->on_guild_emojis_update.call(geu);
-		}
+	}
+	if (!client->creator->on_guild_emojis_update.empty()) {
+		dpp::guild_emojis_update_t geu(client, raw);
+		geu.emojis = g->emojis;
+		geu.updating_guild = g;
+		client->creator->on_guild_emojis_update.call(geu);
 	}
 }
 

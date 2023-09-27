@@ -42,28 +42,27 @@ using namespace dpp;
  */
 void guild_role_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json &d = j["d"];
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-	if (g) {
-		if (client->creator->cache_policy.role_policy == dpp::cp_none) {
-			dpp::role r;
-			r.fill_from_json(g->id, &d);
+	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+	dpp::guild* g = dpp::find_guild(guild_id);
+	if (client->creator->cache_policy.role_policy == dpp::cp_none) {
+		dpp::role r;
+		r.fill_from_json(guild_id, &d);
+		if (!client->creator->on_guild_role_update.empty()) {
+			dpp::guild_role_update_t gru(client, raw);
+			gru.updating_guild = g;
+			gru.updated = &r;
+			client->creator->on_guild_role_update.call(gru);
+		}
+	} else {
+		json& role = d["role"];
+		dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
+		if (r) {
+			r->fill_from_json(g->id, &role);
 			if (!client->creator->on_guild_role_update.empty()) {
 				dpp::guild_role_update_t gru(client, raw);
 				gru.updating_guild = g;
-				gru.updated = &r;
+				gru.updated = r;
 				client->creator->on_guild_role_update.call(gru);
-			}
-		} else {
-			json& role = d["role"];
-			dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
-			if (r) {
-				r->fill_from_json(g->id, &role);
-				if (!client->creator->on_guild_role_update.empty()) {
-					dpp::guild_role_update_t gru(client, raw);
-					gru.updating_guild = g;
-					gru.updated = r;
-					client->creator->on_guild_role_update.call(gru);
-				}
 			}
 		}
 	}

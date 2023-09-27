@@ -435,7 +435,7 @@ slashcommand& slashcommand::add_option(const command_option &o)
 	return *this;
 }
 
-interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), cache_policy({cp_aggressive, cp_aggressive, cp_aggressive}) {
+interaction::interaction() : application_id(0), type(0), guild_id(0), channel_id(0), message_id(0), version(0), cache_policy({cp_aggressive, cp_aggressive, cp_aggressive, cp_aggressive, cp_aggressive}) {
 }
 
 command_interaction interaction::get_command_interaction() const {

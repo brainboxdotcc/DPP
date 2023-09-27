@@ -40,23 +40,23 @@ using namespace dpp;
  */
 void channel_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
+	dpp::guild* g = nullptr;
 	dpp::channel* c = dpp::find_channel(snowflake_not_null(&d, "id"));
 	if (c) {
-		dpp::guild* g = dpp::find_guild(c->guild_id);
+		g = dpp::find_guild(c->guild_id);
 		if (g) {
 			auto gc = std::find(g->channels.begin(), g->channels.end(), c->id);
 			if (gc != g->channels.end()) {
 				g->channels.erase(gc);
 			}
-
-			if (!client->creator->on_channel_delete.empty()) {
-				dpp::channel_delete_t cd(client, raw);
-				cd.deleted = c;
-				cd.deleting_guild = g;
-				client->creator->on_channel_delete.call(cd);
-			}
 		}
 		dpp::get_channel_cache()->remove(c);
+	}
+	if (!client->creator->on_channel_delete.empty()) {
+		dpp::channel_delete_t cd(client, raw);
+		cd.deleted = c;
+		cd.deleting_guild = g;
+		client->creator->on_channel_delete.call(cd);
 	}
 }
 

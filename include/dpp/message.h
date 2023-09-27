@@ -1172,6 +1172,16 @@ struct DPP_EXPORT cache_policy_t {
 	 * @brief Caching policy for roles
 	 */
 	cache_policy_setting_t role_policy = cp_aggressive;
+
+	/**
+	 * @brief Caching policy for roles
+	 */
+	cache_policy_setting_t channel_policy = cp_aggressive;
+
+	/**
+	 * @brief Caching policy for roles
+	 */
+	cache_policy_setting_t guild_policy = cp_aggressive;
 };
 
 /**
