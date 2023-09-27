@@ -46,7 +46,7 @@ void guild_update::handle(discord_client* client, json &j, const std::string &ra
 		newguild.fill_from_json(client, &d);
 		g = &newguild;
 	} else {
-		g = dpp::find_guild(from_string<uint64_t>(d["id"].get<std::string>()));
+		g = dpp::find_guild(snowflake_not_null(&d, "id"));
 		if (g) {
 			g->fill_from_json(client, &d);
 			if (!g->is_unavailable()) {

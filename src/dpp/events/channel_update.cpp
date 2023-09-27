@@ -46,7 +46,7 @@ void channel_update::handle(discord_client* client, json &j, const std::string &
 		newchannel.fill_from_json(&d);
 		c = &newchannel;
 	} else {
-		c = dpp::find_channel(from_string<uint64_t>(d["id"].get<std::string>()));
+		c = dpp::find_channel(snowflake_not_null(&d, "id"));
 		if (c) {
 			c->fill_from_json(&d);
 		}
