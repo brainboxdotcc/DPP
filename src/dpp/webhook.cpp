@@ -84,16 +84,21 @@ std::string webhook::build_json(bool with_id) const {
 	}
 	j["name"] = name;
 	j["type"] = type;
-	if (channel_id)
+	if (channel_id) {
 		j["channel_id"] = channel_id;
-	if (guild_id)
+	}
+	if (guild_id) {
 		j["guild_id"] = guild_id;
-	if (!name.empty())
+	}
+	if (!name.empty()) {
 		j["name"] = name;
-	if (image_data)
+	}
+	if (image_data) {
 		j["avatar"] = *image_data;
-	if (application_id)
+	}
+	if (application_id) {
 		j["application_id"] = application_id;
+	}
 	return j.dump();
 }
 

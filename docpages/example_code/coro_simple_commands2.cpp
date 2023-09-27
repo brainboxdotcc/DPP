@@ -20,8 +20,9 @@ int main() {
 
 				// If we have the guild member in the command's resolved data, return it
 				const auto &member_map = event.command.resolved.members;
-				if (auto member = member_map.find(user_id); member != member_map.end())
+				if (auto member = member_map.find(user_id); member != member_map.end()) {
 					co_return member->second;
+				}
 				// Try looking in guild cache
 				dpp::guild *guild = dpp::find_guild(event.command.guild_id);
 				if (guild) {

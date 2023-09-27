@@ -78,7 +78,7 @@ presence::presence(presence_status status, activity_type type, const std::string
 	a.name = activity_description;
 
 	/* If the type is custom, set the state as "activity_description" */
-	if(type == activity_type::at_custom) {
+	if (type == activity_type::at_custom) {
 	    	a.state = activity_description;
 	}
 
@@ -86,24 +86,26 @@ presence::presence(presence_status status, activity_type type, const std::string
 	activities.clear();
 	activities.emplace_back(a);
 	flags &= PF_CLEAR_STATUS;
-	if (status == ps_online)
+	if (status == ps_online) {
 		flags |= p_status_online;
-	else if (status == ps_idle)
+	} else if (status == ps_idle) {
 		flags |= p_status_idle;
-	else if (status == ps_dnd)
+	} else if (status == ps_dnd) {
 		flags |= p_status_dnd;
+	}
 }
 
 presence::presence(presence_status status, const activity &a) {
 	activities.clear();
 	activities.emplace_back(a);
 	flags &= PF_CLEAR_STATUS;
-	if (status == ps_online)
+	if (status == ps_online) {
 		flags |= p_status_online;
-	else if (status == ps_idle)
+	} else if (status == ps_idle) {
 		flags |= p_status_idle;
-	else if (status == ps_dnd)
+	} else if (status == ps_dnd) {
 		flags |= p_status_dnd;
+	}
 }
 
 presence::~presence() = default;
@@ -133,44 +135,48 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 
 		if (update_desktop) {
 			flags &= PF_CLEAR_DESKTOP;
-			if (desktop == "online")
+			if (desktop == "online") {
 				flags |= p_desktop_online;
-			else if (desktop == "idle")
+			} else if (desktop == "idle") {
 				flags |= p_desktop_idle;
-			else if (desktop == "dnd")
+			} else if (desktop == "dnd") {
 				flags |= p_desktop_dnd;
+			}
 		}
 
 		if (update_mobile) {
 			flags &= PF_CLEAR_MOBILE;
-			if (mobile == "online")
+			if (mobile == "online") {
 				flags |= p_mobile_online;
-			else if (mobile == "idle")
+			} else if (mobile == "idle") {
 				flags |= p_mobile_idle;
-			else if (mobile == "dnd")
+			} else if (mobile == "dnd") {
 				flags |= p_mobile_dnd;
+			}
 		}
 
 		if (update_web) {
 			flags &= PF_CLEAR_WEB;
-			if (web == "online")
+			if (web == "online") {
 				flags |= p_web_online;
-			else if (web == "idle")
+			} else if (web == "idle") {
 				flags |= p_web_idle;
-			else if (web == "dnd")
+			} else if (web == "dnd") {
 				flags |= p_web_dnd;
+			}
 		}
 	}
 
 	if (j->contains("status")) {
 		flags &= PF_CLEAR_STATUS;
 		std::string main = string_not_null(j, "status");
-		if (main == "online")
+		if (main == "online") {
 			flags |= p_status_online;
-		else if (main == "idle")
+		} else if (main == "idle") {
 			flags |= p_status_idle;
-		else if (main == "dnd")
+		} else if (main == "dnd") {
 			flags |= p_status_dnd;
+		}
 	}
 
 
@@ -204,8 +210,9 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 			if (act.find("emoji") != act.end()) {
 				a.emoji.name = string_not_null(&act["emoji"], "name");
 				a.emoji.id = snowflake_not_null(&act["emoji"], "id");
-				if (bool_not_null(&act["emoji"], "animated"))
+				if (bool_not_null(&act["emoji"], "animated")) {
 					a.emoji.flags |= e_animated;
+				}
 			}
 			if (act.find("party") != act.end()) {
 				a.party.id = snowflake_not_null(&act["party"], "id");
@@ -264,7 +271,7 @@ std::string presence::build_json(bool with_id) const {
 			});
 			if (!i.url.empty()) j2["url"] = i.url;
 
-			if(i.type == activity_type::at_custom) {
+			if (i.type == activity_type::at_custom) {
 			    	if (!i.state.empty()) j2["state"] = i.state; /* When type is custom, bot needs to use "state" */
 			} else {
 			    	if (!i.state.empty()) j2["details"] = i.state; /* Otherwise, the bot needs to use "details" */

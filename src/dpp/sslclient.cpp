@@ -322,20 +322,23 @@ void ssl_client::connect()
 
 				/* Create SSL context */
 				openssl_context = SSL_CTX_new(method);
-				if (openssl_context == nullptr)
+				if (openssl_context == nullptr) {
 					throw dpp::connection_exception("Failed to create SSL client context!");
+				}
 
 				/* Do not allow SSL 3.0, TLS 1.0 or 1.1
 				* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
 				*/
-				if (!SSL_CTX_set_min_proto_version(openssl_context, TLS1_2_VERSION))
+				if (!SSL_CTX_set_min_proto_version(openssl_context, TLS1_2_VERSION)) {
 					throw dpp::connection_exception("Failed to set minimum SSL version!");
+				}
 			}
 
 			/* Create SSL session */
 			ssl->ssl = SSL_new(openssl_context);
-			if (ssl->ssl == nullptr)
+			if (ssl->ssl == nullptr) {
 				throw dpp::connection_exception("SSL_new failed!");
+			}
 
 			SSL_set_fd(ssl->ssl, (int)sfd);
 
@@ -463,8 +466,9 @@ void ssl_client::read_loop()
 			poll_time = poll_time > 400 ? 1000 : poll_time + poll_time / 3 + 1;
 			r = poll(pfd, sockets, now / 1000 == (int64_t)last_tick ? poll_time : 0);
 
-			if (r == 0)
+			if (r == 0) {
 				continue;
+			}
 
 			if (custom_writeable_fd && custom_writeable_fd() >= 0 && pfd[1].revents & POLLOUT) {
 				custom_writeable_ready();
@@ -477,7 +481,7 @@ void ssl_client::read_loop()
 			}
 
 			/* Now check if there's data to read */
-			if(((pfd[0].revents & POLLIN) && !write_blocked_on_read) || (read_blocked_on_write && (pfd[0].revents & POLLOUT))) {
+			if (((pfd[0].revents & POLLIN) && !write_blocked_on_read) || (read_blocked_on_write && (pfd[0].revents & POLLOUT))) {
 				if (plaintext) {
 					read_blocked_on_write = false;
 					read_blocked = false;
@@ -511,17 +515,18 @@ void ssl_client::read_loop()
 									const std::string http_reponse(data_lines[0]);
 
 									/* Does the first line begin with a http code? */
-									if(http_reponse.rfind("HTTP/1.1", 0) != std::string::npos) {
+									if (http_reponse.rfind("HTTP/1.1", 0) != std::string::npos) {
 										/* Now let's split the first line by every space, meaning we can check the actual HTTP code. */
 										const std::vector<std::string> line_split_by_space = utility::tokenize(data_lines[0], " ");
 
 										/* We need to make sure there's at least 3 elements in line_split_by_space. */
-										if(line_split_by_space.size() >= 3) {
+										if (line_split_by_space.size() >= 3) {
 											const int http_code = std::stoi(line_split_by_space[1]);
 
 											/* If the http_code isn't 204, 101, or 200, log it. */
-											if(http_code != 204 && http_code != 101 && http_code != 200)
+											if (http_code != 204 && http_code != 101 && http_code != 200) {
 												log(ll_warning, "Received unhandled code: " + http_reponse);
+											}
 										}
 									}
 

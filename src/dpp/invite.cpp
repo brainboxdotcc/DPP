@@ -72,14 +72,18 @@ std::string invite::build_json(bool with_id) const {
 	json j;
 	j["max_age"] = max_age;
 	j["max_uses"] = max_uses;
-	if (target_user_id > 0)
+	if (target_user_id > 0) {
 		j["target_user"] = target_user_id;
-	if (target_type != itt_none)
+	}
+	if (target_type != itt_none) {
 		j["target_type"] = target_type;
-	if (temporary)
+	}
+	if (temporary) {
 		j["temporary"] = temporary;
-	if (unique)
+	}
+	if (unique) {
 		j["unique"] = unique;
+	}
 	return j.dump();
 }
 

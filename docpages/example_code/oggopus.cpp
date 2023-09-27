@@ -87,8 +87,9 @@ int main(int argc, char const *argv[])
 				const long read_bytes = oggz_read(track_og, CHUNK_READ);
 
 				// break on eof
-				if (!read_bytes)
+				if (!read_bytes) {
 					break;
+				}
 			}
 
 			// don't forget to free the memory

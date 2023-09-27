@@ -138,7 +138,7 @@ guild_member& guild_member::set_communication_disabled_until(const time_t disabl
 }
 	
 bool guild_member::operator == (guild_member const& other_member) const {
-	if((this->user_id == other_member.user_id && this->user_id.empty()) || (this->guild_id == other_member.guild_id && this->guild_id.empty()))
+	if ((this->user_id == other_member.user_id && this->user_id.empty()) || (this->guild_id == other_member.guild_id && this->guild_id.empty()))
 		return false;
 	return this->user_id == other_member.user_id && this->guild_id == other_member.guild_id;
 }
@@ -690,12 +690,14 @@ std::string guild_widget::build_json(bool with_id) const {
 
 
 permission guild::base_permissions(const user* user) const {
-	if (user == nullptr)
+	if (user == nullptr) {
 		return 0;
+	}
 
 	auto mi = members.find(user->id);
-	if (mi == members.end())
+	if (mi == members.end()) {
 		return 0;
+	}
 	guild_member gm = mi->second;
 
 	return base_permissions(gm);
@@ -705,12 +707,14 @@ permission guild::base_permissions(const guild_member &member) const {
 
 	/* this method is written with the help of discord's pseudocode available here https://discord.com/developers/docs/topics/permissions#permission-overwrites */
 
-	if (owner_id == member.user_id)
+	if (owner_id == member.user_id) {
 		return ~0; // return all permissions if it's the owner of the guild
+	}
 
 	role* everyone = dpp::find_role(id);
-	if (everyone == nullptr)
+	if (everyone == nullptr) {
 		return 0;
+	}
 
 	permission permissions = everyone->permissions;
 
@@ -721,21 +725,24 @@ permission guild::base_permissions(const guild_member &member) const {
 		}
 	}
 
-	if (permissions & p_administrator)
+	if (permissions & p_administrator) {
 		return ~0;
+	}
 
 	return permissions;
 }
 
 permission guild::permission_overwrites(const uint64_t base_permissions, const user* user, const channel* channel) const {
-	if (user == nullptr || channel == nullptr)
+	if (user == nullptr || channel == nullptr) {
 		return 0;
+	}
 
 	/* this method is written with the help of discord's pseudocode available here https://discord.com/developers/docs/topics/permissions#permission-overwrites */
 
 	// ADMINISTRATOR overrides any potential permission overwrites, so there is nothing to do here.
-	if (base_permissions & p_administrator)
+	if (base_permissions & p_administrator) {
 		return ~0;
+	}
 
 	permission permissions = base_permissions;
 
@@ -749,8 +756,9 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 	}
 
 	auto mi = members.find(user->id);
-	if (mi == members.end())
+	if (mi == members.end()) {
 		return 0;
+	}
 	guild_member gm = mi->second;
 
 	// Apply role specific overwrites.
@@ -760,8 +768,9 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 	for (auto& rid : gm.roles) {
 
 		/* Skip \@everyone role to not break the hierarchy. It's calculated above */
-		if (rid == this->id)
+		if (rid == this->id) {
 			continue;
+		}
 
 		for (auto it = channel->permission_overwrites.begin(); it != channel->permission_overwrites.end(); ++it) {
 			if (rid == it->id && it->type == ot_role) {
@@ -815,8 +824,9 @@ permission guild::permission_overwrites(const guild_member &member, const channe
 	for (auto& rid : member.roles) {
 
 		/* Skip \@everyone role to not break the hierarchy. It's calculated above */
-		if (rid == this->id)
+		if (rid == this->id) {
 			continue;
+		}
 
 		for (auto it = channel.permission_overwrites.begin(); it != channel.permission_overwrites.end(); ++it) {
 			if (rid == it->id && it->type == ot_role) {

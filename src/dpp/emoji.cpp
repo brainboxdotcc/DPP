@@ -41,14 +41,18 @@ emoji& emoji::fill_from_json(nlohmann::json* j) {
 		json & user = (*j)["user"];
 		user_id = snowflake_not_null(&user, "id");
 	}
-	if (bool_not_null(j, "require_colons"))
+	if (bool_not_null(j, "require_colons")) {
 		flags |= e_require_colons;
-	if (bool_not_null(j, "managed"))
+	}
+	if (bool_not_null(j, "managed")) {
 		flags |= e_managed;
-	if (bool_not_null(j, "animated"))
+	}
+	if (bool_not_null(j, "animated")) {
 		flags |= e_animated;
-	if (bool_not_null(j, "available"))
+	}
+	if (bool_not_null(j, "available")) {
 		flags |= e_available;
+	}
 	return *this;
 }
 

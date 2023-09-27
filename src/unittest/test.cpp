@@ -34,8 +34,9 @@ int main(int argc, char *argv[])
 	if (offline) {
 		std::cout << "Running offline unit tests only.\n";
 	} else {
-		if (argc > 1 && std::find_if(argv + 1, argv + argc, [](const char *a){ return (std::strcmp(a, "full") == 0); }) != argv + argc)
+		if (argc > 1 && std::find_if(argv + 1, argv + argc, [](const char *a){ return (std::strcmp(a, "full") == 0); }) != argv + argc) {
 			extended = true;
+		}
 		std::cout << "Running offline and " << (extended ? "extended" : "limited") << " online unit tests. Guild ID: " << TEST_GUILD_ID << " Text Channel ID: " << TEST_TEXT_CHANNEL_ID << " VC ID: " << TEST_VC_ID << " User ID: " << TEST_USER_ID << " Event ID: " << TEST_EVENT_ID << "\n";
 	}
 
@@ -1056,8 +1057,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				}
 				events_tested_mask |= flag;
 				for (uint32_t i = 1; i < EVENT_END; i <<= 1) {
-					if ((events_to_test_mask & i) && (events_tested_mask & i) != i)
+					if ((events_to_test_mask & i) && (events_tested_mask & i) != i) {
 						return;
+					}
 				}
 				set_events_tested();
 			}
@@ -1066,8 +1068,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 			{
 				events_tested_mask |= ~events_to_test_mask;
 				for (uint32_t i = 1; i < EVENT_END; i <<= 1) {
-					if ((events_tested_mask & i) != i)
+					if ((events_tested_mask & i) != i) {
 						return;
+					}
 				}
 				set_events_tested();
 			}
@@ -1508,7 +1511,9 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 				invite.max_uses = 100;
 				set_test(INVITE_CREATE_EVENT, false);
 				bot.channel_invite_create(channel, invite, [&bot, invite](const dpp::confirmation_callback_t &event) {
-					if (event.is_error()) return;
+					if (event.is_error()) {
+						return;
+					}
 
 					auto created = event.get<dpp::invite>();
 					if (!created.code.empty() && created.channel_id == TEST_TEXT_CHANNEL_ID && created.guild_id == TEST_GUILD_ID && created.inviter.id == bot.me.id) {
@@ -1519,13 +1524,13 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 						if (!event.is_error()) {
 							auto retrieved = event.get<dpp::invite>();
 							if (retrieved.code == created.code && retrieved.guild_id == created.guild_id && retrieved.channel_id == created.channel_id && retrieved.inviter.id == created.inviter.id) {
-								if (retrieved.destination_guild.flags & dpp::g_community)
+								if (retrieved.destination_guild.flags & dpp::g_community) {
 									set_test(INVITE_GET, retrieved.expires_at == 0);
-								else
+								} else {
 									set_test(INVITE_GET, true);
+								}
 
-							}
-							else {
+							} else {
 								set_test(INVITE_GET, false);
 							}
 						} else {

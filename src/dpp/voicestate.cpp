@@ -38,20 +38,27 @@ voicestate& voicestate::fill_from_json(nlohmann::json* j) {
 	session_id = string_not_null(j, "session_id");
 	request_to_speak = ts_not_null(j, "request_to_speak_timestamp");
 	flags = 0;
-	if (bool_not_null(j, "deaf"))
+	if (bool_not_null(j, "deaf")) {
 		flags |= vs_deaf;
-	if (bool_not_null(j, "mute"))
+	}
+	if (bool_not_null(j, "mute")) {
 		flags |= vs_mute;
-	if (bool_not_null(j, "self_mute"))
+	}
+	if (bool_not_null(j, "self_mute")) {
 		flags |= vs_self_mute;
-	if (bool_not_null(j, "self_deaf"))
+	}
+	if (bool_not_null(j, "self_deaf")) {
 		flags |= vs_self_deaf;
-	if (bool_not_null(j, "self_stream"))
+	}
+	if (bool_not_null(j, "self_stream")) {
 		flags |= vs_self_stream;
-	if (bool_not_null(j, "self_video"))
+	}
+	if (bool_not_null(j, "self_video")) {
 		flags |= vs_self_video;
-	if (bool_not_null(j, "suppress"))
+	}
+	if (bool_not_null(j, "suppress")) {
 		flags |= vs_suppress;
+	}
 	return *this;
 }
 

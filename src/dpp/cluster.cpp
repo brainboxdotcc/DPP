@@ -232,8 +232,9 @@ void cluster::start(bool return_after) {
 
 	log(ll_debug, "Shards started.");
 	
-	if (!return_after)
+	if (!return_after) {
 		block_calling_thread();
+	}
 }
 
 void cluster::shutdown() {

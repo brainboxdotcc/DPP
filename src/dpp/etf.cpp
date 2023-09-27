@@ -574,7 +574,7 @@ json etf_parser::decode_export() {
 
 json etf_parser::inner_parse() {
 	/* Decode one value into json from ETF */
-	if(offset >= size) {
+	if (offset >= size) {
 		throw dpp::parse_exception("Read past end of ETF buffer");
 	}
 

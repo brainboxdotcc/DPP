@@ -72,22 +72,18 @@ size_t websocket_client::fill_header(unsigned char* outbuf, size_t sendlength, w
 	size_t pos = 0;
 	outbuf[pos++] = WS_FINBIT | opcode;
 
-	if (sendlength <= WS_MAX_PAYLOAD_LENGTH_SMALL)
-	{
+	if (sendlength <= WS_MAX_PAYLOAD_LENGTH_SMALL) {
 		outbuf[pos++] = (unsigned int)sendlength;
-	}
-	else if (sendlength <= WS_MAX_PAYLOAD_LENGTH_LARGE)
-	{
+	} else if (sendlength <= WS_MAX_PAYLOAD_LENGTH_LARGE) {
 		outbuf[pos++] = WS_PAYLOAD_LENGTH_MAGIC_LARGE;
 		outbuf[pos++] = (sendlength >> 8) & 0xff;
 		outbuf[pos++] = sendlength & 0xff;
-	}
-	else
-	{
+	} else {
 		outbuf[pos++] = WS_PAYLOAD_LENGTH_MAGIC_HUGE;
 		const uint64_t len = sendlength;
-		for (int i = sizeof(uint64_t)-1; i >= 0; i--)
+		for (int i = sizeof(uint64_t)-1; i >= 0; i--) {
 			outbuf[pos++] = ((len >> i*8) & 0xff);
+		}
 	}
 
 	/* Masking - We don't care about masking, but discord insists on it. We send a mask of 0x00000000 because
@@ -174,14 +170,12 @@ bool websocket_client::parseheader(std::string &data)
 		return false;
 	} else {
 		unsigned char opcode = data[0];
-		switch (opcode & ~WS_FINBIT)
-		{
+		switch (opcode & ~WS_FINBIT) {
 			case OP_CONTINUATION:
 			case OP_TEXT:
 			case OP_BINARY:
 			case OP_PING:
-			case OP_PONG:
-			{
+			case OP_PONG: {
 				unsigned char len1 = data[1];
 				unsigned int payloadstartoffset = 2;
 
@@ -240,8 +234,7 @@ bool websocket_client::parseheader(std::string &data)
 			}
 			break;
 
-			case OP_CLOSE:
-			{
+			case OP_CLOSE: {
 				uint16_t error = data[2] & 0xff;
 			       	error <<= 8;
 				error |= (data[3] & 0xff);
@@ -250,8 +243,7 @@ bool websocket_client::parseheader(std::string &data)
 			}
 			break;
 
-			default:
-			{
+			default: {
 				this->error(0);
 				return false;
 			}
