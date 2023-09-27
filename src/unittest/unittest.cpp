@@ -41,10 +41,12 @@ void set_status(test_t &test, test_status_t newstatus, std::string_view message)
 	static std::mutex m;
 	std::scoped_lock lock{m};
 
-	if (is_skipped(test) || newstatus == test.status)
+	if (is_skipped(test) || newstatus == test.status) {
 		return;
-	if (test.status != ts_failed) // disallow changing the state of a failed test, but we still log
+	}
+	if (test.status != ts_failed) { // disallow changing the state of a failed test, but we still log
 		test.status = newstatus;
+	}
 	switch (newstatus) {
 		case ts_started:
 			std::cout << "[" << std::fixed << std::setprecision(3) << get_time() << "]: " << "[\u001b[33mTESTING\u001b[0m] " << test.description << (message.empty() ? "" : " - " + std::string{message} ) << "\n";
@@ -198,7 +200,8 @@ void wait_for_tests() {
 		ticks++;
 	}
 	for (auto t : tests) {
-		if (t->status == ts_started)
+		if (t->status == ts_started) {
 			std::cout << "[" << std::fixed << std::setprecision(3)  << get_time() << "]: " << "[\u001b[31mTIMEOUT\u001b[0m] " << t->description << "\n";
+		}
 	}
 }

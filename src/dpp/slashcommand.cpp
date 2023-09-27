@@ -243,7 +243,7 @@ void to_json(json& j, const slashcommand& p) {
 		}
 	}
 
-	if(p.permissions.size())  {
+	if (p.permissions.size())  {
 		j["permissions"] = json();
 
 		for(const auto& perm : p.permissions) {

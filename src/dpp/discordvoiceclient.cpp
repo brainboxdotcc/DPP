@@ -418,13 +418,13 @@ void discord_voice_client::thread_run()
 		 * this gives us time to see if it's an actual disconnect, or an error.
 		 * This will prevent us from looping too much, meaning error codes do not cause an infinite loop.
 		 */
-		if(current_time - last_loop_time >= 3)
+		if (current_time - last_loop_time >= 3)
 			times_looped = 0;
 
 		/* This does mean we'll always have times_looped at a minimum of 1, this is intended. */
 		times_looped++;
 		/* If we've looped 5 or more times, abort the loop. */
-		if(times_looped >= 5) {
+		if (times_looped >= 5) {
 			log(dpp::ll_warning, "Reached max loops whilst attempting to read from the websocket. Aborting websocket.");
 			break;
 		}
@@ -488,10 +488,8 @@ bool discord_voice_client::handle_frame(const std::string &data)
 
 		switch (op) {
 			/* Client Disconnect */
-			case 13:
-			{
-				if (j.find("d") != j.end() && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null())
-				{
+			case 13: {
+				if (j.find("d") != j.end() && j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()) {
 					snowflake u_id = snowflake_not_null(&j["d"], "user_id");
 					auto it = std::find_if(ssrc_map.begin(), ssrc_map.end(),
 					   [&u_id](const auto & p) { return p.second == u_id; });
@@ -500,8 +498,7 @@ bool discord_voice_client::handle_frame(const std::string &data)
 						ssrc_map.erase(it);
 					}
 
-					if (!creator->on_voice_client_disconnect.empty())
-					{
+					if (!creator->on_voice_client_disconnect.empty()) {
 						voice_client_disconnect_t vcd(nullptr, data);
 						vcd.voice_client = this;
 						vcd.user_id = u_id;
@@ -513,12 +510,10 @@ bool discord_voice_client::handle_frame(const std::string &data)
 			/* Speaking */ 
 			case 5:
 			/* Client Connect (doesn't seem to work) */
-			case 12:
-			{
+			case 12: {
 				if (j.find("d") != j.end() 
 					&& j["d"].find("user_id") != j["d"].end() && !j["d"]["user_id"].is_null()
-					&& j["d"].find("ssrc") != j["d"].end() && !j["d"]["ssrc"].is_null() && j["d"]["ssrc"].is_number_integer()) 
-				{
+					&& j["d"].find("ssrc") != j["d"].end() && !j["d"]["ssrc"].is_null() && j["d"]["ssrc"].is_number_integer()) {
 					uint32_t u_ssrc = j["d"]["ssrc"].get<uint32_t>();
 					snowflake u_id = snowflake_not_null(&j["d"], "user_id");
 					ssrc_map[u_ssrc] = u_id;
@@ -683,8 +678,9 @@ float discord_voice_client::get_secs_remaining() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
 	float ret = 0;
 
-	for (const auto& packet : outbuf)
+	for (const auto& packet : outbuf) {
 		ret += packet.duration * (timescale / 1000000000.0f);
+	}
 
 	return ret;
 }
@@ -799,8 +795,7 @@ void discord_voice_client::read_ready()
 			std::lock_guard lk(voice_courier_shared_state.mtx);
 			auto& [range, payload_queue, pending_decoder_ctls, decoder] = voice_courier_shared_state.parked_voice_payloads[vp.vr->user_id];
 
-			if (!decoder)
-			{
+			if (!decoder) {
 				/*
 				 * Most likely this is the first time we encounter this speaker.
 				 * Do some initialization for not only the decoder but also the range.
@@ -852,8 +847,9 @@ void discord_voice_client::write_ready()
 			if (outbuf[0].packet.size() == 2 && (*((uint16_t*)(outbuf[0].packet.data()))) == AUDIO_TRACK_MARKER) {
 				outbuf.erase(outbuf.begin());
 				track_marker_found = true;
-				if (tracks > 0)
+				if (tracks > 0) {
 					tracks--;
+				}
 			}
 			if (outbuf.size()) {
 				if (this->udp_send(outbuf[0].packet.data(), outbuf[0].packet.length()) == (int)outbuf[0].packet.length()) {
@@ -890,9 +886,9 @@ void discord_voice_client::write_ready()
 					sleep_time -= std::chrono::duration_cast<std::chrono::nanoseconds>(end_sleep - start_sleep);
 				} while (std::chrono::nanoseconds(overshoot_accumulator.count() / samples_count) + sleep_increment < sleep_time);
 				last_sleep_remainder = sleep_time;
-			}
-			else
+			} else {
 				last_sleep_remainder = std::chrono::nanoseconds(0);
+			}
 		}
 
 		last_timestamp = std::chrono::high_resolution_clock::now();
@@ -1157,10 +1153,11 @@ discord_voice_client& discord_voice_client::insert_marker(const std::string& met
 
 uint32_t discord_voice_client::get_tracks_remaining() {
 	std::lock_guard<std::mutex> lock(this->stream_mutex);
-	if (outbuf.empty())
+	if (outbuf.empty()) {
 		return 0;
-	else
+	} else {
 		return tracks + 1;
+	}
 }
 
 discord_voice_client& discord_voice_client::skip_to_next_marker() {
@@ -1173,8 +1170,9 @@ discord_voice_client& discord_voice_client::skip_to_next_marker() {
 		/* Remove the actual track marker out of the buffer */
 		outbuf.erase(outbuf.begin());
 	}
-	if (tracks > 0)
+	if (tracks > 0) {
 		tracks--;
+	}
 	if (!track_meta.empty()) {
 		track_meta.erase(track_meta.begin());
 	}

@@ -46,7 +46,7 @@ int main(int argc, char const *argv[])
 			}
 
 			/* If we need to join a vc at all, join it here if join_vc == true */
-			if(join_vc) {
+			if (join_vc) {
 				/* Attempt to connect to a voice channel, returns false if we fail to connect. */
 
 				/* The user issuing the command is not on any voice channel, we can't do anything */

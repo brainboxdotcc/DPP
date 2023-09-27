@@ -210,8 +210,9 @@ namespace dpp {
 				 */
 				clean_hash = hash.substr(2);
 			}
-			if (clean_hash.length() != 32)
+			if (clean_hash.length() != 32) {
 				throw std::length_error("iconhash must be exactly 32 characters in length, passed value is: '" + clean_hash + "'");
+			}
 			this->first = from_string<uint64_t>(clean_hash.substr(0, 16), std::hex);
 			this->second = from_string<uint64_t>(clean_hash.substr(16, 16), std::hex);
 		}
@@ -330,8 +331,9 @@ namespace dpp {
 		{
 			size_t i = 0, iBefore = 0, count = 0;
 			const char* s = str.c_str();
-			if (*s == 0)
+			if (*s == 0) {
 				return 0;
+			}
 
 			while (s[i] > 0) {
 		ascii:
@@ -373,29 +375,33 @@ namespace dpp {
 				return str;
 			}
 			std::string::size_type i, ix, q, min = std::string::npos, max = std::string::npos;
-			for (q = 0, i = 0, ix = str.length(); i < ix; i++, q++)
-			{
-				if (q == start)
+			for (q = 0, i = 0, ix = str.length(); i < ix; i++, q++) {
+				if (q == start) {
 					min = i;
-				if (q <= start + leng || leng == std::string::npos)
+				}
+				if (q <= start + leng || leng == std::string::npos) {
 					max = i;
+				}
 
 				unsigned char c = (unsigned char)str[i];
-				if (c < 0x80)
+				if (c < 0x80) {
 					i += 0;
-				else if ((c & 0xE0) == 0xC0)
+				} else if ((c & 0xE0) == 0xC0) {
 					i += 1;
-				else if ((c & 0xF0) == 0xE0)
+				} else if ((c & 0xF0) == 0xE0) {
 					i += 2;
-				else if ((c & 0xF8) == 0xF0)
+				} else if ((c & 0xF8) == 0xF0) {
 					i += 3;
-				else
+				} else {
 					return "";	//invalid utf8
+				}
 			}
-			if (q <= start + leng || leng == std::string::npos)
+			if (q <= start + leng || leng == std::string::npos) {
 				max = i;
-			if (min == std::string::npos || max == std::string::npos)
+			}
+			if (min == std::string::npos || max == std::string::npos) {
 				return "";
+			}
 
 			return str.substr(min, max);
 		}

@@ -57,16 +57,21 @@ integration& integration::fill_from_json(nlohmann::json* j)
 	this->id = snowflake_not_null(j, "id");
 	this->name = string_not_null(j, "name");
 	this->type = type_map[string_not_null(j, "type")];
-	if (bool_not_null(j, "enabled"))
+	if (bool_not_null(j, "enabled")) {
 		this->flags |= if_enabled;
-	if (bool_not_null(j, "syncing"))
+	}
+	if (bool_not_null(j, "syncing")) {
 		this->flags |= if_syncing;
-	if (bool_not_null(j, "enable_emoticons"))
+	}
+	if (bool_not_null(j, "enable_emoticons")) {
 		this->flags |= if_emoticons;
-	if (bool_not_null(j, "revoked"))
+	}
+	if (bool_not_null(j, "revoked")) {
 		this->flags |= if_revoked;
-	if (int8_not_null(j, "expire_behavior"))
+	}
+	if (int8_not_null(j, "expire_behavior")) {
 		this->flags |= if_expire_kick;
+	}
 	this->expire_grace_period = int32_not_null(j, "expire_grace_period");
 	if (j->contains("user")) {
 		auto t = (*j)["user"];

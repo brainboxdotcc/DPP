@@ -34,14 +34,18 @@ voiceregion::voiceregion() : flags(0)
 voiceregion& voiceregion::fill_from_json(nlohmann::json* j) {
 	id = string_not_null(j, "id");
 	name = string_not_null(j, "id");
-	if (bool_not_null(j, "optimal"))
+	if (bool_not_null(j, "optimal")) {
 		flags |= v_optimal;
-	if (bool_not_null(j, "deprecated"))
+	}
+	if (bool_not_null(j, "deprecated")) {
 		flags |= v_deprecated;
-	if (bool_not_null(j, "custom"))
+	}
+	if (bool_not_null(j, "custom")) {
 		flags |= v_custom;
-	if (bool_not_null(j, "vip"))
+	}
+	if (bool_not_null(j, "vip")) {
 		flags |= v_vip;
+	}
 	return *this;
 }
 

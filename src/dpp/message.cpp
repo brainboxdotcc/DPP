@@ -123,7 +123,7 @@ component& component::set_type(component_type ct)
 	} else if (type == cot_selectmenu) {
 		label = dpp::utility::utf8substr(label, 0, 100);
 	}
-	if(type == cot_text) {
+	if (type == cot_text) {
 		placeholder = dpp::utility::utf8substr(placeholder, 0, 100);
 	} else if (type == cot_selectmenu || type == cot_user_selectmenu || type == cot_role_selectmenu || type == cot_mentionable_selectmenu || type == cot_channel_selectmenu) {
 		placeholder = dpp::utility::utf8substr(placeholder, 0, 150);
@@ -412,7 +412,7 @@ select_option& select_option::fill_from_json(nlohmann::json* j) {
 }
 
 component& component::set_placeholder(const std::string &_placeholder) {
-	if(type == cot_text) {
+	if (type == cot_text) {
 		placeholder = dpp::utility::utf8substr(_placeholder, 0, 100);
 	} else if (type == cot_selectmenu || type == cot_user_selectmenu || type == cot_role_selectmenu || type == cot_mentionable_selectmenu || type == cot_channel_selectmenu) {
 		placeholder = dpp::utility::utf8substr(_placeholder, 0, 150);
@@ -834,7 +834,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		j["id"] = std::to_string(id);
 	}
 
-	if(!author.username.empty()) {
+	if (!author.username.empty()) {
 		/* Used for webhooks */
 		j["username"] = author.username;
 	}
@@ -907,12 +907,15 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 	j["embeds"] = json::array();
 	for (auto& embed : embeds) {
 		json e;
-		if (!embed.description.empty())
+		if (!embed.description.empty()) {
 			e["description"] = embed.description;
-		if (!embed.title.empty())
+		}
+		if (!embed.title.empty()) {
 			e["title"] = embed.title;
-		if (!embed.url.empty())
+		}
+		if (!embed.url.empty()) {
 			e["url"] = embed.url;
+		}
 		e["color"] = embed.color;
 		if (embed.footer.has_value()) {
 			e["footer"]["text"] = embed.footer->text;

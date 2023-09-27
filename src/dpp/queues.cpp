@@ -35,12 +35,15 @@ namespace dpp {
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method _method, const std::string &audit_reason, const std::string &filename, const std::string &filecontent, const std::string &filemimetype)
  : complete_handler(completion), completed(false), non_discord(false), endpoint(_endpoint), parameters(_parameters), postdata(_postdata),  method(_method), reason(audit_reason), mimetype("application/json"), waiting(false)
 {
-		if (!filename.empty())
-			file_name.push_back(filename);
-		if (!filecontent.empty())
-			file_content.push_back(filecontent);
-	if (!filemimetype.empty())
+	if (!filename.empty()) {
+		file_name.push_back(filename);
+	}
+	if (!filecontent.empty()) {
+		file_content.push_back(filecontent);
+	}
+	if (!filemimetype.empty()) {
 		file_mimetypes.push_back(filemimetype);
+	}
 }
 
 http_request::http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata, http_method method, const std::string &audit_reason, const std::vector<std::string> &filename, const std::vector<std::string> &filecontent, const std::vector<std::string> &filemimetypes)
@@ -58,8 +61,9 @@ http_request::~http_request() = default;
 
 void http_request::complete(const http_request_completion_t &c) {
 	/* Call completion handler only if the request has been completed */
-	if (is_completed() && complete_handler)
+	if (is_completed() && complete_handler) {
 		complete_handler(c);
+	}
 }
 
 /* Fill a http_request_completion_t from a HTTP result */
@@ -399,8 +403,9 @@ void in_thread::post_request(http_request* req)
 inline uint32_t hash(const char *s)
 {
 	uint32_t hashval;
-	for (hashval = 17; *s != 0; s++)
+	for (hashval = 17; *s != 0; s++) {
 		hashval = *s + 31 * hashval;
+	}
 	return hashval;
 }
 
