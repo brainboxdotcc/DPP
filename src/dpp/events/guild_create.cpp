@@ -47,7 +47,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 	
 	if (client->creator->cache_policy.guild_policy == cp_none) {
 		newguild.fill_from_json(client, &d);
-		g = *newguild;
+		g = &newguild;
 	} else {
 		bool newguild = false;
 		if (snowflake_not_null(&d, "id") == 0)

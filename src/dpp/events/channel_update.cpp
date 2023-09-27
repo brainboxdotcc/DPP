@@ -43,8 +43,8 @@ void channel_update::handle(discord_client* client, json &j, const std::string &
 	channel newchannel;
 	channel* c = nullptr;
 	if (client->creator->cache_policy.channel_policy == cp_none) {
-		newchannel.fill_from_json(client, &d);
-		c = *newchannel;
+		newchannel.fill_from_json(&d);
+		c = &newchannel;
 	} else {
 		c = dpp::find_channel(from_string<uint64_t>(d["id"].get<std::string>()));
 		if (c) {

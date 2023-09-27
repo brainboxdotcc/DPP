@@ -822,7 +822,7 @@ public:
 	const dpp::message& get_resolved_message(snowflake id) const;
 
 	/**
-	 * @brief Get an uploaded attachment associated with the slash command from the resolved list.
+	 * @brief Get an uploaded axttachment associated with the slash command from the resolved list.
 	 * The resolved list contains associated structures for this command and does not
 	 * use the cache or require any extra API calls.
 	 * 

@@ -38,12 +38,13 @@ using namespace dpp;
  */
 void channel_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
+	dpp::channel newchannel;
 	dpp::channel* c = nullptr;
 	dpp::guild* g = nullptr;
 	
 	if (client->creator->cache_policy.channel_policy == cp_none) {
-		newchannel.fill_from_json(client, &d);
-		c = *newchannel;
+		newchannel.fill_from_json(&d);
+		c = &newchannel;
 		g = dpp::find_guild(c->guild_id);
 	} else {
 		c = dpp::find_channel(snowflake_not_null(&d, "id"));

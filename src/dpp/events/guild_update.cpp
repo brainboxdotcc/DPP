@@ -44,7 +44,7 @@ void guild_update::handle(discord_client* client, json &j, const std::string &ra
 	dpp::guild* g = nullptr;
 	if (client->creator->cache_policy.guild_policy == cp_none) {
 		newguild.fill_from_json(client, &d);
-		g = *newguild;
+		g = &newguild;
 	} else {
 		g = dpp::find_guild(from_string<uint64_t>(d["id"].get<std::string>()));
 		if (g) {

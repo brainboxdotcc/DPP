@@ -71,6 +71,6 @@ void guild_role_create::handle(discord_client* client, json &j, const std::strin
 			client->creator->on_guild_role_create.call(grc);
 		}
 	}
-
+}
 
 }};

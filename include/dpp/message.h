@@ -1185,6 +1185,28 @@ struct DPP_EXPORT cache_policy_t {
 };
 
 /**
+ * @brief Contains a set of predefined cache policies for use when constructing a dpp::cluster
+ */
+namespace cache_policy {
+
+	/**
+	 * @brief A shortcut constant for all caching enabled for use in dpp::cluster constructor
+	 */
+	inline constexpr cache_policy_t cpol_default = { cp_aggressive, cp_aggressive, cp_aggressive, cp_aggressive, cp_aggressive };
+
+	/**
+	 * @brief A shortcut constant for a more balanced caching policy for use in dpp::cluster constructor
+	 */
+	inline constexpr cache_policy_t cpol_balanced = { cp_lazy, cp_lazy, cp_lazy, cp_aggressive, cp_aggressive };
+
+	/**
+	 * @brief A shortcut constant for all caching disabled for use in dpp::cluster constructor
+	 */
+	inline constexpr cache_policy_t cpol_none = { cp_none, cp_none, cp_none, cp_none, cp_none };
+
+};
+
+/**
  * @brief Represents messages sent and received on Discord
  */
 struct DPP_EXPORT message : public managed {
