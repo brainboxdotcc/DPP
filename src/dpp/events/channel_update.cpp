@@ -40,15 +40,22 @@ using namespace dpp;
  */
 void channel_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::channel* c = dpp::find_channel(from_string<uint64_t>(d["id"].get<std::string>()));
-	if (c) {
-		c->fill_from_json(&d);
-		if (!client->creator->on_channel_update.empty()) {
-			dpp::channel_update_t cu(client, raw);
-	  		cu.updated = c;
-  			cu.updating_guild = dpp::find_guild(c->guild_id);
-			client->creator->on_channel_update.call(cu);
+	channel newchannel;
+	channel* c = nullptr;
+	if (client->creator->cache_policy.channel_policy == cp_none) {
+		newchannel.fill_from_json(&d);
+		c = &newchannel;
+	} else {
+		c = dpp::find_channel(snowflake_not_null(&d, "id"));
+		if (c) {
+			c->fill_from_json(&d);
 		}
+	}
+	if (!client->creator->on_channel_update.empty()) {
+		dpp::channel_update_t cu(client, raw);
+		cu.updated = c;
+		cu.updating_guild = dpp::find_guild(c->guild_id);
+		client->creator->on_channel_update.call(cu);
 	}
 }
 

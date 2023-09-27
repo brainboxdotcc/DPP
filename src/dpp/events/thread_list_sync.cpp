@@ -43,20 +43,20 @@ void thread_list_sync::handle(discord_client* client, json& j, const std::string
 				g->threads.push_back(snowflake_not_null(&t, "id"));
 			}
 		}
-		if (!client->creator->on_thread_list_sync.empty()) {
-			dpp::thread_list_sync_t tls(client, raw);
-			if (d.find("threads") != d.end()) {
-				for (auto& t : d["threads"]) {
-					tls.threads.push_back(thread().fill_from_json(&t));
-				}
+	}
+	if (!client->creator->on_thread_list_sync.empty()) {
+		dpp::thread_list_sync_t tls(client, raw);
+		if (d.find("threads") != d.end()) {
+			for (auto& t : d["threads"]) {
+				tls.threads.push_back(thread().fill_from_json(&t));
 			}
-			if (d.find("members") != d.end()) {
-				for (auto& tm : d["members"]) {
-					tls.members.push_back(thread_member().fill_from_json(&tm));
-				}
-			}
-			client->creator->on_thread_list_sync.call(tls);
 		}
+		if (d.find("members") != d.end()) {
+			for (auto& tm : d["members"]) {
+				tls.members.push_back(thread_member().fill_from_json(&tm));
+			}
+		}
+		client->creator->on_thread_list_sync.call(tls);
 	}
 }
 }};

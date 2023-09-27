@@ -84,11 +84,12 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 			g->flags |= dpp::g_unavailable;
 		}
 
-		if (!client->creator->on_guild_delete.empty()) {
-			dpp::guild_delete_t gd(client, raw);
-			gd.deleted = g;
-			client->creator->on_guild_delete.call(gd);
-		}
+	}
+	
+	if (!client->creator->on_guild_delete.empty()) {
+		dpp::guild_delete_t gd(client, raw);
+		gd.deleted = g;
+		client->creator->on_guild_delete.call(gd);
 	}
 }
 

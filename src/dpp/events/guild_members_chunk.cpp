@@ -64,12 +64,12 @@ void guild_members_chunk::handle(discord_client* client, json &j, const std::str
 				}
 			}
 		}
-		if (!client->creator->on_guild_members_chunk.empty()) {
-			dpp::guild_members_chunk_t gmc(client, raw);
-			gmc.adding = g;
-			gmc.members = &um;
-			client->creator->on_guild_members_chunk.call(gmc);
-		}
+	}
+	if (!client->creator->on_guild_members_chunk.empty()) {
+		dpp::guild_members_chunk_t gmc(client, raw);
+		gmc.adding = g;
+		gmc.members = &um;
+		client->creator->on_guild_members_chunk.call(gmc);
 	}
 }
 

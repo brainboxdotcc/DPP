@@ -213,12 +213,12 @@ public:
 	 * @param cluster_id The ID of this cluster, should be between 0 and MAXCLUSTERS-1
 	 * @param maxclusters The total number of clusters that are active, which may be on separate processes or even separate machines.
 	 * @param compressed Whether or not to use compression for shards on this cluster. Saves a ton of bandwidth at the cost of some CPU
-	 * @param policy Set the user caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
+	 * @param policy Set the caching policy for the cluster, either lazy (only cache users/members when they message the bot) or aggressive (request whole member lists on seeing new guilds too)
 	 * @param request_threads The number of threads to allocate for making HTTP requests to Discord. This defaults to 12. You can increase this at runtime via the object returned from get_rest().
 	 * @param request_threads_raw The number of threads to allocate for making HTTP requests to sites outside of Discord. This defaults to 1. You can increase this at runtime via the object returned from get_raw_rest().
 	 * @throw dpp::exception Thrown on windows, if WinSock fails to initialise, or on any other system if a dpp::request_queue fails to construct
 	 */
-	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = { cp_aggressive, cp_aggressive, cp_aggressive }, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
+	cluster(const std::string& token, uint32_t intents = i_default_intents, uint32_t shards = 0, uint32_t cluster_id = 0, uint32_t maxclusters = 1, bool compressed = true, cache_policy_t policy = cache_policy::cpol_default, uint32_t request_threads = 12, uint32_t request_threads_raw = 1);
 
 	/**
 	 * @brief dpp::cluster is non-copyable
@@ -695,6 +695,9 @@ public:
 	/**
 	 * @brief Called when a new guild is created.
 	 * D++ will request members for the guild for its cache using guild_members_chunk.
+	 * 
+	 * @warning If the cache policy has disabled guild caching, the pointer in this event will become invalid after the
+	 * event ends. You should make a copy of any data you wish to preserve beyond this.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -706,6 +709,9 @@ public:
 	/**
 	 * @brief Called when a new channel is created on a guild.
 	 *
+	 * @warning If the cache policy has disabled channel caching, the pointer in this event will become invalid after the
+	 * event ends. You should make a copy of any data you wish to preserve beyond this.
+	 * 
 	 * @see https://discord.com/developers/docs/topics/gateway-events#channel-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type channel_create_t&, and returns void.
@@ -736,6 +742,8 @@ public:
 	/**
 	 * @brief Called when an existing role is updated on a guild.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-role-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_role_update_t&, and returns void.
@@ -745,6 +753,8 @@ public:
 	
 	/**
 	 * @brief Called when a role is deleted in a guild.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-role-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -780,6 +790,8 @@ public:
 	 * This will be sent either when we establish a new voice channel connection,
 	 * or as discord rearrange their infrastructure.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type voice_server_update_t&, and returns void.
 	 */
@@ -789,6 +801,8 @@ public:
 	/**
 	 * @brief Called when new emojis are added to a guild.
 	 * The complete set of emojis is sent every time.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -800,6 +814,8 @@ public:
 	/**
 	 * @brief Called when new stickers are added to a guild.
 	 * The complete set of stickers is sent every time.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-stickers-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -871,6 +887,8 @@ public:
 	/**
 	 * @brief Called when a new member joins a guild.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-member-add
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_member_add_t&, and returns void.
@@ -891,6 +909,10 @@ public:
 	/**
 	 * @brief Called when details of a guild are updated.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer in this event will become invalid after the
+	 * event ends. You should make a copy of any data you wish to preserve beyond this. If the guild cache is disabled,
+	 * only changed elements in the updated guild object will be set. all other values will be empty or defaults.
+	 * 
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_update_t&, and returns void.
@@ -904,6 +926,8 @@ public:
 	 * An integration is a connection to a guild of a user's associated accounts,
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-integrations-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_integrations_update_t&, and returns void.
@@ -914,6 +938,8 @@ public:
 	/**
 	 * @brief Called when details of a guild member (e.g. their roles or nickname) are updated.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-member-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_member_update_t&, and returns void.
@@ -923,6 +949,8 @@ public:
 	
 	/**
 	 * @brief Called when a new invite is created for a guild.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#invite-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -978,6 +1006,8 @@ public:
 	/**
 	 * @brief Called when a ban is added to a guild.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-ban-add
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_ban_add_t&, and returns void.
@@ -987,6 +1017,8 @@ public:
 	
 	/**
 	 * @brief Called when a ban is removed from a guild.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-ban-remove
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -999,6 +1031,8 @@ public:
 	 * @brief Called when a new integration is attached to a guild by a user.
 	 * An integration is a connection to a guild of a user's associated accounts,
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#integration-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1013,6 +1047,8 @@ public:
 	 * An integration is a connection to a guild of a user's associated accounts,
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#integration-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type integration_update_t&, and returns void.
@@ -1025,6 +1061,8 @@ public:
 	 * An integration is a connection to a guild of a user's associated accounts,
 	 * e.g. youtube or twitch, for automatic assignment of roles etc.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#integration-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type integration_delete_t&, and returns void.
@@ -1036,6 +1074,8 @@ public:
 	 * @brief Called when a thread is created.
 	 * Note that threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_create_t&, and returns void.
@@ -1046,6 +1086,8 @@ public:
 	/**
 	 * @brief Called when a thread is updated
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_update_t&, and returns void.
@@ -1055,6 +1097,8 @@ public:
 	
 	/**
 	 * @brief Called when a thread is deleted
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1067,6 +1111,8 @@ public:
 	 * @brief Called when thread list is synced (upon gaining access to a channel).
 	 * Note that threads are not cached by D++, but a list of thread IDs is accessible in a guild object
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-list-sync
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_list_sync_t&, and returns void.
@@ -1076,6 +1122,8 @@ public:
 	
 	/**
 	 * @brief Called when current user's thread member object is updated
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-member-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1087,6 +1135,8 @@ public:
 	/**
 	 * @brief Called when a thread's member list is updated (without GUILD_MEMBERS intent, is only called for current user)
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#thread-members-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type thread_members_update_t&, and returns void.
@@ -1096,6 +1146,8 @@ public:
 	
 	/**
 	 * @brief Called when a new scheduled event is created
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1107,6 +1159,8 @@ public:
 	/**
 	 * @brief Called when a new scheduled event is updated
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_scheduled_event_update_t&, and returns void.
@@ -1116,6 +1170,8 @@ public:
 	
 	/**
 	 * @brief Called when a new scheduled event is deleted
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1127,6 +1183,8 @@ public:
 	/**
 	 * @brief Called when a user is added to a scheduled event
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-add
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type guild_scheduled_event_user_add_t&, and returns void.
@@ -1135,7 +1193,9 @@ public:
 
 	
 	/**
-	 * @brief Called when a user is removed to a scheduled event
+	 * @brief Called when a user is removed from a scheduled event
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-remove
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1152,6 +1212,8 @@ public:
 	 * of dpp::voice_buffer_send_t to determine if you should fill the buffer with more
 	 * content.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type voice_buffer_send_t&, and returns void.
 	 */
@@ -1160,6 +1222,8 @@ public:
 	
 	/**
 	 * @brief Called when a user is talking on a voice channel.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type voice_user_talking_t&, and returns void.
@@ -1171,6 +1235,8 @@ public:
 	 * @brief Called when a voice channel is connected and ready to send audio.
 	 * Note that this is not directly attached to the READY event of the websocket,
 	 * as there is further connection that needs to be done before audio is ready to send.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type voice_ready_t&, and returns void.
@@ -1216,6 +1282,8 @@ public:
 	/**
 	 * @brief Called when a new stage instance is created on a stage channel.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#stage-instance-create
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type stage_instance_create_t&, and returns void.
@@ -1226,6 +1294,8 @@ public:
 	/**
 	 * @brief Called when a stage instance is updated.
 	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
+	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#stage-instance-update
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type stage_instance_update_t&, and returns void.
@@ -1235,6 +1305,8 @@ public:
 	
 	/**
 	 * @brief Called when an existing stage instance is deleted from a stage channel.
+	 *
+	 * @warning If the cache policy has disabled guild caching, the pointer to the guild in this event may be nullptr.
 	 *
 	 * @see https://discord.com/developers/docs/topics/gateway-events#stage-instance-delete
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.

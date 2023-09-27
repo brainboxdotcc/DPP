@@ -38,28 +38,41 @@ using namespace dpp;
  */
 void channel_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
+	dpp::channel newchannel;
+	dpp::channel* c = nullptr;
+	dpp::guild* g = nullptr;
 	
-	dpp::channel* c = dpp::find_channel(snowflake_not_null(&d, "id"));
-	if (!c) {
-		c = new dpp::channel();
-	}
-	c->fill_from_json(&d);
-	dpp::get_channel_cache()->store(c);
-	if (c->recipients.size()) {
-		for (auto & u : c->recipients) {
-			client->creator->set_dm_channel(u, c->id);
+	if (client->creator->cache_policy.channel_policy == cp_none) {
+		newchannel.fill_from_json(&d);
+		c = &newchannel;
+		g = dpp::find_guild(c->guild_id);
+		if (c->recipients.size()) {
+			for (auto & u : c->recipients) {
+				client->creator->set_dm_channel(u, c->id);
+			}
+		}
+	} else {
+		c = dpp::find_channel(snowflake_not_null(&d, "id"));
+		if (!c) {
+			c = new dpp::channel();
+		}
+		c->fill_from_json(&d);
+		dpp::get_channel_cache()->store(c);
+		if (c->recipients.size()) {
+			for (auto & u : c->recipients) {
+				client->creator->set_dm_channel(u, c->id);
+			}
+		}
+		g = dpp::find_guild(c->guild_id);
+		if (g) {
+			g->channels.push_back(c->id);
 		}
 	}
-	dpp::guild* g = dpp::find_guild(c->guild_id);
-	if (g) {
-		g->channels.push_back(c->id);
-
-		if (!client->creator->on_channel_create.empty()) {
-			dpp::channel_create_t cc(client, raw);
-			cc.created = c;
-			cc.creating_guild = g;
-			client->creator->on_channel_create.call(cc);
-		}
+	if (!client->creator->on_channel_create.empty()) {
+		dpp::channel_create_t cc(client, raw);
+		cc.created = c;
+		cc.creating_guild = g;
+		client->creator->on_channel_create.call(cc);
 	}
 }
 

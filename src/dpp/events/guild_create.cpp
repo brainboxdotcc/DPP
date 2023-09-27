@@ -42,97 +42,110 @@ using namespace dpp;
  */
 void guild_create::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	bool newguild = false;
-	if (snowflake_not_null(&d, "id") == 0)
+	dpp::guild newguild;
+	dpp::guild* g = nullptr;
+
+	if (snowflake_not_null(&d, "id") == 0) {
+		/* This shouldnt ever happen, but it has been seen in the wild i guess?
+		 * Either way a guild with invalid or missing ID doesnt want to cause events.
+		 */
 		return;
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "id"));
-	if (!g) {
-		g = new dpp::guild();
-		newguild = true;
 	}
-	g->fill_from_json(client, &d);
-	g->shard_id = client->shard_id;
-	if (!g->is_unavailable() && newguild) {
-		if (client->creator->cache_policy.role_policy != dpp::cp_none) {
-			/* Store guild roles */
-			g->roles.clear();
-			g->roles.reserve(d["roles"].size());
-			for (auto & role : d["roles"]) {
-				dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
-				if (!r) {
-					r = new dpp::role();
-				}
-				r->fill_from_json(g->id, &role);
-				dpp::get_role_cache()->store(r);
-				g->roles.push_back(r->id);
-			}
-		}
 
-		/* Store guild channels */
-		g->channels.clear();
-		g->channels.reserve(d["channels"].size());
-		for (auto & channel : d["channels"]) {
-			dpp::channel* c = dpp::find_channel(snowflake_not_null(&channel, "id"));
-			if (!c) {
-				c = new dpp::channel();
-			}
-			c->fill_from_json(&channel);
-			c->guild_id = g->id;
-			dpp::get_channel_cache()->store(c);
-			g->channels.push_back(c->id);
+	if (client->creator->cache_policy.guild_policy == cp_none) {
+		newguild.fill_from_json(client, &d);
+		g = &newguild;
+	} else {
+		bool is_new_guild = false;
+		g = dpp::find_guild(snowflake_not_null(&d, "id"));
+		if (!g) {
+			g = new dpp::guild();
+			is_new_guild = true;
 		}
-
-		/* Store guild threads */
-		g->threads.clear();
-		g->threads.reserve(d["threads"].size());
-		for (auto & channel : d["threads"]) {
-			g->threads.push_back(snowflake_not_null(&channel, "id"));
-		}
-
-		/* Store guild members */
-		if (client->creator->cache_policy.user_policy == cp_aggressive) {
-			g->members.reserve(d["members"].size());
-			for (auto & user : d["members"]) {
-				snowflake userid = snowflake_not_null(&(user["user"]), "id");
-				/* Only store ones we don't have already otherwise gm will leak */
-				if (g->members.find(userid) == g->members.end()) {
-					dpp::user* u = dpp::find_user(userid);
-					if (!u) {
-						u = new dpp::user();
-						u->fill_from_json(&(user["user"]));
-						dpp::get_user_cache()->store(u);
-					} else {
-						u->refcount++;
+		g->fill_from_json(client, &d);
+		g->shard_id = client->shard_id;
+		if (!g->is_unavailable() && is_new_guild) {
+			if (client->creator->cache_policy.role_policy != dpp::cp_none) {
+				/* Store guild roles */
+				g->roles.clear();
+				g->roles.reserve(d["roles"].size());
+				for (auto & role : d["roles"]) {
+					dpp::role *r = dpp::find_role(snowflake_not_null(&role, "id"));
+					if (!r) {
+						r = new dpp::role();
 					}
-					dpp::guild_member gm;
-					gm.fill_from_json(&user, g->id, userid);
-					g->members[userid] = gm;
+					r->fill_from_json(g->id, &role);
+					dpp::get_role_cache()->store(r);
+					g->roles.push_back(r->id);
+				}
+			}
+
+			/* Store guild channels */
+			g->channels.clear();
+			g->channels.reserve(d["channels"].size());
+			for (auto & channel : d["channels"]) {
+				dpp::channel* c = dpp::find_channel(snowflake_not_null(&channel, "id"));
+				if (!c) {
+					c = new dpp::channel();
+				}
+				c->fill_from_json(&channel);
+				c->guild_id = g->id;
+				dpp::get_channel_cache()->store(c);
+				g->channels.push_back(c->id);
+			}
+
+			/* Store guild threads */
+			g->threads.clear();
+			g->threads.reserve(d["threads"].size());
+			for (auto & channel : d["threads"]) {
+				g->threads.push_back(snowflake_not_null(&channel, "id"));
+			}
+
+			/* Store guild members */
+			if (client->creator->cache_policy.user_policy == cp_aggressive) {
+				g->members.reserve(d["members"].size());
+				for (auto & user : d["members"]) {
+					snowflake userid = snowflake_not_null(&(user["user"]), "id");
+					/* Only store ones we don't have already otherwise gm will leak */
+					if (g->members.find(userid) == g->members.end()) {
+						dpp::user* u = dpp::find_user(userid);
+						if (!u) {
+							u = new dpp::user();
+							u->fill_from_json(&(user["user"]));
+							dpp::get_user_cache()->store(u);
+						} else {
+							u->refcount++;
+						}
+						dpp::guild_member gm;
+						gm.fill_from_json(&user, g->id, userid);
+						g->members[userid] = gm;
+					}
+				}
+			}
+			if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
+				/* Store emojis */
+				g->emojis.reserve(d["emojis"].size());
+				g->emojis = {};
+				for (auto & emoji : d["emojis"]) {
+					dpp::emoji* e = dpp::find_emoji(snowflake_not_null(&emoji, "id"));
+					if (!e) {
+						e = new dpp::emoji();
+						e->fill_from_json(&emoji);
+						dpp::get_emoji_cache()->store(e);
+					}
+					g->emojis.push_back(e->id);
 				}
 			}
 		}
-		if (client->creator->cache_policy.emoji_policy != dpp::cp_none) {
-			/* Store emojis */
-			g->emojis.reserve(d["emojis"].size());
-			g->emojis = {};
-			for (auto & emoji : d["emojis"]) {
-				dpp::emoji* e = dpp::find_emoji(snowflake_not_null(&emoji, "id"));
-				if (!e) {
-					e = new dpp::emoji();
-					e->fill_from_json(&emoji);
-					dpp::get_emoji_cache()->store(e);
+		dpp::get_guild_cache()->store(g);
+		if (is_new_guild && g->id && (client->intents & dpp::i_guild_members)) {
+			if (client->creator->cache_policy.user_policy == cp_aggressive) {
+				json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(g->id)},{"query",""},{"limit",0}}}});
+				if (client->intents & dpp::i_guild_presences) {
+					chunk_req["d"]["presences"] = true;
 				}
-				g->emojis.push_back(e->id);
+				client->queue_message(client->jsonobj_to_string(chunk_req));
 			}
-		}
-	}
-	dpp::get_guild_cache()->store(g);
-	if (newguild && g->id && (client->intents & dpp::i_guild_members)) {
-		if (client->creator->cache_policy.user_policy == cp_aggressive) {
-			json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(g->id)},{"query",""},{"limit",0}}}});
-			if (client->intents & dpp::i_guild_presences) {
-				chunk_req["d"]["presences"] = true;
-			}
-			client->queue_message(client->jsonobj_to_string(chunk_req));
 		}
 	}
 

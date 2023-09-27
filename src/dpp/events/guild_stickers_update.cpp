@@ -41,18 +41,17 @@ using namespace dpp;
  */
 void guild_stickers_update::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-	if (g) {
-		if (!client->creator->on_guild_stickers_update.empty()) {
-			dpp::guild_stickers_update_t gsu(client, raw);
-			for (auto & sticker : d["stickers"]) {
-				dpp::sticker s;
-				s.fill_from_json(&sticker);
-				gsu.stickers.emplace_back(s);
-			}
-			gsu.updating_guild = g;
-			client->creator->on_guild_stickers_update.call(gsu);
+	if (!client->creator->on_guild_stickers_update.empty()) {
+		dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+		dpp::guild* g = dpp::find_guild(guild_id);
+		dpp::guild_stickers_update_t gsu(client, raw);
+		for (auto & sticker : d["stickers"]) {
+			dpp::sticker s;
+			s.fill_from_json(&sticker);
+			gsu.stickers.emplace_back(s);
 		}
+		gsu.updating_guild = g;
+		client->creator->on_guild_stickers_update.call(gsu);
 	}
 }
 

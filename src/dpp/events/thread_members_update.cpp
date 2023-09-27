@@ -35,28 +35,26 @@ void thread_members_update::handle(discord_client* client, json& j, const std::s
 	json& d = j["d"];
 
 	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
-	if (g) {
-		if (!client->creator->on_thread_members_update.empty()) {
-			dpp::thread_members_update_t tms(client, raw);
-			tms.updating_guild = g;
-			set_snowflake_not_null(&d, "id", tms.thread_id);
-			set_int8_not_null(&d, "member_count", tms.member_count);
-			if (d.find("added_members") != d.end()) {
-				for (auto& tm : d["added_members"]) {
-					tms.added.emplace_back(thread_member().fill_from_json(&tm));
-				}
+	if (!client->creator->on_thread_members_update.empty()) {
+		dpp::thread_members_update_t tms(client, raw);
+		tms.updating_guild = g;
+		set_snowflake_not_null(&d, "id", tms.thread_id);
+		set_int8_not_null(&d, "member_count", tms.member_count);
+		if (d.find("added_members") != d.end()) {
+			for (auto& tm : d["added_members"]) {
+				tms.added.emplace_back(thread_member().fill_from_json(&tm));
 			}
-			if (d.find("removed_member_ids") != d.end()) {
-				try {
-					for (auto& rm : d["removed_member_ids"]) {
-						tms.removed_ids.push_back(std::stoull(static_cast<std::string>(rm)));
-					}
-				} catch (const std::exception& e) {
-					client->creator->log(dpp::ll_error, std::string("thread_members_update: {}") + e.what());
-				}
-			}
-			client->creator->on_thread_members_update.call(tms);
 		}
+		if (d.find("removed_member_ids") != d.end()) {
+			try {
+				for (auto& rm : d["removed_member_ids"]) {
+					tms.removed_ids.push_back(std::stoull(static_cast<std::string>(rm)));
+				}
+			} catch (const std::exception& e) {
+				client->creator->log(dpp::ll_error, std::string("thread_members_update: {}") + e.what());
+			}
+		}
+		client->creator->on_thread_members_update.call(tms);
 	}
 }
 }};
