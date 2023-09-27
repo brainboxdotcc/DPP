@@ -44,22 +44,27 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 	json& d = j["d"];
 	dpp::guild newguild;
 	dpp::guild* g = nullptr;
-	
+
+	if (snowflake_not_null(&d, "id") == 0) {
+		/* This shouldnt ever happen, but it has been seen in the wild i guess?
+		 * Either way a guild with invalid or missing ID doesnt want to cause events.
+		 */
+		return;
+	}
+
 	if (client->creator->cache_policy.guild_policy == cp_none) {
 		newguild.fill_from_json(client, &d);
 		g = &newguild;
 	} else {
-		bool newguild = false;
-		if (snowflake_not_null(&d, "id") == 0)
-			return;
+		bool is_new_guild = false;
 		g = dpp::find_guild(snowflake_not_null(&d, "id"));
 		if (!g) {
 			g = new dpp::guild();
-			newguild = true;
+			is_new_guild = true;
 		}
 		g->fill_from_json(client, &d);
 		g->shard_id = client->shard_id;
-		if (!g->is_unavailable() && newguild) {
+		if (!g->is_unavailable() && is_new_guild) {
 			if (client->creator->cache_policy.role_policy != dpp::cp_none) {
 				/* Store guild roles */
 				g->roles.clear();
@@ -133,7 +138,7 @@ void guild_create::handle(discord_client* client, json &j, const std::string &ra
 			}
 		}
 		dpp::get_guild_cache()->store(g);
-		if (newguild && g->id && (client->intents & dpp::i_guild_members)) {
+		if (is_new_guild && g->id && (client->intents & dpp::i_guild_members)) {
 			if (client->creator->cache_policy.user_policy == cp_aggressive) {
 				json chunk_req = json({{"op", 8}, {"d", {{"guild_id",std::to_string(g->id)},{"query",""},{"limit",0}}}});
 				if (client->intents & dpp::i_guild_presences) {
