@@ -42,8 +42,7 @@ using namespace dpp;
 void guild_members_chunk::handle(discord_client* client, json &j, const std::string &raw) {
 	json &d = j["d"];
 	dpp::guild_member_map um;
-	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
-	dpp::guild* g = dpp::find_guild(guild_id);
+	dpp::guild* g = dpp::find_guild(snowflake_not_null(&d, "guild_id"));
 	if (g) {
 		/* Store guild members */
 		if (client->creator->cache_policy.user_policy == cp_aggressive) {

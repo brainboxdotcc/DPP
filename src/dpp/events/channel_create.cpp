@@ -46,6 +46,11 @@ void channel_create::handle(discord_client* client, json &j, const std::string &
 		newchannel.fill_from_json(&d);
 		c = &newchannel;
 		g = dpp::find_guild(c->guild_id);
+		if (c.recipients.size()) {
+			for (auto & u : c.recipients) {
+				client->creator->set_dm_channel(u, c.id);
+			}
+		}
 	} else {
 		c = dpp::find_channel(snowflake_not_null(&d, "id"));
 		if (!c) {
