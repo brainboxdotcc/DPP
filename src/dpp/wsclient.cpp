@@ -44,7 +44,7 @@ websocket_client::websocket_client(const std::string &hostname, const std::strin
 	data_opcode(opcode)
 {
 	key = std::to_string(time(nullptr));
-	key = base64_encode(key.c_str(), key.length());
+	key = base64_encode((const unsigned char*)key.c_str(), key.length());
 }
 
 void websocket_client::connect()
