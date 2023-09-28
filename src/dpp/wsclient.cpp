@@ -25,6 +25,7 @@
 #include <dpp/wsclient.h>
 #include <dpp/utility.h>
 #include <dpp/httpsclient.h>
+#include <dpp/discordevents.h>
 
 namespace dpp {
 
