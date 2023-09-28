@@ -995,7 +995,7 @@ struct DPP_EXPORT typing_start_t : public event_dispatch_t {
 	 * @brief User id of user typing.
 	 * Always set regardless of caching
 	 */
-	snowflake user_id  = nullptr;
+	snowflake user_id = {};
 
 	/**
 	 * @brief Time of typing event

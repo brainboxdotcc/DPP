@@ -25,6 +25,7 @@
 #include <dpp/dispatcher.h>
 #include <dpp/user.h>
 #include <dpp/restresults.h>
+#include <dpp/cluster.h>
 #include <variant>
 #include <utility>
 
