@@ -7,7 +7,7 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-DDPP_USE_PCH=on",
       "buildCommandArgs": "",
       "ctestCommandArgs": ""
     },
@@ -18,7 +18,7 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-DDPP_USE_PCH=on",
       "buildCommandArgs": "",
       "ctestCommandArgs": ""
     },
@@ -29,7 +29,7 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DDPP_CORO=on",
+      "cmakeCommandArgs": "-DDPP_USE_PCH=on -DDPP_CORO=on",
       "buildCommandArgs": "",
       "ctestCommandArgs": ""
     },
@@ -40,7 +40,7 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DDPP_CORO=on",
+      "cmakeCommandArgs": "-DDPP_USE_PCH=on -DDPP_CORO=on",
       "buildCommandArgs": "",
       "ctestCommandArgs": ""
     }

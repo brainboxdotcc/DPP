@@ -330,6 +330,88 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(PERMISSION_CLASS, success);
 	}
 
+	{ // dpp event classes
+		start_test(EVENT_CLASS);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::log_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_scheduled_event_user_add_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_scheduled_event_user_remove_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_scheduled_event_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_scheduled_event_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_scheduled_event_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::automod_rule_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::automod_rule_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::automod_rule_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::automod_rule_execute_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::stage_instance_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::stage_instance_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::stage_instance_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_state_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::interaction_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::slashcommand_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::button_click_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::form_submit_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::autocomplete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::context_menu_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::message_context_menu_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::user_context_menu_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::select_click_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_stickers_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_join_request_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::channel_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::channel_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::ready_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::message_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_member_remove_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::resumed_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_role_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::typing_start_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_track_marker_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::message_reaction_add_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_members_chunk_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::message_reaction_remove_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::channel_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::message_reaction_remove_emoji_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::message_delete_bulk_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_role_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_role_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::channel_pins_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::message_reaction_remove_all_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_server_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_emojis_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::presence_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::webhooks_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_member_add_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::invite_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_integrations_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_member_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::invite_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::message_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::user_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::message_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_audit_log_entry_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_ban_add_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::guild_ban_remove_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::integration_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::integration_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::integration_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::thread_create_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::thread_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::thread_delete_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::thread_list_sync_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::thread_member_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::thread_members_update_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_buffer_send_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_user_talking_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_ready_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_receive_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_client_speaking_t);
+		DPP_CHECK_CONSTRUCT_ASSIGN(EVENT_CLASS, dpp::voice_client_disconnect_t);
+	}
+
+
 	{ // some dpp::user methods
 		dpp::user user1;
 		user1.id = 189759562910400512;
