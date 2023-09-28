@@ -38,11 +38,12 @@ constexpr size_t MAXHEADERSIZE = sizeof(uint64_t) + 2;
 
 websocket_client::websocket_client(const std::string &hostname, const std::string &port, const std::string &urlpath, ws_opcode opcode)
 	: ssl_client(hostname, port),
-	key(std::to_string(time(nullptr))),
 	state(HTTP_HEADERS),
 	path(urlpath),
 	data_opcode(opcode)
 {
+	key = std::to_string(time(nullptr));
+	key = base64_encode(key.c_str(), key.length());
 }
 
 void websocket_client::connect()
