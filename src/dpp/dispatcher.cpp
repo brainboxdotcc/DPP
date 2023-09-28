@@ -107,11 +107,11 @@ void message_create_t::reply(message&& msg, bool mention_replied_user, command_c
 	this->from->creator->message_create(std::move(msg), std::move(callback));
 }
 
-void interaction_create_t::reply(interaction_response_type t, const message & m, command_completion_event_t callback) const {
+void interaction_create_t::reply(interaction_response_type t, const message& m, command_completion_event_t callback) const {
 	from->creator->interaction_response_create(this->command.id, this->command.token, dpp::interaction_response(t, m), std::move(callback));
 }
 
-void interaction_create_t::reply(const message & m, command_completion_event_t callback) const {
+void interaction_create_t::reply(const message& m, command_completion_event_t callback) const {
 	from->creator->interaction_response_create(
 		this->command.id,
 		this->command.token,
@@ -137,32 +137,32 @@ void interaction_create_t::dialog(const interaction_modal_response& mr, command_
 	from->creator->interaction_response_create(this->command.id, this->command.token, mr, std::move(callback));
 }
 
-void interaction_create_t::reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback) const {
+void interaction_create_t::reply(interaction_response_type t, const std::string& mt, command_completion_event_t callback) const {
 	this->reply(t, dpp::message(this->command.channel_id, mt, mt_application_command), std::move(callback));
 }
 
-void interaction_create_t::reply(const std::string & mt, command_completion_event_t callback) const {
+void interaction_create_t::reply(const std::string& mt, command_completion_event_t callback) const {
 	this->reply(ir_channel_message_with_source, dpp::message(this->command.channel_id, mt, mt_application_command), callback);
 }
 
-void interaction_create_t::edit_response(const message & m, command_completion_event_t callback) const {
+void interaction_create_t::edit_response(const message& m, command_completion_event_t callback) const {
 	from->creator->interaction_response_edit(this->command.token, m, std::move(callback));
 }
 
-void interaction_create_t::edit_response(const std::string & mt, command_completion_event_t callback) const {
+void interaction_create_t::edit_response(const std::string& mt, command_completion_event_t callback) const {
 	this->edit_response(dpp::message(this->command.channel_id, mt, mt_application_command), std::move(callback));
 }
 
 void interaction_create_t::get_original_response(command_completion_event_t callback) const {
-	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_get, "", [creator = this->from->creator, cb = std::move(callback)](json &j, const http_request_completion_t& http) {
+	from->creator->post_rest(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_get, "", [creator = this->from->creator, cb = std::move(callback)](json& j, const http_request_completion_t& http) {
 		if (cb) {
 			cb(confirmation_callback_t(creator, message().fill_from_json(&j), http));
 		}
 	});
 }
 
-void interaction_create_t::edit_original_response(const message & m, command_completion_event_t callback) const {
-	from->creator->post_rest_multipart(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_patch, m.build_json(), [creator = this->from->creator, cb = std::move(callback)](json &j, const http_request_completion_t& http) {
+void interaction_create_t::edit_original_response(const message& m, command_completion_event_t callback) const {
+	from->creator->post_rest_multipart(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_patch, m.build_json(), [creator = this->from->creator, cb = std::move(callback)](json& j, const http_request_completion_t& http) {
 		if (cb) {
 			cb(confirmation_callback_t(creator, message().fill_from_json(&j), http));
 		}
@@ -183,19 +183,19 @@ async<confirmation_callback_t> interaction_create_t::co_reply() const {
 	return dpp::async{[this] <typename T> (T&& cb) { this->reply(std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const message & m) const {
+async<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const message& m) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(t, m, std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const std::string & mt) const {
+async<confirmation_callback_t> interaction_create_t::co_reply(interaction_response_type t, const std::string& mt) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(t, mt, std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_reply(const message & m) const {
+async<confirmation_callback_t> interaction_create_t::co_reply(const message& m) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(m, std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_reply(const std::string & mt) const {
+async<confirmation_callback_t> interaction_create_t::co_reply(const std::string& mt) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->reply(mt, std::forward<T>(cb)); }};
 }
 
@@ -203,11 +203,11 @@ async<confirmation_callback_t> interaction_create_t::co_dialog(const interaction
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->dialog(mr, std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_edit_response(const message & m) const {
+async<confirmation_callback_t> interaction_create_t::co_edit_response(const message& m) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->edit_response(m, std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_edit_response(const std::string & mt) const {
+async<confirmation_callback_t> interaction_create_t::co_edit_response(const std::string& mt) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->edit_response(mt, std::forward<T>(cb)); }};
 }
 
@@ -219,7 +219,7 @@ async<confirmation_callback_t> interaction_create_t::co_get_original_response() 
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->get_original_response(std::forward<T>(cb)); }};
 }
 
-async<confirmation_callback_t> interaction_create_t::co_edit_original_response(const message & m) const {
+async<confirmation_callback_t> interaction_create_t::co_edit_original_response(const message& m) const {
 	return dpp::async{[&, this] <typename T> (T&& cb) { this->edit_original_response(m, std::forward<T>(cb)); }};
 }
 

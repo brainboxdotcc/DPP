@@ -62,7 +62,7 @@ class discord_voice_client;
 /**
  * @brief A function used as a callback for any REST based command
  */
-using command_completion_event_t = std::function<void(const confirmation_callback_t&)> ;
+using command_completion_event_t = std::function<void(const confirmation_callback_t&)>;
 
 /** @brief Base event parameter struct.
  * Each event you receive from the library will have its parameter derived from this class.
@@ -72,11 +72,6 @@ using command_completion_event_t = std::function<void(const confirmation_callbac
  */
 struct DPP_EXPORT event_dispatch_t {
 protected:
-	/**
-	 * @brief Destroy an event_dispatch_t object
-	 * Protected because this object is to be derived from
-	 */
-	~event_dispatch_t() = default;
 
 public:
 	/**
@@ -145,6 +140,15 @@ public:
 	 * @param rhs The event to move from
 	 */
 	event_dispatch_t &operator=(event_dispatch_t&& rhs) = default;
+
+	/**
+	 * @brief Destroy an event_dispatch_t object
+	 * Protected because this object is to be derived from
+	 */
+	virtual ~event_dispatch_t() = default;
+	// ^^^^ THIS MUST BE VIRTUAL. It used to be interaction_create_t's destructor was virtual,
+	// however before gcc 8.4 a bug prevents inheriting constructors with a user-declared destructors.
+	// since we need to support gcc 8.3... this is the fix. see https://godbolt.org/z/4xrsPhjzv foo is event_dispatch_t, bar is interaction_create_t
 
 	/**
 	 * @brief Cancels the event in progress. Any other attached lambdas for this event after this one are not called.
@@ -637,11 +641,6 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @brief command interaction
 	 */
 	interaction command = {};
-
-	/**
-	 * @brief Destroy this object
-	 */
-	virtual ~interaction_create_t() = default;
 
 	/**
 	 * @brief Get a slashcommand parameter

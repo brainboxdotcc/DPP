@@ -549,19 +549,19 @@ inline constexpr auto is_owner = [](auto &&user) noexcept {
 	return get_user_snowflake(user) == TEST_USER_ID;
 };
 
-#define DPP_RUNTIME_CHECK(test, check) if (!check) set_status(test, ts_failed, "check failed: " #check)
-#define DPP_COMPILETIME_CHECK(test, check) static_assert(check, #test ": " #check)
+#define DPP_RUNTIME_CHECK(test, check, var) if (!check) { var = false; set_status(test, ts_failed, "check failed: " #check); }
+#define DPP_COMPILETIME_CHECK(test, check, var) static_assert(check, #test ": " #check)
 
 #ifndef DPP_STATIC_TEST
-#define DPP_CHECK(test, check) DPP_RUNTIME_CHECK(test, check)
+#define DPP_CHECK(test, check, var) DPP_RUNTIME_CHECK(test, check, var)
 #else
-#define DPP_CHECK(test, check) DPP_COMPILETIME_CHECK(test, check)
+#define DPP_CHECK(test, check, var) DPP_COMPILETIME_CHECK(test, check, var)
 #endif
 
-#define DPP_CHECK_CONSTRUCT_ASSIGN(test, type) do { \
-  DPP_CHECK(test, std::is_default_constructible_v<type>); \
-  DPP_CHECK(test, std::is_copy_constructible_v<type>); \
-  DPP_CHECK(test, std::is_move_constructible_v<type>); \
-  DPP_CHECK(test, std::is_copy_assignable_v<type>); \
-	DPP_CHECK(test, std::is_move_assignable_v<type>); \
+#define DPP_CHECK_CONSTRUCT_ASSIGN(test, type, var) do { \
+  DPP_CHECK(test, std::is_default_constructible_v<type>, var); \
+  DPP_CHECK(test, std::is_copy_constructible_v<type>, var); \
+  DPP_CHECK(test, std::is_move_constructible_v<type>, var); \
+  DPP_CHECK(test, std::is_copy_assignable_v<type>, var); \
+	DPP_CHECK(test, std::is_move_assignable_v<type>, var); \
   } while(0)
