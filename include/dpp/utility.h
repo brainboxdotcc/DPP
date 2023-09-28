@@ -448,8 +448,8 @@ namespace dpp {
 
 		/**
 		 * @brief Read a whole file into a std::string.
-		 * Be sure you have enough memory to read the file, if you are reading a large file.
-		 * @note Be aware this function can block! If you are regularly reading large files, consider caching them.
+		 * @note This function can take a while if this is a large file, causing events to not reply and also taking up a lot of memory. Make sure you have enough memory, and use dpp::interaction_create_t::thinking in events where you call this function on big files.
+		 * @warning Be aware this function can block! If you are regularly reading large files, consider caching them.
 		 * @param filename The path to the file to read
 		 * @return std::string The file contents
 		 * @throw dpp::file_exception on failure to read the entire file
