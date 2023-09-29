@@ -56,11 +56,13 @@ namespace dpp {
 
 /* Forward declaration */
 struct confirmation_callback_t;
+class discord_client;
+class discord_voice_client;
 
 /**
  * @brief A function used as a callback for any REST based command
  */
-typedef std::function<void(const confirmation_callback_t&)> command_completion_event_t;
+using command_completion_event_t = std::function<void(const confirmation_callback_t&)>;
 
 /** @brief Base event parameter struct.
  * Each event you receive from the library will have its parameter derived from this class.
@@ -69,34 +71,100 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  * not get notified of the current event if you call it.
  */
 struct DPP_EXPORT event_dispatch_t {
+protected:
+
+public:
 	/**
 	 * @brief Raw event data.
 	 * If you are using json on your websocket, this will contain json, and if you are using
 	 * ETF as your websocket protocol, it will contain raw ETF data.
 	 */
-	const std::string raw_event;
+	std::string raw_event = {};
 
 	/**
 	 * @brief Shard the event came from.
 	 * Note that for some events, notably voice events, this may be nullptr.
 	 */
-	class discord_client* from; 
+	discord_client* from = nullptr;
+
+	/**
+	 * @brief Whether the event was cancelled using cancel_event().
+	 */
+	mutable bool cancelled = false;
 
 	/**
 	 * @brief Construct a new event_dispatch_t object
-	 * 
- 	 * @param client The shard the event originated on. May be a nullptr, e.g. for voice events
+	 */
+	event_dispatch_t() = default;
+
+	/**
+	 * @brief Construct a new event_dispatch_t object
+	 *
+	 * @param rhs event_dispatch_t object to copy from
+	 */
+	event_dispatch_t(const event_dispatch_t& rhs) = default;
+
+	/**
+	 * @brief Construct a new event_dispatch_t object
+	 *
+	 * @param rhs event_dispatch_t object to move from
+	 */
+	event_dispatch_t(event_dispatch_t&& rhs) = default;
+
+	/**
+	 * @brief Construct a new event_dispatch_t object
+	 *
+	 * @param client The shard the event originated on. May be a nullptr, e.g. for voice events
 	 * @param raw Raw event data as JSON or ETF
 	 */
-	event_dispatch_t(class discord_client* client, const std::string& raw);
+	event_dispatch_t(discord_client* client, const std::string& raw);
+
+	/**
+	 * @brief Construct a new event_dispatch_t object
+	 *
+	 * @param client The shard the event originated on. May be a nullptr, e.g. for voice events
+	 * @param raw Raw event data as JSON or ETF
+	 */
+	event_dispatch_t(discord_client* client, std::string&& raw);
+
+	/**
+	 * @brief Copy another event_dispatch_t object
+	 *
+	 * @param rhs The event to copy from
+	 */
+	event_dispatch_t &operator=(const event_dispatch_t& rhs) = default;
+
+	/**
+	 * @brief Move from another event_dispatch_t object
+	 *
+	 * @param rhs The event to move from
+	 */
+	event_dispatch_t &operator=(event_dispatch_t&& rhs) = default;
+
+	/**
+	 * @brief Destroy an event_dispatch_t object
+	 * Protected because this object is to be derived from
+	 */
+	virtual ~event_dispatch_t() = default;
+	// ^^^^ THIS MUST BE VIRTUAL. It used to be interaction_create_t's destructor was virtual,
+	// however before gcc 8.4 a bug prevents inheriting constructors with a user-declared destructors.
+	// since we need to support gcc 8.3... this is the fix. see https://godbolt.org/z/4xrsPhjzv foo is event_dispatch_t, bar is interaction_create_t
 
 	/**
 	 * @brief Cancels the event in progress. Any other attached lambdas for this event after this one are not called.
-	 * Note that event cancellation is a thread local state, and not stored in the object (because object which can
-	 * be cancelled is `const` during the event, and cannot itself contain the changeable state).
+	 *
+	 * @warning This will modify the event object in a non-thread-safe manner.
 	 * @return const event_dispatch_t& reference to self for chaining
 	 */
 	const event_dispatch_t& cancel_event() const;
+
+	/**
+	 * @brief Cancels the event in progress. Any other attached lambdas for this event after this one are not called.
+	 *
+	 * @warning This will modify the event object in a non-thread-safe manner.
+	 * @return const event_dispatch_t& reference to self for chaining
+	 */
+	event_dispatch_t &cancel_event();
 
 	/**
 	 * @brief Returns true if the event is cancelled.
@@ -109,18 +177,14 @@ struct DPP_EXPORT event_dispatch_t {
 
 /** @brief Log messages */
 struct DPP_EXPORT log_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	log_t(class discord_client* client, const std::string& raw);
-	/** Severity */
-	loglevel severity;
-	/** Log Message */
-	std::string message;
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
 
-	log_t(const log_t&) = default; 	
+	/** Severity */
+	loglevel severity = ll_info;
+
+	/** Log Message */
+	std::string message = {};
 };
 
 namespace utility {
@@ -141,232 +205,226 @@ namespace utility {
 	 * 
 	 * @return A lambda for attaching to an API callback
 	 */
-	std::function<void(const dpp::confirmation_callback_t& detail)> DPP_EXPORT log_error();
+	command_completion_event_t DPP_EXPORT log_error();
 } // namespace utility
 
 /** @brief Add user to scheduled event */
 struct DPP_EXPORT guild_scheduled_event_user_add_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	guild_scheduled_event_user_add_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief event user added to
 	 */
-	snowflake event_id;
+	snowflake event_id = {};
 
 	/**
 	 * @brief User being added
-	 * 
 	 */
-	snowflake user_id;
+	snowflake user_id = {};
 
 	/**
 	 * @brief Guild being added to
-	 * 
 	 */
-	snowflake guild_id;
+	snowflake guild_id = {};
 };
 
 /** @brief Delete user from scheduled event */
 struct DPP_EXPORT guild_scheduled_event_user_remove_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	guild_scheduled_event_user_remove_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief event user removed from
 	 */
-	snowflake event_id;
+	snowflake event_id = {};
 
 	/**
 	 * @brief User being removed
-	 * 
 	 */
-	snowflake user_id;
+	snowflake user_id = {};
 
 	/**
 	 * @brief Guild being removed from
-	 * 
 	 */
-	snowflake guild_id;
+	snowflake guild_id = {};
 };
 
 /** @brief Create scheduled event */
 struct DPP_EXPORT guild_scheduled_event_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	guild_scheduled_event_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief created event
 	 */
-	scheduled_event created;
+	scheduled_event created = {};
 };
 
 /** @brief Create scheduled event */
 struct DPP_EXPORT guild_scheduled_event_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	guild_scheduled_event_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief updated event
 	 */
-	scheduled_event updated;
+	scheduled_event updated = {};
 };
 
 /** @brief Delete scheduled event */
 struct DPP_EXPORT guild_scheduled_event_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	guild_scheduled_event_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief deleted event
 	 */
-	scheduled_event deleted;
+	scheduled_event deleted = {};
 };
 
 /** @brief Create automod rule */
 struct DPP_EXPORT automod_rule_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	automod_rule_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief updated event
 	 */
-	automod_rule created;
+	automod_rule created = {};
 };
 
 /** @brief Update automod rule */
 struct DPP_EXPORT automod_rule_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	automod_rule_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief updated event
 	 */
-	automod_rule updated;
+	automod_rule updated = {};
 };
 
 /** @brief Delete automod rule */
 struct DPP_EXPORT automod_rule_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	automod_rule_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief updated event
 	 */
-	automod_rule deleted;
+	automod_rule deleted = {};
 };
 
 /** @brief Execute/trigger automod rule */
 struct DPP_EXPORT automod_rule_execute_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief The id of the guild in which action was executed.
 	 */
-	automod_rule_execute_t(class discord_client* client, const std::string& raw);
+	snowflake guild_id = {};
 
-	snowflake		guild_id;			//!< the id of the guild in which action was executed
-	automod_action		action;				//!< the action which was executed
-	snowflake		rule_id;			//!< the id of the rule which action belongs to
-	automod_trigger_type	rule_trigger_type;		//!< the trigger type of rule which was triggered
-	snowflake		user_id;			//!< the id of the user which generated the content which triggered the rule
-	snowflake		channel_id;			//!< Optional: the id of the channel in which user content was posted
-	snowflake		message_id;			//!< Optional: the id of any user message which content belongs to
-	snowflake		alert_system_message_id;	//!< Optional: the id of any system auto moderation messages posted as a result of this action
-	std::string		content;			//!< the user generated text content
-	std::string		matched_keyword;		//!< the word or phrase configured in the rule that triggered the rule (may be empty)
-	std::string		matched_content;		//!< the substring in content that triggered the rule (may be empty)
+	/**
+	 * @brief The action which was executed.
+	 */
+	automod_action action = {};
+
+	/**
+	 * @brief The id of the rule which action belongs to.
+	 */
+	snowflake rule_id = {};
+
+	/**
+	 * @brief The trigger type of rule which was triggered.
+	 */
+	automod_trigger_type rule_trigger_type = {};
+
+	/**
+	 * @brief The id of the user which generated the content which triggered the rule.
+	 */
+	snowflake user_id = {};
+
+	/**
+	 * @brief Optional: the id of the channel in which user content was posted.
+	 */
+	snowflake channel_id = {};
+
+	/**
+	 * @brief Optional: the id of any user message which content belongs to.
+	 */
+	snowflake message_id = {};
+
+	/**
+	 * @brief Optional: the id of any system auto moderation messages posted as a result of this action.
+	 */
+	snowflake alert_system_message_id = {};
+
+	/**
+	 * @brief The user generated text content.
+	 */
+	std::string content = {};
+
+	/**
+	 * @brief The word or phrase configured in the rule that triggered the rule (may be empty).
+	 */
+	std::string matched_keyword = {};
+
+	/**
+	 * @brief The substring in content that triggered the rule (may be empty).
+	 */
+	std::string matched_content = {};
 };
-
-
 
 /** @brief Create stage instance */
 struct DPP_EXPORT stage_instance_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	stage_instance_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief created stage instance
 	 */
-	stage_instance created;
+	stage_instance created = {};
 };
 
 /** @brief Update stage instance */
 struct DPP_EXPORT stage_instance_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	stage_instance_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief updated stage instance
 	 */
-	stage_instance updated;
+	stage_instance updated = {};
 };
 
 /** @brief Delete stage instance */
 struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on. CAN BE NULL
-	 * for log events originating from the cluster object
-	 * @param raw Raw event text as JSON
-	 */
-	stage_instance_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief deleted stage instance
 	 */
-	stage_instance deleted;
+	stage_instance deleted = {};
 };
 
 /** @brief Voice state update */
 struct DPP_EXPORT voice_state_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	voice_state_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/** Voice state */
-	voicestate state;
+	voicestate state = {};
 };
 
 /**
  * @brief Create interaction
  */
 struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
-
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	interaction_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
 
 
 	/**
@@ -380,47 +438,47 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 
 	/**
 	 * @brief Send a reply for this interaction
-	 * 
+	 *
 	 * @param t Type of reply to send
 	 * @param m Message object to send. Not all fields are supported by Discord.
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void reply(interaction_response_type t, const message & m, command_completion_event_t callback = utility::log_error()) const;
+	void reply(interaction_response_type t, const message& m, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Send a reply for this interaction
-	 * 
+	 *
 	 * @param t Type of reply to send
 	 * @param mt The string value to send, for simple text only messages
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void reply(interaction_response_type t, const std::string & mt, command_completion_event_t callback = utility::log_error()) const;
+	void reply(interaction_response_type t, const std::string& mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Send a reply for this interaction.
 	 * Uses the default type of dpp::ir_channel_message_with_source, a simple message reply.
-	 * 
+	 *
 	 * @param m Message object to send. Not all fields are supported by Discord.
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void reply(const message & m, command_completion_event_t callback = utility::log_error()) const;
+	void reply(const message& m, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Send a reply for this interaction.
 	 * Uses the default type of dpp::ir_channel_message_with_source, a simple message reply.
-	 * 
+	 *
 	 * @param mt The string value to send, for simple text only messages
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void reply(const std::string & mt, command_completion_event_t callback = utility::log_error()) const;
+	void reply(const std::string& mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Reply to interaction with a dialog box
-	 * 
+	 *
 	 * @param mr Dialog box response to send
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -434,7 +492,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_response(const message & m, command_completion_event_t callback = utility::log_error()) const;
+	void edit_response(const message& m, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Edit the response for this interaction
@@ -443,7 +501,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param callback User function to execute when the api call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_response(const std::string & mt, command_completion_event_t callback = utility::log_error()) const;
+	void edit_response(const std::string& mt, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Set the bot to 'thinking' state where you have up to 15 minutes to respond
@@ -469,7 +527,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_original_response(const message & m, command_completion_event_t callback = utility::log_error()) const;
+	void edit_original_response(const message& m, command_completion_event_t callback = utility::log_error()) const;
 
 	/**
 	 * @brief Delete original response message for this interaction. This cannot be used on an ephemeral interaction response.
@@ -495,7 +553,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param m Message object to send. Not all fields are supported by Discord.
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_reply(interaction_response_type t, const message & m) const;
+	dpp::async<dpp::confirmation_callback_t> co_reply(interaction_response_type t, const message& m) const;
 
 	/**
 	 * @brief Send a reply for this interaction
@@ -504,7 +562,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param mt The string value to send, for simple text only messages
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_reply(interaction_response_type t, const std::string & mt) const;
+	dpp::async<dpp::confirmation_callback_t> co_reply(interaction_response_type t, const std::string& mt) const;
 
 	/**
 	 * @brief Send a reply for this interaction.
@@ -513,7 +571,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param m Message object to send. Not all fields are supported by Discord.
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_reply(const message & m) const;
+	dpp::async<dpp::confirmation_callback_t> co_reply(const message& m) const;
 
 	/**
 	 * @brief Send a reply for this interaction.
@@ -522,7 +580,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param mt The string value to send, for simple text only messages
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_reply(const std::string & mt) const;
+	dpp::async<dpp::confirmation_callback_t> co_reply(const std::string& mt) const;
 
 	/**
 	 * @brief Reply to interaction with a dialog box
@@ -538,7 +596,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param m Message object to send. Not all fields are supported by Discord.
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_edit_response(const message & m) const;
+	dpp::async<dpp::confirmation_callback_t> co_edit_response(const message& m) const;
 
 	/**
 	 * @brief Edit the response for this interaction
@@ -546,7 +604,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param mt The string value to send, for simple text only messages
 	 * On success the result will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_edit_response(const std::string & mt) const;
+	dpp::async<dpp::confirmation_callback_t> co_edit_response(const std::string& mt) const;
 
 	/**
 	 * @brief Set the bot to 'thinking' state where you have up to 15 minutes to respond
@@ -569,7 +627,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	 * @param m Message object to send. Not all fields are supported by Discord.
 	 * On success the result will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	dpp::async<dpp::confirmation_callback_t> co_edit_original_response(const message & m) const;
+	dpp::async<dpp::confirmation_callback_t> co_edit_original_response(const message& m) const;
 
 	/**
 	 * @brief Delete original response message for this interaction. This cannot be used on an ephemeral interaction response.
@@ -582,12 +640,7 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	/**
 	 * @brief command interaction
 	 */
-	interaction command;
-
-	/**
-	 * @brief Destroy this object
-	 */
-	virtual ~interaction_create_t() = default;
+	interaction command = {};
 
 	/**
 	 * @brief Get a slashcommand parameter
@@ -605,12 +658,8 @@ struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
  * @brief User has issued a slash command
  */
 struct DPP_EXPORT slashcommand_t : public interaction_create_t {
-
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	slashcommand_t(class discord_client* client, const std::string& raw);
+	using interaction_create_t::interaction_create_t;
+	using interaction_create_t::operator=;
 };
 
 /**
@@ -620,42 +669,36 @@ struct DPP_EXPORT button_click_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
-
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	button_click_t(class discord_client* client, const std::string& raw);
+	using interaction_create_t::interaction_create_t;
+	using interaction_create_t::operator=;
 
 	/**
 	 * @brief button custom id
 	 */
-	std::string custom_id;
+	std::string custom_id = {};
+
 	/**
 	 * @brief component type
 	 */
-	uint8_t component_type;
+	uint8_t component_type = {};
 };
 
 struct DPP_EXPORT form_submit_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
-
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	form_submit_t(class discord_client* client, const std::string& raw);
+	using interaction_create_t::interaction_create_t;
+	using interaction_create_t::operator=;
 
 	/**
 	 * @brief button custom id
 	 */
-	std::string custom_id;
+	std::string custom_id = {};
+
 	/**
 	 * @brief Message components for form reply
 	 */
-	std::vector<component> components;
+	std::vector<component> components = {};
 };
 
 /**
@@ -665,27 +708,23 @@ struct DPP_EXPORT autocomplete_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
-
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	autocomplete_t(class discord_client* client, const std::string& raw);
+	using interaction_create_t::interaction_create_t;
+	using interaction_create_t::operator=;
 
 	/**
 	 * @brief Command ID
 	 */
-	dpp::snowflake id;
+	dpp::snowflake id = {};
 
 	/**
 	 * @brief Command name
 	 */
-	std::string name;
+	std::string name = {};
 
 	/**
 	 * @brief auto completion options
 	 */
-	std::vector<dpp::command_option> options;
+	std::vector<dpp::command_option> options = {};
 };
 
 /**
@@ -696,40 +735,33 @@ struct DPP_EXPORT context_menu_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
-
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	context_menu_t(class discord_client* client, const std::string& raw);
+	using interaction_create_t::interaction_create_t;
+	using interaction_create_t::operator=;
 };
 
 /**
  * @brief Event parameter for context menu interactions for messages
  */
 struct DPP_EXPORT message_context_menu_t : public context_menu_t {
+public:
+	using context_menu_t::context_menu_t;
+	using context_menu_t::operator=;
 
 	/**
 	 * @brief Related message
 	 */
-	message ctx_message;
-public:
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	message_context_menu_t(class discord_client* client, const std::string& raw);
+	message ctx_message = {};
 
 	/**
 	 * @brief Get the message which was right-clicked on
-	 * 
+	 *
 	 * @return message right-clicked on
 	 */
-	message get_message() const;
+	const message& get_message() const;
 
 	/**
 	 * @brief Set the message object for this event
-	 * 
+	 *
 	 * @param m message to set
 	 * @return message_context_menu_t& reference to self for fluent chaining
 	 */
@@ -740,28 +772,25 @@ public:
  * @brief Event parameter for context menu interactions for users
  */
 struct DPP_EXPORT user_context_menu_t : public context_menu_t {
+public:
+	using context_menu_t::context_menu_t;
+	using context_menu_t::operator=;
 
 	/**
 	 * @brief Related user
 	 */
-	user ctx_user;
-public:
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	user_context_menu_t(class discord_client* client, const std::string& raw);
+	user ctx_user = {};
 
 	/**
 	 * @brief Get the user which was right-clicked on
-	 * 
+	 *
 	 * @return user right clicked on
 	 */
-	user get_user() const;
+	const user& get_user() const;
 
 	/**
 	 * @brief Set the user object for this event
-	 * 
+	 *
 	 * @param u user to set
 	 * @return user_context_menu_t& reference to self for fluent chaining
 	 */
@@ -776,555 +805,550 @@ struct DPP_EXPORT select_click_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
 public:
-
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	select_click_t(class discord_client* client, const std::string& raw);
+	using interaction_create_t::interaction_create_t;
+	using interaction_create_t::operator=;
 
 	/**
 	 * @brief select menu custom id
 	 */
-	std::string custom_id;
+	std::string custom_id = {};
+
 	/**
 	 * @brief select menu values
 	 */
-	std::vector<std::string> values;
+	std::vector<std::string> values = {};
+
 	/**
 	 * @brief select menu component type (dpp::component_type)
 	 */
-	uint8_t component_type;
+	uint8_t component_type = {};
 };
 
 
 /** @brief Delete guild */
 struct DPP_EXPORT guild_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/** Deleted guild */
-	guild* deleted;
+	guild* deleted = nullptr;
 };
 
 /** @brief Update guild stickers */
 struct DPP_EXPORT guild_stickers_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_stickers_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/** Updating guild */
-	guild* updating_guild;
+	guild* updating_guild = nullptr;
+
 	/**
 	 * @brief stickers being updated
 	 */
-	std::vector<sticker> stickers;
+	std::vector<sticker> stickers = {};
 };
 
 /** @brief Guild join request delete (user declined membership screening) */
 struct DPP_EXPORT guild_join_request_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_join_request_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/** Deleted guild */
-	snowflake guild_id;
+	snowflake guild_id = {};
+
 	/**
 	 * @brief user id
 	 */
-	snowflake user_id;
+	snowflake user_id = {};
 };
 
 /** @brief Delete channel */
 struct DPP_EXPORT channel_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	channel_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild channel is being deleted from
 	 */
-	guild* deleting_guild;
+	guild* deleting_guild = nullptr;
+
 	/**
 	 * @brief channel being deleted
 	 */
-	channel* deleted;
+	channel* deleted = nullptr;
 };
 
 /** @brief Update channel */
 struct DPP_EXPORT channel_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	channel_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild channel is being updated on
 	 */
-	guild* updating_guild;
+	guild* updating_guild = nullptr;
+
 	/**
 	 * @brief channel being updated
 	 */
-	channel* updated;
+	channel* updated = nullptr;
 };
 
 /** @brief Session ready */
 struct DPP_EXPORT ready_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	ready_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief websocket session id
 	 */
-	std::string session_id;
+	std::string session_id = {};
+
 	/**
 	 * @brief shard id
 	 */
-	uint32_t shard_id;
+	uint32_t shard_id = {};
 };
 
 /** @brief Message Deleted */
 struct DPP_EXPORT message_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	message_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief message being deleted
 	 */
-	message* deleted;
+	message* deleted = nullptr;
 };
 
 /** @brief Guild member remove */
 struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_member_remove_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild user is being removed from
 	 */
-	guild* removing_guild;
+	guild* removing_guild = nullptr;
+
 	/**
 	 * @brief user being removed
 	 */
-	user* removed;
+	user* removed = nullptr;
 };
 
 /** @brief Session resumed */
 struct DPP_EXPORT resumed_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	resumed_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief websocket session id
 	 */
-	std::string session_id;
+	std::string session_id = {};
+
 	/**
 	 * @brief shard id
 	 */
-	uint32_t shard_id;
+	uint32_t shard_id = 0;
 };
 
 /** @brief Guild role create */
 struct DPP_EXPORT guild_role_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_role_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild role is being created on
 	 */
-	guild* creating_guild;
+	guild* creating_guild = nullptr;
+
 	/**
 	 * @brief role being created
 	 */
-	role* created;
+	role* created = nullptr;
 };
 
 /** @brief Typing start */
 struct DPP_EXPORT typing_start_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	typing_start_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild user is typing on
 	 */
-	guild* typing_guild;
+	guild* typing_guild = nullptr;
+
 	/**
 	 * @brief channel user is typing on
 	 */
-	channel* typing_channel;
+	channel* typing_channel = nullptr;
+
 	/**
 	 * @brief user who is typing.
 	 * Can be nullptr if user is not cached
 	 */
-	user* typing_user;
+	user* typing_user = nullptr;
+
 	/**
 	 * @brief User id of user typing.
 	 * Always set regardless of caching
 	 */
-	snowflake user_id;
+	snowflake user_id = {};
+
 	/**
 	 * @brief Time of typing event
 	 */
-	time_t timestamp;
+	time_t timestamp = 0;
 };
 
 /** @brief Voice state update */
 struct DPP_EXPORT voice_track_marker_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on.
-	 * Will always be null.
-	 * @param raw Raw event text as JSON.
-	 * Will always be empty.
-	 */
-	voice_track_marker_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/** Voice client */
-	class discord_voice_client* voice_client;
+	discord_voice_client* voice_client = nullptr;
+
 	/** Track metadata */
-	std::string track_meta;
+	std::string track_meta = {};
 };
 
 
 /** @brief Message reaction add */
 struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	message_reaction_add_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief Guild reaction occurred on
 	 */
-	guild* reacting_guild;
+	guild* reacting_guild = nullptr;
+
 	/**
 	 * @brief User who reacted
 	 */
-	user reacting_user;
+	user reacting_user = {};
+
 	/**
 	 * @brief member data of user who reacted
 	 */
-	guild_member reacting_member;
+	guild_member reacting_member = {};
+
 	/**
 	 * @brief Channel ID the reaction happened on
 	 */
-	snowflake channel_id;
+	snowflake channel_id = {};
+
 	/**
 	 * @brief channel the reaction happened on (Optional)
 	 * @note only filled when the channel is cached
 	 */
-	channel* reacting_channel;
+	channel* reacting_channel = nullptr;
+
 	/**
 	 * @brief emoji of reaction
 	 */
-	emoji reacting_emoji;
+	emoji reacting_emoji = {};
+
 	/**
 	 * @brief message id of the message reacted upon
 	 */
-	snowflake message_id;
+	snowflake message_id = {};
+
 	/**
 	 * @brief ID of the user who authored the message which was reacted to (Optional)
 	 */
-	snowflake message_author_id;
+	snowflake message_author_id = {};
 };
 
 /** @brief Guild members chunk */
 struct DPP_EXPORT guild_members_chunk_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_members_chunk_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild the members chunk is for
 	 */
-	guild* adding;
+	guild* adding = nullptr;
+
 	/**
 	 * @brief list of members in the chunk
 	 */
-	guild_member_map* members;
+	guild_member_map* members = nullptr;
 };
 
 /** @brief Message reaction remove */
 struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	message_reaction_remove_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief Guild reaction occurred on
 	 */
-	guild* reacting_guild;
+	guild* reacting_guild = nullptr;
+
 	/**
 	 * @brief User who reacted
 	 */
-	dpp::snowflake reacting_user_id;
+	dpp::snowflake reacting_user_id = {};
+
 	/**
 	 * @brief Channel ID the reaction was removed in
 	 */
-	snowflake channel_id;
+	snowflake channel_id = {};
+
 	/**
 	 * @brief channel the reaction happened on (optional)
 	 * @note only filled when the channel is cached
 	 */
-	channel* reacting_channel;
+	channel* reacting_channel = nullptr;
+
 	/**
 	 * @brief emoji of reaction
 	 */
-	emoji reacting_emoji;
+	emoji reacting_emoji = {};
+
 	/**
 	 * @brief message id of the message reacted upon
 	 */
-	snowflake message_id;	
+	snowflake message_id = {};
 };
 
 /** @brief Create guild */
 struct DPP_EXPORT guild_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild that was created
 	 */
-	guild* created;
+	guild* created = nullptr;
+
 	/**
 	 * @brief List of presences of all users on the guild.
-	 * 
+	 *
 	 * This is only filled if you have the GUILD_PRESENCES
 	 * privileged intent.
 	 */
-	presence_map presences;
+	presence_map presences = {};
+
 	/**
 	 * @brief List of scheduled events in the guild
 	 */
-	scheduled_event_map scheduled_events;
+	scheduled_event_map scheduled_events = {};
+
 	/**
 	 * @brief List of stage instances in the guild
 	 */
-	stage_instance_map stage_instances;
+	stage_instance_map stage_instances = {};
+
 	/**
 	 * @brief List of threads in the guild
 	 */
-	thread_map threads;
+	thread_map threads = {};
+
 	/**
 	 * @brief List of stickers in the guild
 	 */
-	sticker_map stickers;
+	sticker_map stickers = {};
 };
 
 /** @brief Create channel */
 struct DPP_EXPORT channel_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	channel_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild channel was created on
 	 */
-	guild* creating_guild;
+	guild* creating_guild = nullptr;
+
 	/**
 	 * @brief channel that was created
 	 */
-	channel* created;
+	channel* created = nullptr;
 };
 
 /** @brief Message remove emoji */
 struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	message_reaction_remove_emoji_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief Guild reaction occurred on
 	 */
-	guild* reacting_guild;
+	guild* reacting_guild = nullptr;
+
 	/**
 	 * @brief Channel ID the reactions was removed in
 	 */
-	snowflake channel_id;
+	snowflake channel_id = {};
+
 	/**
 	 * @brief channel the reaction happened on (optional)
 	 * @note only filled when the channel is cached
 	 */
-	channel* reacting_channel;
+	channel* reacting_channel = nullptr;
+
 	/**
 	 * @brief emoji of reaction
 	 */
-	emoji reacting_emoji;
+	emoji reacting_emoji = {};
+
 	/**
 	 * @brief message id of the message reacted upon
 	 */
-	snowflake message_id;	
+	snowflake message_id = {};
 };
 
 /** @brief Message delete bulk */
 struct DPP_EXPORT message_delete_bulk_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	message_delete_bulk_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild messages are being deleted upon
 	 */
-	guild* deleting_guild;
+	guild* deleting_guild = nullptr;
+
 	/**
 	 * @brief user who is deleting the messages
 	 */
-	user* deleting_user;
+	user* deleting_user = nullptr;
+
 	/**
 	 * @brief channel messages are being deleted from
 	 */
-	channel* deleting_channel;
+	channel* deleting_channel = nullptr;
+
 	/**
 	 * @brief list of message ids of deleted messages
 	 */
-	std::vector<snowflake> deleted;
+	std::vector<snowflake> deleted = {};
 };
 
 /** @brief Guild role update */
 struct DPP_EXPORT guild_role_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_role_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where roles are being updated
 	 */
-	guild* updating_guild;
+	guild* updating_guild = nullptr;
+
 	/**
 	 * @brief the role being updated
 	 */
-	role* updated;
+	role* updated = nullptr;
 };
 
 /** @brief Guild role delete */
 struct DPP_EXPORT guild_role_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_role_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where role is being deleted
 	 */
-	guild* deleting_guild;
+	guild* deleting_guild = nullptr;
+
 	/**
 	 * @brief role being deleted
 	 */
-	role* deleted;
+	role* deleted = nullptr;
+
 	/**
 	 * @brief ID of the deleted role
 	 */
-	snowflake role_id;
+	snowflake role_id = {};
 };
 
 /** @brief Channel pins update */
 struct DPP_EXPORT channel_pins_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	channel_pins_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where message is being pinned
 	 */
-	guild* pin_guild;
+	guild* pin_guild = nullptr;
+
 	/**
 	 * @brief channel where message is being pinned
 	 */
-	channel* pin_channel;
+	channel* pin_channel = nullptr;
+
 	/**
 	 * @brief timestamp of pin
 	 */
-	time_t timestamp;
+	time_t timestamp = 0;
 };
 
 /** @brief Message remove all reactions */
 struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	message_reaction_remove_all_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief Guild reaction occurred on
 	 */
-	guild* reacting_guild;
+	guild* reacting_guild = nullptr;
+
 	/**
 	 * @brief Channel ID the reactions was removed in
 	 */
-	snowflake channel_id;
+	snowflake channel_id = {};
+
 	/**
 	 * @brief channel the reaction happened on (optional)
 	 * @note only filled when the channel is cached
 	 */
-	channel* reacting_channel;
+	channel* reacting_channel = nullptr;
+
 	/**
 	 * @brief message id of the message reacted upon
 	 */
-	snowflake message_id;	
+	snowflake message_id = {};
 
 };
 
 /** @brief Voice server update */
 struct DPP_EXPORT voice_server_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	voice_server_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild id where voice server updated
 	 */
-	snowflake guild_id;
+	snowflake guild_id = {};
+
 	/**
 	 * @brief voice server token, used to connect to vc
 	 */
-	std::string token;
+	std::string token = {};
+
 	/**
 	 * @brief voice server endpoint wss:// address
-	 * 
 	 */
-	std::string endpoint;
+	std::string endpoint = {};
 };
 
 /** @brief Guild emojis update */
 struct DPP_EXPORT guild_emojis_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_emojis_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief snowflake ids of list of emojis
 	 */
-	std::vector<snowflake> emojis;
+	std::vector<snowflake> emojis = {};
+
 	/**
 	 * @brief guild where emojis are being updated
 	 */
-	guild* updating_guild;
+	guild* updating_guild = nullptr;
 };
 
 /**
@@ -1332,157 +1356,138 @@ struct DPP_EXPORT guild_emojis_update_t : public event_dispatch_t {
  * 
  */
 struct DPP_EXPORT presence_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	presence_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief rich presence being updated
 	 */
-	presence rich_presence;
+	presence rich_presence = {};
 };
 
 /** @brief Webhooks update */
 struct DPP_EXPORT webhooks_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	webhooks_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where webhooks are being updated
 	 */
-	guild* webhook_guild;
+	guild* webhook_guild = nullptr;
+
 	/**
 	 * @brief channel where webhooks are being updated
 	 */
-	channel* webhook_channel;
+	channel* webhook_channel = nullptr;
 };
 
 /** @brief Guild member add */
 struct DPP_EXPORT guild_member_add_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_member_add_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild which gained new member
 	 */
-	guild* adding_guild;
+	guild* adding_guild = nullptr;
+
 	/**
 	 * @brief member which was added
 	 */
-	guild_member added;
+	guild_member added = {};
 };
 
 /** @brief Invite delete */
 struct DPP_EXPORT invite_delete_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	invite_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief the deleted invite
 	 */
-	invite deleted_invite;
+	invite deleted_invite = {};
 };
 
 /** @brief Guild update */
 struct DPP_EXPORT guild_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild being updated
 	 */
-	guild* updated;
+	guild* updated = nullptr;
 };
 
 /** @brief Guild integrations update */
 struct DPP_EXPORT guild_integrations_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_integrations_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where integrations are being updated
 	 */
-	guild* updating_guild;
+	guild* updating_guild = nullptr;
 };
 
 /** @brief Guild member update */
 struct DPP_EXPORT guild_member_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_member_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where member is being updated
 	 */
-	guild* updating_guild;
+	guild* updating_guild = nullptr;
+
 	/**
 	 * @brief member being updated
 	 */
-	guild_member updated;
+	guild_member updated = {};
 };
 
 /** @brief Invite create */
 struct DPP_EXPORT invite_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	invite_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief created invite
 	 */
-	invite created_invite;
+	invite created_invite = {};
 };
 
 /** @brief Message update */
 struct DPP_EXPORT message_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	message_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief message being updated
 	 */
-	message msg;
+	message msg = {};
 };
 
 /** @brief User update */
 struct DPP_EXPORT user_update_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	user_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief user being updated
 	 */
-	user updated;
+	user updated = {};
 };
 
 /** @brief Create message */
 struct DPP_EXPORT message_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	message_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief message that was created (sent).
 	 */
-	message msg;
+	message msg = {};
 	/**
 	 * @brief Send a text to the same channel as the channel_id in received event.
 	 * @param m Text to send
@@ -1496,7 +1501,7 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * @param callback User function to execute once the API call completes.
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
-	void send(message& msg, command_completion_event_t callback = utility::log_error()) const;
+	void send(const message& msg, command_completion_event_t callback = utility::log_error()) const;
 	/**
 	 * @brief Send a message to the same channel as the channel_id in received event.
 	 * @param msg Message to send
@@ -1519,7 +1524,7 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	 * @param callback User function to execute once the API call completes.
 	 * @note confirmation_callback_t::value contains a message object on success. On failure, value is undefined and confirmation_callback_t::is_error() is true.
 	 */
-	void reply(message& msg, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
+	void reply(const message& msg, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
 	/**
 	 * @brief Reply to the message received in the event.
 	 * @param msg Message to send as a reply.
@@ -1532,294 +1537,262 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 
 /** @brief Guild audit log entry create */
 struct DPP_EXPORT guild_audit_log_entry_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_audit_log_entry_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief created audit log entry
 	 */
-	audit_entry entry;
+	audit_entry entry = {};
 };
 
 /** @brief Guild ban add */
 struct DPP_EXPORT guild_ban_add_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_ban_add_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where ban was added
 	 */
-	guild* banning_guild;
+	guild* banning_guild = nullptr;
+
 	/**
 	 * @brief user being banned
 	 */
-	user banned;
+	user banned = {};
 };
 
 /** @brief Guild ban remove */
 struct DPP_EXPORT guild_ban_remove_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	guild_ban_remove_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where ban is being removed
 	 */
-	guild* unbanning_guild;
+	guild* unbanning_guild = nullptr;
+
 	/**
 	 * @brief user being unbanned
 	 */
-	user unbanned;
+	user unbanned = {};
 };
 
 /** @brief Integration create */
 struct DPP_EXPORT integration_create_t : public event_dispatch_t {
-	/** Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	integration_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief created integration
 	 */
-	integration created_integration;
+	integration created_integration = {};
 };
 
 /** @brief Integration update */
 struct DPP_EXPORT integration_update_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	integration_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief updated integration
 	 */
-	integration updated_integration;
+	integration updated_integration = {};
 };
 
 /** @brief Integration delete */
 struct DPP_EXPORT integration_delete_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	integration_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief deleted integration
 	 */
-	integration deleted_integration;
+	integration deleted_integration = {};
 };
 
 /** @brief Thread Create*/
 struct DPP_EXPORT thread_create_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	thread_create_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where thread was created
 	 */
-	guild* creating_guild;
+	guild* creating_guild = nullptr;
+
 	/**
 	 * @brief thread created
 	 */
-	thread created;
+	thread created = {};
 };
 
 /** @brief Thread Update
 */
 struct DPP_EXPORT thread_update_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	thread_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where thread was updated
 	 */
-	guild* updating_guild;
+	guild* updating_guild = nullptr;
+
 	/**
 	 * @brief thread updated
 	 */
-	thread updated;
+	thread updated = {};
 };
 
 /** @brief Thread Delete
  */
 struct DPP_EXPORT thread_delete_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	thread_delete_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where thread was deleted
 	 */
-	guild* deleting_guild;
+	guild* deleting_guild = nullptr;
+
 	/**
 	 * @brief thread deleted
 	 */
-	thread deleted;
+	thread deleted = {};
 };
 
 /** @brief Thread List Sync
  */
 struct DPP_EXPORT thread_list_sync_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	thread_list_sync_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief guild where thread list was synchronised
 	 */
-	guild* updating_guild;
+	guild* updating_guild = nullptr;
+
 	/**
 	 * @brief list of threads (channels) synchronised
 	 */
-	std::vector<thread> threads;
+	std::vector<thread> threads = {};
+
 	/**
 	 * @brief list of thread members for the channels (threads)
 	 */
-	std::vector<thread_member> members;
+	std::vector<thread_member> members = {};
 };
 
 /** @brief Thread Member Update
  */
 struct DPP_EXPORT thread_member_update_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	thread_member_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief updated thread member
 	 */
-	thread_member updated;
+	thread_member updated = {};
 };
 
 /** @brief Thread Members Update
  */
 struct DPP_EXPORT thread_members_update_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * @param raw Raw event text as JSON
-	 */
-	thread_members_update_t(class discord_client* client, const std::string& raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief thread (channel) id
 	 */
-	snowflake thread_id;
+	snowflake thread_id = {};
+
 	/**
 	 * @brief guild thread members updated on
 	 */
-	guild* updating_guild;
+	guild* updating_guild = nullptr;
+
 	/**
 	 * @brief new approximate member count
 	 */
-	uint8_t member_count;
+	uint8_t member_count = 0;
+
 	/**
 	 * @brief added members
 	 */
-	std::vector<thread_member> added;
+	std::vector<thread_member> added = {};
+
 	/**
 	 * @brief ids only of removed members
 	 */
-	std::vector<snowflake> removed_ids;
+	std::vector<snowflake> removed_ids = {};
 };
 
-/** @brief voice buffer send
+/**
+ * @brief voice buffer send
+ * @warning The shard in `from` will ALWAYS be null.
  */
 struct DPP_EXPORT voice_buffer_send_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * WILL ALWAYS be NULL.
-	 * @param raw Raw event text as JSON
-	 */
-	voice_buffer_send_t(class discord_client* client, const std::string &raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief voice client where buffer was sent
 	 */
-	class discord_voice_client* voice_client;
+	class discord_voice_client* voice_client = nullptr;
+
 	/**
 	 * @brief encoded size of sent buffer
 	 */
-	int buffer_size;
+	int buffer_size = 0;
 };
 
 /** @brief voice user talking */
 struct DPP_EXPORT voice_user_talking_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * WILL ALWAYS be NULL.
-	 * @param raw Raw event text as JSON
-	 */
-	voice_user_talking_t(class discord_client* client, const std::string &raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief voice client where user is talking
 	 */
-	class discord_voice_client* voice_client;
+	class discord_voice_client* voice_client = nullptr;
+
 	/**
 	 * @brief talking user id
 	 */
-	snowflake user_id;
+	snowflake user_id = {};
+
 	/**
 	 * @brief flags for talking user
 	 */
-	uint8_t talking_flags;
+	uint8_t talking_flags = 0;
 };
 
 /** @brief voice user talking */
 struct DPP_EXPORT voice_ready_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on
-	 * WILL ALWAYS be NULL.
-	 * @param raw Raw event text as JSON
-	 */
-	voice_ready_t(class discord_client* client, const std::string &raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief voice client which is ready
 	 */
-	class discord_voice_client* voice_client;
+	discord_voice_client* voice_client = nullptr;
+
 	/**
 	 * @brief id of voice channel
 	 */
-	snowflake voice_channel_id;
+	snowflake voice_channel_id = {};
 };
 
 /** @brief voice receive packet */
 struct DPP_EXPORT voice_receive_t : public event_dispatch_t {
+	friend class discord_voice_client;
 
-friend class discord_voice_client;
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
 
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on.
-	 * WILL ALWAYS be NULL.
-	 * @param raw Raw event text as UDP packet.
-	 */
-	voice_receive_t(class discord_client* client, const std::string &raw);
 	/**
 	 * @brief Construct a new voice receive t object
-	 * 
+	 *
 	 * @param client The shard the event originated on.
 	 * WILL ALWAYS be NULL.
 	 * @param raw Raw event text as UDP packet.
@@ -1828,82 +1801,95 @@ friend class discord_voice_client;
 	 * @param pcm user audio to set
 	 * @param length length of user audio in bytes
 	 */
-	voice_receive_t(class discord_client* client, const std::string &raw, class discord_voice_client* vc, snowflake _user_id, uint8_t* pcm, size_t length);
+	voice_receive_t(discord_client* client, const std::string& raw, class discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
+
+	/**
+	 * @brief Construct a new voice receive t object
+	 *
+	 * @param client The shard the event originated on.
+	 * WILL ALWAYS be NULL.
+	 * @param raw Raw event text as UDP packet.
+	 * @param vc owning voice client pointer
+	 * @param _user_id user id who is speaking, 0 for a mix of all user audio
+	 * @param pcm user audio to set
+	 * @param length length of user audio in bytes
+	 */
+	voice_receive_t(discord_client* client, std::string&& raw, class discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
+
 	/**
 	 * @brief Voice client
 	 */
-	class discord_voice_client* voice_client;
+	discord_voice_client* voice_client = nullptr;
+
 	/**
 	 * @brief Audio data, encoded as 48kHz stereo PCM or Opus,
 	 * @deprecated Please switch to using audio_data.
 	 */
 	uint8_t* audio = nullptr;
+
 	/**
 	 * @brief Size of audio buffer
 	 * @deprecated Please switch to using audio_data.
 	 */
 	size_t audio_size = 0;
+
 	/**
 	 * @brief Audio data, encoded as 48kHz stereo PCM or Opus,
 	 */
-	std::basic_string<uint8_t> audio_data;
+	std::basic_string<uint8_t> audio_data = {};
+
 	/**
 	 * @brief User ID of speaker (zero if unknown)
 	 */
-	snowflake user_id;
+	snowflake user_id = {};
+
 protected:
 	/**
 	 * @brief Reassign values outside of the constructor for use within discord_voice_client
-	 * 
+	 *
 	 * @param vc owning voice client pointer
 	 * @param _user_id user id who is speaking, 0 for a mix of all user audio
 	 * @param pcm user audio to set
 	 * @param length length of user audio in bytes
 	 */
-	void reassign(class discord_voice_client* vc, snowflake _user_id, uint8_t* pcm, size_t length);
+	void reassign(discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
 };
 
 /** @brief voice client speaking event */
 struct DPP_EXPORT voice_client_speaking_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on.
-	 * WILL ALWAYS be NULL.
-	 * @param raw Raw event text as JSON
-	 */
-	voice_client_speaking_t(class discord_client* client, const std::string &raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief voice client where user is speaking
 	 */
-	class discord_voice_client* voice_client;
+	discord_voice_client* voice_client = nullptr;
+
 	/**
 	 * @brief speaking user id
-	 * 
 	 */
-	snowflake user_id;
+	snowflake user_id = {};
+
 	/**
 	 * @brief ssrc value of speaking user
 	 */
-	uint32_t ssrc;
+	uint32_t ssrc = 0;
 };
 
 /** @brief voice client disconnect event */
 struct DPP_EXPORT voice_client_disconnect_t : public event_dispatch_t {
-	/** 
-	 * @brief Constructor
-	 * @param client The shard the event originated on.
-	 * WILL ALWAYS be NULL.
-	 * @param raw Raw event text as JSON
-	 */
-	voice_client_disconnect_t(class discord_client* client, const std::string &raw);
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
 	/**
 	 * @brief voice client where user disconnected
 	 */
-	class discord_voice_client* voice_client;
+	discord_voice_client* voice_client = nullptr;
+
 	/**
 	 * @brief user id of user who left vc
 	 */
-	snowflake user_id;
+	snowflake user_id = {};
 };
 
 } // namespace dpp

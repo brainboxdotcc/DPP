@@ -27,6 +27,7 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 #include <dpp/dpp.h>
 #include <dpp/json_fwd.h>
 #include <iomanip>
+#include <type_traits>
 
 #ifdef _WIN32
 #define SHARED_OBJECT "dpp.dll"
@@ -163,6 +164,7 @@ DPP_TEST(VOICE_CHANNEL_EDIT, "editing the created voice channel", tf_online);
 DPP_TEST(VOICE_CHANNEL_DELETE, "deleting the created voice channel", tf_online);
 
 DPP_TEST(PERMISSION_CLASS, "permission", tf_offline);
+DPP_TEST(EVENT_CLASS, "event class", tf_offline);
 DPP_TEST(USER_GET, "cluster::user_get", tf_online);
 DPP_TEST(USER_GET_FLAGS, "cluster::user_get flag parsing", tf_online);
 DPP_TEST(MEMBER_GET, "cluster::guild_get_member", tf_online);
@@ -546,3 +548,20 @@ inline constexpr user_project_id_t get_user_snowflake;
 inline constexpr auto is_owner = [](auto &&user) noexcept {
 	return get_user_snowflake(user) == TEST_USER_ID;
 };
+
+#define DPP_RUNTIME_CHECK(test, check, var) if (!check) { var = false; set_status(test, ts_failed, "check failed: " #check); }
+#define DPP_COMPILETIME_CHECK(test, check, var) static_assert(check, #test ": " #check)
+
+#ifndef DPP_STATIC_TEST
+#define DPP_CHECK(test, check, var) DPP_RUNTIME_CHECK(test, check, var)
+#else
+#define DPP_CHECK(test, check, var) DPP_COMPILETIME_CHECK(test, check, var)
+#endif
+
+#define DPP_CHECK_CONSTRUCT_ASSIGN(test, type, var) do { \
+  DPP_CHECK(test, std::is_default_constructible_v<type>, var); \
+  DPP_CHECK(test, std::is_copy_constructible_v<type>, var); \
+  DPP_CHECK(test, std::is_move_constructible_v<type>, var); \
+  DPP_CHECK(test, std::is_copy_assignable_v<type>, var); \
+	DPP_CHECK(test, std::is_move_assignable_v<type>, var); \
+  } while(0)
