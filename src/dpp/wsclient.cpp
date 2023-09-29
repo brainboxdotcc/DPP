@@ -43,7 +43,17 @@ websocket_client::websocket_client(const std::string &hostname, const std::strin
 	path(urlpath),
 	data_opcode(opcode)
 {
-	key = std::to_string(time(nullptr));
+	uint64_t k = (time(nullptr) * time(nullptr));
+	/* A 64 bit value as hex with leading zeroes is always 16 chars.
+	 *
+	 * The request MUST include a header field with the name
+	 * |Sec-WebSocket-Key|.  The value of this header field MUST be a
+	 * nonce consisting of a randomly selected 16-byte value that has
+	 * been base64-encoded (see [Section 4 of
+	 * [RFC4648]](https://datatracker.ietf.org/doc/html/rfc4648#section-4)).
+	 * The nonce MUST be selected randomly for each connection.
+	 */
+	key = to_hex<uint64_t>(k);
 	key = base64_encode(reinterpret_cast<const unsigned char*>(key.c_str()), key.length());
 }
 
