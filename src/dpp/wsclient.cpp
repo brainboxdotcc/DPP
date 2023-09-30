@@ -156,7 +156,11 @@ bool websocket_client::handle_buffer(std::string &buffer)
 						}
 		
 						state = CONNECTED;
+					} else if (status.size() < 3) {
+						log(ll_warning, "Malformed HTTP response on websocket");
+						return false;
 					} else {
+						log(ll_warning, "Received unhandled code: " + status[1]);
 						return false;
 					}
 				}
