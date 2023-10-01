@@ -15,7 +15,7 @@ jobs:
              egress-policy: audit
 
          - name: Setup PHP
-           uses: shivammathur/setup-php@72ae4ccbe57f82bbe08411e84e2130bd4ba1c10f # v2
+           uses: shivammathur/setup-php@7fdd3ece872ec7ec4c098ae5ab7637d5e0a96067 # v2
            with:
              php-version: '8.1'
 
