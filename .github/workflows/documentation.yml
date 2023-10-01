@@ -9,8 +9,13 @@ on:
       - '**/*.h'
       - '**/documentation.yml'
 
+permissions:
+  contents: read
+
 jobs:
   docs:
+    permissions:
+      contents: write # Needs to be able to write to the repo.
     name: Build Documentation
     runs-on: ubuntu-20.04
 
