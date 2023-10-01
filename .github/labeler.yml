@@ -25,7 +25,7 @@ packaging:
 - '**Dockerfile'
 submodules:
 - '**.gitmodules'
-github_action:
+github_actions:
 - '**/.github/labeler.yml'
 - '**/.github/dependabot.yml'
 - '**/.github/workflows/**'

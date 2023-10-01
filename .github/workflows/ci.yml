@@ -21,9 +21,13 @@ on:
       - '**ci.yml'
       - '**CMakeLists.txt'
 
+permissions:
+  contents: read
 
 jobs:
   linux-with-unit-test:
+    permissions:
+      contents: write
     concurrency: 
       group: linux-build-unit-test
       cancel-in-progress: false
@@ -42,7 +46,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} libsodium-dev libopus-dev zlib1g-dev rpm
@@ -66,6 +70,8 @@ jobs:
           TEST_EVENT_ID: ${{secrets.TEST_EVENT_ID}}
 
   linux-no-unit-tests:
+    permissions:
+      contents: write
     name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
     runs-on: ${{matrix.cfg.os}}
     strategy:
@@ -84,7 +90,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} libsodium-dev libopus-dev zlib1g-dev rpm
@@ -116,6 +122,8 @@ jobs:
           path: '${{github.workspace}}/build/*.rpm'
 
   macos:
+    permissions:
+      contents: write
     name: macOS x64
     runs-on: macos-latest
     steps:
@@ -125,7 +133,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Install homebrew packages
         run: brew install cmake make libsodium opus openssl
@@ -141,6 +149,8 @@ jobs:
           DONT_RUN_VCPKG: true
 
   windows: # Windows x64 and x86 build matrix
+    permissions:
+      contents: write
     strategy:
       fail-fast: false # Don't cancel other matrix jobs if one fails
       matrix:
@@ -163,7 +173,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
           path: main
 
@@ -206,6 +216,8 @@ jobs:
           path: '${{github.workspace}}/main/build/*.zip'
 
   cross-compiles:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -224,7 +236,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Install Packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake rpm
@@ -254,7 +266,7 @@ jobs:
 #   runs-on: macos-10.15
 #   name: FreeBSD (g++-10)
 #   steps:
-#   - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+#   - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 #   - name: FreeBSD Build and Package
 #     id: freebsdtest
 #     uses: vmactions/freebsd-vm@v0.1.5

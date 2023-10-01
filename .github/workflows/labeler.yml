@@ -8,8 +8,7 @@ permissions:
 jobs:
   triage:
     permissions:
-      contents: read
-      pull-requests: write
+      pull-requests: write # Labeler needs to be able to add labels to PRs.
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner

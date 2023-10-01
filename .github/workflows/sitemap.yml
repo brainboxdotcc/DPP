@@ -3,8 +3,13 @@ on:
   schedule:
     - cron: '0 6 * * 6'
 
+permissions:
+  contents: read
+
 jobs:
   updater:
+    permissions:
+      contents: write # Needs to be able to write to the repo.
     name: Generate Sitemap
     if: github.repository == 'brainboxdotcc/DPP'
     runs-on: ubuntu-20.04

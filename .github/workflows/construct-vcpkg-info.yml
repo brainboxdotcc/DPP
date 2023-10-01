@@ -5,8 +5,13 @@ on:
     types: [published]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   Collect-Vcpkg-Info:
+    permissions:
+      contents: write # Allow the creation of a release.
     runs-on: ubuntu-latest
     steps:
          - name: Harden Runner
@@ -15,12 +20,12 @@ jobs:
              egress-policy: audit
 
          - name: Setup PHP
-           uses: shivammathur/setup-php@72ae4ccbe57f82bbe08411e84e2130bd4ba1c10f # v2
+           uses: shivammathur/setup-php@7fdd3ece872ec7ec4c098ae5ab7637d5e0a96067 # v2
            with:
              php-version: '8.1'
 
          - name: Checkout D++
-           uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+           uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
            with:
              submodules: recursive
 
