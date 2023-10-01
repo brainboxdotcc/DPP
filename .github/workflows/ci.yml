@@ -42,7 +42,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} libsodium-dev libopus-dev zlib1g-dev rpm
@@ -84,7 +84,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Install apt packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} libsodium-dev libopus-dev zlib1g-dev rpm
@@ -125,7 +125,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Install homebrew packages
         run: brew install cmake make libsodium opus openssl
@@ -163,7 +163,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
         with:
           path: main
 
@@ -224,7 +224,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout D++
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Install Packages
         run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install cmake rpm
@@ -254,7 +254,7 @@ jobs:
 #   runs-on: macos-10.15
 #   name: FreeBSD (g++-10)
 #   steps:
-#   - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+#   - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 #   - name: FreeBSD Build and Package
 #     id: freebsdtest
 #     uses: vmactions/freebsd-vm@v0.1.5
