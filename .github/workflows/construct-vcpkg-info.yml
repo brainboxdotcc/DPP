@@ -5,8 +5,13 @@ on:
     types: [published]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   Collect-Vcpkg-Info:
+    permissions:
+      contents: write # Allow the creation of a release.
     runs-on: ubuntu-latest
     steps:
          - name: Harden Runner

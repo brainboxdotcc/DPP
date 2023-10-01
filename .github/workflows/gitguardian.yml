@@ -2,6 +2,9 @@ name: GitGuardian scan
 
 on: [push]
 
+permissions:
+  contents: read # GitGuardian only needs to read.
+
 jobs:
   scanning:
     name: GitGuardian scan

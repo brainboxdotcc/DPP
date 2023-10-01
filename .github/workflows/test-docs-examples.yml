@@ -11,6 +11,9 @@ on:
       - '**Doxyfile'
       - '**docpages/example_code/**'
   workflow_dispatch:
+
+permissions:
+  contents: read
     
 jobs:
   test_docs_examples:

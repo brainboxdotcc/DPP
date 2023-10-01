@@ -5,8 +5,13 @@ on:
     branches:
       - 'master'
 
+permissions:
+  contents: read
+
 jobs:
   run:
+    permissions:
+      pull-requests: write # Needs to be able to close a PR.
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
