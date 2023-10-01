@@ -12,6 +12,9 @@ on:
     files:
       - '**/documentation-check.yml'
 
+permissions:
+  contents: read # This only needs to read the contents of a PR.
+
 jobs:
   docs:
     name: Check Documentation Spelling

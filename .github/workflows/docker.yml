@@ -7,8 +7,14 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
+permissions:
+  contents: read
+
 jobs:
   docker:
+    permissions:
+      deployments: write # Docker needs to be able to deploy and package.
+      packages: write
     if: github.repository == 'brainboxdotcc/DPP'
     runs-on: ubuntu-latest
     concurrency: 
