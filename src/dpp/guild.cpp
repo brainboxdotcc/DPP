@@ -128,7 +128,7 @@ guild_member& guild_member::remove_role(dpp::snowflake role_id) {
 	return *this;
 }
 
-std::string guild_member::get_nickname() {
+std::string guild_member::get_nickname() const {
 	return nickname;
 }
 

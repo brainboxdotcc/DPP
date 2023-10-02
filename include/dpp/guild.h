@@ -332,7 +332,7 @@ public:
 	 * 
 	 * @return std::string nickname
 	 */
-	std::string get_nickname();
+	std::string get_nickname() const;
 
 	/**
 	 * @brief Get the roles
