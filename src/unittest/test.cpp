@@ -19,7 +19,6 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#define DPP_STATIC_TEST
 #include "test.h"
 #include <dpp/dpp.h>
 #include <dpp/unicode_emoji.h>
