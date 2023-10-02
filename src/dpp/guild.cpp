@@ -259,14 +259,6 @@ std::string guild_member::build_json(bool with_id) const {
 		j["deaf"] = is_deaf();
 	}
 
-	uint32_t out_flags = 0;
-	for (auto & flag : membermap) {
-		if (flags & flag.second) {
-			out_flags |= flag.first;
-		}
-	}
-	j["flags"] = out_flags;
-
 	return j.dump();
 }
 
@@ -901,8 +893,8 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 std::string guild::get_banner_url(uint16_t size, const image_type format, bool prefer_animated) const {
 	if (!this->banner.to_string().empty() && this->id) {
 		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-											  "banners/" + std::to_string(this->id), this->banner.to_string(),
-											  format, size, prefer_animated, has_animated_banner_hash());
+			"banners/" + std::to_string(this->id), this->banner.to_string(),
+			format, size, prefer_animated, has_animated_banner_hash());
 	} else {
 		return std::string();
 	}
@@ -911,8 +903,8 @@ std::string guild::get_banner_url(uint16_t size, const image_type format, bool p
 std::string guild::get_discovery_splash_url(uint16_t size, const image_type format) const {
 	if (!this->discovery_splash.to_string().empty() && this->id) {
 		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
-										 "discovery-splashes/" + std::to_string(this->id) + "/" + this->discovery_splash.to_string(),
-										 format, size);
+			"discovery-splashes/" + std::to_string(this->id) + "/" + this->discovery_splash.to_string(),
+			format, size);
 	} else {
 		return std::string();
 	}
@@ -921,8 +913,8 @@ std::string guild::get_discovery_splash_url(uint16_t size, const image_type form
 std::string guild::get_icon_url(uint16_t size, const image_type format, bool prefer_animated) const {
 	if (!this->icon.to_string().empty() && this->id) {
 		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-											  "icons/" + std::to_string(this->id), this->icon.to_string(),
-											  format, size, prefer_animated, has_animated_icon_hash());
+			"icons/" + std::to_string(this->id), this->icon.to_string(),
+			format, size, prefer_animated, has_animated_icon_hash());
 	} else {
 		return std::string();
 	}
@@ -931,8 +923,8 @@ std::string guild::get_icon_url(uint16_t size, const image_type format, bool pre
 std::string guild::get_splash_url(uint16_t size, const image_type format) const {
 	if (!this->splash.to_string().empty() && this->id) {
 		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
-										 "splashes/" + std::to_string(this->id) + "/" + this->splash.to_string(),
-										 format, size);
+			"splashes/" + std::to_string(this->id) + "/" + this->splash.to_string(),
+			format, size);
 	} else {
 		return std::string();
 	}
