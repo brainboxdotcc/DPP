@@ -28,9 +28,9 @@ jobs:
   linux-with-unit-test:
     permissions:
       contents: write
-    concurrency: 
-      group: linux-build-unit-test
-      cancel-in-progress: false
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
     runs-on: ${{matrix.cfg.os}}
     strategy:
