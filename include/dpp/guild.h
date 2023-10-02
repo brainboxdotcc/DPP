@@ -189,11 +189,14 @@ enum guild_member_flags : uint16_t {
  * This contains the user's nickname, guild roles, and any other guild-specific flags.
  */
 class DPP_EXPORT guild_member {
-public:
+protected:
 	/** Nickname, or empty string if they don't have a nickname on this guild */
 	std::string nickname;
 	/** List of roles this user has on this guild */
 	std::vector<snowflake> roles;
+	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
+	uint16_t flags;
+public:
 	/** Guild id */
 	snowflake guild_id;
 	/** User id */
@@ -206,8 +209,6 @@ public:
 	time_t joined_at;
 	/** Boosting since */
 	time_t premium_since;
-	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
-	uint16_t flags;
 
 	/** Default constructor */
 	guild_member();
@@ -323,6 +324,20 @@ public:
 	 * @return guild_member& reference to self
 	 */
 	guild_member& set_nickname(const std::string& nick);
+
+	/**
+	 * @brief Get the nickname 
+	 * 
+	 * @return std::string nickname
+	 */
+	std::string get_nickname();
+
+	/**
+	 * @brief Get the roles
+	 * 
+	 * @return std::vector<dpp::snowflake> roles
+	 */
+	std::vector<dpp::snowflake> get_roles();
 
 	/**
 	 * @brief Find the dpp::user object for this member. This is an alias for dpp::find_user

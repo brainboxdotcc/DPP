@@ -97,12 +97,12 @@ guild::guild() :
 
 
 guild_member::guild_member() :
+	flags(0),
 	guild_id(0),
 	user_id(0),
 	communication_disabled_until(0),
 	joined_at(0),
-	premium_since(0),
-	flags(0)
+	premium_since(0)
 {
 }
 
@@ -129,6 +129,15 @@ guild_member& guild_member::remove_role(dpp::snowflake role_id) {
 	flags |= gm_roles_action;
 	return *this;
 }
+
+std::string guild_member::get_nickname() {
+	return nickname;
+}
+
+std::vector<dpp::snowflake> guild_member::get_roles() {
+	return roles;
+}
+
 
 guild_member& guild_member::set_roles(const std::vector<dpp::snowflake> &role_ids) {
 	roles = role_ids;
