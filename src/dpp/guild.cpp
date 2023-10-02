@@ -112,6 +112,27 @@ std::string guild_member::get_mention() const {
 
 guild_member& guild_member::set_nickname(const std::string& nick) {
 	this->nickname = nick;
+	this->flags |= gm_nickname_action;
+	return *this;
+}
+
+guild_member& guild_member::add_role(dpp::snowflake role_id) {
+	roles.emplace_back(role_id);
+	flags |= gm_roles_action;
+	return *this;
+}
+
+guild_member& guild_member::remove_role(dpp::snowflake role_id) {
+	roles.erase(std::remove_if(roles.begin(), roles.end(), [&role_id](dpp::snowflake role) {
+		return role == role_id;
+	}), roles.end());
+	flags |= gm_roles_action;
+	return *this;
+}
+
+guild_member& guild_member::set_roles(const std::vector<dpp::snowflake> &role_ids) {
+	roles = role_ids;
+	flags |= gm_roles_action;
 	return *this;
 }
 
@@ -211,19 +232,23 @@ std::string guild_member::build_json(bool with_id) const {
 		}
 	}
 	
-	if (!this->nickname.empty()) {
-		j["nick"] = this->nickname;
-	} else {
-		j["nick"] = json::value_t::null;
+	if (this->flags & gm_nickname_action) {
+		if (!this->nickname.empty()) {
+			j["nick"] = this->nickname;
+		} else {
+			j["nick"] = json::value_t::null;
+		}
 	}
 
-	if (!this->roles.empty()) {
-		j["roles"] = {};
-		for (auto & role : this->roles) {
-			j["roles"].push_back(std::to_string(role));
+	if (this->flags & gm_roles_action) {
+		if (!this->roles.empty()) {
+			j["roles"] = {};
+			for (auto & role : this->roles) {
+				j["roles"].push_back(std::to_string(role));
+			}
+		} else {
+			j["roles"] = {};
 		}
-	} else {
-		j["roles"] = {};
 	}
 
 	if (this->flags & gm_voice_action) {

@@ -180,6 +180,8 @@ enum guild_member_flags : uint16_t {
 	gm_bypasses_verification = 0b0000000010000000,
 	/** Member has started onboarding */
 	gm_started_onboarding = 0b0000000100000000,
+	gm_roles_action    = 0b0000001000000000,
+	gm_nickname_action = 0b0000010000000000,
 };
 
 /**
@@ -378,6 +380,40 @@ public:
 	 * @return std::string mention
 	 */
 	std::string get_mention() const;
+
+	/**
+	 * @brief Add a role to this member
+	 * @note This call sets the role change bit, which causes the new role
+	 * list to be sent if this is passed to dpp::clusterguild_edit_member
+	 * or dpp::cluster::guild_add_member
+	 * 
+	 * @param role_id Role ID to add
+	 * @return guild_member& Reference to self
+	 */
+	guild_member& add_role(dpp::snowflake role_id);
+
+	/**
+	 * @brief Remove a role from this member
+	 * @note This call sets the role change bit, which causes the new role
+	 * list to be sent if this is passed to dpp::clusterguild_edit_member
+	 * or dpp::cluster::guild_add_member
+	 * 
+	 * @param role_id Role ID to remove
+	 * @return guild_member& Reference to self
+	 */
+	guild_member& remove_role(dpp::snowflake role_id);
+
+	/**
+	 * @brief Set a new role list for this member
+	 * @note This call sets the role change bit, which causes the new role
+	 * list to be sent if this is passed to dpp::clusterguild_edit_member
+	 * or dpp::cluster::guild_add_member
+	 * 
+	 * @param role_ids Roles to set
+	 * @return guild_member& Reference to self
+	 */
+	guild_member& set_roles(const std::vector<dpp::snowflake> &role_ids);
+
 };
 
 /**
