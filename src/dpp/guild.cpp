@@ -239,7 +239,7 @@ std::string guild_member::build_json(bool with_id) const {
 		}
 	}
 	
-	if (gm_nickname_action) {
+	if (this->flags & gm_nickname_action) {
 		if (!this->nickname.empty()) {
 			j["nick"] = this->nickname;
 		} else {
@@ -247,7 +247,7 @@ std::string guild_member::build_json(bool with_id) const {
 		}
 	}
 
-	if (gm_roles_action) {
+	if (this->flags & gm_roles_action) {
     		j["roles"] = {};
 		for (const auto & role : this->roles) {
 			j["roles"].push_back(std::to_string(role));
