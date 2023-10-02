@@ -401,7 +401,7 @@ public:
 	/**
 	 * @brief Add a role to this member
 	 * @note This call sets the role change bit, which causes the new role
-	 * list to be sent if this is passed to dpp::clusterguild_edit_member
+	 * list to be sent if this is passed to dpp::cluster::guild_edit_member
 	 * or dpp::cluster::guild_add_member
 	 * 
 	 * @param role_id Role ID to add
