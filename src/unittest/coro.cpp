@@ -460,7 +460,7 @@ void event_handler_test(dpp::cluster *bot) {
 						if (!pair.first.has_value()) {
 							co_return {};
 						}
-						const std::string& member_nick = pair.second.has_value() ? pair.second->nickname : "";
+						const std::string& member_nick = pair.second.has_value() ? pair.second->get_nickname() : "";
 						const std::string& user_nick = pair.first->username;
 						result = co_await bot->co_message_edit(msg.set_content("coro " + (member_nick.empty() ? user_nick : member_nick) + " " + std::to_string(i)));
 						co_return result.is_error() ? dpp::snowflake{} : std::get<dpp::message>(result.value).id;

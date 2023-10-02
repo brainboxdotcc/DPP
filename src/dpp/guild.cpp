@@ -134,7 +134,7 @@ std::string guild_member::get_nickname() {
 	return nickname;
 }
 
-std::vector<dpp::snowflake> guild_member::get_roles() {
+std::vector<dpp::snowflake> guild_member::get_roles() const {
 	return roles;
 }
 
@@ -752,7 +752,7 @@ permission guild::base_permissions(const guild_member &member) const {
 
 	permission permissions = everyone->permissions;
 
-	for (auto& rid : member.roles) {
+	for (auto& rid : member.get_roles()) {
 		role* r = dpp::find_role(rid);
 		if (r) {
 			permissions |= r->permissions;
@@ -799,7 +799,7 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 	uint64_t allow = 0;
 	uint64_t deny = 0;
 
-	for (auto& rid : gm.roles) {
+	for (auto& rid : gm.get_roles()) {
 
 		/* Skip \@everyone role to not break the hierarchy. It's calculated above */
 		if (rid == this->id) {
@@ -855,7 +855,7 @@ permission guild::permission_overwrites(const guild_member &member, const channe
 	uint64_t allow = 0;
 	uint64_t deny = 0;
 
-	for (auto& rid : member.roles) {
+	for (auto& rid : member.get_roles()) {
 
 		/* Skip \@everyone role to not break the hierarchy. It's calculated above */
 		if (rid == this->id) {

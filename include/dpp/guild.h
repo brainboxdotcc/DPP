@@ -196,6 +196,8 @@ protected:
 	std::vector<snowflake> roles;
 	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
 	uint16_t flags;
+
+	friend void from_json(const nlohmann::json& j, guild_member& gm);
 public:
 	/** Guild id */
 	snowflake guild_id;
@@ -337,7 +339,7 @@ public:
 	 * 
 	 * @return std::vector<dpp::snowflake> roles
 	 */
-	std::vector<dpp::snowflake> get_roles();
+	std::vector<dpp::snowflake> get_roles() const;
 
 	/**
 	 * @brief Find the dpp::user object for this member. This is an alias for dpp::find_user
