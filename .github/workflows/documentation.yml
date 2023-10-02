@@ -21,7 +21,7 @@ jobs:
 
     concurrency: 
       group: docs-deployment
-      cancel-in-progress: false
+      cancel-in-progress: true
 
     steps:
       - name: Harden Runner
