@@ -180,6 +180,8 @@ enum guild_member_flags : uint16_t {
 	gm_bypasses_verification = 0b0000000010000000,
 	/** Member has started onboarding */
 	gm_started_onboarding = 0b0000000100000000,
+	gm_roles_action    = 0b0000001000000000,
+	gm_nickname_action = 0b0000010000000000,
 };
 
 /**
@@ -187,11 +189,16 @@ enum guild_member_flags : uint16_t {
  * This contains the user's nickname, guild roles, and any other guild-specific flags.
  */
 class DPP_EXPORT guild_member {
-public:
+protected:
 	/** Nickname, or empty string if they don't have a nickname on this guild */
 	std::string nickname;
 	/** List of roles this user has on this guild */
 	std::vector<snowflake> roles;
+	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
+	uint16_t flags;
+
+	friend void from_json(const nlohmann::json& j, guild_member& gm);
+public:
 	/** Guild id */
 	snowflake guild_id;
 	/** User id */
@@ -204,8 +211,6 @@ public:
 	time_t joined_at;
 	/** Boosting since */
 	time_t premium_since;
-	/** A set of flags built from the bitmask defined by dpp::guild_member_flags */
-	uint16_t flags;
 
 	/** Default constructor */
 	guild_member();
@@ -323,6 +328,20 @@ public:
 	guild_member& set_nickname(const std::string& nick);
 
 	/**
+	 * @brief Get the nickname 
+	 * 
+	 * @return std::string nickname
+	 */
+	std::string get_nickname() const;
+
+	/**
+	 * @brief Get the roles
+	 * 
+	 * @return std::vector<dpp::snowflake> roles
+	 */
+	const std::vector<dpp::snowflake>& get_roles() const;
+
+	/**
 	 * @brief Find the dpp::user object for this member. This is an alias for dpp::find_user
 	 * @return dpp::user* Pointer to the user object. If not in cache, it returns nullptr
 	 */
@@ -378,6 +397,40 @@ public:
 	 * @return std::string mention
 	 */
 	std::string get_mention() const;
+
+	/**
+	 * @brief Add a role to this member
+	 * @note This call sets the role change bit, which causes the new role
+	 * list to be sent if this is passed to dpp::cluster::guild_edit_member
+	 * or dpp::cluster::guild_add_member
+	 * 
+	 * @param role_id Role ID to add
+	 * @return guild_member& Reference to self
+	 */
+	guild_member& add_role(dpp::snowflake role_id);
+
+	/**
+	 * @brief Remove a role from this member
+	 * @note This call sets the role change bit, which causes the new role
+	 * list to be sent if this is passed to dpp::cluster::guild_edit_member
+	 * or dpp::cluster::guild_add_member
+	 * 
+	 * @param role_id Role ID to remove
+	 * @return guild_member& Reference to self
+	 */
+	guild_member& remove_role(dpp::snowflake role_id);
+
+	/**
+	 * @brief Set a new role list for this member
+	 * @note This call sets the role change bit, which causes the new role
+	 * list to be sent if this is passed to dpp::cluster::guild_edit_member
+	 * or dpp::cluster::guild_add_member
+	 * 
+	 * @param role_ids Roles to set
+	 * @return guild_member& Reference to self
+	 */
+	guild_member& set_roles(const std::vector<dpp::snowflake> &role_ids);
+
 };
 
 /**

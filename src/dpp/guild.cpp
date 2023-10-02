@@ -97,12 +97,12 @@ guild::guild() :
 
 
 guild_member::guild_member() :
+	flags(0),
 	guild_id(0),
 	user_id(0),
 	communication_disabled_until(0),
 	joined_at(0),
-	premium_since(0),
-	flags(0)
+	premium_since(0)
 {
 }
 
@@ -112,6 +112,34 @@ std::string guild_member::get_mention() const {
 
 guild_member& guild_member::set_nickname(const std::string& nick) {
 	this->nickname = nick;
+	this->flags |= gm_nickname_action;
+	return *this;
+}
+
+guild_member& guild_member::add_role(dpp::snowflake role_id) {
+	roles.emplace_back(role_id);
+	flags |= gm_roles_action;
+	return *this;
+}
+
+guild_member& guild_member::remove_role(dpp::snowflake role_id) {
+	roles.erase(std::remove(roles.begin(), roles.end(), role_id), roles.end());
+	flags |= gm_roles_action;
+	return *this;
+}
+
+std::string guild_member::get_nickname() const {
+	return nickname;
+}
+
+const std::vector<dpp::snowflake>& guild_member::get_roles() const {
+	return roles;
+}
+
+
+guild_member& guild_member::set_roles(const std::vector<dpp::snowflake> &role_ids) {
+	roles = role_ids;
+	flags |= gm_roles_action;
 	return *this;
 }
 
@@ -189,8 +217,8 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 std::string guild_member::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
 	if (this->guild_id && this->user_id && !this->avatar.to_string().empty()) {
 		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-											  "guilds/" + std::to_string(this->guild_id) + "/" + std::to_string(this->user_id), this->avatar.to_string(),
-											  format, size, prefer_animated, has_animated_guild_avatar());
+			"guilds/" + std::to_string(this->guild_id) + "/" + std::to_string(this->user_id), this->avatar.to_string(),
+			format, size, prefer_animated, has_animated_guild_avatar());
 	} else {
 		return std::string();
 	}
@@ -211,19 +239,19 @@ std::string guild_member::build_json(bool with_id) const {
 		}
 	}
 	
-	if (!this->nickname.empty()) {
-		j["nick"] = this->nickname;
-	} else {
-		j["nick"] = json::value_t::null;
+	if (this->flags & gm_nickname_action) {
+		if (!this->nickname.empty()) {
+			j["nick"] = this->nickname;
+		} else {
+			j["nick"] = json::value_t::null;
+		}
 	}
 
-	if (!this->roles.empty()) {
+	if (this->flags & gm_roles_action) {
 		j["roles"] = {};
-		for (auto & role : this->roles) {
+		for (const auto & role : this->roles) {
 			j["roles"].push_back(std::to_string(role));
 		}
-	} else {
-		j["roles"] = {};
 	}
 
 	if (this->flags & gm_voice_action) {
@@ -718,7 +746,7 @@ permission guild::base_permissions(const guild_member &member) const {
 
 	permission permissions = everyone->permissions;
 
-	for (auto& rid : member.roles) {
+	for (auto& rid : member.get_roles()) {
 		role* r = dpp::find_role(rid);
 		if (r) {
 			permissions |= r->permissions;
@@ -765,7 +793,7 @@ permission guild::permission_overwrites(const uint64_t base_permissions, const u
 	uint64_t allow = 0;
 	uint64_t deny = 0;
 
-	for (auto& rid : gm.roles) {
+	for (auto& rid : gm.get_roles()) {
 
 		/* Skip \@everyone role to not break the hierarchy. It's calculated above */
 		if (rid == this->id) {
@@ -821,7 +849,7 @@ permission guild::permission_overwrites(const guild_member &member, const channe
 	uint64_t allow = 0;
 	uint64_t deny = 0;
 
-	for (auto& rid : member.roles) {
+	for (auto& rid : member.get_roles()) {
 
 		/* Skip \@everyone role to not break the hierarchy. It's calculated above */
 		if (rid == this->id) {
