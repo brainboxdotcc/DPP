@@ -52,105 +52,75 @@ protected:
 	/**
 	 * @brief The snowflake value
 	 */
-	uint64_t value;
+	uint64_t value = 0;
 
 public:
+	/**
+ 	 * @brief Construct a snowflake object
+ 	 */
+	constexpr snowflake() noexcept = default;
+
 	/**
 	 * @brief Construct a snowflake object
 	 * @param value A snowflake value
 	 */
-	snowflake(const uint64_t& value);
+	constexpr snowflake(const uint64_t value_) noexcept : value{value_} {}
 
 	/**
 	 * @brief Construct a snowflake object
 	 * @param string_value A snowflake value
 	 */
-	snowflake(const std::string& string_value);
-
-	/**
- 	 * @brief Construct a snowflake object
- 	 */
-	snowflake();
-
-	/**
-	 * @brief Destroy the snowflake object
-	 */
-	~snowflake() = default;
+	snowflake(std::string_view string_value) noexcept;
 
 	/**
 	 * @brief For acting like an integer
 	 * @return The snowflake value
 	 */
-	operator uint64_t() const;
+	constexpr operator uint64_t() const noexcept {
+		return value;
+	}
 
 	/**
 	 * @brief Returns true if the snowflake holds an empty value (is 0)
-	 * 
+	 *
 	 * @return true if empty (zero)
 	 */
-	inline bool empty() const
-	{
+	constexpr bool empty() const noexcept {
 		return value == 0;
 	}
 
 	/**
 	 * @brief Returns the stringified version of the snowflake value
-	 * 
+	 *
 	 * @return std::string string form of snowflake value
 	 */
-	inline std::string str() const
-	{
+	inline std::string str() const {
 		return std::to_string(value);
 	}
 
 	/**
-	 * @brief Operator less than, used for maps/unordered maps
-	 * when the snowflake is a key value.
-	 * 
-	 * @param lhs fist snowflake to compare
-	 * @param rhs second snowflake to compare
-	 * @return true if lhs is less than rhs
-	 */
-	friend inline bool operator< (const snowflake& lhs, const snowflake& rhs)
-	{
-		return lhs.value < rhs.value;
-	}
-
-	/**
 	 * @brief Assign from std::string
-	 * 
+	 *
 	 * @param snowflake_val string to assign from.
 	 */
-	snowflake& operator=(const std::string &snowflake_val);
+	snowflake& operator=(std::string_view snowflake_val) noexcept;
 
 	/**
-	 * @brief Assign from std::string
-	 * 
-	 * @param snowflake_val value to assign from.
+	 * @brief Comparison operator with a string
+	 *
+	 * @param snowflake_val snowflake value as a string
 	 */
-	snowflake& operator=(const uint64_t &snowflake_val);
-
-	/**
-	 * @brief Check if one snowflake value is equal to another
-	 * 
-	 * @param other other snowflake to compare
-	 * @return True if the snowflake objects match
-	 */
-	bool operator==(const snowflake& other) const;
-
-	/**
-	 * @brief Check if one snowflake value is equal to a uint64_t
-	 * 
-	 * @param other other snowflake to compare
-	 * @return True if the snowflake objects match
-	 */
-	bool operator==(const uint64_t& other) const;
+	inline bool operator==(std::string_view snowflake_val) const noexcept {
+		return *this == dpp::snowflake{snowflake_val};
+	}
 
 	/**
 	 * @brief For acting like an integer
 	 * @return A reference to the snowflake value
 	 */
-	operator uint64_t &();
+	constexpr operator uint64_t &() noexcept {
+		return value;
+	}
 
 	/**
 	 * @brief For building json
@@ -160,33 +130,42 @@ public:
 
 	/**
 	 * @brief Get the creation time of this snowflake according to Discord.
-	 * 
+	 *
 	 * @return double creation time inferred from the snowflake ID.
 	 * The minimum possible value is the first second of 2015.
 	 */
-	double get_creation_time() const;
+	constexpr double get_creation_time() const noexcept {
+		constexpr uint64_t first_january_2016 = 1420070400000ull;
+		return static_cast<double>((value >> 22) + first_january_2016) / 1000.0;
+	}
 
 	/**
 	 * @brief Get the worker id that produced this snowflake value
-	 * 
+	 *
 	 * @return uint8_t worker id
 	 */
-	uint8_t get_worker_id() const;
+	constexpr uint8_t get_worker_id() const noexcept {
+		return static_cast<uint8_t>((value & 0x3E0000) >> 17);
+	}
 
 	/**
 	 * @brief Get the process id that produced this snowflake value
-	 * 
+	 *
 	 * @return uint8_t process id
 	 */
-	uint8_t get_process_id() const;
+	constexpr uint8_t get_process_id() const noexcept {
+		return static_cast<uint8_t>((value & 0x1F000) >> 12);
+	}
 
 	/**
 	 * @brief Get the increment, which is incremented for every snowflake
 	 * created over the one millisecond resolution in the timestamp.
-	 * 
+	 *
 	 * @return uint64_t millisecond increment
 	 */
-	uint16_t get_increment() const;
+	constexpr uint16_t get_increment() const noexcept {
+		return static_cast<uint16_t>(value & 0xFFF);
+	}
 };
 
 } // namespace dpp
@@ -195,13 +174,13 @@ template<>
 struct std::hash<dpp::snowflake>
 {
 	/**
-	 * @brief Hashing function for dpp::slowflake
+	 * @brief Hashing function for dpp::snowflake
 	 * Used by std::unordered_map. This just calls std::hash<uint64_t>.
-	 * 
+	 *
 	 * @param s Snowflake value to hash
 	 * @return std::size_t hash value
 	 */
-	std::size_t operator()(dpp::snowflake const& s) const noexcept {
+	std::size_t operator()(dpp::snowflake s) const noexcept {
 		return std::hash<uint64_t>{}(s.value);
 	}
 };
