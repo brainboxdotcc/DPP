@@ -123,9 +123,7 @@ guild_member& guild_member::add_role(dpp::snowflake role_id) {
 }
 
 guild_member& guild_member::remove_role(dpp::snowflake role_id) {
-	roles.erase(std::remove_if(roles.begin(), roles.end(), [&role_id](dpp::snowflake role) {
-		return role == role_id;
-	}), roles.end());
+	std::remove(roles.begin(), roles.end(), role_id);
 	flags |= gm_roles_action;
 	return *this;
 }
@@ -219,8 +217,8 @@ void from_json(const nlohmann::json& j, guild_member& gm) {
 std::string guild_member::get_avatar_url(uint16_t size, const image_type format, bool prefer_animated) const {
 	if (this->guild_id && this->user_id && !this->avatar.to_string().empty()) {
 		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-											  "guilds/" + std::to_string(this->guild_id) + "/" + std::to_string(this->user_id), this->avatar.to_string(),
-											  format, size, prefer_animated, has_animated_guild_avatar());
+			"guilds/" + std::to_string(this->guild_id) + "/" + std::to_string(this->user_id), this->avatar.to_string(),
+			format, size, prefer_animated, has_animated_guild_avatar());
 	} else {
 		return std::string();
 	}
@@ -250,13 +248,9 @@ std::string guild_member::build_json(bool with_id) const {
 	}
 
 	if (gm_roles_action) {
-		if (!this->roles.empty()) {
-			j["roles"] = {};
-			for (const auto & role : this->roles) {
-				j["roles"].push_back(std::to_string(role));
-			}
-		} else {
-			j["roles"] = {};
+    		j["roles"] = {};
+		for (const auto & role : this->roles) {
+			j["roles"].push_back(std::to_string(role));
 		}
 	}
 
