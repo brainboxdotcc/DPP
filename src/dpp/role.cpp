@@ -413,8 +413,9 @@ members_container role::get_members() const {
 		}
 		for (auto & m : g->members) {
 			/* Iterate all members and use std::find on their role list to see who has this role */
-			auto i = std::find(m.second.roles.begin(), m.second.roles.end(), this->id);
-			if (i != m.second.roles.end()) {
+			const auto& r = m.second.get_roles();
+			auto i = std::find(r.begin(), r.end(), this->id);
+			if (i != r.end()) {
 				gm[m.second.user_id] = m.second;
 			}
 		}
@@ -425,8 +426,8 @@ members_container role::get_members() const {
 std::string role::get_icon_url(uint16_t size, const image_type format) const {
 	if (!this->icon.to_string().empty() && this->id) {
 		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
-										 "role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
-										 format, size);
+			"role-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
+			format, size);
 	} else {
 		return std::string();
 	}
