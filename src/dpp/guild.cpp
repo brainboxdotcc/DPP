@@ -123,7 +123,7 @@ guild_member& guild_member::add_role(dpp::snowflake role_id) {
 }
 
 guild_member& guild_member::remove_role(dpp::snowflake role_id) {
-	std::remove(roles.begin(), roles.end(), role_id);
+	roles.erase(std::remove(roles.begin(), roles.end(), role_id), roles.end());
 	flags |= gm_roles_action;
 	return *this;
 }
