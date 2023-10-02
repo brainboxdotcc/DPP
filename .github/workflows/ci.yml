@@ -28,9 +28,6 @@ jobs:
   linux-with-unit-test:
     permissions:
       contents: write
-    concurrency: 
-      group: linux-build-unit-test
-      cancel-in-progress: false
     name: Linux ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
     runs-on: ${{matrix.cfg.os}}
     strategy:
