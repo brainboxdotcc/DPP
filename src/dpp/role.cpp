@@ -413,7 +413,7 @@ members_container role::get_members() const {
 		}
 		for (auto & m : g->members) {
 			/* Iterate all members and use std::find on their role list to see who has this role */
-			auto r = m.second.get_roles();
+			const auto& r = m.second.get_roles();
 			auto i = std::find(r.begin(), r.end(), this->id);
 			if (i != r.end()) {
 				gm[m.second.user_id] = m.second;
