@@ -339,7 +339,7 @@ public:
 	 * 
 	 * @return std::vector<dpp::snowflake> roles
 	 */
-	std::vector<dpp::snowflake> get_roles() const;
+	const std::vector<dpp::snowflake>& get_roles() const;
 
 	/**
 	 * @brief Find the dpp::user object for this member. This is an alias for dpp::find_user

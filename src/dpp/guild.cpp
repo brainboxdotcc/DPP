@@ -132,7 +132,7 @@ std::string guild_member::get_nickname() {
 	return nickname;
 }
 
-std::vector<dpp::snowflake> guild_member::get_roles() const {
+const std::vector<dpp::snowflake>& guild_member::get_roles() const {
 	return roles;
 }
 
@@ -248,7 +248,7 @@ std::string guild_member::build_json(bool with_id) const {
 	}
 
 	if (this->flags & gm_roles_action) {
-			j["roles"] = {};
+		j["roles"] = {};
 		for (const auto & role : this->roles) {
 			j["roles"].push_back(std::to_string(role));
 		}
