@@ -14,9 +14,9 @@ dpkg -x libdpp.deb .
 3. Compile your bot, note that you should be sure to include the `pthread` library explicitly and reference the extracted dpp installation you just put into the repl:
 ```bash
 g++ -o bot main.cpp -ldpp -lpthread -L./usr/lib -I./usr/include -std=c++17
-```bash
-4. Run your bot! Note that you will need to set `LD_PRELOAD` to reference `libdpp.so` as it will be located in `$HOME` and not `/usr/lib`:
 ```
+4. Run your bot! Note that you will need to set `LD_PRELOAD` to reference `libdpp.so` as it will be located in `$HOME` and not `/usr/lib`:
+```bash
 LD_PRELOAD=./usr/lib/libdpp.so ./bot
 ```
 
