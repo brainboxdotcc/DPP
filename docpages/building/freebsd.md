@@ -43,7 +43,7 @@ cd build
 make install
 ```
 
-## 5. Installation to a D0ifferent Directory (Optional)
+## 5. Installation to a Different Directory (Optional)
 
 If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
 
