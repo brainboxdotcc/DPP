@@ -22,8 +22,8 @@
 #pragma once
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
-#include <stdint.h>
-#include <functional>
+#include <cstdint>
+#include <charconv>
 
 /**
  * @brief The main namespace for D++ functions. classes and types
@@ -61,23 +61,75 @@ public:
 	constexpr snowflake() noexcept = default;
 
 	/**
-	 * @brief Construct a snowflake object
-	 * @param value A snowflake value
-	 */
-	constexpr snowflake(const uint64_t value_) noexcept : value{value_} {}
+ 	 * @brief Copy a snowflake object
+ 	 */
+	constexpr snowflake(const snowflake &rhs) noexcept = default;
 
 	/**
-	 * @brief Construct a snowflake object
+ 	 * @brief Move a snowflake object
+ 	 */
+	constexpr snowflake(snowflake &&rhs) noexcept = default;
+
+	/**
+	 * @brief Construct a snowflake from an integer value
+	 *
+	 * @throw dpp::logic_exception on assigning a negative value. the function is noexcept if the type given is unsigned
+	 * @param snowflake_val snowflake value as an integer type
+	 */
+	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+	constexpr snowflake(T snowflake_val) noexcept(std::is_unsigned_v<T>) : value(static_cast<std::make_unsigned_t<T>>(snowflake_val)) {
+		/**
+		 * we cast to the unsigned version of the type given - this maintains "possible loss of data" warnings for sizeof(T) > sizeof(value)
+		 * while suppressing them for signed to unsigned conversion
+		 */
+		if constexpr (!std::is_unsigned_v<T>) {
+			/* if the type is signed, at compile-time, add a check at runtime that the value is unsigned */
+			if (snowflake_val < 0) {
+				value = 0;
+				throw dpp::logic_exception{"cannot assign a negative value to dpp::snowflake"};
+			}
+		}
+	}
+
+	/**
+	 * @brief Construct a snowflake object from an unsigned integer in a string
+	 *
+	 * On invalid string the value will be 0
 	 * @param string_value A snowflake value
 	 */
 	snowflake(std::string_view string_value) noexcept;
 
 	/**
-	 * @brief For acting like an integer
-	 * @return The snowflake value
+	 * @brief Copy value from another snowflake
+	 *
+	 * @param rhs The snowflake to copy from
 	 */
-	constexpr operator uint64_t() const noexcept {
-		return value;
+	constexpr dpp::snowflake &operator=(const dpp::snowflake& rhs) noexcept = default;
+
+	/**
+	 * @brief Move value from another snowflake
+	 *
+	 * @param rhs The snowflake to move from
+	 */
+	constexpr dpp::snowflake &operator=(dpp::snowflake&& rhs) noexcept = default;
+
+	/**
+	 * @brief Assign value converted from a string to the snowflake
+	 *
+	 * On invalid string the value will be 0
+	 * @param snowflake_val snowflake value as a string
+	 */
+	dpp::snowflake &operator=(std::string_view snowflake_val) noexcept;
+
+	/**
+	 * @brief Assign integer value to the snowflake
+	 *
+	 * @throw dpp::logic_exception on assigning a negative value. the function is noexcept if the type given is unsigned
+	 * @param snowflake_val snowflake value as an integer type
+	 */
+	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+	constexpr dpp::snowflake &operator=(T snowflake_val) noexcept(std::is_unsigned_v<T>) {
+		return *this = dpp::snowflake{snowflake_val};
 	}
 
 	/**
@@ -99,11 +151,13 @@ public:
 	}
 
 	/**
-	 * @brief Assign from std::string
+	 * @brief Comparison operator with another snowflake
 	 *
-	 * @param snowflake_val string to assign from.
+	 * @param snowflake_val snowflake
 	 */
-	snowflake& operator=(std::string_view snowflake_val) noexcept;
+	constexpr bool operator==(dpp::snowflake snowflake_val) const noexcept {
+		return value == snowflake_val.value;
+	}
 
 	/**
 	 * @brief Comparison operator with a string
@@ -111,7 +165,30 @@ public:
 	 * @param snowflake_val snowflake value as a string
 	 */
 	inline bool operator==(std::string_view snowflake_val) const noexcept {
+		uint64_t v;
+		auto [end, err] = std::from_chars(snowflake_val.data(), snowflake_val.data() + snowflake_val.size(), v);
+		if (end != snowflake_val.data() + snowflake_val.size()) // parse error
+			return false;
+		return *this == v;
+	}
+
+	/**
+	 * @brief Comparison operator with an integer
+	 *
+	 * @param snowflake_val snowflake value as an integer type
+	 */
+	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+	constexpr bool operator==(T snowflake_val) const noexcept {
+		/* We use the std::enable_if_t trick to disable implicit conversions so there is a perfect candidate for overload resolution for integers, and it isn't ambiguous */
 		return *this == dpp::snowflake{snowflake_val};
+	}
+
+	/**
+	 * @brief For acting like an integer
+	 * @return The snowflake value
+	 */
+	constexpr operator uint64_t() const noexcept {
+		return value;
 	}
 
 	/**

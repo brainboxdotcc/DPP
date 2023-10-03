@@ -36,13 +36,18 @@ namespace dpp {
 		 * This value contains a timestamp, worker ID, internal server ID, and an incrementing value.
 		 * Only the timestamp is relevant to us as useful metadata.
 		 */
-		snowflake id;
+		snowflake id = 0;
+
+		/**
+		 * @brief Constructor, initialises id to 0.
+		 */
+		constexpr managed() noexcept = default;
 
 		/**
 		 * @brief Constructor, initialises ID
 		 * @param nid ID to set
 		 */
-		constexpr managed(const snowflake nid = 0) noexcept : id{nid} {}
+		constexpr managed(const snowflake nid) noexcept : id{nid} {}
 
 		/**
 		 * @brief Copy constructor

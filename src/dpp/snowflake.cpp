@@ -20,6 +20,7 @@
  ************************************************************************************/
 #include <dpp/snowflake.h>
 #include <charconv>
+#include <string>
 
 namespace dpp {
 
@@ -29,7 +30,7 @@ snowflake::snowflake(std::string_view string_value) noexcept {
 		value = 0;
 }
 
-snowflake& snowflake::operator=(std::string_view string_value) {
+snowflake& snowflake::operator=(std::string_view string_value) noexcept {
 	auto [end, err] = std::from_chars(string_value.data(), string_value.data() + string_value.size(), value);
 	if (end != string_value.data() + string_value.size())
 		value = 0;

@@ -194,10 +194,11 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	}
 
 	{ // test dpp::snowflake
+		start_test(SNOWFLAKE);
 		bool success = true;
 		dpp::snowflake s = 69420;
 		json j;
-		j["value"] = 69420;
+		j["value"] = s;
 		success = dpp::snowflake_not_null(&j, "value") == 69420 && success;
 		DPP_CHECK_CONSTRUCT_ASSIGN(SNOWFLAKE, dpp::snowflake, success);
 		s = 42069;
@@ -207,6 +208,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = success && s == 69420;
 		s = dpp::snowflake{"1337"};
 		success = success && s == 1337;
+		success = success && dpp::snowflake{0} == 0;
 		set_test(SNOWFLAKE, success);
 	}
 
