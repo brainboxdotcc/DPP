@@ -36,7 +36,7 @@ namespace dpp {
 		 * This value contains a timestamp, worker ID, internal server ID, and an incrementing value.
 		 * Only the timestamp is relevant to us as useful metadata.
 		 */
-		snowflake id = 0;
+		snowflake id = {};
 
 		/**
 		 * @brief Constructor, initialises id to 0.
