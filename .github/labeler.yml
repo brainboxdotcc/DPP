@@ -25,7 +25,11 @@ packaging:
 - '**Dockerfile'
 submodules:
 - '**.gitmodules'
+- '**doxygen-awesome-css/**' # Ideally, nobody should be touching this, but it's here just in-case.
 github_actions:
-- '**/.github/labeler.yml'
-- '**/.github/dependabot.yml'
-- '**/.github/workflows/**'
+- '**.github/labeler.yml'
+- '**.github/dependabot.yml'
+- '**.github/workflows/**'
+code:
+- '**src/**'
+- '**include/**'
