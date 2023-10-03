@@ -25,6 +25,7 @@
 #include <dpp/exception.h>
 #include <cstdint>
 #include <charconv>
+#include <type_traits>
 
 /**
  * @brief The main namespace for D++ functions. classes and types
@@ -33,17 +34,17 @@ namespace dpp {
 
 /** @brief A container for a 64 bit unsigned value representing many things on discord.
  * This value is known in distributed computing as a snowflake value.
- * 
+ *
  * Snowflakes are:
- * 
+ *
  * - Performant (very fast to generate at source and to compare in code)
  * - Uncoordinated (allowing high availability across clusters, data centres etc)
  * - Time ordered (newer snowflakes have higher IDs)
  * - Directly Sortable (due to time ordering)
  * - Compact (64 bit numbers, not 128 bit, or string)
- * 
+ *
  * An identical format of snowflake is used by Twitter, Instagram and several other platforms.
- * 
+ *
  * @see https://en.wikipedia.org/wiki/Snowflake_ID
  * @see https://github.com/twitter-archive/snowflake/tree/b3f6a3c6ca8e1b6847baa6ff42bf72201e2c2231
  */
@@ -81,7 +82,7 @@ public:
 	constexpr snowflake(T snowflake_val) noexcept(std::is_unsigned_v<T>) : value(static_cast<std::make_unsigned_t<T>>(snowflake_val)) {
 		/**
 		 * we cast to the unsigned version of the type given - this maintains "possible loss of data" warnings for sizeof(T) > sizeof(value)
-		 * while suppressing them for signed to unsigned conversion
+		 * while suppressing them for signed to unsigned conversion (for example snowflake(42) will call snowflake(int) which is a signed type)
 		 */
 		if constexpr (!std::is_unsigned_v<T>) {
 			/* if the type is signed, at compile-time, add a check at runtime that the value is unsigned */
@@ -204,7 +205,7 @@ public:
 	 * @brief For building json
 	 * @return The snowflake value as a string
 	 */
-	operator nlohmann::json() const;
+	operator json() const;
 
 	/**
 	 * @brief Get the creation time of this snowflake according to Discord.

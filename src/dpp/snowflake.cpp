@@ -19,6 +19,7 @@
  *
  ************************************************************************************/
 #include <dpp/snowflake.h>
+#include <dpp/json.h>
 #include <charconv>
 #include <string>
 
@@ -37,7 +38,7 @@ snowflake& snowflake::operator=(std::string_view string_value) noexcept {
 	return *this;
 }
 
-snowflake::operator nlohmann::json() const {
+snowflake::operator json() const {
 	/* Discord transfers snowflakes as strings for compatibility with javascript */
 	return std::to_string(value);
 }

@@ -51,8 +51,6 @@
 
 namespace dpp {
 
-using  json = nlohmann::json;
-
 /**
  * @brief Types of startup for cluster::start()
  */
