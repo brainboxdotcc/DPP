@@ -82,12 +82,10 @@ error_info confirmation_callback_t::get_error() const {
 		json& errors = j["errors"];
 		for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
 
-			int array_index = 0;
-
 			/* Arrays in the error report are numerically indexed with a number in a string. Ugh. */
 			if (isdigit(*(obj.key().c_str()))) {
 				/* An array of error messages */
-				array_index = std::atoll(obj.key().c_str());
+				int array_index = std::atoll(obj.key().c_str());
 				for (auto index = obj->begin(); index != obj->end(); ++index) {
 					if (index->find("_errors") != index->end()) {
 						/* A single object where one or more fields generated an error */
@@ -146,7 +144,7 @@ error_info confirmation_callback_t::get_error() const {
 			} else {
 				/* An object that has a subobject with errors */
 				for (auto index = obj->begin(); index != obj->end(); ++index) {
-					array_index = std::atoll(index.key().c_str());
+					int array_index = std::atoll(index.key().c_str());
 					for (auto index2 = index->begin(); index2 != index->end(); ++index2) {
 						if (index2->find("_errors") != index2->end()) {
 							/* A single object where one or more fields generated an error */
