@@ -82,7 +82,9 @@ error_info confirmation_callback_t::get_error() const {
 		json& errors = j["errors"];
 		for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
 
+			int array_index = 0;
 			if (obj->find("0") != obj->end()) {
+				array_index = 0;
 				/* An array of error messages */
 				for (auto index = obj->begin(); index != obj->end(); ++index) {
 					if (index->find("_errors") != index->end()) {
@@ -92,6 +94,7 @@ error_info confirmation_callback_t::get_error() const {
 							detail.reason = (*errordetails)["message"].get<std::string>();
 							detail.object.clear();
 							detail.field = obj.key();
+							detail.index = array_index;
 							e.errors.emplace_back(detail);
 						}
 					} else {
@@ -102,10 +105,13 @@ error_info confirmation_callback_t::get_error() const {
 								detail.reason = (*errordetails)["message"].get<std::string>();
 								detail.field = fields.key();
 								detail.object = obj.key();
+								detail.index = array_index;
 								e.errors.emplace_back(detail);
 							}
 						}
 					}
+					/* Index only increments per field, not per error*/
+					array_index++;
 				}
 
 			} else if (obj->find("_errors") != obj->end()) {
@@ -117,8 +123,19 @@ error_info confirmation_callback_t::get_error() const {
 					detail.reason = (*errordetails)["message"].get<std::string>();
 					detail.object.clear();
 					detail.field = obj.key();
+					detail.index = 0;
 					e.errors.emplace_back(detail);
 				}
+			}
+		}
+
+		e.human_readable = std::to_string(e.code) + ": " + e.message;
+		std::string prefix = e.errors.size() == 1 ? " " : "\n\t";
+		for (const auto& error : e.errors) {
+			if (error.object.empty()) {
+				e.human_readable += prefix + "- " + error.field + ": " + error.reason + " (" + error.code + ")";
+			} else {
+				e.human_readable += prefix + "- " + error.object + "[" + std::to_string(error.index) + "]." + error.field + ": " + error.reason + " (" + error.code + ")";
 			}
 		}
 

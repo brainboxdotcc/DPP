@@ -58,6 +58,25 @@ Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 	set_test(COMPARISON, u1 == u2 && u1 != u3);
 
 
+	dpp::confirmation_callback_t error_test;
+	set_test(ERRORS, false);
+	bool error_message_success = false;
+	error_test.http_info.status = 400;
+
+	error_test.http_info.body = "{\"message\": \"Invalid Form Body\", \"code\": 50035, \"errors\": {\"options\": {\"0\": {\"name\": {\"_errors\": [{\"code\": \"STRING_TYPE_REGEX\", \"message\": \"String value did not match validation regex.\"}, {\"code\": \"APPLICATION_COMMAND_INVALID_NAME\", \"message\": \"Command name is invalid\"}]}}}}}";
+	error_message_success = (error_test.get_error().human_readable == "50035: Invalid Form Body\n\t- options[0].name: String value did not match validation regex. (STRING_TYPE_REGEX)\n\t- options[0].name: Command name is invalid (APPLICATION_COMMAND_INVALID_NAME)");
+
+	error_test.http_info.body = "{\"message\": \"Invalid Form Body\", \"code\": 50035, \"errors\": {\"type\": {\"_errors\": [{\"code\": \"BASE_TYPE_CHOICES\", \"message\": \"Value must be one of {4, 5, 9, 10, 11}.\"}]}}}";
+	error_message_success = (error_message_success && error_test.get_error().human_readable == "50035: Invalid Form Body - type: Value must be one of {4, 5, 9, 10, 11}. (BASE_TYPE_CHOICES)");
+
+	error_test.http_info.body = "{\"message\": \"Unknown Guild\", \"code\": 10004}";
+	error_message_success = (error_message_success && error_test.get_error().human_readable == "10004: Unknown Guild");
+
+	error_test.http_info.body = "{\"message\": \"Invalid Form Body\", \"code\": 50035, \"errors\": {\"allowed_mentions\": {\"_errors\": [{\"code\": \"MESSAGE_ALLOWED_MENTIONS_PARSE_EXCLUSIVE\", \"message\": \"parse:[\\\"users\\\"] and users: [ids...] are mutually exclusive.\"}]}}}";
+	error_message_success = (error_message_success && error_test.get_error().human_readable == "50035: Invalid Form Body - allowed_mentions: parse:[\"users\"] and users: [ids...] are mutually exclusive. (MESSAGE_ALLOWED_MENTIONS_PARSE_EXCLUSIVE)");
+
+	set_test(ERRORS, error_message_success);
+
 	set_test(MD_ESC_1, false);
 	set_test(MD_ESC_2, false);
 	std::string escaped1 = dpp::utility::markdown_escape(test_to_escape);
