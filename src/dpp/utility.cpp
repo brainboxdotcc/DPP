@@ -499,10 +499,10 @@ namespace dpp {
 			return [](const dpp::confirmation_callback_t& detail) {
 				if (detail.is_error()) {
 					if (detail.bot) {
+						error_info e = detail.get_error();
 						detail.bot->log(
 							dpp::ll_error, 
-							"Error " + std::to_string(detail.get_error().code) + " [" +
-							detail.get_error().message + "] on API request, returned content was: " + detail.http_info.body
+							"Error: " + e.human_readable
 						);
 					}
 				}

@@ -144,6 +144,7 @@ DPP_TEST(CHANNELTYPES, "channel type flags", tf_online);
 DPP_TEST(FORUM_CREATION, "create a forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_GET, "retrieve the created forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_DELETE, "delete the created forum channel", tf_online);
+DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
 
 DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three deleted discord accounts", tf_online);
 DPP_TEST(GUILD_BAN_GET, "cluster::guild_get_ban getting one of the banned accounts", tf_online);
