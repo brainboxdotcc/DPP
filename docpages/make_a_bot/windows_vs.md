@@ -2,7 +2,17 @@
 
 To create a basic bot using **Visual Studio 2019** or **Visual Studio 2022**, follow the steps below to create a *working skeleton project you can build upon*.
 
-If you prefer a video tutorial, you can watch [this video](https://youtu.be/JGqaQ9nH5sk) to see how to run your bot, otherwise, keep reading!
+If you prefer a video tutorial, you can watch the video below! Otherwise, scroll past and keep reading!
+
+## Video Tutorial
+
+\htmlonly
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/JGqaQ9nH5sk?si=dung8KuYbWvP2_oL" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+\endhtmlonly
+
+## Text Tutorial
 
 1. Make sure you have Visual Studio 2019 or 2022. Community, Professional or Enterprise work fine. These instructions are not for Visual Studio Code. You can [download the correct version here](https://visualstudio.microsoft.com/downloads/). Note that older versions of Visual Studio will not work as they do not support enough of the C++17 standard.
 2. Clone the [template project](https://github.com/brainboxdotcc/windows-bot-template/). Be sure to clone the entire project and not just copy and paste the `.cpp` file.
