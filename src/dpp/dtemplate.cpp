@@ -23,8 +23,6 @@
 #include <dpp/discordevents.h>
 #include <dpp/json.h>
 
-
-
 namespace dpp {
 
 using json = nlohmann::json;
@@ -32,7 +30,6 @@ using json = nlohmann::json;
 dtemplate::dtemplate() : code(""), name(""), description(""), usage_count(0), creator_id(0), source_guild_id(0)
 {
 }
-
 
 dtemplate& dtemplate::fill_from_json(nlohmann::json* j) {
 	code = string_not_null(j, "code");
