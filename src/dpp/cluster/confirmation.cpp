@@ -83,11 +83,14 @@ error_info confirmation_callback_t::get_error() const {
 		for (auto obj = errors.begin(); obj != errors.end(); ++obj) {
 
 			int array_index = 0;
-			if (obj->find("0") != obj->end()) {
-				array_index = 0;
+
+			/* Arrays in the error report are numerically indexed with a number in a string. Ugh. */
+			if (isdigit(*(obj.key().c_str()))) {
 				/* An array of error messages */
+				array_index = std::atoll(obj.key().c_str());
 				for (auto index = obj->begin(); index != obj->end(); ++index) {
 					if (index->find("_errors") != index->end()) {
+						/* A single object where one or more fields generated an error */
 						for (auto errordetails = (*index)["_errors"].begin(); errordetails != (*index)["_errors"].end(); ++errordetails) {
 							error_detail detail;
 							detail.code = (*errordetails)["code"].get<std::string>();
@@ -98,24 +101,38 @@ error_info confirmation_callback_t::get_error() const {
 							e.errors.emplace_back(detail);
 						}
 					} else {
+						/* An object where one or more fields within it generated an error, e.g. slash command */
 						for (auto fields = index->begin(); fields != index->end(); ++fields) {
-							for (auto errordetails = (*fields)["_errors"].begin(); errordetails != (*fields)["_errors"].end(); ++errordetails) {
-								error_detail detail;
-								detail.code = (*errordetails)["code"].get<std::string>();
-								detail.reason = (*errordetails)["message"].get<std::string>();
-								detail.field = fields.key();
-								detail.object = obj.key();
-								detail.index = array_index;
-								e.errors.emplace_back(detail);
+							if (fields->find("_errors") != fields->end()) {
+								for (auto errordetails = (*fields)["_errors"].begin(); errordetails != (*fields)["_errors"].end(); ++errordetails) {
+									error_detail detail;
+									detail.code = (*errordetails)["code"].get<std::string>();
+									detail.reason = (*errordetails)["message"].get<std::string>();
+									detail.field = fields.key();
+									detail.object = obj.key();
+									detail.index = array_index;
+									e.errors.emplace_back(detail);
+								}
+							} else {
+								/* An array of objects where one or more generated an error, e.g. slash command bulk registration */
+								for (auto fields2 = fields->begin(); fields2 != fields->end(); ++fields2) {
+									for (auto errordetails = (*fields2)["_errors"].begin(); errordetails != (*fields2)["_errors"].end(); ++errordetails) {
+										error_detail detail;
+										detail.code = (*errordetails)["code"].get<std::string>();
+										detail.reason = (*errordetails)["message"].get<std::string>();
+										detail.field = index.key() + "[" + fields.key() +  "]." + fields2.key();
+										detail.object = obj.key();
+										detail.index = array_index;
+										e.errors.emplace_back(detail);
+									}
+								}
 							}
 						}
 					}
-					/* Index only increments per field, not per error*/
-					array_index++;
 				}
 
 			} else if (obj->find("_errors") != obj->end()) {
-				/* An object of error messages */
+				/* An object of error messages (rare) */
 				e.errors.reserve((*obj)["_errors"].size());
 				for (auto errordetails = (*obj)["_errors"].begin(); errordetails != (*obj)["_errors"].end(); ++errordetails) {
 					error_detail detail;
@@ -126,6 +143,25 @@ error_info confirmation_callback_t::get_error() const {
 					detail.index = 0;
 					e.errors.emplace_back(detail);
 				}
+			} else {
+				/* An object that has a subobject with errors */
+				for (auto index = obj->begin(); index != obj->end(); ++index) {
+					array_index = std::atoll(index.key().c_str());
+					for (auto index2 = index->begin(); index2 != index->end(); ++index2) {
+						if (index2->find("_errors") != index2->end()) {
+							/* A single object where one or more fields generated an error */
+							for (auto errordetails = (*index2)["_errors"].begin(); errordetails != (*index2)["_errors"].end(); ++errordetails) {
+								error_detail detail;
+								detail.code = (*errordetails)["code"].get<std::string>();
+								detail.reason = (*errordetails)["message"].get<std::string>();
+								detail.object = obj.key();
+								detail.field = index2.key();
+								detail.index = array_index;
+								e.errors.emplace_back(detail);
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -133,8 +169,13 @@ error_info confirmation_callback_t::get_error() const {
 		std::string prefix = e.errors.size() == 1 ? " " : "\n\t";
 		for (const auto& error : e.errors) {
 			if (error.object.empty()) {
+				/* A singular field with an error in an unnamed object */
 				e.human_readable += prefix + "- " + error.field + ": " + error.reason + " (" + error.code + ")";
+			} else if (isdigit(*(error.object.c_str()))) {
+				/* An unnamed array of objects where one or more generated an error, e.g. slash command bulk registration */
+				e.human_readable += prefix + "- <array>[" + error.object + "]." + error.field + ": " + error.reason + " (" + error.code + ")";
 			} else {
+				/* A named array of objects whre a field in the object has an error */
 				e.human_readable += prefix + "- " + error.object + "[" + std::to_string(error.index) + "]." + error.field + ": " + error.reason + " (" + error.code + ")";
 			}
 		}
