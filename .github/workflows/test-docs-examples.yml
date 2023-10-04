@@ -19,7 +19,10 @@ jobs:
   test_docs_examples:
     name: Test build examples
     runs-on: ubuntu-22.04
-
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+  
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
