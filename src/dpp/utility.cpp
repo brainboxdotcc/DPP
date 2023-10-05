@@ -33,7 +33,6 @@
 #include <fstream>
 #include <streambuf>
 #include <array>
-#include <cmath>
 #include <dpp/cluster.h>
 #include <dpp/dispatcher.h>
 #include <dpp/message.h>
@@ -305,7 +304,7 @@ namespace dpp {
 			double hue = static_cast<double>(h) / 360.0;
 			double saturation = static_cast<double>(s) / 100.0;
 			double lightness = static_cast<double>(l) / 100.0;
-			return hsl(hue,saturation,lightness);
+			return hsl(hue, saturation, lightness);
 		}
 		
 		uint32_t hsl(double h, double s, double l) {
@@ -323,7 +322,7 @@ namespace dpp {
 					return q;
 				}
 				if (t < 2.0 / 3.0) {
-					 return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+					return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
 				}
 				return p;
 			};
@@ -339,7 +338,7 @@ namespace dpp {
 				g = hue_to_rgb(p, q, h);
 				b = hue_to_rgb(p, q, h - 1.0 / 3.0);
 			}
-			return rgb(r,g,b);
+			return rgb(r, g, b);
 		}
 
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
