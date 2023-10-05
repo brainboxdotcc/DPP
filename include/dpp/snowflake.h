@@ -24,7 +24,6 @@
 #include <dpp/json_fwd.h>
 #include <dpp/exception.h>
 #include <cstdint>
-#include <charconv>
 #include <type_traits>
 
 /**
@@ -58,18 +57,18 @@ protected:
 
 public:
 	/**
- 	 * @brief Construct a snowflake object
- 	 */
+	 * @brief Construct a snowflake object
+	 */
 	constexpr snowflake() noexcept = default;
 
 	/**
- 	 * @brief Copy a snowflake object
- 	 */
+	 * @brief Copy a snowflake object
+	 */
 	constexpr snowflake(const snowflake &rhs) noexcept = default;
 
 	/**
- 	 * @brief Move a snowflake object
- 	 */
+	 * @brief Move a snowflake object
+	 */
 	constexpr snowflake(snowflake &&rhs) noexcept = default;
 
 	/**
@@ -100,6 +99,16 @@ public:
 	 * @param string_value A snowflake value
 	 */
 	snowflake(std::string_view string_value) noexcept;
+
+	/**
+	 * @brief Construct a snowflake object from an unsigned integer in a string
+	 *
+	 * On invalid string the value will be 0
+	 * @param string_value A snowflake value
+	 */
+	template <typename T, typename = std::enable_if_t<std::is_same_v<T, std::string>>>
+	snowflake(const T &string_value) noexcept : snowflake(std::string_view{string_value}) {}
+	/* ^ this exists to preserve `message_cache.find(std::get<std::string>(event.get_parameter("message_id")));`*/
 
 	/**
 	 * @brief Copy value from another snowflake
@@ -166,13 +175,7 @@ public:
 	 *
 	 * @param snowflake_val snowflake value as a string
 	 */
-	inline bool operator==(std::string_view snowflake_val) const noexcept {
-		uint64_t v;
-		auto [end, err] = std::from_chars(snowflake_val.data(), snowflake_val.data() + snowflake_val.size(), v);
-		if (end != snowflake_val.data() + snowflake_val.size()) // parse error
-			return false;
-		return *this == v;
-	}
+	bool operator==(std::string_view snowflake_val) const noexcept;
 
 	/**
 	 * @brief Comparison operator with an integer

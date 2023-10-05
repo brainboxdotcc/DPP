@@ -66,19 +66,19 @@ namespace dpp {
 		/**
 		 * @brief Destroy the managed object
 		 */
-		virtual ~managed() = default;
+		virtual ~managed() noexcept = default;
 
 		/**
 		 * @brief Copy assignment operator
 		 * @param rhs Object to copy
 		 */
-		constexpr managed &operator=(const managed& rhs) = default;
+		constexpr managed &operator=(const managed& rhs) noexcept = default;
 
 		/**
 		 * @brief Move assignment operator
-		 * @param rhs Object to copy
+		 * @param rhs Object to move from
 		 */
-		constexpr managed &operator=(managed&& rhs) = default;
+		constexpr managed &operator=(managed&& rhs) noexcept = default;
 
 		/**
 		 * @brief Get the creation time of this object according to Discord.

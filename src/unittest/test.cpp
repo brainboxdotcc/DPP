@@ -206,7 +206,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = success && (dpp::snowflake{69} < dpp::snowflake{420} && (dpp::snowflake{69} < 420));
 		s = "69420";
 		success = success && s == 69420;
-		s = dpp::snowflake{"1337"};
+		auto conversion_test = [](dpp::snowflake sl) {
+			return sl;
+		};
+		s = conversion_test(std::string{"1337"});
 		success = success && s == 1337;
 		success = success && dpp::snowflake{0} == 0;
 		set_test(SNOWFLAKE, success);
