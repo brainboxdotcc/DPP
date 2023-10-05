@@ -73,3 +73,5 @@
 #include <dpp/discordevents.h>
 #include <dpp/timed_listener.h>
 #include <dpp/collector.h>
+#include <dpp/json_fwd.h>
+#include <dpp/json.h>
