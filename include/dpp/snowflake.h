@@ -108,7 +108,7 @@ public:
 	 */
 	template <typename T, typename = std::enable_if_t<std::is_same_v<T, std::string>>>
 	snowflake(const T &string_value) noexcept : snowflake(std::string_view{string_value}) {}
-	/* ^ this exists to preserve `message_cache.find(std::get<std::string>(event.get_parameter("message_id")));`*/
+	/* ^ this exists to preserve `message_cache.find(std::get<std::string>(event.get_parameter("message_id")));` */
 
 	/**
 	 * @brief Copy value from another snowflake
@@ -125,14 +125,6 @@ public:
 	constexpr dpp::snowflake &operator=(dpp::snowflake&& rhs) noexcept = default;
 
 	/**
-	 * @brief Assign value converted from a string to the snowflake
-	 *
-	 * On invalid string the value will be 0
-	 * @param snowflake_val snowflake value as a string
-	 */
-	dpp::snowflake &operator=(std::string_view snowflake_val) noexcept;
-
-	/**
 	 * @brief Assign integer value to the snowflake
 	 *
 	 * @throw dpp::logic_exception on assigning a negative value. the function is noexcept if the type given is unsigned
@@ -141,6 +133,17 @@ public:
 	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
 	constexpr dpp::snowflake &operator=(T snowflake_val) noexcept(std::is_unsigned_v<T>) {
 		return *this = dpp::snowflake{snowflake_val};
+	}
+
+	/**
+	 * @brief Assign value converted from a string to the snowflake
+	 *
+	 * On invalid string the value will be 0
+	 * @param snowflake_val snowflake value as a string
+	 */
+	template <typename T, typename = std::enable_if_t<std::is_convertible_v<T, std::string_view>>>
+	constexpr dpp::snowflake &operator=(T&& snowflake_val) noexcept {
+		return *this = dpp::snowflake{std::forward<T>(snowflake_val)};
 	}
 
 	/**

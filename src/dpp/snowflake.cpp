@@ -31,13 +31,6 @@ snowflake::snowflake(std::string_view string_value) noexcept {
 		value = 0;
 }
 
-snowflake& snowflake::operator=(std::string_view string_value) noexcept {
-	auto [_, err] = std::from_chars(string_value.data(), string_value.data() + string_value.size(), value);
-	if (err != std::errc{})
-		value = 0;
-	return *this;
-}
-
 bool snowflake::operator==(std::string_view snowflake_val) const noexcept {
 	uint64_t v;
 	auto [end, err] = std::from_chars(snowflake_val.data(), snowflake_val.data() + snowflake_val.size(), v);

@@ -300,10 +300,10 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		s = "69420";
 		success = success && s == 69420;
 		auto conversion_test = [](dpp::snowflake sl) {
-			return sl;
+			return sl.str();
 		};
 		s = conversion_test(std::string{"1337"});
-		success = success && s == 1337;
+		success = success && s == 1337; /* THIS BREAKS (and i do not care very much): && s == conversion_test(dpp::snowflake{"1337"}); */
 		success = success && dpp::snowflake{0} == 0;
 		set_test(SNOWFLAKE, success);
 	}
