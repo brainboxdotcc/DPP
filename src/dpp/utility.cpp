@@ -50,9 +50,7 @@
 
 using namespace std::literals;
 
-namespace dpp {
-
-	namespace utility {
+namespace dpp::utility {
 
 		std::string cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated, bool is_animated) {
 			return cdn_endpoint_url_hash(allowed_formats, path_without_extension, "", format, size, prefer_animated, is_animated);
@@ -777,6 +775,4 @@ namespace dpp {
 				#endif
 			#endif
 		}
-    } // namespace utility
-
-} // namespace dpp
+} // namespace dpp::utility
