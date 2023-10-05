@@ -169,8 +169,8 @@ uptime::uptime(time_t diff) : uptime() {
 }
 
 std::string uptime::to_string() const {
-	char print_buffer[64];
 	if (hours == 0 && days == 0) {
+		char print_buffer[64];
 		snprintf(print_buffer, 64, "%02d:%02d", mins, secs);
 		return print_buffer;
 	} else {
@@ -518,10 +518,10 @@ std::vector<std::string> tokenize(std::string const &in, const char* sep) {
 std::string bot_invite_url(const snowflake bot_id, const uint64_t permissions, const std::vector<std::string>& scopes) {
 	std::string scope;
 	if (scopes.size()) {
-		for (auto& s : scopes) {
+		for (const auto& s : scopes) {
 			scope += s + "+";
 		}
-		scope = scope.substr(0, scope.length() - 1);
+		scope.pop_back();
 	}
 	return "https://discord.com/oauth2/authorize?client_id=" + std::to_string(bot_id) + "&permissions=" + std::to_string(permissions) + "&scope=" + scope;
 }
@@ -568,7 +568,7 @@ std::string url_encode(const std::string &value) {
 		}
 	}
 	*data = 0;
-	return escaped.data();
+	return escaped;
 }
 
 std::string slashcommand_mention(snowflake command_id, const std::string &command_name, const std::string &subcommand) {
