@@ -316,7 +316,7 @@ namespace dpp {
 				} 
 				if (t < 1.0 / 6.0) {
 					return p + (q - p) * 6.0 * t;
-				}	else if (t < 0.5) {
+				} else if (t < 0.5) {
 					return q;
 				} else if (t < 2.0 / 3.0) {
 					return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
