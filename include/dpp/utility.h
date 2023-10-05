@@ -433,7 +433,7 @@ namespace dpp {
 		/**
 		 * @brief Convert ints to HSL for sending in embeds
 		 *
-		 * @param h hue value, between 0 and 356 inclusive
+		 * @param h hue value, between 0 and 360 inclusive
 		 * @param s saturation value in procents, between 0 and 100 inclusive
 		 * @param l lightness value in procents, between 0 and 100 inclusive
 		 * @return uint32_t returned integer colour value
