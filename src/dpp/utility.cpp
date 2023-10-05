@@ -309,7 +309,7 @@ namespace dpp {
 		}
 		
 		uint32_t hsl(double h, double s, double l) {
-			const auto hueToRgb = [](double p, double q, double t){
+			const auto hue_to_rgb = [](double p, double q, double t){
 				if (t < 0) t += 1;
 				if (t > 1) t -= 1;
 				if (t < 1.0 / 6.0) return p + (q - p) * 6.0 * t;
@@ -325,9 +325,9 @@ namespace dpp {
 			} else {
 				double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
 				double p = 2 * l - q;
-				r = hueToRgb(p, q, h + 1.0 / 3.0);
-				g = hueToRgb(p, q, h);
-				b = hueToRgb(p, q, h - 1.0 / 3.0);
+				r = hue_to_rgb(p, q, h + 1.0 / 3.0);
+				g = hue_to_rgb(p, q, h);
+				b = hue_to_rgb(p, q, h - 1.0 / 3.0);
 			}
 			return rgb(r,g,b);
 		}

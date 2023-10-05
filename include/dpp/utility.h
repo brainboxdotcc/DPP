@@ -425,7 +425,7 @@ namespace dpp {
 		 *
 		 * @param h hue value, between 0 and 1 inclusive
 		 * @param s saturation value in procents, between 0 and 1 inclusive
-		 * @param l ligthness value in procents, between 0 and 1 inclusive
+		 * @param l lightness value in procents, between 0 and 1 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
 		uint32_t DPP_EXPORT hsl(double h, double s, double l);
@@ -435,7 +435,7 @@ namespace dpp {
 		 *
 		 * @param h hue value, between 0 and 356 inclusive
 		 * @param s saturation value in procents, between 0 and 100 inclusive
-		 * @param l ligthness value in procents, between 0 and 100 inclusive
+		 * @param l lightness value in procents, between 0 and 100 inclusive
 		 * @return uint32_t returned integer colour value
 		 */
 		uint32_t DPP_EXPORT hsl(int h, int s, int l);
