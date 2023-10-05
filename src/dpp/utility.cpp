@@ -33,6 +33,7 @@
 #include <fstream>
 #include <streambuf>
 #include <array>
+#include <cmath>
 #include <dpp/cluster.h>
 #include <dpp/dispatcher.h>
 #include <dpp/message.h>
@@ -299,7 +300,38 @@ namespace dpp {
 		uint32_t cmyk(int c, int m, int y, int k) {
 			return cmyk(c / 255.0, m / 255.0, y / 255.0, k / 255.0);
 		}
+
+		uint32_t hsl(int h, int s, int l) {
+			double hue = static_cast<double>(h) / 360.0;
+			double saturation = static_cast<double>(s) / 100.0;
+			double lightness = static_cast<double>(l) / 100.0;
+			return hsl(hue,saturation,lightness);
+		}
 		
+		uint32_t hsl(double h, double s, double l) {
+			const auto hueToRgb = [](double p, double q, double t){
+				if (t < 0) t += 1;
+				if (t > 1) t -= 1;
+				if (t < 1.0 / 6.0) return p + (q - p) * 6.0 * t;
+				if (t < 0.5) return q;
+				if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+				return p;
+			};
+
+			double r, g, b;
+
+			if (s == 0) {
+				r = g = b = l; // Gray scale
+			} else {
+				double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+				double p = 2 * l - q;
+				r = hueToRgb(p, q, h + 1.0 / 3.0);
+				g = hueToRgb(p, q, h);
+				b = hueToRgb(p, q, h - 1.0 / 3.0);
+			}
+			return rgb(r,g,b);
+		}
+
 		void exec(const std::string& cmd, std::vector<std::string> parameters, cmd_result_t callback) {
 			auto t = std::thread([cmd, parameters, callback]() {
 				utility::set_thread_name("async_exec");
