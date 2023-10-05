@@ -555,19 +555,22 @@ std::string url_encode(const std::string &value) {
 	// Reserve worst-case encoded length of string, input length * 3
 	std::string escaped(value.length() * 3, '\0');
 	char* data = escaped.data();
+	int len = 0;
 	for (auto i = value.begin(); i != value.end(); ++i) {
 		unsigned char c = (unsigned char)(*i);
 		if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
 			// Keep alphanumeric and other accepted characters intact
 			*data++ = c;
+			len++;
 		} else {
 			// Any other characters are percent-encoded
 			*data++ = '%';
 			*data++ = hex[c >> 4];
 			*data++ = hex[c & 0x0f];
+			len += 3;
 		}
 	}
-	*data = 0;
+	escaped.resize(len);
 	return escaped;
 }
 
