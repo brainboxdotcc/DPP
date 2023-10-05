@@ -310,11 +310,21 @@ namespace dpp {
 		
 		uint32_t hsl(double h, double s, double l) {
 			const auto hue_to_rgb = [](double p, double q, double t){
-				if (t < 0) t += 1;
-				if (t > 1) t -= 1;
-				if (t < 1.0 / 6.0) return p + (q - p) * 6.0 * t;
-				if (t < 0.5) return q;
-				if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+				if (t < 0) {
+					t += 1;
+				}
+				if (t > 1) {
+					t -= 1;
+				} 
+				if (t < 1.0 / 6.0) {
+					return p + (q - p) * 6.0 * t;
+				}
+				if (t < 0.5) {
+					return q;
+				}
+				if (t < 2.0 / 3.0) {
+					 return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+				}
 				return p;
 			};
 
