@@ -26,8 +26,8 @@
 namespace dpp {
 
 snowflake::snowflake(std::string_view string_value) noexcept {
-	auto [end, err] = std::from_chars(string_value.data(), string_value.data() + string_value.size(), value);
-	if (end != string_value.data() + string_value.size())
+	auto [_, err] = std::from_chars(string_value.data(), string_value.data() + string_value.size(), value);
+	if (err != std::errc{})
 		value = 0;
 }
 
