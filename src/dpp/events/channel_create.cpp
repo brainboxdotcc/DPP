@@ -24,7 +24,7 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using json = nlohmann::json;
 using namespace dpp;
@@ -76,4 +76,4 @@ void channel_create::handle(discord_client* client, json &j, const std::string &
 	}
 }
 
-}};
+};
