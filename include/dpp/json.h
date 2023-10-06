@@ -26,5 +26,7 @@
 #endif
 
 namespace dpp {
-	using json = nlohmann::json;
+
+using json = nlohmann::json;
+
 }
