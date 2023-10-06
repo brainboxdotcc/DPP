@@ -28,7 +28,7 @@
 
 
 
-namespace dpp { namespace events {
+namespace dpp::events {
 	
 using json = nlohmann::json;
 using namespace dpp;
@@ -68,4 +68,4 @@ void voice_server_update::handle(discord_client* client, json &j, const std::str
 	}
 }
 
-}};
+};
