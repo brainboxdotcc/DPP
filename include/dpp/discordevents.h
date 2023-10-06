@@ -22,7 +22,6 @@
 
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
-#include <dpp/json.h>
 #include <dpp/json_interface.h>
 
 namespace dpp {
@@ -47,6 +46,27 @@ void DPP_EXPORT set_snowflake_not_null(const nlohmann::json* j, const char *keyn
  * @param v Value to change
  */
 void DPP_EXPORT set_snowflake_array_not_null(const nlohmann::json* j, const char *keyname, std::vector<class snowflake> &v);
+
+/**
+ * @brief Applies a function to each element of a json array.
+ * @param j nlohmann::json instance to retrieve value from
+ * @param key key name to check for the values
+ * @param fn function to apply to each element
+ */
+void DPP_EXPORT for_each_json(const nlohmann::json* parent, std::string_view key, std::function<void(const nlohmann::json*)> fn);
+
+/** @brief Sets an array of objects from a json field value, if defined, else does nothing
+ * @tparam T The class of which the array consists of. Must be derived from dpp::json_interface
+ * @param j nlohmann::json instance to retrieve value from
+ * @param keyname key name to check for the values
+ * @param v Value to change
+ */
+template<class T> void set_object_array_not_null(const nlohmann::json* j, std::string_view key, std::vector<T>& v) {
+	v.clear();
+	for_each_json(j, key, [&v](const json& elem) {
+		v.push_back(T{}.fill_from_json(elem));
+	});
+}
 
 /** @brief Sets an array of objects from a json field value, if defined, else does nothing
  * @tparam T The class of which the array consists of. Must be derived from dpp::json_interface
