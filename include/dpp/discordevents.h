@@ -61,28 +61,11 @@ void DPP_EXPORT for_each_json(const nlohmann::json* parent, std::string_view key
  * @param keyname key name to check for the values
  * @param v Value to change
  */
-template<class T> void set_object_array_not_null(const nlohmann::json* j, std::string_view key, std::vector<T>& v) {
+template<class T> void set_object_array_not_null(nlohmann::json* j, std::string_view key, std::vector<T>& v) {
 	v.clear();
-	for_each_json(j, key, [&v](const json& elem) {
+	for_each_json(j, key, [&v](nlohmann::json* elem) {
 		v.push_back(T{}.fill_from_json(elem));
 	});
-}
-
-/** @brief Sets an array of objects from a json field value, if defined, else does nothing
- * @tparam T The class of which the array consists of. Must be derived from dpp::json_interface
- * @param j nlohmann::json instance to retrieve value from
- * @param keyname key name to check for the values
- * @param v Value to change
- */
-template<class T> std::enable_if_t<std::is_base_of_v<json_interface<T>, T>, void> set_object_array_not_null(nlohmann::json* j, const char *keyname, std::vector<T> &v) {
-	v.clear();
-	auto k = j->find(keyname);
-	if (k != j->end() && !k->is_null()) {
-		v.reserve(j->at(keyname).size());
-		for (auto &obj : j->at(keyname)) {
-			v.emplace_back(T().fill_from_json(&obj));
-		}
-	}
 }
 
 /** @brief Returns a string from a json field value, if defined, else returns an empty string.
