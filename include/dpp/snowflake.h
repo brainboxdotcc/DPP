@@ -74,7 +74,7 @@ public:
 	/**
 	 * @brief Construct a snowflake from an integer value
 	 *
-	 * @throw dpp::logic_exception on assigning a negative value. the function is noexcept if the type given is unsigned
+	 * @throw dpp::logic_exception on assigning a negative value. The function is noexcept if the type given is unsigned
 	 * @param snowflake_val snowflake value as an integer type
 	 */
 	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
@@ -127,7 +127,7 @@ public:
 	/**
 	 * @brief Assign integer value to the snowflake
 	 *
-	 * @throw dpp::logic_exception on assigning a negative value. the function is noexcept if the type given is unsigned
+	 * @throw dpp::logic_exception on assigning a negative value. The function is noexcept if the type given is unsigned
 	 * @param snowflake_val snowflake value as an integer type
 	 */
 	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
