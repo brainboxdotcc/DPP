@@ -23,6 +23,8 @@
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+#include <string_view>
+#include <functional>
 
 namespace dpp {
 
@@ -53,7 +55,7 @@ void DPP_EXPORT set_snowflake_array_not_null(const nlohmann::json* j, const char
  * @param key key name to check for the values
  * @param fn function to apply to each element
  */
-void DPP_EXPORT for_each_json(nlohmann::json* parent, std::string_view key, std::function<void(const nlohmann::json*)> fn);
+void DPP_EXPORT for_each_json(nlohmann::json* parent, std::string_view key, const std::function<void(nlohmann::json*)> &fn);
 
 /** @brief Sets an array of objects from a json field value, if defined, else does nothing
  * @tparam T The class of which the array consists of. Must be derived from dpp::json_interface
