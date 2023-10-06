@@ -24,7 +24,7 @@
 #include <dpp/stringops.h>
 #include <dpp/json.h>
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using json = nlohmann::json;
 using namespace dpp;
@@ -55,4 +55,4 @@ void automod_rule_execute::handle(discord_client* client, json &j, const std::st
 	}
 }
 
-}};
+};

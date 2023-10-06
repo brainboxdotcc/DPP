@@ -25,17 +25,13 @@
 #include <dpp/json_fwd.h>
 
 #define event_decl(x,wstype) /** @brief Internal event handler for wstype websocket events. Called for each websocket message of this type. @internal */ \
-	class x : public event { public: virtual void handle(dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
-
-namespace dpp { 
-
-class discord_client;
+	class x : public event { public: virtual void handle(class dpp::discord_client* client, nlohmann::json &j, const std::string &raw); };
 
 /**
  * @brief The events namespace holds the internal event handlers for each websocket event.
  * These are handled internally and also dispatched to the user code if the event is hooked.
  */
-namespace events {
+namespace dpp::events { 
 
 /**
  * @brief An event object represents an event handled internally, passed from the websocket e.g. MESSAGE_CREATE.
@@ -152,5 +148,4 @@ event_decl(automod_rule_execute, AUTO_MODERATION_ACTION_EXECUTION);
 /* Audit log */
 event_decl(guild_audit_log_entry_create, GUILD_AUDIT_LOG_ENTRY_CREATE);
 
-} // namespace events
-} // namespace dpp
+} // namespace dpp::events

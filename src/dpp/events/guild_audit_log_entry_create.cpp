@@ -21,7 +21,7 @@
 #include <dpp/discordevents.h>
 #include <dpp/cluster.h>
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using json = nlohmann::json;
 using namespace dpp;
@@ -43,4 +43,4 @@ void guild_audit_log_entry_create::handle(discord_client* client, json &j, const
 	}
 }
 
-}};
+};
