@@ -23,6 +23,8 @@
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+#include <string_view>
+#include <functional>
 
 namespace dpp {
 
