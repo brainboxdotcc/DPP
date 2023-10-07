@@ -100,6 +100,15 @@ void set_snowflake_array_not_null(const json* j, const char *keyname, std::vecto
 	}
 }
 
+void for_each_json(nlohmann::json* parent, std::string_view key, const std::function<void(nlohmann::json*)> &fn) {
+	auto it = parent->find(key);
+	if (it == parent->end() || it->is_null()) {
+		return;
+	}
+	for (nlohmann::json &elem : *it) {
+		fn(&elem);
+	}
+}
 
 std::string string_not_null(const json* j, const char *keyname) {
 	/* Returns empty string if the value is not a string, or is null or not defined */

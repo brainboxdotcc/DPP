@@ -26,7 +26,7 @@
 
 
 
-namespace dpp { namespace events {
+namespace dpp::events {
 	
 using json = nlohmann::json;
 using namespace dpp;
@@ -47,4 +47,4 @@ void automod_rule_delete::handle(discord_client* client, json &j, const std::str
 	}
 }
 
-}};
+};

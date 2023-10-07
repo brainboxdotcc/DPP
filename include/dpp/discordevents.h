@@ -22,8 +22,9 @@
 
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
-#include <dpp/json.h>
 #include <dpp/json_interface.h>
+#include <string_view>
+#include <functional>
 
 namespace dpp {
 
@@ -48,21 +49,25 @@ void DPP_EXPORT set_snowflake_not_null(const nlohmann::json* j, const char *keyn
  */
 void DPP_EXPORT set_snowflake_array_not_null(const nlohmann::json* j, const char *keyname, std::vector<class snowflake> &v);
 
+/**
+ * @brief Applies a function to each element of a json array.
+ * @param j nlohmann::json instance to retrieve value from
+ * @param key key name to check for the values
+ * @param fn function to apply to each element
+ */
+void DPP_EXPORT for_each_json(nlohmann::json* parent, std::string_view key, const std::function<void(nlohmann::json*)> &fn);
+
 /** @brief Sets an array of objects from a json field value, if defined, else does nothing
  * @tparam T The class of which the array consists of. Must be derived from dpp::json_interface
  * @param j nlohmann::json instance to retrieve value from
  * @param keyname key name to check for the values
  * @param v Value to change
  */
-template<class T> std::enable_if_t<std::is_base_of_v<json_interface<T>, T>, void> set_object_array_not_null(nlohmann::json* j, const char *keyname, std::vector<T> &v) {
+template<class T> void set_object_array_not_null(nlohmann::json* j, std::string_view key, std::vector<T>& v) {
 	v.clear();
-	auto k = j->find(keyname);
-	if (k != j->end() && !k->is_null()) {
-		v.reserve(j->at(keyname).size());
-		for (auto &obj : j->at(keyname)) {
-			v.emplace_back(T().fill_from_json(&obj));
-		}
-	}
+	for_each_json(j, key, [&v](nlohmann::json* elem) {
+		v.push_back(T{}.fill_from_json(elem));
+	});
 }
 
 /** @brief Returns a string from a json field value, if defined, else returns an empty string.

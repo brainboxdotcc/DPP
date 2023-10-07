@@ -58,6 +58,99 @@ Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 	set_test(COMPARISON, u1 == u2 && u1 != u3);
 
 
+	set_test(ERRORS, false);
+
+	/* Prepare a confirmation_callback_t in error state (400) */
+	dpp::confirmation_callback_t error_test;
+	bool error_message_success = false;
+	error_test.http_info.status = 400;
+
+	error_test.http_info.body = "{\
+		\"message\": \"Invalid Form Body\",\
+		\"code\": 50035,\
+		\"errors\": {\
+			\"options\": {\
+				\"0\": {\
+					\"name\": {\
+						\"_errors\": [\
+							{\
+								\"code\": \"STRING_TYPE_REGEX\",\
+								\"message\": \"String value did not match validation regex.\"\
+							},\
+							{\
+								\"code\": \"APPLICATION_COMMAND_INVALID_NAME\",\
+								\"message\": \"Command name is invalid\"\
+							}\
+						]\
+					}\
+				}\
+			}\
+		}\
+	}";
+	error_message_success = (error_test.get_error().human_readable == "50035: Invalid Form Body\n\t- options[0].name: String value did not match validation regex. (STRING_TYPE_REGEX)\n\t- options[0].name: Command name is invalid (APPLICATION_COMMAND_INVALID_NAME)");
+
+	error_test.http_info.body = "{\
+		\"message\": \"Invalid Form Body\",\
+		\"code\": 50035,\
+		\"errors\": {\
+			\"type\": {\
+				\"_errors\": [\
+					{\
+						\"code\": \"BASE_TYPE_CHOICES\",\
+						\"message\": \"Value must be one of {4, 5, 9, 10, 11}.\"\
+					}\
+				]\
+			}\
+		}\
+	}";
+	error_message_success = (error_message_success && error_test.get_error().human_readable == "50035: Invalid Form Body - type: Value must be one of {4, 5, 9, 10, 11}. (BASE_TYPE_CHOICES)");
+
+	error_test.http_info.body = "{\
+		\"message\": \"Unknown Guild\",\
+		\"code\": 10004\
+	}";
+	error_message_success = (error_message_success && error_test.get_error().human_readable == "10004: Unknown Guild");
+
+	error_test.http_info.body = "{\
+		\"message\": \"Invalid Form Body\",\
+		\"code\": 50035,\
+		\"errors\": {\
+			\"allowed_mentions\": {\
+				\"_errors\": [\
+					{\
+						\"code\": \"MESSAGE_ALLOWED_MENTIONS_PARSE_EXCLUSIVE\",\
+						\"message\": \"parse:[\\\"users\\\"] and users: [ids...] are mutually exclusive.\"\
+					}\
+				]\
+			}\
+		}\
+	}";
+	error_message_success = (error_message_success && error_test.get_error().human_readable == "50035: Invalid Form Body - allowed_mentions: parse:[\"users\"] and users: [ids...] are mutually exclusive. (MESSAGE_ALLOWED_MENTIONS_PARSE_EXCLUSIVE)");
+
+	error_test.http_info.body = "{\
+		\"message\": \"Invalid Form Body\",\
+		\"code\": 50035,\
+		\"errors\": {\
+			\"1\": {\
+				\"options\": {\
+					\"1\": {\
+						\"description\": {\
+							\"_errors\": [\
+								{\
+									\"code\": \"BASE_TYPE_BAD_LENGTH\",\
+									\"message\": \"Must be between 1 and 100 in length.\"\
+								}\
+							]\
+						}\
+					}\
+				}\
+			}\
+		}\
+	}";
+	error_message_success = (error_message_success && error_test.get_error().human_readable == "50035: Invalid Form Body - <array>[1].options[1].description: Must be between 1 and 100 in length. (BASE_TYPE_BAD_LENGTH)");
+
+	set_test(ERRORS, error_message_success);
+
 	set_test(MD_ESC_1, false);
 	set_test(MD_ESC_2, false);
 	std::string escaped1 = dpp::utility::markdown_escape(test_to_escape);
@@ -193,6 +286,29 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(WEBHOOK, false);
 	}
 
+	{ // test dpp::snowflake
+		start_test(SNOWFLAKE);
+		bool success = true;
+		dpp::snowflake s = 69420;
+		json j;
+		j["value"] = s;
+		success = dpp::snowflake_not_null(&j, "value") == 69420 && success;
+		DPP_CHECK_CONSTRUCT_ASSIGN(SNOWFLAKE, dpp::snowflake, success);
+		s = 42069;
+		success = success && (s == 42069 && s == dpp::snowflake{42069} && s == "42069");
+		success = success && (dpp::snowflake{69} < dpp::snowflake{420} && (dpp::snowflake{69} < 420));
+		s = "69420";
+		success = success && s == 69420;
+		auto conversion_test = [](dpp::snowflake sl) {
+			return sl.str();
+		};
+		s = conversion_test(std::string{"1337"});
+		success = success && s == 1337; /* THIS BREAKS (and i do not care very much): && s == conversion_test(dpp::snowflake{"1337"}); */
+		success = success && dpp::snowflake{0} == 0;
+		set_test(SNOWFLAKE, success);
+	}
+
+
 	{ // test interaction_create_t::get_parameter
 		// create a fake interaction
 		dpp::cluster cluster("");
@@ -299,9 +415,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = p == 5120 && success;
 		auto s = std::to_string(p);
 		success = s == "5120" && success;
-		json j;
-		j["value"] = p;
-		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
 		p.set(0).add(~uint64_t{0}).remove(dpp::p_speak).set(dpp::p_administrator);
 		success = !p.has(dpp::p_administrator, dpp::p_ban_members) && success; // must return false because they're not both set
 		success = !p.has(dpp::p_administrator | dpp::p_ban_members) && success;

@@ -26,7 +26,7 @@
 #include <dpp/json.h>
 
 
-namespace dpp { namespace events {
+namespace dpp::events {
 
 using json = nlohmann::json;
 using namespace dpp;
@@ -49,4 +49,4 @@ void message_create::handle(discord_client* client, json &j, const std::string &
 	}
 }
 
-}};
+};

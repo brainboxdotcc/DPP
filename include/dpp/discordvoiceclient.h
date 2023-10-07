@@ -64,8 +64,6 @@ class audio_mixer;
 
 inline constexpr size_t send_audio_raw_max_length = 11520;
 
-using json = nlohmann::json;
-
 /*
 * @brief For holding a moving average of the number of current voice users, for applying a smooth gain ramp.
 */

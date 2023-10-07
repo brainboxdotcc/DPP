@@ -44,8 +44,6 @@
 #include <shared_mutex>
 #include <cstring>
 
-using  json = nlohmann::json;
-
 namespace dpp {
 
 #ifdef _WIN32
@@ -216,6 +214,10 @@ struct DPP_EXPORT error_detail {
 	 * @brief Error reason (full message)
 	 */
 	std::string reason;
+	/**
+	 * @brief Object field index
+	 */
+	int index = 0;
 };
 
 /**
@@ -235,6 +237,10 @@ struct DPP_EXPORT error_info {
 	 * @brief Field specific error descriptions
 	 */
 	std::vector<error_detail> errors;
+	/**
+	 * @brief Human readable error message constructed from the above
+	 */
+	std::string human_readable;
 };
 
 /**
