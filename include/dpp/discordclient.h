@@ -41,8 +41,6 @@
 #define API_PATH	        "/api/v" DISCORD_API_VERSION
 namespace dpp {
 
-using json = nlohmann::json;
-
 // Forward declarations
 class cluster;
 

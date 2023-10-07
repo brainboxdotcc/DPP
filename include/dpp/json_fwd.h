@@ -24,3 +24,9 @@
 #else
 	#include <dpp/nlohmann/json_fwd.hpp>
 #endif
+
+namespace dpp {
+
+using json = nlohmann::json;
+
+}

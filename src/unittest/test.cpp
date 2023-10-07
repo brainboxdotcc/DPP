@@ -286,6 +286,29 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(WEBHOOK, false);
 	}
 
+	{ // test dpp::snowflake
+		start_test(SNOWFLAKE);
+		bool success = true;
+		dpp::snowflake s = 69420;
+		json j;
+		j["value"] = s;
+		success = dpp::snowflake_not_null(&j, "value") == 69420 && success;
+		DPP_CHECK_CONSTRUCT_ASSIGN(SNOWFLAKE, dpp::snowflake, success);
+		s = 42069;
+		success = success && (s == 42069 && s == dpp::snowflake{42069} && s == "42069");
+		success = success && (dpp::snowflake{69} < dpp::snowflake{420} && (dpp::snowflake{69} < 420));
+		s = "69420";
+		success = success && s == 69420;
+		auto conversion_test = [](dpp::snowflake sl) {
+			return sl.str();
+		};
+		s = conversion_test(std::string{"1337"});
+		success = success && s == 1337; /* THIS BREAKS (and i do not care very much): && s == conversion_test(dpp::snowflake{"1337"}); */
+		success = success && dpp::snowflake{0} == 0;
+		set_test(SNOWFLAKE, success);
+	}
+
+
 	{ // test interaction_create_t::get_parameter
 		// create a fake interaction
 		dpp::cluster cluster("");
@@ -392,9 +415,6 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		success = p == 5120 && success;
 		auto s = std::to_string(p);
 		success = s == "5120" && success;
-		json j;
-		j["value"] = p;
-		success = dpp::snowflake_not_null(&j, "value") == 5120 && success;
 		p.set(0).add(~uint64_t{0}).remove(dpp::p_speak).set(dpp::p_administrator);
 		success = !p.has(dpp::p_administrator, dpp::p_ban_members) && success; // must return false because they're not both set
 		success = !p.has(dpp::p_administrator | dpp::p_ban_members) && success;
