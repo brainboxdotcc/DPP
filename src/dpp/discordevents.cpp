@@ -105,7 +105,7 @@ void for_each_json(nlohmann::json* parent, std::string_view key, const std::func
 	if (it == parent->end() || it->is_null()) {
 		return;
 	}
-	for (nlohmann::json &elem : *parent) {
+	for (nlohmann::json &elem : *it) {
 		fn(&elem);
 	}
 }
