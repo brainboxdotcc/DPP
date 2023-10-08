@@ -16,3 +16,4 @@ The example programs listed here demonstrate lots of things to do with interacti
 * \subpage discord-application-command-file-upload "Using file parameters in slash commands"
 * \subpage private-messaging
 * \subpage making_threads
+* \subpage resolved-objects
