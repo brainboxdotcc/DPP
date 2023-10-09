@@ -685,6 +685,10 @@ confirmation cluster::thread_member_remove_sync(snowflake thread_id, snowflake u
 	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::thread_member_remove), thread_id, user_id);
 }
 
+thread cluster::thread_get_sync(snowflake thread_id) {
+	return dpp::sync<thread>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::thread_get), thread_id);
+}
+
 user cluster::current_user_edit_sync(const std::string &nickname, const std::string& image_blob, const image_type type) {
 	return dpp::sync<user>(this, static_cast<void (cluster::*)(const std::string &, const std::string&, const image_type, command_completion_event_t)>(&cluster::current_user_edit), nickname, image_blob, type);
 }
