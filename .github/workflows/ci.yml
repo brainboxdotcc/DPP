@@ -79,6 +79,7 @@ jobs:
       matrix:
         cfg:
           - { arch: 'amd64', os: ubuntu-20.04, package: clang-10, cpp-version: clang++-10, cmake-flags: '' }
+          - { arch: 'amd64', os: ubuntu-22.04, package: clang-11, cpp-version: clang++-11, cmake-flags: '' }
           - { arch: 'amd64', os: ubuntu-22.04, package: clang-12, cpp-version: clang++-12, cmake-flags: '' }
           - { arch: 'amd64', os: ubuntu-22.04, package: clang-13, cpp-version: clang++-13, cmake-flags: '' }
           - { arch: 'amd64', os: ubuntu-22.04, package: clang-14, cpp-version: clang++-14, cmake-flags: '' }
@@ -149,34 +150,7 @@ jobs:
           DONT_RUN_VCPKG: true
 
       - name: Build Project
-        run: cd build && make -j2
-        env:
-          DONT_RUN_VCPKG: true
-
-  macos-arm:
-    permissions:
-      contents: write
-    name: macOS 13 ARM64
-    runs-on: macos-13-arm64
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
-        with:
-          egress-policy: audit
-
-      - name: Checkout D++
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
-
-      - name: Install homebrew packages
-        run: brew install cmake make libsodium opus openssl
-
-      - name: Generate CMake
-        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0 ..
-        env:
-          DONT_RUN_VCPKG: true
-
-      - name: Build Project
-        run: cd build && make -j2
+        run: cd build && make -j3
         env:
           DONT_RUN_VCPKG: true
 
@@ -293,30 +267,3 @@ jobs:
         with:
           name: "libdpp - RPM Package ${{matrix.cfg.name}}"
           path: "${{github.workspace}}/build/*.rpm"
-
-#  testfreebsd:
-#   runs-on: macos-10.15
-#   name: FreeBSD (g++-10)
-#   steps:
-#   - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
-#   - name: FreeBSD Build and Package
-#     id: freebsdtest
-#     uses: vmactions/freebsd-vm@v0.1.5
-#     with:
-#        usesh: true
-#       prepare: pkg install -y openssl-devel gcc gmake cmake git
-#       run: |
-#         pwd
-#         ls -lah
-#          mkdir build
-#          cd build
-#          cmake -DAVX_TYPE=AVX0 -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release ..
-#          make -j2
-#          make install
-#          cpack --verbose
-#
-#    - name: Upload Binaries (BZ2)
-#      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
-#      with:
-#        name: "libdpp - FreeBSD x64"
-#        path: "${{github.workspace}}/build/*.tar.bz2"
