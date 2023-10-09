@@ -47,13 +47,13 @@ namespace dpp {
 		 * @brief Constructor, initialises ID
 		 * @param nid ID to set
 		 */
-	        managed(const snowflake nid) : id{nid} {}
+		managed(const snowflake nid) : id{nid} {}
 
 		/**
 		 * @brief Copy constructor
 		 * @param rhs Object to copy
 		 */
-	        managed(const managed &rhs) = default;
+		managed(const managed &rhs) = default;
 
 		/**
 		 * @brief Move constructor
@@ -72,7 +72,7 @@ namespace dpp {
 		 * @brief Copy assignment operator
 		 * @param rhs Object to copy
 		 */
-	        managed &operator=(const managed& rhs) = default;
+		managed &operator=(const managed& rhs) = default;
 
 		/**
 		 * @brief Move assignment operator
