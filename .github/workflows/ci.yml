@@ -78,6 +78,7 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
+          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: clang-10, cmake-flags: '' }
           - { arch: 'amd64', os: ubuntu-22.04, cpp-version: clang-12, cmake-flags: '' }
           - { arch: 'amd64', os: ubuntu-22.04, cpp-version: clang-13, cmake-flags: '' }
           - { arch: 'amd64', os: ubuntu-22.04, cpp-version: clang-14, cmake-flags: '' }
@@ -130,6 +131,33 @@ jobs:
       contents: write
     name: macOS x64
     runs-on: macos-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout D++
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+
+      - name: Install homebrew packages
+        run: brew install cmake make libsodium opus openssl
+
+      - name: Generate CMake
+        run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0 ..
+        env:
+          DONT_RUN_VCPKG: true
+
+      - name: Build Project
+        run: cd build && make -j2
+        env:
+          DONT_RUN_VCPKG: true
+
+  macos-arm:
+    permissions:
+      contents: write
+    name: macOS 13 ARM64
+    runs-on: macos-13-arm64
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
