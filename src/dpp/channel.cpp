@@ -484,7 +484,7 @@ std::string thread::build_json(bool with_id) const {
 	j["auto_archive_duration"] = this->metadata.auto_archive_duration;
 	j["locked"] = this->metadata.locked;
 	
-	if(this->get_type() == dpp::channel_type::CHANNEL_PRIVATE_THREAD) {
+	if(is_private_thread()) {
 		j["invitable"] = this->metadata.invitable;
 	}
 
