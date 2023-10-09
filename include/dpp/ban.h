@@ -39,7 +39,7 @@ public:
 	std::string reason;
 	/** User ID the ban applies to */
 	snowflake user_id;
-	
+
 	/** Constructor */
 	ban();
 
@@ -50,15 +50,7 @@ public:
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
-	 ban& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build json representation of a ban
-	 * @param with_id Include ID in json
-	 * 
-	 * @return std::string stringified json
-	 */
-	std::string build_json(bool with_id = false) const;
+	ban& fill_from_json(nlohmann::json* j);
 };
 
 /**

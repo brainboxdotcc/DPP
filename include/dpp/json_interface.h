@@ -32,30 +32,62 @@ namespace dpp {
 	 * 
 	 * @tparam T Type of class that implements the interface
 	 */
-	template<typename T> struct DPP_EXPORT json_interface {
+	template<typename T>
+	struct DPP_EXPORT json_interface {
 	protected:
-		/* Must not destruct through pointer to json_interface. */
+		/**
+		 * @brief Destructor is protected - cannot delete json_interface from outside
+		 *
+		 * Because we declare this, we have to declare all the other special members
+		 */
 		~json_interface() = default;
 
 	public:
 		/**
-		 * @brief Convert object from nlohmann::json
-		 * 
-		 * @param j nlohmann::json object
-		 * @return T& Reference to self for fluent calling
+		 * @brief Default constructor
 		 */
-		T& fill_from_json([[maybe_unused]] nlohmann::json* j) {
-			throw dpp::logic_exception("JSON interface doesn't implement parse_from_json");
+		constexpr json_interface() noexcept = default;
+
+		/**
+		 * @brief Copy constructor
+		 */
+		constexpr json_interface(const json_interface&) noexcept = default;
+
+		/**
+		 * @brief Move constructor
+		 */
+		constexpr json_interface(json_interface&&) noexcept = default;
+
+		/**
+		 * @brief Copy assignment operator
+		 */
+		constexpr json_interface &operator=(const json_interface&) noexcept = default;
+
+		/**
+		 * @brief Move assignment operator
+		 */
+		constexpr json_interface &operator=(json_interface&&) noexcept = default;
+
+		/**
+			* @brief Convert object from nlohmann::json
+			*
+			* @param j nlohmann::json object
+			* @return T& Reference to self for fluent calling
+			*/
+		template <typename U = T, typename = decltype(U::fill_from_json)>
+		T& fill_from_json(nlohmann::json* j) {
+			return static_cast<T*>(this)->fill_from_json(j);
 		}
 
 		/**
-		 * @brief Build JSON string from the object
-		 * 
-		 * @param with_id Include the ID in the JSON
-		 * @return std::string JSON string version of object
-		 */
-		virtual std::string build_json([[maybe_unused]] bool with_id = false) const {
-			throw dpp::logic_exception("JSON interface doesn't implement build_json");
+			* @brief Convert object from nlohmann::json
+			*
+			* @param j nlohmann::json object
+			* @return T& Reference to self for fluent calling
+			*/
+		template <typename U = T, typename = decltype(U::build_json)>
+		std::string build_json(bool with_id = false) const {
+			return static_cast<const T*>(this)->build_json(with_id);
 		}
 	};
 } // namespace dpp

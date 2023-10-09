@@ -40,10 +40,5 @@ ban& ban::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string ban::build_json(bool with_id) const {
-	/* This is an unused stub, because sending a ban is simple as a user id and a reason */
-	return "{}";
-}
-
 } // namespace dpp
 

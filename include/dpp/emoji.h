@@ -139,7 +139,7 @@ public:
 	 * @param with_id include the id in the JSON
 	 * @return std::string json data
 	 */
-	std::string build_json(bool with_id = false) const override;
+	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Emoji requires colons
