@@ -41,19 +41,19 @@ namespace dpp {
 		/**
 		 * @brief Constructor, initialises id to 0.
 		 */
-		constexpr managed() noexcept = default;
+		managed() = default;
 
 		/**
 		 * @brief Constructor, initialises ID
 		 * @param nid ID to set
 		 */
-		constexpr managed(const snowflake nid) noexcept : id{nid} {}
+		managed(const snowflake nid) : id{nid} {}
 
 		/**
 		 * @brief Copy constructor
 		 * @param rhs Object to copy
 		 */
-		constexpr managed(const managed &rhs) noexcept = default;
+		managed(const managed &rhs) = default;
 
 		/**
 		 * @brief Move constructor
@@ -61,24 +61,24 @@ namespace dpp {
 		 * Effectively equivalent to copy constructor
 		 * @param rhs Object to move from
 		 */
-		constexpr managed(managed &&rhs) noexcept = default;
+		managed(managed &&rhs) = default;
 
 		/**
 		 * @brief Destroy the managed object
 		 */
-		virtual ~managed() noexcept = default;
+		virtual ~managed() = default;
 
 		/**
 		 * @brief Copy assignment operator
 		 * @param rhs Object to copy
 		 */
-		constexpr managed &operator=(const managed& rhs) noexcept = default;
+		managed &operator=(const managed& rhs) = default;
 
 		/**
 		 * @brief Move assignment operator
 		 * @param rhs Object to move from
 		 */
-		constexpr managed &operator=(managed&& rhs) noexcept = default;
+		managed &operator=(managed&& rhs) = default;
 
 		/**
 		 * @brief Get the creation time of this object according to Discord.
