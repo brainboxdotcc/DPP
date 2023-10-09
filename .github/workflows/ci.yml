@@ -78,15 +78,15 @@ jobs:
       fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
       matrix:
         cfg:
-          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: clang++-10, cmake-flags: '' }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: clang++-12, cmake-flags: '' }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: clang++-13, cmake-flags: '' }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: clang++-14, cmake-flags: '' }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: clang++-15, cmake-flags: '-DDPP_CORO=ON' }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-12, cmake-flags: '-DDPP_CORO=ON' }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-11, cmake-flags: '-DDPP_CORO=ON' }
-          - { arch: 'amd64', os: ubuntu-22.04, cpp-version: g++-10, cmake-flags: '' }
-          - { arch: 'amd64', os: ubuntu-20.04, cpp-version: g++-9, cmake-flags: '' }
+          - { arch: 'amd64', os: ubuntu-20.04, package: clang-10, cpp-version: clang++-10, cmake-flags: '' }
+          - { arch: 'amd64', os: ubuntu-22.04, package: clang-12, cpp-version: clang++-12, cmake-flags: '' }
+          - { arch: 'amd64', os: ubuntu-22.04, package: clang-13, cpp-version: clang++-13, cmake-flags: '' }
+          - { arch: 'amd64', os: ubuntu-22.04, package: clang-14, cpp-version: clang++-14, cmake-flags: '' }
+          - { arch: 'amd64', os: ubuntu-22.04, package: clang-15, cpp-version: clang++-15, cmake-flags: '-DDPP_CORO=ON' }
+          - { arch: 'amd64', os: ubuntu-22.04, package: g++-12, cpp-version: g++-12, cmake-flags: '-DDPP_CORO=ON' }
+          - { arch: 'amd64', os: ubuntu-22.04, package: g++-11, cpp-version: g++-11, cmake-flags: '-DDPP_CORO=ON' }
+          - { arch: 'amd64', os: ubuntu-22.04, package: g++-10, cpp-version: g++-10, cmake-flags: '' }
+          - { arch: 'amd64', os: ubuntu-20.04, package: g++-9, cpp-version: g++-9, cmake-flags: '' }
 
     steps:
       - name: Harden Runner
@@ -98,7 +98,7 @@ jobs:
         uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Install apt packages
-        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.cpp-version }} libsodium-dev libopus-dev zlib1g-dev rpm
+        run: sudo sed -i 's/azure\.//' /etc/apt/sources.list && sudo apt update && sudo apt install  ${{ matrix.cfg.package }} libsodium-dev libopus-dev zlib1g-dev rpm
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DAVX_TYPE=AVX0 -DCMAKE_BUILD_TYPE=Release ${{matrix.cfg.cmake-flags}} ..
