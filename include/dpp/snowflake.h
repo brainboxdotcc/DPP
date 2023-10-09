@@ -77,7 +77,7 @@ public:
 	 * @throw dpp::logic_exception on assigning a negative value. The function is noexcept if the type given is unsigned
 	 * @param snowflake_val snowflake value as an integer type
 	 */
-	template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+	template <typename T, typename = std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<T, bool>>>
 	constexpr snowflake(T snowflake_val) noexcept(std::is_unsigned_v<T>) : value(static_cast<std::make_unsigned_t<T>>(snowflake_val)) {
 		/**
 		 * we cast to the unsigned version of the type given - this maintains "possible loss of data" warnings for sizeof(T) > sizeof(value)
