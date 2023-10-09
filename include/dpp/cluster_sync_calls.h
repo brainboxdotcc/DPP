@@ -2536,6 +2536,19 @@ confirmation thread_member_add_sync(snowflake thread_id, snowflake user_id);
 confirmation thread_member_remove_sync(snowflake thread_id, snowflake user_id);
 
 /**
+ * @brief Get the thread specified by thread_id. This uses the same call as dpp::cluster::channel_get but returns a thread object.
+ * @see dpp::cluster::thread_get
+ * @see https://discord.com/developers/docs/resources/channel#get-channel
+ * @param thread_id The id of the thread to obtain.
+ * @return thread returned object on completion
+ * \memberof dpp::cluster
+ * @throw dpp::rest_exception upon failure to execute REST function
+ * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
+ * Avoid direct use of this function inside an event handler.
+ */
+thread thread_get_sync(snowflake thread_id);
+
+/**
  * @brief Edit current (bot) user
  *
  * Modifies the current member in a guild. Returns the updated guild_member object on success.

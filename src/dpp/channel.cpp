@@ -480,7 +480,14 @@ channel& channel::fill_from_json(json* j) {
 std::string thread::build_json(bool with_id) const {
 	json j = json::parse(channel::build_json(with_id));
 	j["type"] = (flags & CHANNEL_TYPE_MASK);
-	j["thread_metadata"] = this->metadata;
+	j["archived"] = this->metadata.archived;
+	j["auto_archive_duration"] = this->metadata.auto_archive_duration;
+	j["locked"] = this->metadata.locked;
+	
+	if(this->get_type() == dpp::channel_type::CHANNEL_PRIVATE_THREAD) {
+		j["invitable"] = this->metadata.invitable;
+	}
+
 	if (!this->applied_tags.empty()) {
 		j["applied_tags"] = json::array();
 		for (auto &tag_id: this->applied_tags) {

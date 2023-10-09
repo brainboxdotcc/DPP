@@ -3313,6 +3313,15 @@ public:
 	void threads_get_joined_private_archived(snowflake channel_id, snowflake before_id, uint16_t limit, command_completion_event_t callback);
 
 	/**
+	 * @brief Get the thread specified by thread_id. This uses the same call as dpp::cluster::channel_get but returns a thread object.
+	 * @see https://discord.com/developers/docs/resources/channel#get-channel
+	 * @param thread_id The id of the thread to obtain.
+	 * @param callback Function to call when the API call completes
+	 * On success the callback will contain a dpp::thread object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void thread_get(snowflake thread_id, command_completion_event_t callback);
+
+	/**
 	 * @brief Create a sticker in a guild
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @see https://discord.com/developers/docs/resources/sticker#create-guild-sticker
