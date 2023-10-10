@@ -27,11 +27,11 @@ namespace dpp {
 
 using json = nlohmann::json;
 
-voiceregion::voiceregion() : flags(0) 
+voiceregion::voiceregion() : flags(0)
 {
 }
 
-voiceregion& voiceregion::fill_from_json(nlohmann::json* j) {
+voiceregion& voiceregion::fill_from_json_impl(nlohmann::json* j) {
 	id = string_not_null(j, "id");
 	name = string_not_null(j, "id");
 	if (bool_not_null(j, "optimal")) {
@@ -49,15 +49,15 @@ voiceregion& voiceregion::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string voiceregion::build_json(bool with_id) const {
-	return json({
+json voiceregion::to_json_impl(bool with_id) const {
+	return json{
 		{ "id", id },
 		{ "name", name },
 		{ "optimal", is_optimal() },
 		{ "deprecated", is_deprecated() },
 		{ "custom", is_custom() },
 		{ "vip", is_vip() }
-	}).dump();
+	};
 }
 
 bool voiceregion::is_optimal() const {

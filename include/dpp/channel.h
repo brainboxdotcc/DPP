@@ -175,8 +175,18 @@ enum auto_archive_duration_t : uint8_t {
 /**
  * @brief represents membership of a user with a thread
  */
-struct DPP_EXPORT thread_member  
-{
+struct DPP_EXPORT thread_member : public json_interface<thread_member> {
+protected:
+	friend struct json_interface<thread_member>;
+
+	/**
+	 * @brief Read struct values from a json object 
+	 * @param j json to read values from
+	 * @return A reference to self	
+	 */
+	thread_member& fill_from_json_impl(nlohmann::json* j);
+
+public:
 	/// ID of the thread member is part of
 	snowflake thread_id;
 	/// ID of the member
@@ -185,19 +195,31 @@ struct DPP_EXPORT thread_member
 	time_t joined;
 	/// Any user-thread settings, currently only used for notifications
 	uint32_t flags;
-
-	/**
-	 * @brief Read struct values from a json object 
-	 * @param j json to read values from
-	 * @return A reference to self	
-	 */
-	 thread_member& fill_from_json(nlohmann::json* j);
 };
 
 /**
  * @brief Represents a tag that is able to be applied to a thread in a forum or media channel
  */
 struct DPP_EXPORT forum_tag : public managed, public json_interface<forum_tag> {
+protected:
+	friend struct json_interface<forum_tag>;
+
+	/**
+	 * @brief Read struct values from a json object
+	 * @param j json to read values from
+	 * @return A reference to self
+	 */
+	forum_tag& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this forum_tag object
+	 *
+	 * @param with_id include the ID in the json
+	 * @return json JSON object
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
 	/** The name of the tag (0-20 characters) */
 	std::string name;
 	/** The emoji of the tag. Contains either nothing, the id of a guild's custom emoji or the unicode character of the emoji */
@@ -217,21 +239,6 @@ struct DPP_EXPORT forum_tag : public managed, public json_interface<forum_tag> {
 
 	/** Destructor */
 	virtual ~forum_tag() = default;
-
-	/**
-	 * @brief Read struct values from a json object
-	 * @param j json to read values from
-	 * @return A reference to self
-	 */
-	forum_tag& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build json for this forum_tag object
-	 *
-	 * @param with_id include the ID in the json
-	 * @return std::string JSON string
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set name of this forum_tag object
@@ -254,7 +261,24 @@ typedef std::unordered_map<snowflake, thread_member> thread_member_map;
  * There are one of these for every channel type except threads. Threads are
  * special snowflakes. Get it? A Discord pun. Hahaha. .... I'll get my coat.
  */ 
-class DPP_EXPORT channel : public managed, public json_interface<channel>  {
+class DPP_EXPORT channel : public managed, public json_interface<channel> {
+protected:
+	friend struct json_interface<channel>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	channel& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this channel object
+	 *
+	 * @param with_id include the ID in the json
+	 * @return json JSON object
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	/** Channel name (1-100 characters) */
 	std::string name;
@@ -333,7 +357,7 @@ public:
 
 	/** Flags bitmap (dpp::channel_flags) */
 	uint16_t flags;
-	
+
 	/** Maximum user limit for voice channels (0-99) */
 	uint8_t user_limit;
 
@@ -349,20 +373,6 @@ public:
 	* @return std::string The formatted mention of the channel.
 	*/
 	static std::string get_mention(const snowflake& id);
-
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	 channel& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build json for this channel object
-	 * 
-	 * @param with_id include the ID in the json
-	 * @return std::string JSON string
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set name of this channel object
@@ -742,8 +752,29 @@ public:
 /** @brief A definition of a discord thread.
  * A thread is a superset of a channel. Not to be confused with `std::thread`!
  */
-class DPP_EXPORT thread : public channel {
+class DPP_EXPORT thread : public channel, public json_interface<thread> {
+protected:
+	friend struct json_interface<thread>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	thread& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this thread object
+	 *
+	 * @param with_id include the ID in the json
+	 * @return std::string JSON string
+	 */
+	json to_json_impl(bool with_id = false) const override;
+
 public:
+	using json_interface<thread>::fill_from_json;
+	using json_interface<thread>::build_json;
+	using json_interface<thread>::to_json;
+
 	/**
 	 * @brief Thread member of current user if joined to the thread.
 	 * Note this is only set by certain api calls otherwise contains default data
@@ -802,25 +833,10 @@ public:
 	 */
 	bool is_private_thread() const;
 
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	thread& fill_from_json(nlohmann::json* j);
-
 	/**
 	 * @brief Destroy the thread object
 	 */
 	virtual ~thread() = default;
-
-	/**
-	 * @brief Build json for this thread object
-	 * 
-	 * @param with_id include the ID in the json
-	 * @return std::string JSON string
-	 */
-	std::string build_json(bool with_id = false) const;
-
 };
 
 

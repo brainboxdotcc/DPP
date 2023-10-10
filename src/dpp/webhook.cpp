@@ -60,7 +60,7 @@ webhook::~webhook() {
 	delete image_data;
 }
 
-webhook& webhook::fill_from_json(nlohmann::json* j) {
+webhook& webhook::fill_from_json_impl(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	type = int8_not_null(j, "type");
 	channel_id = snowflake_not_null(j, "channel_id");
@@ -77,7 +77,7 @@ webhook& webhook::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string webhook::build_json(bool with_id) const {
+json webhook::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id) {
 		j["id"] = std::to_string(id);
@@ -99,7 +99,7 @@ std::string webhook::build_json(bool with_id) const {
 	if (application_id) {
 		j["application_id"] = application_id;
 	}
-	return j.dump();
+	return j;
 }
 
 webhook& webhook::load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded) {

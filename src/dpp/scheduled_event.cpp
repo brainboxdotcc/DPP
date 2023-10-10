@@ -31,8 +31,8 @@ using json = nlohmann::json;
 scheduled_event::scheduled_event() :
 	managed(0),
 	guild_id(0),
-	channel_id(0),	
-	creator_id(0),	
+	channel_id(0),
+	creator_id(0),
 	scheduled_start_time(0),
 	scheduled_end_time(0),
 	privacy_level(ep_guild_only),
@@ -109,7 +109,7 @@ scheduled_event& scheduled_event::set_end_time(time_t t) {
 	return *this;
 }
 
-scheduled_event& scheduled_event::fill_from_json(const json* j) {
+scheduled_event& scheduled_event::fill_from_json_impl(const json* j) {
 	set_snowflake_not_null(j, "id", this->id);
 	set_snowflake_not_null(j, "guild_id", this->guild_id);
 	set_snowflake_not_null(j, "channel_id", this->channel_id);
@@ -135,7 +135,7 @@ scheduled_event& scheduled_event::fill_from_json(const json* j) {
 	return *this;
 }
 
-std::string scheduled_event::build_json(bool with_id) const {
+json scheduled_event::to_json_impl(bool with_id) const {
 	json j;
 	if (this->id && with_id) {
 		j["id"] = std::to_string(id);
@@ -179,7 +179,7 @@ std::string scheduled_event::build_json(bool with_id) const {
 		j["entity_metadata"]["location"] = json::value_t::null;
 	}
 
-	return j.dump();
+	return j;
 }
 
 } // namespace dpp

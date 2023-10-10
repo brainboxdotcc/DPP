@@ -90,7 +90,19 @@ typedef std::variant<std::monostate, std::string, int64_t, bool, snowflake, doub
  * meaning it can hold different potential types (see dpp::command_value)
  * that you can retrieve with std::get().
  */
-struct DPP_EXPORT command_option_choice : public json_interface<command_option_choice>  {
+struct DPP_EXPORT command_option_choice : public json_interface<command_option_choice> {
+protected:
+	friend struct json_interface<command_option_choice>;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return command_option_choice& Reference to self
+	 */
+	command_option_choice& fill_from_json_impl(nlohmann::json* j);
+
+public:
 	std::string name;	//!< Option name (1-32 chars)
 	command_value value;	//!< Option value
 	std::map<std::string, std::string> name_localizations; //!< Localisations of command option name
@@ -118,14 +130,6 @@ struct DPP_EXPORT command_option_choice : public json_interface<command_option_c
 	 * @param v value to initialise with
 	 */
 	command_option_choice(const std::string &n, command_value v);
-
-	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return command_option_choice& Reference to self
-	 */
-	command_option_choice& fill_from_json(nlohmann::json* j);
 };
 
 /**
@@ -152,7 +156,19 @@ typedef std::variant<std::monostate, int64_t, double> command_option_range;
  * Adding options acts like sub-commands and can contain more
  * options.
  */
-struct DPP_EXPORT command_option : public json_interface<command_option>  {
+struct DPP_EXPORT command_option : public json_interface<command_option> {
+protected:
+	friend struct json_interface<command_option>;
+
+	/**
+	 * @brief Fill object properties from JSON. Fills options recursively.
+	 *
+	 * @param j JSON to fill from
+	 * @return command_option& Reference to self
+	 */
+	command_option& fill_from_json_impl(nlohmann::json* j);
+
+public:
 	command_option_type type;                    //!< Option type (what type of value is accepted)
 	std::string name;                            //!< Option name (1-32 chars)
 	std::string description;                     //!< Option description (1-100 chars)
@@ -265,14 +281,6 @@ struct DPP_EXPORT command_option : public json_interface<command_option>  {
 	 * @throw dpp::logic_exception You attempted to enable auto complete on a command_option that has choices added to it
 	 */
 	command_option& set_auto_complete(bool autocomp);
-
-	/**
-	 * @brief Fill object properties from JSON. Fills options recursively.
-	 *
-	 * @param j JSON to fill from
-	 * @return command_option& Reference to self
-	 */
-	 command_option& fill_from_json(nlohmann::json* j);
 };
 
 /**
@@ -308,8 +316,26 @@ enum interaction_response_type {
  *
  * `mymessage.flags |= dpp::m_ephemeral;`
  */
-struct DPP_EXPORT interaction_response : public json_interface<interaction_response>   {
+struct DPP_EXPORT interaction_response : public json_interface<interaction_response> {
+protected:
+	friend struct json_interface<interaction_response>;
 
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return interaction_response& Reference to self
+	 */
+	interaction_response& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this object
+	 *
+	 * @return json JSON object
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
 	/**
 	 * @brief Response type from dpp::interaction_response_type.
 	 * Should be one of ir_pong, ir_channel_message_with_source,
@@ -356,21 +382,6 @@ struct DPP_EXPORT interaction_response : public json_interface<interaction_respo
 	interaction_response(interaction_response_type t, message&& m);
 
 	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return interaction_response& Reference to self
-	 */
-	interaction_response& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build a json string for this object
-	 *
-	 * @return std::string JSON string
-	 */
-	virtual std::string build_json(bool with_id = false) const;
-
-	/**
 	 * @brief Add a command option choice
 	 * 
 	 * @param achoice command option choice to add
@@ -393,8 +404,27 @@ struct DPP_EXPORT interaction_response : public json_interface<interaction_respo
  * When the user submits the form an on_form_submit event is dispatched to any listeners.
  */
 struct DPP_EXPORT interaction_modal_response : public interaction_response, public json_interface<interaction_modal_response> {
-private:
+protected:
+	friend struct json_interface<interaction_modal_response>;
+
 	size_t current_row;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return interaction_response& Reference to self
+	 */
+	interaction_modal_response& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json for this object
+	 * @param with_id include id in json output
+	 *
+	 * @return json JSON object
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
 	 * @brief Custom ID for the modal form
@@ -457,22 +487,6 @@ public:
 	 * @return interaction_modal_response& Reference to self
 	 */
 	interaction_modal_response& add_row();
-
-	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return interaction_response& Reference to self
-	 */
-	 interaction_modal_response& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build a json string for this object
-	 * @param with_id include id in json output
-	 *
-	 * @return std::string JSON string
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Destroy the interaction modal response object
@@ -675,7 +689,9 @@ void from_json(const nlohmann::json& j, autocomplete_interaction& ai);
  * into the events on_form_submit, on_slashcommand, on_user_context_menu,
  * on_button_click, on_select_menu, etc.
  */
-class DPP_EXPORT interaction : public managed, public json_interface<interaction>  {
+class DPP_EXPORT interaction : public managed, public json_interface<interaction> {
+protected:
+	friend struct json_interface<interaction>;
 
 	/**
 	 * @brief Get a resolved object from the resolved set
@@ -694,6 +710,22 @@ class DPP_EXPORT interaction : public managed, public json_interface<interaction
 		}
 		return i->second;
 	}
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return interaction& Reference to self
+	 */
+	interaction& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json for this object
+	 *
+	 * @param with_id True if to include the ID in the JSON
+	 * @return json JSON object
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
 
 public:
 	snowflake application_id;                                   //!< id of the application this interaction is for
@@ -866,22 +898,6 @@ public:
 	 * is not for a command.
 	 */
 	std::string get_command_name() const;
-
-	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return interaction& Reference to self
-	 */
-	interaction& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build a json string for this object
-	 *
-	 * @param with_id True if to include the ID in the JSON
-	 * @return std::string JSON string
-	 */
-	std::string build_json(bool with_id = false) const;
 };
 
 /**
@@ -914,7 +930,18 @@ enum command_permission_type {
  * @brief Application command permissions allow you to enable or
  * disable commands for specific users or roles within a guild
  */
-class DPP_EXPORT command_permission : public json_interface<command_permission>   {
+class DPP_EXPORT command_permission : public json_interface<command_permission> {
+protected:
+	friend struct json_interface<command_permission>;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return command_permission& Reference to self
+	 */
+	command_permission &fill_from_json_impl(nlohmann::json *j);
+
 public:
 	snowflake id;                  //!< the ID of the role or user
 	command_permission_type type;  //!< the type of permission
@@ -935,14 +962,6 @@ public:
 	 * @param permission True to allow, false, to disallow
 	 */
 	command_permission(snowflake id, const command_permission_type t, bool permission);
-
-	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return command_permission& Reference to self
-	 */
-	command_permission &fill_from_json(nlohmann::json *j);
 };
 
 /**
@@ -958,7 +977,18 @@ void to_json(nlohmann::json& j, const command_permission& cp);
 /**
  * @brief Returned when fetching the permissions for a command in a guild.
  */
-class DPP_EXPORT guild_command_permissions : public json_interface<guild_command_permissions>  {
+class DPP_EXPORT guild_command_permissions : public json_interface<guild_command_permissions> {
+protected:
+	friend struct json_interface<guild_command_permissions>;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return guild_command_permissions& Reference to self
+	 */
+	guild_command_permissions &fill_from_json_impl(nlohmann::json *j);
+
 public:
 	snowflake id;                                 //!< the id of the command
 	snowflake application_id;                     //!< the id of the application the command belongs to
@@ -971,14 +1001,6 @@ public:
 	guild_command_permissions();
 
 	virtual ~guild_command_permissions() = default;
-
-	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return guild_command_permissions& Reference to self
-	 */
-	guild_command_permissions &fill_from_json(nlohmann::json *j);
 
 };
 
@@ -996,7 +1018,26 @@ void to_json(nlohmann::json& j, const guild_command_permissions& gcp);
  * @brief Represents an application command, created by your bot
  * either globally, or on a guild.
  */
-class DPP_EXPORT slashcommand : public managed, public json_interface<slashcommand>  {
+class DPP_EXPORT slashcommand : public managed, public json_interface<slashcommand> {
+protected:
+	friend struct json_interface<slashcommand>;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return slashcommand& Reference to self
+	 */
+	slashcommand& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json for this object
+	 *
+	 * @param with_id True if to include the ID in the JSON
+	 * @return json JSON object
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
 	 * @brief Application id (usually matches your bots id)
@@ -1207,22 +1248,6 @@ public:
 	 * @note If you want a mention for a subcommand or subcommand group, you can use dpp::utility::slashcommand_mention
 	 */
 	std::string get_mention() const;
-
-	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return slashcommand& Reference to self
-	 */
-	 slashcommand& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build a json string for this object
-	 *
-	 * @param with_id True if to include the ID in the JSON
-	 * @return std::string JSON string
-	 */
-	std::string build_json(bool with_id = false) const;
 };
 
 /**

@@ -85,7 +85,24 @@ enum user_flags : uint32_t {
 /**
  * @brief Represents a user on discord. May or may not be a member of a dpp::guild.
  */
-class DPP_EXPORT user : public managed, public json_interface<user>  {
+class DPP_EXPORT user : public managed, public json_interface<user> {
+protected:
+	friend struct json_interface<user>;
+
+	/** Fill this record from json.
+	 * @param j The json to fill this record from
+	 * @return Reference to self
+	 */
+	user& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Convert to JSON
+	 *
+	 * @param with_id include ID in output
+	 * @return json JSON output
+	 */
+	virtual json to_json_impl(bool with_id = true) const;
+
 public:
 	/** Discord username */
 	std::string username;
@@ -122,20 +139,6 @@ public:
 	 * @return std::string The formatted mention of the user.
 	*/
 	static std::string get_mention(const snowflake& id);
-
-	/** Fill this record from json.
-	 * @param j The json to fill this record from
-	 * @return Reference to self
-	 */
-	user& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Convert to JSON string
-	 * 
-	 * @param with_id include ID in output
-	 * @return std::string JSON output
-	 */
-	virtual std::string build_json(bool with_id = true) const;
 
 	/**
 	 * @brief Get the avatar url of the user
@@ -341,26 +344,29 @@ public:
  * which bots do not normally have.
  */
 class DPP_EXPORT user_identified : public user, public json_interface<user_identified> {
+protected:
+	friend struct json_interface<user_identified>;
+
+	/** Fill this record from json.
+	 * @param j The json to fill this record from
+	 * @return Reference to self
+	 */
+	user_identified& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Convert to JSON
+	 *
+	 * @param with_id include ID in output
+	 * @return json JSON output
+	 */
+	virtual json to_json_impl(bool with_id = true) const;
+
 public:
 	std::string		locale;		//!< Optional: the user's chosen language option identify
 	std::string		email;		//!< Optional: the user's email  email (may be empty)
 	utility::iconhash	banner;		//!< Optional: the user's banner hash    identify (may be empty)
 	uint32_t		accent_color;	//!< Optional: the user's banner color encoded as an integer representation of hexadecimal color code    identify (may be empty)
 	bool			verified;	//!< Optional: whether the email on this account has been verified       email
-	
-	/** Fill this record from json.
-	 * @param j The json to fill this record from
-	 * @return Reference to self
-	 */
-	user_identified& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Convert to JSON string
-	 * 
-	 * @param with_id include ID in output
-	 * @return std::string JSON output
-	 */
-	virtual std::string build_json(bool with_id = true) const;
 
 	/**
 	 * @brief Construct a new user identified object
@@ -378,6 +384,10 @@ public:
 	 * @brief Destroy the user identified object
 	 */
 	virtual ~user_identified() = default;
+
+	using json_interface<user_identified>::fill_from_json;
+	using json_interface<user_identified>::build_json;
+	using json_interface<user_identified>::to_json;
 
 	/**
 	 * @brief Return true if user has an animated banner

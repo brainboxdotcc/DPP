@@ -116,7 +116,16 @@ public:
 /**
  * @brief The application class represents details of a bot application
  */
-class DPP_EXPORT application : public managed, public json_interface<application>  {
+class DPP_EXPORT application : public managed, public json_interface<application> {
+protected:
+	friend struct json_interface<application>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	application& fill_from_json_impl(nlohmann::json* j);
+
 public:
 	std::string		name;			//!< the name of the app
 	utility::iconhash	icon;			//!< the icon hash of the app (may be empty)
@@ -145,12 +154,6 @@ public:
 
 	/** Destructor */
 	~application();
-
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	application& fill_from_json(nlohmann::json* j);
 
 	/**
 	 * @brief Get the application's cover image url if they have one, otherwise returns an empty string

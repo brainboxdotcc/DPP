@@ -34,6 +34,15 @@ namespace dpp {
  * 
  */
 class DPP_EXPORT ban : public json_interface<ban> {
+protected:
+	friend struct json_interface<ban>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	ban& fill_from_json_impl(nlohmann::json* j);
+
 public:
 	/** The ban reason */
 	std::string reason;
@@ -45,12 +54,6 @@ public:
 
 	/** Destructor */
 	virtual ~ban() = default;
-
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	ban& fill_from_json(nlohmann::json* j);
 };
 
 /**

@@ -47,6 +47,17 @@ enum voicestate_flags {
  * or via dpp::channel::get_voice_members
  */
 class DPP_EXPORT voicestate : public json_interface<voicestate> {
+protected:
+	friend struct json_interface<voicestate>;
+
+	/**
+	 * @brief Fill voicestate object from json data
+	 * 
+	 * @param j JSON data to fill from
+	 * @return voicestate& Reference to self
+	 */
+	voicestate& fill_from_json_impl(nlohmann::json* j);
+
 public:
 	class discord_client*	shard;             //!< Owning shard
 	snowflake		guild_id;          //!< Optional: the guild id this voice state is for
@@ -65,22 +76,6 @@ public:
 	 * @brief Destroy the voicestate object
 	 */
 	virtual ~voicestate() = default;
-
-	/**
-	 * @brief Fill voicestate object from json data
-	 * 
-	 * @param j JSON data to fill from
-	 * @return voicestate& Reference to self
-	 */
-	voicestate& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build json representation of the object
-	 * 
-	 * @param with_id Add ID to output
-	 * @return std::string JSON string
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 
 	/// Return true if the user is deafened by the server
 	bool is_deaf() const;

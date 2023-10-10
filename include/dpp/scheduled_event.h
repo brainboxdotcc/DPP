@@ -96,6 +96,25 @@ struct DPP_EXPORT event_member {
  * @brief A scheduled event
  */
 struct DPP_EXPORT scheduled_event : public managed, public json_interface<scheduled_event> {
+protected:
+	friend struct json_interface<scheduled_event>;
+
+	/**
+	 * @brief Serialise a scheduled_event object from json
+	 *
+	 * @return scheduled_event& a reference to self
+	 */
+	scheduled_event& fill_from_json_impl(const nlohmann::json* j);
+
+	/**
+	 * @brief Build json for this object
+	 * @param with_id Include id field in json
+	 *
+	 * @return std::string Json of this object
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
+public:
 	snowflake		guild_id;		//!< the guild id which the scheduled event belongs to
 	snowflake		channel_id;		//!< the channel id in which the scheduled event will be hosted, or null if scheduled entity type is EXTERNAL (may be empty)
 	snowflake		creator_id;		//!< Optional: the id of the user that created the scheduled event
@@ -194,21 +213,6 @@ struct DPP_EXPORT scheduled_event : public managed, public json_interface<schedu
 	 * @throw dpp::length_error if time is before now
 	 */
 	scheduled_event& set_end_time(time_t t);
-
-	/**
-	 * @brief Serialise a scheduled_event object from json
-	 *
-	 * @return scheduled_event& a reference to self
-	 */
-	scheduled_event& fill_from_json(const nlohmann::json* j);
-
-	/**
-	 * @brief Build json for this object
-	 * @param with_id Include id field in json
-	 *
-	 * @return std::string Dumped json of this object
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 };
 
 /**

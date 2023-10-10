@@ -31,7 +31,7 @@ ban::ban() : user_id(0)
 {
 }
 
-ban& ban::fill_from_json(nlohmann::json* j) {
+ban& ban::fill_from_json_impl(nlohmann::json* j) {
 	reason = string_not_null(j, "reason");
 	if (j->contains("user")) {
 		json & user = (*j)["user"];

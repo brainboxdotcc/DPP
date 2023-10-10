@@ -229,7 +229,7 @@ bool guild_member::has_animated_guild_avatar() const {
 	return this->flags & gm_animated_avatar;
 }
 
-std::string guild_member::build_json(bool with_id) const {
+json guild_member::to_json_impl(bool with_id) const {
 	json j;
 	if (this->communication_disabled_until > 0) {
 		if (this->communication_disabled_until > std::time(nullptr)) {
@@ -238,7 +238,7 @@ std::string guild_member::build_json(bool with_id) const {
 			j["communication_disabled_until"] = json::value_t::null;
 		}
 	}
-	
+
 	if (this->flags & gm_nickname_action) {
 		if (!this->nickname.empty()) {
 			j["nick"] = this->nickname;
@@ -259,7 +259,7 @@ std::string guild_member::build_json(bool with_id) const {
 		j["deaf"] = is_deaf();
 	}
 
-	return j.dump();
+	return j;
 }
 
 guild& guild::set_name(const std::string& n) {
@@ -303,7 +303,7 @@ bool guild_member::has_bypasses_verification() const {
 welcome_channel::welcome_channel(): channel_id(0), emoji_id(0) {
 }
 
-welcome_channel &welcome_channel::fill_from_json(nlohmann::json *j) {
+welcome_channel &welcome_channel::fill_from_json_impl(nlohmann::json *j) {
 	channel_id = snowflake_not_null(j, "channel_id");
 	description = string_not_null(j, "channel_id");
 	emoji_id = snowflake_not_null(j, "emoji_id");
@@ -311,7 +311,7 @@ welcome_channel &welcome_channel::fill_from_json(nlohmann::json *j) {
 	return *this;
 }
 
-std::string welcome_channel::build_json(bool with_id) const {
+json welcome_channel::to_json_impl(bool with_id) const {
 	json j;
 	j["channel_id"] = std::to_string(channel_id);
 	j["description"] = description;
@@ -321,7 +321,7 @@ std::string welcome_channel::build_json(bool with_id) const {
 	if (!emoji_name.empty()) {
 		j["emoji_name"] = emoji_name;
 	}
-	return j.dump();
+	return j;
 }
 
 welcome_channel &welcome_channel::set_channel_id(const snowflake _channel_id) {
@@ -334,14 +334,14 @@ welcome_channel &welcome_channel::set_description(const std::string &_descriptio
 	return *this;
 }
 
-welcome_screen &welcome_screen::fill_from_json(nlohmann::json *j) {
+welcome_screen &welcome_screen::fill_from_json_impl(nlohmann::json *j) {
 	description = string_not_null(j, "description");
 
 	set_object_array_not_null<welcome_channel>(j, "welcome_channels", welcome_channels);
 	return *this;
 }
 
-std::string welcome_screen::build_json(bool with_id) const {
+json welcome_screen::to_json_impl(bool with_id) const {
 	json j;
 	if (!description.empty()) {
 		j["description"] = description;
@@ -350,11 +350,11 @@ std::string welcome_screen::build_json(bool with_id) const {
 	if (!welcome_channels.empty()) {
 		j["welcome_channels"] = json::array();
 		for (const auto &welcome_channel : welcome_channels) {
-			j["welcome_channels"].push_back(json::parse(welcome_channel.build_json()));
+			j["welcome_channels"].push_back(welcome_channel.to_json());
 		}
 	}
 
-	return j.dump();
+	return j;
 }
 
 welcome_screen &welcome_screen::set_description(const std::string &s){
@@ -502,7 +502,7 @@ bool guild::has_ticketed_events() const {
 	return this->flags & g_ticketed_events;
 }
 
-std::string guild::build_json(bool with_id) const {
+json guild::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id) {
 		j["id"] = std::to_string(id);
@@ -549,7 +549,7 @@ std::string guild::build_json(bool with_id) const {
 	if (!safety_alerts_channel_id.empty()) {
 		j["safety_alerts_channel_id"] = safety_alerts_channel_id;
 	}
-	return j.dump();
+	return j;
 }
 
 void guild::rehash_members() {
@@ -561,7 +561,7 @@ void guild::rehash_members() {
 	members = n;
 }
 
-guild& guild::fill_from_json(nlohmann::json* d) {
+guild& guild::fill_from_json_impl(nlohmann::json* d) {
 	return fill_from_json(nullptr, d);
 }
 
@@ -687,7 +687,6 @@ guild& guild::fill_from_json(discord_client* shard, nlohmann::json* d) {
 		}
 
 		set_snowflake_not_null(d, "safety_alerts_channel_id", this->safety_alerts_channel_id);
-		
 	} else {
 		this->flags |= dpp::g_unavailable;
 	}
@@ -698,13 +697,13 @@ guild_widget::guild_widget() : channel_id(0), enabled(false)
 {
 }
 
-guild_widget& guild_widget::fill_from_json(nlohmann::json* j) {
+guild_widget& guild_widget::fill_from_json_impl(nlohmann::json* j) {
 	enabled = bool_not_null(j, "enabled");
 	channel_id = snowflake_not_null(j, "channel_id");
 	return *this;
 }
 
-std::string guild_widget::build_json(bool with_id) const {
+json guild_widget::to_json_impl(bool with_id) const {
 	return json({{"channel_id", channel_id}, {"enabled", enabled}}).dump();
 }
 
@@ -954,7 +953,7 @@ onboarding_prompt::onboarding_prompt(): managed(0), type(opt_multiple_choice), f
 onboarding::onboarding(): guild_id(0), mode(gom_default), enabled(false) {
 }
 
-onboarding_prompt_option &onboarding_prompt_option::fill_from_json(nlohmann::json *j) {
+onboarding_prompt_option &onboarding_prompt_option::fill_from_json_impl(nlohmann::json *j) {
 	this->id = snowflake_not_null(j, "id");
 	if (j->contains("emoji")) {
 		this->emoji = dpp::emoji().fill_from_json(&j->at("emoji"));
@@ -967,9 +966,9 @@ onboarding_prompt_option &onboarding_prompt_option::fill_from_json(nlohmann::jso
 	return *this;
 }
 
-std::string onboarding_prompt_option::build_json(bool with_id) const {
+json onboarding_prompt_option::to_json_impl(bool with_id) const {
 	json j;
-	j["emoji"] = json::parse(emoji.build_json());
+	j["emoji"] = emoji.to_json();
 	j["title"] = title;
 	if (!description.empty()) {
 		j["description"] = description;
@@ -989,7 +988,7 @@ std::string onboarding_prompt_option::build_json(bool with_id) const {
 		}
 	}
 
-	return j.dump();
+	return j;
 }
 
 onboarding_prompt_option &onboarding_prompt_option::set_emoji(const dpp::emoji &_emoji) {
@@ -1007,7 +1006,7 @@ onboarding_prompt_option &onboarding_prompt_option::set_description(const std::s
 	return *this;
 }
 
-onboarding_prompt &onboarding_prompt::fill_from_json(nlohmann::json *j) {
+onboarding_prompt &onboarding_prompt::fill_from_json_impl(nlohmann::json *j) {
 	id = snowflake_not_null(j, "id");
 	type = static_cast<onboarding_prompt_type>(int8_not_null(j, "type"));
 	title = string_not_null(j, "title");
@@ -1020,7 +1019,7 @@ onboarding_prompt &onboarding_prompt::fill_from_json(nlohmann::json *j) {
 	return *this;
 }
 
-std::string onboarding_prompt::build_json(bool with_id) const {
+json onboarding_prompt::to_json_impl(bool with_id) const {
 	json j;
 	j["type"] = type;
 	j["title"] = title;
@@ -1028,14 +1027,14 @@ std::string onboarding_prompt::build_json(bool with_id) const {
 	if (!options.empty()) {
 		j["options"] = json::array();
 		for (auto const &option : options) {
-			j["options"].push_back(json::parse(option.build_json()));
+			j["options"].push_back(option.to_json());
 		}
 	}
 
 	j["single_select"] = is_single_select();
 	j["required"] = is_required();
 	j["in_onboarding"] = is_in_onboarding();
-	return j.dump();
+	return j;
 }
 
 bool onboarding_prompt::is_single_select() const {
@@ -1060,7 +1059,7 @@ onboarding_prompt &onboarding_prompt::set_title(const std::string& _title) {
 	return *this;
 }
 
-onboarding& onboarding::fill_from_json(nlohmann::json* j) {
+onboarding& onboarding::fill_from_json_impl(nlohmann::json* j) {
 	guild_id = snowflake_not_null(j, "guild_id");
 	enabled = bool_not_null(j, "enabled");
 	mode = static_cast<onboarding_mode>(int8_not_null(j, "mode"));
@@ -1071,13 +1070,13 @@ onboarding& onboarding::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string onboarding::build_json(bool with_id) const {
+json onboarding::to_json_impl(bool with_id) const {
 	json j;
 
 	if (!prompts.empty()) {
 		j["prompts"] = json::array();
 		for (auto const &prompt : prompts) {
-			j["prompts"].push_back(json::parse(prompt.build_json()));
+			j["prompts"].push_back(prompt.to_json());
 		}
 	}
 
@@ -1090,7 +1089,7 @@ std::string onboarding::build_json(bool with_id) const {
 
 	j["enabled"] = enabled;
 	j["mode"] = mode;
-	return j.dump();
+	return j;
 }
 
 onboarding &onboarding::set_guild_id(const snowflake id) {

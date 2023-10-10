@@ -45,7 +45,7 @@ integration::integration() :
 	app.bot = nullptr;
 }
 
-integration& integration::fill_from_json(nlohmann::json* j)
+integration& integration::fill_from_json_impl(nlohmann::json* j)
 {
 	std::map<std::string, integration_type> type_map = {
 		{ "", i_discord },
@@ -93,7 +93,7 @@ integration& integration::fill_from_json(nlohmann::json* j)
 	return *this;
 }
 
-std::string integration::build_json(bool with_id) const {
+json integration::to_json_impl(bool with_id) const {
 	return json({
 		{ "expire_behavior", (flags & if_expire_kick) ? 1 : 0 },
 		{ "expire_grace_period", expire_grace_period },
@@ -124,7 +124,7 @@ bool integration::expiry_kicks_user() const {
 connection::connection() : id({}), revoked(false), verified(false), friend_sync(false), show_activity(false), visible(false) {
 }
 
-connection& connection::fill_from_json(nlohmann::json* j) {
+connection& connection::fill_from_json_impl(nlohmann::json* j) {
 	this->id = string_not_null(j, "id");
 	this->name = string_not_null(j, "name");
 	this->type = string_not_null(j, "type");

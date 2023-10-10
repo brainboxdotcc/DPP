@@ -315,6 +315,26 @@ public:
  * @brief Represents user presence, e.g. what game they are playing and if they are online
  */
 class DPP_EXPORT presence : public json_interface<presence> {
+protected:
+	friend struct json_interface<presence>;
+
+	/** Fill this object from json.
+	 * @param j JSON object to fill from
+	 * @return A reference to self
+	 */
+	presence& fill_from_json_impl(nlohmann::json* j);
+
+	/** Build JSON from this object.
+	 *
+	 * @note This excludes any part of the presence object that are not valid for websockets and bots,
+	 * and includes websocket opcode 3. You will not get what you expect if you call this on a user's
+	 * presence received from on_presence_update or on_guild_create!
+	 *
+	 * @param with_id Add ID to output
+	 * @return The JSON text of the presence
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	/** The user the presence applies to */
 	snowflake	user_id;
@@ -351,23 +371,6 @@ public:
 	/** Destructor */
 	~presence();
 
-	/** Fill this object from json.
-	 * @param j JSON object to fill from
-	 * @return A reference to self
-	 */
-	 presence& fill_from_json(nlohmann::json* j);
-
-	/** Build JSON from this object.
-	 * 
-	 * Note: This excludes any part of the presence object that are not valid for websockets and bots,
-	 * and includes websocket opcode 3. You will not get what you expect if you call this on a user's
-	 * presence received from on_presence_update or on_guild_create!
-	 * 
-	 * @param with_id Add ID to output
-	 * @return The JSON text of the presence
-	 */
-	virtual std::string build_json(bool with_id = false) const;
-
 	/** The users status on desktop
 	 * @return The user's status on desktop
 	 */
@@ -387,6 +390,17 @@ public:
 	 * @return The user's status as shown to other users
 	 */
 	presence_status status() const;
+
+	/** Build JSON from this object.
+	 *
+	 * @note This excludes any part of the presence object that are not valid for websockets and bots,
+	 * and includes websocket opcode 3. You will not get what you expect if you call this on a user's
+	 * presence received from on_presence_update or on_guild_create!
+	 *
+	 * @param with_id Add ID to output
+	 * @return The JSON of the presence
+	 */
+	json to_json(bool with_id = false) const; // Intentional shadow of json_interface, mostly present for documentation
 };
 
 /** A container of presences */

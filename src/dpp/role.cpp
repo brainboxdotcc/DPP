@@ -61,7 +61,7 @@ std::string role::get_mention(const snowflake& id){
 	return utility::role_mention(id);
 }
 
-role& role::fill_from_json(nlohmann::json* j)
+role& role::fill_from_json_impl(nlohmann::json* j)
 {
 	return fill_from_json(0, j);
 }
@@ -110,7 +110,7 @@ role& role::fill_from_json(snowflake _guild_id, nlohmann::json* j)
 	return *this;
 }
 
-std::string role::build_json(bool with_id) const {
+json role::to_json_impl(bool with_id) const {
 	json j;
 
 	if (with_id) {
@@ -133,7 +133,7 @@ std::string role::build_json(bool with_id) const {
 		j["unicode_emoji"] = unicode_emoji;
 	}
 
-	return j.dump();
+	return j;
 }
 
 std::string role::get_mention() const {
@@ -436,7 +436,7 @@ std::string role::get_icon_url(uint16_t size, const image_type format) const {
 application_role_connection_metadata::application_role_connection_metadata() : key(""), name(""), description("") {
 }
 
-application_role_connection_metadata &application_role_connection_metadata::fill_from_json(nlohmann::json *j) {
+application_role_connection_metadata &application_role_connection_metadata::fill_from_json_impl(nlohmann::json *j) {
 	type = (application_role_connection_metadata_type)int8_not_null(j, "type");
 	key = string_not_null(j, "key");
 	name = string_not_null(j, "name");
@@ -454,7 +454,7 @@ application_role_connection_metadata &application_role_connection_metadata::fill
 	return *this;
 }
 
-std::string application_role_connection_metadata::build_json(bool with_id) const {
+json application_role_connection_metadata::to_json_impl(bool with_id) const {
 	json j;
 	j["type"] = type;
 	j["key"] = key;
@@ -472,21 +472,21 @@ std::string application_role_connection_metadata::build_json(bool with_id) const
 			j["description_localizations"][loc.first] = loc.second;
 		}
 	}
-	return j.dump();
+	return j;
 }
 
 
 application_role_connection::application_role_connection() : platform_name(""), platform_username("") {
 }
 
-application_role_connection &application_role_connection::fill_from_json(nlohmann::json *j) {
+application_role_connection &application_role_connection::fill_from_json_impl(nlohmann::json *j) {
 	platform_name = string_not_null(j, "platform_name");
 	platform_username = string_not_null(j, "platform_username");
 	metadata = application_role_connection_metadata().fill_from_json(&((*j)["metadata"]));
 	return *this;
 }
 
-std::string application_role_connection::build_json(bool with_id) const {
+json application_role_connection::to_json_impl(bool with_id) const {
 	json j;
 	if (!platform_name.empty()) {
 		j["platform_name"] = platform_name;
@@ -497,7 +497,7 @@ std::string application_role_connection::build_json(bool with_id) const {
 	if (std::holds_alternative<application_role_connection_metadata>(metadata)) {
 		j["metadata"] = json::parse(std::get<application_role_connection_metadata>(metadata).build_json());
 	}
-	return j.dump();
+	return j;
 }
 
 
