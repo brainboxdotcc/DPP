@@ -1,20 +1,10 @@
 \page interactions-and-components Interactions And Components
 
-The example programs listed here demonstrate lots of things to do with interactions, application commands (slash commands) and message components. If you're looking to make your bot **modern and user friendly** these examples are what you need.
+Interactions are a unified way provided by Discord to handle \ref slashcommands "slash commands" and \ref components-menu "component interactions", such as \ref components "clicking a button". Slash commands are much better than message commands as they are not rate limited as much, meaning your bot can handle a lot more at once. They also contain a lot of data about a command, for example by making a command take a user as a parameter, \ref resolved-objects "the entire user object will be contained in the interaction" so you do not have to fetch it yourself, avoiding even more rate limits!
 
-* \subpage slashcommands "Using Slash Commands and Interactions"
-* \subpage clearing_slashcommands
-* \subpage subcommands "Slash command sub-commands"
+* \subpage slashcommands-menu "Slash Commands"
 * \subpage user-only-messages "Ephemeral replies ('Only you can see this' replies)"
-* \subpage components "Using button components"
-* \subpage components2 "Advanced button components"
-* \subpage components3 "Using select menu components"
-* \subpage detecting-messages "Listening to messages"
-* \subpage context-menu "Context Menus"
-* \subpage modal-dialog-interactions "Modal Dialogs"
-* \subpage commandhandler "Unified message/slash command handler"
-* \subpage application-command-autocomplete "Slash command auto completion"
-* \subpage discord-application-command-file-upload "Using file parameters in slash commands"
-* \subpage private-messaging
-* \subpage making_threads
 * \subpage resolved-objects
+* \subpage components-menu
+* \subpage modal-dialog-interactions "Modals"
+* \subpage context-menu "Context Menus"
