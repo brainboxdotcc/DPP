@@ -41,6 +41,17 @@
 [[nodiscard]] async<confirmation_callback_t> co_global_bulk_command_create(const std::vector<slashcommand> &commands);
 
 /**
+ * @brief Delete all existing global slash commands.
+ * Updates will be available in all guilds after 1 hour.
+ * 
+ * @see dpp::cluster::global_bulk_command_delete
+ * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+ * @return slashcommand_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_global_bulk_command_delete();
+
+/**
  * @brief Create a global slash command (a bot can have a maximum of 100 of these).
  * 
  * @see dpp::cluster::global_command_create
@@ -107,6 +118,18 @@
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id);
+
+/**
+ * @brief Delete all existing guild slash commands.
+ * Updates will be available in all guilds after 1 hour.
+ * 
+ * @see dpp::cluster::guild_bulk_command_delete
+ * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+ * @param guild_id Guild ID to delete the slash commands in.
+ * @return slashcommand_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_guild_bulk_command_delete(snowflake guild_id);
 
 /**
  * @brief Get all slash command permissions of a guild
