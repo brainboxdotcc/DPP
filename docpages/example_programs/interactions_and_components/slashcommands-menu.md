@@ -9,4 +9,4 @@ Here you will find examples on how to use slash commands, subcommands, and diffe
 * \subpage discord-application-command-file-upload "Using file parameters in slash commands"
 * \subpage commandhandler "Unified message/slash command handler"
 
-\note Keep in mind, someone using a slash command is <b>NOT A MESSAGE!!</b> It is not a string but an interaction structure with its own data, and command parameters are objects.
+\note Keep in mind, someone using a slash command is <b>NOT A MESSAGE!!</b> It is not a string but an interaction structure with its own data, and \ref resolved-objects "command parameters are objects".
