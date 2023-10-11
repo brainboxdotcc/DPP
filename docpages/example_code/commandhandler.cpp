@@ -1,16 +1,16 @@
 #include <dpp/dpp.h>
 
-int main()
-{
+int main() {
 	/* If your bot only uses the "/" prefix, you can remove the intents here. */
 	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
-	bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger()); 
 
 	/* Create command handler, and specify prefixes */
 	dpp::commandhandler command_handler(&bot);
 	/* Specifying a prefix of "/" tells the command handler it should also expect slash commands. Remove the .add_prefix(".") if you wish to only make it a slash command */
-	command_handler.add_prefix(".").add_prefix("/");
+	command_handler.add_prefix(".")
+		.add_prefix("/");
 
 	bot.on_ready([&command_handler](const dpp::ready_t &event) {
 
