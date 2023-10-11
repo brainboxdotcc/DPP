@@ -22,8 +22,8 @@ int main()
 		if (dpp::run_once<struct register_bot_commands>()) {
 			/* Create the command */
 			dpp::slashcommand command;
-			command.set_name("High Five");
-				.set_application_id(bot.me.id);
+			command.set_name("High Five")
+				.set_application_id(bot.me.id)
 				.set_type(dpp::ctxm_user);
 
 			/* Register the command */
