@@ -4,21 +4,21 @@ int main()
 {
 	dpp::cluster bot("token");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
-	    if (dpp::run_once<struct register_bot_commands>()) {
+		if (dpp::run_once<struct register_bot_commands>()) {
 
-		    /* Create a new global command once on ready event */
-		    bot.global_command_create(dpp::slashcommand("blep", "Send a random adorable animal photo", bot.me.id)
-		    	.add_option(
-		    		/* If you set the auto complete setting on a command option, it will trigger the on_autocomplete
-		    		 * event whenever discord needs to fill information for the choices. You cannot set any choices
-		    		 * here if you set the auto complete value to true.
-		    		 */
-		    		dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
-		    	)
-		    );
+			/* Create a new global command once on ready event */
+			bot.global_command_create(dpp::slashcommand("blep", "Send a random adorable animal photo", bot.me.id)
+				.add_option(
+				/* If you set the auto complete setting on a command option, it will trigger the on_autocomplete
+				* event whenever discord needs to fill information for the choices. You cannot set any choices
+				* here if you set the auto complete value to true.
+				*/
+				dpp::command_option(dpp::co_string, "animal", "The type of animal").set_auto_complete(true)
+				)
+			);
 		}
 	});
 

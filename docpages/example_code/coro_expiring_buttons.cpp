@@ -11,12 +11,19 @@ int main() {
 			dpp::message m{"Test"};
 			std::string id{event.command.id.str()};
 			m.add_component(
-				dpp::component{}.add_component(dpp::component{}.set_type(dpp::cot_button).set_label("Click me!").set_id(id))
+				dpp::component{}.add_component(
+					dpp::component{}
+						.set_type(dpp::cot_button)
+						.set_label("Click me!")
+						.set_id(id)
+				)
 			);
 			co_await event.co_reply(m);
 
 			auto result = co_await dpp::when_any{ // Whichever completes first...
-				event.from->creator->on_button_click.when([&id](const dpp::button_click_t &b) { return b.custom_id == id; }), // Button clicked
+				event.from->creator->on_button_click.when([&id](const dpp::button_click_t &b) { // Button clicked
+					return b.custom_id == id;
+				}),
 				event.from->creator->co_sleep(5) // Or sleep 5 seconds
 			};
 			// Note!! Due to a bug in g++11 and g++12, id must be captured as a reference above or the compiler will destroy it twice. This is fixed in g++13
@@ -40,4 +47,6 @@ int main() {
 	});
 
 	bot.start(dpp::st_wait);
+
+	return 0;
 }
