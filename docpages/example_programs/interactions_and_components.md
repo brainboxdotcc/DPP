@@ -3,6 +3,7 @@
 The example programs listed here demonstrate lots of things to do with interactions, application commands (slash commands) and message components. If you're looking to make your bot **modern and user friendly** these examples are what you need.
 
 * \subpage slashcommands "Using Slash Commands and Interactions"
+* \subpage clearing_slashcommands
 * \subpage subcommands "Slash command sub-commands"
 * \subpage user-only-messages "Ephemeral replies ('Only you can see this' replies)"
 * \subpage components "Using button components"
