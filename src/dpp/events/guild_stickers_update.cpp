@@ -28,8 +28,6 @@
 
 namespace dpp::events {
 
-using json = nlohmann::json;
-using namespace dpp;
 
 
 /**

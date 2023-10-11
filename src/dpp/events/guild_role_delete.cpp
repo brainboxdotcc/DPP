@@ -40,25 +40,23 @@ using json = nlohmann::json;
 void guild_role_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json &d = j["d"];
 	dpp::snowflake guild_id = snowflake_not_null(&d, "guild_id");
+	dpp::snowflake role_id = snowflake_not_null(&d, "role_id");
 	dpp::guild* g = dpp::find_guild(guild_id);
 	if (client->creator->cache_policy.role_policy == dpp::cp_none) {
-		dpp::role r;
-		r.fill_from_json(guild_id, &d);
 		if (!client->creator->on_guild_role_delete.empty()) {
 			dpp::guild_role_delete_t grd(client, raw);
 			grd.deleting_guild = g;
-			grd.deleted = &r;
+			grd.role_id = role_id;
+			grd.deleted = nullptr;
 			client->creator->on_guild_role_delete.call(grd);
 		}
 	} else {
-		json& role = d["role"];
-		dpp::snowflake id = snowflake_not_null(&role, "id");
-		dpp::role *r = dpp::find_role(id);
+		dpp::role *r = dpp::find_role(role_id);
 		if (!client->creator->on_guild_role_delete.empty()) {
 			dpp::guild_role_delete_t grd(client, raw);
 			grd.deleting_guild = g;
-			grd.deleted = r ? r : nullptr;
-			grd.role_id = id;
+			grd.deleted = r;
+			grd.role_id = role_id;
 			client->creator->on_guild_role_delete.call(grd);
 		}
 		if (r) {

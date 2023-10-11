@@ -28,8 +28,6 @@
 
 namespace dpp::events {
 
-using json = nlohmann::json;
-using namespace dpp;
 
 void thread_delete::handle(discord_client* client, json& j, const std::string& raw) {
 	json& d = j["d"];
@@ -38,10 +36,7 @@ void thread_delete::handle(discord_client* client, json& j, const std::string& r
 	t.fill_from_json(&d);
 	dpp::guild* g = dpp::find_guild(t.guild_id);
 	if (g) {
-		auto gt = std::find(g->threads.begin(), g->threads.end(), t.id);
-		if (gt != g->threads.end()) {
-			g->threads.erase(gt);
-		}
+		g->threads.erase(std::remove(g->threads.begin(), g->threads.end(), t.id), g->threads.end());
 	}
 	if (!client->creator->on_thread_delete.empty()) {
 		dpp::thread_delete_t td(client, raw);

@@ -28,8 +28,6 @@
 
 namespace dpp::events {
 
-using json = nlohmann::json;
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -42,9 +40,9 @@ void message_delete::handle(discord_client* client, json &j, const std::string &
 	if (!client->creator->on_message_delete.empty()) {
 		json d = j["d"];
 		dpp::message_delete_t msg(client, raw);
-		dpp::message m(client->creator);
-		m.fill_from_json(&d);
-		msg.deleted = &m;
+		msg.id = snowflake_not_null(&d, "id");
+		msg.guild_id = snowflake_not_null(&d, "guild_id");
+		msg.channel_id = snowflake_not_null(&d, "channel_id");
 		client->creator->on_message_delete.call(msg);
 	}
 

@@ -28,8 +28,6 @@
 
 namespace dpp::events {
 
-using json = nlohmann::json;
-using namespace dpp;
 
 void thread_create::handle(discord_client* client, json& j, const std::string& raw) {
 	json& d = j["d"];

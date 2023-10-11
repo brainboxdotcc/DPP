@@ -830,8 +830,17 @@ struct DPP_EXPORT guild_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
-	/** Deleted guild */
-	guild* deleted = nullptr;
+	/**
+	 * @brief Deleted guild
+	 * 
+	 */
+	guild deleted;
+
+	/**
+	 * @brief Guild ID deleted
+	 * 
+	 */
+	snowflake guild_id{0};
 };
 
 /** @brief Update guild stickers */
@@ -875,7 +884,7 @@ struct DPP_EXPORT channel_delete_t : public event_dispatch_t {
 	/**
 	 * @brief channel being deleted
 	 */
-	channel* deleted = nullptr;
+	channel deleted;
 };
 
 /** @brief Update channel */
@@ -918,7 +927,19 @@ struct DPP_EXPORT message_delete_t : public event_dispatch_t {
 	/**
 	 * @brief message being deleted
 	 */
-	message* deleted = nullptr;
+	snowflake id{0};
+
+	/**
+	 * @brief Channel the message was deleted on
+	 * 
+	 */
+	snowflake channel_id{0};
+
+	/**
+	 * @brief Guild the message was deleted on
+	 */
+	snowflake guild_id{0};
+
 };
 
 /** @brief Guild member remove */
@@ -932,9 +953,14 @@ struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
 	guild* removing_guild = nullptr;
 
 	/**
+	 * @brief Guild ID removed from
+	 */
+	snowflake guild_id{0};
+
+	/**
 	 * @brief user being removed
 	 */
-	user* removed = nullptr;
+	user removed;
 };
 
 /** @brief Session resumed */

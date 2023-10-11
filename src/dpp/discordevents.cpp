@@ -371,6 +371,7 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "EMBEDDED_ACTIVITY_UPDATE", nullptr },
 	{ "GUILD_APPLICATION_COMMAND_INDEX_UPDATE", nullptr },
 	{ "CHANNEL_TOPIC_UPDATE", nullptr },
+	{ "VOICE_CHANNEL_STATUS_UPDATE", nullptr },
 	{ "GUILD_SCHEDULED_EVENT_CREATE", new dpp::events::guild_scheduled_event_create() },
 	{ "GUILD_SCHEDULED_EVENT_UPDATE", new dpp::events::guild_scheduled_event_update() },
 	{ "GUILD_SCHEDULED_EVENT_DELETE", new dpp::events::guild_scheduled_event_delete() },
