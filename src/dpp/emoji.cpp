@@ -34,7 +34,7 @@ std::string emoji::get_mention(std::string_view name, snowflake id, bool is_anim
 	return utility::emoji_mention(name,id,is_animated);
 }
 
-emoji& emoji::fill_from_json(nlohmann::json* j) {
+emoji& emoji::fill_from_json_impl(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	name = string_not_null(j, "name");
 	if (j->contains("user")) {
@@ -56,7 +56,7 @@ emoji& emoji::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string emoji::build_json(bool with_id) const {
+json emoji::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id) {
 		j["id"] = std::to_string(id);
@@ -65,7 +65,7 @@ std::string emoji::build_json(bool with_id) const {
 	if (!image_data.empty()) {
 		j["image"] = image_data;
 	}
-	return j.dump();
+	return j;
 }
 
 bool emoji::requires_colons() const {

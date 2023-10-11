@@ -51,7 +51,7 @@ forum_tag::forum_tag(const std::string& name) : forum_tag() {
 	this->set_name(name);
 }
 
-forum_tag& forum_tag::fill_from_json(nlohmann::json *j) {
+forum_tag& forum_tag::fill_from_json_impl(nlohmann::json *j) {
 	set_snowflake_not_null(j, "id", this->id);
 	set_string_not_null(j, "name", this->name);
 	set_bool_not_null(j, "moderated", this->moderated);
@@ -65,7 +65,7 @@ forum_tag& forum_tag::fill_from_json(nlohmann::json *j) {
 	return *this;
 }
 
-std::string forum_tag::build_json(bool with_id) const {
+json forum_tag::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id && id) {
 		j["id"] = std::to_string(id);
@@ -77,7 +77,7 @@ std::string forum_tag::build_json(bool with_id) const {
 	} else if (std::holds_alternative<std::string>(emoji)) {
 		j["emoji_name"] = std::get<std::string>(emoji);
 	}
-	return j.dump();
+	return j;
 }
 
 forum_tag &forum_tag::set_name(const std::string &name) {
@@ -88,7 +88,7 @@ forum_tag &forum_tag::set_name(const std::string &name) {
 const uint16_t CHANNEL_TYPE_MASK = 0b0000000000001111;
 const uint16_t DEFAULT_FORUM_LAYOUT_MASK = 0b0000011000000000;
 
-thread_member& thread_member::fill_from_json(nlohmann::json* j) {
+thread_member& thread_member::fill_from_json_impl(nlohmann::json* j) {
 	set_snowflake_not_null(j, "id", this->thread_id);
 	set_snowflake_not_null(j, "user_id", this->user_id);
 	set_ts_not_null(j, "join_timestamp", this->joined);
@@ -344,7 +344,7 @@ bool thread::is_private_thread() const {
 	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_PRIVATE_THREAD;
 }
 
-thread& thread::fill_from_json(json* j) {
+thread& thread::fill_from_json_impl(json* j) {
 	channel::fill_from_json(j);
 
 	uint8_t type = int8_not_null(j, "type");
@@ -366,14 +366,13 @@ thread& thread::fill_from_json(json* j) {
 	if (j->contains("member"))  {
 		member.fill_from_json(&((*j)["member"]));
 	}
-	
 	return *this;
 }
 
 thread::thread() : channel(), total_messages_sent(0), message_count(0), member_count(0) {
 }
 
-channel& channel::fill_from_json(json* j) {
+channel& channel::fill_from_json_impl(json* j) {
 	this->id = snowflake_not_null(j, "id");
 	set_snowflake_not_null(j, "guild_id", this->guild_id);
 	set_int16_not_null(j, "position", this->position);
@@ -477,13 +476,13 @@ channel& channel::fill_from_json(json* j) {
 	return *this;
 }
 
-std::string thread::build_json(bool with_id) const {
-	json j = json::parse(channel::build_json(with_id));
+json thread::to_json_impl(bool with_id) const {
+	json j = channel::to_json_impl(with_id);
 	j["type"] = (flags & CHANNEL_TYPE_MASK);
 	j["archived"] = this->metadata.archived;
 	j["auto_archive_duration"] = this->metadata.auto_archive_duration;
 	j["locked"] = this->metadata.locked;
-	
+
 	if(this->get_type() == dpp::channel_type::CHANNEL_PRIVATE_THREAD) {
 		j["invitable"] = this->metadata.invitable;
 	}
@@ -496,10 +495,10 @@ std::string thread::build_json(bool with_id) const {
 			}
 		}
 	}
-	return j.dump();
+	return j;
 }
 
-std::string channel::build_json(bool with_id) const {
+json channel::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id && id) {
 		j["id"] = std::to_string(id);
@@ -569,7 +568,7 @@ std::string channel::build_json(bool with_id) const {
 	if (!available_tags.empty()) {
 		j["available_tags"] = json::array();
 		for (const auto &available_tag : this->available_tags) {
-			j["available_tags"].push_back(json::parse(available_tag.build_json()));
+			j["available_tags"].push_back(available_tag.to_json());
 		}
 	}
 	if (std::holds_alternative<snowflake>(this->default_reaction)) {
@@ -583,8 +582,8 @@ std::string channel::build_json(bool with_id) const {
 	if (flags & c_lock_permissions) {
 		j["lock_permissions"] = true;
 	}
-	
-	return j.dump();
+
+	return j;
 }
 
 permission channel::get_user_permissions(const user* user) const {

@@ -94,7 +94,7 @@ void cluster::thread_create_in_forum(const std::string& thread_name, snowflake c
 	json j({
 		{"name",                  thread_name},
 		{"rate_limit_per_user",   rate_limit_per_user},
-		{"message",               json::parse(msg.build_json())},
+		{"message",               msg.to_json()},
 		{"applied_tags",          applied_tags},
 	});
 	switch (auto_archive_duration) {

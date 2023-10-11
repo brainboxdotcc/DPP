@@ -188,7 +188,18 @@ enum guild_member_flags : uint16_t {
  * @brief Represents dpp::user membership upon a dpp::guild.
  * This contains the user's nickname, guild roles, and any other guild-specific flags.
  */
-class DPP_EXPORT guild_member {
+class DPP_EXPORT guild_member : public json_interface<guild_member> {
+protected:
+	friend struct json_interface<guild_member>;
+
+	/**
+	 * @brief Build json for the member object
+	 *
+	 * @param with_id Add ID to output
+	 * @return json JSON object
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 protected:
 	/** Nickname, or empty string if they don't have a nickname on this guild */
 	std::string nickname;
@@ -198,6 +209,7 @@ protected:
 	uint16_t flags;
 
 	friend void from_json(const nlohmann::json& j, guild_member& gm);
+
 public:
 	/** Guild id */
 	snowflake guild_id;
@@ -222,14 +234,6 @@ public:
 	 * @return Reference to self for call chaining
 	 */
 	guild_member& fill_from_json(nlohmann::json* j, snowflake g_id, snowflake u_id);
-
-	/**
-	 * @brief Build json string for the member object
-	 * 
-	 * @param with_id Add ID to output
-	 * @return std::string json string
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Returns true if the user is in time-out (communication disabled)
@@ -437,6 +441,26 @@ public:
  * @brief Defines a channel on a server's welcome screen
  */
 struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
+protected:
+	friend struct json_interface<welcome_channel>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_channel& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return json JSON data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
 	/// The description shown for the channel
 	std::string description;
 	/// The emoji name if custom, the unicode character if standard, or null if no emoji is set
@@ -455,22 +479,6 @@ struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
 	 * @brief Destroy the welcome channel object
 	 */
 	virtual ~welcome_channel() = default;
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	welcome_channel& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set the channel ID of this welcome channel object
@@ -494,6 +502,26 @@ struct DPP_EXPORT welcome_channel: public json_interface<welcome_channel> {
  * @brief Defines a server's welcome screen
  */
 struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
+protected:
+	friend struct json_interface<welcome_screen>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	welcome_screen& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
 	/// The server description shown in the welcome screen
 	std::string description;
 	/// The channels shown in the welcome screen (max 5)
@@ -508,22 +536,6 @@ struct DPP_EXPORT welcome_screen: public json_interface<welcome_screen> {
 	 * @brief Destroy the welcome screen object
 	 */
 	virtual ~welcome_screen() = default;
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	welcome_screen& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set the server description for this welcome screen object shown in the welcome screen
@@ -640,8 +652,25 @@ typedef std::unordered_map<snowflake, guild_member> members_container;
 /**
  * @brief Represents a guild on Discord (AKA a server)
  */
-class DPP_EXPORT guild : public managed, public json_interface<guild>  {
+class DPP_EXPORT guild : public managed, public json_interface<guild> {
+protected:
+	friend struct json_interface<guild>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	guild& fill_from_json_impl(nlohmann::json* j);
+
+	/** Build a JSON from this object.
+	 * @param with_id True if an ID is to be included in the JSON
+	 * @return JSON
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 public:
+	using json_interface<guild>::fill_from_json;
+
 	/** Guild name */
 	std::string name;
 
@@ -783,23 +812,11 @@ public:
 	virtual ~guild() = default;
 
 	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	 guild& fill_from_json(nlohmann::json* j);
-
-	/** Read class values from json object
 	 * @param shard originating shard
 	 * @param j A json object to read from
 	 * @return A reference to self
 	 */
 	guild& fill_from_json(class discord_client* shard, nlohmann::json* j);
-
-	/** Build a JSON string from this object.
-	 * @param with_id True if an ID is to be included in the JSON
-	 * @return JSON string
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Compute the base permissions for a member on this guild,
@@ -1149,7 +1166,26 @@ typedef std::unordered_map<snowflake, guild> guild_map;
 /**
  * @brief Represents a guild widget, simple web widget of member list
  */
-class DPP_EXPORT guild_widget {
+class DPP_EXPORT guild_widget : public json_interface<guild_widget> {
+protected:
+	friend struct json_interface<guild_widget>;
+
+	/**
+	 * @brief Build a guild widget from json
+	 *
+	 * @param j json to build from
+	 * @return guild_widget& reference to self
+	 */
+	guild_widget& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build json for a guild widget
+	 *
+	 * @param with_id Add ID to output
+	 * @return std::string guild widget stringified json
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
 	 * @brief Channel widget points to
@@ -1165,22 +1201,6 @@ public:
 	 * @brief Construct a new guild widget object
 	 */
 	guild_widget();
-
-	/**
-	 * @brief Build a guild widget from json
-	 *
-	 * @param j json to build from
-	 * @return guild_widget& reference to self
-	 */
-	guild_widget& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build json for a guild widget
-	 *
-	 * @param with_id Add ID to output
-	 * @return std::string guild widget stringified json
-	 */
-	std::string build_json(bool with_id = false) const;
 };
 
 /**
@@ -1212,6 +1232,26 @@ enum onboarding_prompt_flags: uint8_t {
  * @brief Represents an onboarding prompt option
  */
 struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interface<onboarding_prompt_option> {
+protected:
+	friend struct json_interface<onboarding_prompt_option>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt_option& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
 	std::vector<snowflake> channel_ids; //!< IDs for channels a member is added to when the option is selected
 	std::vector<snowflake> role_ids; //!< IDs for roles assigned to a member when the option is selected
 	dpp::emoji emoji; //!< Emoji of the option
@@ -1227,22 +1267,6 @@ struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interfac
 	 * @brief Destroy the onboarding prompt option object
 	 */
 	virtual ~onboarding_prompt_option() = default;
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	onboarding_prompt_option& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set the emoji of this onboarding prompt option object
@@ -1273,6 +1297,26 @@ struct DPP_EXPORT onboarding_prompt_option: public managed, public json_interfac
  * @brief Represents an onboarding prompt
  */
 struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboarding_prompt> {
+protected:
+	friend struct json_interface<onboarding_prompt>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding_prompt& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
 	onboarding_prompt_type type; //!< Type of prompt (defaults to dpp::opt_multiple_choice)
 	std::vector<onboarding_prompt_option> options; //!< Options available within the prompt
 	std::string title; //!< Title of the prompt
@@ -1287,22 +1331,6 @@ struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboa
 	 * @brief Destroy the onboarding prompt object
 	 */
 	virtual ~onboarding_prompt() = default;
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	onboarding_prompt& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set the type of this onboarding prompt object
@@ -1343,6 +1371,26 @@ struct DPP_EXPORT onboarding_prompt: public managed, public json_interface<onboa
  * @brief Represents a guild's onboarding flow
  */
 struct DPP_EXPORT onboarding: public json_interface<onboarding> {
+protected:
+	friend struct json_interface<onboarding>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	onboarding& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
 	snowflake guild_id; //!< ID of the guild this onboarding is part of
 	std::vector<onboarding_prompt> prompts; //!< Prompts shown during onboarding and in customize community
 	std::vector<snowflake> default_channel_ids; //!< Channel IDs that members get opted into automatically
@@ -1358,22 +1406,6 @@ struct DPP_EXPORT onboarding: public json_interface<onboarding> {
 	 * @brief Destroy the onboarding object
 	 */
 	virtual ~onboarding() = default;
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	onboarding& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Set guild_id of this onboarding object

@@ -50,7 +50,26 @@ enum emoji_flags : uint8_t {
 /**
  * @brief Represents an emoji for a dpp::guild
  */
-class DPP_EXPORT emoji : public managed, public json_interface<emoji>  {
+class DPP_EXPORT emoji : public managed, public json_interface<emoji> {
+protected:
+	friend struct json_interface<emoji>;
+
+	/**
+	 * @brief Read class values from json object
+	 *
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	emoji& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the json for this object
+	 *
+	 * @param with_id include the id in the JSON
+	 * @return std::string json data
+	 */
+	json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
 	 * @brief Emoji name
@@ -124,22 +143,6 @@ public:
 	* @return std::string The formatted mention of the emoji.
 	*/
 	static std::string get_mention(std::string_view name, snowflake id, bool is_animated = false);
-
-	/**
-	 * @brief Read class values from json object
-	 *
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	emoji& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the json for this object
-	 *
-	 * @param with_id include the id in the JSON
-	 * @return std::string json data
-	 */
-	std::string build_json(bool with_id = false) const override;
 
 	/**
 	 * @brief Emoji requires colons

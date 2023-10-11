@@ -31,7 +31,7 @@ dtemplate::dtemplate() : code(""), name(""), description(""), usage_count(0), cr
 {
 }
 
-dtemplate& dtemplate::fill_from_json(nlohmann::json* j) {
+dtemplate& dtemplate::fill_from_json_impl(nlohmann::json* j) {
 	code = string_not_null(j, "code");
 	name = string_not_null(j, "name");
 	description = string_not_null(j, "description");
@@ -44,8 +44,8 @@ dtemplate& dtemplate::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string dtemplate::build_json(bool with_id) const {
-	json j({
+json dtemplate::to_json_impl(bool with_id) const {
+	return {
 		{"code", code},
 		{"name", name},
 		{"description", description},
@@ -54,8 +54,7 @@ std::string dtemplate::build_json(bool with_id) const {
 		{"updated_at", updated_at},
 		{"source_guild_id", source_guild_id,
 		"is_dirty", is_dirty}
-	});
-	return j.dump();
+	};
 }
 
 } // namespace dpp

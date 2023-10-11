@@ -49,7 +49,26 @@ enum role_flags : uint8_t {
  * ID as the guild's ID. This is the base permission set applied to all users where no other role or override
  * applies, and is the starting value of the bit mask looped through to calculate channel permissions.
  */
-class DPP_EXPORT role : public managed, public json_interface<role>  {
+class DPP_EXPORT role : public managed, public json_interface<role> {
+protected:
+	friend struct json_interface<role>;
+
+	/**
+	 * @brief Fill this role from json.
+	 * 
+	 * @param j The json data
+	 * @return A reference to self
+	 */
+	role& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json from this object.
+	 * 
+	 * @param with_id true if the ID is to be included in the json
+	 * @return The json of the role
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
 	 * @brief Role name
@@ -162,13 +181,7 @@ public:
 	 */
 	role& set_guild_id(snowflake gid);
 
-	/**
-	 * @brief Fill this role from json.
-	 * 
-	 * @param j The json data
-	 * @return A reference to self
-	 */
-	role& fill_from_json(nlohmann::json* j);
+	using json_interface<role>::fill_from_json;
 
 	/**
 	 * @brief Fill this role from json.
@@ -178,14 +191,6 @@ public:
 	 * @return A reference to self
 	 */
 	role& fill_from_json(snowflake guild_id, nlohmann::json* j);
-
-	/**
-	 * @brief Build a json string from this object.
-	 * 
-	 * @param with_id true if the ID is to be included in the json text
-	 * @return The json of the role
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Get the mention/ping for the role
@@ -640,6 +645,23 @@ enum application_role_connection_metadata_type : uint8_t {
  * @brief Application Role Connection Metadata. Represents a role connection metadata for an dpp::application
  */
 class DPP_EXPORT application_role_connection_metadata : public json_interface<application_role_connection_metadata> {
+protected:
+	friend struct json_interface<application_role_connection_metadata>;
+
+	/** Fill this record from json.
+	 * @param j The json to fill this record from
+	 * @return Reference to self
+	 */
+	application_role_connection_metadata& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Convert to JSON
+	 *
+	 * @param with_id include ID in output
+	 * @return json JSON output
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	application_role_connection_metadata_type type; //!< Type of metadata value
 	std::string key; //!< Dictionary key for the metadata field (must be `a-z`, `0-9`, or `_` characters; 1-50 characters)
@@ -654,26 +676,29 @@ public:
 	application_role_connection_metadata();
 
 	virtual ~application_role_connection_metadata() = default;
-
-	/** Fill this record from json.
-	 * @param j The json to fill this record from
-	 * @return Reference to self
-	 */
-	application_role_connection_metadata& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Convert to JSON string
-	 *
-	 * @param with_id include ID in output
-	 * @return std::string JSON output
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 };
 
 /**
  * @brief The application role connection that an application has attached to a user.
  */
 class DPP_EXPORT application_role_connection : public json_interface<application_role_connection> {
+protected:
+	friend struct json_interface<application_role_connection>;
+
+	/** Fill this record from json.
+	 * @param j The json to fill this record from
+	 * @return Reference to self
+	 */
+	application_role_connection& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Convert to JSON
+	 *
+	 * @param with_id include ID in output
+	 * @return json JSON output
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	std::string platform_name; //!< Optional: The vanity name of the platform a bot has connected (max 50 characters)
 	std::string platform_username; //!< Optional: The username on the platform a bot has connected (max 100 characters)
@@ -685,20 +710,6 @@ public:
 	application_role_connection();
 
 	virtual ~application_role_connection() = default;
-
-	/** Fill this record from json.
-	 * @param j The json to fill this record from
-	 * @return Reference to self
-	 */
-	application_role_connection& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Convert to JSON string
-	 *
-	 * @param with_id include ID in output
-	 * @return std::string JSON output
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 };
 
 /** A group of roles */

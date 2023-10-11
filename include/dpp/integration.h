@@ -81,6 +81,21 @@ struct DPP_EXPORT integration_app {
  * @brief Represents an integration on a guild, e.g. a connection to twitch.
  */
 class DPP_EXPORT integration : public managed, public json_interface<integration> {
+protected:
+	friend struct json_interface<integration>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	integration& fill_from_json_impl(nlohmann::json* j);
+
+	/** Build a json from this object.
+	 * @param with_id Add ID to output
+	 * @return JSON of the object
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	/** Integration name */
 	std::string name;
@@ -111,18 +126,6 @@ public:
 	/** Default destructor */
 	~integration() = default;
 
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	integration& fill_from_json(nlohmann::json* j);
-
-	/** Build a json string from this object.
-	 * @param with_id Add ID to output
-	 * @return JSON string of the object
-	 */
-	virtual std::string build_json(bool with_id = false) const;
-
 	/** True if emoticons are enabled */
 	bool emoticons_enabled() const;
 	/** True if integration is enabled */
@@ -138,7 +141,16 @@ public:
 /**
  * @brief The connection object that the user has attached.
  */
-class DPP_EXPORT connection {
+class DPP_EXPORT connection : public json_interface<connection> {
+protected:
+	friend struct json_interface<connection>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	connection& fill_from_json_impl(nlohmann::json* j);
+
 public:
 	std::string			id;		//!< id of the connection account
 	std::string			name;		//!< the username of the connection account
@@ -155,13 +167,6 @@ public:
 	 * @brief Construct a new connection object
 	 */
 	connection();
-
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	connection& fill_from_json(nlohmann::json* j);
-
 };
 
 /** A group of integrations */

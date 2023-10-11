@@ -58,7 +58,7 @@ std::string user::get_mention(const snowflake& id) {
 	return utility::user_mention(id);
 }
 
-std::string user::build_json(bool with_id) const {
+json user::to_json_impl(bool with_id) const {
 	json j;
 
 	j["id"] = id;
@@ -79,11 +79,11 @@ std::string user::build_json(bool with_id) const {
 	}
 	j["flags"] = out_flags;
 
-	return j.dump();
+	return j;
 }
 
-std::string user_identified::build_json(bool with_id) const {
-	return "";
+json user_identified::to_json_impl(bool with_id) const {
+	return {};
 }
 
 user_identified::user_identified() : user(), accent_color(0), verified(false) {
@@ -236,12 +236,12 @@ bool user::has_animated_icon() const {
 	return this->flags & u_animated_icon;
 }
 
-user& user::fill_from_json(json* j) {
+user& user::fill_from_json_impl(json* j) {
 	j->get_to(*this);
 	return *this;
 }
 
-user_identified& user_identified::fill_from_json(json* j) {
+user_identified& user_identified::fill_from_json_impl(json* j) {
 	j->get_to(*this);
 	return *this;
 }

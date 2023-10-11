@@ -21,41 +21,51 @@
 
 #pragma once
 #include <dpp/export.h>
-#include <dpp/exception.h>
 #include <dpp/json_fwd.h>
 
 namespace dpp {
 	/**
 	 * @brief Represents an interface for an object that can optionally implement functions
-	 * for converting to and from nlohmann::json. In the event either parse_from_json() or
-	 * build_json() are not implemented and are called, they will throw at runtime.
-	 * 
+	 * for converting to and from nlohmann::json. The methods are only present if the actual object
+	 * also has those methods.
+	 *
 	 * @tparam T Type of class that implements the interface
 	 */
-	template<typename T> struct DPP_EXPORT json_interface {
-	protected:
-		/* Must not destruct through pointer to json_interface. */
-		~json_interface() = default;
-
-	public:
+	template<typename T>
+	struct DPP_EXPORT json_interface {
 		/**
-		 * @brief Convert object from nlohmann::json
-		 * 
-		 * @param j nlohmann::json object
-		 * @return T& Reference to self for fluent calling
-		 */
-		T& fill_from_json([[maybe_unused]] nlohmann::json* j) {
-			throw dpp::logic_exception("JSON interface doesn't implement parse_from_json");
+			* @brief Convert object from nlohmann::json
+			*
+			* @param j nlohmann::json object
+			* @return T& Reference to self for fluent calling
+			*/
+		template <typename U = T, typename = decltype(std::declval<U&>().fill_from_json_impl(std::declval<nlohmann::json*>()))>
+		T& fill_from_json(nlohmann::json* j) {
+			return static_cast<T*>(this)->fill_from_json_impl(j);
 		}
 
 		/**
-		 * @brief Build JSON string from the object
-		 * 
-		 * @param with_id Include the ID in the JSON
-		 * @return std::string JSON string version of object
-		 */
-		virtual std::string build_json([[maybe_unused]] bool with_id = false) const {
-			throw dpp::logic_exception("JSON interface doesn't implement build_json");
+			* @brief Convert object to nlohmann::json
+			*
+			* @param with_id Whether to include the ID or not
+			* @note Some fields are conditionally filled, do not rely on all fields being present
+			* @return json Json built from the structure
+			*/
+		template <typename U = T, typename = decltype(std::declval<U&>().to_json_impl(bool{}))>
+		auto to_json(bool with_id = false) const {
+			return static_cast<const T*>(this)->to_json_impl(with_id);
+		}
+
+		/**
+			* @brief Convert object to json string
+			*
+			* @param with_id Whether to include the ID or not
+			* @note Some fields are conditionally filled, do not rely on all fields being present
+			* @return std::string Json built from the structure
+			*/
+		template <typename U = T, typename = decltype(std::declval<U&>().to_json_impl(bool{}))>
+		std::string build_json(bool with_id = false) const {
+			return to_json(with_id).dump();
 		}
 	};
 } // namespace dpp

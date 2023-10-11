@@ -41,6 +41,25 @@ enum voiceregion_flags {
  * @brief Represents a voice region on discord
  */
 class DPP_EXPORT voiceregion : public json_interface<voiceregion> {
+protected:
+	friend struct json_interface<voiceregion>;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 * 
+	 * @param j JSON to fill from
+	 * @return voiceregion& Reference to self
+	 */
+	voiceregion& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json for this object
+	 *
+	 * @param with_id Add ID to output
+	 * @return json JSON string
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
 	 * @brief Voice server ID
@@ -66,22 +85,6 @@ public:
 	 * @brief Destroy the voiceregion object
 	 */
 	virtual ~voiceregion() = default;
-
-	/**
-	 * @brief Fill object properties from JSON
-	 * 
-	 * @param j JSON to fill from
-	 * @return voiceregion& Reference to self
-	 */
-	voiceregion& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build a json string for this object
-	 * 
-	 * @param with_id Add ID to output
-	 * @return std::string JSON string
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief True if is the optimal voice server

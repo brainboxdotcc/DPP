@@ -23,7 +23,7 @@
 namespace dpp {
 
 void cluster::guild_add_member(const guild_member& gm, const std::string &access_token, command_completion_event_t callback) {
-	json j = json::parse(gm.build_json());
+	json j = gm.to_json();
 	j["access_token"] = access_token;
 	rest_request<confirmation>(this, API_PATH "/guilds", std::to_string(gm.guild_id), "members/" + std::to_string(gm.user_id), m_put, j.dump(), callback);
 }

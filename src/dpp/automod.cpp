@@ -33,7 +33,7 @@ automod_action::automod_action() : channel_id(0), duration_seconds(0)
 
 automod_action::~automod_action() = default;
 
-automod_action& automod_action::fill_from_json(nlohmann::json* j) {
+automod_action& automod_action::fill_from_json_impl(nlohmann::json* j) {
 	type = (automod_action_type)int8_not_null(j, "type");
 	switch (type) {
 		case amod_action_block_message:
@@ -51,7 +51,7 @@ automod_action& automod_action::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string automod_action::build_json(bool with_id) const {
+json automod_action::to_json_impl(bool with_id) const {
 	json j({
 		{ "type", type }
 	});
@@ -77,14 +77,14 @@ std::string automod_action::build_json(bool with_id) const {
 		default:
 			break;
 	};
-	return j.dump();
+	return j;
 }
 
 automod_metadata::automod_metadata() : mention_total_limit(0) {}
 
 automod_metadata::~automod_metadata() = default;
 
-automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
+automod_metadata& automod_metadata::fill_from_json_impl(nlohmann::json* j) {
 	for (auto k : (*j)["keyword_filter"]) {
 		keywords.push_back(k);
 	}
@@ -102,7 +102,7 @@ automod_metadata& automod_metadata::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string automod_metadata::build_json(bool with_id) const {
+json automod_metadata::to_json_impl(bool with_id) const {
 	json j;
 	j["keyword_filter"] = json::array();
 	j["regex_patterns"] = json::array();
@@ -122,7 +122,7 @@ std::string automod_metadata::build_json(bool with_id) const {
 	}
 	j["mention_total_limit"] = mention_total_limit;
 	j["mention_raid_protection_enabled"] = mention_raid_protection_enabled;
-	return j.dump();
+	return j;
 
 }
 
@@ -132,7 +132,7 @@ automod_rule::automod_rule() : managed(), guild_id(0), creator_id(0), event_type
 
 automod_rule::~automod_rule() = default;
 
-automod_rule& automod_rule::fill_from_json(nlohmann::json* j) {
+automod_rule& automod_rule::fill_from_json_impl(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	guild_id = snowflake_not_null(j, "guild_id");
 	name = string_not_null(j, "name");
@@ -149,7 +149,7 @@ automod_rule& automod_rule::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string automod_rule::build_json(bool with_id) const {
+json automod_rule::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id && id) {
 		j["id"] = std::to_string(id);
@@ -161,12 +161,12 @@ std::string automod_rule::build_json(bool with_id) const {
 	j["enabled"] = enabled;
 	j["event_type"] = event_type;
 	j["trigger_type"] = trigger_type;
-	j["trigger_metadata"] = json::parse(trigger_metadata.build_json());
+	j["trigger_metadata"] = trigger_metadata.to_json();
 	if (actions.size()) {
 		j["actions"] = json::array();
 		json& act = j["actions"];
 		for (auto v : actions) {
-			act.push_back(json::parse(v.build_json()));
+			act.push_back(v.to_json());
 		}
 	}
 	if (exempt_roles.size()) {
@@ -183,7 +183,7 @@ std::string automod_rule::build_json(bool with_id) const {
 			channels.push_back(std::to_string(v));
 		}
 	}
-	return j.dump();
+	return j;
 }
 
 } // namespace dpp
