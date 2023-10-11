@@ -1517,7 +1517,6 @@ public:
 
 	/**
 	 * @brief Delete all existing guild slash commands.
-	 * Updates will be available in all guilds after 1 hour.
 	 * 
 	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
 	 * @param guild_id Guild ID to delete the slash commands in.
@@ -1532,7 +1531,7 @@ public:
 	 *
 	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
 	 * @param commands Vector of slash commands to create/update.
-	 * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
+	 * overwriting existing commands that are registered globally for this application.
 	 * Commands that do not already exist will count toward daily application command create limits.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1541,7 +1540,6 @@ public:
 
 	/**
 	 * @brief Delete all existing global slash commands.
-	 * Updates will be available in all guilds after 1 hour.
 	 * 
 	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
 	 * @param callback Function to call when the API call completes.
