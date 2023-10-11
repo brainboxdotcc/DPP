@@ -28,8 +28,6 @@
 
 namespace dpp::events {
 
-using json = nlohmann::json;
-using namespace dpp;
 
 /**
  * @brief Handle event
@@ -40,20 +38,17 @@ using namespace dpp;
  */
 void channel_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	dpp::guild* g = nullptr;
-	dpp::channel* c = dpp::find_channel(snowflake_not_null(&d, "id"));
-	if (c) {
-		g = dpp::find_guild(c->guild_id);
-		if (g) {
-			auto gc = std::find(g->channels.begin(), g->channels.end(), c->id);
-			if (gc != g->channels.end()) {
-				g->channels.erase(gc);
-			}
-		}
-		dpp::get_channel_cache()->remove(c);
+	channel c = channel().fill_from_json(&d);
+	guild* g = find_guild(c.guild_id);
+	if (g) {
+		g->channels.erase(std::remove(g->channels.begin(), g->channels.end(), c.id), g->channels.end());
+	}
+	if (client->creator->cache_policy.channel_policy != cp_none) {
+		/* We must only pass pointers found by find_channel into here, any other ptr is an invalid non-op */
+		get_channel_cache()->remove(find_channel(c.id));
 	}
 	if (!client->creator->on_channel_delete.empty()) {
-		dpp::channel_delete_t cd(client, raw);
+		channel_delete_t cd(client, raw);
 		cd.deleted = c;
 		cd.deleting_guild = g;
 		client->creator->on_channel_delete.call(cd);
