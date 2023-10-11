@@ -1541,7 +1541,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_message_delete([&](const dpp::message_delete_t & event) {
-			if (event.deleted->channel_id == thread_helper.thread_id) {
+			if (event.channel_id == thread_helper.thread_id) {
 				set_test(THREAD_MESSAGE_DELETE_EVENT, true);
 				thread_helper.notify_event_tested(thread_test_helper::MESSAGE_DELETE);
 			}
