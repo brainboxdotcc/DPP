@@ -37,6 +37,10 @@ slashcommand_map cluster::global_bulk_command_create_sync(const std::vector<slas
 	return dpp::sync<slashcommand_map>(this, static_cast<void (cluster::*)(const std::vector<slashcommand> &, command_completion_event_t)>(&cluster::global_bulk_command_create), commands);
 }
 
+slashcommand_map cluster::global_bulk_command_delete_sync() {
+	return dpp::sync<slashcommand_map>(this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::global_bulk_command_delete));
+}
+
 slashcommand cluster::global_command_create_sync(const slashcommand &s) {
 	return dpp::sync<slashcommand>(this, static_cast<void (cluster::*)(const slashcommand &, command_completion_event_t)>(&cluster::global_command_create), s);
 }
@@ -59,6 +63,10 @@ slashcommand_map cluster::global_commands_get_sync() {
 
 slashcommand_map cluster::guild_bulk_command_create_sync(const std::vector<slashcommand> &commands, snowflake guild_id) {
 	return dpp::sync<slashcommand_map>(this, static_cast<void (cluster::*)(const std::vector<slashcommand> &, snowflake, command_completion_event_t)>(&cluster::guild_bulk_command_create), commands, guild_id);
+}
+
+slashcommand_map cluster::guild_bulk_command_delete_sync(snowflake guild_id) {
+	return dpp::sync<slashcommand_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_bulk_command_delete), guild_id);
 }
 
 guild_command_permissions_map cluster::guild_commands_get_permissions_sync(snowflake guild_id) {

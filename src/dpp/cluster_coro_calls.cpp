@@ -39,6 +39,10 @@ async<confirmation_callback_t> cluster::co_global_bulk_command_create(const std:
 	return async{ this, static_cast<void (cluster::*)(const std::vector<slashcommand> &, command_completion_event_t)>(&cluster::global_bulk_command_create), commands };
 }
 
+async<confirmation_callback_t> cluster::co_global_bulk_command_delete() {
+	return async{ this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::global_bulk_command_delete) };
+}
+
 async<confirmation_callback_t> cluster::co_global_command_create(const slashcommand &s) {
 	return async{ this, static_cast<void (cluster::*)(const slashcommand &, command_completion_event_t)>(&cluster::global_command_create), s };
 }
@@ -61,6 +65,10 @@ async<confirmation_callback_t> cluster::co_global_commands_get() {
 
 async<confirmation_callback_t> cluster::co_guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id) {
 	return async{ this, static_cast<void (cluster::*)(const std::vector<slashcommand> &, snowflake, command_completion_event_t)>(&cluster::guild_bulk_command_create), commands, guild_id };
+}
+
+async<confirmation_callback_t> cluster::co_guild_bulk_command_delete(snowflake guild_id) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_bulk_command_delete), guild_id };
 }
 
 async<confirmation_callback_t> cluster::co_guild_commands_get_permissions(snowflake guild_id) {

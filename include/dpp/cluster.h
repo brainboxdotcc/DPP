@@ -1502,7 +1502,6 @@ public:
 	 */
 	void guild_command_create(const slashcommand &s, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
-
 	/**
 	 * @brief Create/overwrite guild slash commands.
 	 * Any existing guild slash commands on this guild will be deleted and replaced with these.
@@ -1517,17 +1516,36 @@ public:
 	void guild_bulk_command_create(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
 	/**
+	 * @brief Delete all existing guild slash commands.
+	 * 
+	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+	 * @param guild_id Guild ID to delete the slash commands in.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value **which will be empty, meaning there are no commands**. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_bulk_command_delete(snowflake guild_id, command_completion_event_t callback = utility::log_error());
+
+	/**
 	 * @brief Create/overwrite global slash commands.
 	 * Any existing global slash commands will be deleted and replaced with these.
 	 *
 	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
 	 * @param commands Vector of slash commands to create/update.
-	 * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
+	 * overwriting existing commands that are registered globally for this application.
 	 * Commands that do not already exist will count toward daily application command create limits.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
 	void global_bulk_command_create(const std::vector<slashcommand> &commands, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Delete all existing global slash commands.
+	 * 
+	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::slashcommand_map object in confirmation_callback_t::value **which will be empty, meaning there are no commands**. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void global_bulk_command_delete(command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
