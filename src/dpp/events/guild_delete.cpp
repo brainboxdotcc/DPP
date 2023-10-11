@@ -42,8 +42,7 @@ void guild_delete::handle(discord_client* client, json &j, const std::string &ra
 	dpp::guild guild_del;
 	if (!g) {
 		guild_del.fill_from_json(&d);
-	}
-	if (g) {
+	} else {
 		guild_del = *g;
 		if (!bool_not_null(&d, "unavailable")) {
 			dpp::get_guild_cache()->remove(g);

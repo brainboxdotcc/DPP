@@ -38,7 +38,7 @@ namespace dpp::events {
  */
 void channel_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	json& d = j["d"];
-	channel c = channel().fill_from_json(&d);
+	const channel c = channel().fill_from_json(&d);
 	guild* g = find_guild(c.guild_id);
 	if (g) {
 		g->channels.erase(std::remove(g->channels.begin(), g->channels.end(), c.id), g->channels.end());
