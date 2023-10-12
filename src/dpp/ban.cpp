@@ -31,18 +31,13 @@ ban::ban() : user_id(0)
 {
 }
 
-ban& ban::fill_from_json(nlohmann::json* j) {
+ban& ban::fill_from_json_impl(nlohmann::json* j) {
 	reason = string_not_null(j, "reason");
 	if (j->contains("user")) {
 		json & user = (*j)["user"];
 		user_id = snowflake_not_null(&user, "id");
 	}
 	return *this;
-}
-
-std::string ban::build_json(bool with_id) const {
-	/* This is an unused stub, because sending a ban is simple as a user id and a reason */
-	return "{}";
 }
 
 } // namespace dpp

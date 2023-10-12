@@ -1,7 +1,6 @@
 #include <dpp/dpp.h>
 
-int main()
-{
+int main() {
 	/* Create the bot */
 	dpp::cluster bot("token");
 

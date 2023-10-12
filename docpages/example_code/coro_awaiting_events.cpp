@@ -11,7 +11,12 @@ int main() {
 			dpp::message m{"Test"};
 			std::string id{event.command.id.str()};
 			m.add_component(
-				dpp::component{}.add_component(dpp::component{}.set_type(dpp::cot_button).set_label("Click me!").set_id(id))
+				dpp::component{}.add_component(
+					dpp::component{}
+						.set_type(dpp::cot_button)
+						.set_label("Click me!")
+						.set_id(id)
+				)
 			);
 			co_await event.co_reply(m);
 
@@ -36,4 +41,6 @@ int main() {
 	});
 
 	bot.start(dpp::st_wait);
+
+	return 0;
 }

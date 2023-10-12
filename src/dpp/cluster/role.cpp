@@ -57,7 +57,7 @@ void cluster::application_role_connection_get(snowflake application_id, command_
 void cluster::application_role_connection_update(snowflake application_id, const std::vector<application_role_connection_metadata> &connection_metadata, command_completion_event_t callback) {
 	json j = json::array();
 	for (const auto &conn_metadata : connection_metadata) {
-		j.push_back(json::parse(conn_metadata.build_json()));
+		j.push_back(conn_metadata.to_json());
 	}
 	rest_request_vector<application_role_connection_metadata>(this, API_PATH "/applications", std::to_string(application_id), "role-connections/metadata", m_put, j.dump(), callback);
 }

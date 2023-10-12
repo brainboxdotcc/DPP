@@ -31,6 +31,22 @@ namespace dpp {
  * @brief Defines a request to count prunable users, or start a prune operation
  */
 struct DPP_EXPORT prune : public json_interface<prune> {
+protected:
+	friend struct json_interface<prune>;
+
+	/** Fill this object from json.
+	 * @param j JSON object to fill from
+	 * @return A reference to self
+	 */
+	prune& fill_from_json_impl(nlohmann::json* j);
+
+	/** Build JSON from this object.
+	 * @param with_prune_count True if the prune count boolean is to be set in the built JSON
+	 * @return The JSON of the prune object
+	 */
+	virtual json to_json_impl(bool with_prune_count = false) const;
+
+public:
 	/**
 	 * Destroy this prune object
 	 */
@@ -47,18 +63,12 @@ struct DPP_EXPORT prune : public json_interface<prune> {
 	 */
 	bool compute_prune_count;
 
-	/** Fill this object from json.
-	 * @param j JSON object to fill from
-	 * @return A reference to self
-	 */
-	 prune& fill_from_json(nlohmann::json* j);
-
-	/** Build JSON from this object.
+	/**
+	 * Build JSON from this object.
 	 * @param with_prune_count True if the prune count boolean is to be set in the built JSON
-	 * @return The JSON text of the prune object
+	 * @return The JSON of the prune object
 	 */
-	virtual std::string build_json(bool with_prune_count = false) const;
-
+	json to_json(bool with_id = false) const; // Intentional shadow of json_interface, mostly present for documentation
 };
 
 } // namespace dpp

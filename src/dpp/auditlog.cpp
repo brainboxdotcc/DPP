@@ -30,7 +30,7 @@ using json = nlohmann::json;
 audit_entry::audit_entry(): type(aut_guild_update) {
 }
 
-audit_entry &audit_entry::fill_from_json(nlohmann::json *j) {
+audit_entry &audit_entry::fill_from_json_impl(nlohmann::json *j) {
 	this->id = snowflake_not_null(j, "id");
 	this->type = (audit_type)int8_not_null(j, "action_type");
 	this->user_id = snowflake_not_null(j, "user_id");
@@ -69,7 +69,7 @@ audit_entry &audit_entry::fill_from_json(nlohmann::json *j) {
 	return *this;
 }
 
-auditlog& auditlog::fill_from_json(nlohmann::json* j) {
+auditlog& auditlog::fill_from_json_impl(nlohmann::json* j) {
 	set_object_array_not_null<audit_entry>(j, "audit_log_entries", this->entries);
 	return *this;
 }

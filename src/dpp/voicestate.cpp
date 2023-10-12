@@ -31,7 +31,7 @@ voicestate::voicestate() : shard(nullptr), guild_id(0), channel_id(0), user_id(0
 {
 }
 
-voicestate& voicestate::fill_from_json(nlohmann::json* j) {
+voicestate& voicestate::fill_from_json_impl(nlohmann::json* j) {
 	guild_id = snowflake_not_null(j, "guild_id");
 	channel_id = snowflake_not_null(j, "channel_id");
 	user_id = snowflake_not_null(j, "user_id");
@@ -88,11 +88,6 @@ bool voicestate::self_video() const {
 
 bool voicestate::is_suppressed() const {
 	return flags & vs_suppress;
-}
-
-std::string voicestate::build_json(bool with_id) const {
-	/* Voicestates are never sent from a bot */
-	return json({}).dump();
 }
 
 } // namespace dpp

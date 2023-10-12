@@ -45,6 +45,21 @@ enum invite_target_t : uint8_t {
  * @brief Represents an invite to a discord guild or channel
  */
 class DPP_EXPORT invite : public json_interface<invite> {
+protected:
+	friend struct json_interface<invite>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	invite& fill_from_json_impl(nlohmann::json* j);
+
+	/** Build JSON from this object.
+	 * @param with_id Include ID in JSON
+	 * @return The JSON of the invite
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	/** Invite code
 	 */
@@ -164,19 +179,6 @@ public:
 	 * @return invite& reference to self for chaining of calls
 	 */
 	invite& set_unique(const bool is_unique);
-
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	invite& fill_from_json(nlohmann::json* j);
-
-	/** Build JSON from this object.
-	 * @param with_id Include ID in JSON
-	 * @return The JSON text of the invite
-	 */
-	virtual std::string build_json(bool with_id = false) const;
-
 };
 
 /** A container of invites */

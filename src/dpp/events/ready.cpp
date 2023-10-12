@@ -28,9 +28,6 @@
 
 namespace dpp::events {
 
-using json = nlohmann::json;
-using namespace dpp;
-
 #ifndef _DOXYGEN_
 std::mutex protect_the_loot;
 #endif

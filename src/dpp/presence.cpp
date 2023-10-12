@@ -110,7 +110,7 @@ presence::presence(presence_status status, const activity &a) {
 
 presence::~presence() = default;
 
-presence& presence::fill_from_json(nlohmann::json* j) {
+presence& presence::fill_from_json_impl(nlohmann::json* j) {
 	guild_id = snowflake_not_null(j, "guild_id");
 	user_id = snowflake_not_null(&((*j)["user"]), "id");
 
@@ -244,7 +244,7 @@ presence& presence::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string presence::build_json(bool with_id) const {
+json presence::to_json_impl(bool with_id) const {
 	std::map<presence_status, std::string> status_name_mapping = {
 		{ps_online, "online"},
 		{ps_offline, "offline"},
@@ -285,7 +285,11 @@ std::string presence::build_json(bool with_id) const {
 		});*/
 	}
 
-	return j.dump();
+	return j;
+}
+
+json presence::to_json(bool with_id) const {
+	return to_json_impl(with_id);
 }
 
 presence_status presence::desktop_status() const {

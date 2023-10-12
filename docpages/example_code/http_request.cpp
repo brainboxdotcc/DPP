@@ -2,7 +2,7 @@
 #include <iostream>
 
 int main() {
-	dpp::cluster bot("TOKEN GOES HERE");
+	dpp::cluster bot("token");
 
 	bot.on_log(dpp::utility::cout_logger());
 
@@ -25,4 +25,6 @@ int main() {
 	});
 
 	bot.start(dpp::st_wait);
+
+	return 0;
 }

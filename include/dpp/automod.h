@@ -109,6 +109,25 @@ enum automod_trigger_type : uint8_t {
  * @brief Metadata associated with an automod action. Different fields are relevant based on the value of dpp::automod_rule::trigger_type.
  */
 struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
+protected:
+	friend struct json_interface<automod_metadata>;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return automod_metadata& Reference to self
+	 */
+	automod_metadata& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json for this object
+	 *
+	 * @return json JSON object
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
+public:
 	/**
 	 * @brief @brief Substrings which will be searched for in content (Maximum of 1000).
 	 *
@@ -224,28 +243,31 @@ struct DPP_EXPORT automod_metadata : public json_interface<automod_metadata> {
 	 * @brief Destroy the automod metadata object
 	 */
 	virtual ~automod_metadata();
-
-	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return automod_metadata& Reference to self
-	 */
-	automod_metadata& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build a json string for this object
-	 *
-	 * @return std::string JSON string
-	 */
-	virtual std::string build_json(bool with_id = false) const;
-
 };
 
 /**
  * @brief Represents an automod action
  */
 struct DPP_EXPORT automod_action : public json_interface<automod_action> {
+protected:
+	friend struct json_interface<automod_action>;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return automod_action& Reference to self
+	 */
+	automod_action& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json for this object
+	 *
+	 * @return json JSON object
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
+public:
 	/**
 	 * @brief Type of action to take
 	 */
@@ -275,27 +297,30 @@ struct DPP_EXPORT automod_action : public json_interface<automod_action> {
 	 * @brief Destroy the automod action object
 	 */
 	virtual ~automod_action();
-
-	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return automod_action& Reference to self
-	 */
-	automod_action& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build a json string for this object
-	 *
-	 * @return std::string JSON string
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 };
 
 /**
  * @brief Represents an automod rule
  */
 class DPP_EXPORT automod_rule : public managed, public json_interface<automod_rule> {
+protected:
+	friend struct json_interface<automod_rule>;
+
+	/**
+	 * @brief Fill object properties from JSON
+	 *
+	 * @param j JSON to fill from
+	 * @return automod_rule& Reference to self
+	 */
+	automod_rule& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build a json string for this object
+	 *
+	 * @return json JSON object
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	/**
 	 * @brief the id of this rule
@@ -351,21 +376,6 @@ public:
 	 * @brief Destroy the automod rule object
 	 */
 	virtual ~automod_rule();
-
-	/**
-	 * @brief Fill object properties from JSON
-	 *
-	 * @param j JSON to fill from
-	 * @return automod_rule& Reference to self
-	 */
-	automod_rule& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build a json string for this object
-	 *
-	 * @return std::string JSON string
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 };
 
 /** A group of automod rules.

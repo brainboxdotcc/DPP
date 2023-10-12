@@ -344,7 +344,7 @@ void cluster::request(const std::string &url, http_method method, http_completio
 gateway::gateway() : shards(0), session_start_total(0), session_start_remaining(0), session_start_reset_after(0), session_start_max_concurrency(0) {
 }
 
-gateway& gateway::fill_from_json(nlohmann::json* j) {
+gateway& gateway::fill_from_json_impl(nlohmann::json* j) {
 	url = string_not_null(j, "url");
 	shards = int32_not_null(j, "shards");
 	session_start_total = int32_not_null(&((*j)["session_start_limit"]), "total");
@@ -359,7 +359,7 @@ gateway::gateway(nlohmann::json* j) {
 }
 
 void cluster::set_presence(const dpp::presence &p) {
-	json pres = json::parse(p.build_json());
+	json pres = p.to_json();
 	for (auto& s : shards) {
 		if (s.second->is_connected()) {
 			s.second->queue_message(s.second->jsonobj_to_string(pres));

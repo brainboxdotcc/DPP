@@ -20,10 +20,49 @@
  *
  ************************************************************************************/
 #include "test.h"
+
 #include <dpp/dpp.h>
 #include <dpp/unicode_emoji.h>
 #include <dpp/restrequest.h>
 #include <dpp/json.h>
+
+/**
+ * @brief Type trait to check if a certain type has a build_json method
+ *
+ * @tparam T type to check for
+ */
+template <typename T, typename = std::void_t<>>
+struct has_build_json : std::false_type {};
+
+template <typename T>
+struct has_build_json<T, std::void_t<decltype(std::declval<T&>().build_json())>> : std::true_type {};
+
+/**
+ * @brief Type trait to check if a certain type has a build_json method
+ *
+ * @tparam T type to check for
+ */
+template <typename T>
+constexpr bool has_build_json_v = has_build_json<T>::value;
+
+/**
+ * @brief Type trait to check if a certain type has a fill_from_json method
+ *
+ * @tparam T type to check for
+ */
+template <typename T, typename = void>
+struct has_fill_from_json : std::false_type {};
+
+template <typename T>
+struct has_fill_from_json<T, std::void_t<decltype(std::declval<T&>().fill_from_json(std::declval<dpp::json*>()))>> : std::true_type {};
+
+/**
+ * @brief Type trait to check if a certain type has a fill_from_json method
+ *
+ * @tparam T type to check for
+ */
+template <typename T>
+constexpr bool has_fill_from_json_v = has_fill_from_json<T>::value;
 
 /* Unit tests go here */
 int main(int argc, char *argv[])
@@ -308,6 +347,45 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		set_test(SNOWFLAKE, success);
 	}
 
+	{ // test dpp::json_interface
+		start_test(JSON_INTERFACE);
+		struct fillable : dpp::json_interface<fillable> {
+			fillable &fill_from_json_impl(dpp::json *) {
+				return *this;
+			}
+		};
+		struct buildable : dpp::json_interface<buildable> {
+			json to_json_impl(bool = false) const {
+				return {};
+			}
+		};
+		struct fillable_and_buildable : dpp::json_interface<fillable_and_buildable> {
+			fillable_and_buildable &fill_from_json_impl(dpp::json *) {
+				return *this;
+			}
+
+			json to_json_impl(bool = false) const {
+				return {};
+			}
+		};
+		bool success = true;
+
+		DPP_CHECK(JSON_INTERFACE, has_build_json_v<dpp::json_interface<buildable>>, success);
+		DPP_CHECK(JSON_INTERFACE, !has_fill_from_json_v<dpp::json_interface<buildable>>, success);
+		DPP_CHECK(JSON_INTERFACE, has_build_json_v<buildable>, success);
+		DPP_CHECK(JSON_INTERFACE, !has_fill_from_json_v<buildable>, success);
+
+		DPP_CHECK(JSON_INTERFACE, !has_build_json_v<dpp::json_interface<fillable>>, success);
+		DPP_CHECK(JSON_INTERFACE, has_fill_from_json_v<dpp::json_interface<fillable>>, success);
+		DPP_CHECK(JSON_INTERFACE, !has_build_json_v<fillable>, success);
+		DPP_CHECK(JSON_INTERFACE, has_fill_from_json_v<fillable>, success);
+
+		DPP_CHECK(JSON_INTERFACE, has_build_json_v<dpp::json_interface<fillable_and_buildable>>, success);
+		DPP_CHECK(JSON_INTERFACE, has_fill_from_json_v<dpp::json_interface<fillable_and_buildable>>, success);
+		DPP_CHECK(JSON_INTERFACE, has_build_json_v<fillable_and_buildable>, success);
+		DPP_CHECK(JSON_INTERFACE, has_fill_from_json_v<fillable_and_buildable>, success);
+		set_test(JSON_INTERFACE, success);
+	}
 
 	{ // test interaction_create_t::get_parameter
 		// create a fake interaction
@@ -1541,7 +1619,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		});
 
 		bot.on_message_delete([&](const dpp::message_delete_t & event) {
-			if (event.deleted->channel_id == thread_helper.thread_id) {
+			if (event.channel_id == thread_helper.thread_id) {
 				set_test(THREAD_MESSAGE_DELETE_EVENT, true);
 				thread_helper.notify_event_tested(thread_test_helper::MESSAGE_DELETE);
 			}

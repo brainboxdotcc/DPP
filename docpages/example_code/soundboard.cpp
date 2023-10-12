@@ -2,8 +2,7 @@
 #include <iomanip>
 #include <sstream>
 
-int main(int argc, char const *argv[])
-{
+int main() {
 	/* Load a sound file called Robot.pcm into memory.
 	 * The bot expects PCM format, which are raw sound data,
 	 * 2 channel stereo, 16 bit signed 48000Hz.
@@ -29,14 +28,12 @@ int main(int argc, char const *argv[])
 	/* Setup the bot */
 	dpp::cluster bot("token");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot, robot, robot_size](const dpp::slashcommand_t& event) {
-
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "join") {
-
 			/* Get the guild */
 			dpp::guild* g = dpp::find_guild(event.command.guild_id);
 
@@ -49,7 +46,6 @@ int main(int argc, char const *argv[])
 			/* Tell the user we joined their channel. */
 			event.reply("Joined your channel!");
 		} else if (event.command.get_command_name() == "robot") {
-
 			/* Get the voice channel the bot is in, in this current guild. */
 			dpp::voiceconn* v = event.from->get_voice(event.command.guild_id);
 
@@ -68,13 +64,12 @@ int main(int argc, char const *argv[])
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-
 			/* Create a new command. */
 			dpp::slashcommand joincommand("join", "Joins your voice channel.", bot.me.id);
 
 			dpp::slashcommand robotcommand("robot", "Plays a robot noise in your voice channel.", bot.me.id);
 
-			bot.global_bulk_command_create({joincommand, robotcommand});
+			bot.global_bulk_command_create({ joincommand, robotcommand });
 		}
 	});
 

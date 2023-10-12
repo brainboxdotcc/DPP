@@ -64,7 +64,7 @@ void cluster::edit_webhook_message(const class webhook &wh, const struct message
 
 
 void cluster::edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback) {
-	json jwh = json::parse(wh.build_json(true));
+	json jwh = wh.to_json(true);
 	if (jwh.find("channel_id") != jwh.end()) {
 		jwh.erase(jwh.find("channel_id"));
 	}
@@ -79,7 +79,7 @@ void cluster::execute_webhook(const class webhook &wh, const struct message& m, 
 	});
 	std::string body;
 	if (!thread_name.empty() || !wh.avatar.empty() || !wh.name.empty()) { // only use json::parse if thread_name is set
-		json j = json::parse(m.build_json(false));
+		json j = m.to_json(false);
 		if (!thread_name.empty()) {
 			j["thread_name"] = thread_name;
 		}

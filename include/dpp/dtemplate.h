@@ -31,8 +31,25 @@ namespace dpp {
 /**
  * @brief Represents a guild template
  */
-class DPP_EXPORT dtemplate : public json_interface<dtemplate>  {
-public:	
+class DPP_EXPORT dtemplate : public json_interface<dtemplate> {
+protected:
+	friend struct json_interface<dtemplate>;
+
+	/** Read class values from json object
+	 * @param j A json object to read from
+	 * @return A reference to self
+	 */
+	dtemplate& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build the JSON for this object
+	 *
+	 * @param with_id Add ID to output
+	 * @return json JSON content
+	 */
+	json to_json_impl(bool with_id = false) const;
+
+public:
 	/**
 	 * @brief Template code
 	 */
@@ -80,21 +97,6 @@ public:
 	 * @brief Destroy the dtemplate object
 	 */
 	virtual ~dtemplate() = default;
-	
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	 dtemplate& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build the JSON for this object
-	 * 
-	 * @param with_id Add ID to output
-	 * @return std::string JSON content 
-	 */
-	std::string build_json(bool with_id = false) const;
-
 };
 
 /** A container of invites */

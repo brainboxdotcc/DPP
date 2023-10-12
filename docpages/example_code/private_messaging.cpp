@@ -1,7 +1,6 @@
 #include <dpp/dpp.h>
 
-int main()
-{
+int main() {
 	/* Create the bot */
 	dpp::cluster bot("token");
 
@@ -9,10 +8,8 @@ int main()
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t & event) {
-
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "pm") {
-
 			dpp::snowflake user;
 
 			/* If there was no specified user, we set the "user" variable to the command author (issuing user). */
@@ -48,7 +45,6 @@ int main()
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-
 			/* Register the command */
 			dpp::slashcommand command("pm", "Send a private message.", bot.me.id);
 

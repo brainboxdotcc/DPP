@@ -77,7 +77,19 @@ typedef std::map<uint32_t, class discord_client*> shard_list;
 /**
  * @brief Represents the various information from the 'get gateway bot' api call
  */
-struct DPP_EXPORT gateway {
+struct DPP_EXPORT gateway : public json_interface<gateway> {
+protected:
+	friend struct json_interface<gateway>;
+
+	/**
+	 * @brief Fill this object from json
+	 * 
+	 * @param j json to fill from
+	 * @return gateway& reference to self
+	 */
+	gateway& fill_from_json_impl(nlohmann::json* j);
+
+public:
 	/// Gateway websocket url
 	std::string url;
 
@@ -107,14 +119,6 @@ struct DPP_EXPORT gateway {
 	 * @brief Construct a new gateway object
 	 */
 	gateway();
-
-	/**
-	 * @brief Fill this object from json
-	 * 
-	 * @param j json to fill from
-	 * @return gateway& reference to self
-	 */
-	gateway& fill_from_json(nlohmann::json* j);
 };
 
 /**

@@ -41,7 +41,26 @@ enum webhook_type {
 /**
  * @brief Represents a discord webhook
  */
-class DPP_EXPORT webhook : public managed, public json_interface<webhook>  {
+class DPP_EXPORT webhook : public managed, public json_interface<webhook> {
+protected:
+	friend struct json_interface<webhook>;
+
+	/**
+	 * @brief Fill in object from json data
+	 * 
+	 * @param j JSON data
+	 * @return webhook& Reference to self
+	 */
+	webhook& fill_from_json_impl(nlohmann::json* j);
+
+	/**
+	 * @brief Build JSON string from object
+	 * 
+	 * @param with_id Include the ID of the webhook in the json
+	 * @return std::string JSON encoded object
+	 */
+	virtual json to_json_impl(bool with_id = false) const;
+
 public:
 	uint8_t type;   		//!< the type of the webhook
 	snowflake guild_id;     	//!< Optional: the guild id this webhook is for
@@ -78,22 +97,6 @@ public:
 	 * @brief Destroy the webhook object
 	 */
 	~webhook();
-
-	/**
-	 * @brief Fill in object from json data
-	 * 
-	 * @param j JSON data
-	 * @return webhook& Reference to self
-	 */
-	 webhook& fill_from_json(nlohmann::json* j);
-
-	/**
-	 * @brief Build JSON string from object
-	 * 
-	 * @param with_id Include the ID of the webhook in the json
-	 * @return std::string JSON encoded object
-	 */
-	virtual std::string build_json(bool with_id = false) const;
 
 	/**
 	 * @brief Base64 encode image data and allocate it to image_data

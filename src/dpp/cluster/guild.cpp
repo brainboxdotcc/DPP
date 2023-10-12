@@ -163,7 +163,7 @@ void cluster::guild_get_welcome_screen(snowflake guild_id, command_completion_ev
 }
 
 void cluster::guild_edit_welcome_screen(snowflake guild_id, const struct welcome_screen& welcome_screen, bool enabled, command_completion_event_t callback) {
-	json j = json::parse(welcome_screen.build_json());
+	json j = welcome_screen.to_json();
 	j["enabled"] = enabled;
 	rest_request<dpp::welcome_screen>(this, API_PATH "/guilds", std::to_string(guild_id), "welcome-screen", m_patch, j.dump(), callback);
 }

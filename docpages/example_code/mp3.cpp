@@ -12,8 +12,7 @@
 /* For an example we will hardcode a path to some awesome music here */
 #define MUSIC_FILE "/media/music/Rick Astley/Whenever You Need Somebody/Never Gonna Give You Up.mp3"
 
-int main(int argc, char const *argv[])
-{
+int main() {
 	/* This will hold the decoded MP3.
 	* The D++ library expects PCM format, which are raw sound
 	* data, 2 channel stereo, 16 bit signed 48000Hz.
@@ -62,10 +61,8 @@ int main(int argc, char const *argv[])
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot, &pcmdata](const dpp::slashcommand_t& event) {
-
 		/* Check which command they ran */
 		if (event.command.get_command_name() == "join") {
-
 			/* Get the guild */
 			dpp::guild* g = dpp::find_guild(event.command.guild_id);
 
@@ -78,7 +75,6 @@ int main(int argc, char const *argv[])
 			/* Tell the user we joined their channel. */
 			event.reply("Joined your channel!");
 		} else if (event.command.get_command_name() == "mp3") {
-
 			/* Get the voice channel the bot is in, in this current guild. */
 			dpp::voiceconn* v = event.from->get_voice(event.command.guild_id);
 
@@ -97,13 +93,11 @@ int main(int argc, char const *argv[])
 
 	bot.on_ready([&bot](const dpp::ready_t & event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-
 			/* Create a new command. */
 			dpp::slashcommand joincommand("join", "Joins your voice channel.", bot.me.id);
-
 			dpp::slashcommand mp3command("mp3", "Plays an mp3 file.", bot.me.id);
 
-			bot.global_bulk_command_create({joincommand, mp3command});
+			bot.global_bulk_command_create({ joincommand, mp3command });
 		}
 	});
 

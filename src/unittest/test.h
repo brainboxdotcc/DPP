@@ -81,6 +81,7 @@ struct test_t {
 
 /* Current list of unit tests */
 DPP_TEST(SNOWFLAKE, "dpp::snowflake class", tf_offline);
+DPP_TEST(JSON_INTERFACE, "dpp::json_interface class", tf_offline);
 DPP_TEST(CLUSTER, "Instantiate DPP cluster", tf_offline);
 DPP_TEST(BOTSTART, "cluster::start method", tf_online);
 DPP_TEST(CONNECTION, "Connection to client websocket", tf_online);

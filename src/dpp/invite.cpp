@@ -33,7 +33,7 @@ invite::invite() : expires_at(0), guild_id(0), channel_id(0), inviter_id(0), tar
 {
 }
 
-invite& invite::fill_from_json(nlohmann::json* j) {
+invite& invite::fill_from_json_impl(nlohmann::json* j) {
 	code = string_not_null(j, "code");
 	expires_at = (j->contains("expires_at")) ? ts_not_null(j, "expires_at") : 0;
 	created_at = (j->contains("created_at")) ? ts_not_null(j, "created_at") : 0;
@@ -68,7 +68,7 @@ invite& invite::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string invite::build_json(bool with_id) const {
+json invite::to_json_impl(bool with_id) const {
 	json j;
 	j["max_age"] = max_age;
 	j["max_uses"] = max_uses;
@@ -84,7 +84,7 @@ std::string invite::build_json(bool with_id) const {
 	if (unique) {
 		j["unique"] = unique;
 	}
-	return j.dump();
+	return j;
 }
 
 invite &invite::set_max_age(const uint32_t max_age_) {

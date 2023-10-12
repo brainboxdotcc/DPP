@@ -46,7 +46,7 @@ component::component() :
 }
 
 
-component& component::fill_from_json(nlohmann::json* j) {
+component& component::fill_from_json_impl(nlohmann::json* j) {
 	type = static_cast<component_type>(int8_not_null(j, "type"));
 	label = string_not_null(j, "label");
 	custom_id = string_not_null(j, "custom_id");
@@ -397,7 +397,7 @@ select_option& select_option::set_animated(bool anim) {
 	return *this;
 }
 
-select_option& select_option::fill_from_json(nlohmann::json* j) {
+select_option& select_option::fill_from_json_impl(nlohmann::json* j) {
 	label = string_not_null(j, "label");
 	value = string_not_null(j, "value");
 	description = string_not_null(j, "description");
@@ -819,7 +819,7 @@ bool attachment::is_remix() const {
 	return flags & a_is_remix;
 }
 
-std::string message::build_json(bool with_id, bool is_interaction_response) const {
+json message::to_json(bool with_id, bool is_interaction_response) const {
 	/* This is the basics. once it works, expand on it. */
 	json j({
 		{"channel_id", channel_id},
@@ -946,7 +946,7 @@ std::string message::build_json(bool with_id, bool is_interaction_response) cons
 		j["embeds"].push_back(e);
 	}
 
-	return j.dump();
+	return j;
 }
 
 bool message::is_crossposted() const {
@@ -1136,7 +1136,7 @@ std::string message::get_url() const {
 sticker::sticker() : managed(0), pack_id(0), type(st_standard), format_type(sf_png), available(true), guild_id(0), sort_value(0) {
 }
 
-sticker& sticker::fill_from_json(nlohmann::json* j) {
+sticker& sticker::fill_from_json_impl(nlohmann::json* j) {
 	this->id = snowflake_not_null(j, "id");
 	this->pack_id = snowflake_not_null(j, "pack_id");
 	this->name = string_not_null(j, "name");
@@ -1155,7 +1155,7 @@ sticker& sticker::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string sticker::build_json(bool with_id) const {
+json sticker::to_json_impl(bool with_id) const {
 	json j;
 
 	if (with_id) {
@@ -1178,13 +1178,13 @@ std::string sticker::build_json(bool with_id) const {
 	j["available"] = this->available;
 	j["sort_value"] = this->sort_value;
 
-	return j.dump();
+	return j;
 }
 
 sticker_pack::sticker_pack() : managed(0), sku_id(0), cover_sticker_id(0), banner_asset_id(0) {
 }
 
-sticker_pack& sticker_pack::fill_from_json(nlohmann::json* j) {
+sticker_pack& sticker_pack::fill_from_json_impl(nlohmann::json* j) {
 	this->id = snowflake_not_null(j, "id");
 	this->sku_id = snowflake_not_null(j, "sku_id");
 	this->cover_sticker_id = snowflake_not_null(j, "cover_sticker_id");
@@ -1200,7 +1200,7 @@ sticker_pack& sticker_pack::fill_from_json(nlohmann::json* j) {
 	return *this;
 }
 
-std::string sticker_pack::build_json(bool with_id) const {
+json sticker_pack::to_json_impl(bool with_id) const {
 	json j;
 	if (with_id) {
 		j["id"] = std::to_string(this->id);
@@ -1220,7 +1220,7 @@ std::string sticker_pack::build_json(bool with_id) const {
 	for (auto& s : stickers) {
 		j["stickers"].push_back(json::parse(s.second.build_json(with_id)));
 	}
-	return j.dump();
+	return j;
 }
 
 std::string sticker::get_url() const {
