@@ -1053,7 +1053,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 	/* Fill in member record, cache uncached ones */
 	guild* g = find_guild(this->guild_id);
 	this->member = {};
-	if (g && d->find("member") != d->end()) {
+	if (guild_id && d->find("member") != d->end()) {
 		json& mi = (*d)["member"];
 		snowflake uid = snowflake_not_null(&(mi["user"]), "id");
 		if (!uid && author.id) {
@@ -1061,14 +1061,14 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 		}
 		if (cp.user_policy == dpp::cp_none) {
 			/* User caching off! Just fill in directly but dont store member to guild */
-			this->member.fill_from_json(&mi, g->id, uid);
-		} else {
+			this->member.fill_from_json(&mi, this->guild_id, uid);
+		} else if (g) {
 			/* User caching on, lazy or aggressive - cache the member information */
 			auto thismember = g->members.find(uid);
 			if (thismember == g->members.end()) {
 				if (!uid.empty() && author.id) {
 					guild_member gm;
-					gm.fill_from_json(&mi, g->id, uid);
+					gm.fill_from_json(&mi, this->guild_id, uid);
 					g->members[author.id] = gm;
 					this->member = gm;
 				}
@@ -1076,7 +1076,7 @@ message& message::fill_from_json(json* d, cache_policy_t cp) {
 				/* Update roles etc */
 				this->member = thismember->second;
 				if (author.id) {
-					this->member.fill_from_json(&mi, g->id, author.id);
+					this->member.fill_from_json(&mi, this->guild_id, author.id);
 					g->members[author.id] = this->member;
 				}
 			}
