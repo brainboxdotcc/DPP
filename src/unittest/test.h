@@ -569,3 +569,8 @@ inline constexpr auto is_owner = [](auto &&user) noexcept {
   DPP_CHECK(test, std::is_copy_assignable_v<type>, var); \
 	DPP_CHECK(test, std::is_move_assignable_v<type>, var); \
   } while(0)
+
+/**
+ * @brief Unit tests for Human readable error translation
+ */
+void errors_test();
