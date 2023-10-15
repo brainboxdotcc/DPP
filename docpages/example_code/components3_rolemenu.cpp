@@ -1,5 +1,4 @@
 #include <dpp/dpp.h>
-#include <dpp/unicode_emoji.h>
 
 int main() {
 	dpp::cluster bot("token");
