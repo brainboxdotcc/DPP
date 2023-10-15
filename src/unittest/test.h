@@ -579,3 +579,8 @@ void errors_test();
 * @brief Unit tests for HTTPS client
 */
 void http_client_tests(const std::string&);
+
+/**
+* @brief Unit tests for Discord objects (webhook, interaction, user etc.)
+*/
+void discord_objects_tests();
