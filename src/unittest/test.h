@@ -574,3 +574,8 @@ inline constexpr auto is_owner = [](auto &&user) noexcept {
  * @brief Unit tests for Human readable error translation
  */
 void errors_test();
+
+/**
+* @brief Unit tests for HTTPS client
+*/
+void http_client_tests(const std::string&);
