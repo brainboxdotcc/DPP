@@ -81,6 +81,31 @@ enum component_style : uint8_t {
 };
 
 /**
+ * Represents the type of a dpp::component_default_value
+ *
+ * @note They're different to discord's value types
+ */
+enum component_default_value_type: uint8_t {
+	cdt_user = 0,
+	cdt_role = 1,
+	cdt_channel = 2,
+};
+
+/**
+ * @brief A Default value structure for components
+ */
+struct DPP_EXPORT component_default_value {
+	/**
+	 * @brief The type this default value represents
+	 */
+	component_default_value_type type;
+	/**
+	 * @brief Default value. ID of a user, role, or channel
+	 */
+	dpp::snowflake id;
+};
+
+/**
  * @brief An option for a select component
  */
 struct DPP_EXPORT select_option : public json_interface<select_option> {
@@ -295,6 +320,13 @@ public:
 	 */
 	std::vector<uint8_t> channel_types;
 
+	/**
+	 * List of default values for auto-populated select menu components. The amount of default values must be in the range defined by dpp::component::min_value and dpp::component::max_values.
+	 *
+	 * @note Only available for auto-populated select menu components, which include dpp::cot_user_selectmenu, dpp::cot_role_selectmenu, dpp::cot_mentionable_selectmenu, and dpp::cot_channel_selectmenu components.
+	 */
+	std::vector<component_default_value> default_values;
+
 	/** Disabled flag (for buttons)
 	 */
 	bool disabled;
@@ -502,6 +534,14 @@ public:
 	 * @return component& reference to self
 	 */
 	component& add_component(const component& c);
+
+	/**
+ 	 * @brief Add a default value.
+ 	 *
+ 	 * @param id Default value. ID of a user, role, or channel
+ 	 * @param type The type this default value represents
+ 	 */
+	component& add_default_value(const snowflake id, const component_default_value_type type);
 
 	/**
 	 * @brief Set the emoji of the current sub-component.
