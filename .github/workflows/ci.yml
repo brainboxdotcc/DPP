@@ -187,7 +187,7 @@ jobs:
         uses: microsoft/setup-msbuild@1ff57057b5cfdc39105cd07a01d78e9b0ea0c14c # v1.3.1
 
       - name: Install chocolatey packages ${{ matrix.cfg.arch}}
-        uses: seanmiddleditch/gha-setup-ninja@6263846cf3c17009dfc81604efabae16044fc074 # master
+        uses: seanmiddleditch/gha-setup-ninja@8b297075da4cd2a5f1fd21fe011b499edf06e9d2 # master
 
       - name: Generate CMake (x64)
         if: ${{ matrix.cfg.arch == 'x64' }}
