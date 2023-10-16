@@ -326,14 +326,14 @@ protected:
 	 * @param j JSON to fill from
 	 * @return interaction_response& Reference to self
 	 */
-	interaction_response& fill_from_json_impl(nlohmann::json* j);
+	virtual interaction_response& fill_from_json_impl(nlohmann::json* j);
 
 	/**
 	 * @brief Build json for this object
 	 *
 	 * @return json JSON object
 	 */
-	json to_json_impl(bool with_id = false) const;
+	virtual json to_json_impl(bool with_id = false) const;
 
 public:
 	/**
@@ -415,7 +415,7 @@ protected:
 	 * @param j JSON to fill from
 	 * @return interaction_response& Reference to self
 	 */
-	interaction_modal_response& fill_from_json_impl(nlohmann::json* j);
+	virtual interaction_modal_response& fill_from_json_impl(nlohmann::json* j);
 
 	/**
 	 * @brief Build a json for this object
@@ -423,7 +423,7 @@ protected:
 	 *
 	 * @return json JSON object
 	 */
-	json to_json_impl(bool with_id = false) const;
+	virtual json to_json_impl(bool with_id = false) const;
 
 public:
 	/**
