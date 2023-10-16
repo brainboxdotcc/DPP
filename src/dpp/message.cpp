@@ -58,6 +58,14 @@ component& component::fill_from_json_impl(nlohmann::json* j) {
 	if (j->contains("max_values") && j->at("max_values").is_number_integer()) {
 		max_values = j->at("max_values").get<int32_t>();
 	}
+	if (j->contains("default_values") && !j->at("default_values").is_null()) {
+		for (auto const &v : j->at("default_values")) {
+			component_default_value d;
+			d.id = snowflake_not_null(&v, "id");
+			d.type = static_cast<component_default_value_type>(int8_not_null(&v, "type"));
+			default_values.push_back(d);
+		}
+	}
 	if (type == cot_action_row) {
 		set_object_array_not_null<component>(j, "components", components);
 	} else if (type == cot_button) { // button specific fields
@@ -338,6 +346,21 @@ void to_json(json& j, const component& cp) {
 		if (cp.max_values >= 0) {
 			j["max_values"] = cp.max_values;
 		}
+		if (!cp.default_values.empty()) {
+			j["default_values"] = json::array();
+			for (auto const &v : cp.default_values) {
+				json o;
+				o["id"] = v.id;
+				if (v.type == dpp::cdt_role) {
+					o["type"] = "role";
+				} else if (v.type == dpp::cdt_channel) {
+					o["type"] = "channel";
+				} else if (v.type == dpp::cdt_user) {
+					o["type"] = "user";
+				}				
+				j["default_values"].push_back(o);
+			}
+		}
 	} else if (cp.type == cot_channel_selectmenu) {
 		j["custom_id"] = cp.custom_id;
 		j["disabled"] = cp.disabled;
@@ -354,6 +377,21 @@ void to_json(json& j, const component& cp) {
 			j["channel_types"] = json::array();
 			for (auto &type : cp.channel_types) {
 				j["channel_types"].push_back(type);
+			}
+		}
+		if (!cp.default_values.empty()) {
+			j["default_values"] = json::array();
+			for (auto const &v : cp.default_values) {
+				json o;
+				o["id"] = v.id;
+				if (v.type == dpp::cdt_role) {
+					o["type"] = "role";
+				} else if (v.type == dpp::cdt_channel) {
+					o["type"] = "channel";
+				} else if (v.type == dpp::cdt_user) {
+					o["type"] = "user";
+				}
+				j["default_values"].push_back(o);
 			}
 		}
 	}
@@ -436,6 +474,14 @@ component& component::add_select_option(const select_option &option) {
 	if (options.size() <= 25) {
 		options.emplace_back(option);
 	}
+	return *this;
+}
+
+component &component::add_default_value(const snowflake id, const component_default_value_type type) {
+	component_default_value default_value;
+	default_value.id = id;
+	default_value.type = type;
+	this->default_values.push_back(default_value);
 	return *this;
 }
 
