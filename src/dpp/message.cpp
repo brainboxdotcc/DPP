@@ -358,7 +358,13 @@ void to_json(json& j, const component& cp) {
 			for (auto const &v : cp.default_values) {
 				json o;
 				o["id"] = v.id;
-				o["type"] = v.type;
+				if(v.type == dpp::cdt_role) {
+					o["type"] = "role";
+				} else if(v.type == dpp::cdt_channel) {
+					o["type"] = "channel";
+				} else if(v.type == dpp::cdt_user) {
+					o["type"] = "user";
+				}				
 				j["default_values"].push_back(o);
 			}
 		}
