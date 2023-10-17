@@ -1325,8 +1325,9 @@ public:
 	 * @param filename Filename to post for POST requests (for uploading files)
 	 * @param filecontent File content to post for POST requests (for uploading files)
 	 * @param filemimetype File content to post for POST requests (for uploading files)
+	 * @param protocol HTTP protocol to use (1.0 and 1.1 are supported)
 	 */
-	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "");
+	void post_rest(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "", const std::string& protocol = "1.1");
 
 	/**
 	 * @brief Post a multipart REST request. Where possible use a helper method instead like message_create
@@ -1352,8 +1353,9 @@ public:
 	 * @param postdata POST data
 	 * @param mimetype MIME type of POST data
 	 * @param headers Headers to send with the request
+	 * @param protocol HTTP protocol to use (1.1 and 1.0 are supported)
 	 */
-	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {});
+	void request(const std::string &url, http_method method, http_completion_event callback, const std::string &postdata = "", const std::string &mimetype = "text/plain", const std::multimap<std::string, std::string> &headers = {}, const std::string &protocol = "1.1");
 
 	/**
 	 * @brief Respond to a slash command
