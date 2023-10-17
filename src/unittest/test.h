@@ -584,3 +584,8 @@ void http_client_tests(const std::string&);
 * @brief Unit tests for Discord objects (webhook, interaction, user etc.)
 */
 void discord_objects_tests();
+
+/**
+ * @brief Unit tests for Gateway events
+ */
+void gateway_events_tests(const std::string&);
