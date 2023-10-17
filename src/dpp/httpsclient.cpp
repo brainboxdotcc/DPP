@@ -32,7 +32,7 @@
 
 namespace dpp {
 
-https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout)
+https_client::https_client(const std::string &hostname, uint16_t port,  const std::string &urlpath, const std::string &verb, const std::string &req_body, const http_headers& extra_headers, bool plaintext_connection, uint16_t request_timeout, const std::string &protocol)
 	: ssl_client(hostname, std::to_string(port), plaintext_connection, false),
 	state(HTTPS_HEADERS),
 	request_type(verb),
@@ -41,6 +41,7 @@ https_client::https_client(const std::string &hostname, uint16_t port,  const st
 	content_length(0),
 	request_headers(extra_headers),
 	status(0),
+	http_protocol(protocol),
 	timeout(request_timeout)
 {
 	nonblocking = false;
@@ -57,7 +58,7 @@ void https_client::connect()
 	}
 	if (this->sfd != SOCKET_ERROR) {
 		this->write(
-			this->request_type + " " + this->path + " HTTP/1.1\r\n"
+			this->request_type + " " + this->path + " HTTP/" + http_protocol + "\r\n"
 			"Host: " + this->hostname + "\r\n"
 			"pragma: no-cache\r\n"
 			"Connection: keep-alive\r\n"
