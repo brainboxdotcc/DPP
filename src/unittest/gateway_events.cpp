@@ -106,32 +106,32 @@ void gateway_events_tests(const std::string& token) {
 						    test_message.add_file("test.txt", "test", "text/plain");
 						    test_message.add_file("test.png", std::string{test_image.begin(), test_image.end()}, "image/png");
 						    bot.message_create(test_message, [&bot](const dpp::confirmation_callback_t &callback) {
-							if (!callback.is_error()) {
-								set_test(MESSAGECREATE, true);
-								set_test(REACT, false);
-								dpp::message m = std::get<dpp::message>(callback.value);
-								set_test(REACTEVENT, false);
-								bot.message_add_reaction(m.id, TEST_TEXT_CHANNEL_ID, "😄", [](const dpp::confirmation_callback_t &callback) {
-								    if (!callback.is_error()) {
-									    set_test(REACT, true);
-								    } else {
-									    set_test(REACT, false);
-								    }
-								});
-								set_test(EDITEVENT, false);
-								bot.message_edit(dpp::message(m).set_content("test edit"), [](const dpp::confirmation_callback_t &callback) {
-								    if (!callback.is_error()) {
-									    set_test(MESSAGEEDIT, true);
-								    }
-								});
-							}
+								if (!callback.is_error()) {
+									set_test(MESSAGECREATE, true);
+									set_test(REACT, false);
+									dpp::message m = std::get<dpp::message>(callback.value);
+									set_test(REACTEVENT, false);
+									bot.message_add_reaction(m.id, TEST_TEXT_CHANNEL_ID, "😄", [](const dpp::confirmation_callback_t &callback) {
+										if (!callback.is_error()) {
+											set_test(REACT, true);
+										} else {
+											set_test(REACT, false);
+										}
+									});
+									set_test(EDITEVENT, false);
+									bot.message_edit(dpp::message(m).set_content("test edit"), [](const dpp::confirmation_callback_t &callback) {
+										if (!callback.is_error()) {
+											set_test(MESSAGEEDIT, true);
+										}
+									});
+								}
 						    });
 					    } else {
 						    set_test(DELCOMMAND, false);
 					    }
 					});
 				}
-			    });
+			});
 		});
 
 		std::mutex loglock;
@@ -256,25 +256,24 @@ void gateway_events_tests(const std::string& token) {
 			    delete_message_if_done();
 		    }
 
-		    void test_threads(const dpp::message &message)
-		    {
+		    void test_threads(const dpp::message &message) {
 			    set_test(THREAD_CREATE_MESSAGE, false);
 			    set_test(THREAD_DELETE, false);
 			    set_test(THREAD_DELETE_EVENT, false);
 			    bot.thread_create_with_message("test", message.channel_id, message.id, 60, 60, [this](const dpp::confirmation_callback_t &callback) {
-				std::lock_guard lock(mutex);
-				if (callback.is_error()) {
-					set_thread_tested();
-				}
-				else {
-					auto thread = callback.get<dpp::thread>();
-					thread_id = thread.id;
-					set_test(THREAD_CREATE_MESSAGE, true);
-					bot.channel_delete(thread.id, [this](const dpp::confirmation_callback_t &callback) {
-					    set_test(THREAD_DELETE, !callback.is_error());
-					    set_thread_tested();
-					});
-				}
+					std::lock_guard lock(mutex);
+					if (callback.is_error()) {
+						set_thread_tested();
+					}
+					else {
+						auto thread = callback.get<dpp::thread>();
+						thread_id = thread.id;
+						set_test(THREAD_CREATE_MESSAGE, true);
+						bot.channel_delete(thread.id, [this](const dpp::confirmation_callback_t &callback) {
+							set_test(THREAD_DELETE, !callback.is_error());
+							set_thread_tested();
+						});
+					}
 			    });
 		    }
 
@@ -282,35 +281,35 @@ void gateway_events_tests(const std::string& token) {
 			    set_test(MESSAGEFILE, false);
 			    if (message.attachments.size() == 3) {
 				    static constexpr auto check_mimetype = [](const auto &headers, std::string mimetype) {
-					if (auto it = headers.find("content-type"); it != headers.end()) {
-						// check that the mime type starts with what we gave : for example discord will change "text/plain" to "text/plain; charset=UTF-8"
-						return it->second.size() >= mimetype.size() && std::equal(it->second.begin(), it->second.begin() + mimetype.size(), mimetype.begin());
-					}
-					else {
-						return false;
-					}
+						if (auto it = headers.find("content-type"); it != headers.end()) {
+							// check that the mime type starts with what we gave : for example discord will change "text/plain" to "text/plain; charset=UTF-8"
+							return it->second.size() >= mimetype.size() && std::equal(it->second.begin(), it->second.begin() + mimetype.size(), mimetype.begin());
+						}
+						else {
+							return false;
+						}
 				    };
 				    message.attachments[0].download([&](const dpp::http_request_completion_t &callback) {
-					std::lock_guard lock(mutex);
-					if (callback.status == 200 && callback.body == "test") {
-						files_success[0] = true;
-					}
-					set_file_tested(0);
+						std::lock_guard lock(mutex);
+						if (callback.status == 200 && callback.body == "test") {
+							files_success[0] = true;
+						}
+						set_file_tested(0);
 				    });
 				    message.attachments[1].download([&](const dpp::http_request_completion_t &callback) {
-					std::lock_guard lock(mutex);
-					if (callback.status == 200 && check_mimetype(callback.headers, "text/plain") && callback.body == "test") {
-						files_success[1] = true;
-					}
-					set_file_tested(1);
+						std::lock_guard lock(mutex);
+						if (callback.status == 200 && check_mimetype(callback.headers, "text/plain") && callback.body == "test") {
+							files_success[1] = true;
+						}
+						set_file_tested(1);
 				    });
 				    message.attachments[2].download([&](const dpp::http_request_completion_t &callback) {
-					std::lock_guard lock(mutex);
-					// do not check the contents here because discord can change compression
-					if (callback.status == 200 && check_mimetype(callback.headers, "image/png")) {
-						files_success[2] = true;
-					}
-					set_file_tested(2);
+						std::lock_guard lock(mutex);
+						// do not check the contents here because discord can change compression
+						if (callback.status == 200 && check_mimetype(callback.headers, "image/png")) {
+							files_success[2] = true;
+						}
+						set_file_tested(2);
 				    });
 			    }
 			    else {
@@ -328,20 +327,20 @@ void gateway_events_tests(const std::string& token) {
 			    set_test(MESSAGEPIN, false);
 			    set_test(MESSAGEUNPIN, false);
 			    bot.message_pin(channel_id, message_id, [this](const dpp::confirmation_callback_t &callback) {
-				std::lock_guard lock(mutex);
-				if (!callback.is_error()) {
-					set_test(MESSAGEPIN, true);
-					bot.message_unpin(TEST_TEXT_CHANNEL_ID, message_id, [this](const dpp::confirmation_callback_t &callback) {
-					    std::lock_guard lock(mutex);
-					    if (!callback.is_error()) {
-						    set_test(MESSAGEUNPIN, true);
-					    }
-					    set_pin_tested();
-					});
-				}
-				else {
-					set_pin_tested();
-				}
+					std::lock_guard lock(mutex);
+					if (!callback.is_error()) {
+						set_test(MESSAGEPIN, true);
+						bot.message_unpin(TEST_TEXT_CHANNEL_ID, message_id, [this](const dpp::confirmation_callback_t &callback) {
+							std::lock_guard lock(mutex);
+							if (!callback.is_error()) {
+								set_test(MESSAGEUNPIN, true);
+							}
+							set_pin_tested();
+						});
+					}
+					else {
+						set_pin_tested();
+					}
 			    });
 		    }
 
@@ -370,12 +369,12 @@ void gateway_events_tests(const std::string& token) {
 		public:
 		    enum event_flag
 		    {
-			MESSAGE_CREATE = 1 << 0,
-			MESSAGE_EDIT = 1 << 1,
-			MESSAGE_REACT = 1 << 2,
-			MESSAGE_REMOVE_REACT = 1 << 3,
-			MESSAGE_DELETE = 1 << 4,
-			EVENT_END = 1 << 5
+				MESSAGE_CREATE = 1 << 0,
+				MESSAGE_EDIT = 1 << 1,
+				MESSAGE_REACT = 1 << 2,
+				MESSAGE_REMOVE_REACT = 1 << 3,
+				MESSAGE_DELETE = 1 << 4,
+				EVENT_END = 1 << 5
 		    };
 		private:
 		    std::mutex mutex;
@@ -489,11 +488,11 @@ void gateway_events_tests(const std::string& token) {
 				    edit.name = "edited";
 				    edit.metadata.locked = true;
 				    bot.thread_edit(edit, [this](const dpp::confirmation_callback_t &callback) {
-					std::lock_guard lock(mutex);
-					if (!callback.is_error()) {
-						set_test(THREAD_EDIT, true);
-					}
-					set_edit_tested();
+						std::lock_guard lock(mutex);
+						if (!callback.is_error()) {
+							set_test(THREAD_EDIT, true);
+						}
+						set_edit_tested();
 				    });
 			    }
 		    }
@@ -504,18 +503,18 @@ void gateway_events_tests(const std::string& token) {
 
 			    set_test(THREAD_GET_ACTIVE, false);
 			    bot.threads_get_active(TEST_GUILD_ID, [this](const dpp::confirmation_callback_t &callback) {
-				std::lock_guard lock{mutex};
-				if (!callback.is_error()) {
-					const auto &threads = callback.get<dpp::active_threads>();
-					if (auto thread_it = threads.find(thread_id); thread_it != threads.end()) {
-						const auto &thread = thread_it->second.active_thread;
-						const auto &member = thread_it->second.bot_member;
-						if (thread.id == thread_id && member.has_value() && member->user_id == bot.me.id) {
-							set_test(THREAD_GET_ACTIVE, true);
+					std::lock_guard lock{mutex};
+					if (!callback.is_error()) {
+						const auto &threads = callback.get<dpp::active_threads>();
+						if (auto thread_it = threads.find(thread_id); thread_it != threads.end()) {
+							const auto &thread = thread_it->second.active_thread;
+							const auto &member = thread_it->second.bot_member;
+							if (thread.id == thread_id && member.has_value() && member->user_id == bot.me.id) {
+								set_test(THREAD_GET_ACTIVE, true);
+							}
 						}
 					}
-				}
-				set_get_active_tested();
+					set_get_active_tested();
 			    });
 		    }
 
@@ -535,40 +534,40 @@ void gateway_events_tests(const std::string& token) {
 				    set_test(THREAD_MEMBERS_ADD_EVENT, false);
 				    set_test(THREAD_MEMBERS_REMOVE_EVENT, false);
 				    bot.thread_member_add(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
-					std::lock_guard lock{mutex};
-					if (callback.is_error()) {
-						set_members_tested();
-						return;
-					}
-					set_test(THREAD_MEMBER_ADD, true);
-					bot.thread_member_get(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
-					    std::lock_guard lock{mutex};
-					    if (callback.is_error()) {
-						    set_members_tested();
-						    return;
-					    }
-					    set_test(THREAD_MEMBER_GET, true);
-					    bot.thread_members_get(thread_id, [this](const dpp::confirmation_callback_t &callback) {
 						std::lock_guard lock{mutex};
 						if (callback.is_error()) {
 							set_members_tested();
 							return;
 						}
-						const auto &members = callback.get<dpp::thread_member_map>();
-						if (members.find(TEST_USER_ID) == members.end() || members.find(bot.me.id) == members.end()) {
-							set_members_tested();
-							return;
-						}
-						set_test(THREAD_MEMBERS_GET, true);
-						bot.thread_member_remove(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
-						    std::lock_guard lock{mutex};
-						    if (!callback.is_error()) {
-							    set_test(THREAD_MEMBER_REMOVE, true);
-						    }
-						    set_members_tested();
+						set_test(THREAD_MEMBER_ADD, true);
+						bot.thread_member_get(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
+							std::lock_guard lock{mutex};
+							if (callback.is_error()) {
+								set_members_tested();
+								return;
+							}
+							set_test(THREAD_MEMBER_GET, true);
+							bot.thread_members_get(thread_id, [this](const dpp::confirmation_callback_t &callback) {
+								std::lock_guard lock{mutex};
+								if (callback.is_error()) {
+									set_members_tested();
+									return;
+								}
+								const auto &members = callback.get<dpp::thread_member_map>();
+								if (members.find(TEST_USER_ID) == members.end() || members.find(bot.me.id) == members.end()) {
+									set_members_tested();
+									return;
+								}
+								set_test(THREAD_MEMBERS_GET, true);
+								bot.thread_member_remove(thread_id, TEST_USER_ID, [this](const dpp::confirmation_callback_t &callback) {
+									std::lock_guard lock{mutex};
+									if (!callback.is_error()) {
+										set_test(THREAD_MEMBER_REMOVE, true);
+									}
+									set_members_tested();
+								});
+							});
 						});
-					    });
-					});
 				    });
 			    }
 		    }
@@ -590,51 +589,51 @@ void gateway_events_tests(const std::string& token) {
 			    set_test(THREAD_MESSAGE_DELETE_EVENT, false);
 			    events_to_test_mask |= MESSAGE_CREATE;
 			    bot.message_create(dpp::message{"hello thread"}.set_channel_id(thread.id), [this](const dpp::confirmation_callback_t &callback) {
-				std::lock_guard lock{mutex};
-				if (callback.is_error()) {
-					events_abort();
-					set_messages_tested();
-					return;
-				}
-				auto m = callback.get<dpp::message>();
-				m.content = "hello thread?";
-				events_to_test_mask |= MESSAGE_EDIT;
-				bot.message_edit(m, [this, message_id = m.id](const dpp::confirmation_callback_t &callback) {
-				    std::lock_guard lock{mutex};
-				    if (callback.is_error()) {
-					    events_abort();
-					    set_messages_tested();
-					    return;
-				    }
-				    events_to_test_mask |= MESSAGE_REACT;
-				    bot.message_add_reaction(message_id, thread_id, dpp::unicode_emoji::thread, [this, message_id](const dpp::confirmation_callback_t &callback) {
 					std::lock_guard lock{mutex};
 					if (callback.is_error()) {
 						events_abort();
 						set_messages_tested();
 						return;
 					}
-					events_to_test_mask |= MESSAGE_REMOVE_REACT;
-					bot.message_delete_reaction(message_id, thread_id, bot.me.id, dpp::unicode_emoji::thread, [this, message_id](const dpp::confirmation_callback_t &callback) {
-					    std::lock_guard lock{mutex};
-					    if (callback.is_error()) {
-						    events_abort();
-						    set_messages_tested();
-						    return;
-					    }
-					    events_to_test_mask |= MESSAGE_DELETE;
-					    bot.message_delete(message_id, thread_id, [this] (const dpp::confirmation_callback_t &callback) {
+					auto m = callback.get<dpp::message>();
+					m.content = "hello thread?";
+					events_to_test_mask |= MESSAGE_EDIT;
+					bot.message_edit(m, [this, message_id = m.id](const dpp::confirmation_callback_t &callback) {
 						std::lock_guard lock{mutex};
-						set_messages_tested();
 						if (callback.is_error()) {
 							events_abort();
+							set_messages_tested();
 							return;
 						}
-						set_test(THREAD_MESSAGE, true);
-					    });
+						events_to_test_mask |= MESSAGE_REACT;
+						bot.message_add_reaction(message_id, thread_id, dpp::unicode_emoji::thread, [this, message_id](const dpp::confirmation_callback_t &callback) {
+							std::lock_guard lock{mutex};
+							if (callback.is_error()) {
+								events_abort();
+								set_messages_tested();
+								return;
+							}
+							events_to_test_mask |= MESSAGE_REMOVE_REACT;
+							bot.message_delete_reaction(message_id, thread_id, bot.me.id, dpp::unicode_emoji::thread, [this, message_id](const dpp::confirmation_callback_t &callback) {
+								std::lock_guard lock{mutex};
+								if (callback.is_error()) {
+									events_abort();
+									set_messages_tested();
+									return;
+								}
+								events_to_test_mask |= MESSAGE_DELETE;
+								bot.message_delete(message_id, thread_id, [this] (const dpp::confirmation_callback_t &callback) {
+								std::lock_guard lock{mutex};
+								set_messages_tested();
+								if (callback.is_error()) {
+									events_abort();
+									return;
+								}
+								set_test(THREAD_MESSAGE, true);
+								});
+							});
+						});
 					});
-				    });
-				});
 			    });
 		    }
 
@@ -670,39 +669,39 @@ void gateway_events_tests(const std::string& token) {
 				    message_helper.run(event.msg);
 				    set_test(MESSAGESGET, false);
 				    bot.messages_get(event.msg.channel_id, 0, event.msg.id, 0, 5, [](const dpp::confirmation_callback_t &cc){
-					if (!cc.is_error()) {
-						dpp::message_map mm = std::get<dpp::message_map>(cc.value);
-						if (mm.size()) {
-							set_test(MESSAGESGET, true);
-							set_test(TIMESTAMP, false);
-							dpp::message m = mm.begin()->second;
-							if (m.sent > 0) {
-								set_test(TIMESTAMP, true);
-							} else {
+						if (!cc.is_error()) {
+							dpp::message_map mm = std::get<dpp::message_map>(cc.value);
+							if (mm.size()) {
+								set_test(MESSAGESGET, true);
 								set_test(TIMESTAMP, false);
+								dpp::message m = mm.begin()->second;
+								if (m.sent > 0) {
+									set_test(TIMESTAMP, true);
+								} else {
+									set_test(TIMESTAMP, false);
+								}
+							} else {
+								set_test(MESSAGESGET, false);
 							}
-						} else {
+						}  else {
 							set_test(MESSAGESGET, false);
 						}
-					}  else {
-						set_test(MESSAGESGET, false);
-					}
 				    });
 				    set_test(MSGCREATESEND, false);
 				    event.send("MSGCREATESEND", [&bot, ch_id = event.msg.channel_id] (const auto& cc) {
-					if (!cc.is_error()) {
-						dpp::message m = std::get<dpp::message>(cc.value);
-						if (m.channel_id == ch_id) {
-							set_test(MSGCREATESEND, true);
+						if (!cc.is_error()) {
+							dpp::message m = std::get<dpp::message>(cc.value);
+							if (m.channel_id == ch_id) {
+								set_test(MSGCREATESEND, true);
+							} else {
+								bot.log(dpp::ll_debug, cc.http_info.body);
+								set_test(MSGCREATESEND, false);
+							}
+							bot.message_delete(m.id, m.channel_id);
 						} else {
 							bot.log(dpp::ll_debug, cc.http_info.body);
 							set_test(MSGCREATESEND, false);
 						}
-						bot.message_delete(m.id, m.channel_id);
-					} else {
-						bot.log(dpp::ll_debug, cc.http_info.body);
-						set_test(MSGCREATESEND, false);
-					}
 				    });
 			    }
 			    if (event.msg.channel_id == thread_helper.thread_id && event.msg.content == "hello thread") {
@@ -833,17 +832,17 @@ void gateway_events_tests(const std::string& token) {
 							bot.guild_ban_delete(TEST_GUILD_ID, deadUser1, [&bot, deadUser2, deadUser3](const dpp::confirmation_callback_t &event) {
 							    if (!event.is_error()) {
 								    bot.guild_ban_delete(TEST_GUILD_ID, deadUser2, [&bot, deadUser3](const dpp::confirmation_callback_t &event) {
-									if (!event.is_error()) {
-										bot.guild_ban_delete(TEST_GUILD_ID, deadUser3, [](const dpp::confirmation_callback_t &event) {
-										    if (!event.is_error()) {
-											    set_test(GUILD_BAN_DELETE, true);
-										    }
-										});
-									}
+										if (!event.is_error()) {
+											bot.guild_ban_delete(TEST_GUILD_ID, deadUser3, [](const dpp::confirmation_callback_t &event) {
+												if (!event.is_error()) {
+													set_test(GUILD_BAN_DELETE, true);
+												}
+											});
+										}
 								    });
 							    }
 							});
-						    });
+						});
 					});
 			    });
 		    }
@@ -851,42 +850,42 @@ void gateway_events_tests(const std::string& token) {
 		    set_test(REQUEST_GET_IMAGE, false);
 		    if (!offline) {
 			    bot.request("https://dpp.dev/DPP-Logo.png", dpp::m_get, [&bot](const dpp::http_request_completion_t &callback) {
-				if (callback.status != 200) {
-					return;
-				}
-				set_test(REQUEST_GET_IMAGE, true);
-
-				dpp::emoji emoji;
-				emoji.load_image(callback.body, dpp::i_png);
-				emoji.name = "dpp";
-
-				// emoji unit test with the requested image
-				set_test(EMOJI_CREATE, false);
-				set_test(EMOJI_GET, false);
-				set_test(EMOJI_DELETE, false);
-				bot.guild_emoji_create(TEST_GUILD_ID, emoji, [&bot](const dpp::confirmation_callback_t &event) {
-				    if (event.is_error()) {
-					    return;
-				    }
-				    set_test(EMOJI_CREATE, true);
-
-				    auto created = event.get<dpp::emoji>();
-				    bot.guild_emoji_get(TEST_GUILD_ID, created.id, [&bot, created](const dpp::confirmation_callback_t &event) {
-					if (event.is_error()) {
+					if (callback.status != 200) {
 						return;
 					}
-					auto fetched = event.get<dpp::emoji>();
-					if (created.id == fetched.id && created.name == fetched.name && created.flags == fetched.flags) {
-						set_test(EMOJI_GET, true);
-					}
+					set_test(REQUEST_GET_IMAGE, true);
 
-					bot.guild_emoji_delete(TEST_GUILD_ID, fetched.id, [](const dpp::confirmation_callback_t &event) {
-					    if (!event.is_error()) {
-						    set_test(EMOJI_DELETE, true);
-					    }
+					dpp::emoji emoji;
+					emoji.load_image(callback.body, dpp::i_png);
+					emoji.name = "dpp";
+
+					// emoji unit test with the requested image
+					set_test(EMOJI_CREATE, false);
+					set_test(EMOJI_GET, false);
+					set_test(EMOJI_DELETE, false);
+					bot.guild_emoji_create(TEST_GUILD_ID, emoji, [&bot](const dpp::confirmation_callback_t &event) {
+						if (event.is_error()) {
+							return;
+						}
+						set_test(EMOJI_CREATE, true);
+
+						auto created = event.get<dpp::emoji>();
+						bot.guild_emoji_get(TEST_GUILD_ID, created.id, [&bot, created](const dpp::confirmation_callback_t &event) {
+							if (event.is_error()) {
+								return;
+							}
+							auto fetched = event.get<dpp::emoji>();
+							if (created.id == fetched.id && created.name == fetched.name && created.flags == fetched.flags) {
+								set_test(EMOJI_GET, true);
+							}
+
+							bot.guild_emoji_delete(TEST_GUILD_ID, fetched.id, [](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									set_test(EMOJI_DELETE, true);
+								}
+							});
+						});
 					});
-				    });
-				});
 			    });
 		    }
 
@@ -901,37 +900,37 @@ void gateway_events_tests(const std::string& token) {
 			    invite.max_uses = 100;
 			    set_test(INVITE_CREATE_EVENT, false);
 			    bot.channel_invite_create(channel, invite, [&bot, invite](const dpp::confirmation_callback_t &event) {
-				if (event.is_error()) {
-					return;
-				}
+					if (event.is_error()) {
+						return;
+					}
 
-				auto created = event.get<dpp::invite>();
-				if (!created.code.empty() && created.channel_id == TEST_TEXT_CHANNEL_ID && created.guild_id == TEST_GUILD_ID && created.inviter.id == bot.me.id) {
-					set_test(INVITE_CREATE, true);
-				}
+					auto created = event.get<dpp::invite>();
+					if (!created.code.empty() && created.channel_id == TEST_TEXT_CHANNEL_ID && created.guild_id == TEST_GUILD_ID && created.inviter.id == bot.me.id) {
+						set_test(INVITE_CREATE, true);
+					}
 
-				bot.invite_get(created.code, [&bot, created](const dpp::confirmation_callback_t &event) {
-				    if (!event.is_error()) {
-					    auto retrieved = event.get<dpp::invite>();
-					    if (retrieved.code == created.code && retrieved.guild_id == created.guild_id && retrieved.channel_id == created.channel_id && retrieved.inviter.id == created.inviter.id) {
-						    if (retrieved.destination_guild.flags & dpp::g_community) {
-							    set_test(INVITE_GET, retrieved.expires_at == 0);
-						    } else {
-							    set_test(INVITE_GET, true);
-						    }
+					bot.invite_get(created.code, [&bot, created](const dpp::confirmation_callback_t &event) {
+						if (!event.is_error()) {
+							auto retrieved = event.get<dpp::invite>();
+							if (retrieved.code == created.code && retrieved.guild_id == created.guild_id && retrieved.channel_id == created.channel_id && retrieved.inviter.id == created.inviter.id) {
+								if (retrieved.destination_guild.flags & dpp::g_community) {
+									set_test(INVITE_GET, retrieved.expires_at == 0);
+								} else {
+									set_test(INVITE_GET, true);
+								}
 
-					    } else {
-						    set_test(INVITE_GET, false);
-					    }
-				    } else {
-					    set_test(INVITE_GET, false);
-				    }
+							} else {
+								set_test(INVITE_GET, false);
+							}
+						} else {
+							set_test(INVITE_GET, false);
+						}
 
-				    set_test(INVITE_DELETE_EVENT, false);
-				    bot.invite_delete(created.code, [](const dpp::confirmation_callback_t &event) {
-					set_test(INVITE_DELETE, !event.is_error());
-				    });
-				});
+						set_test(INVITE_DELETE_EVENT, false);
+						bot.invite_delete(created.code, [](const dpp::confirmation_callback_t &event) {
+						set_test(INVITE_DELETE, !event.is_error());
+						});
+					});
 			    });
 		    }
 
@@ -956,50 +955,50 @@ void gateway_events_tests(const std::string& token) {
 			    automodRule.actions.emplace_back(automodAction);
 
 			    bot.automod_rules_get(TEST_GUILD_ID, [&bot, automodRule](const dpp::confirmation_callback_t &event) {
-				if (event.is_error()) {
-					return;
-				}
-				auto rules = event.get<dpp::automod_rule_map>();
-				set_test(AUTOMOD_RULE_GET_ALL, true);
-				for (const auto &rule: rules) {
-					if (rule.second.trigger_type == dpp::amod_type_keyword) {
-						// delete one automod rule of type KEYWORD before creating one to make space...
-						bot.automod_rule_delete(TEST_GUILD_ID, rule.first);
-					}
-				}
-
-				// start creating the automod rules
-				bot.automod_rule_create(TEST_GUILD_ID, automodRule, [&bot, automodRule](const dpp::confirmation_callback_t &event) {
-				    if (event.is_error()) {
-					    return;
-				    }
-				    auto created = event.get<dpp::automod_rule>();
-				    if (created.name == automodRule.name) {
-					    set_test(AUTOMOD_RULE_CREATE, true);
-				    }
-
-				    // get automod rule
-				    bot.automod_rule_get(TEST_GUILD_ID, created.id, [automodRule, &bot, created](const dpp::confirmation_callback_t &event) {
 					if (event.is_error()) {
 						return;
 					}
-					auto retrieved = event.get<dpp::automod_rule>();
-					if (retrieved.name == automodRule.name &&
-					    retrieved.trigger_type == automodRule.trigger_type &&
-					    retrieved.trigger_metadata.keywords == automodRule.trigger_metadata.keywords &&
-					    retrieved.trigger_metadata.regex_patterns == automodRule.trigger_metadata.regex_patterns &&
-					    retrieved.trigger_metadata.allow_list == automodRule.trigger_metadata.allow_list && retrieved.actions.size() == automodRule.actions.size()) {
-						set_test(AUTOMOD_RULE_GET, true);
+					auto rules = event.get<dpp::automod_rule_map>();
+					set_test(AUTOMOD_RULE_GET_ALL, true);
+					for (const auto &rule: rules) {
+						if (rule.second.trigger_type == dpp::amod_type_keyword) {
+							// delete one automod rule of type KEYWORD before creating one to make space...
+							bot.automod_rule_delete(TEST_GUILD_ID, rule.first);
+						}
 					}
 
-					// delete the automod rule
-					bot.automod_rule_delete(TEST_GUILD_ID, retrieved.id, [](const dpp::confirmation_callback_t &event) {
-					    if (!event.is_error()) {
-						    set_test(AUTOMOD_RULE_DELETE, true);
-					    }
+					// start creating the automod rules
+					bot.automod_rule_create(TEST_GUILD_ID, automodRule, [&bot, automodRule](const dpp::confirmation_callback_t &event) {
+						if (event.is_error()) {
+							return;
+						}
+						auto created = event.get<dpp::automod_rule>();
+						if (created.name == automodRule.name) {
+							set_test(AUTOMOD_RULE_CREATE, true);
+						}
+
+						// get automod rule
+						bot.automod_rule_get(TEST_GUILD_ID, created.id, [automodRule, &bot, created](const dpp::confirmation_callback_t &event) {
+							if (event.is_error()) {
+								return;
+							}
+							auto retrieved = event.get<dpp::automod_rule>();
+							if (retrieved.name == automodRule.name &&
+								retrieved.trigger_type == automodRule.trigger_type &&
+								retrieved.trigger_metadata.keywords == automodRule.trigger_metadata.keywords &&
+								retrieved.trigger_metadata.regex_patterns == automodRule.trigger_metadata.regex_patterns &&
+								retrieved.trigger_metadata.allow_list == automodRule.trigger_metadata.allow_list && retrieved.actions.size() == automodRule.actions.size()) {
+								set_test(AUTOMOD_RULE_GET, true);
+							}
+
+							// delete the automod rule
+							bot.automod_rule_delete(TEST_GUILD_ID, retrieved.id, [](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									set_test(AUTOMOD_RULE_DELETE, true);
+								}
+							});
+						});
 					});
-				    });
-				});
 			    });
 		    }
 
@@ -1007,46 +1006,46 @@ void gateway_events_tests(const std::string& token) {
 		    set_test(USER_GET_FLAGS, false);
 		    if (!offline) {
 			    bot.user_get(TEST_USER_ID, [](const dpp::confirmation_callback_t &event) {
-				if (!event.is_error()) {
-					auto u = std::get<dpp::user_identified>(event.value);
-					if (u.id == TEST_USER_ID) {
-						set_test(USER_GET, true);
+					if (!event.is_error()) {
+						auto u = std::get<dpp::user_identified>(event.value);
+						if (u.id == TEST_USER_ID) {
+							set_test(USER_GET, true);
+						} else {
+							set_test(USER_GET, false);
+						}
+						json j = json::parse(event.http_info.body);
+						uint64_t raw_flags = j["public_flags"];
+						if (j.contains("flags")) {
+							uint64_t flags = j["flags"];
+							raw_flags |= flags;
+						}
+						// testing all user flags from https://discord.com/developers/docs/resources/user#user-object-user-flags
+						// they're manually set here because the dpp::user_flags don't match to the discord API, so we can't use them to compare with the raw flags!
+						if (
+							u.is_discord_employee() == 			((raw_flags & (1 << 0)) != 0) &&
+							u.is_partnered_owner() == 			((raw_flags & (1 << 1)) != 0) &&
+							u.has_hypesquad_events() == 		((raw_flags & (1 << 2)) != 0) &&
+							u.is_bughunter_1() == 				((raw_flags & (1 << 3)) != 0) &&
+							u.is_house_bravery() == 			((raw_flags & (1 << 6)) != 0) &&
+							u.is_house_brilliance() == 			((raw_flags & (1 << 7)) != 0) &&
+							u.is_house_balance() == 			((raw_flags & (1 << 8)) != 0) &&
+							u.is_early_supporter() == 			((raw_flags & (1 << 9)) != 0) &&
+							u.is_team_user() == 				((raw_flags & (1 << 10)) != 0) &&
+							u.is_bughunter_2() == 				((raw_flags & (1 << 14)) != 0) &&
+							u.is_verified_bot() == 				((raw_flags & (1 << 16)) != 0) &&
+							u.is_verified_bot_dev() == 			((raw_flags & (1 << 17)) != 0) &&
+							u.is_certified_moderator() == 		((raw_flags & (1 << 18)) != 0) &&
+							u.is_bot_http_interactions() == 	((raw_flags & (1 << 19)) != 0) &&
+							u.is_active_developer() == 			((raw_flags & (1 << 22)) != 0)
+							) {
+							set_test(USER_GET_FLAGS, true);
+						} else {
+							set_test(USER_GET_FLAGS, false);
+						}
 					} else {
 						set_test(USER_GET, false);
-					}
-					json j = json::parse(event.http_info.body);
-					uint64_t raw_flags = j["public_flags"];
-					if (j.contains("flags")) {
-						uint64_t flags = j["flags"];
-						raw_flags |= flags;
-					}
-					// testing all user flags from https://discord.com/developers/docs/resources/user#user-object-user-flags
-					// they're manually set here because the dpp::user_flags don't match to the discord API, so we can't use them to compare with the raw flags!
-					if (
-						u.is_discord_employee() == 			((raw_flags & (1 << 0)) != 0) &&
-						u.is_partnered_owner() == 			((raw_flags & (1 << 1)) != 0) &&
-						u.has_hypesquad_events() == 		((raw_flags & (1 << 2)) != 0) &&
-						u.is_bughunter_1() == 				((raw_flags & (1 << 3)) != 0) &&
-						u.is_house_bravery() == 			((raw_flags & (1 << 6)) != 0) &&
-						u.is_house_brilliance() == 			((raw_flags & (1 << 7)) != 0) &&
-						u.is_house_balance() == 			((raw_flags & (1 << 8)) != 0) &&
-						u.is_early_supporter() == 			((raw_flags & (1 << 9)) != 0) &&
-						u.is_team_user() == 				((raw_flags & (1 << 10)) != 0) &&
-						u.is_bughunter_2() == 				((raw_flags & (1 << 14)) != 0) &&
-						u.is_verified_bot() == 				((raw_flags & (1 << 16)) != 0) &&
-						u.is_verified_bot_dev() == 			((raw_flags & (1 << 17)) != 0) &&
-						u.is_certified_moderator() == 		((raw_flags & (1 << 18)) != 0) &&
-						u.is_bot_http_interactions() == 	((raw_flags & (1 << 19)) != 0) &&
-						u.is_active_developer() == 			((raw_flags & (1 << 22)) != 0)
-						) {
-						set_test(USER_GET_FLAGS, true);
-					} else {
 						set_test(USER_GET_FLAGS, false);
 					}
-				} else {
-					set_test(USER_GET, false);
-					set_test(USER_GET_FLAGS, false);
-				}
 			    });
 		    }
 
@@ -1121,67 +1120,67 @@ void gateway_events_tests(const std::string& token) {
 			    c.default_reaction = "✅";
 			    c.default_thread_rate_limit_per_user = 10;
 			    bot.channel_create(c, [&bot](const dpp::confirmation_callback_t &event) {
-				if (!event.is_error()) {
-					set_test(FORUM_CREATION, true);
-					auto channel = std::get<dpp::channel>(event.value);
-					// retrieve the forum channel and check the values
-					bot.channel_get(channel.id, [forum_id = channel.id, &bot](const dpp::confirmation_callback_t &event) {
-					    if (!event.is_error()) {
-						    auto channel = std::get<dpp::channel>(event.value);
-						    bot.log(dpp::ll_debug, event.http_info.body);
-						    bool tag = false;
-						    for (auto &t : channel.available_tags) {
-							    if (t.name == "Alpha" && std::holds_alternative<std::string>(t.emoji) && std::get<std::string>(t.emoji) == "❌") {
-								    tag = true;
-							    }
-						    }
-						    bool name = channel.name == "test-forum-channel";
-						    bool sort = channel.default_sort_order == dpp::so_creation_date;
-						    bool rateLimit = channel.default_thread_rate_limit_per_user == 10;
-						    set_test(FORUM_CHANNEL_GET, tag && name && sort && rateLimit);
-					    } else {
-						    set_test(FORUM_CHANNEL_GET, false);
-					    }
-					    // delete the forum channel
-					    bot.channel_delete(forum_id, [](const dpp::confirmation_callback_t &event) {
-						if (!event.is_error()) {
-							set_test(FORUM_CHANNEL_DELETE, true);
-						} else {
-							set_test(FORUM_CHANNEL_DELETE, false);
-						}
-					    });
-					});
-				} else {
-					set_test(FORUM_CREATION, false);
-					set_test(FORUM_CHANNEL_GET, false);
-				}
+					if (!event.is_error()) {
+						set_test(FORUM_CREATION, true);
+						auto channel = std::get<dpp::channel>(event.value);
+						// retrieve the forum channel and check the values
+						bot.channel_get(channel.id, [forum_id = channel.id, &bot](const dpp::confirmation_callback_t &event) {
+							if (!event.is_error()) {
+								auto channel = std::get<dpp::channel>(event.value);
+								bot.log(dpp::ll_debug, event.http_info.body);
+								bool tag = false;
+								for (auto &t : channel.available_tags) {
+									if (t.name == "Alpha" && std::holds_alternative<std::string>(t.emoji) && std::get<std::string>(t.emoji) == "❌") {
+										tag = true;
+									}
+								}
+								bool name = channel.name == "test-forum-channel";
+								bool sort = channel.default_sort_order == dpp::so_creation_date;
+								bool rateLimit = channel.default_thread_rate_limit_per_user == 10;
+								set_test(FORUM_CHANNEL_GET, tag && name && sort && rateLimit);
+							} else {
+								set_test(FORUM_CHANNEL_GET, false);
+							}
+							// delete the forum channel
+							bot.channel_delete(forum_id, [](const dpp::confirmation_callback_t &event) {
+								if (!event.is_error()) {
+									set_test(FORUM_CHANNEL_DELETE, true);
+								} else {
+									set_test(FORUM_CHANNEL_DELETE, false);
+								}
+							});
+						});
+					} else {
+						set_test(FORUM_CREATION, false);
+						set_test(FORUM_CHANNEL_GET, false);
+					}
 			    });
 		    }
 
 		    set_test(THREAD_CREATE, false);
 		    if (!offline) {
 			    bot.thread_create("thread test", TEST_TEXT_CHANNEL_ID, 60, dpp::channel_type::CHANNEL_PUBLIC_THREAD, true, 60, [&](const dpp::confirmation_callback_t &event) {
-				if (!event.is_error()) {
-					[[maybe_unused]] const auto &thread = event.get<dpp::thread>();
-					set_test(THREAD_CREATE, true);
-				}
-				// the thread tests are in the on_thread_create event handler
+					if (!event.is_error()) {
+						[[maybe_unused]] const auto &thread = event.get<dpp::thread>();
+						set_test(THREAD_CREATE, true);
+					}
+					// the thread tests are in the on_thread_create event handler
 			    });
 		    }
 
 		    set_test(MEMBER_GET, false);
 		    if (!offline) {
 			    bot.guild_get_member(TEST_GUILD_ID, TEST_USER_ID, [](const dpp::confirmation_callback_t &event){
-				if (!event.is_error()) {
-					dpp::guild_member m = std::get<dpp::guild_member>(event.value);
-					if (m.guild_id == TEST_GUILD_ID && m.user_id == TEST_USER_ID) {
-						set_test(MEMBER_GET, true);
+					if (!event.is_error()) {
+						dpp::guild_member m = std::get<dpp::guild_member>(event.value);
+						if (m.guild_id == TEST_GUILD_ID && m.user_id == TEST_USER_ID) {
+							set_test(MEMBER_GET, true);
+						} else {
+							set_test(MEMBER_GET, false);
+						}
 					} else {
 						set_test(MEMBER_GET, false);
 					}
-				} else {
-					set_test(MEMBER_GET, false);
-				}
 			    });
 		    }
 
