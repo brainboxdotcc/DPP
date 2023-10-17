@@ -176,6 +176,11 @@ class DPP_EXPORT https_client : public ssl_client
 	uint16_t status;
 
 	/**
+	 * @brief The HTTP protocol to use
+	 */
+	std::string http_protocol;
+
+	/**
 	 * @brief Time at which the request should be abandoned
 	 */
 	time_t timeout;
@@ -243,8 +248,9 @@ public:
 	 * @param extra_headers Additional request headers, e.g. user-agent, authorization, etc
 	 * @param plaintext_connection Set to true to make the connection plaintext (turns off SSL)
 	 * @param request_timeout How many seconds before the connection is considered failed if not finished
+	 * @param http_protocol Request HTTP protocol
 	 */
-        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5);
+        https_client(const std::string &hostname, uint16_t port = 443, const std::string &urlpath = "/", const std::string &verb = "GET", const std::string &req_body = "", const http_headers& extra_headers = {}, bool plaintext_connection = false, uint16_t request_timeout = 5, const std::string &protocol = "1.1");
 
 	/**
 	 * @brief Destroy the https client object

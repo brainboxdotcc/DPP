@@ -158,6 +158,8 @@ public:
 	std::multimap<std::string, std::string> req_headers;
 	/** @brief Waiting for rate limit to expire */
 	bool waiting;
+	/** @brief HTTP protocol */
+	std::string protocol;
 
 	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
@@ -170,8 +172,9 @@ public:
 	 * @param filename The filename (server side) of any uploaded file
 	 * @param filecontent The binary content of any uploaded file for the request
 	 * @param filemimetype The MIME type of any uploaded file for the request
+	 * @param http_protocol HTTP protocol
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "");
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::string &filename = "", const std::string &filecontent = "", const std::string &filemimetype = "", const std::string &http_protocol = "1.1");
 
 	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
@@ -184,8 +187,9 @@ public:
 	 * @param filename The filename (server side) of any uploaded file
 	 * @param filecontent The binary content of any uploaded file for the request
 	 * @param filemimetypes The MIME type of any uploaded file for the request
+	 * @param http_protocol HTTP protocol
 	 */
-	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {}, const std::vector<std::string> &filemimetypes = {});
+	http_request(const std::string &_endpoint, const std::string &_parameters, http_completion_event completion, const std::string &_postdata = "", http_method method = m_get, const std::string &audit_reason = "", const std::vector<std::string> &filename = {}, const std::vector<std::string> &filecontent = {}, const std::vector<std::string> &filemimetypes = {}, const std::string &http_protocol = "1.1");
 
 	/**
 	 * @brief Constructor. When constructing one of these objects it should be passed to request_queue::post_request().
@@ -195,8 +199,9 @@ public:
 	 * @param _postdata Data to send in POST and PUT requests
 	 * @param _mimetype POST data mime type
 	 * @param _headers HTTP headers to send
+	 * @param http_protocol HTTP protocol
 	 */
-	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {});
+	http_request(const std::string &_url, http_completion_event completion, http_method method = m_get, const std::string &_postdata = "", const std::string &_mimetype = "text/plain", const std::multimap<std::string, std::string> &_headers = {}, const std::string &http_protocol = "1.1");
 
 	/**
 	 * @brief Destroy the http request object
