@@ -23,6 +23,7 @@
 #include <dpp/export.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+#include <dpp/utility.h>
 #include <string_view>
 #include <functional>
 
@@ -83,6 +84,13 @@ std::string DPP_EXPORT string_not_null(const nlohmann::json* j, const char *keyn
  * @param v Value to change
  */
 void DPP_EXPORT set_string_not_null(const nlohmann::json* j, const char *keyname, std::string &v);
+
+/** @brief This is a repeat of set_string_not_null, but takes in a iconhash.
+ * @param j nlohmann::json instance to retrieve value from
+ * @param keyname key name to check for a value
+ * @param v Value to change
+ */
+void DPP_EXPORT set_iconhash_not_null(const nlohmann::json* j, const char *keyname, utility::iconhash &v);
 
 /** @brief Returns a double from a json field value, if defined, else returns 0.
  * @param j nlohmann::json instance to retrieve value from

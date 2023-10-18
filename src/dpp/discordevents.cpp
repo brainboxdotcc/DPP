@@ -128,6 +128,14 @@ void set_string_not_null(const json* j, const char *keyname, std::string &v) {
 	}
 }
 
+void set_iconhash_not_null(const json* j, const char *keyname, utility::iconhash &v) {
+	/* Returns empty string if the value is not a string, or is null or not defined */
+	auto k = j->find(keyname);
+	if (k != j->end()) {
+		v = !k->is_null() && k->is_string() ? k->get<std::string>() : "";
+	}
+}
+
 double double_not_null(const json* j, const char *keyname) {
 	auto k = j->find(keyname);
 	if (k != j->end()) {
