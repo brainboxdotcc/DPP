@@ -594,3 +594,8 @@ void gateway_events_tests(const std::string&, dpp::cluster&);
 * @brief Unit tests for Cache
 */
 void cache_tests(dpp::cluster&);
+
+/**
+* @brief Unit tests for library Utilities
+*/
+void utility_tests();
