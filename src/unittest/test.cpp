@@ -21,9 +21,6 @@
  ************************************************************************************/
 #include "test.h"
 
-#include <dpp/restrequest.h>
-#include <dpp/json.h>
-
 /* Unit tests go here */
 int main(int argc, char *argv[])
 {
