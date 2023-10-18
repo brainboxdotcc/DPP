@@ -96,10 +96,13 @@ Markdown lol ||spoiler|| ~~strikethrough~~ `small *code* block`\n";
 	u3.id = 777;
 	set_test(COMPARISON, u1 == u2 && u1 != u3);
 
+	dpp::cluster bot(token, dpp::i_all_intents);
+
 	errors_test();
 	http_client_tests(token);
 	discord_objects_tests();
-	gateway_events_tests(token);
+	gateway_events_tests(token, bot);
+	cache_tests(bot);
 
 	set_test(MD_ESC_1, false);
 	set_test(MD_ESC_2, false);

@@ -588,4 +588,9 @@ void discord_objects_tests();
 /**
  * @brief Unit tests for Gateway events
  */
-void gateway_events_tests(const std::string&);
+void gateway_events_tests(const std::string&, dpp::cluster&);
+
+/**
+* @brief Unit tests for Cache
+*/
+void cache_tests(dpp::cluster&);

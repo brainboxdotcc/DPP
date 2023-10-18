@@ -25,14 +25,13 @@
 #include <dpp/unicode_emoji.h>
 
 /* Unit tests for Gateway events */
-void gateway_events_tests(const std::string& token) {
+void gateway_events_tests(const std::string& token, dpp::cluster& bot) {
 	std::vector<uint8_t> test_image = load_test_image();
 	std::vector<uint8_t> testaudio = load_test_audio();
 
 	set_test(PRESENCE, false);
 	set_test(CLUSTER, false);
 	try {
-		dpp::cluster bot(token, dpp::i_all_intents);
 		bot.set_websocket_protocol(dpp::ws_etf);
 		set_test(CLUSTER, true);
 		set_test(CONNECTION, false);
@@ -1249,30 +1248,6 @@ void gateway_events_tests(const std::string& token) {
 		    ticks++;
 		}, 1);
 
-		set_test(USER_GET_CACHED_PRESENT, false);
-		try {
-			dpp::user_identified u = bot.user_get_cached_sync(TEST_USER_ID);
-			set_test(USER_GET_CACHED_PRESENT, (u.id == TEST_USER_ID));
-		}
-		catch (const std::exception&) {
-			set_test(USER_GET_CACHED_PRESENT, false);
-		}
-
-		set_test(USER_GET_CACHED_ABSENT, false);
-		try {
-			/* This is the snowflake ID of a discord staff member.
-			 * We assume here that staffer's discord IDs will remain constant
-			 * for long periods of time and they won't lurk in the unit test server.
-			 * If this becomes not true any more, we'll pick another well known
-			 * user ID.
-			 */
-			dpp::user_identified u = bot.user_get_cached_sync(90339695967350784);
-			set_test(USER_GET_CACHED_ABSENT, (u.id == dpp::snowflake(90339695967350784)));
-		}
-		catch (const std::exception&) {
-			set_test(USER_GET_CACHED_ABSENT, false);
-		}
-
 		set_test(TIMEDLISTENER, false);
 		dpp::timed_listener tl(&bot, 10, bot.on_log, [&](const dpp::log_t & event) {
 		    set_test(TIMEDLISTENER, true);
@@ -1289,19 +1264,7 @@ void gateway_events_tests(const std::string& token) {
 		    once = true;
 		});
 
-		set_test(CUSTOMCACHE, false);
-		dpp::cache<test_cached_object_t> testcache;
-		test_cached_object_t* tco = new test_cached_object_t(666);
-		tco->foo = "bar";
-		testcache.store(tco);
-		test_cached_object_t* found_tco = testcache.find(666);
-		if (found_tco && found_tco->id == dpp::snowflake(666) && found_tco->foo == "bar") {
-			set_test(CUSTOMCACHE, true);
-		} else {
-			set_test(CUSTOMCACHE, false);
-		}
-		testcache.remove(found_tco);
-
+		// online tests
 		if (!offline) {
 			if (std::future_status status = ready_future.wait_for(std::chrono::seconds(20)); status != std::future_status::timeout) {
 				do_online_tests();
