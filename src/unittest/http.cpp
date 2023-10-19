@@ -59,7 +59,6 @@ void http_client_tests(const std::string& token) {
 					    }
 			);
 			std::string hdr1 = c.get_header("server");
-			std::string content1 = c.get_content();
 			set_test(HTTPS, hdr1 == "cloudflare" && c.get_status() == 200);
 		}
 		catch (const dpp::exception& e) {
@@ -72,7 +71,6 @@ void http_client_tests(const std::string& token) {
 	try {
 		dpp::https_client c2("github.com", 80, "/", "GET", "", {}, true);
 		std::string hdr2 = c2.get_header("location");
-		std::string content2 = c2.get_content();
 		set_test(HTTP, hdr2 == "https://github.com/" && c2.get_status() == 301);
 	}
 	catch (const dpp::exception& e) {
