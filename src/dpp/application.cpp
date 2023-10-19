@@ -148,7 +148,7 @@ application& application::fill_from_json_impl(nlohmann::json* j) {
 }
 
 std::string application::get_cover_image_url(uint16_t size, const image_type format) const {
-	if (!this->cover_image.to_string().empty()) {
+	if (!this->cover_image.to_string().empty() && this->id) {
 		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
 	 		"app-icons/" + std::to_string(this->id) + "/" + this->cover_image.to_string(),
 			format, size);
@@ -158,7 +158,7 @@ std::string application::get_cover_image_url(uint16_t size, const image_type for
 }
 
 std::string application::get_icon_url(uint16_t size, const image_type format) const {
-	if (!this->icon.to_string().empty()) {
+	if (!this->icon.to_string().empty() && this->id) {
 		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
 	 		"app-icons/" + std::to_string(this->id) + "/" + this->icon.to_string(),
 		 	format, size);
