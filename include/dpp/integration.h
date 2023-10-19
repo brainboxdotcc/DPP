@@ -78,7 +78,7 @@ struct DPP_EXPORT integration_account {
  * @brief Represents an integration on a guild, e.g. a connection to twitch.
  */
 class DPP_EXPORT integration : public managed, public json_interface<integration> {
-	protected:
+protected:
 	friend struct json_interface<integration>;
 
 	/** Read class values from json object
@@ -93,7 +93,7 @@ class DPP_EXPORT integration : public managed, public json_interface<integration
 	 */
 	virtual json to_json_impl(bool with_id = false) const;
 
-	public:
+public:
 	std::string 			name;			//!< integration name
 	integration_type 		type;			//!< integration type (twitch, youtube, discord, or guild_subscription)
 	uint8_t 			flags;			//!< integration flags from dpp::integration_flags
@@ -148,7 +148,7 @@ class DPP_EXPORT integration : public managed, public json_interface<integration
  * @brief The connection object that the user has attached.
  */
 class DPP_EXPORT connection : public json_interface<connection> {
-	protected:
+protected:
 	friend struct json_interface<connection>;
 
 	/** Read class values from json object
@@ -157,7 +157,7 @@ class DPP_EXPORT connection : public json_interface<connection> {
 	 */
 	connection& fill_from_json_impl(nlohmann::json* j);
 
-	public:
+public:
 	std::string			id;		//!< id of the connection account
 	std::string			name;		//!< the username of the connection account
 	std::string			type;		//!< the service of the connection (twitch, youtube, discord, or guild_subscription)
