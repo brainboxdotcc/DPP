@@ -158,7 +158,7 @@ void gateway_events_tests(const std::string& token, dpp::cluster& bot) {
 		    dpp::discord_voice_client* v = event.voice_client;
 		    set_test(VOICESEND, false);
 		    if (v && v->is_ready()) {
-			    v->send_audio_raw((uint16_t*)testaudio.data(), testaudio.size());
+				v->send_audio_raw(reinterpret_cast<uint16_t*>(testaudio.data()), testaudio.size()); // TODO: fix type punning
 		    } else {
 			    set_test(VOICESEND, false);
 		    }
@@ -215,10 +215,10 @@ void gateway_events_tests(const std::string& token, dpp::cluster& bot) {
 		{
 		private:
 		    std::mutex mutex;
-		    bool pin_tested;
-		    bool thread_tested;
-		    std::array<bool, 3> files_tested;
-		    std::array<bool, 3> files_success;
+		    bool pin_tested = false;
+		    bool thread_tested = false;
+		    std::array<bool, 3> files_tested{};
+		    std::array<bool, 3> files_success{};
 		    dpp::snowflake channel_id;
 		    dpp::snowflake message_id;
 		    dpp::cluster &bot;
@@ -346,7 +346,7 @@ void gateway_events_tests(const std::string& token, dpp::cluster& bot) {
 		public:
 		    dpp::snowflake thread_id;
 
-		    message_test_helper(dpp::cluster &_bot) : bot(_bot) {}
+		    explicit message_test_helper(dpp::cluster &_bot) : bot(_bot) {}
 
 		    void run(const dpp::message &message) {
 			    pin_tested = false;
@@ -645,7 +645,7 @@ void gateway_events_tests(const std::string& token, dpp::cluster& bot) {
 			    test_messages(thread);
 		    }
 
-		    thread_test_helper(dpp::cluster &bot_) : bot{bot_}
+		    explicit thread_test_helper(dpp::cluster &bot_) : bot{bot_}
 		    {
 		    }
 		};
