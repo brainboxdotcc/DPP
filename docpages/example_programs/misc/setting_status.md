@@ -2,6 +2,8 @@
 
 A bot status is pretty cool, and it'd be cooler if you knew how to do it! This tutorial will cover how to set the bot status to say `Playing games!`, as well as covering how to set the status to the amount of guilds every two minutes.
 
+\note dpp::get_guild_cache requires the bot to have the guild cache enabled, if your bot has this disabled then you can't use that. Instead, you should look to use either dpp::cluster::current_user_get_guilds and seeing how many elements are in the array, or dpp::cluster::current_application_get and getting `approximate_guild_count` from the application in the callback.
+
 First, we'll cover setting the bot status to `Playing games!`.
 
 \include{cpp} setting_status1.cpp
