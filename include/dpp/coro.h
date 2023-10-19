@@ -19,7 +19,6 @@
  *
  ************************************************************************************/
 
-#ifdef DPP_CORO
 #pragma once
 
 #include "coro/async.h"
@@ -27,5 +26,3 @@
 #include "coro/job.h"
 #include "coro/task.h"
 #include "coro/when_any.h"
-
-#endif /* DPP_CORO */

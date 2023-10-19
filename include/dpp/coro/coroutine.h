@@ -18,9 +18,19 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#pragma once
+
+#include <dpp/utility.h>
+
+namespace dpp {
+
+struct coroutine_dummy {
+	int *handle_dummy = nullptr;
+};
+
+}
 
 #ifdef DPP_CORO
-#pragma once
 
 #include "coro.h"
 
@@ -561,6 +571,9 @@ inline void coroutine<void>::await_resume_impl() const {
 	}
 }
 #endif /* _DOXYGEN_ */
+
+DPP_CHECK_ABI_COMPAT(coroutine<void>, coroutine_dummy)
+DPP_CHECK_ABI_COMPAT(coroutine<uint64_t>, coroutine_dummy)
 
 } // namespace dpp
 
