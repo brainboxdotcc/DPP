@@ -426,6 +426,10 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
+	using json_interface<interaction_modal_response>::fill_from_json;
+	using json_interface<interaction_modal_response>::to_json;
+	using json_interface<interaction_modal_response>::build_json;
+
 	/**
 	 * @brief Custom ID for the modal form
 	 */
