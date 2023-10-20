@@ -66,19 +66,76 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
-	uint8_t 		type;   		//!< the type of the webhook
-	snowflake 		guild_id;     		//!< Optional: the guild id this webhook is for (may be empty)
-	snowflake 		channel_id;   		//!< the channel id this webhook is for (may be empty)
-	user 			user_obj;		//!< Optional: the user this webhook was created by (not returned when getting a webhook with its token)
-	std::string 		name;			//!< the default name of the webhook (may be empty)
-	utility::iconhash 	avatar;			//!< the default avatar of the webhook (may be empty)
-	std::string 		token;			//!< Optional: the secure token of the webhook (returned for Incoming Webhooks)
-	snowflake 		application_id;		//!< the bot/OAuth2 application that created this webhook (may be empty)
-	guild			source_guild;		//!< the guild of the channel that this webhook is following (only for Channel Follower Webhooks) @note This will be absent if the webhook creator has since lost access to the guild where the followed channel resides!
-	channel			source_channel;		//!< the channel that this webhook is following (only for Channel Follower Webhooks) @note This will be absent if the webhook creator has since lost access to the guild where the followed channel resides!
-	std::string 		url;			//!< the url used for executing the webhook (returned by the webhooks OAuth2 flow)
+	/**
+	 * @brief Type of the webhook from dpp::webhook_type.
+	 */
+	uint8_t type;
 
-	std::string* 		image_data;		//!< base64 encoded image data if uploading a new image
+	/**
+	 * @brief The guild id this webhook is for.
+	 * @note This field is optional, and may also be empty.
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief The channel id this webhook is for.
+	 * @note This may be empty.
+	 */
+	snowflake channel_id;
+
+	/**
+	 * @brief The user this webhook was created by.
+	 * @note This field is optional.
+	 * @warning This is not returned when getting a webhook with its token!
+	 */
+	user user_obj;
+
+	/**
+	 * @brief The default name of the webhook.
+	 * @note This may be empty.
+	 */
+	std::string name;
+
+	/**
+	 * @brief The default avatar of the webhook
+	 * @note This may be empty.
+	 */
+	utility::iconhash avatar;
+
+	/**
+	 * @brief The secure token of the webhook (returned for Incoming Webhooks).
+	 * @note This field is optional.
+	 */
+	std::string token;
+
+	/**
+	 * @brief The bot/OAuth2 application that created this webhook.
+	 * @note This may be empty.
+	 */
+	snowflake application_id;
+
+	/**
+	 * @brief The guild of the channel that this webhook is following (only for Channel Follower Webhooks).
+	 * @warning This will be absent if the webhook creator has since lost access to the guild where the followed channel resides!
+	 */
+	guild source_guild;
+
+	/**
+	 * @brief The channel that this webhook is following (only for Channel Follower Webhooks).
+	 * @warning This will be absent if the webhook creator has since lost access to the guild where the followed channel resides!
+	 */
+	channel	source_channel;
+
+	/**
+	 * @brief The url used for executing the webhook (returned by the webhooks OAuth2 flow).
+	 */
+	std::string url;
+
+	/**
+	 * @brief base64 encoded image data if uploading a new image.
+	 * @warning You should only ever read data from here. If you want to set the data, use dpp::webhook::load_image.
+	 */
+	std::string* image_data;
 
 	/**
 	 * @brief Construct a new webhook object
