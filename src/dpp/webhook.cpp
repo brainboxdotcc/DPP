@@ -56,10 +56,6 @@ webhook::webhook(const snowflake webhook_id, const std::string& webhook_token) :
 	id = webhook_id;
 }
 
-webhook::~webhook() {
-	delete image_data;
-}
-
 webhook& webhook::fill_from_json_impl(nlohmann::json* j) {
 	set_snowflake_not_null(j, "id", id);
 	set_int8_not_null(j, "type", type);
@@ -89,8 +85,8 @@ json webhook::to_json_impl(bool with_id) const {
 	if (channel_id) {
 		j["channel_id"] = channel_id;
 	}
-	if (image_data) {
-		j["avatar"] = *image_data;
+	if (!image_data.empty()) {
+		j["avatar"] = image_data;
 	}
 	return j;
 }
@@ -100,9 +96,7 @@ webhook& webhook::load_image(const std::string &image_blob, const image_type typ
 		throw dpp::length_exception("Webhook icon file exceeds discord limit of 256 kilobytes");
 	}
 
-	/* If there's already image data defined, free the old data, to prevent a memory leak */
-	delete image_data;
-	image_data = new std::string("data:" + utility::mime_type(type) + ";base64," + (is_base64_encoded ? image_blob : base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length())));
+	image_data = "data:" + utility::mime_type(type) + ";base64," + (is_base64_encoded ? image_blob : base64_encode(reinterpret_cast<unsigned char const*>(image_blob.data()), static_cast<unsigned int>(image_blob.length())));
 
 	return *this;
 }

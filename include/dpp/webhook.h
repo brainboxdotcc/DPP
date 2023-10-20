@@ -135,7 +135,7 @@ public:
 	 * @brief base64 encoded image data if uploading a new image.
 	 * @warning You should only ever read data from here. If you want to set the data, use dpp::webhook::load_image.
 	 */
-	std::string* image_data;
+	std::string image_data;
 
 	/**
 	 * @brief Construct a new webhook object
@@ -161,7 +161,7 @@ public:
 	/**
 	 * @brief Destroy the webhook object
 	 */
-	~webhook();
+	virtual ~webhook() = default;
 
 	/**
 	 * @brief Base64 encode image data and allocate it to image_data
