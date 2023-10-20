@@ -159,11 +159,6 @@ public:
 	webhook(const snowflake webhook_id, const std::string& webhook_token);
 
 	/**
-	 * @brief Destroy the webhook object
-	 */
-	virtual ~webhook() = default;
-
-	/**
 	 * @brief Base64 encode image data and allocate it to image_data
 	 * 
 	 * @param image_blob Binary image data
