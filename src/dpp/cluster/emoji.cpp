@@ -23,7 +23,7 @@
 namespace dpp {
 
 void cluster::guild_emoji_create(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback) {
-	rest_request<emoji>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis", m_post, newemoji.build_json(), callback);
+	rest_request<emoji>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis", m_post, newemoji.build_json(false), callback);
 }
 
 void cluster::guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback) {
@@ -31,7 +31,17 @@ void cluster::guild_emoji_delete(snowflake guild_id, snowflake emoji_id, command
 }
 
 void cluster::guild_emoji_edit(snowflake guild_id, const class emoji& newemoji, command_completion_event_t callback) {
-	rest_request<emoji>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis/" + std::to_string(newemoji.id), m_patch, newemoji.build_json(), callback);
+
+	/* Because newemoji.build_json will give more data than discord wants,
+	 * we will just pull the data into a new json object.
+	 */
+	json newemoji_json = newemoji.build_json(false);
+	json j;
+
+	j["name"] = newemoji_json["name"];
+	j["roles"] = newemoji_json["roles"];
+
+	rest_request<emoji>(this, API_PATH "/guilds", std::to_string(guild_id), "emojis/" + std::to_string(newemoji.id), m_patch, j, callback);
 }
 
 void cluster::guild_emoji_get(snowflake guild_id, snowflake emoji_id, command_completion_event_t callback) {

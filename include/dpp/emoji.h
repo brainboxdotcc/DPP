@@ -26,6 +26,7 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/json_fwd.h>
+#include <dpp/user.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
@@ -71,22 +72,11 @@ protected:
 	json to_json_impl(bool with_id = false) const;
 
 public:
-	/**
-	 * @brief Emoji name
-	 */
-	std::string name{};
-	/**
-	 * @brief User id who uploaded the emoji
-	 */
-	snowflake user_id{0};
-	/**
-	 * @brief Flags for the emoji from dpp::emoji_flags
-	 */
-	uint8_t flags{0};
-	/**
-	 * @brief Image data for the emoji if uploading
-	 */
-	std::string image_data{};
+	std::string 			name{};		//<! emoji name
+	std::vector<dpp::snowflake>	roles;		//!< roles allowed to use this emoji
+	user 				user_obj;	//!< user that created this emoji
+	std::string 			image_data{};	//!< Image data for the emoji if uploading
+	uint8_t 			flags{0};	//!< Flags for the emoji from dpp::emoji_flags
 
 	/**
 	 * @brief Construct a new emoji object

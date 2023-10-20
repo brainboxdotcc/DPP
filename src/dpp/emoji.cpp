@@ -38,9 +38,15 @@ emoji& emoji::fill_from_json_impl(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	name = string_not_null(j, "name");
 	if (j->contains("user")) {
-		json & user = (*j)["user"];
-		user_id = snowflake_not_null(&user, "id");
+		user_obj = user().fill_from_json(&((*j)["user"]));
 	}
+
+	if(j->contains("roles")) {
+		for (const auto& role : (*j)["roles"]) {
+			this->roles.emplace_back(to_string(role));
+		}
+	}
+
 	if (bool_not_null(j, "require_colons")) {
 		flags |= e_require_colons;
 	}
@@ -64,6 +70,10 @@ json emoji::to_json_impl(bool with_id) const {
 	j["name"] = name;
 	if (!image_data.empty()) {
 		j["image"] = image_data;
+	}
+	j["roles"] = json::array();
+	for (const auto& role : roles) {
+		j["roles"].push_back(role);
 	}
 	return j;
 }
@@ -94,8 +104,7 @@ emoji& emoji::load_image(std::string_view image_blob, const image_type type) {
 	return *this;
 }
 
-std::string emoji::format() const
-{
+std::string emoji::format() const {
 	return id ? ((is_animated() ? "a:" : "") + name + ":" + std::to_string(id)) : name;
 }
 
@@ -106,11 +115,11 @@ std::string emoji::get_mention() const {
 std::string emoji::get_url(uint16_t size, const dpp::image_type format, bool prefer_animated) const {
 	if (this->id) {
 		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
-										 "emojis/" + std::to_string(this->id),
-										 format, size, prefer_animated, is_animated());
-	} else {
-		return std::string();
+	 		"emojis/" + std::to_string(this->id),
+		 	format, size, prefer_animated, is_animated());
 	}
+
+	return "";
 }
 
 
