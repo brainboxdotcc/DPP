@@ -39,7 +39,7 @@ namespace dpp {
 enum webhook_type {
 	w_incoming = 1,		//!< Incoming webhook
 	w_channel_follower = 2,	//!< Channel following webhook
-	w_application = 2	//!< Application webhooks for interactions.
+	w_application = 3	//!< Application webhooks for interactions.
 };
 
 /**
