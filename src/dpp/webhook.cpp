@@ -61,43 +61,36 @@ webhook::~webhook() {
 }
 
 webhook& webhook::fill_from_json_impl(nlohmann::json* j) {
-	id = snowflake_not_null(j, "id");
-	type = int8_not_null(j, "type");
-	channel_id = snowflake_not_null(j, "channel_id");
-	guild_id = snowflake_not_null(j, "guild_id");
+	set_snowflake_not_null(j, "id", id);
+	set_int8_not_null(j, "type", type);
+	set_snowflake_not_null(j, "guild_id", guild_id);
+	set_snowflake_not_null(j, "channel_id", channel_id);
 	if (j->contains("user")) {
-		json & user = (*j)["user"];
-		user_id = snowflake_not_null(&user, "id");
+		user_obj = user().fill_from_json(&((*j)["user"]));
 	}
-	name = string_not_null(j, "name");
-	avatar = string_not_null(j, "avatar");
-	token = string_not_null(j, "token");
-	application_id = snowflake_not_null(j, "application_id");
+	set_string_not_null(j, "name", name);
+	set_iconhash_not_null(j, "avatar", avatar);
+	set_string_not_null(j, "token", token);
+	set_snowflake_not_null(j, "application_id", application_id);
+	if (j->contains("source_guild")) {
+		source_guild = guild().fill_from_json(&((*j)["source_guild"]));
+	}
+	if (j->contains("source_channel")) {
+		source_channel = channel().fill_from_json(&((*j)["source_channel"]));
+	}
+	set_string_not_null(j, "url", url);
 
 	return *this;
 }
 
 json webhook::to_json_impl(bool with_id) const {
 	json j;
-	if (with_id) {
-		j["id"] = std::to_string(id);
-	}
 	j["name"] = name;
-	j["type"] = type;
 	if (channel_id) {
 		j["channel_id"] = channel_id;
 	}
-	if (guild_id) {
-		j["guild_id"] = guild_id;
-	}
-	if (!name.empty()) {
-		j["name"] = name;
-	}
 	if (image_data) {
 		j["avatar"] = *image_data;
-	}
-	if (application_id) {
-		j["application_id"] = application_id;
 	}
 	return j;
 }

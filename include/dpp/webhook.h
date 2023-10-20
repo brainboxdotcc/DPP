@@ -25,6 +25,9 @@
 #include <dpp/misc-enum.h>
 #include <dpp/managed.h>
 #include <dpp/json_fwd.h>
+#include <dpp/user.h>
+#include <dpp/guild.h>
+#include <dpp/channel.h>
 #include <unordered_map>
 #include <dpp/json_interface.h>
 
@@ -35,7 +38,8 @@ namespace dpp {
  */
 enum webhook_type {
 	w_incoming = 1,		//!< Incoming webhook
-	w_channel_follower = 2	//!< Channel following webhook
+	w_channel_follower = 2,	//!< Channel following webhook
+	w_application = 2	//!< Application webhooks for interactions.
 };
 
 /**
@@ -62,15 +66,19 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
-	uint8_t type;   		//!< the type of the webhook
-	snowflake guild_id;     	//!< Optional: the guild id this webhook is for
-	snowflake channel_id;   	//!< the channel id this webhook is for
-	snowflake user_id;		//!< Optional: the user this webhook was created by (not returned when getting a webhook with its token)
-	std::string name;		//!< the default name of the webhook (may be empty)
-	std::string avatar;		//!< the default avatar of the webhook (may be empty)
-	std::string token;		//!< Optional: the secure token of the webhook (returned for Incoming Webhooks)
-	snowflake application_id;	//!< the bot/OAuth2 application that created this webhook (may be empty)
-	std::string* image_data;	//!< base64 encoded image data if uploading a new image
+	uint8_t 		type;   		//!< the type of the webhook
+	snowflake 		guild_id;     		//!< Optional: the guild id this webhook is for (may be empty)
+	snowflake 		channel_id;   		//!< the channel id this webhook is for (may be empty)
+	user 			user_obj;		//!< Optional: the user this webhook was created by (not returned when getting a webhook with its token)
+	std::string 		name;			//!< the default name of the webhook (may be empty)
+	utility::iconhash 	avatar;			//!< the default avatar of the webhook (may be empty)
+	std::string 		token;			//!< Optional: the secure token of the webhook (returned for Incoming Webhooks)
+	snowflake 		application_id;		//!< the bot/OAuth2 application that created this webhook (may be empty)
+	guild			source_guild;		//!< the guild of the channel that this webhook is following (only for Channel Follower Webhooks) @note This will be absent if the webhook creator has since lost access to the guild where the followed channel resides!
+	channel			source_channel;		//!< the channel that this webhook is following (only for Channel Follower Webhooks) @note This will be absent if the webhook creator has since lost access to the guild where the followed channel resides!
+	std::string 		url;			//!< the url used for executing the webhook (returned by the webhooks OAuth2 flow)
+
+	std::string* 		image_data;		//!< base64 encoded image data if uploading a new image
 
 	/**
 	 * @brief Construct a new webhook object
