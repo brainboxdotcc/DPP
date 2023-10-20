@@ -618,7 +618,9 @@ embed::embed(json* j) : embed() {
 	description = string_not_null(j, "description");
 	url = string_not_null(j, "url");
 	timestamp = ts_not_null(j, "timestamp");
-	color = int32_not_null(j, "color");
+	if (j->contains("color")) {
+		color = int32_not_null(j, "color");
+	}
 	if (j->contains("footer")) {
 		dpp::embed_footer f;
 		json& fj = (*j)["footer"];
