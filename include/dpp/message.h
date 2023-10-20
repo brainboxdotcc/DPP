@@ -658,7 +658,7 @@ struct DPP_EXPORT embed {
 	/** Optional: timestamp of embed content */
 	time_t				timestamp;
 	/** Optional: color code of the embed */
-	uint32_t			color;
+	std::optional<uint32_t>			color;
 	/** Optional: footer information */
 	std::optional<embed_footer>	footer;
 	/** Optional: image information */
