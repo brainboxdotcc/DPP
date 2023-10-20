@@ -72,7 +72,7 @@ protected:
 	json to_json_impl(bool with_id = false) const;
 
 public:
-	std::string 			name{};		//<! emoji name
+	std::string 			name{};		//!< emoji name
 	std::vector<snowflake>		roles;		//!< roles allowed to use this emoji
 	snowflake 			user_id;	//!< user id that created this emoji
 	std::string 			image_data{};	//!< Image data for the emoji if uploading
