@@ -73,7 +73,7 @@ json emoji::to_json_impl(bool with_id) const {
 	}
 	j["roles"] = json::array();
 	for (const auto& role : roles) {
-		j["roles"].push_back(role);
+		j["roles"].push_back(role.str());
 	}
 	return j;
 }
