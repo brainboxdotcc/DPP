@@ -5,7 +5,7 @@ int main() {
 
 	bot.on_log(dpp::utility::cout_logger());
 
-	bot.on_slashcommand([](dpp::slashcommand_t event) -> dpp::job {
+	bot.on_slashcommand([](const dpp::slashcommand_t& event) -> dpp::task<void> {
 		if (event.command.get_command_name() == "avatar") {
 			// Make a nested coroutine to fetch the guild member requested, that returns it as an optional
 			constexpr auto resolve_member = [](const dpp::slashcommand_t &event) -> dpp::task<std::optional<dpp::guild_member>> {
@@ -70,7 +70,7 @@ int main() {
 	});
 
 
-	bot.on_ready([&bot](const dpp::ready_t & event) {
+	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
 			dpp::slashcommand command("avatar", "Get your or another user's avatar image", bot.me.id);
 			command.add_option(dpp::command_option(dpp::co_user, "user", "User to fetch the avatar from"));

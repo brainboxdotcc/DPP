@@ -560,8 +560,8 @@ public:
 #ifdef _DOXYGEN_
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
-	 * `dpp::job(T)` (the latter requires DPP_CORO to be defined),
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)` (the latter requires DPP_CORO to be defined),
 	 * where T is the event type for this event router.
 	 *
 	 * This has the exact same behavior as using \ref attach(F&&) "attach".
@@ -576,8 +576,8 @@ public:
 
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
-	 * `dpp::job(T)` (the latter requires DPP_CORO to be defined),
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)` (the latter requires DPP_CORO to be defined),
 	 * where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
@@ -590,8 +590,8 @@ public:
 #  ifdef DPP_CORO
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
-	 * `dpp::job(T)`, where T is the event type for this event router.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
 	 * @return event_handle An event handle unique to this event, used to
@@ -605,7 +605,7 @@ public:
 
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
+	 * The callable should either be of the form `void(const T&)` or
 	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
@@ -623,7 +623,7 @@ public:
 
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
+	 * The callable should either be of the form `void(const T&)` or
 	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
@@ -643,7 +643,7 @@ public:
 
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
+	 * The callable should either be of the form `void(const T&)` or
 	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
 	 *
 	 * @deprecated dpp::job event handlers are deprecated and will be removed in a future version, use dpp::task<void> instead.
@@ -665,7 +665,7 @@ public:
 #  else
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should be of the form `void(const T &)`
+	 * The callable should be of the form `void(const T&)`
 	 * where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
@@ -679,7 +679,7 @@ public:
 
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should be of the form `void(const T &)`
+	 * The callable should be of the form `void(const T&)`
 	 * where T is the event type for this event router.
 	 *
 	 * @warning You cannot call this within an event handler.
