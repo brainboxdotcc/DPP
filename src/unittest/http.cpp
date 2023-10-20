@@ -53,10 +53,10 @@ void http_client_tests(const std::string& token) {
 		);
 		try {
 			dpp::https_client c("discord.com", 443, "/api/channels/" + std::to_string(TEST_TEXT_CHANNEL_ID) + "/messages", "POST", multipart.body,
-					    {
-						    {"Content-Type", multipart.mimetype},
-						    {"Authorization", "Bot " + token}
-					    }
+					{
+						{"Content-Type", multipart.mimetype},
+						{"Authorization", "Bot " + token}
+					}
 			);
 			std::string hdr1 = c.get_header("server");
 			set_test(HTTPS, hdr1 == "cloudflare" && c.get_status() == 200);

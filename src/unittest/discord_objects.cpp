@@ -47,7 +47,7 @@ void discord_objects_tests() {
 		s = "69420";
 		success = success && s == 69420;
 		auto conversion_test = [](dpp::snowflake sl) {
-		    return sl.str();
+			return sl.str();
 		};
 		s = conversion_test(std::string{"1337"});
 		success = success && s == 1337; /* THIS BREAKS (and i do not care very much): && s == conversion_test(dpp::snowflake{"1337"}); */
@@ -168,21 +168,21 @@ void discord_objects_tests() {
 		success = p.can(dpp::p_speak) && success;
 
 		constexpr auto permission_test = [](dpp::permission p) constexpr noexcept {
-		    bool success{true};
+			bool success{true};
 
-		    p.set(0).add(~uint64_t{0}).remove(dpp::p_speak).set(dpp::p_connect);
-		    p.set(dpp::p_administrator, dpp::p_ban_members);
-		    success = p.has(dpp::p_administrator) && success;
-		    success = p.has(dpp::p_administrator) && p.has(dpp::p_ban_members) && success;
-		    success = p.has(dpp::p_administrator, dpp::p_ban_members) && success;
-		    success = p.has(dpp::p_administrator | dpp::p_ban_members) && success;
-		    success = p.add(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
-		    success = !p.remove(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
-		    p.remove(dpp::p_administrator);
-		    success = p.can(dpp::p_ban_members) && success;
-		    success = !p.can(dpp::p_speak, dpp::p_ban_members) && success;
-		    success = p.can_any(dpp::p_speak, dpp::p_ban_members) && success;
-		    return success;
+			p.set(0).add(~uint64_t{0}).remove(dpp::p_speak).set(dpp::p_connect);
+			p.set(dpp::p_administrator, dpp::p_ban_members);
+			success = p.has(dpp::p_administrator) && success;
+			success = p.has(dpp::p_administrator) && p.has(dpp::p_ban_members) && success;
+			success = p.has(dpp::p_administrator, dpp::p_ban_members) && success;
+			success = p.has(dpp::p_administrator | dpp::p_ban_members) && success;
+			success = p.add(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
+			success = !p.remove(dpp::p_speak).has(dpp::p_administrator, dpp::p_speak) && success;
+			p.remove(dpp::p_administrator);
+			success = p.can(dpp::p_ban_members) && success;
+			success = !p.can(dpp::p_speak, dpp::p_ban_members) && success;
+			success = p.can_any(dpp::p_speak, dpp::p_ban_members) && success;
+			return success;
 		};
 		constexpr auto constexpr_success = permission_test({~uint64_t{0}}); // test in constant evaluated
 		success = permission_test({~uint64_t{0}}) && constexpr_success && success; // test at runtime
@@ -388,13 +388,13 @@ void discord_objects_tests() {
 
 		set_test(UTILITY_MAKE_URL_PARAMETERS, false);
 		auto url_params1 = dpp::utility::make_url_parameters({
-									     {"foo", 15},
-									     {"bar", 7}
-								     });
+			{"foo", 15},
+			{"bar", 7}
+		});
 		auto url_params2 = dpp::utility::make_url_parameters({
-									     {"foo", "hello"},
-									     {"bar", "two words"}
-								     });
+			{"foo", "hello"},
+			{"bar", "two words"}
+		});
 		set_test(UTILITY_MAKE_URL_PARAMETERS, url_params1 == "?bar=7&foo=15" && url_params2 == "?bar=two%20words&foo=hello");
 
 		set_test(UTILITY_MARKDOWN_ESCAPE, false);

@@ -151,23 +151,23 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 	{ // test dpp::json_interface
 		start_test(JSON_INTERFACE);
 		struct fillable : dpp::json_interface<fillable> {
-		    fillable &fill_from_json_impl(dpp::json *) {
-			    return *this;
-		    }
+			fillable &fill_from_json_impl(dpp::json *) {
+				return *this;
+			}
 		};
 		struct buildable : dpp::json_interface<buildable> {
-		    json to_json_impl(bool = false) const {
-			    return {};
-		    }
+			json to_json_impl(bool = false) const {
+				return {};
+			}
 		};
 		struct fillable_and_buildable : dpp::json_interface<fillable_and_buildable> {
-		    fillable_and_buildable &fill_from_json_impl(dpp::json *) {
-			    return *this;
-		    }
+			fillable_and_buildable &fill_from_json_impl(dpp::json *) {
+				return *this;
+			}
 
-		    json to_json_impl(bool = false) const {
-			    return {};
-		    }
+			json to_json_impl(bool = false) const {
+				return {};
+			}
 		};
 		bool success = true;
 
