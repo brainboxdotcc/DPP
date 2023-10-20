@@ -74,7 +74,7 @@ protected:
 public:
 	std::string 			name{};		//<! emoji name
 	std::vector<dpp::snowflake>	roles;		//!< roles allowed to use this emoji
-	user 				user_obj;	//!< user that created this emoji
+	snowflake 			user_id;	//!< user id that created this emoji
 	std::string 			image_data{};	//!< Image data for the emoji if uploading
 	uint8_t 			flags{0};	//!< Flags for the emoji from dpp::emoji_flags
 

@@ -38,7 +38,8 @@ emoji& emoji::fill_from_json_impl(nlohmann::json* j) {
 	id = snowflake_not_null(j, "id");
 	name = string_not_null(j, "name");
 	if (j->contains("user")) {
-		user_obj = user().fill_from_json(&((*j)["user"]));
+		json & user = (*j)["user"];
+		user_id = snowflake_not_null(&user, "id");
 	}
 
 	if(j->contains("roles")) {
