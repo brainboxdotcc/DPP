@@ -96,11 +96,12 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 			dpp::autocomplete_t ac(client, raw);
 			ac.id = snowflake_not_null(&(d["data"]), "id");
 			ac.name = string_not_null(&(d["data"]), "name");
-			for (auto & o : d["data"]["options"]) {
-				dpp::command_option opt;
-				opt.name = string_not_null(&o, "name");
-				opt.type = (dpp::command_option_type)int8_not_null(&o, "type");
-				if (o.contains("value") && !o.at("value").is_null()) {
+			using fill_options_t = void(*)(dpp::json, std::vector<dpp::command_option>&);
+			static fill_options_t fill_options =[](dpp::json option_json, std::vector<dpp::command_option>& options) {
+				for (auto & o : option_json) {
+					dpp::command_option opt;
+					opt.name = string_not_null(&o, "name");
+					opt.type = (dpp::command_option_type)int8_not_null(&o, "type");
 					switch (opt.type) {
 						case co_boolean:
 							opt.value = o.at("value").get<bool>();
@@ -123,13 +124,14 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 							break;
 						case co_sub_command:
 						case co_sub_command_group:
-							/* Silences warning on clang, handled elsewhere */
-						break;
+							fill_options(o["options"], opt.options);
+							break;
 					}
+					opt.focused = bool_not_null(&o, "focused");
+					options.emplace_back(opt);
 				}
-				opt.focused = bool_not_null(&o, "focused");
-				ac.options.emplace_back(opt);
-			}
+			};
+			fill_options(d["data"]["options"], ac.options);
 			ac.command = i;
 			client->creator->on_autocomplete.call(ac);
 		}
