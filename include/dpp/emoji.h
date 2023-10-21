@@ -71,11 +71,30 @@ protected:
 	json to_json_impl(bool with_id = false) const;
 
 public:
-	std::string 			name{};		//!< emoji name
-	std::vector<snowflake>		roles;		//!< roles allowed to use this emoji
-	snowflake 			user_id;	//!< user id that created this emoji
-	std::string 			image_data{};	//!< Image data for the emoji if uploading
-	uint8_t 			flags{0};	//!< Flags for the emoji from dpp::emoji_flags
+	/**
+	 * @brief Emoji name.
+	 */
+	std::string name{};
+
+	/**
+	 * @brief Roles allowed to use this emoji.
+	 */
+	std::vector<snowflake> roles;
+
+	/**
+	 * @brief The id of the user that created this emoji.
+	 */
+	snowflake user_id;
+
+	/**
+	 * @brief Image data for the emoji, if uploading.
+	 */
+	std::string image_data;
+
+	/**
+	 * @brief Flags for the emoji from dpp::emoji_flags.
+	 */
+	uint8_t flags{0};
 
 	/**
 	 * @brief Construct a new emoji object
