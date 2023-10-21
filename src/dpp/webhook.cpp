@@ -30,7 +30,7 @@ using json = nlohmann::json;
 
 const size_t MAX_ICON_SIZE = 256 * 1024;
 
-webhook::webhook() : managed(), type(w_incoming), guild_id(0), channel_id(0), application_id(0), image_data(nullptr)
+webhook::webhook() : managed(), type(w_incoming), guild_id(0), channel_id(0), application_id(0)
 {
 }
 
