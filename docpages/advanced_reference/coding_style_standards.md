@@ -72,7 +72,35 @@ Constants and macros should be all `UPPERCASE` with `SNAKE_CASE` to separate wor
 
 ## Comments
 
-All comments should be in `doxygen` format (similar to javadoc). Please see existing class definitions for an example. You should use doxygen style comments in a class definition inside a header file, and can use any other comment types within the .cpp file. Be liberal with comments, especially if your code makes any assumptions!
+All comments should be in `doxygen` format (similar to javadoc). Please see existing class definitions for an example. You should use doxygen style comments in a class definition inside a header file. Be liberal with comments, especially if your code makes any assumptions! Comments should follow the format below:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
+/**
+ * @brief This is a function that does some cool stuff.
+ * More stuff here will still go in brief!
+ * @warning This current does nothing!
+ */
+func_name();
+
+/**
+ * @brief This turns a name into a meme name!
+ *
+ * @param name The name of the user that you want to meme-ify.
+ * @return a meme name!
+ */
+std::string name_to_meme(const std::string& name) const;
+
+int main() {
+	/* We are now going to do some cool stuff. */
+	func_name();
+
+	/* Going to turn brain into a meme name.
+	 * Why?
+	 * Because why not. That's why.
+	 */
+	std::cout << name_to_meme("Brain") << "\n";
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Spell Checks
 
