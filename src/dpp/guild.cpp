@@ -164,7 +164,7 @@ guild_member& guild_member::set_communication_disabled_until(const time_t disabl
 	this->communication_disabled_until = disabled_timestamp;
 	return *this;
 }
-	
+
 bool guild_member::operator == (guild_member const& other_member) const {
 	if ((this->user_id == other_member.user_id && this->user_id.empty()) || (this->guild_id == other_member.guild_id && this->guild_id.empty()))
 		return false;
@@ -264,6 +264,66 @@ json guild_member::to_json_impl(bool with_id) const {
 
 guild& guild::set_name(const std::string& n) {
 	this->name = utility::validate(trim(n), 2, 100, "Guild names cannot be less than 2 characters");
+	return *this;
+}
+
+guild &guild::remove_banner() {
+	this->banner = utility::image_data{};
+	return *this;
+}
+
+guild& guild::set_banner(image_type format, std::string_view data) {
+	this->banner = utility::image_data{format, data};
+	return *this;
+}
+
+guild& guild::set_banner(image_type format, const std::byte* data, uint32_t size) {
+	this->banner = utility::image_data{format, data, size};
+	return *this;
+}
+
+guild &guild::remove_discovery_splash() {
+	this->discovery_splash = utility::image_data{};
+	return *this;
+}
+
+guild& guild::set_discovery_splash(image_type format, std::string_view data) {
+	this->discovery_splash = utility::image_data{format, data};
+	return *this;
+}
+
+guild& guild::set_discovery_splash(image_type format, const std::byte* data, uint32_t size) {
+	this->discovery_splash = utility::image_data{format, data, size};
+	return *this;
+}
+
+guild &guild::remove_splash() {
+	this->splash = utility::image_data{};
+	return *this;
+}
+
+guild& guild::set_splash(image_type format, std::string_view data) {
+	this->splash = utility::image_data{format, data};
+	return *this;
+}
+
+guild& guild::set_splash(image_type format, const std::byte* data, uint32_t size) {
+	this->splash = utility::image_data{format, data, size};
+	return *this;
+}
+
+guild &guild::remove_icon() {
+	this->icon = utility::image_data{};
+	return *this;
+}
+
+guild& guild::set_icon(image_type format, std::string_view data) {
+	this->icon = utility::image_data{format, data};
+	return *this;
+}
+
+guild& guild::set_icon(image_type format, const std::byte* data, uint32_t size) {
+	this->icon = utility::image_data{format, data, size};
 	return *this;
 }
 
@@ -548,6 +608,18 @@ json guild::to_json_impl(bool with_id) const {
 	}
 	if (!safety_alerts_channel_id.empty()) {
 		j["safety_alerts_channel_id"] = safety_alerts_channel_id;
+	}
+	if (banner.is_image_data()) {
+		j["banner"] = banner.as_image_data().to_nullable_json();
+	}
+	if (discovery_splash.is_image_data()) {
+		j["discovery_splash"] = discovery_splash.as_image_data().to_nullable_json();
+	}
+	if (splash.is_image_data()) {
+		j["splash"] = splash.as_image_data().to_nullable_json();
+	}
+	if (icon.is_image_data()) {
+		j["icon"] = icon.as_image_data().to_nullable_json();
 	}
 	return j;
 }
@@ -890,43 +962,55 @@ bool guild::connect_member_voice(snowflake user_id, bool self_mute, bool self_de
 }
 
 std::string guild::get_banner_url(uint16_t size, const image_type format, bool prefer_animated) const {
-	if (!this->banner.to_string().empty() && this->id) {
-		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-			"banners/" + std::to_string(this->id), this->banner.to_string(),
-			format, size, prefer_animated, has_animated_banner_hash());
-	} else {
-		return std::string();
+	if (this->banner.is_iconhash() && this->id) {
+		std::string as_str = this->banner.as_iconhash().to_string();
+
+		if (!as_str.empty()) {
+			return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+				"banners/" + std::to_string(this->id), as_str,
+				format, size, prefer_animated, has_animated_banner_hash());
+		}
 	}
+	return std::string{};
 }
 
 std::string guild::get_discovery_splash_url(uint16_t size, const image_type format) const {
-	if (!this->discovery_splash.to_string().empty() && this->id) {
-		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
-			"discovery-splashes/" + std::to_string(this->id) + "/" + this->discovery_splash.to_string(),
-			format, size);
-	} else {
-		return std::string();
+	if (this->discovery_splash.is_iconhash() && this->id) {
+		std::string as_str = this->discovery_splash.as_iconhash().to_string();
+
+		if (!as_str.empty()) {
+			return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp },
+				"discovery-splashes/" + std::to_string(this->id) + "/" + as_str,
+				format, size);
+		}
 	}
+	return std::string{};
 }
 
 std::string guild::get_icon_url(uint16_t size, const image_type format, bool prefer_animated) const {
-	if (!this->icon.to_string().empty() && this->id) {
-		return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
-			"icons/" + std::to_string(this->id), this->icon.to_string(),
-			format, size, prefer_animated, has_animated_icon_hash());
-	} else {
-		return std::string();
+	if (this->icon.is_iconhash() && this->id) {
+		std::string as_str = this->icon.as_iconhash().to_string();
+
+		if (!as_str.empty()) {
+			return utility::cdn_endpoint_url_hash({ i_jpg, i_png, i_webp, i_gif },
+				"icons/" + std::to_string(this->id), as_str,
+				format, size, prefer_animated, has_animated_icon_hash());
+		}
 	}
+	return std::string{};
 }
 
 std::string guild::get_splash_url(uint16_t size, const image_type format) const {
-	if (!this->splash.to_string().empty() && this->id) {
-		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
-			"splashes/" + std::to_string(this->id) + "/" + this->splash.to_string(),
-			format, size);
-	} else {
-		return std::string();
+	if (this->splash.is_iconhash() && this->id) {
+		std::string as_str = this->splash.as_iconhash().to_string();
+
+		if (!as_str.empty()) {
+			return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
+				"splashes/" + std::to_string(this->id) + "/" + as_str,
+				format, size);
+		}
 	}
+	return std::string{};
 }
 
 guild_member find_guild_member(const snowflake guild_id, const snowflake user_id) {
@@ -939,7 +1023,6 @@ guild_member find_guild_member(const snowflake guild_id, const snowflake user_id
 
 		throw dpp::cache_exception("Requested member not found in the guild cache!");
 	}
-	
 	throw dpp::cache_exception("Requested guild cache not found!");
 }
 
