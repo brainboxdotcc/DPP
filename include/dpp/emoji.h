@@ -72,21 +72,29 @@ protected:
 
 public:
 	/**
-	 * @brief Emoji name
+	 * @brief Emoji name.
 	 */
 	std::string name{};
+
 	/**
-	 * @brief User id who uploaded the emoji
+	 * @brief Roles allowed to use this emoji.
 	 */
-	snowflake user_id{0};
+	std::vector<snowflake> roles;
+
 	/**
-	 * @brief Flags for the emoji from dpp::emoji_flags
+	 * @brief The id of the user that created this emoji.
+	 */
+	snowflake user_id;
+
+	/**
+	 * @brief Image data for the emoji, if uploading.
+	 */
+	std::string image_data;
+
+	/**
+	 * @brief Flags for the emoji from dpp::emoji_flags.
 	 */
 	uint8_t flags{0};
-	/**
-	 * @brief Image data for the emoji if uploading
-	 */
-	std::string image_data{};
 
 	/**
 	 * @brief Construct a new emoji object
