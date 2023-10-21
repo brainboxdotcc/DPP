@@ -18,28 +18,7 @@ This covers your standard Curly Braces (commonly known as squiggly brackets), an
 
 Curly Braces should be on the same line as the keyword, for example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
-void foo() {
-	if (a == b) {
-		c();
-	} else {
-		d();
-	}
-
-	while (true) {
-		// ...
-	}
-
-	switch (a) {
-		case 1:
-			c();
-		break;
-		case 2:
-			d();
-		break;
-	}
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\include{cpp} coding_style_standards/curly_braces.cpp
 
 This applies to functions, `while` statements, `if` statements, lambdas, nearly anything that uses curly braces with statements!
 
@@ -47,20 +26,12 @@ This applies to functions, `while` statements, `if` statements, lambdas, nearly 
 
 Lists should have a space after the comma in parameter lists, and after opening brackets and before closing brackets except when calling a function, for example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
-std::vector<std::string> clowns = { "pennywise", "bobo" };
-
-evaluate_clown(clowns[0], evilness(2.5, factor));
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\include{cpp} coding_style_standards/lists.cpp
 
 ## Dot (.) Notation
 When using the dot notation repeatedly (For example, creating an embed.), you should start each `.function()` on a new line, as such:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
-stuff{}
-    .add_stuff()
-    .add_stuff();
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\include{cpp} coding_style_standards/dot_notation.cpp
 
 ## Indentation
 
@@ -72,7 +43,11 @@ Constants and macros should be all `UPPERCASE` with `SNAKE_CASE` to separate wor
 
 ## Comments
 
-All comments should be in `doxygen` format (similar to javadoc). Please see existing class definitions for an example. You should use doxygen style comments in a class definition inside a header file, and can use any other comment types within the .cpp file. Be liberal with comments, especially if your code makes any assumptions!
+All comments should be in `doxygen` format (similar to javadoc). Please see existing class definitions for an example. You should use doxygen style comments in a class definition inside a header file. Be liberal with comments, especially if your code makes any assumptions! Comments should follow the format below:
+
+\note Comments that contain doxygen stuff need to use two stars at the beginning (/**). This example doesn't because doxygen gets confused and doesn't show the comments.
+
+\include{cpp} coding_style_standards/comments.cpp
 
 ## Spell Checks
 
@@ -82,13 +57,7 @@ To prevent typos, a GitHub-Action checks the documentation. If it fails for a wo
 
 If you export a class which is to be accessible to users, be sure to prefix it with the `DPP_EXPORT` macro, for example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
-class DPP_EXPORT my_new_class {
-public:
-	int hats;
-	int clowns;
-};
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\include{cpp} coding_style_standards/symbol_exporting.cpp
 
 The `DPP_EXPORT` macro ensures that on certain platforms (notably Windows) the symbol is exported to be available to the library user.
 
@@ -132,33 +101,11 @@ If a value will only hold values up to 255, use `uint8_t`. If a value cannot hol
 
 Where possible, if you are adding methods to a class you should consider fluent design. Fluent design is the use of class methods that return a reference to self (via `return *this`), so that you can chain object method calls together (in the way dpp::message and dpp::embed do). For example:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
-class DPP_EXPORT my_new_class {
-public:
-	int hats;
-	int clowns;
-
-	my_new_class& set_hats(int new_hats);
-	my_new_class& set_clowns(int new_clowns);
-};
-
-my_new_class& my_new_class::set_hats(int new_hats) {
-	hats = new_hats;
-	return *this;
-}
-
-my_new_class& my_new_class::set_clowns(int new_clowns) {
-	clowns = new_clowns;
-	return *this;
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\include{cpp} coding_style_standards/fluent_design.cpp
 
 This would allow the user to do this:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~cpp
-dpp::my_new_class nc;
-nc.set_hats(3).set_clowns(9001);
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\include{cpp} coding_style_standards/fluent_design2.cpp
 
 ## Keep All D++ Related Types in the dpp Namespace
 
