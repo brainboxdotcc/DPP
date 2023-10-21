@@ -30,7 +30,7 @@ using json = nlohmann::json;
 
 const size_t MAX_ICON_SIZE = 256 * 1024;
 
-webhook::webhook() : managed(), type(w_incoming), guild_id(0), channel_id(0), user_id(0), application_id(0), image_data(nullptr)
+webhook::webhook() : managed(), type(w_incoming), guild_id(0), channel_id(0), application_id(0)
 {
 }
 
@@ -56,66 +56,47 @@ webhook::webhook(const snowflake webhook_id, const std::string& webhook_token) :
 	id = webhook_id;
 }
 
-webhook::~webhook() {
-	delete image_data;
-}
-
 webhook& webhook::fill_from_json_impl(nlohmann::json* j) {
-	id = snowflake_not_null(j, "id");
-	type = int8_not_null(j, "type");
-	channel_id = snowflake_not_null(j, "channel_id");
-	guild_id = snowflake_not_null(j, "guild_id");
+	set_snowflake_not_null(j, "id", id);
+	set_int8_not_null(j, "type", type);
+	set_snowflake_not_null(j, "guild_id", guild_id);
+	set_snowflake_not_null(j, "channel_id", channel_id);
 	if (j->contains("user")) {
-		json & user = (*j)["user"];
-		user_id = snowflake_not_null(&user, "id");
+		user_obj = user().fill_from_json(&((*j)["user"]));
 	}
-	name = string_not_null(j, "name");
-	avatar = string_not_null(j, "avatar");
-	token = string_not_null(j, "token");
-	application_id = snowflake_not_null(j, "application_id");
+	set_string_not_null(j, "name", name);
+	set_iconhash_not_null(j, "avatar", avatar);
+	set_string_not_null(j, "token", token);
+	set_snowflake_not_null(j, "application_id", application_id);
+	if (j->contains("source_guild")) {
+		source_guild = guild().fill_from_json(&((*j)["source_guild"]));
+	}
+	if (j->contains("source_channel")) {
+		source_channel = channel().fill_from_json(&((*j)["source_channel"]));
+	}
+	set_string_not_null(j, "url", url);
 
 	return *this;
 }
 
 json webhook::to_json_impl(bool with_id) const {
 	json j;
-	if (with_id) {
-		j["id"] = std::to_string(id);
-	}
 	j["name"] = name;
-	j["type"] = type;
 	if (channel_id) {
 		j["channel_id"] = channel_id;
 	}
-	if (guild_id) {
-		j["guild_id"] = guild_id;
-	}
-	if (!name.empty()) {
-		j["name"] = name;
-	}
-	if (image_data) {
-		j["avatar"] = *image_data;
-	}
-	if (application_id) {
-		j["application_id"] = application_id;
+	if (!image_data.empty()) {
+		j["avatar"] = image_data;
 	}
 	return j;
 }
 
 webhook& webhook::load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded) {
-	static const std::map<image_type, std::string> mimetypes = {
-		{ i_gif, "image/gif" },
-		{ i_jpg, "image/jpeg" },
-		{ i_png, "image/png" },
-		{ i_webp, "image/webp" },
-	};
 	if (image_blob.size() > MAX_ICON_SIZE) {
 		throw dpp::length_exception("Webhook icon file exceeds discord limit of 256 kilobytes");
 	}
 
-	/* If there's already image data defined, free the old data, to prevent a memory leak */
-	delete image_data;
-	image_data = new std::string("data:" + mimetypes.find(type)->second + ";base64," + (is_base64_encoded ? image_blob : base64_encode((unsigned char const*)image_blob.data(), (unsigned int)image_blob.length())));
+	image_data = "data:" + utility::mime_type(type) + ";base64," + (is_base64_encoded ? image_blob : base64_encode(reinterpret_cast<unsigned char const*>(image_blob.data()), static_cast<unsigned int>(image_blob.length())));
 
 	return *this;
 }
