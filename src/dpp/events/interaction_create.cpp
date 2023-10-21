@@ -28,6 +28,44 @@
 
 namespace dpp::events {
 
+namespace {
+
+void fill_options(dpp::json option_json, std::vector<dpp::command_option>& options) {
+	for (auto & o : option_json) {
+		dpp::command_option opt;
+		opt.name = string_not_null(&o, "name");
+		opt.type = (dpp::command_option_type)int8_not_null(&o, "type");
+		switch (opt.type) {
+			case co_boolean:
+				opt.value = o.at("value").get<bool>();
+				break;
+			case co_channel:
+			case co_role:
+			case co_user:
+			case co_attachment:
+			case co_mentionable:
+				opt.value = dpp::snowflake(snowflake_not_null(&o, "value"));
+				break;
+			case co_integer:
+				opt.value = o.at("value").get<int64_t>();
+				break;
+			case co_string:
+				opt.value = o.at("value").get<std::string>();
+				break;
+			case co_number:
+				opt.value = o.at("value").get<double>();
+				break;
+			case co_sub_command:
+			case co_sub_command_group:
+				fill_options(o["options"], opt.options);
+				break;
+		}
+		opt.focused = bool_not_null(&o, "focused");
+		options.emplace_back(opt);
+	}
+}
+
+}
 
 /**
  * @brief Handle event
@@ -96,41 +134,6 @@ void interaction_create::handle(discord_client* client, json &j, const std::stri
 			dpp::autocomplete_t ac(client, raw);
 			ac.id = snowflake_not_null(&(d["data"]), "id");
 			ac.name = string_not_null(&(d["data"]), "name");
-			using fill_options_t = void(*)(dpp::json, std::vector<dpp::command_option>&);
-			static fill_options_t fill_options =[](dpp::json option_json, std::vector<dpp::command_option>& options) {
-				for (auto & o : option_json) {
-					dpp::command_option opt;
-					opt.name = string_not_null(&o, "name");
-					opt.type = (dpp::command_option_type)int8_not_null(&o, "type");
-					switch (opt.type) {
-						case co_boolean:
-							opt.value = o.at("value").get<bool>();
-							break;
-						case co_channel:
-						case co_role:
-						case co_user:
-						case co_attachment:
-						case co_mentionable:
-							opt.value = dpp::snowflake(snowflake_not_null(&o, "value"));
-							break;
-						case co_integer:
-							opt.value = o.at("value").get<int64_t>();
-							break;
-						case co_string:
-							opt.value = o.at("value").get<std::string>();
-							break;
-						case co_number:
-							opt.value = o.at("value").get<double>();
-							break;
-						case co_sub_command:
-						case co_sub_command_group:
-							fill_options(o["options"], opt.options);
-							break;
-					}
-					opt.focused = bool_not_null(&o, "focused");
-					options.emplace_back(opt);
-				}
-			};
 			fill_options(d["data"]["options"], ac.options);
 			ac.command = i;
 			client->creator->on_autocomplete.call(ac);
