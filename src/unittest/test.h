@@ -569,33 +569,3 @@ inline constexpr auto is_owner = [](auto &&user) noexcept {
   DPP_CHECK(test, std::is_copy_assignable_v<type>, var); \
 	DPP_CHECK(test, std::is_move_assignable_v<type>, var); \
   } while(0)
-
-/**
- * @brief Unit tests for Human readable error translation
- */
-void errors_test();
-
-/**
-* @brief Unit tests for HTTPS client
-*/
-void http_client_tests(const std::string&);
-
-/**
-* @brief Unit tests for Discord objects (webhook, interaction, user etc.)
-*/
-void discord_objects_tests();
-
-/**
- * @brief Unit tests for Gateway events
- */
-void gateway_events_tests(const std::string&, dpp::cluster&);
-
-/**
-* @brief Unit tests for Cache
-*/
-void cache_tests(dpp::cluster&);
-
-/**
-* @brief Unit tests for library Utilities
-*/
-void utility_tests();
