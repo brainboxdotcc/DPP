@@ -35,6 +35,7 @@
 #include <atomic>
 #include <dpp/exception.h>
 #include <dpp/coro/job.h>
+#include <dpp/coro/task.h>
 
 namespace dpp {
 
@@ -200,10 +201,28 @@ template<class T> class event_router_t {
 private:
 	friend class cluster;
 
+	/** @brief Non-coro event handler type */
+	using regular_handler_t = std::function<void(const T&)>;
+
+	/** @brief Type that event handlers will be stored as with DPP_CORO off. This is the ABI DPP_CORO has to match */
+	using event_handler_abi_t = std::variant<regular_handler_t, std::function<task_dummy(T)>>;
+
 #ifdef DPP_CORO
 	friend class detail::event_router::awaitable<T>;
+
+	/** @brief dpp::task coro event handler */
+	using task_handler_t = std::function<dpp::task<void>(const T&)>;
+
+	/** @brief Type that event handlers are stored as */
+	using event_handler_t = std::variant<regular_handler_t, task_handler_t>;
+
+	DPP_CHECK_ABI_COMPAT(event_handler_t, event_handler_abi_t)
+#else
+	/** @brief Type that event handlers are stored as */
+	using event_handler_t = event_handler_abi_t;
 #endif
 
+	/** @brief Identifier for the next event handler, will be given to the user on attaching a handler */
 	event_handle next_handle = 1;
 
 	/**
@@ -217,7 +236,7 @@ private:
 	 * be called in they order they are bound to the event
 	 * as std::map is an ordered container.
 	 */
-	std::map<event_handle, std::function<void(const T&)>> dispatch_container;
+	std::map<event_handle, event_handler_t> dispatch_container;
 
 #ifdef DPP_CORO
 	/**
@@ -263,7 +282,57 @@ protected:
 		warning = warning_function;
 	}
 
+	/**
+	 * @brief Handle an event. This function should only be used without coro enabled, otherwise use handle_coro.
+	 */
+	void handle(const T& event) const {
+		if (warning) {
+			warning(event);
+		}
+
+		std::shared_lock l(mutex);
+		for (const auto& [_, listener] : dispatch_container) {
+			if (!event.is_cancelled()) {
+				if (std::holds_alternative<regular_handler_t>(listener)) {
+					std::get<regular_handler_t>(listener)(event);
+				} else {
+					throw dpp::logic_exception("cannot handle a coroutine event handler with a library	built without DPP_CORO");
+				}
+			}
+		};
+	}
+
 #ifdef DPP_CORO
+	/**
+	 * @brief Handle an event as a coroutine, ensuring the lifetime of the event object.
+	 */
+	dpp::job handle_coro(T event) const {
+		if (warning) {
+			warning(event);
+		}
+
+		resume_awaiters(event);
+
+		std::vector<dpp::task<void>> tasks;
+		{
+			std::shared_lock l(mutex);
+
+			for (const auto& [_, listener] : dispatch_container) {
+				if (!event.is_cancelled()) {
+					if (std::holds_alternative<task_handler_t>(listener)) {
+						tasks.push_back(std::get<task_handler_t>(listener)(event));
+					} else if (std::holds_alternative<regular_handler_t>(listener)) {
+						std::get<regular_handler_t>(listener)(event);
+					}
+				}
+			};
+		}
+
+		for (dpp::task<void>& t : tasks) {
+			co_await t; // keep the event object alive until all tasks finished
+		}
+	}
+
 	/**
 	 * @brief Attach a suspended coroutine to this event router via detail::event_router::awaitable.
 	 * It will be resumed and detached when an event satisfying its condition completes, or it is cancelled.
@@ -371,20 +440,25 @@ public:
 	 * @param event Class to pass as parameter to all listeners.
 	 */
 	void call(const T& event) const {
-		if (warning) {
-			warning(event);
-		}
-
 #ifdef DPP_CORO
-		resume_awaiters(event);
+		handle_coro(event);
+#else
+		handle(event);
 #endif
+	};
 
-		std::shared_lock l(mutex);
-		for (const auto& [_, listener] : dispatch_container) {
-			if (!event.is_cancelled()) {
-				listener(event);
-			}
-		};
+	/**
+	 * @brief Call all attached listeners.
+	 * Listeners may cancel, by calling the event.cancel method.
+	 *
+	 * @param event Class to pass as parameter to all listeners.
+	 */
+	void call(T&& event) const {
+#ifdef DPP_CORO
+		handle_coro(std::move(event));
+#else
+		handle(std::move(event));
+#endif
 	};
 
 #ifdef DPP_CORO
@@ -486,8 +560,8 @@ public:
 #ifdef _DOXYGEN_
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
-	 * `dpp::job(T)` (the latter requires DPP_CORO to be defined),
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)` (the latter requires DPP_CORO to be defined),
 	 * where T is the event type for this event router.
 	 *
 	 * This has the exact same behavior as using \ref attach(F&&) "attach".
@@ -502,8 +576,8 @@ public:
 
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
-	 * `dpp::job(T)` (the latter requires DPP_CORO to be defined),
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)` (the latter requires DPP_CORO to be defined),
 	 * where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
@@ -516,40 +590,82 @@ public:
 #  ifdef DPP_CORO
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
-	 * `dpp::job(T)`, where T is the event type for this event router.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
 	 */
 	template <typename F>
-	requires (utility::callable_returns<F, dpp::job, const T&> || utility::callable_returns<F, void, const T&>)
+	requires (utility::callable_returns<F, dpp::job, const T&> || utility::callable_returns<F, dpp::task<void>, const T&> || utility::callable_returns<F, void, const T&>)
 	[[maybe_unused]] event_handle operator()(F&& fun) {
 		return this->attach(std::forward<F>(fun));
 	}
 
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should either be of the form `void(const T &)` or
-	 * `dpp::job(T)`, where T is the event type for this event router.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
 	 * @return event_handle An event handle unique to this event, used to
 	 * detach the listener from the event later if necessary.
 	 */
 	template <typename F>
-	requires (utility::callable_returns<F, dpp::job, const T&> || utility::callable_returns<F, void, const T&>)
+	requires (utility::callable_returns<F, void, const T&>)
 	[[maybe_unused]] event_handle attach(F&& fun) {
 		std::unique_lock l(mutex);
 		event_handle h = next_handle++;
-		dispatch_container.emplace(h, std::forward<F>(fun));
+		dispatch_container.emplace(std::piecewise_construct, std::forward_as_tuple(h), std::forward_as_tuple(std::in_place_type_t<regular_handler_t>{}, std::forward<F>(fun)));
+		return h;
+	}
+
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
+	 *
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	requires (utility::callable_returns<F, task<void>, const T&>)
+	[[maybe_unused]] event_handle attach(F&& fun) {
+		assert(dpp::utility::is_coro_enabled());
+
+		std::unique_lock l(mutex);
+		event_handle h = next_handle++;
+		dispatch_container.emplace(std::piecewise_construct, std::forward_as_tuple(h), std::forward_as_tuple(std::in_place_type_t<task_handler_t>{}, std::forward<F>(fun)));
+		return h;
+	}
+
+	/**
+	 * @brief Attach a callable to the event, adding a listener.
+	 * The callable should either be of the form `void(const T&)` or
+	 * `dpp::task<void>(const T&)`, where T is the event type for this event router.
+	 *
+	 * @deprecated dpp::job event handlers are deprecated and will be removed in a future version, use dpp::task<void> instead.
+	 * @param fun Callable to attach to event
+	 * @return event_handle An event handle unique to this event, used to
+	 * detach the listener from the event later if necessary.
+	 */
+	template <typename F>
+	requires (utility::callable_returns<F, dpp::job, const T&>)
+	DPP_DEPRECATED("dpp::job event handlers are deprecated and will be removed in a future version, use dpp::task<void> instead")
+	[[maybe_unused]] event_handle attach(F&& fun) {
+		assert(dpp::utility::is_coro_enabled());
+
+		std::unique_lock l(mutex);
+		event_handle h = next_handle++;
+		dispatch_container.emplace(std::piecewise_construct, std::forward_as_tuple(h), std::forward_as_tuple(std::in_place_type_t<regular_handler_t>{}, std::forward<F>(fun)));
 		return h;
 	}
 #  else
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should be of the form `void(const T &)`
+	 * The callable should be of the form `void(const T&)`
 	 * where T is the event type for this event router.
 	 *
 	 * @param fun Callable to attach to event
@@ -563,7 +679,7 @@ public:
 
 	/**
 	 * @brief Attach a callable to the event, adding a listener.
-	 * The callable should be of the form `void(const T &)`
+	 * The callable should be of the form `void(const T&)`
 	 * where T is the event type for this event router.
 	 *
 	 * @warning You cannot call this within an event handler.
