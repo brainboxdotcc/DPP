@@ -747,8 +747,8 @@ async<confirmation_callback_t> cluster::co_guild_get_voice_regions(snowflake gui
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_get_voice_regions), guild_id };
 }
 
-async<confirmation_callback_t> cluster::co_create_webhook(const class webhook &w) {
-	return async{ this, static_cast<void (cluster::*)(const class webhook &, command_completion_event_t)>(&cluster::create_webhook), w };
+async<confirmation_callback_t> cluster::co_create_webhook(const class webhook &wh) {
+	return async{ this, static_cast<void (cluster::*)(const class webhook &, command_completion_event_t)>(&cluster::create_webhook), wh };
 }
 
 async<confirmation_callback_t> cluster::co_delete_webhook(snowflake webhook_id) {

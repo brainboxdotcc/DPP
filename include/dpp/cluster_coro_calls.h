@@ -2263,16 +2263,8 @@
  */
 [[nodiscard]] async<confirmation_callback_t> co_guild_get_voice_regions(snowflake guild_id);
 
-/**
- * @brief Create a webhook
- * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
- * @see dpp::cluster::create_webhook
- * @see https://discord.com/developers/docs/resources/webhook#create-webhook
- * @param w Webhook to create
- * @return webhook returned object on completion
- * \memberof dpp::cluster
- */
-[[nodiscard]] async<confirmation_callback_t> co_create_webhook(const class webhook &w);
+
+[[nodiscard]] async<confirmation_callback_t> co_create_webhook(const class webhook &wh);
 
 /**
  * @brief Delete a webhook

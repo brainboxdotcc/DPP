@@ -2782,19 +2782,8 @@ voiceregion_map get_voice_regions_sync();
  */
 voiceregion_map guild_get_voice_regions_sync(snowflake guild_id);
 
-/**
- * @brief Create a webhook
- * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
- * @see dpp::cluster::create_webhook
- * @see https://discord.com/developers/docs/resources/webhook#create-webhook
- * @param w Webhook to create
- * @return webhook returned object on completion
- * \memberof dpp::cluster
- * @throw dpp::rest_exception upon failure to execute REST function
- * @warning This function is a blocking (synchronous) call and should only be used from within a separate thread.
- * Avoid direct use of this function inside an event handler.
- */
-webhook create_webhook_sync(const class webhook &w);
+
+webhook create_webhook_sync(const class webhook &wh);
 
 /**
  * @brief Delete a webhook

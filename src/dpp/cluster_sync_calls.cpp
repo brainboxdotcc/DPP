@@ -745,8 +745,8 @@ voiceregion_map cluster::guild_get_voice_regions_sync(snowflake guild_id) {
 	return dpp::sync<voiceregion_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_get_voice_regions), guild_id);
 }
 
-webhook cluster::create_webhook_sync(const class webhook &w) {
-	return dpp::sync<webhook>(this, static_cast<void (cluster::*)(const class webhook &, command_completion_event_t)>(&cluster::create_webhook), w);
+webhook cluster::create_webhook_sync(const class webhook &wh) {
+	return dpp::sync<webhook>(this, static_cast<void (cluster::*)(const class webhook &, command_completion_event_t)>(&cluster::create_webhook), wh);
 }
 
 confirmation cluster::delete_webhook_sync(snowflake webhook_id) {
