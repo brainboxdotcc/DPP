@@ -286,7 +286,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	set_test(MULTIHEADER, false);
 	try {
-		dpp::https_client c2("www.google.com", 80, "/", "GET", "", {}, true);
+		dpp::https_client c2("dl.dpp.dev", 443, "/cookietest.php", "GET", "", {});
 		size_t count = c2.get_header_count("set-cookie");
 		size_t count_list = c2.get_header_list("set-cookie").size();
 		// Google sets a bunch of cookies when we start accessing it.
