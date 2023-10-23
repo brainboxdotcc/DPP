@@ -1312,6 +1312,40 @@ public:
 	 */
 	event_router_t<stage_instance_delete_t> on_stage_instance_delete;
 
+	/**
+	 * @brief Called when a channel is deleted from a guild.
+	 * The channel will still be temporarily available in the cache. Pointers to the
+	 * channel should not be retained long-term as they will be deleted by the garbage
+	 * collector.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#new-entitlement
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type channel_delete_t&, and returns void.
+	 */
+	event_router_t<entitlement_create_t> on_entitlement_create;
+
+
+	/**
+	 * @brief Called when a channel is edited on a guild.
+	 * The new channel details have already been applied to the guild when you
+	 * receive this event.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#updated-entitlement
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type channel_update_t&, and returns void.
+	 */
+	event_router_t<entitlement_update_t> on_entitlement_update;
+
+	/**
+	 * @brief Called when a channel is edited on a guild.
+	 * The new channel details have already been applied to the guild when you
+	 * receive this event.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type channel_update_t&, and returns void.
+	 */
+	event_router_t<entitlement_delete_t> on_entitlement_delete;
 	
 	/**
 	 * @brief Post a REST request. Where possible use a helper method instead like message_create

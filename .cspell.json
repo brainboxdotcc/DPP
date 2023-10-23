@@ -133,7 +133,9 @@
 		"cvtps",
 		"neww",
 		"STDCORO",
-		"NOMINMAX"
+		"NOMINMAX",
+		"sku",
+		"skus"
 	],
 	"flagWords": [
 		"hte"
