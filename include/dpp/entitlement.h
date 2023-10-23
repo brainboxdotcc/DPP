@@ -56,7 +56,7 @@ enum entitlement_flags : uint16_t {
 	/**
 	 * @brief Entitlement was deleted
 	 */
-	et_deleted =		0b000000000000001,
+	ent_deleted =		0b000000000000001,
 };
 
 /**
@@ -73,12 +73,12 @@ protected:
 	entitlement& fill_from_json_impl(nlohmann::json* j);
 
 	/**
-	 * @brief Build json for this channel object
+	 * @brief Build json for this entitlement object
 	 *
 	 * @param with_id include the ID in the json
 	 * @return json JSON object
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	json to_json_impl(bool with_id = false) const;
 
 public:
 	/**
@@ -99,7 +99,7 @@ public:
 	/**
 	 * @brief The type of entitlement.
 	 */
-	entitlement_type type;
+	entitlement_type type = entitlement_type::APPLICATION_SUBSCRIPTION;
 
 	/**
 	 * @brief Optional: Start date at which the entitlement is valid.
@@ -112,8 +112,6 @@ public:
 	 * @brief Optional: Date at which the entitlement is no longer valid.
 	 *
 	 * @note Not present when using test entitlements.
-	 *
-	 * @note This field is optional.
 	 */
 	time_t ends_at{0};
 
@@ -128,11 +126,13 @@ public:
 	entitlement() = default;
 
 	/**
-	 * @brief Construct a new emoji object with name, ID and flags
+	 * @brief Construct a new entitlement object with sku_id, ID, application_id, type, and flags.
 	 *
-	 * @param name The emoji's name
-	 * @param id ID, if it has one (unicode does not)
-	 * @param flags Emoji flags (emoji_flags)
+	 * @param sku_id The ID of the SKU.
+	 * @param id The ID of the entitlement.
+	 * @param application_id The ID of the parent application.
+	 * @param type The type of entitlement (Should only ever be APPLICATION_SUBSCRIPTION unless you going to use this object as a parameter for dpp::cluster::entitlement_test_create).
+	 * @param flags The flags for the SKU from dpp::entitlement_flags.
 	 */
 	entitlement(const snowflake sku_id, const snowflake id = 0, const snowflake application_id = 0, const entitlement_type type = dpp::entitlement_type::APPLICATION_SUBSCRIPTION, const uint8_t flags = 0);
 
@@ -148,11 +148,11 @@ public:
 	 *
 	 * @return true if the entitlement was deleted.
 	 */
-	bool is_deleted();
+	bool is_deleted() const;
 };
 
 /**
- * @brief Group of emojis
+ * @brief Group of entitlements.
  */
 typedef std::unordered_map<snowflake, entitlement> entitlement_map;
 

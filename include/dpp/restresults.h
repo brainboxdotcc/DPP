@@ -44,6 +44,7 @@
 #include <shared_mutex>
 #include <cstring>
 #include <dpp/entitlement.h>
+#include <dpp/sku.h>
 
 namespace dpp {
 
@@ -198,7 +199,8 @@ typedef std::variant<
 		onboarding,
 		welcome_screen,
 		entitlement,
-		entitlement_map
+		entitlement_map,
+		sku
 	> confirmable_t;
 
 /**

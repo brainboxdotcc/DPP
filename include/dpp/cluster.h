@@ -3625,17 +3625,24 @@ public:
 	void automod_rule_delete(snowflake guild_id, snowflake rule_id, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Get all emojis for a guild
+	 * @brief Returns all entitlements for a given app, active and expired.
 	 *
 	 * @see https://discord.com/developers/docs/monetization/entitlements#list-entitlements
-	 * @param guild_id Guild ID to get emojis for
+	 * @param user_id User ID to look up entitlements for.
+	 * @param sku_ids List of SKU IDs to check entitlements for.
+	 * @param before_id Retrieve entitlements before this entitlement ID.
+	 * @param after_id Retrieve entitlements after this entitlement ID.
+	 * @param limit Number of entitlements to return, 1-100 (default 100).
+	 * @param guild_id Guild ID to look up entitlements for.
+	 * @param exclude_ended Whether ended entitlements should be excluded from the search.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void list_entitlements(snowflake guild_id, command_completion_event_t callback = utility::log_error());
+	void entitlements_get(snowflake user_id = 0, const std::vector<snowflake>& sku_ids = {}, snowflake before_id = 0, snowflake after_id = 0, uint8_t limit = 100, snowflake guild_id = 0, bool exclude_ended = false, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Get all emojis for a guild
+	 * @brief Creates a test entitlement to a given SKU for a given guild or user.
+	 * Discord will act as though that user or guild has entitlement to your premium offering.
 	 *
 	 * @see https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement
 	 * @param new_entitlement The entitlement to create.
@@ -3644,17 +3651,29 @@ public:
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::entitlement object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void create_test_entitlement(const class entitlement& new_entitlement, command_completion_event_t callback = utility::log_error());
+	void entitlement_test_create(const class entitlement& new_entitlement, command_completion_event_t callback = utility::log_error());
 
 	/**
-	 * @brief Get all emojis for a guild
+	 * @brief Deletes a currently-active test entitlement.
+	 * Discord will act as though that user or guild no longer has entitlement to your premium offering.
 	 *
 	 * @see https://discord.com/developers/docs/monetization/entitlements#delete-test-entitlement
 	 * @param entitlement_id The test entitlement to delete.
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_test_entitlement(snowflake entitlement_id, command_completion_event_t callback = utility::log_error());
+	void entitlement_test_delete(snowflake entitlement_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Returns all SKUs for a given application.
+	 * @note Because of how Discord's SKU and subscription systems work, you will see two SKUs for your premium offering.
+	 * For integration and testing entitlements, you should use the SKU with type: 5.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/skus#list-skus
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void skus_get(command_completion_event_t callback = utility::log_error());
 
 #include <dpp/cluster_sync_calls.h>
 #ifdef DPP_CORO

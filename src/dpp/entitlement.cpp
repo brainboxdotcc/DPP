@@ -42,10 +42,10 @@ entitlement& entitlement::fill_from_json_impl(nlohmann::json* j) {
 		set_snowflake_not_null(j, "guild_id", owner_id);
 	}
 
-	type = static_cast<entitlement_type>(int16_not_null(j, "type"));
+	type = static_cast<entitlement_type>(int8_not_null(j, "type"));
 
 	if (bool_not_null(j, "deleted")) {
-		flags |= et_deleted;
+		flags |= ent_deleted;
 	}
 
 	set_ts_not_null(j, "starts_at", starts_at);
@@ -71,8 +71,8 @@ entitlement_type entitlement::get_type() const {
 	return type;
 }
 
-bool entitlement::is_deleted() {
-	return flags & entitlement_flags::et_deleted;
+bool entitlement::is_deleted() const {
+	return flags & entitlement_flags::ent_deleted;
 }
 
 } // namespace dpp
