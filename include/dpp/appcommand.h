@@ -297,13 +297,49 @@ void to_json(nlohmann::json& j, const command_option& opt);
  * @brief Response types when responding to an interaction within on_interaction_create.
  */
 enum interaction_response_type {
-	ir_pong = 1,					//!< Acknowledge a Ping
-	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
-	ir_deferred_channel_message_with_source = 5,	//!< Acknowledge an interaction and edit a response later, the user sees a loading state
-	ir_deferred_update_message = 6,			//!< for components, acknowledge an interaction and edit the original message later; the user does not see a loading state
-	ir_update_message = 7,				//!< for components, edit the message the component was attached to
-	ir_autocomplete_reply = 8,			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
-	ir_modal_dialog = 9,				//!< A modal dialog box
+	/**
+	 * @brief Acknowledge a Ping
+	 */
+	ir_pong = 1,
+	/**
+	 * @brief Respond to an interaction with a message.
+	 */
+	ir_channel_message_with_source = 4,
+	/**
+	 * @brief Acknowledge an interaction and edit a response later, the user sees a loading state
+	 */
+	ir_deferred_channel_message_with_source = 5,
+
+	/**
+	 * @brief For components, acknowledge an interaction and edit the original message later; the user does not see a loading state.
+	 */
+	ir_deferred_update_message = 6,
+
+	/**
+	 * @brief For components, edit the message the component was attached to.
+	 */
+	ir_update_message = 7,
+
+	/**
+	 * @brief Reply to autocomplete interaction.
+	 * @note Be sure to do this within 500ms of the interaction!
+	 */
+	ir_autocomplete_reply = 8,
+
+	/**
+	 * @brief A modal dialog box
+	 * @warning Not available for modal submit and ping interactions.
+	 */
+	ir_modal_dialog = 9,
+
+	/**
+	 * @brief Acknowledge a interaction with an upgrade button, only available for apps with monetization enabled.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#premiumrequired-interaction-response
+	 * @note Not available for autocomplete and ping interactions.
+	 * @warning This response does not support using `content`, `embeds`, or `attachments`, so reply with no data when using this!
+	 */
+	ir_premium_required = 10,
 };
 
 /**
