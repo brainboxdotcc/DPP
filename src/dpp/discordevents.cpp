@@ -390,7 +390,6 @@ const std::map<std::string, dpp::events::event*> eventmap = {
 	{ "AUTO_MODERATION_RULE_DELETE", new dpp::events::automod_rule_delete() },
 	{ "AUTO_MODERATION_ACTION_EXECUTION", new dpp::events::automod_rule_execute() },
 	{ "GUILD_AUDIT_LOG_ENTRY_CREATE", new dpp::events::guild_audit_log_entry_create() },
-	{ "GUILD_AUDIT_LOG_ENTRY_CREATE", new dpp::events::guild_audit_log_entry_create() },
 	{ "ENTITLEMENT_CREATE", new dpp::events::entitlement_create() },
 	{ "ENTITLEMENT_UPDATE", new dpp::events::entitlement_update() },
 	{ "ENTITLEMENT_DELETE", new dpp::events::entitlement_delete() },
