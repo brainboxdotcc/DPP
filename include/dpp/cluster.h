@@ -3624,6 +3624,38 @@ public:
 	 */
 	void automod_rule_delete(snowflake guild_id, snowflake rule_id, command_completion_event_t callback = utility::log_error());
 
+	/**
+	 * @brief Get all emojis for a guild
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#list-entitlements
+	 * @param guild_id Guild ID to get emojis for
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::emoji_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void list_entitlements(snowflake guild_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get all emojis for a guild
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement
+	 * @param new_entitlement The entitlement to create.
+	 * Make sure your dpp::entitlement_type (inside your dpp::entitlement object) matches the type of the owner_id
+	 * (if type is guild, owner_id is a guild id), otherwise it won't work!
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::entitlement object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void create_test_entitlement(const class entitlement& new_entitlement, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Get all emojis for a guild
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#delete-test-entitlement
+	 * @param entitlement_id The test entitlement to delete.
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void delete_test_entitlement(snowflake entitlement_id, command_completion_event_t callback = utility::log_error());
+
 #include <dpp/cluster_sync_calls.h>
 #ifdef DPP_CORO
 #include <dpp/cluster_coro_calls.h>
