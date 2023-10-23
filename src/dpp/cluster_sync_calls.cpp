@@ -257,6 +257,18 @@ emoji_map cluster::guild_emojis_get_sync(snowflake guild_id) {
 	return dpp::sync<emoji_map>(this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_emojis_get), guild_id);
 }
 
+entitlement_map cluster::entitlements_get_sync(snowflake user_id, const std::vector<snowflake>& sku_ids, snowflake before_id, snowflake after_id, uint8_t limit, snowflake guild_id, bool exclude_ended) {
+	return dpp::sync<entitlement_map>(this, static_cast<void (cluster::*)(snowflake, const std::vector<snowflake>&, snowflake, snowflake, uint8_t, snowflake, bool, command_completion_event_t)>(&cluster::entitlements_get), user_id, sku_ids, before_id, after_id, limit, guild_id, exclude_ended);
+}
+
+entitlement cluster::entitlement_test_create_sync(const class entitlement& new_entitlement) {
+	return dpp::sync<entitlement>(this, static_cast<void (cluster::*)(const class entitlement&, command_completion_event_t)>(&cluster::entitlement_test_create), new_entitlement);
+}
+
+confirmation cluster::entitlement_test_delete_sync(const class snowflake entitlement_id) {
+	return dpp::sync<confirmation>(this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_test_delete), entitlement_id);
+}
+
 gateway cluster::get_gateway_bot_sync() {
 	return dpp::sync<gateway>(this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::get_gateway_bot));
 }
@@ -563,6 +575,10 @@ scheduled_event cluster::guild_event_edit_sync(const scheduled_event& event) {
 
 scheduled_event cluster::guild_event_get_sync(snowflake guild_id, snowflake event_id) {
 	return dpp::sync<scheduled_event>(this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_event_get), guild_id, event_id);
+}
+
+sku_map cluster::skus_get_sync() {
+	return dpp::sync<sku_map>(this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::skus_get));
 }
 
 stage_instance cluster::stage_instance_create_sync(const stage_instance& si) {
