@@ -200,7 +200,8 @@ typedef std::variant<
 		welcome_screen,
 		entitlement,
 		entitlement_map,
-		sku
+		sku,
+		sku_map
 	> confirmable_t;
 
 /**
