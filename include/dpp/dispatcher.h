@@ -1925,7 +1925,7 @@ struct DPP_EXPORT entitlement_create_t : public event_dispatch_t {
 	using event_dispatch_t::operator=;
 
 	/**
-	 * @brief created entitlement
+	 * @brief The created entitlement.
 	 */
 	entitlement created = {};
 };
@@ -1936,7 +1936,7 @@ struct DPP_EXPORT entitlement_update_t : public event_dispatch_t {
 	using event_dispatch_t::operator=;
 
 	/**
-	 * @brief created entitlement
+	 * @brief The entitlement that was updated.
 	 */
 	entitlement updating_entitlement = {};
 };
@@ -1947,7 +1947,7 @@ struct DPP_EXPORT entitlement_delete_t : public event_dispatch_t {
 	using event_dispatch_t::operator=;
 
 	/**
-	 * @brief created entitlement
+	 * @brief The deleted entitlement.
 	 */
 	entitlement deleted = {};
 };
