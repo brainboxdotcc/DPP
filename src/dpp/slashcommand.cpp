@@ -593,12 +593,12 @@ void from_json(const nlohmann::json& j, interaction& i) {
 
 	if (j.contains("channel") && !j.at("channel").is_null()) {
 		const json& c = j["channel"];
-		i.channel = channel().fill_from_json((json*)&c);
+		i.channel = channel().fill_from_json(const_cast<json*>(&c));
 	}
 
 	if (j.contains("message") && !j.at("message").is_null()) {
 		const json& m = j["message"];
-		i.msg = message().fill_from_json((json*)&m, i.cache_policy);
+		i.msg = message().fill_from_json(const_cast<json*>(&m), i.cache_policy);
 		set_snowflake_not_null(&m, "id", i.message_id);
 	}
 
@@ -721,8 +721,8 @@ void from_json(const nlohmann::json& j, interaction& i) {
 	}
 
 	if(j.contains("entitlements")) {
-		for (const auto& entitle : j["entitlements"]) {
-			i.entitlements.emplace_back(entitlement().fill_from_json((json*)&entitle));
+		for (auto& entitle : j["entitlements"]) {
+			i.entitlements.emplace_back(entitlement().fill_from_json(const_cast<json*>(&entitle)));
 		}
 	}
 }
