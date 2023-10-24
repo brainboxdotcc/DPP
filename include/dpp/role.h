@@ -99,10 +99,8 @@ public:
 	snowflake subscription_listing_id;
 	/** The unicode emoji used for the role's icon, can be an empty string */
 	std::string unicode_emoji;
-	/** The role icon hash, can be an empty string */
-	utility::iconhash icon;
-	/** Image data for the role icon (if any) */
-	std::string* image_data;
+	/** The role icon */
+	utility::icon icon;
 
 	/**
 	 * @brief Construct a new role object
@@ -210,13 +208,22 @@ public:
 	std::string get_icon_url(uint16_t size = 0, const image_type format = i_png) const;
 
 	/**
-	 * @brief Load an image into the object as base64
-	 * 
+	 * @brief Load a role icon
+	 *
 	 * @param image_blob Image binary data
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @return emoji& Reference to self
 	 */
-	role& load_image(const std::string &image_blob, const image_type type);
+	role& load_image(std::string_view image_blob, const image_type type);
+
+	/**
+	 * @brief Load a role icon
+	 *
+	 * @param image_blob Image binary data
+	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @return emoji& Reference to self
+	 */
+	role& load_image(const std::byte* data, uint32_t size, const image_type type);
 
 	/**
 	 * @brief Operator less than, used for checking if a role is below another.
