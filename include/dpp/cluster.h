@@ -1313,10 +1313,7 @@ public:
 	event_router_t<stage_instance_delete_t> on_stage_instance_delete;
 
 	/**
-	 * @brief Called when a channel is deleted from a guild.
-	 * The channel will still be temporarily available in the cache. Pointers to the
-	 * channel should not be retained long-term as they will be deleted by the garbage
-	 * collector.
+	 * @brief Called when a user subscribes to an SKU.
 	 *
 	 * @see https://discord.com/developers/docs/monetization/entitlements#new-entitlement
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1326,9 +1323,8 @@ public:
 
 
 	/**
-	 * @brief Called when a channel is edited on a guild.
-	 * The new channel details have already been applied to the guild when you
-	 * receive this event.
+	 * @brief Called when a user's subscription renews for the next billing period.
+	 * The `ends_at` field will have an updated value with the new expiration date.
 	 *
 	 * @see https://discord.com/developers/docs/monetization/entitlements#updated-entitlement
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
@@ -1337,9 +1333,9 @@ public:
 	event_router_t<entitlement_update_t> on_entitlement_update;
 
 	/**
-	 * @brief Called when a channel is edited on a guild.
-	 * The new channel details have already been applied to the guild when you
-	 * receive this event.
+	 * @brief Called when a user's entitlement is deleted.
+	 * These events aare infrequent and only occur if Discord issues a refund or Discord removes an entitlement "via internal tooling".
+	 * Entitlements **are not deleted** when they expire.
 	 *
 	 * @see https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.

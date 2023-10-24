@@ -26,6 +26,7 @@
 #include <dpp/managed.h>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+#include <unordered_map>
 
 namespace dpp {
 
