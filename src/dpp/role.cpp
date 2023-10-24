@@ -38,24 +38,6 @@ std::map<uint8_t, dpp::role_flags> rolemap = {
 		{ 1 << 0,       dpp::r_in_prompt },
 };
 
-role::role() :
-	managed(),
-	guild_id(0),
-	colour(0),
-	position(0),
-	permissions(0),
-	flags(0),
-	integration_id(0),
-	bot_id(0),
-	subscription_listing_id(0),
-	icon{}
-{
-}
-
-role::~role()
-{
-}
-
 std::string role::get_mention(const snowflake& id){
 	return utility::role_mention(id);
 }
