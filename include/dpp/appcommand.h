@@ -322,13 +322,15 @@ enum interaction_response_type {
 
 	/**
 	 * @brief Reply to autocomplete interaction.
+	 *
 	 * @note Be sure to do this within 500ms of the interaction!
 	 */
 	ir_autocomplete_reply = 8,
 
 	/**
 	 * @brief A modal dialog box
-	 * @warning Not available for modal submit and ping interactions.
+	 *
+	 * @note Not available for modal submit and ping interactions.
 	 */
 	ir_modal_dialog = 9,
 
