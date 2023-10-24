@@ -26,11 +26,11 @@
 #include <dpp/channel.h>
 #include <dpp/role.h>
 #include <dpp/user.h>
+#include <dpp/entitlement.h>
 #include <variant>
 #include <map>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
-#include "entitlement.h"
 
 namespace dpp {
 
