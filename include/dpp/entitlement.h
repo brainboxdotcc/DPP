@@ -158,4 +158,3 @@ public:
 typedef std::unordered_map<snowflake, entitlement> entitlement_map;
 
 } // namespace dpp
-
