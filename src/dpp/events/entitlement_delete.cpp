@@ -35,6 +35,11 @@ namespace dpp::events {
 void entitlement_delete::handle(discord_client* client, json &j, const std::string &raw) {
 	dpp::entitlement ent;
 	ent.fill_from_json(&j);
+
+	dpp::entitlement_delete_t entitlement_event(client, raw);
+	entitlement_event.deleted = ent;
+
+	client->creator->on_entitlement_delete.call(entitlement_event);
 }
 
 };
