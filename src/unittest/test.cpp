@@ -945,6 +945,21 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		i = dummyval;
 		set_test(ICONHASH, (i.to_string() == dummyval));
 
+		start_test(UTILITY_IF_SUCCESS);
+		try {
+			auto test_cb = [cluster = &bot](dpp::command_completion_event_t cb) {
+				cb(dpp::confirmation_callback_t{cluster, dpp::message{"test"}, dpp::http_request_completion_t{}});
+			};
+			test_cb(dpp::utility::if_success([](const dpp::message &m) {
+				if (m.content == "test") {
+					set_status(UTILITY_IF_SUCCESS, ts_success);
+				}
+			}));
+		}
+		catch (const std::exception &e) {
+			set_status(UTILITY_IF_SUCCESS, ts_failed, e.what());
+		}
+
 		/* This ensures we test both protocols, as voice is json and shard is etf */
 		bot.set_websocket_protocol(dpp::ws_etf);
 

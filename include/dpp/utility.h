@@ -759,5 +759,13 @@ struct alignas(T) dummy {
 	std::array<std::byte, sizeof(T)> data;
 };
 
+/**
+ * @brief C++17 implementation of C++20's std::remove_cvref_t.
+ *
+ * @see https://en.cppreference.com/w/cpp/types/remove_cvref
+ */
+template <typename T>
+using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
 } // namespace utility
 } // namespace dpp
