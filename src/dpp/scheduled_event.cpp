@@ -109,6 +109,16 @@ scheduled_event& scheduled_event::set_end_time(time_t t) {
 	return *this;
 }
 
+scheduled_event& scheduled_event::load_image(std::string_view image_blob, const image_type type) {
+	image = utility::image_data{type, image_blob};
+	return *this;
+}
+
+scheduled_event& scheduled_event::load_image(const std::byte* data, uint32_t size, const image_type type) {
+	image = utility::image_data{type, data, size};
+	return *this;
+}
+
 scheduled_event& scheduled_event::fill_from_json_impl(const json* j) {
 	set_snowflake_not_null(j, "id", this->id);
 	set_snowflake_not_null(j, "guild_id", this->guild_id);
@@ -117,7 +127,8 @@ scheduled_event& scheduled_event::fill_from_json_impl(const json* j) {
 	set_snowflake_not_null(j, "creator_id", this->creator_id);
 	set_string_not_null(j, "name", this->name);
 	set_string_not_null(j, "description", this->description);
-	set_string_not_null(j, "image", this->image);
+	if (auto it = j->find("image"); it != j->end() && !it->is_null())
+		this->image = utility::iconhash{it->get<std::string>()};
 	set_ts_not_null(j, "scheduled_start_time", this->scheduled_start_time);
 	set_ts_not_null(j, "scheduled_end_time", this->scheduled_end_time);
 	this->privacy_level = static_cast<dpp::event_privacy_level>(int8_not_null(j, "privacy_level"));
@@ -144,8 +155,8 @@ json scheduled_event::to_json_impl(bool with_id) const {
 	if (!this->description.empty()) {
 		j["description"] = this->description;
 	}
-	if (!this->image.empty()) {
-		j["image"] = this->image;
+	if (image.is_image_data()) {
+		j["image"] = image.as_image_data().to_nullable_json();
 	}
 	j["privacy_level"] = this->privacy_level;
 	j["status"] = this->status;
