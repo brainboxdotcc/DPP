@@ -1334,7 +1334,7 @@ public:
 
 	/**
 	 * @brief Called when a user's entitlement is deleted.
-	 * These events aare infrequent and only occur if Discord issues a refund or Discord removes an entitlement "via internal tooling".
+	 * These events are infrequent and only occur if Discord issues a refund, or Discord removes an entitlement via "internal tooling".
 	 * Entitlements **are not deleted** when they expire.
 	 *
 	 * @see https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
