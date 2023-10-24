@@ -719,6 +719,12 @@ void from_json(const nlohmann::json& j, interaction& i) {
 			i.data = ai;
 		}
 	}
+
+	if(j.contains("entitlements")) {
+		for (const auto& entitle : j["entitlements"]) {
+			i.entitlements.emplace_back(entitlement().fill_from_json((json*)&entitle));
+		}
+	}
 }
 
 interaction_response& interaction_response::add_autocomplete_choice(const command_option_choice& achoice) {

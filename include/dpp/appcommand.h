@@ -30,6 +30,7 @@
 #include <map>
 #include <dpp/json_fwd.h>
 #include <dpp/json_interface.h>
+#include "entitlement.h"
 
 namespace dpp {
 
@@ -770,26 +771,98 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
-	snowflake application_id;                                   //!< id of the application this interaction is for
-	uint8_t	type;                                               //!< the type of interaction (dpp::interaction_type)
-	std::variant<command_interaction, component_interaction, autocomplete_interaction> data; //!< Optional: the command data payload
-	snowflake guild_id;                                         //!< Optional: the guild it was sent from
-	snowflake channel_id;                                       //!< Optional: the channel it was sent from
-	dpp::channel channel;										//!< Optional: The partial channel object where it was sent from
-	snowflake message_id;					    //!< Originating message id for context menu actions
-	permission app_permissions;				    //!< Permissions of the bot in the channel/guild where this command was issued
-	message msg;						    //!< Originating message for context menu actions
-	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions. Filled when the interaction is invoked in a guild
-	user usr;                                                   //!< User object for the invoking user
-	std::string token;                                          //!< a continuation token for responding to the interaction
-	uint8_t version;                                            //!< read-only property, always 1
-	command_resolved resolved;				    //!< Resolved data e.g. users, members, roles, channels, permissions, etc.
-	std::string locale;                                         //!< User's [locale](https://discord.com/developers/docs/reference#locales) (language)
-	std::string guild_locale;                                   //!< Guild's locale (language) - for guild interactions only
-	cache_policy_t cache_policy;                                //!< Cache policy from cluster
+	/**
+	 * @brief ID of the application this interaction is for.
+	 */
+	snowflake application_id;
 
 	/**
-	 * @brief Construct a new interaction object
+	 * @brief The type of interaction from dpp::interaction_type.
+	 */
+	uint8_t	type;
+
+	/**
+	 * @brief Optional: the command data payload.
+	 */
+	std::variant<command_interaction, component_interaction, autocomplete_interaction> data;
+
+	/**
+	 * @brief Optional: the guild it was sent from.
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief Optional: the channel it was sent from
+	 */
+	snowflake channel_id;
+
+	/**
+	 * @brief Optional: The partial channel object where it was sent from.
+	 */
+	dpp::channel channel;
+
+	/**
+	 * @brief Originating message id for context menu actions.
+	 */
+	snowflake message_id;
+
+	/**
+	 * @brief Permissions of the bot in the channel/guild where this command was issued.
+	 */
+	permission app_permissions;
+
+	/**
+	 * @brief Originating message for context menu actions.
+	 */
+	message msg;
+
+	/**
+	 * @brief Optional: guild member data for the invoking user, including permissions. Filled when the interaction is invoked in a guild
+	 */
+	guild_member member;
+
+	/**
+	 * @brief User object for the invoking user.
+	 */
+	user usr;
+
+	/**
+	 * @brief A continuation token for responding to the interaction.
+	 */
+	std::string token;
+
+	/**
+	 * @brief Read-only property, always 1.
+	 */
+	uint8_t version;
+
+	/**
+	 * @brief Resolved data e.g. users, members, roles, channels, permissions, etc.
+	 */
+	command_resolved resolved;
+
+	/**
+	 * @brief User's [locale](https://discord.com/developers/docs/reference#locales) (language).
+	 */
+	std::string locale;
+
+	/**
+	 * @brief Guild's locale (language) - for guild interactions only.
+	 */
+	std::string guild_locale;
+
+	/**
+	 * @brief Cache policy from cluster.
+	 */
+	cache_policy_t cache_policy;
+
+	/**
+	 * @brief For monetized apps, any entitlements for the invoking user, representing access to premium SKUs.
+	 */
+	std::vector<entitlement> entitlements;
+
+	/**
+	 * @brief Construct a new interaction object.
 	 */
 	interaction();
 
