@@ -36,6 +36,7 @@
 #include <dpp/cluster.h>
 #include <dpp/dispatcher.h>
 #include <dpp/message.h>
+#include <dpp/discordevents.h>
 
 #ifdef _WIN32
 	#include <stdio.h>
@@ -192,12 +193,8 @@ uint64_t uptime::to_msecs() const {
 	return to_secs() * 1000;
 }
 
-iconhash::iconhash(uint64_t _first, uint64_t _second) : first(_first), second(_second) {
+iconhash::iconhash(uint64_t _first, uint64_t _second) noexcept : first(_first), second(_second) {
 }
-
-iconhash::iconhash(const iconhash&) = default;
-
-iconhash::~iconhash() = default;
 
 void iconhash::set(const std::string &hash) {
 	std::string clean_hash(hash);
@@ -227,7 +224,7 @@ iconhash& iconhash::operator=(const std::string &assignment) {
 	return *this;
 }
 
-bool iconhash::operator==(const iconhash& other) const {
+bool iconhash::operator==(const iconhash& other) const noexcept {
 	return other.first == first && other.second == second;
 }
 
@@ -237,6 +234,125 @@ std::string iconhash::to_string() const {
 	} else {
 		return to_hex(this->first) + to_hex(this->second);
 	}
+}
+
+namespace {
+	std::unique_ptr<std::byte[]> copy_data(const std::byte* data, size_t size) {
+		if (!data)
+			return nullptr;
+		std::unique_ptr<std::byte[]> ret = std::make_unique<std::byte[]>(size);
+
+		std::copy_n(data, size, ret.get());
+		return ret;
+	}
+
+	template <typename Range>
+	std::unique_ptr<std::byte[]> copy_data(Range&& range) {
+		return copy_data(reinterpret_cast<const std::byte*>(std::data(range)), std::size(range));
+	}
+}
+
+image_data::image_data(const image_data& rhs) : data{copy_data(rhs.data.get(), rhs.size)}, size{rhs.size}, type{rhs.type} {
+}
+
+image_data::image_data(image_type format, std::string_view str) : data{copy_data(str)}, size{static_cast<uint32_t>(str.size())}, type{format} {
+}
+
+image_data::image_data(image_type format, const std::byte* data, uint32_t byte_size) : data{copy_data(data, byte_size)}, size{byte_size}, type{format} {
+}
+
+image_data& image_data::operator=(const image_data& rhs) {
+	data = copy_data(rhs.data.get(), rhs.size);
+	size = rhs.size;
+	type = rhs.type;
+	return *this;
+}
+
+void image_data::set(image_type format, std::string_view bytes) {
+	data = copy_data(bytes);
+	size = static_cast<uint32_t>(bytes.size());
+}
+
+void image_data::set(image_type format, const std::byte* bytes, uint32_t byte_size) {
+	data = copy_data(bytes, size);
+	size = static_cast<uint32_t>(byte_size);
+}
+
+std::string image_data::base64_encode() const {
+	return dpp::base64_encode(reinterpret_cast<unsigned char*>(data.get()), size);
+}
+
+std::string image_data::get_file_extension() const {
+	return utility::file_extension(type);
+}
+
+std::string image_data::get_mime_type() const {
+	return utility::mime_type(type);
+}
+
+bool image_data::empty() const noexcept {
+	return (size == 0);
+}
+
+json image_data::to_nullable_json() const {
+	if (empty()) {
+		return nullptr;
+	}
+	else {
+		return "data:" + get_mime_type() + ";base64," + base64_encode();
+	}
+}
+
+bool icon::is_iconhash() const {
+	return std::holds_alternative<iconhash>(hash_or_data);
+}
+
+iconhash& icon::as_iconhash() & {
+	return std::get<iconhash>(hash_or_data);
+}
+
+const iconhash& icon::as_iconhash() const& {
+	return std::get<iconhash>(hash_or_data);
+}
+
+iconhash&& icon::as_iconhash() && {
+	return std::move(std::get<iconhash>(hash_or_data));
+}
+
+icon& icon::operator=(const iconhash& hash) {
+	hash_or_data = hash;
+	return *this;
+}
+
+icon& icon::operator=(iconhash&& hash) noexcept {
+	hash_or_data = std::move(hash);
+	return *this;
+}
+
+icon& icon::operator=(const image_data& img) {
+	hash_or_data = img;
+	return *this;
+}
+
+icon& icon::operator=(image_data&& img) noexcept {
+	hash_or_data = std::move(img);
+	return *this;
+}
+
+bool icon::is_image_data() const {
+	return std::holds_alternative<image_data>(hash_or_data);
+}
+
+image_data& icon::as_image_data() & {
+	return std::get<image_data>(hash_or_data);
+}
+
+const image_data& icon::as_image_data() const& {
+	return std::get<image_data>(hash_or_data);
+}
+
+image_data&& icon::as_image_data() && {
+	return std::move(std::get<image_data>(hash_or_data));
 }
 
 std::string debug_dump(uint8_t* data, size_t length) {

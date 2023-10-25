@@ -70,7 +70,7 @@ json emoji::to_json_impl(bool with_id) const {
 	}
 	j["name"] = name;
 	if (!image_data.empty()) {
-		j["image"] = image_data;
+		j["image"] = image_data.to_nullable_json();
 	}
 	j["roles"] = json::array();
 	for (const auto& role : roles) {
@@ -99,9 +99,15 @@ emoji& emoji::load_image(std::string_view image_blob, const image_type type) {
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
 		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
 	}
+	image_data = utility::image_data{type, image_blob};
+	return *this;
+}
 
-	image_data = "data:" + utility::mime_type(type) + ";base64," + base64_encode(reinterpret_cast<unsigned char const*>(image_blob.data()), static_cast<unsigned int>(image_blob.length()));
-
+emoji& emoji::load_image(const std::byte *data, uint32_t size, const image_type type) {
+	if (size > MAX_EMOJI_SIZE) {
+		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
+	}
+	image_data = utility::image_data{type, data, size};
 	return *this;
 }
 

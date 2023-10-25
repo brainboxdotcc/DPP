@@ -713,17 +713,17 @@ public:
 	 */
 	dpp::welcome_screen welcome_screen;
 
-	/** Guild icon hash */
-	utility::iconhash icon;
+	/** Guild icon */
+	utility::icon icon;
 
-	/** Guild splash hash */
-	utility::iconhash splash;
+	/** Guild splash */
+	utility::icon splash;
 
-	/** Guild discovery splash hash */
-	utility::iconhash discovery_splash;
+	/** Guild discovery splash */
+	utility::icon discovery_splash;
 
-	/** Server banner hash */
-	utility::iconhash banner;
+	/** Server banner */
+	utility::icon banner;
 
 	/** Snowflake id of guild owner */
 	snowflake owner_id;
@@ -944,6 +944,108 @@ public:
 	 * @throw dpp::length_exception if guild name is too short
 	 */
 	guild& set_name(const std::string& n);
+
+	/**
+	 * @brief Remove the guild banner.
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& remove_banner();
+
+	/**
+	 * @brief Set the guild banner image. Server needs banner feature.
+	 * Must be 16:9, and depending on nitro level, must be png or jpeg.
+	 * Animated gif needs the animated banner server feature.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_banner(image_type format, std::string_view data);
+
+	/**
+	 * @brief Set the guild banner image. Server needs banner feature.
+	 * Must be 16:9, and depending on nitro level, must be png or jpeg.
+	 * Animated gif needs the animated banner server feature.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @param size Size of the data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_banner(image_type format, const std::byte* data, uint32_t size);
+
+	/**
+	 * @brief Remove the guild discovery splash.
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& remove_discovery_splash();
+
+	/**
+	 * @brief Set the guild discovery splash image. Server needs discoverable feature.
+	 * Must be 16:9 and png or jpeg.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_discovery_splash(image_type format, std::string_view data);
+
+	/**
+	 * @brief Set the guild discovery splash image. Server needs discoverable feature.
+	 * Must be 16:9 and png or jpeg.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @param size Size of the data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_discovery_splash(image_type format, const std::byte* data, uint32_t size);
+
+	/**
+	 * @brief Remove the guild invite splash.
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& remove_splash();
+
+	/**
+	 * @brief Set the guild invite splash image. Server needs invite splash feature.
+	 * Must be 16:9 and png or jpeg.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_splash(image_type format, std::string_view data);
+
+	/**
+	 * @brief Set the guild invite splash image. Server needs invite splash feature.
+	 * Must be 16:9 and png or jpeg.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @param size Size of the data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_splash(image_type format, const std::byte* data, uint32_t size);
+
+	/**
+	 * @brief Remove the guild icon.
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& remove_icon();
+
+	/**
+	 * @brief Set the guild icon image.
+	 * Must be 1024x1024 and png or jpeg. Gif allowed only if the server has animated icon.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_icon(image_type format, std::string_view data);
+
+	/**
+	 * @brief Set the 1024x1024 guild icon image.
+	 * Must be png or jpeg. Gif allowed only if the server has animated icon.
+	 * @param format Image format.
+	 * @param data Image data in bytes
+	 * @param size Size of the data in bytes
+	 * @return guild& Reference to self for chaining
+	 */
+	guild& set_icon(image_type format, const std::byte* data, uint32_t size);
 
 	/**
 	 * @brief Is a large server (>250 users)
