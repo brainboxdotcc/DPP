@@ -697,6 +697,49 @@
 [[nodiscard]] async<confirmation_callback_t> co_guild_emojis_get(snowflake guild_id);
 
 /**
+ * @brief Returns all entitlements for a given app, active and expired.
+ *
+ * @see dpp::cluster::entitlements_get
+ * @see https://discord.com/developers/docs/monetization/entitlements#list-entitlements
+ * @param user_id User ID to look up entitlements for.
+ * @param sku_ids List of SKU IDs to check entitlements for.
+ * @param before_id Retrieve entitlements before this entitlement ID.
+ * @param after_id Retrieve entitlements after this entitlement ID.
+ * @param limit Number of entitlements to return, 1-100 (default 100).
+ * @param guild_id Guild ID to look up entitlements for.
+ * @param exclude_ended Whether ended entitlements should be excluded from the search.
+ * @return entitlement_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_entitlements_get(snowflake user_id = 0, const std::vector<snowflake>& sku_ids = {}, snowflake before_id = 0, snowflake after_id = 0, uint8_t limit = 100, snowflake guild_id = 0, bool exclude_ended = false);
+
+/**
+ * @brief Creates a test entitlement to a given SKU for a given guild or user.
+ * Discord will act as though that user or guild has entitlement to your premium offering.
+ *
+ * @see dpp::cluster::entitlement_test_create
+ * @see https://discord.com/developers/docs/monetization/entitlements#create-test-entitlement
+ * @param new_entitlement The entitlement to create.
+ * Make sure your dpp::entitlement_type (inside your dpp::entitlement object) matches the type of the owner_id
+ * (if type is guild, owner_id is a guild id), otherwise it won't work!
+ * @return entitlement returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_entitlement_test_create(const class entitlement& new_entitlement);
+
+/**
+ * @brief Deletes a currently-active test entitlement.
+ * Discord will act as though that user or guild no longer has entitlement to your premium offering.
+ *
+ * @see dpp::cluster::entitlement_test_delete
+ * @see https://discord.com/developers/docs/monetization/entitlements#delete-test-entitlement
+ * @param entitlement_id The test entitlement to delete.
+ * @return confirmation returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_entitlement_test_delete(snowflake entitlement_id);
+
+/**
  * @brief Get the gateway information for the bot using the token
  * @see dpp::cluster::get_gateway_bot
  * @see https://discord.com/developers/docs/topics/gateway#get-gateway-bot
@@ -1726,6 +1769,18 @@
  * \memberof dpp::cluster
  */
 [[nodiscard]] async<confirmation_callback_t> co_guild_event_get(snowflake guild_id, snowflake event_id);
+
+/**
+ * @brief Returns all SKUs for a given application.
+ * @note Because of how Discord's SKU and subscription systems work, you will see two SKUs for your premium offering.
+ * For integration and testing entitlements, you should use the SKU with type: 5.
+ *
+ * @see dpp::cluster::skus_get
+ * @see https://discord.com/developers/docs/monetization/skus#list-skus
+ * @return sku_map returned object on completion
+ * \memberof dpp::cluster
+ */
+[[nodiscard]] async<confirmation_callback_t> co_skus_get();
 
 
 [[nodiscard]] async<confirmation_callback_t> co_stage_instance_create(const stage_instance& si);

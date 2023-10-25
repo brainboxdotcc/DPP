@@ -26,6 +26,7 @@
 #include <dpp/channel.h>
 #include <dpp/role.h>
 #include <dpp/user.h>
+#include <dpp/entitlement.h>
 #include <variant>
 #include <map>
 #include <dpp/json_fwd.h>
@@ -297,13 +298,51 @@ void to_json(nlohmann::json& j, const command_option& opt);
  * @brief Response types when responding to an interaction within on_interaction_create.
  */
 enum interaction_response_type {
-	ir_pong = 1,					//!< Acknowledge a Ping
-	ir_channel_message_with_source = 4,		//!< respond to an interaction with a message
-	ir_deferred_channel_message_with_source = 5,	//!< Acknowledge an interaction and edit a response later, the user sees a loading state
-	ir_deferred_update_message = 6,			//!< for components, acknowledge an interaction and edit the original message later; the user does not see a loading state
-	ir_update_message = 7,				//!< for components, edit the message the component was attached to
-	ir_autocomplete_reply = 8,			//!< Reply to autocomplete interaction. Be sure to do this within 500ms of the interaction!
-	ir_modal_dialog = 9,				//!< A modal dialog box
+	/**
+	 * @brief Acknowledge a Ping
+	 */
+	ir_pong = 1,
+	/**
+	 * @brief Respond to an interaction with a message.
+	 */
+	ir_channel_message_with_source = 4,
+	/**
+	 * @brief Acknowledge an interaction and edit a response later, the user sees a loading state
+	 */
+	ir_deferred_channel_message_with_source = 5,
+
+	/**
+	 * @brief For components, acknowledge an interaction and edit the original message later; the user does not see a loading state.
+	 */
+	ir_deferred_update_message = 6,
+
+	/**
+	 * @brief For components, edit the message the component was attached to.
+	 */
+	ir_update_message = 7,
+
+	/**
+	 * @brief Reply to autocomplete interaction.
+	 *
+	 * @note Be sure to do this within 500ms of the interaction!
+	 */
+	ir_autocomplete_reply = 8,
+
+	/**
+	 * @brief A modal dialog box
+	 *
+	 * @note Not available for modal submit and ping interactions.
+	 */
+	ir_modal_dialog = 9,
+
+	/**
+	 * @brief Acknowledge a interaction with an upgrade button, only available for apps with monetization enabled.
+	 *
+	 * @see https://discord.com/developers/docs/monetization/entitlements#premiumrequired-interaction-response
+	 * @note Not available for autocomplete and ping interactions.
+	 * @warning This response does not support using `content`, `embeds`, or `attachments`, so reply with no data when using this!
+	 */
+	ir_premium_required = 10,
 };
 
 /**
@@ -732,26 +771,98 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
-	snowflake application_id;                                   //!< id of the application this interaction is for
-	uint8_t	type;                                               //!< the type of interaction (dpp::interaction_type)
-	std::variant<command_interaction, component_interaction, autocomplete_interaction> data; //!< Optional: the command data payload
-	snowflake guild_id;                                         //!< Optional: the guild it was sent from
-	snowflake channel_id;                                       //!< Optional: the channel it was sent from
-	dpp::channel channel;										//!< Optional: The partial channel object where it was sent from
-	snowflake message_id;					    //!< Originating message id for context menu actions
-	permission app_permissions;				    //!< Permissions of the bot in the channel/guild where this command was issued
-	message msg;						    //!< Originating message for context menu actions
-	guild_member member;                                        //!< Optional: guild member data for the invoking user, including permissions. Filled when the interaction is invoked in a guild
-	user usr;                                                   //!< User object for the invoking user
-	std::string token;                                          //!< a continuation token for responding to the interaction
-	uint8_t version;                                            //!< read-only property, always 1
-	command_resolved resolved;				    //!< Resolved data e.g. users, members, roles, channels, permissions, etc.
-	std::string locale;                                         //!< User's [locale](https://discord.com/developers/docs/reference#locales) (language)
-	std::string guild_locale;                                   //!< Guild's locale (language) - for guild interactions only
-	cache_policy_t cache_policy;                                //!< Cache policy from cluster
+	/**
+	 * @brief ID of the application this interaction is for.
+	 */
+	snowflake application_id;
 
 	/**
-	 * @brief Construct a new interaction object
+	 * @brief The type of interaction from dpp::interaction_type.
+	 */
+	uint8_t	type;
+
+	/**
+	 * @brief Optional: the command data payload.
+	 */
+	std::variant<command_interaction, component_interaction, autocomplete_interaction> data;
+
+	/**
+	 * @brief Optional: the guild it was sent from.
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief Optional: the channel it was sent from
+	 */
+	snowflake channel_id;
+
+	/**
+	 * @brief Optional: The partial channel object where it was sent from.
+	 */
+	dpp::channel channel;
+
+	/**
+	 * @brief Originating message id for context menu actions.
+	 */
+	snowflake message_id;
+
+	/**
+	 * @brief Permissions of the bot in the channel/guild where this command was issued.
+	 */
+	permission app_permissions;
+
+	/**
+	 * @brief Originating message for context menu actions.
+	 */
+	message msg;
+
+	/**
+	 * @brief Optional: guild member data for the invoking user, including permissions. Filled when the interaction is invoked in a guild
+	 */
+	guild_member member;
+
+	/**
+	 * @brief User object for the invoking user.
+	 */
+	user usr;
+
+	/**
+	 * @brief A continuation token for responding to the interaction.
+	 */
+	std::string token;
+
+	/**
+	 * @brief Read-only property, always 1.
+	 */
+	uint8_t version;
+
+	/**
+	 * @brief Resolved data e.g. users, members, roles, channels, permissions, etc.
+	 */
+	command_resolved resolved;
+
+	/**
+	 * @brief User's [locale](https://discord.com/developers/docs/reference#locales) (language).
+	 */
+	std::string locale;
+
+	/**
+	 * @brief Guild's locale (language) - for guild interactions only.
+	 */
+	std::string guild_locale;
+
+	/**
+	 * @brief Cache policy from cluster.
+	 */
+	cache_policy_t cache_policy;
+
+	/**
+	 * @brief For monetized apps, any entitlements for the invoking user, representing access to premium SKUs.
+	 */
+	std::vector<entitlement> entitlements;
+
+	/**
+	 * @brief Construct a new interaction object.
 	 */
 	interaction();
 

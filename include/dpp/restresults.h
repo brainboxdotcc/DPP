@@ -43,6 +43,8 @@
 #include <iostream>
 #include <shared_mutex>
 #include <cstring>
+#include <dpp/entitlement.h>
+#include <dpp/sku.h>
 
 namespace dpp {
 
@@ -202,7 +204,11 @@ typedef std::variant<
 		automod_rule,
 		automod_rule_map,
 		onboarding,
-		welcome_screen
+		welcome_screen,
+		entitlement,
+		entitlement_map,
+		sku,
+		sku_map
 	> confirmable_t;
 
 /**
