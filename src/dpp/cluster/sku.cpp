@@ -2,7 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2022 Craig Edwards and D++ contributors
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,13 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/restrequest.h>
+#include <dpp/sku.h>
 
-#pragma once
+namespace dpp {
 
-#include "coro/async.h"
-#include "coro/coroutine.h"
-#include "coro/job.h"
-#include "coro/task.h"
-#include "coro/when_any.h"
+void cluster::skus_get(command_completion_event_t callback) {
+	rest_request_list<sku>(this, API_PATH "/applications", me.id.str(), "entitlements", m_get, "", callback);
+}
+
+} // namespace dpp

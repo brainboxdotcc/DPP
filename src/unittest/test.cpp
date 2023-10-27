@@ -286,7 +286,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 
 	set_test(MULTIHEADER, false);
 	try {
-		dpp::https_client c2("www.google.com", 80, "/", "GET", "", {}, true);
+		dpp::https_client c2("dl.dpp.dev", 443, "/cookietest.php", "GET", "", {});
 		size_t count = c2.get_header_count("set-cookie");
 		size_t count_list = c2.get_header_list("set-cookie").size();
 		// Google sets a bunch of cookies when we start accessing it.
@@ -912,7 +912,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		coro_offline_tests();
 	}
 
-	std::vector<uint8_t> test_image = load_test_image();
+	std::vector<std::byte> dpp_logo = load_data("DPP-Logo.png");
 
 	set_test(PRESENCE, false);
 	set_test(CLUSTER, false);
@@ -959,6 +959,40 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 		bot.on_voice_receive_combined([&](const auto& event) {
 		});
 
+		bot.on_guild_create([&](const dpp::guild_create_t& event) {
+			dpp::guild *g = event.created;
+
+			if (g->id == TEST_GUILD_ID) {
+				start_test(GUILD_EDIT);
+				g->set_icon(dpp::i_png, dpp_logo.data(), static_cast<uint32_t>(dpp_logo.size()));
+				bot.guild_edit(*g, [&bot](const dpp::confirmation_callback_t &result) {
+					if (result.is_error()) {
+						set_status(GUILD_EDIT, ts_failed, "guild_edit 1 errored:\n" + result.get_error().human_readable);
+						return;
+					}
+					dpp::guild g = result.get<dpp::guild>();
+
+					if (g.get_icon_url().empty()) {
+						set_status(GUILD_EDIT, ts_failed, "icon not set or not retrieved");
+						return;
+					}
+					g.remove_icon();
+					bot.guild_edit(g, [&bot](const dpp::confirmation_callback_t &result) {
+						if (result.is_error()) {
+							set_status(GUILD_EDIT, ts_failed, "guild_edit 2 errored:\n" + result.get_error().human_readable);
+							return;
+						}
+						const dpp::guild &g = result.get<dpp::guild>();
+						if (!g.get_icon_url().empty()) {
+							set_status(GUILD_EDIT, ts_failed, "icon not removed");
+							return;
+						}
+						set_status(GUILD_EDIT, ts_success);
+					});
+				});
+			}
+		});
+
 		std::promise<void> ready_promise;
 		std::future ready_future = ready_promise.get_future();
 		bot.on_ready([&](const dpp::ready_t & event) {
@@ -989,7 +1023,7 @@ Markdown lol \\|\\|spoiler\\|\\| \\~\\~strikethrough\\~\\~ \\`small \\*code\\* b
 								set_test(MESSAGERECEIVE, false);
 								test_message.add_file("no-mime", "test");
 								test_message.add_file("test.txt", "test", "text/plain");
-								test_message.add_file("test.png", std::string{test_image.begin(), test_image.end()}, "image/png");
+								test_message.add_file("test.png", std::string{reinterpret_cast<const char*>(dpp_logo.data()), dpp_logo.size()}, "image/png");
 								bot.message_create(test_message, [&bot](const dpp::confirmation_callback_t &callback) {
 									if (!callback.is_error()) {
 										set_test(MESSAGECREATE, true);

@@ -487,7 +487,7 @@ component &component::add_default_value(const snowflake id, const component_defa
 
 embed::~embed() = default;
 
-embed::embed() : timestamp(0), color(0) {
+embed::embed() : timestamp(0) {
 }
 
 message::message() : managed(0), channel_id(0), guild_id(0), sent(0), edited(0), webhook_id(0),
@@ -618,7 +618,9 @@ embed::embed(json* j) : embed() {
 	description = string_not_null(j, "description");
 	url = string_not_null(j, "url");
 	timestamp = ts_not_null(j, "timestamp");
-	color = int32_not_null(j, "color");
+	if (j->contains("color")) {
+		color = int32_not_null(j, "color");
+	}
 	if (j->contains("footer")) {
 		dpp::embed_footer f;
 		json& fj = (*j)["footer"];
@@ -962,7 +964,9 @@ json message::to_json(bool with_id, bool is_interaction_response) const {
 		if (!embed.url.empty()) {
 			e["url"] = embed.url;
 		}
-		e["color"] = embed.color;
+		if (embed.color.has_value()) {
+			e["color"] = embed.color.value();
+		}
 		if (embed.footer.has_value()) {
 			e["footer"]["text"] = embed.footer->text;
 			e["footer"]["icon_url"] = embed.footer->icon_url;

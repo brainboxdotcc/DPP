@@ -66,3 +66,16 @@
 
 	#include <WinSock2.h>
 #endif
+
+#ifdef _DOXYGEN_
+	/** @brief Macro that expands to [[deprecated(reason)]] when including the library, nothing when building the library */
+	#define DPP_DEPRECATED(reason)
+#else /* !_DOXYGEN_ */
+	#if defined(DPP_BUILD) || defined(DPP_NO_DEPRECATED)
+		/** @brief Macro that expands to [[deprecated(reason)]] when including the library, nothing when building the library */
+		#define DPP_DEPRECATED(reason)
+	#else
+		/** @brief Macro that expands to [[deprecated(reason)]] when including the library, nothing when building the library */
+		#define DPP_DEPRECATED(reason) [[deprecated(reason)]]
+	#endif
+#endif /* _DOXYGEN_ */

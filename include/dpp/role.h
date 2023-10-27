@@ -74,45 +74,71 @@ public:
 	 * @brief Role name
 	 * Between 1 and 100 characters.
 	 */
-	std::string name;
+	std::string name{};
 	/**
 	 * @brief Guild ID
 	 */
-	snowflake guild_id;
+	snowflake guild_id{0};
 	/**
 	 * @brief Role colour.
 	 * A colour of 0 means no colour. If you want a black role,
 	 * you must use the value 0x000001.
 	 */
-	uint32_t colour;
+	uint32_t colour{0};
 	/** Role position */
-	uint8_t position;
+	uint8_t position{0};
 	/** Role permissions bitmask values from dpp::permissions */
-	permission permissions;
+	permission permissions{};
 	/** Role flags from dpp::role_flags */
-	uint8_t flags;
+	uint8_t flags{0};
 	/** Integration id if any (e.g. role is a bot's role created when it was invited) */
-	snowflake integration_id;
+	snowflake integration_id{};
 	/** Bot id if any (e.g. role is a bot's role created when it was invited) */
-	snowflake bot_id;
+	snowflake bot_id{};
 	/** The id of the role's subscription sku and listing */
-	snowflake subscription_listing_id;
+	snowflake subscription_listing_id{};
 	/** The unicode emoji used for the role's icon, can be an empty string */
-	std::string unicode_emoji;
-	/** The role icon hash, can be an empty string */
-	utility::iconhash icon;
-	/** Image data for the role icon (if any) */
-	std::string* image_data;
+	std::string unicode_emoji{};
+	/** The role icon */
+	utility::icon icon{};
 
 	/**
 	 * @brief Construct a new role object
 	 */
-	role();
+	role() = default;
+
+	/**
+	 * @brief Construct a new role object.
+	 *
+	 * @param rhs Role object to copy
+	 */
+	role(const role& rhs) = default;
+
+	/**
+	 * @brief Construct a new role object.
+	 *
+	 * @param rhs Role object to move
+	 */
+	role(role&& rhs) = default;
+
+	/**
+	 * @brief Copy another role object
+	 *
+	 * @param rhs Role object to copy
+	 */
+	role &operator=(const role& rhs) = default;
+
+	/**
+	 * @brief Move from another role object
+	 *
+	 * @param rhs Role object to copy
+	 */
+	role &operator=(role&& rhs) = default;
 
 	/**
 	 * @brief Destroy the role object
 	 */
-	virtual ~role();
+	virtual ~role() = default;
 
 	/**
 	* @brief Create a mentionable role.
@@ -210,13 +236,22 @@ public:
 	std::string get_icon_url(uint16_t size = 0, const image_type format = i_png) const;
 
 	/**
-	 * @brief Load an image into the object as base64
-	 * 
+	 * @brief Load a role icon
+	 *
 	 * @param image_blob Image binary data
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
 	 * @return emoji& Reference to self
 	 */
-	role& load_image(const std::string &image_blob, const image_type type);
+	role& load_image(std::string_view image_blob, const image_type type);
+
+	/**
+	 * @brief Load a role icon
+	 *
+	 * @param image_blob Image binary data
+	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @return emoji& Reference to self
+	 */
+	role& load_image(const std::byte* data, uint32_t size, const image_type type);
 
 	/**
 	 * @brief Operator less than, used for checking if a role is below another.

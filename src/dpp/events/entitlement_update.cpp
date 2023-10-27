@@ -2,7 +2,8 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * Copyright 2022 Craig Edwards and D++ contributors
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +19,29 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/json.h>
 
-#pragma once
+namespace dpp::events {
 
-#include "coro/async.h"
-#include "coro/coroutine.h"
-#include "coro/job.h"
-#include "coro/task.h"
-#include "coro/when_any.h"
+/**
+ * @brief Handle event
+ *
+ * @param client Websocket client (current shard)
+ * @param j JSON data for the event
+ * @param raw Raw JSON string
+ */
+void entitlement_update::handle(discord_client* client, json &j, const std::string &raw) {
+	if (!client->creator->on_entitlement_update.empty()) {
+		dpp::entitlement ent;
+		ent.fill_from_json(&j);
+
+		dpp::entitlement_update_t entitlement_event(client, raw);
+		entitlement_event.updating_entitlement = ent;
+
+		client->creator->on_entitlement_update.call(entitlement_event);
+	}
+}
+
+};

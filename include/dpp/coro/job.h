@@ -18,9 +18,18 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#pragma once
+
+#include <dpp/utility.h>
+
+namespace dpp {
+
+struct job_dummy {
+};
+
+}
 
 #ifdef DPP_CORO
-#pragma once
 
 #include "coro.h"
 
@@ -48,15 +57,6 @@ struct job {};
 namespace detail {
 
 namespace job {
-
-template <typename... Args>
-inline constexpr bool coroutine_has_no_ref_params_v = false;
-
-template <>
-inline constexpr bool coroutine_has_no_ref_params_v<> = true;
-
-template <typename T, typename... Args>
-inline constexpr bool coroutine_has_no_ref_params_v<T, Args...> = (std::is_invocable_v<T, Args...> || !std::is_reference_v<T>) && (!std::is_reference_v<Args> && ... && true);
 
 #ifdef DPP_CORO_TEST
 	struct promise{};
@@ -118,31 +118,13 @@ struct promise {
 	 * @brief Function called when the job returns. Does nothing.
 	 */
 	void return_void() const noexcept {}
-
-	/**
-	 * @brief Function that will wrap every co_await inside of the job.
-	 */
-	template <typename T>
-	T await_transform(T &&expr) const noexcept {
-		/**
-		 * `job` is extremely efficient as a coroutine but this comes with drawbacks :
-		 * It cannot be co_awaited, which means the second it co_awaits something, the program jumps back to the calling function, which continues executing.
-		 * At this point, if the function returns, every object declared in the function including its parameters are destroyed, which causes dangling references.
-		 * This is exactly the same problem as references in lambdas : https://dpp.dev/lambdas-and-locals.html.
-		 *
-		 * If you must pass a reference, pass it as a pointer or with std::ref, but you must fully understand the reason behind this warning, and what to avoid.
-		 * If you prefer a safer type, use `coroutine` for synchronous execution, or `task` for parallel tasks, and co_await them.
-		 */
-		static_assert(coroutine_has_no_ref_params_v<Args...>, "co_await is disabled in dpp::job when taking parameters by reference. read comment above this line for more info");
-
-		return std::forward<T>(expr);
-	}
 };
 
 } // namespace job
 
 } // namespace detail
 
+DPP_CHECK_ABI_COMPAT(job, job_dummy)
 } // namespace dpp
 
 /**

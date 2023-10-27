@@ -116,7 +116,7 @@ public:
 	uint32_t flags;
 	/** Discriminator (aka tag), 4 digits usually displayed with leading zeroes.
 	 *
-	 * @note To print the discriminator with leading zeroes, use format_username(). 
+	 * @note To print the discriminator with leading zeroes, use format_username().
 	 * 0 for users that have migrated to the new username format.
 	 */
 	uint16_t discriminator;

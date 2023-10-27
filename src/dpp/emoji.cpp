@@ -41,6 +41,13 @@ emoji& emoji::fill_from_json_impl(nlohmann::json* j) {
 		json & user = (*j)["user"];
 		user_id = snowflake_not_null(&user, "id");
 	}
+
+	if(j->contains("roles")) {
+		for (const auto& role : (*j)["roles"]) {
+			this->roles.emplace_back(to_string(role));
+		}
+	}
+
 	if (bool_not_null(j, "require_colons")) {
 		flags |= e_require_colons;
 	}
@@ -63,7 +70,11 @@ json emoji::to_json_impl(bool with_id) const {
 	}
 	j["name"] = name;
 	if (!image_data.empty()) {
-		j["image"] = image_data;
+		j["image"] = image_data.to_nullable_json();
+	}
+	j["roles"] = json::array();
+	for (const auto& role : roles) {
+		j["roles"].push_back(role.str());
 	}
 	return j;
 }
@@ -88,14 +99,19 @@ emoji& emoji::load_image(std::string_view image_blob, const image_type type) {
 	if (image_blob.size() > MAX_EMOJI_SIZE) {
 		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
 	}
-
-	image_data = "data:" + utility::mime_type(type) + ";base64," + base64_encode(reinterpret_cast<unsigned char const*>(image_blob.data()), static_cast<unsigned int>(image_blob.length()));
-
+	image_data = utility::image_data{type, image_blob};
 	return *this;
 }
 
-std::string emoji::format() const
-{
+emoji& emoji::load_image(const std::byte *data, uint32_t size, const image_type type) {
+	if (size > MAX_EMOJI_SIZE) {
+		throw dpp::length_exception("Emoji file exceeds discord limit of 256 kilobytes");
+	}
+	image_data = utility::image_data{type, data, size};
+	return *this;
+}
+
+std::string emoji::format() const {
 	return id ? ((is_animated() ? "a:" : "") + name + ":" + std::to_string(id)) : name;
 }
 
@@ -106,11 +122,11 @@ std::string emoji::get_mention() const {
 std::string emoji::get_url(uint16_t size, const dpp::image_type format, bool prefer_animated) const {
 	if (this->id) {
 		return utility::cdn_endpoint_url({ i_jpg, i_png, i_webp, i_gif },
-										 "emojis/" + std::to_string(this->id),
-										 format, size, prefer_animated, is_animated());
-	} else {
-		return std::string();
+	 		"emojis/" + std::to_string(this->id),
+		 	format, size, prefer_animated, is_animated());
 	}
+
+	return "";
 }
 
 

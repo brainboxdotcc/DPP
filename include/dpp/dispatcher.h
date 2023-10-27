@@ -42,6 +42,7 @@
 #include <dpp/stage_instance.h>
 #include <dpp/integration.h>
 #include <dpp/auditlog.h>
+#include <dpp/entitlement.h>
 #include <functional>
 #include <variant>
 #include <exception>
@@ -1916,6 +1917,39 @@ struct DPP_EXPORT voice_client_disconnect_t : public event_dispatch_t {
 	 * @brief user id of user who left vc
 	 */
 	snowflake user_id = {};
+};
+
+/** @brief Delete stage instance */
+struct DPP_EXPORT entitlement_create_t : public event_dispatch_t {
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief The created entitlement.
+	 */
+	entitlement created = {};
+};
+
+/** @brief Delete stage instance */
+struct DPP_EXPORT entitlement_update_t : public event_dispatch_t {
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief The entitlement that was updated.
+	 */
+	entitlement updating_entitlement = {};
+};
+
+/** @brief Delete stage instance */
+struct DPP_EXPORT entitlement_delete_t : public event_dispatch_t {
+	using event_dispatch_t::event_dispatch_t;
+	using event_dispatch_t::operator=;
+
+	/**
+	 * @brief The deleted entitlement.
+	 */
+	entitlement deleted = {};
 };
 
 } // namespace dpp
