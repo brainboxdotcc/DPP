@@ -140,7 +140,7 @@ public:
 	/**
 	 * @brief The emoji for the select option.
 	 */
-	inner_emoji emoji;
+	component_emoji emoji;
 
 	/**
 	 * @brief Construct a new select option object
@@ -320,7 +320,7 @@ public:
 	/**
 	 * @brief The emoji for this component.
 	 */
-	inner_emoji emoji;
+	component_emoji emoji;
 
 	/** Constructor
 	 */
