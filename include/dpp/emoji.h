@@ -82,7 +82,7 @@ struct component_emoji {
 	 * @note Only applies to custom emojis.
 	 */
 	bool animated{false};
-}
+};
 
 /**
  * @brief Represents an emoji for a dpp::guild
