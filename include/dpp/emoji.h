@@ -48,43 +48,6 @@ enum emoji_flags : uint8_t {
 };
 
 /**
- * @brief An emoji for a component (select menus included).
- *
- * To set an emoji on your button, you must set one of either the name or id fields.
- * The easiest way is to use the dpp::component::set_emoji method.
- *
- * @note This is a **very** scaled down version of dpp::emoji, we advise that you refrain from using this.
- */
-struct component_emoji {
-	/**
-	 * @brief The name of the emoji.
-	 *
-	 * For built in unicode emojis, set this to the
-	 * actual unicode value of the emoji e.g. "😄"
-	 * and not for example ":smile:"
-	 */
-	std::string name{""};
-
-	/**
-	 * @brief The emoji ID value for emojis that are custom
-	 * ones belonging to a guild.
-	 *
-	 * The same rules apply as with other emojis,
-	 * that the bot must be on the guild where the emoji resides
-	 * and it must be available for use
-	 * (e.g. not disabled due to lack of boosts, etc)
-	 */
-	dpp::snowflake id{0};
-
-	/**
-	 * @brief Is the emoji animated?
-	 *
-	 * @note Only applies to custom emojis.
-	 */
-	bool animated{false};
-};
-
-/**
  * @brief Represents an emoji for a dpp::guild
  */
 class DPP_EXPORT emoji : public managed, public json_interface<emoji> {
