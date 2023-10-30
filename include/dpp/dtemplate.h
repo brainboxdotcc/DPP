@@ -54,35 +54,43 @@ public:
 	 * @brief Template code
 	 */
 	std::string code;
+
 	/**
 	 * @brief Template name
 	 */
 	std::string name;
+
 	/**
 	 * @brief Template description
 	 */
 	std::string description;
+
 	/**
 	 * @brief Usage counter
 	 */
 	uint32_t usage_count;
+
 	/**
 	 * @brief User ID of creator
 	 */
 	snowflake creator_id;
+
 	/**
 	 * @brief Creation date/time
 	 * 
 	 */
 	time_t created_at;
+
 	/**
 	 * @brief Last update date/time
 	 */
 	time_t updated_at;
+
 	/**
 	 * @brief Guild id the template is created from
 	 */
 	snowflake source_guild_id;
+
 	/**
 	 * @brief True if needs synchronising
 	 */
@@ -99,8 +107,9 @@ public:
 	virtual ~dtemplate() = default;
 };
 
-/** A container of invites */
+/**
+ * @brief A container of invites
+ */
 typedef std::unordered_map<snowflake, dtemplate> dtemplate_map;
-
 
 } // namespace dpp

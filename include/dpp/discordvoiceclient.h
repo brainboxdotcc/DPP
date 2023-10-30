@@ -93,6 +93,7 @@ struct DPP_EXPORT voice_out_packet {
 	 * Generally these will be RTP.
 	 */
 	std::string packet;
+
 	/**
 	 * @brief Duration of packet
 	 */
@@ -189,6 +190,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 		 * voice payload.
 		 */
 		rtp_seq_t seq;
+
 		/**
 		 * @brief The timestamp of the RTP packet that generated this voice
 		 * payload.
@@ -197,6 +199,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 		 * number wraps around.
 		 */
 		rtp_timestamp_t timestamp;
+
 		/**
 		 * @brief The event payload that voice handlers receive.
 		 */
@@ -226,6 +229,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 			rtp_seq_t min_seq, max_seq;
 			rtp_timestamp_t min_timestamp, max_timestamp;
 		} range;
+
 		/**
 		 * @brief The queue of parked voice payloads.
 		 * 
@@ -234,10 +238,12 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 		 * are parked and sorted in this queue.
 		 */
 		std::priority_queue<voice_payload> parked_payloads;
+
 		/**
 		 * @brief The decoder ctls to be set on the decoder.
 		 */
 		std::vector<std::function<void(OpusDecoder&)>> pending_decoder_ctls;
+
 		/**
 		 * @brief libopus decoder
 		 *
@@ -251,6 +257,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 	 * @brief Thread used to deliver incoming voice data to handlers.
 	 */
 	std::thread voice_courier;
+
 	/**
 	 * @brief Shared state between this voice client and the courier thread.
 	 */
@@ -259,16 +266,19 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 		 * @brief Protects all following members.
 		 */
 		std::mutex mtx;
+
 		/**
 		 * @brief Signaled when there is a new payload to deliver or terminating state has changed.
 		 */
 		std::condition_variable signal_iteration;
+
 		/**
 		 * @brief Voice buffers to be reported to handler, grouped by speaker.
 		 *
 		 * Buffers are parked here and flushed every 500ms.
 		 */
 		std::map<snowflake, voice_payload_parking_lot> parked_voice_payloads;
+
 		/**
 		 * @brief Used to signal termination.
 		 *
@@ -276,6 +286,7 @@ class DPP_EXPORT discord_voice_client : public websocket_client
 		 */
 		bool terminating = false;
 	} voice_courier_shared_state;
+
 	/**
 	 * @brief The run loop of the voice courier thread.
 	 */
