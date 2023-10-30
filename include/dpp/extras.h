@@ -118,7 +118,7 @@ using function_arg_t = typename function_traits<T>::template arg<Idx>;
  */
 template <typename Callable>
 dpp::command_completion_event_t if_success(Callable&& on_success) {
-	if constexpr (variant_has_v<remove_cvref_t<function_arg_t<Callable, 0>>, dpp::confirmable_t>) {
+	if constexpr (variant_has_v<remove_cvref_t<function_arg_t<std::invoke_result_t<fun_converter, Callable>, 0>>, dpp::confirmable_t>) {
 		using fn_arg = std::remove_cv_t<std::remove_reference_t<function_arg_t<Callable, 0>>>;
 
 		return [cb = std::forward<Callable>(on_success)](const dpp::confirmation_callback_t &callback) {
