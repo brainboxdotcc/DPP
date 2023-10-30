@@ -3,7 +3,7 @@
  * D++, A Lightweight C++ library for Discord
  *
  * SPDX-License-Identifier: Apache-2.0
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,51 +19,29 @@
  * limitations under the License.
  *
  ************************************************************************************/
+#include <dpp/discordevents.h>
+#include <dpp/cluster.h>
+#include <dpp/json.h>
 
-#pragma once
-#include <dpp/export.h>
-#include <dpp/snowflake.h>
-#include <dpp/json_fwd.h>
-#include <dpp/json_interface.h>
-#include <unordered_map>
-
-namespace dpp {
+namespace dpp::events {
 
 /**
- * @brief The ban class represents a ban on a guild.
- * 
+ * @brief Handle event
+ *
+ * @param client Websocket client (current shard)
+ * @param j JSON data for the event
+ * @param raw Raw JSON string
  */
-class DPP_EXPORT ban : public json_interface<ban> {
-protected:
-	friend struct json_interface<ban>;
+void entitlement_update::handle(discord_client* client, json &j, const std::string &raw) {
+	if (!client->creator->on_entitlement_update.empty()) {
+		dpp::entitlement ent;
+		ent.fill_from_json(&j);
 
-	/** Read class values from json object
-	 * @param j A json object to read from
-	 * @return A reference to self
-	 */
-	ban& fill_from_json_impl(nlohmann::json* j);
+		dpp::entitlement_update_t entitlement_event(client, raw);
+		entitlement_event.updating_entitlement = ent;
 
-public:
-	/**
-	 * @brief The ban reason.
-	 */
-	std::string reason;
+		client->creator->on_entitlement_update.call(entitlement_event);
+	}
+}
 
-	/**
-	 * @brief User ID the ban applies to.
-	 */
-	snowflake user_id;
-
-	/** Constructor */
-	ban();
-
-	/** Destructor */
-	virtual ~ban() = default;
 };
-
-/**
- * @brief A group of bans. The key is the user ID.
- */
-typedef std::unordered_map<snowflake, ban> ban_map;
-
-} // namespace dpp

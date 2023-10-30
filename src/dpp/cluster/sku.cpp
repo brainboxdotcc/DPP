@@ -2,8 +2,7 @@
  *
  * D++, A Lightweight C++ library for Discord
  *
- * SPDX-License-Identifier: Apache-2.0
- * Copyright 2021 Craig Edwards and D++ contributors 
+ * Copyright 2021 Craig Edwards and D++ contributors
  * (https://github.com/brainboxdotcc/DPP/graphs/contributors)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +18,13 @@
  * limitations under the License.
  *
  ************************************************************************************/
-#pragma once
+#include <dpp/restrequest.h>
+#include <dpp/sku.h>
 
-#if !defined(DPP_VERSION_LONG)
-#define DPP_VERSION_LONG 0x00100028
-#define DPP_VERSION_SHORT 100028
-#define DPP_VERSION_TEXT "D++ 10.0.28 (27-Oct-2023)"
+namespace dpp {
 
-#define DPP_VERSION_MAJOR ((DPP_VERSION_LONG & 0x00ff0000) >> 16)
-#define DPP_VERSION_MINOR ((DPP_VERSION_LONG & 0x0000ff00) >> 8)
-#define DPP_VERSION_PATCH (DPP_VERSION_LONG & 0x000000ff)
-#endif
+void cluster::skus_get(command_completion_event_t callback) {
+	rest_request_list<sku>(this, API_PATH "/applications", me.id.str(), "entitlements", m_get, "", callback);
+}
+
+} // namespace dpp

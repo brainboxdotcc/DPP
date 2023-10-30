@@ -201,10 +201,15 @@ template<class T> class event_router_t {
 private:
 	friend class cluster;
 
-	/** @brief Non-coro event handler type */
+	/**
+	 * @brief Non-coro event handler type
+	 */
 	using regular_handler_t = std::function<void(const T&)>;
 
-	/** @brief Type that event handlers will be stored as with DPP_CORO off. This is the ABI DPP_CORO has to match */
+	/**
+	 * @brief Type that event handlers will be stored as with DPP_CORO off.
+	 * This is the ABI DPP_CORO has to match.
+	 */
 	using event_handler_abi_t = std::variant<regular_handler_t, std::function<task_dummy(T)>>;
 
 #ifdef DPP_CORO
@@ -218,11 +223,15 @@ private:
 
 	DPP_CHECK_ABI_COMPAT(event_handler_t, event_handler_abi_t)
 #else
-	/** @brief Type that event handlers are stored as */
+	/**
+	 * @brief Type that event handlers are stored as
+	 */
 	using event_handler_t = event_handler_abi_t;
 #endif
 
-	/** @brief Identifier for the next event handler, will be given to the user on attaching a handler */
+	/**
+	 * @brief Identifier for the next event handler, will be given to the user on attaching a handler
+	 */
 	event_handle next_handle = 1;
 
 	/**

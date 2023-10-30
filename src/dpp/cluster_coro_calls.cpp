@@ -259,6 +259,18 @@ async<confirmation_callback_t> cluster::co_guild_emojis_get(snowflake guild_id) 
 	return async{ this, static_cast<void (cluster::*)(snowflake, command_completion_event_t)>(&cluster::guild_emojis_get), guild_id };
 }
 
+async<confirmation_callback_t> cluster::co_entitlements_get(snowflake user_id, const std::vector<snowflake>& sku_ids, snowflake before_id, snowflake after_id, uint8_t limit, snowflake guild_id, bool exclude_ended) {
+	return async{ this, static_cast<void (cluster::*)(snowflake, const std::vector<snowflake>&, snowflake, snowflake, uint8_t, snowflake, bool, command_completion_event_t)>(&cluster::entitlements_get), user_id, sku_ids, before_id, after_id, limit, guild_id, exclude_ended };
+}
+
+async<confirmation_callback_t> cluster::co_entitlement_test_create(const class entitlement& new_entitlement) {
+	return async{ this, static_cast<void (cluster::*)(const class entitlement&, command_completion_event_t)>(&cluster::entitlement_test_create), new_entitlement };
+}
+
+async<confirmation_callback_t> cluster::co_entitlement_test_delete(const class snowflake entitlement_id) {
+	return async{ this, static_cast<void (cluster::*)(const class snowflake, command_completion_event_t)>(&cluster::entitlement_test_delete), entitlement_id };
+}
+
 async<confirmation_callback_t> cluster::co_get_gateway_bot() {
 	return async{ this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::get_gateway_bot) };
 }
@@ -565,6 +577,10 @@ async<confirmation_callback_t> cluster::co_guild_event_edit(const scheduled_even
 
 async<confirmation_callback_t> cluster::co_guild_event_get(snowflake guild_id, snowflake event_id) {
 	return async{ this, static_cast<void (cluster::*)(snowflake, snowflake, command_completion_event_t)>(&cluster::guild_event_get), guild_id, event_id };
+}
+
+async<confirmation_callback_t> cluster::co_skus_get() {
+	return async{ this, static_cast<void (cluster::*)(command_completion_event_t)>(&cluster::skus_get) };
 }
 
 async<confirmation_callback_t> cluster::co_stage_instance_create(const stage_instance& si) {

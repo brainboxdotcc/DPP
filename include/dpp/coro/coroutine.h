@@ -51,8 +51,8 @@ struct promise_t;
 
 template <typename R>
 /**
-	* @brief Alias for the handle_t of a coroutine.
-	*/
+ * @brief Alias for the handle_t of a coroutine.
+ */
 using handle_t = std_coroutine::coroutine_handle<promise_t<R>>;
 
 /**
@@ -188,7 +188,8 @@ public:
 
 } // namespace detail
 
-/** @class coroutine coroutine.h coro/coroutine.h
+/**
+ * @class coroutine coroutine.h coro/coroutine.h
  * @brief Base type for a coroutine, starts on co_await.
  *
  * @warning - This feature is EXPERIMENTAL. The API may change at any time and there may be bugs.

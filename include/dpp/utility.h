@@ -29,6 +29,9 @@
 #include <map>
 #include <functional>
 #include <cstddef>
+#include <variant>
+#include <memory>
+#include <string_view>
 
 /**
  * @brief The main namespace for D++ functions, classes and types
@@ -215,33 +218,24 @@ std::string DPP_EXPORT loglevel(dpp::loglevel in);
  * the value back in string form.
  */
 struct DPP_EXPORT iconhash {
-
-	uint64_t first;		//!< High 64 bits
-	uint64_t second;	//!< Low 64 bits
+	/** @brief High 64 bits */
+	uint64_t first;
+	/** @brief Low 64 bits */
+	uint64_t second;
 
 	/**
 	 * @brief Construct a new iconhash object
 	 * @param _first Leftmost portion of the hash value
 	 * @param _second Rightmost portion of the hash value
 	 */
-	iconhash(uint64_t _first = 0, uint64_t _second = 0);
+	iconhash(uint64_t _first = 0, uint64_t _second = 0) noexcept;
 
 	/**
 	 * @brief Construct a new iconhash object
-	 */
-	iconhash(const iconhash&);
-
-	/**
-	 * @brief Destroy the iconhash object
-	 */
-	~iconhash();
-
-	/**
-	 * @brief Construct a new iconhash object
-	 * 
+	 *
 	 * @param hash String hash to construct from.
 	 * Must contain a 32 character hex string.
-	 * 
+	 *
 	 * @throws std::length_error if the provided
 	 * string is not exactly 32 characters long.
 	 */
@@ -249,9 +243,9 @@ struct DPP_EXPORT iconhash {
 
 	/**
 	 * @brief Assign from std::string
-	 * 
+	 *
 	 * @param assignment string to assign from.
-	 * 
+	 *
 	 * @throws std::length_error if the provided
 	 * string is not exactly 32 characters long.
 	 */
@@ -259,18 +253,18 @@ struct DPP_EXPORT iconhash {
 
 	/**
 	 * @brief Check if one iconhash is equal to another
-	 * 
+	 *
 	 * @param other other iconhash to compare
 	 * @return True if the iconhash objects match
 	 */
-	bool operator==(const iconhash& other) const;
+	bool operator==(const iconhash& other) const noexcept;
 
 	/**
 	 * @brief Change value of iconhash object
-	 * 
+	 *
 	 * @param hash String hash to change to.
 	 * Must contain a 32 character hex string.
-	 * 
+	 *
 	 * @throws std::length_error if the provided
 	 * string is not exactly 32 characters long.
 	 */
@@ -279,10 +273,248 @@ struct DPP_EXPORT iconhash {
 	/**
 	 * @brief Convert iconhash back to 32 character
 	 * string value.
-	 * 
-	 * @return std::string Hash value 
+	 *
+	 * @return std::string Hash value
 	 */
 	std::string to_string() const;
+};
+
+/**
+ * @brief Image to be received or sent to API calls.
+ *
+ * This class is carefully crafted to be 16 bytes,
+ * this is why we use a ptr + 4 byte size instead of a vector.
+ * We want this class to be substitutable with iconhash in data structures.
+ */
+struct DPP_EXPORT image_data {
+	/**
+	 * @brief Data in bytes of the image.
+	 */
+	std::unique_ptr<std::byte[]> data = nullptr;
+
+	/**
+	 * @brief Size of the data in bytes.
+	 */
+	uint32_t size = 0;
+
+	/**
+	 * @brief Type of the image.
+	 *
+	 * @see image_type
+	 */
+	image_type type = {};
+
+	/**
+	 * @brief Construct an empty image.
+	 */
+	image_data() = default;
+
+	/**
+	 * @brief Copy an image.
+	 *
+	 * @param rhs Image to copy
+	 */
+	image_data(const image_data& rhs);
+
+	/**
+	 * @brief Move an image.
+	 *
+	 * @param rhs Image to copy
+	 */
+	image_data(image_data&&) noexcept = default;
+
+	/**
+	 * @brief Construct from string buffer
+	 *
+	 * @param format Image format
+	 * @param str Data in a string
+	 * @see image_type
+	 */
+	image_data(image_type format, std::string_view bytes);
+
+	/**
+	 * @brief Construct from byte buffer
+	 *
+	 * @param format Image format
+	 * @param buf Byte buffer
+	 * @param size_t Image size in bytes
+	 * @see image_type
+	 */
+	image_data(image_type format, const std::byte* bytes, uint32_t byte_size);
+
+	/**
+	 * @brief Copy an image data.
+	 *
+	 * @param rhs Image to copy
+	 * @return self for chaining
+	 */
+	image_data& operator=(const image_data& rhs);
+
+	/**
+	 * @brief Move an image data.
+	 *
+	 * @param rhs Image to move from
+	 * @return self for chaining
+	 */
+	image_data& operator=(image_data&& rhs) noexcept = default;
+
+	/**
+	 * @brief Set image data.
+	 *
+	 * @param format Format of the image
+	 * @param data Data of the image
+	 */
+	void set(image_type format, std::string_view bytes);
+
+	/**
+	 * @brief Set image data.
+	 *
+	 * @param format Format of the image
+	 * @param data Data of the image
+	 */
+	void set(image_type format, const std::byte* bytes, uint32_t byte_size);
+
+	/**
+	 * @brief Encode to base64.
+	 *
+	 * @return std::string New string with the image data encoded in base64
+	 */
+	std::string base64_encode() const;
+
+	/**
+	 * @brief Get the file extension.
+	 *
+	 * Alias for \ref file_extension
+	 * @return std::string File extension e.g. `.png`
+	 */
+	std::string get_file_extension() const;
+
+	/**
+	 * @brief Get the mime type.
+	 *
+	 * Alias for \ref mime_type
+	 * @return std::string File mime type e.g. "image/png"
+	 */
+	std::string get_mime_type() const;
+
+	/**
+	 * @brief Check if this is an empty image.
+	 *
+	 * @return bool Whether the image is empty or not
+	 */
+	bool empty() const noexcept;
+
+	/**
+	 * @brief Build a data URI scheme suitable for sending to Discord
+	 *
+	 * @see https://discord.com/developers/docs/reference#image-data
+	 * @return The data URI scheme as a json or null if empty
+	 */
+	json to_nullable_json() const;
+};
+
+/**
+ * @brief Wrapper class around a variant for either iconhash or image,
+ * for API objects that have one or the other (generally iconhash when receiving,
+ * image when uploading an image)
+ */
+struct icon {
+	/**
+	 * @brief Iconhash received or image data for upload.
+	 */
+	std::variant<std::monostate, iconhash, image_data> hash_or_data;
+
+	/**
+	 * @brief Assign to iconhash.
+	 *
+	 * @param hash Iconhash
+	 */
+	icon& operator=(const iconhash& hash);
+
+	/**
+	 * @brief Assign to iconhash.
+	 *
+	 * @param hash Iconhash
+	 */
+	icon& operator=(iconhash&& hash) noexcept;
+
+	/**
+	 * @brief Assign to image.
+	 *
+	 * @param img Image
+	 */
+	icon& operator=(const image_data& img);
+
+	/**
+	 * @brief Assign to image.
+	 *
+	 * @param img Image
+	 */
+	icon& operator=(image_data&& img) noexcept;
+
+	/**
+	 * @brief Check whether this icon is stored as an iconhash
+	 *
+	 * @see iconhash
+	 * @return bool Whether this icon is stored as an iconhash
+	 */
+	bool is_iconhash() const;
+
+	/**
+	 * @brief Get as icon hash.
+	 *
+	 * @warn The behavior is undefined if `is_iconhash() == false`
+	 * @return iconhash& This iconhash
+	 */
+	iconhash& as_iconhash() &;
+
+	/**
+	 * @brief Get as icon hash.
+	 *
+	 * @warn The behavior is undefined if `is_iconhash() == false`
+	 * @return iconhash& This iconhash
+	 */
+	const iconhash& as_iconhash() const&;
+
+	/**
+	 * @brief Get as icon hash.
+	 *
+	 * @warn The behavior is undefined if `is_iconhash() == false`
+	 * @return iconhash& This iconhash
+	 */
+	iconhash&& as_iconhash() &&;
+
+	/**
+	 * @brief Check whether this icon is stored as an image
+	 *
+	 * @see image_data
+	 * @return bool Whether this icon is stored as an image
+	 */
+	bool is_image_data() const;
+
+	/**
+	 * @brief Get as image data.
+	 *
+	 * @warn The behavior is undefined if `is_image_data() == false`
+	 * @return image_data& This image
+	 */
+	image_data& as_image_data() &;
+
+	/**
+	 * @brief Get as image.
+	 *
+	 * @warn The behavior is undefined if `is_image_data() == false`
+	 * @return image_data& This image
+	 */
+	const image_data& as_image_data() const&;
+
+	/**
+	 * @brief Get as image.
+	 *
+	 * @warn The behavior is undefined if `is_image_data() == false`
+	 * @return image_data& This image
+	 */
+	image_data&& as_image_data() &&;
 };
 
 /**

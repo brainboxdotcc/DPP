@@ -39,7 +39,9 @@
 
 namespace dpp {
 
-/** Current ETF format version in use */
+/**
+ * @brief Current ETF format version in use
+ */
 const uint8_t FORMAT_VERSION = 131;
 
 /**
@@ -47,60 +49,142 @@ const uint8_t FORMAT_VERSION = 131;
  * in the ETF binary structure.
  */
 enum etf_token_type : uint8_t {
-	/// 68  [Distribution header]
-	ett_distribution =	'D',
-	/// 70  [Float64:IEEE float]
-	ett_new_float =		'F',
-	/// 77  [UInt32:Len, UInt8:Bits, Len:Data]
-	ett_bit_binary =	'M',
-	/// 80  [UInt4:UncompressedSize, N:ZlibCompressedData]
-	ett_compressed =	'P',
-	/// 97  [UInt8:Int]
-	ett_smallint =		'a',
-	/// 98  [Int32:Int]
-	ett_integer =		'b',
-	/// 99  [31:Float String] Float in string format (formatted "%.20e", sscanf "%lf"). Superseded by ett_new_float
-	ett_float =		'c',
-	/// 100 [UInt16:Len, Len:AtomName] max Len is 255
-	ett_atom =		'd',
-	/// 101 [atom:Node, UInt32:ID, UInt8:Creation]
-	ett_reference =		'e',
-	/// 102 [atom:Node, UInt32:ID, UInt8:Creation]
-	ett_port =		'f',
-	/// 103 [atom:Node, UInt32:ID, UInt32:Serial, UInt8:Creation]
-	ett_pid =		'g',
-	/// 104 [UInt8:Arity, N:Elements]
-	ett_small_tuple =	'h',
-	/// 105 [UInt32:Arity, N:Elements]
-	ett_large_tuple =	'i',
-	/// 106 empty list
-	ett_nil =		'j',
-	/// 107 [UInt16:Len, Len:Characters]
-	ett_string =		'k',
-	/// 108 [UInt32:Len, Elements, Tail]
-	ett_list =		'l',
-	/// 109 [UInt32:Len, Len:Data]
-	ett_binary =		'm',
-	/// 110 [UInt8:n, UInt8:Sign, n:nums]
-	ett_bigint_small =	'n',
-	/// 111 [UInt32:n, UInt8:Sign, n:nums]
-	ett_bigint_large =	'o',
-	/// 112 [UInt32:Size, UInt8:Arity, 16*Uint6-MD5:Uniq, UInt32:Index, UInt32:NumFree, atom:Module, int:OldIndex, int:OldUniq, pid:Pid, NunFree*ext:FreeVars]
-	ett_new_function =	'p',
-	/// 113 [atom:Module, atom:Function, smallint:Arity]
-	ett_export =		'q',
-	/// 114 [UInt16:Len, atom:Node, UInt8:Creation, Len*UInt32:ID]
-	ett_new_reference =	'r',
-	/// 115 [UInt8:Len, Len:AtomName]
-	ett_atom_small =	's',
-	/// 116 [UInt32:Airty, N:Pairs]
-	ett_map =	 	't',
-	/// 117 [UInt4:NumFree, pid:Pid, atom:Module, int:Index, int:Uniq, NumFree*ext:FreeVars]
-	ett_function =		'u',
-	/// 118 [UInt16:Len, Len:AtomName] max Len is 255 characters (up to 4 bytes per)
-	ett_atom_utf8 =		'v',
-	/// 119 [UInt8:Len, Len:AtomName]
-	ett_atom_utf8_small =	'w'
+	/**
+	 * @brief 68 [Distribution header]
+	 */
+	ett_distribution = 'D',
+
+	/**
+	 * @brief 70 [Float64:IEEE float]
+	 */
+	ett_new_float =	'F',
+
+	/**
+	 * @brief 77 [UInt32:Len, UInt8:Bits, Len:Data]
+	 */
+	ett_bit_binary = 'M',
+
+	/**
+	 * @brief 80 [UInt4:UncompressedSize, N:ZlibCompressedData]
+	 */
+	ett_compressed = 'P',
+
+	/**
+	 * @brief 97 [UInt8:Int]
+	 */
+	ett_smallint = 'a',
+
+	/**
+	 * @brief 98 [Int32:Int]
+	 */
+	ett_integer = 'b',
+
+	/**
+	 * @brief 99 [31:Float String] Float in string format (formatted "%.20e", sscanf "%lf").
+	 *
+	 * @note Superseded by ett_new_float.
+	 */
+	ett_float = 'c',
+
+	/**
+	 * @brief 100 [UInt16:Len, Len:AtomName] max Len is 255
+	 */
+	ett_atom = 'd',
+
+	/**
+	 * @brief 101 [atom:Node, UInt32:ID, UInt8:Creation]
+	 */
+	ett_reference = 'e',
+
+	/**
+	 * @brief 102 [atom:Node, UInt32:ID, UInt8:Creation]
+	 */
+	ett_port = 'f',
+
+	/**
+	 * @brief 103 [atom:Node, UInt32:ID, UInt32:Serial, UInt8:Creation]
+	 */
+	ett_pid = 'g',
+
+	/**
+	 * @brief 104 [UInt8:Arity, N:Elements]
+	 */
+	ett_small_tuple = 'h',
+
+	/**
+	 * @brief 105 [UInt32:Arity, N:Elements]
+	 */
+	ett_large_tuple = 'i',
+
+	/**
+	 * @brief 106 empty list
+	 */
+	ett_nil = 'j',
+
+	/**
+	 * @brief 107 [UInt16:Len, Len:Characters]
+	 */
+	ett_string = 'k',
+
+	/**
+	 * @brief 108 [UInt32:Len, Elements, Tail]
+	 */
+	ett_list = 'l',
+
+	/**
+	 * @brief 109 [UInt32:Len, Len:Data]
+	 */
+	ett_binary = 'm',
+
+	/**
+	 * @brief 110 [UInt8:n, UInt8:Sign, n:nums]
+	 */
+	ett_bigint_small = 'n',
+
+	/**
+	 * @brief 111 [UInt32:n, UInt8:Sign, n:nums]
+	 */
+	ett_bigint_large = 'o',
+
+	/**
+	 * @brief 112 [UInt32:Size, UInt8:Arity, 16*Uint6-MD5:Uniq, UInt32:Index, UInt32:NumFree, atom:Module, int:OldIndex, int:OldUniq, pid:Pid, NunFree*ext:FreeVars]
+	 */
+	ett_new_function = 'p',
+
+	/**
+	 * @brief 113 [atom:Module, atom:Function, smallint:Arity]
+	 */
+	ett_export = 'q',
+
+	/**
+	 * @brief 114 [UInt16:Len, atom:Node, UInt8:Creation, Len*UInt32:ID]
+	 */
+	ett_new_reference = 'r',
+
+	/**
+	 * @brief 115 [UInt8:Len, Len:AtomName]
+	 */
+	ett_atom_small = 's',
+
+	/**
+	 * @brief 116 [UInt32:Airty, N:Pairs]
+	 */
+	ett_map = 't',
+
+	/**
+	 * @brief 117 [UInt4:NumFree, pid:Pid, atom:Module, int:Index, int:Uniq, NumFree*ext:FreeVars]
+	 */
+	ett_function = 'u',
+
+	/**
+	 * @brief 118 [UInt16:Len, Len:AtomName] max Len is 255 characters (up to 4 bytes per)
+	 */
+	ett_atom_utf8 =	 'v',
+
+	/**
+	 * @brief 119 [UInt8:Len, Len:AtomName]
+	 */
+	ett_atom_utf8_small = 'w'
 };
 
 /**
@@ -111,6 +195,7 @@ struct DPP_EXPORT etf_buffer {
 	 * @brief Raw buffer
 	 */
 	std::vector<char> buf;
+
 	/**
 	 * @brief Current used length of buffer
 	 * (this is different from buf.size() as it is pre-allocated
@@ -137,7 +222,6 @@ struct DPP_EXPORT etf_buffer {
  * have to be any different for handling ETF.
  */
 class DPP_EXPORT etf_parser {
-
 	/**
 	 * @brief Current size of binary data
 	 */

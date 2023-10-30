@@ -147,10 +147,10 @@ std::vector<uint8_t> load_test_audio() {
 	return testaudio;
 }
 
-std::vector<uint8_t> load_test_image() {
-	std::vector<uint8_t> testimage;
+std::vector<std::byte> load_data(const std::string& file) {
+	std::vector<std::byte> testimage;
 	std::string dir = get_testdata_dir();
-	std::ifstream input (dir + "DPP-Logo.png", std::ios::in|std::ios::binary|std::ios::ate);
+	std::ifstream input (dir + file, std::ios::in|std::ios::binary|std::ios::ate);
 	if (input.is_open()) {
 		size_t testimage_size = input.tellg();
 		testimage.resize(testimage_size);
@@ -159,7 +159,7 @@ std::vector<uint8_t> load_test_image() {
 		input.close();
 	}
 	else {
-		std::cout << "ERROR: Can't load " + dir + "DPP-Logo.png\n";
+		std::cout << "ERROR: Can't load " + dir + file + "\n";
 		exit(1);
 	}
 	return testimage;

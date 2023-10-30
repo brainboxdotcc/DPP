@@ -38,7 +38,8 @@ namespace dpp::events {
  */
 class DPP_EXPORT event {
 public:
-	/** Pure virtual method for event handler code
+	/**
+	 * @brief Pure virtual method for event handler code
 	 * @param client The creating shard
 	 * @param j The json data of the event
 	 * @param raw The raw event json
@@ -147,5 +148,10 @@ event_decl(automod_rule_execute, AUTO_MODERATION_ACTION_EXECUTION);
 
 /* Audit log */
 event_decl(guild_audit_log_entry_create, GUILD_AUDIT_LOG_ENTRY_CREATE);
+
+/* Entitlements */
+event_decl(entitlement_create, ENTITLEMENT_CREATE);
+event_decl(entitlement_update, ENTITLEMENT_UPDATE);
+event_decl(entitlement_delete, ENTITLEMENT_DELETE);
 
 } // namespace dpp::events

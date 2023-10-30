@@ -37,9 +37,13 @@ namespace dpp {
  * @brief status of a member of a team who maintain a bot/application
  */
 enum team_member_status : uint8_t {
-	/// User was invited to the team
+	/**
+	 * @brief User was invited to the team.
+	 */
 	tms_invited = 1,
-	/// User has accepted membership onto the team
+	/**
+	 * @brief User has accepted membership onto the team.
+	 */
 	tms_accepted = 2
 };
 
@@ -47,25 +51,54 @@ enum team_member_status : uint8_t {
  * @brief Flags for a bot or application
  */
 enum application_flags : uint32_t {
-	/// Indicates if an app uses the Auto Moderation API
+	/**
+	 * @brief Indicates if an app uses the Auto Moderation API
+	 */
 	apf_application_automod_rule_create_badge = (1 << 6),
-	/// Has gateway presence intent
+
+	/**
+	 * @brief Has gateway presence intent
+	 */
 	apf_gateway_presence = (1 << 12),
-	/// Has gateway presence intent for <100 guilds
+
+	/**
+	 * @brief Has gateway presence intent for <100 guilds
+	 */
 	apf_gateway_presence_limited = (1 << 13),
-	/// Has guild members intent 
+
+	/**
+	 * @brief Has guild members intent
+	 */
 	apf_gateway_guild_members = (1 << 14),
-	/// Has guild members intent for <100 guilds
+
+	/**
+	 * @brief Has guild members intent for <100 guilds
+	 */
 	apf_gateway_guild_members_limited = (1 << 15),
-	/// Verification is pending
+
+	/**
+	 * @brief Verification is pending
+	 */
 	apf_verification_pending_guild_limit = (1 << 16),
-	/// Embedded
+
+	/**
+	 * @brief Embedded
+	 */
 	apf_embedded = (1 << 17),
-	/// Has approval for message content
+
+	/**
+	 * @brief Has approval for message content
+	 */
 	apf_gateway_message_content = (1 << 18),
-	/// Has message content, but <100 guilds
+
+	/**
+	 * @brief Has message content, but <100 guilds
+	 */
 	apf_gateway_message_content_limited = (1 << 19),
-	/// Indicates if the app has registered global application commands
+
+	/**
+	 * @brief Indicates if the app has registered global application commands
+	 */
 	apf_application_command_badge = (1 << 23)
 };
 
@@ -73,8 +106,17 @@ enum application_flags : uint32_t {
  * @brief Represents the settings for the bot/application's in-app authorization link
  */
 struct DPP_EXPORT application_install_params {
-	permission permissions;	//!< A bitmask of dpp::permissions to request for the bot role
-	std::vector<std::string> scopes;	//!< The [scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes) as strings to add the application to the server with
+	/**
+	 * @brief A bitmask of dpp::permissions to request for the bot role.
+	 */
+	permission permissions;
+
+	/**
+	 * @brief The scopes as strings to add the application to the server with.
+	 *
+	 * @see https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes
+	 */
+	std::vector<std::string> scopes;
 };
 
 /**
@@ -84,10 +126,25 @@ struct DPP_EXPORT application_install_params {
  * this enum will be extended to support them.
  */
 enum team_member_role_t : uint8_t {
-	tmr_owner,	//!< Team owner
-	tmr_admin,	//!< Team admin
-	tmr_developer,	//!< Developer
-	tmr_readonly,	//!< Read-Only
+	/**
+	 * @brief Team owner.
+	 */
+	tmr_owner,
+
+	/**
+	 * @brief Team admin.
+	 */
+	tmr_admin,
+
+	/**
+	 * @brief Developer
+	 */
+	tmr_developer,
+
+	/**
+	 * @brief Read-Only
+	 */
+	tmr_readonly,
 };
 
 /**
@@ -95,11 +152,30 @@ enum team_member_role_t : uint8_t {
  */
 class DPP_EXPORT team_member {
 public:
-	team_member_status	membership_state;	//!< the user's membership state on the team
-	std::string		permissions;		//!< will always be [""]
-	snowflake		team_id;		//!< the id of the parent team of which they are a member
-	user			member_user;		//!< the avatar, discriminator, id, and username of the user
-	team_member_role_t	member_role;		//!< the role of the user
+	/**
+	 * @brief The user's membership state on the team.
+	 */
+	team_member_status membership_state;
+
+	/**
+	 * @brief Will always be "".
+	 */
+	std::string permissions;
+
+	/**
+	 * @brief The id of the parent team of which they are a member.
+	 */
+	snowflake team_id;
+
+	/**
+	 * @brief The avatar, discriminator, id, and username, of the user.
+	 */
+	user member_user;
+
+	/**
+	 * @brief The role of the user in the team.
+	 */
+	team_member_role_t member_role;
 };
 
 /**
@@ -107,11 +183,30 @@ public:
  */
 class DPP_EXPORT app_team {
 public:
-	utility::iconhash		icon;		//!< a hash of the image of the team's icon (may be empty)
-	snowflake			id;		//!< the unique id of the team
-	std::vector<team_member>	members;	//!< the members of the team
-	std::string			name;		//!< the name of the team
-	snowflake			owner_user_id;	//!< the user id of the current team owner
+	/**
+	 * @brief A hash of the image of the team's icon (may be empty).
+	 */
+	utility::iconhash icon;
+
+	/**
+	 * @brief The id of the team.
+	 */
+	snowflake id;
+
+	/**
+	 * @brief The members of the team.
+	 */
+	std::vector<team_member> members;
+
+	/**
+	 * @brief The name of the team.
+	 */
+	std::string name;
+
+	/**
+	 * @brief The user id of the current team owner.
+	 */
+	snowflake owner_user_id;
 };
 
 /**
@@ -128,48 +223,213 @@ protected:
 	application& fill_from_json_impl(nlohmann::json* j);
 
 public:
-	std::string		name;				//!< the name of the app
-	utility::iconhash	icon;				//!< the icon hash of the app (may be empty)
-	std::string		description;			//!< the description of the app
-	std::vector<std::string> rpc_origins;			//!< Optional: an array of rpc origin urls, if rpc is enabled
-	bool			bot_public;			//!< when false only app owner can join the app's bot to guilds
-	bool			bot_require_code_grant;		//!< when true the app's bot will only join upon completion of the full oauth2 code grant flow
-	user			bot;				//!< Optional: Partial user object for the bot user associated with the app.
-	std::string		terms_of_service_url;		//!< Optional: the url of the app's terms of service
-	std::string		privacy_policy_url;		//!< Optional: the url of the app's privacy policy
-	user			owner;				//!< Optional: partial user object containing info on the owner of the application
-	std::string		summary;			//!< if this application is a game sold on Discord, this field will be the summary field for the store page of its primary sku @deprecated Will be removed in v11
-	std::string		verify_key;			//!< the hex encoded key for verification in interactions and the GameSDK's GetTicket
-	app_team		team;				//!< if the application belongs to a team, this will be a list of the members of that team (may be empty)
-	snowflake		guild_id;			//!< Optional: if this application is a game sold on Discord, this field will be the guild to which it has been linked
-	guild			guild_obj;			//!< Optional: Partial object of the associated guild
-	snowflake		primary_sku_id;			//!< Optional: if this application is a game sold on Discord, this field will be the id of the "Game SKU" that is created, if exists
-	std::string		slug;				//!< Optional: if this application is a game sold on Discord, this field will be the URL slug that links to the store page
-	utility::iconhash	cover_image;			//!< Optional: the application's default rich presence invite cover image hash
-	uint32_t		flags;				//!< Optional: the application's public flags
-	uint64_t		approximate_guild_count;	//!< Optional: Approximate count of guilds the app has been added to
-	std::vector<std::string> redirect_uris;			//!< Optional: Array of redirect URIs for the app
-	std::string		interactions_endpoint_url;	//!< Optional: Interactions endpoint URL for the app
-	std::string 	role_connections_verification_url;	//!< The application's role connection verification entry point, which when configured will render the app as a verification method in the guild role verification configuration
-	std::vector<std::string> tags;				//!< Up to 5 tags describing the content and functionality of the application
-	application_install_params install_params;		//!< Settings for the application's default in-app authorization link, if enabled
-	std::string 		custom_install_url;		//!< The application's default custom authorization link, if enabled
+	/**
+	 * @brief The name of the app.
+	 */
+	std::string name;
 
-	uint8_t			discoverability_state;		//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	uint32_t 		discovery_eligibility_flags;	//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	uint8_t			explicit_content_filter;	//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	uint8_t			creator_monetization_state;	//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	bool			integration_public;		//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	bool			integration_require_code_grant;	//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	std::vector<std::string> interactions_event_types;	//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	uint8_t			interactions_version;		//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	bool			is_monetized;			//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	uint32_t		monetization_eligibility_flags;	//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	uint8_t			monetization_state;		//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	bool			hook;				//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	uint8_t			rpc_application_state;		//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	uint8_t			store_application_state;	//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
-	uint8_t			verification_state;		//!< @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	/**
+	 * @brief The icon hash of the app (may be empty).
+	 */
+	utility::iconhash icon;
+
+	/**
+	 * @brief The description of the app.
+	 */
+	std::string description;
+
+	/**
+	 * @brief Optional: an array of rpc origin urls, if rpc is enabled.
+	 */
+	std::vector<std::string> rpc_origins;
+
+	/**
+	 * @brief When false, only app owner add the bot to guilds.
+	 */
+	bool bot_public;
+
+	/**
+	 * @brief When true, the app's bot will only join upon completion of the full oauth2 code grant flow
+	 */
+	bool bot_require_code_grant;
+
+	/**
+	 * @brief Optional: Partial user object for the bot user associated with the app.
+	 */
+	user bot;
+
+	/**
+	 * @brief Optional: the url of the app's terms of service.
+	 */
+	std::string terms_of_service_url;
+
+	/**
+	 * @brief Optional: the url of the app's privacy policy.
+	 */
+	std::string privacy_policy_url;
+
+	/**
+	 * @brief Optional: partial user object containing info on the owner of the application.
+	 */
+	user owner;
+
+	/**
+	 * @brief If this application is a game sold on Discord, this field will be the summary field for the store page of its primary SKU.
+	 *
+	 * @deprecated Will be removed in v11
+	 */
+	std::string summary;
+
+	/**
+	 * @brief The hex encoded key for verification in interactions and the GameSDK's GetTicket.
+	 */
+	std::string verify_key;
+
+	/**
+	 * @brief If the application belongs to a team, this will be a list of the members of that team (may be empty).
+	 */
+	app_team team;
+
+	/**
+	 * @brief Optional: if this application is a game sold on Discord, this field will be the guild to which it has been linked.
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief Partial object of the associated guild.
+	 */
+	guild guild_obj;
+
+	/**
+	 * @brief Optional: if this application is a game sold on Discord, this field will be the id of the "Game SKU" that is created, if exists.
+	 */
+	snowflake primary_sku_id;
+
+	/**
+	 * @brief Optional: if this application is a game sold on Discord, this field will be the URL slug that links to the store page.
+	 */
+	std::string slug;
+
+	/**
+	 * @brief Optional: the application's default rich presence invite cover image hash
+	 */
+	utility::iconhash cover_image;
+
+	/**
+	 * @brief Optional: the application's public flags.
+	 */
+	uint32_t flags;
+
+	/**
+	 * @brief Optional: Approximate count of guilds the app has been added to.
+	 */
+	uint64_t approximate_guild_count;
+
+	/**
+	 * @brief Optional: Array of redirect URIs for the app.
+	 */
+	std::vector<std::string> redirect_uris;
+
+	/**
+	 * @brief Optional: Interactions endpoint URL for the app.
+	 */
+	std::string interactions_endpoint_url;
+
+	/**
+	 * @brief The application's role connection verification entry point
+	 * which, when configured, will render the app as a verification method
+	 * in the guild role verification configuration.
+	 */
+	std::string role_connections_verification_url;
+
+	/**
+	 * @brief Up to 5 tags describing the content and functionality of the application.
+	 */
+	std::vector<std::string> tags;
+
+	/**
+	 * @brief Settings for the application's default in-app authorization link, if enabled.
+	 */
+	application_install_params install_params;
+
+	/**
+	 * @brief The application's default custom authorization link, if enabled.
+	 */
+	std::string custom_install_url;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint8_t	discoverability_state;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint32_t discovery_eligibility_flags;
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint8_t	explicit_content_filter;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint8_t	creator_monetization_state;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	bool integration_public;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	bool integration_require_code_grant;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	std::vector<std::string> interactions_event_types;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint8_t	interactions_version;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	bool is_monetized;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint32_t monetization_eligibility_flags;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint8_t	monetization_state;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	bool hook;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint8_t	rpc_application_state;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint8_t	store_application_state;
+
+	/**
+	 * @warning This variable is not documented by discord, we have no idea what it means and how it works. Use at your own risk.
+	 */
+	uint8_t	verification_state;
 
 	/** Constructor */
 	application();
@@ -198,7 +458,9 @@ public:
 	std::string get_icon_url(uint16_t size = 0, const image_type format = i_png) const;
 };
 
-/** A group of applications.
+/**
+ * @brief A group of applications.
+ *
  * This is not currently ever sent by Discord API but the DPP standard setup for
  * objects that can be received by REST has the possibility for this, so this exists.
  * Don't ever expect to see one at present.

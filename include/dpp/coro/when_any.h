@@ -45,18 +45,30 @@ class awaitable;
 
 }
 
-/** @brief Internal cogwheels for dpp::when_any */
+/**
+ * @brief Internal cogwheels for dpp::when_any
+ */
 namespace when_any {
 
-/** @brief Current state of a when_any object */
+/**
+ * @brief Current state of a when_any object
+ */
 enum class await_state {
-	/** @brief Object was started but not awaited */
+	/**
+	 * @brief Object was started but not awaited
+	 */
 	started,
-	/** @brief Object is being awaited */
+	/**
+	 * @brief Object is being awaited
+	 */
 	waiting,
-	/** @brief Object was resumed*/
+	/**
+	 * @brief Object was resumed
+	 */
 	done,
-	/** @brief Object was destroyed */
+	/**
+	 * @brief Object was destroyed
+	 */
 	dangling
 };
 
@@ -102,14 +114,20 @@ using awaitable_type = typename arg_helper_s<T>::type;
 template <typename T>
 using arg_helper = arg_helper_s<std::remove_cvref_t<T>>;
 
-/** @brief Empty result from void-returning awaitable */
+/**
+ * @brief Empty result from void-returning awaitable
+ */
 struct empty{};
 
-/** @brief Actual type a result will be stores as in when_any */
+/**
+ * @brief Actual type a result will be stores as in when_any
+ */
 template <typename T>
 using storage_type = std::conditional_t<std::is_void_v<T>, empty, T>;
 
-/** @brief Concept satisfied if a stored result is void */
+/**
+ * @brief Concept satisfied if a stored result is void
+ */
 template <typename T>
 concept void_result = std::same_as<T, empty>;
 
@@ -117,7 +135,8 @@ concept void_result = std::same_as<T, empty>;
 
 } // namespace detail
 
-/** @class when_any when_any.h coro/when_any.h
+/**
+ * @class when_any when_any.h coro/when_any.h
  * @brief Experimental class to co_await on a bunch of awaitable objects, resuming when the first one completes.
  * On completion, returns a @ref result object that contains the index of the awaitable that finished first.
  * A user can call @ref result::index() and @ref result::get<N>() on the result object to get the result, similar to std::variant.
@@ -130,7 +149,9 @@ template <typename... Args>
 requires (sizeof...(Args) >= 1)
 #endif
 class when_any {
-	/** @brief Alias for the type of the result variant */
+	/**
+	 * @brief Alias for the type of the result variant
+	 */
 	using variant_type = std::variant<std::exception_ptr, std::remove_cvref_t<detail::when_any::storage_type<detail::awaitable_result<Args>>>...>;
 
 	/**
@@ -193,9 +214,9 @@ class when_any {
 	template <size_t N>
 	static dpp::job make_job(std::shared_ptr<state_t> shared_state) {
 		/**
-			* Any exceptions from the awaitable's await_suspend should be thrown to the caller (the coroutine creating the when_any object)
-			* If the co_await passes, and it is the first one to complete, try construct the result, catch any exceptions to rethrow at resumption, and resume.
-			*/
+		 * Any exceptions from the awaitable's await_suspend should be thrown to the caller (the coroutine creating the when_any object)
+		 * If the co_await passes, and it is the first one to complete, try construct the result, catch any exceptions to rethrow at resumption, and resume.
+		 */
 		if constexpr (!std::same_as<result_t<N>, detail::when_any::empty>) {
 			decltype(auto) result = co_await std::get<N>(shared_state->awaitables);
 
@@ -236,7 +257,8 @@ class when_any {
 	}
 
 	/**
-	 * @brief Spawn a dpp::job to handle each awaitable. Each of them will co_await the awaitable and set the result if they are the first to finish
+	 * @brief Spawn a dpp::job to handle each awaitable.
+	 * Each of them will co_await the awaitable and set the result if they are the first to finish
 	 */
 	void make_jobs() {
 		[]<size_t... Ns>(when_any *self, std::index_sequence<Ns...>) {
@@ -251,26 +273,40 @@ public:
 	class result {
 		friend class when_any<Args...>;
 
-		/** @brief Reference to the shared state to pull the data from */
+		/**
+		 * @brief Reference to the shared state to pull the data from
+		 */
 		std::shared_ptr<state_t> shared_state;
 
-		/** @brief Default construction is deleted */
+		/**
+		 * @brief Default construction is deleted
+		 */
 		result() = delete;
 
-		/** @brief Internal constructor taking the shared state */
+		/**
+		 * @brief Internal constructor taking the shared state
+		 */
 		result(std::shared_ptr<state_t> state) : shared_state{state} {}
 
 	public:
-		/** @brief Move constructor */
+		/**
+		 * @brief Move constructor
+		 */
 		result(result&&) = default;
 
-		/** @brief This object is not copyable. */
+		/**
+		 * @brief This object is not copyable.
+		 */
 		result(const result &) = delete;
 
-		/** @brief Move assignment operator */
+		/**
+		 * @brief Move assignment operator
+		 */
 		result &operator=(result&&) = default;
 
-		/** @brief This object is not copyable. */
+		/**
+		 * @brief This object is not copyable.
+		 */
 		result &operator=(const result&) = delete;
 
 		/**
@@ -361,7 +397,9 @@ public:
 	 * @see result
 	 */
 	struct awaiter {
-		/** @brief Pointer to the when_any object */
+		/**
+		 * @brief Pointer to the when_any object
+		 */
 		when_any *self;
 
 		/**
@@ -394,7 +432,10 @@ public:
 		}
 	};
 
-	/** @brief Default constructor. A when_any object created this way holds no state */
+	/**
+	 * @brief Default constructor.
+	 * A when_any object created this way holds no state
+	 */
 	when_any() = default;
 
 	/**
@@ -411,10 +452,14 @@ public:
 		make_jobs();
 	}
 
-	/** @brief This object is not copyable. */
+	/**
+	 * @brief This object is not copyable.
+	 */
 	when_any(const when_any &) = delete;
 
-	/** @brief Move constructor. */
+	/**
+	 * @brief Move constructor.
+	 */
 	when_any(when_any &&) noexcept = default;
 
 	/**
@@ -444,10 +489,14 @@ public:
 		}(this, std::index_sequence_for<Args...>());
 	}
 
-	/** @brief This object is not copyable. */
+	/**
+	 * @brief This object is not copyable.
+	 */
 	when_any &operator=(const when_any &) = delete;
 
-	/** @brief Move assignment operator. */
+	/**
+	 * @brief Move assignment operator.
+	 */
 	when_any &operator=(when_any &&) noexcept = default;
 
 	/**

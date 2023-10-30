@@ -112,7 +112,7 @@ protected:
 	 *
 	 * @return std::string Json of this object
 	 */
-	virtual json to_json_impl(bool with_id = false) const;
+	json to_json_impl(bool with_id = false) const;
 
 public:
 	snowflake		guild_id;		//!< the guild id which the scheduled event belongs to
@@ -120,7 +120,7 @@ public:
 	snowflake		creator_id;		//!< Optional: the id of the user that created the scheduled event
 	std::string		name;			//!< the name of the scheduled event
 	std::string		description;		//!< Optional: the description of the scheduled event (1-1000 characters)
-	std::string		image;			//!< the image of the scheduled event (may be empty)
+	utility::icon		image;			//!< the image of the scheduled event (may be empty)
 	time_t			scheduled_start_time;	//!< the time the scheduled event will start
 	time_t			scheduled_end_time;	//!< the time the scheduled event will end, or null if the event does not have a scheduled time to end (may be empty)
 	event_privacy_level	privacy_level;		//!< the privacy level of the scheduled event
@@ -135,11 +135,6 @@ public:
 	 * @brief Create a scheduled_event object
 	 */
 	scheduled_event();
-
-	/**
-	 * @brief Destroy the scheduled_event object
-	 */
-	~scheduled_event() = default;
 
 	/**
 	 * @brief Set the name of the event
@@ -213,6 +208,24 @@ public:
 	 * @throw dpp::length_error if time is before now
 	 */
 	scheduled_event& set_end_time(time_t t);
+
+	/**
+	 * @brief Load an image for the event cover
+	 *
+	 * @param image_blob Image binary data
+	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @return emoji& Reference to self
+	 */
+	scheduled_event& load_image(std::string_view image_blob, const image_type type);
+
+	/**
+	 * @brief Load an image for the event cover
+	 *
+	 * @param image_blob Image binary data
+	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @return emoji& Reference to self
+	 */
+	scheduled_event& load_image(const std::byte* data, uint32_t size, const image_type type);
 };
 
 /**

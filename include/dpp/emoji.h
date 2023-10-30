@@ -37,13 +37,24 @@ namespace dpp {
  * @brief Flags for dpp::emoji
  */
 enum emoji_flags : uint8_t {
-	/// Emoji requires colons
+	/**
+	 * @brief Emoji requires colons.
+	 */
 	e_require_colons = 0b00000001,
-	/// Managed (introduced by application)
+
+	/**
+	 * @brief Managed (introduced by application)
+	 */
 	e_managed =        0b00000010,
-	/// Animated
+
+	/**
+	 * @brief Animated emoji.
+	 */
 	e_animated =       0b00000100,
-	/// Available (false if the guild doesn't meet boosting criteria, etc)
+
+	/**
+	 * @brief Available (false if the guild doesn't meet boosting criteria, etc)
+	 */
 	e_available =      0b00001000,
 };
 
@@ -89,7 +100,7 @@ public:
 	/**
 	 * @brief Image data for the emoji, if uploading.
 	 */
-	std::string image_data;
+	utility::image_data image_data;
 
 	/**
 	 * @brief Flags for the emoji from dpp::emoji_flags.
@@ -185,7 +196,7 @@ public:
 	bool is_available() const;
 
 	/**
-	 * @brief Load an image into the object as base64
+	 * @brief Load an image into the object
 	 *
 	 * @param image_blob Image binary data
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
@@ -193,6 +204,16 @@ public:
 	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes
 	 */
 	emoji& load_image(std::string_view image_blob, const image_type type);
+
+	/**
+	 * @brief Load an image into the object
+	 *
+	 * @param image_blob Image binary data
+	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
+	 * @return emoji& Reference to self
+	 * @throw dpp::length_exception Image content exceeds discord maximum of 256 kilobytes
+	 */
+	emoji& load_image(const std::byte* data, uint32_t size, const image_type type);
 
 	/**
 	 * @brief Format to name if unicode, name:id if has id or a:name:id if animated

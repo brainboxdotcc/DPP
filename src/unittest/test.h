@@ -148,6 +148,7 @@ DPP_TEST(FORUM_CHANNEL_GET, "retrieve the created forum channel", tf_online);
 DPP_TEST(FORUM_CHANNEL_DELETE, "delete the created forum channel", tf_online);
 DPP_TEST(ERRORS, "Human readable error translation", tf_offline);
 
+DPP_TEST(GUILD_EDIT, "cluster::guild_edit", tf_online);
 DPP_TEST(GUILD_BAN_CREATE, "cluster::guild_ban_add ban three deleted discord accounts", tf_online);
 DPP_TEST(GUILD_BAN_GET, "cluster::guild_get_ban getting one of the banned accounts", tf_online);
 DPP_TEST(GUILD_BANS_GET, "cluster::guild_get_bans get bans using the after-parameter", tf_online);
@@ -472,11 +473,11 @@ int test_summary();
 std::vector<uint8_t> load_test_audio();
 
 /**
- * @brief Load test image for the attachment tests
+ * @brief Load bytes from file
  * 
- * @return std::vector<uint8_t> data and size for test image
+ * @return std::vector<std::byte> File data
  */
-std::vector<uint8_t> load_test_image();
+std::vector<std::byte> load_data(const std::string& file);
 
 /**
  * @brief Get the token from the environment variable DPP_UNIT_TEST_TOKEN

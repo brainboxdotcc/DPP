@@ -56,39 +56,54 @@ namespace async {
  * @brief Represents the step an std::async is at.
  */
 enum class state_t {
-	sent, /* Request was sent but not co_await-ed. handle is nullptr, result_storage is not constructed */
-	waiting, /* Request was co_await-ed. handle is valid, result_storage is not constructed */
-	done, /* Request was completed. handle is unknown, result_storage is valid */
-	dangling /* Request was never co_await-ed. */
+	/**
+	 * @brief Request was sent but not co_await-ed. handle is nullptr, result_storage is not constructed.
+	 */
+	sent,
+
+	/**
+	 * @brief Request was co_await-ed. handle is valid, result_storage is not constructed.
+	 */
+	waiting,
+
+	/**
+	 * @brief Request was completed. handle is unknown, result_storage is valid.
+	 */
+	done,
+
+	/**
+	 * @brief Request was never co_await-ed.
+	 */
+	dangling
 };
 
 /**
-	* @brief State of the async and its callback.
-	*
-	* Defined outside of dpp::async because this seems to work better with Intellisense.
-	*/
+ * @brief State of the async and its callback.
+ *
+ * Defined outside of dpp::async because this seems to work better with Intellisense.
+ */
 template <typename R>
 struct async_callback_data {
 	/**
-		* @brief Number of references to this callback state.
-		*/
+	 * @brief Number of references to this callback state.
+	 */
 	std::atomic<int> ref_count{1};
 
 	/**
-		* @brief State of the awaitable and the API callback
-		*/
+	 * @brief State of the awaitable and the API callback
+	 */
 	std::atomic<state_t> state = state_t::sent;
 
 	/**
-		* @brief The stored result of the API call, stored as an array of bytes to directly construct in place
-		*/
+	 * @brief The stored result of the API call, stored as an array of bytes to directly construct in place
+	 */
 	alignas(R) std::array<std::byte, sizeof(R)> result_storage;
 
 	/**
-		* @brief Handle to the coroutine co_await-ing on this API call
-		*
-		* @see <a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">std::coroutine_handle</a>
-		*/
+	 * @brief Handle to the coroutine co_await-ing on this API call
+	 *
+	 * @see <a href="https://en.cppreference.com/w/cpp/coroutine/coroutine_handle">std::coroutine_handle</a>
+	 */
 	std_coroutine::coroutine_handle<> coro_handle = nullptr;
 
 	/**
@@ -374,7 +389,8 @@ public:
 
 struct confirmation_callback_t;
 
-/** @class async async.h coro/async.h
+/**
+ * @class async async.h coro/async.h
  * @brief A co_await-able object handling an API call in parallel with the caller.
  *
  * This class is the return type of the dpp::cluster::co_* methods, but it can also be created manually to wrap any async call.
