@@ -81,7 +81,6 @@ template <typename T, typename... Args>
 inline constexpr bool variant_has_v<T, std::variant<Args...>> = (std::is_same_v<T, Args> || ...);
 
 struct fun_converter {
-	// this function is consteval but std::function is unusuable in constexpr - this is intended
 	template <typename T>
 	constexpr auto operator()(T &&fun) const {
 		using fun_t = std::remove_reference_t<T>;
@@ -118,7 +117,10 @@ using function_arg_t = typename function_traits<T>::template arg<Idx>;
  */
 template <typename Callable>
 dpp::command_completion_event_t if_success(Callable&& on_success) {
-	if constexpr (variant_has_v<remove_cvref_t<function_arg_t<std::invoke_result_t<fun_converter, Callable>, 0>>, dpp::confirmable_t>) {
+	using arg_t = remove_cvref_t<function_arg_t<std::invoke_result_t<fun_converter, Callable>, 0>>;
+
+	static_assert(variant_has_v<arg_t, dpp::confirmable_t>); // duplicate for nice errors
+	if constexpr (variant_has_v<arg_t, dpp::confirmable_t>) {
 		using fn_arg = std::remove_cv_t<std::remove_reference_t<function_arg_t<Callable, 0>>>;
 
 		return [cb = std::forward<Callable>(on_success)](const dpp::confirmation_callback_t &callback) {
@@ -138,8 +140,6 @@ dpp::command_completion_event_t if_success(Callable&& on_success) {
 			}
 		};
 	} else {
-		static_assert(!std::is_same_v<std::void_t<Callable>, void>, "invalid parameter to if_success, type is not a callback type");
-
 		return {};
 	}
 }
