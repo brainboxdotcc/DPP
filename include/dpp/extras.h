@@ -34,11 +34,12 @@ namespace utility {
 /**
  * @brief Structure to access traits of a callable. For example how many arguments it has and its return type
  */
+
 template <typename T>
 struct function_traits;
 
 template <typename R, typename... Args>
-struct function_traits<std::function<R(Args...)>> {
+struct function_traits<R(Args...)> {
 	/**
 	 * @brief Number of arguments to the function.
 	 */
@@ -58,6 +59,15 @@ struct function_traits<std::function<R(Args...)>> {
 	using arg = std::tuple_element_t<Idx, args_tuple>;
 };
 
+template <typename R, typename... Args>
+struct function_traits<R(*)(Args...)> : function_traits<R(Args...)> {};
+
+template <typename C, typename R, typename... Args>
+struct function_traits<R(C::*)(Args...)> : function_traits<R(C, Args...)> {};
+
+template <typename R, typename... Args>
+struct function_traits<std::function<R(Args...)>> : function_traits<R(Args...)> {};
+
 /**
  * @brief Type trait constexpr variable to check if a type T is one of the possible types in a variant V.
  *
@@ -70,15 +80,21 @@ inline constexpr bool variant_has_v = false;
 template <typename T, typename... Args>
 inline constexpr bool variant_has_v<T, std::variant<Args...>> = (std::is_same_v<T, Args> || ...);
 
-/**
- * @brief Structure to access traits of a callable. For example how many arguments it has and its return type
- *
- * This is a type alias to \ref function_traits for convenience
- * @tparam Type of the callable
- * @see function_traits
- */
+struct fun_converter {
+	// this function is consteval but std::function is unusuable in constexpr - this is intended
+	template <typename T>
+	constexpr auto operator()(T &&fun) const {
+		using fun_t = std::remove_reference_t<T>;
+
+		if constexpr (std::is_member_function_pointer_v<fun_t>)
+			return std::function([](typename function_traits<fun_t>::template arg<0>){});
+		else
+			return std::function(fun);
+	};
+};
+
 template <typename T>
-using function_traits_t = function_traits<decltype(std::function{std::declval<T&&>()})>;
+struct function_traits : function_traits<std::invoke_result_t<fun_converter, T>> {};
 
 /**
  * @brief Type trait to get the Idx-th argument to a function-like type.
@@ -86,7 +102,7 @@ using function_traits_t = function_traits<decltype(std::function{std::declval<T&
  * @tparam Idx Index of the argument in the callable's argument list
  */
 template <typename T, size_t Idx = 0>
-using function_arg_t = typename function_traits_t<T>::template arg<Idx>;
+using function_arg_t = typename function_traits<T>::template arg<Idx>;
 
 /**
  * @brief Convenience function to generate a function suitable for use as a callback to API calls. On success calls the given function, on error log the error to the cluster.
