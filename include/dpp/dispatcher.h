@@ -176,15 +176,21 @@ public:
 	bool is_cancelled() const;
 };
 
-/** @brief Log messages */
+/**
+ * @brief Log messages
+ */
 struct DPP_EXPORT log_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
-	/** Severity */
+	/**
+	 * @brief Severity.
+	 */
 	loglevel severity = ll_info;
 
-	/** Log Message */
+	/**
+	 * @brief Log Message
+	 */
 	std::string message = {};
 };
 
@@ -209,7 +215,9 @@ namespace utility {
 	command_completion_event_t DPP_EXPORT log_error();
 } // namespace utility
 
-/** @brief Add user to scheduled event */
+/**
+ * @brief Add user to scheduled event
+ */
 struct DPP_EXPORT guild_scheduled_event_user_add_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -230,7 +238,9 @@ struct DPP_EXPORT guild_scheduled_event_user_add_t : public event_dispatch_t {
 	snowflake guild_id = {};
 };
 
-/** @brief Delete user from scheduled event */
+/**
+ * @brief Delete user from scheduled event
+ */
 struct DPP_EXPORT guild_scheduled_event_user_remove_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -251,7 +261,9 @@ struct DPP_EXPORT guild_scheduled_event_user_remove_t : public event_dispatch_t 
 	snowflake guild_id = {};
 };
 
-/** @brief Create scheduled event */
+/**
+ * @brief Create scheduled event
+ */
 struct DPP_EXPORT guild_scheduled_event_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -262,7 +274,9 @@ struct DPP_EXPORT guild_scheduled_event_create_t : public event_dispatch_t {
 	scheduled_event created = {};
 };
 
-/** @brief Create scheduled event */
+/**
+ * @brief Create scheduled event
+ */
 struct DPP_EXPORT guild_scheduled_event_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -273,7 +287,9 @@ struct DPP_EXPORT guild_scheduled_event_update_t : public event_dispatch_t {
 	scheduled_event updated = {};
 };
 
-/** @brief Delete scheduled event */
+/**
+ * @brief Delete scheduled event
+ */
 struct DPP_EXPORT guild_scheduled_event_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -284,7 +300,9 @@ struct DPP_EXPORT guild_scheduled_event_delete_t : public event_dispatch_t {
 	scheduled_event deleted = {};
 };
 
-/** @brief Create automod rule */
+/**
+ * @brief Create automod rule
+ */
 struct DPP_EXPORT automod_rule_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -295,7 +313,9 @@ struct DPP_EXPORT automod_rule_create_t : public event_dispatch_t {
 	automod_rule created = {};
 };
 
-/** @brief Update automod rule */
+/**
+ * @brief Update automod rule
+ */
 struct DPP_EXPORT automod_rule_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -306,7 +326,9 @@ struct DPP_EXPORT automod_rule_update_t : public event_dispatch_t {
 	automod_rule updated = {};
 };
 
-/** @brief Delete automod rule */
+/**
+ * @brief Delete automod rule
+ */
 struct DPP_EXPORT automod_rule_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -317,7 +339,9 @@ struct DPP_EXPORT automod_rule_delete_t : public event_dispatch_t {
 	automod_rule deleted = {};
 };
 
-/** @brief Execute/trigger automod rule */
+/**
+ * @brief Execute/trigger automod rule
+ */
 struct DPP_EXPORT automod_rule_execute_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -378,7 +402,9 @@ struct DPP_EXPORT automod_rule_execute_t : public event_dispatch_t {
 	std::string matched_content = {};
 };
 
-/** @brief Create stage instance */
+/**
+ * @brief Create stage instance
+ */
 struct DPP_EXPORT stage_instance_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -389,7 +415,9 @@ struct DPP_EXPORT stage_instance_create_t : public event_dispatch_t {
 	stage_instance created = {};
 };
 
-/** @brief Update stage instance */
+/**
+ * @brief Update stage instance
+ */
 struct DPP_EXPORT stage_instance_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -400,7 +428,9 @@ struct DPP_EXPORT stage_instance_update_t : public event_dispatch_t {
 	stage_instance updated = {};
 };
 
-/** @brief Delete stage instance */
+/**
+ * @brief Delete stage instance
+ */
 struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -411,12 +441,16 @@ struct DPP_EXPORT stage_instance_delete_t : public event_dispatch_t {
 	stage_instance deleted = {};
 };
 
-/** @brief Voice state update */
+/**
+ * @brief Voice state update
+ */
 struct DPP_EXPORT voice_state_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
-	/** Voice state */
+	/**
+	 * @brief Voice state
+	 */
 	voicestate state = {};
 };
 
@@ -426,7 +460,6 @@ struct DPP_EXPORT voice_state_update_t : public event_dispatch_t {
 struct DPP_EXPORT interaction_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
-
 
 	/**
 	 * @brief Acknowledge interaction without displaying a message to the user,
@@ -684,6 +717,9 @@ public:
 	uint8_t component_type = {};
 };
 
+/**
+ * @brief On form submitted.
+ */
 struct DPP_EXPORT form_submit_t : public interaction_create_t {
 private:
 	using interaction_create_t::get_parameter;
@@ -826,7 +862,9 @@ public:
 };
 
 
-/** @brief Delete guild */
+/**
+ * @brief Delete guild
+ */
 struct DPP_EXPORT guild_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -844,12 +882,16 @@ struct DPP_EXPORT guild_delete_t : public event_dispatch_t {
 	snowflake guild_id{0};
 };
 
-/** @brief Update guild stickers */
+/**
+ * @brief Update guild stickers
+ */
 struct DPP_EXPORT guild_stickers_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
-	/** Updating guild */
+	/**
+	 * @brief Updating guild
+	 */
 	guild* updating_guild = nullptr;
 
 	/**
@@ -858,12 +900,16 @@ struct DPP_EXPORT guild_stickers_update_t : public event_dispatch_t {
 	std::vector<sticker> stickers = {};
 };
 
-/** @brief Guild join request delete (user declined membership screening) */
+/**
+ * @brief Guild join request delete (user declined membership screening)
+ */
 struct DPP_EXPORT guild_join_request_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
-	/** Deleted guild */
+	/**
+	 * @brief Deleted guild
+	 */
 	snowflake guild_id = {};
 
 	/**
@@ -872,7 +918,9 @@ struct DPP_EXPORT guild_join_request_delete_t : public event_dispatch_t {
 	snowflake user_id = {};
 };
 
-/** @brief Delete channel */
+/**
+ * @brief Delete channel
+ */
 struct DPP_EXPORT channel_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -888,7 +936,9 @@ struct DPP_EXPORT channel_delete_t : public event_dispatch_t {
 	channel deleted;
 };
 
-/** @brief Update channel */
+/**
+ * @brief Update channel
+ */
 struct DPP_EXPORT channel_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -904,7 +954,9 @@ struct DPP_EXPORT channel_update_t : public event_dispatch_t {
 	channel* updated = nullptr;
 };
 
-/** @brief Session ready */
+/**
+ * @brief Session ready
+ */
 struct DPP_EXPORT ready_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -920,7 +972,9 @@ struct DPP_EXPORT ready_t : public event_dispatch_t {
 	uint32_t shard_id = {};
 };
 
-/** @brief Message Deleted */
+/**
+ * @brief Message Deleted
+ */
 struct DPP_EXPORT message_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -943,7 +997,9 @@ struct DPP_EXPORT message_delete_t : public event_dispatch_t {
 
 };
 
-/** @brief Guild member remove */
+/**
+ * @brief Guild member remove
+ */
 struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -964,7 +1020,9 @@ struct DPP_EXPORT guild_member_remove_t : public event_dispatch_t {
 	user removed;
 };
 
-/** @brief Session resumed */
+/**
+ * @brief Session resumed
+ */
 struct DPP_EXPORT resumed_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -980,7 +1038,9 @@ struct DPP_EXPORT resumed_t : public event_dispatch_t {
 	uint32_t shard_id = 0;
 };
 
-/** @brief Guild role create */
+/**
+ * @brief Guild role create
+ */
 struct DPP_EXPORT guild_role_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -996,7 +1056,9 @@ struct DPP_EXPORT guild_role_create_t : public event_dispatch_t {
 	role* created = nullptr;
 };
 
-/** @brief Typing start */
+/**
+ * @brief Typing start
+ */
 struct DPP_EXPORT typing_start_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1029,20 +1091,28 @@ struct DPP_EXPORT typing_start_t : public event_dispatch_t {
 	time_t timestamp = 0;
 };
 
-/** @brief Voice state update */
+/**
+ * @brief Voice state update
+ */
 struct DPP_EXPORT voice_track_marker_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
 
-	/** Voice client */
+	/**
+	 * @brief Voice client
+	 */
 	discord_voice_client* voice_client = nullptr;
 
-	/** Track metadata */
+	/**
+	 * @brief Track metadata
+	 */
 	std::string track_meta = {};
 };
 
 
-/** @brief Message reaction add */
+/**
+ * @brief Message reaction add
+ */
 struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1089,7 +1159,9 @@ struct DPP_EXPORT message_reaction_add_t : public event_dispatch_t {
 	snowflake message_author_id = {};
 };
 
-/** @brief Guild members chunk */
+/**
+ * @brief Guild members chunk
+ */
 struct DPP_EXPORT guild_members_chunk_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1105,7 +1177,9 @@ struct DPP_EXPORT guild_members_chunk_t : public event_dispatch_t {
 	guild_member_map* members = nullptr;
 };
 
-/** @brief Message reaction remove */
+/**
+ * @brief Message reaction remove
+ */
 struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1142,7 +1216,9 @@ struct DPP_EXPORT message_reaction_remove_t : public event_dispatch_t {
 	snowflake message_id = {};
 };
 
-/** @brief Create guild */
+/**
+ * @brief Create guild
+ */
 struct DPP_EXPORT guild_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1181,7 +1257,9 @@ struct DPP_EXPORT guild_create_t : public event_dispatch_t {
 	sticker_map stickers = {};
 };
 
-/** @brief Create channel */
+/**
+ * @brief Create channel
+ */
 struct DPP_EXPORT channel_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1197,7 +1275,9 @@ struct DPP_EXPORT channel_create_t : public event_dispatch_t {
 	channel* created = nullptr;
 };
 
-/** @brief Message remove emoji */
+/**
+ * @brief Message remove emoji
+ */
 struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1229,7 +1309,9 @@ struct DPP_EXPORT message_reaction_remove_emoji_t : public event_dispatch_t {
 	snowflake message_id = {};
 };
 
-/** @brief Message delete bulk */
+/**
+ * @brief Message delete bulk
+ */
 struct DPP_EXPORT message_delete_bulk_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1255,7 +1337,9 @@ struct DPP_EXPORT message_delete_bulk_t : public event_dispatch_t {
 	std::vector<snowflake> deleted = {};
 };
 
-/** @brief Guild role update */
+/**
+ * @brief Guild role update
+ */
 struct DPP_EXPORT guild_role_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1271,7 +1355,9 @@ struct DPP_EXPORT guild_role_update_t : public event_dispatch_t {
 	role* updated = nullptr;
 };
 
-/** @brief Guild role delete */
+/**
+ * @brief Guild role delete
+ */
 struct DPP_EXPORT guild_role_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1292,7 +1378,9 @@ struct DPP_EXPORT guild_role_delete_t : public event_dispatch_t {
 	snowflake role_id = {};
 };
 
-/** @brief Channel pins update */
+/**
+ * @brief Channel pins update
+ */
 struct DPP_EXPORT channel_pins_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1313,7 +1401,9 @@ struct DPP_EXPORT channel_pins_update_t : public event_dispatch_t {
 	time_t timestamp = 0;
 };
 
-/** @brief Message remove all reactions */
+/**
+ * @brief Message remove all reactions
+ */
 struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1341,7 +1431,9 @@ struct DPP_EXPORT message_reaction_remove_all_t : public event_dispatch_t {
 
 };
 
-/** @brief Voice server update */
+/**
+ * @brief Voice server update
+ */
 struct DPP_EXPORT voice_server_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1362,7 +1454,9 @@ struct DPP_EXPORT voice_server_update_t : public event_dispatch_t {
 	std::string endpoint = {};
 };
 
-/** @brief Guild emojis update */
+/**
+ * @brief Guild emojis update
+ */
 struct DPP_EXPORT guild_emojis_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1392,7 +1486,9 @@ struct DPP_EXPORT presence_update_t : public event_dispatch_t {
 	presence rich_presence = {};
 };
 
-/** @brief Webhooks update */
+/**
+ * @brief Webhooks update
+ */
 struct DPP_EXPORT webhooks_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1408,7 +1504,9 @@ struct DPP_EXPORT webhooks_update_t : public event_dispatch_t {
 	channel* webhook_channel = nullptr;
 };
 
-/** @brief Guild member add */
+/**
+ * @brief Guild member add
+ */
 struct DPP_EXPORT guild_member_add_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1424,7 +1522,9 @@ struct DPP_EXPORT guild_member_add_t : public event_dispatch_t {
 	guild_member added = {};
 };
 
-/** @brief Invite delete */
+/**
+ * @brief Invite delete
+ */
 struct DPP_EXPORT invite_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1435,7 +1535,9 @@ struct DPP_EXPORT invite_delete_t : public event_dispatch_t {
 	invite deleted_invite = {};
 };
 
-/** @brief Guild update */
+/**
+ * @brief Guild update
+ */
 struct DPP_EXPORT guild_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1446,7 +1548,9 @@ struct DPP_EXPORT guild_update_t : public event_dispatch_t {
 	guild* updated = nullptr;
 };
 
-/** @brief Guild integrations update */
+/**
+ * @brief Guild integrations update
+ */
 struct DPP_EXPORT guild_integrations_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1457,7 +1561,9 @@ struct DPP_EXPORT guild_integrations_update_t : public event_dispatch_t {
 	guild* updating_guild = nullptr;
 };
 
-/** @brief Guild member update */
+/**
+ * @brief Guild member update
+ */
 struct DPP_EXPORT guild_member_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1473,7 +1579,9 @@ struct DPP_EXPORT guild_member_update_t : public event_dispatch_t {
 	guild_member updated = {};
 };
 
-/** @brief Invite create */
+/**
+ * @brief Invite create
+ */
 struct DPP_EXPORT invite_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1484,7 +1592,9 @@ struct DPP_EXPORT invite_create_t : public event_dispatch_t {
 	invite created_invite = {};
 };
 
-/** @brief Message update */
+/**
+ * @brief Message update
+ */
 struct DPP_EXPORT message_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1495,7 +1605,9 @@ struct DPP_EXPORT message_update_t : public event_dispatch_t {
 	message msg = {};
 };
 
-/** @brief User update */
+/**
+ * @brief User update
+ */
 struct DPP_EXPORT user_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1506,7 +1618,9 @@ struct DPP_EXPORT user_update_t : public event_dispatch_t {
 	user updated = {};
 };
 
-/** @brief Create message */
+/**
+ * @brief Create message
+ */
 struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1562,7 +1676,9 @@ struct DPP_EXPORT message_create_t : public event_dispatch_t {
 	void reply(message&& msg, bool mention_replied_user = false, command_completion_event_t callback = utility::log_error()) const;
 };
 
-/** @brief Guild audit log entry create */
+/**
+ * @brief Guild audit log entry create
+ */
 struct DPP_EXPORT guild_audit_log_entry_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1573,7 +1689,9 @@ struct DPP_EXPORT guild_audit_log_entry_create_t : public event_dispatch_t {
 	audit_entry entry = {};
 };
 
-/** @brief Guild ban add */
+/**
+ * @brief Guild ban add
+ */
 struct DPP_EXPORT guild_ban_add_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1589,7 +1707,9 @@ struct DPP_EXPORT guild_ban_add_t : public event_dispatch_t {
 	user banned = {};
 };
 
-/** @brief Guild ban remove */
+/**
+ * @brief Guild ban remove
+ */
 struct DPP_EXPORT guild_ban_remove_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1605,7 +1725,9 @@ struct DPP_EXPORT guild_ban_remove_t : public event_dispatch_t {
 	user unbanned = {};
 };
 
-/** @brief Integration create */
+/**
+ * @brief Integration create
+ */
 struct DPP_EXPORT integration_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1616,7 +1738,9 @@ struct DPP_EXPORT integration_create_t : public event_dispatch_t {
 	integration created_integration = {};
 };
 
-/** @brief Integration update */
+/**
+ * @brief Integration update
+ */
 struct DPP_EXPORT integration_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1627,7 +1751,9 @@ struct DPP_EXPORT integration_update_t : public event_dispatch_t {
 	integration updated_integration = {};
 };
 
-/** @brief Integration delete */
+/**
+ * @brief Integration delete
+ */
 struct DPP_EXPORT integration_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1638,7 +1764,9 @@ struct DPP_EXPORT integration_delete_t : public event_dispatch_t {
 	integration deleted_integration = {};
 };
 
-/** @brief Thread Create*/
+/**
+ * @brief Thread Create
+ */
 struct DPP_EXPORT thread_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1654,8 +1782,9 @@ struct DPP_EXPORT thread_create_t : public event_dispatch_t {
 	thread created = {};
 };
 
-/** @brief Thread Update
-*/
+/**
+ * @brief Thread Update
+ */
 struct DPP_EXPORT thread_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1671,7 +1800,8 @@ struct DPP_EXPORT thread_update_t : public event_dispatch_t {
 	thread updated = {};
 };
 
-/** @brief Thread Delete
+/**
+ * @brief Thread Delete
  */
 struct DPP_EXPORT thread_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
@@ -1688,7 +1818,8 @@ struct DPP_EXPORT thread_delete_t : public event_dispatch_t {
 	thread deleted = {};
 };
 
-/** @brief Thread List Sync
+/**
+ * @brief Thread List Sync
  */
 struct DPP_EXPORT thread_list_sync_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
@@ -1710,7 +1841,8 @@ struct DPP_EXPORT thread_list_sync_t : public event_dispatch_t {
 	std::vector<thread_member> members = {};
 };
 
-/** @brief Thread Member Update
+/**
+ * @brief Thread Member Update
  */
 struct DPP_EXPORT thread_member_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
@@ -1722,7 +1854,8 @@ struct DPP_EXPORT thread_member_update_t : public event_dispatch_t {
 	thread_member updated = {};
 };
 
-/** @brief Thread Members Update
+/**
+ * @brief Thread Members Update
  */
 struct DPP_EXPORT thread_members_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
@@ -1773,7 +1906,9 @@ struct DPP_EXPORT voice_buffer_send_t : public event_dispatch_t {
 	int buffer_size = 0;
 };
 
-/** @brief voice user talking */
+/**
+ * @brief voice user talking
+ */
 struct DPP_EXPORT voice_user_talking_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1794,7 +1929,9 @@ struct DPP_EXPORT voice_user_talking_t : public event_dispatch_t {
 	uint8_t talking_flags = 0;
 };
 
-/** @brief voice user talking */
+/**
+ * @brief voice user talking
+ */
 struct DPP_EXPORT voice_ready_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1810,7 +1947,9 @@ struct DPP_EXPORT voice_ready_t : public event_dispatch_t {
 	snowflake voice_channel_id = {};
 };
 
-/** @brief voice receive packet */
+/**
+ * @brief voice receive packet
+ */
 struct DPP_EXPORT voice_receive_t : public event_dispatch_t {
 	friend class discord_voice_client;
 
@@ -1882,7 +2021,9 @@ protected:
 	void reassign(discord_voice_client* vc, snowflake _user_id, const uint8_t* pcm, size_t length);
 };
 
-/** @brief voice client speaking event */
+/**
+ * @brief voice client speaking event
+ */
 struct DPP_EXPORT voice_client_speaking_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1903,7 +2044,9 @@ struct DPP_EXPORT voice_client_speaking_t : public event_dispatch_t {
 	uint32_t ssrc = 0;
 };
 
-/** @brief voice client disconnect event */
+/**
+ * @brief voice client disconnect event
+ */
 struct DPP_EXPORT voice_client_disconnect_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1919,7 +2062,9 @@ struct DPP_EXPORT voice_client_disconnect_t : public event_dispatch_t {
 	snowflake user_id = {};
 };
 
-/** @brief Delete stage instance */
+/**
+ * @brief Delete stage instance
+ */
 struct DPP_EXPORT entitlement_create_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1930,7 +2075,9 @@ struct DPP_EXPORT entitlement_create_t : public event_dispatch_t {
 	entitlement created = {};
 };
 
-/** @brief Delete stage instance */
+/**
+ * @brief Delete stage instance
+ */
 struct DPP_EXPORT entitlement_update_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
@@ -1941,7 +2088,9 @@ struct DPP_EXPORT entitlement_update_t : public event_dispatch_t {
 	entitlement updating_entitlement = {};
 };
 
-/** @brief Delete stage instance */
+/**
+ * @brief Delete stage instance
+ */
 struct DPP_EXPORT entitlement_delete_t : public event_dispatch_t {
 	using event_dispatch_t::event_dispatch_t;
 	using event_dispatch_t::operator=;
