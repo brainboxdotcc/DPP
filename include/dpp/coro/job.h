@@ -38,7 +38,8 @@ struct job_dummy {
 
 namespace dpp {
 
-/** @class job job.h coro/job.h
+/**
+ * @class job job.h coro/job.h
  * @brief Extremely light coroutine object designed to send off a coroutine to execute on its own.
  * Can be used in conjunction with coroutine events via @ref dpp::event_router_t::operator()(F&&) "event routers", or on its own.
  *
@@ -78,20 +79,20 @@ struct promise {
 	}
 #endif
 
-	/*
-	* @brief Function called when the job is done.
-	*
-	* @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Do not suspend at the end, destroying the handle immediately
-	*/
+	/**
+	 * @brief Function called when the job is done.
+	 *
+	 * @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Do not suspend at the end, destroying the handle immediately
+	 */
 	std_coroutine::suspend_never final_suspend() const noexcept {
 		return {};
 	}
 
-	/*
-	* @brief Function called when the job is started.
-	*
-	* @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Do not suspend at the start, starting the job immediately
-	*/
+	/**
+	 * @brief Function called when the job is started.
+	 *
+	 * @return <a href="https://en.cppreference.com/w/cpp/coroutine/suspend_never">std::suspend_never</a> Do not suspend at the start, starting the job immediately
+	 */
 	std_coroutine::suspend_never initial_suspend() const noexcept {
 		return {};
 	}

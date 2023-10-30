@@ -48,27 +48,59 @@ namespace dpp {
  * These are the possible parameter value types.
  */
 enum command_option_type : uint8_t {
-	/** A sub-command */
+	/**
+	 * @brief A sub-command.
+	 */
 	co_sub_command = 1,
-	/** A sub-command group */
+
+	/**
+	 * @brief A sub-command group.
+	 */
 	co_sub_command_group = 2,
-	/** A string value */
+
+	/**
+	 * @brief A string value.
+	 */
 	co_string = 3,
-	/** An integer value */
+
+	/**
+	 * @brief An integer value.
+	 */
 	co_integer = 4,
-	/** A boolean value */
+
+	/**
+	 * @brief A boolean value.
+	 */
 	co_boolean = 5,
-	/** A user snowflake id */
+
+	/**
+	 * @brief A user snowflake id.
+	 */
 	co_user = 6,
-	/** A channel snowflake id. Includes all channel types and categories */
+
+	/**
+	 * @brief A channel snowflake id. Includes all channel types and categories.
+	 */
 	co_channel = 7,
-	/** A role snowflake id */
+
+	/**
+	 * @brief A role id (snowflake).
+	 */
 	co_role = 8,
-	/** A mentionable. Includes users and roles */
+
+	/**
+	 * @brief A mentionable (users and roles).
+	 */
 	co_mentionable = 9,
-	/** Any double between -2^53 and 2^53 */
+
+	/**
+	 * @brief Any double between -2^53 and 2^53.
+	 */
 	co_number = 10,
-	/** File attachment type */
+
+	/**
+	 * @brief File attachment type.
+	 */
 	co_attachment = 11,
 };
 
@@ -104,9 +136,20 @@ protected:
 	command_option_choice& fill_from_json_impl(nlohmann::json* j);
 
 public:
-	std::string name;	//!< Option name (1-32 chars)
-	command_value value;	//!< Option value
-	std::map<std::string, std::string> name_localizations; //!< Localisations of command option name
+	/**
+	 * @brief Option name (1-32 chars).
+	 */
+	std::string name;
+
+	/**
+	 * @brief Option value.
+	 */
+	command_value value;
+
+	/**
+	 * @brief Localisations of command option name.
+	 */
+	std::map<std::string, std::string> name_localizations;
 
 	/**
 	 * @brief Construct a new command option choice object
@@ -170,22 +213,79 @@ protected:
 	command_option& fill_from_json_impl(nlohmann::json* j);
 
 public:
-	command_option_type type;                    //!< Option type (what type of value is accepted)
-	std::string name;                            //!< Option name (1-32 chars)
-	std::string description;                     //!< Option description (1-100 chars)
-	bool required;                               //!< True if this is a mandatory parameter
-	bool focused;                                //!< True if the user is typing in this field, when sent via autocomplete
-	command_value value;                         //!< Set only by autocomplete went sent as part of an interaction
-	std::vector<command_option_choice> choices;  //!< List of choices for multiple choice command
-	bool autocomplete;                           //!< True if this option supports auto completion
-	std::vector<command_option> options;         //!< Sub-commands
-	std::vector<channel_type> channel_types;     //!< Allowed channel types for channel snowflake id options
-	// Combines the `min_length` and `max_length` field by storing its value in the int64_t of the command_option_range
-	command_option_range min_value;              //!< Minimum value/length that can be entered, for dpp::co_number, dpp::co_integer and dpp::co_string types only
-	command_option_range max_value;              //!< Maximum value/length that can be entered, for dpp::co_number, dpp::co_integer and dpp::co_string types only
-	std::map<std::string, std::string> name_localizations; //!< Localisations of command name
-	std::map<std::string, std::string> description_localizations; //!< Localisations of command description
+	/**
+	 * @brief Option type (what type of value is accepted).
+	 */
+	command_option_type type;
 
+	/**
+	 * @brief Option name (1-32 chars).
+	 */
+	std::string name;
+
+	/**
+	 * @brief Option description (1-100 chars).
+	 */
+	std::string description;
+
+	/**
+	 * @brief Is this a mandatory parameter?
+	 */
+	bool required;
+
+	/**
+	 * @brief Is the user is typing in this field?
+	 *
+	 * @note This is sent via autocomplete.
+	 */
+	bool focused;
+
+	/**
+	 * @brief Set only by autocomplete when sent as part of an interaction.
+	 */
+	command_value value;
+
+	/**
+	 * @brief List of choices for multiple choice command.
+	 */
+	std::vector<command_option_choice> choices;
+
+	/**
+	 * @brief Does this option supports auto completion?
+	 */
+	bool autocomplete;
+
+	/**
+	 * @brief An array of sub-commands (options).
+	 */
+	std::vector<command_option> options;
+
+	/**
+	 * @brief Allowed channel types for channel snowflake id options.
+	 */
+	std::vector<channel_type> channel_types;
+
+	// Combines the `min_length` and `max_length` field by storing its value in the int64_t of the command_option_range
+
+	/**
+	 * @brief Minimum value/length that can be entered, for dpp::co_number, dpp::co_integer and dpp::co_string types only.
+	 */
+	command_option_range min_value;
+
+	/**
+	 * @brief Maximum value/length that can be entered, for dpp::co_number, dpp::co_integer and dpp::co_string types only.
+	 */
+	command_option_range max_value;
+
+	/**
+	 * @brief Localisations of command name.
+	 */
+	std::map<std::string, std::string> name_localizations;
+
+	/**
+	 * @brief Localisations of command description.
+	 */
+	std::map<std::string, std::string> description_localizations;
 
 	/**
 	 * @brief Construct a new command option object
@@ -302,10 +402,12 @@ enum interaction_response_type {
 	 * @brief Acknowledge a Ping
 	 */
 	ir_pong = 1,
+
 	/**
 	 * @brief Respond to an interaction with a message.
 	 */
 	ir_channel_message_with_source = 4,
+
 	/**
 	 * @brief Acknowledge an interaction and edit a response later, the user sees a loading state
 	 */
@@ -584,18 +686,37 @@ struct DPP_EXPORT command_resolved {
  * the command on a channel or in DM.
  */
 struct DPP_EXPORT command_data_option {
-	std::string name;                          //!< the name of the parameter
-	command_option_type type;                  //!< value of ApplicationCommandOptionType
-	command_value value;                       //!< Optional: the value of the pair
-	std::vector<command_data_option> options;  //!< Optional: present if this option is a group or subcommand
-	bool focused;                              //!< Optional: true if this option is the currently focused option for autocomplete
+	/**
+	 * @brief The name of the parameter.
+	 */
+	std::string name;
+
+	/**
+	 * @brief The type of option (value of ApplicationCommandOptionType).
+	 */
+	command_option_type type;
+
+	/**
+	 * @brief Optional: the value of the pair
+	 */
+	command_value value;
+
+	/**
+	 * @brief Optional: present if this option is a group or subcommand
+	 */
+	std::vector<command_data_option> options;
+
+	/**
+	 * @brief Optional: true if this option is the currently focused option for autocomplete
+	 */
+	bool focused;
 
 	/**
 	 * @brief Check if the value variant holds std::monostate and options vector is empty (i.e. the option wasn't supplied) 
 	 * @return bool true, if value variant holds std::monostate and options vector is empty
 	 */
 	bool empty() {
-	    return std::holds_alternative<std::monostate>(value) && options.empty();
+		return std::holds_alternative<std::monostate>(value) && options.empty();
 	}
 
 	/**
@@ -623,21 +744,55 @@ void from_json(const nlohmann::json& j, command_data_option& cdo);
 /** Types of interaction in the dpp::interaction class
  */
 enum interaction_type {
-	it_ping = 1,			//!< ping
-	it_application_command = 2,	//!< application command (slash command)
-	it_component_button = 3,	//!< button click or select menu chosen (component interaction)
-	it_autocomplete = 4,		//!< Autocomplete interaction
-	it_modal_submit = 5,		//!< Modal form submission
+	/**
+	 * @brief A ping interaction.
+	 */
+	it_ping = 1,
+
+	/**
+	 * @brief Application command (slash command) interaction.
+	 */
+	it_application_command = 2,
+
+	/**
+	 * @brief Button click or select menu chosen (component interaction)
+	 */
+	it_component_button = 3,
+
+	/**
+	 * @brief Autocomplete interaction.
+	 */
+	it_autocomplete = 4,
+
+	/**
+	 * @brief Modal form submission.
+	 */
+	it_modal_submit = 5,
 };
 
 /**
  * @brief Right-click context menu types
  */
 enum slashcommand_contextmenu_type {
-    ctxm_none = 0,        //!< Undefined context menu type
-    ctxm_chat_input = 1,    //!< DEFAULT, these are the slash commands you're used to
-    ctxm_user = 2,        //!< Add command to user context menu
-    ctxm_message = 3    //!< Add command to message context menu
+	/**
+	 * @brief Undefined context menu type
+	 */
+	ctxm_none = 0,
+
+	/**
+	 * @brief DEFAULT: these are the generic slash commands (e.g. /ping, /pong, etc)
+	 */
+	ctxm_chat_input = 1,
+
+	/**
+	 * @brief A slashcommand that goes in the user context menu.
+	 */
+	ctxm_user = 2,
+
+	/**
+	 * @brief A slashcommand that goes in the message context menu.
+	 */
+	ctxm_message = 3
 };
 
 /**
@@ -646,11 +801,32 @@ enum slashcommand_contextmenu_type {
  * with the interaction.
  */
 struct DPP_EXPORT command_interaction {
-	snowflake id;                              //!< the ID of the invoked command
-	std::string name;                          //!< the name of the invoked command
-	std::vector<command_data_option> options;  //!< Optional: the params + values from the user
-	slashcommand_contextmenu_type type;        //!< type of the command interaction
-	dpp::snowflake target_id;                  //!< Non-zero target ID for context menu actions. e.g. user id or message id whom clicked or tapped with the context menu https://discord.com/developers/docs/interactions/application-commands#user-commands
+	/**
+	 * @brief The ID of the invoked command.
+	 */
+	snowflake id;
+
+	/**
+	 * @brief The name of the invoked command.
+	 */
+	std::string name;
+
+	/**
+	 * @brief Optional: the params + values from the user.
+	 */
+	std::vector<command_data_option> options;
+
+	/**
+	 * @brief The type of command interaction.
+	 */
+	slashcommand_contextmenu_type type;
+
+	/**
+	 * @brief Non-zero target ID for context menu actions (e.g. user id or message id whom clicked or tapped with the context menu).
+	 *
+	 * @see https://discord.com/developers/docs/interactions/application-commands#user-commands
+	 */
+	dpp::snowflake target_id;
 
 	/**
 	 * @brief Get an option value by index
@@ -690,10 +866,12 @@ struct DPP_EXPORT component_interaction {
 	 * @brief Component type (dpp::component_type)
 	 */
 	uint8_t component_type;
+
 	/**
 	 * @brief Custom ID set when created
 	 */
 	std::string custom_id;
+
 	/**
 	 * @brief Possible values for a drop down list
 	 */
@@ -1031,12 +1209,11 @@ void from_json(const nlohmann::json& j, interaction& i);
 enum command_permission_type {
 	/**
 	 * @brief Role permission
-	 * 
 	 */
 	cpt_role = 1,
+
 	/**
 	 * @brief User permission
-	 * 
 	 */
 	cpt_user = 2,
 };
@@ -1058,12 +1235,23 @@ protected:
 	command_permission &fill_from_json_impl(nlohmann::json *j);
 
 public:
-	snowflake id;                  //!< the ID of the role or user
-	command_permission_type type;  //!< the type of permission
-	bool permission;               //!< true to allow, false, to disallow
+	/**
+	 * @brief The ID of the role/user.
+	 */
+	snowflake id;
 
 	/**
-	 * @brief Construct a new command permission object
+	 * @brief The type of permission.
+	 */
+	command_permission_type type;
+
+	/**
+	 * @brief True to allow, false to disallow.
+	 */
+	bool permission;
+
+	/**
+	 * @brief Construct a new command permission object.
 	 */
 	command_permission() = default;
 
@@ -1105,10 +1293,25 @@ protected:
 	guild_command_permissions &fill_from_json_impl(nlohmann::json *j);
 
 public:
-	snowflake id;                                 //!< the id of the command
-	snowflake application_id;                     //!< the id of the application the command belongs to
-	snowflake guild_id;                           //!< the id of the guild
-	std::vector<command_permission> permissions;  //!< the permissions for the command in the guild
+	/**
+	 * @brief The id of the command.
+	 */
+	snowflake id;
+
+	/**
+	 * @brief The id of the application the command belongs to.
+	 */
+	snowflake application_id;
+
+	/**
+	 * @brief The id of the guild.
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief The permissions for the command, in the guild.
+	 */
+	std::vector<command_permission> permissions;
 
 	/**
 	 * @brief Construct a new guild command permissions object

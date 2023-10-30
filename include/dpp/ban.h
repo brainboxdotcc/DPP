@@ -44,9 +44,14 @@ protected:
 	ban& fill_from_json_impl(nlohmann::json* j);
 
 public:
-	/** The ban reason */
+	/**
+	 * @brief The ban reason.
+	 */
 	std::string reason;
-	/** User ID the ban applies to */
+
+	/**
+	 * @brief User ID the ban applies to.
+	 */
 	snowflake user_id;
 
 	/** Constructor */
@@ -57,7 +62,7 @@ public:
 };
 
 /**
- * A group of bans. The key is the user ID
+ * @brief A group of bans. The key is the user ID.
  */
 typedef std::unordered_map<snowflake, ban> ban_map;
 
