@@ -339,12 +339,14 @@ public:
 	snowflake id;
 
 	/**
-	 * @brief The party's current size. Used to show the party's current size.
+	 * @brief The party's current size.
+	 * Used to show the party's current size.
 	 */
 	int32_t current_size;
 
 	/**
-	 * @brief The party's maximum size. Used to show the party's maximum size.
+	 * @brief The party's maximum size.
+	 * Used to show the party's maximum size.
 	 */
 	int32_t maximum_size;
 
@@ -358,12 +360,14 @@ public:
 class DPP_EXPORT activity {
 public:
 	/**
-	 * @brief Name of activity (e.g. "Fortnite", "Mr Boom's Firework Factory", etc).
+	 * @brief Name of activity.
+	 * e.g. "Fortnite", "Mr Boom's Firework Factory", etc.
 	 */
 	std::string name;
 
 	/**
-	 * @brief State of activity or the custom user status (e.g. "Waiting in lobby").
+	 * @brief State of activity or the custom user status.
+	 * e.g. "Waiting in lobby".
 	 */
 	std::string state;
 
@@ -415,17 +419,20 @@ public:
 	time_t created_at;
 
 	/**
-	 * @brief Start time. e.g. when game was started.
+	 * @brief Start time.
+	 * e.g. when game was started.
 	 */
 	time_t start;
 
 	/**
-	 * @brief End time, e.g. for songs on spotify.
+	 * @brief End time.
+	 * e.g. for songs on spotify.
 	 */
 	time_t end;
 
 	/**
-	 * @brief Creating application (e.g. a linked account on the user's client).
+	 * @brief Creating application.
+	 * e.g. a linked account on the user's client.
 	 */
 	snowflake application_id;
 
@@ -519,7 +526,7 @@ public:
 	uint8_t	flags;
 
 	/**
-	 * @brief List of activities
+	 * @brief List of activities.
 	 */
 	std::vector<activity> activities;
 

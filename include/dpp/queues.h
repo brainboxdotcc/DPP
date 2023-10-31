@@ -114,12 +114,14 @@ struct DPP_EXPORT http_request_completion_t {
 	std::multimap<std::string, std::string> headers;
 
 	/**
-	 * @brief HTTP status (e.g. 200 = OK, 404 = Not found, 429 = Rate limited, etc).
+	 * @brief HTTP status.
+	 * e.g. 200 = OK, 404 = Not found, 429 = Rate limited, etc.
 	 */
 	uint16_t status = 0;
 
 	/**
-	 * @brief Error status (e.g. if the request could not connect at all).
+	 * @brief Error status.
+	 * e.g. if the request could not connect at all.
 	 */
 	http_error error = h_success;
 
@@ -149,7 +151,7 @@ struct DPP_EXPORT http_request_completion_t {
 	uint64_t ratelimit_retry_after = 0;
 
 	/**
-	 * @brief True if this request has caused us to be globally rate limited .
+	 * @brief True if this request has caused us to be globally rate limited.
 	 */
 	bool ratelimit_global = false;
 
@@ -230,7 +232,8 @@ class DPP_EXPORT http_request {
 	bool non_discord;
 public:
 	/**
-	 * @brief Endpoint name e.g. /api/users.
+	 * @brief Endpoint name
+	 * e.g. /api/users.
 	 */
 	std::string endpoint;
 
@@ -265,7 +268,8 @@ public:
 	std::vector<std::string> file_content;
 
 	/**
-	 * @brief Upload file mime types (application/octet-stream if unspecified).
+	 * @brief Upload file mime types.
+	 * application/octet-stream if unspecified.
 	 */
 	std::vector<std::string> file_mimetypes;
 

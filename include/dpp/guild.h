@@ -417,7 +417,9 @@ protected:
 
 protected:
 	/**
-	 * @brief Nickname, or empty string if they don't have a nickname on this guild
+	 * @brief Nickname.
+	 *
+	 * @note Empty string if they don't have a nickname on this guild
 	 */
 	std::string nickname;
 
@@ -445,9 +447,12 @@ public:
 	snowflake user_id;
 
 	/**
-	 * @brief User avatar (per-server avatar is a nitro only feature)
+	 * @brief User avatar.
+	 *
+	 * @note Per-server avatar is a nitro only feature.
 	 */
 	utility::iconhash avatar;
+
 	/**
 	 * @brief Timestamp of when the time out will be removed; until then, they cannot interact with the guild
 	 */
@@ -707,7 +712,9 @@ public:
 	std::string description;
 
 	/**
-	 * @brief The emoji name if custom, the unicode character if standard, or null if no emoji is set.
+	 * @brief The emoji name.
+	 *
+	 * @note name if custom, the unicode character if standard, or null if no emoji is set.
 	 */
 	std::string emoji_name;
 
@@ -852,8 +859,8 @@ enum guild_explicit_content_t : uint8_t {
 };
 
 /**
- * @brief MFA level for server. If set to elevated all moderators need MFA to perform specific
- * actions such as kick or ban.
+ * @brief MFA level for server.
+ * If set to elevated all moderators need MFA to perform specific actions such as kick or ban.
  */
 enum mfa_level_t : uint8_t {
 	/**

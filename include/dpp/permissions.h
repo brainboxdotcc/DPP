@@ -235,8 +235,9 @@ enum permissions : uint64_t {
 	p_use_embedded_activities = 0x08000000000,
 
 	/**
-	 * @brief Allows for timing out users to prevent them from sending or reacting
-	 * to messages in chat and threads, and from speaking in voice and stage channels.
+	 * @brief Allows for timing out users
+	 * to prevent them from sending or reacting to messages in chat and threads,
+	 * and from speaking in voice and stage channels.
 	 */
 	p_moderate_members = 0x10000000000,
 
