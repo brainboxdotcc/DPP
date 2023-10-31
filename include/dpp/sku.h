@@ -38,6 +38,7 @@ enum sku_type : uint8_t {
 	 * @brief Represents a recurring subscription
 	 */
 	SUBSCRIPTION = 5,
+
 	/**
 	 * @brief System-generated group for each SUBSCRIPTION SKU created
 	 * @warning These are automatically created for each subscription SKU and are not used at this time. Please refrain from using these.
@@ -53,10 +54,12 @@ enum sku_flags : uint16_t {
 	 * @brief SKU is available for purchase
 	 */
 	sku_available =			0b000000000000100,
+
 	/**
 	 * @brief Recurring SKU that can be purchased by a user and applied to a single server. Grants access to every user in that server.
 	 */
 	sku_guild_subscription = 	0b000000010000000,
+
 	/**
 	 * @brief Recurring SKU purchased by a user for themselves. Grants access to the purchasing user in every server.
 	 */

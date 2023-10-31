@@ -45,17 +45,17 @@ namespace std {
 namespace dpp {
 
 /**
-	* @brief Implementation details for internal use only.
-	*
-	* @attention This is only meant to be used by D++ internally. Support will not be given regarding the facilities in this namespace.
-	*/
+ * @brief Implementation details for internal use only.
+ *
+ * @attention This is only meant to be used by D++ internally. Support will not be given regarding the facilities in this namespace.
+ */
 namespace detail {
 #ifdef _DOXYGEN_
 /**
-	* @brief Alias for either std or std::experimental depending on compiler and library. Used by coroutine implementation.
-	*
-	* @todo Remove and use std when all supported libraries have coroutines in it
-	*/
+ * @brief Alias for either std or std::experimental depending on compiler and library. Used by coroutine implementation.
+ *
+ * @todo Remove and use std when all supported libraries have coroutines in it
+ */
 namespace std_coroutine {}
 #else
 #  ifdef STDCORO_EXPERIMENTAL_NAMESPACE

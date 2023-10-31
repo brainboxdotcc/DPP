@@ -55,14 +55,24 @@ namespace dpp {
 template<class T, class C> class collector
 {
 protected:
-	/// Owning cluster
+	/**
+	 * @brief Owning cluster.
+	 */
 	class cluster* owner;
 private:
-	/// Timed listener
+	/**
+	 * @brief Timed listener.
+	 */
 	timed_listener<event_router_t<T>, std::function<void(const T&)>>* tl;
-	/// stored list
+
+	/**
+	 * @brief Stored list.
+	 */
 	std::vector<C> stored;
-	/// Trigger flag
+
+	/**
+	 * @brief Trigger flag.
+	 */
 	bool triggered;
 public:
 	/**
@@ -153,17 +163,34 @@ public:
  */
 class collected_reaction : public managed {
 public:
-	/// Reacting user
+	/**
+	 * @brief Reacting user.
+	 */
 	user react_user;
-	/// Reacting guild
+
+	/**
+	 * @brief Reacting guild.
+	 */
 	guild* react_guild{};
-	/// Reacting guild member
+
+	/**
+	 * @brief Reacting guild member.
+	 */
 	guild_member react_member;
-	/// Reacting channel
+
+	/**
+	 * @brief Reacting channel.
+	 */
 	channel* react_channel{};
-	/// Reacted emoji
+
+	/**
+	 * @brief Reacted emoji.
+	 */
 	emoji react_emoji;
-	/// ID of the user who authored the message which was reacted to (Optional)
+
+	/**
+	 * @brief Optional: ID of the user who authored the message which was reacted to.
+	 */
 	snowflake message_author_id{};
 };
 
@@ -239,7 +266,14 @@ public:
  * Collects message reactions during a set timeframe and returns them in a list via the completed() method.
  */
 class reaction_collector : public reaction_collector_t {
+	/**
+	 * @brief The ID of the message.
+	 */
 	snowflake message_id;
+
+	/**
+	 * @brief The reaction.
+	 */
 	collected_reaction react;
 public:
 	/**

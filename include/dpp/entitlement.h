@@ -39,11 +39,13 @@ enum entitlement_type : uint8_t {
 	 * @warning This can only be used when creating a test entitlement.
 	 */
 	GUILD_SUBSCRIPTION = 1,
+
 	/**
 	 * @brief A subscription for a user.
 	 * @warning This can only be used when creating a test entitlement.
 	 */
 	USER_SUBSCRIPTION = 2,
+
 	/**
 	 * @brief Entitlement was purchased as an app subscription.
 	 */

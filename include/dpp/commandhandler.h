@@ -50,6 +50,7 @@ struct DPP_EXPORT resolved_user {
 	 * @brief Holds user information
 	 */
 	dpp::user user;
+
 	/**
 	 * @brief Holds member information
 	 */
@@ -69,13 +70,40 @@ typedef std::variant<std::monostate, std::string, dpp::role, dpp::channel, dpp::
  * parameter.
  */
 enum parameter_type {
-	pt_string,	//!< String value
-	pt_role,	//!< Role object
-	pt_channel,	//!< Channel object
-	pt_user,	//!< User object
-	pt_integer,	//!< 64 bit signed integer
-	pt_double,	//!< double floating point
-	pt_boolean	//!< boolean
+	/**
+	 * @brief String parameter.
+	 */
+	pt_string,
+
+	/**
+	 * @brief Role object parameter.
+	 */
+	pt_role,
+
+	/**
+	 * @brief Channel object parameter.
+	 */
+	pt_channel,
+
+	/**
+	 * @brief User object parameter.
+	 */
+	pt_user,
+
+	/**
+	 * @brief 64 bit signed integer parameter.
+	 */
+	pt_integer,
+
+	/**
+	 * @brief double floating point parameter.
+	 */
+	pt_double,
+
+	/**
+	 * @brief Boolean parameter.
+	 */
+	pt_boolean
 };
 
 /**
@@ -84,7 +112,6 @@ enum parameter_type {
  * the list of parameters.
  */
 struct DPP_EXPORT param_info {
-
 	/**
 	 * @brief Type of parameter
 	 */
@@ -147,18 +174,22 @@ struct DPP_EXPORT command_source {
 	 * @brief Sending guild id
 	 */
 	snowflake guild_id;
+
 	/**
 	 * @brief Source channel id
 	 */
 	snowflake channel_id;
+
 	/**
 	 * @brief Command ID of a slash command
 	 */
 	snowflake command_id;
+
 	/**
 	 * @brief Token for sending a slash command reply
 	 */
 	std::string command_token;
+
 	/**
 	 * @brief The user who issued the command
 	 */
@@ -202,10 +233,12 @@ struct DPP_EXPORT command_info_t {
 	 * a class member, a lambda or a raw C function pointer.
 	 */
 	command_handler func;
+
 	/**
 	 * @brief Parameters requested for the command, with their types
 	 */
 	parameter_registration_t parameters;
+
 	/**
 	 * @brief Guild ID the command exists on, or 0 to be present on all guilds
 	 */
@@ -226,6 +259,7 @@ private:
 	 * @brief List of guild commands to bulk register
 	 */
 	std::map<dpp::snowflake, std::vector<dpp::slashcommand>> bulk_registration_list_guild;
+
 	/**
 	 * @brief List of global commands to bulk register
 	 */
@@ -384,7 +418,9 @@ public:
 	 */
 	void thinking(command_source source, command_completion_event_t callback = utility::log_error());
 
-	/* Easter egg */
+	/**
+	 * @brief Easter egg (redefinition of dpp::commandhandler::thinking).
+	 */
 	void thonk(command_source source, command_completion_event_t callback = utility::log_error());
 
 };
