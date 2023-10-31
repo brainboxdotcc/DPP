@@ -59,6 +59,62 @@
 	#define DPP_EXPORT
 #endif
 
+namespace dpp {
+
+/**
+ * @brief Represents a build configuration. On some platforms (e.g. Windows) release isn't compatible with debug, so we use this enum to detect it.
+ */
+enum class build_type {
+	/**
+	 * @brief Universal build, works with both debug and release
+	 */
+	universal,
+
+	/**
+	 * @brief Debug build
+	 */
+	debug,
+
+	/**
+	 * @brief Release build
+	 */
+	release
+};
+
+template <build_type>
+extern bool DPP_EXPORT validate_configuration();
+
+#if defined(UE_BUILD_DEBUG) || defined(UE_BUILD_DEVELOPMENT) || defined(UE_BUILD_TEST) || defined(UE_BUILD_SHIPPING) || defined(UE_GAME) || defined(UE_EDITOR) || defined(UE_BUILD_SHIPPING_WITH_EDITOR) || defined(UE_BUILD_DOCS)
+	/*
+	 * We need to tell DPP to NOT do the version checker if something from Unreal Engine is defined.
+	 * We have to do this because UE is causing some weirdness where the version checker is broken and always errors.
+	 * This is really only for DPP-UE. There is no reason to not do the version checker unless you are in Unreal Engine.
+	 */
+	#define DPP_BYPASS_VERSION_CHECKING
+#endif /* UE */
+
+#ifndef DPP_BUILD /* when including dpp */
+	/**
+	 * Version checking, making sure the program is in a configuration compatible with DPP's.
+	 *
+	 * Do NOT make these variables constexpr.
+	 * We want them to initialize at runtime so the function can be pulled from the shared library object.
+	 */
+	#ifndef DPP_BYPASS_VERSION_CHECKING
+		#if defined(_WIN32)
+			#ifdef _DEBUG
+				inline const bool is_valid_config = validate_configuration<build_type::debug>();
+			#else
+				inline const bool is_valid_config = validate_configuration<build_type::release>();
+			#endif /* _DEBUG */
+		#else
+			inline const bool is_valid_config = validate_configuration<build_type::universal>();
+		#endif /* _WIN32 */
+	#endif /* !DPP_BYPASS_VERSION_CHECKING */
+#endif /* !DPP_BUILD */
+
+}
+
 #ifndef _WIN32
 	#define SOCKET int
 #else
