@@ -511,7 +511,8 @@ protected:
 	std::thread* out_thread;
 
 	/**
-	 * @brief Outbound queue condition, signalled when there are requests completed to call callbacks for
+	 * @brief Outbound queue condition.
+	 * Signalled when there are requests completed to call callbacks for.
 	 */
 	std::condition_variable out_ready;
 
@@ -547,7 +548,9 @@ protected:
 	bool globally_ratelimited;
 
 	/**
-	 * @brief How many seconds we are globally rate limited for, if globally_ratelimited is true
+	 * @brief How many seconds we are globally rate limited for
+	 *
+	 * @note Only if globally_ratelimited is true.
 	 */
 	uint64_t globally_limited_for;
 
