@@ -48,36 +48,6 @@
 
 namespace dpp {
 
-#ifdef _WIN32
-	#ifdef _DEBUG
-		extern "C" DPP_EXPORT void you_are_using_a_debug_build_of_dpp_on_a_release_project();
-	#else
-		extern "C" DPP_EXPORT void you_are_using_a_release_build_of_dpp_on_a_debug_project();
-	#endif
-#endif
-
-struct DPP_EXPORT version_checker {
-	version_checker() {
-		#ifdef _WIN32
-			#ifdef _DEBUG
-				you_are_using_a_debug_build_of_dpp_on_a_release_project();
-			#else
-				you_are_using_a_release_build_of_dpp_on_a_debug_project();
-			#endif
-		#endif
-	}
-};
-
-/*
- * We need to tell DPP to NOT do the version checker if something from Unreal Engine is defined.
- * We have to do this because UE is causing some weirdness where the version checker is broken and always errors.
- * This is really only for DPP-UE. There is no reason to not do the version checker unless you are in Unreal Engine.
- */
-#if !defined(UE_BUILD_DEBUG) && !defined(UE_BUILD_DEVELOPMENT) && !defined(UE_BUILD_TEST) && !defined(UE_BUILD_SHIPPING) && !defined(UE_GAME) && !defined(UE_EDITOR) && !defined(UE_BUILD_SHIPPING_WITH_EDITOR) && !defined(UE_BUILD_DOCS)
-static version_checker dpp_vc;
-#endif
-
-
 /**
  * @brief A list of shards
  */

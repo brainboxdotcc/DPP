@@ -35,16 +35,6 @@
 
 namespace dpp {
 
-#ifdef _WIN32
-	#ifdef _DEBUG
-		extern "C" void you_are_using_a_debug_build_of_dpp_on_a_release_project() {
-		}
-	#else
-		extern "C" void you_are_using_a_release_build_of_dpp_on_a_debug_project() {
-		}
-	#endif
-#endif
-
 /**
  * @brief An audit reason for each thread. These are per-thread to make the cluster
  * methods like cluster::get_audit_reason and cluster::set_audit_reason thread safe across
@@ -69,6 +59,38 @@ template<typename T> std::function<void(const T&)> make_intent_warning(cluster* 
 		}
 	};
 }
+
+template <build_type BuildType>
+bool validate_configuration() {
+#ifdef _DEBUG
+	constexpr build_type expected = build_type::debug;
+#else
+	constexpr build_type expected = build_type::release;
+#endif
+#ifdef _WIN32
+	if constexpr (BuildType != build_type::universal && BuildType != expected) {
+		MessageBox(
+			nullptr,
+			"Mismatched Debug/Release configurations between project and dpp.dll.\n"
+			"Please ensure both your program and the D++ DLL file are both using the same configuration.\n"
+			"The program will now terminate.",
+			"D++ Debug/Release mismatch",
+			MB_OK | MB_ICONERROR
+		);
+		/* Use std::runtime_rror here because dpp exceptions use std::string and that would crash when catching, because of ABI */
+		throw std::runtime_error("Mismatched Debug/Release configurations between project and dpp.dll");
+	}
+	return true;
+#else
+	return true;
+#endif
+}
+
+template bool DPP_EXPORT validate_configuration<build_type::debug>();
+
+template bool DPP_EXPORT validate_configuration<build_type::release>();
+
+template bool DPP_EXPORT validate_configuration<build_type::universal>();
 
 cluster::cluster(const std::string &_token, uint32_t _intents, uint32_t _shards, uint32_t _cluster_id, uint32_t _maxclusters, bool comp, cache_policy_t policy, uint32_t request_threads, uint32_t request_threads_raw)
 	: default_gateway("gateway.discord.gg"), rest(nullptr), raw_rest(nullptr), compressed(comp), start_time(0), token(_token), last_identify(time(nullptr) - 5), intents(_intents),
