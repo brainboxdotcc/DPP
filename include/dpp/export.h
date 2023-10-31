@@ -62,7 +62,7 @@
 namespace dpp {
 
 /**
- * @brief Represents a build configuration. On some platforms (e.g. Windows) release isnt compatible with debug, so we use this enum to detect it.
+ * @brief Represents a build configuration. On some platforms (e.g. Windows) release isn't compatible with debug, so we use this enum to detect it.
  */
 enum class build_type {
 	/**
