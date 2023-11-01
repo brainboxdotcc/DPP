@@ -88,7 +88,7 @@ jobs:
           - { arch: 'amd64', os: ubuntu-22.04, package: g++-11, cpp-version: g++-11, cmake-flags: '-DDPP_CORO=ON' }
           - { arch: 'amd64', os: ubuntu-22.04, package: g++-10, cpp-version: g++-10, cmake-flags: '' }
           - { arch: 'amd64', os: ubuntu-20.04, package: g++-9, cpp-version: g++-9, cmake-flags: '' }
-
+          - { arch: 'arm7hf', os: [self-hosted, linux, ARM], package: g++-10, cpp-version: g++-10, cmake-flags: '-DDPP_CORO=ON' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@8ca2b8b2ece13480cda6dacd3511b49857a23c09 # v2.5.1
