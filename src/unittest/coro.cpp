@@ -365,7 +365,110 @@ dpp::job async_test() {
 		set_status(test, ts_success);
 	} catch (const std::exception &e) {
 		/* no exception should be caught here */
-		set_status(test, ts_failed, "unknown exception thrown");
+		set_status(test, ts_failed, std::string{"unknown exception thrown: "} + e.what());
+	}
+}
+
+dpp::job coro_awaitable_test() {
+	try {
+		{
+			dpp::promise<int> test;
+
+			test.set_value(42);
+			if (int res = co_await test.get_awaitable(); res != 42) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set before co_await");
+			}
+		}
+		{
+			dpp::promise<int> test;
+
+			test.set_value(420);
+			if (int res = test.get_awaitable().sync_wait(); res != 420) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set before sync_wait");
+			}
+		}
+		{
+			dpp::promise<int>   test;
+			dpp::awaitable<int> awaitable;
+
+			awaitable = test.get_awaitable();
+			test.set_value(420);
+			if (std::optional<int> res = awaitable.sync_wait_for(std::chrono::seconds(5)); !res || *res != 420) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set before sync_wait_for");
+			}
+		}
+		{
+			dpp::promise<void> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+
+			if (bool res = awaitable.sync_wait_for(std::chrono::seconds(5)); res) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve time out with sync_wait_for");
+			}
+		}
+		{
+			dpp::promise<int> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+			std::thread        th{[p = std::move(test)]() mutable {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+				p.set_value(69);
+			}};
+			th.detach();
+			if (std::optional<int> res = awaitable.sync_wait_for(std::chrono::seconds(5)); !res || *res != 69) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set after sync_wait_for");
+			}
+		}
+		{
+			dpp::promise<int> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+			std::thread        th{[p = std::move(test)]() mutable {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+				p.set_value(69420);
+			}};
+			th.detach();
+			if (int res = co_await awaitable; res != 69420) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "could not retrieve value set after co_await");
+			}
+		}
+		{
+			dpp::promise<void> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+			std::thread        th{[p = std::move(test)]() mutable {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+				p.set_exception(std::make_exception_ptr(dpp::voice_exception("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")));
+			}};
+			th.detach();
+			bool success = false;
+			try {
+				co_await awaitable;
+			} catch (const dpp::voice_exception &) {
+				success = true;
+			}
+			if (!success) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "retrieval of an exception with co_await failed");
+			}
+		}
+		{
+			dpp::promise<void> test;
+			dpp::awaitable     awaitable{test.get_awaitable()};
+			std::thread        th{[p = std::move(test)]() mutable {
+				std::this_thread::sleep_for(std::chrono::seconds(2));
+				p.set_exception(std::make_exception_ptr(dpp::voice_exception("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")));
+			}};
+			th.detach();
+			bool success = false;
+			try {
+				awaitable.sync_wait();
+			} catch (const dpp::voice_exception &) {
+				success = true;
+			}
+			if (!success) {
+				set_status(CORO_AWAITABLE_OFFLINE, ts_failed, "retrieval of an exception with co_await failed");
+			}
+		}
+		set_status(CORO_AWAITABLE_OFFLINE, ts_success);
+	} catch (const std::exception &e) {
+		// no exception should reach this point
+		set_status(CORO_AWAITABLE_OFFLINE, ts_failed, std::string{"unknown exception thrown: "} + e.what());
 	}
 }
 
@@ -378,6 +481,9 @@ void coro_offline_tests()
 	std::fill(job_data.begin(), job_data.end(), -1);
 	job_offline_test();
 
+	start_test(CORO_AWAITABLE_OFFLINE);
+	coro_awaitable_test();
+
 	start_test(CORO_TASK_OFFLINE);
 	std::fill(task_data.begin(), task_data.end(), -1);
 	[]() -> dpp::job {
@@ -388,7 +494,7 @@ void coro_offline_tests()
 		} catch (const test_exception<0> &) { // exception thrown at the end of the task test
 			set_status(CORO_TASK_OFFLINE, ts_success);
 		} catch (const std::exception &e) { // anything else should not escape
-			set_status(CORO_TASK_OFFLINE, ts_failed, "unknown exception thrown");
+			set_status(CORO_TASK_OFFLINE, ts_failed, std::string{"unknown exception thrown: "} + e.what());
 		}
 	}();
 
@@ -401,7 +507,7 @@ void coro_offline_tests()
 		} catch (const test_exception<0> &) {
 			set_status(CORO_COROUTINE_OFFLINE, ts_success);
 		} catch (const std::exception &e) { // anything else should not escape
-			set_status(CORO_COROUTINE_OFFLINE, ts_failed, "unknown exception thrown");
+			set_status(CORO_COROUTINE_OFFLINE, ts_failed, std::string{"unknown exception thrown: "} + e.what());
 		}
 	}();
 

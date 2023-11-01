@@ -256,6 +256,7 @@ DPP_TEST(THREAD_MESSAGE_REACT_ADD_EVENT, "cluster::on_reaction_add in thread", t
 DPP_TEST(THREAD_MESSAGE_REACT_REMOVE_EVENT, "cluster::on_reaction_remove in thread", tf_online | tf_extended);
 
 DPP_TEST(CORO_JOB_OFFLINE, "coro: offline job", tf_offline | tf_coro);
+DPP_TEST(CORO_AWAITABLE_OFFLINE, "coro: offline promise & awaitable", tf_offline | tf_coro);
 DPP_TEST(CORO_COROUTINE_OFFLINE, "coro: offline coroutine", tf_offline | tf_coro);
 DPP_TEST(CORO_TASK_OFFLINE, "coro: offline task", tf_offline | tf_coro);
 DPP_TEST(CORO_ASYNC_OFFLINE, "coro: offline async", tf_offline | tf_coro);
