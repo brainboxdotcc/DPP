@@ -39,7 +39,7 @@ int main(int argc, char const *argv[]) {
 		} else if (event.command.get_command_name() == "play") {
 
 			/* Get the voice channel the bot is in, in this current guild. */
-			dpp::voiceconn* v = event.from->get_voice(event.channel.guild_id);
+			dpp::voiceconn* v = event.from->get_voice(event.command.guild_id);
 
 			/* If the voice channel was invalid, or there is an issue with it, then tell the user. */
 			if (!v || !v->voiceclient || !v->voiceclient->is_ready()) {
@@ -164,7 +164,7 @@ int main(int argc, char const *argv[]) {
 			dpp::slashcommand joincommand("join", "Joins your voice channel.", bot.me.id);
 			dpp::slashcommand playcommand("play", "Plays an ogg file.", bot.me.id);
 
-			bot.global_bulk_command_create({joincommand, playcommand});
+			bot.global_bulk_command_create({ joincommand, playcommand });
 		}
 	});
 	
