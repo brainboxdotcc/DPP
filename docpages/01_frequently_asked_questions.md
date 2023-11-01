@@ -4,7 +4,7 @@
 
 ## Is this library in production use?
 
-This library powers the bot [TriviaBot](https://triviabot.co.uk) which has over **199,000 servers**, and [Sporks](https://sporks.gg) which has over **3,500 severs**. The library's use in these bots shows that the library is production ready for bots of all sizes.
+This library powers the bot [TriviaBot](https://triviabot.co.uk) which has over **201,000 servers**, and [Sporks](https://sporks.gg) which has over **3,500 servers**. The library's use in these bots shows that the library is production ready for bots of all sizes.
 
 ## How much RAM does this library use?
 
@@ -14,7 +14,7 @@ For a very small bot, you can get the memory usage as low as **6 megabytes** on 
 
 ## How do I use this library in Windows?
 
-The easiest way is to use our [template project](https://github.com/brainboxdotcc/windows-bot-template). If you are unable to do this, download the precompiled latest release from our GitHub releases, and take the dlls, `.lib` file, and header files (`bin`, `lib` and `include` directories), placing them in a easily accessible place on your computer. Go into Visual Studio project settings in a new project, and point the project directories (notably the library directories and and include directories) at the correct locations. Add the `include` folder you extracted to your include directories, and add `dpp.lib` to your library directories. Ensure the project is set to C++17 standard or later in the settings. You should then be able to compile example programs within that project. When you run the program you have compiled you must ensure that all the dll files from the `bin` directory exist in the same directory as your executable.
+The easiest way is to use our [template project](https://github.com/brainboxdotcc/windows-bot-template). If you are unable to do this, download the precompiled latest release from our GitHub releases, and take the DLLs, `.lib` file, and header files (`bin`, `lib` and `include` directories), placing them in a easily accessible place on your computer. Go into Visual Studio project settings in a new project, and point the project directories (notably the library directories and and include directories) at the correct locations. Add the `include` folder you extracted to your include directories, and add `dpp.lib` to your library directories. Ensure the project is set to C++17 standard or later in the settings. You should then be able to compile example programs within that project. When you run the program you have compiled you must ensure that all the dll files from the `bin` directory exist in the same directory as your executable.
 
 ## Does this library support Visual Studio 2022?
 
@@ -98,7 +98,7 @@ To fix this issue, run `ldconfig`: `sudo ldconfig` as root. Log out if your SSH 
 
 The libsodium package requires pkg-config, but does not check for it when installed. Install it as root, e.g. `sudo apt install pkg-config`. Rerun cmake, and rebuild the library.
 
-## When I try to instantiate a dpp::cluster in windows, a std::bad_alloc exception is thrown
+## When I try to instantiate a dpp::cluster in windows, I get "D++ Debug/Release mismatch"
 
 If this happens, ensure you are using the correct precompiled build of the library. Our precompiled binaries are built in two forms, **release mode** and **debug mode** for Visual Studio 2019/2022. These two versions of the library are not cross-compatible due to differences in the debug and release STL (Microsoft standard library implementation). You should not need to build your own copy, but please see the section about \ref buildwindows for more information on how to build your own copy, if needed.
 
