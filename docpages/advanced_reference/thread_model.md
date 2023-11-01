@@ -32,11 +32,11 @@ digraph "Thread Model" {
 		style=filled
 		color=lightgrey;
 		node [style=filled,color=4]
-        	"REST Requests"
+		"REST Requests"
 		"Request In Queue 1"
 		"Request In Queue 2"
 		"Request In Queue 3..."
-        	"Request Out Queue"
+		"Request Out Queue"
 		label = "REST Requests (Each in queue, and the out queue, are threads)"
 	}
 
@@ -44,7 +44,7 @@ digraph "Thread Model" {
 		style=filled
 		color=lightgrey;
 		node [style=filled,color=4]
-        	"Discord Events" [style=filled,color=4]
+		"Discord Events" [style=filled,color=4]
 		"User Callback Functions"
 		label = "Events and Callbacks"
 	}

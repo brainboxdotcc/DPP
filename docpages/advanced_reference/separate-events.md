@@ -25,8 +25,8 @@ class message_listener {
 
 public:
 
-    /* Create a static function that can be called anywhere. */
-    static void on_message_create(const dpp::message_create_t& event);
+	/* Create a static function that can be called anywhere. */
+	static void on_message_create(const dpp::message_create_t& event);
 
 };
 ~~~~~~~~~~
@@ -37,12 +37,12 @@ Then we need to add our code for what should happen when this event fires. We do
 #include "message_listener.h"
 
 void message_listener::on_message_create(const dpp::message_create_t &event) {
-    /* See if the message contains the phrase we want to check for.
-     * If there's at least a single match, we reply and say it's not allowed.
-     */
-    if (event.msg.content.find("bad word") != std::string::npos) {
-        event.reply("That is not allowed here. Please, mind your language!", true);
-    }
+	/* See if the message contains the phrase we want to check for.
+	 * If there's at least a single match, we reply and say it's not allowed.
+	 */
+	if (event.msg.content.find("bad word") != std::string::npos) {
+	event.reply("That is not allowed here. Please, mind your language!", true);
+	}
 }
 
 ~~~~~~~~~~
@@ -56,17 +56,19 @@ However, we've not finished yet! If you thought "How does the `main.cpp` file ac
 #include "listeners/message_listener.h"
 
 int main() {
-    /* Create the bot, but with our intents so we can use messages. */
-    dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
+	/* Create the bot, but with our intents so we can use messages. */
+	dpp::cluster bot("token", dpp::i_default_intents | dpp::i_message_content);
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
-    /* Fires our event that is located in MessageListener when the bot detects a message in any server and any channel it has access to. */
-    bot.on_message_create(&message_listener::on_message_create);
+	/* Fires our event that is located in MessageListener 
+	 * when the bot detects a message in any server and any channel it has access to.
+	 */
+	bot.on_message_create(&message_listener::on_message_create);
 
-    bot.start(dpp::st_wait);
+	bot.start(dpp::st_wait);
 
-    return 0;
+	return 0;
 }
 ~~~~~~~~~~
 
