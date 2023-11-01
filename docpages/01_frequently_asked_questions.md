@@ -40,7 +40,7 @@ A simple search can find some learning tools, however not all are good. Here is 
 * [Learn CPP](https://www.learncpp.com/)
 * [Learn CPP (Very Basic)](https://www.learn-cpp.org/)
 
-We do ask that you don't come into the [Discord server](https://discord.gg/dpp) and expect help for everything C++!
+If you don't understand something then feel free to ask in the [Discord server](https://discord.gg/dpp)... *we don't bite!*
 
 ## Do I need to be an expert in C++ to use this library?
 
