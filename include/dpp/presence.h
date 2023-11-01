@@ -33,84 +33,174 @@ namespace dpp {
  * @brief Presence flags bitmask
  */
 enum presence_flags {
-	/// Desktop: Online
-	p_desktop_online	=	0b00000001,
-	/// Desktop: DND
-	p_desktop_dnd		=	0b00000010,
-	/// Desktop: Idle
-	p_desktop_idle		=	0b00000011,
-	/// Web: Online
-	p_web_online		=	0b00000100,
-	/// Web: DND
-	p_web_dnd		=	0b00001000,
-	/// Web: Idle
-	p_web_idle		=	0b00001100,
-	/// Mobile: Online
-	p_mobile_online		=	0b00010000,
-	/// Mobile: DND
-	p_mobile_dnd		=	0b00100000,
-	/// Mobile: Idle
-	p_mobile_idle		=	0b00110000,
-	/// General: Online
-	p_status_online		=	0b01000000,
-	/// General: DND
-	p_status_dnd		=	0b10000000,
-	/// General: Idle
-	p_status_idle		=	0b11000000
+	/**
+	 * @brief Desktop: Online.
+	 */
+	p_desktop_online = 0b00000001,
+
+	/**
+	 * @brief Desktop: DND.
+	 */
+	p_desktop_dnd = 0b00000010,
+
+	/**
+	 * @brief Desktop: Idle.
+	 */
+	p_desktop_idle = 0b00000011,
+
+	/**
+	 * @brief Web: Online.
+	 */
+	p_web_online = 0b00000100,
+
+	/**
+	 * @brief Web: DND.
+	 */
+	p_web_dnd = 0b00001000,
+
+	/**
+	 * @brief Web: Idle.
+	 */
+	p_web_idle = 0b00001100,
+
+	/**
+	 * @brief Mobile: Online.
+	 */
+	p_mobile_online	= 0b00010000,
+
+	/**
+	 * @brief Mobile: DND.
+	 */
+	p_mobile_dnd = 0b00100000,
+
+	/**
+	 * @brief Mobile: Idle.
+	 */
+	p_mobile_idle = 0b00110000,
+
+	/**
+	 * @brief General: Online.
+	 */
+	p_status_online	= 0b01000000,
+
+	/**
+	 * @brief General: DND.
+	 */
+	p_status_dnd = 0b10000000,
+
+	/**
+	 * @brief General: Idle.
+	 */
+	p_status_idle = 0b11000000
 };
 
 /**
  * @brief Online presence status values
  */
 enum presence_status : uint8_t {
-	/// Offline
-	ps_offline	=	0,
-	/// Online
-	ps_online	=	1,
-	/// DND
-	ps_dnd		=	2,
-	/// Idle
-	ps_idle		=	3,
-	/// Invisible (show as offline)
-	ps_invisible	=	4,
+	/**
+	 * @brief Offline.
+	 */
+	ps_offline = 0,
+
+	/**
+	 * @brief Online.
+	 */
+	ps_online = 1,
+
+	/**
+	 * @brief DND.
+	 */
+	ps_dnd = 2,
+
+	/**
+	 * @brief Idle.
+	 */
+	ps_idle	= 3,
+
+	/**
+	 * @brief Invisible (show as offline).
+	 */
+	ps_invisible = 4,
 };
 
 /**
- * @brief Bit shift for desktop status
+ * @brief Bit shift for desktop status.
  */
 #define PF_SHIFT_DESKTOP	0
-/** Bit shift for web status */
+
+/**
+ * @brief Bit shift for web status.
+ */
 #define PF_SHIFT_WEB		2
-/** Bit shift for mobile status */
+
+/**
+ * @brief Bit shift for mobile status.
+ */
 #define PF_SHIFT_MOBILE		4
-/** Bit shift for main status */
+
+/**
+ * @brief Bit shift for main status.
+ */
 #define PF_SHIFT_MAIN		6
-/** Bit mask for status */
+
+/**
+ * @brief Bit mask for status.
+ */
 #define PF_STATUS_MASK		0b00000011
-/** Bit mask for clearing desktop status */
+
+/**
+ * @brief Bit mask for clearing desktop status.
+ */
 #define PF_CLEAR_DESKTOP	0b11111100
-/** Bit mask for clearing web status */
+
+/**
+ * @brief Bit mask for clearing web status.
+ */
 #define PF_CLEAR_WEB		0b11110011
-/** Bit mask for clearing mobile status */
+
+/**
+ * @brief Bit mask for clearing mobile status.
+ */
 #define PF_CLEAR_MOBILE		0b11001111
-/** Bit mask for clearing main status */
+
+/**
+ * @brief Bit mask for clearing main status.
+ */
 #define PF_CLEAR_STATUS		0b00111111
 
 /**
  * @brief Game types
  */
 enum activity_type : uint8_t {
-	/// "Playing ..."
+	/**
+	 * @brief "Playing ..."
+	 */
 	at_game		=	0,
-	/// "Streaming ..."
+
+	/**
+	 * @brief "Streaming ..."
+	 */
 	at_streaming	=	1,
-	/// "Listening to..."
+
+	/**
+	 * @brief "Listening to..."
+	 */
 	at_listening	=	2,
-	/// "Watching..."
+
+	/**
+	 * @brief "Watching..."
+	 */
 	at_watching	=	3,
-	/// "Emoji..."
+
+	/**
+	 * @brief "Emoji..."
+	 */
 	at_custom	=	4,
-	/// "Competing in..."
+
+	/**
+	 * @brief "Competing in..."
+	 */
 	at_competing	=	5
 };
 
@@ -118,23 +208,49 @@ enum activity_type : uint8_t {
  * @brief Activity types for rich presence
  */
 enum activity_flags {
-	/// In an instance
+	/**
+	 * @brief In an instance.
+	 */
 	af_instance					= 0b000000001,
-	/// Joining
+
+	/**
+	 * @brief Joining.
+	 */
 	af_join						= 0b000000010,
-	/// Spectating
+
+	/**
+	 * @brief Spectating.
+	 */
 	af_spectate					= 0b000000100,
-	/// Sending join request
+
+	/**
+	 * @brief Sending join request.
+	 */
 	af_join_request					= 0b000001000,
-	/// Synchronising
+
+	/**
+	 * @brief Synchronising.
+	 */
 	af_sync						= 0b000010000,
-	/// Playing
+
+	/**
+	 * @brief Playing.
+	 */
 	af_play						= 0b000100000,
-	/// Party privacy friends
+
+	/**
+	 * @brief Party privacy friends.
+	 */
 	af_party_privacy_friends 			= 0b001000000,
-	/// Party privacy voice channel
+
+	/**
+	 * @brief Party privacy voice channel.
+	 */
 	af_party_privacy_voice_channel			= 0b010000000,
-	/// Embedded
+
+	/**
+	 * @brief Embedded.
+	 */
 	af_embedded 					= 0b100000000
 };
 
@@ -143,10 +259,13 @@ enum activity_flags {
  */
 struct DPP_EXPORT activity_button {
 public:
-	/** The text shown on the button (1-32 characters)
+	/**
+	 * @brief The text shown on the button (1-32 characters).
 	 */
 	std::string label;
-	/** The url opened when clicking the button (1-512 characters). It's may be empty
+
+	/**
+	 * @brief The url opened when clicking the button (1-512 characters, can be empty).
 	 *
 	 * @note Bots cannot access the activity button URLs.
 	 */
@@ -161,16 +280,23 @@ public:
  */
 struct DPP_EXPORT activity_assets {
 public:
-	/** The large asset image which usually contain snowflake ID or prefixed image ID
+	/**
+	 * @brief The large asset image which usually contain snowflake ID or prefixed image ID.
 	 */
 	std::string large_image;
-	/** Text displayed when hovering over the large image of the activity
+
+	/**
+	 * @brief Text displayed when hovering over the large image of the activity.
 	 */
 	std::string large_text;
-	/** The small asset image which usually contain snowflake ID or prefixed image ID
+
+	/**
+	 * @brief The small asset image which usually contain snowflake ID or prefixed image ID.
 	 */
 	std::string small_image;
-	/** Text displayed when hovering over the small image of the activity
+
+	/**
+	 * @brief Text displayed when hovering over the small image of the activity.
 	 */
 	std::string small_text;
 
@@ -179,17 +305,22 @@ public:
 };
 
 /**
- * @brief Secrets for Rich Presence joining and spectating
+ * @brief Secrets for Rich Presence joining and spectating.
  */
 struct DPP_EXPORT activity_secrets {
 public:
-	/** The secret for joining a party
+	/**
+	 * @brief The secret for joining a party.
 	 */
 	std::string join;
-	/** The secret for spectating a game
+
+	/**
+	 * @brief The secret for spectating a game.
 	 */
 	std::string spectate;
-	/** The secret for a specific instanced match
+
+	/**
+	 * @brief The secret for a specific instanced match.
 	 */
 	std::string match;
 
@@ -202,13 +333,20 @@ public:
  */
 struct DPP_EXPORT activity_party {
 public:
-	/** The ID of the party
+	/**
+	 * @brief The ID of the party.
 	 */
 	snowflake id;
-	/** The party's current size. Used to show the party's current size
+
+	/**
+	 * @brief The party's current size.
+	 * Used to show the party's current size.
 	 */
 	int32_t current_size;
-	/** The party's maximum size. Used to show the party's maximum size
+
+	/**
+	 * @brief The party's maximum size.
+	 * Used to show the party's maximum size.
 	 */
 	int32_t maximum_size;
 
@@ -221,56 +359,90 @@ public:
  */
 class DPP_EXPORT activity {
 public:
-	/** Name of activity
-	 * e.g. "Fortnite"
+	/**
+	 * @brief Name of activity.
+	 * e.g. "Fortnite", "Mr Boom's Firework Factory", etc.
 	 */
 	std::string name;
-	/** State of activity or the custom user status.
-	 * e.g. "Waiting in lobby"
+
+	/**
+	 * @brief State of activity or the custom user status.
+	 * e.g. "Waiting in lobby".
 	 */
 	std::string state;
-	/** What the player is currently doing
+
+	/**
+	 * @brief What the player is currently doing.
 	 */
 	std::string details;
-	/** Images for the presence and their hover texts
+
+	/**
+	 * @brief Images for the presence and their hover texts.
 	 */
 	activity_assets assets;
-	/** URL.
-	 * Only applicable for certain sites such a YouTube
-	 * Alias: details
+
+	/**
+	 * @brief URL of activity (this is also named details).
+	 *
+	 * @note Only applicable for certain sites such a YouTube
 	 */
 	std::string url;
-	/** The custom buttons shown in the Rich Presence (max 2)
+
+	/**
+	 * @brief The custom buttons shown in the Rich Presence (max 2).
 	 */
 	std::vector<activity_button> buttons;
-	/** The emoji used for the custom status
+
+	/**
+	 * @brief The emoji used for the custom status.
 	 */
 	dpp::emoji emoji;
-	/** Information of the current party if there is one
+
+	/**
+	 * @brief Information of the current party if there is one.
 	 */
 	activity_party party;
-	/** Secrets for rich presence joining and spectating
+
+	/**
+	 * @brief Secrets for rich presence joining and spectating.
 	 */
 	activity_secrets secrets;
-	/** Activity type
+
+	/**
+	 * @brief Activity type.
 	 */
 	activity_type type;
-	/** Time activity was created
+
+	/**
+	 * @brief Time activity was created.
 	 */
 	time_t created_at;
-	/** Start time. e.g. when game was started
+
+	/**
+	 * @brief Start time.
+	 * e.g. when game was started.
 	 */
 	time_t start;
-	/** End time, e.g. for songs on spotify
+
+	/**
+	 * @brief End time.
+	 * e.g. for songs on spotify.
 	 */
 	time_t end;
-	/** Creating application (e.g. a linked account on the user's client)
+
+	/**
+	 * @brief Creating application.
+	 * e.g. a linked account on the user's client.
 	 */
 	snowflake application_id;
-	/** Flags bitmask from dpp::activity_flags
+
+	/**
+	 * @brief Flags bitmask from dpp::activity_flags.
 	 */
 	uint8_t flags;
-	/** Whether or not the activity is an instanced game session
+
+	/**
+	 * @brief Whether or not the activity is an instanced game session.
 	 */
 	bool is_instance;
 
@@ -336,16 +508,26 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
-	/** The user the presence applies to */
-	snowflake	user_id;
+	/**
+	 * @brief The user the presence applies to.
+	 */
+	snowflake user_id;
 
-	/** Guild ID. Apparently, Discord supports this internally but the client doesn't... */
-	snowflake       guild_id;
+	/**
+	 * @brief Guild ID.
+	 *
+	 * @note Apparently, Discord supports this internally, but the client doesn't...
+	 */
+	snowflake guild_id;
 
-	/** Flags bitmask containing dpp::presence_flags */
-	uint8_t		flags;
+	/**
+	 * @brief Flags bitmask containing dpp::presence_flags
+	 */
+	uint8_t	flags;
 
-	/** List of activities */
+	/**
+	 * @brief List of activities.
+	 */
 	std::vector<activity> activities;
 
 	/** Constructor */
@@ -371,27 +553,32 @@ public:
 	/** Destructor */
 	~presence();
 
-	/** The users status on desktop
+	/**
+	 * @brief The users status on desktop
 	 * @return The user's status on desktop
 	 */
 	presence_status desktop_status() const;
 
-	/** The user's status on web
+	/**
+	 * @brief The user's status on web
 	 * @return The user's status on web
 	 */
 	presence_status web_status() const;
 
-	/** The user's status on mobile
+	/**
+	 * @brief The user's status on mobile
 	 * @return The user's status on mobile
 	 */
 	presence_status mobile_status() const;
 
-	/** The user's status as shown to other users
+	/**
+	 * @brief The user's status as shown to other users
 	 * @return The user's status as shown to other users
 	 */
 	presence_status status() const;
 
-	/** Build JSON from this object.
+	/**
+	 * @brief Build JSON from this object.
 	 *
 	 * @note This excludes any part of the presence object that are not valid for websockets and bots,
 	 * and includes websocket opcode 3. You will not get what you expect if you call this on a user's
@@ -403,7 +590,9 @@ public:
 	json to_json(bool with_id = false) const; // Intentional shadow of json_interface, mostly present for documentation
 };
 
-/** A container of presences */
+/**
+ * @brief A container of presences
+ */
 typedef std::unordered_map<snowflake, presence> presence_map;
 
 } // namespace dpp
