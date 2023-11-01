@@ -34,13 +34,24 @@ namespace dpp {
  * @brief Integration types
  */
 enum integration_type {
-	/// Twitch integration
+	/**
+	 * @brief Twitch integration
+	 */
 	i_twitch,
-	/// YouTube integration
+
+	/**
+	 * @brief YouTube integration
+	 */
 	i_youtube,
-	/// Discord integration
+
+	/**
+	 * @brief Discord integration
+	 */
 	i_discord,
-	/// Subscription
+
+	/**
+	 * @brief Subscription
+	 */
 	i_guild_subscription,
 };
 
@@ -48,30 +59,79 @@ enum integration_type {
  * @brief Integration flags
  */
 enum integration_flags {
-	if_enabled 	=	0b00000001,		//!< is this integration enabled
-	if_syncing 	=	0b00000010,		//!< is this integration syncing @warning This is not provided for discord bot integrations.
-	if_emoticons 	=	0b00000100,		//!< whether emoticons should be synced for this integration (twitch only currently) @warning This is not provided for discord bot integrations.
-	if_revoked 	=	0b00001000,		//!< has this integration been revoked @warning This is not provided for discord bot integrations.
-	if_expire_kick 	= 	0b00010000,		//!< kick user when their subscription expires, otherwise only remove the role that is specified by `role_id`. @warning This is not provided for discord bot integrations.
+	/**
+	 * @brief Is this integration enabled?
+	 */
+	if_enabled = 0b00000001,
+
+	/**
+	 * @brief Is this integration syncing?
+	 * @warning This is not provided for discord bot integrations.
+	 */
+	if_syncing = 0b00000010,
+
+	/**
+	 * @brief Whether emoticons should be synced for this integration (twitch only currently).
+	 * @warning This is not provided for discord bot integrations.
+	 */
+	if_emoticons = 0b00000100,
+
+	/**
+	 * @brief Has this integration been revoked?
+	 * @warning This is not provided for discord bot integrations.
+	 */
+	if_revoked = 0b00001000,
+
+	/**
+	 * @brief Kick user when their subscription expires, otherwise only remove the role that is specified by `role_id`.
+	 * @warning This is not provided for discord bot integrations.
+	 */
+	if_expire_kick = 0b00010000,
 };
 
 /**
  * @brief An application that has been integrated
  */
 struct DPP_EXPORT integration_app {
-	snowflake		id;		//!< the id of the app
-	std::string 		name;		//!< the name of the app
-	utility::iconhash 	icon;		//!< the icon hash of the app
-	std::string 		description;	//!< the description of the app
-	class user* 		bot; 		//!< the bot associated with this application
+	/**
+	 * @brief The id of the app.
+	 */
+	snowflake id;
+
+	/**
+	 * @brief The name of the app.
+	 */
+	std::string name;
+
+	/**
+	 * @brief The icon hash of the app.
+	 */
+	utility::iconhash icon;
+
+	/**
+	 * @brief The description of the app
+	 */
+	std::string description;
+
+	/**
+	 * @brief The bot associated with this application.
+	 */
+	class user* bot;
 };
 
 /**
  * @brief The account information for an integration.
  */
 struct DPP_EXPORT integration_account {
-	snowflake		id;		//!< id of the account
-	std::string 		name;		//!< name of the account
+	/**
+	 * @brief ID of the account
+	 */
+	snowflake id;
+
+	/**
+	 * @brief Name of the account.
+	 */
+	std::string name;
 };
 
 /**
@@ -94,17 +154,68 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
-	std::string 			name;			//!< integration name
-	integration_type 		type;			//!< integration type (twitch, youtube, discord, or guild_subscription)
-	uint8_t 			flags;			//!< integration flags from dpp::integration_flags
-	snowflake 			role_id;		//!< id that this integration uses for "subscribers" @warning This is not provided for discord bot integrations.
-	uint32_t 			expire_grace_period;	//!< The grace period (in days) before expiring subscribers @warning This is not provided for discord bot integrations.
-	user 				user_obj;		//!< user for this integration
-	integration_account		account;		//!< integration account information
-	time_t 				synced_at;		//!< when this integration was last synced @warning This is not provided for discord bot integrations.
-	uint32_t 			subscriber_count;	//!< how many subscribers this integration has @warning This is not provided for discord bot integrations.
-	integration_app 		app;			//!< the bot/OAuth2 application for discord integrations
-	std::vector<std::string> 	scopes;			//!< the scopes the application has been authorized for
+	/**
+	 * @brief Integration name.
+	 */
+	std::string name;
+
+	/**
+	 * @brief Integration type (twitch, youtube, discord, or guild_subscription).
+	 */
+	integration_type type;
+
+	/**
+	 * @brief Integration flags from dpp::integration_flags
+	 */
+	uint8_t flags;
+
+	/**
+	 * @brief ID that this integration uses for "subscribers".
+	 *
+	 * @warning This is not provided for discord bot integrations.
+	 */
+	snowflake role_id;
+
+	/**
+	 * @brief The grace period (in days) before expiring subscribers.
+	 *
+	 * @warning This is not provided for discord bot integrations.
+	 */
+	uint32_t expire_grace_period;
+
+	/**
+	 * @brief User for this integration
+	 */
+	user user_obj;
+
+	/**
+	 * @brief Integration account information
+	 */
+	integration_account account;
+
+	/**
+	 * @brief When this integration was last synced.
+	 *
+	 * @warning This is not provided for discord bot integrations.
+	 */
+	time_t synced_at;
+
+	/**
+	 * @brief How many subscribers this integration has.
+	 *
+	 * @warning This is not provided for discord bot integrations.
+	 */
+	uint32_t subscriber_count;
+
+	/**
+	 * @brief The bot/OAuth2 application for discord integrations.
+	 */
+	integration_app app;
+
+	/**
+	 * @brief The scopes the application has been authorized for.
+	 */
+	std::vector<std::string> scopes;
 
 	/** Default constructor */
 	integration();
@@ -158,16 +269,55 @@ protected:
 	connection& fill_from_json_impl(nlohmann::json* j);
 
 public:
-	std::string			id;		//!< id of the connection account
-	std::string			name;		//!< the username of the connection account
-	std::string			type;		//!< the service of the connection (twitch, youtube, discord, or guild_subscription)
-	bool				revoked;	//!< Optional: whether the connection is revoked
-	std::vector<integration>	integrations;	//!< Optional: an array of partial server integrations
-	bool				verified;	//!< whether the connection is verified
-	bool				friend_sync;	//!< whether friend sync is enabled for this connection
-	bool				show_activity;	//!< whether activities related to this connection will be shown in presence updates
-	bool				two_way_link;	//!< Whether this connection has a corresponding third party OAuth2 token
-	bool				visible;	//!< visibility of this connection
+	/**
+	 * @brief ID of the connection account.
+	 */
+	std::string id;
+
+	/**
+	 * @brief the username of the connection account.
+	 */
+	std::string name;
+
+	/**
+	 * @brief the service of the connection (twitch, youtube, discord, or guild_subscription).
+	 */
+	std::string type;
+
+	/**
+	 * @brief Optional: whether the connection is revoked.
+	 */
+	bool revoked;
+
+	/**
+	 * @brief Optional: an array of partial server integrations.
+	 */
+	std::vector<integration> integrations;
+
+	/**
+	 * @brief Whether the connection is verified.
+	 */
+	bool verified;
+
+	/**
+	 * @brief Whether friend sync is enabled for this connection.
+	 */
+	bool friend_sync;
+
+	/**
+	 * @brief Whether activities related to this connection will be shown in presence updates.
+	 */
+	bool show_activity;
+
+	/**
+	 * @brief Whether this connection has a corresponding third party OAuth2 token.
+	 */
+	bool two_way_link;
+
+	/**
+	 * @brief Visibility of this connection.
+	 */
+	bool visible;
 
 	/**
 	 * @brief Construct a new connection object
@@ -175,10 +325,14 @@ public:
 	connection();
 };
 
-/** A group of integrations */
+/**
+ * @brief A group of integrations
+ */
 typedef std::unordered_map<snowflake, integration> integration_map;
 
-/** A group of connections */
+/**
+ * @brief A group of connections
+ */
 typedef std::unordered_map<snowflake, connection> connection_map;
 
 } // namespace dpp

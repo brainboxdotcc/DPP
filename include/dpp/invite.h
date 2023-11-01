@@ -36,9 +36,20 @@ namespace dpp {
  * @brief Invite target types for dpp::invite
  */
 enum invite_target_t : uint8_t {
-	itt_none = 0, //!< Undefined invite target type
-	itt_stream = 1, //!< Stream target type
-	itt_embedded_application = 2, //!< Embedded Application target type
+	/**
+	 * @brief Undefined invite target type.
+	 */
+	itt_none = 0,
+
+	/**
+	 * @brief Stream target type.
+	 */
+	itt_stream = 1,
+
+	/**
+	 * @brief Embedded Application target type.
+	 */
+	itt_embedded_application = 2,
 };
 
 /**
@@ -61,74 +72,119 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
-	/** Invite code
+	/**
+	 * @brief Invite code.
 	 */
 	std::string code;
-	/** Readonly expiration timestamp of this invite or 0 if the invite doesn't expire
+
+	/**
+	 * @brief Readonly expiration timestamp of this invite or 0 if the invite doesn't expire.
 	 * @note Only returned from cluster::invite_get
 	 */
 	time_t expires_at;
-	/** Guild ID this invite is for
+
+	/**
+	 * @brief Guild ID this invite is for.
 	 */
 	snowflake guild_id;
-	/** The partial guild this invite is for. Only filled in retrieved invites
+
+	/**
+	 * @brief The partial guild this invite is for.
+	 * @note Only filled in retrieved invites.
 	 */
 	guild destination_guild;
-	/** Channel ID this invite is for
+
+	/**
+	 * @brief Channel ID this invite is for.
 	 */
 	snowflake channel_id;
-	/** The partial channel this invite is for. Only filled in retrieved invites
+
+	/**
+	 * @brief The partial channel this invite is for.
+	 * @note Only filled in retrieved invites.
 	 */
 	channel destination_channel;
-	/** User ID who created this invite
+
+	/**
+	 * @brief User ID who created this invite.
 	 * @deprecated Use the `inviter` field instead
 	 */
 	snowflake inviter_id;
-	/** User who created this invite
+
+	/**
+	 * @brief User who created this invite.
 	 */
 	user inviter;
-	/** The user ID whose stream to display for this voice channel stream invite
+
+	/**
+	 * @brief The user ID whose stream to display for this voice channel stream invite.
 	 */
 	snowflake target_user_id;
-	/** Target type for this voice channel invite
+
+	/**
+	 * @brief Target type for this voice channel invite.
 	 */
 	invite_target_t target_type;
-	/** Approximate number of online users
+
+	/**
+	 * @brief Approximate number of online users.
 	 * @note Only returned from cluster::invite_get
 	 */
 	uint32_t approximate_presence_count;
-	/** Approximate number of total users online and offline
-	 * @note Only returned from cluster::invite_get
+
+	/**
+	 * @brief Approximate number of total users online and offline.
+	 * @note Only returned from cluster::invite_get.
 	 */
 	uint32_t approximate_member_count;
-	/** Duration (in seconds) after which the invite expires, or 0 for no expiration. Must be between 0 and 604800 (7 days). Defaults to 86400 (1 day)
+
+	/**
+	 * @brief Duration (in seconds) after which the invite expires, or 0 for no expiration. Defaults to 86400 (1 day).
+	 *
+	 * @note Must be between 0 and 604800 (7 days).
 	 */
 	uint32_t max_age;
-	/** Maximum number of uses, or 0 for unlimited. Must be between 0 and 100. Defaults to 0
+
+	/**
+	 * @brief Maximum number of uses, or 0 for unlimited. Defaults to 0.
+	 *
+	 * @note Must be between 0 and 100.
 	 */
 	uint8_t max_uses;
-	/** Whether this invite only grants temporary membership
+
+	/**
+	 * @brief Whether this invite only grants temporary membership.
 	 */
 	bool temporary;
-	/** True if this invite should not replace or "attach to" similar invites
+
+	/**
+	 * @brief True if this invite should not replace or "attach to" similar invites.
 	 */
 	bool unique;
-	/** How many times this invite has been used
+
+	/**
+	 * @brief How many times this invite has been used.
 	 */
 	uint32_t uses;
-	/** The stage instance data if there is a public stage instance in the stage channel this invite is for
+
+	/**
+	 * @note The stage instance data if there is a public stage instance in the stage channel this invite is for.
 	 * @deprecated Deprecated
 	 */
 	stage_instance stage;
-	/** Timestamp at which the invite was created
+
+	/**
+	 * @brief Timestamp at which the invite was created.
 	 */
 	time_t created_at;
 
-	/** Constructor
+	/**
+	 * @brief Constructor.
 	 */
 	invite();
 
-	/** Destructor
+	/**
+	 * @brief Destructor.
 	 */
 	virtual ~invite() = default;
 
@@ -181,7 +237,9 @@ public:
 	invite& set_unique(const bool is_unique);
 };
 
-/** A container of invites */
+/**
+ * @brief A container of invites
+ */
 typedef std::unordered_map<std::string, invite> invite_map;
 
 } // namespace dpp
