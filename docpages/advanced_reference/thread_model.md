@@ -25,7 +25,7 @@ digraph "Thread Model" {
 		"Shard 1" [style=filled, color=4]
 		"Shard 2"
 		"Shard 3..."
-		label = "Shards (Each is a thread, one per 2500 discord guilds)";
+		label = "Shards (Each is a thread, one per 2500 Discord guilds)";
 	}
 
 	subgraph cluster_1 {

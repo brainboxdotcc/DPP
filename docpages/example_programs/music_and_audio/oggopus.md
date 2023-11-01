@@ -2,11 +2,10 @@
 
 This example shows how to stream an Ogg Opus file to a voice channel. This example requires some additional dependencies, namely `libogg` and `opusfile`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+~~~~~~~~~~~~~~~~~~~~~~~~~cpp
 #include <dpp/dpp.h>
 #include <iomanip>
 #include <sstream>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -24,7 +23,7 @@ int main(int argc, char const *argv[])
 
 	dpp::cluster bot("token");
 
-    bot.on_log(dpp::utility::cout_logger());
+	bot.on_log(dpp::utility::cout_logger());
 
 	/* The event is fired when someone issues your commands */
 	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event) {
@@ -186,7 +185,9 @@ int main(int argc, char const *argv[])
 
 You can compile this example using the following command
 
-	c++ /path/to/source.cc -ldpp -lopus -lopusfile -logg -I/usr/include/opus
+```bash
+c++ /path/to/source.cc -ldpp -lopus -lopusfile -logg -I/usr/include/opus
+```
 
 ## Using liboggz
 
@@ -198,4 +199,6 @@ Read more on the [documentation](https://www.xiph.org/oggz/doc/).
 
 You can compile this example using the following command:
 
-	c++ /path/to/source.cc -ldpp -loggz
+```bash
+c++ /path/to/source.cc -ldpp -loggz
+```

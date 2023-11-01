@@ -17,7 +17,7 @@ digraph "Example Directory" {
         
         "guild::connect_member_voice" -> "discord_client::connect_voice";
         
-        label = "This is the front-end of DPP.\n'connect_voice' will now queue a JSON message.";
+        label = "This is the front-end of D++.\n'connect_voice' will now queue a JSON message.";
 	}
 	
 	subgraph cluster_1 {

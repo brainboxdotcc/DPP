@@ -4,37 +4,45 @@
 
 ## 1. Build Source Code
 
-    cmake -B ./build
-    cmake --build ./build -j8
+```bash
+cmake -B ./build
+cmake --build ./build -j8
+```
     
 Replace the number after `-j` with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
 ## 2. Install to /usr/local/include and /usr/local/lib
 
-    cd build; sudo make install
+```bash
+cd build
+sudo make install
+```
 
-## 3. Installation to a different directory
+## 3. Installation to a Different Directory
 
-If you want to install the library, its dependencies and header files to a different directory, specify this directory when running `cmake`:
+If you want to install the library, its dependencies, and header files to a different directory, specify this directory when running `cmake`:
 
-    cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
+```bash
+cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
+```
 
 Then once the build is complete, run `make install` to install to the location you specified.
 
-## 4. Using the library
+## 4. Using the Library
 
 Once installed to the `/usr/local` directory, you can make use of the library in standalone programs simply by including it and linking to it:
 
-    g++ -std=c++17 mydppbot.cpp -o dppbot -ldpp
+```bash
+g++ -std=c++17 mydppbot.cpp -o dppbot -ldpp
+```
 
 The important flags in this command-line are:
 
- * `-std=c++17` - Required to compile the headers
-  * `mydppbot.cpp` - Your source code
- * `dppbot` - The name of the executable to make
+* `-std=c++17` - Required to compile the headers
+* `-ldpp` - Link to libdpp.so
+* `mydppbot.cpp` - Your source code
+* `dppbot` - The name of the executable to make
 
 \include{doc} install_prebuilt_footer.dox
 
 **Have fun!**
-
-

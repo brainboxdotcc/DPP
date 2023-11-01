@@ -1,20 +1,16 @@
-\page attach-file Attaching a file to a message
+\page attach-file Attaching a File to a Message
 
-Attached files must be locally stored.
+To attach a local file to an message, you can use dpp::utility::read_file. It's a helper function from D++ that allows you to read the file's content and sent it to discord.
 
-To attach a file to a message, you can upload a local image.
-
-D++ has this helper function to read a file: dpp::utility::read_file.
-
-An example program:
+An example of this:
 
 \include{cpp} attachments1.cpp
 
-Attachments via an url aren't possible. But there's a workaround for. You can download the file and then attach it to the message.
+Attachments via URL aren't possible. But there's a workaround for this! You can download the file and then attach it to the message.
 
-To make requests, D++ also has a helper function: dpp::cluster::request.
+Amazingly, D++ also has a function for this! You can use dpp::cluster::request to make HTTP requests, allowing you to go ahead and pull the content from a URL.
 
-The following example program shows how to request a file and attach it to a message.
+The following example program shows how to request a file and attach it to a message:
 
 \include{cpp} attachments2.cpp
 

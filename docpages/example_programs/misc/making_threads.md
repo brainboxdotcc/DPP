@@ -1,4 +1,4 @@
-\page making_threads Creating and interacting with threads
+\page making_threads Creating and Interacting with Threads
 
 A new feature added to Discord recently is `Threads`, these allow you to break off a message into a different "channel", without creating a whole new channel. There are also other types of "thread channels", one example being a `forums channel`. This type of channel only contains threads, meaning you can't send messages in it so if you want to make one of them, be careful about trying to send a message in it!
 
