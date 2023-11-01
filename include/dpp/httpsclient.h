@@ -96,6 +96,7 @@ struct multipart_content {
 	 * @brief Multipart body
 	 */
 	std::string body;
+
 	/**
 	 * @brief MIME type
 	 */
@@ -111,14 +112,17 @@ struct http_connect_info {
 	 * @brief True if the connection should be SSL
 	 */
 	bool is_ssl;
+
 	/**
 	 * @brief The request scheme, e.g. 'https' or 'http'
 	 */
 	std::string scheme;
+
 	/**
 	 * @brief The request hostname part, e.g. 'discord.com'
 	 */
 	std::string hostname;
+
 	/**
 	 * @brief The port number, either determined from the scheme,
 	 * or from the part of the hostname after a colon ":" character
@@ -130,8 +134,7 @@ struct http_connect_info {
  * @brief Implements a HTTPS socket client based on the SSL client.
  * @note plaintext HTTP without SSL is also supported via a "downgrade" setting
  */
-class DPP_EXPORT https_client : public ssl_client
-{
+class DPP_EXPORT https_client : public ssl_client {
 	/**
 	 * @brief Current connection state
 	 */
@@ -215,7 +218,6 @@ class DPP_EXPORT https_client : public ssl_client
 	bool do_buffer(std::string& buffer);
 
 protected:
-
 	/**
 	 * @brief Start the connection
 	 */
@@ -228,7 +230,6 @@ protected:
 	http_state get_state();
 
 public:
-
 	/**
 	 * @brief Connect to a specific HTTP(S) server and complete a request.
 	 * 
