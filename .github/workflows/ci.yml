@@ -91,6 +91,7 @@ jobs:
           - { arch: 'amd64', concurrency: 2, os: ubuntu-22.04, package: g++-10, cpp-version: g++-10, cmake-flags: '', cpack: 'yes' }
           - { arch: 'amd64', concurrency: 2, os: ubuntu-20.04, package: g++-9, cpp-version: g++-9, cmake-flags: '', cpack: 'no' }
           - { arch: 'arm7hf', concurrency: 4, os: [self-hosted, linux, ARM], package: g++-12, cpp-version: g++-12, cmake-flags: '', cpack: 'yes' }
+          - { arch: 'arm64', concurrency: 4, os: [self-hosted, linux, ARM64], package: g++-12, cpp-version: g++-12, cmake-flags: '', cpack: 'yes' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@1b05615854632b887b69ae1be8cbefe72d3ae423 # v2.6.0
@@ -230,8 +231,8 @@ jobs:
       fail-fast: false
       matrix:
         cfg:
-          - {name: "ARM64", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake}
           # Replaced with self-hosted runner
+          # - {name: "ARM64", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARM64ToolChain.cmake}
           # - {name: "ARMv7 HF", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv7ToolChain.cmake}
           - {name: "Linux x86", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/LINUXx86ToolChain.cmake -DBUILD_VOICE_SUPPORT=OFF}
           - {name: "ARMv6", os: ubuntu-20.04, cmake-options: -DCMAKE_TOOLCHAIN_FILE=cmake/ARMv6ToolChain.cmake}
