@@ -1,4 +1,4 @@
-\page setting_status Setting the bot's status
+\page setting_status Setting the Bot's Status
 
 A bot status is pretty cool, and it'd be cooler if you knew how to do it! This tutorial will cover how to set the bot status to say `Playing games!`, as well as covering how to set the status to the amount of guilds every two minutes.
 

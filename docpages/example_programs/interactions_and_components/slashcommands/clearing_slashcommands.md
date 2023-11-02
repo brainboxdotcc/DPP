@@ -1,4 +1,4 @@
-\page clearing_slashcommands Clearing registered commands
+\page clearing_slashcommands Clearing Registered Commands
 
 After a while of creating commands, you may start to wonder "hm, how can I clear these?". Well, this tutorial covers it! All you have to do is simply call dpp::cluster::global_bulk_command_delete or dpp::cluster::guild_bulk_command_delete.
 

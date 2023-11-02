@@ -1,4 +1,4 @@
-\page commandhandler Using a command handler object
+\page commandhandler Using a Command Handler Object
 
 If you have many commands in your bot, and want to handle commands from multiple sources, you should consider instantiating a dpp::commandhandler object. This object can be used to automatically route
 commands and their parameters to functions in your program. A simple example of using this object to route commands is shown below, and will

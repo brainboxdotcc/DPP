@@ -1,6 +1,6 @@
 \page slashcommands-menu Slash commands
 
-Here you will find examples on how to use slash commands, subcommands, and different types or parameters.
+Here, you will find examples on how to use slash commands, subcommands, and different types or parameters.
 
 * \subpage slashcommands "Using Slash Commands"
 * \subpage clearing_slashcommands

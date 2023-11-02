@@ -135,7 +135,8 @@
 		"STDCORO",
 		"NOMINMAX",
 		"sku",
-		"skus"
+		"skus",
+		"Codecademy"
 	],
 	"flagWords": [
 		"hte"

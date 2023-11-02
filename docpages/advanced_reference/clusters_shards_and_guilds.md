@@ -1,6 +1,6 @@
-\page clusters-shards-guilds Clusters, Shards and Guilds
+\page clusters-shards-guilds Clusters, Shards, and Guilds
 
-D++ takes a three-tiered highly scalable approach to bots, with three levels known as Clusters, Shards and Guilds as documented below.
+D++ takes a three-tiered highly scalable approach to bots, with three levels known as Clusters, Shards, and Guilds as documented below.
 
 \dot
 digraph "Clusters, Shards and Guilds" {
