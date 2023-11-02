@@ -64,9 +64,6 @@ int main(int argc, char const *argv[]) {
 
 			ogg_sync_init(&oy);
 
-			int eos = 0;
-			int i;
-
 			buffer = ogg_sync_buffer(&oy, sz);
 			fread(buffer, 1, sz, fd);
 
