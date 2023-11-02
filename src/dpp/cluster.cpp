@@ -63,9 +63,9 @@ template<typename T> std::function<void(const T&)> make_intent_warning(cluster* 
 template <build_type BuildType>
 bool validate_configuration() {
 #ifdef _DEBUG
-	constexpr build_type expected = build_type::debug;
+	[[maybe_unused]] constexpr build_type expected = build_type::debug;
 #else
-	constexpr build_type expected = build_type::release;
+	[[maybe_unused]] constexpr build_type expected = build_type::release;
 #endif
 #ifdef _WIN32
 	if constexpr (BuildType != build_type::universal && BuildType != expected) {

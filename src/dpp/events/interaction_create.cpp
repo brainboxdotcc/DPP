@@ -37,23 +37,31 @@ void fill_options(dpp::json option_json, std::vector<dpp::command_option>& optio
 		opt.type = (dpp::command_option_type)int8_not_null(&o, "type");
 		switch (opt.type) {
 			case co_boolean:
-				opt.value = o.at("value").get<bool>();
+				if(o.at("value").is_boolean()) {
+					opt.value = o.at("value").get<bool>();
+				}
 				break;
 			case co_channel:
 			case co_role:
-			case co_user:
 			case co_attachment:
+			case co_user:
 			case co_mentionable:
 				opt.value = dpp::snowflake(snowflake_not_null(&o, "value"));
 				break;
 			case co_integer:
-				opt.value = o.at("value").get<int64_t>();
+				if(o.at("value").is_number_integer()) {
+					opt.value = o.at("value").get<int64_t>();
+				}
 				break;
 			case co_string:
-				opt.value = o.at("value").get<std::string>();
+				if(o.at("value").is_string()) {
+					opt.value = o.at("value").get<std::string>();
+				}
 				break;
 			case co_number:
-				opt.value = o.at("value").get<double>();
+				if(o.at("value").is_number_float()) {
+					opt.value = o.at("value").get<double>();
+				}
 				break;
 			case co_sub_command:
 			case co_sub_command_group:

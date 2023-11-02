@@ -1,4 +1,4 @@
-\page default_select_value Setting default values on select menus.
+\page default_select_value Setting Default Values on Select Menus.
 
 This tutorial will cover how to set the default value for a select menu (that isn't a text select menu)!
 
