@@ -521,7 +521,9 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 	if (j.contains("value") && !j.at("value").is_null()) {
 		switch (cdo.type) {
 			case co_boolean:
-				cdo.value = j.at("value").get<bool>();
+				if(j.at("value").is_boolean()) {
+					cdo.value = j.at("value").get<bool>();
+				}
 				break;
 			case co_channel:
 			case co_role:
@@ -531,13 +533,19 @@ void from_json(const nlohmann::json& j, command_data_option& cdo) {
 				cdo.value = dpp::snowflake(snowflake_not_null(&j, "value"));
 				break;
 			case co_integer:
-				cdo.value = j.at("value").get<int64_t>();
+				if(j.at("value").is_number_integer()) {
+					cdo.value = j.at("value").get<int64_t>();
+				}
 				break;
 			case co_string:
-				cdo.value = j.at("value").get<std::string>();
+				if(j.at("value").is_string()) {
+					cdo.value = j.at("value").get<std::string>();
+				}
 				break;
 			case co_number:
-				cdo.value = j.at("value").get<double>();
+				if(j.at("value").is_number_float()) {
+					cdo.value = j.at("value").get<double>();
+				}
 				break;
 			case co_sub_command:
 			case co_sub_command_group:
