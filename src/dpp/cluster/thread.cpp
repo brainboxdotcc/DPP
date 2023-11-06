@@ -111,6 +111,17 @@ void cluster::thread_create_in_forum(const std::string& thread_name, snowflake c
 			j["auto_archive_duration"] = 10080;
 			break;
 	}
+
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : msg.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
 	this->post_rest_multipart(API_PATH "/channels", std::to_string(channel_id), "threads", m_post, j.dump(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			auto t = thread().fill_from_json(&j);
@@ -122,7 +133,7 @@ void cluster::thread_create_in_forum(const std::string& thread_name, snowflake c
 			}
 			callback(confirmation_callback_t(this, t, http));
 		}
-	}, msg.filename, msg.filecontent, msg.filemimetype);
+	}, file_names, file_contents, file_mimetypes);
 }
 
 void cluster::thread_create(const std::string& thread_name, snowflake channel_id, uint16_t auto_archive_duration, channel_type thread_type, bool invitable, uint16_t rate_limit_per_user, command_completion_event_t callback)
