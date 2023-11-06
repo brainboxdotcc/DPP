@@ -45,17 +45,17 @@ enum emoji_flags : uint8_t {
 	/**
 	 * @brief Managed (introduced by application)
 	 */
-	e_managed =        0b00000010,
+	e_managed = 0b00000010,
 
 	/**
 	 * @brief Animated emoji.
 	 */
-	e_animated =       0b00000100,
+	e_animated = 0b00000100,
 
 	/**
 	 * @brief Available (false if the guild doesn't meet boosting criteria, etc)
 	 */
-	e_available =      0b00001000,
+	e_available = 0b00001000,
 };
 
 /**

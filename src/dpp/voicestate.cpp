@@ -32,12 +32,12 @@ voicestate::voicestate() : shard(nullptr), guild_id(0), channel_id(0), user_id(0
 }
 
 voicestate& voicestate::fill_from_json_impl(nlohmann::json* j) {
-	guild_id = snowflake_not_null(j, "guild_id");
-	channel_id = snowflake_not_null(j, "channel_id");
-	user_id = snowflake_not_null(j, "user_id");
-	session_id = string_not_null(j, "session_id");
-	request_to_speak = ts_not_null(j, "request_to_speak_timestamp");
-	flags = 0;
+	set_snowflake_not_null(j, "guild_id", guild_id);
+	set_snowflake_not_null(j, "channel_id", channel_id);
+	set_snowflake_not_null(j, "user_id", user_id);
+	set_string_not_null(j, "session_id", session_id);
+	set_ts_not_null(j, "request_to_speak_timestamp", request_to_speak);
+
 	if (bool_not_null(j, "deaf")) {
 		flags |= vs_deaf;
 	}
