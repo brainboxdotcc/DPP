@@ -136,19 +136,39 @@ void cluster::guild_commands_get(snowflake guild_id, command_completion_event_t 
 }
 
 void cluster::interaction_response_create(snowflake interaction_id, const std::string &token, const interaction_response &r, command_completion_event_t callback) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : r.msg.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
 	this->post_rest_multipart(API_PATH "/interactions", std::to_string(interaction_id), utility::url_encode(token) + "/callback", m_post, r.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, r.msg.filename, r.msg.filecontent, r.msg.filemimetype);
+	}, file_names, file_contents, file_mimetypes);
 }
 
 void cluster::interaction_response_edit(const std::string &token, const message &m, command_completion_event_t callback) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : m.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
 	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), utility::url_encode(token) + "/messages/@original", m_patch, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, file_names, file_contents, file_mimetypes);
 }
 
 void cluster::interaction_response_get_original(const std::string &token, command_completion_event_t callback) {
@@ -156,19 +176,39 @@ void cluster::interaction_response_get_original(const std::string &token, comman
 }
 
 void cluster::interaction_followup_create(const std::string &token, const message &m, command_completion_event_t callback) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : m.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
 	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), utility::url_encode(token), m_post, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, file_names, file_contents, file_mimetypes);
 }
 
 void cluster::interaction_followup_edit_original(const std::string &token, const message &m, command_completion_event_t callback) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : m.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
 	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), utility::url_encode(token) + "/messages/@original", m_patch, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, file_names, file_contents, file_mimetypes);
 }
 
 void cluster::interaction_followup_delete(const std::string &token, command_completion_event_t callback) {
@@ -176,11 +216,21 @@ void cluster::interaction_followup_delete(const std::string &token, command_comp
 }
 
 void cluster::interaction_followup_edit(const std::string &token, const message &m, command_completion_event_t callback) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : m.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
 	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(me.id), utility::url_encode(token) + "/messages/" + std::to_string(m.id), m_patch, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, confirmation(), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, file_names, file_contents, file_mimetypes);
 }
 
 void cluster::interaction_followup_get(const std::string &token, snowflake message_id, command_completion_event_t callback) {
