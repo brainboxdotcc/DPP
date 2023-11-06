@@ -37,9 +37,20 @@ namespace dpp {
  * @brief Defines types of webhook
  */
 enum webhook_type {
-	w_incoming = 1,		//!< Incoming webhook
-	w_channel_follower = 2,	//!< Channel following webhook
-	w_application = 3	//!< Application webhooks for interactions.
+	/**
+	 * @brief Incoming webhook.
+	 */
+	w_incoming = 1,
+
+	/**
+	 * @brief Channel following webhook.
+	 */
+	w_channel_follower = 2,
+
+	/**
+	 * @brief Application webhooks for interactions.
+	 */
+	w_application = 3
 };
 
 /**
@@ -73,18 +84,21 @@ public:
 
 	/**
 	 * @brief The guild id this webhook is for.
+	 *
 	 * @note This field is optional, and may also be empty.
 	 */
 	snowflake guild_id;
 
 	/**
 	 * @brief The channel id this webhook is for.
+	 *
 	 * @note This may be empty.
 	 */
 	snowflake channel_id;
 
 	/**
 	 * @brief The user this webhook was created by.
+	 *
 	 * @note This field is optional.
 	 * @warning This is not returned when getting a webhook with its token!
 	 */
@@ -92,36 +106,42 @@ public:
 
 	/**
 	 * @brief The default name of the webhook.
+	 *
 	 * @note This may be empty.
 	 */
 	std::string name;
 
 	/**
-	 * @brief The default avatar of the webhook
+	 * @brief The default avatar of the webhook.
+	 *
 	 * @note This may be empty.
 	 */
 	utility::iconhash avatar;
 
 	/**
 	 * @brief The secure token of the webhook (returned for Incoming Webhooks).
+	 *
 	 * @note This field is optional.
 	 */
 	std::string token;
 
 	/**
 	 * @brief The bot/OAuth2 application that created this webhook.
+	 *
 	 * @note This may be empty.
 	 */
 	snowflake application_id;
 
 	/**
 	 * @brief The guild of the channel that this webhook is following (only for Channel Follower Webhooks).
+	 *
 	 * @warning This will be absent if the webhook creator has since lost access to the guild where the followed channel resides!
 	 */
 	guild source_guild;
 
 	/**
 	 * @brief The channel that this webhook is following (only for Channel Follower Webhooks).
+	 *
 	 * @warning This will be absent if the webhook creator has since lost access to the guild where the followed channel resides!
 	 */
 	channel	source_channel;
@@ -133,6 +153,7 @@ public:
 
 	/**
 	 * @brief base64 encoded image data if uploading a new image.
+	 *
 	 * @warning You should only ever read data from here. If you want to set the data, use dpp::webhook::load_image.
 	 */
 	std::string image_data;

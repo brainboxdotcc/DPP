@@ -32,53 +32,126 @@ namespace dpp {
  * @brief Various bitmask flags used to represent information about a dpp::user
  */
 enum user_flags : uint32_t {
-	/// User is a bot
-	u_bot =				0b00000000000000000000000000000001,
-	/// User is a system user (Clyde!)
-	u_system =			0b00000000000000000000000000000010,
-	/// User has multi-factor authentication enabled
-	u_mfa_enabled =			0b00000000000000000000000000000100,
-	/// User is verified (verified email address)
-	u_verified =			0b00000000000000000000000000001000,
-	/// User has full nitro
-	u_nitro_full =			0b00000000000000000000000000010000,
-	/// User has nitro classic
-	u_nitro_classic =		0b00000000000000000000000000100000,
-	/// User is discord staff
-	u_discord_employee =		0b00000000000000000000000001000000,
-	/// User owns a partnered server
-	u_partnered_owner =		0b00000000000000000000000010000000,
-	/// User is a member of hypesquad events
-	u_hypesquad_events =		0b00000000000000000000000100000000,
-	/// User has BugHunter level 1
-	u_bughunter_1 =			0b00000000000000000000001000000000,
-	/// User is a member of House Bravery
-	u_house_bravery =		0b00000000000000000000010000000000,
-	/// User is a member of House Brilliance
-	u_house_brilliance =		0b00000000000000000000100000000000,
-	/// User is a member of House Balance
-	u_house_balance =		0b00000000000000000001000000000000,
-	/// User is an early supporter
-	u_early_supporter =		0b00000000000000000010000000000000,
-	/// User is a team user
-	u_team_user =			0b00000000000000000100000000000000,
-	/// User is has Bug Hunter level 2
-	u_bughunter_2 =			0b00000000000000001000000000000000,
-	/// User is a verified bot
-	u_verified_bot =		0b00000000000000010000000000000000,
-	/// User has the Early Verified Bot Developer badge
-	u_verified_bot_dev =	 	0b00000000000000100000000000000000,
-	/// User's icon is animated
-	u_animated_icon =		0b00000000000001000000000000000000,
-	/// User is a certified moderator
-	u_certified_moderator =		0b00000000000010000000000000000000,
-	/// User is a bot using HTTP interactions (shows online even when not connected to a websocket)
-	u_bot_http_interactions =	0b00000000000100000000000000000000,
-	/// User has nitro basic
-	u_nitro_basic = 			0b00000000001000000000000000000000,
-	/// User has the active developer badge
-	u_active_developer =		0b00000000010000000000000000000000,
-	/// User's banner is animated
+	/**
+	 * @brief User is a bot.
+	 */
+	u_bot =	0b00000000000000000000000000000001,
+
+	/**
+	 * @brief User is a system user (Clyde!).
+	 */
+	u_system = 0b00000000000000000000000000000010,
+
+	/**
+	 * @brief User has multi-factor authentication enabled.
+	 */
+	u_mfa_enabled = 0b00000000000000000000000000000100,
+
+	/**
+	 * @brief User is verified (verified email address).
+	 */
+	u_verified = 0b00000000000000000000000000001000,
+
+	/**
+	 * @brief User has full nitro.
+	 */
+	u_nitro_full = 0b00000000000000000000000000010000,
+
+	/**
+	 * @brief User has nitro classic.
+	 */
+	u_nitro_classic = 0b00000000000000000000000000100000,
+
+	/**
+	 * @brief User is discord staff.
+	 */
+	u_discord_employee = 0b00000000000000000000000001000000,
+
+	/**
+	 * @brief User owns a partnered server.
+	 */
+	u_partnered_owner = 0b00000000000000000000000010000000,
+
+	/**
+	 * @brief User is a member of hypesquad events.
+	 */
+	u_hypesquad_events = 0b00000000000000000000000100000000,
+
+	/**
+	 * @brief User has BugHunter level 1.
+	 */
+	u_bughunter_1 =	0b00000000000000000000001000000000,
+
+	/**
+	 * @brief User is a member of House Bravery.
+	 */
+	u_house_bravery = 0b00000000000000000000010000000000,
+
+	/**
+	 * @brief User is a member of House Brilliance.
+	 */
+	u_house_brilliance = 0b00000000000000000000100000000000,
+
+	/**
+	 * @brief User is a member of House Balance.
+	 */
+	u_house_balance = 0b00000000000000000001000000000000,
+
+	/**
+	 * @brief User is an early supporter.
+	 */
+	u_early_supporter = 0b00000000000000000010000000000000,
+
+	/**
+	 * @brief User is a team user.
+	 */
+	u_team_user = 0b00000000000000000100000000000000,
+
+	/**
+	 * @brief User is has Bug Hunter level 2.
+	 */
+	u_bughunter_2 =	0b00000000000000001000000000000000,
+
+	/**
+	 * @brief User is a verified bot.
+	 */
+	u_verified_bot = 0b00000000000000010000000000000000,
+
+	/**
+	 * @brief User has the Early Verified Bot Developer badge.
+	 */
+	u_verified_bot_dev = 0b00000000000000100000000000000000,
+
+	/**
+	 * @brief User's icon is animated.
+	 */
+	u_animated_icon = 0b00000000000001000000000000000000,
+
+	/**
+	 * @brief User is a certified moderator.
+	 */
+	u_certified_moderator =	0b00000000000010000000000000000000,
+
+	/**
+	 * @brief User is a bot using HTTP interactions.
+	 *
+	 * @note shows online even when not connected to a websocket.
+	 */
+	u_bot_http_interactions = 0b00000000000100000000000000000000,
+
+	/**
+	 * @brief User has nitro basic.
+	 */
+	u_nitro_basic = 0b00000000001000000000000000000000,
+
+	/**
+	 * @brief User has the active developer badge.
+	 */
+	u_active_developer = 0b00000000010000000000000000000000,
+
+	/**
+	 * @brief User's banner is animated.
+	 */
 	u_animated_banner =			0b00000000100000000000000000000000,
 };
 
@@ -104,23 +177,42 @@ protected:
 	virtual json to_json_impl(bool with_id = true) const;
 
 public:
-	/** Discord username */
+	/**
+	 * @brief Discord username.
+	 */
 	std::string username;
-	/** Global display name */
+
+	/**
+	 * @brief Global display name.
+	 */
 	std::string global_name;
-	/** Avatar hash */
+
+	/**
+	 * @brief Avatar hash.
+	 */
 	utility::iconhash avatar;
-	/** Avatar decoration hash */
+
+	/**
+	 * @brief Avatar decoration hash.
+	 */
 	utility::iconhash avatar_decoration;
-	/** Flags built from a bitmask of values in dpp::user_flags */
+
+	/**
+	 * @brief Flags built from a bitmask of values in dpp::user_flags.
+	 */
 	uint32_t flags;
-	/** Discriminator (aka tag), 4 digits usually displayed with leading zeroes.
+
+	/**
+	 * @brief Discriminator (aka tag), 4 digits usually displayed with leading zeroes.
 	 *
 	 * @note To print the discriminator with leading zeroes, use format_username().
 	 * 0 for users that have migrated to the new username format.
 	 */
 	uint16_t discriminator;
-	/** Reference count of how many guilds this user is in */
+
+	/**
+	 * @brief Reference count of how many guilds this user is in.
+	 */
 	uint8_t refcount;
 
 	/**
@@ -134,10 +226,10 @@ public:
 	virtual ~user() = default;
 
 	/**
-	* @brief Create a mentionable user.
+	 * @brief Create a mentionable user.
 	 * @param id The ID of the user.
 	 * @return std::string The formatted mention of the user.
-	*/
+	 */
 	static std::string get_mention(const snowflake& id);
 
 	/**
@@ -191,30 +283,35 @@ public:
 	 * @return true if has active developer
 	 */
 	bool is_active_developer() const;
+
 	/**
 	 * @brief User is a bot
 	 *
 	 * @return True if the user is a bot
 	 */
 	bool is_bot() const;
+
 	/**
 	 * @brief User is a system user (Clyde)
 	 *
 	 * @return true  if user is a system user
 	 */
 	bool is_system() const;
+
 	/**
 	 * @brief User has multi-factor authentication enabled
 	 *
 	 * @return true if multi-factor is enabled
 	 */
 	bool is_mfa_enabled() const;
+
 	/**
 	 * @brief Return true if user has verified account
 	 *
 	 * @return true if verified
 	 */
 	bool is_verified() const;
+
 	/**
 	 * @brief Return true if user has full nitro.
 	 * This is mutually exclusive with full nitro.
@@ -222,6 +319,7 @@ public:
 	 * @return true if user has full nitro
 	 */
 	bool has_nitro_full() const;
+
 	/**
 	 * @brief Return true if user has nitro classic.
 	 * This is mutually exclusive with nitro classic.
@@ -229,6 +327,7 @@ public:
 	 * @return true if user has nitro classic
 	 */
 	bool has_nitro_classic() const;
+
 	/**
 	 * @brief Return true if user has nitro basic.
 	 * This is mutually exclusive with nitro basic.
@@ -236,84 +335,98 @@ public:
 	 * @return true if user has nitro basic
 	 */
 	bool has_nitro_basic() const;
+
 	/**
 	 * @brief Return true if user is a discord employee
 	 *
 	 * @return true if user is discord staff
 	 */
 	bool is_discord_employee() const;
+
 	/**
 	 * @brief Return true if user owns a partnered server
 	 *
 	 * @return true if user has partnered server
 	 */
 	bool is_partnered_owner() const;
+
 	/**
 	 * @brief Return true if user has hypesquad events
 	 *
 	 * @return true if has hypesquad events
 	 */
 	bool has_hypesquad_events() const;
+
 	/**
 	 * @brief Return true if user has the bughunter level 1 badge
 	 *
 	 * @return true if has bughunter level 1
 	 */
 	bool is_bughunter_1() const;
+
 	/**
 	 * @brief Return true if user is in house bravery
 	 *
 	 * @return true if in house bravery
 	 */
 	bool is_house_bravery() const;
+
 	/**
 	 * @brief Return true if user is in house brilliance
 	 *
 	 * @return true if in house brilliance
 	 */
 	bool is_house_brilliance() const;
+
 	/**
 	 * @brief Return true if user is in house balance
 	 *
 	 * @return true if in house brilliance
 	 */
 	bool is_house_balance() const;
+
 	/**
 	 * @brief Return true if user is an early supporter
 	 *
 	 * @return true if early supporter
 	 */
 	bool is_early_supporter() const;
+
 	/**
 	 * @brief Return true if user is a team user
 	 *
 	 * @return true if a team user
 	 */
 	bool is_team_user() const;
+
 	/**
 	 * @brief Return true if user has the bughunter level 2 badge
 	 *
 	 * @return true if has bughunter level 2
 	 */
 	bool is_bughunter_2() const;
+
 	/**
 	 * @brief Return true if user has the verified bot badge
 	 *
 	 * @return true if verified bot
 	 */
 	bool is_verified_bot() const;
+
 	/**
 	 * @brief Return true if user is an early verified bot developer
 	 *
 	 * @return true if verified bot developer
 	 */
 	bool is_verified_bot_dev() const;
+
 	/**
 	 * @brief Return true if user is a certified moderator
 	 *
 	 * @return true if certified moderator
 	 */
 	bool is_certified_moderator() const;
+
 	/**
 	 * @brief Return true if user is a bot which exclusively uses HTTP interactions.
 	 * Bots using HTTP interactions are always considered online even when not connected to a websocket.
@@ -321,6 +434,7 @@ public:
 	 * @return true if is a http interactions only bot
 	 */
 	bool is_bot_http_interactions() const;
+
 	/**
 	 * @brief Return true if user has an animated icon
 	 *
@@ -332,6 +446,9 @@ public:
 	 * @brief Format a username into user\#discriminator
 	 * 
 	 * For example Brain#0001
+	 *
+	 * @note This will, most often, return something like Brain#0000 due to discriminators slowly being removed.
+	 * Some accounts, along with most bots, still have discriminators, so they will still show as Bot#1234.
 	 * 
 	 * @return Formatted username and discriminator
 	 */
@@ -362,11 +479,37 @@ protected:
 	virtual json to_json_impl(bool with_id = true) const;
 
 public:
-	std::string		locale;		//!< Optional: the user's chosen language option identify
-	std::string		email;		//!< Optional: the user's email  email (may be empty)
-	utility::iconhash	banner;		//!< Optional: the user's banner hash    identify (may be empty)
-	uint32_t		accent_color;	//!< Optional: the user's banner color encoded as an integer representation of hexadecimal color code    identify (may be empty)
-	bool			verified;	//!< Optional: whether the email on this account has been verified       email
+	/**
+	 * @brief Optional: The user's chosen language option identify.
+	 */
+	std::string locale;
+
+	/**
+	 * @brief Optional: The user's email.
+	 *
+	 * @note This may be empty.
+	 */
+	std::string email;
+
+	/**
+	 * @brief Optional: The user's banner hash identify.
+	 *
+	 * @note This may be empty.
+	 */
+	utility::iconhash banner;
+
+	/**
+	 * @brief Optional: The user's banner color encoded as an integer representation of hexadecimal color code identify.
+	 *
+	 * @note This may be empty.
+	 */
+	uint32_t accent_color;
+
+
+	/**
+	 * @brief Optional: Whether the email on this account has been verified email.
+	 */
+	bool verified;
 
 	/**
 	 * @brief Construct a new user identified object
@@ -431,7 +574,9 @@ void from_json(const nlohmann::json& j, user& u);
  */
 void from_json(const nlohmann::json& j, user_identified& u);
 
-/** A group of users */
+/**
+ * @brief A group of users.
+ */
 typedef std::unordered_map<snowflake, user> user_map;
 
 } // namespace dpp

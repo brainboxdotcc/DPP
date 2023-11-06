@@ -3,9 +3,11 @@
 namespace dpp {
 
 /**
- * The unicode emojis in this namespace are auto-generated from https://raw.githubusercontent.com/ArkinSolomon/discord-emoji-converter/master/emojis.json
+ * @brief Emoji unicodes.
  *
- * If you want to use this, you have to pull the header in separately. e.g.
+ * @note The unicode emojis in this namespace are auto-generated from https://raw.githubusercontent.com/ArkinSolomon/discord-emoji-converter/master/emojis.json
+ *
+ * @warning If you want to use this, you have to pull the header in separately. For example:
  * ```cpp
  * #include <dpp/dpp.h>
  * #include <dpp/unicode_emoji.h>

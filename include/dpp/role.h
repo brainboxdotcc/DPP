@@ -30,21 +30,51 @@
 
 namespace dpp {
 
-/** Various flags related to dpp::role */
+/**
+ * @brief Various flags related to dpp::role
+ */
 enum role_flags : uint8_t {
-	r_hoist =		0b00000001, //!< Hoisted role (if the role is pinned in the user listing)
-	r_managed =		0b00000010, //!< Managed role (introduced by a bot or application)
-	r_mentionable =		0b00000100, //!< Whether this role is mentionable with a ping
-	r_premium_subscriber =	0b00001000, //!< Whether this is the guild's booster role
-	r_available_for_purchase = 0b00010000, //!< Whether the role is available for purchase
-	r_guild_connections = 0b00100000, //!< Whether the role is a guild's linked role
-	r_in_prompt			= 0b01000000, //!< Whether the role can be selected by members in an onboarding prompt
+	/**
+	 * @brief Hoisted role (if the role is pinned in the user listing).
+	 */
+	r_hoist = 0b00000001,
+
+	/**
+	 * @brief Managed role (introduced by a bot or application).
+	 */
+	r_managed = 0b00000010,
+
+	/**
+	 * @brief Whether this role is mentionable with a ping.
+	 */
+	r_mentionable =	0b00000100,
+
+	/**
+	 * @brief Whether this is the guild's booster role.
+	 */
+	r_premium_subscriber = 0b00001000,
+
+	/**
+	 * @brief Whether the role is available for purchase.
+	 */
+	r_available_for_purchase = 0b00010000,
+
+	/**
+	 * @brief Whether the role is a guild's linked role.
+	 */
+	r_guild_connections = 0b00100000,
+
+	/**
+	 * @brief Whether the role can be selected by members in an onboarding prompt.
+	 */
+	r_in_prompt = 0b01000000,
 };
 
 /**
  * @brief Represents a role within a dpp::guild.
  * Roles are combined via logical OR of the permission bitmasks, then channel-specific overrides
  * can be applied on top, deny types apply a logic NOT to the bit mask, and allows apply a logical OR.
+ *
  * @note Every guild has at least one role, called the 'everyone' role, which always has the same role
  * ID as the guild's ID. This is the base permission set applied to all users where no other role or override
  * applies, and is the starting value of the bit mask looped through to calculate channel permissions.
@@ -75,31 +105,61 @@ public:
 	 * Between 1 and 100 characters.
 	 */
 	std::string name{};
+
 	/**
 	 * @brief Guild ID
 	 */
 	snowflake guild_id{0};
+
 	/**
 	 * @brief Role colour.
 	 * A colour of 0 means no colour. If you want a black role,
 	 * you must use the value 0x000001.
 	 */
 	uint32_t colour{0};
-	/** Role position */
+
+	/**
+	 * @brief Role position.
+	 */
 	uint8_t position{0};
-	/** Role permissions bitmask values from dpp::permissions */
+
+	/**
+	 * @brief Role permissions bitmask values from dpp::permissions.
+	 */
 	permission permissions{};
-	/** Role flags from dpp::role_flags */
+
+	/**
+	 * @brief Role flags from dpp::role_flags
+	 */
 	uint8_t flags{0};
-	/** Integration id if any (e.g. role is a bot's role created when it was invited) */
+
+	/**
+	 * @brief Integration id if any.
+	 * (e.g. role is a bot's role created when it was invited).
+	 */
 	snowflake integration_id{};
-	/** Bot id if any (e.g. role is a bot's role created when it was invited) */
+
+	/**
+	 * @brief Bot id if any.
+	 * (e.g. role is a bot's role created when it was invited)
+	 */
 	snowflake bot_id{};
-	/** The id of the role's subscription sku and listing */
+
+	/**
+	 * @brief The id of the role's subscription sku and listing.
+	 */
 	snowflake subscription_listing_id{};
-	/** The unicode emoji used for the role's icon, can be an empty string */
+
+	/**
+	 * @brief The unicode emoji used for the role's icon.
+	 *
+	 * @note This can be an empty string.
+	 */
 	std::string unicode_emoji{};
-	/** The role icon */
+
+	/**
+	 * @brief The role icon.
+	 */
 	utility::icon icon{};
 
 	/**
@@ -148,7 +208,7 @@ public:
 	static std::string get_mention(const snowflake& id);
 
 	/**
-	 * @brief Set the name of the role
+	 * @brief Set the name of the role.
 	 * Maximum length: 100
 	 * Minimum length: 1
 	 * @param n Name to set
@@ -158,7 +218,7 @@ public:
 	role& set_name(const std::string& n);
 
 	/**
-	 * @brief Set the colour
+	 * @brief Set the colour.
 	 * 
 	 * @param c Colour to set
 	 * @note There is an americanised version of this method, role::set_color().
@@ -167,7 +227,7 @@ public:
 	role& set_colour(uint32_t c);
 
 	/**
-	 * @brief Set the color
+	 * @brief Set the color.
 	 * 
 	 * @param c Colour to set
 	 * @note This is an alias of role::set_colour for American spelling.
@@ -176,7 +236,7 @@ public:
 	role& set_color(uint32_t c);
 
 	/**
-	 * @brief Set the flags
+	 * @brief Set the flags.
 	 * 
 	 * @param f Flags to set from dpp::role_flags
 	 * @return role& reference to self
@@ -184,7 +244,7 @@ public:
 	role& set_flags(uint8_t f);
 
 	/**
-	 * @brief Set the integration id
+	 * @brief Set the integration ID.
 	 * 
 	 * @param i Integration ID to set
 	 * @return role& reference to self
@@ -192,7 +252,7 @@ public:
 	role& set_integration_id(snowflake i);
 
 	/**
-	 * @brief Set the bot id
+	 * @brief Set the bot ID.
 	 * 
 	 * @param b Bot ID to set
 	 * @return role& reference to self
@@ -200,7 +260,7 @@ public:
 	role& set_bot_id(snowflake b);
 
 	/**
-	 * @brief Set the guild id
+	 * @brief Set the guild ID.
 	 * 
 	 * @param gid Guild ID to set
 	 * @return role& reference to self
@@ -219,14 +279,14 @@ public:
 	role& fill_from_json(snowflake guild_id, nlohmann::json* j);
 
 	/**
-	 * @brief Get the mention/ping for the role
+	 * @brief Get the mention/ping for the role.
 	 * 
 	 * @return std::string mention
 	 */
 	std::string get_mention() const;
 
 	/**
-	 * @brief Returns the role's icon url if they have one, otherwise returns an empty string
+	 * @brief Returns the role's icon url if they have one, otherwise returns an empty string.
 	 *
 	 * @param size The size of the icon in pixels. It can be any power of two between 16 and 4096,
 	 * otherwise the default sized icon is returned.
@@ -236,7 +296,7 @@ public:
 	std::string get_icon_url(uint16_t size = 0, const image_type format = i_png) const;
 
 	/**
-	 * @brief Load a role icon
+	 * @brief Load a role icon.
 	 *
 	 * @param image_blob Image binary data
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
@@ -245,7 +305,7 @@ public:
 	role& load_image(std::string_view image_blob, const image_type type);
 
 	/**
-	 * @brief Load a role icon
+	 * @brief Load a role icon.
 	 *
 	 * @param image_blob Image binary data
 	 * @param type Type of image. It can be one of `i_gif`, `i_jpg` or `i_png`.
@@ -260,8 +320,7 @@ public:
 	 * @param rhs second role to compare
 	 * @return true if lhs is less than rhs
 	 */
-	friend inline bool operator< (const role& lhs, const role& rhs)
-	{
+	friend inline bool operator< (const role& lhs, const role& rhs) {
 		return lhs.position < rhs.position;
 	}
 
@@ -272,8 +331,7 @@ public:
 	 * @param rhs second role to compare
 	 * @return true if lhs is greater than rhs
 	 */
-	friend inline bool operator> (const role& lhs, const role& rhs)
-	{
+	friend inline bool operator> (const role& lhs, const role& rhs) {
 		return lhs.position > rhs.position;
 	}
 
@@ -283,8 +341,7 @@ public:
 	 * @param other role to compare
 	 * @return true if is equal to other
 	 */
-	inline bool operator== (const role& other) const
-	{
+	inline bool operator== (const role& other) const {
 		return this->position == other.position;
 	}
 
@@ -294,358 +351,467 @@ public:
 	 * @param other role to compare
 	 * @return true if is not equal to other
 	 */
-	inline bool operator!= (const role& other) const
-	{
+	inline bool operator!= (const role& other) const {
 		return this->position != other.position;
 	}
 
 	/**
-	 * @brief True if the role is hoisted
+	 * @brief True if the role is hoisted.
+	 *
 	 * @return bool Role appears separated from others in the member list
 	 */
 	bool is_hoisted() const;
+
 	/**
-	 * @brief True if the role is mentionable
+	 * @brief True if the role is mentionable.
+	 *
 	 * @return bool Role is mentionable
 	 */
 	bool is_mentionable() const;
+
 	/**
-	 * @brief True if the role is managed (belongs to a bot or application)
+	 * @brief True if the role is managed (belongs to a bot or application).
+	 *
 	 * @return bool True if the role is managed (introduced for a bot or other application by Discord)
 	 */
 	bool is_managed() const;
+
 	/**
-	 * @brief True if the role is the guild's Booster role
+	 * @brief True if the role is the guild's Booster role.
+	 *
 	 * @return bool whether the role is the premium subscriber, AKA "boost", role for the guild
 	 */
 	bool is_premium_subscriber() const;
+
 	/**
-	 * @brief True if the role is available for purchase
+	 * @brief True if the role is available for purchase.
+	 *
 	 * @return bool whether this role is available for purchase
 	 */
 	bool is_available_for_purchase() const;
+
 	/**
-	 * @brief True if the role is a linked role
+	 * @brief True if the role is a linked role.
+	 *
 	 * @return bool True if the role is a linked role
 	 */
 	bool is_linked() const;
+
 	/**
-	 * @brief True if the role can be selected by members in an onboarding prompt
+	 * @brief True if the role can be selected by members in an onboarding prompt.
+	 *
 	 * @return bool True if the role can be selected by members in an onboarding prompt
 	 */
 	bool is_selectable_in_prompt() const;
+
 	/**
-	 * @brief True if has create instant invite permission
+	 * @brief True if has create instant invite permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the instant invite permission or is administrator.
 	 */
 	bool has_create_instant_invite() const;
+
 	/**
 	 * @brief True if has the kick members permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the kick members permission or is administrator.
 	 */
 	bool has_kick_members() const;
+
 	/**
 	 * @brief True if has the ban members permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the ban members permission or is administrator.
 	 */
 	bool has_ban_members() const;
+
 	/**
 	 * @brief True if has the administrator permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the administrator permission or is administrator.
 	 */
 	bool has_administrator() const;
+
 	/**
 	 * @brief True if has the manage channels permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the manage channels permission or is administrator.
 	 */
 	bool has_manage_channels() const;
+
 	/**
 	 * @brief True if has the manage guild permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the manage guild permission or is administrator.
 	 */
 	bool has_manage_guild() const;
+
 	/**
 	 * @brief True if has the add reactions permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the add reactions permission or is administrator.
 	 */
 	bool has_add_reactions() const;
+
 	/**
 	 * @brief True if has the view audit log permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the view audit log permission or is administrator.
 	 */
 	bool has_view_audit_log() const;
+
 	/**
 	 * @brief True if has the priority speaker permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the priority speaker permission or is administrator.
 	 */
 	bool has_priority_speaker() const;
+
 	/**
 	 * @brief True if has the stream permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the stream permission or is administrator.
 	 */
 	bool has_stream() const;
+
 	/**
 	 * @brief True if has the view channel permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the view channel permission or is administrator.
 	 */
 	bool has_view_channel() const;
+
 	/**
 	 * @brief True if has the send messages permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the send messages permission or is administrator.
 	 */
 	bool has_send_messages() const;
+
 	/**
 	 * @brief True if has the send TTS messages permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the send TTS messages permission or is administrator.
 	 */
 	bool has_send_tts_messages() const;
+
 	/**
 	 * @brief True if has the manage messages permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the manage messages permission or is administrator.
 	 */
 	bool has_manage_messages() const;
+
 	/**
 	 * @brief True if has the embed links permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the embed links permission or is administrator.
 	 */
 	bool has_embed_links() const;
+
 	/**
 	 * @brief True if has the attach files permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the attach files permission or is administrator.
 	 */
 	bool has_attach_files() const;
+
 	/**
 	 * @brief True if has the read message history permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the read message history permission or is administrator.
 	 */
 	bool has_read_message_history() const;
+
 	/**
 	 * @brief True if has the mention \@everyone and \@here permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the mention \@everyone and \@here permission or is administrator.
 	 */
 	bool has_mention_everyone() const;
+
 	/**
 	 * @brief True if has the use external emojis permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the use external emojis permission or is administrator.
 	 */
 	bool has_use_external_emojis() const;
+
 	/**
 	 * @brief True if has the view guild insights permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the view guild insights permission or is administrator.
 	 */
 	bool has_view_guild_insights() const;
+
 	/**
 	 * @brief True if has the connect voice permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the connect voice permission or is administrator.
 	 */
 	bool has_connect() const;
+
 	/**
 	 * @brief True if has the speak permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the speak permission or is administrator.
 	 */
 	bool has_speak() const;
+
 	/**
 	 * @brief True if has the mute members permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the mute members permission or is administrator.
 	 */
 	bool has_mute_members() const;
+
 	/**
 	 * @brief True if has the deafen members permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the deafen members permission or is administrator.
 	 */
 	bool has_deafen_members() const;
+
 	/**
 	 * @brief True if has the move members permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the move members permission or is administrator.
 	 */
 	bool has_move_members() const;
-	/** True if has use voice activity detection permission */
+
+	/**
+	 * @brief True if has use voice activity detection permission
+	 *
+	 * @note Having the administrator permission causes this method to always return true
+	 * Channel specific overrides may apply to permissions.
+	 * @return bool True if user has use voice activity detection permission or is administrator.
+	 */
 	bool has_use_vad() const;
+
 	/**
 	 * @brief True if has the change nickname permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the change nickname permission or is administrator.
 	 */
 	bool has_change_nickname() const;
+
 	/**
 	 * @brief True if has the manage nicknames permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the manage nicknames permission or is administrator.
 	 */
 	bool has_manage_nicknames() const;
+
 	/**
 	 * @brief True if has the manage roles permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the manage roles permission or is administrator.
 	 */
 	bool has_manage_roles() const;
+
 	/**
 	 * @brief True if has the manage webhooks permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the manage webhooks permission or is administrator.
 	 */
 	bool has_manage_webhooks() const;
+
 	/**
 	 * @brief True if has the manage emojis and stickers permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the manage emojis and stickers permission or is administrator.
 	 */
 	bool has_manage_emojis_and_stickers() const;
+
 	/**
 	 * @brief True if has the use application commands permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the use application commands permission or is administrator.
 	 */
 	bool has_use_application_commands() const;
+
 	/**
 	 * @brief True if has the request to speak permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the request to speak permission or is administrator.
 	 */
 	bool has_request_to_speak() const;
+
 	/**
 	 * @brief True if has the manage threads permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the manage threads permission or is administrator.
 	 */
 	bool has_manage_threads() const;
+
 	/**
 	 * @brief True if has the create public threads permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the create public threads permission or is administrator.
 	 */
 	bool has_create_public_threads() const;
+
 	/**
 	 * @brief True if has the create private threads permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the create private threads permission or is administrator.
 	 */
 	bool has_create_private_threads() const;
+
 	/**
 	 * @brief True if has the use external stickers permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the use external stickers permission or is administrator.
 	 */
+
 	bool has_use_external_stickers() const;
 	/**
 	 * @brief True if has the send messages in threads permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the send messages in threads permission or is administrator.
 	 */
 	bool has_send_messages_in_threads() const;
+
 	/**
 	 * @brief True if has the start embedded activities permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the start embedded activities permission or is administrator.
 	 */
 	bool has_use_embedded_activities() const;
+
 	/**
 	 * @brief True if has the manage events permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the manage events permission or is administrator.
 	 */
 	bool has_manage_events() const;
+
 	/**
 	 * @brief True if has the moderate users permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the moderate users permission or is administrator.
 	 */
 	bool has_moderate_members() const;
+
 	/**
 	 * @brief True if has the view creator monetization analytics permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the view creator monetization analytics permission or is administrator.
 	 */
 	bool has_view_creator_monetization_analytics() const;
+
 	/**
 	 * @brief True if has the use soundboard permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the use soundboard permission or is administrator.
 	 */
 	bool has_use_soundboard() const;
+
 	/**
 	 * @brief True if has the use external sounds permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the use external sounds permission or is administrator.
 	 */
 	bool has_use_external_sounds() const;
+
 	/**
 	 * @brief True if has the send voice messages permission.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the send voice messages permission or is administrator.
 	 */
 	bool has_send_voice_messages() const;
+
 	/**
 	 * @brief True if has permission to use clyde AI.
+	 *
 	 * @note Having the administrator permission causes this method to always return true
 	 * Channel specific overrides may apply to permissions.
 	 * @return bool True if user has the clyde AI permission or is administrator.
@@ -653,7 +819,8 @@ public:
 	bool has_use_clyde_ai() const;
 
 	/**
-	 * @brief Get guild members who have this role
+	 * @brief Get guild members who have this role.
+	 *
 	 * @note This method requires user/members cache to be active
 	 * @return members_container List of members who have this role
 	 */
@@ -663,17 +830,51 @@ public:
 /**
  * @brief Application Role Connection Metadata Type
  *
- * @note Each metadata type offers a comparison operation that allows guilds to configure role requirements based on metadata values stored by the bot. Bots specify a `metadata value` for each user and guilds specify the required `guild's configured value` within the guild role settings.
+ * @note Each metadata type offers a comparison operation that allows guilds
+ * to configure role requirements based on metadata values stored by the bot.
+ * Bots specify a `metadata value` for each user and guilds specify the
+ * required `guild's configured value` within the guild role settings.
  */
 enum application_role_connection_metadata_type : uint8_t {
-	rc_integer_less_than_or_equal = 1, //!< The metadata value (integer) is less than or equal to the guild's configured value (integer)
-	rc_integer_greater_than_or_equal = 2, //!< The metadata value (integer) is greater than or equal to the guild's configured value (integer)
-	rc_integer_equal = 3, //!< The metadata value (integer) is equal to the guild's configured value (integer)
-	rc_integer_not_equal = 4, //!< The metadata value (integer) is not equal to the guild's configured value (integer)
-	rc_datetime_less_than_or_equal = 5, //!< The metadata value (ISO8601 string) is less than or equal to the guild's configured value (integer; days before current date)
-	rc_datetime_greater_than_or_equal = 6, //!< The metadata value (ISO8601 string) is greater than or equal to the guild's configured value (integer; days before current date)
-	rc_boolean_equal = 7, //!< The metadata value (integer) is equal to the guild's configured value (integer; 1)
-	rc_boolean_not_equal = 8, //!< The metadata value (integer) is not equal to the guild's configured value (integer; 1)
+	/**
+	 * @brief The metadata value (integer) is less than or equal to the guild's configured value (integer).
+	 */
+	rc_integer_less_than_or_equal = 1,
+
+	/**
+	 * @brief The metadata value (integer) is greater than or equal to the guild's configured value (integer).
+	 */
+	rc_integer_greater_than_or_equal = 2,
+
+	/**
+	 * @brief The metadata value (integer) is equal to the guild's configured value (integer).
+	 */
+	rc_integer_equal = 3,
+
+	/**
+	 * @brief The metadata value (integer) is not equal to the guild's configured value (integer).
+	 */
+	rc_integer_not_equal = 4,
+
+	/**
+	 * @brief The metadata value (ISO8601 string) is less than or equal to the guild's configured value (integer; days before current date).
+	 */
+	rc_datetime_less_than_or_equal = 5,
+
+	/**
+	 * @brief The metadata value (ISO8601 string) is greater than or equal to the guild's configured value (integer; days before current date).
+	 */
+	rc_datetime_greater_than_or_equal = 6,
+
+	/**
+	 * @brief The metadata value (integer) is equal to the guild's configured value (integer; 1).
+	 */
+	rc_boolean_equal = 7,
+
+	/**
+	 * @brief The metadata value (integer) is not equal to the guild's configured value (integer; 1).
+	 */
+	rc_boolean_not_equal = 8,
 };
 
 /**
@@ -698,15 +899,38 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
-	application_role_connection_metadata_type type; //!< Type of metadata value
-	std::string key; //!< Dictionary key for the metadata field (must be `a-z`, `0-9`, or `_` characters; 1-50 characters)
-	std::string name; //!< Name of the metadata field (1-100 characters)
-	std::map<std::string, std::string> name_localizations; //!< Translations of the name
-	std::string description; //!< Description of the metadata field (1-200 characters)
-	std::map<std::string, std::string> description_localizations; //!< Translations of the description
+	/**
+	 * @brief Type of metadata value.
+	 */
+	application_role_connection_metadata_type type;
 
 	/**
-	 * Constructor
+	 * @brief Dictionary key for the metadata field (must be `a-z`, `0-9`, or `_` characters; 1-50 characters).
+	 */
+	std::string key;
+
+	/**
+	 * @brief Name of the metadata field (1-100 characters).
+	 */
+	std::string name;
+
+	/**
+	 * @brief Translations of the name.
+	 */
+	std::map<std::string, std::string> name_localizations;
+
+	/**
+	 * @brief Description of the metadata field (1-200 characters).
+	 */
+	std::string description;
+
+	/**
+	 * @brief Translations of the description.
+	 */
+	std::map<std::string, std::string> description_localizations;
+
+	/**
+	 * @brief Constructor
 	 */
 	application_role_connection_metadata();
 
@@ -720,7 +944,8 @@ class DPP_EXPORT application_role_connection : public json_interface<application
 protected:
 	friend struct json_interface<application_role_connection>;
 
-	/** Fill this record from json.
+	/**
+	 * @brief Fill this record from json.
 	 * @param j The json to fill this record from
 	 * @return Reference to self
 	 */
@@ -735,22 +960,37 @@ protected:
 	virtual json to_json_impl(bool with_id = false) const;
 
 public:
-	std::string platform_name; //!< Optional: The vanity name of the platform a bot has connected (max 50 characters)
-	std::string platform_username; //!< Optional: The username on the platform a bot has connected (max 100 characters)
-	std::variant<std::monostate, application_role_connection_metadata> metadata; //!< Optional: Object mapping application role connection metadata keys to their stringified value (max 100 characters) for the user on the platform a bot has connected
+	/**
+	 * @brief Optional: The vanity name of the platform a bot has connected (max 50 characters).
+	 */
+	std::string platform_name;
 
 	/**
-	 * Constructor
+	 * @brief Optional: The username on the platform a bot has connected (max 100 characters).
+	 */
+	std::string platform_username;
+
+	/**
+	 * @brief Optional: Object mapping application role connection metadata keys to their "stringified" value (max 100 characters) for the user on the platform a bot has connected.
+	 */
+	std::variant<std::monostate, application_role_connection_metadata> metadata;
+
+	/**
+	 * @brief Constructor
 	 */
 	application_role_connection();
 
 	virtual ~application_role_connection() = default;
 };
 
-/** A group of roles */
+/**
+ * @brief A group of roles.
+ */
 typedef std::unordered_map<snowflake, role> role_map;
 
-/** A group of application_role_connection_metadata objects */
+/**
+ * @brief A group of dpp::application_role_connection_metadata objects.
+ */
 typedef std::vector<application_role_connection_metadata> application_role_connection_metadata_list;
 
 } // namespace dpp
