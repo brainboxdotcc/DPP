@@ -250,10 +250,8 @@ file(COPY "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}
         chdir('/usr/local/share/vcpkg');
         $this->sudo('./vcpkg format-manifest ./ports/dpp/vcpkg.json');
         /* Note: We commit this in /usr/local, but we never push it (we can't) */
-        $this->git('config --global user.email "noreply@dpp.dev"');
-        $this->git('config --global user.name "DPP VCPKG Bot"');
         $this->git('add .', true);
-        $this->git('commit -m "[bot] VCPKG info update"', true);
+        $this->git('-c user.name="DPP VCPKG Bot" -c user.email=noreply@dpp.dev commit -m "[bot] VCPKG info update"', true);
         $this->sudo('/usr/local/share/vcpkg/vcpkg x-add-version dpp');
 
         echo GREEN . "Copy back port files from /usr/local/share...\n" . WHITE;
