@@ -1709,6 +1709,26 @@ namespace cache_policy {
 };
 
 /**
+ * @brief The data for a file.
+ */
+struct message_file_data {
+	/**
+	 * @brief Name of file to upload (for use server-side in discord's url).
+	 */
+	std::string name{};
+
+	/**
+	 * @brief File content to upload (raw binary)
+	 */
+	std::string content{};
+
+	/**
+	 * @brief Mime type of files to upload.
+	 */
+	std::string mimetype{};
+};
+
+/**
  * @brief Represents messages sent and received on Discord
  */
 struct DPP_EXPORT message : public managed, json_interface<message> {
@@ -1828,19 +1848,9 @@ public:
 	std::vector<sticker> stickers;
 
 	/**
-	 * @brief Name of file to upload (for use server-side in discord's url).
+	 * @brief An array of file data.
 	 */
-	std::vector<std::string> filename;
-
-	/**
-	 * @brief File content to upload (raw binary)
-	 */
-	std::vector<std::string> filecontent;
-
-	/**
-	 * @brief Mime type of files to upload.
-	 */
-	std::vector<std::string> filemimetype;
+	std::vector<message_file_data> file_data;
 
 	/**
 	 * @brief Reference to another message, e.g. a reply
