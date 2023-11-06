@@ -36,11 +36,21 @@ void cluster::message_add_reaction(snowflake message_id, snowflake channel_id, c
 
 
 void cluster::message_create(const message &m, command_completion_event_t callback) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : m.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
 	this->post_rest_multipart(API_PATH "/channels", std::to_string(m.channel_id), "messages", m_post, m.build_json(), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, file_names, file_contents, file_mimetypes);
 }
 
 
@@ -112,11 +122,21 @@ void cluster::message_delete_reaction_emoji(snowflake message_id, snowflake chan
 
 
 void cluster::message_edit(const message &m, command_completion_event_t callback) {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : m.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
 	this->post_rest_multipart(API_PATH "/channels", std::to_string(m.channel_id), "messages/" + std::to_string(m.id), m_patch, m.build_json(true), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, file_names, file_contents, file_mimetypes);
 }
 
 
