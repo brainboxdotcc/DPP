@@ -1830,17 +1830,17 @@ public:
 	/**
 	 * @brief Name of file to upload (for use server-side in discord's url).
 	 */
-	std::vector<std::string> file_name;
+	std::vector<std::string> filename;
 
 	/**
 	 * @brief File content to upload (raw binary)
 	 */
-	std::vector<std::string> file_content;
+	std::vector<std::string> filecontent;
 
 	/**
 	 * @brief Mime type of files to upload.
 	 */
-	std::vector<std::string> file_mimetype;
+	std::vector<std::string> filemimetype;
 
 	/**
 	 * @brief Reference to another message, e.g. a reply
