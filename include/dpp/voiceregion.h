@@ -44,14 +44,7 @@ enum voiceregion_flags {
 	/**
 	 * @brief A custom voice region (used for events/etc).
 	 */
-	v_custom = 0x00000100,
-
-	/**
-	 * @brief A VIP voice server.
-	 *
-	 * @warning This is undocumented by Discord and may not even exist anymore.
-	 */
-	v_vip = 0x00001000
+	v_custom = 0x00000100
 };
 
 /**
@@ -123,13 +116,6 @@ public:
 	 * @return true if custom
 	 */
 	bool is_custom() const;
-
-	/**
-	 * @brief True if is a VIP voice server
-	 * 
-	 * @return true if VIP 
-	 */
-	bool is_vip() const;
 };
 
 /**
