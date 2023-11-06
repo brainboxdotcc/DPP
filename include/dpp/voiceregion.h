@@ -31,10 +31,10 @@ namespace dpp {
  * @brief Flags related to a voice region
  */
 enum voiceregion_flags {
-	v_optimal	= 0x00000001,
-	v_deprecated	= 0x00000010,
-	v_custom	= 0x00000100,
-	v_vip		= 0x00001000
+	v_optimal = 0x00000001,
+	v_deprecated = 0x00000010,
+	v_custom = 0x00000100,
+	v_vip = 0x00001000
 };
 
 /**

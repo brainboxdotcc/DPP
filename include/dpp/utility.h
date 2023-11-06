@@ -40,7 +40,9 @@ namespace dpp {
 
 enum sticker_format : uint8_t;
 
-/** @brief Macro that expands to static_asserts checking sizeof and alignof are equal between two types */
+/**
+ * @brief Macro that expands to static_asserts checking sizeof and alignof are equal between two types.
+ */
 #define DPP_CHECK_ABI_COMPAT(a, b) \
 static_assert(sizeof(a) == sizeof(b), #a " and " #b " must be the same size for ABI compatibility"); \
 static_assert(alignof(a) == alignof(b), #a " and " #b " must be the same alignment for ABI compatibility"); \
@@ -51,7 +53,9 @@ static_assert(alignof(a) == alignof(b), #a " and " #b " must be the same alignme
 namespace utility {
 
 /**
- * For internal use only. Helper function to easily create discord's cdn endpoint urls
+ * @brief Helper function to easily create discord's cdn endpoint urls.
+ * @warning **For internal use only!**
+ *
  * @see https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
  * @param allowed_formats A vector of supported formats for the endpoint from the discord docs
  * @param path_without_extension The path for the endpoint (without the extension e.g. `.png`)
@@ -66,7 +70,9 @@ namespace utility {
 std::string DPP_EXPORT cdn_endpoint_url(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
 
 /**
- * For internal use only. Helper function to easily create discord's cdn endpoint urls
+ * @brief Helper function to easily create discord's cdn endpoint urls.
+ * @warning **For internal use only!**
+ *
  * @see https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
  * @param allowed_formats A vector of supported formats for the endpoint from the discord docs
  * @param path_without_extension The path for the endpoint (without the extension e.g. `.png`)
@@ -82,7 +88,9 @@ std::string DPP_EXPORT cdn_endpoint_url(const std::vector<image_type> &allowed_f
 std::string DPP_EXPORT cdn_endpoint_url_hash(const std::vector<image_type> &allowed_formats, const std::string &path_without_extension, const std::string &hash, const dpp::image_type format, uint16_t size, bool prefer_animated = false, bool is_animated = false);
 
 /**
- * For internal use only. Helper function to easily create discord's cdn endpoint urls (specialised for stickers)
+ * @brief Helper function to easily create discord's cdn endpoint urls (specialised for stickers)
+ * @warning **For internal use only!**
+ *
  * @see https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints
  * @param sticker_id The sticker ID. Returns empty string if 0
  * @param format The format type
@@ -98,14 +106,17 @@ enum avx_type_t : uint8_t {
 	 * @brief No AVX Support
 	 */
 	avx_none,
+
 	/**
 	 * @brief AVX support
 	 */
 	avx_1,
+
 	/**
 	 * @brief AVX2 support
 	 */
 	avx_2,
+
 	/**
 	 * @brief AVX512 support
 	 */
@@ -120,31 +131,59 @@ enum avx_type_t : uint8_t {
  * They have been sorted into numerical order of their ASCII value to keep C++ happy.
  */
 enum time_format : uint8_t {
-	/// "20 April 2021" - Long Date
-	tf_long_date		=	'D',
-	/// "Tuesday, 20 April 2021 16:20" - Long Date/Time
-	tf_long_datetime	=	'F',
-	/// "2 months ago" - Relative Time		
-	tf_relative_time	=	'R',
-	/// "16:20:30" - Long Time
-	tf_long_time		=	'T',
-	/// "20/04/2021" - Short Date
-	tf_short_date		=	'd',
-	/// "20 April 2021 16:20" - Short Date/Time
-	tf_short_datetime	=	'f',
-	/// "16:20" - Short Time
-	tf_short_time		=	't',
+	/**
+	 * @brief "20 April 2021" - Long Date
+	 */
+	tf_long_date = 'D',
+
+	/**
+	 * @brief "Tuesday, 20 April 2021 16:20" - Long Date/Time
+	 */
+	tf_long_datetime = 'F',
+
+	/**
+	 * @brief "2 months ago" - Relative Time
+	 */
+	tf_relative_time = 'R',
+
+	/**
+	 * @brief "16:20:30" - Long Time
+	 */
+	tf_long_time = 'T',
+
+	/**
+	 * @brief "20/04/2021" - Short Date
+	 */
+	tf_short_date =	'd',
+
+	/**
+	 * @brief "20 April 2021 16:20" - Short Date/Time
+	 */
+	tf_short_datetime = 'f',
+
+	/**
+	 * @brief "16:20" - Short Time
+	 */
+	tf_short_time =	't',
 };
 
 /**
  * @brief Guild navigation types for dpp::utility::guild_navigation()
  */
 enum guild_navigation_type {
-	/// _Customize_ tab with the server's dpp::onboarding_prompt
+	/**
+	 * @brief _Customize_ tab with the server's dpp::onboarding_prompt
+	 */
 	gnt_customize,
-	/// _Browse Channels_ tab
+
+	/**
+	 * @brief "16:20" _Browse Channels_ tab
+	 */
 	gnt_browse,
-	/// Server Guide
+
+	/**
+	 * @brief Server Guide
+	 */
 	gnt_guide,
 };
 
@@ -166,8 +205,8 @@ typedef std::function<void(const std::string& output)> cmd_result_t;
 /**
  * @brief Run a commandline program asynchronously. The command line program
  * is spawned in a separate std::thread, and when complete, its output from
- * stdout is passed to the callback function in its string parameter. For example
- * ```
+ * stdout is passed to the callback function in its string parameter. For example:
+ * ```cpp
  * dpp::utility::exec("/bin/ls", {"-al"}, [](const std::string& output) {
  *     std::cout << "Output of 'ls -al': " << output << "\n";
  * });
@@ -218,9 +257,14 @@ std::string DPP_EXPORT loglevel(dpp::loglevel in);
  * the value back in string form.
  */
 struct DPP_EXPORT iconhash {
-	/** @brief High 64 bits */
+	/**
+	 * @brief High 64 bits.
+	 */
 	uint64_t first;
-	/** @brief Low 64 bits */
+
+	/**
+	 * @brief Low 64 bits.
+	 */
 	uint64_t second;
 
 	/**
@@ -562,10 +606,25 @@ std::string DPP_EXPORT bytes(uint64_t c);
  * and display as a string.
  */
 struct DPP_EXPORT uptime {
-	uint16_t days;	//!< Number of days
-	uint8_t hours;	//!< Number of hours
-	uint8_t mins;	//!< Number of minutes
-	uint8_t secs;	//!< Number of seconds
+	/**
+	 * @brief Number of days.
+	 */
+	uint16_t days;
+
+	/**
+	 * @brief Number of hours.
+	 */
+	uint8_t hours;
+
+	/**
+	 * @brief Number of minutes.
+	 */
+	uint8_t mins;
+
+	/**
+	 * @brief Number of seconds.
+	 */
+	uint8_t secs;
 
 	/**
 	 * @brief Construct a new uptime object
