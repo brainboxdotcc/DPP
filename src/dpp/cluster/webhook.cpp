@@ -51,21 +51,11 @@ void cluster::edit_webhook_message(const class webhook &wh, const struct message
 		{"thread_id", thread_id},
 	});
 
-	std::vector<std::string> file_names{};
-	std::vector<std::string> file_contents{};
-	std::vector<std::string> file_mimetypes{};
-
-	for(message_file_data data : m.file_data) {
-		file_names.push_back(data.name);
-		file_contents.push_back(data.content);
-		file_mimetypes.push_back(data.mimetype);
-	}
-
 	this->post_rest_multipart(API_PATH "/webhooks", std::to_string(wh.id), utility::url_encode(!wh.token.empty() ? wh.token: token) + "/messages/" + std::to_string(m.id) + parameters, m_patch, m.build_json(false), [this, callback](json &j, const http_request_completion_t& http) {
 		if (callback) {
 			callback(confirmation_callback_t(this, message(this).fill_from_json(&j), http));
 		}
-	}, file_names, file_contents, file_mimetypes);
+	}, m.file_data);
 }
 
 void cluster::edit_webhook_with_token(const class webhook& wh, command_completion_event_t callback) {
