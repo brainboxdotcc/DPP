@@ -176,7 +176,7 @@ void interaction_create_t::edit_original_response(const message& m, command_comp
 		if (cb) {
 			cb(confirmation_callback_t(creator, message().fill_from_json(&j), http));
 		}
-	}, file_names, file_contents, file_mimetypes);
+	}, m.file_data);
 }
 
 void interaction_create_t::delete_original_response(command_completion_event_t callback) const {
