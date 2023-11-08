@@ -94,19 +94,19 @@ public:
 	/**
 	 * @brief Optional: The guild id this voice state is for.
 	 */
-	snowflake guild_id;
+	snowflake guild_id{0};
 
 	/**
 	 * @brief The channel id this user is connected to.
 	 *
 	 * @note This may be empty.
 	 */
-	snowflake channel_id;
+	snowflake channel_id{0};
 
 	/**
 	 * @brief The user id this voice state is for.
 	 */
-	snowflake user_id;
+	snowflake user_id{0};
 
 	/**
 	 * @brief The session id for this voice state.
@@ -116,14 +116,14 @@ public:
 	/**
 	 * @brief Voice state flags from dpp::voicestate_flags.
 	 */
-	uint8_t	flags;
+	uint8_t	flags{0};
 
 	/**
 	 * @brief The time at which the user requested to speak.
 	 *
 	 * @note If the user never requested to speak, this is 0.
 	 */
-	time_t request_to_speak;
+	time_t request_to_speak{0};
 
 	/**
 	 * @brief Construct a new voicestate object

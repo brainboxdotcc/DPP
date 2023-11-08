@@ -877,15 +877,23 @@ std::string make_url_parameters(const std::map<std::string, uint64_t>& parameter
 
 std::string markdown_escape(const std::string& text, bool escape_code_blocks) {
 	/**
-		* @brief Represents the current state of the finite state machine
-		* for the markdown_escape function.
-		*/
+	 * @brief Represents the current state of the finite state machine
+	 * for the markdown_escape function.
+	 */
 	enum md_state {
-		/// normal text
+		/**
+		 * @brief Normal text
+		 */
 		md_normal = 0,
-		/// a paragraph code block, represented by three backticks
+
+		/**
+		 * @brief A paragraph code block, represented by three backticks.
+		 */
 		md_big_code_block = 1,
-		/// an inline code block, represented by one backtick
+
+		/**
+		 * @brief An inline code block, represented by one backtick.
+		 */
 		md_small_code_block = 2,
 	};
 
