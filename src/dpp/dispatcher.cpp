@@ -162,11 +162,21 @@ void interaction_create_t::get_original_response(command_completion_event_t call
 }
 
 void interaction_create_t::edit_original_response(const message& m, command_completion_event_t callback) const {
+	std::vector<std::string> file_names{};
+	std::vector<std::string> file_contents{};
+	std::vector<std::string> file_mimetypes{};
+
+	for(message_file_data data : m.file_data) {
+		file_names.push_back(data.name);
+		file_contents.push_back(data.content);
+		file_mimetypes.push_back(data.mimetype);
+	}
+
 	from->creator->post_rest_multipart(API_PATH "/webhooks", std::to_string(command.application_id), command.token + "/messages/@original", m_patch, m.build_json(), [creator = this->from->creator, cb = std::move(callback)](json& j, const http_request_completion_t& http) {
 		if (cb) {
 			cb(confirmation_callback_t(creator, message().fill_from_json(&j), http));
 		}
-	}, m.filename, m.filecontent, m.filemimetype);
+	}, m.file_data);
 }
 
 void interaction_create_t::delete_original_response(command_completion_event_t callback) const {

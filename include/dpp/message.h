@@ -115,6 +115,30 @@ struct component_emoji {
 };
 
 /**
+ * @brief The data for a file attached to a message.
+ *
+ * @todo Change the naming of this and make stickers (and potentially anything else that has data like this) use this.
+ */
+struct message_file_data {
+	/**
+	 * @brief Name of file to upload (for use server-side in discord's url).
+	 */
+	std::string name{};
+
+	/**
+	 * @brief File content to upload (raw binary)
+	 */
+	std::string content{};
+
+	/**
+	 * @brief Mime type of files to upload.
+	 *
+	 * @todo Look at turning this into an enum? This would allow people to easily compare mimetypes if they happen to change.
+	 */
+	std::string mimetype{};
+};
+
+/**
  * @brief Types of text input
  */
 enum text_style_type : uint8_t {
@@ -1828,19 +1852,11 @@ public:
 	std::vector<sticker> stickers;
 
 	/**
-	 * @brief Name of file to upload (for use server-side in discord's url).
+	 * @brief An array of file data to use for uploading files.
+	 *
+	 * @note You should use dpp::message::add_file to add data to this!
 	 */
-	std::vector<std::string> filename;
-
-	/**
-	 * @brief File content to upload (raw binary)
-	 */
-	std::vector<std::string> filecontent;
-
-	/**
-	 * @brief Mime type of files to upload.
-	 */
-	std::vector<std::string> filemimetype;
+	std::vector<message_file_data> file_data;
 
 	/**
 	 * @brief Reference to another message, e.g. a reply
