@@ -10,8 +10,10 @@ Before compiling make sure you have all the tools installed.
 ## 2. Install External Dependencies
 
 ```bash
-brew install openssl
+brew install openssl pkgconfig
 ```
+
+\note Usually, you do not need pkgconfig. However, it seems that it throws errors about openssl without.
 
 For voice support, additional dependencies are required:
 
@@ -43,7 +45,7 @@ If you want to install the library, its dependencies, and header files to a diff
 cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
 ```
 
-Then once the build is complete, run `make install` to install to the location you specified.
+Then once the build is complete, run `sudo make install` to install to the location you specified.
 
 ## 6. Using the Library
 
