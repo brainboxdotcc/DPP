@@ -31,6 +31,8 @@ _Pragma("warning( disable : 5105 )"); // 4251 warns when we export classes or st
 
 #ifdef _WIN32
 #define SHARED_OBJECT "dpp.dll"
+#elif __APPLE__
+#define SHARED_OBJECT "libdpp.dylib"
 #else
 #define SHARED_OBJECT "libdpp.so"
 #endif

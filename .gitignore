@@ -30,3 +30,4 @@ config.json
 .misspell-fixer.ignore
 compile_commands.json
 src/dpp/dpp.rc
+.DS_STORE
