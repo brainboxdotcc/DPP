@@ -69,6 +69,12 @@ if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
 		HOMEPAGE_URL "https://dpp.dev/"
 		DESCRIPTION "An incredibly lightweight C++ Discord library."
 	)
+
+	# Required before we add any subdirectories.
+	if (DPP_BUILD_TEST)
+		enable_testing(${CMAKE_CURRENT_SOURCE_DIR})
+	endif()
+
 	add_subdirectory(library-vcpkg)
 else()
 	set(PROJECT_NAME "libdpp")
@@ -79,6 +85,12 @@ else()
 		HOMEPAGE_URL "https://dpp.dev/"
 		DESCRIPTION "An incredibly lightweight C++ Discord library."
 	)
+
+	# Required before we add any subdirectories.
+	if (DPP_BUILD_TEST)
+		enable_testing(${CMAKE_CURRENT_SOURCE_DIR})
+	endif()
+
 	add_subdirectory(library)
 endif()
 

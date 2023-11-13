@@ -365,9 +365,8 @@ if (DPP_BUILD_TEST)
 		endif()
 	endforeach()
 	add_test(
-		NAME unittests
-		COMMAND library/unittest
-		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/library
+		NAME unittest
+		COMMAND unittest
 	)
 endif()
 	
