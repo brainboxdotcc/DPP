@@ -597,7 +597,12 @@ public:
 	    satype_recorded_audio,
 	    satype_live_audio,
 		satype_overlap_audio
-	} send_audio_type = satype_recorded_audio;
+	} send_audio_type =
+#ifdef _WIN32
+            satype_overlap_audio;
+#else
+            satype_recorded_audio;
+#endif
 
 	/**
 	 * @brief Sets the gain for the specified user.
