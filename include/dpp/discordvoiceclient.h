@@ -564,7 +564,10 @@ public:
 	snowflake channel_id;
 
 	/**
-	 * @brief The audio type to be sent. The default type is recorded audio.
+	 * @brief The audio type to be sent.
+	 *
+	 * @note On Windows, the default type is overlap audio.
+	 * On all other platforms, it is recorded audio.
 	 *
 	 * If the audio is recorded, the sending of audio packets is throttled.
 	 * Otherwise, if the audio is live, the sending is not throttled.
