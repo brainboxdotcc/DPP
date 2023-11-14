@@ -597,8 +597,8 @@ public:
 	 */
 	enum send_audio_type_t
 	{
-	    satype_recorded_audio,
-	    satype_live_audio,
+		satype_recorded_audio,
+		satype_live_audio,
 		satype_overlap_audio
 	} send_audio_type =
 #ifdef _WIN32
