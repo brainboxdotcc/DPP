@@ -599,9 +599,9 @@ public:
 		satype_overlap_audio
 	} send_audio_type =
 #ifdef _WIN32
-        satype_overlap_audio;
+	satype_overlap_audio;
 #else
-        satype_recorded_audio;
+	satype_recorded_audio;
 #endif
 
 	/**
