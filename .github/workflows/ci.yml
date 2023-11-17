@@ -157,15 +157,8 @@ jobs:
         env:
           DONT_RUN_VCPKG: true
 
-      - name: Run unit tests
+      - name: Run offline unit tests
         run: cd build && ctest -VV
-        env:
-          DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
-          TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
-          TEST_TEXT_CHANNEL_ID: ${{secrets.TEST_TEXT_CHANNEL_ID}}
-          TEST_VC_ID: ${{secrets.TEST_VC_ID}}
-          TEST_USER_ID: ${{secrets.TEST_USER_ID}}
-          TEST_EVENT_ID: ${{secrets.TEST_EVENT_ID}}
 
   windows: # Windows x64 and x86 build matrix
     permissions:
