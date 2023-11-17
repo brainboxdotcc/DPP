@@ -60,7 +60,7 @@ jobs:
         run: cd build && make -j2
 
       - name: Run unit tests
-        run: cd build/library && ./unittest
+        run: cd build && ctest -VV
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
           TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
@@ -156,6 +156,9 @@ jobs:
         run: cd build && make -j3
         env:
           DONT_RUN_VCPKG: true
+
+      - name: Run offline unit tests
+        run: cd build && ctest -VV
 
   windows: # Windows x64 and x86 build matrix
     permissions:
