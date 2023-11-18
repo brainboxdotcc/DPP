@@ -28,6 +28,6 @@ brew unlink libdpp
 brew uninstall libdpp
 ```
 
-Then, double check inside `/opt/homebrew/lib` and `/opt/homebrew/include` to make sure that libdpp does not exist. If it does, remove files/folders relating to libdpp.
+\note As a precaution, double check inside `/opt/homebrew/lib` and `/opt/homebrew/include` to make sure that libdpp does not exist. If it does, remove files/folders relating to libdpp. If there are files left here and you don't remove them, you may see issues arise with different versions of D++
 
 **Have fun!**
