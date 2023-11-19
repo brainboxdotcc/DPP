@@ -140,7 +140,7 @@ jobs:
       matrix:
         # arm64 is a self-hosted runner on a Mac M2 Mini, ran inside a virtual machine by Archie Jaskowicz.
         cfg:
-          - { arch: 'x64', concurrency: 3, os: ubuntu-20.04, cpp-version: clang++-10, cmake-flags: '', cpack: 'no' }
+          - { arch: 'x64', concurrency: 3, os: [x64, macOS], cpp-version: clang++-10, cmake-flags: '', cpack: 'no' }
           - { arch: 'arm64', concurrency: 2, os: [self-hosted, ARM64, macOS], cpp-version: clang++-15, cmake-flags: '', cpack: 'no' }
     steps:
       - name: Harden Runner
