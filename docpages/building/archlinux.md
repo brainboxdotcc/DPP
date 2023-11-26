@@ -2,7 +2,7 @@
 
 \note You might not have to build the library from source on arch, you can install directly from AUR repo, see the guide \ref install-arch-aur "here".
 
-## 1. Copy & build Source code
+## 1. Copy & Build Source code
 ```bash
 git clone https://github.com/brainboxdotcc/DPP
 cd DPP/
