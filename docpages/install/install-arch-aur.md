@@ -15,7 +15,7 @@ or use your favourite package manager:
 yay -Syu dpp
 ```
 
-\note The package is currently outdated. We are looking for a new maintainer. For now, please use `dpp-git` or build it from \ref build-archlinux "source".
+\note The package is currently outdated. We are looking for a new maintainer. For now, please use `dpp-git` or build it from \ref buildlinux "source".
 
 This will do the following three things:
 
