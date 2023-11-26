@@ -47,7 +47,7 @@ export CPLUS_INCLUDE_PATH=/usr/local/include:$CPLUS_INCLUDE_PATH
 However, if you don't want to change your environment settings, you can use these flags to compile:
 
 ```bash
-g++ -std=c++17 -L/usr/local/lib -I/usr/local/include -ldpp mydppbot.cpp -o dppbot
+g++ -std=c++17 -L/usr/local/lib -I/usr/local/include mydppbot.cpp -o dppbot -ldpp
 ```
 
 The important flags in this command-line are:
@@ -55,9 +55,9 @@ The important flags in this command-line are:
 * `-std=c++17` - Required to compile the headers
 * `-L/usr/local/lib` - Required to tell the linker where libdpp is located.
 * `-I/usr/local/include` - Required to tell the linker where dpp headers are located.
-* `-ldpp` - Link to libdpp.so
 * `mydppbot.cpp` - Your source code
 * `dppbot` - The name of the executable to make
+* `-ldpp` - Link to libdpp.so
 
 \include{doc} install_prebuilt_footer.dox
 
