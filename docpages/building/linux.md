@@ -7,7 +7,8 @@
 git clone https://github.com/brainboxdotcc/DPP
 cd DPP/
 cmake -B ./build -DCMAKE_INSTALL_PREFIX=/usr/
-cmak
+cmake --build ./build -j8
+```
     
 Replace the number after `-j` with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
