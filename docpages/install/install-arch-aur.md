@@ -15,6 +15,8 @@ or use your favourite package manager:
 yay -Sy dpp
 ```
 
+\note If the package is outdated try installing `dpp-git` or build it from [source](/buildarchlinux.html).
+
 This will do the following three things:
 
 - Clone the D++ AUR repository to a directory called `dpp`
