@@ -46,7 +46,6 @@ sudo chmod 644 /usr/local/lib/libdpp.so.10.0.29 && sudo chmod +x /usr/local/lib/
 ```
 
 - You need to specify the location for `libdpp.so` when compilling:
-
 ```bash
 g++ -std=c++17 -I/usr/local/include mydppbot.cpp -o dppbot /usr/local/lib/libdpp.so -Wl,-rpath,/usr/local/lib
 ```
