@@ -19,12 +19,14 @@ cd build
 sudo make install
 ```
 
+\note If you are on Arch Liunx, follow the steps below and set the path to `/usr/` to avoid shared-library conflict.
+
 ## 3. Installation to a Different Directory
 
 If you want to install the library, its dependencies, and header files to a different directory, specify this directory when running `cmake`:
 
 ```bash
-cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
+cmake -B ./build -DCMAKE_INSTALL_PREFIX=/path/to/install
 ```
 
 Then once the build is complete, run `make install` to install to the location you specified.
