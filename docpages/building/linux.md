@@ -2,12 +2,12 @@
 
 \note You might not need to build a copy of the library for Linux - precompiled deb files for 64 bit and 32 bit Debian and Ubuntu are provided in the GitHub version releases. Unless you are on a different Linux distribution which does not support the installation of deb files, or wish to submit fixes and enhancements to the library itself you should have an easier time installing the precompiled version instead.
 
-## 1. Build Source Code
-
+## 1. Copy & Build Source code
 ```bash
-cmake -B ./build
-cmake --build ./build -j8
-```
+git clone https://github.com/brainboxdotcc/DPP
+cd DPP/
+cmake -B ./build -DCMAKE_INSTALL_PREFIX=/usr/
+cmak
     
 Replace the number after `-j` with a number suitable for your setup, usually the same as the number of cores on your machine. `cmake` will fetch any dependencies that are required for you and ensure they are compiled alongside the library.
 
