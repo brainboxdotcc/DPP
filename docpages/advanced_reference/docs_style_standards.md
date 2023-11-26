@@ -36,13 +36,19 @@ All code needs to be a `.cpp` file in the `example_code` folder. You then refere
 
 Your text and images should be in English.
 
+## Images
+
+Images are a great way to show people what they can expect at the end, a lot of tutorials don't have them but don't feel like you can't add any! We ask that you don't add images that aren't inappropriate and only add them if they make sense. Cut them down to a size that is very readable (if possible) and only contains information that is needed, for example, we don't need to see your server's channels list if the tutorial isn't covering it!
+
+Take a look at some tutorial pages (for example, \ref embed-message and \ref callback-functions) to understand what we mean.
+
 ## Grammar and Spelling
 
-Your spelling and grammar matters a lot, it's essential that you get it right. We do have a GitHub Action runner that may flag for incorrect spellings for if you accidentally spell something incorrectly (We're all human!). If this falsely flags you, read the \ref coding-standards page for more information about how to tell it to ignore a word.
+Your spelling and grammar matters a lot, it's essential that you get it right. We do have a GitHub Action runner that may flag for incorrect spellings if you accidentally spell something incorrectly (We're all human!), so keep an eye out for that. If this falsely flags you, read the \ref coding-standards page for more information about how to tell it to ignore a word.
 
 ## Consistency
 
-Try to match other pages if you are making a similar guide (for example, the building from source pages). If the pages are inconsistent, they will start to confuse people.
+Try to match other pages if you are making a similar guide (for example, the building from source pages). If the pages are inconsistent, they will start to confuse people. This also goes for pages that may not even be similar! For example, you should try keep your code examples similar to others, so that people don't get confused and can easily follow along.
 
 ## Being Simplistic
 
@@ -54,10 +60,10 @@ We are strongly against the use of AI within any part of code and docs. AI can b
 
 We also advise you do not use grammarly or other tools that fix your grammar/spelling for you. They can mess with text, get it wrong, not understand the context, etc. Whilst you can certainly use spell checkers and/or tools to see if there's issues with your text, you should look over each issue yourself to make sure if it matches the context and the issue is actually correct.
 
-## Testing
+## Testing Your Changes
 
 To test your commits, you should install `doxygen` and `graphviz`. Then, inside your DPP folder, run `doxygen`. This will start generating a bunch of files inside a `docs` folder and may take a while. After that, view the .md file in your web browser.
 
 If this seems to fail, you can make your PR draft and use the netlify bot that replies with a link (the link may take a bit to generate) to preview your changes.
 
-If you are adding code with your commits, you **need** to test it. Our CI will test it too, but we expect that you at least test it on your end.
+If you are adding code with your commits, you **need** to test it with a bot. Our CI will test it too, but we expect that you at least test it on your end.
