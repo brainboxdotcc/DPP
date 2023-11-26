@@ -6,7 +6,7 @@
 ```bash
 git clone https://github.com/brainboxdotcc/DPP
 cd DPP/
-cmake -B ./build -DCMAKE_INSTALL_PREFIX=/usr/
+cmake -B ./build
 cmake --build ./build -j8
 ```
     
