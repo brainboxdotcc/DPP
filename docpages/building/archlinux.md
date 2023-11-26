@@ -1,14 +1,11 @@
 \page build-archlinux Building on Arch Linux
 
-\note You might not have to build library from source on arch, you can install directly from AUR repo, See the guide [here](/install-arch-aur.html).
+\note You might not have to build the library from source on arch, you can install directly from AUR repo, see the guide \ref install-arch-aur "here".
 
-## 1. Copy Source code
+## 1. Copy & build Source code
 ```bash
 git clone https://github.com/brainboxdotcc/DPP
 cd DPP/
-```
-
-```bash
 cmake -B ./build -DCMAKE_INSTALL_PREFIX=/usr/
 cmake --build ./build -j8
 ```
@@ -31,8 +28,6 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
 ```
 
 Then once the build is complete, run `make install` to install to the location you specified.
-
-\note If you have installed `g++` and not made any changes in enviorment variable related to the path of system headers then you should install in `/usr/` because it is the default system header location on arch.
 
 ## 4. Using the Library
 

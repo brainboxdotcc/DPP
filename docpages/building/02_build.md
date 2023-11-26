@@ -3,6 +3,7 @@
 The way you build D++ varies from system to system. Please follow the guide below for your OS:
 
 * \subpage buildlinux
+* \subpage build-archlinux
 * \subpage buildwindows
 * \subpage buildosx
 * \subpage buildfreebsd

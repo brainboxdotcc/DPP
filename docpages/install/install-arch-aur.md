@@ -15,7 +15,7 @@ or use your favourite package manager:
 yay -Sy dpp
 ```
 
-\note If the package is outdated try installing `dpp-git` or build it from [source](/buildarchlinux.html).
+\note The package is currently outdated. We are looking for a new maintainer. For now, please use `dpp-git` or build it from \ref build-archlinux "source".
 
 This will do the following three things:
 
