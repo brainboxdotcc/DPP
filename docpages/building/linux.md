@@ -2,9 +2,10 @@
 
 \note You might not need to build a copy of the library for Linux - precompiled deb files for 64 bit and 32 bit Debian and Ubuntu are provided in the GitHub version releases. Unless you are on a different Linux distribution which does not support the installation of deb files, or wish to submit fixes and enhancements to the library itself you should have an easier time installing the precompiled version instead.
 
-## 1. Build Source Code
-
+## 1. Copy & Build Source code
 ```bash
+git clone https://github.com/brainboxdotcc/DPP
+cd DPP/
 cmake -B ./build
 cmake --build ./build -j8
 ```
@@ -23,7 +24,7 @@ sudo make install
 If you want to install the library, its dependencies, and header files to a different directory, specify this directory when running `cmake`:
 
 ```bash
-cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
+cmake -B ./build -DCMAKE_INSTALL_PREFIX=/path/to/install
 ```
 
 Then once the build is complete, run `make install` to install to the location you specified.
@@ -36,12 +37,27 @@ Once installed to the `/usr/local` directory, you can make use of the library in
 g++ -std=c++17 mydppbot.cpp -o dppbot -ldpp
 ```
 
+If you are on **Arch Linux**, you will need to add `/usr/local` to your environment variables:
+
+```bash
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export CPLUS_INCLUDE_PATH=/usr/local/include:$CPLUS_INCLUDE_PATH
+```
+
+However, if you don't want to change your environment settings, you can use these flags to compile:
+
+```bash
+g++ -std=c++17 -L/usr/local/lib -I/usr/local/include mydppbot.cpp -o dppbot -ldpp
+```
+
 The important flags in this command-line are:
 
 * `-std=c++17` - Required to compile the headers
-* `-ldpp` - Link to libdpp.so
+* `-L/usr/local/lib` - Required to tell the linker where libdpp is located.
+* `-I/usr/local/include` - Required to tell the linker where dpp headers are located.
 * `mydppbot.cpp` - Your source code
 * `dppbot` - The name of the executable to make
+* `-ldpp` - Link to libdpp.so
 
 \include{doc} install_prebuilt_footer.dox
 
