@@ -12,7 +12,7 @@ or use your favourite package manager:
 
 ```bash
 # example with `yay` (without root)
-yay -Sy dpp
+yay -Syu dpp
 ```
 
 \note The package is currently outdated. We are looking for a new maintainer. For now, please use `dpp-git` or build it from \ref build-archlinux "source".
