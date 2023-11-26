@@ -37,27 +37,31 @@ Once installed to the `/usr/local` directory, you can make use of the library in
 g++ -std=c++17 mydppbot.cpp -o dppbot -ldpp
 ```
 
-If you are on **Arch Linux**, you will need to add `/usr/local` to your environment variables:
+If you are on **Arch Linux**:
 
+- You need to give proper permission to `libdpp.so` and `libdpp.so.10.0.29`
 ```bash
-export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-export CPLUS_INCLUDE_PATH=/usr/local/include:$CPLUS_INCLUDE_PATH
+sudo chmod 644 /usr/local/lib/libdpp.so && sudo chmod +x /usr/local/lib/dpp.so
+sudo chmod 644 /usr/local/lib/libdpp.so.10.0.29 && sudo chmod +x /usr/local/lib/dpp.so.10.0.29
 ```
 
-However, if you don't want to change your environment settings, you can use these flags to compile:
+- You need to specify the location for `libdpp.so` when compilling:
 
 ```bash
-g++ -std=c++17 -L/usr/local/lib -I/usr/local/include mydppbot.cpp -o dppbot -ldpp
+g++ -std=c++17 -I/usr/local/include mydppbot.cpp -o dppbot /usr/local/lib/libdpp.so -Wl,-rpath,/usr/local/lib
 ```
 
 The important flags in this command-line are:
 
 * `-std=c++17` - Required to compile the headers
-* `-L/usr/local/lib` - Required to tell the linker where libdpp is located.
-* `-I/usr/local/include` - Required to tell the linker where dpp headers are located.
+* `-L/usr/local/lib` - Required to tell the linker where libdpp is located
+* `-I/usr/local/include` - Required to tell the linker where dpp headers are located
 * `mydppbot.cpp` - Your source code
 * `dppbot` - The name of the executable to make
 * `-ldpp` - Link to libdpp.so
+* `/usr/local/lib/libdpp.so` - Required to specifies the path to the shared library
+* `-Wl` - Required to pass options directly to the linker
+* `-rpath,/usr/local/lib` - Required to specifies the runtime library search path
 
 \include{doc} install_prebuilt_footer.dox
 
