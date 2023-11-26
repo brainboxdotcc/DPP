@@ -37,12 +37,27 @@ Once installed to the `/usr/local` directory, you can make use of the library in
 g++ -std=c++17 mydppbot.cpp -o dppbot -ldpp
 ```
 
+If you are on Arch Linux you can add `/usr/local` to your enviorment variable:
+
+```bash
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+export CPLUS_INCLUDE_PATH=/usr/local/include:$CPLUS_INCLUDE_PATH
+```
+
+OR if you dont want to change your enviorment you can use add these flags while compiling.
+
+```bash
+g++ -std=c++17 mydppbot.cpp -o dppbot -I/usr/local/include -L/usr/local/lib -ldpp
+```
+
 The important flags in this command-line are:
 
 * `-std=c++17` - Required to compile the headers
-* `-ldpp` - Link to libdpp.so
 * `mydppbot.cpp` - Your source code
 * `dppbot` - The name of the executable to make
+* `-I/usr/local/include` - This include `/usr/local/include` directory to find header file
+* `-L/usr/local/lib` - This include `/usr/local/lib` directory to find libraries file
+* `-ldpp` - Link to libdpp.so
 
 \include{doc} install_prebuilt_footer.dox
 
