@@ -19,7 +19,7 @@ cd build
 sudo make install
 ```
 
-\note If you are on Arch Liunx, follow the steps below and set the path to `/usr/` to avoid shared-library conflict.
+\note If you are on Arch Linux, follow the steps below and set the path to `/usr/` to avoid shared-library conflict.
 
 ## 3. Installation to a Different Directory
 
