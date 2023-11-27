@@ -1,4 +1,4 @@
-\page docs_standards Documentation Style Standards
+\page docs-standards Documentation Style Standards
 
 This page lists the documentation standards that you must follow when making PRs for files in `docpages`, this does not mean documentation for functions/variables inside actual code. If something is not covered here, ask on the [official Discord server](https://discord.gg/dpp)!
 
@@ -14,7 +14,7 @@ All subpages should be added like so: `* \ subpage <page_name>`, with the space 
 
 ## Page and File Names
 
-The naming convention for page names follows the same style convention as our code docs (`snake_case`), so you should name pages and files something like `name_of_page`, with `.md` added to the end of the file name.
+The naming convention for page and file names are `kebab-case`, so you should name pages and files something like `name-of-page`, with `.md` added to the end of the file name.
 
 \note There are pages that do not follow this format, **please do not change them**. This is explained in the **Renaming Files** section.
 
@@ -45,6 +45,8 @@ Your text and images should be in English.
 Images are a great way to show people what they can expect at the end, a lot of tutorials don't have them but don't feel like you can't add any! We ask that you don't add images that are inappropriate and only add them if they make sense. Cut them down to a size that is readable and make sure it only contains information that is needed, for example, we don't need to see your server's channels list if the tutorial isn't covering it!
 
 Take a look at some tutorial pages (for example, \ref embed-message and \ref callback-functions) to understand what we mean.
+
+All your images should be placed in the `images` folder and should be named similar to your page's name. If you have multiple images, you can either do something like `image_name2`, `image_name3`, and so on. You can also give them unique names like `image_name_overview`, `image_name_end`, and so on.
 
 ## Grammar and Spelling
 
