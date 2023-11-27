@@ -12,17 +12,21 @@ Adding a new page requires you to also add the page as a subpage to a section. F
 
 All subpages should be added like so: `* \ subpage <page_name>`, with the space between `\` and `subpage` removed.
 
-## Page Titles and file Names
+## Page and File Names
 
-The naming convention for this follows the same style convention as our code docs (snake case), so you should title pages and name files something like: `name_of_page`.
+The naming convention for page names follows the same style convention as our code docs (`snake_case`), so you should name pages and files something like `name_of_page`, with `.md` added to the end of the file name.
 
-\note There are pages that do not follow this format, **please do not change them**. This is explained in the section below.
+\note There are pages that do not follow this format, **please do not change them**. This is explained in the **Renaming Files** section.
 
-## Renaming files
+## Page Titles
+
+Page titles shouldn't be mistaken with page names! Page titles are the, sometimes, long-ish titles you see in the navbar on the left of the docs page or at the top of each page when you view it in a web browser. Try not to make these too long (80 chars is the max limit but reach for less) as it's a bit daunting seeing a long title!
+
+## Renaming Files
 
 Renaming `.md` files is something that shouldn't really be done unless you have a very good reason. Changing it harms our SEO, meaning google will get a bit confused.
 
-Changing images or files inside "example_code" is more acceptable, however, still shouldn't be done without reason.
+Changing images in the `images` folder or files inside the `example_code` folder is more acceptable, however, still shouldn't be done without reason.
 
 ## Referencing Other Pages
 
@@ -38,7 +42,7 @@ Your text and images should be in English.
 
 ## Images
 
-Images are a great way to show people what they can expect at the end, a lot of tutorials don't have them but don't feel like you can't add any! We ask that you don't add images that aren't inappropriate and only add them if they make sense. Cut them down to a size that is very readable (if possible) and only contains information that is needed, for example, we don't need to see your server's channels list if the tutorial isn't covering it!
+Images are a great way to show people what they can expect at the end, a lot of tutorials don't have them but don't feel like you can't add any! We ask that you don't add images that are inappropriate and only add them if they make sense. Cut them down to a size that is readable and make sure it only contains information that is needed, for example, we don't need to see your server's channels list if the tutorial isn't covering it!
 
 Take a look at some tutorial pages (for example, \ref embed-message and \ref callback-functions) to understand what we mean.
 
