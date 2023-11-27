@@ -16,6 +16,8 @@ All subpages should be added like so: `* \ subpage <page_name>`, with the space 
 
 The naming convention for page and file names are `kebab-case`, so you should name pages and files something like `name-of-page`, with `.md` added to the end of the file name.
 
+However, code files should be `snake_case` to follow the \ref coding-standards. Images follow the same format.
+
 \note There are pages that do not follow this format, **please do not change them**. This is explained in the **Renaming Files** section.
 
 ## Page Titles
@@ -35,6 +37,13 @@ Pages located within our file structure should be referenced like `\ ref <page_n
 ## Adding Code to Examples
 
 All code needs to be a `.cpp` file in the `example_code` folder. You then reference it via `\ include{cpp} file.cpp`, with the space between `\` and `include{cpp}` removed.
+
+Any code that will **not** build, for example:
+```cpp
+bot.start(dpp::st_wait);
+/* This code will not build as it has no entry (int main), which will cause CI fails. */
+```
+should be placed in the file itself. This is so we do not have to worry about the CI testing your example when we know it will not work.
 
 ## Language (Not Programming)
 
