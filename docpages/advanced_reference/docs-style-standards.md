@@ -53,7 +53,7 @@ Your text and images should be in English.
 
 ## Images
 
-Images are a great way to show people how their bot should act when they're finished with the tutorial! A lot of tutorials don't have them, but we do recommend that you add some as, not only does it tell us that you've tested you example, but it helps users know if they've went wrong! We ask that you don't add images that are inappropriate and only add them if they make sense. Cut them down to a size that is readable and make sure it only contains information that is needed, for example, we don't need to see your server's channels list if the tutorial isn't covering it!
+Images are a great way to show people how their bot should act when they're finished with the tutorial! A lot of tutorials don't have them, however, we recommend that you add some as, not only does it tell us that you've tested your example, but it helps users know if they've went wrong! We ask that you don't add images that are inappropriate and only add them if they make sense. Cut them down to a size that is readable and make sure it only contains information that is needed, for example, we don't need to see your server's channels list if the tutorial isn't covering it!
 
 Take a look at some tutorial pages (for example, \ref embed-message and \ref callback-functions) to understand what we mean.
 
