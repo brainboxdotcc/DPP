@@ -45,13 +45,15 @@ bot.start(dpp::st_wait);
 ```
 should be placed in the file itself. This is so we do not have to worry about the CI testing your example when we know it will not work.
 
+Your examples **need** to be tested. For more information about this, visit the **Testing Your Changes** section.
+
 ## Language (Not Programming)
 
 Your text and images should be in English.
 
 ## Images
 
-Images are a great way to show people what they can expect at the end, a lot of tutorials don't have them but don't feel like you can't add any! We ask that you don't add images that are inappropriate and only add them if they make sense. Cut them down to a size that is readable and make sure it only contains information that is needed, for example, we don't need to see your server's channels list if the tutorial isn't covering it!
+Images are a great way to show people how their bot should act when they're finished with the tutorial! A lot of tutorials don't have them, however, we recommend that you add some as, not only does it tell us that you've tested your example, but it helps users know if they've went wrong! We ask that you don't add images that are inappropriate and only add them if they make sense. Cut them down to a size that is readable and make sure it only contains information that is needed, for example, we don't need to see your server's channels list if the tutorial isn't covering it!
 
 Take a look at some tutorial pages (for example, \ref embed-message and \ref callback-functions) to understand what we mean.
 
@@ -81,4 +83,4 @@ To test your commits, you should install `doxygen` and `graphviz`. Then, inside 
 
 If this seems to fail, you can make your PR draft and use the netlify bot that replies with a link (the link may take a bit to generate) to preview your changes.
 
-If you are adding code with your commits, you **need** to test it with a bot. Our CI will test it too, but we expect that you at least test it on your end.
+If you are adding code with your commits, you **need** to test that it actually works with a bot. Our CI will test compile it but will not run it, we expect that you test it on your system and ensure you are giving the correct information to users.
