@@ -100,7 +100,7 @@ The `event.reply` function (dpp::slashcommand_t::reply) replies to a slash comma
 
 To make the bot start, we must call the dpp::cluster::start method, e.g. in our program by using `bot.start(dpp::st_wait)`.
 
-We also add a line to tell the library to output all its log information to the console, use `bot.on_log(dpp::utility::cout_logger());` (dpp::utility::cout_logger) - if you wanted to do something more advanced, you can replace this parameter with a lambda just like all other events.
+We also add a line to tell the library to output all its log information to the console, `bot.on_log(dpp::utility::cout_logger());` - if you wanted to do something more advanced, you can replace this parameter with a lambda just like all other events.
 
 The parameter which we set to false indicates if the function should return once all shards are created. Passing dpp::st_wait here tells the program you do not need to do anything once `bot.start` is called.
 
