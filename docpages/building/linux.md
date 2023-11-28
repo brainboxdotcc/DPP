@@ -41,8 +41,7 @@ If you are on **Arch Linux**:
 
 - You need to give proper permission to `libdpp.so` and `libdpp.so.10.0.29`
 ```bash
-sudo chmod 644 /usr/local/lib/libdpp.so && sudo chmod +x /usr/local/lib/dpp.so
-sudo chmod 644 /usr/local/lib/libdpp.so.10.0.29 && sudo chmod +x /usr/local/lib/dpp.so.10.0.29
+sudo chmod 755 /usr/local/lib/libdpp.so.10.0.29
 ```
 
 - You need to specify the location for `libdpp.so` when compilling:
@@ -58,9 +57,9 @@ The important flags in this command-line are:
 * `mydppbot.cpp` - Your source code
 * `dppbot` - The name of the executable to make
 * `-ldpp` - Link to libdpp.so
-* `/usr/local/lib/libdpp.so` - Required to specifies the path to the shared library
+* `/usr/local/lib/libdpp.so` - Required to specify the path to the shared library
 * `-Wl` - Required to pass options directly to the linker
-* `-rpath,/usr/local/lib` - Required to specifies the runtime library search path
+* `-rpath,/usr/local/lib` - Required to specify the runtime library search path
 
 \include{doc} install_prebuilt_footer.dox
 
