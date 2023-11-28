@@ -32,13 +32,40 @@ namespace dpp {
  * @brief Bit mask flags relating to voice states
  */
 enum voicestate_flags {
-	vs_deaf		=	0b00000001,	//!< Deafened by the server
-	vs_mute		=	0b00000010,	//!< Muted by the server
-	vs_self_mute	=	0b00000100,	//!< Locally Muted
-	vs_self_deaf	=	0b00001000,	//!< Locally deafened
-	vs_self_stream	=	0b00010000,	//!< Whether this user is streaming using "Go Live"
-	vs_self_video	=	0b00100000,	//!< Whether this user's camera is enabled
-	vs_suppress	=	0b01000000	//!< Whether this user's permission to speak is denied
+	/**
+	 * @brief Deafened by the server.
+	 */
+	vs_deaf	= 0b00000001,
+
+	/**
+	 * @brief Muted by the server.
+	 */
+	vs_mute	= 0b00000010,
+
+	/**
+	 * @brief Locally Muted.
+	 */
+	vs_self_mute = 0b00000100,
+
+	/**
+	 * @brief Locally deafened.
+	 */
+	vs_self_deaf = 0b00001000,
+
+	/**
+	 * @brief Whether this user is streaming using "Go Live".
+	 */
+	vs_self_stream = 0b00010000,
+
+	/**
+	 * @brief Whether this user's camera is enabled.
+	 */
+	vs_self_video =	0b00100000,
+
+	/**
+	 * @brief Whether this user's permission to speak is denied.
+	 */
+	vs_suppress = 0b01000000
 };
 
 /**
@@ -59,13 +86,44 @@ protected:
 	voicestate& fill_from_json_impl(nlohmann::json* j);
 
 public:
-	class discord_client*	shard;             //!< Owning shard
-	snowflake		guild_id;          //!< Optional: the guild id this voice state is for
-	snowflake		channel_id;        //!< the channel id this user is connected to (may be empty)
-	snowflake		user_id;           //!< the user id this voice state is for
-	std::string		session_id;        //!< the session id for this voice state
-	uint8_t			flags;             //!< Voice state flags (see dpp::voicestate_flags)
-	time_t			request_to_speak;  //!< The time at which the user requested to speak, or 0
+	/**
+	 * @brief Owning shard.
+	 */
+	class discord_client* shard;
+
+	/**
+	 * @brief Optional: The guild id this voice state is for.
+	 */
+	snowflake guild_id{0};
+
+	/**
+	 * @brief The channel id this user is connected to.
+	 *
+	 * @note This may be empty.
+	 */
+	snowflake channel_id{0};
+
+	/**
+	 * @brief The user id this voice state is for.
+	 */
+	snowflake user_id{0};
+
+	/**
+	 * @brief The session id for this voice state.
+	 */
+	std::string session_id;
+
+	/**
+	 * @brief Voice state flags from dpp::voicestate_flags.
+	 */
+	uint8_t	flags{0};
+
+	/**
+	 * @brief The time at which the user requested to speak.
+	 *
+	 * @note If the user never requested to speak, this is 0.
+	 */
+	time_t request_to_speak{0};
 
 	/**
 	 * @brief Construct a new voicestate object
@@ -77,26 +135,41 @@ public:
 	 */
 	virtual ~voicestate() = default;
 
-	/// Return true if the user is deafened by the server
+	/**
+	 * @brief Return true if the user is deafened by the server.
+	 */
 	bool is_deaf() const;
 
-	/// Return true if the user is muted by the server
+	/**
+	 * @brief Return true if the user is muted by the server.
+	 */
 	bool is_mute() const;
 
-	/// Return true if user muted themselves
+	/**
+	 * @brief Return true if user muted themselves.
+	 */
 	bool is_self_mute() const;
 
-	/// Return true if user deafened themselves
+	/**
+	 * @brief Return true if user deafened themselves.
+	 */
 	bool is_self_deaf() const;
 
-	/// Return true if the user is streaming using "Go Live"
+	/**
+	 * @brief Return true if the user is streaming using "Go Live".
+	 */
 	bool self_stream() const;
 
-	/// Return true if the user's camera is enabled
+	/**
+	 * @brief Return true if the user's camera is enabled.
+	 */
 	bool self_video() const;
 
-	/// Return true if user is suppressed.
-	/// "HELP HELP I'M BEING SUPPRESSED!"
+	/**
+	 * @brief Return true if user is suppressed.
+	 *
+	 * "HELP HELP I'M BEING SUPPRESSED!"
+	 */
 	bool is_suppressed() const;
 };
 

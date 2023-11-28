@@ -36,21 +36,44 @@ namespace dpp {
  * @brief Represents the type of a component
  */
 enum component_type : uint8_t {
-	/// Action row, a container for other components
+	/**
+	 * @brief Action row, a container for other components.
+	 */
 	cot_action_row = 1,
-	/// Clickable button
+
+	/**
+	 * @brief Clickable button.
+	 */
 	cot_button = 2,
-	/// Select menu for picking from defined text options
+
+	/**
+	 * @brief Select menu for picking from defined text options.
+	 */
 	cot_selectmenu = 3,
-	/// Text input
+
+	/**
+	 * @brief Text input.
+	 */
 	cot_text = 4,
-	/// Select menu for users
+
+	/**
+	 * @brief Select menu for users.
+	 */
 	cot_user_selectmenu = 5,
-	/// Select menu for roles
+
+	/**
+	 * @brief Select menu for roles.
+	 */
 	cot_role_selectmenu = 6,
-	/// Select menu for mentionables (users and roles)
+
+	/**
+	 * @brief Select menu for mentionables (users and roles).
+	 */
 	cot_mentionable_selectmenu = 7,
-	/// Select menu for channels
+
+	/**
+	 * @brief Select menu for channels.
+	 */
 	cot_channel_selectmenu = 8,
 };
 
@@ -92,12 +115,41 @@ struct component_emoji {
 };
 
 /**
+ * @brief The data for a file attached to a message.
+ *
+ * @todo Change the naming of this and make stickers (and potentially anything else that has data like this) use this.
+ */
+struct message_file_data {
+	/**
+	 * @brief Name of file to upload (for use server-side in discord's url).
+	 */
+	std::string name{};
+
+	/**
+	 * @brief File content to upload (raw binary)
+	 */
+	std::string content{};
+
+	/**
+	 * @brief Mime type of files to upload.
+	 *
+	 * @todo Look at turning this into an enum? This would allow people to easily compare mimetypes if they happen to change.
+	 */
+	std::string mimetype{};
+};
+
+/**
  * @brief Types of text input
  */
 enum text_style_type : uint8_t {
-	/// Intended for short single-line text.
+	/**
+	 * @brief Intended for short single-line text.
+	 */
 	text_short = 1,
-	/// Intended for much longer inputs.
+
+	/**
+	 * @brief Intended for much longer inputs.
+	 */
 	text_paragraph = 2,
 };
 
@@ -105,15 +157,29 @@ enum text_style_type : uint8_t {
  * @brief Represents the style of a button
  */
 enum component_style : uint8_t {
-	/// Blurple
+	/**
+	 * @brief Blurple
+	 */
 	cos_primary = 1,
-	/// Grey
+
+	/**
+	 * @brief Grey
+	 */
 	cos_secondary,
-	/// Green
+
+	/**
+	 * @brief Green
+	 */
 	cos_success,
-	/// Red
+
+	/**
+	 * @brief Red
+	 */
 	cos_danger,
-	/// An external hyperlink to a website
+
+	/**
+	 * @brief An external hyperlink to a website
+	 */
 	cos_link
 };
 
@@ -136,6 +202,7 @@ struct DPP_EXPORT component_default_value {
 	 * @brief The type this default value represents
 	 */
 	component_default_value_type type;
+
 	/**
 	 * @brief Default value. ID of a user, role, or channel
 	 */
@@ -160,14 +227,17 @@ public:
 	 * @brief User-facing name of the option
 	 */
 	std::string label;
+
 	/**
 	 * @brief Dev-defined value of the option
 	 */
 	std::string value;
+
 	/**
 	 * @brief Additional description of the option
 	 */
 	std::string description;
+
 	/**
 	 * @brief True if option is the default option
 	 */
@@ -271,85 +341,107 @@ protected:
 	component& fill_from_json_impl(nlohmann::json* j);
 
 public:
-	/** Component type, either a button or action row
+	/**
+	 * @brief Component type, either a button or action row
 	 */
 	component_type type;
 
-	/** Sub components, buttons on an action row
+	/**
+	 * @brief Sub components, buttons on an action row
 	 */
 	std::vector<component> components;
 
-	/** Component label (for buttons, text inputs).
+	/**
+	 * @brief Component label (for buttons, text inputs).
 	 * Maximum of 80 characters.
 	 */
 	std::string label;
 
-	/** Component style (for buttons)
+	/**
+	 * @brief Component style (for buttons).
 	 */
 	component_style style;
 
 	/**
-	 * @brief Text style (for text inputs)
+	 * @brief Text style (for text inputs).
 	 */
 	text_style_type text_style;
 
-	/** Component id (for buttons, menus, text inputs).
+	/**
+	 * @brief Component id (for buttons, menus, text inputs).
 	 * Maximum of 100 characters.
 	 */
 	std::string custom_id;
 
-	/** URL for link types (dpp::cos_link).
+	/**
+	 * @brief URL for link types (dpp::cos_link).
 	 * Maximum of 512 characters.
 	 */
 	std::string url;
 
-	/** Placeholder text for select menus and text inputs (max 150 characters)
+	/**
+	 * @brief Placeholder text for select menus and text inputs (max 150 characters)
 	 */
 	std::string placeholder;
 
-	/** Minimum number of items that must be chosen for a select menu (0-25).
-	 * Default is -1 to not set this
+	/**
+	 * @brief Minimum number of items that must be chosen for a select menu (0-25).
+	 *
+	 * @note Use -1 to not set this. This is done by default.
 	 */
 	int32_t min_values;
 
-	/** Maximum number of items that can be chosen for a select menu (0-25).
-	 * Default is -1 to not set this
+	/**
+	 * @brief Maximum number of items that can be chosen for a select menu (0-25).
+	 *
+	 * @note Use -1 to not set this. This is done by default.
 	 */
 	int32_t max_values;
 
-	/** Minimum length for text input (0-4000)
+	/**
+	 * @brief Minimum length for text input (0-4000)
 	 */
 	int32_t min_length;
 
-	/** Maximum length for text input (1-4000)
+	/**
+	 * @brief Maximum length for text input (1-4000)
 	 */
 	int32_t max_length;
 
-	/** Select options for select menus. Only required and available for select menus of type dpp::cot_selectmenu
+	/**
+	 * @brief Select options for select menus.
+	 *
+	 * @warning Only required and available for select menus of type dpp::cot_selectmenu
 	 */
 	std::vector<select_option> options;
 
-	/** List of channel types (dpp::channel_type) to include in the channel select component (dpp::cot_channel_selectmenu)
+	/**
+	 * @brief List of channel types (dpp::channel_type) to include in the channel select component (dpp::cot_channel_selectmenu)
 	 */
 	std::vector<uint8_t> channel_types;
 
 	/**
-	 * List of default values for auto-populated select menu components. The amount of default values must be in the range defined by dpp::component::min_value and dpp::component::max_values.
+	 * @brief List of default values for auto-populated select menu components.
 	 *
-	 * @note Only available for auto-populated select menu components, which include dpp::cot_user_selectmenu, dpp::cot_role_selectmenu, dpp::cot_mentionable_selectmenu, and dpp::cot_channel_selectmenu components.
+	 * @note The amount of default values must be in the range defined by dpp::component::min_values and dpp::component::max_values.
+	 *
+	 * @warning Only available for auto-populated select menu components, which include dpp::cot_user_selectmenu, dpp::cot_role_selectmenu, dpp::cot_mentionable_selectmenu, and dpp::cot_channel_selectmenu components.
 	 */
 	std::vector<component_default_value> default_values;
 
-	/** Disabled flag (for buttons)
+	/**
+	 * @brief Disabled flag (for buttons)
 	 */
 	bool disabled;
 
-	/** Whether the text input is required to be filled
+	/**
+	 * @brief Whether the text input is required to be filled
 	 */
 	bool required;
 
-	/** Value of the modal (filled or valid when populated from an
-	 * on_form_submit event, or from the set_value function)
+	/**
+	 * @brief Value of the modal.
+	 * Filled or valid when populated from an on_form_submit event, or from the set_value function.
 	 */
 	std::variant<std::monostate, std::string, int64_t, double> value;
 
@@ -358,11 +450,13 @@ public:
 	 */
 	component_emoji emoji;
 
-	/** Constructor
+	/**
+	 * @brief Constructor
 	 */
 	component();
 
-	/** Destructor
+	/**
+	 * @brief Destructor
 	 */
 	virtual ~component() = default;
 
@@ -559,28 +653,41 @@ public:
  * @brief A footer in a dpp::embed
  */
 struct DPP_EXPORT embed_footer {
-	/** Footer text */
+	/**
+	 * @brief Footer text
+	 */
 	std::string text;
-	/** Footer icon url (only supports http(s) and attachments) */
+
+	/**
+	 * @brief Footer icon url.
+	 *
+	 * @warning Only supports http(s) and attachments.
+	 */
 	std::string icon_url;
-	/** Proxied icon url */
+
+	/**
+	 * @brief Proxied icon url.
+	 */
 	std::string proxy_url;
 
-	/** Set footer's text. Returns footer itself so these methods may be "chained"
+	/**
+	 * @brief Set footer's text.
 	 * @param t string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed_footer& set_text(const std::string& t);
 
-	/** Set footer's icon url. Returns footer itself so these methods may be "chained"
+	/**
+	 * @brief Set footer's icon url.
 	 * @param i url to set as footer icon url
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed_footer& set_icon(const std::string& i);
 
-	/** Set footer's proxied icon url. Returns footer itself so these methods may be "chained"
+	/**
+	 * @brief Set footer's proxied icon url.
 	 * @param p url to set as footer proxied icon url
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed_footer& set_proxy(const std::string& p);
 };
@@ -589,13 +696,24 @@ struct DPP_EXPORT embed_footer {
  * @brief An video, image or thumbnail in a dpp::embed
  */
 struct DPP_EXPORT embed_image {
-	/** URL to image or video */
+	/**
+	 * @brief URL to image or video.
+	 */
 	std::string url;
-	/** Proxied image url */
+
+	/**
+	 * @brief Proxied image url.
+	 */
 	std::string proxy_url;
-	/** Height (calculated by discord) */
+
+	/**
+	 * @brief Height (calculated by discord).
+	 */
 	std::string height;
-	/** Width (calculated by discord) */
+
+	/**
+	 * @brief Width (calculated by discord).
+	 */
 	std::string width;
 };
 
@@ -603,9 +721,14 @@ struct DPP_EXPORT embed_image {
  * @brief Embed provider in a dpp::embed. Received from discord but cannot be sent
  */
 struct DPP_EXPORT embed_provider {
-	/** Provider name */
+	/**
+	 * @brief Provider name.
+	 */
 	std::string name;
-	/** Provider URL */
+
+	/**
+	 * @brief Provider URL.
+	 */
 	std::string url;
 };
 
@@ -613,186 +736,298 @@ struct DPP_EXPORT embed_provider {
  * @brief Author within a dpp::embed object
  */
 struct DPP_EXPORT embed_author {
-	/** Author name */
+	/**
+	 * @brief Author name.
+	 */
 	std::string name;
-	/** Author url (only supports http(s)) */
+
+	/**
+	 * @brief Author url.
+	 *
+	 * @warning Only supports http(s).
+	 */
 	std::string url;
-	/** Author icon url (only supports http(s) and attachments) */
+
+	/**
+	 * @brief Author icon url.
+	 *
+	 * @warning Only supports http(s) and attachments.
+	 */
 	std::string icon_url;
-	/** Proxied icon url */
+
+	/**
+	 * @brief Proxied icon url.
+	 */
 	std::string proxy_icon_url;
 };
 
 /**
- * @brief A dpp::embed may contain zero or more fields
+ * @brief A dpp::embed may contain zero or more fields.
  */
 struct DPP_EXPORT embed_field {
-	/** Name of field (max length 256) */
+	/**
+	 * @brief Name of field (max length 256).
+	 */
 	std::string name;
-	/** Value of field (max length 1024) */
+
+	/**
+	 * @brief Value of field (max length 1024).
+	 */
 	std::string value;
-	/** True if the field is to be displayed inline */
+
+	/**
+	 * @brief True if the field is to be displayed inline.
+	 */
 	bool is_inline;
 };
 
 /**
- * @brief A rich embed for display within a dpp::message
+ * @brief A rich embed for display within a dpp::message.
  */
 struct DPP_EXPORT embed {
-	/** Optional: title of embed */
-	std::string			title;
-	/** Optional: type of embed (always "rich" for webhook embeds) */
-	std::string			type;
-	/** Optional: description of embed */
-	std::string			description;
-	/** Optional: url of embed */
-	std::string			url;
-	/** Optional: timestamp of embed content */
-	time_t				timestamp;
-	/** Optional: color code of the embed */
-	std::optional<uint32_t>			color;
-	/** Optional: footer information */
-	std::optional<embed_footer>	footer;
-	/** Optional: image information */
-	std::optional<embed_image>	image;
-	/** Optional: thumbnail information */
-	std::optional<embed_image>	thumbnail;
-	/** Optional: video information (can't send these) */
-	std::optional<embed_image>	video;
-	/** Optional: provider information (can't send these) */
-	std::optional<embed_provider>	provider;
-	/** Optional: author information */
-	std::optional<embed_author>	author;
-	/** Optional: fields information */
-	std::vector<embed_field>	fields;
+	/**
+	 * @brief Optional: Title of embed.
+	 */
+	std::string title;
 
-	/** Constructor */
+	/**
+	 * @brief Optional: Type of embed.
+	 *
+	 * @note Always "rich" for webhook embeds.
+	 */
+	std::string type;
+
+	/**
+	 * @brief Optional: Description of embed.
+	 */
+	std::string description;
+
+	/**
+	 * @brief Optional: URL of embed.
+	 */
+	std::string url;
+
+	/**
+	 * @brief Optional: Timestamp of embed content.
+	 */
+	time_t timestamp;
+
+	/**
+	 * @brief Optional: Color code of the embed.
+	 */
+	std::optional<uint32_t>	color;
+
+	/**
+	 * @brief Optional: Footer information.
+	 */
+	std::optional<embed_footer> footer;
+
+	/**
+	 * @brief Optional: Image information.
+	 */
+	std::optional<embed_image> image;
+
+	/**
+	 * @brief Optional: Thumbnail information.
+	 */
+	std::optional<embed_image> thumbnail;
+
+	/**
+	 * @brief Optional: Video information
+	 *
+	 * @warning Can't send this.
+	 */
+	std::optional<embed_image> video;
+
+	/**
+	 * @brief Optional: Provider information.
+	 *
+	 * @warning Can't send this.
+	 */
+	std::optional<embed_provider> provider;
+
+	/**
+	 * @brief Optional: Author information.
+	 */
+	std::optional<embed_author> author;
+
+	/**
+	 * @brief Optional: Fields information.
+	 */
+	std::vector<embed_field> fields;
+
+	/**
+	 * @brief Constructor
+	 */
 	embed();
 
-	/** Constructor to build embed from json object
+	/**
+	 * @brief Constructor to build embed from json object
 	 * @param j JSON to read content from
 	 */
 	embed(nlohmann::json* j);
 
-	/** Destructor */
+	/**
+	 * @brief Destructor
+	 */
 	~embed();
 
-	/** Set embed title. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed title.
 	 * @param text The text of the title. It will be truncated to the maximum length of 256 UTF-8 characters.
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_title(const std::string &text);
 
-	/** Set embed description. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed description.
 	 * @param text The text of the title. It will be truncated to the maximum length of 4096 UTF-8 characters.
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_description(const std::string &text);
 
-	/** Set the footer of the embed. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set the footer of the embed.
 	 * @param f the footer to set
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_footer(const embed_footer& f);
 
-	 /** Set the footer of the embed. Returns the embed itself so these method calls may be "chained"
-	  * @param text string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
-	  * @param icon_url an url to set as footer icon url (only supports http(s) and attachments)
-	  * @return A reference to self
-	  */
+	/**
+	 * @brief Set the footer of the embed.
+	 * @param text string to set as footer text. It will be truncated to the maximum length of 2048 UTF-8 characters.
+	 * @param icon_url an url to set as footer icon url (only supports http(s) and attachments)
+	 * @return A reference to self so this method may be "chained".
+	 */
 	embed& set_footer(const std::string& text, const std::string& icon_url);
 
-	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed colour.
 	 * @param col The colour of the embed
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_color(uint32_t col);
 
-	/** Set embed colour. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed colour.
 	 * @param col The colour of the embed
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_colour(uint32_t col);
 
-	/** Set embed timestamp. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed timestamp.
 	 * @param tstamp The timestamp to show in the footer, should be in UTC
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_timestamp(time_t tstamp);
 
-	/** Set embed url. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed url.
 	 * @param url the url of the embed
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_url(const std::string &url);
 
-	/** Add an embed field. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Add an embed field.
 	 * @param name The name of the field. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @param value The value of the field. It will be truncated to the maximum length of 1024 UTF-8 characters.
 	 * @param is_inline Whether or not to display the field 'inline' or on its own line
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& add_field(const std::string& name, const std::string &value, bool is_inline = false);
 
-	/** Set embed author. Returns the embed itself so these method calls may be "chained" 
+	/**
+	 * @brief Set embed author.
 	 * @param a The author to set
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */ 
 	embed& set_author(const dpp::embed_author& a);
 
-	/** Set embed author. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed author.
 	 * @param name The name of the author. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @param url The url of the author (only supports http(s))
 	 * @param icon_url The icon URL of the author (only supports http(s) and attachments)
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_author(const std::string& name, const std::string& url, const std::string& icon_url);
 
-	/** Set embed provider. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed provider.
 	 * @param name The provider name. It will be truncated to the maximum length of 256 UTF-8 characters.
 	 * @param url The provider url
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_provider(const std::string& name, const std::string& url);
 
-	/** Set embed image. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed image.
 	 * @param url The embed image URL (only supports http(s) and attachments)
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_image(const std::string& url);
 
-	/** Set embed video. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed video.
 	 * @param url The embed video url
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_video(const std::string& url);
 
-	/** Set embed thumbnail. Returns the embed itself so these method calls may be "chained"
+	/**
+	 * @brief Set embed thumbnail.
 	 * @param url The embed thumbnail url (only supports http(s) and attachments)
-	 * @return A reference to self
+	 * @return A reference to self so this method may be "chained".
 	 */
 	embed& set_thumbnail(const std::string& url);
 };
 
 /**
- * @brief Represents a reaction to a dpp::message
+ * @brief Represents a reaction to a dpp::message.
  */
 struct DPP_EXPORT reaction {
-	/** Total number of times this emoji has been used to react (including super reacts) */
+	/**
+	 * @brief Total number of times this emoji has been used to react (including super reacts)
+	 */
 	uint32_t count;
-	/** Count of super reactions */
+
+	/**
+	 * @brief Count of super reactions
+	 */
 	uint32_t count_burst;
-	/** Count of normal reactions */
+
+	/**
+	 * @brief Count of normal reactions
+	 */
 	uint32_t count_normal;
-	/** ID of emoji for reaction */
+
+	/**
+	 * @brief ID of emoji for reaction
+	 */
 	snowflake emoji_id;
-	/** Name of emoji, if applicable */
+
+	/**
+	 * @brief Name of emoji, if applicable
+	 */
 	std::string emoji_name;
-	/** Whether your bot reacted using this emoji */
+
+	/**
+	 * @brief Whether your bot reacted using this emoji
+	 */
 	bool me;
-	/** Whether your bot super-reacted using this emoji */
+
+	/**
+	 * @brief Whether your bot super-reacted using this emoji
+	 */
 	bool me_burst;
-	/** HEX colors used for super reaction. Stored as integers */
+
+	/**
+	 * @brief HEX colors used for super reaction.
+	 *
+	 * @note Stored as integers.
+	 */
 	std::vector<uint32_t> burst_colors;
 
 	/**
@@ -816,7 +1051,9 @@ struct DPP_EXPORT reaction {
  * @brief Bitmask flags for a dpp::attachment
  */
 enum attachment_flags : uint8_t {
-	/// this attachment has been edited using the remix feature on mobile
+	/**
+	 * @brief This attachment has been edited using the remix feature on mobile.
+	 */
 	a_is_remix = 1 << 2,
 };
 
@@ -824,33 +1061,79 @@ enum attachment_flags : uint8_t {
  * @brief Represents an attachment in a dpp::message
  */
 struct DPP_EXPORT attachment {
-	/** ID of attachment */
+	/**
+	 * @brief ID of attachment.
+	 */
 	snowflake id;
-	/** Size of the attachment in bytes */
+
+	/**
+	 * @brief Size of the attachment in bytes.
+	 */
 	uint32_t size;
-	/** File name of the attachment */
+
+	/**
+	 * @brief File name of the attachment.
+	 */
 	std::string filename;
-	/** Optional: Description of the attachment (max 1024 characters) */
+
+	/**
+	 * @brief Optional: Description of the attachment.
+	 * Max 1024 characters.
+	 */
 	std::string description;
-	/** URL which points to the attachment */
+
+	/**
+	 * @brief URL which points to the attachment.
+	 */
 	std::string url;
-	/** Proxied URL which points to the attachment */
+
+	/**
+	 * @brief Proxied URL which points to the attachment.
+	 */
 	std::string proxy_url;
-	/** Width of the attachment, if applicable */
+
+	/**
+	 * @brief Width of the attachment, if applicable.
+	 */
 	uint32_t width;
-	/** Height of the attachment, if applicable */
+
+	/**
+	 * @brief Height of the attachment, if applicable.
+	 */
 	uint32_t height;
-	/** MIME type of the attachment, if applicable */
+
+	/**
+	 * @brief MIME type of the attachment, if applicable.
+	 */
 	std::string content_type;
-	/** Whether this attachment is ephemeral, if applicable */
+
+	/**
+	 * @brief Whether this attachment is ephemeral, if applicable.
+	 */
 	bool ephemeral;
-	/** The duration of the audio file (currently for voice messages) */
+
+	/**
+	 * @brief The duration of the audio file.
+	 *
+	 * @note Currently for voice messages.
+	 */
 	double duration_secs;
-	/** base64 encoded bytearray representing a sampled waveform (currently for voice messages) */
+
+	/**
+	 * @brief Base64 encoded bytearray representing a sampled waveform.
+	 *
+	 * @note Currently for voice messages.
+	 */
 	std::string waveform;
-	/** Flags. Made of bits in dpp::attachment_flags */
-	uint8_t		flags;
-	/** Owning message */
+
+	/**
+	 * @brief Flags made from dpp::attachment_flags.
+	 */
+	uint8_t	flags;
+
+	/**
+	 * @brief Owning message
+	 */
 	struct message* owner;
 
 	/**
@@ -873,6 +1156,7 @@ struct DPP_EXPORT attachment {
 
 	/**
 	 * @brief Download this attachment
+	 *
 	 * @param callback A callback which is called when the download completes.
 	 * @note The content of the file will be in the http_info.body parameter of the
 	 * callback parameter.
@@ -893,9 +1177,14 @@ struct DPP_EXPORT attachment {
  * @brief Represents the type of a sticker
  */
 enum sticker_type : uint8_t {
-	/// An official sticker in a pack
+	/**
+	 * @brief An official sticker in a pack.
+	 */
 	st_standard = 1,
-	/// Guild sticker
+
+	/**
+	 * @brief Guild sticker.
+	 */
 	st_guild = 2
 };
 
@@ -929,40 +1218,82 @@ protected:
 	virtual json to_json_impl(bool with_id = true) const;
 
 public:
-	/** Optional: for standard stickers, id of the pack the sticker is from
+	/**
+	 * @brief Optional: for standard stickers, id of the pack the sticker is from
 	 */
-	snowflake	pack_id;
-	/** The name of the sticker */
-	std::string	name;
-	/// description of the sticker (may be empty)
-	std::string	 description;	
-	/** for guild stickers, the Discord name of a unicode emoji representing the sticker's expression.
-	 * for standard stickers, a comma-separated list of related expressions.
+	snowflake pack_id;
+
+	/**
+	 * @brief The name of the sticker.
 	 */
-	std::string	 tags;
+	std::string name;
+
+	/**
+	 * @brief Description of the sticker
+	 *
+	 * @note This may be empty.
+	 */
+	std::string description;
+
+	/**
+	 * @brief The sticker's (or related) expressions.
+	 *
+	 * @note If it's a guild sticker, this will be the Discord name of
+	 * a unicode emoji representing the sticker's expression.
+	 * Otherwise, this will be a comma-separated list of related expressions.
+	 */
+	std::string tags;
+
 	/**
 	 * @brief Asset ID
+	 *
 	 * @deprecated now an empty string but still sent by discord.
-	 * While discord still send this empty string value we will still have a field
-	 * here in the library.
+	 * While discord still send this empty string value,
+	 * we will still have this field here in the library.
 	 */
-	std::string	 asset;
-	/** The type of sticker */
-	sticker_type	type;
-	/// type of sticker format
-	sticker_format	format_type;
-	/// Optional: whether this guild sticker can be used, may be false due to loss of Server Boosts
-	bool		available;
-	/// Optional: id of the guild that owns this sticker
-	snowflake	guild_id;
-	/// Optional: the user that uploaded the guild sticker
-	user		sticker_user;
-	/// Optional: the standard sticker's sort order within its pack
-	uint8_t		sort_value;
-	/** Name of file to upload (when adding or editing a sticker) */
-	std::string	filename;
-	/** File content to upload (raw binary) */
-	std::string	filecontent;
+	std::string asset;
+
+	/**
+	 * @brief The type of sticker.
+	 */
+	sticker_type type;
+
+	/**
+	 * @brief type of sticker format.
+	 */
+	sticker_format format_type;
+
+	/**
+	 * @brief Optional: Whether this guild sticker can be used.
+	 *
+	 * @note May be false due to loss of Server Boosts.
+	 */
+	bool available;
+
+	/**
+	 * @brief Optional: ID of the guild that owns this sticker.
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief Optional: The user that uploaded the guild sticker.
+	 */
+	user sticker_user;
+
+	/**
+	 * @brief Optional: The standard sticker's sort order within its pack.
+	 */
+	uint8_t	sort_value;
+
+	/**
+	 * @brief Name of file to upload (when adding or editing a sticker).
+	 */
+	std::string filename;
+
+	/**
+	 * @brief File content to upload (raw binary).
+	 */
+	std::string filecontent;
 
 	/**
 	 * @brief Construct a new sticker object
@@ -1016,18 +1347,35 @@ protected:
 	virtual json to_json_impl(bool with_id = true) const;
 
 public:
-	/// the stickers in the pack
+	/**
+	 * @brief The stickers in the pack.
+	 */
 	std::map<snowflake, sticker> stickers;
-	/// name of the sticker pack
-	std::string	 name;
-	/// id of the pack's SKU
-	snowflake	   sku_id;
-	/// Optional: id of a sticker in the pack which is shown as the pack's icon
-	snowflake	   cover_sticker_id;
-	/// description of the sticker pack
-	std::string	 description;
-	/// id of the sticker pack's banner image
-	snowflake	   banner_asset_id;
+
+	/**
+	 * @brief Name of the sticker pack.
+	 */
+	std::string name;
+
+	/**
+	 * @brief ID of the pack's SKU.
+	 */
+	snowflake sku_id;
+
+	/**
+	 * @brief Optional: ID of a sticker in the pack which is shown as the pack's icon.
+	 */
+	snowflake cover_sticker_id;
+
+	/**
+	 * @brief Description of the sticker pack.
+	 */
+	std::string description;
+
+	/**
+	 * @brief ID of the sticker pack's banner image.
+	 */
+	snowflake banner_asset_id;
 
 	/**
 	 * @brief Construct a new sticker pack object
@@ -1041,60 +1389,99 @@ public:
  * @brief Bitmask flags for a dpp::message
  */
 enum message_flags : uint16_t {
-	/// this message has been published to subscribed channels (via Channel Following)
+	/**
+	 * @brief This message has been published to subscribed channels (via Channel Following).
+	 */
 	m_crossposted = 1 << 0,
-	/// this message originated from a message in another channel (via Channel Following)
+
+	/**
+	 * @brief This message originated from a message in another channel (via Channel Following).
+	 */
 	m_is_crosspost =  1 << 1,
-	/// do not include any embeds when serializing this message
+
+	/**
+	 * @brief Do not include any embeds when serializing this message.
+	 */
 	m_suppress_embeds = 1 << 2,
-	/// the source message for this crosspost has been deleted (via Channel Following)
+
+	/**
+	 * @brief The source message for this crosspost has been deleted (via Channel Following).
+	 */
 	m_source_message_deleted = 1 << 3,
-	/// this message came from the urgent message system
+
+	/**
+	 * @brief This message came from the urgent message system.
+	 */
 	m_urgent = 1 << 4,
-	/// this message has an associated thread, with the same id as the message
+
+	/**
+	 * @brief This message has an associated thread, with the same id as the message.
+	 */
 	m_has_thread = 1 << 5,
-	/// this message is only visible to the user who invoked the Interaction
+
+	/**
+	 * @brief This message is only visible to the user who invoked the Interaction.
+	 */
 	m_ephemeral = 1 << 6,
-	/// this message is an Interaction Response and the bot is "thinking"
+
+	/**
+	 * @brief This message is an Interaction Response and the bot is "thinking".
+	 */
 	m_loading = 1 << 7,
-	/// this message failed to mention some roles and add their members to the thread
+
+	/**
+	 * @brief This message failed to mention some roles and add their members to the thread.
+	 */
 	m_thread_mention_failed = 1 << 8,
-	/// this message will not trigger push and desktop notifications
+
+	/**
+	 * @brief This message will not trigger push and desktop notifications.
+	 */
 	m_suppress_notifications = 1 << 12,
-	/// this message is a voice message
+
+	/**
+	 * @brief This message is a voice message.
+	 */
 	m_is_voice_message = 1 << 13,
 };
 
 /**
  * @brief Represents possible values for the dpp::embed type field.
  * These are loosely defined by the API docs and do not influence how the client renders embeds.
- * The only type a bot can send is dpp::embed_type::emt_rich.
+ *
+ * @note The only type a bot can send is dpp::embed_type::emt_rich.
  */
 namespace embed_type {
 	/**
 	 * @brief Rich text
 	 */
 	const std::string emt_rich = "rich";
+
 	/**
 	 * @brief Image
 	 */
 	const std::string emt_image = "image";
+
 	/**
 	 * @brief Video link
 	 */
 	const std::string emt_video = "video";
+
 	/**
 	 * @brief Animated gif
 	 */
 	const std::string emt_gifv = "gifv";
+
 	/**
 	 * @brief Article
 	 */
 	const std::string emt_article = "article";
+
 	/**
 	 * @brief Link URL
 	 */
 	const std::string emt_link = "link";
+
 	/**
 	 * @brief Auto moderation filter
 	 */
@@ -1105,68 +1492,160 @@ namespace embed_type {
  * @brief Message types for dpp::message::type
  */
 enum message_type {
-	/// Default
-	mt_default					= 0,
-	/// Add recipient
-	mt_recipient_add				= 1,
-	/// Remove recipient
-	mt_recipient_remove				= 2,
-	/// Call
-	mt_call						= 3,
-	/// Channel name change
-	mt_channel_name_change				= 4,
-	/// Channel icon change
-	mt_channel_icon_change				= 5,
-	/// Message pinned
-	mt_channel_pinned_message			= 6,
-	/// Member joined
-	mt_guild_member_join				= 7,
-	/// Boost
-	mt_user_premium_guild_subscription		= 8,
-	/// Boost level 1
-	mt_user_premium_guild_subscription_tier_1	= 9,
-	/// Boost level 2
-	mt_user_premium_guild_subscription_tier_2	= 10,
-	/// Boost level 3
-	mt_user_premium_guild_subscription_tier_3	= 11,
-	/// Follow channel
-	mt_channel_follow_add				= 12,
-	/// Disqualified from discovery
-	mt_guild_discovery_disqualified			= 14,
-	/// Re-qualified for discovery
-	mt_guild_discovery_requalified			= 15,
-	/// Discovery grace period warning 1
+	/**
+	 * @brief Default
+	 */
+	mt_default = 0,
+
+	/**
+	 * @brief Add recipient
+	 */
+	mt_recipient_add = 1,
+
+	/**
+	 * @brief Remove recipient
+	 */
+	mt_recipient_remove = 2,
+
+	/**
+	 * @brief Call
+	 */
+	mt_call	= 3,
+
+	/**
+	 * @brief Channel name change
+	 */
+	mt_channel_name_change = 4,
+
+	/**
+	 * @brief Channel icon change
+	 */
+	mt_channel_icon_change = 5,
+
+	/**
+	 * @brief Message pinned
+	 */
+	mt_channel_pinned_message = 6,
+
+	/**
+	 * @brief Member joined
+	 */
+	mt_guild_member_join = 7,
+
+	/**
+	 * @brief Boost
+	 */
+	mt_user_premium_guild_subscription = 8,
+
+	/**
+	 * @brief Boost level 1
+	 */
+	mt_user_premium_guild_subscription_tier_1 = 9,
+
+	/**
+	 * @brief Boost level 2
+	 */
+	mt_user_premium_guild_subscription_tier_2 = 10,
+
+	/**
+	 * @brief Boost level 3
+	 */
+	mt_user_premium_guild_subscription_tier_3 = 11,
+
+	/**
+	 * @brief Follow channel
+	 */
+	mt_channel_follow_add = 12,
+
+	/**
+	 * @brief Disqualified from discovery
+	 */
+	mt_guild_discovery_disqualified	= 14,
+
+	/**
+	 * @brief Re-qualified for discovery
+	 */
+	mt_guild_discovery_requalified = 15,
+
+	/**
+	 * @brief Discovery grace period warning 1
+	 */
 	mt_guild_discovery_grace_period_initial_warning	= 16,
-	/// Discovery grace period warning 2
-	mt_guild_discovery_grace_period_final_warning	= 17,
-	/// Thread Created 
-	mt_thread_created				= 18,
-	/// Reply
-	mt_reply					= 19,
-	/// Application command
-	mt_application_command				= 20,
-	/// Thread starter message
-	mt_thread_starter_message			= 21,
-	/// Invite reminder
-	mt_guild_invite_reminder			= 22,
-	/// Context Menu Command
-	mt_context_menu_command 			= 23,
-	/// Auto moderation action
-	mt_auto_moderation_action			= 24,
-	/// Role subscription purchase
-	mt_role_subscription_purchase		= 25,
-	/// Interaction premium upsell
-	mt_interaction_premium_upsell		= 26,
-	/// Stage start
-	mt_stage_start						= 27,
-	/// Stage end
-	mt_stage_end						= 28,
-	/// Stage speaker
-	mt_stage_speaker					= 29,
-	/// Stage topic
-	mt_stage_topic						= 31,
-	/// Guild application premium subscription
-	mt_application_premium_subscription	= 32,
+
+	/**
+	 * @brief Discovery grace period warning 2
+	 */
+	mt_guild_discovery_grace_period_final_warning = 17,
+
+	/**
+	 * @brief Thread Created
+	 */
+	mt_thread_created = 18,
+
+	/**
+	 * @brief Reply
+	 */
+	mt_reply = 19,
+
+	/**
+	 * @brief Application command
+	 */
+	mt_application_command = 20,
+
+	/**
+	 * @brief Thread starter message
+	 */
+	mt_thread_starter_message = 21,
+
+	/**
+	 * @brief Invite reminder
+	 */
+	mt_guild_invite_reminder = 22,
+
+	/**
+	 * @brief Context Menu Command
+	 */
+	mt_context_menu_command = 23,
+
+	/**
+	 * @brief Auto moderation action
+	 */
+	mt_auto_moderation_action = 24,
+
+	/**
+	 * @brief Role subscription purchase
+	 */
+	mt_role_subscription_purchase = 25,
+
+	/**
+	 * @brief Interaction premium upsell
+	 */
+	mt_interaction_premium_upsell = 26,
+
+	/**
+	 * @brief Stage start
+	 */
+	mt_stage_start = 27,
+
+	/**
+	 * @brief Stage end
+	 */
+	mt_stage_end = 28,
+
+	/**
+	 * @brief Stage speaker
+	 */
+	mt_stage_speaker = 29,
+
+	/**
+	 * @brief Stage topic
+	 */
+	mt_stage_topic = 31,
+
+	/**
+	 * @brief Guild application premium subscription
+	 */
+	mt_application_premium_subscription = 32,
 };
 
 /**
@@ -1180,11 +1659,13 @@ enum cache_policy_setting_t {
 	 * setting.
 	 */
 	cp_aggressive = 0,
+
 	/**
 	 * @brief only cache when there is relevant activity, e.g. a message to the bot.
 	 * This is a good middle-ground, memory usage will increase linearly over time.
 	 */
 	cp_lazy = 1,
+
 	/**
 	 * @brief Don't cache anything. Fill details when we see them.
 	 * This is the most memory-efficient option but consumes more CPU time
@@ -1274,62 +1755,132 @@ protected:
 		return to_json(with_id, false);
 	}
 public:
-	/** id of the channel the message was sent in */
-	snowflake	   channel_id;
-	/** Optional: id of the guild the message was sent in */
-	snowflake	   guild_id;
-	/** the author of this message (not guaranteed to be a valid user) */
-	user		author;
-	/** Optional: member properties for this message's author */
-	guild_member	member;
-	/** contents of the message */
-	std::string	content;
-	/** message components */
+	/**
+	 * @brief ID of the channel the message was sent in.
+	 */
+	snowflake channel_id;
+
+	/**
+	 * @brief Optional: ID of the guild the message was sent in.
+	 */
+	snowflake guild_id;
+
+	/**
+	 * @brief The author of this message.
+	 *
+	 * @warning This is not guaranteed to be a valid user.
+	 */
+	user author;
+
+	/**
+	 * @brief Optional: member properties for this message's author
+	 */
+	guild_member member;
+
+	/**
+	 * @brief Contents of the message.
+	 */
+	std::string content;
+
+	/**
+	 * @brief Message components.
+	 */
 	std::vector<dpp::component> components;
-	/** when this message was sent */
-	time_t		sent;
-	/** when this message was edited (may be 0 if never edited) */
-	time_t		edited;
-	/** users specifically mentioned in the message */
-	std::vector<std::pair<user, guild_member>>	mentions;
-	/** roles specifically mentioned in this message (only IDs currently)*/
+
+	/**
+	 * @brief When this message was sent.
+	 */
+	time_t sent;
+
+	/**
+	 * @brief When this message was edited.
+	 *
+	 * @note This may be 0 if never edited.
+	 */
+	time_t edited;
+
+	/**
+	 * @brief Users specifically mentioned in the message.
+	 */
+	std::vector<std::pair<user, guild_member>> mentions;
+
+	/**
+	 * @brief Roles specifically mentioned in this message (only IDs currently).
+	 */
 	std::vector<snowflake> mention_roles;
-	/** Channels mentioned in the message. (Discord: not all types supported)
-	 * Discord: Only textual channels that are visible to everyone in a lurkable guild will ever be included. Only crossposted messages (via Channel Following) currently include mention_channels at all. (includes ID, Guild ID, Type, Name)*/
+
+	/**
+	 * @brief Channels mentioned in the message.
+	 *
+	 * @warning Not all types supported.
+	 *
+	 * @note Discord: Only textual channels that are visible to everyone in a lurkable guild will ever be included.
+	 * Only crossposted messages (via Channel Following) currently include mention_channels at all. (includes ID, Guild ID, Type, Name).
+	 */
 	std::vector<channel> mention_channels;
-	/** any attached files */
+
+	/**
+	 * @brief Any attached files.
+	 */
 	std::vector<attachment> attachments;
-	/** Up to 10 dpp::embed objects */
+
+	/**
+	 * @brief Up to 10 dpp::embed objects.
+	 */
 	std::vector<embed> embeds;
-	/** Optional: reactions to the message */
+
+	/**
+	 * @brief Optional: reactions to the message.
+	 */
 	std::vector<reaction> reactions;
-	/** Optional: used for validating a message was sent */
-	std::string	nonce;
-	/** Optional: if the message is generated by a webhook, its id will be here otherwise the field will be 0 */
-	snowflake	webhook_id;
-	/** Stickers */
+
+	/**
+	 * @brief Optional: Used for validating a message was sent.
+	 */
+	std::string nonce;
+
+	/**
+	 * @brief Optional: Webhook ID.
+	 *
+	 * @note If the message is generated by a webhook, its ID will be here. Otherwise, the field will be 0.
+	 */
+	snowflake webhook_id;
+
+	/**
+	 * @brief Stickers.
+	 */
 	std::vector<sticker> stickers;
 
-	/** Name of file to upload (for use server-side in discord's url) */
-	std::vector<std::string>	filename;
-
-	/** File content to upload (raw binary) */
-	std::vector<std::string>	filecontent;
-
-	/** Mime type of files to upload */
-	std::vector<std::string>	filemimetype;
+	/**
+	 * @brief An array of file data to use for uploading files.
+	 *
+	 * @note You should use dpp::message::add_file to add data to this!
+	 */
+	std::vector<message_file_data> file_data;
 
 	/**
 	 * @brief Reference to another message, e.g. a reply
 	 */
 	struct message_ref {
-		/// id of the originating message
+		/**
+		 * @brief ID of the originating message.
+		 */
 		snowflake message_id;
-		/// id of the originating message's channel
+
+		/**
+		 * @brief ID of the originating message's channel.
+		 */
 		snowflake channel_id;
-		/// id of the originating message's guild
+
+		/**
+		 * @brief ID of the originating message's guild.
+		 */
 		snowflake guild_id;
-		/// when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message, default true
+
+		/**
+		 * @brief when sending, whether to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message.
+		 * Default true.
+		 */
 		bool fail_if_not_exists;
 	} message_reference;
 
@@ -1337,13 +1888,24 @@ public:
 	 * @brief Reference to an interaction
 	 */
 	struct message_interaction_struct{
-		/// id of the interaction
+		/**
+		 * @brief ID of the interaction.
+		 */
 		snowflake id;
-		/// type of interaction
+
+		/**
+		 * @brief Type of interaction.
+		 */
 		uint8_t type;
-		/// name of the application command
+
+		/**
+		 * @brief Name of the application command.
+		 */
 		std::string name;
-		/// the user who invoked the interaction
+
+		/**
+		 * @brief The user who invoked the interaction.
+		 */
 		user usr;
 	} interaction;
 
@@ -1355,22 +1917,27 @@ public:
 		 * @brief Set to true to parse user mentions in the text. Default is false
 		 */
 		bool parse_users;
+
 		/**
 		 * @brief Set to true to at-everyone and at-here mentions in the text. Default is false
 		 */
 		bool parse_everyone;
+
 		/**
 		 * @brief Set to true to parse role mentions in the text. Default is false
 		 */
 		bool parse_roles;
+
 		/**
 		 * @brief Set to true to mention the user who sent the message this one is replying to. Default is false
 		 */
 		bool replied_user;
+
 		/**
 		 * @brief List of users to allow pings for 
 		 */
 		std::vector<snowflake> users;
+
 		/**
 		 * @brief List of roles to allow pings for 
 		 */
@@ -1378,22 +1945,34 @@ public:
 	} allowed_mentions;
 
 	/**
-	 * @brief The cluster which created this message object
+	 * @brief The cluster which created this message object.
 	 */
 	class cluster* owner;
 
-	/** Message type */
+	/**
+	 * @brief Message type.
+	 */
 	message_type type;
 
-	/** Flags. Made of bits in dpp::message_flags */
-	uint16_t		flags;
+	/**
+	 * @brief Flags made from dpp::message_flags
+	 */
+	uint16_t flags;
 
-	/** whether this message is pinned */
-	bool		pinned;
-	/** whether this was a TTS message */
-	bool		tts;
-	/** whether this message mentions everyone */
-	bool   		mention_everyone;
+	/**
+	 * @brief Whether this message is pinned.
+	 */
+	bool pinned;
+
+	/**
+	 * @brief Whether this was a TTS message.
+	 */
+	bool tts;
+
+	/**
+	 * @brief Whether this message mentions everyone.
+	 */
+	bool mention_everyone;
 
 	/**
 	 * @brief Construct a new message object
@@ -1663,13 +2242,19 @@ public:
 	std::string get_url() const;
 };
 
-/** A group of messages */
+/**
+ * @brief A group of messages
+ */
 typedef std::unordered_map<snowflake, message> message_map;
 
-/** A group of stickers */
+/**
+ * @brief A group of stickers
+ */
 typedef std::unordered_map<snowflake, sticker> sticker_map;
 
-/** A group of sticker packs */
+/**
+ * @brief A group of sticker packs
+ */
 typedef std::unordered_map<snowflake, sticker_pack> sticker_pack_map;
 
 } // namespace dpp

@@ -559,30 +559,39 @@ message& message::set_type(message_type t)
 	return *this;
 }
 
-message& message::set_filename(const std::string &fn)
-{
-	if (filename.empty()) {
-		filename.push_back(fn);
+message& message::set_filename(const std::string &fn) {
+	if (file_data.empty()) {
+		message_file_data data;
+		data.name = fn;
+
+		file_data.push_back(data);
 	} else {
-		filename[filename.size() - 1] = fn;
+		file_data[file_data.size() - 1].name = fn;
 	}
+
 	return *this;
 }
 
-message& message::set_file_content(const std::string &fc)
-{
-	if (filecontent.empty()) {
-		filecontent.push_back(fc);
+message& message::set_file_content(const std::string &fc) {
+	if (file_data.empty()) {
+		message_file_data data;
+		data.content = fc;
+
+		file_data.push_back(data);
 	} else {
-		filecontent[filecontent.size() - 1] = fc;
+		file_data[file_data.size() - 1].content = fc;
 	}
+
 	return *this;
 }
 
 message& message::add_file(const std::string &fn, const std::string &fc, const std::string &fm) {
-	filename.push_back(fn);
-	filecontent.push_back(fc);
-	filemimetype.push_back(fm);
+	message_file_data data;
+	data.name = fn;
+	data.content = fc;
+	data.mimetype = fm;
+
+	file_data.push_back(data);
 	return *this;
 }
 

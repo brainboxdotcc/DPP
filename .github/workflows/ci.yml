@@ -60,7 +60,7 @@ jobs:
         run: cd build && make -j2
 
       - name: Run unit tests
-        run: cd build/library && ./unittest
+        run: cd build && ctest -VV
         env:
           DPP_UNIT_TEST_TOKEN: ${{secrets.DPP_UNIT_TEST_TOKEN}}
           TEST_GUILD_ID: ${{secrets.TEST_GUILD_ID}}
@@ -133,8 +133,15 @@ jobs:
   macos:
     permissions:
       contents: write
-    name: macOS x64
-    runs-on: macos-latest
+    name: macOS ${{matrix.cfg.arch}} (${{matrix.cfg.cpp-version}})
+    runs-on: ${{matrix.cfg.os}}
+    strategy:
+      fail-fast: false # Don't fail everything if one fails. We want to test each OS/Compiler individually
+      matrix:
+        # arm64 is a self-hosted runner on a Mac M2 Mini, ran inside a virtual machine by Archie Jaskowicz.
+        cfg:
+          - { arch: 'x64', concurrency: 3, os: macos-latest, cpp-version: clang++-14, cmake-flags: '', cpack: 'no' }
+          - { arch: 'arm64', concurrency: 2, os: [self-hosted, ARM64, macOS], cpp-version: clang++-15, cmake-flags: '', cpack: 'no' }
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@1b05615854632b887b69ae1be8cbefe72d3ae423 # v2.6.0
@@ -145,7 +152,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install homebrew packages
-        run: brew install cmake make libsodium opus openssl
+        run: brew install cmake make libsodium opus openssl pkg-config
 
       - name: Generate CMake
         run: mkdir build && cd build && cmake -DDPP_NO_VCPKG=ON -DCMAKE_BUILD_TYPE=Release -DDPP_CORO=ON -DAVX_TYPE=AVX0 ..
@@ -153,9 +160,12 @@ jobs:
           DONT_RUN_VCPKG: true
 
       - name: Build Project
-        run: cd build && make -j3
+        run: cd build && make -j${{ matrix.cfg.concurrency }}
         env:
           DONT_RUN_VCPKG: true
+
+      - name: Run offline unit tests
+        run: cd build && ctest -VV
 
   windows: # Windows x64 and x86 build matrix
     permissions:

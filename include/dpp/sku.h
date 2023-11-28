@@ -91,7 +91,7 @@ public:
 	/**
 	 * @brief The type of SKU.
 	 */
-	sku_type type = sku_type::SUBSCRIPTION;
+	sku_type type{sku_type::SUBSCRIPTION};
 
 	/**
 	 * @brief ID of the parent application

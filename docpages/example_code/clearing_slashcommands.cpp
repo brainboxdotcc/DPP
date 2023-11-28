@@ -1,7 +1,6 @@
 #include <dpp/dpp.h>
 
-int main()
-{
+int main() {
 	dpp::cluster bot("token");
 
 	bot.on_log(dpp::utility::cout_logger());
@@ -12,7 +11,7 @@ int main()
 		if (dpp::run_once<struct clear_bot_commands>()) {
 			/* Now, we're going to wipe our commands */
 			bot.global_bulk_command_delete();
-			/* This one requires a guild id, otherwise it won't what guild's commands it needs to wipe! */
+			/* This one requires a guild id, otherwise it won't know what guild's commands it needs to wipe! */
 			bot.guild_bulk_command_delete(857692897221033129);
 		}
 

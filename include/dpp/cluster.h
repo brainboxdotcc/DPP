@@ -1368,11 +1368,9 @@ public:
 	 * @param method Method, e.g. GET, POST
 	 * @param postdata Post data (usually JSON encoded)
 	 * @param callback Function to call when the HTTP call completes. The callback parameter will contain amongst other things, the decoded json.
-	 * @param filename List of filenames to post for POST requests (for uploading files)
-	 * @param filecontent List of file content to post for POST requests (for uploading files)
-	 * @param filemimetypes List of mime types for each file to post for POST requests (for uploading files)
+	 * @param file_data List of files to post for POST requests (for uploading files)
 	 */
-	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<std::string> &filename = {}, const std::vector<std::string>& filecontent = {}, const std::vector<std::string>& filemimetypes = {});
+	void post_rest_multipart(const std::string &endpoint, const std::string &major_parameters, const std::string &parameters, http_method method, const std::string &postdata, json_encode_t callback, const std::vector<message_file_data> &file_data = {});
 
 	/**
 	 * @brief Make a HTTP(S) request. For use when wanting asynchronous access to HTTP APIs outside of Discord.
