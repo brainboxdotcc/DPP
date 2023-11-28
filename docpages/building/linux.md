@@ -52,11 +52,9 @@ g++ -std=c++17 -I/usr/local/include mydppbot.cpp -o dppbot /usr/local/lib/libdpp
 The important flags in this command-line are:
 
 * `-std=c++17` - Required to compile the headers
-* `-L/usr/local/lib` - Required to tell the linker where libdpp is located
 * `-I/usr/local/include` - Required to tell the linker where dpp headers are located
 * `mydppbot.cpp` - Your source code
-* `dppbot` - The name of the executable to make
-* `-ldpp` - Link to libdpp.so
+* `-o dppbot` - The name of the executable to make
 * `/usr/local/lib/libdpp.so` - Required to specify the path to the shared library
 * `-Wl` - Required to pass options directly to the linker
 * `-rpath,/usr/local/lib` - Required to specify the runtime library search path
