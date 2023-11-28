@@ -46,7 +46,7 @@ The important flags in this command-line are:
 
 If you are on **Arch Linux**:
 
-- You need to give proper permission to `libdpp.so` and `libdpp.so.10.0.29`
+- You need to give proper permission to `libdpp.so.10.0.29`
 ```bash
 sudo chmod 755 /usr/local/lib/libdpp.so.10.0.29
 ```
