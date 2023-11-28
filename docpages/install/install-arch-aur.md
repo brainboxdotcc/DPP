@@ -12,10 +12,8 @@ or use your favourite package manager:
 
 ```bash
 # example with `yay` (without root)
-yay -Syu dpp
+yay -Sy dpp
 ```
-
-\note The package is currently outdated. We are looking for a new maintainer. For now, please use `dpp-git` or build it from \ref buildlinux "source".
 
 This will do the following three things:
 
