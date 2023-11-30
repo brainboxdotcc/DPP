@@ -11,3 +11,4 @@ Click on a link below for a guide specifically for your system:
 * \subpage buildcmake
 * \subpage buildmeson
 * \subpage building-a-cpp-discord-bot-in-repl
+* \subpage build-a-bot-xcode
