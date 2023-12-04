@@ -70,6 +70,10 @@ if (NOT DPP_NO_VCPKG AND EXISTS "${_VCPKG_ROOT_DIR}")
 		DESCRIPTION "An incredibly lightweight C++ Discord library."
 	)
 
+	if (MSVC AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		set(DPP_CLANG_CL true)
+	endif()
+
 	# Required before we add any subdirectories.
 	if (DPP_BUILD_TEST)
 		enable_testing(${CMAKE_CURRENT_SOURCE_DIR})
@@ -85,6 +89,10 @@ else()
 		HOMEPAGE_URL "https://dpp.dev/"
 		DESCRIPTION "An incredibly lightweight C++ Discord library."
 	)
+
+	if (MSVC AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		set(DPP_CLANG_CL true)
+	endif()
 
 	# Required before we add any subdirectories.
 	if (DPP_BUILD_TEST)
