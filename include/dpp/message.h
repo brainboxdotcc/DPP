@@ -24,6 +24,7 @@
 #include <dpp/snowflake.h>
 #include <dpp/managed.h>
 #include <dpp/user.h>
+#include <dpp/channel.h>
 #include <dpp/guild.h>
 #include <optional>
 #include <variant>
@@ -622,11 +623,11 @@ public:
 	component& add_component(const component& c);
 
 	/**
- 	 * @brief Add a default value.
- 	 *
- 	 * @param id Default value. ID of a user, role, or channel
- 	 * @param type The type this default value represents
- 	 */
+	 * @brief Add a default value.
+	 *
+	 * @param id Default value. ID of a user, role, or channel
+	 * @param type The type this default value represents
+	 */
 	component& add_default_value(const snowflake id, const component_default_value_type type);
 
 	/**
@@ -1979,6 +1980,18 @@ public:
 	 */
 	message();
 
+	/*
+	 * @brief Construct a new message object
+	 * @param m Message to copy
+	 */
+	message(const message& m) = default;
+
+	/*
+	 * @brief Construct a new message object
+	 * @param m Message to move
+	 */
+	message(message&& m) = default;
+
 	/**
 	 * @brief Construct a new message object
 	 * @param o Owning cluster, passed down to various things such as dpp::attachment.
@@ -1986,11 +1999,6 @@ public:
 	 * such as attachment::download from functioning (they will throw, if used)
 	 */
 	message(class cluster* o);
-
-	/**
-	 * @brief Destroy the message object
-	 */
-	virtual ~message();
 
 	/**
 	 * @brief Construct a new message object with a channel and content
@@ -2016,6 +2024,27 @@ public:
 	 * @param type The message type to create
 	 */
 	message(const std::string &content, message_type type = mt_default);
+
+	/**
+	 * @brief Destroy the message object
+	 */
+	~message() override = default;
+
+	/**
+	 * @brief Copy a message object
+	 *
+	 * @param m Message to copy
+	 * @return message& Reference to self
+	 */
+	message &operator=(const message& m) = default;
+
+	/**
+	 * @brief Move a message object
+	 *
+	 * @param m Message to move
+	 * @return message& Reference to self
+	 */
+	message &operator=(message&& m) = default;
 
 	/**
 	 * @brief Set the original message reference for replies/crossposts

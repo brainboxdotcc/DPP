@@ -85,23 +85,7 @@ forum_tag &forum_tag::set_name(const std::string &name) {
 	return *this;
 }
 
-const uint16_t CHANNEL_TYPE_MASK = 0b0000000000001111;
 const uint16_t DEFAULT_FORUM_LAYOUT_MASK = 0b0000011000000000;
-
-thread_member& thread_member::fill_from_json_impl(nlohmann::json* j) {
-	set_snowflake_not_null(j, "id", this->thread_id);
-	set_snowflake_not_null(j, "user_id", this->user_id);
-	set_ts_not_null(j, "join_timestamp", this->joined);
-	set_int32_not_null(j, "flags", this->flags);
-	return *this;
-}
-
-void to_json(nlohmann::json& j, const thread_metadata& tmdata) {
-	j["archived"] = tmdata.archived;
-	j["auto_archive_duration"] = tmdata.auto_archive_duration;
-	j["locked"] = tmdata.locked;
-	j["invitable"] = tmdata.invitable;
-}
 
 void to_json(nlohmann::json& j, const permission_overwrite& po) {
 	j["id"] = std::to_string(po.id);
@@ -332,46 +316,6 @@ bool channel::is_download_options_hidden() const {
 	return flags & dpp::c_hide_media_download_options;
 }
 
-bool thread::is_news_thread() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_ANNOUNCEMENT_THREAD;
-}
-
-bool thread::is_public_thread() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_PUBLIC_THREAD;
-}
-
-bool thread::is_private_thread() const {
-	return (flags & CHANNEL_TYPE_MASK) == CHANNEL_PRIVATE_THREAD;
-}
-
-thread& thread::fill_from_json_impl(json* j) {
-	channel::fill_from_json(j);
-
-	uint8_t type = int8_not_null(j, "type");
-	this->flags |= (type & CHANNEL_TYPE_MASK);
-
-	set_snowflake_array_not_null(j, "applied_tags", this->applied_tags);
-
-	set_int32_not_null(j, "total_message_sent", this->total_messages_sent);
-	set_int8_not_null(j, "message_count", this->message_count);
-	set_int8_not_null(j, "member_count", this->member_count);
-	auto json_metadata = (*j)["thread_metadata"];
-	metadata.archived = bool_not_null(&json_metadata, "archived");
-	metadata.archive_timestamp = ts_not_null(&json_metadata, "archive_timestamp");
-	metadata.auto_archive_duration = int16_not_null(&json_metadata, "auto_archive_duration");
-	metadata.locked = bool_not_null(&json_metadata, "locked");
-	metadata.invitable = bool_not_null(&json_metadata, "invitable");
-
-	/* Only certain events set this */
-	if (j->contains("member"))  {
-		member.fill_from_json(&((*j)["member"]));
-	}
-	return *this;
-}
-
-thread::thread() : channel(), total_messages_sent(0), message_count(0), member_count(0) {
-}
-
 channel& channel::fill_from_json_impl(json* j) {
 	this->id = snowflake_not_null(j, "id");
 	set_snowflake_not_null(j, "guild_id", this->guild_id);
@@ -472,30 +416,8 @@ channel& channel::fill_from_json_impl(json* j) {
 	}
 
 	set_string_not_null(j, "rtc_region", rtc_region);
-	
+
 	return *this;
-}
-
-json thread::to_json_impl(bool with_id) const {
-	json j = channel::to_json_impl(with_id);
-	j["type"] = (flags & CHANNEL_TYPE_MASK);
-	j["archived"] = this->metadata.archived;
-	j["auto_archive_duration"] = this->metadata.auto_archive_duration;
-	j["locked"] = this->metadata.locked;
-
-	if(this->get_type() == dpp::channel_type::CHANNEL_PRIVATE_THREAD) {
-		j["invitable"] = this->metadata.invitable;
-	}
-
-	if (!this->applied_tags.empty()) {
-		j["applied_tags"] = json::array();
-		for (auto &tag_id: this->applied_tags) {
-			if (tag_id) {
-				j["applied_tags"].push_back(tag_id);
-			}
-		}
-	}
-	return j;
 }
 
 json channel::to_json_impl(bool with_id) const {

@@ -1056,8 +1056,6 @@ bool message::is_voice_message() const {
 	return flags & m_is_voice_message;
 }
 
-message::~message() = default;
-
 
 message& message::fill_from_json(json* d, cache_policy_t cp) {
 	this->id = snowflake_not_null(d, "id");
