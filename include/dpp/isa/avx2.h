@@ -20,11 +20,7 @@
  ************************************************************************************/
 #pragma once
 
-/* 
- * If the user is using clang-cl, both _MSC_VER and __clang__ are defined. However, clang-cl breaks using this as it knows nothing above __m128.
- * So, we make sure that both aren't defined, and only do this if _MSC_VER, __GNUC__, or __clang__, is defined.
- */
-#if (!defined _MSC_VER && !defined __clang__) && (defined _MSC_VER || defined __GNUC__ || defined __clang__)
+#if defined _MSC_VER || defined __GNUC__ || defined __clang__
 
 #include <immintrin.h>
 #include <numeric>
