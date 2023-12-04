@@ -2,7 +2,7 @@
 
 Need your bot to use an emoji? Then you've come to the right place! Here are three examples of using emojis.
 
-First - Sending emoji. You have to use its mention, which depends on the type. If it's a default emoji, you use the corresponding character. So, for example, if you wanted to send a nerd emoji, you would use the nerd unicode character. Now, custom emoji. There are two types: static and animated. Their mentions are `<:[name]:[id]>` and `<a:[name]:[id]>`, where `[name]` means the emoji name and `[id]` is for its ID. When you send such mention, it automatically gets converted into your emoji. Here's an example of sending emojis:
+First - Sending emojis. You have to use its mention, which depends on the type. If it's a default emoji, you use the corresponding character. So, for example, if you wanted to send a nerd emoji, you would use the nerd unicode character. Now, custom emoji. There are two types: static and animated. Their mentions are `<:[name]:[id]>` and `<a:[name]:[id]>`, where `[name]` means the emoji name and `[id]` is for its ID. When you send such mention, it automatically gets converted into your emoji. Here's an example of sending emojis:
 
 \include{cpp} using_emojis1.cpp
 
