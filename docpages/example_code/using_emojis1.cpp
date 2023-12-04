@@ -19,8 +19,7 @@ int main() {
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-			dpp::slashcommand send("send-emojis", "Send the emojis", bot.me.id);
-			bot.global_command_create(send);
+			bot.global_command_create(dpp::slashcommand("send-emojis", "Send the emojis", bot.me.id));
 		}
 	});
 

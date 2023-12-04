@@ -35,8 +35,7 @@ int main() {
 
 	bot.on_ready([&bot](const dpp::ready_t& event) {
 		if (dpp::run_once<struct register_bot_commands>()) {
-			dpp::slashcommand select("select", "Send the select menu", bot.me.id);
-			bot.global_command_create(select);
+			bot.global_command_create(dpp::slashcommand("select", "Send the select menu", bot.me.id));
 		}
 	});
 

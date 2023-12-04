@@ -18,7 +18,7 @@ Yay, our bot has emotions now!
 
 \image html using_emojis2.png
 
-Finally, select menus. They're lists that let you select an option with an emoji each and are an optional part of a message. These guys are covered \ref components3 "here". They require emoji components (name, ID, animated state) to come separately. Also, if the emoji you're using isn't animated, you don't have to specify that. If your emoji is unicode, the ID is optional, too, since both are defaulted to none (0/false).
+Finally, select menus. These guys are covered \ref components3 "here". They require emoji components (name, ID, animated state) to come separately. If the emoji you're using isn't animated, you don't have to specify that. If your emoji is unicode, it doesn't even have an ID, so you only put the character, since both animated state and ID are defaulted to none (false/0).
 
 \include{cpp} using_emojis3.cpp
 
