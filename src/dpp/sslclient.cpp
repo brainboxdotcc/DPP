@@ -170,7 +170,7 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 		return (::connect(sockfd, addr, addrlen));
 #else
 	if (!set_nonblocking(sockfd, true)) {
-		throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+		throw dpp::connection_exception(err_nonblocking_failure, "Can't switch socket to non-blocking mode!");
 	}
 #ifdef _WIN32
 	/* Windows connect returns -1 and sets its error value to 0 for successfull blocking connection -
@@ -186,14 +186,14 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 	int err = errno;
 #endif
 	if (rc == -1 && err != EWOULDBLOCK && err != EINPROGRESS) {
-		throw connection_exception(strerror(errno));
+		throw connection_exception(err_connect_failure, strerror(errno));
 	} else {
 		/* Set a deadline timestamp 'timeout' ms from now */
 		double deadline = utility::time_f() + (timeout_ms / 1000.0);
 		do {
 			rc = -1;
 			if (utility::time_f() >= deadline) {
-				throw connection_exception("Connection timed out");
+				throw connection_exception(err_connection_timed_out, "Connection timed out");
 			}
 			pollfd pfd = {};
 			pfd.fd = sockfd;
@@ -202,12 +202,12 @@ int connect_with_timeout(dpp::socket sockfd, const struct sockaddr *addr, sockle
 			if (r > 0 && pfd.revents & POLLOUT) {
 				rc = 0;
 			} else if (r != 0 || pfd.revents & POLLERR) {
-				throw connection_exception(strerror(errno));
+				throw connection_exception(err_connection_timed_out, strerror(errno));
 			}
 		} while (rc == -1);
 	}
 	if (!set_nonblocking(sockfd, false)) {
-		throw connection_exception("Can't switch socket to blocking mode!");
+		throw connection_exception(err_nonblocking_failure, "Can't switch socket to blocking mode!");
 	}
 	return rc;
 #endif
@@ -236,7 +236,7 @@ ssl_client::ssl_client(const std::string &_hostname, const std::string &_port, b
 	// Set up winsock.
 	WSADATA wsadata;
 	if (WSAStartup(MAKEWORD(2, 2), &wsadata)) {
-		throw dpp::connection_exception("WSAStartup failure");
+		throw dpp::connection_exception(err_connect_failure, "WSAStartup failure");
 	}
 #endif
 	if (keepalive) {
@@ -311,7 +311,7 @@ void ssl_client::connect()
 
 		/* Check if none of the IPs yielded a valid connection */
 		if (sfd == ERROR_STATUS) {
-			throw dpp::connection_exception(strerror(err));
+			throw dpp::connection_exception(err_connect_failure, strerror(err));
 		}
 
 		if (!plaintext) {
@@ -323,21 +323,21 @@ void ssl_client::connect()
 				/* Create SSL context */
 				openssl_context = SSL_CTX_new(method);
 				if (openssl_context == nullptr) {
-					throw dpp::connection_exception("Failed to create SSL client context!");
+					throw dpp::connection_exception(err_ssl_context, "Failed to create SSL client context!");
 				}
 
 				/* Do not allow SSL 3.0, TLS 1.0 or 1.1
 				* https://www.packetlabs.net/posts/tls-1-1-no-longer-secure/
 				*/
 				if (!SSL_CTX_set_min_proto_version(openssl_context, TLS1_2_VERSION)) {
-					throw dpp::connection_exception("Failed to set minimum SSL version!");
+					throw dpp::connection_exception(err_ssl_version, "Failed to set minimum SSL version!");
 				}
 			}
 
 			/* Create SSL session */
 			ssl->ssl = SSL_new(openssl_context);
 			if (ssl->ssl == nullptr) {
-				throw dpp::connection_exception("SSL_new failed!");
+				throw dpp::connection_exception(err_ssl_new, "SSL_new failed!");
 			}
 
 			SSL_set_fd(ssl->ssl, (int)sfd);
@@ -354,7 +354,7 @@ void ssl_client::connect()
 			setsockopt(sfd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 #endif
 			if (SSL_connect(ssl->ssl) != 1) {
-				throw dpp::connection_exception("SSL_connect error");
+				throw dpp::connection_exception(err_ssl_connect, "SSL_connect error");
 			}
 
 			this->cipher = SSL_get_cipher(ssl->ssl);
@@ -376,11 +376,11 @@ void ssl_client::write(const std::string &data)
 		const int data_length = (int)data.length();
 		if (plaintext) {
 			if (sfd == INVALID_SOCKET || ::send(sfd, data.data(), data_length, 0) != data_length) {
-				throw dpp::connection_exception("write() failed");
+				throw dpp::connection_exception(err_write, "write() failed");
 			}
 		} else {
 			if (SSL_write(ssl->ssl, data.data(), data_length) != data_length) {
-				throw dpp::connection_exception("SSL_write() failed");
+				throw dpp::connection_exception(err_ssl_write, "SSL_write() failed");
 			}
 		}
 	}
@@ -417,12 +417,12 @@ void ssl_client::read_loop()
 	try {
 
 		if (sfd == INVALID_SOCKET)  {
-			throw dpp::connection_exception("Invalid file descriptor in read_loop()");
+			throw dpp::connection_exception(err_invalid_socket, "Invalid file descriptor in read_loop()");
 		}
 		
 		/* Make the socket nonblocking */
 		if (!set_nonblocking(sfd, true)) {
-			throw dpp::connection_exception("Can't switch socket to non-blocking mode!");
+			throw dpp::connection_exception(err_nonblocking_failure, "Can't switch socket to non-blocking mode!");
 		}
 		nonblocking = true;
 
@@ -453,7 +453,7 @@ void ssl_client::read_loop()
 			}
 
 			if (sfd == -1) {
-				throw dpp::connection_exception("File descriptor invalidated, connection died");
+				throw dpp::connection_exception(err_invalid_socket, "File descriptor invalidated, connection died");
 			}
 
 			/* If we're waiting for a read on the socket don't try to write to the server */
@@ -477,7 +477,7 @@ void ssl_client::read_loop()
 				custom_readable_ready();
 			}
 			if ((pfd[0].revents & POLLERR) || (pfd[0].revents & POLLNVAL) || sfd == INVALID_SOCKET) {
-				throw dpp::connection_exception(strerror(errno));
+				throw dpp::connection_exception(err_socket_error, strerror(errno));
 			}
 
 			/* Now check if there's data to read */

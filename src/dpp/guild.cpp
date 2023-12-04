@@ -1021,9 +1021,9 @@ guild_member find_guild_member(const snowflake guild_id, const snowflake user_id
 			return gm->second;
 		}
 
-		throw dpp::cache_exception("Requested member not found in the guild cache!");
+		throw dpp::cache_exception(err_cache, "Requested member not found in the guild cache!");
 	}
-	throw dpp::cache_exception("Requested guild cache not found!");
+	throw dpp::cache_exception(err_cache, "Requested guild cache not found!");
 }
 
 

@@ -334,14 +334,14 @@ command_option::command_option(command_option_type t, const std::string &n, cons
 	type(t), name(n), description(d), required(r), autocomplete(false)
 {
 	if (std::any_of(n.begin(), n.end(), [](unsigned char c){ return std::isupper(c); })) {
-		throw dpp::logic_exception("Command options can not contain capital letters in the name of the option.");
+		throw dpp::logic_exception(err_command_has_caps, "Command options can not contain capital letters in the name of the option.");
 	}
 }
 
 command_option& command_option::add_choice(const command_option_choice &o)
 {
 	if (this->autocomplete) {
-		throw dpp::logic_exception("Can't set autocomplete=true if choices exist in the command_option");
+		throw dpp::logic_exception(err_choice_autocomplete, "Can't set autocomplete=true if choices exist in the command_option");
 	}
 	choices.emplace_back(o);
 	return *this;
@@ -362,7 +362,7 @@ command_option& command_option::add_channel_type(const channel_type ch)
 command_option& command_option::set_auto_complete(bool autocomp)
 {
 	if (autocomp && !choices.empty()) {
-		throw dpp::logic_exception("Can't set autocomplete=true if choices exist in the command_option");
+		throw dpp::logic_exception(err_choice_autocomplete, "Can't set autocomplete=true if choices exist in the command_option");
 	}
 	this->autocomplete = autocomp;
 	return *this;
@@ -445,7 +445,7 @@ command_interaction interaction::get_command_interaction() const {
 	if (std::holds_alternative<command_interaction>(data)) {
 		return std::get<command_interaction>(data);
 	} else {
-		throw dpp::logic_exception("Interaction is not for a command");
+		throw dpp::logic_exception(err_interaction, "Interaction is not for a command");
 	}
 }
 
@@ -453,7 +453,7 @@ component_interaction interaction::get_component_interaction() const {
 	if (std::holds_alternative<component_interaction>(data)) {
 		return std::get<component_interaction>(data);
 	} else {
-		throw dpp::logic_exception("Interaction is not for a component");
+		throw dpp::logic_exception(err_interaction, "Interaction is not for a component");
 	}
 }
 
@@ -461,7 +461,7 @@ autocomplete_interaction interaction::get_autocomplete_interaction() const {
 	if (std::holds_alternative<autocomplete_interaction>(data)) {
 		return std::get<autocomplete_interaction>(data);
 	} else {
-		throw dpp::logic_exception("Interaction is not for an autocomplete");
+		throw dpp::logic_exception(err_interaction, "Interaction is not for an autocomplete");
 	}
 }
 
@@ -843,7 +843,7 @@ interaction_modal_response& interaction_modal_response::add_row() {
 		current_row++;
 		components.push_back({});
 	} else {
-		throw dpp::logic_exception("A modal dialog can only have a maximum of five component rows");
+		throw dpp::logic_exception(err_too_many_component_rows, "A modal dialog can only have a maximum of five component rows");
 	}
 	return *this;
 }
@@ -921,7 +921,7 @@ const dpp::message& interaction::get_context_message() const {
 const dpp::channel& interaction::get_channel() const {
 	auto c = find_channel(channel_id);
 	if (c == nullptr) {
-		throw dpp::logic_exception("No channel for this command interaction");
+		throw dpp::logic_exception(err_unknown_channel, "No channel for this command interaction");
 	}
 	return *c;
 }
@@ -929,7 +929,7 @@ const dpp::channel& interaction::get_channel() const {
 const dpp::guild& interaction::get_guild() const {
 	auto g = find_guild(guild_id);
 	if (g == nullptr) {
-		throw dpp::logic_exception("No guild for this command interaction");
+		throw dpp::logic_exception(err_unknown_guild, "No guild for this command interaction");
 	}
 	return *g;
 }

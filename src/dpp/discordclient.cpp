@@ -149,8 +149,9 @@ void discord_client::setup_zlib()
 		zlib->d_stream.zalloc = (alloc_func)0;
 		zlib->d_stream.zfree = (free_func)0;
 		zlib->d_stream.opaque = (voidpf)0;
-		if (inflateInit(&(zlib->d_stream)) != Z_OK) {
-			throw dpp::connection_exception("Can't initialise stream compression!");
+		int error = inflateInit(&(zlib->d_stream));
+		if (error != Z_OK) {
+			throw dpp::connection_exception((exception_error_code)error, "Can't initialise stream compression!");
 		}
 		this->decomp_buffer = new unsigned char[DECOMP_BUFFER_SIZE];
 	}
@@ -242,17 +243,17 @@ bool discord_client::handle_frame(const std::string &buffer)
 				{
 					case Z_NEED_DICT:
 					case Z_STREAM_ERROR:
-						this->error(6000);
+						this->error(err_compression_stream);
 						this->close();
 						return true;
 					break;
 					case Z_DATA_ERROR:
-						this->error(6001);
+						this->error(err_compression_data);
 						this->close();
 						return true;
 					break;
 					case Z_MEM_ERROR:
-						this->error(6002);
+						this->error(err_compression_memory);
 						this->close();
 						return true;
 					break;
@@ -383,7 +384,7 @@ bool discord_client::handle_frame(const std::string &buffer)
 			case 7:
 				log(dpp::ll_debug, "Reconnection requested, closing socket " + sessionid);
 				message_queue.clear();
-				throw dpp::connection_exception("Remote site requested reconnection");
+				throw dpp::connection_exception(err_reconnection, "Remote site requested reconnection");
 			break;
 			/* Heartbeat ack */
 			case 11:

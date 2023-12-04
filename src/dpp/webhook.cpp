@@ -38,7 +38,7 @@ webhook::webhook(const std::string& webhook_url) : webhook()
 {
 	auto pos = webhook_url.find_last_of('/');
 	if (pos == std::string::npos) { // throw when the url doesn't contain a slash at all
-		throw dpp::logic_exception(std::string("Failed to parse webhook URL: No '/' found in the webhook url"));
+		throw dpp::logic_exception(err_invalid_webhook, std::string("Failed to parse webhook URL: No '/' found in the webhook url"));
 	}
 	try {
 		token = webhook_url.substr(pos + 1);
@@ -46,7 +46,7 @@ webhook::webhook(const std::string& webhook_url) : webhook()
 		id = std::stoull(webhook_url.substr(endpoint.size(), pos));
 	}
 	catch (const std::exception& e) {
-		throw dpp::logic_exception(std::string("Failed to parse webhook URL: ") + e.what());
+		throw dpp::logic_exception(err_invalid_webhook, std::string("Failed to parse webhook URL: ") + e.what());
 	}
 }
 
@@ -93,7 +93,7 @@ json webhook::to_json_impl(bool with_id) const {
 
 webhook& webhook::load_image(const std::string &image_blob, const image_type type, bool is_base64_encoded) {
 	if (image_blob.size() > MAX_ICON_SIZE) {
-		throw dpp::length_exception("Webhook icon file exceeds discord limit of 256 kilobytes");
+		throw dpp::length_exception(err_icon_size, "Webhook icon file exceeds discord limit of 256 kilobytes");
 	}
 
 	image_data = "data:" + utility::mime_type(type) + ";base64," + (is_base64_encoded ? image_blob : base64_encode(reinterpret_cast<unsigned char const*>(image_blob.data()), static_cast<unsigned int>(image_blob.length())));
